@@ -1,0 +1,16 @@
+
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "dist",
+        // "target": "es6",
+        "declaration": true,
+        "declarationMap": true,
+        "types": ["react", "jest"],
+        "isolatedModules": false,
+        "noEmit": false,
+        "allowJs": false,
+        "emitDeclarationOnly": true
+    },
+    "exclude": ["src/**/*-stories.tsx"]
+}
