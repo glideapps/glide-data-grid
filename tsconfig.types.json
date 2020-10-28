@@ -2,7 +2,7 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "dist",
+        "outDir": "dist/ts",
         // "target": "es6",
         "declaration": true,
         "declarationMap": true,
