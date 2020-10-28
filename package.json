@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/quicktype/glide-data-grid.git"
+    "url": "git+https://github.com/glideapps/glide-data-grid.git"
   },
   "keywords": [
     "react",
