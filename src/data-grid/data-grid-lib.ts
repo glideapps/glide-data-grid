@@ -396,15 +396,15 @@ export function drawImage(
         //     drawGenImageToCanvas(ctx, i, drawX, y + cellYPad, size);
         //     drawX += size + itemMargin;
         // } else {
-            const img = imageLoader.loadOrGetImage(i, col, row);
+        const img = imageLoader.loadOrGetImage(i, col, row);
 
-            if (img !== undefined) {
-                const imgHeight = height - cellYPad * 2;
-                const imgWidth = img.naturalWidth * (imgHeight / img.naturalHeight);
-                ctx.drawImage(img, drawX, y + cellYPad, imgWidth, imgHeight);
+        if (img !== undefined) {
+            const imgHeight = height - cellYPad * 2;
+            const imgWidth = img.naturalWidth * (imgHeight / img.naturalHeight);
+            ctx.drawImage(img, drawX, y + cellYPad, imgWidth, imgHeight);
 
-                drawX += imgWidth + itemMargin;
-            }
+            drawX += imgWidth + itemMargin;
+        }
         // }
     });
 

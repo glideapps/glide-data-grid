@@ -1,4 +1,3 @@
-
 export type JSONData = unknown;
 export type JSONObject = Record<string, JSONData>;
 
@@ -66,7 +65,6 @@ export function proveType<T>(_val: T) {
 }
 
 export function proveNever<T>(_never: never, _message: string, result: T): never {
-    
     return result as never;
 }
 
@@ -139,7 +137,6 @@ export function fillArray<T>(length: number, value: T): T[] {
 
 export function dontAwait(p: Promise<unknown>): void {
     p.catch(e => {
-       
         throw e;
     });
 }

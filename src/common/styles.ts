@@ -98,8 +98,6 @@ const builderThemeBase = {
             fgSelectedColor: "#FFFFFF",
         },
     },
-
-   
 };
 
 export type Theme = typeof builderThemeBase;

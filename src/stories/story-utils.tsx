@@ -4,60 +4,60 @@ import { StoryContext } from "@storybook/addons";
 import { getBuilderTheme } from "../common/styles";
 
 interface Props {
-  width: number;
-  height: number;
-  useMoreTopPadding?: boolean;
-  figmaDoc?: string;
-  context?: StoryContext;
+    width: number;
+    height: number;
+    useMoreTopPadding?: boolean;
+    figmaDoc?: string;
+    context?: StoryContext;
 }
 
 const BuilderWrapper = styled.div<Props>`
-  padding-left: 40px;
-  padding-top: ${(p) => (p.useMoreTopPadding ? 500 : 40)}px;
-  display: flex;
+    padding-left: 40px;
+    padding-top: ${p => (p.useMoreTopPadding ? 500 : 40)}px;
+    display: flex;
 
-  height: 100vh;
-  & > .content {
-    display: block;
+    height: 100vh;
+    & > .content {
+        display: block;
 
-    width: ${(p) => p.width}px;
-    min-height: ${(p) => p.height}px;
-    align-self: center;
-    margin-bottom: 48px;
+        width: ${p => p.width}px;
+        min-height: ${p => p.height}px;
+        align-self: center;
+        margin-bottom: 48px;
 
-    position: relative;
+        position: relative;
 
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
 
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
-    user-select: none;
+        user-select: none;
 
-    box-sizing: border-box;
+        box-sizing: border-box;
 
-    *,
-    *::before,
-    *::after {
-      box-sizing: inherit;
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit;
+        }
     }
-  }
 `;
 
 export class BuilderThemeWrapper extends React.PureComponent<Props> {
-  private builderTheme = getBuilderTheme(false);
+    private builderTheme = getBuilderTheme(false);
 
-  public render(): React.ReactNode {
-    const { context, ...rest } = this.props;
-    return (
-      <ThemeProvider theme={this.builderTheme}>
-        <BuilderWrapper {...rest}>
-          <div className="content">{this.props.children}</div>
-        </BuilderWrapper>
-        <div id="portal" />
-      </ThemeProvider>
-    );
-  }
+    public render(): React.ReactNode {
+        const { context, ...rest } = this.props;
+        return (
+            <ThemeProvider theme={this.builderTheme}>
+                <BuilderWrapper {...rest}>
+                    <div className="content">{this.props.children}</div>
+                </BuilderWrapper>
+                <div id="portal" />
+            </ThemeProvider>
+        );
+    }
 }
 
 // export function permuteAll(
