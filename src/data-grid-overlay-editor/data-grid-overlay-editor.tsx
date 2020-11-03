@@ -12,15 +12,18 @@ import NumberOverlayEditor from "./private/number-overlay-editor";
 import UriOverlayEditor from "./private/uri-overlay-editor";
 import { NumberFormatValues } from "react-number-format";
 
+type ImageEditorType = typeof ImageOverlayEditor;
+
 interface Props {
     readonly target: Rectangle;
     readonly content: GridCell;
     readonly onFinishEditing: (newCell: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly forceEditMode: boolean;
+    readonly imageEditorOverride?: ImageEditorType;
 }
 
 const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { target, content, onFinishEditing, forceEditMode } = p;
+    const { target, content, onFinishEditing, forceEditMode, imageEditorOverride } = p;
 
     const [tempValue, setTempValue] = React.useState<GridCell | undefined>(forceEditMode ? content : undefined);
 
@@ -88,6 +91,8 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
         [onFinishEditing, tempValue]
     );
 
+    const ImageEditor = imageEditorOverride ?? ImageOverlayEditor;
+
     const targetValue = tempValue ?? content;
     let editor: React.ReactNode;
     switch (targetValue.kind) {
@@ -125,7 +130,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
             break;
         case GridCellKind.Image:
             editor = (
-                <ImageOverlayEditor
+                <ImageEditor
                     urls={targetValue.data}
                     canWrite={targetValue.allowAdd}
                     onCancel={onClickOutside}

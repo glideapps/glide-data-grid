@@ -3,6 +3,7 @@ import { ImageOverlayEditorStyle } from "./image-overlay-editor-style";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { panic } from "../../common/support";
+import { EditPencil } from "../../common/utils";
 // import { createPortal } from "react-dom";
 // import ClickOutsideContainer from "../../click-outside-container/click-outside-container";
 
@@ -12,6 +13,7 @@ interface Props {
     readonly onCancel: () => void;
     readonly onChange: (newImage: string) => void;
     readonly onKeyDown: (event: React.KeyboardEvent) => void;
+    readonly onEditClick?: () => void;
 }
 
 const ImageOverlayEditor: React.FunctionComponent<Props> = p => {
@@ -44,9 +46,9 @@ const ImageOverlayEditor: React.FunctionComponent<Props> = p => {
                     </div>
                 ))}
             </Carousel>
-            {canWrite && (
+            {canWrite && onEditClick && (
                 <button className="edit-icon" onClick={onEditClick}>
-                    X
+                    <EditPencil />
                 </button>
             )}
             <textarea autoFocus={true} onKeyDown={onKeyDown} />

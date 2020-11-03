@@ -1,3 +1,4 @@
+import { EditPencil } from "../../common/utils";
 import * as React from "react";
 import GrowingEntry from "../../growing-entry/growing-entry";
 import { UriOverlayEditorStyle } from "./uri-overlay-editor-style";
@@ -30,7 +31,7 @@ const UriOverlayEditor: React.FunctionComponent<Props> = p => {
                 </a>
             </div>
             <div className="edit-icon" onClick={onEditClick}>
-                X
+                <EditPencil />
             </div>
             <textarea autoFocus={true} onKeyDown={onKeyDown} />
         </UriOverlayEditorStyle>

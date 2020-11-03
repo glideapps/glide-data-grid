@@ -56,3 +56,17 @@ export const disabledProps = css`
     opacity: 0.4;
     pointer-events: none;
 `;
+
+export const EditPencil: React.FunctionComponent<IconProps> = (props: IconProps) => {
+    const bg = props.bgColor ?? "currentColor";
+    const fg = props.fgColor ?? "#313139";
+    return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="8" cy="8" r="8" fill={bg} />
+            <path
+                d="M4.25 10.1874V11.7499H5.8125L10.4208 7.14161L8.85833 5.57911L4.25 10.1874ZM11.6292 5.93328C11.7917 5.77078 11.7917 5.50828 11.6292 5.34578L10.6542 4.37078C10.4917 4.20828 10.2292 4.20828 10.0667 4.37078L9.30417 5.13328L10.8667 6.69578L11.6292 5.93328V5.93328Z"
+                fill={fg}
+            />
+        </svg>
+    );
+};

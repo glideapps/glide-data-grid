@@ -2,6 +2,7 @@ import * as React from "react";
 import MarkdownDiv from "../../markdown-div/markdown-div";
 import GrowingEntry from "../../growing-entry/growing-entry";
 import { MarkdownOverlayEditorStyle } from "./markdown-overlay-editor-style";
+import { EditPencil } from "../../common/utils";
 
 interface Props {
     readonly markdown: string;
@@ -27,7 +28,7 @@ const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
         <MarkdownOverlayEditorStyle>
             <MarkdownDiv contents={markdown} />
             <div className="edit-icon" onClick={onEditClick}>
-                X
+                <EditPencil />
             </div>
             <textarea autoFocus={true} onKeyDown={onKeyDown} />
         </MarkdownOverlayEditorStyle>
