@@ -1,7 +1,7 @@
 import { isFirefox } from "../common/browser-detect";
 import * as React from "react";
-import AutoSizer from "../autosizer/autosizer";
 import { ScrollRegionStyle } from "./scroll-region-style";
+import { AutoSizer } from "react-virtualized";
 
 export interface ScrollRegionUpdateArgs {
     readonly clientWidth: number;

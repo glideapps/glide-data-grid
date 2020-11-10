@@ -28,7 +28,8 @@
   "dependencies": {
     "canvg": "^3.0.6",
     "collection-utils": "^1.0.1",
-    "copy-to-clipboard": "^3.1.0"
+    "copy-to-clipboard": "^3.1.0",
+    "react-virtualized-auto-sizer": "^1.0.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.1",
