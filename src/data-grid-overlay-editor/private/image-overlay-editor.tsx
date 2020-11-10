@@ -7,7 +7,7 @@ import { EditPencil } from "../../common/utils";
 // import { createPortal } from "react-dom";
 // import ClickOutsideContainer from "../../click-outside-container/click-outside-container";
 
-interface Props {
+export interface OverlayImageEditorProps {
     readonly urls: readonly string[];
     readonly canWrite: boolean;
     readonly onCancel: () => void;

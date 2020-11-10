@@ -6,13 +6,13 @@ import { GridCell, GridCellKind, Rectangle } from "../data-grid/data-grid-types"
 import GrowingEntry from "../growing-entry/growing-entry";
 import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style";
 import BubblesOverlayEditor from "./private/bubbles-overlay-editor";
-import ImageOverlayEditor from "./private/image-overlay-editor";
+import ImageOverlayEditor, { OverlayImageEditorProps } from "./private/image-overlay-editor";
 import MarkdownOverlayEditor from "./private/markdown-overlay-editor";
 import NumberOverlayEditor from "./private/number-overlay-editor";
 import UriOverlayEditor from "./private/uri-overlay-editor";
 import { NumberFormatValues } from "react-number-format";
 
-type ImageEditorType = typeof ImageOverlayEditor;
+type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
 interface Props {
     readonly target: Rectangle;
