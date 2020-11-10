@@ -2,7 +2,6 @@ import * as React from "react";
 import { ImageOverlayEditorStyle } from "./image-overlay-editor-style";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
-import { panic } from "../../common/support";
 import { EditPencil } from "../../common/utils";
 // import { createPortal } from "react-dom";
 // import ClickOutsideContainer from "../../click-outside-container/click-outside-container";
@@ -17,18 +16,12 @@ export interface OverlayImageEditorProps {
 }
 
 const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps> = p => {
-    const { urls, canWrite, onKeyDown } = p;
-
-    const [editing, setEditing] = React.useState(false);
-
-    const onEditClick = React.useCallback(() => {
-        setEditing(true);
-    }, []);
+    const { urls, canWrite, onKeyDown, onEditClick } = p;
 
     const filtered = urls.filter(u => u !== "");
 
-    if (editing || filtered.length === 0) {
-        panic("FIXME");
+    if (filtered.length === 0) {
+        return null;
     }
 
     const allowMove = filtered.length > 1;

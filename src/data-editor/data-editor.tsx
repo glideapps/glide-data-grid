@@ -18,6 +18,7 @@ import copy from "copy-to-clipboard";
 import { makeEditCell } from "../data-grid/data-grid-lib";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
+import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
@@ -52,6 +53,8 @@ interface Handled {
     readonly searchColOffset: number;
 }
 
+type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
+
 export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
@@ -63,6 +66,8 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
     readonly headerHeight?: number; // default 36
     readonly rowHeight?: number; // default 34
     readonly rowMarkerWidth?: number; // default 50
+
+    readonly imageEditorOverride?: ImageEditorType;
 }
 
 const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
@@ -82,6 +87,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const scrollTimer = React.useRef<number>();
     const lastSent = React.useRef<[number, number]>();
 
+    const imageEditorOverride = p.imageEditorOverride;
     const rowMarkers = p.rowMarkers ?? true;
     const allowInsertRow = p.allowInsertRow ?? true;
     const rowMarkerOffset = rowMarkers ? 1 : 0;
@@ -863,7 +869,13 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 onSearchResultsChanged={onSearchResultsChanged}
                 searchColOffset={rowMarkerOffset}
             />
-            {overlay !== undefined && <DataGridOverlayEditor {...overlay} onFinishEditing={onFinishEditing} />}
+            {overlay !== undefined && (
+                <DataGridOverlayEditor
+                    {...overlay}
+                    imageEditorOverride={imageEditorOverride}
+                    onFinishEditing={onFinishEditing}
+                />
+            )}
         </>
     );
 };
