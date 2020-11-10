@@ -13,10 +13,11 @@ export interface OverlayImageEditorProps {
     readonly onChange: (newImage: string) => void;
     readonly onKeyDown: (event: React.KeyboardEvent) => void;
     readonly onEditClick?: () => void;
+    readonly renderImage?: (url: string) => React.ReactNode;
 }
 
 const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps> = p => {
-    const { urls, canWrite, onKeyDown, onEditClick } = p;
+    const { urls, canWrite, onKeyDown, onEditClick, renderImage } = p;
 
     const filtered = urls.filter(u => u !== "");
 
@@ -33,11 +34,14 @@ const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps> = p =
                 swipeable={allowMove}
                 emulateTouch={allowMove}
                 infiniteLoop={allowMove}>
-                {filtered.map(url => (
-                    <div className="centering-container" key={url}>
-                        <img draggable={false} src={url} />
-                    </div>
-                ))}
+                {filtered.map(url => {
+                    const innerContent = renderImage?.(url) ?? <img draggable={false} src={url} />;
+                    return (
+                        <div className="centering-container" key={url}>
+                            {innerContent}
+                        </div>
+                    );
+                })}
             </Carousel>
             {canWrite && onEditClick && (
                 <button className="edit-icon" onClick={onEditClick}>
