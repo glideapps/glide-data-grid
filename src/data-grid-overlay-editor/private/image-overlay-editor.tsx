@@ -16,7 +16,7 @@ export interface OverlayImageEditorProps {
     readonly onEditClick?: () => void;
 }
 
-const ImageOverlayEditor: React.FunctionComponent<Props> = p => {
+const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps> = p => {
     const { urls, canWrite, onKeyDown } = p;
 
     const [editing, setEditing] = React.useState(false);
