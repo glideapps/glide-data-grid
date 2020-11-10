@@ -1,4 +1,3 @@
-import deepEqual from "deep-equal";
 import * as React from "react";
 import { Subtract } from "utility-types";
 import DataGridDnd, { DataGridDndProps } from "../data-grid-dnd/data-grid-dnd";
@@ -90,7 +89,15 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                 height: cellBottom - cellY,
             };
 
-            if (!deepEqual(last.current, rect)) {
+            const oldRect = last.current;
+
+            if (
+                oldRect === undefined ||
+                oldRect.y !== rect.y ||
+                oldRect.x !== rect.x ||
+                oldRect.height !== rect.height ||
+                oldRect.width !== rect.width
+            ) {
                 onVisibleRowsChanged?.({
                     x: cellX,
                     y: cellY,
