@@ -20,10 +20,11 @@ interface Props {
     readonly onFinishEditing: (newCell: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly forceEditMode: boolean;
     readonly imageEditorOverride?: ImageEditorType;
+    readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
 }
 
 const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { target, content, onFinishEditing, forceEditMode, imageEditorOverride } = p;
+    const { target, content, onFinishEditing, forceEditMode, imageEditorOverride, markdownDivCreateNode } = p;
 
     const [tempValue, setTempValue] = React.useState<GridCell | undefined>(forceEditMode ? content : undefined);
 
@@ -149,6 +150,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
                     onKeyDown={onKeyDown}
                     onChange={onStringValueChange}
                     forceEditMode={forceEditMode}
+                    createNode={markdownDivCreateNode}
                 />
             );
             break;

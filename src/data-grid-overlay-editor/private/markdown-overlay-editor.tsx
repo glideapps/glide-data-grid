@@ -9,10 +9,11 @@ interface Props {
     readonly onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
     readonly onChange: (ev: React.ChangeEvent<HTMLTextAreaElement>) => void;
     readonly forceEditMode: boolean;
+    createNode?: (content: string) => DocumentFragment;
 }
 
 const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { markdown, onChange, onKeyDown, forceEditMode } = p;
+    const { markdown, onChange, onKeyDown, forceEditMode, createNode } = p;
 
     const [editMode, setEditMode] = React.useState<boolean>(markdown === "" || forceEditMode);
 
@@ -26,7 +27,7 @@ const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
 
     return (
         <MarkdownOverlayEditorStyle>
-            <MarkdownDiv contents={markdown} />
+            <MarkdownDiv contents={markdown} createNode={createNode} />
             <div className="edit-icon" onClick={onEditClick}>
                 <EditPencil />
             </div>

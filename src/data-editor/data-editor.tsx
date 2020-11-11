@@ -68,6 +68,7 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
     readonly rowMarkerWidth?: number; // default 50
 
     readonly imageEditorOverride?: ImageEditorType;
+    readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
 }
 
 const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
@@ -88,6 +89,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const lastSent = React.useRef<[number, number]>();
 
     const imageEditorOverride = p.imageEditorOverride;
+    const markdownDivCreateNode = p.markdownDivCreateNode;
     const rowMarkers = p.rowMarkers ?? true;
     const allowInsertRow = p.allowInsertRow ?? true;
     const rowMarkerOffset = rowMarkers ? 1 : 0;
@@ -874,6 +876,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     {...overlay}
                     imageEditorOverride={imageEditorOverride}
                     onFinishEditing={onFinishEditing}
+                    markdownDivCreateNode={markdownDivCreateNode}
                 />
             )}
         </>
