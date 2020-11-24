@@ -1,9 +1,0 @@
-src
-babel.config.json
-.prettierrc
-.storybook
-build.sh
-package-lock.json
-.gitignore
-tsconfig.json
-tsconfig.types.json

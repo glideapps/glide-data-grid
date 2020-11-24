@@ -1,78 +1,43 @@
 {
-    "name": "@glideapps/glide-data-grid",
-    "version": "1.0.4",
-    "description": "Super fast, pure canvas Data Grid Editor",
-    "main": "dist/js/index.js",
-    "types": "dist/ts/index.d.ts",
-    "scripts": {
-        "build": "npm run build-js && npm run build-types",
-        "build-js": "babel ./src -d dist/js --ignore './src/__tests__' --extensions .ts,.tsx --config-file ./babel.config.json",
-        "build-types": "tsc -p tsconfig.types.json",
-        "storybook": "start-storybook -p 9009 -s public"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/glideapps/glide-data-grid.git"
-    },
-    "keywords": [
-        "react",
-        "datagrid",
-        "editor"
+  "name": "glide-data-grid",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "@types/jest": "^26.0.15",
+    "@types/node": "^12.0.0",
+    "@types/react": "^16.9.53",
+    "@types/react-dom": "^16.9.8",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-scripts": "4.0.1",
+    "typescript": "^4.0.3",
+    "web-vitals": "^0.2.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
     ],
-    "author": "Glide",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/quicktype/glide-data-grid/issues"
-    },
-    "homepage": "https://github.com/quicktype/glide-data-grid#readme",
-    "dependencies": {
-        "canvg": "^3.0.6",
-        "collection-utils": "^1.0.1",
-        "copy-to-clipboard": "^3.1.0",
-        "react-virtualized-auto-sizer": "^1.0.2"
-    },
-    "devDependencies": {
-        "@babel/cli": "^7.12.1",
-        "@babel/core": "^7.12.3",
-        "@babel/plugin-proposal-class-properties": "^7.8.3",
-        "@babel/preset-env": "^7.8.4",
-        "@babel/preset-react": "^7.8.3",
-        "@babel/preset-typescript": "^7.9.0",
-        "@storybook/addon-actions": "^5.3.18",
-        "@storybook/addon-knobs": "^5.3.18",
-        "@storybook/addon-links": "^5.3.18",
-        "@storybook/addon-storyshots": "^5.3.18",
-        "@storybook/addon-storysource": "^6.0.27",
-        "@storybook/addons": "^5.3.18",
-        "@storybook/react": "^5.3.18",
-        "@types/direction": "^1.0.0",
-        "@types/dompurify": "^2.0.4",
-        "@types/lodash": "^4.14.141",
-        "@types/lru-cache": "^5.1.0",
-        "@types/marked": "^0.6.5",
-        "@types/react": "^16.9.19",
-        "@types/react-dom": "^16.9.5",
-        "@types/react-virtualized": "^9.21.10",
-        "@types/styled-components": "5.1.4",
-        "@typescript-eslint/eslint-plugin": "^3.10.0",
-        "@typescript-eslint/parser": "^3.10.0",
-        "@typescript-eslint/typescript-estree": "^3.10.0",
-        "babel-loader": "^8.1.0",
-        "direction": "^1.0.4",
-        "dompurify": "^2.0.1",
-        "eslint": "^7.12.1",
-        "eslint-plugin-import": "^2.22.0",
-        "jest": "^26.6.1",
-        "lodash": "^4.17.19",
-        "lru-cache": "^6.0.0",
-        "marked": "^0.7.0",
-        "react": "^16.12.0",
-        "react-dom": "^16.12.0",
-        "react-number-format": "^4.4.1",
-        "react-responsive-carousel": "^3.2.7",
-        "react-virtualized": "^9.21.0",
-        "styled-components": "5.2.0",
-        "typescript": "^4.0.3",
-        "utility-types": "^3.10.0"
-    }
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }

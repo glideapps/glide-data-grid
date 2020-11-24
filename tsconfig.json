@@ -1,34 +1,26 @@
-// {
-//     "compilerOptions": {
-//       "target": "es5",
-//       "module": "commonjs",
-//       "types": ["react", "jest"],
-//       "lib": ["es2017", "es7", "es6", "dom"],
-//       "declaration": true,
-//       "jsx": "react",
-//       "outDir": "dist",
-//       "strict": true,
-//       "esModuleInterop": true
-//     },
-//     "exclude": [
-//       "node_modules",
-//       "dist"
-//     ]
-//   }
-
-
 {
   "compilerOptions": {
-      "allowSyntheticDefaultImports": true,
-      "esModuleInterop": true,
-      "noImplicitAny": true,
-      "noUnusedParameters": true,
-      "noUnusedLocals": true,
-      "strict": true,
-      "target": "es5",
-      "jsx": "react",
-      "baseUrl": "./src",
-      "typeRoots": ["./node_modules/@types"],
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx"]
+  "include": [
+    "src"
+  ]
 }
