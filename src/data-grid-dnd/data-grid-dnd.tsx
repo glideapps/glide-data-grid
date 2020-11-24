@@ -1,4 +1,4 @@
-import { clamp } from "lodash";
+import clamp from "lodash/clamp";
 import * as React from "react";
 import { Subtract } from "utility-types";
 import DataGrid, { DataGridProps } from "../data-grid/data-grid";
