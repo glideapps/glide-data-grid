@@ -6,6 +6,45 @@ import { GridCell, GridCellKind, GridKeyEventArgs, GridSelection } from "../data
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
 
+// icons
+const UpArrow = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="button-icon">
+        <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="48"
+            d="M112 244l144-144 144 144M256 120v292"
+        />
+    </svg>
+);
+const DownArrow = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="button-icon" viewBox="0 0 512 512">
+        <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="48"
+            d="M112 268l144 144 144-144M256 392V100"
+        />
+    </svg>
+);
+
+const CloseX = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="button-icon" viewBox="0 0 512 512">
+        <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="32"
+            d="M368 368L144 144M368 144L144 368"
+        />
+    </svg>
+);
+
 interface Handled {
     readonly prelightCells?: readonly (readonly [number, number])[];
 }
@@ -293,16 +332,13 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         onKeyDownCapture={onSearchKeyDown}
                     />
                     <button onClick={onPrev} disabled={(searchStatus?.results ?? 0) === 0}>
-                        <div>FIXME</div>
-                        {/* <AppIcon icon="01-50-navigation-up-circle-alternate" size={16} /> */}
+                        <UpArrow />
                     </button>
                     <button onClick={onNext} disabled={(searchStatus?.results ?? 0) === 0}>
-                        <div>FIXME</div>
-                        {/* <AppIcon icon="01-50-navigation-down-circle-alternate" size={16} /> */}
+                        <DownArrow />
                     </button>
                     <button onClick={onClose}>
-                        <div>FIXME</div>
-                        {/* <AppIcon icon="01-33-close" size={12} /> */}
+                        <CloseX />
                     </button>
                 </div>
                 {searchStatus !== undefined && (

@@ -36,7 +36,7 @@ const builderThemeBase = {
         columnHeader: {
             bgColor: "#EDEDF3",
             bgDark: "#D8D8E3",
-            fgColor: "#D8D8E3",
+            fgColor: "#737383",
             fgSelected: "#FFFFFF",
             bgSelected: "#4F5DFF",
 

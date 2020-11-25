@@ -34,9 +34,15 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
 
     input {
         width: 100%;
+
+        border: none;
+        border-width: 0;
+        outline: none;
     }
 
     ${GrowingEntryStyle} {
         height: 100%;
     }
+
+    text-align: unset;
 `;

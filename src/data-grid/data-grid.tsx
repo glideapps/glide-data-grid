@@ -736,6 +736,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         () => ({
             width,
             height,
+            display: "block",
             cursor: canDrag ? "col-resize" : headerHovered ? "pointer" : "default",
         }),
         [width, height, headerHovered, canDrag]

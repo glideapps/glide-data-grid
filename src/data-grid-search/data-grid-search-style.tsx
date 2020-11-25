@@ -38,11 +38,19 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
     input {
         width: 220px;
         color: ${p => p.theme.fgColorDark};
+        border: none;
+        border-width: 0;
+        outline: none;
     }
 
     button {
         width: 24px;
         height: 24px;
+        padding: 0;
+
+        border: none;
+        outline: none;
+        background: none;
 
         display: flex;
         justify-content: center;
@@ -52,6 +60,11 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
 
         :hover {
             color: ${p => p.theme.fgColorDark};
+        }
+
+        .button-icon {
+            width: 16px;
+            height: 16px;
         }
 
         :disabled {
