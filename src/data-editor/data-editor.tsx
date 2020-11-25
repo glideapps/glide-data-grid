@@ -846,9 +846,11 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     }, [mangledCols, rows, selectedCell, updateSelectedCell]);
 
     let theme = useTheme();
-    theme = { ...getBuilderTheme(), ...theme };
+    const mergedTheme = React.useMemo(() => {
+        return { ...getBuilderTheme(), ...theme };
+    }, [theme]);
     return (
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mergedTheme}>
             <DataGridSearch
                 {...rest}
                 canvasRef={canvasRef}
