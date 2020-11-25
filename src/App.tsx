@@ -1,13 +1,13 @@
 import React from "react";
-import logo from "./logo.svg";
+// import logo from "./logo.svg";
 import "./App.css";
-import {
+import DataEditor, {
   GridCell,
   GridCellKind,
   GridColumn,
+  GridSelection,
   Rectangle,
 } from "@glideapps/glide-data-grid";
-import DataEditor from "@glideapps/glide-data-grid";
 
 function getDummyData([col, row]: readonly [number, number]): GridCell {
   if (col === 0) {
@@ -161,13 +161,35 @@ function App() {
     [cols]
   );
 
+  const getCellsForSelection = React.useCallback(
+    (selection: GridSelection): readonly (readonly GridCell[])[] => {
+      if (selection.range === undefined)
+        return [[getDummyData(selection.cell)]];
+
+      const range = selection.range;
+
+      const result: GridCell[][] = [];
+      for (let row = range.y; row < range.y + range.height; row++) {
+        const inner: GridCell[] = [];
+        for (let col = range.x; col < range.x + range.width; col++) {
+          inner.push(getDummyData([col, row]));
+        }
+
+        result.push(inner);
+      }
+
+      return result;
+    },
+    []
+  );
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
+        {/* <img src={logo} className="App-logo" alt="logo" /> */}
+      </header>
+
+      <div className="data-area">
         <DataEditor
           cellXOffset={x}
           cellYOffset={y}
@@ -177,8 +199,10 @@ function App() {
           allowResize={true}
           onVisibleRowsChanged={onVisibleRowsChanged}
           onColumnResized={onColumnResized}
+          getCellsForSelection={getCellsForSelection}
         />
-      </header>
+      </div>
+      <div id="portal" />
     </div>
   );
 }
