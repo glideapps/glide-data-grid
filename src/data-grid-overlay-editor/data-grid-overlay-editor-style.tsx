@@ -52,5 +52,5 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
         height: 100%;
     }
 
-    text-align: unset;
+    text-align: start;
 `;
