@@ -20,7 +20,7 @@ import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-gr
 import { browserIsOSX } from "../common/browser-detect";
 import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
 import { ThemeProvider, useTheme } from "styled-components";
-import { getBuilderTheme } from "common/styles";
+import { getBuilderTheme } from "../common/styles";
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
