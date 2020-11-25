@@ -19,6 +19,8 @@ import { makeEditCell } from "../data-grid/data-grid-lib";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
 import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
+import { ThemeProvider, useTheme } from "styled-components";
+import { getBuilderTheme } from "common/styles";
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
@@ -843,8 +845,14 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         updateSelectedCell(col, row);
     }, [mangledCols, rows, selectedCell, updateSelectedCell]);
 
+    let theme = useTheme();
+
+    if (theme === undefined) {
+        theme = getBuilderTheme();
+    }
+
     return (
-        <>
+        <ThemeProvider theme={theme}>
             <DataGridSearch
                 {...rest}
                 canvasRef={canvasRef}
@@ -879,7 +887,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     markdownDivCreateNode={markdownDivCreateNode}
                 />
             )}
-        </>
+        </ThemeProvider>
     );
 };
 

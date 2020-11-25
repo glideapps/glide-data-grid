@@ -45,7 +45,7 @@ const BuilderWrapper = styled.div<Props>`
 `;
 
 export class BuilderThemeWrapper extends React.PureComponent<Props> {
-    private builderTheme = getBuilderTheme(false);
+    private builderTheme = getBuilderTheme();
 
     public render(): React.ReactNode {
         const { context, ...rest } = this.props;
