@@ -8,6 +8,8 @@ interface Props {
 export const DataGridOverlayEditorStyle = styled.div<Props>`
     position: absolute;
 
+    box-sizing: border-box;
+
     --overlay-top: ${p => p.targetRect.y}px;
 
     left: ${p => p.targetRect.x}px;
@@ -35,6 +37,12 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
     input {
         width: 100%;
 
+        border: none;
+        border-width: 0;
+        outline: none;
+    }
+
+    textarea {
         border: none;
         border-width: 0;
         outline: none;
