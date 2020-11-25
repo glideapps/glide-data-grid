@@ -12,9 +12,9 @@ const UpArrow = () => (
         <path
             fill="none"
             stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="48"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="48"
             d="M112 244l144-144 144 144M256 120v292"
         />
     </svg>
@@ -24,9 +24,9 @@ const DownArrow = () => (
         <path
             fill="none"
             stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="48"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="48"
             d="M112 268l144 144 144-144M256 392V100"
         />
     </svg>
@@ -37,9 +37,9 @@ const CloseX = () => (
         <path
             fill="none"
             stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="32"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="32"
             d="M368 368L144 144M368 144L144 368"
         />
     </svg>
@@ -59,7 +59,7 @@ const targetSearchTimeMS = 10;
 
 const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const { onKeyDown, getCellsForSelection, onSearchResultsChanged, searchColOffset, ...rest } = p;
-    const { canvasRef, cellYOffset, rows, columns } = p;
+    const { canvasRef, cellYOffset, rows, columns, getCellContent } = p;
 
     const [searchString, setSearchString] = React.useState("");
     const [showSearch, setShowSearch] = React.useState(false);
@@ -83,10 +83,31 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         }
     }, []);
 
+    const getCellsForSelectionMangled = React.useCallback(
+        (selection: GridSelection): readonly (readonly GridCell[])[] => {
+            if (getCellsForSelection !== undefined) return getCellsForSelection(selection);
+
+            if (selection.range === undefined) return [[getCellContent(selection.cell)]];
+
+            const range = selection.range;
+
+            const result: GridCell[][] = [];
+            for (let row = range.y; row < range.y + range.height; row++) {
+                const inner: GridCell[] = [];
+                for (let col = range.x; col < range.x + range.width; col++) {
+                    inner.push(getCellContent([col, row]));
+                }
+
+                result.push(inner);
+            }
+
+            return result;
+        },
+        [getCellContent, getCellsForSelection]
+    );
+
     const beginSearch = React.useCallback(
         (str: string) => {
-            if (getCellsForSelection === undefined) return;
-
             const regex = new RegExp(str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1"), "i");
 
             let startY = cellYOffset;
@@ -105,7 +126,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
             const tick = () => {
                 const tStart = performance.now();
-                const data = getCellsForSelection({
+                const data = getCellsForSelectionMangled({
                     cell: [0, 0],
                     range: {
                         x: 0,
@@ -180,7 +201,15 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
             cancelSearch();
             searchHandle.current = window.requestAnimationFrame(tick);
         },
-        [cancelSearch, cellYOffset, columns.length, getCellsForSelection, onSearchResultsChanged, rows, searchColOffset]
+        [
+            cancelSearch,
+            cellYOffset,
+            columns.length,
+            getCellsForSelectionMangled,
+            onSearchResultsChanged,
+            rows,
+            searchColOffset,
+        ]
     );
 
     const cancelEvent = React.useCallback((ev: React.MouseEvent) => {
