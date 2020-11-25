@@ -709,7 +709,9 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                                 });
                                 break;
                         }
-                    } catch {}
+                    } catch {
+                        // do nothing
+                    }
                 } else if (event.key === "ArrowDown") {
                     if (shiftKey) {
                         adjustSelection([0, 1]);
@@ -845,7 +847,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         updateSelectedCell(col, row);
     }, [mangledCols, rows, selectedCell, updateSelectedCell]);
 
-    let theme = useTheme();
+    const theme = useTheme();
     const mergedTheme = React.useMemo(() => {
         return { ...getBuilderTheme(), ...theme };
     }, [theme]);

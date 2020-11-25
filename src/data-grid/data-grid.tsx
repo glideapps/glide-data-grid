@@ -687,6 +687,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         selectedRows,
         rows,
         getCellContent,
+        drawCustomCell,
         prelightCells,
     ]);
 
