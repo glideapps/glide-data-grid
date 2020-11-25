@@ -846,11 +846,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     }, [mangledCols, rows, selectedCell, updateSelectedCell]);
 
     let theme = useTheme();
-
-    if (theme === undefined) {
-        theme = getBuilderTheme();
-    }
-
+    theme = { ...getBuilderTheme(), ...theme };
     return (
         <ThemeProvider theme={theme}>
             <DataGridSearch
