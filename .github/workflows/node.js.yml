@@ -42,4 +42,4 @@ jobs:
             - uses: JS-DevTools/npm-publish@v1
               with:
                   token: ${{ secrets.NPM_TOKEN }}
-                  access: restricted
+                  access: public
