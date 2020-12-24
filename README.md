@@ -20,7 +20,7 @@ The data editor has no intrinisic size. This is likely to change in a future ver
 
 ```CSS
 .gridWrapper > :first-child {
-  width: 8000px;
+  width: 800px;
   height: 500px;
 }
 ```
