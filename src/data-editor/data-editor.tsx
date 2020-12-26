@@ -160,7 +160,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             if (col === 0 && rowMarkers) {
                 return {
                     kind: GridCellKind.Boolean,
-                    checked: selectedRows?.includes(row),
+                    data: selectedRows?.includes(row),
                     showUnchecked: hoveredFirstRow === row,
                     allowOverlay: false,
                     allowEdit: false,
@@ -170,8 +170,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 if (row === 0) {
                     return {
                         kind: GridCellKind.Text,
+                        displayData: "",
                         data: "",
-                        editData: "",
                         allowOverlay: true,
                     };
                 }
@@ -261,13 +261,13 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         case GridCellKind.Text:
                             content = {
                                 ...content,
-                                editData: initialValue,
+                                data: initialValue,
                             };
                             break;
                         case GridCellKind.Number:
                             content = {
                                 ...content,
-                                editData: maybe(() => Number.parseFloat(initialValue), 0),
+                                data: maybe(() => Number.parseFloat(initialValue), 0),
                             };
                             break;
                         case GridCellKind.Markdown:
@@ -288,7 +288,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             } else if (c.kind === GridCellKind.Boolean) {
                 mangledOnCellEdited?.([col - rowMarkerOffset, row], {
                     ...c,
-                    checked: !c.checked,
+                    data: !c.data,
                 });
             } else {
                 onCellClicked?.([col - rowMarkerOffset, row]);
@@ -430,16 +430,17 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         const formatCell = (cell: GridCell) => {
             switch (cell.kind) {
                 case GridCellKind.Text:
+                case GridCellKind.Number:
+                    return escape(cell.displayData);
                 case GridCellKind.Markdown:
                 case GridCellKind.RowID:
                 case GridCellKind.Uri:
-                case GridCellKind.Number:
                     return escape(cell.data);
                 case GridCellKind.Image:
                 case GridCellKind.Bubble:
                     return cell.data.reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
                 case GridCellKind.Boolean:
-                    return cell.checked ? "TRUE" : "FALSE";
+                    return cell.data ? "TRUE" : "FALSE";
                 case GridCellKind.Loading:
                     return "#LOADING";
                 case GridCellKind.Protected:
@@ -698,7 +699,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                             case GridCellKind.Text:
                                 mangledOnCellEdited?.([col - rowMarkerOffset, row], {
                                     ...cellValue,
-                                    editData: text,
+                                    data: text,
                                 });
                                 break;
                             case GridCellKind.Markdown:
@@ -754,7 +755,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                                 case GridCellKind.Text:
                                     mangledOnCellEdited?.(cell, {
                                         ...cellValue,
-                                        editData: "",
+                                        data: "",
                                     });
                                     break;
                                 case GridCellKind.Markdown:
@@ -773,13 +774,13 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                                 case GridCellKind.Boolean:
                                     mangledOnCellEdited?.(cell, {
                                         ...cellValue,
-                                        checked: false,
+                                        data: false,
                                     });
                                     break;
                                 case GridCellKind.Number:
                                     mangledOnCellEdited?.(cell, {
                                         ...cellValue,
-                                        editData: undefined,
+                                        data: undefined,
                                     });
                                     break;
                                 default:

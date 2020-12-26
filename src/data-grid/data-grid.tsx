@@ -600,16 +600,13 @@ const DataGrid: React.FunctionComponent<Props> = p => {
 
                         const drawn = drawCustomCell?.(ctx, cell, theme, x, y, c.width, rh) === true;
                         if (!drawn) {
-                            if (
-                                cell.kind === GridCellKind.Text ||
-                                cell.kind === GridCellKind.Markdown ||
-                                cell.kind === GridCellKind.Uri ||
-                                cell.kind === GridCellKind.Number
-                            ) {
+                            if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
+                                drawTextCell(ctx, theme, cell.displayData, x, y, c.width, rh);
+                            } else if (cell.kind === GridCellKind.Markdown || cell.kind === GridCellKind.Uri) {
                                 drawTextCell(ctx, theme, cell.data, x, y, c.width, rh);
                             } else if (cell.kind === GridCellKind.Boolean) {
-                                if (cell.checked || cell.showUnchecked) {
-                                    drawBoolean(ctx, theme, cell.checked, x, y, c.width, rh, highlighted);
+                                if (cell.data || cell.showUnchecked) {
+                                    drawBoolean(ctx, theme, cell.data, x, y, c.width, rh, highlighted);
                                 }
                             } else if (cell.kind === GridCellKind.Bubble) {
                                 drawBubbles(ctx, theme, cell.data, x, y, c.width, rh, highlighted);

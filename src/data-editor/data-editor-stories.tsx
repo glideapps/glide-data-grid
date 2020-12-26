@@ -94,9 +94,9 @@ And supports newline chars and automatic wrapping text that just needs to be lon
     if (col === 4) {
         return {
             kind: GridCellKind.Number,
-            data: "$10,352",
+            displayData: "$10,352",
             allowOverlay: true,
-            editData: 10352,
+            data: 10352,
         };
     }
     if (col === 5) {
@@ -109,7 +109,7 @@ And supports newline chars and automatic wrapping text that just needs to be lon
     if (col === 6) {
         return {
             kind: GridCellKind.Boolean,
-            checked: row % 3 === 0 || row % 5 === 0,
+            data: row % 3 === 0 || row % 5 === 0,
             showUnchecked: true,
             allowEdit: false,
             allowOverlay: false,
@@ -119,15 +119,15 @@ And supports newline chars and automatic wrapping text that just needs to be lon
         return {
             kind: GridCellKind.Text,
             // RTL test
+            displayData: `הרפתקה חדשה`,
             data: `הרפתקה חדשה`,
-            editData: `הרפתקה חדשה`,
             allowOverlay: true,
         };
     }
     return {
         kind: GridCellKind.Text,
+        displayData: `${col}, ${row} 🦝`,
         data: `${col}, ${row} 🦝`,
-        editData: `${col}, ${row} 🦝`,
         allowOverlay: true,
     };
 }
