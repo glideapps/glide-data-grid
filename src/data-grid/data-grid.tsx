@@ -67,15 +67,7 @@ export interface DataGridProps {
     readonly isDraggable?: boolean;
     readonly onDragStart?: (args: GridDragEventArgs) => void;
 
-    readonly drawCustomCell?: (
-        ctx: CanvasRenderingContext2D,
-        cell: GridCell,
-        theme: Theme,
-        x: number,
-        y: number,
-        width: number,
-        height: number
-    ) => boolean;
+    readonly drawCustomCell?: (ctx: CanvasRenderingContext2D, cell: GridCell, theme: Theme, rect: Rectangle) => boolean;
 
     readonly dragAndDropState?: {
         src: number;
@@ -598,7 +590,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                             ctx.globalAlpha = 0.6;
                         }
 
-                        const drawn = drawCustomCell?.(ctx, cell, theme, x, y, c.width, rh) === true;
+                        const drawn = drawCustomCell?.(ctx, cell, theme, { x, y, width: c.width, height: rh }) === true;
                         if (!drawn) {
                             if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
                                 drawTextCell(ctx, theme, cell.displayData, x, y, c.width, rh);

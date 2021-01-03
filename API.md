@@ -158,10 +158,7 @@ drawCustomCell?: (
     ctx: CanvasRenderingContext2D,
     cell: GridCell,
     theme: Theme,
-    x: number,
-    y: number,
-    width: number,
-    height: number
+    rect: Rectangle
 ) => boolean;
 ```
 
