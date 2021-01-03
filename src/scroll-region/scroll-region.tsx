@@ -37,7 +37,7 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
             clientHeight: el.clientHeight - (isFirefox ? 4 : 0),
             clientWidth: el.clientWidth,
             scrollLeft: el.scrollLeft,
-            scrollTop: el.scrollTop,
+            scrollTop: Math.max(0, el.scrollTop),
         });
     }, [update]);
 
