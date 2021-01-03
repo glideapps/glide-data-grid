@@ -64,7 +64,7 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
     readonly onCellClicked?: (cell: readonly [number, number]) => void;
 
     readonly rowMarkers?: boolean; // default true;
-    readonly allowInsertRow?: boolean; // default true;
+    readonly showTrailingBlankRow?: boolean; // default true;
     readonly headerHeight?: number; // default 36
     readonly rowHeight?: number; // default 34
     readonly rowMarkerWidth?: number; // default 50
@@ -93,7 +93,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const imageEditorOverride = p.imageEditorOverride;
     const markdownDivCreateNode = p.markdownDivCreateNode;
     const rowMarkers = p.rowMarkers ?? true;
-    const allowInsertRow = p.allowInsertRow ?? true;
+    const showTrailingBlankRow = p.showTrailingBlankRow ?? true;
     const rowMarkerOffset = rowMarkers ? 1 : 0;
 
     const rowHeight = p.rowHeight ?? 34;
@@ -127,18 +127,18 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         });
     }, []);
 
-    const mangledRows = allowInsertRow ? rows + 1 : rows;
+    const mangledRows = showTrailingBlankRow ? rows + 1 : rows;
 
     const mangledOnCellEdited = React.useCallback(
         (cell: readonly [number, number], newValue: EditableGridCell) => {
             const [, row] = cell;
-            if (allowInsertRow && row === mangledRows - 1) {
+            if (showTrailingBlankRow && row === mangledRows - 1) {
                 onRowInserted?.(cell, newValue);
             } else {
                 onCellEdited?.(cell, newValue);
             }
         },
-        [onRowInserted, onCellEdited, mangledRows, allowInsertRow]
+        [onRowInserted, onCellEdited, mangledRows, showTrailingBlankRow]
     );
 
     const mangledCols = React.useMemo(() => {
@@ -165,7 +165,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     allowOverlay: false,
                     allowEdit: false,
                 };
-            } else if (allowInsertRow && row === mangledRows - 1) {
+            } else if (showTrailingBlankRow && row === mangledRows - 1) {
                 //If the grid is empty, we will return text
                 if (row === 0) {
                     return {
@@ -182,7 +182,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 return getCellContent([col - rowMarkerOffset, row]);
             }
         },
-        [rowMarkers, allowInsertRow, mangledRows, selectedRows, hoveredFirstRow, getCellContent, rowMarkerOffset]
+        [rowMarkers, showTrailingBlankRow, mangledRows, selectedRows, hoveredFirstRow, getCellContent, rowMarkerOffset]
     );
 
     const onMouseDown = React.useCallback(
@@ -331,12 +331,12 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 ...visibleRegion,
                 x: visibleRegion.x - rowMarkerOffset,
                 height:
-                    allowInsertRow && visibleRegion.y + visibleRegion.height >= rows
+                    showTrailingBlankRow && visibleRegion.y + visibleRegion.height >= rows
                         ? visibleRegion.height - 1
                         : visibleRegion.height,
             });
         },
-        [onVisibleRowsChanged, rowMarkerOffset, rows, allowInsertRow]
+        [onVisibleRowsChanged, rowMarkerOffset, rows, showTrailingBlankRow]
     );
 
     const onColumnMovedImpl = React.useCallback(
