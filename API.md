@@ -122,10 +122,10 @@ onDeleteRows?: (rows: readonly number[]) => void;
 
 ```
 showTrailingBlankRow?: boolean;
-onRowInserted?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
+onRowAppended?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
 ```
 
-`showTrailingBlankRow` and `onRowInserted` control adding new rows at the bottom of the Grid. If `showTrailingBlankRow` is `true`, an empty, editable row will display at the bottom. If the user enters a value in one of its cells, `onRowInserted` is called, which is responsible for appending the new row.
+`showTrailingBlankRow` and `onRowAppended` control adding new rows at the bottom of the Grid. If `showTrailingBlankRow` is `true`, an empty, editable row will display at the bottom. If the user enters a value in one of its cells, `onRowAppended` is called, which is responsible for appending the new row.
 
 `showTrailingBlankRow` is `true` by default.
 

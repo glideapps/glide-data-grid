@@ -60,7 +60,7 @@ type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
-    readonly onRowInserted?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
+    readonly onRowAppended?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
     readonly onCellClicked?: (cell: readonly [number, number]) => void;
 
     readonly rowMarkers?: boolean; // default true;
@@ -110,7 +110,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         getCellContent,
         onCellClicked,
         onCellEdited,
-        onRowInserted,
+        onRowAppended,
         onColumnMoved,
         onDeleteRows,
         onDragStart,
@@ -133,12 +133,12 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         (cell: readonly [number, number], newValue: EditableGridCell) => {
             const [, row] = cell;
             if (showTrailingBlankRow && row === mangledRows - 1) {
-                onRowInserted?.(cell, newValue);
+                onRowAppended?.(cell, newValue);
             } else {
                 onCellEdited?.(cell, newValue);
             }
         },
-        [onRowInserted, onCellEdited, mangledRows, showTrailingBlankRow]
+        [onRowAppended, onCellEdited, mangledRows, showTrailingBlankRow]
     );
 
     const mangledCols = React.useMemo(() => {
