@@ -3,7 +3,7 @@ import { HeaderIcon } from "./data-grid-sprites";
 
 export interface GridSelection {
     readonly cell: readonly [number, number];
-    readonly range?: Readonly<Rectangle>;
+    readonly range: Readonly<Rectangle>;
 }
 
 export type GridMouseEventArgs = GridMouseCellEventArgs | GridMouseHeaderEventArgs | GridMouseOutOfBoundsEventArgs;

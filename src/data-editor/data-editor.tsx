@@ -222,7 +222,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                                 },
                             });
                         } else {
-                            setSelectedCell({ cell: [col, row] });
+                            setSelectedCell({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
                             setSelectedColumns([]);
                             setSelectedRows([]);
                             setOverlay(undefined);
@@ -517,7 +517,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             col = clamp(rowMarkerOffset, columns.length, col);
             row = clamp(0, mangledRows - 1, row);
             if (col === selectedCell?.cell[0] && row === selectedCell?.cell[1]) return false;
-            setSelectedCell({ cell: [col, row] });
+            setSelectedCell({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
 
             if (lastSent.current !== undefined && lastSent.current[0] === col && lastSent.current[1] === row) {
                 lastSent.current = undefined;
@@ -642,11 +642,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         if (selectedCell.range !== undefined && getCellsForSelection !== undefined) {
                             copyToClipboard(
                                 getCellsForSelection({
-                                    ...selectedCell,
-                                    range: {
-                                        ...selectedCell.range,
-                                        x: selectedCell.range.x - rowMarkerOffset,
-                                    },
+                                    ...selectedCell.range,
+                                    x: selectedCell.range.x - rowMarkerOffset,
                                 })
                             );
                         } else {
@@ -657,26 +654,20 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         const cells = selectedRows.map(
                             rowIndex =>
                                 getCellsForSelection({
-                                    cell: [0, 0],
-                                    range: {
-                                        x: 0,
-                                        y: rowIndex,
-                                        width: columns.length,
-                                        height: 1,
-                                    },
+                                    x: 0,
+                                    y: rowIndex,
+                                    width: columns.length,
+                                    height: 1,
                                 })[0]
                         );
                         copyToClipboard(cells);
                     } else if (selectedColumns.length === 1) {
                         copyToClipboard(
                             getCellsForSelection({
-                                cell: [0, 0],
-                                range: {
-                                    x: selectedColumns[0] - rowMarkerOffset,
-                                    y: 0,
-                                    width: 1,
-                                    height: rows,
-                                },
+                                x: selectedColumns[0] - rowMarkerOffset,
+                                y: 0,
+                                width: 1,
+                                height: rows,
                             })
                         );
                     }

@@ -2,7 +2,7 @@
 import * as React from "react";
 import { Subtract } from "utility-types";
 import { useEventListener } from "../common/utils";
-import { GridCell, GridCellKind, GridKeyEventArgs, GridSelection } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, GridKeyEventArgs, GridSelection, Rectangle } from "../data-grid/data-grid-types";
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
 
@@ -50,7 +50,7 @@ interface Handled {
 }
 
 export interface DataGridSearchProps extends Subtract<ScrollingDataGridProps, Handled> {
-    readonly getCellsForSelection?: (selection: GridSelection) => readonly (readonly GridCell[])[];
+    readonly getCellsForSelection?: (selection: Rectangle) => readonly (readonly GridCell[])[];
     readonly onSearchResultsChanged?: (results: readonly (readonly [number, number])[], navIndex: number) => void;
     readonly searchColOffset: number;
 }
@@ -85,7 +85,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
     const getCellsForSelectionMangled = React.useCallback(
         (selection: GridSelection): readonly (readonly GridCell[])[] => {
-            if (getCellsForSelection !== undefined) return getCellsForSelection(selection);
+            if (getCellsForSelection !== undefined) return getCellsForSelection(selection.range);
 
             if (selection.range === undefined) return [[getCellContent(selection.cell)]];
 
