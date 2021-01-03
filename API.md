@@ -1,68 +1,184 @@
-# Grid API
+# Glide Data Grid
+
+## HTML/CSS Prerequisites
+
+Currently the Grid depends on there being a root level "portal" div in your HTML. Insert this snippet as the last child of your `<body>` tag.
+
+```HTML
+<div id="portal" />
+```
+
+The Grid has no intrinisic size. This is likely to change in a future version, for now however the quickest way to give it a size is by wrapping it in a div with CSS like:
+
+```CSS
+.gridWrapper > :first-child {
+  width: 800px;
+  height: 500px;
+}
+```
+
+##
+
+The Grid will never change any of your underlying data. You have to do so yourself when one of the callbacks is invoked. For example, when the user edits the value in a cell, the Grid will invoke the `onCellEdited` callback. If you don't implement that callback, or if it doesn't change the undelying data to the new value, the Grid will keep displaying the old value.
+
+Note that there is currently no way to tell the grid that data has changed. It has to be forced to redraw by
 
 ## Properties
 
 ### Required
 
+```
+rows: number;
+```
+
 `rows` is the number of rows to display.
+
+```
+columns: readonly GridColumn[];
+```
 
 `columns` is an array of objects of type `GridColumn` describing the column headers. The length of the array is the number of columns to display.
 
-`cellXOffset` is the zero-based index of the leftmost column to display.
+```
+cellXOffset: number;
+cellYOffset: number;
+```
 
-`cellYOffset` is the zero-based index of the topmost row to display.
+`cellXOffset` and `cellYOffset` are the zero-based indexes of the leftmost column, and topmost row to display, respectively.
+
+```
+allowResize: boolean;
+```
 
 `allowResize` is a boolean indicating whether to allow resizing the widths of columns.
+
+```
+getCellContent: (cell: readonly [number, number]) => GridCell;
+```
 
 `getCellContent` returns an object of type `GridCell` describing the contents for the cell at the given coordinates.
 
 ### Optional
 
-`onVisibleRowsChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`. Note that because the component doesn't keep any state, you have to keep track of at least the `cellXOffset` and `cellYOffset`, for which the rectangle provides new values in `.x` and `.y`, respectively.
+```
+onVisibleRowsChanged?: (range: Rectangle) => void;
+```
+
+`onVisibleRowsChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`. Note that you have to keep track of at least the `cellXOffset` and `cellYOffset`, for which the rectangle provides new values in `.x` and `.y`, respectively, and pass them back in as properties, otherwise your Grid will not scroll.
+
+```
+headerHeight: number;
+```
 
 `headerHeight` is the height of the table header. It defaults to `36`.
 
-`rowHeight` is the height of a row in the table. It defaults to `34`.
+```
+rowHeight: number | ((index: number) => number);
+```
+
+`rowHeight` is the height of a row in the table. It defaults to `34`. By passing a function instead of a number you can give different heights to each row. The `index` is the zero-based absolute row index.
+
+```
+rowMarkers?: boolean;
+```
 
 `rowMarkers` determines whether to display the marker column on the very left. It defaults to `true`. Note that this column doesn't count as a table column, i.e. it has no index, and doesn't change column indexes.
+
+```
+rowMarkerWidth?: number;
+```
 
 `rowMarkerWidth` is the width of the marker column on the very left. It defaults to `50`.
 
 ```
-    readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
-
-    readonly onKeyUp?: (event: GridKeyEventArgs) => void;
-
-    readonly isDraggable?: boolean;
-    readonly onDragStart?: (args: GridDragEventArgs) => void;
-
-    readonly drawCustomCell?: (
-        ctx: CanvasRenderingContext2D,
-        cell: GridCell,
-        theme: Theme,
-        x: number,
-        y: number,
-        width: number,
-        height: number
-    ) => boolean;
-
-    readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
-    readonly onColumnResized?: (column: GridColumn, newSize: number) => void;
-
-    readonly scrollToEnd?: boolean;
-
-    readonly getCellsForSelection?: (selection: GridSelection) => readonly (readonly GridCell[])[];
-
-    readonly onDeleteRows?: (rows: readonly number[]) => void;
-    readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
-    readonly onRowInserted?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
-    readonly onCellClicked?: (cell: readonly [number, number]) => void;
-
-    readonly allowInsertRow?: boolean; // default true;
-
-    readonly imageEditorOverride?: ImageEditorType;
-    readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
+onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 ```
+
+`onHeaderMenuClick` is called when the user clicks the menu button on a column header. `col` is the column index, and `screenPosition` is the bounds of the column header. You are responsible for drawing and handling the menu.
+
+```
+onColumnMoved?: (startIndex: number, endIndex: number) => void;
+```
+
+`onColumnMoved` is called when the user finishes moving a column. `startIndex` is the index of the column that was moved, and `endIndex` is the index at which it should end up. Note that you have to effect the move of the column, and pass the reordered columns back in the `columns` property.
+
+```
+onColumnResized?: (column: GridColumn, newSize: number) => void;
+```
+
+`onColumnResized` is called when the user finishes resizing a column. `newSize` is the new size of the column. Note that you have change the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
+
+```
+onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
+```
+
+`onCellEdited` is called when the user finishes editing a cell. Note that you are responsible for setting the new value of the cell.
+
+```
+onDeleteRows?: (rows: readonly number[]) => void;
+```
+
+`onDeleteRows` is called when the user deletes one or more rows. `rows` is an array with the absolute indexes of the deletes rows. Note that it is on you to actually effect the deletion of those rows.
+
+```
+allowInsertRow?: boolean;
+onRowInserted?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
+```
+
+`allowInsertRow` and `onRowInserted` control adding new rows at the bottom of the Grid. If `allowInsertRow` is `true`, an empty, editable row will display at the bottom. If the user enters a value in one of its cells, `onRowInserted` is called, which is responsible for appending the new row.
+
+`allowInsertRow` is `true` by default.
+
+```
+getCellsForSelection?: (selection: GridSelection) => readonly (readonly GridCell[])[];
+```
+
+`getCellsForSelection` is called when the user copies a selection to the clipboard. It must return a two-dimensional array (an array of rows, where each row is an array of cells) of the cells in the selection's rectangle. Note that the rectangle can include cells that are not currently visible.
+
+```
+onCellClicked?: (cell: readonly [number, number]) => void;
+```
+
+`onCellClicked` is called whenever the user clicks a cell in the grid.
+
+```
+imageEditorOverride?: ImageEditorType;
+```
+
+If `imageEditorOverride` is specified, then it will be used instead of the default image editor overlay, which is what the user sees when they double-click on an image cell.
+
+```
+markdownDivCreateNode?: (content: string) => DocumentFragment;
+```
+
+IF `markdownDivCreateNode` is specified, then it will be used to render Markdown, instead of the default Markdown renderer used by the Grid. You'll want to use this if you need to process your Markdown for security purposes, or if you want to use a renderer with different Markdown features.
+
+```
+drawCustomCell?: (
+    ctx: CanvasRenderingContext2D,
+    cell: GridCell,
+    theme: Theme,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+) => boolean;
+```
+
+You can specify `drawCustomCell` to enable rendering your own cells. The Grid will call this for every cell it needs to render. It should either render the cell and return `true`, or not render anything and return `false`, in which case the Grid will render the cell.
+
+```
+scrollToEnd?: boolean;
+```
+
+When this property changes to `true`, the Grid will scroll all the way to the right. Glide uses that when the user clicks the "Add Column" button.
+
+```
+isDraggable?: boolean;
+onDragStart?: (args: GridDragEventArgs) => void;
+```
+
+If `isDraggable` is set, the whole Grid is draggable, and `onDragStart` will be called when dragging starts. You can use this to build a UI where the user can drag the Grid around.
 
 ## Types
 
