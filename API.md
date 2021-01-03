@@ -17,11 +17,13 @@ The Grid has no intrinisic size. This is likely to change in a future version, f
 }
 ```
 
-##
-
 The Grid will never change any of your underlying data. You have to do so yourself when one of the callbacks is invoked. For example, when the user edits the value in a cell, the Grid will invoke the `onCellEdited` callback. If you don't implement that callback, or if it doesn't change the undelying data to the new value, the Grid will keep displaying the old value.
 
-Note that there is currently no way to tell the grid that data has changed. It has to be forced to redraw by
+Note that there is currently no way to tell the grid that data has changed. It has to be forced to redraw by passing a different object to the `getCellContent` property. This triggers the entire grid to redraw. You should avoid changing the `getCellContent` object ID as much as possible otherwise.
+
+## A note on col/row values
+
+Grid always passes col/row coordinate pairs in the format [col, row] and never [row, col]. This is to more accurately match an [x, y] world, even though most english speakers will tend to say "row col".
 
 ## Properties
 
@@ -214,15 +216,16 @@ export type GridCell = EditableGridCell | BubbleCell | RowIDCell | LoadingCell |
 
 export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell | UriCell | NumberCell;
 
-interface BaseGridCell {
-    readonly allowOverlay: boolean;
-    readonly style?: "normal" | "faded";
-}
-
 interface TextCell extends BaseGridCell {
     readonly kind: GridCellKind.Text;
+    readonly displayData: string;
     readonly data: string;
-    readonly editData: string;
+}
+
+interface NumberCell extends BaseGridCell {
+    readonly kind: GridCellKind.Number;
+    readonly displayData: string;
+    readonly data: number | undefined;
 }
 
 interface ImageCell extends BaseGridCell {
@@ -231,11 +234,21 @@ interface ImageCell extends BaseGridCell {
     readonly allowAdd: boolean;
 }
 
+interface BubbleCell extends BaseGridCell {
+    readonly kind: GridCellKind.Bubble;
+    readonly data: string[];
+}
+
 interface BooleanCell extends BaseGridCell {
     readonly kind: GridCellKind.Boolean;
-    readonly checked: boolean;
+    readonly data: boolean;
     readonly showUnchecked: boolean;
     readonly allowEdit: boolean;
+}
+
+interface RowIDCell extends BaseGridCell {
+    readonly kind: GridCellKind.RowID;
+    readonly data: string;
 }
 
 interface MarkdownCell extends BaseGridCell {
@@ -245,22 +258,6 @@ interface MarkdownCell extends BaseGridCell {
 
 interface UriCell extends BaseGridCell {
     readonly kind: GridCellKind.Uri;
-    readonly data: string;
-}
-
-interface NumberCell extends BaseGridCell {
-    readonly kind: GridCellKind.Number;
-    readonly data: string;
-    readonly editData: number | undefined;
-}
-
-interface BubbleCell extends BaseGridCell {
-    readonly kind: GridCellKind.Bubble;
-    readonly data: string[];
-}
-
-interface RowIDCell extends BaseGridCell {
-    readonly kind: GridCellKind.RowID;
     readonly data: string;
 }
 
