@@ -61,10 +61,10 @@ getCellContent: (cell: readonly [number, number]) => GridCell;
 ### Optional
 
 ```
-onVisibleRowsChanged?: (range: Rectangle) => void;
+onVisibleRegionChanged?: (range: Rectangle) => void;
 ```
 
-`onVisibleRowsChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`. Note that you have to keep track of at least the `cellXOffset` and `cellYOffset`, for which the rectangle provides new values in `.x` and `.y`, respectively, and pass them back in as properties, otherwise your Grid will not scroll.
+`onVisibleRegionChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`. Note that you have to keep track of at least the `cellXOffset` and `cellYOffset`, for which the rectangle provides new values in `.x` and `.y`, respectively, and pass them back in as properties, otherwise your Grid will not scroll.
 
 ```
 headerHeight: number;

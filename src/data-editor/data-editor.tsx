@@ -115,7 +115,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         onDeleteRows,
         onDragStart,
         onHeaderMenuClick,
-        onVisibleRowsChanged,
+        onVisibleRegionChanged,
         ...rest
     } = p;
 
@@ -325,9 +325,9 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         [onHeaderMenuClick, rowMarkerOffset]
     );
 
-    const onVisibleRowsChangedImpl = React.useCallback(
+    const onVisibleRegionChangedImpl = React.useCallback(
         (visibleRegion: Rectangle) => {
-            onVisibleRowsChanged?.({
+            onVisibleRegionChanged?.({
                 ...visibleRegion,
                 x: visibleRegion.x - rowMarkerOffset,
                 height:
@@ -336,7 +336,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         : visibleRegion.height,
             });
         },
-        [onVisibleRowsChanged, rowMarkerOffset, rows, showTrailingBlankRow]
+        [onVisibleRegionChanged, rowMarkerOffset, rows, showTrailingBlankRow]
     );
 
     const onColumnMovedImpl = React.useCallback(
@@ -862,7 +862,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 onKeyDown={onKeyDown}
                 onMouseDown={onMouseDown}
                 onMouseUp={onMouseUp}
-                onVisibleRowsChanged={onVisibleRowsChangedImpl}
+                onVisibleRegionChanged={onVisibleRegionChangedImpl}
                 rowHeight={rowHeight}
                 scrollRef={scrollRef}
                 selectedCell={selectedCell}

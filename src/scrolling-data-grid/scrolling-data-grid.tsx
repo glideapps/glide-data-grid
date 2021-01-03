@@ -10,14 +10,14 @@ interface Handled {
 }
 
 export interface ScrollingDataGridProps extends Subtract<DataGridDndProps, Handled> {
-    readonly onVisibleRowsChanged?: (range: Rectangle) => void;
+    readonly onVisibleRegionChanged?: (range: Rectangle) => void;
     readonly scrollToEnd?: boolean;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const { columns, rows, rowHeight, headerHeight, firstColSticky } = p;
-    const { className, onVisibleRowsChanged, scrollToEnd, scrollRef, ...dateGridProps } = p;
+    const { className, onVisibleRegionChanged, scrollToEnd, scrollRef, ...dateGridProps } = p;
 
     const [clientWidth, setClientWidth] = React.useState<number>(10);
     const [clientHeight, setClientHeight] = React.useState<number>(10);
@@ -98,7 +98,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                 oldRect.height !== rect.height ||
                 oldRect.width !== rect.width
             ) {
-                onVisibleRowsChanged?.({
+                onVisibleRegionChanged?.({
                     x: cellX,
                     y: cellY,
                     width: cellRight - cellX,
@@ -107,7 +107,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                 last.current = rect;
             }
         },
-        [columns, rowHeight, rows, onVisibleRowsChanged, firstColSticky]
+        [columns, rowHeight, rows, onVisibleRegionChanged, firstColSticky]
     );
 
     return (
