@@ -34,10 +34,6 @@ interface Handled {
 
     readonly className?: string;
 
-    readonly onCellClick?: (cell: readonly [number, number], screenPosition: Rectangle) => void;
-    readonly onCellHovered?: (cell: readonly [number, number] | undefined) => void;
-
-    readonly openedCell?: readonly [number, number];
     readonly selectedRows?: readonly number[];
     readonly selectedColumns?: readonly number[];
     readonly selectedCell?: GridSelection;
@@ -47,6 +43,7 @@ interface Handled {
     readonly onMouseUp?: (args: GridMouseEventArgs) => void;
 
     readonly onKeyDown?: (event: GridKeyEventArgs) => void;
+    readonly onKeyUp?: (event: GridKeyEventArgs) => void;
 
     readonly canvasRef?: React.MutableRefObject<HTMLCanvasElement | null>;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
