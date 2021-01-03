@@ -43,7 +43,7 @@ interface Handled {
     readonly onMouseUp?: (args: GridMouseEventArgs) => void;
 
     readonly onKeyDown?: (event: GridKeyEventArgs) => void;
-    // what about onKeyUp?
+    readonly onKeyUp?: (event: GridKeyEventArgs) => void;
 
     readonly canvasRef?: React.MutableRefObject<HTMLCanvasElement | null>;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
