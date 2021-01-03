@@ -17,8 +17,6 @@ The Grid has no intrinisic size. This is likely to change in a future version, f
 }
 ```
 
-##
-
 The Grid will never change any of your underlying data. You have to do so yourself when one of the callbacks is invoked. For example, when the user edits the value in a cell, the Grid will invoke the `onCellEdited` callback. If you don't implement that callback, or if it doesn't change the undelying data to the new value, the Grid will keep displaying the old value.
 
 Note that there is currently no way to tell the grid that data has changed. It has to be forced to redraw by passing a different object to the `getCellContent` property. This triggers the entire grid to redraw. You should avoid changing the `getCellContent` object ID as much as possible otherwise.
@@ -65,10 +63,10 @@ getCellContent: (cell: readonly [number, number]) => GridCell;
 ### Optional
 
 ```
-onVisibleRowsChanged?: (range: Rectangle) => void;
+onVisibleRegionChanged?: (range: Rectangle) => void;
 ```
 
-`onVisibleRowsChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`. Note that you have to keep track of at least the `cellXOffset` and `cellYOffset`, for which the rectangle provides new values in `.x` and `.y`, respectively, and pass them back in as properties, otherwise your Grid will not scroll.
+`onVisibleRegionChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`. Note that you have to keep track of at least the `cellXOffset` and `cellYOffset`, for which the rectangle provides new values in `.x` and `.y`, respectively, and pass them back in as properties, otherwise your Grid will not scroll.
 
 ```
 headerHeight: number;
@@ -125,13 +123,13 @@ onDeleteRows?: (rows: readonly number[]) => void;
 `onDeleteRows` is called when the user deletes one or more rows. `rows` is an array with the absolute indexes of the deletes rows. Note that it is on you to actually effect the deletion of those rows.
 
 ```
-allowInsertRow?: boolean;
-onRowInserted?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
+showTrailingBlankRow?: boolean;
+onRowAppended?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
 ```
 
-`allowInsertRow` and `onRowInserted` control adding new rows at the bottom of the Grid. If `allowInsertRow` is `true`, an empty, editable row will display at the bottom. If the user enters a value in one of its cells, `onRowInserted` is called, which is responsible for appending the new row.
+`showTrailingBlankRow` and `onRowAppended` control adding new rows at the bottom of the Grid. If `showTrailingBlankRow` is `true`, an empty, editable row will display at the bottom. If the user enters a value in one of its cells, `onRowAppended` is called, which is responsible for appending the new row.
 
-`allowInsertRow` is `true` by default.
+`showTrailingBlankRow` is `true` by default.
 
 ```
 getCellsForSelection?: (selection: GridSelection) => readonly (readonly GridCell[])[];
@@ -162,10 +160,7 @@ drawCustomCell?: (
     ctx: CanvasRenderingContext2D,
     cell: GridCell,
     theme: Theme,
-    x: number,
-    y: number,
-    width: number,
-    height: number
+    rect: Rectangle
 ) => boolean;
 ```
 
@@ -221,15 +216,16 @@ export type GridCell = EditableGridCell | BubbleCell | RowIDCell | LoadingCell |
 
 export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell | UriCell | NumberCell;
 
-interface BaseGridCell {
-    readonly allowOverlay: boolean;
-    readonly style?: "normal" | "faded";
-}
-
 interface TextCell extends BaseGridCell {
     readonly kind: GridCellKind.Text;
+    readonly displayData: string;
     readonly data: string;
-    readonly editData: string;
+}
+
+interface NumberCell extends BaseGridCell {
+    readonly kind: GridCellKind.Number;
+    readonly displayData: string;
+    readonly data: number | undefined;
 }
 
 interface ImageCell extends BaseGridCell {
@@ -238,11 +234,21 @@ interface ImageCell extends BaseGridCell {
     readonly allowAdd: boolean;
 }
 
+interface BubbleCell extends BaseGridCell {
+    readonly kind: GridCellKind.Bubble;
+    readonly data: string[];
+}
+
 interface BooleanCell extends BaseGridCell {
     readonly kind: GridCellKind.Boolean;
-    readonly checked: boolean;
+    readonly data: boolean;
     readonly showUnchecked: boolean;
     readonly allowEdit: boolean;
+}
+
+interface RowIDCell extends BaseGridCell {
+    readonly kind: GridCellKind.RowID;
+    readonly data: string;
 }
 
 interface MarkdownCell extends BaseGridCell {
@@ -252,22 +258,6 @@ interface MarkdownCell extends BaseGridCell {
 
 interface UriCell extends BaseGridCell {
     readonly kind: GridCellKind.Uri;
-    readonly data: string;
-}
-
-interface NumberCell extends BaseGridCell {
-    readonly kind: GridCellKind.Number;
-    readonly data: string;
-    readonly editData: number | undefined;
-}
-
-interface BubbleCell extends BaseGridCell {
-    readonly kind: GridCellKind.Bubble;
-    readonly data: string[];
-}
-
-interface RowIDCell extends BaseGridCell {
-    readonly kind: GridCellKind.RowID;
     readonly data: string;
 }
 

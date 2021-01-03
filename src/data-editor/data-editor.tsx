@@ -57,11 +57,11 @@ type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
-    readonly onRowInserted?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
+    readonly onRowAppended?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
     readonly onCellClicked?: (cell: readonly [number, number]) => void;
 
     readonly rowMarkers?: boolean; // default true;
-    readonly allowInsertRow?: boolean; // default true;
+    readonly showTrailingBlankRow?: boolean; // default true;
     readonly headerHeight?: number; // default 36
     readonly rowHeight?: number; // default 34
     readonly rowMarkerWidth?: number; // default 50
@@ -90,7 +90,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const imageEditorOverride = p.imageEditorOverride;
     const markdownDivCreateNode = p.markdownDivCreateNode;
     const rowMarkers = p.rowMarkers ?? true;
-    const allowInsertRow = p.allowInsertRow ?? true;
+    const showTrailingBlankRow = p.showTrailingBlankRow ?? true;
     const rowMarkerOffset = rowMarkers ? 1 : 0;
 
     const rowHeight = p.rowHeight ?? 34;
@@ -107,12 +107,12 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         getCellContent,
         onCellClicked,
         onCellEdited,
-        onRowInserted,
+        onRowAppended,
         onColumnMoved,
         onDeleteRows,
         onDragStart,
         onHeaderMenuClick,
-        onVisibleRowsChanged,
+        onVisibleRegionChanged,
         ...rest
     } = p;
 
@@ -124,18 +124,18 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         });
     }, []);
 
-    const mangledRows = allowInsertRow ? rows + 1 : rows;
+    const mangledRows = showTrailingBlankRow ? rows + 1 : rows;
 
     const mangledOnCellEdited = React.useCallback(
         (cell: readonly [number, number], newValue: EditableGridCell) => {
             const [, row] = cell;
-            if (allowInsertRow && row === mangledRows - 1) {
-                onRowInserted?.(cell, newValue);
+            if (showTrailingBlankRow && row === mangledRows - 1) {
+                onRowAppended?.(cell, newValue);
             } else {
                 onCellEdited?.(cell, newValue);
             }
         },
-        [onRowInserted, onCellEdited, mangledRows, allowInsertRow]
+        [onRowAppended, onCellEdited, mangledRows, showTrailingBlankRow]
     );
 
     const mangledCols = React.useMemo(() => {
@@ -157,18 +157,18 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             if (col === 0 && rowMarkers) {
                 return {
                     kind: GridCellKind.Boolean,
-                    checked: selectedRows?.includes(row),
+                    data: selectedRows?.includes(row),
                     showUnchecked: hoveredFirstRow === row,
                     allowOverlay: false,
                     allowEdit: false,
                 };
-            } else if (allowInsertRow && row === mangledRows - 1) {
+            } else if (showTrailingBlankRow && row === mangledRows - 1) {
                 //If the grid is empty, we will return text
                 if (row === 0) {
                     return {
                         kind: GridCellKind.Text,
+                        displayData: "",
                         data: "",
-                        editData: "",
                         allowOverlay: true,
                     };
                 }
@@ -179,7 +179,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 return getCellContent([col - rowMarkerOffset, row]);
             }
         },
-        [rowMarkers, allowInsertRow, mangledRows, selectedRows, hoveredFirstRow, getCellContent, rowMarkerOffset]
+        [rowMarkers, showTrailingBlankRow, mangledRows, selectedRows, hoveredFirstRow, getCellContent, rowMarkerOffset]
     );
 
     const onMouseDown = React.useCallback(
@@ -219,7 +219,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                                 },
                             });
                         } else {
-                            setSelectedCell({ cell: [col, row] });
+                            setSelectedCell({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
                             setSelectedColumns([]);
                             setSelectedRows([]);
                             setOverlay(undefined);
@@ -258,13 +258,13 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         case GridCellKind.Text:
                             content = {
                                 ...content,
-                                editData: initialValue,
+                                data: initialValue,
                             };
                             break;
                         case GridCellKind.Number:
                             content = {
                                 ...content,
-                                editData: maybe(() => Number.parseFloat(initialValue), 0),
+                                data: maybe(() => Number.parseFloat(initialValue), 0),
                             };
                             break;
                         case GridCellKind.Markdown:
@@ -285,7 +285,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             } else if (c.kind === GridCellKind.Boolean) {
                 mangledOnCellEdited?.([col - rowMarkerOffset, row], {
                     ...c,
-                    checked: !c.checked,
+                    data: !c.data,
                 });
             } else {
                 onCellClicked?.([col - rowMarkerOffset, row]);
@@ -322,18 +322,18 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         [onHeaderMenuClick, rowMarkerOffset]
     );
 
-    const onVisibleRowsChangedImpl = React.useCallback(
+    const onVisibleRegionChangedImpl = React.useCallback(
         (visibleRegion: Rectangle) => {
-            onVisibleRowsChanged?.({
+            onVisibleRegionChanged?.({
                 ...visibleRegion,
                 x: visibleRegion.x - rowMarkerOffset,
                 height:
-                    allowInsertRow && visibleRegion.y + visibleRegion.height >= rows
+                    showTrailingBlankRow && visibleRegion.y + visibleRegion.height >= rows
                         ? visibleRegion.height - 1
                         : visibleRegion.height,
             });
         },
-        [onVisibleRowsChanged, rowMarkerOffset, rows, allowInsertRow]
+        [onVisibleRegionChanged, rowMarkerOffset, rows, showTrailingBlankRow]
     );
 
     const onColumnMovedImpl = React.useCallback(
@@ -427,16 +427,17 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         const formatCell = (cell: GridCell) => {
             switch (cell.kind) {
                 case GridCellKind.Text:
+                case GridCellKind.Number:
+                    return escape(cell.displayData);
                 case GridCellKind.Markdown:
                 case GridCellKind.RowID:
                 case GridCellKind.Uri:
-                case GridCellKind.Number:
                     return escape(cell.data);
                 case GridCellKind.Image:
                 case GridCellKind.Bubble:
                     return cell.data.reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
                 case GridCellKind.Boolean:
-                    return cell.checked ? "TRUE" : "FALSE";
+                    return cell.data ? "TRUE" : "FALSE";
                 case GridCellKind.Loading:
                     return "#LOADING";
                 case GridCellKind.Protected:
@@ -513,7 +514,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             col = clamp(rowMarkerOffset, columns.length, col);
             row = clamp(0, mangledRows - 1, row);
             if (col === selectedCell?.cell[0] && row === selectedCell?.cell[1]) return false;
-            setSelectedCell({ cell: [col, row] });
+            setSelectedCell({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
 
             if (lastSent.current !== undefined && lastSent.current[0] === col && lastSent.current[1] === row) {
                 lastSent.current = undefined;
@@ -638,11 +639,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         if (selectedCell.range !== undefined && getCellsForSelection !== undefined) {
                             copyToClipboard(
                                 getCellsForSelection({
-                                    ...selectedCell,
-                                    range: {
-                                        ...selectedCell.range,
-                                        x: selectedCell.range.x - rowMarkerOffset,
-                                    },
+                                    ...selectedCell.range,
+                                    x: selectedCell.range.x - rowMarkerOffset,
                                 })
                             );
                         } else {
@@ -653,26 +651,20 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         const cells = selectedRows.map(
                             rowIndex =>
                                 getCellsForSelection({
-                                    cell: [0, 0],
-                                    range: {
-                                        x: 0,
-                                        y: rowIndex,
-                                        width: columns.length,
-                                        height: 1,
-                                    },
+                                    x: 0,
+                                    y: rowIndex,
+                                    width: columns.length,
+                                    height: 1,
                                 })[0]
                         );
                         copyToClipboard(cells);
                     } else if (selectedColumns.length === 1) {
                         copyToClipboard(
                             getCellsForSelection({
-                                cell: [0, 0],
-                                range: {
-                                    x: selectedColumns[0] - rowMarkerOffset,
-                                    y: 0,
-                                    width: 1,
-                                    height: rows,
-                                },
+                                x: selectedColumns[0] - rowMarkerOffset,
+                                y: 0,
+                                width: 1,
+                                height: rows,
                             })
                         );
                     }
@@ -695,7 +687,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                             case GridCellKind.Text:
                                 mangledOnCellEdited?.([col - rowMarkerOffset, row], {
                                     ...cellValue,
-                                    editData: text,
+                                    data: text,
                                 });
                                 break;
                             case GridCellKind.Markdown:
@@ -751,7 +743,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                                 case GridCellKind.Text:
                                     mangledOnCellEdited?.(cell, {
                                         ...cellValue,
-                                        editData: "",
+                                        data: "",
                                     });
                                     break;
                                 case GridCellKind.Markdown:
@@ -770,13 +762,13 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                                 case GridCellKind.Boolean:
                                     mangledOnCellEdited?.(cell, {
                                         ...cellValue,
-                                        checked: false,
+                                        data: false,
                                     });
                                     break;
                                 case GridCellKind.Number:
                                     mangledOnCellEdited?.(cell, {
                                         ...cellValue,
-                                        editData: undefined,
+                                        data: undefined,
                                     });
                                     break;
                                 default:
@@ -867,7 +859,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 onKeyDown={onKeyDown}
                 onMouseDown={onMouseDown}
                 onMouseUp={onMouseUp}
-                onVisibleRowsChanged={onVisibleRowsChangedImpl}
+                onVisibleRegionChanged={onVisibleRegionChangedImpl}
                 rowHeight={rowHeight}
                 scrollRef={scrollRef}
                 selectedCell={selectedCell}

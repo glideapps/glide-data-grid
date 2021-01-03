@@ -33,7 +33,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
             if (content.kind === GridCellKind.Text) {
                 setTempValue({
                     ...content,
-                    editData: ev.target.value,
+                    data: ev.target.value,
                 });
             } else if (content.kind === GridCellKind.Markdown || content.kind === GridCellKind.Uri) {
                 setTempValue({
@@ -64,7 +64,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
             if (content.kind === GridCellKind.Number) {
                 setTempValue({
                     ...content,
-                    editData: values.floatValue,
+                    data: values.floatValue,
                 });
             }
         },
@@ -103,7 +103,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
                     autoFocus={true}
                     allowCtrlEnter={true}
                     onKeyDown={onKeyDown}
-                    value={targetValue.editData}
+                    value={targetValue.data}
                     onChange={onStringValueChange}
                 />
             );
@@ -122,11 +122,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
             break;
         case GridCellKind.Number:
             editor = (
-                <NumberOverlayEditor
-                    value={targetValue.editData}
-                    onKeyDown={onKeyDown}
-                    onChange={onNumberValueChange}
-                />
+                <NumberOverlayEditor value={targetValue.data} onKeyDown={onKeyDown} onChange={onNumberValueChange} />
             );
             break;
         case GridCellKind.Image:

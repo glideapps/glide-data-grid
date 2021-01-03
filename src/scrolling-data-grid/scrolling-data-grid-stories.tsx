@@ -42,7 +42,7 @@ export function Simplenotest() {
     const [x, setX] = React.useState<number>(0);
     const [y, setY] = React.useState<number>(0);
 
-    const onVisibleRowsChanged = React.useCallback((range: Rectangle) => {
+    const onVisibleRegionChanged = React.useCallback((range: Rectangle) => {
         setX(range.x);
         setY(range.y);
     }, []);
@@ -55,15 +55,15 @@ export function Simplenotest() {
             headerHeight={44}
             allowResize={true}
             rowHeight={34}
-            onVisibleRowsChanged={onVisibleRowsChanged}
+            onVisibleRegionChanged={onVisibleRegionChanged}
             columns={["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"].map(t => ({
                 title: t,
                 width: 122 + (j += 10),
             }))}
             getCellContent={([col, row]) => ({
                 kind: GridCellKind.Text,
+                displayData: `${col},${row} Testing things that are way too long`,
                 data: `${col},${row} Testing things that are way too long`,
-                editData: `${col},${row} Testing things that are way too long`,
                 allowOverlay: true,
             })}
             firstColSticky={false}

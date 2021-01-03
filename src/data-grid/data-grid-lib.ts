@@ -17,13 +17,13 @@ export function makeEditCell(cell: GridCell): GridCell {
         case GridCellKind.Boolean:
             return {
                 ...cell,
-                checked: false,
+                data: false,
             };
         case GridCellKind.Text:
             return {
                 ...cell,
                 data: "",
-                editData: "",
+                displayData: "",
             };
         case GridCellKind.Markdown:
         case GridCellKind.Uri:
@@ -46,8 +46,8 @@ export function makeEditCell(cell: GridCell): GridCell {
         case GridCellKind.Number:
             return {
                 ...cell,
-                data: "",
-                editData: undefined,
+                data: undefined,
+                displayData: "",
             };
         default:
             assertNever(cell);
