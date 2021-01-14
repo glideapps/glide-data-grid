@@ -340,7 +340,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
     let resultString: string | undefined;
     if (searchStatus !== undefined) {
-        resultString = `${searchStatus.results} result${searchStatus.results !== 1 && "s"}`;
+        resultString = `${searchStatus.results} result${searchStatus.results !== 1 ? "s" : ""}`;
         if (searchStatus.selectedIndex >= 0) {
             resultString = `${searchStatus.selectedIndex + 1} / ${resultString}`;
         }
