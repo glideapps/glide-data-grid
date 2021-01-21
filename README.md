@@ -22,7 +22,7 @@ $ npm install direction marked react-responsive-carousel styled-components
 
 First you need to define your columns:
 
-```
+```ts
 const columns: GridColumn[] = [
     { title: "Number", width: 100 },
     { title: "Square", width: 100 },
@@ -31,7 +31,7 @@ const columns: GridColumn[] = [
 
 Next you need a function which, given column and row indexes, returns a cell to display. Here we have two columns, the first of which shows the index of the row, and the second the square of that number:
 
-```
+```ts
 function getData([col, row]: readonly [number, number]): GridCell {
     let n: number;
     if (col === 0) {
@@ -52,7 +52,7 @@ function getData([col, row]: readonly [number, number]): GridCell {
 
 Now you can use Data Grid:
 
-```
+```jsx
 <DataEditorContainer width={500} height={300}>
     <DataEditor getCellContent={getData} columns={columns} rows={1000} />
 </DataEditorContainer>
