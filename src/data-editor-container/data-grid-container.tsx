@@ -15,7 +15,7 @@ const Wrapper = styled.div<WrapperProps>`
 
 interface Props extends WrapperProps, React.HTMLAttributes<HTMLDivElement> {}
 
-const DataGridContainer: React.FunctionComponent<React.PropsWithChildren<Props>> = p => {
+const DataEditorContainer: React.FunctionComponent<React.PropsWithChildren<Props>> = p => {
     const { width, height, children, ...rest } = p;
     return (
         <Wrapper width={width} height={height} {...rest}>
@@ -24,4 +24,4 @@ const DataGridContainer: React.FunctionComponent<React.PropsWithChildren<Props>>
     );
 };
 
-export default DataGridContainer;
+export default DataEditorContainer;

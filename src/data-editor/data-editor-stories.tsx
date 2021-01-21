@@ -7,7 +7,7 @@ import { BuilderThemeWrapper } from "../stories/story-utils";
 // import { styled } from "../common/styles";
 import { GridCell, GridCellKind, GridColumn, Rectangle } from "../data-grid/data-grid-types";
 import DataEditor from "./data-editor";
-import DataGridContainer from "../data-grid-container/data-grid-container";
+import DataEditorContainer from "../data-editor-container/data-grid-container";
 
 // const InnerContainer = styled.div`
 //     width: 100%;
@@ -30,9 +30,9 @@ export default {
         (fn: StoryFn<StoryFnReactReturnType>, context: StoryContext) => (
             <div style={{ overflow: "hidden" }}>
                 <BuilderThemeWrapper width={1000} height={800} context={context}>
-                    <DataGridContainer width={500} height={500}>
+                    <DataEditorContainer width={500} height={500}>
                         {fn()}
-                    </DataGridContainer>
+                    </DataEditorContainer>
                 </BuilderThemeWrapper>
             </div>
         ),
