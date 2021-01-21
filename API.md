@@ -17,6 +17,14 @@ The Grid has no intrinisic size. This is likely to change in a future version, f
 }
 ```
 
+You can also use the provided DataGridContainer component for a quicker start.
+
+```jsx
+<DataGridContainer width={500} height={300}>
+    <DataEditor {...props} />
+</DataGridContainer>
+```
+
 The Grid will never change any of your underlying data. You have to do so yourself when one of the callbacks is invoked. For example, when the user edits the value in a cell, the Grid will invoke the `onCellEdited` callback. If you don't implement that callback, or if it doesn't change the undelying data to the new value, the Grid will keep displaying the old value.
 
 Note that there is currently no way to tell the grid that data has changed. It has to be forced to redraw by passing a different object to the `getCellContent` property. This triggers the entire grid to redraw. You should avoid changing the `getCellContent` object ID as much as possible otherwise.
