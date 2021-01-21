@@ -4,20 +4,21 @@ import { withKnobs } from "@storybook/addon-knobs";
 import { StoryFn, StoryContext } from "@storybook/addons";
 import { StoryFnReactReturnType } from "@storybook/react/dist/client/preview/types";
 import { BuilderThemeWrapper } from "../stories/story-utils";
-import { styled } from "../common/styles";
+// import { styled } from "../common/styles";
 import { GridCell, GridCellKind, GridColumn, Rectangle } from "../data-grid/data-grid-types";
 import DataEditor from "./data-editor";
+import DataGridContainer from "../data-grid-container/data-grid-container";
 
-const InnerContainer = styled.div`
-    width: 100%;
-    height: 100px;
+// const InnerContainer = styled.div`
+//     width: 100%;
+//     height: 100px;
 
-    > :first-child {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-    }
-`;
+//     > :first-child {
+//         position: absolute;
+//         width: 100%;
+//         height: 100%;
+//     }
+// `;
 
 export default {
     title: "Designer/DateViewer/DataEditor",
@@ -28,8 +29,10 @@ export default {
         }),
         (fn: StoryFn<StoryFnReactReturnType>, context: StoryContext) => (
             <div style={{ overflow: "hidden" }}>
-                <BuilderThemeWrapper width={1500} height={1130} context={context}>
-                    <InnerContainer>{fn()}</InnerContainer>
+                <BuilderThemeWrapper width={1000} height={800} context={context}>
+                    <DataGridContainer width={500} height={500}>
+                        {fn()}
+                    </DataGridContainer>
                 </BuilderThemeWrapper>
             </div>
         ),

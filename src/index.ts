@@ -8,5 +8,6 @@ export {
 export { default as MarkdownDiv, MarkdownDivProps } from "./markdown-div/markdown-div";
 export * from "./data-editor/data-editor";
 export * from "./data-grid/data-grid-types";
+export { default as DataGridContainer } from "./data-grid-container/data-grid-container";
 export { Theme } from "./common/styles";
 export default DataEditor;

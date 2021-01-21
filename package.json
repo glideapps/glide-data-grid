@@ -23,9 +23,9 @@
     "author": "Glide",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/quicktype/glide-data-grid/issues"
+        "url": "https://github.com/glideapps/glide-data-grid/issues"
     },
-    "homepage": "https://github.com/quicktype/glide-data-grid#readme",
+    "homepage": "https://github.com/glideapps/glide-data-grid#readme",
     "dependencies": {
         "canvg": "^3.0.6",
         "collection-utils": "^1.0.1",
