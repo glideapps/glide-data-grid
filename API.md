@@ -50,25 +50,25 @@ columns: readonly GridColumn[];
 `columns` is an array of objects of type `GridColumn` describing the column headers. The length of the array is the number of columns to display.
 
 ```
-cellXOffset: number;
-cellYOffset: number;
-```
-
-`cellXOffset` and `cellYOffset` are the zero-based indexes of the leftmost column, and topmost row to display, respectively.
-
-```
-allowResize: boolean;
-```
-
-`allowResize` is a boolean indicating whether to allow resizing the widths of columns.
-
-```
 getCellContent: (cell: readonly [number, number]) => GridCell;
 ```
 
 `getCellContent` returns an object of type `GridCell` describing the contents for the cell at the given coordinates.
 
 ### Optional
+
+```
+cellXOffset?: number;
+cellYOffset?: number;
+```
+
+`cellXOffset` and `cellYOffset` are the zero-based indexes of the leftmost column, and topmost row to display, respectively. Both should be provided if one is.
+
+```
+allowResize?: boolean;
+```
+
+`allowResize` is a boolean indicating whether to allow resizing the widths of columns. Default is `false`.
 
 ```
 onVisibleRegionChanged?: (range: Rectangle) => void;

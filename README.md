@@ -18,9 +18,49 @@ $ npm install @glideapps/glide-data-grid
 $ npm install direction marked react-responsive-carousel styled-components
 ```
 
-## API documentation
+## Usage
 
-The [API documentation is in the `API.md` file](API.md).
+First you need to define your columns:
+
+```
+const columns: GridColumn[] = [
+    { title: "Number", width: 100 },
+    { title: "Square", width: 100 },
+];
+```
+
+Next you need a function which, given column and row indexes, returns a cell to display. Here we have two columns, the first of which shows the index of the row, and the second the square of that number:
+
+```
+function getData([col, row]: readonly [number, number]): GridCell {
+    let n: number;
+    if (col === 0) {
+        n = row;
+    } else if (col === 1) {
+        n = row * row;
+    } else {
+        throw new Error("This should not happen");
+    }
+    return {
+        kind: GridCellKind.Number,
+        data: n,
+        displayData: n.toString(),
+        allowOverlay: false,
+    };
+}
+```
+
+Now you can use Data Grid:
+
+```
+<DataEditorContainer width={500} height={300}>
+    <DataEditor getCellContent={getData} columns={columns} rows={1000} />
+</DataEditorContainer>
+```
+
+## Full API documentation
+
+The full [API documentation is in the `API.md` file](API.md).
 
 ## FAQ
 
