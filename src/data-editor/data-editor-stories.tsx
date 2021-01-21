@@ -184,3 +184,29 @@ export function Simplenotest() {
         />
     );
 }
+
+const columns: GridColumn[] = [
+    { title: "Number", width: 100 },
+    { title: "Square", width: 100 },
+];
+
+function getData([col, row]: readonly [number, number]): GridCell {
+    let n: number;
+    if (col === 0) {
+        n = row;
+    } else if (col === 1) {
+        n = row * row;
+    } else {
+        throw new Error("This should not happen");
+    }
+    return {
+        kind: GridCellKind.Number,
+        data: n,
+        displayData: n.toString(),
+        allowOverlay: false,
+    };
+}
+
+export function Minimal() {
+    return <DataEditor getCellContent={getData} columns={columns} rows={1000} />;
+}

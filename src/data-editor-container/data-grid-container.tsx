@@ -7,9 +7,18 @@ interface WrapperProps {
 }
 
 const Wrapper = styled.div<WrapperProps>`
+    overflow: hidden;
+    position: relative;
+
+    width: ${p => p.width}px;
+    height: ${p => p.height}px;
+
     > :first-child {
-        width: ${p => p.width}px;
-        height: ${p => p.height}px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
     }
 `;
 

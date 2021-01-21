@@ -35,7 +35,7 @@ export interface DataGridProps {
     readonly cellYOffset: number;
 
     readonly firstColSticky: boolean;
-    readonly allowResize: boolean;
+    readonly allowResize?: boolean;
 
     readonly columns: readonly GridColumn[];
     readonly rows: number;
@@ -781,7 +781,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                 hoveredRef.current = args;
             }
             if (args.kind !== "out-of-bounds") {
-                setHoveredOnEdge(args.isEdge && allowResize);
+                setHoveredOnEdge(args.isEdge && allowResize === true);
             }
 
             onMouseMove?.(ev);

@@ -50,6 +50,9 @@ interface Handled {
 
     readonly onSearchResultsChanged?: (results: readonly (readonly [number, number])[], navIndex: number) => void;
     readonly searchColOffset: number;
+
+    readonly cellXOffset: number;
+    readonly cellYOffset: number;
 }
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
@@ -68,6 +71,9 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
 
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
+
+    readonly cellXOffset?: number;
+    readonly cellYOffset?: number;
 }
 
 const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
@@ -100,8 +106,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const { isDraggable, getCellsForSelection } = p;
 
     const {
-        cellXOffset,
-        cellYOffset,
+        cellXOffset: xOff,
+        cellYOffset: yOff,
         columns,
         rows,
         getCellContent,
@@ -322,16 +328,23 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         [onHeaderMenuClick, rowMarkerOffset]
     );
 
+    const [visibileRegion, setVisibleRegion] = React.useState<Rectangle>({ x: 0, y: 0, width: 1, height: 1 });
+
+    const cellXOffset = xOff ?? visibileRegion.x;
+    const cellYOffset = yOff ?? visibileRegion.y;
+
     const onVisibleRegionChangedImpl = React.useCallback(
         (visibleRegion: Rectangle) => {
-            onVisibleRegionChanged?.({
+            const newRegion = {
                 ...visibleRegion,
                 x: visibleRegion.x - rowMarkerOffset,
                 height:
                     showTrailingBlankRow && visibleRegion.y + visibleRegion.height >= rows
                         ? visibleRegion.height - 1
                         : visibleRegion.height,
-            });
+            };
+            setVisibleRegion(newRegion);
+            onVisibleRegionChanged?.(newRegion);
         },
         [onVisibleRegionChanged, rowMarkerOffset, rows, showTrailingBlankRow]
     );
@@ -845,8 +858,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             <DataGridSearch
                 {...rest}
                 canvasRef={canvasRef}
-                cellXOffset={cellXOffset + rowMarkerOffset}
-                cellYOffset={cellYOffset}
+                cellXOffset={(cellXOffset ?? visibileRegion.x) + rowMarkerOffset}
+                cellYOffset={cellYOffset ?? visibileRegion.y}
                 columns={mangledCols}
                 rows={mangledRows}
                 firstColSticky={rowMarkers}
