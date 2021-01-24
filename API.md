@@ -29,6 +29,12 @@ The Grid will never change any of your underlying data. You have to do so yourse
 
 Note that there is currently no way to tell the grid that data has changed. It has to be forced to redraw by passing a different object to the `getCellContent` property. This triggers the entire grid to redraw. You should avoid changing the `getCellContent` object ID as much as possible otherwise.
 
+If you want to use the default Image overlay preview you must remember to include the react-responsive-carousel css file or it will not function correctly. This should be available in your node-modules.
+
+```ts
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+```
+
 ## A note on col/row values
 
 Grid always passes col/row coordinate pairs in the format [col, row] and never [row, col]. This is to more accurately match an [x, y] world, even though most english speakers will tend to say "row col".

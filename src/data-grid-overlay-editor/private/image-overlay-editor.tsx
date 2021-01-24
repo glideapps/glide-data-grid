@@ -1,10 +1,8 @@
 import * as React from "react";
 import { ImageOverlayEditorStyle } from "./image-overlay-editor-style";
 import { Carousel } from "react-responsive-carousel";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
+//import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { EditPencil } from "../../common/utils";
-// import { createPortal } from "react-dom";
-// import ClickOutsideContainer from "../../click-outside-container/click-outside-container";
 
 export interface OverlayImageEditorProps {
     readonly urls: readonly string[];

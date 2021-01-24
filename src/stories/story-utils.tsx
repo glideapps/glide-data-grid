@@ -1,6 +1,7 @@
 import * as React from "react";
 import styled, { ThemeProvider } from "styled-components";
 import { StoryContext } from "@storybook/addons";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { getBuilderTheme } from "../common/styles";
 
 interface Props {
