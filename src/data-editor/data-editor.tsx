@@ -629,7 +629,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         (event: GridKeyEventArgs) => {
             const fn = async () => {
                 const shiftKey = event.shiftKey;
-                const isDeleteKey = event.key === "Delete" || (browserIsOSX && event.key === "Backspace");
+                const isDeleteKey = event.key === "Delete" || (browserIsOSX.value && event.key === "Backspace");
                 const isCopyKey = event.key === "c" && (event.metaKey || event.ctrlKey);
 
                 if (event.key === "Escape") {
