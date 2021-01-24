@@ -1,6 +1,7 @@
-import { nonNull } from "../common/support";
 import * as React from "react";
 import { createPortal } from "react-dom";
+import { NumberFormatValues } from "react-number-format";
+
 import ClickOutsideContainer from "../click-outside-container/click-outside-container";
 import { GridCell, GridCellKind, Rectangle } from "../data-grid/data-grid-types";
 import GrowingEntry from "../growing-entry/growing-entry";
@@ -10,7 +11,6 @@ import ImageOverlayEditor, { OverlayImageEditorProps } from "./private/image-ove
 import MarkdownOverlayEditor from "./private/markdown-overlay-editor";
 import NumberOverlayEditor from "./private/number-overlay-editor";
 import UriOverlayEditor from "./private/uri-overlay-editor";
-import { NumberFormatValues } from "react-number-format";
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
@@ -156,13 +156,20 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
         ev.stopPropagation();
     };
 
+    const portalElement = document.getElementById("portal");
+    if (portalElement === null) {
+        console.error(
+            'Cannot open Data Grid overlay editor, because portal not found.  Please add `<div id="portal" />` as the last child of your `<body>`.'
+        );
+        return null;
+    }
     const portal = createPortal(
         <ClickOutsideContainer onClickOutside={onClickOutside}>
             <DataGridOverlayEditorStyle targetRect={target} onMouseDown={f} onClick={f}>
                 {editor}
             </DataGridOverlayEditorStyle>
         </ClickOutsideContainer>,
-        nonNull(document.getElementById("portal"))
+        portalElement
     );
 
     return portal;
