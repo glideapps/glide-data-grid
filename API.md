@@ -2,13 +2,21 @@
 
 ## HTML/CSS Prerequisites
 
-Currently the Grid depends on there being a root level "portal" div in your HTML. Insert this snippet as the last child of your `<body>` tag.
+Currently the Grid depends on there being a root level "portal" div in your HTML. Insert this snippet as the last child of your `<body>` tag:
 
 ```HTML
 <div id="portal" />
 ```
 
-The Grid has no intrinisic size. This is likely to change in a future version, for now however the quickest way to give it a size is by wrapping it in a div with CSS like:
+Once you've got that done, the easiest way to use the Data Grid is to wrap it inside a `DataEditorContainer` component:
+
+```jsx
+<DataEditorContainer width={500} height={300}>
+    <DataEditor {...props} />
+</DataEditorContainer>
+```
+
+What the container does is give the Grid its size. The Grid itself has no intrinisic size. This is likely to change in a future version. If you'd rather not use the container and set a size yourself, the quickest way is by wrapping it in a div with CSS like this:
 
 ```CSS
 .gridWrapper > :first-child {
@@ -17,13 +25,7 @@ The Grid has no intrinisic size. This is likely to change in a future version, f
 }
 ```
 
-You can also use the provided DataEditorContainer component for a quicker start.
-
-```jsx
-<DataEditorContainer width={500} height={300}>
-    <DataEditor {...props} />
-</DataEditorContainer>
-```
+## Changes to your data
 
 The Grid will never change any of your underlying data. You have to do so yourself when one of the callbacks is invoked. For example, when the user edits the value in a cell, the Grid will invoke the `onCellEdited` callback. If you don't implement that callback, or if it doesn't change the undelying data to the new value, the Grid will keep displaying the old value.
 

@@ -13,7 +13,7 @@
         "project": "tsconfig.json"
     },
     "rules": {
-        "no-console": "error",
+        "no-console": "warn",
         "guard-for-in": "error",
         "no-empty": "error",
         "no-shadow": "error",
