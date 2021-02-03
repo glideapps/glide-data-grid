@@ -13,11 +13,29 @@ const variantList: SpriteVariant[] = ["normal", "selected", "special", "specialS
 const renderSize = 40;
 
 let spriteCanvas: HTMLCanvasElement | undefined;
-let lastTheme: Theme | undefined;
+interface SpriteTheme {
+    bgColorLight: string;
+    fgColorDark: string;
+    acceptColor: string;
+    columnHeaderBg: string;
+}
+let lastTheme: SpriteTheme | undefined;
 export async function buildSpriteMap(theme: Theme): Promise<void> {
     // spriteCanvas = new OffscreenCanvas(spriteList.length * renderSize, 4 * renderSize);
-    if (theme === lastTheme) return;
-    lastTheme = theme;
+    const themeExtract: SpriteTheme = {
+        bgColorLight: theme.bgColorLight,
+        fgColorDark: theme.fgColorDark,
+        acceptColor: theme.acceptColor,
+        columnHeaderBg: theme.dataViewer.columnHeader.bgColor,
+    };
+    if (
+        lastTheme?.acceptColor === themeExtract.acceptColor &&
+        lastTheme?.bgColorLight === themeExtract.bgColorLight &&
+        lastTheme?.columnHeaderBg === themeExtract.columnHeaderBg &&
+        lastTheme?.fgColorDark === themeExtract.fgColorDark
+    ) {
+        return;
+    }
 
     spriteCanvas = document.createElement("canvas");
     spriteCanvas.width = spriteList.length * renderSize;
@@ -31,14 +49,14 @@ export async function buildSpriteMap(theme: Theme): Promise<void> {
 
         let y = 0;
         for (const variant of variantList) {
-            let fgColor = theme.bgColorLight;
-            let bgColor = theme.fgColorDark;
+            let fgColor = themeExtract.bgColorLight;
+            let bgColor = themeExtract.fgColorDark;
             if (variant === "selected") {
                 bgColor = "white";
-                fgColor = theme.acceptColor;
+                fgColor = themeExtract.acceptColor;
             } else if (variant === "special") {
-                bgColor = theme.acceptColor;
-                fgColor = theme.dataViewer.columnHeader.bgColor;
+                bgColor = themeExtract.acceptColor;
+                fgColor = themeExtract.columnHeaderBg;
             }
             const renderTarget = document.createElement("canvas");
             renderTarget.width = renderSize;
