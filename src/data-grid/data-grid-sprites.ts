@@ -37,6 +37,8 @@ export async function buildSpriteMap(theme: Theme): Promise<void> {
         return;
     }
 
+    lastTheme = themeExtract;
+
     spriteCanvas = document.createElement("canvas");
     spriteCanvas.width = spriteList.length * renderSize;
     spriteCanvas.height = 4 * renderSize;
