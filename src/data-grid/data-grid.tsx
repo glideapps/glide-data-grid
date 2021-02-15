@@ -867,13 +867,27 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                 dragData = payload;
             };
 
+            let dragImage: Element | undefined;
+            let dragImageX: number | undefined;
+            let dragImageY: number | undefined;
+            const setDragImage = (image: Element, x: number, y: number) => {
+                dragImage = image;
+                dragImageX = x;
+                dragImageY = y;
+            };
+
             onDragStart?.({
                 ...args,
                 setData,
+                setDragImage,
             });
             if (dragMime !== undefined && dragData !== undefined) {
                 event.dataTransfer.setData(dragMime, dragData);
                 event.dataTransfer.effectAllowed = "link";
+
+                if (dragImage !== undefined && dragImageX !== undefined && dragImageY !== undefined) {
+                    event.dataTransfer.setDragImage(dragImage, dragImageX, dragImageY);
+                }
             } else {
                 event.preventDefault();
             }
