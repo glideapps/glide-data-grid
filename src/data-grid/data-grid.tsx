@@ -255,6 +255,42 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         hoveredCol = hoveredItem[0];
     }
 
+    const drawCell = React.useCallback(
+        (
+            ctx: CanvasRenderingContext2D,
+            row: number,
+            cell: GridCell,
+            sourceIndex: number,
+            x: number,
+            y: number,
+            w: number,
+            h: number,
+            highlighted: boolean
+        ) => {
+            const drawn = drawCustomCell?.(ctx, cell, theme, { x, y, width: w, height: h }) === true;
+            if (!drawn) {
+                if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
+                    drawTextCell(ctx, theme, cell.displayData, x, y, w, h);
+                } else if (cell.kind === GridCellKind.Markdown || cell.kind === GridCellKind.Uri) {
+                    drawTextCell(ctx, theme, cell.data, x, y, w, h);
+                } else if (cell.kind === GridCellKind.Boolean) {
+                    if (cell.data || cell.showUnchecked) {
+                        drawBoolean(ctx, theme, cell.data, x, y, w, h, highlighted);
+                    }
+                } else if (cell.kind === GridCellKind.Bubble) {
+                    drawBubbles(ctx, theme, cell.data, x, y, w, h, highlighted);
+                } else if (cell.kind === GridCellKind.Image && imageLoader.current !== undefined) {
+                    drawImage(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, imageLoader.current);
+                } else if (cell.kind === GridCellKind.RowID) {
+                    drawTextCell(ctx, theme, cell.data, x, y, w, h, theme.fgColorLight);
+                } else if (cell.kind === GridCellKind.Protected) {
+                    drawProtectedCell(ctx, theme, x, y, w, h, !highlighted);
+                }
+            }
+        },
+        [drawCustomCell, theme]
+    );
+
     const draw = React.useCallback(() => {
         const canvas = ref.current;
         if (canvas === null) return;
@@ -590,37 +626,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                             ctx.globalAlpha = 0.6;
                         }
 
-                        const drawn = drawCustomCell?.(ctx, cell, theme, { x, y, width: c.width, height: rh }) === true;
-                        if (!drawn) {
-                            if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
-                                drawTextCell(ctx, theme, cell.displayData, x, y, c.width, rh);
-                            } else if (cell.kind === GridCellKind.Markdown || cell.kind === GridCellKind.Uri) {
-                                drawTextCell(ctx, theme, cell.data, x, y, c.width, rh);
-                            } else if (cell.kind === GridCellKind.Boolean) {
-                                if (cell.data || cell.showUnchecked) {
-                                    drawBoolean(ctx, theme, cell.data, x, y, c.width, rh, highlighted);
-                                }
-                            } else if (cell.kind === GridCellKind.Bubble) {
-                                drawBubbles(ctx, theme, cell.data, x, y, c.width, rh, highlighted);
-                            } else if (cell.kind === GridCellKind.Image && imageLoader.current !== undefined) {
-                                drawImage(
-                                    ctx,
-                                    theme,
-                                    cell.data,
-                                    c.sourceIndex,
-                                    row,
-                                    x,
-                                    y,
-                                    c.width,
-                                    rh,
-                                    imageLoader.current
-                                );
-                            } else if (cell.kind === GridCellKind.RowID) {
-                                drawTextCell(ctx, theme, cell.data, x, y, c.width, rh, theme.fgColorLight);
-                            } else if (cell.kind === GridCellKind.Protected) {
-                                drawProtectedCell(ctx, theme, x, y, c.width, rh, !highlighted);
-                            }
-                        }
+                        drawCell(ctx, row, cell, c.sourceIndex, x, y, c.width, rh, highlighted);
 
                         ctx.globalAlpha = 1;
 
@@ -666,7 +672,16 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         cellXOffset,
         firstColSticky,
         dragAndDropState,
-        theme,
+        theme.dataViewer.gridColor,
+        theme.dataViewer.columnHeader.bgColor,
+        theme.dataViewer.columnHeader.fgSelected,
+        theme.dataViewer.columnHeader.fgColor,
+        theme.dataViewer.columnHeader.bgSelected,
+        theme.dataViewer.columnHeader.bgDark,
+        theme.dataViewer.bgSelected,
+        theme.dataViewer.bgPrelight,
+        theme.borderColor,
+        theme.acceptColor,
         cellYOffset,
         rowHeight,
         headerHeight,
@@ -676,7 +691,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         selectedRows,
         rows,
         getCellContent,
-        drawCustomCell,
+        drawCell,
         prelightCells,
     ]);
 
@@ -887,12 +902,53 @@ const DataGrid: React.FunctionComponent<Props> = p => {
 
                 if (dragImage !== undefined && dragImageX !== undefined && dragImageY !== undefined) {
                     event.dataTransfer.setDragImage(dragImage, dragImageX, dragImageY);
+                } else {
+                    const [col, row] = args.location;
+                    if (row !== undefined) {
+                        const offscreen = document.createElement("canvas");
+                        const boundsForDragTarget = getBoundsForItem(canvas, col, row);
+
+                        offscreen.width = boundsForDragTarget.width;
+                        offscreen.height = boundsForDragTarget.height;
+
+                        const ctx = offscreen.getContext("2d");
+                        if (ctx !== null) {
+                            ctx.fillStyle = theme.dataViewer.bgColor;
+                            ctx.fillRect(0, 0, offscreen.width, offscreen.height);
+                            drawCell(
+                                ctx,
+                                row,
+                                getCellContent([col, row]),
+                                0,
+                                0,
+                                0,
+                                boundsForDragTarget.width,
+                                boundsForDragTarget.height,
+                                false
+                            );
+                        }
+
+                        offscreen.style.left = "-100%";
+                        offscreen.style.position = "absolute";
+
+                        document.body.appendChild(offscreen);
+
+                        event.dataTransfer.setDragImage(
+                            offscreen,
+                            boundsForDragTarget.width / 2,
+                            boundsForDragTarget.height / 2
+                        );
+
+                        window.setTimeout(() => {
+                            document.body.removeChild(offscreen);
+                        }, 0);
+                    }
                 }
             } else {
                 event.preventDefault();
             }
         },
-        [isDraggable, getMouseArgsForPosition, onDragStart]
+        [isDraggable, getMouseArgsForPosition, onDragStart, getBoundsForItem, drawCell, getCellContent]
     );
 
     return (

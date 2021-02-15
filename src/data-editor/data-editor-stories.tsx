@@ -208,5 +208,19 @@ function getData([col, row]: readonly [number, number]): GridCell {
 }
 
 export function Minimal() {
-    return <DataEditor getCellContent={getData} columns={columns} rows={1000} />;
+    return <DataEditor isDraggable={true} getCellContent={getData} columns={columns} rows={1000} />;
+}
+
+export function Draggable() {
+    return (
+        <DataEditor
+            isDraggable={true}
+            onDragStart={args => {
+                args.setData("text", "testing");
+            }}
+            getCellContent={getData}
+            columns={columns}
+            rows={1000}
+        />
+    );
 }
