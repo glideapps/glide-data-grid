@@ -5,7 +5,7 @@ import { StoryFn, StoryContext } from "@storybook/addons";
 import { StoryFnReactReturnType } from "@storybook/react/dist/client/preview/types";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 // import { styled } from "../common/styles";
-import { GridCell, GridCellKind, GridColumn, Rectangle } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, GridColumn, GridSelection, Rectangle } from "../data-grid/data-grid-types";
 import DataEditor from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
@@ -208,7 +208,27 @@ function getData([col, row]: readonly [number, number]): GridCell {
 }
 
 export function Minimal() {
-    return <DataEditor isDraggable={true} getCellContent={getData} columns={columns} rows={1000} />;
+    return <DataEditor getCellContent={getData} columns={columns} rows={1000} />;
+}
+
+export function ManualControl() {
+    const [gridSelection, setGridSelection] = React.useState<GridSelection>();
+
+    const cb = (newVal: GridSelection | undefined) => {
+        if ((newVal?.cell[0] ?? 0) % 2 === 0) {
+            setGridSelection(newVal);
+        }
+    };
+
+    return (
+        <DataEditor
+            gridSelection={gridSelection}
+            onGridSelectionChange={cb}
+            getCellContent={getData}
+            columns={columns}
+            rows={1000}
+        />
+    );
 }
 
 export function Draggable() {
