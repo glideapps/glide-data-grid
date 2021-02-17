@@ -28,12 +28,11 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
 
     let height = headerHeight;
     if (typeof rowHeight === "number") {
-        height += rows * rowHeight + rowHeight / 2;
+        height += rows * rowHeight;
     } else {
         for (let r = 0; r < rows; r++) {
             height += rowHeight(r);
         }
-        height += rowHeight(rows - 1) / 2;
     }
 
     const onScrollUpdate = React.useCallback(
@@ -63,7 +62,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             let cellY = 0;
             let cellBottom = 0;
             if (typeof rowHeight === "number") {
-                cellY = Math.round(args.scrollTop / rowHeight);
+                cellY = Math.ceil(args.scrollTop / rowHeight);
                 cellBottom = Math.ceil(args.clientHeight / rowHeight) + cellY;
             } else {
                 let y = 0;

@@ -244,3 +244,26 @@ export function Draggable() {
         />
     );
 }
+
+export function IdealSize() {
+    // trying to be 500x500
+    const cols: GridColumn[] = [
+        { title: "Number", width: 250 },
+        { title: "Square", width: 250 },
+    ];
+    return (
+        <DataEditor
+            isDraggable={true}
+            onDragStart={args => {
+                args.setData("text", "testing");
+            }}
+            getCellContent={getData}
+            columns={cols}
+            rowHeight={50}
+            headerHeight={50}
+            showTrailingBlankRow={false}
+            rowMarkers={false}
+            rows={9}
+        />
+    );
+}
