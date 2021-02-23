@@ -34,6 +34,9 @@ export interface DataGridProps {
     readonly cellXOffset: number;
     readonly cellYOffset: number;
 
+    readonly translateX?: number;
+    readonly translateY?: number;
+
     readonly firstColSticky: boolean;
     readonly allowResize?: boolean;
 
@@ -111,6 +114,8 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         prelightCells,
         drawCustomCell,
     } = p;
+    const translateX = p.translateX ?? 0;
+    const translateY = p.translateY ?? 0;
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const imageLoader = React.useRef<ImageWindowLoader>();
@@ -134,7 +139,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                 width: 0,
                 height: 0,
             };
-            const effectiveCols = getEffectiveColumns(columns, cellXOffset, width, firstColSticky);
+            const effectiveCols = getEffectiveColumns(columns, cellXOffset, width, firstColSticky, undefined, translateX);
 
             for (const c of effectiveCols) {
                 result.width = c.width + 1;
@@ -164,7 +169,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             const y = posY - rect.top;
             const edgeDetectionBuffer = 5;
 
-            const effectiveCols = getEffectiveColumns(columns, cellXOffset, width, firstColSticky);
+            const effectiveCols = getEffectiveColumns(columns, cellXOffset, width, firstColSticky, undefined, translateX);
 
             // -1 === off right edge
             const col = getColumnIndexForX(x, effectiveCols);
@@ -384,11 +389,11 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             }
         }
 
-        const effectiveCols = getEffectiveColumns(columns, cellXOffset, width, firstColSticky, dragAndDropState);
+        const effectiveCols = getEffectiveColumns(columns, cellXOffset, width, firstColSticky, dragAndDropState, translateX);
 
         if (damage !== undefined) {
             let row = cellYOffset;
-            let y = headerHeight;
+            let y = headerHeight + translateY;
             ctx.beginPath();
             while (y < height) {
                 let x = 0;
@@ -397,7 +402,8 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                 for (const c of effectiveCols) {
                     const rowLocal = row;
                     if (damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) !== undefined) {
-                        ctx.rect(x + 1, y + 1, c.width - 1, rh - 1);
+                        const tx = c.sticky ? 0 : translateX;
+                        ctx.rect(x + 1 + tx, y + 1, c.width - 1, rh - 1);
                     }
                     x += c.width;
                 }
@@ -427,18 +433,22 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             let x = 0.5;
             effectiveCols.forEach(c => {
                 x += c.width;
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, height);
+                const tx = c.sticky ? x : x + translateX;
+                ctx.moveTo(tx, 0);
+                ctx.lineTo(tx, height);
             });
 
             // horizontal lines
             let y = headerHeight + 0.5;
             let row = cellYOffset;
+            var isHeader = true;
             while (y <= height) {
-                ctx.moveTo(0, y);
-                ctx.lineTo(width, y);
+                const ty = isHeader ? y : y + translateY;
+                ctx.moveTo(0, ty);
+                ctx.lineTo(width, ty);
 
                 y += getRowHeight(row);
+                isHeader = false;
                 row++;
             }
 
@@ -453,6 +463,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         // draw header contents
         if (!blitted && damage === undefined) {
             let x = 0;
+            let clipX = 0;
             for (const c of effectiveCols) {
                 const selected = selectedColumns?.includes(c.sourceIndex);
                 const hovered = hoveredCol === c.sourceIndex && dragAndDropState === undefined;
@@ -470,6 +481,14 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                     : theme.dataViewer.columnHeader.bgColor;
 
                 ctx.save();
+                if (c.sticky) {
+                    clipX = Math.max(clipX, x + c.width);
+                } else {
+                    ctx.beginPath();
+                    ctx.rect(clipX, 0, width, height);
+                    ctx.clip();
+                    ctx.translate(translateX, 0);
+                }
 
                 if (selected) {
                     ctx.fillStyle = bgFillStyle;
@@ -558,9 +577,10 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         // draw cell contents
         let row = cellYOffset;
         {
-            let y = headerHeight;
+            let y = headerHeight + translateY;
             while (y < height) {
                 let x = 0;
+                let clipX = 0;
                 const rh = getRowHeight(row);
 
                 if (
@@ -580,6 +600,17 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                         }
 
                         ctx.save();
+                        ctx.beginPath();
+                        if (c.sticky) {
+                            clipX = Math.max(clipX, x + c.width);
+                            ctx.rect(0, headerHeight, width, height);
+                            ctx.clip();
+                        } else {
+                            ctx.rect(clipX, headerHeight, width, height);
+                            ctx.clip();
+                            ctx.translate(translateX, 0);
+                        }
+
                         const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
                         let highlighted = rowSelected || selectedColumns?.includes(c.sourceIndex) || isFocused;
 
@@ -671,6 +702,8 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         columns,
         cellXOffset,
         firstColSticky,
+        translateX,
+        translateY,
         dragAndDropState,
         theme.dataViewer.gridColor,
         theme.dataViewer.columnHeader.bgColor,

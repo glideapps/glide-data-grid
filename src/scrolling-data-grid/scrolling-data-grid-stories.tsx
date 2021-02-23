@@ -41,10 +41,14 @@ export function Simplenotest() {
 
     const [x, setX] = React.useState<number>(0);
     const [y, setY] = React.useState<number>(0);
+    const [tx, setTx] = React.useState<number | undefined>(0);
+    const [ty, setTy] = React.useState<number | undefined>(0);
 
-    const onVisibleRegionChanged = React.useCallback((range: Rectangle) => {
+    const onVisibleRegionChanged = React.useCallback((range: Rectangle, tx?: number, ty?: number) => {
         setX(range.x);
         setY(range.y);
+        setTx(tx);
+        setTy(ty);
     }, []);
 
     return (
@@ -52,13 +56,15 @@ export function Simplenotest() {
             rows={10000}
             cellXOffset={x}
             cellYOffset={y}
+            translateX={tx}
+            translateY={ty}
             headerHeight={44}
             allowResize={true}
             rowHeight={34}
             onVisibleRegionChanged={onVisibleRegionChanged}
             columns={["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"].map(t => ({
                 title: t,
-                width: 122 + (j += 10),
+                width: 122 + (j += 50),
             }))}
             getCellContent={([col, row]) => ({
                 kind: GridCellKind.Text,
@@ -67,6 +73,8 @@ export function Simplenotest() {
                 allowOverlay: true,
             })}
             firstColSticky={false}
+            smoothScrollX={false}
+            smoothScrollY={false}
         />
     );
 }

@@ -8,6 +8,7 @@ import { assertNever } from "../common/support";
 
 interface MappedGridColumn extends GridColumn {
     sourceIndex: number;
+    sticky: boolean;
 }
 
 export function makeEditCell(cell: GridCell): GridCell {
@@ -62,11 +63,13 @@ export function getEffectiveColumns(
     dndState?: {
         src: number;
         dest: number;
-    }
+    },
+    tx?: number
 ): readonly MappedGridColumn[] {
     const mappedCols = columns.map((c, i) => ({
         ...c,
         sourceIndex: i,
+        sticky: firstColSticky && i === 0
     }));
 
     if (dndState !== undefined) {
@@ -84,7 +87,7 @@ export function getEffectiveColumns(
         width -= mappedCols[0].width;
     }
     let endIndex = cellXOffset;
-    let curX = 0;
+    let curX = tx ?? 0;
 
     while (curX <= width && endIndex < mappedCols.length) {
         curX += mappedCols[endIndex].width;
