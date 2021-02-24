@@ -82,6 +82,13 @@ interface Props extends DataGridProps {
     readonly theme: Theme;
 }
 
+interface BlitData {
+    readonly cellXOffset: number;
+    readonly cellYOffset: number;
+    readonly translateX: number;
+    readonly translateY: number;
+}
+
 const DataGrid: React.FunctionComponent<Props> = p => {
     const {
         width,
@@ -121,7 +128,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
     const imageLoader = React.useRef<ImageWindowLoader>();
     const canBlit = React.useRef<boolean>();
     const damageRegion = React.useRef<readonly (readonly [number, number])[] | undefined>(undefined);
-    const lastCellYOffset = React.useRef<number>(cellYOffset);
+    const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
     const [hoveredItem, setHoveredItem] = React.useState<readonly [number, number | undefined] | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
 
@@ -307,6 +314,14 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             canvas.height = Math.floor(height * dpr);
         }
 
+        const last = lastBlitData.current;
+        if (canBlit.current === true &&
+            cellXOffset === last.cellXOffset &&
+            cellYOffset === last.cellYOffset &&
+            translateX === last.translateX &&
+            translateY === last.translateY)
+                return;
+
         const ctx = canvas.getContext("2d", {
             alpha: false,
         });
@@ -319,77 +334,142 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         ctx.scale(dpr, dpr);
 
         const damage = damageRegion.current;
-        let blitted = false;
-        let drawRegion: Rectangle | undefined;
+        let blittedYOnly = false;
+        let drawRegions: Rectangle[] = [];
+
+        const effectiveCols = getEffectiveColumns(columns, cellXOffset, width, firstColSticky, dragAndDropState, translateX);
 
         if (canBlit.current === true) {
-            const lastOffset = lastCellYOffset.current;
-            const current = cellYOffset;
-
-            if (current === lastOffset) return;
-
-            const min = Math.min(lastOffset, current);
-            const max = Math.max(lastOffset, current);
-
-            let delta = 0;
-            for (let i = min; i < max; i++) {
-                delta += getRowHeight(i);
+            const minY = Math.min(last.cellYOffset, cellYOffset);
+            const maxY = Math.max(last.cellYOffset, cellYOffset);
+            let deltaY = 0;
+            for (let i = minY; i < maxY; i++) {
+                deltaY += getRowHeight(i);
             }
+            if (cellYOffset > last.cellYOffset) {
+                deltaY = -deltaY;
+            }
+            deltaY += translateY - last.translateY;
 
-            if (current < lastOffset) {
-                delta = -delta;
+            const minX = Math.min(last.cellXOffset, cellXOffset);
+            const maxX = Math.max(last.cellXOffset, cellXOffset);
+            let deltaX = 0;
+            for (let i = minX; i < maxX; i++) {
+                deltaX += columns[i].width;
+            }
+            if (cellXOffset > last.cellXOffset) {
+                deltaX = -deltaX;
+            }
+            deltaX += translateX - last.translateX;
+
+            let stickyWidth = 0;
+            for (const c of effectiveCols) {
+                if (c.sticky) {
+                    stickyWidth += c.width + 1;
+                } else {
+                    break;
+                }
             }
 
             // drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
-            const blitHeight = height - headerHeight - Math.abs(delta);
 
-            if (blitHeight > 150) {
-                blitted = true;
-                if (delta > 0) {
+            const blitWidth = width - stickyWidth - Math.abs(deltaX);
+            const blitHeight = height - headerHeight - Math.abs(deltaY) - 1;
+
+            if (blitWidth > 150 && blitHeight > 150) {
+                blittedYOnly = deltaX === 0;
+
+                // blit Y
+                if (deltaY > 0) {
+                    // scrolling up
                     ctx.drawImage(
                         canvas,
                         0,
-                        (delta + headerHeight) * dpr,
+                        (headerHeight + 1) * dpr,
                         width * dpr,
                         blitHeight * dpr,
                         0,
-                        headerHeight,
+                        deltaY + headerHeight + 1,
                         width,
                         blitHeight
                     );
-                    ctx.rect(0, height - delta, width, delta);
-                    drawRegion = {
+                    drawRegions.push({
                         x: 0,
-                        y: height - delta,
+                        y: headerHeight + 1,
                         width: width,
-                        height: delta,
-                    };
-                    ctx.clip();
-                } else {
+                        height: deltaY
+                    });
+                } else if (deltaY < 0) {
+                    // scrolling down
                     ctx.drawImage(
                         canvas,
                         0,
-                        headerHeight * dpr,
+                        (-deltaY + headerHeight + 1) * dpr,
                         width * dpr,
                         blitHeight * dpr,
                         0,
-                        -delta + headerHeight,
+                        headerHeight + 1,
                         width,
                         blitHeight
                     );
-                    ctx.rect(0, headerHeight, width, -delta);
-                    drawRegion = {
+                    drawRegions.push({
                         x: 0,
-                        y: headerHeight,
+                        y: height + deltaY,
                         width: width,
-                        height: -delta,
-                    };
+                        height: -deltaY
+                    });
+                }
+
+                // blit X
+                if (deltaX > 0) {
+                    // scrolling right
+                    ctx.drawImage(
+                        canvas,
+                        stickyWidth * dpr,
+                        0,
+                        blitWidth * dpr,
+                        height * dpr,
+                        deltaX + stickyWidth,
+                        0,
+                        blitWidth,
+                        height
+                    );
+                    drawRegions.push({
+                        x: stickyWidth,
+                        y: 0,
+                        width: deltaX,
+                        height: height
+                    });
+                } else if (deltaX < 0) {
+                    // scrolling left
+                    ctx.drawImage(
+                        canvas,
+                        (stickyWidth - deltaX) * dpr,
+                        0,
+                        blitWidth * dpr,
+                        height * dpr,
+                        stickyWidth,
+                        0,
+                        blitWidth,
+                        height
+                    );
+                    drawRegions.push({
+                        x: width + deltaX,
+                        y: 0,
+                        width: -deltaX,
+                        height: height
+                    });
+                }
+
+                if (drawRegions.length > 0) {
+                    for (const r of drawRegions) {
+                        ctx.rect(r.x, r.y, r.width, r.height);
+                    }
                     ctx.clip();
+                    ctx.beginPath();
                 }
             }
         }
-
-        const effectiveCols = getEffectiveColumns(columns, cellXOffset, width, firstColSticky, dragAndDropState, translateX);
 
         if (damage !== undefined) {
             let row = cellYOffset;
@@ -419,7 +499,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         ctx.fillStyle = theme.dataViewer.gridColor;
         ctx.fillRect(0, 0, width, height);
 
-        if (!blitted && damage === undefined) {
+        if (!blittedYOnly && damage === undefined) {
             // draw header background
             ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
             ctx.fillRect(0, 0, width, headerHeight);
@@ -461,7 +541,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         const yPad = 2;
 
         // draw header contents
-        if (!blitted && damage === undefined) {
+        if (!blittedYOnly && damage === undefined) {
             let x = 0;
             let clipX = 0;
             for (const c of effectiveCols) {
@@ -498,6 +578,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                     ctx.fillRect(x + 1, 0, c.width - 1, headerHeight);
                 }
 
+                ctx.beginPath();
                 ctx.rect(x + xPad, yPad, c.width - xPad, headerHeight - yPad * 2);
                 ctx.clip();
 
@@ -583,11 +664,10 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                 let clipX = 0;
                 const rh = getRowHeight(row);
 
-                if (
-                    drawRegion === undefined ||
+                if (drawRegions.length === 0 || drawRegions.find(drawRegion => 
                     (y >= drawRegion.y && y <= drawRegion.y + drawRegion.height) ||
                     (drawRegion.y >= y && drawRegion.y <= y + rh)
-                ) {
+                )) {
                     const rowSelected = selectedRows?.includes(row);
                     for (const c of effectiveCols) {
                         const rowLocal = row;
@@ -693,7 +773,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             height: row - cellYOffset,
         });
 
-        lastCellYOffset.current = cellYOffset;
+        lastBlitData.current = { cellXOffset, cellYOffset, translateX, translateY };
 
         ctx.restore();
     }, [
@@ -739,7 +819,6 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         width,
         height,
         columns,
-        cellXOffset,
         theme,
         headerHeight,
         rowHeight,
