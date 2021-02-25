@@ -108,10 +108,11 @@ export function getEffectiveColumns(
     return effectiveCols;
 }
 
-export function getColumnIndexForX(targetX: number, effectiveColumns: readonly MappedGridColumn[]): number {
+export function getColumnIndexForX(targetX: number, effectiveColumns: readonly MappedGridColumn[], translateX?: number): number {
     let x = 0;
     for (const c of effectiveColumns) {
-        if (targetX <= x + c.width) {
+        const cx = c.sticky ? x : x + (translateX ?? 0);
+        if (targetX <= cx + c.width) {
             return c.sourceIndex;
         }
         x += c.width;
@@ -124,19 +125,21 @@ export function getRowIndexForY(
     headerHeight: number,
     rows: number,
     rowHeight: number | ((index: number) => number),
-    cellYOffset: number
+    cellYOffset: number,
+    translateY?: number
 ): number | undefined {
     if (targetY <= headerHeight) return -1;
 
+    let ty = targetY - (translateY ?? 0);
     if (typeof rowHeight === "number") {
-        const target = Math.floor((targetY - headerHeight) / rowHeight) + cellYOffset;
+        const target = Math.floor((ty - headerHeight) / rowHeight) + cellYOffset;
         if (target >= rows) return undefined;
         return target;
     } else {
         let curY = headerHeight;
         for (let i = cellYOffset; i < rows; i++) {
             const rh = rowHeight(i);
-            if (targetY <= curY + rh) return i;
+            if (ty <= curY + rh) return i;
             curY += rh;
         }
         return undefined;

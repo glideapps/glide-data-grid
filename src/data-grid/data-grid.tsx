@@ -142,7 +142,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
 
             const result: Rectangle = {
                 x: rect.x,
-                y: rect.y + headerHeight,
+                y: rect.y + headerHeight + translateY,
                 width: 0,
                 height: 0,
             };
@@ -150,7 +150,11 @@ const DataGrid: React.FunctionComponent<Props> = p => {
 
             for (const c of effectiveCols) {
                 result.width = c.width + 1;
-                if (c.sourceIndex === col) break;
+                if (c.sourceIndex === col) {
+                    if (!c.sticky)
+                        result.x += translateX;
+                    break;
+                }
                 result.x += c.width;
             }
 
@@ -166,7 +170,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
 
             return result;
         },
-        [cellXOffset, cellYOffset, columns, firstColSticky, headerHeight, rowHeight, width]
+        [cellXOffset, cellYOffset, columns, firstColSticky, headerHeight, rowHeight, width, translateX, translateY]
     );
 
     const getMouseArgsForPosition = React.useCallback(
@@ -179,11 +183,11 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             const effectiveCols = getEffectiveColumns(columns, cellXOffset, width, firstColSticky, undefined, translateX);
 
             // -1 === off right edge
-            const col = getColumnIndexForX(x, effectiveCols);
+            const col = getColumnIndexForX(x, effectiveCols, translateX);
 
             // -1: header or above
             // undefined: offbottom
-            const row = getRowIndexForY(y, headerHeight, rows, rowHeight, cellYOffset);
+            const row = getRowIndexForY(y, headerHeight, rows, rowHeight, cellYOffset, translateY);
 
             const shiftKey = ev?.shiftKey === true;
 
@@ -250,6 +254,8 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             rowHeight,
             rows,
             width,
+            translateX,
+            translateY
         ]
     );
 
