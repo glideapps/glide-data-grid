@@ -130,7 +130,7 @@ export function getRowIndexForY(
 ): number | undefined {
     if (targetY <= headerHeight) return -1;
 
-    let ty = targetY - (translateY ?? 0);
+    const ty = targetY - (translateY ?? 0);
     if (typeof rowHeight === "number") {
         const target = Math.floor((ty - headerHeight) / rowHeight) + cellYOffset;
         if (target >= rows) return undefined;

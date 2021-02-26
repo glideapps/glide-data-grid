@@ -53,7 +53,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             const stickyColWidth = firstColSticky ? columns[0].width : 0;
 
             for (const c of columns) {
-                let cx = x - stickyColWidth;
+                const cx = x - stickyColWidth;
                 if (args.scrollLeft >= cx + c.width) {
                     x += c.width;
                     cellX++;
@@ -142,7 +142,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                 lastY.current = ty;
             }
         },
-        [columns, rowHeight, rows, onVisibleRegionChanged, firstColSticky]
+        [columns, rowHeight, rows, onVisibleRegionChanged, firstColSticky, smoothScrollX, smoothScrollY]
     );
 
     return (

@@ -340,8 +340,8 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         ctx.scale(dpr, dpr);
 
         const damage = damageRegion.current;
+        const drawRegions: Rectangle[] = [];
         let blittedYOnly = false;
-        let drawRegions: Rectangle[] = [];
 
         const effectiveCols = getEffectiveColumns(columns, cellXOffset, width, firstColSticky, dragAndDropState, translateX);
 
@@ -527,7 +527,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             // horizontal lines
             let y = headerHeight + 0.5;
             let row = cellYOffset;
-            var isHeader = true;
+            let isHeader = true;
             while (y <= height) {
                 const ty = isHeader ? y : y + translateY;
                 ctx.moveTo(0, ty);
