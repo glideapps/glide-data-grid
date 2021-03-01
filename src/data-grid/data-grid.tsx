@@ -401,9 +401,9 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                     );
                     drawRegions.push({
                         x: 0,
-                        y: headerHeight + 1,
+                        y: headerHeight,
                         width: width,
-                        height: deltaY
+                        height: deltaY + 1
                     });
                 } else if (deltaY < 0) {
                     // scrolling down
@@ -441,9 +441,9 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                         height
                     );
                     drawRegions.push({
-                        x: stickyWidth,
+                        x: stickyWidth - 1,
                         y: 0,
-                        width: deltaX,
+                        width: deltaX + 1,
                         height: height
                     });
                 } else if (deltaX < 0) {
