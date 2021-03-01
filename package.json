@@ -1,6 +1,6 @@
 {
     "name": "@glideapps/glide-data-grid",
-    "version": "2.0.7",
+    "version": "2.1.0",
     "description": "Super fast, pure canvas Data Grid Editor",
     "main": "dist/js/index.js",
     "types": "dist/ts/index.d.ts",
