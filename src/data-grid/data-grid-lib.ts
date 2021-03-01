@@ -8,6 +8,7 @@ import { assertNever } from "../common/support";
 
 interface MappedGridColumn extends GridColumn {
     sourceIndex: number;
+    sticky: boolean;
 }
 
 export function makeEditCell(cell: GridCell): GridCell {
@@ -62,11 +63,13 @@ export function getEffectiveColumns(
     dndState?: {
         src: number;
         dest: number;
-    }
+    },
+    tx?: number
 ): readonly MappedGridColumn[] {
     const mappedCols = columns.map((c, i) => ({
         ...c,
         sourceIndex: i,
+        sticky: firstColSticky && i === 0
     }));
 
     if (dndState !== undefined) {
@@ -84,7 +87,7 @@ export function getEffectiveColumns(
         width -= mappedCols[0].width;
     }
     let endIndex = cellXOffset;
-    let curX = 0;
+    let curX = tx ?? 0;
 
     while (curX <= width && endIndex < mappedCols.length) {
         curX += mappedCols[endIndex].width;
@@ -105,10 +108,11 @@ export function getEffectiveColumns(
     return effectiveCols;
 }
 
-export function getColumnIndexForX(targetX: number, effectiveColumns: readonly MappedGridColumn[]): number {
+export function getColumnIndexForX(targetX: number, effectiveColumns: readonly MappedGridColumn[], translateX?: number): number {
     let x = 0;
     for (const c of effectiveColumns) {
-        if (targetX <= x + c.width) {
+        const cx = c.sticky ? x : x + (translateX ?? 0);
+        if (targetX <= cx + c.width) {
             return c.sourceIndex;
         }
         x += c.width;
@@ -121,19 +125,21 @@ export function getRowIndexForY(
     headerHeight: number,
     rows: number,
     rowHeight: number | ((index: number) => number),
-    cellYOffset: number
+    cellYOffset: number,
+    translateY?: number
 ): number | undefined {
     if (targetY <= headerHeight) return -1;
 
+    const ty = targetY - (translateY ?? 0);
     if (typeof rowHeight === "number") {
-        const target = Math.floor((targetY - headerHeight) / rowHeight) + cellYOffset;
+        const target = Math.floor((ty - headerHeight) / rowHeight) + cellYOffset;
         if (target >= rows) return undefined;
         return target;
     } else {
         let curY = headerHeight;
         for (let i = cellYOffset; i < rows; i++) {
             const rh = rowHeight(i);
-            if (targetY <= curY + rh) return i;
+            if (ty <= curY + rh) return i;
             curY += rh;
         }
         return undefined;

@@ -30,7 +30,7 @@ export default {
         (fn: StoryFn<StoryFnReactReturnType>, context: StoryContext) => (
             <div style={{ overflow: "hidden" }}>
                 <BuilderThemeWrapper width={1000} height={800} context={context}>
-                    <DataEditorContainer width={500} height={500}>
+                    <DataEditorContainer width={1000} height={800}>
                         {fn()}
                     </DataEditorContainer>
                 </BuilderThemeWrapper>
@@ -209,6 +209,12 @@ function getData([col, row]: readonly [number, number]): GridCell {
 
 export function Minimal() {
     return <DataEditor getCellContent={getData} columns={columns} rows={1000} />;
+}
+
+export function Smooth() {
+    const [cols] = React.useState(getDummyCols);
+
+    return <DataEditor getCellContent={getDummyData} columns={cols} rows={1000} smoothScrollY={true} smoothScrollX={true} />;
 }
 
 export function ManualControl() {
