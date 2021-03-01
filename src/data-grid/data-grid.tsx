@@ -528,7 +528,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             let y = headerHeight + 0.5;
             let row = cellYOffset;
             let isHeader = true;
-            while (y <= height) {
+            while (y + translateY <= height) {
                 const ty = isHeader ? y : y + translateY;
                 ctx.moveTo(0, ty);
                 ctx.lineTo(width, ty);
