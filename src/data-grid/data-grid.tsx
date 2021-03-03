@@ -918,6 +918,12 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         [width, height, headerHovered, canDrag]
     );
 
+    const target = eventTargetRef?.current;
+    if (target !== null && target !== undefined) {
+        // because we have an event target we need to set its cursor instead.
+        target.style.cursor = style.cursor;
+    }
+
     const onMouseDownImpl = React.useCallback(
         (ev: MouseEvent) => {
             const canvas = ref.current;

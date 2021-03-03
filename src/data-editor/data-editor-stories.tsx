@@ -212,11 +212,31 @@ export function Minimal() {
 }
 
 export function Smooth() {
-    const [cols] = React.useState(getDummyCols);
+    const [cols, setCols] = React.useState(getDummyCols);
+
+    const onColumnResized = React.useCallback(
+        (column: GridColumn, newSize: number) => {
+            const index = cols.indexOf(column);
+            if (index !== -1) {
+                const newCol: GridColumn = {
+                    ...column,
+                    width: newSize,
+                };
+
+                const newCols = [...cols];
+                newCols.splice(index, 1, newCol);
+
+                setCols(newCols);
+            }
+        },
+        [cols]
+    );
 
     return (
         <DataEditor
             getCellContent={getDummyData}
+            allowResize={true}
+            onColumnResized={onColumnResized}
             columns={cols}
             rows={1000}
             smoothScrollY={true}
