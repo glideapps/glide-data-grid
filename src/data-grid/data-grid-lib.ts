@@ -69,7 +69,7 @@ export function getEffectiveColumns(
     const mappedCols = columns.map((c, i) => ({
         ...c,
         sourceIndex: i,
-        sticky: firstColSticky && i === 0
+        sticky: firstColSticky && i === 0,
     }));
 
     if (dndState !== undefined) {
@@ -108,7 +108,11 @@ export function getEffectiveColumns(
     return effectiveCols;
 }
 
-export function getColumnIndexForX(targetX: number, effectiveColumns: readonly MappedGridColumn[], translateX?: number): number {
+export function getColumnIndexForX(
+    targetX: number,
+    effectiveColumns: readonly MappedGridColumn[],
+    translateX?: number
+): number {
     let x = 0;
     for (const c of effectiveColumns) {
         const cx = c.sticky ? x : x + (translateX ?? 0);

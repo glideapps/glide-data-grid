@@ -29,8 +29,8 @@ export default {
         }),
         (fn: StoryFn<StoryFnReactReturnType>, context: StoryContext) => (
             <div style={{ overflow: "hidden" }}>
-                <BuilderThemeWrapper width={1000} height={800} context={context}>
-                    <DataEditorContainer width={1000} height={800}>
+                <BuilderThemeWrapper width={1920} height={1080} context={context}>
+                    <DataEditorContainer width={1920} height={1080}>
                         {fn()}
                     </DataEditorContainer>
                 </BuilderThemeWrapper>
@@ -214,7 +214,15 @@ export function Minimal() {
 export function Smooth() {
     const [cols] = React.useState(getDummyCols);
 
-    return <DataEditor getCellContent={getDummyData} columns={cols} rows={1000} smoothScrollY={true} smoothScrollX={true} />;
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={cols}
+            rows={1000}
+            smoothScrollY={true}
+            smoothScrollX={true}
+        />
+    );
 }
 
 export function ManualControl() {
