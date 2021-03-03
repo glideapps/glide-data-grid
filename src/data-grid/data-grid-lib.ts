@@ -69,7 +69,7 @@ export function getEffectiveColumns(
     const mappedCols = columns.map((c, i) => ({
         ...c,
         sourceIndex: i,
-        sticky: firstColSticky && i === 0
+        sticky: firstColSticky && i === 0,
     }));
 
     if (dndState !== undefined) {
@@ -108,7 +108,11 @@ export function getEffectiveColumns(
     return effectiveCols;
 }
 
-export function getColumnIndexForX(targetX: number, effectiveColumns: readonly MappedGridColumn[], translateX?: number): number {
+export function getColumnIndexForX(
+    targetX: number,
+    effectiveColumns: readonly MappedGridColumn[],
+    translateX?: number
+): number {
     let x = 0;
     for (const c of effectiveColumns) {
         const cx = c.sticky ? x : x + (translateX ?? 0);
@@ -180,11 +184,6 @@ export function drawTextCell(
 
     const dir = direction(data);
 
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x, y + cellYPad, width, height - cellYPad * 2);
-    ctx.clip();
-    ctx.font = "13px Roboto, sans-serif";
     ctx.fillStyle = overrideColor ?? theme.fgColorDark;
     if (dir === "rtl") {
         const textWidth = measureTextWidth(data, ctx);
@@ -192,8 +191,6 @@ export function drawTextCell(
     } else {
         ctx.fillText(data, x + cellXPad + 0.5, y + height / 2 + 4.5);
     }
-
-    ctx.restore();
 }
 
 export function drawProtectedCell(
@@ -205,18 +202,12 @@ export function drawProtectedCell(
     height: number,
     drawBackground: boolean
 ) {
-    ctx.save();
-
     if (drawBackground) {
         ctx.beginPath();
         ctx.rect(x + 1, y + 1, width - 1, height - 1);
         ctx.fillStyle = theme.bgColorAltLight;
         ctx.fill();
     }
-
-    ctx.beginPath();
-    ctx.rect(x, y + cellYPad, width, height - cellYPad * 2);
-    ctx.clip();
 
     ctx.beginPath();
 
@@ -242,8 +233,6 @@ export function drawProtectedCell(
     ctx.lineCap = "square";
     ctx.strokeStyle = theme.fgColorMedium + "DD";
     ctx.stroke();
-
-    ctx.restore();
 }
 
 interface CornerRadius {
@@ -282,11 +271,6 @@ export function drawBoolean(
     height: number,
     highlighted: boolean
 ) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x, y, width, height - 1);
-    ctx.clip();
-
     const centerX = x + width / 2;
     const centerY = y + height / 2;
 
@@ -315,8 +299,6 @@ export function drawBoolean(
         ctx.strokeStyle = theme.fgColorLight;
         ctx.stroke();
     }
-
-    ctx.restore();
 }
 
 const itemMargin = 4;
@@ -331,15 +313,9 @@ export function drawBubbles(
     height: number,
     highlighted: boolean
 ) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x + cellXPad, y + cellYPad, width - cellXPad, height - cellYPad * 2);
-    ctx.clip();
-
     const bubbleHeight = 20;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
-    ctx.font = "13px Roboto, sans-serif";
     let renderX = x + cellXPad;
 
     const renderBoxes: { x: number; width: number }[] = [];
@@ -373,8 +349,6 @@ export function drawBubbles(
         ctx.fillStyle = theme.fgColorDark;
         ctx.fillText(data[i], rectInfo.x + bubblePad, y + height / 2 + 4);
     });
-
-    ctx.restore();
 }
 
 export function drawImage(
@@ -385,15 +359,10 @@ export function drawImage(
     row: number,
     x: number,
     y: number,
-    width: number,
+    _width: number,
     height: number,
     imageLoader: ImageWindowLoader
 ) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x + cellXPad, y + cellYPad, width - cellXPad, height - cellYPad * 2);
-    ctx.clip();
-
     let drawX = x + cellXPad;
     data.filter(s => s.length > 0).forEach(i => {
         // FIXME: Injection?
@@ -413,8 +382,6 @@ export function drawImage(
         }
         // }
     });
-
-    ctx.restore();
 }
 
 interface Point {

@@ -2,10 +2,17 @@ import { browserIsSafari } from "../common/browser-detect";
 import { styled } from "../common/styles";
 
 export const ScrollRegionStyle = styled.div`
-    overflow: ${browserIsSafari ? "scroll" : "auto"};
+    .dvn-scroller {
+        overflow: ${browserIsSafari ? "scroll" : "auto"};
+        transform: translate3d(0, 0, 0);
+    }
 
-    .dvn-scroll-inner > * {
-        position: sticky;
+    .dvn-scroll-inner {
+        pointer-events: none;
+    }
+
+    .dvn-underlay > * {
+        position: absolute;
         left: 0;
         top: 0;
     }
