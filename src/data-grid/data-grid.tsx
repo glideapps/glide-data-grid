@@ -530,7 +530,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         }
 
         ctx.fillStyle = theme.dataViewer.gridColor;
-        ctx.fillRect(0, 0, width, height);
+        ctx.fillRect(0, headerHeight + 1, width, height - headerHeight - 1);
 
         if (!blittedYOnly && damage === undefined) {
             // draw header background

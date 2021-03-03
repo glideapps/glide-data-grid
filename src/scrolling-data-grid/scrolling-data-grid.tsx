@@ -7,6 +7,7 @@ import ScrollRegion, { ScrollRegionUpdateArgs } from "../scroll-region/scroll-re
 interface Handled {
     readonly width: number;
     readonly height: number;
+    readonly eventTargetRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 export interface ScrollingDataGridProps extends Subtract<DataGridDndProps, Handled> {
