@@ -48,6 +48,8 @@ export interface DataGridProps {
 
     readonly canvasRef?: React.MutableRefObject<HTMLCanvasElement | null>;
 
+    readonly eventTargetRef?: React.MutableRefObject<HTMLDivElement | null>;
+
     readonly className?: string;
 
     readonly getCellContent: (cell: readonly [number, number]) => GridCell;
@@ -116,6 +118,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         onKeyUp,
         canvasRef,
         onDragStart,
+        eventTargetRef,
         isDraggable,
         allowResize,
         prelightCells,
@@ -685,12 +688,17 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             }
         }
 
+        ctx.beginPath();
         ctx.rect(0, headerHeight + 1, width, height - headerHeight - 1);
         ctx.clip();
         ctx.beginPath();
         // draw cell contents
         let row = cellYOffset;
         {
+            // we are going to set the font out here because setting this in FF is slow
+            // for no obvious reason. It will get saved/restored as needed anyway. All cells
+            // can depend on the default font being set and not need to set it themselves.
+            ctx.font = "13px Roboto, sans-serif";
             let y = headerHeight + translateY;
             while (y < height) {
                 let x = 0;
@@ -720,13 +728,15 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                         ctx.beginPath();
                         if (c.sticky) {
                             clipX = Math.max(clipX, x + c.width);
-                            ctx.rect(0, headerHeight, width, height);
+                            ctx.rect(x, y, c.width, rh);
                             ctx.clip();
                         } else {
-                            ctx.rect(clipX, headerHeight, width, height);
+                            const diff = Math.min(0, x + translateX - clipX);
+                            ctx.rect(Math.max(x + translateX, clipX), y, c.width + diff, rh);
                             ctx.clip();
                             ctx.translate(translateX, 0);
                         }
+                        ctx.beginPath();
 
                         const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
                         let highlighted = rowSelected || selectedColumns?.includes(c.sourceIndex) || isFocused;
@@ -778,15 +788,27 @@ const DataGrid: React.FunctionComponent<Props> = p => {
 
                         ctx.globalAlpha = 1;
 
+                        ctx.restore();
+
                         if (isFocused) {
+                            ctx.save();
+                            ctx.beginPath();
+                            if (c.sticky) {
+                                ctx.rect(x, y, c.width + 1, rh + 1);
+                                ctx.clip();
+                            } else {
+                                ctx.rect(Math.max(x, clipX) + translateX, y, c.width + 1, rh + 1);
+                                ctx.clip();
+                                ctx.translate(translateX, 0);
+                            }
+
                             ctx.beginPath();
                             ctx.rect(x + 1, y + 1, c.width - 1, rh - 1);
                             ctx.strokeStyle = theme.acceptColor;
                             ctx.lineWidth = 2;
                             ctx.stroke();
+                            ctx.restore();
                         }
-
-                        ctx.restore();
 
                         x += c.width;
                     }
@@ -899,7 +921,8 @@ const DataGrid: React.FunctionComponent<Props> = p => {
     const onMouseDownImpl = React.useCallback(
         (ev: MouseEvent) => {
             const canvas = ref.current;
-            if (canvas === null || ev.target !== canvas) return;
+            const eventTarget = eventTargetRef?.current;
+            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) return;
             const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
 
             if (args.kind === "header") {
@@ -917,7 +940,15 @@ const DataGrid: React.FunctionComponent<Props> = p => {
 
             onMouseDown?.(args);
         },
-        [getMouseArgsForPosition, onMouseDown, columns, getBoundsForItem, onHeaderMenuClick, hoveredOnEdge]
+        [
+            eventTargetRef,
+            getMouseArgsForPosition,
+            onMouseDown,
+            columns,
+            hoveredOnEdge,
+            getBoundsForItem,
+            onHeaderMenuClick,
+        ]
     );
     useEventListener("mousedown", onMouseDownImpl, window, true);
 

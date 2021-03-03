@@ -58,17 +58,27 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
         [scrollRef]
     );
 
+    const lastProps = React.useRef<{ width?: number; height?: number }>();
+
     return (
         <div style={style}>
             <AutoSizer>
                 {(props: { width?: number; height?: number }) => {
                     if (props.width === 0 || props.height === 0) return null;
-                    window.setTimeout(onScroll, 0);
+                    if (lastProps.current?.height !== props.height || lastProps.current?.width !== props.width) {
+                        window.setTimeout(onScroll, 0);
+                        lastProps.current = props;
+                    }
 
                     return (
-                        <ScrollRegionStyle ref={setRefs} style={props} className={className} onScroll={onScroll}>
-                            <div className="dvn-scroll-inner" style={innerStyle}>
-                                {children}
+                        <ScrollRegionStyle>
+                            <div className="dvn-underlay">{children}</div>
+                            <div
+                                ref={setRefs}
+                                style={props}
+                                className={"dvn-scroller " + className}
+                                onScroll={onScroll}>
+                                <div className="dvn-scroll-inner" style={innerStyle} />
                             </div>
                         </ScrollRegionStyle>
                     );

@@ -80,13 +80,12 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             if (typeof rowHeight === "number") {
                 if (smoothScrollY) {
                     cellY = Math.floor(args.scrollTop / rowHeight);
-                    ty = (cellY * rowHeight) - args.scrollTop;
+                    ty = cellY * rowHeight - args.scrollTop;
                 } else {
                     cellY = Math.ceil(args.scrollTop / rowHeight);
                 }
                 cellBottom = Math.ceil(args.clientHeight / rowHeight) + cellY;
-                if (ty < 0)
-                    cellBottom++;
+                if (ty < 0) cellBottom++;
             } else {
                 let y = 0;
                 for (let row = 0; row < rows; row++) {
@@ -131,12 +130,16 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                 lastX.current !== tx ||
                 lastY.current !== ty
             ) {
-                onVisibleRegionChanged?.({
-                    x: cellX,
-                    y: cellY,
-                    width: cellRight - cellX,
-                    height: cellBottom - cellY,
-                }, tx, ty);
+                onVisibleRegionChanged?.(
+                    {
+                        x: cellX,
+                        y: cellY,
+                        width: cellRight - cellX,
+                        height: cellBottom - cellY,
+                    },
+                    tx,
+                    ty
+                );
                 last.current = rect;
                 lastX.current = tx;
                 lastY.current = ty;
@@ -153,7 +156,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             scrollHeight={height}
             update={onScrollUpdate}
             scrollToEnd={scrollToEnd}>
-            <DataGridDnd width={clientWidth} height={clientHeight} {...dateGridProps} />
+            <DataGridDnd eventTargetRef={scrollRef} width={clientWidth} height={clientHeight} {...dateGridProps} />
         </ScrollRegion>
     );
 };
