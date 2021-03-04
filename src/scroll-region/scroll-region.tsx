@@ -23,10 +23,14 @@ interface Props {
 const ScrollRegion: React.FunctionComponent<Props> = p => {
     const { className, scrollWidth, scrollHeight, style, children, update, scrollToEnd, scrollRef } = p;
 
-    const innerStyle = React.useMemo<React.CSSProperties>(() => ({ width: scrollWidth, height: scrollHeight }), [
-        scrollWidth,
-        scrollHeight,
-    ]);
+    const innerStyle = React.useMemo<React.CSSProperties>(
+        () => ({
+            width: scrollWidth,
+            height: scrollHeight,
+            contain: "size paint layout",
+        }),
+        [scrollWidth, scrollHeight]
+    );
 
     const scroller = React.useRef<HTMLDivElement | null>(null);
 

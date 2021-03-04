@@ -1,35 +1,15 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Release CI
+name: Beta CI
 
 on:
     push:
-        branches: [main]
-    pull_request:
-        branches: [main]
+        tags: [v*]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        if: github.ref != 'refs/heads/main'
-        strategy:
-            matrix:
-                node-version: [10.x]
-
-        steps:
-            - uses: actions/checkout@v2
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v1
-              with:
-                  node-version: ${{ matrix.node-version }}
-            - run: npm ci
-            - run: npm run lint
-            - run: npm run build-js
-            - run: npm run build-types
     publish:
         runs-on: ubuntu-latest
-        if: github.ref == 'refs/heads/main'
         steps:
             - uses: actions/checkout@v1
             - uses: actions/setup-node@v1
@@ -43,3 +23,4 @@ jobs:
               with:
                   token: ${{ secrets.NPM_TOKEN }}
                   access: public
+                  tag: beta
