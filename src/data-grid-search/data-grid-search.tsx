@@ -5,6 +5,7 @@ import { useEventListener } from "../common/utils";
 import { GridCell, GridCellKind, GridKeyEventArgs, GridSelection, Rectangle } from "../data-grid/data-grid-types";
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
+import { assert } from "../common/support";
 
 // icons
 const UpArrow = () => (
@@ -95,7 +96,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
             for (let row = range.y; row < range.y + range.height; row++) {
                 const inner: GridCell[] = [];
                 for (let col = range.x; col < range.x + range.width; col++) {
-                    inner.push(getCellContent([col, row]));
+                    inner.push(getCellContent([col + searchColOffset, row]));
                 }
 
                 result.push(inner);
@@ -103,7 +104,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
             return result;
         },
-        [getCellContent, getCellsForSelection]
+        [getCellContent, getCellsForSelection, searchColOffset]
     );
 
     const beginSearch = React.useCallback(
@@ -117,7 +118,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
             // performing sheets.
             let searchStride = Math.min(10, rows);
 
-            let i = 0;
+            let rowsSearched = 0;
 
             setSearchStatus(undefined);
             setSearchResults([]);
@@ -126,13 +127,14 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
             const tick = () => {
                 const tStart = performance.now();
+                const rowsLeft = rows - rowsSearched;
                 const data = getCellsForSelectionMangled({
                     cell: [0, 0],
                     range: {
                         x: 0,
                         y: startY,
                         width: columns.length - searchColOffset,
-                        height: Math.min(searchStride, rows - i),
+                        height: Math.min(searchStride, rowsLeft, rows - startY),
                     },
                 });
 
@@ -173,12 +175,13 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                     setSearchResults([...runningResult]);
                 }
 
-                i += Math.min(searchStride, rows - i);
+                rowsSearched += data.length;
+                assert(rowsSearched <= rows);
 
                 const selectedIndex = searchStatusRef.current?.selectedIndex ?? -1;
                 setSearchStatus({
                     results: runningResult.length,
-                    rowsSearched: i,
+                    rowsSearched,
                     selectedIndex,
                 });
                 onSearchResultsChanged?.(runningResult, selectedIndex);
@@ -195,7 +198,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 const scalar = targetSearchTimeMS / rounded;
                 searchStride = Math.ceil(searchStride * scalar);
 
-                if (i < rows) {
+                if (rowsSearched < rows) {
                     searchHandle.current = window.requestAnimationFrame(tick);
                 }
             };
