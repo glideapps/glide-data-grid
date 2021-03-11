@@ -13,18 +13,15 @@ interface Props {
 }
 
 const BuilderWrapper = styled.div<Props>`
-    padding-left: 40px;
-    padding-top: ${p => (p.useMoreTopPadding ? 500 : 40)}px;
     display: flex;
-
     height: 100vh;
+
     & > .content {
         display: block;
 
         width: ${p => p.width}px;
         min-height: ${p => p.height}px;
         align-self: center;
-        margin-bottom: 48px;
 
         position: relative;
 

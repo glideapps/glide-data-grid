@@ -1,11 +1,12 @@
 import * as React from "react";
 
 import { withKnobs } from "@storybook/addon-knobs";
-import { StoryFn, StoryContext } from "@storybook/addons";
+import { StoryFn, StoryContext, useState, useCallback } from "@storybook/addons";
 import { StoryFnReactReturnType } from "@storybook/react/dist/client/preview/types";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 // import { styled } from "../common/styles";
 import { GridCell, GridCellKind, GridColumn, GridSelection, Rectangle } from "../data-grid/data-grid-types";
+import AutoSizer from "react-virtualized-auto-sizer";
 import DataEditor from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
@@ -28,13 +29,15 @@ export default {
             escapeHTML: false,
         }),
         (fn: StoryFn<StoryFnReactReturnType>, context: StoryContext) => (
-            <div style={{ overflow: "hidden" }}>
-                <BuilderThemeWrapper width={1920} height={1080} context={context}>
-                    <DataEditorContainer width={1920} height={1080}>
-                        {fn()}
-                    </DataEditorContainer>
-                </BuilderThemeWrapper>
-            </div>
+            <AutoSizer>
+                {(props: { width?: number; height?: number }) => (
+                    <BuilderThemeWrapper width={props.width ?? 1000} height={props.height ?? 800} context={context}>
+                        <DataEditorContainer width={props.width ?? 1000} height={props.height ?? 800}>
+                            {fn()}
+                        </DataEditorContainer>
+                    </BuilderThemeWrapper>
+                )}
+            </AutoSizer>
         ),
     ],
 };
@@ -148,17 +151,17 @@ function getDummyCols() {
 }
 
 export function Simplenotest() {
-    const [cols, setColumns] = React.useState(getDummyCols);
+    const [cols, setColumns] = useState(getDummyCols);
 
-    const [x, setX] = React.useState<number>(0);
-    const [y, setY] = React.useState<number>(0);
+    const [x, setX] = useState<number>(0);
+    const [y, setY] = useState<number>(0);
 
-    const onVisibleRegionChanged = React.useCallback((range: Rectangle) => {
+    const onVisibleRegionChanged = useCallback((range: Rectangle) => {
         setX(range.x);
         setY(range.y);
     }, []);
 
-    const onColumnResized = React.useCallback(
+    const onColumnResized = useCallback(
         (col: GridColumn, newSize: number) => {
             const index = cols.indexOf(col);
             const newCols = [...cols];
@@ -212,9 +215,9 @@ export function Minimal() {
 }
 
 export function Smooth() {
-    const [cols, setCols] = React.useState(getDummyCols);
+    const [cols, setCols] = useState(getDummyCols);
 
-    const onColumnResized = React.useCallback(
+    const onColumnResized = useCallback(
         (column: GridColumn, newSize: number) => {
             const index = cols.indexOf(column);
             if (index !== -1) {
@@ -246,7 +249,7 @@ export function Smooth() {
 }
 
 export function ManualControl() {
-    const [gridSelection, setGridSelection] = React.useState<GridSelection>();
+    const [gridSelection, setGridSelection] = useState<GridSelection | undefined>(undefined);
 
     const cb = (newVal: GridSelection | undefined) => {
         if ((newVal?.cell[0] ?? 0) % 2 === 0) {
