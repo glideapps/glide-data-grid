@@ -325,7 +325,13 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         [drawCustomCell, theme]
     );
 
+    const timingValue = React.useRef({
+        count: 0,
+        time: 0,
+    });
+
     const draw = React.useCallback(() => {
+        const currentTime = timingValue.current;
         const canvas = ref.current;
         if (canvas === null) return;
 
@@ -350,6 +356,8 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             alpha: false,
         });
         if (ctx === null) return;
+
+        const start = window.performance.now();
 
         const getRowHeight = (r: number) => (typeof rowHeight === "number" ? rowHeight : rowHeight(r));
 
@@ -692,18 +700,31 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         ctx.rect(0, headerHeight + 1, width, height - headerHeight - 1);
         ctx.clip();
         ctx.beginPath();
-        // draw cell contents
-        let row = cellYOffset;
-        {
-            // we are going to set the font out here because setting this in FF is slow
-            // for no obvious reason. It will get saved/restored as needed anyway. All cells
-            // can depend on the default font being set and not need to set it themselves.
-            ctx.font = "13px Roboto, sans-serif";
+
+        let x = 0;
+        let clipX = 0;
+        let row = 0;
+        ctx.font = "13px Roboto, sans-serif";
+        for (const c of effectiveCols) {
             let y = headerHeight + translateY;
+            row = cellYOffset;
+
+            ctx.save();
+            ctx.beginPath();
+            if (c.sticky) {
+                clipX = Math.max(clipX, x + c.width);
+                ctx.rect(x, headerHeight + 1, c.width, height - headerHeight - 1);
+                ctx.clip();
+            } else {
+                const diff = Math.min(0, x + translateX - clipX);
+                ctx.rect(Math.max(x + translateX, clipX), headerHeight + 1, c.width + diff, height - headerHeight - 1);
+                ctx.clip();
+                ctx.translate(translateX, 0);
+            }
+
             while (y < height) {
-                let x = 0;
-                let clipX = 0;
                 const rh = getRowHeight(row);
+                const rowSelected = selectedRows?.includes(row);
 
                 if (
                     drawRegions.length === 0 ||
@@ -713,29 +734,11 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                             (drawRegion.y >= y && drawRegion.y <= y + rh)
                     )
                 ) {
-                    const rowSelected = selectedRows?.includes(row);
-                    for (const c of effectiveCols) {
-                        const rowLocal = row;
-                        if (
-                            damage !== undefined &&
-                            damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) === undefined
-                        ) {
-                            x += c.width;
-                            continue;
-                        }
-
-                        ctx.save();
-                        ctx.beginPath();
-                        if (c.sticky) {
-                            clipX = Math.max(clipX, x + c.width);
-                            ctx.rect(x, y, c.width, rh);
-                            ctx.clip();
-                        } else {
-                            const diff = Math.min(0, x + translateX - clipX);
-                            ctx.rect(Math.max(x + translateX, clipX), y, c.width + diff, rh);
-                            ctx.clip();
-                            ctx.translate(translateX, 0);
-                        }
+                    const rowLocal = row;
+                    if (
+                        damage === undefined ||
+                        damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) !== undefined
+                    ) {
                         ctx.beginPath();
 
                         const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
@@ -753,7 +756,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                             }
                         }
 
-                        if (highlighted) {
+                        if (highlighted || rowSelected) {
                             ctx.fillStyle = theme.dataViewer.bgSelected;
                             if (x === 0) {
                                 ctx.fillRect(x, y + 1, c.width, rh - 1);
@@ -788,8 +791,6 @@ const DataGrid: React.FunctionComponent<Props> = p => {
 
                         ctx.globalAlpha = 1;
 
-                        ctx.restore();
-
                         if (isFocused) {
                             ctx.save();
                             ctx.beginPath();
@@ -809,20 +810,15 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                             ctx.stroke();
                             ctx.restore();
                         }
-
-                        x += c.width;
-                    }
-
-                    if (x < width && rowSelected) {
-                        ctx.beginPath();
-                        ctx.fillStyle = theme.dataViewer.bgSelected;
-                        ctx.fillRect(x + 1, y + 1, width - x, rh - 1);
                     }
                 }
 
                 y += rh;
                 row++;
             }
+
+            ctx.restore();
+            x += c.width;
         }
 
         imageLoader.current?.setWindow({
@@ -835,6 +831,19 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         lastBlitData.current = { cellXOffset, cellYOffset, translateX, translateY };
 
         ctx.restore();
+
+        const end = window.performance.now();
+        const elapsedMs = end - start;
+        timingValue.current = {
+            count: currentTime.count + 1,
+            time: currentTime.time + elapsedMs,
+        };
+
+        // Do nothing with frame times for now, in the future we can use them to draw placeholders instead
+        // when rapid scrolling is underway.
+        // if (timingValue.current.count % 1000 === 0) {
+        //     alert(`Average Frame Time: ${timingValue.current.time / timingValue.current.count}`);
+        // }
     }, [
         width,
         height,
