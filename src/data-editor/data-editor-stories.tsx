@@ -5,7 +5,14 @@ import { StoryFn, StoryContext, useState, useCallback } from "@storybook/addons"
 import { StoryFnReactReturnType } from "@storybook/react/dist/client/preview/types";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 // import { styled } from "../common/styles";
-import { GridCell, GridCellKind, GridColumn, GridSelection, Rectangle } from "../data-grid/data-grid-types";
+import {
+    GridCell,
+    GridCellKind,
+    GridColumn,
+    GridSelection,
+    Rectangle,
+    RowSelection,
+} from "../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
 import DataEditor from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
@@ -301,6 +308,34 @@ export function IdealSize() {
             showTrailingBlankRow={false}
             rowMarkers={false}
             rows={9}
+        />
+    );
+}
+
+export function RowSelectionStateLivesOutside() {
+    const cols: GridColumn[] = [
+        { title: "Number", width: 250 },
+        { title: "Square", width: 250 },
+    ];
+
+    const [selected_rows, setSelectedRows] = React.useState<RowSelection>([]);
+    const cb = (newRows: RowSelection | undefined) => {
+        if (newRows != undefined) {
+            setSelectedRows(newRows);
+        }
+    };
+
+    return (
+        <DataEditor
+            selectedRows={selected_rows}
+            onSelectedRowsChange={cb}
+            isDraggable={true}
+            onDragStart={args => {
+                args.setData("text", "testing");
+            }}
+            getCellContent={getData}
+            columns={columns}
+            rows={1000}
         />
     );
 }
