@@ -538,7 +538,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         }
 
         ctx.fillStyle = theme.dataViewer.gridColor;
-        ctx.fillRect(0, headerHeight + 1, width, height - headerHeight - 1);
+        ctx.fillRect(0, headerHeight, width, height - headerHeight);
 
         if (!blittedYOnly && damage === undefined) {
             // draw header background
@@ -710,17 +710,26 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             row = cellYOffset;
 
             ctx.save();
-            ctx.beginPath();
-            if (c.sticky) {
-                clipX = Math.max(clipX, x + c.width);
-                ctx.rect(x, headerHeight + 1, c.width, height - headerHeight - 1);
-                ctx.clip();
-            } else {
-                const diff = Math.min(0, x + translateX - clipX);
-                ctx.rect(Math.max(x + translateX, clipX), headerHeight + 1, c.width + diff, height - headerHeight - 1);
-                ctx.clip();
-                ctx.translate(translateX, 0);
-            }
+
+            const clipCol = (offset: number) => {
+                ctx.beginPath();
+                if (c.sticky) {
+                    clipX = Math.max(clipX, x + c.width);
+                    ctx.rect(x, headerHeight + 1, c.width + offset, height - headerHeight - 1);
+                    ctx.clip();
+                } else {
+                    const diff = Math.min(0, x + translateX - clipX);
+                    ctx.rect(
+                        Math.max(x + translateX, clipX),
+                        headerHeight + 1,
+                        c.width + diff + offset,
+                        height - headerHeight - 1
+                    );
+                    ctx.clip();
+                    ctx.translate(translateX, 0);
+                }
+            };
+            clipCol(0);
 
             while (y < height) {
                 const rh = getRowHeight(row);
@@ -792,23 +801,17 @@ const DataGrid: React.FunctionComponent<Props> = p => {
                         ctx.globalAlpha = 1;
 
                         if (isFocused) {
+                            ctx.restore();
                             ctx.save();
+
                             ctx.beginPath();
-                            if (c.sticky) {
-                                ctx.rect(x, y, c.width + 1, rh + 1);
-                                ctx.clip();
-                            } else {
-                                ctx.rect(Math.max(x, clipX) + translateX, y, c.width + 1, rh + 1);
-                                ctx.clip();
-                                ctx.translate(translateX, 0);
-                            }
+                            clipCol(1);
 
                             ctx.beginPath();
                             ctx.rect(x + 1, y + 1, c.width - 1, rh - 1);
                             ctx.strokeStyle = theme.acceptColor;
                             ctx.lineWidth = 2;
                             ctx.stroke();
-                            ctx.restore();
                         }
                     }
                 }

@@ -12,7 +12,7 @@ const builderThemeBase = {
 
     bgColorLight: "#FFFFFF",
 
-    borderColor: "#D8D8E3",
+    borderColor: "rgba(45,45,45,0.16)",
 
     bgColorAltLight: "#FAFAFB",
 
