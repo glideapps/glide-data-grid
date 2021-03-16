@@ -25,7 +25,7 @@ import {
 } from "./data-grid-types";
 import { dontAwait } from "../common/support";
 import { buildSpriteMap, drawSprite, SpriteVariant } from "./data-grid-sprites";
-import { useEventListener } from "../common/utils";
+import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
 
 export interface DataGridProps {
@@ -1198,75 +1198,79 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         [canvasRef]
     );
 
-    const accessibilityTree = React.useMemo(() => {
-        const effectiveCols = getEffectiveColumns(
-            columns,
-            cellXOffset,
-            width,
-            firstColSticky,
-            dragAndDropState,
-            translateX
-        );
+    const accessibilityTree = useDebouncedMemo(
+        () => {
+            const effectiveCols = getEffectiveColumns(
+                columns,
+                cellXOffset,
+                width,
+                firstColSticky,
+                dragAndDropState,
+                translateX
+            );
 
-        const getRowData = (cell: GridCell) => {
-            switch (cell.kind) {
-                case GridCellKind.Boolean:
-                case GridCellKind.Markdown:
-                case GridCellKind.Number:
-                case GridCellKind.RowID:
-                case GridCellKind.Text:
-                case GridCellKind.Uri:
-                    return cell.data?.toString() ?? "";
-                case GridCellKind.Bubble:
-                    return cell.data.join(", ");
-                case GridCellKind.Image:
-                    return cell.data.map((i, index) => <img key={index} src={i} />);
-            }
+            const getRowData = (cell: GridCell) => {
+                switch (cell.kind) {
+                    case GridCellKind.Boolean:
+                    case GridCellKind.Markdown:
+                    case GridCellKind.Number:
+                    case GridCellKind.RowID:
+                    case GridCellKind.Text:
+                    case GridCellKind.Uri:
+                        return cell.data?.toString() ?? "";
+                    case GridCellKind.Bubble:
+                        return cell.data.join(", ");
+                    case GridCellKind.Image:
+                        return cell.data.map((i, index) => <img key={index} src={i} />);
+                }
 
-            return "";
-        };
+                return "";
+            };
 
-        return (
-            <table>
-                <thead>
-                    <tr>
-                        {effectiveCols.map(c => (
-                            <th key={c.sourceIndex}>{c.title}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {makeRange(cellYOffset, 50).map(row => (
-                        <tr key={row}>
-                            {effectiveCols.map(c => {
-                                const key = `${c.sourceIndex},${row}`;
-                                const [fCol, fRow] = selectedCell?.cell ?? [];
-                                const focused = fCol === c.sourceIndex && fRow === row;
-                                return (
-                                    <td key={key}>
-                                        <div ref={focused ? focusElement : undefined} tabIndex={0}>
-                                            {getRowData(getCellContent([c.sourceIndex, row]))}
-                                        </div>
-                                    </td>
-                                );
-                            })}
+            return (
+                <table>
+                    <thead>
+                        <tr>
+                            {effectiveCols.map(c => (
+                                <th key={c.sourceIndex}>{c.title}</th>
+                            ))}
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-        );
-    }, [
-        cellXOffset,
-        cellYOffset,
-        columns,
-        dragAndDropState,
-        firstColSticky,
-        focusElement,
-        getCellContent,
-        selectedCell?.cell,
-        translateX,
-        width,
-    ]);
+                    </thead>
+                    <tbody>
+                        {makeRange(cellYOffset, cellYOffset + 50).map(row => (
+                            <tr key={row}>
+                                {effectiveCols.map(c => {
+                                    const key = `${c.sourceIndex},${row}`;
+                                    const [fCol, fRow] = selectedCell?.cell ?? [];
+                                    const focused = fCol === c.sourceIndex && fRow === row;
+                                    return (
+                                        <td key={key}>
+                                            <div ref={focused ? focusElement : undefined} tabIndex={0}>
+                                                {getRowData(getCellContent([c.sourceIndex, row]))}
+                                            </div>
+                                        </td>
+                                    );
+                                })}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            );
+        },
+        [
+            cellXOffset,
+            cellYOffset,
+            columns,
+            dragAndDropState,
+            firstColSticky,
+            focusElement,
+            getCellContent,
+            selectedCell?.cell,
+            translateX,
+            width,
+        ],
+        100
+    );
 
     return (
         <canvas
