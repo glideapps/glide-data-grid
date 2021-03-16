@@ -22,6 +22,7 @@ import { browserIsOSX } from "../common/browser-detect";
 import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
 import { ThemeProvider, useTheme } from "styled-components";
 import { getBuilderTheme } from "../common/styles";
+import { DataGridRef } from "data-grid/data-grid";
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
@@ -57,6 +58,8 @@ interface Handled {
 
     readonly translateX?: number;
     readonly translateY?: number;
+
+    readonly gridRef?: React.Ref<DataGridRef>;
 }
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
@@ -144,9 +147,11 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
     const hoveredFirstRow = hoveredCell?.[0] === 0 ? hoveredCell?.[1] : undefined;
 
+    const gridRef = React.useRef<DataGridRef | null>(null);
+
     const focus = React.useCallback(() => {
         window.requestAnimationFrame(() => {
-            canvasRef.current?.focus();
+            gridRef.current?.focus();
         });
     }, []);
 
@@ -911,6 +916,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 selectedRows={selectedRows}
                 onSearchResultsChanged={onSearchResultsChanged}
                 searchColOffset={rowMarkerOffset}
+                gridRef={gridRef}
             />
             {overlay !== undefined && (
                 <DataGridOverlayEditor
