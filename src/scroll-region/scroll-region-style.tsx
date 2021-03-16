@@ -19,5 +19,9 @@ export const ScrollRegionStyle = styled.div`
 
     canvas {
         outline: none;
+
+        * {
+            height: 0;
+        }
     }
 `;

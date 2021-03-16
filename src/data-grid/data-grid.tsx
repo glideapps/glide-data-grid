@@ -1231,30 +1231,35 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             };
 
             return (
-                <table>
-                    <thead>
-                        <tr>
+                <div role="grid" aria-rowcount={rows} aria-colcount={columns.length}>
+                    <div role="rowgroup">
+                        <div role="row" aria-rowindex={1} row-index={1}>
                             {effectiveCols.map(c => (
-                                <th key={c.sourceIndex}>{c.title}</th>
+                                <div role="columnheader" aria-colindex={c.sourceIndex + 1} key={c.sourceIndex}>
+                                    {c.title}
+                                </div>
                             ))}
-                        </tr>
-                    </thead>
-                    <tbody>
+                        </div>
+                    </div>
+                    <div role="rowgroup">
                         {makeRange(cellYOffset, cellYOffset + 50).map(row => (
-                            <tr key={row}>
+                            <div role="row" key={row} aria-rowindex={row + 2} row-index={row + 2}>
                                 {effectiveCols.map(c => {
-                                    const key = `${c.sourceIndex},${row}`;
+                                    const col = c.sourceIndex;
+                                    const key = `${col},${row}`;
                                     const [fCol, fRow] = selectedCell?.cell ?? [];
-                                    const focused = fCol === c.sourceIndex && fRow === row;
+                                    const focused = fCol === col && fRow === row;
                                     return (
                                         <div
                                             key={key}
-                                            role="cell"
-                                            onClick={function () {
+                                            role="gridcell"
+                                            aria-colindex={col + 1}
+                                            id={`glide-cell-${col}-${row}`}
+                                            onClick={() => {
                                                 const canvas = canvasRef?.current;
                                                 if (canvas === null || canvas === undefined) return;
                                                 return onKeyDown?.({
-                                                    bounds: getBoundsForItem(canvas, c.sourceIndex, row),
+                                                    bounds: getBoundsForItem(canvas, col, row),
                                                     cancel: () => undefined,
                                                     ctrlKey: false,
                                                     key: "Enter",
@@ -1265,18 +1270,18 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                                             }}
                                             onFocusCapture={e => {
                                                 if (e.target === focusRef.current) return;
-                                                return onCellFocused?.([c.sourceIndex, row]);
+                                                return onCellFocused?.([col, row]);
                                             }}
                                             ref={focused ? focusElement : undefined}
                                             tabIndex={-1}>
-                                            {getRowData(getCellContent([c.sourceIndex, row]))}
+                                            {getRowData(getCellContent([col, row]))}
                                         </div>
                                     );
                                 })}
-                            </tr>
+                            </div>
                         ))}
-                    </tbody>
-                </table>
+                    </div>
+                </div>
             );
         },
         [
