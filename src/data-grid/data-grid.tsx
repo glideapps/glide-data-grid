@@ -65,6 +65,8 @@ export interface DataGridProps {
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
     readonly onMouseUp?: (args: GridMouseEventArgs) => void;
 
+    readonly onCellFocused?: (args: readonly [number, number]) => void;
+
     readonly onMouseMove?: (event: MouseEvent) => void;
 
     readonly onKeyDown?: (event: GridKeyEventArgs) => void;
@@ -128,6 +130,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         allowResize,
         prelightCells,
         drawCustomCell,
+        onCellFocused,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -1244,11 +1247,30 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                                     const [fCol, fRow] = selectedCell?.cell ?? [];
                                     const focused = fCol === c.sourceIndex && fRow === row;
                                     return (
-                                        <td key={key}>
-                                            <div ref={focused ? focusElement : undefined} tabIndex={0}>
-                                                {getRowData(getCellContent([c.sourceIndex, row]))}
-                                            </div>
-                                        </td>
+                                        <div
+                                            key={key}
+                                            role="cell"
+                                            onClick={function () {
+                                                const canvas = canvasRef?.current;
+                                                if (canvas === null || canvas === undefined) return;
+                                                return onKeyDown?.({
+                                                    bounds: getBoundsForItem(canvas, c.sourceIndex, row),
+                                                    cancel: () => undefined,
+                                                    ctrlKey: false,
+                                                    key: "Enter",
+                                                    keyCode: 13,
+                                                    metaKey: false,
+                                                    shiftKey: false,
+                                                });
+                                            }}
+                                            onFocusCapture={e => {
+                                                if (e.target === focusRef.current) return;
+                                                return onCellFocused?.([c.sourceIndex, row]);
+                                            }}
+                                            ref={focused ? focusElement : undefined}
+                                            tabIndex={-1}>
+                                            {getRowData(getCellContent([c.sourceIndex, row]))}
+                                        </div>
                                     );
                                 })}
                             </tr>

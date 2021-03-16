@@ -45,6 +45,7 @@ interface Handled {
 
     readonly onKeyDown?: (event: GridKeyEventArgs) => void;
     readonly onKeyUp?: (event: GridKeyEventArgs) => void;
+    readonly onCellFocused?: (args: readonly [number, number]) => void;
 
     readonly canvasRef?: React.MutableRefObject<HTMLCanvasElement | null>;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
@@ -657,6 +658,17 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         [gridSelection, focus, mangledOnCellEdited, rowMarkerOffset, updateSelectedCell]
     );
 
+    const onCellFocused = React.useCallback(
+        (cell: readonly [number, number]) => {
+            setGridSelection({
+                cell,
+                range: { x: cell[0], y: cell[1], width: 1, height: 1 },
+            });
+            setSelectedRows([]);
+        },
+        [setGridSelection, setSelectedRows]
+    );
+
     const onKeyDown = React.useCallback(
         (event: GridKeyEventArgs) => {
             const fn = async () => {
@@ -903,6 +915,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 headerHeight={headerHeight}
                 onColumnMoved={onColumnMovedImpl}
                 onDragStart={onDragStartImpl}
+                onCellFocused={onCellFocused}
                 onHeaderMenuClick={onHeaderMenuClickInner}
                 onItemHovered={onItemHovered}
                 onKeyDown={onKeyDown}
