@@ -1,7 +1,7 @@
 import clamp from "lodash/clamp";
 import * as React from "react";
 import { Subtract } from "utility-types";
-import DataGrid, { DataGridProps } from "../data-grid/data-grid";
+import DataGrid, { DataGridProps, DataGridRef } from "../data-grid/data-grid";
 import { GridColumn, GridMouseEventArgs } from "../data-grid/data-grid-types";
 
 interface Handled {
@@ -16,6 +16,7 @@ interface Handled {
 export interface DataGridDndProps extends Subtract<DataGridProps, Handled> {
     readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
     readonly onColumnResized?: (column: GridColumn, newSize: number) => void;
+    readonly gridRef?: React.Ref<DataGridRef>;
 }
 
 const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
@@ -33,6 +34,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         isDraggable,
         columns,
         onColumnResized,
+        gridRef,
     } = p;
 
     const onItemHoveredImpl = React.useCallback(
@@ -112,6 +114,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             onMouseUp={onMouseUpImpl}
             dragAndDropState={dragOffset}
             onMouseMove={onMouseMove}
+            ref={gridRef}
         />
     );
 };

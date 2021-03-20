@@ -6,7 +6,7 @@ import direction from "direction";
 import { degreesToRadians } from "../common/utils";
 import { assertNever } from "../common/support";
 
-interface MappedGridColumn extends GridColumn {
+export interface MappedGridColumn extends GridColumn {
     sourceIndex: number;
     sticky: boolean;
 }

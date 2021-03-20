@@ -1,5 +1,6 @@
 import * as React from "react";
 import { css } from "styled-components";
+import debounce from "lodash/debounce";
 
 export function useEventListener<K extends keyof HTMLElementEventMap>(
     eventName: K,
@@ -70,3 +71,17 @@ export const EditPencil: React.FunctionComponent<IconProps> = (props: IconProps)
         </svg>
     );
 };
+
+export function useDebouncedMemo<T>(factory: () => T, deps: React.DependencyList | undefined, time: number): T {
+    const [state, setState] = React.useState(factory());
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const debouncedSetState = React.useCallback(debounce(setState, time), []);
+
+    React.useEffect(() => {
+        debouncedSetState(factory());
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, deps);
+
+    return state;
+}

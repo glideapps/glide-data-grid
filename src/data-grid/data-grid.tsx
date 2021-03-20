@@ -25,7 +25,8 @@ import {
 } from "./data-grid-types";
 import { dontAwait } from "../common/support";
 import { buildSpriteMap, drawSprite, SpriteVariant } from "./data-grid-sprites";
-import { useEventListener } from "../common/utils";
+import { useDebouncedMemo, useEventListener } from "../common/utils";
+import makeRange from "lodash/range";
 
 export interface DataGridProps {
     readonly width: number;
@@ -64,6 +65,8 @@ export interface DataGridProps {
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
     readonly onMouseUp?: (args: GridMouseEventArgs) => void;
 
+    readonly onCellFocused?: (args: readonly [number, number]) => void;
+
     readonly onMouseMove?: (event: MouseEvent) => void;
 
     readonly onKeyDown?: (event: GridKeyEventArgs) => void;
@@ -91,7 +94,11 @@ interface BlitData {
     readonly translateY: number;
 }
 
-const DataGrid: React.FunctionComponent<Props> = p => {
+export interface DataGridRef {
+    focus: () => void;
+}
+
+const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forwardedRef) => {
     const {
         width,
         height,
@@ -123,6 +130,7 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         allowResize,
         prelightCells,
         drawCustomCell,
+        onCellFocused,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -1157,6 +1165,140 @@ const DataGrid: React.FunctionComponent<Props> = p => {
         ]
     );
 
+    const focusRef = React.useRef<HTMLElement | null>(null);
+    const focusElement = React.useCallback(
+        (el: HTMLElement | null) => {
+            if (el === null) {
+                window.requestAnimationFrame(() => {
+                    canvasRef?.current?.focus();
+                });
+            } else {
+                window.requestAnimationFrame(() => {
+                    el.focus();
+                });
+            }
+            focusRef.current = el;
+        },
+        [canvasRef]
+    );
+
+    React.useImperativeHandle(
+        forwardedRef,
+        () => ({
+            focus: () => {
+                const el = focusRef.current;
+                if (el === null) {
+                    window.requestAnimationFrame(() => {
+                        canvasRef?.current?.focus();
+                    });
+                } else {
+                    window.requestAnimationFrame(() => {
+                        el.focus();
+                    });
+                }
+            },
+        }),
+        [canvasRef]
+    );
+
+    const accessibilityTree = useDebouncedMemo(
+        () => {
+            const effectiveCols = getEffectiveColumns(
+                columns,
+                cellXOffset,
+                width,
+                firstColSticky,
+                dragAndDropState,
+                translateX
+            );
+
+            const getRowData = (cell: GridCell) => {
+                switch (cell.kind) {
+                    case GridCellKind.Boolean:
+                    case GridCellKind.Markdown:
+                    case GridCellKind.Number:
+                    case GridCellKind.RowID:
+                    case GridCellKind.Text:
+                    case GridCellKind.Uri:
+                        return cell.data?.toString() ?? "";
+                    case GridCellKind.Bubble:
+                        return cell.data.join(", ");
+                    case GridCellKind.Image:
+                        return cell.data.map((i, index) => <img key={index} src={i} />);
+                }
+
+                return "";
+            };
+
+            return (
+                <div role="grid" aria-rowcount={rows} aria-colcount={columns.length}>
+                    <div role="rowgroup">
+                        <div role="row" aria-rowindex={1} row-index={1}>
+                            {effectiveCols.map(c => (
+                                <div role="columnheader" aria-colindex={c.sourceIndex + 1} key={c.sourceIndex}>
+                                    {c.title}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div role="rowgroup">
+                        {makeRange(cellYOffset, cellYOffset + 50).map(row => (
+                            <div role="row" key={row} aria-rowindex={row + 2} row-index={row + 2}>
+                                {effectiveCols.map(c => {
+                                    const col = c.sourceIndex;
+                                    const key = `${col},${row}`;
+                                    const [fCol, fRow] = selectedCell?.cell ?? [];
+                                    const focused = fCol === col && fRow === row;
+                                    return (
+                                        <div
+                                            key={key}
+                                            role="gridcell"
+                                            aria-colindex={col + 1}
+                                            id={`glide-cell-${col}-${row}`}
+                                            onClick={() => {
+                                                const canvas = canvasRef?.current;
+                                                if (canvas === null || canvas === undefined) return;
+                                                return onKeyDown?.({
+                                                    bounds: getBoundsForItem(canvas, col, row),
+                                                    cancel: () => undefined,
+                                                    ctrlKey: false,
+                                                    key: "Enter",
+                                                    keyCode: 13,
+                                                    metaKey: false,
+                                                    shiftKey: false,
+                                                });
+                                            }}
+                                            onFocusCapture={e => {
+                                                if (e.target === focusRef.current) return;
+                                                return onCellFocused?.([col, row]);
+                                            }}
+                                            ref={focused ? focusElement : undefined}
+                                            tabIndex={-1}>
+                                            {getRowData(getCellContent([col, row]))}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        },
+        [
+            cellXOffset,
+            cellYOffset,
+            columns,
+            dragAndDropState,
+            firstColSticky,
+            focusElement,
+            getCellContent,
+            selectedCell?.cell,
+            translateX,
+            width,
+        ],
+        100
+    );
+
     return (
         <canvas
             draggable={isDraggable === true}
@@ -1166,9 +1308,10 @@ const DataGrid: React.FunctionComponent<Props> = p => {
             className={className}
             ref={refImpl}
             style={style}
-            onDragStart={onDragStartImpl}
-        />
+            onDragStart={onDragStartImpl}>
+            {accessibilityTree}
+        </canvas>
     );
 };
 
-export default React.memo(withTheme(DataGrid));
+export default React.memo(withTheme(React.forwardRef(DataGrid)));
