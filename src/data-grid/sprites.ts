@@ -527,6 +527,22 @@ const headerGeoDistance = (props: IconProps) => {
     `;
 };
 
+const headerArray = (props: IconProps) => {
+    const fg = withDefault(props.fgColor, "white");
+    const bg = withDefault(props.bgColor, "currentColor");
+    return `
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="16" height="16" rx="2" fill=${bg} />
+            <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M14.25 7.25C14.6642 7.25 15 6.91421 15 6.5C15 6.08579 14.6642 5.75 14.25 5.75H7.75C7.33578 5.75 7 6.08579 7 6.5C7 6.91421 7.33578 7.25 7.75 7.25L14.25 7.25ZM15 10C15 10.4142 14.6642 10.75 14.25 10.75L7.75 10.75C7.33578 10.75 7 10.4142 7 10C7 9.58579 7.33578 9.25 7.75 9.25L14.25 9.25C14.6642 9.25 15 9.58579 15 10ZM14.25 14.25C14.6642 14.25 15 13.9142 15 13.5C15 13.0858 14.6642 12.75 14.25 12.75L7.75 12.75C7.33578 12.75 7 13.0858 7 13.5C7 13.9142 7.33578 14.25 7.75 14.25L14.25 14.25ZM5.2632 7.24998C5.67726 7.24998 6.01292 6.91432 6.01292 6.50026C6.01292 6.08621 5.67726 5.75055 5.2632 5.75055C4.84915 5.75055 4.51349 6.08621 4.51349 6.50026C4.51349 6.91432 4.84915 7.24998 5.2632 7.24998ZM6.01292 10C6.01292 10.4141 5.67726 10.7497 5.2632 10.7497C4.84915 10.7497 4.51349 10.4141 4.51349 10C4.51349 9.58596 4.84915 9.25031 5.2632 9.25031C5.67726 9.25031 6.01292 9.58596 6.01292 10ZM5.2632 14.2492C5.67726 14.2492 6.01292 13.9135 6.01292 13.4995C6.01292 13.0854 5.67726 12.7498 5.2632 12.7498C4.84915 12.7498 4.51349 13.0854 4.51349 13.4995C4.51349 13.9135 4.84915 14.2492 5.2632 14.2492Z"
+                fill=${fg}
+            />
+        </svg>
+    `;
+};
+
 const rowOwnerOverlay = (props: IconProps) => {
     const fg = withDefault(props.fgColor, "white");
     const bg = withDefault(props.bgColor, "currentColor");
@@ -588,6 +604,7 @@ export const sprites = {
     headerJoinStrings,
     headerSplitString,
     headerGeoDistance,
+    headerArray,
     rowOwnerOverlay,
     protectedColumnOverlay,
 };
