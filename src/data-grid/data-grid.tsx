@@ -1243,7 +1243,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                         </div>
                     </div>
                     <div role="rowgroup">
-                        {makeRange(cellYOffset, cellYOffset + 50).map(row => (
+                        {makeRange(cellYOffset, Math.min(rows, cellYOffset + 50)).map(row => (
                             <div role="row" key={row} aria-rowindex={row + 2} row-index={row + 2}>
                                 {effectiveCols.map(c => {
                                     const col = c.sourceIndex;

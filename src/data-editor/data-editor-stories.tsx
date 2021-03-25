@@ -303,6 +303,8 @@ export function IdealSize() {
             }}
             getCellContent={getData}
             columns={cols}
+            smoothScrollX={true}
+            smoothScrollY={true}
             rowHeight={50}
             headerHeight={50}
             showTrailingBlankRow={false}
@@ -313,12 +315,7 @@ export function IdealSize() {
 }
 
 export function RowSelectionStateLivesOutside() {
-    const cols: GridColumn[] = [
-        { title: "Number", width: 250 },
-        { title: "Square", width: 250 },
-    ];
-
-    const [selected_rows, setSelectedRows] = React.useState<RowSelection>([]);
+    const [selected_rows, setSelectedRows] = useState<RowSelection>([]);
     const cb = (newRows: RowSelection | undefined) => {
         if (newRows != undefined) {
             setSelectedRows(newRows);
