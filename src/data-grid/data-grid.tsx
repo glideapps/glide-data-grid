@@ -1074,7 +1074,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     );
 
     const onDragStartImpl = React.useCallback(
-        (event: React.DragEvent<HTMLCanvasElement>) => {
+        (event: DragEvent) => {
             const canvas = ref.current;
             if (canvas === null || !isDraggable === true) return;
 
@@ -1102,7 +1102,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 setData,
                 setDragImage,
             });
-            if (dragMime !== undefined && dragData !== undefined) {
+            if (dragMime !== undefined && dragData !== undefined && event.dataTransfer !== null) {
                 event.dataTransfer.setData(dragMime, dragData);
                 event.dataTransfer.effectAllowed = "link";
 
@@ -1164,6 +1164,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             getCellContent,
         ]
     );
+    useEventListener("dragstart", onDragStartImpl, eventTargetRef?.current ?? null, false, false);
 
     const focusRef = React.useRef<HTMLElement | null>(null);
     const focusElement = React.useCallback(
@@ -1301,14 +1302,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
     return (
         <canvas
-            draggable={isDraggable === true}
             tabIndex={0}
             onKeyDown={onKeyDownImpl}
             onKeyUp={onKeyUpImpl}
             className={className}
             ref={refImpl}
-            style={style}
-            onDragStart={onDragStartImpl}>
+            style={style}>
             {accessibilityTree}
         </canvas>
     );

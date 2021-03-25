@@ -13,6 +13,7 @@ export interface ScrollRegionUpdateArgs {
 interface Props {
     readonly className?: string;
     readonly scrollHeight: number;
+    readonly draggable: boolean;
     readonly scrollWidth: number;
     readonly scrollToEnd?: boolean;
     readonly style?: React.CSSProperties;
@@ -21,7 +22,7 @@ interface Props {
 }
 
 const ScrollRegion: React.FunctionComponent<Props> = p => {
-    const { className, scrollWidth, scrollHeight, style, children, update, scrollToEnd, scrollRef } = p;
+    const { className, scrollWidth, scrollHeight, style, children, update, scrollToEnd, scrollRef, draggable } = p;
 
     const innerStyle = React.useMemo<React.CSSProperties>(
         () => ({
@@ -80,6 +81,7 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
                             <div
                                 ref={setRefs}
                                 style={props}
+                                draggable={draggable}
                                 className={"dvn-scroller " + className}
                                 onScroll={onScroll}>
                                 <div className="dvn-scroll-inner" style={innerStyle} />

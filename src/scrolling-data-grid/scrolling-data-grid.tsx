@@ -20,7 +20,7 @@ export interface ScrollingDataGridProps extends Subtract<DataGridDndProps, Handl
 
 const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const { columns, rows, rowHeight, headerHeight, firstColSticky } = p;
-    const { className, onVisibleRegionChanged, scrollToEnd, scrollRef, ...dateGridProps } = p;
+    const { className, onVisibleRegionChanged, scrollToEnd, scrollRef, ...dataGridProps } = p;
     const { smoothScrollX, smoothScrollY } = p;
 
     const [clientWidth, setClientWidth] = React.useState<number>(10);
@@ -153,11 +153,12 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         <ScrollRegion
             scrollRef={scrollRef}
             className={className}
+            draggable={dataGridProps.isDraggable === true}
             scrollWidth={width}
             scrollHeight={height}
             update={onScrollUpdate}
             scrollToEnd={scrollToEnd}>
-            <DataGridDnd eventTargetRef={scrollRef} width={clientWidth} height={clientHeight} {...dateGridProps} />
+            <DataGridDnd eventTargetRef={scrollRef} width={clientWidth} height={clientHeight} {...dataGridProps} />
         </ScrollRegion>
     );
 };
