@@ -196,7 +196,7 @@ export function Simplenotest() {
 }
 
 const columns: GridColumn[] = [
-    { title: "Number", width: 100 },
+    { title: "Number", width: 100, icon: "headerArray", overlayIcon: "rowOwnerOverlay" },
     { title: "Square", width: 100 },
 ];
 
