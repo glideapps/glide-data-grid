@@ -116,7 +116,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
     const rowHeight = p.rowHeight ?? 34;
     const headerHeight = p.headerHeight ?? 36;
-    const rowMarkerWidth = p.rowMarkerWidth ?? 50;
+    const rowMarkerWidth = p.rowMarkerWidth ?? 36;
 
     const { isDraggable, getCellsForSelection } = p;
 
