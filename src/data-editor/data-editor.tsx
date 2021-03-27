@@ -14,6 +14,7 @@ import {
     RowSelection,
     isEditableGridCell,
     Rectangle,
+    ColumnSelection,
 } from "../data-grid/data-grid-types";
 import copy from "copy-to-clipboard";
 import { makeEditCell } from "../data-grid/data-grid-lib";
@@ -86,6 +87,9 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
     readonly selectedRows?: RowSelection;
     readonly onSelectedRowsChange?: (newRows: RowSelection | undefined) => void;
 
+    readonly selectedColumns?: ColumnSelection;
+    readonly onSelectedColumnsChange?: (newColumns: ColumnSelection | undefined) => void;
+
     readonly gridSelection?: GridSelection;
     readonly onGridSelectionChange?: (newSelection: GridSelection | undefined) => void;
     readonly onVisibleRegionChanged?: (range: Rectangle) => void;
@@ -93,8 +97,8 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
 
 const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const [gridSelectionInner, setGridSelectionInner] = React.useState<GridSelection>();
-    const [selectedRowsInner, setSelectedRowsInner] = React.useState<readonly number[]>([]);
-    const [selectedColumns, setSelectedColumns] = React.useState<readonly number[]>([]);
+    const [selectedColumnsInner, setSelectedColumnsInner] = React.useState<ColumnSelection>([]);
+    const [selectedRowsInner, setSelectedRowsInner] = React.useState<RowSelection>([]);
     const [hoveredCell, setHoveredCell] = React.useState<readonly [number, number]>();
     const [overlay, setOverlay] = React.useState<{
         target: Rectangle;
@@ -134,6 +138,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         onDragStart,
         onHeaderMenuClick,
         onVisibleRegionChanged,
+        selectedColumns: selectedColumnsOuter,
+        onSelectedColumnsChange: setSelectedColumnsOuter,
         selectedRows: selectedRowsOuter,
         onSelectedRowsChange: setSelectedRowsOuter,
         gridSelection: gridSelectionOuter,
@@ -145,6 +151,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const setGridSelection = onGridSelectionChange ?? setGridSelectionInner;
     const selectedRows = selectedRowsOuter ?? selectedRowsInner;
     const setSelectedRows = setSelectedRowsOuter ?? setSelectedRowsInner;
+    const selectedColumns = selectedColumnsOuter ?? selectedColumnsInner;
+    const setSelectedColumns = setSelectedColumnsOuter ?? setSelectedColumnsInner;
 
     const hoveredFirstRow = hoveredCell?.[0] === 0 ? hoveredCell?.[1] : undefined;
 
@@ -273,7 +281,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 setSelectedRows([]);
             }
         },
-        [gridSelection, rowMarkers, setGridSelection, focus, selectedRows, setSelectedRows]
+        [gridSelection, rowMarkers, setGridSelection, focus, setSelectedColumns, selectedRows, setSelectedRows]
     );
 
     const reselect = React.useCallback(
@@ -386,7 +394,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset);
             setSelectedColumns([endIndex]);
         },
-        [onColumnMoved, rowMarkerOffset]
+        [onColumnMoved, rowMarkerOffset, setSelectedColumns]
     );
 
     const onDragStartImpl = React.useCallback(
@@ -856,10 +864,12 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         },
         [
             selectedRows,
-            setSelectedRows,
             gridSelection,
             getCellsForSelection,
             updateSelectedCell,
+            setGridSelection,
+            setSelectedRows,
+            setSelectedColumns,
             focus,
             onDeleteRows,
             selectedColumns,
@@ -871,7 +881,6 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             reselect,
             mangledOnCellEdited,
             adjustSelection,
-            setGridSelection,
         ]
     );
 

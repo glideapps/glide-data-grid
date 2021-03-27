@@ -8,6 +8,8 @@ export interface GridSelection {
 
 export type RowSelection = readonly number[];
 
+export type ColumnSelection = readonly number[];
+
 export type GridMouseEventArgs = GridMouseCellEventArgs | GridMouseHeaderEventArgs | GridMouseOutOfBoundsEventArgs;
 
 interface BaseGridMouseEventArgs {
