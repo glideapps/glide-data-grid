@@ -92,7 +92,7 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
 
     readonly gridSelection?: GridSelection;
     readonly onGridSelectionChange?: (newSelection: GridSelection | undefined) => void;
-    readonly onVisibleRegionChanged?: (range: Rectangle) => void;
+    readonly onVisibleRegionChanged?: (range: Rectangle, tx?: number, ty?: number) => void;
 }
 
 const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
@@ -384,7 +384,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 ty,
             };
             setVisibleRegion(newRegion);
-            onVisibleRegionChanged?.(newRegion);
+            onVisibleRegionChanged?.(newRegion, tx, ty);
         },
         [onVisibleRegionChanged, rowMarkerOffset, rows, showTrailingBlankRow]
     );
