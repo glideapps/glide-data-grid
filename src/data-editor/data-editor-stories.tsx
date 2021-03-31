@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { withKnobs } from "@storybook/addon-knobs";
+import { number, withKnobs } from "@storybook/addon-knobs";
 import { StoryFn, StoryContext, useState, useCallback } from "@storybook/addons";
 import { StoryFnReactReturnType } from "@storybook/react/dist/client/preview/types";
 import { BuilderThemeWrapper } from "../stories/story-utils";
@@ -201,14 +201,8 @@ const columns: GridColumn[] = [
 ];
 
 function getData([col, row]: readonly [number, number]): GridCell {
-    let n: number;
-    if (col === 0) {
-        n = row;
-    } else if (col === 1) {
-        n = row * row;
-    } else {
-        throw new Error("This should not happen");
-    }
+    const n = Math.pow(row, col + 1);
+
     return {
         kind: GridCellKind.Number,
         data: n,
@@ -295,6 +289,44 @@ export function IdealSize() {
         { title: "Number", width: 250 },
         { title: "Square", width: 250 },
     ];
+    return (
+        <DataEditor
+            isDraggable={true}
+            onDragStart={args => {
+                args.setData("text", "testing");
+            }}
+            getCellContent={getData}
+            columns={cols}
+            smoothScrollX={true}
+            smoothScrollY={true}
+            rowHeight={50}
+            headerHeight={50}
+            showTrailingBlankRow={false}
+            rowMarkers={false}
+            rows={9}
+        />
+    );
+}
+
+export function AdjustableColumns() {
+    const columnCount = number("Columns", 2, {
+        min: 2,
+        max: 5,
+    });
+
+    // trying to be 500x500
+    const cols: GridColumn[] = [
+        { title: "Number", width: 250 },
+        { title: "Square", width: 250 },
+    ];
+
+    for (let i = 2; i < columnCount; i++) {
+        cols.push({
+            title: "Foo",
+            width: 250,
+        });
+    }
+
     return (
         <DataEditor
             isDraggable={true}
