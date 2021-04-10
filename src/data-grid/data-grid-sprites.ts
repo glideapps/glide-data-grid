@@ -44,11 +44,14 @@ export async function buildSpriteMap(theme: Theme): Promise<void> {
     const ctx = spriteCanvas.getContext("2d");
     if (ctx === null) return;
 
+    const images: { image: HTMLImageElement; x: number; y: number }[] = [];
+
     let x = 0;
     for (const key of spriteList) {
         const sprite = sprites[key];
 
         let y = 0;
+
         for (const variant of variantList) {
             let fgColor = themeExtract.bgColorLight;
             let bgColor = themeExtract.fgColorDark;
@@ -59,25 +62,37 @@ export async function buildSpriteMap(theme: Theme): Promise<void> {
                 bgColor = themeExtract.acceptColor;
                 fgColor = themeExtract.columnHeaderBg;
             }
-            const renderTarget = document.createElement("canvas");
-            renderTarget.width = renderSize;
-            renderTarget.height = renderSize;
-            const renderCtx = renderTarget.getContext("2d");
-            if (renderCtx === null) continue;
+
             const img = new Image(40, 40);
             const svg = sprite({ fgColor, bgColor });
-            img.onload = () => {
-                renderCtx.drawImage(img, 0, 0, 40, 40);
-            };
             img.src = "data:image/svg+xml;base64," + btoa(svg);
-
-            ctx.drawImage(renderTarget, x, y);
-
+            images.push({ image: img, x: x, y: y });
             y += renderSize;
         }
 
         x += renderSize;
     }
+
+    return new Promise((resolve, reject) => {
+        Promise.all(images.map(image => image.image.decode())).then(
+            () => {
+                for (let i = 0; i < images.length; i++) {
+                    const img = images[i];
+                    const renderTarget = document.createElement("canvas");
+                    renderTarget.width = renderSize;
+                    renderTarget.height = renderSize;
+                    const renderCtx = renderTarget.getContext("2d");
+                    if (renderCtx === null) continue;
+                    renderCtx.drawImage(img.image, 0, 0, renderSize, renderSize);
+                    ctx.drawImage(renderTarget, img.x, img.y);
+                }
+                resolve();
+            },
+            () => {
+                reject();
+            }
+        );
+    });
 }
 
 export function drawSprite(
