@@ -105,7 +105,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         className,
         theme,
         columns,
-        cellXOffset,
+        cellXOffset: cellXOffsetReal,
         cellYOffset,
         headerHeight,
         rowHeight,
@@ -134,6 +134,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
+    const cellXOffset = Math.max(0, Math.min(columns.length - 1, cellXOffsetReal));
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const imageLoader = React.useRef<ImageWindowLoader>();

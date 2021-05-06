@@ -311,7 +311,7 @@ export function IdealSize() {
 export function AdjustableColumns() {
     const columnCount = number("Columns", 2, {
         min: 2,
-        max: 5,
+        max: 50,
     });
 
     // trying to be 500x500
