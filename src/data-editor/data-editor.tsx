@@ -495,6 +495,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     return "#LOADING";
                 case GridCellKind.Protected:
                     return "************";
+                case GridCellKind.Drilldown:
+                    return cell.data.map(i => i.text).reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
                 default:
                     assertNever(cell);
             }
