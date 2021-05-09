@@ -63,6 +63,7 @@ export enum GridCellKind {
     Boolean = "boolean",
     Loading = "loading",
     Markdown = "markdown",
+    Drilldown = "drilldown",
     Protected = "protected",
 }
 
@@ -84,7 +85,8 @@ export function isEditableGridCell(cell: GridCell): cell is EditableGridCell {
         cell.kind === GridCellKind.Loading ||
         cell.kind === GridCellKind.Bubble ||
         cell.kind === GridCellKind.RowID ||
-        cell.kind === GridCellKind.Protected
+        cell.kind === GridCellKind.Protected ||
+        cell.kind === GridCellKind.Drilldown
     ) {
         return false;
     }
@@ -93,7 +95,7 @@ export function isEditableGridCell(cell: GridCell): cell is EditableGridCell {
     return true;
 }
 
-export type GridCell = EditableGridCell | BubbleCell | RowIDCell | LoadingCell | ProtectedCell;
+export type GridCell = EditableGridCell | BubbleCell | RowIDCell | LoadingCell | ProtectedCell | DrilldownCell;
 
 export interface Rectangle {
     x: number;
@@ -136,6 +138,16 @@ interface ImageCell extends BaseGridCell {
 interface BubbleCell extends BaseGridCell {
     readonly kind: GridCellKind.Bubble;
     readonly data: string[];
+}
+
+export interface DrilldownCellData {
+    readonly text: string;
+    readonly img?: string;
+}
+
+interface DrilldownCell extends BaseGridCell {
+    readonly kind: GridCellKind.Drilldown;
+    readonly data: readonly DrilldownCellData[];
 }
 
 interface BooleanCell extends BaseGridCell {

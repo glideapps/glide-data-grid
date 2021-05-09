@@ -137,6 +137,20 @@ And supports newline chars and automatic wrapping text that just needs to be lon
             allowOverlay: true,
         };
     }
+    if (col === 8) {
+        return {
+            kind: GridCellKind.Drilldown,
+            data: [
+                {
+                    text: "Test",
+                    img:
+                        "https://allthatsinteresting.com/wordpress/wp-content/uploads/2012/06/iconic-photos-1950-einstein.jpg",
+                },
+                { text: "No Image" },
+            ],
+            allowOverlay: false,
+        };
+    }
     return {
         kind: GridCellKind.Text,
         displayData: `${col}, ${row} 🦝`,

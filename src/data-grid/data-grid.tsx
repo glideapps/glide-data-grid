@@ -5,6 +5,7 @@ import ImageWindowLoader from "../common/image-window-loader";
 import {
     drawBoolean,
     drawBubbles,
+    drawDrilldownCell,
     drawImage,
     drawProtectedCell,
     drawTextCell,
@@ -328,6 +329,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     drawTextCell(ctx, theme, cell.data, x, y, w, h, theme.fgColorLight);
                 } else if (cell.kind === GridCellKind.Protected) {
                     drawProtectedCell(ctx, theme, x, y, w, h, !highlighted);
+                } else if (cell.kind === GridCellKind.Drilldown && imageLoader.current !== undefined) {
+                    drawDrilldownCell(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, imageLoader.current);
                 }
             }
         },
@@ -1223,6 +1226,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     case GridCellKind.Text:
                     case GridCellKind.Uri:
                         return cell.data?.toString() ?? "";
+                    case GridCellKind.Drilldown:
+                        return cell.data.map(d => d.text).join(", ");
                     case GridCellKind.Bubble:
                         return cell.data.join(", ");
                     case GridCellKind.Image:

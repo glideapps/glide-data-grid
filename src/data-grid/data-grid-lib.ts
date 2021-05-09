@@ -1,6 +1,6 @@
 import { Theme } from "../common/styles";
 import ImageWindowLoader from "../common/image-window-loader";
-import { GridCell, GridCellKind, GridColumn, isEditableGridCell } from "./data-grid-types";
+import { DrilldownCellData, GridCell, GridCellKind, GridColumn, isEditableGridCell } from "./data-grid-types";
 import direction from "direction";
 // import { drawGenImageToCanvas } from "../../lib/gen-image-cache";
 import { degreesToRadians } from "../common/utils";
@@ -49,6 +49,11 @@ export function makeEditCell(cell: GridCell): GridCell {
                 ...cell,
                 data: undefined,
                 displayData: "",
+            };
+        case GridCellKind.Drilldown:
+            return {
+                ...cell,
+                data: [],
             };
         default:
             assertNever(cell);
@@ -351,6 +356,116 @@ export function drawBubbles(
     });
 }
 
+export function drawDrilldownCell(
+    ctx: CanvasRenderingContext2D,
+    theme: Theme,
+    data: readonly DrilldownCellData[],
+    col: number,
+    row: number,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    imageLoader: ImageWindowLoader
+) {
+    const bubbleHeight = 24;
+    const bubblePad = 8;
+    const bubbleMargin = itemMargin;
+    let renderX = x + cellXPad;
+    const centerY = y + height / 2;
+
+    const renderBoxes: { x: number; width: number }[] = [];
+    for (const el of data) {
+        if (renderX > x + width) break;
+        const textWidth = measureTextWidth(el.text, ctx);
+        const imgWidth = el.img === undefined ? 0 : bubbleHeight - 8 + 4;
+        const renderWidth = 8 + textWidth + imgWidth + bubblePad * 2;
+        renderBoxes.push({
+            x: renderX,
+            width: renderWidth,
+        });
+
+        renderX += renderWidth + bubbleMargin;
+    }
+
+    ctx.beginPath();
+    renderBoxes.forEach(rectInfo => {
+        roundedRect(ctx, rectInfo.x, y + (height - bubbleHeight) / 2, rectInfo.width, bubbleHeight, 6);
+    });
+    ctx.shadowColor = "rgba(62, 65, 86, 0.4)";
+    ctx.shadowBlur = 1;
+    ctx.fillStyle = theme.dataViewer.gridColor;
+    ctx.fill();
+
+    ctx.shadowColor = "rgba(62, 65, 86, 0.15)";
+    ctx.shadowOffsetY = 1;
+    ctx.shadowBlur = 3;
+    ctx.fillStyle = theme.dataViewer.gridColor;
+    ctx.fill();
+
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 0;
+    ctx.shadowBlur = 0;
+
+    renderBoxes.forEach((rectInfo, i) => {
+        const d = data[i];
+        let drawX = rectInfo.x + bubblePad;
+
+        ctx.beginPath();
+        roundedPoly(
+            ctx,
+            [
+                { x: drawX + -3, y: centerY - 5 },
+                { x: drawX + -3, y: centerY + 5 },
+                { x: drawX + 2, y: centerY },
+            ],
+            1
+        );
+        ctx.fillStyle = theme.fgColorMedium;
+        ctx.fill();
+
+        drawX += 8;
+
+        if (d.img !== undefined) {
+            const img = imageLoader.loadOrGetImage(d.img, col, row);
+            if (img !== undefined) {
+                const imgSize = bubbleHeight - 8;
+                let srcX = 0;
+                let srcY = 0;
+                let srcWidth = img.naturalWidth;
+                let srcHeight = img.naturalHeight;
+
+                if (srcWidth > srcHeight) {
+                    // landscape
+                    srcX += (srcWidth - srcHeight) / 2;
+                    srcWidth = srcHeight;
+                } else if (srcHeight > srcWidth) {
+                    //portrait
+                    srcY += (srcHeight - srcWidth) / 2;
+                    srcHeight = srcWidth;
+                }
+                ctx.drawImage(
+                    img,
+                    srcX,
+                    srcY,
+                    srcWidth,
+                    srcHeight,
+                    drawX,
+                    y + height / 2 - imgSize / 2,
+                    imgSize,
+                    imgSize
+                );
+
+                drawX += imgSize + 4;
+            }
+        }
+
+        ctx.beginPath();
+        ctx.fillStyle = theme.fgColorDark;
+        ctx.fillText(d.text, drawX, y + height / 2 + 4);
+    });
+}
+
 export function drawImage(
     ctx: CanvasRenderingContext2D,
     _theme: Theme,
@@ -365,12 +480,6 @@ export function drawImage(
 ) {
     let drawX = x + cellXPad;
     data.filter(s => s.length > 0).forEach(i => {
-        // FIXME: Injection?
-        // if (i.startsWith("glide:")) {
-        //     const size = height - cellYPad * 2;
-        //     drawGenImageToCanvas(ctx, i, drawX, y + cellYPad, size);
-        //     drawX += size + itemMargin;
-        // } else {
         const img = imageLoader.loadOrGetImage(i, col, row);
 
         if (img !== undefined) {
