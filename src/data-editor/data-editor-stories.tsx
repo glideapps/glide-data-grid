@@ -181,11 +181,25 @@ export function Simplenotest() {
         [cols]
     );
 
+    const getCellsForSelection = useCallback((selection: Rectangle) => {
+        const cells: GridCell[][] = [];
+        for (let yCoord = selection.y; yCoord < selection.y + selection.height; yCoord++) {
+            const rowCells: GridCell[] = [];
+            for (let xCoord = selection.x; xCoord < selection.x + selection.width; xCoord++) {
+                rowCells.push(getDummyData([xCoord, yCoord]));
+            }
+            cells.push(rowCells);
+        }
+
+        return cells;
+    }, []);
+
     return (
         <DataEditor
             cellXOffset={x}
             cellYOffset={y}
             getCellContent={getDummyData}
+            getCellsForSelection={getCellsForSelection}
             columns={cols}
             rows={1000}
             allowResize={true}
