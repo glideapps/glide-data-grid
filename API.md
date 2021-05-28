@@ -195,6 +195,13 @@ onDragStart?: (args: GridDragEventArgs) => void;
 
 If `isDraggable` is set, the whole Grid is draggable, and `onDragStart` will be called when dragging starts. You can use this to build a UI where the user can drag the Grid around.
 
+```
+maxColumnWidth?: number;
+```
+
+If `maxColumnWidth` is set with a value greater than 50, then columns will have a maximum size of that many pixels.
+If the value is less than 50, it will be increased to 50.  If it isn't set, the default value will be 500.
+
 ## Types
 
 ### Cell coordinates

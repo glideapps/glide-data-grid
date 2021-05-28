@@ -17,6 +17,7 @@ export interface DataGridDndProps extends Subtract<DataGridProps, Handled> {
     readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
     readonly onColumnResized?: (column: GridColumn, newSize: number) => void;
     readonly gridRef?: React.Ref<DataGridRef>;
+    readonly maxColumnWidth?: number;
 }
 
 const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
@@ -35,6 +36,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         columns,
         onColumnResized,
         gridRef,
+        maxColumnWidth,
     } = p;
 
     const onItemHoveredImpl = React.useCallback(
@@ -96,14 +98,16 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         };
     }, [dragCol, dropCol]);
 
+    const maxColumnWidthValue = maxColumnWidth === undefined ? 500 : (maxColumnWidth < 50 ? 50 : maxColumnWidth);
+
     const onMouseMove = React.useCallback(
         (event: MouseEvent) => {
             if (resizeCol === undefined || resizeColStartX === undefined) return;
             const column = columns[resizeCol];
-            const newWidth = clamp(event.clientX - resizeColStartX, 50, 500);
+            const newWidth = clamp(event.clientX - resizeColStartX, 50, maxColumnWidthValue);
             onColumnResized?.(column, newWidth);
         },
-        [resizeCol, resizeColStartX, columns, onColumnResized]
+        [resizeCol, resizeColStartX, columns, onColumnResized, maxColumnWidthValue]
     );
 
     return (
