@@ -6,6 +6,7 @@ import { StoryFnReactReturnType } from "@storybook/react/dist/client/preview/typ
 import { BuilderThemeWrapper } from "../stories/story-utils";
 // import { styled } from "../common/styles";
 import {
+    ColumnSelection,
     GridCell,
     GridCellKind,
     GridColumn,
@@ -386,6 +387,29 @@ export function RowSelectionStateLivesOutside() {
         <DataEditor
             selectedRows={selected_rows}
             onSelectedRowsChange={cb}
+            isDraggable={true}
+            onDragStart={args => {
+                args.setData("text", "testing");
+            }}
+            getCellContent={getData}
+            columns={columns}
+            rows={1000}
+        />
+    );
+}
+
+export function ColSelectionStateLivesOutside() {
+    const [selected_cols, setSelectedCols] = useState<RowSelection>([]);
+    const cb = (newRows: ColumnSelection | undefined) => {
+        if (newRows != undefined) {
+            setSelectedCols(newRows);
+        }
+    };
+
+    return (
+        <DataEditor
+            selectedColumns={selected_cols}
+            onSelectedColumnsChange={cb}
             isDraggable={true}
             onDragStart={args => {
                 args.setData("text", "testing");
