@@ -40,7 +40,6 @@ interface Handled {
     readonly selectedColumns?: readonly number[];
     readonly selectedCell?: GridSelection;
 
-    readonly onItemHovered?: (args: GridMouseEventArgs) => void;
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
     readonly onMouseUp?: (args: GridMouseEventArgs) => void;
 
@@ -137,6 +136,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         onDeleteRows,
         onDragStart,
         onHeaderMenuClick,
+        onItemHovered,
         onVisibleRegionChanged,
         selectedColumns: selectedColumnsOuter,
         onSelectedColumnsChange: setSelectedColumnsOuter,
@@ -407,7 +407,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         [onDragStart, rowMarkerOffset]
     );
 
-    const onItemHovered = React.useCallback(
+    const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
             if (args.kind === "cell") {
                 setHoveredCell(args.location);
@@ -465,8 +465,10 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     }
                 }
             }
+
+            onItemHovered?.(args);
         },
-        [gridSelection, isDraggable, rowMarkers, setGridSelection, columns, rowHeight]
+        [onItemHovered, gridSelection, isDraggable, rowMarkers, setGridSelection, columns, rowHeight]
     );
 
     const copyToClipboard = React.useCallback((cells: readonly (readonly GridCell[])[]) => {
@@ -928,7 +930,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 onDragStart={onDragStartImpl}
                 onCellFocused={onCellFocused}
                 onHeaderMenuClick={onHeaderMenuClickInner}
-                onItemHovered={onItemHovered}
+                onItemHovered={onItemHoveredImpl}
                 onKeyDown={onKeyDown}
                 onMouseDown={onMouseDown}
                 onMouseUp={onMouseUp}
