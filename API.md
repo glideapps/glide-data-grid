@@ -138,6 +138,12 @@ onDeleteRows?: (rows: readonly number[]) => void;
 
 `onDeleteRows` is called when the user deletes one or more rows. `rows` is an array with the absolute indexes of the deletes rows. Note that it is on you to actually effect the deletion of those rows.
 
+```ts
+onItemHovered?: (args: GridMouseEventArgs) => void;
+```
+
+`onItemHovered` is called when the user hovers over a cell, a header, or outside the grid.
+
 ```
 showTrailingBlankRow?: boolean;
 onRowAppended?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
@@ -303,5 +309,35 @@ export enum GridCellKind {
     Loading = "loading",
     Markdown = "markdown",
     Protected = "protected",
+}
+```
+
+### GridMouseEventArgs
+
+```ts
+export type GridMouseEventArgs = GridMouseCellEventArgs | GridMouseHeaderEventArgs | GridMouseOutOfBoundsEventArgs;
+
+interface BaseGridMouseEventArgs {
+    shiftKey: boolean;
+}
+
+interface GridMouseCellEventArgs extends BaseGridMouseEventArgs {
+    readonly kind: "cell";
+    readonly location: readonly [number, number];
+    readonly bounds: Rectangle;
+    readonly isEdge: boolean;
+}
+
+interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs {
+    readonly kind: "header";
+    readonly location: readonly [number, undefined];
+    readonly bounds: Rectangle;
+    readonly isEdge: boolean;
+}
+
+interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {
+    readonly kind: "out-of-bounds";
+    readonly location: readonly [number, number];
+    readonly direction: readonly [-1 | 0 | 1, -1 | 0 | 1];
 }
 ```
