@@ -5,6 +5,7 @@
     "main": "dist/js/index.js",
     "types": "dist/ts/index.d.ts",
     "scripts": {
+        "install": "npm run build",
         "build": "npm run build-js && npm run build-types",
         "build-js": "babel ./src -d dist/js --ignore './src/__tests__' --extensions .ts,.tsx --config-file ./babel.config.json",
         "build-types": "tsc -p tsconfig.types.json",
