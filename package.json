@@ -30,17 +30,17 @@
         "canvg": "^3.0.6",
         "collection-utils": "^1.0.1",
         "copy-to-clipboard": "^3.1.0",
-        "react-virtualized-auto-sizer": "^1.0.2",
         "react-number-format": "^4.4.1",
+        "react-virtualized-auto-sizer": "^1.0.2",
         "utility-types": "^3.10.0"
     },
     "peerDependencies": {
         "direction": "^1.0.4",
         "lodash": "^4.17.19",
         "marked": "^0.7.0",
-        "react-responsive-carousel": "^3.2.7",
         "react": "^16.12.0 || 17.x",
         "react-dom": "^16.12.0 || 17.x",
+        "react-responsive-carousel": "^3.2.7",
         "styled-components": "^5.2.0"
     },
     "devDependencies": {

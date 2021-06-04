@@ -86,6 +86,8 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
 
     readonly selectedRows?: RowSelection;
     readonly onSelectedRowsChange?: (newRows: RowSelection | undefined) => void;
+    readonly onRowSelected?: (row: number | undefined) => void;
+    readonly onRowDeselected?: (row: number | undefined) => void;
 
     readonly selectedColumns?: ColumnSelection;
     readonly onSelectedColumnsChange?: (newColumns: ColumnSelection | undefined) => void;
@@ -141,6 +143,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         selectedColumns: selectedColumnsOuter,
         onSelectedColumnsChange: setSelectedColumnsOuter,
         selectedRows: selectedRowsOuter,
+        onRowSelected,
+        onRowDeselected,
         onSelectedRowsChange: setSelectedRowsOuter,
         gridSelection: gridSelectionOuter,
         onGridSelectionChange,
@@ -236,8 +240,14 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     setSelectedColumns([]);
                     const index = selectedRows.indexOf(row);
                     if (index !== -1) {
+                        if (onRowDeselected) {
+                            onRowDeselected(index)
+                        }
                         setSelectedRows(removeArrayItem(selectedRows, index));
                     } else {
+                        if (onRowSelected) {
+                            onRowSelected(index)
+                        }
                         setSelectedRows([...selectedRows, row]);
                     }
                 } else {
