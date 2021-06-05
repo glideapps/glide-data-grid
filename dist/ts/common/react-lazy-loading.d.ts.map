@@ -1,0 +1,1 @@
+{"version":3,"file":"react-lazy-loading.d.ts","sourceRoot":"","sources":["../../../src/common/react-lazy-loading.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,OAAO,CAAC;AAE1B,wBAAgB,qBAAqB,CAAC,CAAC,SAAS,KAAK,CAAC,aAAa,CAAC,GAAG,CAAC,EACpE,UAAU,EAAE,MAAM,EAClB,MAAM,EAAE,MAAM,OAAO,CAAC;IAAE,OAAO,EAAE,CAAC,CAAA;CAAE,CAAC,GACtC,KAAK,CAAC,mBAAmB,CAAC,CAAC,CAAC,CAE9B"}

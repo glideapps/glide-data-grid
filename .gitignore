@@ -1,4 +1,4 @@
-[Dd]ist/
+# [Dd]ist/
 node_modules*
 .DS_Store
 .tool-versions
