@@ -225,13 +225,13 @@ var DataEditor = function DataEditor(p) {
 
         if (_index !== -1) {
           if (onRowDeselected) {
-            onRowDeselected(_index);
+            onRowDeselected(_row);
           }
 
           setSelectedRows((0, _support.removeArrayItem)(selectedRows, _index));
         } else {
           if (onRowSelected) {
-            onRowSelected(_index);
+            onRowSelected(_row);
           }
 
           setSelectedRows([].concat(_toConsumableArray(selectedRows), [_row]));
