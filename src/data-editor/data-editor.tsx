@@ -241,12 +241,12 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     const index = selectedRows.indexOf(row);
                     if (index !== -1) {
                         if (onRowDeselected) {
-                            onRowDeselected(index)
+                            onRowDeselected(row)
                         }
                         setSelectedRows(removeArrayItem(selectedRows, index));
                     } else {
                         if (onRowSelected) {
-                            onRowSelected(index)
+                            onRowSelected(row)
                         }
                         setSelectedRows([...selectedRows, row]);
                     }
