@@ -420,3 +420,15 @@ export function ColSelectionStateLivesOutside() {
         />
     );
 }
+
+export function GridSelectionOutOfRange() {
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={[]}
+            rows={1000}
+            allowResize={true}
+            gridSelection={{ cell: [2, 8], range: { width: 1, height: 1, x: 2, y: 8 } }}
+        />
+    );
+}
