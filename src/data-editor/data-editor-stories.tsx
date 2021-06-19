@@ -149,7 +149,7 @@ And supports newline chars and automatic wrapping text that just needs to be lon
                 },
                 { text: "No Image" },
             ],
-            allowOverlay: false,
+            allowOverlay: true,
         };
     }
     return {

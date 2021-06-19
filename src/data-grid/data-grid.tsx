@@ -824,6 +824,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                             ctx.strokeStyle = theme.acceptColor;
                             ctx.lineWidth = 2;
                             ctx.stroke();
+
+                            ctx.restore();
+                            ctx.save();
+                            ctx.beginPath();
+                            clipCol(0);
                         }
                     }
                 }
