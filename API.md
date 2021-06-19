@@ -45,19 +45,19 @@ Grid always passes col/row coordinate pairs in the format [col, row] and never [
 
 ### Required
 
-```
+```ts
 rows: number;
 ```
 
 `rows` is the number of rows to display.
 
-```
+```ts
 columns: readonly GridColumn[];
 ```
 
 `columns` is an array of objects of type `GridColumn` describing the column headers. The length of the array is the number of columns to display.
 
-```
+```ts
 getCellContent: (cell: readonly [number, number]) => GridCell;
 ```
 
@@ -65,74 +65,74 @@ getCellContent: (cell: readonly [number, number]) => GridCell;
 
 ### Optional
 
-```
+```ts
 cellXOffset?: number;
 cellYOffset?: number;
 ```
 
 `cellXOffset` and `cellYOffset` are the zero-based indexes of the leftmost column, and topmost row to display, respectively. Both should be provided if one is.
 
-```
+```ts
 allowResize?: boolean;
 ```
 
 `allowResize` is a boolean indicating whether to allow resizing the widths of columns. Default is `false`.
 
-```
+```ts
 onVisibleRegionChanged?: (range: Rectangle) => void;
 ```
 
 `onVisibleRegionChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`. Note that you have to keep track of at least the `cellXOffset` and `cellYOffset`, for which the rectangle provides new values in `.x` and `.y`, respectively, and pass them back in as properties, otherwise your Grid will not scroll.
 
-```
+```ts
 headerHeight: number;
 ```
 
 `headerHeight` is the height of the table header. It defaults to `36`.
 
-```
+```ts
 rowHeight: number | ((index: number) => number);
 ```
 
 `rowHeight` is the height of a row in the table. It defaults to `34`. By passing a function instead of a number you can give different heights to each row. The `index` is the zero-based absolute row index.
 
-```
+```ts
 rowMarkers?: boolean;
 ```
 
 `rowMarkers` determines whether to display the marker column on the very left. It defaults to `true`. Note that this column doesn't count as a table column, i.e. it has no index, and doesn't change column indexes.
 
-```
+```ts
 rowMarkerWidth?: number;
 ```
 
 `rowMarkerWidth` is the width of the marker column on the very left. It defaults to `50`.
 
-```
+```ts
 onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 ```
 
 `onHeaderMenuClick` is called when the user clicks the menu button on a column header. `col` is the column index, and `screenPosition` is the bounds of the column header. You are responsible for drawing and handling the menu.
 
-```
+```ts
 onColumnMoved?: (startIndex: number, endIndex: number) => void;
 ```
 
 `onColumnMoved` is called when the user finishes moving a column. `startIndex` is the index of the column that was moved, and `endIndex` is the index at which it should end up. Note that you have to effect the move of the column, and pass the reordered columns back in the `columns` property.
 
-```
+```ts
 onColumnResized?: (column: GridColumn, newSize: number) => void;
 ```
 
 `onColumnResized` is called when the user finishes resizing a column. `newSize` is the new size of the column. Note that you have change the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
 
-```
+```ts
 onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
 ```
 
 `onCellEdited` is called when the user finishes editing a cell. Note that you are responsible for setting the new value of the cell.
 
-```
+```ts
 onDeleteRows?: (rows: readonly number[]) => void;
 ```
 
@@ -144,7 +144,7 @@ onItemHovered?: (args: GridMouseEventArgs) => void;
 
 `onItemHovered` is called when the user hovers over a cell, a header, or outside the grid.
 
-```
+```ts
 showTrailingBlankRow?: boolean;
 onRowAppended?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
 ```
@@ -153,31 +153,31 @@ onRowAppended?: (cell: readonly [number, number], newValue: EditableGridCell) =>
 
 `showTrailingBlankRow` is `true` by default.
 
-```
+```ts
 getCellsForSelection?: (selection: GridSelection) => readonly (readonly GridCell[])[];
 ```
 
 `getCellsForSelection` is called when the user copies a selection to the clipboard. It must return a two-dimensional array (an array of rows, where each row is an array of cells) of the cells in the selection's rectangle. Note that the rectangle can include cells that are not currently visible.
 
-```
+```ts
 onCellClicked?: (cell: readonly [number, number]) => void;
 ```
 
 `onCellClicked` is called whenever the user clicks a cell in the grid.
 
-```
+```ts
 imageEditorOverride?: ImageEditorType;
 ```
 
 If `imageEditorOverride` is specified, then it will be used instead of the default image editor overlay, which is what the user sees when they double-click on an image cell.
 
-```
+```ts
 markdownDivCreateNode?: (content: string) => DocumentFragment;
 ```
 
 IF `markdownDivCreateNode` is specified, then it will be used to render Markdown, instead of the default Markdown renderer used by the Grid. You'll want to use this if you need to process your Markdown for security purposes, or if you want to use a renderer with different Markdown features.
 
-```
+```ts
 drawCustomCell?: (
     ctx: CanvasRenderingContext2D,
     cell: GridCell,
@@ -188,25 +188,25 @@ drawCustomCell?: (
 
 You can specify `drawCustomCell` to enable rendering your own cells. The Grid will call this for every cell it needs to render. It should either render the cell and return `true`, or not render anything and return `false`, in which case the Grid will render the cell.
 
-```
+```ts
 scrollToEnd?: boolean;
 ```
 
 When this property changes to `true`, the Grid will scroll all the way to the right. Glide uses that when the user clicks the "Add Column" button.
 
-```
+```ts
 isDraggable?: boolean;
 onDragStart?: (args: GridDragEventArgs) => void;
 ```
 
 If `isDraggable` is set, the whole Grid is draggable, and `onDragStart` will be called when dragging starts. You can use this to build a UI where the user can drag the Grid around.
 
-```
+```ts
 maxColumnWidth?: number;
 ```
 
 If `maxColumnWidth` is set with a value greater than 50, then columns will have a maximum size of that many pixels.
-If the value is less than 50, it will be increased to 50.  If it isn't set, the default value will be 500.
+If the value is less than 50, it will be increased to 50. If it isn't set, the default value will be 500.
 
 ## Types
 
@@ -216,7 +216,7 @@ Many function properties take cell coordinates. Those are arrays of two numbers,
 
 ### Rectangle
 
-```
+```ts
 export interface Rectangle {
     readonly x: number;
     readonly y: number;
@@ -227,7 +227,7 @@ export interface Rectangle {
 
 ### GridColumn
 
-```
+```ts
 export interface GridColumn {
     readonly width: number;
     readonly title: string;
@@ -240,8 +240,27 @@ export interface GridColumn {
 
 ### GridCell
 
-```
-export type GridCell = EditableGridCell | BubbleCell | RowIDCell | LoadingCell | ProtectedCell;
+Some cells have both a `data` and a `displayData` field. `displayData` is
+always a string, and is what's displayed in the cell for viewing. For cells
+that allow editing via the overlay, `data` is what the overlay display for
+editing. That way you can, for example, display numbers in a specific format.
+
+The Grid supports the following kinds of cells:
+
+-   `TextCell` is just a string.
+-   `ImageCell` is an image URI, displayed as a thumbnail.
+-   `BooleanCell` is a checkbox.
+-   `Markdown` is markdown text, which is rendered nicely in the overlay on double-click.
+-   `UriCell` is a URI.
+-   `NumberCell` is a number.
+-   `BubbleCell` is a number of gray bubbles with a bit of text in them.
+-   `RowIDCell` is a string that's grayed out.
+-   `LoadingCell` is currently rendered empty, but should be used for data that's not loaded in yet.
+-   `ProtectedCell` is for data that the user isn't supposed to see, for example other user's passwords.
+-   `DrilldownCell` displays bubbles with a small thumbnail and text.
+
+```ts
+export type GridCell = EditableGridCell | BubbleCell | RowIDCell | LoadingCell | ProtectedCell | DrilldownCell;
 
 export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell | UriCell | NumberCell;
 
@@ -266,6 +285,16 @@ interface ImageCell extends BaseGridCell {
 interface BubbleCell extends BaseGridCell {
     readonly kind: GridCellKind.Bubble;
     readonly data: string[];
+}
+
+export interface DrilldownCellData {
+    readonly text: string;
+    readonly img?: string;
+}
+
+interface DrilldownCell extends BaseGridCell {
+    readonly kind: GridCellKind.Drilldown;
+    readonly data: readonly DrilldownCellData[];
 }
 
 interface BooleanCell extends BaseGridCell {
