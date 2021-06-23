@@ -1,10 +1,10 @@
 import * as React from "react";
 
 import { number, withKnobs } from "@storybook/addon-knobs";
-import { StoryFn, StoryContext, useState, useCallback } from "@storybook/addons";
+import { StoryFn, StoryContext, useState, useCallback, useMemo } from "@storybook/addons";
 import { StoryFnReactReturnType } from "@storybook/react/dist/client/preview/types";
 import { BuilderThemeWrapper } from "../stories/story-utils";
-// import { styled } from "../common/styles";
+
 import {
     ColumnSelection,
     GridCell,
@@ -411,7 +411,21 @@ export function ColSelectionStateLivesOutside() {
 }
 
 export function GridSelectionOutOfRange() {
-    const [cols, setCols] = useState([{ width: 300, title: "Resize me and I should not crash" }]);
+    const dummyCols = useMemo(
+        () => getDummyCols().map(v => ({ ...v, width: 300, title: "Make me smaller to crash!" })),
+        []
+    );
+
+    const [selected, setSelected] = useState<GridSelection | undefined>({
+        cell: [2, 8],
+        range: { width: 1, height: 1, x: 2, y: 8 },
+    });
+
+    const [cols, setCols] = useState(dummyCols);
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
 
     return (
         <DataEditor
@@ -419,8 +433,15 @@ export function GridSelectionOutOfRange() {
             columns={cols}
             rows={1000}
             allowResize={true}
-            gridSelection={{ cell: [2, 8], range: { width: 1, height: 1, x: 2, y: 8 } }}
-            onColumnResized={() => setCols([])}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
+            onColumnResized={(_col, newSize) => {
+                if (newSize > 300) {
+                    setCols(dummyCols);
+                } else {
+                    setCols([]);
+                }
+            }}
         />
     );
 }

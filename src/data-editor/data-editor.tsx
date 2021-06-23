@@ -179,6 +179,9 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     );
 
     const mangledCols = React.useMemo(() => {
+        // Clear the grid selection to handle the case where changing columns
+        // can highlight new unexpected selections
+        setGridSelection(undefined);
         if (!rowMarkers) return columns;
         return [
             {
@@ -190,7 +193,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             },
             ...columns,
         ];
-    }, [columns, rowMarkerWidth, rowMarkers]);
+    }, [columns, rowMarkerWidth, rowMarkers, setGridSelection]);
 
     const getMangedCellContent = React.useCallback(
         ([col, row]: readonly [number, number]): GridCell => {
