@@ -36,7 +36,7 @@ export function useEventListener<K extends keyof HTMLElementEventMap>(
 
             // Remove event listener on cleanup
             return () => {
-                el.removeEventListener(eventName, eventListener);
+                el.removeEventListener(eventName, eventListener, { capture });
             };
         },
         [eventName, element, passive, capture] // Re-run if eventName or element changes
