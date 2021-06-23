@@ -18,17 +18,6 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import DataEditor from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
-// const InnerContainer = styled.div`
-//     width: 100%;
-//     height: 100px;
-
-//     > :first-child {
-//         position: absolute;
-//         width: 100%;
-//         height: 100%;
-//     }
-// `;
-
 export default {
     title: "Designer/DateViewer/DataEditor",
 
@@ -422,13 +411,16 @@ export function ColSelectionStateLivesOutside() {
 }
 
 export function GridSelectionOutOfRange() {
+    const [cols, setCols] = useState([{ width: 300, title: "Resize me and I should not crash" }]);
+
     return (
         <DataEditor
             getCellContent={getDummyData}
-            columns={[]}
+            columns={cols}
             rows={1000}
             allowResize={true}
             gridSelection={{ cell: [2, 8], range: { width: 1, height: 1, x: 2, y: 8 } }}
+            onColumnResized={() => setCols([])}
         />
     );
 }

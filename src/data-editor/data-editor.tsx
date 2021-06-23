@@ -905,6 +905,11 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     React.useEffect(() => {
         if (gridSelection === undefined) return;
         const [col, row] = gridSelection.cell;
+
+        // Check that the grid selection is in range before updating the selected cell
+        const selectionColInRange = mangledCols[col];
+        if (selectionColInRange === undefined) return;
+
         updateSelectedCell(col, row);
     }, [mangledCols, rows, gridSelection, updateSelectedCell]);
 
