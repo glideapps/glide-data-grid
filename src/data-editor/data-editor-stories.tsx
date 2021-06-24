@@ -1,10 +1,10 @@
 import * as React from "react";
 
 import { number, withKnobs } from "@storybook/addon-knobs";
-import { StoryFn, StoryContext, useState, useCallback } from "@storybook/addons";
+import { StoryFn, StoryContext, useState, useCallback, useMemo } from "@storybook/addons";
 import { StoryFnReactReturnType } from "@storybook/react/dist/client/preview/types";
 import { BuilderThemeWrapper } from "../stories/story-utils";
-// import { styled } from "../common/styles";
+
 import {
     ColumnSelection,
     GridCell,
@@ -17,17 +17,6 @@ import {
 import AutoSizer from "react-virtualized-auto-sizer";
 import DataEditor from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
-
-// const InnerContainer = styled.div`
-//     width: 100%;
-//     height: 100px;
-
-//     > :first-child {
-//         position: absolute;
-//         width: 100%;
-//         height: 100%;
-//     }
-// `;
 
 export default {
     title: "Designer/DateViewer/DataEditor",
@@ -417,6 +406,78 @@ export function ColSelectionStateLivesOutside() {
             getCellContent={getData}
             columns={columns}
             rows={1000}
+        />
+    );
+}
+
+export function GridSelectionOutOfRangeNoColumns() {
+    const dummyCols = useMemo(
+        () => getDummyCols().map(v => ({ ...v, width: 300, title: "Making column smaller used to crash!" })),
+        []
+    );
+
+    const [selected, setSelected] = useState<GridSelection | undefined>({
+        cell: [2, 8],
+        range: { width: 1, height: 1, x: 2, y: 8 },
+    });
+
+    const [cols, setCols] = useState(dummyCols);
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={cols}
+            rows={1000}
+            allowResize={true}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
+            onColumnResized={(_col, newSize) => {
+                if (newSize > 300) {
+                    setCols(dummyCols);
+                } else {
+                    setCols([]);
+                }
+            }}
+        />
+    );
+}
+
+export function GridSelectionOutOfRangeLessColumnsThanSelection() {
+    const dummyCols = useMemo(
+        () => getDummyCols().map(v => ({ ...v, width: 300, title: "Making column smaller used to crash!" })),
+        []
+    );
+
+    const [selected, setSelected] = useState<GridSelection | undefined>({
+        cell: [2, 8],
+        range: { width: 1, height: 1, x: 2, y: 8 },
+    });
+
+    const [cols, setCols] = useState(dummyCols);
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={cols}
+            rows={1000}
+            allowResize={true}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
+            onColumnResized={(_col, newSize) => {
+                if (newSize > 300) {
+                    setCols(dummyCols);
+                } else {
+                    setCols([dummyCols[0]]);
+                }
+            }}
         />
     );
 }
