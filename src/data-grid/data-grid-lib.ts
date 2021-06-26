@@ -372,14 +372,13 @@ export function drawDrilldownCell(
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
     let renderX = x + cellXPad;
-    const centerY = y + height / 2;
 
     const renderBoxes: { x: number; width: number }[] = [];
     for (const el of data) {
         if (renderX > x + width) break;
         const textWidth = measureTextWidth(el.text, ctx);
         const imgWidth = el.img === undefined ? 0 : bubbleHeight - 8 + 4;
-        const renderWidth = 8 + textWidth + imgWidth + bubblePad * 2;
+        const renderWidth = textWidth + imgWidth + bubblePad * 2;
         renderBoxes.push({
             x: renderX,
             width: renderWidth,
@@ -410,21 +409,6 @@ export function drawDrilldownCell(
     renderBoxes.forEach((rectInfo, i) => {
         const d = data[i];
         let drawX = rectInfo.x + bubblePad;
-
-        ctx.beginPath();
-        roundedPoly(
-            ctx,
-            [
-                { x: drawX + -3, y: centerY - 5 },
-                { x: drawX + -3, y: centerY + 5 },
-                { x: drawX + 2, y: centerY },
-            ],
-            1
-        );
-        ctx.fillStyle = theme.fgColorMedium;
-        ctx.fill();
-
-        drawX += 8;
 
         if (d.img !== undefined) {
             const img = imageLoader.loadOrGetImage(d.img, col, row);
