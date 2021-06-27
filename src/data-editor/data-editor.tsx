@@ -257,6 +257,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                                     height: bottom - top + 1,
                                 },
                             });
+                            focus();
                         } else {
                             setGridSelection({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
                             setSelectedColumns([]);
