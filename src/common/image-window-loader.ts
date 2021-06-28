@@ -6,8 +6,19 @@ import debounce from "lodash/debounce";
 export interface LoadResult {
     img: HTMLImageElement | undefined;
     url: string;
-    col: number;
-    row: number;
+    cells: Set<number>;
+}
+
+const rowShift = 1 << 16;
+
+function packColRowToNumber(col: number, row: number) {
+    return row * rowShift + col;
+}
+
+function unpackNumberToColRow(packed: number): [number, number] {
+    const col = packed % rowShift;
+    const row = (packed - col) / rowShift;
+    return [col, row];
 }
 
 class ImageWindowLoader {
@@ -41,7 +52,11 @@ class ImageWindowLoader {
         const old = this.cache;
         this.cache = {};
         Object.values(old)
-            .filter(v => this.isInWindow(v.col, v.row))
+            .map(v => ({
+                ...v,
+                cells: new Set(Array.from(v.cells).filter(n => this.isInWindow(...unpackNumberToColRow(n)))),
+            }))
+            .filter(v => v.cells.size === 0)
             .forEach(v => {
                 this.cache[`${v.url}`] = v;
             });
@@ -64,8 +79,7 @@ class ImageWindowLoader {
 
         const current = this.cache[key];
         if (current !== undefined) {
-            current.col = col;
-            current.row = row;
+            current.cells.add(packColRowToNumber(col, row));
             return current.img;
         } else {
             const img = new Image();
@@ -84,8 +98,7 @@ class ImageWindowLoader {
 
             const result: LoadResult = {
                 img: undefined,
-                col,
-                row,
+                cells: new Set([packColRowToNumber(col, row)]),
                 url,
             };
 
@@ -96,9 +109,12 @@ class ImageWindowLoader {
                 } catch {
                     errored = true;
                 }
-                if (this.cache[key] !== undefined && !errored) {
-                    result.img = img;
-                    this.loadedLocations.push([col, row]);
+                const toWrite = this.cache[key];
+                if (toWrite !== undefined && !errored) {
+                    toWrite.img = img;
+                    for (const packed of Array.from(toWrite.cells)) {
+                        this.loadedLocations.push(unpackNumberToColRow(packed));
+                    }
                     this.sendLoaded();
                 }
             };
