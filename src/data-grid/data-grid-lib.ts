@@ -11,7 +11,7 @@ export interface MappedGridColumn extends GridColumn {
     sticky: boolean;
 }
 
-export function makeEditCell(cell: GridCell): GridCell {
+export function makeEditCell(cell: GridCell, forceBooleanOff: boolean = false): GridCell {
     const isEditable = isEditableGridCell(cell);
 
     switch (cell.kind) {
@@ -19,6 +19,7 @@ export function makeEditCell(cell: GridCell): GridCell {
             return {
                 ...cell,
                 data: false,
+                showUnchecked: forceBooleanOff ? false : cell.showUnchecked,
             };
         case GridCellKind.Text:
             return {

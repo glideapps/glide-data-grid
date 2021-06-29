@@ -194,7 +194,9 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
     const getMangedCellContent = React.useCallback(
         ([col, row]: readonly [number, number]): GridCell => {
-            if (col === 0 && rowMarkers) {
+            const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
+            const isRowMarkerCol = col === 0 && rowMarkers;
+            if (isRowMarkerCol) {
                 return {
                     kind: GridCellKind.Boolean,
                     data: selectedRows?.includes(row),
@@ -202,7 +204,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     allowOverlay: false,
                     allowEdit: false,
                 };
-            } else if (showTrailingBlankRow && row === mangledRows - 1) {
+            } else if (isTrailing) {
                 //If the grid is empty, we will return text
                 if (row === 0) {
                     return {
@@ -214,7 +216,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 }
                 //Base the dataType on the previous row.
                 const previousRow = getCellContent([col - rowMarkerOffset, row - 1]);
-                return makeEditCell(previousRow);
+                return makeEditCell(previousRow, true);
             } else {
                 return getCellContent([col - rowMarkerOffset, row]);
             }
