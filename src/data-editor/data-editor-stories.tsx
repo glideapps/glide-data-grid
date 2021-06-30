@@ -1,8 +1,6 @@
 import * as React from "react";
 
-import { number, withKnobs } from "@storybook/addon-knobs";
 import { StoryFn, StoryContext, useState, useCallback, useMemo } from "@storybook/addons";
-import { StoryFnReactReturnType } from "@storybook/react/dist/client/preview/types";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 
 import {
@@ -22,10 +20,7 @@ export default {
     title: "Designer/DateViewer/DataEditor",
 
     decorators: [
-        withKnobs({
-            escapeHTML: false,
-        }),
-        (fn: StoryFn<StoryFnReactReturnType>, context: StoryContext) => (
+        (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
             <AutoSizer>
                 {(props: { width?: number; height?: number }) => (
                     <BuilderThemeWrapper width={props.width ?? 1000} height={props.height ?? 800} context={context}>
@@ -326,12 +321,7 @@ export function IdealSize() {
     );
 }
 
-export function AdjustableColumns() {
-    const columnCount = number("Columns", 2, {
-        min: 2,
-        max: 50,
-    });
-
+export function AdjustableColumns({ columnCount }: { columnCount: number }) {
     // trying to be 500x500
     const cols: GridColumn[] = [
         { title: "Number", width: 250 },
@@ -363,6 +353,9 @@ export function AdjustableColumns() {
         />
     );
 }
+AdjustableColumns.args = {
+    columnCount: 2,
+};
 
 export function RowSelectionStateLivesOutside() {
     const [selected_rows, setSelectedRows] = useState<RowSelection>([]);
