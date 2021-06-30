@@ -393,6 +393,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         );
 
         if (canBlit.current === true) {
+            ctx.imageSmoothingEnabled = false;
             const minY = Math.min(last.cellYOffset, cellYOffset);
             const maxY = Math.max(last.cellYOffset, cellYOffset);
             let deltaY = 0;
@@ -522,6 +523,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     ctx.beginPath();
                 }
             }
+            ctx.imageSmoothingEnabled = true;
         }
 
         if (damage !== undefined) {
