@@ -8,6 +8,7 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
     min-width: ${p => p.targetRect.width}px;
     display: flex;
     position: relative;
+    color: ${p => p.theme.fgColorDark};
 
     .edit-icon {
         position: absolute;
