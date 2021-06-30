@@ -5,5 +5,8 @@ babel.config.json
 build.sh
 package-lock.json
 .gitignore
+.github
+features.gif
+.eslintrc
 tsconfig.json
 tsconfig.types.json

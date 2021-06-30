@@ -3,7 +3,7 @@ import { Rectangle } from "../data-grid/data-grid-types";
 import throttle from "lodash/throttle";
 import debounce from "lodash/debounce";
 
-export interface LoadResult {
+interface LoadResult {
     img: HTMLImageElement | undefined;
     url: string;
     cells: Set<number>;
