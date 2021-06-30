@@ -500,7 +500,7 @@ export function MarkdownEdits() {
             return editable;
         } else if (col === 1) {
             const editable: EditableGridCell = {
-                data: `text
+                data: `text really really really long
 ## H1
 
 - this
