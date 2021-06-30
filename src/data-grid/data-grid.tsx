@@ -347,7 +347,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         const canvas = ref.current;
         if (canvas === null) return;
 
-        const dpr = window.devicePixelRatio ?? 1;
+        const dpr = Math.ceil(window.devicePixelRatio) ?? 1;
 
         if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
             canvas.width = Math.floor(width * dpr);
