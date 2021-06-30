@@ -5,6 +5,7 @@ import { BuilderThemeWrapper } from "../stories/story-utils";
 
 import {
     ColumnSelection,
+    EditableGridCell,
     GridCell,
     GridCellKind,
     GridColumn,
@@ -471,6 +472,78 @@ export function GridSelectionOutOfRangeLessColumnsThanSelection() {
                     setCols([dummyCols[0]]);
                 }
             }}
+        />
+    );
+}
+
+export function MarkdownEdits() {
+    const dummyCols: GridColumn[] = useMemo(() => {
+        return [
+            {
+                title: "MD short",
+                width: 50,
+            },
+            {
+                title: "MD long",
+                width: 50,
+            },
+        ];
+    }, []);
+
+    const dummyCells = useCallback(([col, _row]: readonly [number, number]) => {
+        if (col === 0) {
+            const editable: EditableGridCell = {
+                data: "text",
+                allowOverlay: true,
+                kind: GridCellKind.Markdown,
+            };
+            return editable;
+        } else if (col === 1) {
+            const editable: EditableGridCell = {
+                data: `text
+## H1
+
+- this
+- is
+- a
+- longer
+- example
+- to
+- test
+- scroll
+- of
+- preview
+                `,
+                allowOverlay: true,
+                kind: GridCellKind.Markdown,
+            };
+            return editable;
+        }
+        const editable: EditableGridCell = {
+            data: "text",
+            allowOverlay: true,
+            kind: GridCellKind.Markdown,
+        };
+        return editable;
+    }, []);
+
+    const [selected, setSelected] = useState<GridSelection | undefined>({
+        cell: [2, 8],
+        range: { width: 1, height: 1, x: 2, y: 8 },
+    });
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={dummyCells}
+            columns={dummyCols}
+            rows={1000}
+            allowResize={true}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
         />
     );
 }

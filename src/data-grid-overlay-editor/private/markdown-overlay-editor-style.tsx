@@ -1,16 +1,21 @@
+import { Rectangle } from "data-grid/data-grid-types";
 import { styled } from "../../common/styles";
 
-export const MarkdownOverlayEditorStyle = styled.div`
+interface Props {
+    targetRect: Rectangle;
+}
+export const MarkdownOverlayEditorStyle = styled.div<Props>`
+    min-width: ${p => p.targetRect.width}px;
     display: flex;
-
     position: relative;
 
     .edit-icon {
         position: absolute;
-        top: -4px;
-        right: -4px;
-        width: 40px;
-        height: 40px;
+        top: 0px;
+        right: 0px;
+        width: 24px;
+        height: 24px;
+        padding-top: 2px;
         color: ${p => p.theme.acceptColor};
 
         cursor: pointer;
