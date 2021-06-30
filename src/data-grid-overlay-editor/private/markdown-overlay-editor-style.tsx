@@ -12,10 +12,9 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
     .edit-icon {
         position: absolute;
         top: 0px;
-        right: 0px;
+        right: -3px;
         width: 24px;
         height: 24px;
-        padding-top: 2px;
         color: ${p => p.theme.acceptColor};
 
         cursor: pointer;
