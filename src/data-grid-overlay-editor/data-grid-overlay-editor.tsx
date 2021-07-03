@@ -146,6 +146,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
         case GridCellKind.Markdown:
             editor = (
                 <MarkdownOverlayEditor
+                    targetRect={target}
                     markdown={targetValue.data}
                     onKeyDown={onKeyDown}
                     onChange={onStringValueChange}
