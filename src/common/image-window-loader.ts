@@ -56,7 +56,7 @@ class ImageWindowLoader {
                 ...v,
                 cells: new Set(Array.from(v.cells).filter(n => this.isInWindow(...unpackNumberToColRow(n)))),
             }))
-            .filter(v => v.cells.size === 0)
+            .filter(v => v.cells.size > 0)
             .forEach(v => {
                 this.cache[`${v.url}`] = v;
             });
