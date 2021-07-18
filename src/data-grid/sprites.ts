@@ -18,6 +18,20 @@ const headerRowID = (props: IconProps) => {
     `;
 };
 
+const headerCode = (props: IconProps) => {
+    const fg = withDefault(props.fgColor, "white");
+    const bg = withDefault(props.bgColor, "currentColor");
+    return `
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="16" height="16" rx="4" fill="${bg}" />
+        <path
+            d="M12.2235 13.3143L15.275 10.4875C15.575 10.2109 15.575 9.78077 15.275 9.50424L12.2235 6.68179C11.9535 6.43159 11.5892 6.44037 11.3578 6.70374C11.1264 6.96711 11.1521 7.34021 11.4135 7.58602L14.015 9.99586L11.4135 12.4057C11.1521 12.6515 11.1264 13.0246 11.3578 13.288C11.5892 13.5514 11.9535 13.5645 12.2235 13.3143ZM7.77916 13.3187C8.04488 13.5689 8.41346 13.5601 8.64489 13.2924C8.87632 13.029 8.85061 12.6559 8.58489 12.4101L5.98342 10.0002L8.58489 7.5948C8.85061 7.3446 8.87632 6.97588 8.64489 6.70812C8.41346 6.44475 8.04917 6.43598 7.77916 6.68618L4.7234 9.50863C4.42339 9.78516 4.42768 10.2197 4.7234 10.4919L7.77916 13.3187Z"
+            fill="${fg}"
+        />
+    </svg>
+    `;
+};
+
 const headerNumber = (props: IconProps) => {
     const fg = withDefault(props.fgColor, "white");
     const bg = withDefault(props.bgColor, "currentColor");
@@ -332,6 +346,7 @@ const protectedColumnOverlay = (props: IconProps) => {
 export const sprites = {
     headerRowID,
     headerNumber,
+    headerCode,
     headerString,
     headerBoolean,
     headerAudioUri,
