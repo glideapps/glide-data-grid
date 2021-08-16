@@ -80,8 +80,26 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
         (event: React.KeyboardEvent) => {
             if (event.key === "Escape") {
                 onFinishEditing(undefined, [0, 0]);
-            } else if (event.key === "Enter" && !event.ctrlKey) {
+            } else if (event.key === "Enter") {
                 onFinishEditing(tempValue, [0, event.shiftKey ? -1 : 1]);
+                event.stopPropagation();
+                event.preventDefault();
+            } else if (event.key === "Tab") {
+                onFinishEditing(tempValue, [event.shiftKey ? -1 : 1, 0]);
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        },
+        [onFinishEditing, tempValue]
+    );
+
+    // The only difference is that `shift + enter` enters a newline
+    const onKeyDownMultiline = React.useCallback(
+        (event: React.KeyboardEvent) => {
+            if (event.key === "Escape") {
+                onFinishEditing(undefined, [0, 0]);
+            } else if (event.key === "Enter" && !event.shiftKey) {
+                onFinishEditing(tempValue, [0, 1]);
                 event.stopPropagation();
                 event.preventDefault();
             } else if (event.key === "Tab") {
@@ -102,8 +120,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
             editor = (
                 <GrowingEntry
                     autoFocus={true}
-                    allowCtrlEnter={true}
-                    onKeyDown={onKeyDown}
+                    onKeyDown={onKeyDownMultiline}
                     value={targetValue.data}
                     onChange={onStringValueChange}
                 />
@@ -148,7 +165,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
                 <MarkdownOverlayEditor
                     targetRect={target}
                     markdown={targetValue.data}
-                    onKeyDown={onKeyDown}
+                    onKeyDown={onKeyDownMultiline}
                     onChange={onStringValueChange}
                     forceEditMode={forceEditMode}
                     createNode={markdownDivCreateNode}
@@ -161,8 +178,10 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
         ev.stopPropagation();
     };
 
+    // Consider imperatively creating and adding the element to the dom?
     const portalElement = document.getElementById("portal");
     if (portalElement === null) {
+        // eslint-disable-next-line no-console
         console.error(
             'Cannot open Data Grid overlay editor, because portal not found.  Please add `<div id="portal" />` as the last child of your `<body>`.'
         );
