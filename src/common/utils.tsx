@@ -72,6 +72,21 @@ export const EditPencil: React.FunctionComponent<IconProps> = (props: IconProps)
     );
 };
 
+export const Checkmark: React.FunctionComponent<IconProps> = (props: IconProps) => {
+    const bg = props.bgColor ?? "currentColor";
+    const fg = props.fgColor ?? "#ffffff";
+    return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill={"none"} xmlns="http://www.w3.org/2000/svg">
+            <circle cx="8" cy="8" r="8" fill={bg} />
+            <path
+                d="M6.84199 11.5072C6.53693 11.832 6.04414 11.832 5.73907 11.5072L2.93094 8.51777C2.62588 8.19301 2.62588 7.6684 2.93094 7.34364C3.23601 7.01888 3.7288 7.01888 4.03386 7.34364L6.28662 9.74187L11.6682 4.01277C11.9733 3.68801 12.4661 3.68801 12.7711 4.01277C13.0762 4.33753 13.0762 4.86214 12.7711 5.1869L6.84199 11.5072Z"
+                fill={fg}
+                stroke="none"
+            />
+        </svg>
+    );
+};
+
 export function useDebouncedMemo<T>(factory: () => T, deps: React.DependencyList | undefined, time: number): T {
     const [state, setState] = React.useState(factory());
 

@@ -4,7 +4,7 @@ export const MarkdownContainer = styled.div`
     word-break: break-word;
     -webkit-touch-callout: default;
 
-    padding-right: 26px;
+    padding-right: 36px;
 
     & *:last-child {
         margin-bottom: 0;

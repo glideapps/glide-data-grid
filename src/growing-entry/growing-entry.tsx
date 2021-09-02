@@ -3,6 +3,7 @@ import * as React from "react";
 import { GrowingEntryStyle, ShadowBox, InputBox } from "./growing-entry-style";
 import { withDefault } from "collection-utils";
 import { assert } from "../common/support";
+// import { Checkmark } from "../common/utils";
 
 interface Props
     extends React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> {
@@ -44,5 +45,5 @@ const GrowingEntryImpl: React.FunctionComponent<Props> = (props: Props) => {
     );
 };
 
-const GrowingEntry = React.memo(GrowingEntryImpl);
+const GrowingEntry = GrowingEntryImpl;
 export default GrowingEntry;

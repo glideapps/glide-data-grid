@@ -7,13 +7,15 @@ interface Props {
 export const MarkdownOverlayEditorStyle = styled.div<Props>`
     min-width: ${p => p.targetRect.width}px;
     display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
     color: ${p => p.theme.fgColorDark};
 
     .edit-icon {
         position: absolute;
-        top: 0px;
-        right: -3px;
+        top: 4px;
+        right: 4px;
         width: 24px;
         height: 24px;
         color: ${p => p.theme.acceptColor};
@@ -30,13 +32,13 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
         }
     }
 
-    textarea {
+    .md-edit-textarea {
         position: absolute;
         top: 0px;
         left: 0px;
         width: 0px;
         height: 0px;
-
+        margin-top: 25px;
         opacity: 0;
     }
 `;
