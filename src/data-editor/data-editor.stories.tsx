@@ -151,7 +151,7 @@ function getDummyCols() {
             ({
                 title: i.toString() + " is the longest header in the world",
                 width: 120 + (i % 4) * 10,
-                icon: "headerArray",
+                icon: "headerString",
                 hasMenu: true,
             } as GridColumn)
     );
