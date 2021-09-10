@@ -718,7 +718,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         let x = 0;
         let clipX = 0;
         let row = 0;
-        /* ctx.font = "13px Roboto, sans-serif"; */
         ctx.font = "14px Circular TT, Roboto, sans-serif";
         for (const c of effectiveCols) {
             let y = headerHeight + translateY;
