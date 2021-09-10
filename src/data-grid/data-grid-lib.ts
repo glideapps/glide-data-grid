@@ -275,7 +275,6 @@ export function drawBoolean(
     y: number,
     width: number,
     height: number,
-    highlighted: boolean
 ) {
     const centerX = x + width / 2;
     const centerY = y + height / 2;
