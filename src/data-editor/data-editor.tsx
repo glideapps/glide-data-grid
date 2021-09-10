@@ -570,9 +570,11 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     );
 
     const updateSelectedCell = React.useCallback(
-        (col: number, row: number): boolean => {
+        (col: number, row: number, fromEditingTrailingRow: boolean = false): boolean => {
+            const rowMax = mangledRows - (fromEditingTrailingRow ? 0 : 1);
             col = clamp(rowMarkerOffset, columns.length, col);
-            row = clamp(0, mangledRows - 1, row);
+            row = clamp(0, rowMax, row);
+
             if (col === gridSelection?.cell[0] && row === gridSelection?.cell[1]) return false;
             setGridSelection({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
 
@@ -638,9 +640,9 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             return true;
         },
         [
+            mangledRows,
             rowMarkerOffset,
             columns,
-            mangledRows,
             gridSelection?.cell,
             setGridSelection,
             rowMarkers,
@@ -667,10 +669,11 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
             const [movX, movY] = movement;
             if (gridSelection !== undefined && (movX !== 0 || movY !== 0)) {
-                updateSelectedCell(gridSelection.cell[0] + movX, gridSelection.cell[1] + movY);
+                const isEditingTrailingRow = gridSelection.cell[1] === mangledRows - 1 && newValue !== undefined;
+                updateSelectedCell(gridSelection.cell[0] + movX, gridSelection.cell[1] + movY, isEditingTrailingRow);
             }
         },
-        [gridSelection, focus, mangledOnCellEdited, rowMarkerOffset, updateSelectedCell]
+        [gridSelection, focus, mangledOnCellEdited, rowMarkerOffset, mangledRows, updateSelectedCell]
     );
 
     const onCellFocused = React.useCallback(

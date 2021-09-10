@@ -476,6 +476,57 @@ export function GridSelectionOutOfRangeLessColumnsThanSelection() {
     );
 }
 
+export function GridAddNewRows() {
+    const cols = useMemo(getDummyCols, []);
+
+    const [rowsCount, setRowsCount] = useState(10);
+
+    const onRowAppended = useCallback(() => {
+        setRowsCount(r => r + 1);
+    }, []);
+
+    const [selected, setSelected] = useState<GridSelection | undefined>(undefined);
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={cols}
+            rows={rowsCount}
+            allowResize={true}
+            onRowAppended={onRowAppended}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
+            showTrailingBlankRow={true}
+        />
+    );
+}
+
+export function GridNoTrailingBlankRow() {
+    const cols = useMemo(getDummyCols, []);
+
+    const [selected, setSelected] = useState<GridSelection | undefined>(undefined);
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={cols}
+            rows={100}
+            allowResize={true}
+            showTrailingBlankRow={false}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
+        />
+    );
+}
+
 export function MarkdownEdits() {
     const dummyCols: GridColumn[] = useMemo(() => {
         return [
