@@ -45,11 +45,11 @@ const headerNumber = (props: IconProps) => {
 
 const headerString = (props: IconProps) => {
     const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
     return `
-<svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M16.222 2H3.778C2.8 2 2 2.8 2 3.778v12.444C2 17.2 2.8 18 3.778 18h12.444c.978 0 1.77-.8 1.77-1.778L18 3.778C18 2.8 17.2 2 16.222 2z" fill="${bg}"/>
-  <path d="M8.182 12.4h3.636l.655 1.6H14l-3.454-8H9.455L6 14h1.527l.655-1.6zM10 7.44l1.36 3.651H8.64L10 7.441z" fill="${fg}"/>
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g opacity="0.75">
+  <path d="M12.3976 12.218H9.22962L8.58062 14H6.97462L9.96662 6.201H11.7266L14.6966 14H13.0466L12.3976 12.218ZM9.73562 10.832H11.8916L10.8136 7.884L9.73562 10.832Z" fill="${fg}"/>
+  </g>
 </svg>
     `;
 };
@@ -309,12 +309,14 @@ const headerGeoDistance = (props: IconProps) => {
 
 const headerArray = (props: IconProps) => {
     const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
     return `
-<svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="2" y="2" width="16" height="16" rx="2" fill="${bg}"/>
-  <path fill-rule="evenodd" clip-rule="evenodd" d="M14.25 7.25a.75.75 0 000-1.5h-6.5a.75.75 0 100 1.5h6.5zM15 10a.75.75 0 01-.75.75h-6.5a.75.75 0 010-1.5h6.5A.75.75 0 0115 10zm-.75 4.25a.75.75 0 000-1.5h-6.5a.75.75 0 000 1.5h6.5zm-8.987-7a.75.75 0 100-1.5.75.75 0 000 1.5zm.75 2.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm-.75 4.25a.75.75 0 100-1.5.75.75 0 000 1.5z" fill="${fg}"/>
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g opacity="0.75">
+  <path d="M11.6672 10C12.4957 10 13.1672 9.32843 13.1672 8.5C13.1672 7.67157 12.4957 7 11.6672 7C10.8388 7 10.1672 7.67157 10.1672 8.5C10.1672 9.32843 10.8388 10 11.6672 10Z" fill="${fg}"/>
+  <path d="M9.6679 5L15.1672 5V10.4985L10.0877 15.5578C9.4816 16.1615 8.49642 16.1449 7.91091 15.5212L4.57811 11.9706C4.00958 11.3649 4.03403 10.4147 4.63298 9.83908L9.6679 5Z" stroke="${fg}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
 </svg>
+
     `;
 };
 

@@ -19,13 +19,13 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
     max-width: 400px;
     max-height: calc(100vh - ${p => p.targetRect.y + 10}px);
 
-    border: 2px solid ${p => p.theme.acceptColor};
+    border: 2px solid red;
     background-color: ${p => p.theme.dataViewer.gridColor};
 
     box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
 
-    font-family: Roboto, sans-serif;
-    font-size: 13px;
+    font-family: Circular TT, Roboto, sans-serif;
+    font-size: 14px;
 
     padding: 3px 6.5px 2px;
 

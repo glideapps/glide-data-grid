@@ -12,6 +12,8 @@ const Wrapper = styled.div<WrapperProps>`
 
     width: ${p => p.width}px;
     height: ${p => p.height}px;
+    border-radius: 8px;
+    border: 1px solid ${p => p.theme.borderColor};
 
     > :first-child {
         position: absolute;

@@ -31,13 +31,16 @@ const builderThemeBase = {
         bgPrelight: "#fff9e3",
 
         checkbox: {
-            checkedColor: "#4F5DFF",
+            checkedColor: "#FFF",
+            borderColor: "#C8C8EE",
+            bgColor: "#F2F2FF",
+            bgColorSelected: "#5A55F2",
         },
         columnHeader: {
             bgColor: "#EDEDF3",
             bgDark: "#D8D8E3",
             fgColor: "#737383",
-            fgSelected: "#FFFFFF",
+            fgSelected: "#00FFFF",
             bgSelected: "#4F5DFF",
 
             icon: {

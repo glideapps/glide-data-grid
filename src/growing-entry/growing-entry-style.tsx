@@ -2,9 +2,9 @@ import { styled } from "../common/styles";
 import { css } from "styled-components";
 
 const inputProps = css`
-    font-size: 13px;
+    font-size: 14px;
     line-height: 16px;
-    font-family: Roboto, sans-serif;
+    font-family: Circular TT, Roboto, sans-serif;
     color: ${p => p.theme.fgColorDark};
     padding: 0;
     margin: 0;

@@ -284,7 +284,7 @@ export function drawBoolean(
         ctx.beginPath();
         roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 3);
 
-        ctx.fillStyle = highlighted ? theme.acceptColor : theme.fgColorMedium;
+        ctx.fillStyle = theme.dataViewer.checkbox.bgColorSelected;
         ctx.fill();
 
         ctx.beginPath();
@@ -292,7 +292,7 @@ export function drawBoolean(
         ctx.lineTo(centerX - 2.5, centerY + 3);
         ctx.lineTo(centerX + 5, centerY - 4);
 
-        ctx.strokeStyle = theme.bgColorLight;
+        ctx.strokeStyle = theme.dataViewer.checkbox.checkedColor;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
         ctx.lineWidth = 1.9;
@@ -302,7 +302,10 @@ export function drawBoolean(
         roundedRect(ctx, centerX - 8, centerY - 8, 16, 16, 2);
 
         ctx.lineWidth = 2;
-        ctx.strokeStyle = theme.fgColorLight;
+
+        ctx.fillStyle = theme.dataViewer.checkbox.bgColor;
+        ctx.fill();
+        ctx.strokeStyle = theme.dataViewer.checkbox.borderColor;
         ctx.stroke();
     }
 }

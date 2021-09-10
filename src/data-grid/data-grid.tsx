@@ -638,7 +638,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 ctx.clip();
 
                 let drawX = x + xPad;
-                ctx.globalAlpha = hovered || selected ? 1 : 0.6;
+                ctx.globalAlpha =  1;
                 if (c.icon !== undefined) {
                     let variant: SpriteVariant = selected ? "selected" : "normal";
                     if (c.style === "highlight") {
@@ -662,7 +662,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     drawX += 26;
                 }
 
-                ctx.font = "bold 14px Roboto, sans-serif";
+                ctx.font = "14px Circular TT, Roboto, sans-serif";
                 ctx.fillStyle = fillStyle;
                 ctx.fillText(c.title, drawX, headerHeight / 2 + 5);
                 ctx.globalAlpha = 1;
@@ -718,7 +718,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         let x = 0;
         let clipX = 0;
         let row = 0;
-        ctx.font = "13px Roboto, sans-serif";
+        /* ctx.font = "13px Roboto, sans-serif"; */
+        ctx.font = "14px Circular TT, Roboto, sans-serif";
         for (const c of effectiveCols) {
             let y = headerHeight + translateY;
             row = cellYOffset;
