@@ -209,6 +209,62 @@ export function Simplenotest() {
     );
 }
 
+function getDummyRelationColumn(): GridColumn[] {
+    return [
+        {
+            title: "Relation",
+            width: 360,
+            icon: "headerString",
+            hasMenu: true,
+        },
+    ];
+}
+
+function getDummyRelationData([col, row]: readonly [number, number]): GridCell {
+    return {
+        kind: GridCellKind.Drilldown,
+        data: [
+            {
+                text: `Image ${col}-${row}`,
+                img:
+                    "https://allthatsinteresting.com/wordpress/wp-content/uploads/2012/06/iconic-photos-1950-einstein.jpg",
+            },
+            { text: `Text ${col}-${row}` },
+            { text: `More text ${col}-${row}` },
+        ],
+        allowOverlay: true,
+    };
+}
+
+export function RelationColumn() {
+    const [cols, setColumns] = useState(getDummyRelationColumn);
+
+    const onColumnResized = useCallback(
+        (col: GridColumn, newSize: number) => {
+            const index = cols.indexOf(col);
+            const newCols = [...cols];
+            newCols[index] = {
+                ...newCols[index],
+                width: newSize,
+            };
+            setColumns(newCols);
+        },
+        [cols]
+    );
+
+    return (
+        <DataEditor
+            getCellContent={getDummyRelationData}
+            columns={cols}
+            rows={1000}
+            allowResize={true}
+            onColumnResized={onColumnResized}
+            smoothScrollX={true}
+            smoothScrollY={true}
+        />
+    );
+}
+
 const columns: GridColumn[] = [
     { title: "Number", width: 100, icon: "headerArray", overlayIcon: "rowOwnerOverlay" },
     { title: "Square", width: 100 },

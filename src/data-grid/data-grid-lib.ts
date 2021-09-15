@@ -392,14 +392,15 @@ export function drawDrilldownCell(
     renderBoxes.forEach(rectInfo => {
         roundedRect(ctx, rectInfo.x, y + (height - bubbleHeight) / 2, rectInfo.width, bubbleHeight, 6);
     });
-    ctx.shadowColor = "rgba(62, 65, 86, 0.4)";
+
+    ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
     ctx.shadowBlur = 1;
     ctx.fillStyle = theme.dataViewer.gridColor;
     ctx.fill();
 
-    ctx.shadowColor = "rgba(62, 65, 86, 0.15)";
+    ctx.shadowColor = "rgba(24, 25, 34, 0.2)";
     ctx.shadowOffsetY = 1;
-    ctx.shadowBlur = 3;
+    ctx.shadowBlur = 5;
     ctx.fillStyle = theme.dataViewer.gridColor;
     ctx.fill();
 
