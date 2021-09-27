@@ -1,4 +1,3 @@
-import Canvg from "canvg";
 import { Theme } from "../common/styles";
 import { sprites } from "./sprites";
 
@@ -60,19 +59,11 @@ export async function buildSpriteMap(theme: Theme): Promise<void> {
                 bgColor = themeExtract.acceptColor;
                 fgColor = themeExtract.columnHeaderBg;
             }
-            const renderTarget = document.createElement("canvas");
-            renderTarget.width = renderSize;
-            renderTarget.height = renderSize;
-            const renderCtx = renderTarget.getContext("2d");
-            if (renderCtx === null) continue;
-            const v = Canvg.fromString(renderCtx, sprite({ fgColor, bgColor }), {
-                scaleHeight: 40,
-                scaleWidth: 40,
-                ignoreDimensions: true,
-            });
-            await v.render();
+            const imgSource = new Image();
+            imgSource.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(sprite({ fgColor, bgColor }))}`;
+            await imgSource.decode();
 
-            ctx.drawImage(renderTarget, x, y);
+            ctx.drawImage(imgSource, x, y, renderSize, renderSize);
 
             y += renderSize;
         }

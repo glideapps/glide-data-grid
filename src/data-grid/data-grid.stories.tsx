@@ -1,8 +1,6 @@
 import * as React from "react";
 
-import { withKnobs } from "@storybook/addon-knobs";
 import { StoryFn, StoryContext } from "@storybook/addons";
-import { StoryFnReactReturnType } from "@storybook/react/dist/client/preview/types";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import DataGrid from "./data-grid";
 import { GridCellKind } from "./data-grid-types";
@@ -11,10 +9,7 @@ export default {
     title: "Designer/DateViewer/DataGrid",
 
     decorators: [
-        withKnobs({
-            escapeHTML: false,
-        }),
-        (fn: StoryFn<StoryFnReactReturnType>, context: StoryContext) => (
+        (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
             <div>
                 <BuilderThemeWrapper width={600} height={0} context={context}>
                     {fn()}
@@ -75,7 +70,7 @@ export function SelectedCellnotest() {
                 allowOverlay: false,
                 owned: true,
             })}
-            selectedCell={{ cell: [2, 2] }}
+            selectedCell={{ cell: [2, 2], range: { x: 2, y: 2, width: 1, height: 1 } }}
             firstColSticky={false}
         />
     );

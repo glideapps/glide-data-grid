@@ -1,12 +1,11 @@
 import * as React from "react";
 
-import { number, withKnobs } from "@storybook/addon-knobs";
-import { StoryFn, StoryContext, useState, useCallback } from "@storybook/addons";
-import { StoryFnReactReturnType } from "@storybook/react/dist/client/preview/types";
+import { StoryFn, StoryContext, useState, useCallback, useMemo } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
-// import { styled } from "../common/styles";
+
 import {
     ColumnSelection,
+    EditableGridCell,
     GridCell,
     GridCellKind,
     GridColumn,
@@ -18,25 +17,11 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import DataEditor from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
-// const InnerContainer = styled.div`
-//     width: 100%;
-//     height: 100px;
-
-//     > :first-child {
-//         position: absolute;
-//         width: 100%;
-//         height: 100%;
-//     }
-// `;
-
 export default {
     title: "Designer/DateViewer/DataEditor",
 
     decorators: [
-        withKnobs({
-            escapeHTML: false,
-        }),
-        (fn: StoryFn<StoryFnReactReturnType>, context: StoryContext) => (
+        (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
             <AutoSizer>
                 {(props: { width?: number; height?: number }) => (
                     <BuilderThemeWrapper width={props.width ?? 1000} height={props.height ?? 800} context={context}>
@@ -149,7 +134,7 @@ And supports newline chars and automatic wrapping text that just needs to be lon
                 },
                 { text: "No Image" },
             ],
-            allowOverlay: false,
+            allowOverlay: true,
         };
     }
     return {
@@ -220,6 +205,62 @@ export function Simplenotest() {
             allowResize={true}
             onVisibleRegionChanged={onVisibleRegionChanged}
             onColumnResized={onColumnResized}
+        />
+    );
+}
+
+function getDummyRelationColumn(): GridColumn[] {
+    return [
+        {
+            title: "Relation",
+            width: 360,
+            icon: "headerString",
+            hasMenu: true,
+        },
+    ];
+}
+
+function getDummyRelationData([col, row]: readonly [number, number]): GridCell {
+    return {
+        kind: GridCellKind.Drilldown,
+        data: [
+            {
+                text: `Image ${col}-${row}`,
+                img:
+                    "https://allthatsinteresting.com/wordpress/wp-content/uploads/2012/06/iconic-photos-1950-einstein.jpg",
+            },
+            { text: `Text ${col}-${row}` },
+            { text: `More text ${col}-${row}` },
+        ],
+        allowOverlay: true,
+    };
+}
+
+export function RelationColumn() {
+    const [cols, setColumns] = useState(getDummyRelationColumn);
+
+    const onColumnResized = useCallback(
+        (col: GridColumn, newSize: number) => {
+            const index = cols.indexOf(col);
+            const newCols = [...cols];
+            newCols[index] = {
+                ...newCols[index],
+                width: newSize,
+            };
+            setColumns(newCols);
+        },
+        [cols]
+    );
+
+    return (
+        <DataEditor
+            getCellContent={getDummyRelationData}
+            columns={cols}
+            rows={1000}
+            allowResize={true}
+            onColumnResized={onColumnResized}
+            smoothScrollX={true}
+            smoothScrollY={true}
         />
     );
 }
@@ -337,12 +378,7 @@ export function IdealSize() {
     );
 }
 
-export function AdjustableColumns() {
-    const columnCount = number("Columns", 2, {
-        min: 2,
-        max: 50,
-    });
-
+export function AdjustableColumns({ columnCount }: { columnCount: number }) {
     // trying to be 500x500
     const cols: GridColumn[] = [
         { title: "Number", width: 250 },
@@ -374,6 +410,9 @@ export function AdjustableColumns() {
         />
     );
 }
+AdjustableColumns.args = {
+    columnCount: 2,
+};
 
 export function RowSelectionStateLivesOutside() {
     const [selected_rows, setSelectedRows] = useState<RowSelection>([]);
@@ -417,6 +456,201 @@ export function ColSelectionStateLivesOutside() {
             getCellContent={getData}
             columns={columns}
             rows={1000}
+        />
+    );
+}
+
+export function GridSelectionOutOfRangeNoColumns() {
+    const dummyCols = useMemo(
+        () => getDummyCols().map(v => ({ ...v, width: 300, title: "Making column smaller used to crash!" })),
+        []
+    );
+
+    const [selected, setSelected] = useState<GridSelection | undefined>({
+        cell: [2, 8],
+        range: { width: 1, height: 1, x: 2, y: 8 },
+    });
+
+    const [cols, setCols] = useState(dummyCols);
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={cols}
+            rows={1000}
+            allowResize={true}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
+            onColumnResized={(_col, newSize) => {
+                if (newSize > 300) {
+                    setCols(dummyCols);
+                } else {
+                    setCols([]);
+                }
+            }}
+        />
+    );
+}
+
+export function GridSelectionOutOfRangeLessColumnsThanSelection() {
+    const dummyCols = useMemo(
+        () => getDummyCols().map(v => ({ ...v, width: 300, title: "Making column smaller used to crash!" })),
+        []
+    );
+
+    const [selected, setSelected] = useState<GridSelection | undefined>({
+        cell: [2, 8],
+        range: { width: 1, height: 1, x: 2, y: 8 },
+    });
+
+    const [cols, setCols] = useState(dummyCols);
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={cols}
+            rows={1000}
+            allowResize={true}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
+            onColumnResized={(_col, newSize) => {
+                if (newSize > 300) {
+                    setCols(dummyCols);
+                } else {
+                    setCols([dummyCols[0]]);
+                }
+            }}
+        />
+    );
+}
+
+export function GridAddNewRows() {
+    const cols = useMemo(getDummyCols, []);
+
+    const [rowsCount, setRowsCount] = useState(10);
+
+    const onRowAppended = useCallback(() => {
+        setRowsCount(r => r + 1);
+    }, []);
+
+    const [selected, setSelected] = useState<GridSelection | undefined>(undefined);
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={cols}
+            rows={rowsCount}
+            allowResize={true}
+            onRowAppended={onRowAppended}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
+            showTrailingBlankRow={true}
+        />
+    );
+}
+
+export function GridNoTrailingBlankRow() {
+    const cols = useMemo(getDummyCols, []);
+
+    const [selected, setSelected] = useState<GridSelection | undefined>(undefined);
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={cols}
+            rows={100}
+            allowResize={true}
+            showTrailingBlankRow={false}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
+        />
+    );
+}
+
+export function MarkdownEdits() {
+    const dummyCols: GridColumn[] = useMemo(() => {
+        return [
+            {
+                title: "MD short",
+                width: 50,
+            },
+            {
+                title: "MD long",
+                width: 50,
+            },
+        ];
+    }, []);
+
+    const dummyCells = useCallback(([col, _row]: readonly [number, number]) => {
+        if (col === 0) {
+            const editable: EditableGridCell = {
+                data: "text",
+                allowOverlay: true,
+                kind: GridCellKind.Markdown,
+            };
+            return editable;
+        } else if (col === 1) {
+            const editable: EditableGridCell = {
+                data: `text really really really long
+## H1
+
+- this
+- is
+- a
+- longer
+- example
+- to
+- test
+- scroll
+- of
+- preview
+                `,
+                allowOverlay: true,
+                kind: GridCellKind.Markdown,
+            };
+            return editable;
+        }
+        const editable: EditableGridCell = {
+            data: "text",
+            allowOverlay: true,
+            kind: GridCellKind.Markdown,
+        };
+        return editable;
+    }, []);
+
+    const [selected, setSelected] = useState<GridSelection | undefined>({
+        cell: [2, 8],
+        range: { width: 1, height: 1, x: 2, y: 8 },
+    });
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={dummyCells}
+            columns={dummyCols}
+            rows={1000}
+            allowResize={true}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
         />
     );
 }

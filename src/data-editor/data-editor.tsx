@@ -40,7 +40,6 @@ interface Handled {
     readonly selectedColumns?: readonly number[];
     readonly selectedCell?: GridSelection;
 
-    readonly onItemHovered?: (args: GridMouseEventArgs) => void;
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
     readonly onMouseUp?: (args: GridMouseEventArgs) => void;
 
@@ -139,6 +138,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         onDeleteRows,
         onDragStart,
         onHeaderMenuClick,
+        onItemHovered,
         onVisibleRegionChanged,
         selectedColumns: selectedColumnsOuter,
         onSelectedColumnsChange: setSelectedColumnsOuter,
@@ -198,7 +198,9 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
     const getMangedCellContent = React.useCallback(
         ([col, row]: readonly [number, number]): GridCell => {
-            if (col === 0 && rowMarkers) {
+            const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
+            const isRowMarkerCol = col === 0 && rowMarkers;
+            if (isRowMarkerCol) {
                 return {
                     kind: GridCellKind.Boolean,
                     data: selectedRows?.includes(row),
@@ -206,7 +208,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     allowOverlay: false,
                     allowEdit: false,
                 };
-            } else if (showTrailingBlankRow && row === mangledRows - 1) {
+            } else if (isTrailing) {
                 //If the grid is empty, we will return text
                 if (row === 0) {
                     return {
@@ -218,7 +220,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 }
                 //Base the dataType on the previous row.
                 const previousRow = getCellContent([col - rowMarkerOffset, row - 1]);
-                return makeEditCell(previousRow);
+                return makeEditCell(previousRow, true);
             } else {
                 return getCellContent([col - rowMarkerOffset, row]);
             }
@@ -267,6 +269,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                                     height: bottom - top + 1,
                                 },
                             });
+                            focus();
                         } else {
                             setGridSelection({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
                             setSelectedColumns([]);
@@ -417,7 +420,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         [onDragStart, rowMarkerOffset]
     );
 
-    const onItemHovered = React.useCallback(
+    const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
             if (args.kind === "cell") {
                 setHoveredCell(args.location);
@@ -475,8 +478,10 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     }
                 }
             }
+
+            onItemHovered?.(args);
         },
-        [gridSelection, isDraggable, rowMarkers, setGridSelection, columns, rowHeight]
+        [onItemHovered, gridSelection, isDraggable, rowMarkers, setGridSelection, columns, rowHeight]
     );
 
     const copyToClipboard = React.useCallback((cells: readonly (readonly GridCell[])[]) => {
@@ -575,9 +580,11 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     );
 
     const updateSelectedCell = React.useCallback(
-        (col: number, row: number): boolean => {
+        (col: number, row: number, fromEditingTrailingRow: boolean = false): boolean => {
+            const rowMax = mangledRows - (fromEditingTrailingRow ? 0 : 1);
             col = clamp(rowMarkerOffset, columns.length, col);
-            row = clamp(0, mangledRows - 1, row);
+            row = clamp(0, rowMax, row);
+
             if (col === gridSelection?.cell[0] && row === gridSelection?.cell[1]) return false;
             setGridSelection({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
 
@@ -643,9 +650,9 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             return true;
         },
         [
+            mangledRows,
             rowMarkerOffset,
             columns,
-            mangledRows,
             gridSelection?.cell,
             setGridSelection,
             rowMarkers,
@@ -672,10 +679,11 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
             const [movX, movY] = movement;
             if (gridSelection !== undefined && (movX !== 0 || movY !== 0)) {
-                updateSelectedCell(gridSelection.cell[0] + movX, gridSelection.cell[1] + movY);
+                const isEditingTrailingRow = gridSelection.cell[1] === mangledRows - 1 && newValue !== undefined;
+                updateSelectedCell(gridSelection.cell[0] + movX, gridSelection.cell[1] + movY, isEditingTrailingRow);
             }
         },
-        [gridSelection, focus, mangledOnCellEdited, rowMarkerOffset, updateSelectedCell]
+        [gridSelection, focus, mangledOnCellEdited, rowMarkerOffset, mangledRows, updateSelectedCell]
     );
 
     const onCellFocused = React.useCallback(
@@ -913,6 +921,11 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     React.useEffect(() => {
         if (gridSelection === undefined) return;
         const [col, row] = gridSelection.cell;
+
+        // Check that the grid selection is in range before updating the selected cell
+        const selectionColInRange = mangledCols[col];
+        if (selectionColInRange === undefined) return;
+
         updateSelectedCell(col, row);
     }, [mangledCols, rows, gridSelection, updateSelectedCell]);
 
@@ -938,7 +951,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 onDragStart={onDragStartImpl}
                 onCellFocused={onCellFocused}
                 onHeaderMenuClick={onHeaderMenuClickInner}
-                onItemHovered={onItemHovered}
+                onItemHovered={onItemHoveredImpl}
                 onKeyDown={onKeyDown}
                 onMouseDown={onMouseDown}
                 onMouseUp={onMouseUp}

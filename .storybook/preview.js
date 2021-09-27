@@ -6,3 +6,7 @@ addParameters({
         storySort: (a, b) => a[1].id.localeCompare(b[1].id, undefined, { numeric: true }),
     },
 });
+
+export const parameters = {
+    layout: 'fullscreen',
+  };

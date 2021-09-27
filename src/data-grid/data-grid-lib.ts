@@ -6,12 +6,12 @@ import direction from "direction";
 import { degreesToRadians } from "../common/utils";
 import { assertNever } from "../common/support";
 
-export interface MappedGridColumn extends GridColumn {
+interface MappedGridColumn extends GridColumn {
     sourceIndex: number;
     sticky: boolean;
 }
 
-export function makeEditCell(cell: GridCell): GridCell {
+export function makeEditCell(cell: GridCell, forceBooleanOff: boolean = false): GridCell {
     const isEditable = isEditableGridCell(cell);
 
     switch (cell.kind) {
@@ -19,6 +19,7 @@ export function makeEditCell(cell: GridCell): GridCell {
             return {
                 ...cell,
                 data: false,
+                showUnchecked: forceBooleanOff ? false : cell.showUnchecked,
             };
         case GridCellKind.Text:
             return {
@@ -372,14 +373,13 @@ export function drawDrilldownCell(
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
     let renderX = x + cellXPad;
-    const centerY = y + height / 2;
 
     const renderBoxes: { x: number; width: number }[] = [];
     for (const el of data) {
         if (renderX > x + width) break;
         const textWidth = measureTextWidth(el.text, ctx);
         const imgWidth = el.img === undefined ? 0 : bubbleHeight - 8 + 4;
-        const renderWidth = 8 + textWidth + imgWidth + bubblePad * 2;
+        const renderWidth = textWidth + imgWidth + bubblePad * 2;
         renderBoxes.push({
             x: renderX,
             width: renderWidth,
@@ -392,14 +392,15 @@ export function drawDrilldownCell(
     renderBoxes.forEach(rectInfo => {
         roundedRect(ctx, rectInfo.x, y + (height - bubbleHeight) / 2, rectInfo.width, bubbleHeight, 6);
     });
-    ctx.shadowColor = "rgba(62, 65, 86, 0.4)";
+
+    ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
     ctx.shadowBlur = 1;
     ctx.fillStyle = theme.dataViewer.gridColor;
     ctx.fill();
 
-    ctx.shadowColor = "rgba(62, 65, 86, 0.15)";
+    ctx.shadowColor = "rgba(24, 25, 34, 0.2)";
     ctx.shadowOffsetY = 1;
-    ctx.shadowBlur = 3;
+    ctx.shadowBlur = 5;
     ctx.fillStyle = theme.dataViewer.gridColor;
     ctx.fill();
 
@@ -410,21 +411,6 @@ export function drawDrilldownCell(
     renderBoxes.forEach((rectInfo, i) => {
         const d = data[i];
         let drawX = rectInfo.x + bubblePad;
-
-        ctx.beginPath();
-        roundedPoly(
-            ctx,
-            [
-                { x: drawX + -3, y: centerY - 5 },
-                { x: drawX + -3, y: centerY + 5 },
-                { x: drawX + 2, y: centerY },
-            ],
-            1
-        );
-        ctx.fillStyle = theme.fgColorMedium;
-        ctx.fill();
-
-        drawX += 8;
 
         if (d.img !== undefined) {
             const img = imageLoader.loadOrGetImage(d.img, col, row);

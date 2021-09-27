@@ -1,8 +1,6 @@
 import * as React from "react";
 
-import { withKnobs } from "@storybook/addon-knobs";
 import { StoryFn, StoryContext } from "@storybook/addons";
-import { StoryFnReactReturnType } from "@storybook/react/dist/client/preview/types";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import GridScroller from "./scrolling-data-grid";
 import { styled } from "../common/styles";
@@ -23,10 +21,7 @@ export default {
     title: "Designer/DateViewer/ScrollingDataGrid",
 
     decorators: [
-        withKnobs({
-            escapeHTML: false,
-        }),
-        (fn: StoryFn<StoryFnReactReturnType>, context: StoryContext) => (
+        (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
             <div>
                 <BuilderThemeWrapper width={1500} height={1000} context={context}>
                     <InnerContainer>{fn()}</InnerContainer>
@@ -57,12 +52,15 @@ export function Simplenotest() {
         }));
     }, []);
 
-    const getCellContent = React.useCallback(([col, row]: readonly [number, number]): GridCell => ({
-        kind: GridCellKind.Text,
-        displayData: `${col},${row} Testing things that are way too long`,
-        data: `${col},${row} Testing things that are way too long`,
-        allowOverlay: true,
-    }), []);
+    const getCellContent = React.useCallback(
+        ([col, row]: readonly [number, number]): GridCell => ({
+            kind: GridCellKind.Text,
+            displayData: `${col},${row} Testing things that are way too long`,
+            data: `${col},${row} Testing things that are way too long`,
+            allowOverlay: true,
+        }),
+        []
+    );
 
     return (
         <GridScroller
