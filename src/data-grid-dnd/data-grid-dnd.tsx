@@ -10,6 +10,7 @@ interface Handled {
         dest: number;
     };
 
+    readonly isResizing: boolean;
     readonly onMouseMove?: (event: MouseEvent) => void;
 }
 
@@ -98,7 +99,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         };
     }, [dragCol, dropCol]);
 
-    const maxColumnWidthValue = maxColumnWidth === undefined ? 500 : (maxColumnWidth < 50 ? 50 : maxColumnWidth);
+    const maxColumnWidthValue = maxColumnWidth === undefined ? 500 : maxColumnWidth < 50 ? 50 : maxColumnWidth;
 
     const onMouseMove = React.useCallback(
         (event: MouseEvent) => {
@@ -113,6 +114,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
     return (
         <DataGrid
             {...p}
+            isResizing={resizeCol !== undefined}
             onItemHovered={onItemHoveredImpl}
             onMouseDown={onMouseDownImpl}
             onMouseUp={onMouseUpImpl}
