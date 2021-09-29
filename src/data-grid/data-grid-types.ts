@@ -121,12 +121,14 @@ interface TextCell extends BaseGridCell {
     readonly kind: GridCellKind.Text;
     readonly displayData: string;
     readonly data: string;
+    readonly readonly?: boolean;
 }
 
 interface NumberCell extends BaseGridCell {
     readonly kind: GridCellKind.Number;
     readonly displayData: string;
     readonly data: number | undefined;
+    readonly readonly?: boolean;
 }
 
 interface ImageCell extends BaseGridCell {

@@ -96,6 +96,7 @@ And supports newline chars and automatic wrapping text that just needs to be lon
             displayData: "$10,352",
             allowOverlay: true,
             data: 10352,
+            readonly: true,
         };
     }
     if (col === 5) {
@@ -121,6 +122,7 @@ And supports newline chars and automatic wrapping text that just needs to be lon
             displayData: `הרפתקה חדשה`,
             data: `הרפתקה חדשה`,
             allowOverlay: true,
+            readonly: true,
         };
     }
     if (col === 8) {

@@ -4,6 +4,7 @@ import NumberFormat, { NumberFormatValues } from "react-number-format";
 
 interface Props {
     value: number | undefined;
+    disabled?: boolean;
     onKeyDown: (ev: React.KeyboardEvent<HTMLInputElement>) => void;
     onChange: (values: NumberFormatValues) => void;
 }
@@ -22,11 +23,12 @@ function getThousandSeprator() {
 }
 
 const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { value, onChange, onKeyDown } = p;
+    const { value, onChange, onKeyDown, disabled } = p;
     return (
         <NumberOverlayEditorStyle>
             <NumberFormat
                 autoFocus={true}
+                disabled={disabled === true}
                 thousandSeparator={getThousandSeprator()}
                 decimalSeparator={getDecimalSeparator()}
                 value={value ?? ""}

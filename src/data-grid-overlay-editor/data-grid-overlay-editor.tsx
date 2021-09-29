@@ -120,6 +120,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
             editor = (
                 <GrowingEntry
                     autoFocus={true}
+                    disabled={targetValue.readonly === true}
                     onKeyDown={onKeyDownMultiline}
                     value={targetValue.data}
                     onChange={onStringValueChange}
@@ -140,7 +141,12 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
             break;
         case GridCellKind.Number:
             editor = (
-                <NumberOverlayEditor value={targetValue.data} onKeyDown={onKeyDown} onChange={onNumberValueChange} />
+                <NumberOverlayEditor
+                    disabled={targetValue.readonly === true}
+                    value={targetValue.data}
+                    onKeyDown={onKeyDown}
+                    onChange={onNumberValueChange}
+                />
             );
             break;
         case GridCellKind.Image:
