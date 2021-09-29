@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Theme } from "../common/styles";
-import { withTheme } from "styled-components";
+import { css, withTheme } from "styled-components";
 import ImageWindowLoader from "../common/image-window-loader";
 import {
     drawBoolean,
@@ -42,6 +42,7 @@ export interface DataGridProps {
     readonly firstColSticky: boolean;
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
+    readonly isDragging: boolean;
 
     readonly columns: readonly GridColumn[];
     readonly rows: number;
@@ -129,6 +130,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         onDragStart,
         eventTargetRef,
         isResizing,
+        isDragging,
         isDraggable,
         allowResize,
         prelightCells,
@@ -948,9 +950,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             width,
             height,
             display: "block",
-            cursor: canDrag || isResizing ? "col-resize" : headerHovered ? "pointer" : "default",
+            cursor: isDragging
+                ? "grabbing"
+                : canDrag || isResizing
+                ? "col-resize"
+                : headerHovered
+                ? "pointer"
+                : "default",
         }),
-        [width, height, canDrag, isResizing, headerHovered]
+        [width, height, canDrag, isResizing, isDragging, headerHovered]
     );
 
     const target = eventTargetRef?.current;

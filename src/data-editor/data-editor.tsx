@@ -29,39 +29,30 @@ interface MouseState {
     readonly previousSelection?: GridSelection;
 }
 
-interface Handled {
-    readonly firstColSticky: boolean;
-
-    readonly headerHeight: number;
-    readonly rowHeight: number | ((index: number) => number);
-
-    readonly className?: string;
-
-    readonly selectedColumns?: readonly number[];
-    readonly selectedCell?: GridSelection;
-
-    readonly onMouseDown?: (args: GridMouseEventArgs) => void;
-    readonly onMouseUp?: (args: GridMouseEventArgs) => void;
-
-    readonly onKeyDown?: (event: GridKeyEventArgs) => void;
-    readonly onKeyUp?: (event: GridKeyEventArgs) => void;
-    readonly onCellFocused?: (args: readonly [number, number]) => void;
-
-    readonly canvasRef?: React.MutableRefObject<HTMLCanvasElement | null>;
-    readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
-
-    readonly onSearchResultsChanged?: (results: readonly (readonly [number, number])[], navIndex: number) => void;
-    readonly onVisibleRegionChanged?: (range: Rectangle, tx?: number, ty?: number) => void;
-    readonly searchColOffset: number;
-
-    readonly cellXOffset: number;
-    readonly cellYOffset: number;
-
-    readonly translateX?: number;
-    readonly translateY?: number;
-
-    readonly gridRef?: React.Ref<DataGridRef>;
-}
+type Handled = Pick<
+    DataGridSearchProps,
+    | "firstColSticky"
+    | "headerHeight"
+    | "rowHeight"
+    | "className"
+    | "selectedColumns"
+    | "selectedCell"
+    | "onMouseDown"
+    | "onMouseUp"
+    | "onKeyDown"
+    | "onKeyUp"
+    | "onCellFocused"
+    | "canvasRef"
+    | "scrollRef"
+    | "onSearchResultsChanged"
+    | "onVisibleRegionChanged"
+    | "searchColOffset"
+    | "cellXOffset"
+    | "cellYOffset"
+    | "translateX"
+    | "translateY"
+    | "gridRef"
+>;
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
