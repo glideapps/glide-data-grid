@@ -9,7 +9,7 @@ interface Props
     readonly placeholder?: string;
 }
 
-export const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
+const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
     const { placeholder, value, onKeyDown, ...rest } = props;
     const { onChange, className } = rest;
 
@@ -43,3 +43,5 @@ export const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
         </GrowingEntryStyle>
     );
 };
+
+export default GrowingEntry;
