@@ -98,7 +98,12 @@ export function isEditableGridCell(cell: GridCell): cell is EditableGridCell {
 export function isReadWriteCell(cell: GridCell): cell is EditableGridCell {
     if (!isEditableGridCell(cell)) return false;
 
-    if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
+    if (
+        cell.kind === GridCellKind.Text ||
+        cell.kind === GridCellKind.Number ||
+        cell.kind === GridCellKind.Markdown ||
+        cell.kind === GridCellKind.Uri
+    ) {
         return cell.readonly !== true;
     }
     return true;
@@ -176,9 +181,11 @@ interface RowIDCell extends BaseGridCell {
 interface MarkdownCell extends BaseGridCell {
     readonly kind: GridCellKind.Markdown;
     readonly data: string;
+    readonly readonly?: boolean;
 }
 
 interface UriCell extends BaseGridCell {
     readonly kind: GridCellKind.Uri;
     readonly data: string;
+    readonly readonly?: boolean;
 }

@@ -132,6 +132,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
                 <UriOverlayEditor
                     forceEditMode={forceEditMode}
                     uri={targetValue.data}
+                    readonly={targetValue.readonly === true}
                     onKeyDown={onKeyDown}
                     onChange={onStringValueChange}
                 />
@@ -170,6 +171,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
             editor = (
                 <MarkdownOverlayEditor
                     targetRect={target}
+                    readonly={targetValue.readonly === true}
                     markdown={targetValue.data}
                     onKeyDown={onKeyDownMultiline}
                     onChange={onStringValueChange}
