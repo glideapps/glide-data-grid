@@ -95,6 +95,15 @@ export function isEditableGridCell(cell: GridCell): cell is EditableGridCell {
     return true;
 }
 
+export function isReadWriteCell(cell: GridCell): cell is EditableGridCell {
+    if (!isEditableGridCell(cell)) return false;
+
+    if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
+        return cell.readonly !== true;
+    }
+    return true;
+}
+
 export type GridCell = EditableGridCell | BubbleCell | RowIDCell | LoadingCell | ProtectedCell | DrilldownCell;
 
 export interface Rectangle {
