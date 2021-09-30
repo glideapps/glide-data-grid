@@ -27,7 +27,7 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
     font-family: Roboto, sans-serif;
     font-size: 13px;
 
-    padding: 3px 6.5px 2px;
+    padding: ${p => Math.max(0, (p.targetRect.height - 30) / 2)}px 6.5px 2px;
 
     display: flex;
 

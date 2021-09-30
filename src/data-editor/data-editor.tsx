@@ -15,6 +15,7 @@ import {
     isEditableGridCell,
     Rectangle,
     ColumnSelection,
+    isReadWriteCell,
 } from "../data-grid/data-grid-types";
 import copy from "copy-to-clipboard";
 import { makeEditCell } from "../data-grid/data-grid-lib";
@@ -855,7 +856,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     !event.metaKey &&
                     !event.ctrlKey &&
                     String.fromCharCode(event.keyCode).match(/(\w|\s)/g) &&
-                    event.bounds !== undefined
+                    event.bounds !== undefined &&
+                    isReadWriteCell(getCellContent([col - rowMarkerOffset, row]))
                 ) {
                     let key = String.fromCharCode(event.keyCode);
                     if (!event.shiftKey) {
