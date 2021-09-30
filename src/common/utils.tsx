@@ -60,9 +60,8 @@ export const disabledProps = css`
 
 export const EditPencil: React.FunctionComponent<IconProps> = (props: IconProps) => {
     const fg = props.fgColor ?? "currentColor";
-    const bg = props.bgColor ?? "#ffffff";
     return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill={bg} id="icon-import" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
                 d="M12.7073 7.05029C7.87391 11.8837 10.4544 9.30322 6.03024 13.7273C5.77392 13.9836 5.58981 14.3071 5.50189 14.6587L4.52521 18.5655C4.38789 19.1148 4.88543 19.6123 5.43472 19.475L9.34146 18.4983C9.69313 18.4104 10.0143 18.2286 10.2706 17.9722L16.9499 11.2929"
                 stroke={fg}
@@ -87,10 +86,9 @@ export const EditPencil: React.FunctionComponent<IconProps> = (props: IconProps)
 
 export const Checkmark: React.FunctionComponent<IconProps> = (props: IconProps) => {
     const fg = props.fgColor ?? "currentColor";
-    // const bg = props.bgColor ?? "#ffffff";
 
     return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" id="icon-import" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
                 d="M19 6L10.3802 17L5.34071 11.8758"
                 vectorEffect="non-scaling-stroke"

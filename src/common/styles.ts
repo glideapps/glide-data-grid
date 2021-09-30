@@ -3,6 +3,11 @@ import baseStyled, { ThemedStyledInterface } from "styled-components";
 // Light theme
 const builderThemeBase = {
     overlayName: "LightTheme",
+
+    // Derived from CoreTheme found in glide/app/src/sharedUI/styles.ts
+    b300: "rgba(79,118,255,0.5)",
+    b400: "#4F5DFF",
+
     darkGrey: "#313139",
 
     fgColorDarkest: "#000000",
@@ -17,7 +22,6 @@ const builderThemeBase = {
     bgColorAltLight: "#FAFAFB",
 
     acceptColor: "#4F5DFF",
-    b300: "rgba(79,118,255,0.5)",
 
     linkColor: "#4F5DFF",
 

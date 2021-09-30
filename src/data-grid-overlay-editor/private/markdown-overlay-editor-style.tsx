@@ -9,28 +9,42 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
     width: 100%;
     display: flex;
     align-items: flex-start;
-    justify-content: flex-start;
+    justify-content: space-between;
     position: relative;
     color: ${p => p.theme.fgColorDark};
+    padding-top: 6px;
+
+    /* buttonVNext 
+        variant: accent
+        style:   minimal
+        size:    xsm
+        iconOnly
+        toggle to primary
+    */
 
     .edit-icon {
         position: relative;
-        width: 24px;
-        height: 24px;
-        color: ${p => p.theme.acceptColor};
-        border-radius: 6px;
-
         cursor: pointer;
 
         display: flex;
         justify-content: center;
         align-items: center;
 
+        color: ${p => p.theme.b400};
+
+        padding: 0;
+
+        height: 24px;
+        width: 24px;
+
+        transition: all "0.125s ease";
+
+        border-radius: 6px;
+
         > * {
-            width: 24px;
-            height: 24px;
+            width: 16px;
+            height: 16px;
         }
-        margin: 10px 0px 0px 10px;
     }
 
     .edit-hover {
@@ -42,7 +56,7 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
     .checkmark-hover {
         :hover {
             color: #ffffff;
-            background-color: ${p => p.theme.acceptColor};
+            background-color: ${p => p.theme.b400};
         }
     }
 
@@ -55,5 +69,9 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
         margin-top: 25px;
         opacity: 0;
         padding: 0;
+    }
+
+    .ml-6 {
+        margin-left: 6px;
     }
 `;
