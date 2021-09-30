@@ -8,10 +8,11 @@ interface Props {
     readonly onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
     readonly onChange: (ev: React.ChangeEvent<HTMLTextAreaElement>) => void;
     readonly forceEditMode: boolean;
+    readonly readonly: boolean;
 }
 
 const UriOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { uri, onChange, onKeyDown, forceEditMode } = p;
+    const { uri, onChange, onKeyDown, forceEditMode, readonly } = p;
 
     const [editMode, setEditMode] = React.useState<boolean>(uri === "" || forceEditMode);
 
@@ -30,9 +31,11 @@ const UriOverlayEditor: React.FunctionComponent<Props> = p => {
                     {uri}
                 </a>
             </div>
-            <div className="edit-icon" onClick={onEditClick}>
-                <EditPencil />
-            </div>
+            {!readonly && (
+                <div className="edit-icon" onClick={onEditClick}>
+                    <EditPencil />
+                </div>
+            )}
             <textarea autoFocus={true} onKeyDown={onKeyDown} />
         </UriOverlayEditorStyle>
     );

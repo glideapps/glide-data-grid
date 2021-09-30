@@ -15,6 +15,7 @@ import {
     isEditableGridCell,
     Rectangle,
     ColumnSelection,
+    isReadWriteCell,
 } from "../data-grid/data-grid-types";
 import copy from "copy-to-clipboard";
 import { makeEditCell } from "../data-grid/data-grid-lib";
@@ -29,39 +30,30 @@ interface MouseState {
     readonly previousSelection?: GridSelection;
 }
 
-interface Handled {
-    readonly firstColSticky: boolean;
-
-    readonly headerHeight: number;
-    readonly rowHeight: number | ((index: number) => number);
-
-    readonly className?: string;
-
-    readonly selectedColumns?: readonly number[];
-    readonly selectedCell?: GridSelection;
-
-    readonly onMouseDown?: (args: GridMouseEventArgs) => void;
-    readonly onMouseUp?: (args: GridMouseEventArgs) => void;
-
-    readonly onKeyDown?: (event: GridKeyEventArgs) => void;
-    readonly onKeyUp?: (event: GridKeyEventArgs) => void;
-    readonly onCellFocused?: (args: readonly [number, number]) => void;
-
-    readonly canvasRef?: React.MutableRefObject<HTMLCanvasElement | null>;
-    readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
-
-    readonly onSearchResultsChanged?: (results: readonly (readonly [number, number])[], navIndex: number) => void;
-    readonly onVisibleRegionChanged?: (range: Rectangle, tx?: number, ty?: number) => void;
-    readonly searchColOffset: number;
-
-    readonly cellXOffset: number;
-    readonly cellYOffset: number;
-
-    readonly translateX?: number;
-    readonly translateY?: number;
-
-    readonly gridRef?: React.Ref<DataGridRef>;
-}
+type Handled = Pick<
+    DataGridSearchProps,
+    | "firstColSticky"
+    | "headerHeight"
+    | "rowHeight"
+    | "className"
+    | "selectedColumns"
+    | "selectedCell"
+    | "onMouseDown"
+    | "onMouseUp"
+    | "onKeyDown"
+    | "onKeyUp"
+    | "onCellFocused"
+    | "canvasRef"
+    | "scrollRef"
+    | "onSearchResultsChanged"
+    | "onVisibleRegionChanged"
+    | "searchColOffset"
+    | "cellXOffset"
+    | "cellYOffset"
+    | "translateX"
+    | "translateY"
+    | "gridRef"
+>;
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
@@ -237,7 +229,22 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     focus();
                     setSelectedColumns([]);
                     const index = selectedRows.indexOf(row);
-                    if (index !== -1) {
+                    if (args.shiftKey) {
+                        if (selectedRows.length === 1 && index === -1) {
+                            const start = Math.min(row, selectedRows[0]);
+                            const end = Math.max(row, selectedRows[0]);
+
+                            const newSel: number[] = [];
+                            for (let i = start; i <= end; i++) {
+                                newSel.push(i);
+                            }
+                            setSelectedRows(newSel);
+                        } else if (index === -1) {
+                            setSelectedRows([row]);
+                        } else {
+                            setSelectedRows([]);
+                        }
+                    } else if (index !== -1) {
                         setSelectedRows(removeArrayItem(selectedRows, index));
                     } else {
                         setSelectedRows([...selectedRows, row]);
@@ -570,9 +577,11 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     );
 
     const updateSelectedCell = React.useCallback(
-        (col: number, row: number): boolean => {
+        (col: number, row: number, fromEditingTrailingRow: boolean = false): boolean => {
+            const rowMax = mangledRows - (fromEditingTrailingRow ? 0 : 1);
             col = clamp(rowMarkerOffset, columns.length, col);
-            row = clamp(0, mangledRows - 1, row);
+            row = clamp(0, rowMax, row);
+
             if (col === gridSelection?.cell[0] && row === gridSelection?.cell[1]) return false;
             setGridSelection({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
 
@@ -638,9 +647,9 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             return true;
         },
         [
+            mangledRows,
             rowMarkerOffset,
             columns,
-            mangledRows,
             gridSelection?.cell,
             setGridSelection,
             rowMarkers,
@@ -667,10 +676,11 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
             const [movX, movY] = movement;
             if (gridSelection !== undefined && (movX !== 0 || movY !== 0)) {
-                updateSelectedCell(gridSelection.cell[0] + movX, gridSelection.cell[1] + movY);
+                const isEditingTrailingRow = gridSelection.cell[1] === mangledRows - 1 && newValue !== undefined;
+                updateSelectedCell(gridSelection.cell[0] + movX, gridSelection.cell[1] + movY, isEditingTrailingRow);
             }
         },
-        [gridSelection, focus, mangledOnCellEdited, rowMarkerOffset, updateSelectedCell]
+        [gridSelection, focus, mangledOnCellEdited, rowMarkerOffset, mangledRows, updateSelectedCell]
     );
 
     const onCellFocused = React.useCallback(
@@ -852,7 +862,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     !event.metaKey &&
                     !event.ctrlKey &&
                     String.fromCharCode(event.keyCode).match(/(\w|\s)/g) &&
-                    event.bounds !== undefined
+                    event.bounds !== undefined &&
+                    isReadWriteCell(getCellContent([col - rowMarkerOffset, row]))
                 ) {
                     let key = String.fromCharCode(event.keyCode);
                     if (!event.shiftKey) {

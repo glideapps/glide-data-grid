@@ -96,6 +96,7 @@ And supports newline chars and automatic wrapping text that just needs to be lon
             displayData: "$10,352",
             allowOverlay: true,
             data: 10352,
+            readonly: true,
         };
     }
     if (col === 5) {
@@ -121,6 +122,7 @@ And supports newline chars and automatic wrapping text that just needs to be lon
             displayData: `הרפתקה חדשה`,
             data: `הרפתקה חדשה`,
             allowOverlay: true,
+            readonly: true,
         };
     }
     if (col === 8) {
@@ -205,6 +207,62 @@ export function Simplenotest() {
             allowResize={true}
             onVisibleRegionChanged={onVisibleRegionChanged}
             onColumnResized={onColumnResized}
+        />
+    );
+}
+
+function getDummyRelationColumn(): GridColumn[] {
+    return [
+        {
+            title: "Relation",
+            width: 360,
+            icon: "headerString",
+            hasMenu: true,
+        },
+    ];
+}
+
+function getDummyRelationData([col, row]: readonly [number, number]): GridCell {
+    return {
+        kind: GridCellKind.Drilldown,
+        data: [
+            {
+                text: `Image ${col}-${row}`,
+                img:
+                    "https://allthatsinteresting.com/wordpress/wp-content/uploads/2012/06/iconic-photos-1950-einstein.jpg",
+            },
+            { text: `Text ${col}-${row}` },
+            { text: `More text ${col}-${row}` },
+        ],
+        allowOverlay: true,
+    };
+}
+
+export function RelationColumn() {
+    const [cols, setColumns] = useState(getDummyRelationColumn);
+
+    const onColumnResized = useCallback(
+        (col: GridColumn, newSize: number) => {
+            const index = cols.indexOf(col);
+            const newCols = [...cols];
+            newCols[index] = {
+                ...newCols[index],
+                width: newSize,
+            };
+            setColumns(newCols);
+        },
+        [cols]
+    );
+
+    return (
+        <DataEditor
+            getCellContent={getDummyRelationData}
+            columns={cols}
+            rows={1000}
+            allowResize={true}
+            onColumnResized={onColumnResized}
+            smoothScrollX={true}
+            smoothScrollY={true}
         />
     );
 }
@@ -472,6 +530,57 @@ export function GridSelectionOutOfRangeLessColumnsThanSelection() {
                     setCols([dummyCols[0]]);
                 }
             }}
+        />
+    );
+}
+
+export function GridAddNewRows() {
+    const cols = useMemo(getDummyCols, []);
+
+    const [rowsCount, setRowsCount] = useState(10);
+
+    const onRowAppended = useCallback(() => {
+        setRowsCount(r => r + 1);
+    }, []);
+
+    const [selected, setSelected] = useState<GridSelection | undefined>(undefined);
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={cols}
+            rows={rowsCount}
+            allowResize={true}
+            onRowAppended={onRowAppended}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
+            showTrailingBlankRow={true}
+        />
+    );
+}
+
+export function GridNoTrailingBlankRow() {
+    const cols = useMemo(getDummyCols, []);
+
+    const [selected, setSelected] = useState<GridSelection | undefined>(undefined);
+
+    const onSelected = useCallback((newSel?: GridSelection) => {
+        setSelected(newSel);
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={cols}
+            rows={100}
+            allowResize={true}
+            showTrailingBlankRow={false}
+            onGridSelectionChange={onSelected}
+            gridSelection={selected}
         />
     );
 }

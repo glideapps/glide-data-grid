@@ -4,11 +4,7 @@ import DataGridDnd, { DataGridDndProps } from "../data-grid-dnd/data-grid-dnd";
 import { Rectangle } from "../data-grid/data-grid-types";
 import ScrollRegion, { ScrollRegionUpdateArgs } from "../scroll-region/scroll-region";
 
-interface Handled {
-    readonly width: number;
-    readonly height: number;
-    readonly eventTargetRef?: React.MutableRefObject<HTMLDivElement | null>;
-}
+type Handled = Pick<DataGridDndProps, "width" | "height" | "eventTargetRef">;
 
 export interface ScrollingDataGridProps extends Subtract<DataGridDndProps, Handled> {
     readonly onVisibleRegionChanged?: (range: Rectangle, tx?: number, ty?: number) => void;
