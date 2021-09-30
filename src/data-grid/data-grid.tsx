@@ -41,6 +41,8 @@ export interface DataGridProps {
 
     readonly firstColSticky: boolean;
     readonly allowResize?: boolean;
+    readonly isResizing: boolean;
+    readonly isDragging: boolean;
 
     readonly columns: readonly GridColumn[];
     readonly rows: number;
@@ -127,6 +129,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         canvasRef,
         onDragStart,
         eventTargetRef,
+        isResizing,
+        isDragging,
         isDraggable,
         allowResize,
         prelightCells,
@@ -601,7 +605,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             let clipX = 0;
             for (const c of effectiveCols) {
                 const selected = selectedColumns?.includes(c.sourceIndex);
-                const hovered = hoveredCol === c.sourceIndex && dragAndDropState === undefined;
+                const hovered = hoveredCol === c.sourceIndex && dragAndDropState === undefined && !isResizing;
 
                 const hasSelectedCell = selectedCell !== undefined && selectedCell.cell[0] === c.sourceIndex;
 
@@ -890,6 +894,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         headerHeight,
         selectedColumns,
         hoveredCol,
+        isResizing,
         selectedCell,
         selectedRows,
         rows,
@@ -913,6 +918,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         headerHeight,
         rowHeight,
         rows,
+        isResizing,
         getCellContent,
         selectedRows,
         selectedColumns,
@@ -944,9 +950,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             width,
             height,
             display: "block",
-            cursor: canDrag ? "col-resize" : headerHovered ? "pointer" : "default",
+            cursor: isDragging
+                ? "grabbing"
+                : canDrag || isResizing
+                ? "col-resize"
+                : headerHovered
+                ? "pointer"
+                : "default",
         }),
-        [width, height, headerHovered, canDrag]
+        [width, height, canDrag, isResizing, isDragging, headerHovered]
     );
 
     const target = eventTargetRef?.current;
