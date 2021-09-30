@@ -229,7 +229,22 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     focus();
                     setSelectedColumns([]);
                     const index = selectedRows.indexOf(row);
-                    if (index !== -1) {
+                    if (args.shiftKey) {
+                        if (selectedRows.length === 1 && index === -1) {
+                            const start = Math.min(row, selectedRows[0]);
+                            const end = Math.max(row, selectedRows[0]);
+
+                            const newSel: number[] = [];
+                            for (let i = start; i <= end; i++) {
+                                newSel.push(i);
+                            }
+                            setSelectedRows(newSel);
+                        } else if (index === -1) {
+                            setSelectedRows([row]);
+                        } else {
+                            setSelectedRows([]);
+                        }
+                    } else if (index !== -1) {
                         setSelectedRows(removeArrayItem(selectedRows, index));
                     } else {
                         setSelectedRows([...selectedRows, row]);
