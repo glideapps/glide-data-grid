@@ -48,5 +48,4 @@ export const GrowingEntryStyle = styled.div`
     position: relative;
     margin-top: 5px;
     width: 100%;
-    /* min-width: 100%; */
 `;
