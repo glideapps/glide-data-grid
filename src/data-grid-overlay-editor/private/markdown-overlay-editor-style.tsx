@@ -6,19 +6,19 @@ interface Props {
 }
 export const MarkdownOverlayEditorStyle = styled.div<Props>`
     min-width: ${p => p.targetRect.width}px;
+    width: 100%;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
     position: relative;
     color: ${p => p.theme.fgColorDark};
 
     .edit-icon {
-        position: absolute;
-        top: 4px;
-        right: 4px;
+        position: relative;
         width: 24px;
         height: 24px;
         color: ${p => p.theme.acceptColor};
+        border-radius: 6px;
 
         cursor: pointer;
 
@@ -30,15 +30,30 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
             width: 24px;
             height: 24px;
         }
+        margin: 10px 0px 0px 10px;
+    }
+
+    .edit-hover {
+        :hover {
+            background-color: ${p => p.theme.b300};
+        }
+    }
+
+    .checkmark-hover {
+        :hover {
+            color: #ffffff;
+            background-color: ${p => p.theme.acceptColor};
+        }
     }
 
     .md-edit-textarea {
-        position: absolute;
+        position: relative;
         top: 0px;
         left: 0px;
         width: 0px;
         height: 0px;
         margin-top: 25px;
         opacity: 0;
+        padding: 0;
     }
 `;

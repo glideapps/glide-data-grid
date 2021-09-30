@@ -47,6 +47,6 @@ export const ShadowBox = styled.div`
 export const GrowingEntryStyle = styled.div`
     position: relative;
     margin-top: 5px;
-
-    min-width: 100%;
+    width: 100%;
+    /* min-width: 100%; */
 `;

@@ -59,29 +59,45 @@ export const disabledProps = css`
 `;
 
 export const EditPencil: React.FunctionComponent<IconProps> = (props: IconProps) => {
-    const bg = props.bgColor ?? "currentColor";
-    const fg = props.fgColor ?? "#ffffff";
+    const fg = props.fgColor ?? "currentColor";
+    const bg = props.bgColor ?? "#ffffff";
     return (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="8" cy="8" r="8" fill={bg} />
+        <svg width="16" height="16" viewBox="0 0 24 24" fill={bg} id="icon-import" xmlns="http://www.w3.org/2000/svg">
             <path
-                d="M4.25 10.1874V11.7499H5.8125L10.4208 7.14161L8.85833 5.57911L4.25 10.1874ZM11.6292 5.93328C11.7917 5.77078 11.7917 5.50828 11.6292 5.34578L10.6542 4.37078C10.4917 4.20828 10.2292 4.20828 10.0667 4.37078L9.30417 5.13328L10.8667 6.69578L11.6292 5.93328V5.93328Z"
-                fill={fg}
+                d="M12.7073 7.05029C7.87391 11.8837 10.4544 9.30322 6.03024 13.7273C5.77392 13.9836 5.58981 14.3071 5.50189 14.6587L4.52521 18.5655C4.38789 19.1148 4.88543 19.6123 5.43472 19.475L9.34146 18.4983C9.69313 18.4104 10.0143 18.2286 10.2706 17.9722L16.9499 11.2929"
+                stroke={fg}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+                vectorEffect="non-scaling-stroke"
+            />
+            <path
+                d="M20.4854 4.92901L19.0712 3.5148C18.2901 2.73375 17.0238 2.73375 16.2428 3.5148L14.475 5.28257C15.5326 7.71912 16.4736 8.6278 18.7176 9.52521L20.4854 7.75744C21.2665 6.97639 21.2665 5.71006 20.4854 4.92901Z"
+                stroke={fg}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+                vectorEffect="non-scaling-stroke"
             />
         </svg>
     );
 };
 
 export const Checkmark: React.FunctionComponent<IconProps> = (props: IconProps) => {
-    const bg = props.bgColor ?? "currentColor";
-    const fg = props.fgColor ?? "#ffffff";
+    const fg = props.fgColor ?? "currentColor";
+    // const bg = props.bgColor ?? "#ffffff";
+
     return (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill={"none"} xmlns="http://www.w3.org/2000/svg">
-            <circle cx="8" cy="8" r="8" fill={bg} />
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" id="icon-import" xmlns="http://www.w3.org/2000/svg">
             <path
-                d="M6.84199 11.5072C6.53693 11.832 6.04414 11.832 5.73907 11.5072L2.93094 8.51777C2.62588 8.19301 2.62588 7.6684 2.93094 7.34364C3.23601 7.01888 3.7288 7.01888 4.03386 7.34364L6.28662 9.74187L11.6682 4.01277C11.9733 3.68801 12.4661 3.68801 12.7711 4.01277C13.0762 4.33753 13.0762 4.86214 12.7711 5.1869L6.84199 11.5072Z"
-                fill={fg}
-                stroke="none"
+                d="M19 6L10.3802 17L5.34071 11.8758"
+                vectorEffect="non-scaling-stroke"
+                stroke={fg}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
             />
         </svg>
     );

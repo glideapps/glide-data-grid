@@ -17,6 +17,7 @@ const builderThemeBase = {
     bgColorAltLight: "#FAFAFB",
 
     acceptColor: "#4F5DFF",
+    b300: "rgba(79,118,255,0.5)",
 
     linkColor: "#4F5DFF",
 
