@@ -1024,9 +1024,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 setHoveredItem(args.kind === "out-of-bounds" ? undefined : args.location);
                 hoveredRef.current = args;
             }
-            if (args.kind !== "out-of-bounds") {
-                setHoveredOnEdge(args.isEdge && allowResize === true);
-            }
+
+            setHoveredOnEdge(args.kind !== "out-of-bounds" && args.isEdge && allowResize === true);
 
             onMouseMove?.(ev);
         },
