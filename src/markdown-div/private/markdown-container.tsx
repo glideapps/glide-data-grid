@@ -3,8 +3,11 @@ import styled from "styled-components";
 export const MarkdownContainer = styled.div`
     word-break: break-word;
     -webkit-touch-callout: default;
+    padding-top: 6px;
 
-    padding-right: 26px;
+    > * {
+        margin: 0;
+    }
 
     & *:last-child {
         margin-bottom: 0;
