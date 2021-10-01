@@ -2,7 +2,7 @@ import { Rectangle } from "data-grid/data-grid-types";
 import { styled } from "../../common/styles";
 
 interface Props {
-  targetRect: Rectangle;
+    targetRect: Rectangle;
 }
 /* buttonVNext 
         variant: accent
@@ -13,13 +13,13 @@ interface Props {
     */
 
 export const MarkdownOverlayEditorStyle = styled.div<Props>`
-    min-width: ${(p) => p.targetRect.width}px;
+    min-width: ${p => p.targetRect.width}px;
     width: 100%;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     position: relative;
-    color: ${(p) => p.theme.fgColorDark};
+    color: ${p => p.theme.fgColorDark};
 
     .edit-icon {
         position: relative;
@@ -29,12 +29,13 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
         justify-content: center;
         align-items: center;
 
-        color: ${(p) => p.theme.b400};
+        color: ${p => p.theme.b400};
 
         padding: 0;
 
         height: 24px;
         width: 24px;
+        flex-shrink: 0;
 
         transition: all "0.125s ease";
 
@@ -48,14 +49,14 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
 
     .edit-hover {
         :hover {
-            background-color: ${(p) => p.theme.b300};
+            background-color: ${p => p.theme.b300};
         }
     }
 
     .checkmark-hover {
         :hover {
             color: #ffffff;
-            background-color: ${(p) => p.theme.b400};
+            background-color: ${p => p.theme.b400};
         }
     }
 
