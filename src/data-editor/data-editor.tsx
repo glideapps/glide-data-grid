@@ -331,7 +331,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     cell: [col, row],
                     forceEditMode: initialValue !== undefined,
                 });
-            } else if (c.kind === GridCellKind.Boolean) {
+            } else if (c.kind === GridCellKind.Boolean && c.allowEdit) {
                 mangledOnCellEdited?.([col - rowMarkerOffset, row], {
                     ...c,
                     data: !c.data,

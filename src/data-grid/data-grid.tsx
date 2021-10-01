@@ -323,7 +323,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     drawTextCell(ctx, theme, cell.data, x, y, w, h);
                 } else if (cell.kind === GridCellKind.Boolean) {
                     if (cell.data || cell.showUnchecked) {
-                        drawBoolean(ctx, theme, cell.data, x, y, w, h, highlighted);
+                        drawBoolean(ctx, theme, cell.data, x, y, w, h, highlighted, cell.allowEdit);
                     }
                 } else if (cell.kind === GridCellKind.Bubble) {
                     drawBubbles(ctx, theme, cell.data, x, y, w, h, highlighted);

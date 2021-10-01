@@ -710,3 +710,40 @@ export function MarkdownEdits() {
         />
     );
 }
+
+export const CanEditBoolean = () => {
+    const [vals, setVals] = useState<[boolean, boolean]>([false, false]);
+    return (
+        <DataEditor
+            columns={[
+                {
+                    title: "Editable",
+                    width: 100,
+                },
+                {
+                    title: "Readonly",
+                    width: 100,
+                },
+            ]}
+            rows={1}
+            getCellContent={([col]) => {
+                return {
+                    kind: GridCellKind.Boolean,
+                    allowEdit: col === 0,
+                    allowOverlay: false,
+                    data: vals[col],
+                    showUnchecked: true,
+                };
+            }}
+            onCellEdited={([col], newVal) => {
+                if (newVal.kind === GridCellKind.Boolean) {
+                    setVals(cv => {
+                        const f = [...cv];
+                        f.splice(col, 1, newVal.data);
+                        return f as [boolean, boolean];
+                    });
+                }
+            }}
+        />
+    );
+};

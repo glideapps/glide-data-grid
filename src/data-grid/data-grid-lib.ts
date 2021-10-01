@@ -275,10 +275,13 @@ export function drawBoolean(
     y: number,
     width: number,
     height: number,
-    highlighted: boolean
+    highlighted: boolean,
+    canEdit: boolean
 ) {
     const centerX = x + width / 2;
     const centerY = y + height / 2;
+
+    ctx.globalAlpha = canEdit ? 1 : 0.5;
 
     if (data) {
         ctx.beginPath();
@@ -305,6 +308,8 @@ export function drawBoolean(
         ctx.strokeStyle = theme.fgColorLight;
         ctx.stroke();
     }
+
+    ctx.globalAlpha = 1;
 }
 
 const itemMargin = 4;
