@@ -498,6 +498,60 @@ export function GridSelectionOutOfRangeNoColumns() {
     );
 }
 
+type ResizableColumnsSizeMap = Record<string, number>;
+
+function getResizableColumnsInitSize(): ResizableColumnsSizeMap {
+    return {
+        "resize me 0": 120,
+        "resize me 1": 120,
+        "resize me 2": 120,
+        "resize me 3": 120,
+        "resize me 4": 120,
+        "resize me 5": 120,
+        "resize me 6": 120,
+        "resize me 7": 120,
+    };
+}
+
+function getResizableColumns(sizeMap: ResizableColumnsSizeMap): GridColumn[] {
+    return Object.entries(sizeMap).map(([title, width]) => ({
+        title,
+        width,
+        icon: "headerString",
+        hasMenu: true,
+    }));
+}
+
+export function ResizableColumns() {
+    const [colSizes, setColSizes] = useState(getResizableColumnsInitSize);
+
+    const cols = useMemo(() => {
+        return getResizableColumns(colSizes);
+    }, [colSizes]);
+
+    const onColumnResized = useCallback((column: GridColumn, newSize: number) => {
+        setColSizes(prevColSizes => {
+            return {
+                ...prevColSizes,
+                [column.title]: newSize,
+            };
+        });
+    }, []);
+
+    return (
+        <DataEditor
+            getCellContent={getDummyData}
+            columns={cols}
+            rows={20}
+            isDraggable={false}
+            smoothScrollX={true}
+            smoothScrollY={true}
+            allowResize={true}
+            onColumnResized={onColumnResized}
+        />
+    );
+}
+
 export function GridSelectionOutOfRangeLessColumnsThanSelection() {
     const dummyCols = useMemo(
         () => getDummyCols().map(v => ({ ...v, width: 300, title: "Making column smaller used to crash!" })),
