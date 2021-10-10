@@ -362,21 +362,25 @@ export function IdealSize() {
         { title: "Square", width: 250 },
     ];
     return (
-        <DataEditor
-            isDraggable={true}
-            onDragStart={args => {
-                args.setData("text", "testing");
-            }}
-            getCellContent={getData}
-            columns={cols}
-            smoothScrollX={true}
-            smoothScrollY={true}
-            rowHeight={50}
-            headerHeight={50}
-            showTrailingBlankRow={false}
-            rowMarkers={false}
-            rows={9}
-        />
+        <div style={{ width: 500, height: 500, position: "relative" }}>
+            <DataEditorContainer width={500} height={500}>
+                <DataEditor
+                    isDraggable={true}
+                    onDragStart={args => {
+                        args.setData("text", "testing");
+                    }}
+                    getCellContent={getData}
+                    columns={cols}
+                    smoothScrollX={true}
+                    smoothScrollY={true}
+                    rowHeight={50}
+                    headerHeight={50}
+                    showTrailingBlankRow={false}
+                    rowMarkers={false}
+                    rows={9}
+                />
+            </DataEditorContainer>
+        </div>
     );
 }
 

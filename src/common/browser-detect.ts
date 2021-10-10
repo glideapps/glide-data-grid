@@ -21,4 +21,3 @@ export const browserIsSafari =
 
 // next.js apps don't have window available at import time, so this will fail if its not lazy.
 export const browserIsOSX = lazy(() => window.navigator.platform.toLowerCase().startsWith("mac"));
-export const isFirefox = userAgent.includes("Firefox");

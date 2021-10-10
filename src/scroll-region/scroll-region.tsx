@@ -1,4 +1,3 @@
-import { isFirefox } from "../common/browser-detect";
 import * as React from "react";
 import { ScrollRegionStyle } from "./scroll-region-style";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -39,7 +38,7 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
         const el = scroller.current;
         if (el === null) return;
         update({
-            clientHeight: el.clientHeight - (isFirefox ? 4 : 0),
+            clientHeight: el.clientHeight,
             clientWidth: el.clientWidth,
             scrollLeft: Math.max(0, el.scrollLeft),
             scrollTop: Math.max(0, el.scrollTop),
