@@ -18,7 +18,7 @@ import DataEditor from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
 export default {
-    title: "Designer/DateViewer/DataEditor",
+    title: "DataEditor",
 
     decorators: [
         (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
@@ -743,6 +743,47 @@ export const CanEditBoolean = () => {
                         return f as [boolean, boolean];
                     });
                 }
+            }}
+        />
+    );
+};
+
+export const SimpleEditable = () => {
+    const [vals, setVals] = useState<[string, string][]>(() => {
+        const result: [string, string][] = [];
+        for (let i = 0; i < 2000; i++) {
+            result.push(["Edit", "Me"]);
+        }
+        return result;
+    });
+
+    return (
+        <DataEditor
+            columns={[
+                {
+                    title: "Column A",
+                    width: 250,
+                },
+                {
+                    title: "Column B",
+                    width: 250,
+                },
+            ]}
+            rows={vals.length}
+            getCellContent={([col, row]) => ({
+                kind: GridCellKind.Text,
+                allowOverlay: true,
+                data: vals[row][col],
+                displayData: vals[row][col],
+            })}
+            onCellEdited={([col, row], newVal) => {
+                const newVals = [...vals];
+                const newRow: [string, string] = [...newVals[row]];
+                if (typeof newVal.data === "string") {
+                    newRow[col] = newVal.data;
+                }
+                newVals[row] = newRow;
+                setVals(newVals);
             }}
         />
     );

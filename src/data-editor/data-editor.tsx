@@ -150,10 +150,14 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
     const gridRef = React.useRef<DataGridRef | null>(null);
 
-    const focus = React.useCallback(() => {
-        window.requestAnimationFrame(() => {
+    const focus = React.useCallback((immediate?: boolean) => {
+        if (immediate === true) {
             gridRef.current?.focus();
-        });
+        } else {
+            window.requestAnimationFrame(() => {
+                gridRef.current?.focus();
+            });
+        }
     }, []);
 
     const mangledRows = showTrailingBlankRow ? rows + 1 : rows;
@@ -579,7 +583,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const updateSelectedCell = React.useCallback(
         (col: number, row: number, fromEditingTrailingRow: boolean = false): boolean => {
             const rowMax = mangledRows - (fromEditingTrailingRow ? 0 : 1);
-            col = clamp(rowMarkerOffset, columns.length, col);
+            col = clamp(rowMarkerOffset, columns.length - 1 + rowMarkerOffset, col);
             row = clamp(0, rowMax, row);
 
             if (col === gridSelection?.cell[0] && row === gridSelection?.cell[1]) return false;
@@ -671,8 +675,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     newValue as EditableGridCell
                 );
             }
+            focus(true);
             setOverlay(undefined);
-            focus();
 
             const [movX, movY] = movement;
             if (gridSelection !== undefined && (movX !== 0 || movY !== 0)) {

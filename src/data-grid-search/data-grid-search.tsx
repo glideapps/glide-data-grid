@@ -358,15 +358,22 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         ref={inputRef}
                         onChange={onSearchChange}
                         value={searchString}
+                        tabIndex={showSearch ? undefined : -1}
                         onKeyDownCapture={onSearchKeyDown}
                     />
-                    <button onClick={onPrev} disabled={(searchStatus?.results ?? 0) === 0}>
+                    <button
+                        tabIndex={showSearch ? undefined : -1}
+                        onClick={onPrev}
+                        disabled={(searchStatus?.results ?? 0) === 0}>
                         <UpArrow />
                     </button>
-                    <button onClick={onNext} disabled={(searchStatus?.results ?? 0) === 0}>
+                    <button
+                        tabIndex={showSearch ? undefined : -1}
+                        onClick={onNext}
+                        disabled={(searchStatus?.results ?? 0) === 0}>
                         <DownArrow />
                     </button>
-                    <button onClick={onClose}>
+                    <button tabIndex={showSearch ? undefined : -1} onClick={onClose}>
                         <CloseX />
                     </button>
                 </div>

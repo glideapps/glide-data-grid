@@ -1191,14 +1191,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const focusRef = React.useRef<HTMLElement | null>(null);
     const focusElement = React.useCallback(
         (el: HTMLElement | null) => {
+            // We don't want to steal the focus if we don't currently own the focus.
+            if (!ref.current?.contains(document.activeElement)) return;
             if (el === null) {
-                window.requestAnimationFrame(() => {
-                    canvasRef?.current?.focus();
-                });
+                canvasRef?.current?.focus();
             } else {
-                window.requestAnimationFrame(() => {
-                    el.focus();
-                });
+                el.focus();
             }
             focusRef.current = el;
         },
@@ -1210,14 +1208,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         () => ({
             focus: () => {
                 const el = focusRef.current;
-                if (el === null) {
-                    window.requestAnimationFrame(() => {
-                        canvasRef?.current?.focus();
-                    });
+                // The element in the ref may have been removed however our callback method ref
+                // won't see the removal so bad things happen. Checking to see if the element is
+                // no longer attached is enough to resolve the problem. In the future this
+                // should be replaced with something much more robust.
+                if (el === null || !document.contains(el)) {
+                    canvasRef?.current?.focus();
                 } else {
-                    window.requestAnimationFrame(() => {
-                        el.focus();
-                    });
+                    el.focus();
                 }
             },
         }),
