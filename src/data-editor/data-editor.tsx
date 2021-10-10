@@ -583,7 +583,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const updateSelectedCell = React.useCallback(
         (col: number, row: number, fromEditingTrailingRow: boolean = false): boolean => {
             const rowMax = mangledRows - (fromEditingTrailingRow ? 0 : 1);
-            col = clamp(rowMarkerOffset, columns.length, col);
+            col = clamp(rowMarkerOffset, columns.length - 1 + rowMarkerOffset, col);
             row = clamp(0, rowMax, row);
 
             if (col === gridSelection?.cell[0] && row === gridSelection?.cell[1]) return false;

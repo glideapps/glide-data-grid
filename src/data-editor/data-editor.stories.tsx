@@ -18,7 +18,7 @@ import DataEditor from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
 export default {
-    title: "Designer/DateViewer/DataEditor",
+    title: "DataEditor",
 
     decorators: [
         (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (

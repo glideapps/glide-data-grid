@@ -5,7 +5,7 @@ import { BuilderThemeWrapper } from "../stories/story-utils";
 import ScrollRegion from "./scroll-region";
 
 export default {
-    title: "Designer/DateViewer/ScrollRegion",
+    title: "Subcomponents/ScrollRegion",
 
     decorators: [
         (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (

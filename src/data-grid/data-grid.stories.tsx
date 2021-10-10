@@ -6,7 +6,7 @@ import DataGrid from "./data-grid";
 import { GridCellKind } from "./data-grid-types";
 
 export default {
-    title: "Designer/DateViewer/DataGrid",
+    title: "Subcomponents/DataGrid",
 
     decorators: [
         (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
@@ -43,6 +43,8 @@ export function Simplenotest() {
                 owned: true,
             })}
             firstColSticky={false}
+            isResizing={false}
+            isDragging={false}
         />
     );
 }
@@ -72,6 +74,8 @@ export function SelectedCellnotest() {
             })}
             selectedCell={{ cell: [2, 2], range: { x: 2, y: 2, width: 1, height: 1 } }}
             firstColSticky={false}
+            isResizing={false}
+            isDragging={false}
         />
     );
 }
@@ -101,6 +105,8 @@ export function SelectedRownotest() {
             })}
             selectedRows={[2, 4]}
             firstColSticky={false}
+            isResizing={false}
+            isDragging={false}
         />
     );
 }
@@ -130,6 +136,8 @@ export const SelectedColumnnotest = () => {
             })}
             selectedColumns={[2, 4]}
             firstColSticky={false}
+            isResizing={false}
+            isDragging={false}
         />
     );
 };

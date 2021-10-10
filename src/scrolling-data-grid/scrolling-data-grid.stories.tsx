@@ -18,7 +18,7 @@ const InnerContainer = styled.div`
 `;
 
 export default {
-    title: "Designer/DateViewer/ScrollingDataGrid",
+    title: "Subcomponents/ScrollingDataGrid",
 
     decorators: [
         (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
