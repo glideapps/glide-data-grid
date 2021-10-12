@@ -139,7 +139,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
             getContent: () => {
                 return {
                     kind: GridCellKind.Image,
-                    data: [faker.image.people()],
+                    data: [`${faker.image.people()}?random=${Math.round(Math.random() * 1000)}`],
                     allowOverlay: true,
                     allowAdd: false,
                     readonly: true,
@@ -328,6 +328,11 @@ export const ResizableColumns: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
+(ResizableColumns as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
 
 export const SmallEditableGrid = () => {
     const { cols, getCellContent, setCellValue } = useMockDataGenerator(5, false);
@@ -351,6 +356,11 @@ export const SmallEditableGrid = () => {
         </BeautifulWrapper>
     );
 };
+(SmallEditableGrid as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
 
 export const OneMillionRows: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(5);
@@ -362,6 +372,11 @@ export const OneMillionRows: React.VFC = () => {
             <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={1_000_000} />
         </BeautifulWrapper>
     );
+};
+(OneMillionRows as any).parameters = {
+    options: {
+        showPanel: false,
+    },
 };
 
 export const TwoThousandCols: React.VFC = () => {
@@ -375,6 +390,11 @@ export const TwoThousandCols: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
+(TwoThousandCols as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
 
 export const TenMillionCells: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(100);
@@ -386,6 +406,11 @@ export const TenMillionCells: React.VFC = () => {
             <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={100_000} />
         </BeautifulWrapper>
     );
+};
+(TenMillionCells as any).parameters = {
+    options: {
+        showPanel: false,
+    },
 };
 
 interface SmoothScrollingGridProps {
@@ -420,6 +445,11 @@ export const SmoothScrollingGrid: React.FC<SmoothScrollingGridProps> = p => {
     smoothScrollX: false,
     smoothScrollY: false,
 };
+(SmoothScrollingGrid as any).parameters = {
+    options: {
+        showPanel: true,
+    },
+};
 
 interface AddColumnsProps {
     columnsCount: number;
@@ -436,9 +466,22 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
         </BeautifulWrapper>
     );
 };
-
 (AddColumns as any).args = {
     columnsCount: 10,
+};
+(AddColumns as any).argTypes = {
+    columnsCount: {
+        control: {
+            type: "range",
+            min: 5,
+            max: 200,
+        },
+    },
+};
+(AddColumns as any).parameters = {
+    options: {
+        showPanel: true,
+    },
 };
 
 export const AutomaticRowMarkers: React.VFC = () => {
@@ -466,6 +509,11 @@ export const AutomaticRowMarkers: React.VFC = () => {
             />
         </BeautifulWrapper>
     );
+};
+(AutomaticRowMarkers as any).parameters = {
+    options: {
+        showPanel: false,
+    },
 };
 
 interface RowAndHeaderSizesProps {
@@ -504,7 +552,6 @@ export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
     rowHeight: 34,
     headerHeight: 34,
 };
-
 (RowAndHeaderSizes as any).argTypes = {
     rowHeight: {
         control: {
@@ -519,5 +566,10 @@ export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
             min: 20,
             max: 200,
         },
+    },
+};
+(RowAndHeaderSizes as any).parameters = {
+    options: {
+        showPanel: true,
     },
 };
