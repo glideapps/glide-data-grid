@@ -860,6 +860,39 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             x += c.width;
         }
 
+        if (selectedRows !== undefined && selectedRows.length > 0) {
+            let y = headerHeight + translateY;
+            row = cellYOffset;
+
+            ctx.save();
+
+            while (y < height) {
+                const rh = getRowHeight(row);
+                const rowSelected = selectedRows?.includes(row);
+
+                if (
+                    drawRegions.length === 0 ||
+                    drawRegions.find(
+                        drawRegion =>
+                            (y >= drawRegion.y && y <= drawRegion.y + drawRegion.height) ||
+                            (drawRegion.y >= y && drawRegion.y <= y + rh)
+                    )
+                ) {
+                    ctx.beginPath();
+
+                    if (rowSelected) {
+                        ctx.fillStyle = theme.dataViewer.bgSelected;
+                        ctx.fillRect(x + 1, y + 1, 100000 - 1, rh - 1);
+                    }
+                }
+
+                y += rh;
+                row++;
+            }
+
+            ctx.restore();
+        }
+
         imageLoader.current?.setWindow({
             x: cellXOffset,
             y: cellYOffset,

@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { StoryFn, StoryContext } from "@storybook/addons";
+import { StoryFn, StoryContext, useState } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 
 import { GridCell, GridCellKind } from "../data-grid/data-grid-types";
@@ -67,5 +67,48 @@ export function Bug70() {
                 />
             </DataEditorContainer>
         </Bug70Style>
+    );
+}
+
+const filterColumnsGen = ([col, row]: readonly [number, number]): GridCell => ({
+    allowOverlay: true,
+    kind: GridCellKind.Text,
+    data: `${col} - ${row}`,
+    displayData: `${col} - ${row}`,
+});
+
+const filteringColumns = [
+    { title: "Col AAAA", width: 120 },
+    { title: "Col AAA", width: 120 },
+    { title: "Col AA", width: 120 },
+    { title: "Col A", width: 120 },
+    { title: "Col", width: 120 },
+];
+
+export function FilterColumns() {
+    const [searchText, setSearchText] = useState("");
+
+    const cols = useMemo(() => {
+        filteringColumns.filter(c => c.title.includes(searchText));
+    });
+
+    const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchText(e.target.value);
+    };
+
+    return (
+        <div>
+            <input value={searchText} onChange={onInputChange} />
+            <DataEditorContainer width={1000} height={500}>
+                <DataEditor
+                    rows={100}
+                    rowMarkers={false}
+                    columns={cols}
+                    getCellContent={filterColumnsGen}
+                    smoothScrollX={true}
+                    smoothScrollY={true}
+                />
+            </DataEditorContainer>
+        </div>
     );
 }
