@@ -333,7 +333,7 @@ const defaultProps: Partial<DataEditorProps> = {
 };
 
 export const ResizableColumns: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized } = useMockDataGenerator(5);
+    const { cols, getCellContent, onColumnResized } = useMockDataGenerator(6);
 
     return (
         <BeautifulWrapper
@@ -389,7 +389,7 @@ export const SmallEditableGrid = () => {
 };
 
 export const OneMillionRows: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(5);
+    const { cols, getCellContent } = useMockDataGenerator(6);
 
     return (
         <BeautifulWrapper
@@ -505,7 +505,7 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
     columnsCount: {
         control: {
             type: "range",
-            min: 5,
+            min: 6,
             max: 200,
         },
     },
@@ -517,7 +517,7 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
 };
 
 export const AutomaticRowMarkers: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(5);
+    const { cols, getCellContent } = useMockDataGenerator(6);
 
     const [selectedRows, setSelectedRows] = React.useState<readonly number[]>();
 
@@ -549,7 +549,7 @@ export const AutomaticRowMarkers: React.VFC = () => {
 };
 
 export const DrawCustomCells: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(5);
+    const { cols, getCellContent } = useMockDataGenerator(6);
 
     return (
         <BeautifulWrapper
@@ -595,7 +595,7 @@ export const DrawCustomCells: React.VFC = () => {
 };
 
 export const RearrangeColumns: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(5);
+    const { cols, getCellContent } = useMockDataGenerator(6);
 
     // This is a dirty hack because the mock generator doesn't really support changing this. In a real data source
     // you should track indexes properly
@@ -647,7 +647,7 @@ interface RowAndHeaderSizesProps {
     headerHeight: number;
 }
 export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
-    const { cols, getCellContent } = useMockDataGenerator(5);
+    const { cols, getCellContent } = useMockDataGenerator(6);
 
     const [selectedRows, setSelectedRows] = React.useState<readonly number[]>();
 
