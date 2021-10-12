@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Storybook Build and Deploy
 on:
     push:
         paths: ["src/**"]
