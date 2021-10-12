@@ -1,10 +1,10 @@
-import { dontAwait } from "./support";
 import { Rectangle } from "../data-grid/data-grid-types";
 import throttle from "lodash/throttle";
 import debounce from "lodash/debounce";
 
 interface LoadResult {
     img: HTMLImageElement | undefined;
+    cancel?: () => void;
     url: string;
     cells: Set<number>;
 }
@@ -51,15 +51,24 @@ class ImageWindowLoader {
     private clearOutOfWindow = debounce(() => {
         const old = this.cache;
         this.cache = {};
-        Object.values(old)
-            .map(v => ({
-                ...v,
-                cells: new Set(Array.from(v.cells).filter(n => this.isInWindow(...unpackNumberToColRow(n)))),
-            }))
+        const whittled = Object.values(old).map(v => ({
+            ...v,
+            cells: new Set(Array.from(v.cells).filter(n => this.isInWindow(...unpackNumberToColRow(n)))),
+        }));
+
+        whittled
             .filter(v => v.cells.size > 0)
             .forEach(v => {
                 this.cache[`${v.url}`] = v;
             });
+
+        for (const v of whittled) {
+            if (v.cells.size === 0) {
+                v.cancel?.();
+            } else {
+                this.cache[v.url] = v;
+            }
+        }
     }, 600);
 
     public setWindow(window: Rectangle): void {
@@ -96,10 +105,15 @@ class ImageWindowLoader {
             //     ) ?? url;
             img.src = url;
 
+            let cancelled = false;
             const result: LoadResult = {
                 img: undefined,
                 cells: new Set([packColRowToNumber(col, row)]),
                 url,
+                cancel: () => {
+                    cancelled = true;
+                    img.src = "";
+                },
             };
 
             const load = async () => {
@@ -110,7 +124,7 @@ class ImageWindowLoader {
                     errored = true;
                 }
                 const toWrite = this.cache[key];
-                if (toWrite !== undefined && !errored) {
+                if (toWrite !== undefined && !errored && !cancelled) {
                     toWrite.img = img;
                     for (const packed of Array.from(toWrite.cells)) {
                         this.loadedLocations.push(unpackNumberToColRow(packed));
@@ -119,7 +133,7 @@ class ImageWindowLoader {
                 }
             };
 
-            dontAwait(load());
+            void load();
             this.cache[key] = result;
             return undefined;
         }

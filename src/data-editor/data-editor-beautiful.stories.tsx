@@ -387,7 +387,13 @@ export const OneHundredThousandCols: React.VFC = () => {
     return (
         <BeautifulWrapper
             title="One Hundred Thousand Columns"
-            description={<p>Data grid supports way more columns than you will ever need.</p>}>
+            description={
+                <p>
+                    {
+                        "Data grid supports way more columns than you will ever need. Also this is rendering 10 million cells but that's not important."
+                    }
+                </p>
+            }>
             <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={1000} />
         </BeautifulWrapper>
     );
