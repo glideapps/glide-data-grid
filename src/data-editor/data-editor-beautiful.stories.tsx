@@ -381,18 +381,18 @@ export const OneMillionRows: React.VFC = () => {
     },
 };
 
-export const TwoThousandCols: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(2000);
+export const OneHundredThousandCols: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(100000);
 
     return (
         <BeautifulWrapper
-            title="Two Thousand Columns"
+            title="One Hundred Thousand Columns"
             description={<p>Data grid supports way more columns than you will ever need.</p>}>
             <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={1000} />
         </BeautifulWrapper>
     );
 };
-(TwoThousandCols as any).parameters = {
+(OneHundredThousandCols as any).parameters = {
     options: {
         showPanel: false,
     },
