@@ -1,6 +1,5 @@
 import { Rectangle } from "../data-grid/data-grid-types";
 import throttle from "lodash/throttle";
-import debounce from "lodash/debounce";
 
 interface LoadResult {
     img: HTMLImageElement | undefined;
@@ -48,7 +47,7 @@ class ImageWindowLoader {
         this.loadedLocations = [];
     }, 20);
 
-    private clearOutOfWindow = debounce(() => {
+    private clearOutOfWindowImpl = () => {
         const old = this.cache;
         this.cache = {};
         const whittled = Object.values(old).map(v => ({
@@ -69,7 +68,12 @@ class ImageWindowLoader {
                 this.cache[v.url] = v;
             }
         }
-    }, 600);
+    };
+
+    private clearOutOfWindow = throttle(this.clearOutOfWindowImpl, 600, {
+        leading: false,
+        trailing: true,
+    });
 
     public setWindow(window: Rectangle): void {
         if (
