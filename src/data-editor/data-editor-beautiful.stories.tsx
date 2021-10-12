@@ -217,6 +217,23 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
                 };
             },
         },
+        {
+            title: "More Info",
+            width: 120,
+            icon: "headerUri",
+            hasMenu: false,
+            getContent: () => {
+                const url = faker.internet.url();
+                const data = `My main link is [This](${url}).`;
+                return {
+                    kind: GridCellKind.Markdown,
+                    displayData: url,
+                    data: url,
+                    allowOverlay: true,
+                    readonly: true,
+                };
+            },
+        },
     ];
 
     const extraColumnsAmount = amount - defaultColumns.length;
