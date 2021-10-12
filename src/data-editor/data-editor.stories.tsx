@@ -18,7 +18,7 @@ import DataEditor from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
 export default {
-    title: "DataEditor",
+    title: "DataEditor/TestCases",
 
     decorators: [
         (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
@@ -384,7 +384,7 @@ export function IdealSize() {
     );
 }
 
-export function AdjustableColumns({ columnCount }: { columnCount: number }) {
+export function DynamicAddRemoveColumns({ columnCount }: { columnCount: number }) {
     // trying to be 500x500
     const cols: GridColumn[] = [
         { title: "Number", width: 250 },
@@ -401,9 +401,6 @@ export function AdjustableColumns({ columnCount }: { columnCount: number }) {
     return (
         <DataEditor
             isDraggable={true}
-            onDragStart={args => {
-                args.setData("text", "testing");
-            }}
             getCellContent={getData}
             columns={cols}
             smoothScrollX={true}
@@ -416,7 +413,7 @@ export function AdjustableColumns({ columnCount }: { columnCount: number }) {
         />
     );
 }
-AdjustableColumns.args = {
+DynamicAddRemoveColumns.args = {
     columnCount: 2,
 };
 
