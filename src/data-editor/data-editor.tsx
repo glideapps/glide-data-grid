@@ -867,7 +867,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     !event.ctrlKey &&
                     String.fromCharCode(event.keyCode).match(/(\w|\s)/g) &&
                     event.bounds !== undefined &&
-                    isReadWriteCell(getCellContent([col - rowMarkerOffset, row]))
+                    isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, row - 1)]))
                 ) {
                     let key = String.fromCharCode(event.keyCode);
                     if (!event.shiftKey) {
