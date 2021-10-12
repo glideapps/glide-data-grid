@@ -16,8 +16,6 @@ const BuilderWrapper = styled.div<Props>`
     display: flex;
     height: 100vh;
 
-    flex-direction: column;
-
     & > .content {
         display: block;
 

@@ -4,9 +4,8 @@ import { themes, create } from "@storybook/theming";
 const glideTheme = create({
     base: "dark",
     brandTitle: "Glide Data Grid",
-    brandUrl: "https://grid.glideapps.com.com",
-    brandImage:
-        "https://res.cloudinary.com/glide/image/upload/c_fill,g_auto,r_max,w_40/v1634012666/glidehq/a1026e6c1993c4e3e334d2f1c36591dfb8a7a729.png",
+    brandUrl: "https://grid.glideapps.com",
+    brandImage: "https://res.cloudinary.com/glide/image/upload/c_scale,w_45/v1634058004/glidehq/glide-transparent.png",
 });
 
 addons.setConfig({
