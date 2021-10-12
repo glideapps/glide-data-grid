@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { StoryFn, StoryContext, useState } from "@storybook/addons";
+import { StoryFn, StoryContext, useState, useMemo } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 
 import { GridCell, GridCellKind } from "../data-grid/data-grid-types";
@@ -89,8 +89,12 @@ export function FilterColumns() {
     const [searchText, setSearchText] = useState("");
 
     const cols = useMemo(() => {
-        filteringColumns.filter(c => c.title.includes(searchText));
-    });
+        if (searchText === "") {
+            return filteringColumns;
+        }
+
+        return filteringColumns.filter(c => c.title.toLowerCase().includes(searchText.toLowerCase()));
+    }, [searchText]);
 
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchText(e.target.value);

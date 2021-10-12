@@ -949,7 +949,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 firstColSticky={rowMarkers}
                 getCellContent={getMangedCellContent}
                 headerHeight={headerHeight}
-                onColumnMoved={onColumnMovedImpl}
+                onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}
                 onDragStart={onDragStartImpl}
                 onCellFocused={onCellFocused}
                 onHeaderMenuClick={onHeaderMenuClickInner}

@@ -46,6 +46,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         [dragCol, dropCol, firstColSticky, onItemHovered]
     );
 
+    const canDragCol = onColumnMoved !== undefined;
     const onMouseDownImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
             let shouldFireEvent = true;
@@ -59,14 +60,14 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                     shouldFireEvent = false;
                     setResizeColStartX(args.bounds.x);
                     setResizeCol(col);
-                } else if (args.kind === "header") {
+                } else if (args.kind === "header" && canDragCol) {
                     setDragStartX(args.bounds.x);
                     setDragCol(col);
                 }
             }
             if (shouldFireEvent) onMouseDown?.(args);
         },
-        [firstColSticky, isDraggable, onMouseDown]
+        [firstColSticky, isDraggable, onMouseDown, canDragCol]
     );
 
     const onMouseUpImpl = React.useCallback(
