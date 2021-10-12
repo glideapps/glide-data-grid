@@ -361,7 +361,7 @@ export const ResizableColumns: React.VFC = () => {
 };
 
 export const SmallEditableGrid = () => {
-    const { cols, getCellContent, setCellValue } = useMockDataGenerator(5, false);
+    const { cols, getCellContent, setCellValue } = useMockDataGenerator(6, false);
 
     return (
         <BeautifulWrapper
