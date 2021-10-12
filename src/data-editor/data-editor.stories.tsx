@@ -79,6 +79,9 @@ function getDummyData([col, row]: readonly [number, number]): GridCell {
 
 And supports newline chars and automatic wrapping text that just needs to be long enough to trigger it.
 
+
+[Google](https://google.com)
+
 - with
 - lists
 - that
