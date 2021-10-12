@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { GridCell, GridCellKind, GridColumn, isEditableGridCell } from "../data-grid/data-grid-types";
+import { ColumnSelection, GridCell, GridCellKind, GridColumn, isEditableGridCell } from "../data-grid/data-grid-types";
 import DataEditor, { DataEditorProps } from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
@@ -8,6 +8,7 @@ import faker from "faker";
 import styled from "styled-components";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { SimpleThemeWrapper } from "../stories/story-utils";
+import { browserIsOSX } from "../common/browser-detect";
 
 faker.seed(1337);
 
@@ -53,12 +54,6 @@ const BeautifulStyle = styled.div`
         margin: 0 0 12px 0;
     }
 
-    & > p {
-        font-size: 18px;
-        flex-shrink: 0;
-        margin: 0 0 20px 0;
-    }
-
     .sizer {
         flex-grow: 1;
 
@@ -80,6 +75,18 @@ const PropName = styled.span`
     font-family: monospace;
     font-weight: 500;
     color: #ffe394;
+`;
+
+const Description = styled.p`
+    font-size: 18px;
+    flex-shrink: 0;
+    margin: 0 0 20px 0;
+`;
+
+const MoreInfo = styled.p`
+    font-size: 14px;
+    flex-shrink: 0;
+    margin: 0 0 20px 0;
 `;
 
 interface BeautifulProps {
@@ -315,9 +322,9 @@ export const ResizableColumns: React.VFC = () => {
         <BeautifulWrapper
             title="Resizable columns"
             description={
-                <p>
+                <Description>
                     can resize columns by passing a <PropName>onColumnResized</PropName> prop
-                </p>
+                </Description>
             }>
             <DataEditor
                 {...defaultProps}
@@ -343,10 +350,10 @@ export const SmallEditableGrid = () => {
         <BeautifulWrapper
             title="Editable Grid"
             description={
-                <p>
-                    Data grid supports overlay editors for changing values. There are bespoke editors for numbers,
-                    strings, images, booleans, markdown, and uri.
-                </p>
+                <Description>
+                    Data grid suDescriptionorts overlay editors for changing values. There are bespoke editors for
+                    numbers, strings, images, booleans, markdown, and uri.
+                </Description>
             }>
             <DataEditor
                 {...defaultProps}
@@ -370,7 +377,7 @@ export const OneMillionRows: React.VFC = () => {
     return (
         <BeautifulWrapper
             title="One Million Rows"
-            description={<p>Data grid supports over 1 million rows. Your limit is mostly RAM.</p>}>
+            description={<Description>Data grid supports over 1 million rows. Your limit is mostly RAM.</Description>}>
             <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={1_000_000} />
         </BeautifulWrapper>
     );
@@ -388,11 +395,10 @@ export const OneHundredThousandCols: React.VFC = () => {
         <BeautifulWrapper
             title="One Hundred Thousand Columns"
             description={
-                <p>
-                    {
-                        "Data grid supports way more columns than you will ever need. Also this is rendering 10 million cells but that's not important."
-                    }
-                </p>
+                <Description>
+                    Data grid supports way more columns than you will ever need. Also this is rendering 10 million cells
+                    but that&apos;s not important.
+                </Description>
             }>
             <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={1000} />
         </BeautifulWrapper>
@@ -410,7 +416,7 @@ export const TenMillionCells: React.VFC = () => {
     return (
         <BeautifulWrapper
             title="Ten Million Cells"
-            description={<p>Data grid supports over 10 million cells. Go nuts with it.</p>}>
+            description={<Description>Data grid supports over 10 million cells. Go nuts with it.</Description>}>
             <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={100_000} />
         </BeautifulWrapper>
     );
@@ -433,11 +439,11 @@ export const SmoothScrollingGrid: React.FC<SmoothScrollingGridProps> = p => {
         <BeautifulWrapper
             title="Smooth scrolling"
             description={
-                <p>
+                <Description>
                     You can enable smooth scrolling with the <PropName>smoothScrollX</PropName> and{" "}
                     <PropName>smoothScrollY</PropName> props. Disabling smooth scrolling can dramatically increase
                     performance with and improve visual stability during rapid scrolling.
-                </p>
+                </Description>
             }>
             <DataEditor
                 {...defaultProps}
@@ -470,7 +476,7 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
     return (
         <BeautifulWrapper
             title="Add and remove columns"
-            description={<p>You can add and remove columns at your disposal</p>}>
+            description={<Description>You can add and remove columns at your disposal</Description>}>
             <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={10_000} />
         </BeautifulWrapper>
     );
@@ -502,10 +508,10 @@ export const AutomaticRowMarkers: React.VFC = () => {
         <BeautifulWrapper
             title="Automatic Row Markers"
             description={
-                <p>
+                <Description>
                     You can enable row markers with complex selection behavior using the <PropName>rowMarkers</PropName>{" "}
                     prop
-                </p>
+                </Description>
             }>
             <DataEditor
                 {...defaultProps}
@@ -525,6 +531,100 @@ export const AutomaticRowMarkers: React.VFC = () => {
     },
 };
 
+export const DrawCustomCells: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(5);
+
+    return (
+        <BeautifulWrapper
+            title="Draw custom cells"
+            description={
+                <Description>
+                    You can draw custom cell contents however you want using the <PropName>drawCustomCell</PropName>{" "}
+                    prop
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                drawCustomCell={(ctx, cell, _theme, rect) => {
+                    if (cell.kind !== GridCellKind.Text) return false;
+
+                    const hasX = cell.displayData.toLowerCase().includes("x"); // all my x's live in texas
+
+                    ctx.save();
+                    const { x, y, width, height } = rect;
+                    const data = cell.displayData;
+
+                    ctx.fillStyle = hasX ? "#bfffcd" : "#ffe6e6";
+                    ctx.fillRect(x + 1, y + 1, width - 1, height - 1);
+
+                    ctx.fillStyle = hasX ? "#0fc035" : "#e01e1e";
+                    ctx.font = "bold 14px sans-serif";
+                    ctx.fillText(data, x + 8 + 0.5, y + height / 2 + 4.5);
+                    ctx.restore();
+
+                    return true;
+                }}
+                rows={1_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(DrawCustomCells as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const RearrangeColumns: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(5);
+
+    // This is a dirty hack because the mock generator doesn't really support changing this. In a real data source
+    // you should track indexes properly
+    const [sortableCols, setSortableCols] = React.useState(cols);
+
+    const onColMoved = React.useCallback((startIndex: number, endIndex: number): void => {
+        setSortableCols(old => {
+            const newCols = [...old];
+            const [toMove] = newCols.splice(startIndex, 1);
+            newCols.splice(endIndex, 0, toMove);
+            return newCols;
+        });
+    }, []);
+
+    const getCellContentMangled = React.useCallback(
+        ([col, row]: readonly [number, number]): GridCell => {
+            const remappedCol = cols.findIndex(c => c.title === sortableCols[col].title);
+            return getCellContent([remappedCol, row]);
+        },
+        [cols, getCellContent, sortableCols]
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Rearrange Columns"
+            description={
+                <Description>
+                    Columns can be rearranged by responding to the <PropName>onColumnMoved</PropName> callback.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContentMangled}
+                columns={sortableCols}
+                onColumnMoved={onColMoved}
+                rows={1_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(RearrangeColumns as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 interface RowAndHeaderSizesProps {
     rowHeight: number;
     headerHeight: number;
@@ -538,10 +638,10 @@ export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
         <BeautifulWrapper
             title="Row and Header sizes"
             description={
-                <p>
+                <Description>
                     The row size can be controlled with <PropName>rowHeight</PropName> and the header size with{" "}
                     <PropName>headerHeight</PropName>.
-                </p>
+                </Description>
             }>
             <DataEditor
                 {...defaultProps}
@@ -580,5 +680,107 @@ export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
 (RowAndHeaderSizes as any).parameters = {
     options: {
         showPanel: true,
+    },
+};
+
+const KeyName = styled.kbd`
+    background-color: #f4f4f4;
+    color: #2b2b2b;
+    padding: 2px 6px;
+    font-family: monospace;
+    font-size: 14px;
+    border-radius: 4px;
+    box-shadow: 0px 1px 2px #00000040;
+    margin: 0 0.1em;
+`;
+
+function useKeyPressed(key: string): boolean {
+    const [isPressed, setIsPressed] = React.useState(false);
+
+    React.useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === key) {
+                setIsPressed(true);
+            }
+        };
+
+        const onKeyUp = (e: KeyboardEvent) => {
+            if (e.key === key) {
+                setIsPressed(false);
+            }
+        };
+
+        document.addEventListener("keydown", onKeyDown);
+        document.addEventListener("keyup", onKeyUp);
+
+        return () => {
+            document.removeEventListener("keydown", onKeyDown);
+            document.removeEventListener("keyup", onKeyUp);
+        };
+    }, [key]);
+
+    return isPressed;
+}
+
+export const MultiSelectColumns: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(100);
+
+    const isCmdPressed = useKeyPressed(browserIsOSX.value ? "Meta" : "Control");
+    const [selectedColumns, setSelectedColumns] = React.useState<Set<number>>(new Set());
+
+    const onSelectedColumnsChange = (newColumns: ColumnSelection | undefined) => {
+        if (newColumns === undefined) {
+            setSelectedColumns(new Set());
+            return;
+        }
+
+        const [colIndex] = newColumns;
+        if (isCmdPressed) {
+            setSelectedColumns(prevSelection => {
+                const newSet = new Set(prevSelection);
+
+                if (prevSelection.has(colIndex)) {
+                    newSet.delete(colIndex);
+                } else {
+                    newSet.add(colIndex);
+                }
+
+                return newSet;
+            });
+        } else {
+            setSelectedColumns(new Set([colIndex]));
+        }
+    };
+
+    return (
+        <BeautifulWrapper
+            title="Multi select columns"
+            description={
+                <>
+                    <Description>
+                        You can select multiple columns by using the <PropName>selectedColumns</PropName> and{" "}
+                        <PropName>onSelectedColumnsChange</PropName> props
+                    </Description>
+                    <MoreInfo>
+                        Here you can multi select columns by using <KeyName>Ctrl</KeyName> (on Windows) or{" "}
+                        <KeyName>⌘</KeyName> (on Mac)
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={100_000}
+                selectedColumns={[...selectedColumns]}
+                onSelectedColumnsChange={onSelectedColumnsChange}
+            />
+        </BeautifulWrapper>
+    );
+};
+
+(MultiSelectColumns as any).parameters = {
+    options: {
+        showPanel: false,
     },
 };

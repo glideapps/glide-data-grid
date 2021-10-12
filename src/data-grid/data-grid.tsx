@@ -1206,7 +1206,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const focusElement = React.useCallback(
         (el: HTMLElement | null) => {
             // We don't want to steal the focus if we don't currently own the focus.
-            if (!ref.current?.contains(document.activeElement)) return;
+            if (ref.current === null || !ref.current.contains(document.activeElement)) return;
             if (el === null) {
                 canvasRef?.current?.focus();
             } else {
