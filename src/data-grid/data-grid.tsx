@@ -13,6 +13,7 @@ import {
     getEffectiveColumns,
     getRowIndexForY,
     roundedPoly,
+    useMappedColumns,
 } from "./data-grid-lib";
 import {
     GridColumn,
@@ -153,6 +154,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         dontAwait(buildSpriteMap(theme));
     }, [theme]);
 
+    const mappedColumns = useMappedColumns(columns, firstColSticky);
+
     const getBoundsForItem = React.useCallback(
         (canvas: HTMLCanvasElement, col: number, row: number | undefined): Rectangle => {
             const rect = canvas.getBoundingClientRect();
@@ -164,7 +167,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 height: 0,
             };
             const effectiveCols = getEffectiveColumns(
-                columns,
+                mappedColumns,
                 cellXOffset,
                 width,
                 firstColSticky,
@@ -193,7 +196,17 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
             return result;
         },
-        [cellXOffset, cellYOffset, columns, firstColSticky, headerHeight, rowHeight, width, translateX, translateY]
+        [
+            headerHeight,
+            translateY,
+            mappedColumns,
+            cellXOffset,
+            width,
+            firstColSticky,
+            translateX,
+            rowHeight,
+            cellYOffset,
+        ]
     );
 
     const getMouseArgsForPosition = React.useCallback(
@@ -204,7 +217,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             const edgeDetectionBuffer = 5;
 
             const effectiveCols = getEffectiveColumns(
-                columns,
+                mappedColumns,
                 cellXOffset,
                 width,
                 firstColSticky,
@@ -228,7 +241,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
                 result = {
                     kind: "out-of-bounds",
-                    location: [col !== -1 ? col : x < 0 ? 0 : columns.length - 1, row ?? rows - 1],
+                    location: [col !== -1 ? col : x < 0 ? 0 : mappedColumns.length - 1, row ?? rows - 1],
                     direction: [horizontal, vertical],
                     shiftKey,
                 };
@@ -276,7 +289,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         [
             cellXOffset,
             cellYOffset,
-            columns,
+            mappedColumns,
             firstColSticky,
             getBoundsForItem,
             headerHeight,
@@ -388,7 +401,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         let blittedYOnly = false;
 
         const effectiveCols = getEffectiveColumns(
-            columns,
+            mappedColumns,
             cellXOffset,
             width,
             firstColSticky,
@@ -890,6 +903,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         theme.borderColor,
         theme.acceptColor,
         cellYOffset,
+        mappedColumns,
         rowHeight,
         headerHeight,
         selectedColumns,
@@ -1225,7 +1239,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const accessibilityTree = useDebouncedMemo(
         () => {
             const effectiveCols = getEffectiveColumns(
-                columns,
+                mappedColumns,
                 cellXOffset,
                 width,
                 firstColSticky,
@@ -1254,7 +1268,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             };
 
             return (
-                <div role="grid" aria-rowcount={rows} aria-colcount={columns.length}>
+                <div role="grid" aria-rowcount={rows} aria-colcount={mappedColumns.length}>
                     <div role="rowgroup">
                         <div role="row" aria-rowindex={1} row-index={1}>
                             {effectiveCols.map(c => (
@@ -1310,7 +1324,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         [
             cellXOffset,
             cellYOffset,
-            columns,
+            mappedColumns,
             dragAndDropState,
             firstColSticky,
             focusElement,

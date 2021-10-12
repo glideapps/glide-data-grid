@@ -278,7 +278,9 @@ function useMockDataGenerator(numCols: number, readonly: boolean = true) {
                 cache.current.set(col, row, val);
             }
 
-            val = { ...val, readonly };
+            if (!readonly) {
+                val = { ...val, readonly };
+            }
             return val;
         },
         [colsMap, readonly]
@@ -427,7 +429,8 @@ export const SmoothScrollingGrid: React.FC<SmoothScrollingGridProps> = p => {
             description={
                 <p>
                     You can enable smooth scrolling with the <PropName>smoothScrollX</PropName> and{" "}
-                    <PropName>smoothScrollY</PropName> props
+                    <PropName>smoothScrollY</PropName> props. Disabling smooth scrolling can dramatically increase
+                    performance with and improve visual stability during rapid scrolling.
                 </p>
             }>
             <DataEditor

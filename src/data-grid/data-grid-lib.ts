@@ -5,6 +5,7 @@ import direction from "direction";
 // import { drawGenImageToCanvas } from "../../lib/gen-image-cache";
 import { degreesToRadians } from "../common/utils";
 import { assertNever } from "../common/support";
+import React from "react";
 
 interface MappedGridColumn extends GridColumn {
     sourceIndex: number;
@@ -61,8 +62,20 @@ export function makeEditCell(cell: GridCell, forceBooleanOff: boolean = false): 
     }
 }
 
+export function useMappedColumns(columns: readonly GridColumn[], firstColSticky: boolean): readonly MappedGridColumn[] {
+    return React.useMemo(
+        () =>
+            columns.map((c, i) => ({
+                ...c,
+                sourceIndex: i,
+                sticky: firstColSticky && i === 0,
+            })),
+        [columns, firstColSticky]
+    );
+}
+
 export function getEffectiveColumns(
-    columns: readonly GridColumn[],
+    columns: readonly MappedGridColumn[],
     cellXOffset: number,
     width: number,
     firstColSticky: boolean,
@@ -72,12 +85,7 @@ export function getEffectiveColumns(
     },
     tx?: number
 ): readonly MappedGridColumn[] {
-    const mappedCols = columns.map((c, i) => ({
-        ...c,
-        sourceIndex: i,
-        sticky: firstColSticky && i === 0,
-    }));
-
+    const mappedCols = [...columns];
     if (dndState !== undefined) {
         const temp = mappedCols[dndState.src];
         if (dndState.src > dndState.dest) {

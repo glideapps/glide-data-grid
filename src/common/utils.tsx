@@ -102,13 +102,12 @@ export const Checkmark: React.FunctionComponent<IconProps> = (props: IconProps) 
 };
 
 export function useDebouncedMemo<T>(factory: () => T, deps: React.DependencyList | undefined, time: number): T {
-    const [state, setState] = React.useState(factory());
+    const [state, setState] = React.useState(factory);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const debouncedSetState = React.useCallback(debounce(setState, time), []);
+    const debouncedSetState = React.useRef(debounce(setState, time));
 
     React.useEffect(() => {
-        debouncedSetState(factory());
+        debouncedSetState.current(() => factory());
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, deps);
 
