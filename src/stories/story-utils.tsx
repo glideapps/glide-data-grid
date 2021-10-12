@@ -16,6 +16,8 @@ const BuilderWrapper = styled.div<Props>`
     display: flex;
     height: 100vh;
 
+    flex-direction: column;
+
     & > .content {
         display: block;
 
@@ -42,6 +44,19 @@ const BuilderWrapper = styled.div<Props>`
     }
 `;
 
+const SimpleWrapper = styled.div`
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+
+    box-sizing: border-box;
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: inherit;
+    }
+`;
+
 export class BuilderThemeWrapper extends React.PureComponent<Props> {
     private builderTheme = getBuilderTheme();
 
@@ -57,6 +72,17 @@ export class BuilderThemeWrapper extends React.PureComponent<Props> {
         );
     }
 }
+
+export const SimpleThemeWrapper: React.FC = p => {
+    const [builderTheme] = React.useState(getBuilderTheme);
+    return (
+        <ThemeProvider theme={builderTheme}>
+            <SimpleWrapper>
+                <div className="content">{p.children}</div>
+            </SimpleWrapper>
+        </ThemeProvider>
+    );
+};
 
 // export function permuteAll(
 //   allOptions: Record<string, any[]>,

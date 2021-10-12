@@ -10,7 +10,7 @@ import DataEditorContainer from "../data-editor-container/data-grid-container";
 import styled from "styled-components";
 
 export default {
-    title: "DataEditor/Bugs",
+    title: "DataEditor/TestCases/Bugs",
 
     decorators: [
         (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (

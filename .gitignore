@@ -5,3 +5,4 @@ node_modules*
 .idea
 .cache
 pubsub-debug.log
+storybook-build/

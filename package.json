@@ -9,7 +9,8 @@
         "build-js": "babel ./src -d dist/js --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx --config-file ./babel.config.json",
         "build-types": "tsc -p tsconfig.types.json",
         "lint": "eslint src --ext .ts,.tsx",
-        "storybook": "start-storybook -p 9009 -s public"
+        "storybook": "start-storybook -p 9009 -s public",
+        "build-storybook": "build-storybook -o storybook-build/"
     },
     "repository": {
         "type": "git",
