@@ -65,6 +65,8 @@ export interface DataGridProps {
     readonly selectedCell?: GridSelection;
     readonly prelightCells?: readonly (readonly [number, number])[];
 
+    readonly disabledRows?: readonly number[];
+
     readonly onItemHovered?: (args: GridMouseEventArgs) => void;
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
     readonly onMouseUp?: (args: GridMouseEventArgs) => void;
@@ -134,6 +136,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         isDragging,
         isDraggable,
         allowResize,
+        disabledRows,
         prelightCells,
         drawCustomCell,
         onCellFocused,
@@ -735,7 +738,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         let x = 0;
         let clipX = 0;
         let row = 0;
-        ctx.font = "13px Roboto, sans-serif";
+        ctx.font =
+            "13px Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif";
         for (const c of effectiveCols) {
             let y = headerHeight + translateY;
             row = cellYOffset;
@@ -765,6 +769,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             while (y < height) {
                 const rh = getRowHeight(row);
                 const rowSelected = selectedRows?.includes(row);
+                const rowDisabled = disabledRows?.includes(row);
 
                 if (
                     drawRegions.length === 0 ||
@@ -798,6 +803,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
                         if (highlighted || rowSelected) {
                             ctx.fillStyle = theme.dataViewer.bgSelected;
+                            if (x === 0) {
+                                ctx.fillRect(x, y + 1, c.width, rh - 1);
+                            } else {
+                                ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
+                            }
+                        } else if (rowDisabled) {
+                            ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
                             if (x === 0) {
                                 ctx.fillRect(x, y + 1, c.width, rh - 1);
                             } else {
@@ -860,7 +872,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             x += c.width;
         }
 
-        if (selectedRows !== undefined && selectedRows.length > 0) {
+        if (
+            (selectedRows !== undefined && selectedRows.length > 0) ||
+            (disabledRows !== undefined && disabledRows.length > 0)
+        ) {
             let y = headerHeight + translateY;
             row = cellYOffset;
 
@@ -869,6 +884,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             while (y < height) {
                 const rh = getRowHeight(row);
                 const rowSelected = selectedRows?.includes(row);
+                const rowDisabled = disabledRows?.includes(row);
 
                 if (
                     drawRegions.length === 0 ||
@@ -882,6 +898,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
                     if (rowSelected) {
                         ctx.fillStyle = theme.dataViewer.bgSelected;
+                        ctx.fillRect(x + 1, y + 1, 100000 - 1, rh - 1);
+                    } else if (rowDisabled) {
+                        ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
                         ctx.fillRect(x + 1, y + 1, 100000 - 1, rh - 1);
                     }
                 }
@@ -944,6 +963,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         isResizing,
         selectedCell,
         selectedRows,
+        disabledRows,
         rows,
         getCellContent,
         drawCell,

@@ -1,6 +1,13 @@
 import * as React from "react";
 
-import { ColumnSelection, GridCell, GridCellKind, GridColumn, isEditableGridCell } from "../data-grid/data-grid-types";
+import {
+    ColumnSelection,
+    EditableGridCell,
+    GridCell,
+    GridCellKind,
+    GridColumn,
+    isEditableGridCell,
+} from "../data-grid/data-grid-types";
 import DataEditor, { DataEditorProps } from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
@@ -224,7 +231,6 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
             hasMenu: false,
             getContent: () => {
                 const url = faker.internet.url();
-                const data = `My main link is [This](${url}).`;
                 return {
                     kind: GridCellKind.Markdown,
                     displayData: url,
@@ -355,6 +361,53 @@ export const ResizableColumns: React.VFC = () => {
     );
 };
 (ResizableColumns as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const AddData: React.VFC = () => {
+    const { cols, getCellContent, setCellValue } = useMockDataGenerator(6);
+
+    const [numRows, setNumRows] = React.useState(50);
+
+    const onRowAppended = React.useCallback(
+        (cell: readonly [number, number], newValue: EditableGridCell) => {
+            const [col, row] = cell;
+            setNumRows(cv => cv + 1);
+            for (let r = 0; r < 7; r++) {
+                setCellValue([col, 0], {
+                    ...newValue,
+                    data: "",
+                } as any);
+            }
+            setCellValue([col, row], newValue);
+        },
+        [setCellValue]
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Add data"
+            description={<Description>Data can be added by typing into the trailing row.</Description>}>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rowMarkers={true}
+                showTrailingBlankRow={true}
+                trailingRowOptions={{
+                    hint: "+ New row...",
+                    sticky: true,
+                    tint: true,
+                }}
+                rows={numRows}
+                onRowAppended={onRowAppended}
+            />
+        </BeautifulWrapper>
+    );
+};
+(AddData as any).parameters = {
     options: {
         showPanel: false,
     },

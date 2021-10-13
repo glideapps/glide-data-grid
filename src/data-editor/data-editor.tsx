@@ -52,6 +52,7 @@ type Handled = Pick<
     | "cellYOffset"
     | "translateX"
     | "translateY"
+    | "disabledRows"
     | "gridRef"
 >;
 
@@ -65,6 +66,11 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
 
     readonly rowMarkers?: boolean; // default true;
     readonly showTrailingBlankRow?: boolean; // default true;
+    readonly trailingRowOptions?: {
+        readonly tint?: boolean;
+        readonly hint?: string;
+        readonly sticky?: boolean;
+    };
     readonly headerHeight?: number; // default 36
     readonly rowHeight?: number; // default 34
     readonly rowMarkerWidth?: number; // default 50
@@ -136,6 +142,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         onSelectedRowsChange: setSelectedRowsOuter,
         gridSelection: gridSelectionOuter,
         onGridSelectionChange,
+        trailingRowOptions,
         ...rest
     } = p;
 
@@ -202,10 +209,11 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 };
             } else if (isTrailing) {
                 //If the grid is empty, we will return text
-                if (row === 0) {
+                const display = col === rowMarkerOffset ? trailingRowOptions?.hint ?? "" : "";
+                if (row === 0 || display !== "") {
                     return {
                         kind: GridCellKind.Text,
-                        displayData: "",
+                        displayData: display,
                         data: "",
                         allowOverlay: true,
                     };
@@ -217,7 +225,16 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 return getCellContent([col - rowMarkerOffset, row]);
             }
         },
-        [rowMarkers, showTrailingBlankRow, mangledRows, selectedRows, hoveredFirstRow, getCellContent, rowMarkerOffset]
+        [
+            showTrailingBlankRow,
+            mangledRows,
+            rowMarkers,
+            selectedRows,
+            hoveredFirstRow,
+            rowMarkerOffset,
+            trailingRowOptions?.hint,
+            getCellContent,
+        ]
     );
 
     const onMouseDown = React.useCallback(
@@ -931,6 +948,13 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         updateSelectedCell(col, row);
     }, [mangledCols, rows, gridSelection, updateSelectedCell]);
 
+    const disabledRows = React.useMemo(() => {
+        if (showTrailingBlankRow === true && trailingRowOptions?.tint === true) {
+            return [mangledRows - 1];
+        }
+        return undefined;
+    }, [mangledRows, showTrailingBlankRow, trailingRowOptions?.tint]);
+
     const theme = useTheme();
     const mergedTheme = React.useMemo(() => {
         return { ...getBuilderTheme(), ...theme };
@@ -952,6 +976,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}
                 onDragStart={onDragStartImpl}
                 onCellFocused={onCellFocused}
+                disabledRows={disabledRows}
                 onHeaderMenuClick={onHeaderMenuClickInner}
                 onItemHovered={onItemHoveredImpl}
                 onKeyDown={onKeyDown}
