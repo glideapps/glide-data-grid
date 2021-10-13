@@ -41,6 +41,7 @@ export interface DataGridProps {
     readonly translateY?: number;
 
     readonly firstColSticky: boolean;
+    readonly lastRowSticky: boolean;
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
     readonly isDragging: boolean;

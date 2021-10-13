@@ -7,6 +7,8 @@ import {
     GridCellKind,
     GridColumn,
     isEditableGridCell,
+    isTextEditableGridCell,
+    lossyCopyData,
 } from "../data-grid/data-grid-types";
 import DataEditor, { DataEditorProps } from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
@@ -253,7 +255,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
 
 class ContentCache {
     // column -> row -> value
-    private cachedContent: Map<number, Map<number, any>> = new Map();
+    private cachedContent: Map<number, Map<number, GridCell>> = new Map();
 
     get(col: number, row: number) {
         const colCache = this.cachedContent.get(col);
@@ -265,12 +267,12 @@ class ContentCache {
         return colCache.get(row);
     }
 
-    set(col: number, row: number, value: any) {
+    set(col: number, row: number, value: GridCell) {
         if (this.cachedContent.get(col) === undefined) {
             this.cachedContent.set(col, new Map());
         }
 
-        const rowCache = this.cachedContent.get(col) as Map<number, any>;
+        const rowCache = this.cachedContent.get(col) as Map<number, GridCell>;
         rowCache.set(row, value);
     }
 }
@@ -307,25 +309,32 @@ function useMockDataGenerator(numCols: number, readonly: boolean = true) {
                 val = colsMap[col].getContent();
                 cache.current.set(col, row, val);
             }
-
             if (!readonly) {
-                val = { ...val, readonly };
+                if (isTextEditableGridCell(val)) {
+                    val = { ...val, readonly };
+                }
             }
             return val;
         },
         [colsMap, readonly]
     );
 
-    const setCellValue = React.useCallback(([col, row]: readonly [number, number], val: GridCell): void => {
-        const current = cache.current.get(col, row);
-        if (isEditableGridCell(val)) {
-            cache.current.set(col, row, {
-                ...current,
-                data: val.data,
-                displayData: val.data,
-            });
-        }
-    }, []);
+    const setCellValue = React.useCallback(
+        ([col, row]: readonly [number, number], val: GridCell): void => {
+            let current = cache.current.get(col, row);
+            if (current === undefined) {
+                current = colsMap[col].getContent();
+            }
+            if (isEditableGridCell(val) && isEditableGridCell(current)) {
+                const copied = lossyCopyData(val, current);
+                cache.current.set(col, row, {
+                    ...copied,
+                    displayData: copied.data?.toString() ?? "",
+                } as any);
+            }
+        },
+        [colsMap]
+    );
 
     return { cols, getCellContent, onColumnResized, setCellValue };
 }
@@ -367,7 +376,7 @@ export const ResizableColumns: React.VFC = () => {
 };
 
 export const AddData: React.VFC = () => {
-    const { cols, getCellContent, setCellValue } = useMockDataGenerator(6);
+    const { cols, getCellContent, setCellValue } = useMockDataGenerator(6, false);
 
     const [numRows, setNumRows] = React.useState(50);
 
@@ -375,9 +384,10 @@ export const AddData: React.VFC = () => {
         (cell: readonly [number, number], newValue: EditableGridCell) => {
             const [col, row] = cell;
             setNumRows(cv => cv + 1);
-            for (let r = 0; r < 7; r++) {
-                setCellValue([col, 0], {
+            for (let c = 0; c < 6; c++) {
+                setCellValue([c, row], {
                     ...newValue,
+                    displayData: "",
                     data: "",
                 } as any);
             }
@@ -395,6 +405,7 @@ export const AddData: React.VFC = () => {
                 getCellContent={getCellContent}
                 columns={cols}
                 rowMarkers={true}
+                onCellEdited={setCellValue}
                 showTrailingBlankRow={true}
                 trailingRowOptions={{
                     hint: "+ New row...",

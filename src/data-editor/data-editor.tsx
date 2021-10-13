@@ -33,6 +33,7 @@ interface MouseState {
 type Handled = Pick<
     DataGridSearchProps,
     | "firstColSticky"
+    | "lastRowSticky"
     | "headerHeight"
     | "rowHeight"
     | "className"
@@ -966,30 +967,31 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 canvasRef={canvasRef}
                 cellXOffset={(cellXOffset ?? visibileRegion.x) + rowMarkerOffset}
                 cellYOffset={cellYOffset ?? visibileRegion.y}
-                translateX={visibileRegion.tx}
-                translateY={visibileRegion.ty}
                 columns={mangledCols}
-                rows={mangledRows}
+                disabledRows={disabledRows}
                 firstColSticky={rowMarkers}
                 getCellContent={getMangedCellContent}
                 headerHeight={headerHeight}
+                lastRowSticky={trailingRowOptions?.sticky === true}
+                onCellFocused={onCellFocused}
                 onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}
                 onDragStart={onDragStartImpl}
-                onCellFocused={onCellFocused}
-                disabledRows={disabledRows}
                 onHeaderMenuClick={onHeaderMenuClickInner}
                 onItemHovered={onItemHoveredImpl}
                 onKeyDown={onKeyDown}
                 onMouseDown={onMouseDown}
                 onMouseUp={onMouseUp}
+                onSearchResultsChanged={onSearchResultsChanged}
                 onVisibleRegionChanged={onVisibleRegionChangedImpl}
                 rowHeight={rowHeight}
+                rows={mangledRows}
                 scrollRef={scrollRef}
+                searchColOffset={rowMarkerOffset}
                 selectedCell={gridSelection}
                 selectedColumns={selectedColumns}
                 selectedRows={selectedRows}
-                onSearchResultsChanged={onSearchResultsChanged}
-                searchColOffset={rowMarkerOffset}
+                translateX={visibileRegion.tx}
+                translateY={visibileRegion.ty}
                 gridRef={gridRef}
             />
             {overlay !== undefined && (
