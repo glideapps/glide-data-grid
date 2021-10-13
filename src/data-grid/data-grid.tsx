@@ -123,6 +123,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         selectedCell,
         selectedColumns,
         firstColSticky,
+        lastRowSticky,
         onMouseDown,
         onMouseUp,
         onMouseMove,
@@ -448,8 +449,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
             // drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
 
+            const stickyRowHeight = lastRowSticky ? getRowHeight(rows - 1) : 0;
+
             const blitWidth = width - stickyWidth - Math.abs(deltaX);
-            const blitHeight = height - headerHeight - Math.abs(deltaY) - 1;
+            const blitHeight = height - headerHeight - stickyRowHeight - Math.abs(deltaY) - 1;
 
             if (blitWidth > 150 && blitHeight > 150) {
                 blittedYOnly = deltaX === 0;
@@ -489,9 +492,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     );
                     drawRegions.push({
                         x: 0,
-                        y: height + deltaY,
+                        y: height + deltaY - stickyRowHeight,
                         width: width,
-                        height: -deltaY,
+                        height: -deltaY + stickyRowHeight,
                     });
                 }
 
@@ -575,7 +578,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         ctx.fillStyle = theme.dataViewer.gridColor;
         ctx.fillRect(0, headerHeight, width, height - headerHeight);
 
-        if (!blittedYOnly && damage === undefined) {
+        const drawHeaders = !blittedYOnly && damage === undefined;
+        if (drawHeaders) {
             // draw header background
             ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
             ctx.fillRect(0, 0, width, headerHeight);
@@ -594,14 +598,24 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 ctx.lineTo(tx, height);
             });
 
+            const stickyHeight = getRowHeight(rows - 1);
+            const stickyRowY = height - stickyHeight + 0.5;
+            if (lastRowSticky) {
+                ctx.moveTo(0, stickyRowY);
+                ctx.lineTo(width, stickyRowY);
+            }
+
             // horizontal lines
             let y = headerHeight + 0.5;
             let row = cellYOffset;
             let isHeader = true;
             while (y + translateY <= height) {
                 const ty = isHeader ? y : y + translateY;
-                ctx.moveTo(0, ty);
-                ctx.lineTo(width, ty);
+                if (!lastRowSticky || ty !== stickyRowY) {
+                    // This shouldn't be needed it seems like... yet it is. We're not sure why.
+                    ctx.moveTo(0, ty);
+                    ctx.lineTo(width, ty);
+                }
 
                 y += getRowHeight(row);
                 isHeader = false;
@@ -611,13 +625,20 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             ctx.strokeStyle = theme.borderColor;
             ctx.lineWidth = 1;
             ctx.stroke();
+
+            if (lastRowSticky) {
+                ctx.rect(0, 0, width, height - stickyHeight);
+                ctx.rect(0, height - stickyHeight + 1, width, stickyHeight - 1);
+                ctx.clip();
+            }
+            ctx.beginPath();
         }
 
         const xPad = 8;
         const yPad = 2;
 
         // draw header contents
-        if (!blittedYOnly && damage === undefined) {
+        if (drawHeaders) {
             let x = 0;
             let clipX = 0;
             for (const c of effectiveCols) {
@@ -683,7 +704,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     drawX += 26;
                 }
 
-                ctx.font = "bold 14px Roboto, sans-serif";
+                ctx.font =
+                    "bold 14px Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif";
                 ctx.fillStyle = fillStyle;
                 ctx.fillText(c.title, drawX, headerHeight / 2 + 5);
                 ctx.globalAlpha = 1;
@@ -767,12 +789,24 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             };
             clipCol(0);
 
-            while (y < height) {
+            let doSticky = lastRowSticky;
+            while (y < height || doSticky) {
+                const doingSticky = doSticky && y >= height;
+                if (doingSticky) {
+                    doSticky = false;
+                    row = rows - 1;
+                }
                 const rh = getRowHeight(row);
+
+                if (doingSticky) {
+                    y = height - rh;
+                }
+
                 const rowSelected = selectedRows?.includes(row);
                 const rowDisabled = disabledRows?.includes(row);
 
                 if (
+                    doingSticky ||
                     drawRegions.length === 0 ||
                     drawRegions.find(
                         drawRegion =>
@@ -782,6 +816,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 ) {
                     const rowLocal = row;
                     if (
+                        doingSticky ||
                         damage === undefined ||
                         damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) !== undefined
                     ) {
@@ -802,15 +837,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                             }
                         }
 
-                        if (highlighted || rowSelected) {
-                            ctx.fillStyle = theme.dataViewer.bgSelected;
-                            if (x === 0) {
-                                ctx.fillRect(x, y + 1, c.width, rh - 1);
-                            } else {
-                                ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
+                        if (highlighted || rowDisabled) {
+                            if (highlighted) {
+                                ctx.fillStyle = theme.dataViewer.bgSelected;
+                            } else if (rowDisabled) {
+                                ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
                             }
-                        } else if (rowDisabled) {
-                            ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
                             if (x === 0) {
                                 ctx.fillRect(x, y + 1, c.width, rh - 1);
                             } else {
@@ -845,11 +877,20 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                         ctx.globalAlpha = 1;
 
                         if (isFocused) {
-                            ctx.restore();
-                            ctx.save();
+                            // we want to UNSET the clip of the column so that we can reclip with the ability to draw
+                            // over the borders
+                            ctx.restore(); // we now have no column clip
+                            ctx.save(); // save state without column clip
 
                             ctx.beginPath();
-                            clipCol(1);
+                            clipCol(1); // we are now clipped with bigger bounds
+
+                            if (lastRowSticky) {
+                                ctx.beginPath();
+                                const stickyHeight = getRowHeight(rows - 1);
+                                ctx.rect(0, 0, width, height - stickyHeight);
+                                ctx.clip();
+                            }
 
                             ctx.beginPath();
                             ctx.rect(x + 1, y + 1, c.width - 1, rh - 1);
@@ -857,14 +898,17 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                             ctx.lineWidth = 2;
                             ctx.stroke();
 
-                            ctx.restore();
-                            ctx.save();
+                            ctx.restore(); // we now have no column clip
+                            ctx.save(); // save state without column clip
                             ctx.beginPath();
-                            clipCol(0);
+                            clipCol(0); // restore original clip
                         }
                     }
                 }
 
+                if (doingSticky) {
+                    break;
+                }
                 y += rh;
                 row++;
             }
@@ -882,8 +926,19 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
             ctx.save();
 
-            while (y < height) {
+            let doSticky = lastRowSticky;
+            while (y < height || doSticky) {
+                const doingSticky = doSticky && y >= height;
+                if (doingSticky) {
+                    doSticky = false;
+                    row = rows - 1;
+                }
                 const rh = getRowHeight(row);
+
+                if (doingSticky) {
+                    y = height - rh;
+                }
+
                 const rowSelected = selectedRows?.includes(row);
                 const rowDisabled = disabledRows?.includes(row);
 
@@ -906,6 +961,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     }
                 }
 
+                if (doingSticky) break;
                 y += rh;
                 row++;
             }
@@ -939,11 +995,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     }, [
         width,
         height,
-        columns,
         cellXOffset,
-        firstColSticky,
+        cellYOffset,
         translateX,
         translateY,
+        mappedColumns,
+        firstColSticky,
         dragAndDropState,
         theme.dataViewer.gridColor,
         theme.dataViewer.columnHeader.bgColor,
@@ -955,16 +1012,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         theme.dataViewer.bgPrelight,
         theme.borderColor,
         theme.acceptColor,
-        cellYOffset,
-        mappedColumns,
-        rowHeight,
         headerHeight,
+        selectedRows,
+        disabledRows,
+        rowHeight,
+        columns,
         selectedColumns,
         hoveredCol,
         isResizing,
         selectedCell,
-        selectedRows,
-        disabledRows,
+        lastRowSticky,
         rows,
         getCellContent,
         drawCell,
@@ -975,7 +1032,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         imageLoader.current = new ImageWindowLoader();
     }, []);
 
-    canBlit.current = canBlit.current !== undefined;
+    canBlit.current = canBlit.current !== undefined && false;
     React.useEffect(() => {
         canBlit.current = false;
     }, [
