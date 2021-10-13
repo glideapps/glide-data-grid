@@ -24,6 +24,7 @@ import {
     GridMouseEventArgs,
     GridDragEventArgs,
     GridKeyEventArgs,
+    InnerGridCell,
 } from "./data-grid-types";
 import { dontAwait } from "../common/support";
 import { buildSpriteMap, drawSprite, SpriteVariant } from "./data-grid-sprites";
@@ -58,7 +59,7 @@ export interface DataGridProps {
 
     readonly className?: string;
 
-    readonly getCellContent: (cell: readonly [number, number]) => GridCell;
+    readonly getCellContent: (cell: readonly [number, number]) => InnerGridCell;
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
     readonly selectedRows?: readonly number[];
@@ -192,6 +193,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             if (row === undefined) {
                 result.y = rect.y;
                 result.height = headerHeight;
+            } else if (lastRowSticky && row === rows - 1) {
+                const stickyHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(row);
+                result.y = rect.y + (height - stickyHeight);
+                result.height = stickyHeight;
             } else {
                 for (let r = cellYOffset; r < row; r++) {
                     result.y += typeof rowHeight === "number" ? rowHeight : rowHeight(r);
@@ -209,7 +214,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             width,
             firstColSticky,
             translateX,
+            lastRowSticky,
+            rows,
             rowHeight,
+            height,
             cellYOffset,
         ]
     );
@@ -235,7 +243,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
             // -1: header or above
             // undefined: offbottom
-            const row = getRowIndexForY(y, headerHeight, rows, rowHeight, cellYOffset, translateY);
+            const row = getRowIndexForY(
+                y,
+                height,
+                headerHeight,
+                rows,
+                rowHeight,
+                cellYOffset,
+                translateY,
+                lastRowSticky
+            );
 
             const shiftKey = ev?.shiftKey === true;
 
@@ -292,18 +309,19 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             return result;
         },
         [
-            cellXOffset,
-            cellYOffset,
             mappedColumns,
-            firstColSticky,
-            getBoundsForItem,
-            headerHeight,
-            height,
-            rowHeight,
-            rows,
+            cellXOffset,
             width,
+            firstColSticky,
             translateX,
+            height,
+            headerHeight,
+            rows,
+            rowHeight,
+            cellYOffset,
             translateY,
+            lastRowSticky,
+            getBoundsForItem,
         ]
     );
 
@@ -325,7 +343,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         (
             ctx: CanvasRenderingContext2D,
             row: number,
-            cell: GridCell,
+            cell: InnerGridCell,
             sourceIndex: number,
             x: number,
             y: number,
@@ -333,7 +351,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             h: number,
             highlighted: boolean
         ) => {
-            const drawn = drawCustomCell?.(ctx, cell, theme, { x, y, width: w, height: h }) === true;
+            const drawn =
+                cell.kind === "new-row"
+                    ? false
+                    : drawCustomCell?.(ctx, cell, theme, { x, y, width: w, height: h }) === true;
             if (!drawn) {
                 if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
                     drawTextCell(ctx, theme, cell.displayData, x, y, w, h);
@@ -353,6 +374,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     drawProtectedCell(ctx, theme, x, y, w, h, !highlighted);
                 } else if (cell.kind === GridCellKind.Drilldown && imageLoader.current !== undefined) {
                     drawDrilldownCell(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, imageLoader.current);
+                } else if (cell.kind === "new-row") {
+                    drawTextCell(ctx, theme, cell.hint, x, y, w, h);
                 }
             }
         },
@@ -805,103 +828,113 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 const rowSelected = selectedRows?.includes(row);
                 const rowDisabled = disabledRows?.includes(row);
 
-                if (
-                    doingSticky ||
-                    drawRegions.length === 0 ||
-                    drawRegions.find(
-                        drawRegion =>
-                            (y >= drawRegion.y && y <= drawRegion.y + drawRegion.height) ||
-                            (drawRegion.y >= y && drawRegion.y <= y + rh)
-                    )
-                ) {
-                    const rowLocal = row;
+                if (!doSticky || row !== rows - 1) {
                     if (
                         doingSticky ||
-                        damage === undefined ||
-                        damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) !== undefined
+                        drawRegions.length === 0 ||
+                        drawRegions.find(
+                            drawRegion =>
+                                (y >= drawRegion.y && y <= drawRegion.y + drawRegion.height) ||
+                                (drawRegion.y >= y && drawRegion.y <= y + rh)
+                        )
                     ) {
-                        ctx.beginPath();
+                        const rowLocal = row;
+                        if (
+                            doingSticky ||
+                            damage === undefined ||
+                            damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) !== undefined
+                        ) {
+                            ctx.beginPath();
 
-                        const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
-                        let highlighted = rowSelected || selectedColumns?.includes(c.sourceIndex) || isFocused;
+                            const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
+                            let highlighted = rowSelected || selectedColumns?.includes(c.sourceIndex) || isFocused;
 
-                        if (selectedCell?.range !== undefined) {
-                            const { range } = selectedCell;
-                            if (
-                                c.sourceIndex >= range.x &&
-                                c.sourceIndex < range.x + range.width &&
-                                row >= range.y &&
-                                row < range.y + range.height
-                            ) {
-                                highlighted = true;
-                            }
-                        }
-
-                        if (highlighted || rowDisabled) {
-                            if (highlighted) {
-                                ctx.fillStyle = theme.dataViewer.bgSelected;
-                            } else if (rowDisabled) {
-                                ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
-                            }
-                            if (x === 0) {
-                                ctx.fillRect(x, y + 1, c.width, rh - 1);
-                            } else {
-                                ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
-                            }
-                        } else {
-                            // eslint-disable-next-line no-loop-func
-                            if (prelightCells?.find(pre => pre[0] === c.sourceIndex && pre[1] === row) !== undefined) {
-                                ctx.fillStyle = theme.dataViewer.bgPrelight;
-                                if (x === 0) {
-                                    ctx.fillRect(x, y + 1, c.width, rh - 1);
-                                } else {
-                                    ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
+                            if (selectedCell?.range !== undefined) {
+                                const { range } = selectedCell;
+                                if (
+                                    c.sourceIndex >= range.x &&
+                                    c.sourceIndex < range.x + range.width &&
+                                    row >= range.y &&
+                                    row < range.y + range.height
+                                ) {
+                                    highlighted = true;
                                 }
                             }
-                        }
 
-                        const cell: GridCell =
-                            row < rows
-                                ? getCellContent([c.sourceIndex, row])
-                                : {
-                                      kind: GridCellKind.Loading,
-                                      allowOverlay: false,
-                                  };
-
-                        if (cell.style === "faded") {
-                            ctx.globalAlpha = 0.6;
-                        }
-
-                        drawCell(ctx, row, cell, c.sourceIndex, x, y, c.width, rh, highlighted);
-
-                        ctx.globalAlpha = 1;
-
-                        if (isFocused) {
-                            // we want to UNSET the clip of the column so that we can reclip with the ability to draw
-                            // over the borders
-                            ctx.restore(); // we now have no column clip
-                            ctx.save(); // save state without column clip
-
-                            ctx.beginPath();
-                            clipCol(1); // we are now clipped with bigger bounds
-
-                            if (lastRowSticky) {
-                                ctx.beginPath();
-                                const stickyHeight = getRowHeight(rows - 1);
-                                ctx.rect(0, 0, width, height - stickyHeight);
-                                ctx.clip();
+                            if (highlighted || rowDisabled) {
+                                if (rowDisabled) {
+                                    ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
+                                    if (x === 0) {
+                                        ctx.fillRect(x, y + 1, c.width, rh - 1);
+                                    } else {
+                                        ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
+                                    }
+                                }
+                                if (highlighted) {
+                                    ctx.fillStyle = theme.dataViewer.bgSelected;
+                                    if (x === 0) {
+                                        ctx.fillRect(x, y + 1, c.width, rh - 1);
+                                    } else {
+                                        ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
+                                    }
+                                }
+                            } else {
+                                // eslint-disable-next-line no-loop-func
+                                if (
+                                    prelightCells?.find(pre => pre[0] === c.sourceIndex && pre[1] === row) !== undefined
+                                ) {
+                                    ctx.fillStyle = theme.dataViewer.bgPrelight;
+                                    if (x === 0) {
+                                        ctx.fillRect(x, y + 1, c.width, rh - 1);
+                                    } else {
+                                        ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
+                                    }
+                                }
                             }
 
-                            ctx.beginPath();
-                            ctx.rect(x + 1, y + 1, c.width - 1, rh - 1);
-                            ctx.strokeStyle = theme.acceptColor;
-                            ctx.lineWidth = 2;
-                            ctx.stroke();
+                            const cell: InnerGridCell =
+                                row < rows
+                                    ? getCellContent([c.sourceIndex, row])
+                                    : {
+                                          kind: GridCellKind.Loading,
+                                          allowOverlay: false,
+                                      };
 
-                            ctx.restore(); // we now have no column clip
-                            ctx.save(); // save state without column clip
-                            ctx.beginPath();
-                            clipCol(0); // restore original clip
+                            if (cell.style === "faded") {
+                                ctx.globalAlpha = 0.6;
+                            }
+
+                            drawCell(ctx, row, cell, c.sourceIndex, x, y, c.width, rh, highlighted);
+
+                            ctx.globalAlpha = 1;
+
+                            if (isFocused) {
+                                // we want to UNSET the clip of the column so that we can reclip with the ability to draw
+                                // over the borders
+                                ctx.restore(); // we now have no column clip
+                                ctx.save(); // save state without column clip
+
+                                ctx.beginPath();
+                                clipCol(1); // we are now clipped with bigger bounds
+
+                                if (lastRowSticky && row !== rows - 1) {
+                                    ctx.beginPath();
+                                    const stickyHeight = getRowHeight(rows - 1);
+                                    ctx.rect(0, 0, width, height - stickyHeight);
+                                    ctx.clip();
+                                }
+
+                                ctx.beginPath();
+                                ctx.rect(x + 1, y + 1, c.width - 1, rh - 1);
+                                ctx.strokeStyle = theme.acceptColor;
+                                ctx.lineWidth = 2;
+                                ctx.stroke();
+
+                                ctx.restore(); // we now have no column clip
+                                ctx.save(); // save state without column clip
+                                ctx.beginPath();
+                                clipCol(0); // restore original clip
+                            }
                         }
                     }
                 }
@@ -942,22 +975,25 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 const rowSelected = selectedRows?.includes(row);
                 const rowDisabled = disabledRows?.includes(row);
 
-                if (
-                    drawRegions.length === 0 ||
-                    drawRegions.find(
-                        drawRegion =>
-                            (y >= drawRegion.y && y <= drawRegion.y + drawRegion.height) ||
-                            (drawRegion.y >= y && drawRegion.y <= y + rh)
-                    )
-                ) {
-                    ctx.beginPath();
+                if (!doSticky || row !== rows - 1) {
+                    if (
+                        drawRegions.length === 0 ||
+                        drawRegions.find(
+                            drawRegion =>
+                                (y >= drawRegion.y && y <= drawRegion.y + drawRegion.height) ||
+                                (drawRegion.y >= y && drawRegion.y <= y + rh)
+                        )
+                    ) {
+                        ctx.beginPath();
 
-                    if (rowSelected) {
-                        ctx.fillStyle = theme.dataViewer.bgSelected;
-                        ctx.fillRect(x + 1, y + 1, 100000 - 1, rh - 1);
-                    } else if (rowDisabled) {
-                        ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
-                        ctx.fillRect(x + 1, y + 1, 100000 - 1, rh - 1);
+                        if (rowDisabled) {
+                            ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
+                            ctx.fillRect(x + 1, y + 1, 100000 - 1, rh - 1);
+                        }
+                        if (rowSelected) {
+                            ctx.fillStyle = theme.dataViewer.bgSelected;
+                            ctx.fillRect(x + 1, y + 1, 100000 - 1, rh - 1);
+                        }
                     }
                 }
 
@@ -1068,7 +1104,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
     imageLoader.current?.setCallback(imageLoaded);
 
-    const headerHovered = hoveredItem?.[0] !== undefined && hoveredItem[1] === undefined;
+    const [hCol, hRow] = hoveredItem ?? [];
+    const headerHovered = hCol !== undefined && hRow === undefined;
+    const newRowCellHovered =
+        hCol !== undefined && hRow !== undefined && getCellContent([hCol, hRow]).kind === "new-row";
     const canDrag = hoveredOnEdge ?? false;
     const style = React.useMemo(
         () => ({
@@ -1079,11 +1118,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 ? "grabbing"
                 : canDrag || isResizing
                 ? "col-resize"
-                : headerHovered
+                : headerHovered || newRowCellHovered
                 ? "pointer"
                 : "default",
         }),
-        [width, height, canDrag, isResizing, isDragging, headerHovered]
+        [width, height, canDrag, isResizing, isDragging, headerHovered, newRowCellHovered]
     );
 
     const target = eventTargetRef?.current;
@@ -1358,7 +1397,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 translateX
             );
 
-            const getRowData = (cell: GridCell) => {
+            const getRowData = (cell: InnerGridCell) => {
                 switch (cell.kind) {
                     case GridCellKind.Boolean:
                     case GridCellKind.Markdown:

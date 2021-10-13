@@ -16,6 +16,7 @@ import {
     Rectangle,
     ColumnSelection,
     isReadWriteCell,
+    InnerGridCell,
 } from "../data-grid/data-grid-types";
 import copy from "copy-to-clipboard";
 import { makeEditCell } from "../data-grid/data-grid-lib";
@@ -51,6 +52,7 @@ type Handled = Pick<
     | "searchColOffset"
     | "cellXOffset"
     | "cellYOffset"
+    | "getCellContent"
     | "translateX"
     | "translateY"
     | "disabledRows"
@@ -59,10 +61,12 @@ type Handled = Pick<
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
+type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parameters<T>) => TNewReturn;
+
 export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
-    readonly onRowAppended?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
+    readonly onRowAppended?: (cell?: readonly [number, number], newValue?: EditableGridCell) => void;
     readonly onCellClicked?: (cell: readonly [number, number]) => void;
 
     readonly rowMarkers?: boolean; // default true;
@@ -91,6 +95,8 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
     readonly gridSelection?: GridSelection;
     readonly onGridSelectionChange?: (newSelection: GridSelection | undefined) => void;
     readonly onVisibleRegionChanged?: (range: Rectangle, tx?: number, ty?: number) => void;
+
+    readonly getCellContent: ReplaceReturnType<DataGridSearchProps["getCellContent"], GridCell>;
 }
 
 const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
@@ -197,7 +203,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     }, [columns, rowMarkerWidth, rowMarkers]);
 
     const getMangedCellContent = React.useCallback(
-        ([col, row]: readonly [number, number]): GridCell => {
+        ([col, row]: readonly [number, number]): InnerGridCell => {
             const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
             const isRowMarkerCol = col === 0 && rowMarkers;
             if (isRowMarkerCol) {
@@ -213,10 +219,9 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 const display = col === rowMarkerOffset ? trailingRowOptions?.hint ?? "" : "";
                 if (row === 0 || display !== "") {
                     return {
-                        kind: GridCellKind.Text,
-                        displayData: display,
-                        data: "",
-                        allowOverlay: true,
+                        kind: "new-row",
+                        hint: display,
+                        allowOverlay: false,
                     };
                 }
                 //Base the dataType on the previous row.
@@ -271,6 +276,22 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     } else {
                         setSelectedRows([...selectedRows, row]);
                     }
+                } else if (
+                    col === rowMarkerOffset &&
+                    trailingRowOptions?.hint !== undefined &&
+                    showTrailingBlankRow &&
+                    row === rows
+                ) {
+                    onRowAppended?.(undefined, undefined);
+                    setGridSelection({
+                        cell: [rowMarkerOffset, rows],
+                        range: {
+                            x: rowMarkerOffset,
+                            y: rows,
+                            width: 1,
+                            height: 1,
+                        },
+                    });
                 } else {
                     if (gridSelection?.cell[0] !== col || gridSelection.cell[1] !== row) {
                         if (args.shiftKey && gridSelection !== undefined) {
@@ -313,7 +334,20 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 setSelectedRows([]);
             }
         },
-        [gridSelection, rowMarkers, setGridSelection, focus, setSelectedColumns, selectedRows, setSelectedRows]
+        [
+            gridSelection,
+            rowMarkers,
+            rowMarkerOffset,
+            trailingRowOptions?.hint,
+            showTrailingBlankRow,
+            setGridSelection,
+            focus,
+            setSelectedColumns,
+            selectedRows,
+            setSelectedRows,
+            onRowAppended,
+            rows,
+        ]
     );
 
     const reselect = React.useCallback(
@@ -322,7 +356,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
             const [col, row] = gridSelection.cell;
             const c = getMangedCellContent([col, row]);
-            if (c.kind !== GridCellKind.Boolean && c.allowOverlay) {
+            if (c.kind !== GridCellKind.Boolean && c.allowOverlay && c.kind !== "new-row") {
                 let content = c;
                 if (initialValue !== undefined) {
                     switch (content.kind) {

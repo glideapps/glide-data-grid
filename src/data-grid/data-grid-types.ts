@@ -200,6 +200,8 @@ export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
 
 export type GridCell = EditableGridCell | BubbleCell | RowIDCell | LoadingCell | ProtectedCell | DrilldownCell;
 
+export type InnerGridCell = GridCell | NewRowCell;
+
 export interface Rectangle {
     x: number;
     y: number;
@@ -277,4 +279,9 @@ interface UriCell extends BaseGridCell {
     readonly kind: GridCellKind.Uri;
     readonly data: string;
     readonly readonly?: boolean;
+}
+
+interface NewRowCell extends BaseGridCell {
+    readonly kind: "new-row";
+    readonly hint: string;
 }

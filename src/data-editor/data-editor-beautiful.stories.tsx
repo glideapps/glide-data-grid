@@ -378,11 +378,11 @@ export const ResizableColumns: React.VFC = () => {
 export const AddData: React.VFC = () => {
     const { cols, getCellContent, setCellValue } = useMockDataGenerator(6, false);
 
-    const [numRows, setNumRows] = React.useState(50);
+    const [numRows, setNumRows] = React.useState(5);
 
     const onRowAppended = React.useCallback(
-        (cell: readonly [number, number], newValue: EditableGridCell) => {
-            const [col, row] = cell;
+        (cell?: readonly [number, number], newValue?: EditableGridCell) => {
+            const [col, row] = cell ?? [0, numRows];
             setNumRows(cv => cv + 1);
             for (let c = 0; c < 6; c++) {
                 setCellValue([c, row], {
@@ -391,9 +391,11 @@ export const AddData: React.VFC = () => {
                     data: "",
                 } as any);
             }
-            setCellValue([col, row], newValue);
+            if (newValue !== undefined) {
+                setCellValue([col, row], newValue);
+            }
         },
-        [setCellValue]
+        [numRows, setCellValue]
     );
 
     return (
