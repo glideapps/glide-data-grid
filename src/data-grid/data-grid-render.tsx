@@ -633,6 +633,7 @@ export function drawGrid(
     cellYOffset: number,
     translateX: number,
     translateY: number,
+    columns: readonly GridColumn[],
     mappedColumns: readonly MappedGridColumn[],
     firstColSticky: boolean,
     dragAndDropState: DragAndDropState | undefined,
@@ -703,8 +704,8 @@ export function drawGrid(
             ctx,
             canvas,
             last,
-            cellYOffset,
             cellXOffset,
+            cellYOffset,
             translateX,
             translateY,
             lastRowSticky,
@@ -713,7 +714,7 @@ export function drawGrid(
             rows,
             headerHeight,
             dpr,
-            mappedColumns,
+            columns,
             effectiveCols,
             getRowHeight
         );

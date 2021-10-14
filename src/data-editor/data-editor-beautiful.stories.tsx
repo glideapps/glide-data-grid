@@ -378,7 +378,7 @@ export const ResizableColumns: React.VFC = () => {
 export const AddData: React.VFC = () => {
     const { cols, getCellContent, setCellValue } = useMockDataGenerator(6, false);
 
-    const [numRows, setNumRows] = React.useState(5);
+    const [numRows, setNumRows] = React.useState(50);
 
     const onRowAppended = React.useCallback(
         (cell?: readonly [number, number], newValue?: EditableGridCell) => {
