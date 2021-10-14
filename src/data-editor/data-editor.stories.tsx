@@ -207,7 +207,6 @@ export function Simplenotest() {
             getCellsForSelection={getCellsForSelection}
             columns={cols}
             rows={1000}
-            allowResize={true}
             onVisibleRegionChanged={onVisibleRegionChanged}
             onColumnResized={onColumnResized}
         />
@@ -262,7 +261,6 @@ export function RelationColumn() {
             getCellContent={getDummyRelationData}
             columns={cols}
             rows={1000}
-            allowResize={true}
             onColumnResized={onColumnResized}
             smoothScrollX={true}
             smoothScrollY={true}
@@ -314,7 +312,6 @@ export function Smooth() {
     return (
         <DataEditor
             getCellContent={getDummyData}
-            allowResize={true}
             onColumnResized={onColumnResized}
             columns={cols}
             rows={1000}
@@ -488,7 +485,6 @@ export function GridSelectionOutOfRangeNoColumns() {
             getCellContent={getDummyData}
             columns={cols}
             rows={1000}
-            allowResize={true}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
             onColumnResized={(_col, newSize) => {
@@ -550,7 +546,6 @@ export function ResizableColumns() {
             isDraggable={false}
             smoothScrollX={true}
             smoothScrollY={true}
-            allowResize={true}
             onColumnResized={onColumnResized}
         />
     );
@@ -578,7 +573,6 @@ export function GridSelectionOutOfRangeLessColumnsThanSelection() {
             getCellContent={getDummyData}
             columns={cols}
             rows={1000}
-            allowResize={true}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
             onColumnResized={(_col, newSize) => {
@@ -612,7 +606,6 @@ export function GridAddNewRows() {
             getCellContent={getDummyData}
             columns={cols}
             rows={rowsCount}
-            allowResize={true}
             onRowAppended={onRowAppended}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
@@ -635,7 +628,6 @@ export function GridNoTrailingBlankRow() {
             getCellContent={getDummyData}
             columns={cols}
             rows={100}
-            allowResize={true}
             showTrailingBlankRow={false}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
@@ -708,7 +700,6 @@ export function MarkdownEdits() {
             getCellContent={dummyCells}
             columns={dummyCols}
             rows={1000}
-            allowResize={true}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
         />

@@ -23,7 +23,6 @@ export function Simplenotest() {
     let x = 0;
     return (
         <DataGrid
-            allowResize={true}
             width={600}
             height={500}
             cellXOffset={0}
@@ -43,6 +42,7 @@ export function Simplenotest() {
                 owned: true,
             })}
             firstColSticky={false}
+            lastRowSticky={false}
             isResizing={false}
             isDragging={false}
         />
@@ -53,7 +53,6 @@ export function SelectedCellnotest() {
     let x = 0;
     return (
         <DataGrid
-            allowResize={true}
             width={600}
             height={500}
             cellXOffset={0}
@@ -74,6 +73,7 @@ export function SelectedCellnotest() {
             })}
             selectedCell={{ cell: [2, 2], range: { x: 2, y: 2, width: 1, height: 1 } }}
             firstColSticky={false}
+            lastRowSticky={false}
             isResizing={false}
             isDragging={false}
         />
@@ -84,7 +84,6 @@ export function SelectedRownotest() {
     let x = 0;
     return (
         <DataGrid
-            allowResize={true}
             width={600}
             height={500}
             cellXOffset={0}
@@ -105,6 +104,7 @@ export function SelectedRownotest() {
             })}
             selectedRows={[2, 4]}
             firstColSticky={false}
+            lastRowSticky={false}
             isResizing={false}
             isDragging={false}
         />
@@ -115,7 +115,6 @@ export const SelectedColumnnotest = () => {
     let x = 0;
     return (
         <DataGrid
-            allowResize={true}
             width={600}
             height={500}
             cellXOffset={0}
@@ -136,6 +135,7 @@ export const SelectedColumnnotest = () => {
             })}
             selectedColumns={[2, 4]}
             firstColSticky={false}
+            lastRowSticky={false}
             isResizing={false}
             isDragging={false}
         />

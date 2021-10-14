@@ -362,7 +362,6 @@ export const ResizableColumns: React.VFC = () => {
                 getCellContent={getCellContent}
                 columns={cols}
                 rows={50}
-                allowResize={true}
                 onColumnResized={onColumnResized}
             />
         </BeautifulWrapper>

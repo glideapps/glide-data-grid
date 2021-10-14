@@ -4,7 +4,7 @@ import { Subtract } from "utility-types";
 import DataGrid, { DataGridProps, DataGridRef } from "../data-grid/data-grid";
 import { GridColumn, GridMouseEventArgs } from "../data-grid/data-grid-types";
 
-type Handled = Pick<DataGridProps, "dragAndDropState" | "isResizing" | "isDragging" | "onMouseMove">;
+type Handled = Pick<DataGridProps, "dragAndDropState" | "isResizing" | "isDragging" | "onMouseMove" | "allowResize">;
 
 export interface DataGridDndProps extends Subtract<DataGridProps, Handled> {
     readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
@@ -123,6 +123,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             isDragging={dragActive}
             onItemHovered={onItemHoveredImpl}
             onMouseDown={onMouseDownImpl}
+            allowResize={onColumnResized !== undefined}
             onMouseUp={onMouseUpImpl}
             dragAndDropState={dragOffset}
             onMouseMove={onMouseMove}
