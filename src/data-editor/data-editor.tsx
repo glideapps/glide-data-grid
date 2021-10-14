@@ -739,15 +739,17 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         [gridSelection, focus, mangledOnCellEdited, rowMarkerOffset, mangledRows, updateSelectedCell]
     );
 
+    const [selCol, selRow] = gridSelection?.cell ?? [];
     const onCellFocused = React.useCallback(
         (cell: readonly [number, number]) => {
+            if (selCol === cell[0] && selRow === cell[1]) return;
             setGridSelection({
                 cell,
                 range: { x: cell[0], y: cell[1], width: 1, height: 1 },
             });
             setSelectedRows([]);
         },
-        [setGridSelection, setSelectedRows]
+        [selCol, selRow, setGridSelection, setSelectedRows]
     );
 
     const onKeyDown = React.useCallback(

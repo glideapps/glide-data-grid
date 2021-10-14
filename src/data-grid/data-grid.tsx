@@ -825,116 +825,119 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     y = height - rh;
                 }
 
-                const rowSelected = selectedRows?.includes(row);
-                const rowDisabled = disabledRows?.includes(row);
+                const isMovedStickyRow = doSticky && row === rows - 1;
 
-                if (!doSticky || row !== rows - 1) {
+                const rowSelected = selectedRows?.includes(row);
+                const rowDisabled = disabledRows?.includes(row) && !isMovedStickyRow;
+
+                if (
+                    doingSticky ||
+                    drawRegions.length === 0 ||
+                    drawRegions.find(
+                        drawRegion =>
+                            (y >= drawRegion.y && y <= drawRegion.y + drawRegion.height) ||
+                            (drawRegion.y >= y && drawRegion.y <= y + rh)
+                    )
+                ) {
+                    const rowLocal = row;
                     if (
                         doingSticky ||
-                        drawRegions.length === 0 ||
-                        drawRegions.find(
-                            drawRegion =>
-                                (y >= drawRegion.y && y <= drawRegion.y + drawRegion.height) ||
-                                (drawRegion.y >= y && drawRegion.y <= y + rh)
-                        )
+                        damage === undefined ||
+                        damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) !== undefined
                     ) {
-                        const rowLocal = row;
-                        if (
-                            doingSticky ||
-                            damage === undefined ||
-                            damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) !== undefined
-                        ) {
+                        ctx.beginPath();
+
+                        const isFocused =
+                            !isMovedStickyRow &&
+                            selectedCell?.cell[0] === c.sourceIndex &&
+                            selectedCell?.cell[1] === row;
+                        let highlighted =
+                            (!isMovedStickyRow && (rowSelected || isFocused)) ||
+                            selectedColumns?.includes(c.sourceIndex) === true;
+
+                        if (selectedCell?.range !== undefined && !isMovedStickyRow) {
+                            const { range } = selectedCell;
+                            if (
+                                c.sourceIndex >= range.x &&
+                                c.sourceIndex < range.x + range.width &&
+                                row >= range.y &&
+                                row < range.y + range.height
+                            ) {
+                                highlighted = true;
+                            }
+                        }
+
+                        if (highlighted || rowDisabled) {
+                            if (rowDisabled) {
+                                ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
+                                if (x === 0) {
+                                    ctx.fillRect(x, y + 1, c.width, rh - 1);
+                                } else {
+                                    ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
+                                }
+                            }
+                            if (highlighted) {
+                                ctx.fillStyle = theme.dataViewer.bgSelected;
+                                if (x === 0) {
+                                    ctx.fillRect(x, y + 1, c.width, rh - 1);
+                                } else {
+                                    ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
+                                }
+                            }
+                        } else {
+                            // eslint-disable-next-line no-loop-func
+                            if (prelightCells?.find(pre => pre[0] === c.sourceIndex && pre[1] === row) !== undefined) {
+                                ctx.fillStyle = theme.dataViewer.bgPrelight;
+                                if (x === 0) {
+                                    ctx.fillRect(x, y + 1, c.width, rh - 1);
+                                } else {
+                                    ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
+                                }
+                            }
+                        }
+
+                        const cell: InnerGridCell =
+                            !isMovedStickyRow && row < rows
+                                ? getCellContent([c.sourceIndex, row])
+                                : {
+                                      kind: GridCellKind.Loading,
+                                      allowOverlay: false,
+                                  };
+
+                        if (cell.style === "faded") {
+                            ctx.globalAlpha = 0.6;
+                        }
+
+                        drawCell(ctx, row, cell, c.sourceIndex, x, y, c.width, rh, highlighted);
+
+                        ctx.globalAlpha = 1;
+
+                        if (isFocused) {
+                            // we want to UNSET the clip of the column so that we can reclip with the ability to draw
+                            // over the borders
+                            ctx.restore(); // we now have no column clip
+                            ctx.save(); // save state without column clip
+
                             ctx.beginPath();
+                            clipCol(1); // we are now clipped with bigger bounds
 
-                            const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
-                            let highlighted = rowSelected || selectedColumns?.includes(c.sourceIndex) || isFocused;
-
-                            if (selectedCell?.range !== undefined) {
-                                const { range } = selectedCell;
-                                if (
-                                    c.sourceIndex >= range.x &&
-                                    c.sourceIndex < range.x + range.width &&
-                                    row >= range.y &&
-                                    row < range.y + range.height
-                                ) {
-                                    highlighted = true;
-                                }
-                            }
-
-                            if (highlighted || rowDisabled) {
-                                if (rowDisabled) {
-                                    ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
-                                    if (x === 0) {
-                                        ctx.fillRect(x, y + 1, c.width, rh - 1);
-                                    } else {
-                                        ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
-                                    }
-                                }
-                                if (highlighted) {
-                                    ctx.fillStyle = theme.dataViewer.bgSelected;
-                                    if (x === 0) {
-                                        ctx.fillRect(x, y + 1, c.width, rh - 1);
-                                    } else {
-                                        ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
-                                    }
-                                }
-                            } else {
-                                // eslint-disable-next-line no-loop-func
-                                if (
-                                    prelightCells?.find(pre => pre[0] === c.sourceIndex && pre[1] === row) !== undefined
-                                ) {
-                                    ctx.fillStyle = theme.dataViewer.bgPrelight;
-                                    if (x === 0) {
-                                        ctx.fillRect(x, y + 1, c.width, rh - 1);
-                                    } else {
-                                        ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
-                                    }
-                                }
-                            }
-
-                            const cell: InnerGridCell =
-                                row < rows
-                                    ? getCellContent([c.sourceIndex, row])
-                                    : {
-                                          kind: GridCellKind.Loading,
-                                          allowOverlay: false,
-                                      };
-
-                            if (cell.style === "faded") {
-                                ctx.globalAlpha = 0.6;
-                            }
-
-                            drawCell(ctx, row, cell, c.sourceIndex, x, y, c.width, rh, highlighted);
-
-                            ctx.globalAlpha = 1;
-
-                            if (isFocused) {
-                                // we want to UNSET the clip of the column so that we can reclip with the ability to draw
-                                // over the borders
-                                ctx.restore(); // we now have no column clip
-                                ctx.save(); // save state without column clip
-
+                            if (lastRowSticky && row !== rows - 1) {
                                 ctx.beginPath();
-                                clipCol(1); // we are now clipped with bigger bounds
-
-                                if (lastRowSticky && row !== rows - 1) {
-                                    ctx.beginPath();
-                                    const stickyHeight = getRowHeight(rows - 1);
-                                    ctx.rect(0, 0, width, height - stickyHeight);
-                                    ctx.clip();
-                                }
-
-                                ctx.beginPath();
-                                ctx.rect(x + 1, y + 1, c.width - 1, rh - 1);
-                                ctx.strokeStyle = theme.acceptColor;
-                                ctx.lineWidth = 2;
-                                ctx.stroke();
-
-                                ctx.restore(); // we now have no column clip
-                                ctx.save(); // save state without column clip
-                                ctx.beginPath();
-                                clipCol(0); // restore original clip
+                                const stickyHeight = getRowHeight(rows - 1);
+                                ctx.rect(0, 0, width, height - stickyHeight);
+                                ctx.clip();
                             }
+
+                            ctx.beginPath();
+                            ctx.rect(x + 1, y + 1, c.width - 1, rh - 1);
+                            ctx.strokeStyle = theme.acceptColor;
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+
+                            ctx.restore(); // we now have no column clip
+                            ctx.save(); // save state without column clip
+                            ctx.beginPath();
+                            clipCol(0); // restore original clip
                         }
                     }
                 }
