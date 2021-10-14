@@ -144,7 +144,6 @@ function createTextColumnInfo(index: number): GridColumnWithMockingInfo {
     };
 }
 
-// Returns a map from column titles to a their corresponding column data
 function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
     const defaultColumns: GridColumnWithMockingInfo[] = [
         {
@@ -890,6 +889,261 @@ export const MultiSelectColumns: React.VFC = () => {
 };
 
 (MultiSelectColumns as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
+    return [
+        {
+            title: "Row ID",
+            width: 120,
+            icon: "headerRowID",
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.RowID,
+                    data: faker.datatype.uuid(),
+                    allowOverlay: false,
+                };
+            },
+        },
+        {
+            title: "Protected",
+            width: 120,
+            icon: "headerCode",
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.Protected,
+                    data: faker.finance.bitcoinAddress(),
+                    allowOverlay: false,
+                };
+            },
+        },
+        {
+            title: "Loading",
+            width: 120,
+            icon: "headerString",
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.Loading,
+                    allowOverlay: false,
+                };
+            },
+        },
+        {
+            title: "Text",
+            width: 120,
+            icon: "headerCode",
+            hasMenu: false,
+            getContent: () => {
+                const name = faker.name.firstName();
+                return {
+                    kind: GridCellKind.Text,
+                    data: name,
+                    displayData: name,
+                    allowOverlay: true,
+                };
+            },
+        },
+        {
+            title: "Number",
+            width: 120,
+            icon: "headerNumber",
+            hasMenu: false,
+            getContent: () => {
+                const age = faker.datatype.number(100);
+                return {
+                    kind: GridCellKind.Number,
+                    data: age,
+                    displayData: `${age}`,
+                    allowOverlay: true,
+                };
+            },
+        },
+        {
+            title: "Boolean",
+            width: 120,
+            icon: "headerBoolean",
+            hasMenu: false,
+            getContent: () => {
+                const checked = Math.random() > 0.5;
+                // TODO: Make editable. UX looks bad by default.
+                return {
+                    kind: GridCellKind.Boolean,
+                    data: checked,
+                    allowOverlay: false,
+                    showUnchecked: !checked,
+                    allowEdit: false,
+                };
+            },
+        },
+        {
+            title: "Image",
+            width: 120,
+            icon: "headerImage",
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.Image,
+                    data: [`${faker.image.cats()}?random=${faker.datatype.number(100000)}`],
+                    allowOverlay: true,
+                    allowAdd: false,
+                    readonly: true,
+                };
+            },
+        },
+        {
+            title: "Uri",
+            width: 120,
+            icon: "headerUri",
+            hasMenu: false,
+            getContent: () => {
+                const url = faker.internet.url();
+                return {
+                    kind: GridCellKind.Uri,
+                    data: url,
+                    allowOverlay: true,
+                };
+            },
+        },
+        {
+            title: "Markdown",
+            width: 120,
+            icon: "headerMarkdown",
+            hasMenu: false,
+            getContent: () => {
+                const markdown = `# Title
+Hello my name is *${faker.name.firstName()}*
+
+## TODO:
+Try out [Glide](https://www.glideapps.com/)
+`;
+                return {
+                    kind: GridCellKind.Markdown,
+                    data: markdown,
+                    allowOverlay: true,
+                };
+            },
+        },
+        {
+            title: "Bubble",
+            width: 120,
+            icon: "headerArray",
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.Bubble,
+                    data: [faker.lorem.word(), faker.lorem.word(), faker.lorem.word()],
+                    allowOverlay: true,
+                };
+            },
+        },
+        {
+            title: "Drilldown",
+            width: 120,
+            icon: "headerArray",
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.Drilldown,
+                    data: [
+                        {
+                            text: faker.address.cityName(),
+                            image: `${faker.image.city()}?random=${faker.datatype.number(100000)}`,
+                        },
+                        {
+                            text: faker.address.cityName(),
+                            image: `${faker.image.city()}?random=${faker.datatype.number(100000)}`,
+                        },
+                    ],
+                    allowOverlay: true,
+                };
+            },
+        },
+    ];
+}
+
+function useAllMockedKinds() {
+    const cache = React.useRef<ContentCache>(new ContentCache());
+
+    const [colsMap, setColsMap] = React.useState(getColumnsForCellTypes);
+
+    const onColumnResized = React.useCallback((column: GridColumn, newSize: number) => {
+        setColsMap(prevColsMap => {
+            const index = prevColsMap.findIndex(ci => ci.title === column.title);
+            const newArray = [...prevColsMap];
+            newArray.splice(index, 1, {
+                ...prevColsMap[index],
+                width: newSize,
+            });
+            return newArray;
+        });
+    }, []);
+
+    const cols = React.useMemo(() => {
+        return colsMap.map(getGridColumn);
+    }, [colsMap]);
+
+    const getCellContent = React.useCallback(
+        ([col, row]: readonly [number, number]): GridCell => {
+            let val = cache.current.get(col, row);
+            if (val === undefined) {
+                val = colsMap[col].getContent();
+                cache.current.set(col, row, val);
+            }
+
+            return val;
+        },
+        [colsMap]
+    );
+
+    const setCellValue = React.useCallback(
+        ([col, row]: readonly [number, number], val: GridCell): void => {
+            let current = cache.current.get(col, row);
+            if (current === undefined) {
+                current = colsMap[col].getContent();
+            }
+            if (isEditableGridCell(val) && isEditableGridCell(current)) {
+                const copied = lossyCopyData(val, current);
+                cache.current.set(col, row, {
+                    ...copied,
+                    displayData: copied.data?.toString() ?? "",
+                } as any);
+            }
+        },
+        [colsMap]
+    );
+
+    return { cols, getCellContent, onColumnResized, setCellValue };
+}
+
+export const AllCellKinds: React.VFC = () => {
+    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+
+    return (
+        <BeautifulWrapper
+            title="Lotsa cell kinds"
+            description={
+                <Description>
+                    Data grid supports plenty cell kinds. Anything under <PropName>GridCellKind</PropName>.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                onCellEdited={setCellValue}
+                onColumnResized={onColumnResized}
+                rows={1_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(AutomaticRowMarkers as any).parameters = {
     options: {
         showPanel: false,
     },
