@@ -85,16 +85,18 @@ export function getEffectiveColumns(
     },
     tx?: number
 ): readonly MappedGridColumn[] {
-    const mappedCols = [...columns];
+    let mappedCols = columns;
     if (dndState !== undefined) {
+        const writable = [...columns];
         const temp = mappedCols[dndState.src];
         if (dndState.src > dndState.dest) {
-            mappedCols.splice(dndState.src, 1);
-            mappedCols.splice(dndState.dest, 0, temp);
+            writable.splice(dndState.src, 1);
+            writable.splice(dndState.dest, 0, temp);
         } else {
-            mappedCols.splice(dndState.dest + 1, 0, temp);
-            mappedCols.splice(dndState.src, 1);
+            writable.splice(dndState.dest + 1, 0, temp);
+            writable.splice(dndState.src, 1);
         }
+        mappedCols = writable;
     }
 
     if (firstColSticky) {

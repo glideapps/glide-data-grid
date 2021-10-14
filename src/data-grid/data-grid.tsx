@@ -392,7 +392,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         imageLoader.current = new ImageWindowLoader();
     }, []);
 
-    canBlit.current = canBlit.current !== undefined && false;
+    canBlit.current = canBlit.current !== undefined;
     React.useEffect(() => {
         canBlit.current = false;
     }, [
