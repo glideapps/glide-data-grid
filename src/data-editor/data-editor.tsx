@@ -153,6 +153,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         ...rest
     } = p;
 
+    const lastRowSticky = trailingRowOptions?.sticky === true;
+
     const gridSelection = gridSelectionOuter ?? gridSelectionInner;
     const setGridSelection = onGridSelectionChange ?? setGridSelectionInner;
     const selectedRows = selectedRowsOuter ?? selectedRowsInner;
@@ -294,7 +296,17 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     });
                 } else {
                     if (gridSelection?.cell[0] !== col || gridSelection.cell[1] !== row) {
-                        if (args.shiftKey && gridSelection !== undefined) {
+                        const isLastStickyRow = lastRowSticky && row === rows;
+
+                        const startedFromLastSticky =
+                            lastRowSticky && gridSelection !== undefined && gridSelection.cell[1] === rows;
+
+                        if (
+                            args.shiftKey &&
+                            gridSelection !== undefined &&
+                            !isLastStickyRow &&
+                            !startedFromLastSticky
+                        ) {
                             const [sCol, sRow] = gridSelection.cell;
                             const left = Math.min(col, sCol);
                             const right = Math.max(col, sCol);
@@ -340,13 +352,14 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             rowMarkerOffset,
             trailingRowOptions?.hint,
             showTrailingBlankRow,
+            rows,
             setGridSelection,
             focus,
             setSelectedColumns,
             selectedRows,
             setSelectedRows,
             onRowAppended,
-            rows,
+            lastRowSticky,
         ]
     );
 
@@ -1045,7 +1058,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 firstColSticky={rowMarkers}
                 getCellContent={getMangedCellContent}
                 headerHeight={headerHeight}
-                lastRowSticky={trailingRowOptions?.sticky === true}
+                lastRowSticky={lastRowSticky}
                 onCellFocused={onCellFocused}
                 onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}
                 onDragStart={onDragStartImpl}
