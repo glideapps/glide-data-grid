@@ -305,12 +305,13 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         const startedFromLastSticky =
                             lastRowSticky && gridSelection !== undefined && gridSelection.cell[1] === rows;
 
-                        if (
-                            args.shiftKey &&
-                            gridSelection !== undefined &&
-                            !isLastStickyRow &&
-                            !startedFromLastSticky
-                        ) {
+                        if (args.shiftKey && gridSelection !== undefined && !startedFromLastSticky) {
+                            if (isLastStickyRow) {
+                                // If we're making a selection and shift click in to the last sticky row,
+                                // just drop the event. Don't kill the selection.
+                                return;
+                            }
+
                             const [sCol, sRow] = gridSelection.cell;
                             const left = Math.min(col, sCol);
                             const right = Math.max(col, sCol);
