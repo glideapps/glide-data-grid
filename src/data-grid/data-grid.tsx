@@ -19,6 +19,7 @@ import { buildSpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
 import { drawCell, drawGrid } from "./data-grid-render";
+import { AnimationManager, StepCallback } from "./animation-manager";
 
 export interface DataGridProps {
     readonly width: number;
@@ -84,6 +85,8 @@ interface Props extends DataGridProps {
     readonly theme: Theme;
 }
 
+type Item = readonly [number, number | undefined];
+
 interface BlitData {
     readonly cellXOffset: number;
     readonly cellYOffset: number;
@@ -140,9 +143,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const imageLoader = React.useRef<ImageWindowLoader>();
     const canBlit = React.useRef<boolean>();
-    const damageRegion = React.useRef<readonly (readonly [number, number])[] | undefined>(undefined);
+    const damageRegion = React.useRef<readonly Item[] | undefined>(undefined);
+    const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
     const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
-    const [hoveredItem, setHoveredItem] = React.useState<readonly [number, number | undefined] | undefined>();
+    const [hoveredItem, setHoveredItem] = React.useState<Item | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
 
     React.useEffect(() => {
@@ -361,7 +365,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             lastBlitData,
             canvas,
             canBlit.current,
-            damageRegion.current
+            damageRegion.current,
+            hoverValues.current
         );
     }, [
         width,
@@ -432,8 +437,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
     const [hCol, hRow] = hoveredItem ?? [];
     const headerHovered = hCol !== undefined && hRow === undefined;
-    const newRowCellHovered =
-        hCol !== undefined && hRow !== undefined && getCellContent([hCol, hRow]).kind === "new-row";
+    let newRowCellHovered = false;
+    let editableBoolHovered = false;
+    if (hCol !== undefined && hRow !== undefined) {
+        const cell = getCellContent([hCol, hRow]);
+        newRowCellHovered = cell.kind === "new-row";
+        editableBoolHovered = cell.kind === GridCellKind.Boolean && cell.allowEdit === true;
+    }
     const canDrag = hoveredOnEdge ?? false;
     const style = React.useMemo(
         () => ({
@@ -444,11 +454,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 ? "grabbing"
                 : canDrag || isResizing
                 ? "col-resize"
-                : headerHovered || newRowCellHovered
+                : headerHovered || newRowCellHovered || editableBoolHovered
                 ? "pointer"
                 : "default",
         }),
-        [width, height, canDrag, isResizing, isDragging, headerHovered, newRowCellHovered]
+        [width, height, isDragging, canDrag, isResizing, headerHovered, newRowCellHovered, editableBoolHovered]
     );
 
     const target = eventTargetRef?.current;
@@ -501,6 +511,21 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         [getMouseArgsForPosition, onMouseUp]
     );
     useEventListener("mouseup", onMouseUpImpl, window, true);
+
+    const drawRef = React.useRef(draw);
+    drawRef.current = draw;
+    const onAnimationFrame = React.useCallback<StepCallback>(values => {
+        canBlit.current = false;
+        damageRegion.current = values.map(x => x.item);
+        hoverValues.current = values;
+        drawRef.current();
+        damageRegion.current = undefined;
+    }, []);
+
+    const animationManager = React.useRef(new AnimationManager(onAnimationFrame));
+    React.useEffect(() => {
+        animationManager.current.setHovered(hoveredItem);
+    }, [hoveredItem]);
 
     const hoveredRef = React.useRef<GridMouseEventArgs>();
     const onMouseMoveImpl = React.useCallback(
@@ -645,7 +670,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                                 false,
                                 theme,
                                 drawCustomCell,
-                                imageLoader.current
+                                imageLoader.current,
+                                1
                             );
                         }
 

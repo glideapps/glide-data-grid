@@ -1,5 +1,6 @@
 import ImageWindowLoader from "common/image-window-loader";
 import { GridSelection, Theme } from "index";
+import { HoverValues } from "./animation-manager";
 import {
     drawBoolean,
     drawBubbles,
@@ -28,7 +29,7 @@ interface DragAndDropState {
 
 type DrawCustomCellCallback = (ctx: CanvasRenderingContext2D, cell: GridCell, theme: Theme, rect: Rectangle) => boolean;
 
-type CellList = readonly (readonly [number, number])[];
+type CellList = readonly (readonly [number, number | undefined])[];
 
 export function drawCell(
     ctx: CanvasRenderingContext2D,
@@ -44,31 +45,32 @@ export function drawCell(
     drawCustomCell:
         | ((ctx: CanvasRenderingContext2D, cell: GridCell, theme: Theme, rect: Rectangle) => boolean)
         | undefined,
-    imageLoader: ImageWindowLoader | undefined
+    imageLoader: ImageWindowLoader | undefined,
+    hoverAmount: number
 ) {
     const drawn =
         cell.kind === "new-row" ? false : drawCustomCell?.(ctx, cell, theme, { x, y, width: w, height: h }) === true;
     if (!drawn) {
         if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
-            drawTextCell(ctx, theme, cell.displayData, x, y, w, h);
+            drawTextCell(ctx, theme, cell.displayData, x, y, w, h, hoverAmount);
         } else if (cell.kind === GridCellKind.Markdown || cell.kind === GridCellKind.Uri) {
-            drawTextCell(ctx, theme, cell.data, x, y, w, h);
+            drawTextCell(ctx, theme, cell.data, x, y, w, h, hoverAmount);
         } else if (cell.kind === GridCellKind.Boolean) {
             if (cell.data || cell.showUnchecked) {
-                drawBoolean(ctx, theme, cell.data, x, y, w, h, highlighted, cell.allowEdit);
+                drawBoolean(ctx, theme, cell.data, x, y, w, h, hoverAmount, highlighted, cell.allowEdit);
             }
         } else if (cell.kind === GridCellKind.Bubble) {
-            drawBubbles(ctx, theme, cell.data, x, y, w, h, highlighted);
+            drawBubbles(ctx, theme, cell.data, x, y, w, h, hoverAmount, highlighted);
         } else if (cell.kind === GridCellKind.Image && imageLoader !== undefined) {
-            drawImage(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, imageLoader);
+            drawImage(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, hoverAmount, imageLoader);
         } else if (cell.kind === GridCellKind.RowID) {
-            drawTextCell(ctx, theme, cell.data, x, y, w, h, theme.fgColorLight);
+            drawTextCell(ctx, theme, cell.data, x, y, w, h, hoverAmount, theme.fgColorLight);
         } else if (cell.kind === GridCellKind.Protected) {
-            drawProtectedCell(ctx, theme, x, y, w, h, !highlighted);
+            drawProtectedCell(ctx, theme, x, y, w, h, hoverAmount, !highlighted);
         } else if (cell.kind === GridCellKind.Drilldown && imageLoader !== undefined) {
-            drawDrilldownCell(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, imageLoader);
+            drawDrilldownCell(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, hoverAmount, imageLoader);
         } else if (cell.kind === "new-row") {
-            drawTextCell(ctx, theme, cell.hint, x, y, w, h);
+            drawTextCell(ctx, theme, cell.hint, x, y, w, h, hoverAmount);
         }
     }
 }
@@ -448,6 +450,7 @@ function drawColumnContent(
     prelightCells: CellList | undefined,
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader | undefined,
+    hoverValues: HoverValues,
     theme: Theme
 ): { lastRowDrawn: number; newClipX: number } {
     let y = headerHeight + translateY;
@@ -568,6 +571,8 @@ function drawColumnContent(
                     ctx.globalAlpha = 0.6;
                 }
 
+                const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
+
                 drawCell(
                     ctx,
                     row,
@@ -580,7 +585,8 @@ function drawColumnContent(
                     highlighted,
                     theme,
                     drawCustomCell,
-                    imageLoader
+                    imageLoader,
+                    hoverValue?.hoverAmount ?? 0
                 );
 
                 ctx.globalAlpha = 1;
@@ -655,7 +661,8 @@ export function drawGrid(
     lastBlitData: React.MutableRefObject<BlitData>,
     canvas: HTMLCanvasElement,
     canBlit: boolean | undefined,
-    damage: CellList | undefined
+    damage: CellList | undefined,
+    hoverValues: HoverValues
 ) {
     const dpr = Math.ceil(window.devicePixelRatio) ?? 1;
 
@@ -825,6 +832,7 @@ export function drawGrid(
             prelightCells,
             drawCustomCell,
             imageLoader,
+            hoverValues,
             theme
         );
         ctx.restore();

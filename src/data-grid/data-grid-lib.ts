@@ -203,6 +203,7 @@ export function drawTextCell(
     y: number,
     width: number,
     height: number,
+    _hoverAmount: number,
     overrideColor?: string
 ) {
     data = data.split(/\r?\n/)[0].slice(0, Math.round(width / 4));
@@ -225,6 +226,7 @@ export function drawProtectedCell(
     y: number,
     width: number,
     height: number,
+    _hoverAmount: number,
     drawBackground: boolean
 ) {
     if (drawBackground) {
@@ -294,13 +296,16 @@ export function drawBoolean(
     y: number,
     width: number,
     height: number,
+    hoverAmount: number,
     highlighted: boolean,
     canEdit: boolean
 ) {
     const centerX = x + width / 2;
     const centerY = y + height / 2;
 
-    ctx.globalAlpha = canEdit ? 1 : 0.5;
+    const hoverEffect = 0.4;
+
+    ctx.globalAlpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.5;
 
     if (data) {
         ctx.beginPath();
@@ -341,6 +346,7 @@ export function drawBubbles(
     y: number,
     width: number,
     height: number,
+    _hoverAmount: number,
     highlighted: boolean
 ) {
     const bubbleHeight = 20;
@@ -391,6 +397,7 @@ export function drawDrilldownCell(
     y: number,
     width: number,
     height: number,
+    _hoverAmount: number,
     imageLoader: ImageWindowLoader
 ) {
     const bubbleHeight = 24;
@@ -486,6 +493,7 @@ export function drawImage(
     y: number,
     _width: number,
     height: number,
+    _hoverAmount: number,
     imageLoader: ImageWindowLoader
 ) {
     let drawX = x + cellXPad;
