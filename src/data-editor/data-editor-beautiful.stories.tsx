@@ -475,15 +475,16 @@ export const ObserveVisibleRegion: React.VFC = () => {
 
     return (
         <BeautifulWrapper
-            title="One Million Rows"
+            title="Observe Visible Region"
             description={
                 <>
                     <Description>
                         The visiible region can be observed using <PropName>onVisibileRegionChanged</PropName>
                     </Description>
                     <MoreInfo>
-                        Then current visible region is x:{visibleRegion.x} y:{visibleRegion.y} width:
-                        {visibleRegion.width} height:{visibleRegion.height}
+                        Then current visible region is x:<KeyName>{visibleRegion.x}</KeyName> y:
+                        <KeyName>{visibleRegion.y}</KeyName> width:
+                        <KeyName>{visibleRegion.width}</KeyName> height:<KeyName>{visibleRegion.height}</KeyName>
                     </MoreInfo>
                 </>
             }>

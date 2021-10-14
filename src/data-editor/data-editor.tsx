@@ -506,6 +506,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 // eslint-disable-next-line prefer-const
                 let [col, row] = args.location;
 
+                if (onRowAppended !== undefined && row === rows) return;
+
                 if (col === 0 && rowMarkers) {
                     col = 1;
                 }
@@ -558,7 +560,17 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
             onItemHovered?.(args);
         },
-        [onItemHovered, gridSelection, isDraggable, rowMarkers, setGridSelection, columns, rowHeight]
+        [
+            gridSelection,
+            isDraggable,
+            onItemHovered,
+            lastRowSticky,
+            rows,
+            rowMarkers,
+            setGridSelection,
+            columns,
+            rowHeight,
+        ]
     );
 
     const copyToClipboard = React.useCallback((cells: readonly (readonly GridCell[])[]) => {
