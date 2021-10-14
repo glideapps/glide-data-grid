@@ -211,12 +211,12 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
             },
         },
         {
-            title: "Company",
+            title: "Title",
             width: 120,
             icon: "headerString",
             hasMenu: false,
             getContent: () => {
-                const company = faker.company.companyName();
+                const company = faker.name.jobTitle();
                 return {
                     kind: GridCellKind.Text,
                     displayData: company,
