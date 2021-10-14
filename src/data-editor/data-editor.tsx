@@ -26,6 +26,7 @@ import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/ima
 import { ThemeProvider, useTheme } from "styled-components";
 import { getBuilderTheme } from "../common/styles";
 import { DataGridRef } from "data-grid/data-grid";
+import noop from "lodash/noop";
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
@@ -115,6 +116,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
     const scrollTimer = React.useRef<number>();
     const lastSent = React.useRef<[number, number]>();
+    const [forceDraw, setForceDraw] = React.useState<number>(0);
 
     const imageEditorOverride = p.imageEditorOverride;
     const markdownDivCreateNode = p.markdownDivCreateNode;
@@ -206,6 +208,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         ([col, row]: readonly [number, number]): InnerGridCell => {
             const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
             const isRowMarkerCol = col === 0 && rowMarkers;
+            noop(forceDraw);
             if (isRowMarkerCol) {
                 return {
                     kind: GridCellKind.Boolean,
@@ -240,6 +243,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             rowMarkerOffset,
             trailingRowOptions?.hint,
             getCellContent,
+            forceDraw,
         ]
     );
 
@@ -392,6 +396,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     ...c,
                     data: !c.data,
                 });
+                setForceDraw(cv => (cv + 1) % 100); // I can't do math with triple digits so I always avoid it
             } else {
                 onCellClicked?.([col - rowMarkerOffset, row]);
             }

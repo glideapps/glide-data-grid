@@ -975,8 +975,8 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
                     kind: GridCellKind.Boolean,
                     data: checked,
                     allowOverlay: false,
-                    showUnchecked: !checked,
-                    allowEdit: false,
+                    showUnchecked: true,
+                    allowEdit: true,
                 };
             },
         },
