@@ -564,7 +564,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             gridSelection,
             isDraggable,
             onItemHovered,
-            lastRowSticky,
+            onRowAppended,
             rows,
             rowMarkers,
             setGridSelection,
