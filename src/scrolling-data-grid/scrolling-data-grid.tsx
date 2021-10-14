@@ -25,8 +25,13 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const lastX = React.useRef<number | undefined>();
     const lastY = React.useRef<number | undefined>();
 
-    let width = 0;
-    columns.forEach(c => (width += c.width));
+    const width = React.useMemo(() => {
+        let r = 0;
+        for (const c of columns) {
+            r += c.width;
+        }
+        return r;
+    }, [columns]);
 
     let height = headerHeight;
     if (typeof rowHeight === "number") {
