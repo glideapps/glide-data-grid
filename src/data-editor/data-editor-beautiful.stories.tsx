@@ -988,7 +988,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             getContent: () => {
                 return {
                     kind: GridCellKind.Image,
-                    data: [`${faker.image.cats(40, 40)}?random=${faker.datatype.number(100000)}`],
+                    data: [`${faker.image.animals(40, 40)}?random=${faker.datatype.number(100000)}`],
                     allowOverlay: true,
                     allowAdd: false,
                     readonly: true,
@@ -1052,11 +1052,11 @@ Try out [Glide](https://www.glideapps.com/)
                     data: [
                         {
                             text: faker.address.cityName(),
-                            img: `${faker.image.city()}?random=${faker.datatype.number(100000)}`,
+                            img: `${faker.image.nature()}?random=${faker.datatype.number(100000)}`,
                         },
                         {
                             text: faker.address.cityName(),
-                            img: `${faker.image.city(40, 40)}?random=${faker.datatype.number(100000)}`,
+                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100000)}`,
                         },
                     ],
                     allowOverlay: true,
