@@ -77,8 +77,8 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
         readonly sticky?: boolean;
     };
     readonly headerHeight?: number; // default 36
-    readonly rowHeight?: number; // default 34
     readonly rowMarkerWidth?: number; // default 50
+    readonly rowHeight?: DataGridSearchProps["rowHeight"];
 
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
@@ -515,7 +515,11 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         scrollX = -columns[0].width;
                     }
                     if (vertical !== 0) {
-                        scrollY = rowHeight * vertical;
+                        if (typeof rowHeight === "number") {
+                            scrollY = rowHeight * vertical;
+                        } else {
+                            scrollY = rowHeight(row ?? 0) * vertical;
+                        }
                     }
 
                     if (scrollTimer.current !== undefined) {
@@ -672,26 +676,59 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
                 let visibleFullColumns = 0;
                 let t = rowMarkers ? rowMarkerWidth : 0;
-                for (let c = cellYOffset; c < columns.length; c++) {
+                for (let c = cellXOffset; c < columns.length; c++) {
                     if (t + columns[c].width > clientWidth) break;
 
                     visibleFullColumns++;
                     t += columns[c].width;
                 }
 
+                let height = 0;
+                if (typeof rowHeight === "number") {
+                    height = Math.ceil((clientHeight - headerHeight) / rowHeight);
+                } else {
+                    let h = 0;
+                    let r = cellYOffset;
+                    while (h < clientHeight - headerHeight) {
+                        h += rowHeight(r);
+                        r++;
+                    }
+                    height = r - cellYOffset;
+                }
+
                 const visible = {
                     x: cellXOffset + 1,
                     y: cellYOffset,
                     width: visibleFullColumns,
-                    height: Math.ceil((clientHeight - headerHeight) / rowHeight),
+                    height,
                 };
 
                 if (row >= visible.y + visible.height - 1) {
                     const delta = row - (visible.y + visible.height - 2);
-                    scrollRef.current.scrollBy(0, rowHeight * delta);
-                } else if (row < visible.y) {
-                    const delta = visible.y - row;
-                    scrollRef.current.scrollBy(0, -(rowHeight * delta));
+                    if (typeof rowHeight === "number") {
+                        scrollRef.current.scrollBy(0, rowHeight * delta);
+                    } else {
+                        let r = visible.y + visible.height - 1;
+                        let toScroll = 0;
+                        for (let i = 0; i < delta; i++) {
+                            toScroll += rowHeight(r);
+                            r++;
+                        }
+                        scrollRef.current.scrollBy(0, toScroll);
+                    }
+                } else if (row < visible.y + 1) {
+                    const delta = visible.y + 1 - row;
+                    if (typeof rowHeight === "number") {
+                        scrollRef.current.scrollBy(0, -(rowHeight * delta));
+                    } else {
+                        let r = visible.y + 1;
+                        let toScroll = 0;
+                        while (r !== row) {
+                            toScroll += rowHeight(r);
+                            r--;
+                        }
+                        scrollRef.current.scrollBy(0, -toScroll);
+                    }
                 } else if (col >= visible.x + visible.width) {
                     scrollRef.current.scrollLeft = minXScrollToCol(col);
                     // scrollRef.current.scrollBy(columns[1].width, 0);

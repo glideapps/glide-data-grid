@@ -614,6 +614,33 @@ export const AutomaticRowMarkers: React.VFC = () => {
     },
 };
 
+export const UnevenRows: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(6);
+
+    return (
+        <BeautifulWrapper
+            title="Uneven Rows"
+            description={
+                <Description>
+                    Rows can be made uneven by passing a callback to the <PropName>rowHeight</PropName> prop
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowHeight={r => (r % 3 === 0 ? 30 : r % 2 ? 50 : 60)}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={1_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(AutomaticRowMarkers as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const DrawCustomCells: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 

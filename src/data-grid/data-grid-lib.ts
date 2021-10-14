@@ -7,7 +7,7 @@ import { degreesToRadians } from "../common/utils";
 import { assertNever } from "../common/support";
 import React from "react";
 
-interface MappedGridColumn extends GridColumn {
+export interface MappedGridColumn extends GridColumn {
     sourceIndex: number;
     sticky: boolean;
 }
