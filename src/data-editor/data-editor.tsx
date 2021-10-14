@@ -212,6 +212,12 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             const isRowMarkerCol = col === 0 && rowMarkers;
             noop(forceDraw);
             if (isRowMarkerCol) {
+                if (isTrailing) {
+                    return {
+                        kind: GridCellKind.Loading,
+                        allowOverlay: false,
+                    };
+                }
                 return {
                     kind: GridCellKind.Boolean,
                     data: selectedRows?.includes(row),
@@ -257,6 +263,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             if (args.kind === "cell") {
                 const [col, row] = args.location;
                 if (col === 0 && rowMarkers) {
+                    if (showTrailingBlankRow === true && row === rows) return;
                     setGridSelection(undefined);
                     setOverlay(undefined);
                     focus();
