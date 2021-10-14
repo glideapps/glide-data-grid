@@ -5,6 +5,7 @@ import { GridCell, GridCellKind, GridKeyEventArgs, GridSelection, Rectangle } fr
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
 import { assert } from "../common/support";
+import { InnerGridCell } from "index";
 
 // icons
 const UpArrow = () => (
@@ -80,16 +81,18 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     }, []);
 
     const getCellsForSelectionMangled = React.useCallback(
-        (selection: GridSelection): readonly (readonly GridCell[])[] => {
+        (selection: GridSelection): readonly (readonly InnerGridCell[])[] => {
             if (getCellsForSelection !== undefined) return getCellsForSelection(selection.range);
 
-            if (selection.range === undefined) return [[getCellContent(selection.cell)]];
+            if (selection.range === undefined) {
+                return [[getCellContent(selection.cell)]];
+            }
 
             const range = selection.range;
 
-            const result: GridCell[][] = [];
+            const result: InnerGridCell[][] = [];
             for (let row = range.y; row < range.y + range.height; row++) {
-                const inner: GridCell[] = [];
+                const inner: InnerGridCell[] = [];
                 for (let col = range.x; col < range.x + range.width; col++) {
                     inner.push(getCellContent([col + searchColOffset, row]));
                 }
