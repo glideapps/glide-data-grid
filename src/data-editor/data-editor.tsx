@@ -71,7 +71,6 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
     readonly onCellClicked?: (cell: readonly [number, number]) => void;
 
     readonly rowMarkers?: boolean; // default true;
-    readonly showTrailingBlankRow?: boolean; // default true;
     readonly trailingRowOptions?: {
         readonly tint?: boolean;
         readonly hint?: string;
@@ -83,9 +82,6 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
 
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
-
-    readonly cellXOffset?: number;
-    readonly cellYOffset?: number;
 
     readonly selectedRows?: RowSelection;
     readonly onSelectedRowsChange?: (newRows: RowSelection | undefined) => void;
@@ -121,7 +117,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const imageEditorOverride = p.imageEditorOverride;
     const markdownDivCreateNode = p.markdownDivCreateNode;
     const rowMarkers = p.rowMarkers ?? true;
-    const showTrailingBlankRow = p.showTrailingBlankRow ?? true;
+    const showTrailingBlankRow = p.onRowAppended !== undefined;
     const rowMarkerOffset = rowMarkers ? 1 : 0;
 
     const rowHeight = p.rowHeight ?? 34;
@@ -131,8 +127,6 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const { isDraggable, getCellsForSelection } = p;
 
     const {
-        cellXOffset: xOff,
-        cellYOffset: yOff,
         columns,
         rows,
         getCellContent,
@@ -460,8 +454,8 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         height: 1,
     });
 
-    const cellXOffset = xOff ?? visibileRegion.x;
-    const cellYOffset = yOff ?? visibileRegion.y;
+    const cellXOffset = visibileRegion.x;
+    const cellYOffset = visibileRegion.y;
 
     const onVisibleRegionChangedImpl = React.useCallback(
         (visibleRegion: Rectangle, tx?: number, ty?: number) => {

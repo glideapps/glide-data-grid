@@ -66,23 +66,10 @@ getCellContent: (cell: readonly [number, number]) => GridCell;
 ### Optional
 
 ```ts
-cellXOffset?: number;
-cellYOffset?: number;
-```
-
-`cellXOffset` and `cellYOffset` are the zero-based indexes of the leftmost column, and topmost row to display, respectively. Both should be provided if one is.
-
-```ts
-allowResize?: boolean;
-```
-
-`allowResize` is a boolean indicating whether to allow resizing the widths of columns. Default is `false`.
-
-```ts
 onVisibleRegionChanged?: (range: Rectangle) => void;
 ```
 
-`onVisibleRegionChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`. Note that you have to keep track of at least the `cellXOffset` and `cellYOffset`, for which the rectangle provides new values in `.x` and `.y`, respectively, and pass them back in as properties, otherwise your Grid will not scroll.
+`onVisibleRegionChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`.
 
 ```ts
 headerHeight: number;
@@ -145,13 +132,15 @@ onItemHovered?: (args: GridMouseEventArgs) => void;
 `onItemHovered` is called when the user hovers over a cell, a header, or outside the grid.
 
 ```ts
-showTrailingBlankRow?: boolean;
-onRowAppended?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
+trailingRowOptions?: {
+    readonly tint?: boolean;
+    readonly hint?: string;
+    readonly sticky?: boolean;
+}
+onRowAppended?: (cell?: readonly [number, number], newValue?: EditableGridCell) => void;
 ```
 
-`showTrailingBlankRow` and `onRowAppended` control adding new rows at the bottom of the Grid. If `showTrailingBlankRow` is `true`, an empty, editable row will display at the bottom. If the user enters a value in one of its cells, `onRowAppended` is called, which is responsible for appending the new row.
-
-`showTrailingBlankRow` is `true` by default.
+`onRowAppended` controls adding new rows at the bottom of the Grid. If `onRowAppended` is defined, an empty, editable row will display at the bottom. If the user enters a value in one of its cells, `onRowAppended` is called, which is responsible for appending the new row. The appearance of the blank row can be configured using `trailingRowOptions`.
 
 ```ts
 getCellsForSelection?: (selection: GridSelection) => readonly (readonly GridCell[])[];

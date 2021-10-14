@@ -9,6 +9,7 @@ import {
     isEditableGridCell,
     isTextEditableGridCell,
     lossyCopyData,
+    Rectangle,
 } from "../data-grid/data-grid-types";
 import DataEditor, { DataEditorProps } from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
@@ -342,7 +343,6 @@ const defaultProps: Partial<DataEditorProps> = {
     smoothScrollX: true,
     smoothScrollY: true,
     isDraggable: false,
-    showTrailingBlankRow: false,
     rowMarkers: false,
 };
 
@@ -406,7 +406,6 @@ export const AddData: React.VFC = () => {
                 columns={cols}
                 rowMarkers={true}
                 onCellEdited={setCellValue}
-                showTrailingBlankRow={true}
                 trailingRowOptions={{
                     hint: "+ New row...",
                     sticky: true,
@@ -460,6 +459,41 @@ export const OneMillionRows: React.VFC = () => {
             title="One Million Rows"
             description={<Description>Data grid supports over 1 million rows. Your limit is mostly RAM.</Description>}>
             <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={1_000_000} />
+        </BeautifulWrapper>
+    );
+};
+(OneMillionRows as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const ObserveVisibleRegion: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(100);
+
+    const [visibleRegion, setVisibleRegion] = React.useState<Rectangle>({ x: 0, y: 0, width: 0, height: 0 });
+
+    return (
+        <BeautifulWrapper
+            title="One Million Rows"
+            description={
+                <>
+                    <Description>
+                        The visiible region can be observed using <PropName>onVisibileRegionChanged</PropName>
+                    </Description>
+                    <MoreInfo>
+                        Then current visible region is x:{visibleRegion.x} y:{visibleRegion.y} width:
+                        {visibleRegion.width} height:{visibleRegion.height}
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={1_000}
+                onVisibleRegionChanged={setVisibleRegion}
+            />
         </BeautifulWrapper>
     );
 };

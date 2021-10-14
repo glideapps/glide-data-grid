@@ -165,14 +165,6 @@ function getDummyCols() {
 export function Simplenotest() {
     const [cols, setColumns] = useState(getDummyCols);
 
-    const [x, setX] = useState<number>(0);
-    const [y, setY] = useState<number>(0);
-
-    const onVisibleRegionChanged = useCallback((range: Rectangle) => {
-        setX(range.x);
-        setY(range.y);
-    }, []);
-
     const onColumnResized = useCallback(
         (col: GridColumn, newSize: number) => {
             const index = cols.indexOf(col);
@@ -201,13 +193,10 @@ export function Simplenotest() {
 
     return (
         <DataEditor
-            cellXOffset={x}
-            cellYOffset={y}
             getCellContent={getDummyData}
             getCellsForSelection={getCellsForSelection}
             columns={cols}
             rows={1000}
-            onVisibleRegionChanged={onVisibleRegionChanged}
             onColumnResized={onColumnResized}
         />
     );
@@ -375,7 +364,6 @@ export function IdealSize() {
                     smoothScrollY={true}
                     rowHeight={50}
                     headerHeight={50}
-                    showTrailingBlankRow={false}
                     rowMarkers={false}
                     rows={9}
                 />
@@ -407,7 +395,6 @@ export function DynamicAddRemoveColumns({ columnCount }: { columnCount: number }
             smoothScrollY={true}
             rowHeight={50}
             headerHeight={50}
-            showTrailingBlankRow={false}
             rowMarkers={false}
             rows={9}
         />
@@ -609,7 +596,6 @@ export function GridAddNewRows() {
             onRowAppended={onRowAppended}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
-            showTrailingBlankRow={true}
         />
     );
 }
@@ -628,7 +614,6 @@ export function GridNoTrailingBlankRow() {
             getCellContent={getDummyData}
             columns={cols}
             rows={100}
-            showTrailingBlankRow={false}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
         />
