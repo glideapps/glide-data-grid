@@ -55,9 +55,7 @@ export function drawCell(
     h: number,
     highlighted: boolean,
     theme: Theme,
-    drawCustomCell:
-        | ((ctx: CanvasRenderingContext2D, cell: GridCell, theme: Theme, rect: Rectangle) => boolean)
-        | undefined,
+    drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader | undefined,
     hoverAmount: number
 ) {
