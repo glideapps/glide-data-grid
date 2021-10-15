@@ -306,15 +306,16 @@ export function drawMarkerRowCell(
         ctx.globalAlpha = 1;
     }
     if (markerKind !== "checkbox" && !checked) {
+        const text = (index + 1).toString();
         ctx.font = `9px ${theme.fontFamily}`;
-        const w = measureTextWidth(index.toString(), ctx);
+        const w = measureTextWidth(text, ctx);
 
         const start = x + (width - w) / 2;
         if (markerKind === "both") {
             ctx.globalAlpha = 1 - hoverAmount;
         }
         ctx.fillStyle = theme.fgColorLight;
-        ctx.fillText(index.toString(), start, y + height / 2 + 4.5);
+        ctx.fillText(text, start, y + height / 2 + 4.5);
         ctx.globalAlpha = 1;
     }
     ctx.globalAlpha = 1;
