@@ -8,6 +8,8 @@ import {
     InnerGridCell,
     InnerGridCellKind,
     Rectangle,
+    CompactSelection,
+    indexInSelection,
 } from "./data-grid-types";
 import { HoverValues } from "./animation-manager";
 import {
@@ -453,8 +455,8 @@ function drawColumnContent(
     rows: number,
     getRowHeight: (row: number) => number,
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
-    selectedRows: readonly number[] | undefined,
-    disabledRows: readonly number[] | undefined,
+    selectedRows: CompactSelection | undefined,
+    disabledRows: CompactSelection | undefined,
     lastRowSticky: boolean,
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
@@ -505,8 +507,8 @@ function drawColumnContent(
 
         const isMovedStickyRow = doSticky && row === rows - 1;
 
-        const rowSelected = selectedRows?.includes(row);
-        const rowDisabled = disabledRows?.includes(row) && !isMovedStickyRow;
+        const rowSelected = indexInSelection(selectedRows, row);
+        const rowDisabled = indexInSelection(disabledRows, row) && !isMovedStickyRow;
 
         if (
             doingSticky ||
@@ -658,8 +660,8 @@ export function drawGrid(
     dragAndDropState: DragAndDropState | undefined,
     theme: Theme,
     headerHeight: number,
-    selectedRows: readonly number[] | undefined,
-    disabledRows: readonly number[] | undefined,
+    selectedRows: CompactSelection | undefined,
+    disabledRows: CompactSelection | undefined,
     rowHeight: number | ((index: number) => number),
     selectedColumns: readonly number[] | undefined,
     hoveredCol: number | undefined,
@@ -867,8 +869,8 @@ export function drawGrid(
 
     // fill blank rows to the right
     if (
-        (selectedRows !== undefined && selectedRows.length > 0) ||
-        (disabledRows !== undefined && disabledRows.length > 0)
+        (selectedRows !== undefined && selectedRows.items.length > 0) ||
+        (disabledRows !== undefined && disabledRows.items.length > 0)
     ) {
         let y = headerHeight + translateY;
         row = cellYOffset;
@@ -888,8 +890,8 @@ export function drawGrid(
                 y = height - rh;
             }
 
-            const rowSelected = selectedRows?.includes(row);
-            const rowDisabled = disabledRows?.includes(row);
+            const rowSelected = indexInSelection(selectedRows, row);
+            const rowDisabled = indexInSelection(disabledRows, row);
 
             if (!doSticky || row !== rows - 1) {
                 if (

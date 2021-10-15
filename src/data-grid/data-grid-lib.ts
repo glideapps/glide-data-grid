@@ -305,7 +305,7 @@ export function drawMarkerRowCell(
         drawCheckbox(ctx, theme, checked, x, y, width, height, true);
         ctx.globalAlpha = 1;
     }
-    if (markerKind !== "checkbox" && !checked) {
+    if (markerKind === "number" || (markerKind === "both" && !checked)) {
         const text = (index + 1).toString();
         ctx.font = `9px ${theme.fontFamily}`;
         const w = measureTextWidth(text, ctx);

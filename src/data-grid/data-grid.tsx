@@ -21,6 +21,7 @@ import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
 import { drawCell, drawGrid } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
+import { CompactSelection } from "index";
 
 export interface DataGridProps {
     readonly width: number;
@@ -53,12 +54,12 @@ export interface DataGridProps {
     readonly getCellContent: (cell: readonly [number, number]) => InnerGridCell;
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
-    readonly selectedRows?: readonly number[];
+    readonly selectedRows?: CompactSelection;
     readonly selectedColumns?: readonly number[];
     readonly selectedCell?: GridSelection;
     readonly prelightCells?: readonly (readonly [number, number])[];
 
-    readonly disabledRows?: readonly number[];
+    readonly disabledRows?: CompactSelection;
 
     readonly onItemHovered?: (args: GridMouseEventArgs) => void;
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
