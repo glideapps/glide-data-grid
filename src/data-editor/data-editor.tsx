@@ -372,6 +372,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             trailingRowOptions?.hint,
             showTrailingBlankRow,
             rows,
+            rowMarkers,
             setGridSelection,
             focus,
             setSelectedColumns,
