@@ -433,7 +433,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         prelightCells,
     ]);
 
-    React.useEffect(draw, [draw]);
+    const lastDrawRef = React.useRef(draw);
+    React.useEffect(() => {
+        lastDrawRef.current = draw;
+        draw();
+    }, [draw]);
 
     const imageLoaded = React.useCallback(
         (locations: readonly (readonly [number, number])[]) => {
@@ -526,13 +530,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     );
     useEventListener("mouseup", onMouseUpImpl, window, true);
 
-    const drawRef = React.useRef(draw);
-    drawRef.current = draw;
     const onAnimationFrame = React.useCallback<StepCallback>(values => {
         canBlit.current = false;
         damageRegion.current = values.map(x => x.item);
         hoverValues.current = values;
-        drawRef.current();
+        lastDrawRef.current();
         damageRegion.current = undefined;
     }, []);
 
