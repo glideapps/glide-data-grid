@@ -162,21 +162,6 @@ function createTextColumnInfo(index: number): GridColumnWithMockingInfo {
 function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
     const defaultColumns: GridColumnWithMockingInfo[] = [
         {
-            title: "Avatar",
-            width: 120,
-            icon: "headerImage",
-            hasMenu: false,
-            getContent: () => {
-                return {
-                    kind: GridCellKind.Image,
-                    data: [`${faker.image.people()}?random=${Math.round(Math.random() * 1000)}`],
-                    allowOverlay: true,
-                    allowAdd: false,
-                    readonly: true,
-                };
-            },
-        },
-        {
             title: "First name",
             width: 120,
             icon: "headerString",
@@ -204,6 +189,21 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
                     displayData: lastName,
                     data: lastName,
                     allowOverlay: true,
+                    readonly: true,
+                };
+            },
+        },
+        {
+            title: "Avatar",
+            width: 120,
+            icon: "headerImage",
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.Image,
+                    data: [`${faker.image.people()}?random=${Math.round(Math.random() * 1000)}`],
+                    allowOverlay: true,
+                    allowAdd: false,
                     readonly: true,
                 };
             },
