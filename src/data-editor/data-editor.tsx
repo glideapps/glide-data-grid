@@ -531,7 +531,9 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 // eslint-disable-next-line prefer-const
                 let [col, row] = args.location;
 
-                if (onRowAppended !== undefined && row === rows) return;
+                const landedOnLastStickyRow = lastRowSticky && row === rows;
+                const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
+                if (landedOnLastStickyRow || startedFromLastStickyRow) return;
 
                 if (col === 0 && hasRowMarkers) {
                     col = 1;
@@ -589,7 +591,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             gridSelection,
             isDraggable,
             onItemHovered,
-            onRowAppended,
+            lastRowSticky,
             rows,
             hasRowMarkers,
             setGridSelection,
