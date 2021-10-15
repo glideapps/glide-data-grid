@@ -285,7 +285,8 @@ function drawGridLines(
     let y = headerHeight + 0.5;
     let row = cellYOffset;
     let isHeader = true;
-    while (y + translateY <= height) {
+    const target = lastRowSticky ? height - stickyHeight : height;
+    while (y + translateY <= target) {
         const ty = isHeader ? y : y + translateY;
         // This shouldn't be needed it seems like... yet it is. We're not sure why.
         if (!lastRowSticky || ty !== stickyRowY) {
@@ -302,11 +303,6 @@ function drawGridLines(
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    if (lastRowSticky) {
-        ctx.rect(0, 0, width, height - stickyHeight);
-        ctx.rect(0, height - stickyHeight + 1, width, stickyHeight - 1);
-        ctx.clip();
-    }
     ctx.beginPath();
 }
 
@@ -462,32 +458,26 @@ function drawColumnContent(
     imageLoader: ImageWindowLoader | undefined,
     hoverValues: HoverValues,
     outerTheme: Theme
-): { lastRowDrawn: number; newClipX: number } {
+): { lastRowDrawn: number; newClipX: number; drawFocusRing?: () => void } {
     const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
 
     let y = headerHeight + translateY;
     let row = cellYOffset;
     let lastRowDrawn = row;
+    let drawFocusRing: (() => void) | undefined;
 
-    const clipCol = (offset: number) => {
-        ctx.beginPath();
-        if (c.sticky) {
-            clipX = Math.max(clipX, x + c.width);
-            ctx.rect(x, headerHeight + 1, c.width + offset, height - headerHeight - 1);
-            ctx.clip();
-        } else {
-            const diff = Math.min(0, x + translateX - clipX);
-            ctx.rect(
-                Math.max(x + translateX, clipX),
-                headerHeight + 1,
-                c.width + diff + offset,
-                height - headerHeight - 1
-            );
-            ctx.clip();
-            ctx.translate(translateX, 0);
-        }
-    };
-    clipCol(0);
+    // clip out the column just to make sure we dont clobby other columns
+    ctx.beginPath();
+    if (c.sticky) {
+        clipX = Math.max(clipX, x + c.width);
+        ctx.rect(x, headerHeight + 1, c.width, height - headerHeight - 1);
+        ctx.clip();
+    } else {
+        const diff = Math.min(0, x + translateX - clipX);
+        ctx.rect(Math.max(x + translateX, clipX), headerHeight + 1, c.width + diff, height - headerHeight - 1);
+        ctx.clip();
+        ctx.translate(translateX, 0);
+    }
 
     let doSticky = lastRowSticky;
     while (y < height || doSticky) {
@@ -604,31 +594,25 @@ function drawColumnContent(
                 ctx.globalAlpha = 1;
 
                 if (isFocused) {
-                    // we want to UNSET the clip of the column so that we can reclip with the ability to draw
-                    // over the borders
-                    ctx.restore(); // we now have no column clip
-                    ctx.save(); // save state without column clip
+                    const localX = x;
+                    const localY = y;
+                    const localRowHeight = rh;
+                    const localRow = row;
+                    const localColWidth = c.width;
+                    drawFocusRing = () => {
+                        if (lastRowSticky && localRow !== rows - 1) {
+                            ctx.beginPath();
+                            const stickyHeight = getRowHeight(rows - 1);
+                            ctx.rect(0, 0, width, height - stickyHeight);
+                            ctx.clip();
+                        }
 
-                    ctx.beginPath();
-                    clipCol(1); // we are now clipped with bigger bounds
-
-                    if (lastRowSticky && row !== rows - 1) {
                         ctx.beginPath();
-                        const stickyHeight = getRowHeight(rows - 1);
-                        ctx.rect(0, 0, width, height - stickyHeight);
-                        ctx.clip();
-                    }
-
-                    ctx.beginPath();
-                    ctx.rect(x + 1, y + 1, c.width - 1, rh - 1);
-                    ctx.strokeStyle = theme.accentColor;
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    ctx.restore(); // we now have no column clip
-                    ctx.save(); // save state without column clip
-                    ctx.beginPath();
-                    clipCol(0); // restore original clip
+                        ctx.rect(localX + 0.5, localY + 0.5, localColWidth, localRowHeight);
+                        ctx.strokeStyle = theme.accentColor;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    };
                 }
             }
         }
@@ -641,7 +625,7 @@ function drawColumnContent(
         lastRowDrawn++;
     }
 
-    return { lastRowDrawn, newClipX: clipX };
+    return { lastRowDrawn, newClipX: clipX, drawFocusRing };
 }
 
 export function drawGrid(
@@ -787,21 +771,6 @@ export function drawGrid(
         ctx.fillRect(0, 0, width, headerHeight);
     }
 
-    drawGridLines(
-        ctx,
-        effectiveCols,
-        cellYOffset,
-        translateX,
-        translateY,
-        width,
-        height,
-        headerHeight,
-        getRowHeight,
-        lastRowSticky,
-        rows,
-        theme
-    );
-
     if (drawHeaders) {
         drawGridHeaders(
             ctx,
@@ -819,7 +788,9 @@ export function drawGrid(
         );
     }
 
+    // clip the headers
     ctx.beginPath();
+    ctx.save();
     ctx.rect(0, headerHeight + 1, width, height - headerHeight - 1);
     ctx.clip();
     ctx.beginPath();
@@ -828,9 +799,10 @@ export function drawGrid(
     let clipX = 0;
     let row = 0;
     ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+    let drawFocus: (() => void) | undefined;
     for (const c of effectiveCols) {
         ctx.save();
-        const { lastRowDrawn, newClipX } = drawColumnContent(
+        const { lastRowDrawn, newClipX, drawFocusRing } = drawColumnContent(
             ctx,
             c,
             headerHeight,
@@ -859,6 +831,7 @@ export function drawGrid(
         );
         ctx.restore();
 
+        drawFocus = drawFocus ?? drawFocusRing;
         row = Math.max(row, lastRowDrawn);
         clipX = newClipX;
         x += c.width;
@@ -913,6 +886,35 @@ export function drawGrid(
             y += rh;
             row++;
         }
+
+        ctx.restore();
+    }
+
+    ctx.restore();
+    drawGridLines(
+        ctx,
+        effectiveCols,
+        cellYOffset,
+        translateX,
+        translateY,
+        width,
+        height,
+        headerHeight,
+        getRowHeight,
+        lastRowSticky,
+        rows,
+        theme
+    );
+
+    if (drawFocus !== undefined) {
+        // clip the headers but the borders
+        ctx.beginPath();
+        ctx.save();
+        ctx.rect(0, headerHeight, width, height - headerHeight);
+        ctx.clip();
+
+        ctx.beginPath();
+        drawFocus();
 
         ctx.restore();
     }
