@@ -303,12 +303,13 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         [getMangedCellContent, mangledOnCellEdited, onCellClicked, rowMarkerOffset, gridSelection]
     );
 
-    const focusOnRow = React.useCallback(
+    const focusOnRowFromTrailingBlankRow = React.useCallback(
         (col: number, row: number) => {
             const bounds = gridRef.current?.getBounds(col, row);
-            if (bounds === undefined) {
+            if (bounds === undefined || scrollRef.current === null) {
                 return;
             }
+            const lastRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
 
             let content = getMangedCellContent([col, row]);
             if (!content.allowOverlay) {
@@ -336,15 +337,20 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     break;
             }
 
-            // FIXME: correct the bounds so scrolling doesn't mess up
+            // The bounds fetched above will almost certainly be wrong because a scroll is about to take place
+            // so instead we can just compute where the scroll will be landing us.
+            const boundingRect = scrollRef.current.getBoundingClientRect();
             setOverlay({
-                target: bounds,
+                target: {
+                    ...bounds,
+                    y: boundingRect.top + scrollRef.current.clientHeight - lastRowHeight - bounds.height,
+                },
                 content,
                 cell: [col, row],
                 forceEditMode: true,
             });
         },
-        [getMangedCellContent]
+        [getMangedCellContent, rowHeight, rows]
     );
 
     const lastHighlightedRef = React.useRef<number>();
@@ -404,7 +410,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                             height: 1,
                         },
                     });
-                    focusOnRow(col, row - 1);
+                    focusOnRowFromTrailingBlankRow(col, row - 1);
                 } else {
                     if (gridSelection?.cell[0] !== col || gridSelection.cell[1] !== row) {
                         const isLastStickyRow = lastRowSticky && row === rows;
@@ -485,7 +491,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             selectedRows,
             setSelectedRows,
             onRowAppended,
-            focusOnRow,
+            focusOnRowFromTrailingBlankRow,
             lastRowSticky,
         ]
     );

@@ -97,16 +97,6 @@ class ImageWindowLoader {
         } else {
             const img = new Image();
 
-            // FIXME
-            // img.src =
-            //     massageImageUrl(
-            //         url,
-            //         {
-            //             height: 34,
-            //             thumbnail: true,
-            //         },
-            //         undefined
-            //     ) ?? url;
             img.src = url;
 
             let cancelled = false;
