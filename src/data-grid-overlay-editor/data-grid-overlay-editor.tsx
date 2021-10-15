@@ -62,7 +62,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
     );
     const onNumberValueChange = React.useCallback(
         (values: NumberFormatValues) => {
-            if (content.kind === GridCellKind.Number) {
+            if (content.kind === GridCellKind.Number && !Number.isNaN(values.floatValue)) {
                 setTempValue({
                     ...content,
                     data: values.floatValue,
