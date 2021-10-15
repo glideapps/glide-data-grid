@@ -1216,6 +1216,7 @@ const darkTheme = {
     textLight: "#a0a0a0",
     textHeader: "#a1a1a1",
     textHeaderSelected: "#000000",
+    textBubble: "#ffffff",
 
     bgCell: "#16161b",
     bgCellMedium: "#202027",
@@ -1229,6 +1230,41 @@ const darkTheme = {
 
     borderColor: "rgba(225,225,225,0.2)",
     borderDark: "rgba(225,225,225,0.4)",
+
+    linkColor: "#4F5DFF",
+
+    headerFontStyle: "bold 14px",
+    baseFontStyle: "13px",
+    fontFamily:
+        "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
+};
+
+const hotdogStand = {
+    overlayName: "LightTheme",
+
+    accentColor: "#8c96ff",
+    accentMedium: "#86a1ff7f",
+    accentLight: "rgba(202, 206, 255, 0.253)",
+
+    textDark: "#ffffff",
+    textMedium: "rgba(255, 255, 255, 0.9)",
+    textLight: "rgba(255, 255, 255, 0.7)",
+    textHeader: "rgba(0, 0, 0, 0.9)",
+    textHeaderSelected: "#000000",
+    textBubble: "#000000",
+
+    bgCell: "#ff0000",
+    bgCellMedium: "#ff4d4d",
+    bgHeader: "#f3f300",
+    bgHeaderHasFocus: "#eeee00",
+
+    bgBubble: "#ffff00",
+    bgBubbleSelected: "#ffff00",
+
+    bgSearchResult: "#423c24",
+
+    borderColor: "#ffff00",
+    borderDark: "#ffff00",
 
     linkColor: "#4F5DFF",
 
@@ -1254,7 +1290,8 @@ export const ThemeSupport: React.VFC = () => {
                         </Description>
                         <MoreInfo>
                             <button onClick={() => setTheme({})}>Light</button> or{" "}
-                            <button onClick={() => setTheme(darkTheme)}>Dark</button>
+                            <button onClick={() => setTheme(darkTheme)}>Dark</button> even{" "}
+                            <button onClick={() => setTheme(hotdogStand)}>Hotdog Stand</button>
                         </MoreInfo>
                     </>
                 }>

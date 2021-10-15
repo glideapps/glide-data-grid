@@ -300,7 +300,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     row === rows
                 ) {
                     onRowAppended?.(undefined, undefined);
-                    scrollRef.current?.scrollBy(0, Number.MAX_SAFE_INTEGER);
+                    scrollRef.current?.scrollBy(0, scrollRef.current.scrollHeight + 100);
                     setGridSelection({
                         cell: [rowMarkerOffset, rows],
                         range: {

@@ -360,7 +360,7 @@ export function drawProtectedCell(
     }
     ctx.lineWidth = 1.1;
     ctx.lineCap = "square";
-    ctx.strokeStyle = theme.textMedium + "DD";
+    ctx.strokeStyle = theme.textLight;
     ctx.stroke();
 }
 
@@ -457,7 +457,7 @@ export function drawBubbles(
 
     renderBoxes.forEach((rectInfo, i) => {
         ctx.beginPath();
-        ctx.fillStyle = theme.textDark;
+        ctx.fillStyle = theme.textBubble;
         ctx.fillText(data[i], rectInfo.x + bubblePad, y + height / 2 + 4);
     });
 }

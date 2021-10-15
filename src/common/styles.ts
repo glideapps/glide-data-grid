@@ -12,6 +12,7 @@ const builderThemeBase = {
     textLight: "#B2B2C0",
     textHeader: "#737383",
     textHeaderSelected: "#FFFFFF",
+    textBubble: "#313139",
 
     bgCell: "#FFFFFF",
     bgCellMedium: "#FAFAFB",
