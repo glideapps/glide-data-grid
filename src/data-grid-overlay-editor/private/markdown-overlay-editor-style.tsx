@@ -49,7 +49,8 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
 
     .edit-hover {
         :hover {
-            background-color: ${p => p.theme.accentMedium};
+            background-color: ${p => p.theme.accentLight};
+            transition: background-color 150ms;
         }
     }
 
