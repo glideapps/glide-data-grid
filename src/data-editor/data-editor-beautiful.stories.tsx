@@ -1307,7 +1307,47 @@ export const ThemeSupport: React.VFC = () => {
         </ThemeProvider>
     );
 };
-(AutomaticRowMarkers as any).parameters = {
+(ThemeSupport as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const ThemePerColumn: React.VFC = () => {
+    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+
+    const realCols = React.useMemo(() => {
+        const c = [...cols];
+        c[3] = {
+            ...c[3],
+            themeOverride: {
+                textDark: "#009CA6",
+            },
+            style: "highlight",
+        };
+        return c;
+    }, [cols]);
+
+    return (
+        <BeautifulWrapper
+            title="Theme per column"
+            description={
+                <>
+                    <Description>Each column can provide theme overrides for rendering that column.</Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={realCols}
+                onCellEdited={setCellValue}
+                onColumnResized={onColumnResized}
+                rows={1_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ThemePerColumn as any).parameters = {
     options: {
         showPanel: false,
     },

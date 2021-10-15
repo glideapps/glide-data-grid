@@ -322,7 +322,7 @@ function drawGridHeaders(
     dragAndDropState: DragAndDropState | undefined,
     isResizing: boolean,
     selectedCell: GridSelection | undefined,
-    theme: Theme
+    outerTheme: Theme
 ) {
     const xPad = 8;
     const yPad = 2;
@@ -330,6 +330,7 @@ function drawGridHeaders(
     let x = 0;
     let clipX = 0;
     for (const c of effectiveCols) {
+        const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
         const selected = selectedColumns?.includes(c.sourceIndex);
         const hovered = hoveredCol === c.sourceIndex && dragAndDropState === undefined && !isResizing;
 
@@ -368,7 +369,7 @@ function drawGridHeaders(
             if (c.style === "highlight") {
                 variant = selected ? "selected" : "special";
             }
-            drawSprite(c.icon, variant, ctx, drawX, (headerHeight - 20) / 2, 20);
+            drawSprite(c.icon, variant, ctx, drawX, (headerHeight - 20) / 2, 20, theme);
 
             if (c.overlayIcon !== undefined) {
                 ctx.globalAlpha = 1;
@@ -378,7 +379,8 @@ function drawGridHeaders(
                     ctx,
                     drawX + 9,
                     (headerHeight - 18) / 2 + 6,
-                    18
+                    18,
+                    theme
                 );
                 ctx.globalAlpha = hovered || selected ? 1 : 0.6;
             }
@@ -459,8 +461,10 @@ function drawColumnContent(
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader | undefined,
     hoverValues: HoverValues,
-    theme: Theme
+    outerTheme: Theme
 ): { lastRowDrawn: number; newClipX: number } {
+    const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
+
     let y = headerHeight + translateY;
     let row = cellYOffset;
     let lastRowDrawn = row;

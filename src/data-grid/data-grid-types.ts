@@ -1,3 +1,4 @@
+import { Theme } from "index";
 import isArray from "lodash/isArray";
 import { assertNever, proveType } from "../common/support";
 import { HeaderIcon } from "./data-grid-sprites";
@@ -77,6 +78,7 @@ export interface GridColumn {
     readonly overlayIcon?: HeaderIcon;
     readonly hasMenu?: boolean;
     readonly style?: "normal" | "highlight";
+    readonly themeOverride?: Partial<Theme>;
 }
 
 export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell;
