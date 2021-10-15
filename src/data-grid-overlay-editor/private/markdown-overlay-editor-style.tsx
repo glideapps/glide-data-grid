@@ -19,7 +19,7 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
     align-items: flex-start;
     justify-content: space-between;
     position: relative;
-    color: ${p => p.theme.fgColorDark};
+    color: ${p => p.theme.textDark};
 
     .edit-icon {
         position: relative;
@@ -29,7 +29,7 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
         justify-content: center;
         align-items: center;
 
-        color: ${p => p.theme.b400};
+        color: ${p => p.theme.accentColor};
 
         padding: 0;
 
@@ -49,14 +49,14 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
 
     .edit-hover {
         :hover {
-            background-color: ${p => p.theme.b300};
+            background-color: ${p => p.theme.accentMedium};
         }
     }
 
     .checkmark-hover {
         :hover {
             color: #ffffff;
-            background-color: ${p => p.theme.b400};
+            background-color: ${p => p.theme.accentColor};
         }
     }
 

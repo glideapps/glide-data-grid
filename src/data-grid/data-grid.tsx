@@ -672,7 +672,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
                         const ctx = offscreen.getContext("2d");
                         if (ctx !== null) {
-                            ctx.fillStyle = theme.dataViewer.bgColor;
+                            ctx.fillStyle = theme.bgCell;
                             ctx.fillRect(0, 0, offscreen.width, offscreen.height);
                             drawCell(
                                 ctx,

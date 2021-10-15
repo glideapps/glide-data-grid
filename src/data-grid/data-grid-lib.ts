@@ -210,7 +210,7 @@ export function drawTextCell(
 
     const dir = direction(data);
 
-    ctx.fillStyle = overrideColor ?? theme.fgColorDark;
+    ctx.fillStyle = overrideColor ?? theme.textDark;
     if (dir === "rtl") {
         const textWidth = measureTextWidth(data, ctx);
         ctx.fillText(data, x + width - cellXPad - textWidth + 0.5, y + height / 2 + 4.5);
@@ -240,10 +240,10 @@ export function drawNewRowCell(
     ctx.moveTo(x + cellXPad + 6, y + height / 2 - 6.5);
     ctx.lineTo(x + cellXPad + 6, y + height / 2 + 6.5);
     ctx.lineWidth = 2;
-    ctx.strokeStyle = theme.fgColorLight;
+    ctx.strokeStyle = theme.textLight;
     ctx.stroke();
 
-    ctx.fillStyle = theme.fgColorMedium;
+    ctx.fillStyle = theme.textMedium;
     ctx.fillText(data, 16 + x + cellXPad + 0.5, y + height / 2 + 4.5);
     ctx.beginPath();
 }
@@ -265,7 +265,7 @@ function drawCheckbox(
         ctx.beginPath();
         roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 3);
 
-        ctx.fillStyle = highlighted ? theme.acceptColor : theme.fgColorMedium;
+        ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
         ctx.fill();
 
         ctx.beginPath();
@@ -273,7 +273,7 @@ function drawCheckbox(
         ctx.lineTo(centerX - 2.5, centerY + 3);
         ctx.lineTo(centerX + 5, centerY - 4);
 
-        ctx.strokeStyle = theme.bgColorLight;
+        ctx.strokeStyle = theme.bgCell;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
         ctx.lineWidth = 1.9;
@@ -283,7 +283,7 @@ function drawCheckbox(
         roundedRect(ctx, centerX - 8, centerY - 8, 16, 16, 2);
 
         ctx.lineWidth = 2;
-        ctx.strokeStyle = theme.fgColorLight;
+        ctx.strokeStyle = theme.textLight;
         ctx.stroke();
     }
 }
@@ -314,7 +314,7 @@ export function drawMarkerRowCell(
         if (markerKind === "both") {
             ctx.globalAlpha = 1 - hoverAmount;
         }
-        ctx.fillStyle = theme.fgColorLight;
+        ctx.fillStyle = theme.textLight;
         ctx.fillText(text, start, y + height / 2 + 4.5);
         ctx.globalAlpha = 1;
     }
@@ -334,7 +334,7 @@ export function drawProtectedCell(
     if (drawBackground) {
         ctx.beginPath();
         ctx.rect(x + 1, y + 1, width - 1, height - 1);
-        ctx.fillStyle = theme.bgColorAltLight;
+        ctx.fillStyle = theme.bgCellMedium;
         ctx.fill();
     }
 
@@ -360,7 +360,7 @@ export function drawProtectedCell(
     }
     ctx.lineWidth = 1.1;
     ctx.lineCap = "square";
-    ctx.strokeStyle = theme.fgColorMedium + "DD";
+    ctx.strokeStyle = theme.textMedium + "DD";
     ctx.stroke();
 }
 
@@ -452,12 +452,12 @@ export function drawBubbles(
             bubbleHeight / 2
         );
     });
-    ctx.fillStyle = highlighted ? theme.dataViewer.bgBubbleSelected : theme.dataViewer.bgBubble;
+    ctx.fillStyle = highlighted ? theme.bgBubbleSelected : theme.bgBubble;
     ctx.fill();
 
     renderBoxes.forEach((rectInfo, i) => {
         ctx.beginPath();
-        ctx.fillStyle = theme.fgColorDark;
+        ctx.fillStyle = theme.textDark;
         ctx.fillText(data[i], rectInfo.x + bubblePad, y + height / 2 + 4);
     });
 }
@@ -496,23 +496,46 @@ export function drawDrilldownCell(
 
     ctx.beginPath();
     renderBoxes.forEach(rectInfo => {
-        roundedRect(ctx, rectInfo.x, y + (height - bubbleHeight) / 2, rectInfo.width, bubbleHeight, 6);
+        roundedRect(
+            ctx,
+            Math.floor(rectInfo.x),
+            y + (height - bubbleHeight) / 2,
+            Math.floor(rectInfo.width),
+            bubbleHeight,
+            6
+        );
     });
 
     ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
     ctx.shadowBlur = 1;
-    ctx.fillStyle = theme.dataViewer.gridColor;
+    ctx.fillStyle = theme.bgCell;
     ctx.fill();
 
     ctx.shadowColor = "rgba(24, 25, 34, 0.2)";
     ctx.shadowOffsetY = 1;
     ctx.shadowBlur = 5;
-    ctx.fillStyle = theme.dataViewer.gridColor;
+    ctx.fillStyle = theme.bgCell;
     ctx.fill();
 
     ctx.shadowOffsetY = 0;
     ctx.shadowBlur = 0;
     ctx.shadowBlur = 0;
+
+    ctx.beginPath();
+    renderBoxes.forEach(rectInfo => {
+        roundedRect(
+            ctx,
+            Math.floor(rectInfo.x) + 0.5,
+            Math.floor(y + (height - bubbleHeight) / 2) + 0.5,
+            Math.round(rectInfo.width),
+            bubbleHeight,
+            6
+        );
+    });
+
+    ctx.strokeStyle = theme.borderDark;
+    ctx.lineWidth = 1;
+    ctx.stroke();
 
     renderBoxes.forEach((rectInfo, i) => {
         const d = data[i];
@@ -553,7 +576,7 @@ export function drawDrilldownCell(
         }
 
         ctx.beginPath();
-        ctx.fillStyle = theme.fgColorDark;
+        ctx.fillStyle = theme.textDark;
         ctx.fillText(d.text, drawX, y + height / 2 + 4);
     });
 }

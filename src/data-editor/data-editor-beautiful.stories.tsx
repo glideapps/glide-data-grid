@@ -16,7 +16,7 @@ import { DataEditor, DataEditorProps } from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
 import faker from "faker";
-import styled from "styled-components";
+import styled, { ThemeProvider } from "styled-components";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { SimpleThemeWrapper } from "../stories/story-utils";
 import { browserIsOSX } from "../common/browser-detect";
@@ -98,6 +98,19 @@ const MoreInfo = styled.p`
     font-size: 14px;
     flex-shrink: 0;
     margin: 0 0 20px 0;
+
+    button {
+        background-color: #f4f4f4;
+        color: #2b2b2b;
+        padding: 2px 6px;
+        font-family: monospace;
+        font-size: 14px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 2px #00000040;
+        margin: 0 0.1em;
+        border: none;
+        cursor: pointer;
+    }
 `;
 
 interface BeautifulProps {
@@ -1183,6 +1196,78 @@ export const AllCellKinds: React.VFC = () => {
                 rows={1_000}
             />
         </BeautifulWrapper>
+    );
+};
+(AutomaticRowMarkers as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+const darkTheme = {
+    overlayName: "LightTheme",
+
+    accentColor: "#8c96ff",
+    accentMedium: "#86a1ff7f",
+    accentLight: "rgba(202, 206, 255, 0.253)",
+
+    textDark: "#ffffff",
+    textMedium: "#b8b8b8",
+    textLight: "#a0a0a0",
+    textHeader: "#a1a1a1",
+    textHeaderSelected: "#000000",
+
+    bgCell: "#16161b",
+    bgCellMedium: "#202027",
+    bgHeader: "#212121",
+    bgHeaderHasFocus: "#474747",
+
+    bgBubble: "#212121",
+    bgBubbleSelected: "#000000",
+
+    bgSearchResult: "#423c24",
+
+    borderColor: "rgba(225,225,225,0.2)",
+    borderDark: "rgba(225,225,225,0.4)",
+
+    linkColor: "#4F5DFF",
+
+    headerFontStyle: "bold 14px",
+    baseFontStyle: "13px",
+    fontFamily:
+        "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
+};
+
+export const ThemeSupport: React.VFC = () => {
+    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+
+    const [theme, setTheme] = React.useState({});
+
+    return (
+        <ThemeProvider theme={theme}>
+            <BeautifulWrapper
+                title="Theme support"
+                description={
+                    <>
+                        <Description>
+                            DataGrid respects the theme provided by styled-components theme provider.
+                        </Description>
+                        <MoreInfo>
+                            <button onClick={() => setTheme({})}>Light</button> or{" "}
+                            <button onClick={() => setTheme(darkTheme)}>Dark</button>
+                        </MoreInfo>
+                    </>
+                }>
+                <DataEditor
+                    {...defaultProps}
+                    getCellContent={getCellContent}
+                    columns={cols}
+                    onCellEdited={setCellValue}
+                    onColumnResized={onColumnResized}
+                    rows={1_000}
+                />
+            </BeautifulWrapper>
+        </ThemeProvider>
     );
 };
 (AutomaticRowMarkers as any).parameters = {

@@ -28,7 +28,7 @@ export const UriOverlayEditorStyle = styled.div`
     .edit-icon {
         flex-shrink: 0;
         width: 32px;
-        color: ${p => p.theme.acceptColor};
+        color: ${p => p.theme.accentColor};
 
         cursor: pointer;
 

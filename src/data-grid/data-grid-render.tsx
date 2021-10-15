@@ -75,7 +75,7 @@ export function drawCell(
         } else if (cell.kind === GridCellKind.Image && imageLoader !== undefined) {
             drawImage(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, hoverAmount, imageLoader);
         } else if (cell.kind === GridCellKind.RowID) {
-            drawTextCell(ctx, theme, cell.data, x, y, w, h, hoverAmount, theme.fgColorLight);
+            drawTextCell(ctx, theme, cell.data, x, y, w, h, hoverAmount, theme.textLight);
         } else if (cell.kind === GridCellKind.Protected) {
             drawProtectedCell(ctx, theme, x, y, w, h, hoverAmount, !highlighted);
         } else if (cell.kind === GridCellKind.Drilldown && imageLoader !== undefined) {
@@ -335,13 +335,9 @@ function drawGridHeaders(
 
         const hasSelectedCell = selectedCell !== undefined && selectedCell.cell[0] === c.sourceIndex;
 
-        const fillStyle = selected ? theme.dataViewer.columnHeader.fgSelected : theme.dataViewer.columnHeader.fgColor;
+        const fillStyle = selected ? theme.textHeaderSelected : theme.textHeader;
 
-        const bgFillStyle = selected
-            ? theme.dataViewer.columnHeader.bgSelected
-            : hasSelectedCell
-            ? theme.dataViewer.columnHeader.bgDark
-            : theme.dataViewer.columnHeader.bgColor;
+        const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
 
         ctx.save();
         if (c.sticky) {
@@ -357,7 +353,7 @@ function drawGridHeaders(
             ctx.fillStyle = bgFillStyle;
             ctx.fillRect(x + 1, 0, c.width - 1, headerHeight);
         } else if (hasSelectedCell) {
-            ctx.fillStyle = theme.dataViewer.columnHeader.bgDark;
+            ctx.fillStyle = theme.bgHeaderHasFocus;
             ctx.fillRect(x + 1, 0, c.width - 1, headerHeight);
         }
 
@@ -544,7 +540,7 @@ function drawColumnContent(
 
                 if (highlighted || rowDisabled) {
                     if (rowDisabled) {
-                        ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
+                        ctx.fillStyle = theme.bgHeader;
                         if (x === 0) {
                             ctx.fillRect(x, y + 1, c.width, rh - 1);
                         } else {
@@ -552,7 +548,7 @@ function drawColumnContent(
                         }
                     }
                     if (highlighted) {
-                        ctx.fillStyle = theme.dataViewer.bgSelected;
+                        ctx.fillStyle = theme.accentLight;
                         if (x === 0) {
                             ctx.fillRect(x, y + 1, c.width, rh - 1);
                         } else {
@@ -562,7 +558,7 @@ function drawColumnContent(
                 } else {
                     // eslint-disable-next-line no-loop-func
                     if (prelightCells?.find(pre => pre[0] === c.sourceIndex && pre[1] === row) !== undefined) {
-                        ctx.fillStyle = theme.dataViewer.bgPrelight;
+                        ctx.fillStyle = theme.bgSearchResult;
                         if (x === 0) {
                             ctx.fillRect(x, y + 1, c.width, rh - 1);
                         } else {
@@ -621,7 +617,7 @@ function drawColumnContent(
 
                     ctx.beginPath();
                     ctx.rect(x + 1, y + 1, c.width - 1, rh - 1);
-                    ctx.strokeStyle = theme.acceptColor;
+                    ctx.strokeStyle = theme.accentColor;
                     ctx.lineWidth = 2;
                     ctx.stroke();
 
@@ -777,13 +773,13 @@ export function drawGrid(
         ctx.beginPath();
     }
 
-    ctx.fillStyle = theme.dataViewer.gridColor;
+    ctx.fillStyle = theme.bgCell;
     ctx.fillRect(0, headerHeight, width, height - headerHeight);
 
     const drawHeaders = !blittedYOnly && damage === undefined;
     if (drawHeaders) {
         // draw header background
-        ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
+        ctx.fillStyle = theme.bgHeader;
         ctx.fillRect(0, 0, width, headerHeight);
     }
 
@@ -899,11 +895,11 @@ export function drawGrid(
                     ctx.beginPath();
 
                     if (rowDisabled) {
-                        ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
+                        ctx.fillStyle = theme.bgHeader;
                         ctx.fillRect(x + 1, y + 1, 100000 - 1, rh - 1);
                     }
                     if (rowSelected) {
-                        ctx.fillStyle = theme.dataViewer.bgSelected;
+                        ctx.fillStyle = theme.accentLight;
                         ctx.fillRect(x + 1, y + 1, 100000 - 1, rh - 1);
                     }
                 }

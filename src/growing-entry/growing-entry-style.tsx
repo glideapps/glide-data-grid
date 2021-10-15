@@ -27,7 +27,7 @@ export const InputBox = styled.textarea`
     background-color: transparent;
 
     ::placeholder {
-        color: ${p => p.theme.fgColorLight};
+        color: ${p => p.theme.textLight};
     }
 
     ${inputProps}

@@ -19,8 +19,8 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
     max-width: 400px;
     max-height: calc(100vh - ${p => p.targetRect.y + 10}px);
 
-    border: 2px solid ${p => p.theme.acceptColor};
-    background-color: ${p => p.theme.dataViewer.gridColor};
+    border: 2px solid ${p => p.theme.accentColor};
+    background-color: ${p => p.theme.bgCell};
 
     box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
 

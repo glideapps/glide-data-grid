@@ -22,10 +22,10 @@ let lastTheme: SpriteTheme | undefined;
 export async function buildSpriteMap(theme: Theme): Promise<void> {
     // spriteCanvas = new OffscreenCanvas(spriteList.length * renderSize, 4 * renderSize);
     const themeExtract: SpriteTheme = {
-        bgColorLight: theme.bgColorLight,
-        fgColorDark: theme.fgColorDark,
-        acceptColor: theme.acceptColor,
-        columnHeaderBg: theme.dataViewer.columnHeader.bgColor,
+        bgColorLight: theme.bgCell,
+        fgColorDark: theme.textDark,
+        acceptColor: theme.accentColor,
+        columnHeaderBg: theme.bgHeader,
     };
     if (
         lastTheme?.acceptColor === themeExtract.acceptColor &&
