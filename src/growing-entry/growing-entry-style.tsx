@@ -4,8 +4,8 @@ import { css } from "styled-components";
 const inputProps = css`
     font-size: 13px;
     line-height: 16px;
-    font-family: Roboto, sans-serif;
-    color: ${p => p.theme.fgColorDark};
+    font-family: ${p => p.theme.fontFamily};
+    color: ${p => p.theme.textDark};
     padding: 0;
     margin: 0;
 `;

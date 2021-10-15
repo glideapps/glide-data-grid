@@ -199,7 +199,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
     const portal = createPortal(
         <ClickOutsideContainer onClickOutside={onClickOutside}>
             <DataGridOverlayEditorStyle targetRect={target} onMouseDown={f} onClick={f}>
-                {editor}
+                <div className="clip-region">{editor}</div>
             </DataGridOverlayEditorStyle>
         </ClickOutsideContainer>,
         portalElement

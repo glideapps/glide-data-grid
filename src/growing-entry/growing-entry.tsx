@@ -25,7 +25,7 @@ const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
 
         const length = useText.toString().length;
         ta.focus();
-        ta.setSelectionRange(length, length);
+        ta.setSelectionRange(0, length);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

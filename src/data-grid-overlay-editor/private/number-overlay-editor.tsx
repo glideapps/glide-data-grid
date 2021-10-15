@@ -28,6 +28,7 @@ const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
         <NumberOverlayEditorStyle>
             <NumberFormat
                 autoFocus={true}
+                onFocus={e => e.target.setSelectionRange(0, e.target.value.length)}
                 disabled={disabled === true}
                 thousandSeparator={getThousandSeprator()}
                 decimalSeparator={getDecimalSeparator()}

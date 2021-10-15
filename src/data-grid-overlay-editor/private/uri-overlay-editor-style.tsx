@@ -6,17 +6,13 @@ export const UriOverlayEditorStyle = styled.div`
     flex-grow: 1;
 
     align-items: center;
+    padding-top: 2px;
 
     .link-area {
         flex-grow: 1;
         flex-shrink: 1;
 
-        display: grid;
-
         margin-right: 8px;
-    }
-
-    a {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
