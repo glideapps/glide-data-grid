@@ -248,6 +248,78 @@ export function drawNewRowCell(
     ctx.beginPath();
 }
 
+function drawCheckbox(
+    ctx: CanvasRenderingContext2D,
+    theme: Theme,
+    checked: boolean,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    highlighted: boolean
+) {
+    const centerX = x + width / 2;
+    const centerY = y + height / 2;
+
+    if (checked) {
+        ctx.beginPath();
+        roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 3);
+
+        ctx.fillStyle = highlighted ? theme.acceptColor : theme.fgColorMedium;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(centerX - 6, centerY - 0.5);
+        ctx.lineTo(centerX - 2.5, centerY + 3);
+        ctx.lineTo(centerX + 5, centerY - 4);
+
+        ctx.strokeStyle = theme.bgColorLight;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.lineWidth = 1.9;
+        ctx.stroke();
+    } else {
+        ctx.beginPath();
+        roundedRect(ctx, centerX - 8, centerY - 8, 16, 16, 2);
+
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = theme.fgColorLight;
+        ctx.stroke();
+    }
+}
+
+export function drawMarkerRowCell(
+    ctx: CanvasRenderingContext2D,
+    theme: Theme,
+    index: number,
+    checked: boolean,
+    markerKind: "checkbox" | "both" | "number",
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    hoverAmount: number
+) {
+    if (markerKind !== "number") {
+        ctx.globalAlpha = checked ? 1 : hoverAmount;
+        drawCheckbox(ctx, theme, checked, x, y, width, height, true);
+        ctx.globalAlpha = 1;
+    }
+    if (markerKind !== "checkbox" && !checked) {
+        ctx.font = `9px ${theme.fontFamily}`;
+        const w = measureTextWidth(index.toString(), ctx);
+
+        const start = x + (width - w) / 2;
+        if (markerKind === "both") {
+            ctx.globalAlpha = 1 - hoverAmount;
+        }
+        ctx.fillStyle = theme.fgColorLight;
+        ctx.fillText(index.toString(), start, y + height / 2 + 4.5);
+        ctx.globalAlpha = 1;
+    }
+    ctx.globalAlpha = 1;
+}
+
 export function drawProtectedCell(
     ctx: CanvasRenderingContext2D,
     theme: Theme,

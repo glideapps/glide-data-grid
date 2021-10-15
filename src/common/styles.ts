@@ -8,9 +8,6 @@ const builderThemeBase = {
     b300: "rgba(79,118,255,0.5)",
     b400: "#4F5DFF",
 
-    darkGrey: "#313139",
-
-    fgColorDarkest: "#000000",
     fgColorDark: "#313139",
     fgColorMedium: "#737383",
     fgColorLight: "#B2B2C0",
@@ -25,8 +22,12 @@ const builderThemeBase = {
 
     linkColor: "#4F5DFF",
 
+    headerFontStyle: "bold 14px",
+    baseFontStyle: "13px",
+    fontFamily:
+        "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
+
     dataViewer: {
-        fgAddButton: "#4F5DFF",
         bgColor: "#FFFFFF",
         gridColor: "#FFFFFF",
         leftMargin: "0px",

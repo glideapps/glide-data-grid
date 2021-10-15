@@ -1,11 +1,21 @@
 import ImageWindowLoader from "common/image-window-loader";
-import { GridSelection, Theme } from "index";
+import {
+    GridSelection,
+    isInnerOnlyCell,
+    GridCell,
+    GridCellKind,
+    GridColumn,
+    InnerGridCell,
+    InnerGridCellKind,
+    Rectangle,
+} from "./data-grid-types";
 import { HoverValues } from "./animation-manager";
 import {
     drawBoolean,
     drawBubbles,
     drawDrilldownCell,
     drawImage,
+    drawMarkerRowCell,
     drawNewRowCell,
     drawProtectedCell,
     drawTextCell,
@@ -14,7 +24,7 @@ import {
     roundedPoly,
 } from "./data-grid-lib";
 import { drawSprite, SpriteVariant } from "./data-grid-sprites";
-import { GridCell, GridCellKind, GridColumn, InnerGridCell, Rectangle } from "./data-grid-types";
+import { Theme } from "common/styles";
 
 interface BlitData {
     readonly cellXOffset: number;
@@ -49,8 +59,9 @@ export function drawCell(
     imageLoader: ImageWindowLoader | undefined,
     hoverAmount: number
 ) {
-    const drawn =
-        cell.kind === "new-row" ? false : drawCustomCell?.(ctx, cell, theme, { x, y, width: w, height: h }) === true;
+    const drawn = isInnerOnlyCell(cell)
+        ? false
+        : drawCustomCell?.(ctx, cell, theme, { x, y, width: w, height: h }) === true;
     if (!drawn) {
         if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
             drawTextCell(ctx, theme, cell.displayData, x, y, w, h, hoverAmount);
@@ -70,8 +81,10 @@ export function drawCell(
             drawProtectedCell(ctx, theme, x, y, w, h, hoverAmount, !highlighted);
         } else if (cell.kind === GridCellKind.Drilldown && imageLoader !== undefined) {
             drawDrilldownCell(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, hoverAmount, imageLoader);
-        } else if (cell.kind === "new-row") {
+        } else if (cell.kind === InnerGridCellKind.NewRow) {
             drawNewRowCell(ctx, theme, cell.hint, x, y, w, h, hoverAmount);
+        } else if (cell.kind === InnerGridCellKind.Marker) {
+            drawMarkerRowCell(ctx, theme, cell.row, cell.checked, cell.markerKind, x, y, w, h, hoverAmount);
         }
     }
 }
@@ -378,8 +391,7 @@ function drawGridHeaders(
             drawX += 26;
         }
 
-        ctx.font =
-            "bold 14px Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif";
+        ctx.font = `${theme.headerFontStyle} ${theme.fontFamily}`;
         ctx.fillStyle = fillStyle;
         ctx.fillText(c.title, drawX, headerHeight / 2 + 5);
         ctx.globalAlpha = 1;
@@ -816,8 +828,7 @@ export function drawGrid(
     let x = 0;
     let clipX = 0;
     let row = 0;
-    ctx.font =
-        "13px Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif";
+    ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     for (const c of effectiveCols) {
         ctx.save();
         const { lastRowDrawn, newClipX } = drawColumnContent(

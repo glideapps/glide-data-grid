@@ -184,6 +184,10 @@ export function isTextEditableGridCell(cell: GridCell): cell is ReadWriteGridCel
     return true;
 }
 
+export function isInnerOnlyCell(cell: InnerGridCell): cell is InnerOnlyGridCell {
+    return cell.kind === InnerGridCellKind.Marker || cell.kind === InnerGridCellKind.NewRow;
+}
+
 export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
     if (!isEditableGridCell(cell)) return false;
 
@@ -200,7 +204,8 @@ export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
 
 export type GridCell = EditableGridCell | BubbleCell | RowIDCell | LoadingCell | ProtectedCell | DrilldownCell;
 
-export type InnerGridCell = GridCell | NewRowCell;
+type InnerOnlyGridCell = NewRowCell | MarkerCell;
+export type InnerGridCell = GridCell | InnerOnlyGridCell;
 
 export interface Rectangle {
     x: number;
@@ -262,6 +267,7 @@ interface BooleanCell extends BaseGridCell {
     readonly data: boolean;
     readonly showUnchecked: boolean;
     readonly allowEdit: boolean;
+    readonly allowOverlay: false;
 }
 
 interface RowIDCell extends BaseGridCell {
@@ -281,7 +287,21 @@ interface UriCell extends BaseGridCell {
     readonly readonly?: boolean;
 }
 
+export enum InnerGridCellKind {
+    NewRow = "new-row",
+    Marker = "marker",
+}
+
 interface NewRowCell extends BaseGridCell {
-    readonly kind: "new-row";
+    readonly kind: InnerGridCellKind.NewRow;
     readonly hint: string;
+    readonly allowOverlay: false;
+}
+
+interface MarkerCell extends BaseGridCell {
+    readonly kind: InnerGridCellKind.Marker;
+    readonly allowOverlay: false;
+    readonly row: number;
+    readonly checked: boolean;
+    readonly markerKind: "checkbox" | "number" | "both";
 }

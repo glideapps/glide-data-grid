@@ -17,6 +17,7 @@ import {
     ColumnSelection,
     isReadWriteCell,
     InnerGridCell,
+    InnerGridCellKind,
 } from "../data-grid/data-grid-types";
 import copy from "copy-to-clipboard";
 import { makeEditCell } from "../data-grid/data-grid-lib";
@@ -34,30 +35,30 @@ interface MouseState {
 
 type Handled = Pick<
     DataGridSearchProps,
-    | "firstColSticky"
-    | "lastRowSticky"
-    | "headerHeight"
-    | "rowHeight"
-    | "className"
-    | "selectedColumns"
-    | "selectedCell"
-    | "onMouseDown"
-    | "onMouseUp"
-    | "onKeyDown"
-    | "onKeyUp"
-    | "onCellFocused"
     | "canvasRef"
-    | "scrollRef"
-    | "onSearchResultsChanged"
-    | "onVisibleRegionChanged"
-    | "searchColOffset"
     | "cellXOffset"
     | "cellYOffset"
+    | "className"
+    | "disabledRows"
+    | "firstColSticky"
     | "getCellContent"
+    | "gridRef"
+    | "headerHeight"
+    | "lastRowSticky"
+    | "onCellFocused"
+    | "onKeyDown"
+    | "onKeyUp"
+    | "onMouseDown"
+    | "onMouseUp"
+    | "onSearchResultsChanged"
+    | "onVisibleRegionChanged"
+    | "rowHeight"
+    | "scrollRef"
+    | "searchColOffset"
+    | "selectedCell"
+    | "selectedColumns"
     | "translateX"
     | "translateY"
-    | "disabledRows"
-    | "gridRef"
 >;
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
@@ -70,14 +71,16 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
     readonly onRowAppended?: (cell?: readonly [number, number], newValue?: EditableGridCell) => void;
     readonly onCellClicked?: (cell: readonly [number, number]) => void;
 
-    readonly rowMarkers?: boolean; // default true;
     readonly trailingRowOptions?: {
         readonly tint?: boolean;
         readonly hint?: string;
         readonly sticky?: boolean;
     };
-    readonly headerHeight?: number; // default 36
-    readonly rowMarkerWidth?: number; // default 50
+    readonly headerHeight?: number;
+
+    readonly rowMarkers?: "checkbox" | "number" | "both" | "none";
+    readonly rowMarkerWidth?: number;
+
     readonly rowHeight?: DataGridSearchProps["rowHeight"];
 
     readonly imageEditorOverride?: ImageEditorType;
@@ -96,11 +99,10 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
     readonly getCellContent: ReplaceReturnType<DataGridSearchProps["getCellContent"], GridCell>;
 }
 
-const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
+export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const [gridSelectionInner, setGridSelectionInner] = React.useState<GridSelection>();
     const [selectedColumnsInner, setSelectedColumnsInner] = React.useState<ColumnSelection>([]);
     const [selectedRowsInner, setSelectedRowsInner] = React.useState<RowSelection>([]);
-    const [hoveredCell, setHoveredCell] = React.useState<readonly [number, number]>();
     const [overlay, setOverlay] = React.useState<{
         target: Rectangle;
         content: GridCell;
@@ -114,17 +116,16 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const lastSent = React.useRef<[number, number]>();
     const [forceDraw, setForceDraw] = React.useState<number>(0);
 
-    const imageEditorOverride = p.imageEditorOverride;
-    const markdownDivCreateNode = p.markdownDivCreateNode;
-    const rowMarkers = p.rowMarkers ?? true;
-    const showTrailingBlankRow = p.onRowAppended !== undefined;
-    const rowMarkerOffset = rowMarkers ? 1 : 0;
-
-    const rowHeight = p.rowHeight ?? 34;
-    const headerHeight = p.headerHeight ?? 36;
-    const rowMarkerWidth = p.rowMarkerWidth ?? 50;
-
-    const { isDraggable, getCellsForSelection } = p;
+    const {
+        isDraggable,
+        getCellsForSelection,
+        rowMarkers = "none",
+        rowHeight = 34,
+        headerHeight = 36,
+        rowMarkerWidth: rowMarkerWidthRaw,
+        imageEditorOverride,
+        markdownDivCreateNode,
+    } = p;
 
     const {
         columns,
@@ -149,6 +150,10 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         ...rest
     } = p;
 
+    const rowMarkerWidth = rowMarkerWidthRaw ?? rows > 10000 ? 48 : rows > 1000 ? 44 : rows > 100 ? 36 : 32;
+    const hasRowMarkers = rowMarkers !== "none";
+    const rowMarkerOffset = hasRowMarkers ? 1 : 0;
+    const showTrailingBlankRow = onRowAppended !== undefined;
     const lastRowSticky = trailingRowOptions?.sticky === true;
 
     const gridSelection = gridSelectionOuter ?? gridSelectionInner;
@@ -157,8 +162,6 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const setSelectedRows = setSelectedRowsOuter ?? setSelectedRowsInner;
     const selectedColumns = selectedColumnsOuter ?? selectedColumnsInner;
     const setSelectedColumns = setSelectedColumnsOuter ?? setSelectedColumnsInner;
-
-    const hoveredFirstRow = hoveredCell?.[0] === 0 ? hoveredCell?.[1] : undefined;
 
     const gridRef = React.useRef<DataGridRef | null>(null);
 
@@ -188,7 +191,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     );
 
     const mangledCols = React.useMemo(() => {
-        if (!rowMarkers) return columns;
+        if (rowMarkers === "none") return columns;
         return [
             {
                 title: "",
@@ -204,7 +207,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const getMangedCellContent = React.useCallback(
         ([col, row]: readonly [number, number]): InnerGridCell => {
             const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
-            const isRowMarkerCol = col === 0 && rowMarkers;
+            const isRowMarkerCol = col === 0 && hasRowMarkers;
             noop(forceDraw);
             if (isRowMarkerCol) {
                 if (isTrailing) {
@@ -214,18 +217,18 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     };
                 }
                 return {
-                    kind: GridCellKind.Boolean,
-                    data: selectedRows?.includes(row),
-                    showUnchecked: hoveredFirstRow === row,
+                    kind: InnerGridCellKind.Marker,
                     allowOverlay: false,
-                    allowEdit: false,
+                    checked: selectedRows?.includes(row),
+                    markerKind: rowMarkers,
+                    row,
                 };
             } else if (isTrailing) {
                 //If the grid is empty, we will return text
                 const display = col === rowMarkerOffset ? trailingRowOptions?.hint ?? "" : "";
                 if (row === 0 || display !== "") {
                     return {
-                        kind: "new-row",
+                        kind: InnerGridCellKind.NewRow,
                         hint: display,
                         allowOverlay: false,
                     };
@@ -240,13 +243,13 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         [
             showTrailingBlankRow,
             mangledRows,
-            rowMarkers,
+            hasRowMarkers,
+            forceDraw,
             selectedRows,
-            hoveredFirstRow,
+            rowMarkers,
             rowMarkerOffset,
             trailingRowOptions?.hint,
             getCellContent,
-            forceDraw,
         ]
     );
 
@@ -257,7 +260,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             };
             if (args.kind === "cell") {
                 const [col, row] = args.location;
-                if (col === 0 && rowMarkers) {
+                if (col === 0 && hasRowMarkers) {
                     if (showTrailingBlankRow === true && row === rows) return;
                     setGridSelection(undefined);
                     setOverlay(undefined);
@@ -356,7 +359,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         },
         [
             gridSelection,
-            rowMarkers,
+            hasRowMarkers,
             rowMarkerOffset,
             trailingRowOptions?.hint,
             showTrailingBlankRow,
@@ -377,7 +380,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
             const [col, row] = gridSelection.cell;
             const c = getMangedCellContent([col, row]);
-            if (c.kind !== GridCellKind.Boolean && c.allowOverlay && c.kind !== "new-row") {
+            if (c.kind !== GridCellKind.Boolean && c.allowOverlay) {
                 let content = c;
                 if (initialValue !== undefined) {
                     switch (content.kind) {
@@ -497,12 +500,6 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
-            if (args.kind === "cell") {
-                setHoveredCell(args.location);
-            } else if (args.kind === "out-of-bounds") {
-                setHoveredCell(undefined);
-            }
-
             if (mouseState.current !== undefined && gridSelection !== undefined && !isDraggable) {
                 const [selectedCol, selectedRow] = gridSelection.cell;
                 // eslint-disable-next-line prefer-const
@@ -510,7 +507,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
                 if (onRowAppended !== undefined && row === rows) return;
 
-                if (col === 0 && rowMarkers) {
+                if (col === 0 && hasRowMarkers) {
                     col = 1;
                 }
 
@@ -568,7 +565,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             onItemHovered,
             onRowAppended,
             rows,
-            rowMarkers,
+            hasRowMarkers,
             setGridSelection,
             columns,
             rowHeight,
@@ -694,10 +691,10 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 };
 
                 const minXScrollToCol = (index: number) => {
-                    // if (rowMarkers) index--;
                     const maxX = maxXScrollToCol(index);
 
-                    const availableSpace = clientWidth - (rowMarkers ? rowMarkerWidth : 0) - mangledCols[index].width;
+                    const availableSpace =
+                        clientWidth - (hasRowMarkers ? rowMarkerWidth : 0) - mangledCols[index].width;
                     let offset = 0;
                     for (let i = index - 1; i >= 0; i--) {
                         if (availableSpace - (offset + mangledCols[i].width) < 0) break;
@@ -709,7 +706,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 };
 
                 let visibleFullColumns = 0;
-                let t = rowMarkers ? rowMarkerWidth : 0;
+                let t = hasRowMarkers ? rowMarkerWidth : 0;
                 for (let c = cellXOffset; c < columns.length; c++) {
                     if (t + columns[c].width > clientWidth) break;
 
@@ -779,7 +776,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             columns,
             gridSelection?.cell,
             setGridSelection,
-            rowMarkers,
+            hasRowMarkers,
             rowMarkerWidth,
             cellXOffset,
             cellYOffset,
@@ -944,7 +941,10 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     }
                 } else if (isDeleteKey) {
                     const cellValue = getCellContent([col - rowMarkerOffset, row]);
-                    if (isEditableGridCell(cellValue) && cellValue.allowOverlay) {
+                    if (
+                        (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
+                        cellValue.kind === GridCellKind.Boolean
+                    ) {
                         // FIXME: Add way to show confirm modal
                         const del = true;
                         focus();
@@ -1076,7 +1076,7 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 cellYOffset={cellYOffset ?? visibileRegion.y}
                 columns={mangledCols}
                 disabledRows={disabledRows}
-                firstColSticky={rowMarkers}
+                firstColSticky={hasRowMarkers}
                 getCellContent={getMangedCellContent}
                 headerHeight={headerHeight}
                 lastRowSticky={lastRowSticky}
@@ -1112,5 +1112,3 @@ const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         </ThemeProvider>
     );
 };
-
-export default DataEditor;

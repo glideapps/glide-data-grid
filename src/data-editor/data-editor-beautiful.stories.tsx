@@ -11,7 +11,7 @@ import {
     lossyCopyData,
     Rectangle,
 } from "../data-grid/data-grid-types";
-import DataEditor, { DataEditorProps } from "./data-editor";
+import { DataEditor, DataEditorProps } from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
 import faker from "faker";
@@ -343,7 +343,7 @@ const defaultProps: Partial<DataEditorProps> = {
     smoothScrollX: true,
     smoothScrollY: true,
     isDraggable: false,
-    rowMarkers: false,
+    rowMarkers: "none",
 };
 
 export const ResizableColumns: React.VFC = () => {
@@ -404,7 +404,7 @@ export const AddData: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
-                rowMarkers={true}
+                rowMarkers={"both"}
                 onCellEdited={setCellValue}
                 trailingRowOptions={{
                     hint: "New row...",
@@ -458,7 +458,14 @@ export const OneMillionRows: React.VFC = () => {
         <BeautifulWrapper
             title="One Million Rows"
             description={<Description>Data grid supports over 1 million rows. Your limit is mostly RAM.</Description>}>
-            <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={1_000_000} />
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rowHeight={31}
+                rows={1_000_000}
+                rowMarkers="number"
+            />
         </BeautifulWrapper>
     );
 };
@@ -633,7 +640,7 @@ export const AutomaticRowMarkers: React.VFC = () => {
                 {...defaultProps}
                 selectedRows={selectedRows}
                 onSelectedRowsChange={setSelectedRows}
-                rowMarkers={true}
+                rowMarkers={"both"}
                 getCellContent={getCellContent}
                 columns={cols}
                 rows={1_000}
@@ -792,7 +799,7 @@ export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
                 headerHeight={p.headerHeight}
                 selectedRows={selectedRows}
                 onSelectedRowsChange={setSelectedRows}
-                rowMarkers={true}
+                rowMarkers={"number"}
                 getCellContent={getCellContent}
                 columns={cols}
                 rows={1_000}

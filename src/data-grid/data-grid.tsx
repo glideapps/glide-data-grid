@@ -13,6 +13,7 @@ import {
     GridDragEventArgs,
     GridKeyEventArgs,
     InnerGridCell,
+    InnerGridCellKind,
 } from "./data-grid-types";
 import { dontAwait } from "../common/support";
 import { buildSpriteMap } from "./data-grid-sprites";
@@ -437,11 +438,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
     const [hCol, hRow] = hoveredItem ?? [];
     const headerHovered = hCol !== undefined && hRow === undefined;
-    let newRowCellHovered = false;
+    let clickableInnerCellHovered = false;
     let editableBoolHovered = false;
     if (hCol !== undefined && hRow !== undefined) {
         const cell = getCellContent([hCol, hRow]);
-        newRowCellHovered = cell.kind === "new-row";
+        clickableInnerCellHovered =
+            cell.kind === InnerGridCellKind.NewRow ||
+            (cell.kind === InnerGridCellKind.Marker && cell.markerKind !== "number");
         editableBoolHovered = cell.kind === GridCellKind.Boolean && cell.allowEdit === true;
     }
     const canDrag = hoveredOnEdge ?? false;
@@ -454,11 +457,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 ? "grabbing"
                 : canDrag || isResizing
                 ? "col-resize"
-                : headerHovered || newRowCellHovered || editableBoolHovered
+                : headerHovered || clickableInnerCellHovered || editableBoolHovered
                 ? "pointer"
                 : "default",
         }),
-        [width, height, isDragging, canDrag, isResizing, headerHovered, newRowCellHovered, editableBoolHovered]
+        [width, height, isDragging, canDrag, isResizing, headerHovered, clickableInnerCellHovered, editableBoolHovered]
     );
 
     const target = eventTargetRef?.current;
