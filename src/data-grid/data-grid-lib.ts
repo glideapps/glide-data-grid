@@ -401,38 +401,11 @@ export function drawBoolean(
     highlighted: boolean,
     canEdit: boolean
 ) {
-    const centerX = x + width / 2;
-    const centerY = y + height / 2;
-
     const hoverEffect = 0.4;
 
     ctx.globalAlpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.5;
 
-    if (data) {
-        ctx.beginPath();
-        roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 3);
-
-        ctx.fillStyle = highlighted ? theme.acceptColor : theme.fgColorMedium;
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(centerX - 6, centerY - 0.5);
-        ctx.lineTo(centerX - 2.5, centerY + 3);
-        ctx.lineTo(centerX + 5, centerY - 4);
-
-        ctx.strokeStyle = theme.bgColorLight;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-        ctx.lineWidth = 1.9;
-        ctx.stroke();
-    } else {
-        ctx.beginPath();
-        roundedRect(ctx, centerX - 8, centerY - 8, 16, 16, 2);
-
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = theme.fgColorLight;
-        ctx.stroke();
-    }
+    drawCheckbox(ctx, theme, data, x, y, width, height, highlighted);
 
     ctx.globalAlpha = 1;
 }
