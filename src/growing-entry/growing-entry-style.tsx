@@ -21,7 +21,7 @@ export const InputBox = styled.textarea`
 
     resize: none;
     white-space: normal;
-    width: 100%;
+    min-width: 100%;
     overflow: hidden;
     border: 0;
     background-color: transparent;
@@ -37,9 +37,11 @@ export const ShadowBox = styled.div`
     visibility: hidden;
     white-space: pre-wrap;
     word-wrap: break-word;
-    overflow-wrap: break-word;
 
-    width: 100%;
+    width: max-content;
+    max-width: 100%;
+
+    min-width: 100%;
 
     ${inputProps}
 `;
@@ -47,5 +49,5 @@ export const ShadowBox = styled.div`
 export const GrowingEntryStyle = styled.div`
     position: relative;
     margin-top: 6px;
-    width: 100%;
+    min-width: 100%;
 `;

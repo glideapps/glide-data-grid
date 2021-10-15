@@ -19,7 +19,7 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
     max-width: 400px;
     max-height: calc(100vh - ${p => p.targetRect.y + 10}px);
 
-    border: 2px solid ${p => p.theme.accentColor};
+    border: 1px solid ${p => p.theme.accentColor};
     background-color: ${p => p.theme.bgCell};
 
     box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
@@ -27,9 +27,10 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
     font-family: Roboto, sans-serif;
     font-size: 13px;
 
-    padding: ${p => Math.max(0, (p.targetRect.height - 30) / 2)}px 6.5px 2px;
+    padding: ${p => Math.max(0, (p.targetRect.height - 30) / 2)}px 7.5px 2px;
 
     display: flex;
+    flex-direction: column;
 
     overflow-y: auto;
     overflow-x: hidden;
