@@ -219,6 +219,35 @@ export function drawTextCell(
     }
 }
 
+export function drawNewRowCell(
+    ctx: CanvasRenderingContext2D,
+    theme: Theme,
+    data: string,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    hoverAmount: number
+) {
+    ctx.beginPath();
+    ctx.rect(x, y, width, height);
+    ctx.fillStyle = `rgba(0, 0, 0, ${hoverAmount * 0.1})`;
+    ctx.fill();
+    ctx.beginPath();
+
+    ctx.moveTo(x + cellXPad, y + height / 2);
+    ctx.lineTo(x + cellXPad + 12, y + height / 2);
+    ctx.moveTo(x + cellXPad + 6, y + height / 2 - 6.5);
+    ctx.lineTo(x + cellXPad + 6, y + height / 2 + 6.5);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = theme.fgColorLight;
+    ctx.stroke();
+
+    ctx.fillStyle = theme.fgColorMedium;
+    ctx.fillText(data, 16 + x + cellXPad + 0.5, y + height / 2 + 4.5);
+    ctx.beginPath();
+}
+
 export function drawProtectedCell(
     ctx: CanvasRenderingContext2D,
     theme: Theme,

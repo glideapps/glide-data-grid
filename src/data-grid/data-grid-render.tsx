@@ -6,6 +6,7 @@ import {
     drawBubbles,
     drawDrilldownCell,
     drawImage,
+    drawNewRowCell,
     drawProtectedCell,
     drawTextCell,
     getEffectiveColumns,
@@ -70,7 +71,7 @@ export function drawCell(
         } else if (cell.kind === GridCellKind.Drilldown && imageLoader !== undefined) {
             drawDrilldownCell(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, hoverAmount, imageLoader);
         } else if (cell.kind === "new-row") {
-            drawTextCell(ctx, theme, cell.hint, x, y, w, h, hoverAmount);
+            drawNewRowCell(ctx, theme, cell.hint, x, y, w, h, hoverAmount);
         }
     }
 }
@@ -733,7 +734,13 @@ export function drawGrid(
         let row = cellYOffset;
         let y = headerHeight + translateY;
         ctx.beginPath();
-        while (y < height) {
+        let doSticky = lastRowSticky;
+        while (y < height || doSticky) {
+            const doingSticky = doSticky && y >= height;
+            if (doingSticky) {
+                doSticky = false;
+                row = rows - 1;
+            }
             let x = 0;
             const rh = getRowHeight(row);
 
@@ -741,11 +748,16 @@ export function drawGrid(
                 const rowLocal = row;
                 if (damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) !== undefined) {
                     const tx = c.sticky ? 0 : translateX;
-                    ctx.rect(x + 1 + tx, y + 1, c.width - 1, rh - 1);
+                    if (rowLocal === rows - 1 && lastRowSticky) {
+                        ctx.rect(x + 1 + tx, height - rh + 1, c.width - 1, rh - 1);
+                    } else {
+                        ctx.rect(x + 1 + tx, y + 1, c.width - 1, rh - 1);
+                    }
                 }
                 x += c.width;
             }
 
+            if (doingSticky) break;
             row++;
             y += rh;
         }

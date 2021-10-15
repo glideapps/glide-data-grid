@@ -407,7 +407,7 @@ export const AddData: React.VFC = () => {
                 rowMarkers={true}
                 onCellEdited={setCellValue}
                 trailingRowOptions={{
-                    hint: "+ New row...",
+                    hint: "New row...",
                     sticky: true,
                     tint: true,
                 }}
