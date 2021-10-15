@@ -1,5 +1,5 @@
 import * as React from "react";
-import { assertNever, dontAwait, maybe } from "../common/support";
+import { assertNever, maybe } from "../common/support";
 import { Subtract } from "utility-types";
 import { clamp } from "lodash/fp";
 import DataGridOverlayEditor from "../data-grid-overlay-editor/data-grid-overlay-editor";
