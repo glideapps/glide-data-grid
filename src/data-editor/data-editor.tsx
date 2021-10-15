@@ -1035,7 +1035,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     event.cancel();
                 }
             };
-            dontAwait(fn());
+            void fn();
         },
         [
             selectedRows,

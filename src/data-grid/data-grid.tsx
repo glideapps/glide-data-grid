@@ -16,7 +16,6 @@ import {
     InnerGridCellKind,
     CompactSelection,
 } from "./data-grid-types";
-import { dontAwait } from "../common/support";
 import { buildSpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
@@ -152,7 +151,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
 
     React.useEffect(() => {
-        dontAwait(buildSpriteMap(theme));
+        const fn = async () => {
+            await buildSpriteMap(theme);
+            lastDrawRef.current();
+        };
+        void fn();
     }, [theme]);
 
     const mappedColumns = useMappedColumns(columns, firstColSticky);
