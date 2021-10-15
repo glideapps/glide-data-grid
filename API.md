@@ -201,7 +201,7 @@ If the value is less than 50, it will be increased to 50. If it isn't set, the d
 
 ### Cell coordinates
 
-Many function properties take cell coordinates. Those are arrays of two numbers, namely the column index and the row index. Both are zero-based, and are absolute, i.e. independent of the region of cells currently displayed in the grid. For example, if `cellOffsetX` is `3` and `cellOffsetY` is `5`, then the coordinates of the cell displayed at the top left would be `[3, 5]`.
+Many function properties take cell coordinates. Those are arrays of two numbers, namely the column index and the row index. Both are zero-based, and are absolute, i.e. independent of the region of cells currently displayed in the grid.
 
 ### Rectangle
 
