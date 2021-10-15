@@ -293,6 +293,8 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                             setSelectedRows(addToCompactSelection(selectedRows, row));
                             lastHighlightedRef.current = row;
                         }
+                    } else if (isSelected && selectionLength(selectedRows) === 1) {
+                        setSelectedRows(undefined);
                     } else {
                         setSelectedRows(addToCompactSelection(undefined, row));
                         lastHighlightedRef.current = row;
