@@ -257,6 +257,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         ]
     );
 
+    const lastHighlightedRef = React.useRef<number>();
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
             mouseState.current = {
@@ -271,21 +272,30 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     focus();
                     setSelectedColumns([]);
                     const isSelected = indexInSelection(selectedRows, row);
-                    if (args.shiftKey) {
-                        if (selectedRows !== undefined && selectionLength(selectedRows) === 1 && !isSelected) {
-                            const selectedRow = selectedRows?.items[0][0] ?? 0;
-                            const start = Math.min(row, selectedRow);
-                            const end = Math.max(row, selectedRow);
-                            setSelectedRows(addToCompactSelection(undefined, [start, end + 1]));
-                        } else if (!isSelected) {
-                            setSelectedRows(addToCompactSelection(undefined, row));
+
+                    const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
+
+                    if (
+                        args.shiftKey &&
+                        lastHighlightedRef.current !== undefined &&
+                        indexInSelection(selectedRows, lastHighlightedRef.current)
+                    ) {
+                        setSelectedRows(
+                            addToCompactSelection(isMultiKey ? selectedRows : undefined, [
+                                Math.min(lastHighlightedRef.current, row),
+                                Math.max(lastHighlightedRef.current, row) + 1,
+                            ])
+                        );
+                    } else if (isMultiKey) {
+                        if (isSelected) {
+                            setSelectedRows(removeFromCompactSelection(selectedRows, row));
                         } else {
-                            setSelectedRows(undefined);
+                            setSelectedRows(addToCompactSelection(selectedRows, row));
+                            lastHighlightedRef.current = row;
                         }
-                    } else if (isSelected) {
-                        setSelectedRows(removeFromCompactSelection(selectedRows, row));
                     } else {
-                        setSelectedRows(addToCompactSelection(selectedRows, row));
+                        setSelectedRows(addToCompactSelection(undefined, row));
+                        lastHighlightedRef.current = row;
                     }
                 } else if (
                     col === rowMarkerOffset &&
@@ -332,11 +342,13 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                                     height: bottom - top + 1,
                                 },
                             });
+                            lastHighlightedRef.current = undefined;
                             focus();
                         } else {
                             setGridSelection({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
                             setSelectedColumns([]);
                             setSelectedRows(undefined);
+                            lastHighlightedRef.current = undefined;
                             setOverlay(undefined);
                             focus();
                         }
@@ -347,6 +359,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 setGridSelection(undefined);
                 setOverlay(undefined);
                 if (hasRowMarkers && col === 0) {
+                    lastHighlightedRef.current = undefined;
                     if (selectionLength(selectedRows) !== rows) {
                         setSelectedRows(addToCompactSelection(undefined, [0, rows]));
                     } else {
@@ -355,6 +368,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 } else {
                     setSelectedColumns([col]);
                     setSelectedRows(undefined);
+                    lastHighlightedRef.current = undefined;
                     focus();
                 }
             } else if (args.kind === "out-of-bounds") {
@@ -363,6 +377,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 focus();
                 setSelectedColumns([]);
                 setSelectedRows(undefined);
+                lastHighlightedRef.current = undefined;
             }
         },
         [

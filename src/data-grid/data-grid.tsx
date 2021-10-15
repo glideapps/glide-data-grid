@@ -250,6 +250,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             );
 
             const shiftKey = ev?.shiftKey === true;
+            const ctrlKey = ev?.ctrlKey === true;
+            const metaKey = ev?.metaKey === true;
 
             let result: GridMouseEventArgs;
             if (col === -1 || y < 0 || x < 0 || row === undefined || x > width || y > height) {
@@ -261,6 +263,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     location: [col !== -1 ? col : x < 0 ? 0 : mappedColumns.length - 1, row ?? rows - 1],
                     direction: [horizontal, vertical],
                     shiftKey,
+                    ctrlKey,
+                    metaKey,
                 };
             } else if (row === -1) {
                 let bounds = getBoundsForItem(canvas, col, undefined);
@@ -280,6 +284,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                         bounds: bounds,
                         isEdge,
                         shiftKey,
+                        ctrlKey,
+                        metaKey,
                     };
                 } else {
                     result = {
@@ -288,6 +294,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                         bounds: bounds,
                         isEdge,
                         shiftKey,
+                        ctrlKey,
+                        metaKey,
                     };
                 }
             } else {
@@ -299,6 +307,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     bounds: bounds,
                     isEdge,
                     shiftKey,
+                    ctrlKey,
+                    metaKey,
                 };
             }
             return result;

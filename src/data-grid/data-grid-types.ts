@@ -14,7 +14,9 @@ export type ColumnSelection = readonly number[];
 export type GridMouseEventArgs = GridMouseCellEventArgs | GridMouseHeaderEventArgs | GridMouseOutOfBoundsEventArgs;
 
 interface BaseGridMouseEventArgs {
-    shiftKey: boolean;
+    readonly shiftKey: boolean;
+    readonly ctrlKey: boolean;
+    readonly metaKey: boolean;
 }
 
 interface GridMouseCellEventArgs extends BaseGridMouseEventArgs {
