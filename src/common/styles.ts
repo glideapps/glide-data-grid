@@ -1,8 +1,6 @@
 import baseStyled, { ThemedStyledInterface } from "styled-components";
 
-const builderThemeBase = {
-    overlayName: "LightTheme",
-
+const dataEditorBaseTheme = {
     accentColor: "#4F5DFF",
     accentMedium: "rgba(79,118,255,0.5)",
     accentLight: "rgba(79, 93, 255, 0.1)",
@@ -35,10 +33,10 @@ const builderThemeBase = {
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
 };
 
-export type Theme = typeof builderThemeBase;
+export type Theme = typeof dataEditorBaseTheme;
 
 export const styled = baseStyled as ThemedStyledInterface<Theme>;
 
-export function getBuilderTheme(): Theme {
-    return builderThemeBase;
+export function getDataEditorTheme(): Theme {
+    return dataEditorBaseTheme;
 }

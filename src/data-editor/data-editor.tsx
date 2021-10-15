@@ -26,7 +26,7 @@ import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-gr
 import { browserIsOSX } from "../common/browser-detect";
 import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
 import { ThemeProvider, useTheme } from "styled-components";
-import { getBuilderTheme } from "../common/styles";
+import { getDataEditorTheme } from "../common/styles";
 import { DataGridRef } from "data-grid/data-grid";
 import noop from "lodash/noop";
 
@@ -1093,7 +1093,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
     const theme = useTheme();
     const mergedTheme = React.useMemo(() => {
-        return { ...getBuilderTheme(), ...theme };
+        return { ...getDataEditorTheme(), ...theme };
     }, [theme]);
     return (
         <ThemeProvider theme={mergedTheme}>
