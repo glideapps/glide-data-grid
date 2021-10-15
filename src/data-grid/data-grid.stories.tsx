@@ -3,7 +3,7 @@ import * as React from "react";
 import { StoryFn, StoryContext } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import DataGrid from "./data-grid";
-import { GridCellKind } from "./data-grid-types";
+import { CompactSelection, GridCellKind } from "./data-grid-types";
 
 export default {
     title: "Subcomponents/DataGrid",
@@ -102,7 +102,7 @@ export function SelectedRownotest() {
                 allowOverlay: false,
                 owned: true,
             })}
-            selectedRows={[2, 4]}
+            selectedRows={CompactSelection.fromSingleSelection([2, 4])}
             firstColSticky={false}
             lastRowSticky={false}
             isResizing={false}
