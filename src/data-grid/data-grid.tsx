@@ -14,6 +14,7 @@ import {
     GridKeyEventArgs,
     InnerGridCell,
     InnerGridCellKind,
+    CompactSelection,
 } from "./data-grid-types";
 import { dontAwait } from "../common/support";
 import { buildSpriteMap } from "./data-grid-sprites";
@@ -21,7 +22,6 @@ import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
 import { drawCell, drawGrid } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
-import { CompactSelection } from "index";
 
 export interface DataGridProps {
     readonly width: number;

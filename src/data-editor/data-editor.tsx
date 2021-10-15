@@ -17,12 +17,8 @@ import {
     isReadWriteCell,
     InnerGridCell,
     InnerGridCellKind,
-    indexInSelection,
     CompactSelection,
-    selectionLength,
-    removeFromCompactSelection,
-    addToCompactSelection,
-    selectionToArray,
+    Slice,
 } from "../data-grid/data-grid-types";
 import copy from "copy-to-clipboard";
 import { makeEditCell } from "../data-grid/data-grid-lib";
@@ -91,7 +87,7 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
 
-    readonly onSelectedRowsChange?: (newRows: CompactSelection | undefined) => void;
+    readonly onSelectedRowsChange?: (newRows: CompactSelection) => void;
 
     readonly selectedColumns?: ColumnSelection;
     readonly onSelectedColumnsChange?: (newColumns: ColumnSelection | undefined) => void;
@@ -106,7 +102,7 @@ export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> 
 export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const [gridSelectionInner, setGridSelectionInner] = React.useState<GridSelection>();
     const [selectedColumnsInner, setSelectedColumnsInner] = React.useState<ColumnSelection>([]);
-    const [selectedRowsInner, setSelectedRowsInner] = React.useState<CompactSelection | undefined>();
+    const [selectedRowsInner, setSelectedRowsInner] = React.useState(CompactSelection.empty());
     const [overlay, setOverlay] = React.useState<{
         target: Rectangle;
         content: GridCell;
@@ -223,7 +219,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 return {
                     kind: InnerGridCellKind.Marker,
                     allowOverlay: false,
-                    checked: indexInSelection(selectedRows, row),
+                    checked: selectedRows.hasIndex(row),
                     markerKind: rowMarkers,
                     row,
                 };
@@ -271,32 +267,30 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     setOverlay(undefined);
                     focus();
                     setSelectedColumns([]);
-                    const isSelected = indexInSelection(selectedRows, row);
+                    const isSelected = selectedRows.hasIndex(row);
 
                     const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
 
-                    if (
-                        args.shiftKey &&
-                        lastHighlightedRef.current !== undefined &&
-                        indexInSelection(selectedRows, lastHighlightedRef.current)
-                    ) {
-                        setSelectedRows(
-                            addToCompactSelection(isMultiKey ? selectedRows : undefined, [
-                                Math.min(lastHighlightedRef.current, row),
-                                Math.max(lastHighlightedRef.current, row) + 1,
-                            ])
-                        );
+                    const lastHighlighted = lastHighlightedRef.current;
+                    if (args.shiftKey && lastHighlighted !== undefined && selectedRows.hasIndex(lastHighlighted)) {
+                        const newSlice: Slice = [Math.min(lastHighlighted, row), Math.max(lastHighlighted, row) + 1];
+
+                        if (isMultiKey) {
+                            setSelectedRows(selectedRows.add(newSlice));
+                        } else {
+                            setSelectedRows(CompactSelection.fromSingleSelection(newSlice));
+                        }
                     } else if (isMultiKey) {
                         if (isSelected) {
-                            setSelectedRows(removeFromCompactSelection(selectedRows, row));
+                            setSelectedRows(selectedRows.remove(row));
                         } else {
-                            setSelectedRows(addToCompactSelection(selectedRows, row));
+                            setSelectedRows(selectedRows.add(row));
                             lastHighlightedRef.current = row;
                         }
-                    } else if (isSelected && selectionLength(selectedRows) === 1) {
-                        setSelectedRows(undefined);
+                    } else if (isSelected && selectedRows.length === 1) {
+                        setSelectedRows(CompactSelection.empty());
                     } else {
-                        setSelectedRows(addToCompactSelection(undefined, row));
+                        setSelectedRows(CompactSelection.fromSingleSelection(row));
                         lastHighlightedRef.current = row;
                     }
                 } else if (
@@ -349,7 +343,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         } else {
                             setGridSelection({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
                             setSelectedColumns([]);
-                            setSelectedRows(undefined);
+                            setSelectedRows(CompactSelection.empty());
                             lastHighlightedRef.current = undefined;
                             setOverlay(undefined);
                             focus();
@@ -362,14 +356,14 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 setOverlay(undefined);
                 if (hasRowMarkers && col === 0) {
                     lastHighlightedRef.current = undefined;
-                    if (selectionLength(selectedRows) !== rows) {
-                        setSelectedRows(addToCompactSelection(undefined, [0, rows]));
+                    if (selectedRows.length !== rows) {
+                        setSelectedRows(CompactSelection.fromSingleSelection([0, rows]));
                     } else {
-                        setSelectedRows(undefined);
+                        setSelectedRows(CompactSelection.empty());
                     }
                 } else {
                     setSelectedColumns([col]);
-                    setSelectedRows(undefined);
+                    setSelectedRows(CompactSelection.empty());
                     lastHighlightedRef.current = undefined;
                     focus();
                 }
@@ -378,7 +372,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 setOverlay(undefined);
                 focus();
                 setSelectedColumns([]);
-                setSelectedRows(undefined);
+                setSelectedRows(CompactSelection.empty());
                 lastHighlightedRef.current = undefined;
             }
         },
@@ -843,7 +837,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 cell,
                 range: { x: cell[0], y: cell[1], width: 1, height: 1 },
             });
-            setSelectedRows(undefined);
+            setSelectedRows(CompactSelection.empty());
         },
         [selCol, selRow, setGridSelection, setSelectedRows]
     );
@@ -857,7 +851,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
                 if (event.key === "Escape") {
                     setGridSelection(undefined);
-                    setSelectedRows(undefined);
+                    setSelectedRows(CompactSelection.empty());
                     setSelectedColumns([]);
                     return;
                 }
@@ -865,12 +859,12 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 if (
                     isDeleteKey &&
                     selectedRows !== undefined &&
-                    selectionLength(selectedRows) !== 0 &&
+                    selectedRows.length !== 0 &&
                     gridSelection === undefined
                 ) {
                     focus();
-                    onDeleteRows?.(selectionToArray(selectedRows));
-                    setSelectedRows(undefined);
+                    onDeleteRows?.(Array.from(selectedRows));
+                    setSelectedRows(CompactSelection.empty());
                     return;
                 }
 
@@ -888,8 +882,8 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                             const cellValue = getCellContent([col - rowMarkerOffset, row]);
                             copyToClipboard([[cellValue]]);
                         }
-                    } else if (selectedRows !== undefined && selectionLength(selectedRows) > 0) {
-                        const toCopy = selectionToArray(selectedRows);
+                    } else if (selectedRows !== undefined && selectedRows.length > 0) {
+                        const toCopy = Array.from(selectedRows);
                         const cells = toCopy.map(
                             rowIndex =>
                                 getCellsForSelection({
@@ -1092,9 +1086,9 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
     const disabledRows = React.useMemo(() => {
         if (showTrailingBlankRow === true && trailingRowOptions?.tint === true) {
-            return addToCompactSelection(undefined, mangledRows - 1);
+            return CompactSelection.fromSingleSelection(mangledRows - 1);
         }
-        return undefined;
+        return CompactSelection.empty();
     }, [mangledRows, showTrailingBlankRow, trailingRowOptions?.tint]);
 
     const theme = useTheme();

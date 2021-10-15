@@ -9,7 +9,6 @@ import {
     InnerGridCellKind,
     Rectangle,
     CompactSelection,
-    indexInSelection,
 } from "./data-grid-types";
 import { HoverValues } from "./animation-manager";
 import {
@@ -453,8 +452,8 @@ function drawColumnContent(
     rows: number,
     getRowHeight: (row: number) => number,
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
-    selectedRows: CompactSelection | undefined,
-    disabledRows: CompactSelection | undefined,
+    selectedRows: CompactSelection,
+    disabledRows: CompactSelection,
     lastRowSticky: boolean,
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
@@ -505,8 +504,8 @@ function drawColumnContent(
 
         const isMovedStickyRow = doSticky && row === rows - 1;
 
-        const rowSelected = indexInSelection(selectedRows, row);
-        const rowDisabled = indexInSelection(disabledRows, row) && !isMovedStickyRow;
+        const rowSelected = selectedRows.hasIndex(row);
+        const rowDisabled = disabledRows.hasIndex(row) && !isMovedStickyRow;
 
         if (
             doingSticky ||
@@ -658,8 +657,8 @@ export function drawGrid(
     dragAndDropState: DragAndDropState | undefined,
     theme: Theme,
     headerHeight: number,
-    selectedRows: CompactSelection | undefined,
-    disabledRows: CompactSelection | undefined,
+    selectedRows: CompactSelection,
+    disabledRows: CompactSelection,
     rowHeight: number | ((index: number) => number),
     selectedColumns: readonly number[] | undefined,
     hoveredCol: number | undefined,
@@ -866,10 +865,7 @@ export function drawGrid(
     }
 
     // fill blank rows to the right
-    if (
-        (selectedRows !== undefined && selectedRows.items.length > 0) ||
-        (disabledRows !== undefined && disabledRows.items.length > 0)
-    ) {
+    if (selectedRows.length > 0 || disabledRows.length > 0) {
         let y = headerHeight + translateY;
         row = cellYOffset;
 
@@ -888,8 +884,8 @@ export function drawGrid(
                 y = height - rh;
             }
 
-            const rowSelected = indexInSelection(selectedRows, row);
-            const rowDisabled = indexInSelection(disabledRows, row);
+            const rowSelected = selectedRows.hasIndex(row);
+            const rowDisabled = disabledRows.hasIndex(row);
 
             if (!doSticky || row !== rows - 1) {
                 if (

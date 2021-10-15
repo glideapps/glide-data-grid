@@ -626,7 +626,7 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
 export const AutomaticRowMarkers: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
-    const [selectedRows, setSelectedRows] = React.useState<CompactSelection>();
+    const [selectedRows, setSelectedRows] = React.useState(CompactSelection.empty());
 
     return (
         <BeautifulWrapper

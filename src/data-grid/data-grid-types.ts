@@ -308,12 +308,10 @@ interface MarkerCell extends BaseGridCell {
     readonly markerKind: "checkbox" | "number" | "both";
 }
 
-export interface CompactSelection {
-    items: readonly (readonly [number, number])[];
-}
-type Slice = CompactSelection["items"][0];
+export type Slice = readonly [number, number];
+export type CompactSelectionRanges = readonly Slice[];
 
-function mergeRanges(input: readonly (readonly [number, number])[] | undefined) {
+function mergeRanges(input: CompactSelectionRanges) {
     if (input === undefined || input.length === 0) {
         return [];
     }
@@ -340,80 +338,72 @@ function mergeRanges(input: readonly (readonly [number, number])[] | undefined) 
     return stack;
 }
 
-export function addToCompactSelection(
-    selection: CompactSelection | undefined,
-    index: number | Slice
-): CompactSelection {
-    if (selection === undefined) {
-        return {
-            items: [typeof index === "number" ? [index, index + 1] : index],
-        };
-    }
-    // add the splice
-    const items = [...selection.items];
-    items.push(typeof index === "number" ? [index, index + 1] : index);
+export class CompactSelection {
+    private constructor(private items: CompactSelectionRanges) {}
 
-    return {
-        items: mergeRanges(items),
+    static empty = (): CompactSelection => {
+        return new CompactSelection([]);
     };
-}
 
-// FIXME: Add support for removing slice
-export function removeFromCompactSelection(
-    selection: CompactSelection | undefined,
-    index: number
-): CompactSelection | undefined {
-    if (selection === undefined) return undefined;
-    const result = [...selection.items];
-    for (const [i, slice] of result.entries()) {
-        const [start, end] = slice;
-        if (start <= index && end > index) {
-            const left: Slice = [start, index];
-            const right: Slice = [index + 1, end];
+    static fromSingleSelection = (selection: number | Slice) => {
+        return CompactSelection.empty().add(selection);
+    };
 
-            const toAdd: Slice[] = [];
-            if (left[0] !== left[1]) {
-                toAdd.push(left);
+    add = (selection: number | Slice): CompactSelection => {
+        const slice: Slice = typeof selection === "number" ? [selection, selection + 1] : selection;
+
+        const newItems = mergeRanges([...this.items, slice]);
+
+        return new CompactSelection(newItems);
+    };
+
+    // TODO: Support removing a slice
+    remove = (selection: number): CompactSelection => {
+        const items = [...this.items];
+
+        for (const [i, slice] of items.entries()) {
+            const [start, end] = slice;
+
+            if (start <= selection && end > selection) {
+                const left: Slice = [start, selection];
+                const right: Slice = [selection + 1, end];
+
+                const toAdd: Slice[] = [];
+                if (left[0] !== left[1]) {
+                    toAdd.push(left);
+                }
+                if (right[0] !== right[1]) {
+                    toAdd.push(right);
+                }
+
+                items.splice(i, 1, ...toAdd);
+                break;
             }
-            if (right[0] !== right[1]) {
-                toAdd.push(right);
-            }
+        }
+        return new CompactSelection(items);
+    };
 
-            result.splice(i, 1, ...toAdd);
-            break;
+    hasIndex = (index: number): boolean => {
+        for (const [start, end] of this.items) {
+            if (index >= start && index < end) return true;
+        }
+        return false;
+    };
+
+    get length(): number {
+        let len = 0;
+        for (const [start, end] of this.items) {
+            len += end - start;
+        }
+
+        return len;
+    }
+
+    *[Symbol.iterator]() {
+        for (const [start, end] of this.items) {
+            for (let x = start; x < end; x++) {
+                yield x;
+            }
         }
     }
-    return {
-        items: result,
-    };
-}
-
-export function indexInSelection(selection: CompactSelection | undefined, index: number): boolean {
-    if (selection === undefined) return false;
-    for (const [start, end] of selection.items) {
-        if (index >= start && index < end) return true;
-    }
-    return false;
-}
-
-export function selectionLength(selection: CompactSelection | undefined): number {
-    if (selection === undefined || selection.items.length === 0) return 0;
-
-    let len = 0;
-    for (const [start, end] of selection.items) {
-        len += end - start;
-    }
-
-    return len;
-}
-
-export function selectionToArray(selection: CompactSelection): number[] {
-    const result: number[] = [];
-    for (const [start, end] of selection.items) {
-        for (let x = start; x < end; x++) {
-            result.push(x);
-        }
-    }
-
-    return result;
 }
