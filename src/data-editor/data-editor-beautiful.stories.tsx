@@ -2,6 +2,7 @@ import * as React from "react";
 
 import {
     ColumnSelection,
+    CompactSelection,
     EditableGridCell,
     GridCell,
     GridCellKind,
@@ -625,7 +626,7 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
 export const AutomaticRowMarkers: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
-    const [selectedRows, setSelectedRows] = React.useState<readonly number[]>();
+    const [selectedRows, setSelectedRows] = React.useState<CompactSelection>();
 
     return (
         <BeautifulWrapper
@@ -782,7 +783,7 @@ interface RowAndHeaderSizesProps {
 export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
-    const [selectedRows, setSelectedRows] = React.useState<readonly number[]>();
+    const [selectedRows, setSelectedRows] = React.useState<CompactSelection>();
 
     return (
         <BeautifulWrapper

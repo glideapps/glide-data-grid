@@ -1,4 +1,4 @@
-import DataEditor from "./data-editor/data-editor";
+import { DataEditor } from "./data-editor/data-editor";
 
 export {
     default as ImageOverlayEditor,

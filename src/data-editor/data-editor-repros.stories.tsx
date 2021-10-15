@@ -5,7 +5,7 @@ import { BuilderThemeWrapper } from "../stories/story-utils";
 
 import { GridCell, GridCellKind } from "../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
-import DataEditor from "./data-editor";
+import { DataEditor } from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 import styled from "styled-components";
 
@@ -58,13 +58,7 @@ export function Bug70() {
                 Original report
             </a>
             <DataEditorContainer width={500} height={500}>
-                <DataEditor
-                    rows={100}
-                    rowMarkers={false}
-                    columns={cols}
-                    getCellContent={bug70Gen}
-                    onCellEdited={ignore}
-                />
+                <DataEditor rows={100} columns={cols} getCellContent={bug70Gen} onCellEdited={ignore} />
             </DataEditorContainer>
         </Bug70Style>
     );
@@ -106,7 +100,6 @@ export function FilterColumns() {
             <DataEditorContainer width={1000} height={500}>
                 <DataEditor
                     rows={100}
-                    rowMarkers={false}
                     columns={cols}
                     getCellContent={filterColumnsGen}
                     smoothScrollX={true}

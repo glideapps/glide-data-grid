@@ -5,6 +5,7 @@ import { BuilderThemeWrapper } from "../stories/story-utils";
 
 import {
     ColumnSelection,
+    CompactSelection,
     EditableGridCell,
     GridCell,
     GridCellKind,
@@ -14,7 +15,7 @@ import {
     RowSelection,
 } from "../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
-import DataEditor from "./data-editor";
+import { DataEditor } from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
 export default {
@@ -364,7 +365,6 @@ export function IdealSize() {
                     smoothScrollY={true}
                     rowHeight={50}
                     headerHeight={50}
-                    rowMarkers={false}
                     rows={9}
                 />
             </DataEditorContainer>
@@ -395,7 +395,6 @@ export function DynamicAddRemoveColumns({ columnCount }: { columnCount: number }
             smoothScrollY={true}
             rowHeight={50}
             headerHeight={50}
-            rowMarkers={false}
             rows={9}
         />
     );
@@ -405,8 +404,8 @@ DynamicAddRemoveColumns.args = {
 };
 
 export function RowSelectionStateLivesOutside() {
-    const [selected_rows, setSelectedRows] = useState<RowSelection>([]);
-    const cb = (newRows: RowSelection | undefined) => {
+    const [selected_rows, setSelectedRows] = useState<CompactSelection | undefined>(undefined);
+    const cb = (newRows: CompactSelection | undefined) => {
         if (newRows != undefined) {
             setSelectedRows(newRows);
         }
