@@ -1,65 +1,14 @@
 import { Theme } from "../common/styles";
 import ImageWindowLoader from "../common/image-window-loader";
-import { DrilldownCellData, GridCell, GridCellKind, GridColumn, isEditableGridCell } from "./data-grid-types";
+import { DrilldownCellData, GridColumn } from "./data-grid-types";
 import direction from "direction";
 // import { drawGenImageToCanvas } from "../../lib/gen-image-cache";
 import { degreesToRadians } from "../common/utils";
-import { assertNever } from "../common/support";
 import React from "react";
 
 export interface MappedGridColumn extends GridColumn {
     sourceIndex: number;
     sticky: boolean;
-}
-
-export function makeEditCell(cell: GridCell, forceBooleanOff: boolean = false, displayData: string = ""): GridCell {
-    const isEditable = isEditableGridCell(cell);
-
-    switch (cell.kind) {
-        case GridCellKind.Boolean:
-            return {
-                ...cell,
-                data: false,
-                showUnchecked: forceBooleanOff ? false : cell.showUnchecked,
-            };
-        case GridCellKind.Text:
-            return {
-                ...cell,
-                data: "",
-                displayData,
-            };
-        case GridCellKind.Markdown:
-        case GridCellKind.Uri:
-        case GridCellKind.RowID:
-            return {
-                ...cell,
-                data: "",
-                allowOverlay: isEditable,
-            };
-        case GridCellKind.Protected:
-        case GridCellKind.Loading:
-            return cell;
-        case GridCellKind.Image:
-        case GridCellKind.Bubble:
-            return {
-                ...cell,
-                data: [],
-                allowOverlay: isEditable,
-            };
-        case GridCellKind.Number:
-            return {
-                ...cell,
-                data: undefined,
-                displayData,
-            };
-        case GridCellKind.Drilldown:
-            return {
-                ...cell,
-                data: [],
-            };
-        default:
-            assertNever(cell);
-    }
 }
 
 export function useMappedColumns(columns: readonly GridColumn[], firstColSticky: boolean): readonly MappedGridColumn[] {
@@ -223,6 +172,7 @@ export function drawNewRowCell(
     ctx: CanvasRenderingContext2D,
     theme: Theme,
     data: string,
+    isFirst: boolean,
     x: number,
     y: number,
     width: number,
@@ -235,13 +185,19 @@ export function drawNewRowCell(
     ctx.fill();
     ctx.beginPath();
 
-    ctx.moveTo(x + cellXPad, y + height / 2);
-    ctx.lineTo(x + cellXPad + 12, y + height / 2);
-    ctx.moveTo(x + cellXPad + 6, y + height / 2 - 6.5);
-    ctx.lineTo(x + cellXPad + 6, y + height / 2 + 6.5);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = theme.textLight;
-    ctx.stroke();
+    const finalLineSize = 12;
+    const lineSize = isFirst ? finalLineSize : hoverAmount * finalLineSize;
+    const xTranslate = isFirst ? 0 : (1 - hoverAmount) * finalLineSize * 0.5;
+
+    if (lineSize > 0) {
+        ctx.moveTo(x + cellXPad + xTranslate, y + height / 2);
+        ctx.lineTo(x + cellXPad + xTranslate + lineSize, y + height / 2);
+        ctx.moveTo(x + cellXPad + xTranslate + lineSize * 0.5, y + height / 2 - lineSize * 0.5 - 0.5);
+        ctx.lineTo(x + cellXPad + xTranslate + lineSize * 0.5, y + height / 2 + lineSize * 0.5 + 0.5);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = theme.textLight;
+        ctx.stroke();
+    }
 
     ctx.fillStyle = theme.textMedium;
     ctx.fillText(data, 16 + x + cellXPad + 0.5, y + height / 2 + 4.5);

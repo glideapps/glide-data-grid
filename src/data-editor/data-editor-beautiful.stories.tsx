@@ -3,7 +3,6 @@ import * as React from "react";
 import {
     ColumnSelection,
     CompactSelection,
-    EditableGridCell,
     GridCell,
     GridCellKind,
     GridColumn,
@@ -392,23 +391,16 @@ export const AddData: React.VFC = () => {
 
     const [numRows, setNumRows] = React.useState(50);
 
-    const onRowAppended = React.useCallback(
-        (cell?: readonly [number, number], newValue?: EditableGridCell) => {
-            const [col, row] = cell ?? [0, numRows];
-            setNumRows(cv => cv + 1);
-            for (let c = 0; c < 6; c++) {
-                setCellValue([c, row], {
-                    ...newValue,
-                    displayData: "",
-                    data: "",
-                } as any);
-            }
-            if (newValue !== undefined) {
-                setCellValue([col, row], newValue);
-            }
-        },
-        [numRows, setCellValue]
-    );
+    const onRowAppended = React.useCallback(() => {
+        const newRow = numRows;
+        setNumRows(cv => cv + 1);
+        for (let c = 0; c < 6; c++) {
+            setCellValue([c, newRow], {
+                displayData: "",
+                data: "",
+            } as any);
+        }
+    }, [numRows, setCellValue]);
 
     return (
         <BeautifulWrapper

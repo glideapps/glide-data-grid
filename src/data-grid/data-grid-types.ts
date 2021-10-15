@@ -299,6 +299,7 @@ export enum InnerGridCellKind {
 interface NewRowCell extends BaseGridCell {
     readonly kind: InnerGridCellKind.NewRow;
     readonly hint: string;
+    readonly isFirst: boolean;
     readonly allowOverlay: false;
 }
 

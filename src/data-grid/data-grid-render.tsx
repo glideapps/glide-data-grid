@@ -81,7 +81,7 @@ export function drawCell(
         } else if (cell.kind === GridCellKind.Drilldown && imageLoader !== undefined) {
             drawDrilldownCell(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, hoverAmount, imageLoader);
         } else if (cell.kind === InnerGridCellKind.NewRow) {
-            drawNewRowCell(ctx, theme, cell.hint, x, y, w, h, hoverAmount);
+            drawNewRowCell(ctx, theme, cell.hint, cell.isFirst, x, y, w, h, hoverAmount);
         } else if (cell.kind === InnerGridCellKind.Marker) {
             drawMarkerRowCell(ctx, theme, cell.row, cell.checked, cell.markerKind, x, y, w, h, hoverAmount);
         }

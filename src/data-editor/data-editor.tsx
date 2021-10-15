@@ -21,7 +21,6 @@ import {
     Slice,
 } from "../data-grid/data-grid-types";
 import copy from "copy-to-clipboard";
-import { makeEditCell } from "../data-grid/data-grid-lib";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
 import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
@@ -69,7 +68,7 @@ type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parame
 export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
-    readonly onRowAppended?: (cell?: readonly [number, number], newValue?: EditableGridCell) => void;
+    readonly onRowAppended?: () => void;
     readonly onCellClicked?: (cell: readonly [number, number]) => void;
 
     readonly trailingRowOptions?: {
@@ -163,6 +162,16 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const selectedColumns = selectedColumnsOuter ?? selectedColumnsInner;
     const setSelectedColumns = setSelectedColumnsOuter ?? setSelectedColumnsInner;
 
+    const [visibileRegion, setVisibleRegion] = React.useState<Rectangle & { tx?: number; ty?: number }>({
+        x: 0,
+        y: 0,
+        width: 1,
+        height: 1,
+    });
+
+    const cellXOffset = visibileRegion.x;
+    const cellYOffset = visibileRegion.y;
+
     const gridRef = React.useRef<DataGridRef | null>(null);
 
     const focus = React.useCallback((immediate?: boolean) => {
@@ -179,15 +188,9 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
 
     const mangledOnCellEdited = React.useCallback(
         (cell: readonly [number, number], newValue: EditableGridCell) => {
-            const [, row] = cell;
-            if (showTrailingBlankRow && row === mangledRows - 1) {
-                onRowAppended?.(cell, newValue);
-                scrollRef.current?.scrollBy(0, scrollRef.current.scrollHeight + 1000);
-            } else {
-                onCellEdited?.(cell, newValue);
-            }
+            onCellEdited?.(cell, newValue);
         },
-        [onRowAppended, onCellEdited, mangledRows, showTrailingBlankRow]
+        [onCellEdited]
     );
 
     const mangledCols = React.useMemo(() => {
@@ -225,17 +228,14 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 };
             } else if (isTrailing) {
                 //If the grid is empty, we will return text
-                const display = col === rowMarkerOffset ? trailingRowOptions?.hint ?? "" : "";
-                if (row === 0 || display !== "") {
-                    return {
-                        kind: InnerGridCellKind.NewRow,
-                        hint: display,
-                        allowOverlay: false,
-                    };
-                }
-                //Base the dataType on the previous row.
-                const previousRow = getCellContent([col - rowMarkerOffset, row - 1]);
-                return makeEditCell(previousRow, true);
+                const isFirst = col === rowMarkerOffset;
+                const display = isFirst ? trailingRowOptions?.hint ?? "" : "";
+                return {
+                    kind: InnerGridCellKind.NewRow,
+                    hint: display,
+                    isFirst,
+                    allowOverlay: false,
+                };
             } else {
                 return getCellContent([col - rowMarkerOffset, row]);
             }
@@ -251,6 +251,100 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             trailingRowOptions?.hint,
             getCellContent,
         ]
+    );
+
+    const reselect = React.useCallback(
+        (bounds: Rectangle, initialValue?: string) => {
+            if (gridSelection === undefined) return;
+
+            const [col, row] = gridSelection.cell;
+            const c = getMangedCellContent([col, row]);
+            if (c.kind !== GridCellKind.Boolean && c.allowOverlay) {
+                let content = c;
+                if (initialValue !== undefined) {
+                    switch (content.kind) {
+                        case GridCellKind.Text:
+                            content = {
+                                ...content,
+                                data: initialValue,
+                            };
+                            break;
+                        case GridCellKind.Number:
+                            content = {
+                                ...content,
+                                data: maybe(() => Number.parseFloat(initialValue), 0),
+                            };
+                            break;
+                        case GridCellKind.Markdown:
+                        case GridCellKind.Uri:
+                            content = {
+                                ...content,
+                                data: initialValue,
+                            };
+                            break;
+                    }
+                }
+                setOverlay({
+                    target: bounds,
+                    content,
+                    cell: [col, row],
+                    forceEditMode: initialValue !== undefined,
+                });
+            } else if (c.kind === GridCellKind.Boolean && c.allowEdit) {
+                mangledOnCellEdited?.([col - rowMarkerOffset, row], {
+                    ...c,
+                    data: !c.data,
+                });
+                setForceDraw(cv => (cv + 1) % 100); // I can't do math with triple digits so I always avoid it
+            } else {
+                onCellClicked?.([col - rowMarkerOffset, row]);
+            }
+        },
+        [getMangedCellContent, mangledOnCellEdited, onCellClicked, rowMarkerOffset, gridSelection]
+    );
+
+    const focusOnRow = React.useCallback(
+        (col: number, row: number) => {
+            const bounds = gridRef.current?.getBounds(col, row);
+            if (bounds === undefined) {
+                return;
+            }
+
+            let content = getMangedCellContent([col, row]);
+            if (!content.allowOverlay) {
+                return;
+            }
+            switch (content.kind) {
+                case GridCellKind.Text:
+                    content = {
+                        ...content,
+                        data: "",
+                    };
+                    break;
+                case GridCellKind.Number:
+                    content = {
+                        ...content,
+                        data: undefined,
+                    };
+                    break;
+                case GridCellKind.Markdown:
+                case GridCellKind.Uri:
+                    content = {
+                        ...content,
+                        data: "",
+                    };
+                    break;
+            }
+
+            // FIXME: correct the bounds so scrolling doesn't mess up
+            setOverlay({
+                target: bounds,
+                content,
+                cell: [col, row],
+                forceEditMode: true,
+            });
+        },
+        [getMangedCellContent]
     );
 
     const lastHighlightedRef = React.useRef<number>();
@@ -294,22 +388,23 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         lastHighlightedRef.current = row;
                     }
                 } else if (
-                    col === rowMarkerOffset &&
+                    col >= rowMarkerOffset &&
                     trailingRowOptions?.hint !== undefined &&
                     showTrailingBlankRow &&
                     row === rows
                 ) {
-                    onRowAppended?.(undefined, undefined);
+                    onRowAppended?.();
                     scrollRef.current?.scrollBy(0, scrollRef.current.scrollHeight + 1000);
                     setGridSelection({
-                        cell: [rowMarkerOffset, rows],
+                        cell: [col, rows],
                         range: {
-                            x: rowMarkerOffset,
+                            x: col,
                             y: rows,
                             width: 1,
                             height: 1,
                         },
                     });
+                    focusOnRow(col, row - 1);
                 } else {
                     if (gridSelection?.cell[0] !== col || gridSelection.cell[1] !== row) {
                         const isLastStickyRow = lastRowSticky && row === rows;
@@ -390,58 +485,9 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             selectedRows,
             setSelectedRows,
             onRowAppended,
+            focusOnRow,
             lastRowSticky,
         ]
-    );
-
-    const reselect = React.useCallback(
-        (bounds: Rectangle, initialValue?: string) => {
-            if (gridSelection === undefined) return;
-
-            const [col, row] = gridSelection.cell;
-            const c = getMangedCellContent([col, row]);
-            if (c.kind !== GridCellKind.Boolean && c.allowOverlay) {
-                let content = c;
-                if (initialValue !== undefined) {
-                    switch (content.kind) {
-                        case GridCellKind.Text:
-                            content = {
-                                ...content,
-                                data: initialValue,
-                            };
-                            break;
-                        case GridCellKind.Number:
-                            content = {
-                                ...content,
-                                data: maybe(() => Number.parseFloat(initialValue), 0),
-                            };
-                            break;
-                        case GridCellKind.Markdown:
-                        case GridCellKind.Uri:
-                            content = {
-                                ...content,
-                                data: initialValue,
-                            };
-                            break;
-                    }
-                }
-                setOverlay({
-                    target: bounds,
-                    content,
-                    cell: [col, row],
-                    forceEditMode: initialValue !== undefined,
-                });
-            } else if (c.kind === GridCellKind.Boolean && c.allowEdit) {
-                mangledOnCellEdited?.([col - rowMarkerOffset, row], {
-                    ...c,
-                    data: !c.data,
-                });
-                setForceDraw(cv => (cv + 1) % 100); // I can't do math with triple digits so I always avoid it
-            } else {
-                onCellClicked?.([col - rowMarkerOffset, row]);
-            }
-        },
-        [getMangedCellContent, mangledOnCellEdited, onCellClicked, rowMarkerOffset, gridSelection]
     );
 
     const onMouseUp = React.useCallback(
@@ -471,16 +517,6 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         },
         [onHeaderMenuClick, rowMarkerOffset]
     );
-
-    const [visibileRegion, setVisibleRegion] = React.useState<Rectangle & { tx?: number; ty?: number }>({
-        x: 0,
-        y: 0,
-        width: 1,
-        height: 1,
-    });
-
-    const cellXOffset = visibileRegion.x;
-    const cellYOffset = visibileRegion.y;
 
     const onVisibleRegionChangedImpl = React.useCallback(
         (visibleRegion: Rectangle, tx?: number, ty?: number) => {

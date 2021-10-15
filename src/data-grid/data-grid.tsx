@@ -97,6 +97,7 @@ interface BlitData {
 
 export interface DataGridRef {
     focus: () => void;
+    getBounds: (col: number, row: number) => Rectangle | undefined;
 }
 
 const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forwardedRef) => {
@@ -748,8 +749,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     el.focus();
                 }
             },
+            getBounds: (col: number, row: number) => {
+                if (canvasRef === undefined || canvasRef.current === null) {
+                    return undefined;
+                }
+
+                return getBoundsForItem(canvasRef.current, col, row);
+            },
         }),
-        [canvasRef]
+        [canvasRef, getBoundsForItem]
     );
 
     const accessibilityTree = useDebouncedMemo(
