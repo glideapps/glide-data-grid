@@ -182,7 +182,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             const [, row] = cell;
             if (showTrailingBlankRow && row === mangledRows - 1) {
                 onRowAppended?.(cell, newValue);
-                scrollRef.current?.scrollBy(0, Number.MAX_SAFE_INTEGER);
+                scrollRef.current?.scrollBy(0, scrollRef.current.scrollHeight + 1000);
             } else {
                 onCellEdited?.(cell, newValue);
             }
@@ -300,7 +300,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     row === rows
                 ) {
                     onRowAppended?.(undefined, undefined);
-                    scrollRef.current?.scrollBy(0, scrollRef.current.scrollHeight + 100);
+                    scrollRef.current?.scrollBy(0, scrollRef.current.scrollHeight + 1000);
                     setGridSelection({
                         cell: [rowMarkerOffset, rows],
                         range: {
