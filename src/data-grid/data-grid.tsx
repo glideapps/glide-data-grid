@@ -498,6 +498,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             const canvas = ref.current;
             const eventTarget = eventTargetRef?.current;
             if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) return;
+            if (ev.target === eventTarget && eventTarget !== null) {
+                const bounds = eventTarget.getBoundingClientRect();
+                if (ev.clientX > bounds.left + eventTarget.clientWidth) return;
+            }
+
             const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
 
             if (args.kind === "header") {
