@@ -4,7 +4,6 @@ import { StoryFn, StoryContext, useState, useCallback, useMemo } from "@storyboo
 import { BuilderThemeWrapper } from "../stories/story-utils";
 
 import {
-    ColumnSelection,
     CompactSelection,
     EditableGridCell,
     GridCell,
@@ -12,7 +11,6 @@ import {
     GridColumn,
     GridSelection,
     Rectangle,
-    RowSelection,
 } from "../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor } from "./data-editor";
@@ -427,8 +425,8 @@ export function RowSelectionStateLivesOutside() {
 }
 
 export function ColSelectionStateLivesOutside() {
-    const [selected_cols, setSelectedCols] = useState<RowSelection>([]);
-    const cb = (newRows: ColumnSelection | undefined) => {
+    const [selected_cols, setSelectedCols] = useState<CompactSelection>(CompactSelection.empty());
+    const cb = (newRows: CompactSelection | undefined) => {
         if (newRows != undefined) {
             setSelectedCols(newRows);
         }

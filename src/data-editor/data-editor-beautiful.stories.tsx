@@ -17,6 +17,7 @@ import faker from "faker";
 import styled, { ThemeProvider } from "styled-components";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { SimpleThemeWrapper } from "../stories/story-utils";
+import { useEventListener } from "../common/utils";
 
 faker.seed(1337);
 
@@ -1298,6 +1299,52 @@ export const ThemePerColumn: React.VFC = () => {
     );
 };
 (ThemePerColumn as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const BuiltInSearch: React.VFC = () => {
+    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+
+    const [showSearch, setShowSearch] = React.useState(false);
+
+    useEventListener(
+        "keydown",
+        React.useCallback(event => {
+            if ((event.ctrlKey || event.metaKey) && event.key === "f") {
+                setShowSearch(cv => !cv);
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        }, []),
+        window,
+        false,
+        true
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Lotsa cell kinds"
+            description={
+                <Description>
+                    Search for any data in your grid by setting <PropName>showSearch</PropName>.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                onCellEdited={setCellValue}
+                onColumnResized={onColumnResized}
+                showSearch={showSearch}
+                onSearchClose={() => setShowSearch(false)}
+                rows={10_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(BuiltInSearch as any).parameters = {
     options: {
         showPanel: false,
     },

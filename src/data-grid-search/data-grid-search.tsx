@@ -1,7 +1,6 @@
 // import AppIcon from "common/app-icon";
 import * as React from "react";
-import { useEventListener } from "../common/utils";
-import { GridCell, GridCellKind, GridKeyEventArgs, GridSelection, Rectangle } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, GridSelection, Rectangle } from "../data-grid/data-grid-types";
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
 import { assert } from "../common/support";
@@ -50,16 +49,25 @@ export interface DataGridSearchProps extends Omit<ScrollingDataGridProps, "preli
     readonly getCellsForSelection?: (selection: Rectangle) => readonly (readonly GridCell[])[];
     readonly onSearchResultsChanged?: (results: readonly (readonly [number, number])[], navIndex: number) => void;
     readonly searchColOffset: number;
+    readonly showSearch?: boolean;
+    readonly onSearchClose?: () => void;
 }
 
 const targetSearchTimeMS = 10;
 
 const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
-    const { onKeyDown, getCellsForSelection, onSearchResultsChanged, searchColOffset, ...rest } = p;
+    const {
+        onKeyDown,
+        getCellsForSelection,
+        onSearchResultsChanged,
+        searchColOffset,
+        showSearch = false,
+        onSearchClose,
+        ...rest
+    } = p;
     const { canvasRef, cellYOffset, rows, columns, getCellContent } = p;
 
     const [searchString, setSearchString] = React.useState("");
-    const [showSearch, setShowSearch] = React.useState(false);
     const [searchStatus, setSearchStatus] = React.useState<{
         rowsSearched: number;
         results: number;
@@ -196,7 +204,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 const scalar = targetSearchTimeMS / rounded;
                 searchStride = Math.ceil(searchStride * scalar);
 
-                if (rowsSearched < rows) {
+                if (rowsSearched < rows && runningResult.length < 1000) {
                     searchHandle.current = window.requestAnimationFrame(tick);
                 }
             };
@@ -219,51 +227,14 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         ev.stopPropagation();
     }, []);
 
-    const onKeyDownImpl = React.useCallback(
-        (event: GridKeyEventArgs) => {
-            if ((event.ctrlKey || event.metaKey) && event.key === "f") {
-                if (!showSearch) {
-                    setShowSearch(true);
-                    setSearchString("");
-                }
-                setTimeout(() => inputRef.current?.focus(), 150);
-                event.cancel();
-            } else {
-                onKeyDown?.(event);
-            }
-        },
-        [onKeyDown, showSearch]
-    );
-
-    useEventListener(
-        "keydown",
-        React.useCallback(
-            event => {
-                if ((event.ctrlKey || event.metaKey) && event.key === "f") {
-                    if (!showSearch) {
-                        setShowSearch(true);
-                        setSearchString("");
-                    }
-                    setTimeout(() => inputRef.current?.focus(), 150);
-                    event.stopPropagation();
-                    event.preventDefault();
-                }
-            },
-            [showSearch]
-        ),
-        window,
-        false,
-        true
-    );
-
     const onClose = React.useCallback(() => {
-        setShowSearch(false);
+        onSearchClose?.();
         setSearchStatus(undefined);
         setSearchResults([]);
         onSearchResultsChanged?.([], -1);
         cancelSearch();
         canvasRef?.current?.focus();
-    }, [cancelSearch, canvasRef, onSearchResultsChanged]);
+    }, [cancelSearch, canvasRef, onSearchClose, onSearchResultsChanged]);
 
     const onSearchChange = React.useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -278,6 +249,13 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         },
         [beginSearch, cancelSearch]
     );
+
+    React.useEffect(() => {
+        if (showSearch && inputRef.current !== null) {
+            setSearchString("");
+            inputRef.current.focus({ preventScroll: true });
+        }
+    }, [showSearch]);
 
     const onNext = React.useCallback(
         (ev?: React.MouseEvent) => {
@@ -341,15 +319,19 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
     let resultString: string | undefined;
     if (searchStatus !== undefined) {
-        resultString = `${searchStatus.results} result${searchStatus.results !== 1 ? "s" : ""}`;
+        if (searchStatus.results >= 1000) {
+            resultString = `thousands`;
+        } else {
+            resultString = `${searchStatus.results} result${searchStatus.results !== 1 ? "s" : ""}`;
+        }
         if (searchStatus.selectedIndex >= 0) {
-            resultString = `${searchStatus.selectedIndex + 1} / ${resultString}`;
+            resultString = `${searchStatus.selectedIndex + 1} of ${resultString}`;
         }
     }
 
     return (
         <>
-            <ScrollingDataGrid {...rest} onKeyDown={onKeyDownImpl} prelightCells={searchResults} />
+            <ScrollingDataGrid {...rest} onKeyDown={onKeyDown} prelightCells={searchResults} />
             <SearchWrapper
                 showSearch={showSearch}
                 onMouseDown={cancelEvent}
@@ -376,9 +358,11 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         disabled={(searchStatus?.results ?? 0) === 0}>
                         <DownArrow />
                     </button>
-                    <button tabIndex={showSearch ? undefined : -1} onClick={onClose}>
-                        <CloseX />
-                    </button>
+                    {onSearchClose !== undefined && (
+                        <button tabIndex={showSearch ? undefined : -1} onClick={onClose}>
+                            <CloseX />
+                        </button>
+                    )}
                 </div>
                 {searchStatus !== undefined && (
                     <>
