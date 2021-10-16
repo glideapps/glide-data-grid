@@ -19,7 +19,7 @@ import {
 import { SpriteManager } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
-import { drawCell, drawGrid } from "./data-grid-render";
+import { drawCell, drawGrid, makeBuffers } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
 
 export interface DataGridProps {
@@ -150,8 +150,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
     const [hoveredItem, setHoveredItem] = React.useState<Item | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
-    const [bufferCanvas] = React.useState(() => document.createElement("canvas"));
-    const [overlayCanvas] = React.useState(() => document.createElement("canvas"));
+    const [buffers] = React.useState(() => makeBuffers());
 
     const spriteManager = React.useMemo(() => new SpriteManager(), []);
 
@@ -358,8 +357,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
         drawGrid(
             canvas,
-            bufferCanvas,
-            overlayCanvas,
+            buffers,
             width,
             height,
             cellXOffset,
@@ -417,8 +415,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         drawCustomCell,
         prelightCells,
         spriteManager,
-        bufferCanvas,
-        overlayCanvas,
+        buffers,
     ]);
 
     React.useEffect(() => {

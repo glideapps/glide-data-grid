@@ -668,8 +668,7 @@ function drawBlanks(
 
 export function drawGrid(
     canvas: HTMLCanvasElement,
-    bufferCanvas: HTMLCanvasElement,
-    overlayCanvas: HTMLCanvasElement,
+    buffers: Buffers,
     width: number,
     height: number,
     cellXOffset: number,
@@ -708,15 +707,18 @@ export function drawGrid(
         canvas.height = height * dpr;
     }
 
+    const bufferCanvas = buffers.backbuffer;
+    const overlayCanvas = buffers.overlay;
+
     if (bufferCanvas.width !== width * dpr || bufferCanvas.height !== height * dpr) {
         bufferCanvas.width = width * dpr;
         bufferCanvas.height = height * dpr;
     }
 
-    overlayCanvas.width = width * dpr;
-    overlayCanvas.height = height * dpr;
-    // if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== height * dpr) {
-    // }
+    if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== headerHeight * dpr) {
+        overlayCanvas.width = width * dpr;
+        overlayCanvas.height = headerHeight * dpr;
+    }
 
     const last = lastBlitData.current;
     if (
@@ -731,7 +733,9 @@ export function drawGrid(
     const targetCtx = canvas.getContext("2d", {
         alpha: false,
     });
-    const overlayCtx = overlayCanvas.getContext("2d");
+    const overlayCtx = overlayCanvas.getContext("2d", {
+        alpha: false,
+    });
     const bufferCtx = bufferCanvas.getContext("2d", {
         alpha: false,
     });
@@ -798,22 +802,6 @@ export function drawGrid(
         damage
     );
 
-    drawGridHeaders(
-        overlayCtx,
-        effectiveCols,
-        width,
-        height,
-        translateX,
-        headerHeight,
-        selectedColumns,
-        hoveredCol,
-        dragAndDropState,
-        isResizing,
-        selectedCell,
-        theme,
-        spriteManager
-    );
-
     if (drawRegions.length > 0) {
         bufferCtx.beginPath();
         for (const r of drawRegions) {
@@ -872,36 +860,23 @@ export function drawGrid(
         theme
     );
 
-    // Draw our overlay buffer
-    drawGridLines(
-        overlayCtx,
-        effectiveCols,
-        cellYOffset,
-        translateX,
-        translateY,
-        width,
-        height,
-        headerHeight,
-        getRowHeight,
-        lastRowSticky,
-        rows,
-        theme
-    );
-
-    drawFocusRing(
-        overlayCtx,
-        height,
-        cellYOffset,
-        translateX,
-        translateY,
-        effectiveCols,
-        theme,
-        headerHeight,
-        selectedCell,
-        getRowHeight,
-        lastRowSticky,
-        rows
-    );
+    if (!canBlit || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
+        drawGridHeaders(
+            overlayCtx,
+            effectiveCols,
+            width,
+            height,
+            translateX,
+            headerHeight,
+            selectedColumns,
+            hoveredCol,
+            dragAndDropState,
+            isResizing,
+            selectedCell,
+            theme,
+            spriteManager
+        );
+    }
 
     imageLoader?.setWindow({
         x: cellXOffset,
@@ -916,16 +891,56 @@ export function drawGrid(
     targetCtx.fillStyle = theme.bgCell;
     targetCtx.fillRect(0, 0, width, height);
 
+    // remove scale for blit
     bufferCtx.restore();
     targetCtx.restore();
     overlayCtx.restore();
 
     targetCtx.drawImage(bufferCanvas, 0, 0);
     targetCtx.drawImage(overlayCanvas, 0, 0);
+
+    targetCtx.save();
+    if (dpr !== 1) {
+        targetCtx.scale(dpr, dpr);
+    }
+
+    drawGridLines(
+        targetCtx,
+        effectiveCols,
+        cellYOffset,
+        translateX,
+        translateY,
+        width,
+        height,
+        headerHeight,
+        getRowHeight,
+        lastRowSticky,
+        rows,
+        theme
+    );
+
+    drawFocusRing(
+        targetCtx,
+        width,
+        height,
+        cellYOffset,
+        translateX,
+        translateY,
+        effectiveCols,
+        theme,
+        headerHeight,
+        selectedCell,
+        getRowHeight,
+        lastRowSticky,
+        rows
+    );
+
+    targetCtx.restore();
 }
 
 export function drawFocusRing(
     ctx: CanvasRenderingContext2D,
+    width: number,
     height: number,
     cellYOffset: number,
     translateX: number,
@@ -941,6 +956,11 @@ export function drawFocusRing(
     if (selectedCell === undefined || effectiveCols.find(c => (c.sourceIndex === selectedCell.cell[0]) === undefined))
         return;
     const [targetCol, targetRow] = selectedCell.cell;
+
+    ctx.beginPath();
+    const stickRowHeight = lastRowSticky ? getRowHeight(rows - 1) : 0;
+    ctx.rect(0, headerHeight, width, height - headerHeight - stickRowHeight);
+    ctx.clip();
 
     walkColumns(
         effectiveCols,
@@ -1037,4 +1057,16 @@ export function walkColumns(
         x += c.width;
         clipX += c.sticky ? c.width : 0;
     }
+}
+
+interface Buffers {
+    backbuffer: HTMLCanvasElement;
+    overlay: HTMLCanvasElement;
+}
+
+export function makeBuffers(): Buffers {
+    return {
+        backbuffer: document.createElement("canvas"),
+        overlay: document.createElement("canvas"),
+    };
 }
