@@ -1,7 +1,6 @@
 import * as React from "react";
 
 import {
-    ColumnSelection,
     CompactSelection,
     GridCell,
     GridCellKind,
@@ -18,7 +17,6 @@ import faker from "faker";
 import styled, { ThemeProvider } from "styled-components";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { SimpleThemeWrapper } from "../stories/story-utils";
-import { browserIsOSX } from "../common/browser-detect";
 
 faker.seed(1337);
 
@@ -257,6 +255,10 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
         },
     ];
 
+    if (amount < defaultColumns.length) {
+        return defaultColumns.slice(0, amount);
+    }
+
     const extraColumnsAmount = amount - defaultColumns.length;
 
     const extraColumns = [...new Array(extraColumnsAmount)].map((_, index) =>
@@ -332,6 +334,23 @@ function useMockDataGenerator(numCols: number, readonly: boolean = true) {
         [colsMap, readonly]
     );
 
+    const getCellsForSelection = React.useCallback(
+        (selection: Rectangle): readonly (readonly GridCell[])[] => {
+            const result: GridCell[][] = [];
+
+            for (let y = selection.y; y < selection.height; y++) {
+                const row: GridCell[] = [];
+                for (let x = selection.x; x < selection.width; x++) {
+                    row.push(getCellContent([x, y]));
+                }
+                result.push(row);
+            }
+
+            return result;
+        },
+        [getCellContent]
+    );
+
     const setCellValue = React.useCallback(
         ([col, row]: readonly [number, number], val: GridCell): void => {
             let current = cache.current.get(col, row);
@@ -349,7 +368,7 @@ function useMockDataGenerator(numCols: number, readonly: boolean = true) {
         [colsMap]
     );
 
-    return { cols, getCellContent, onColumnResized, setCellValue };
+    return { cols, getCellContent, onColumnResized, setCellValue, getCellsForSelection };
 }
 
 const defaultProps: Partial<DataEditorProps> = {
@@ -458,7 +477,7 @@ export const SmallEditableGrid = () => {
 };
 
 export const OneMillionRows: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(6);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(6);
 
     return (
         <BeautifulWrapper
@@ -467,6 +486,7 @@ export const OneMillionRows: React.VFC = () => {
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
+                getCellsForSelection={getCellsForSelection}
                 columns={cols}
                 rowHeight={31}
                 rows={1_000_000}
@@ -850,63 +870,63 @@ const KeyName = styled.kbd`
     margin: 0 0.1em;
 `;
 
-function useKeyPressed(key: string): boolean {
-    const [isPressed, setIsPressed] = React.useState(false);
+// function useKeyPressed(key: string): boolean {
+//     const [isPressed, setIsPressed] = React.useState(false);
 
-    React.useEffect(() => {
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === key) {
-                setIsPressed(true);
-            }
-        };
+//     React.useEffect(() => {
+//         const onKeyDown = (e: KeyboardEvent) => {
+//             if (e.key === key) {
+//                 setIsPressed(true);
+//             }
+//         };
 
-        const onKeyUp = (e: KeyboardEvent) => {
-            if (e.key === key) {
-                setIsPressed(false);
-            }
-        };
+//         const onKeyUp = (e: KeyboardEvent) => {
+//             if (e.key === key) {
+//                 setIsPressed(false);
+//             }
+//         };
 
-        document.addEventListener("keydown", onKeyDown);
-        document.addEventListener("keyup", onKeyUp);
+//         document.addEventListener("keydown", onKeyDown);
+//         document.addEventListener("keyup", onKeyUp);
 
-        return () => {
-            document.removeEventListener("keydown", onKeyDown);
-            document.removeEventListener("keyup", onKeyUp);
-        };
-    }, [key]);
+//         return () => {
+//             document.removeEventListener("keydown", onKeyDown);
+//             document.removeEventListener("keyup", onKeyUp);
+//         };
+//     }, [key]);
 
-    return isPressed;
-}
+//     return isPressed;
+// }
 
 export const MultiSelectColumns: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(100);
 
-    const isCmdPressed = useKeyPressed(browserIsOSX.value ? "Meta" : "Control");
-    const [selectedColumns, setSelectedColumns] = React.useState<Set<number>>(new Set());
+    // const isCmdPressed = useKeyPressed(browserIsOSX.value ? "Meta" : "Control");
+    // const [selectedColumns, setSelectedColumns] = React.useState<Set<number>>(new Set());
 
-    const onSelectedColumnsChange = (newColumns: ColumnSelection | undefined) => {
-        if (newColumns === undefined) {
-            setSelectedColumns(new Set());
-            return;
-        }
+    // const onSelectedColumnsChange = (newColumns: ColumnSelection | undefined) => {
+    //     if (newColumns === undefined) {
+    //         setSelectedColumns(new Set());
+    //         return;
+    //     }
 
-        const [colIndex] = newColumns;
-        if (isCmdPressed) {
-            setSelectedColumns(prevSelection => {
-                const newSet = new Set(prevSelection);
+    //     const [colIndex] = newColumns;
+    //     if (isCmdPressed) {
+    //         setSelectedColumns(prevSelection => {
+    //             const newSet = new Set(prevSelection);
 
-                if (prevSelection.has(colIndex)) {
-                    newSet.delete(colIndex);
-                } else {
-                    newSet.add(colIndex);
-                }
+    //             if (prevSelection.has(colIndex)) {
+    //                 newSet.delete(colIndex);
+    //             } else {
+    //                 newSet.add(colIndex);
+    //             }
 
-                return newSet;
-            });
-        } else {
-            setSelectedColumns(new Set([colIndex]));
-        }
-    };
+    //             return newSet;
+    //         });
+    //     } else {
+    //         setSelectedColumns(new Set([colIndex]));
+    //     }
+    // };
 
     return (
         <BeautifulWrapper
@@ -928,8 +948,7 @@ export const MultiSelectColumns: React.VFC = () => {
                 getCellContent={getCellContent}
                 columns={cols}
                 rows={100_000}
-                selectedColumns={[...selectedColumns]}
-                onSelectedColumnsChange={onSelectedColumnsChange}
+                // onSelectedColumnsChange={onSelectedColumnsChange}
             />
         </BeautifulWrapper>
     );

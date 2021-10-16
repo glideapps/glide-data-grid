@@ -313,7 +313,7 @@ function drawGridHeaders(
     height: number,
     translateX: number,
     headerHeight: number,
-    selectedColumns: readonly number[] | undefined,
+    selectedColumns: CompactSelection,
     hoveredCol: number | undefined,
     dragAndDropState: DragAndDropState | undefined,
     isResizing: boolean,
@@ -327,7 +327,7 @@ function drawGridHeaders(
     let clipX = 0;
     for (const c of effectiveCols) {
         const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
-        const selected = selectedColumns?.includes(c.sourceIndex);
+        const selected = selectedColumns.hasIndex(c.sourceIndex);
         const hovered = hoveredCol === c.sourceIndex && dragAndDropState === undefined && !isResizing;
 
         const hasSelectedCell = selectedCell !== undefined && selectedCell.cell[0] === c.sourceIndex;
@@ -452,7 +452,7 @@ function drawColumnContent(
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
     selectedCell: GridSelection | undefined,
-    selectedColumns: readonly number[] | undefined,
+    selectedColumns: CompactSelection,
     prelightCells: CellList | undefined,
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader | undefined,
@@ -517,8 +517,7 @@ function drawColumnContent(
                 const isFocused =
                     !isMovedStickyRow && selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
                 let highlighted =
-                    (!isMovedStickyRow && (rowSelected || isFocused)) ||
-                    selectedColumns?.includes(c.sourceIndex) === true;
+                    (!isMovedStickyRow && (rowSelected || isFocused)) || selectedColumns.hasIndex(c.sourceIndex);
 
                 if (selectedCell?.range !== undefined && !isMovedStickyRow) {
                     const { range } = selectedCell;
@@ -644,7 +643,7 @@ export function drawGrid(
     selectedRows: CompactSelection,
     disabledRows: CompactSelection,
     rowHeight: number | ((index: number) => number),
-    selectedColumns: readonly number[] | undefined,
+    selectedColumns: CompactSelection,
     hoveredCol: number | undefined,
     isResizing: boolean,
     selectedCell: GridSelection | undefined,
