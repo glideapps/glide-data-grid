@@ -1325,7 +1325,7 @@ export const BuiltInSearch: React.VFC = () => {
 
     return (
         <BeautifulWrapper
-            title="Lotsa cell kinds"
+            title="Search is easy"
             description={
                 <Description>
                     Search for any data in your grid by setting <PropName>showSearch</PropName>.
