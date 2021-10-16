@@ -119,7 +119,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
         case GridCellKind.Text:
             editor = (
                 <GrowingEntry
-                    autoFocus={true}
+                    autoFocus={targetValue.readonly !== true}
                     disabled={targetValue.readonly === true}
                     onKeyDown={onKeyDownMultiline}
                     value={targetValue.data}

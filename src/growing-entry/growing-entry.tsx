@@ -23,6 +23,7 @@ const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
         const ta = inputRef.current;
         if (ta === null) return;
 
+        if (ta.disabled) return;
         const length = useText.toString().length;
         ta.focus();
         ta.setSelectionRange(0, length);

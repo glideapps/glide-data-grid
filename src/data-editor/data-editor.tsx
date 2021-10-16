@@ -909,11 +909,16 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const onKeyDown = React.useCallback(
         (event: GridKeyEventArgs) => {
             const fn = async () => {
+                const overlayOpen = overlay !== undefined;
                 const shiftKey = event.shiftKey;
                 const isDeleteKey = event.key === "Delete" || (browserIsOSX.value && event.key === "Backspace");
                 const isCopyKey = event.key === "c" && (event.metaKey || event.ctrlKey);
 
                 if (event.key === "Escape") {
+                    if (overlayOpen) {
+                        setOverlay(undefined);
+                        return;
+                    }
                     setGridSelection(undefined);
                     setSelectedRows(CompactSelection.empty());
                     setSelectedColumns(CompactSelection.empty());
@@ -984,8 +989,13 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 let [col, row] = gridSelection.cell;
 
                 if (event.key === "Enter" && event.bounds !== undefined) {
-                    reselect(event.bounds);
-                    event.cancel();
+                    if (overlayOpen) {
+                        setOverlay(undefined);
+                        row++;
+                    } else {
+                        reselect(event.bounds);
+                        event.cancel();
+                    }
                 } else if (event.key === "v" && (event.metaKey || event.ctrlKey)) {
                     try {
                         const text = await navigator.clipboard.readText();
@@ -1012,30 +1022,35 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         // do nothing
                     }
                 } else if (event.key === "ArrowDown") {
+                    setOverlay(undefined);
                     if (shiftKey) {
                         adjustSelection([0, 1]);
                     } else {
                         row++;
                     }
                 } else if (event.key === "ArrowUp") {
+                    setOverlay(undefined);
                     if (shiftKey) {
                         adjustSelection([0, -1]);
                     } else {
                         row--;
                     }
                 } else if (event.key === "ArrowRight") {
+                    setOverlay(undefined);
                     if (shiftKey) {
                         adjustSelection([1, 0]);
                     } else {
                         col++;
                     }
                 } else if (event.key === "ArrowLeft") {
+                    setOverlay(undefined);
                     if (shiftKey) {
                         adjustSelection([-1, 0]);
                     } else {
                         col--;
                     }
                 } else if (event.key === "Tab") {
+                    setOverlay(undefined);
                     if (shiftKey) {
                         col--;
                     } else {
@@ -1112,9 +1127,12 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             void fn();
         },
         [
+            overlay,
             selectedRows,
             gridSelection,
             getCellsForSelection,
+            getCellContent,
+            rowMarkerOffset,
             updateSelectedCell,
             setGridSelection,
             setSelectedRows,
@@ -1123,8 +1141,6 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             onDeleteRows,
             selectedColumns,
             copyToClipboard,
-            rowMarkerOffset,
-            getCellContent,
             columns.length,
             rows,
             reselect,
