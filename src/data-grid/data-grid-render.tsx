@@ -916,12 +916,12 @@ export function drawGrid(
     targetCtx.fillStyle = theme.bgCell;
     targetCtx.fillRect(0, 0, width, height);
 
-    targetCtx.drawImage(bufferCanvas, 0, 0);
-    targetCtx.drawImage(overlayCanvas, 0, 0);
-
     bufferCtx.restore();
     targetCtx.restore();
     overlayCtx.restore();
+
+    targetCtx.drawImage(bufferCanvas, 0, 0);
+    targetCtx.drawImage(overlayCanvas, 0, 0);
 }
 
 export function drawFocusRing(
