@@ -31,6 +31,18 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
 
     padding: ${p => Math.max(0, (p.targetRect.height - 28) / 2)}px 8.5px 3px;
 
+    @keyframes glide_fade_in {
+        from {
+            opacity: 0%;
+        }
+
+        to {
+            opacity: 100%;
+        }
+    }
+
+    animation: glide_fade_in 60ms linear 1;
+
     .clip-region {
         display: flex;
         flex-direction: column;
