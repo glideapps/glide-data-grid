@@ -870,63 +870,8 @@ const KeyName = styled.kbd`
     margin: 0 0.1em;
 `;
 
-// function useKeyPressed(key: string): boolean {
-//     const [isPressed, setIsPressed] = React.useState(false);
-
-//     React.useEffect(() => {
-//         const onKeyDown = (e: KeyboardEvent) => {
-//             if (e.key === key) {
-//                 setIsPressed(true);
-//             }
-//         };
-
-//         const onKeyUp = (e: KeyboardEvent) => {
-//             if (e.key === key) {
-//                 setIsPressed(false);
-//             }
-//         };
-
-//         document.addEventListener("keydown", onKeyDown);
-//         document.addEventListener("keyup", onKeyUp);
-
-//         return () => {
-//             document.removeEventListener("keydown", onKeyDown);
-//             document.removeEventListener("keyup", onKeyUp);
-//         };
-//     }, [key]);
-
-//     return isPressed;
-// }
-
 export const MultiSelectColumns: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(100);
-
-    // const isCmdPressed = useKeyPressed(browserIsOSX.value ? "Meta" : "Control");
-    // const [selectedColumns, setSelectedColumns] = React.useState<Set<number>>(new Set());
-
-    // const onSelectedColumnsChange = (newColumns: ColumnSelection | undefined) => {
-    //     if (newColumns === undefined) {
-    //         setSelectedColumns(new Set());
-    //         return;
-    //     }
-
-    //     const [colIndex] = newColumns;
-    //     if (isCmdPressed) {
-    //         setSelectedColumns(prevSelection => {
-    //             const newSet = new Set(prevSelection);
-
-    //             if (prevSelection.has(colIndex)) {
-    //                 newSet.delete(colIndex);
-    //             } else {
-    //                 newSet.add(colIndex);
-    //             }
-
-    //             return newSet;
-    //         });
-    //     } else {
-    //         setSelectedColumns(new Set([colIndex]));
-    //     }
-    // };
 
     return (
         <BeautifulWrapper
@@ -943,13 +888,7 @@ export const MultiSelectColumns: React.VFC = () => {
                     </MoreInfo>
                 </>
             }>
-            <DataEditor
-                {...defaultProps}
-                getCellContent={getCellContent}
-                columns={cols}
-                rows={100_000}
-                // onSelectedColumnsChange={onSelectedColumnsChange}
-            />
+            <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={100_000} />
         </BeautifulWrapper>
     );
 };
