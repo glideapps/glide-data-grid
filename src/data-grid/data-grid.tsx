@@ -16,7 +16,7 @@ import {
     InnerGridCellKind,
     CompactSelection,
 } from "./data-grid-types";
-import { buildSpriteMap } from "./data-grid-sprites";
+import { SpriteManager } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
 import { drawCell, drawGrid } from "./data-grid-render";
@@ -151,13 +151,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const [hoveredItem, setHoveredItem] = React.useState<Item | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
 
+    const spriteManager = React.useMemo(() => new SpriteManager(), []);
+
     React.useEffect(() => {
         const fn = async () => {
-            await buildSpriteMap(theme, columns);
+            await spriteManager.buildSpriteMap(theme, columns);
             lastDrawRef.current();
         };
         void fn();
-    }, [theme, columns]);
+    }, [columns, spriteManager, theme]);
 
     const mappedColumns = useMappedColumns(columns, firstColSticky);
 
@@ -382,7 +384,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             canvas,
             canBlit.current,
             damageRegion.current,
-            hoverValues.current
+            hoverValues.current,
+            spriteManager
         );
     }, [
         width,
@@ -409,6 +412,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         getCellContent,
         drawCustomCell,
         prelightCells,
+        spriteManager,
     ]);
 
     React.useEffect(() => {

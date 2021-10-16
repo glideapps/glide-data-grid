@@ -24,7 +24,7 @@ import {
     MappedGridColumn,
     roundedPoly,
 } from "./data-grid-lib";
-import { drawSprite, SpriteVariant } from "./data-grid-sprites";
+import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "common/styles";
 
 interface BlitData {
@@ -318,7 +318,8 @@ function drawGridHeaders(
     dragAndDropState: DragAndDropState | undefined,
     isResizing: boolean,
     selectedCell: GridSelection | undefined,
-    outerTheme: Theme
+    outerTheme: Theme,
+    spriteManager: SpriteManager
 ) {
     const xPad = 8;
     const yPad = 2;
@@ -365,11 +366,11 @@ function drawGridHeaders(
             if (c.style === "highlight") {
                 variant = selected ? "selected" : "special";
             }
-            drawSprite(c.icon, variant, ctx, drawX, (headerHeight - 20) / 2, 20, theme);
+            spriteManager.drawSprite(c.icon, variant, ctx, drawX, (headerHeight - 20) / 2, 20, theme);
 
             if (c.overlayIcon !== undefined) {
                 ctx.globalAlpha = 1;
-                drawSprite(
+                spriteManager.drawSprite(
                     c.overlayIcon,
                     selected ? "selected" : "special",
                     ctx,
@@ -657,7 +658,8 @@ export function drawGrid(
     canvas: HTMLCanvasElement,
     canBlit: boolean | undefined,
     damage: CellList | undefined,
-    hoverValues: HoverValues
+    hoverValues: HoverValues,
+    spriteManager: SpriteManager
 ) {
     const dpr = Math.ceil(window.devicePixelRatio) ?? 1;
 
@@ -783,7 +785,8 @@ export function drawGrid(
             dragAndDropState,
             isResizing,
             selectedCell,
-            theme
+            theme,
+            spriteManager
         );
     }
 
