@@ -316,6 +316,10 @@ function drawGridHeaders(
     outerTheme: Theme,
     spriteManager: SpriteManager
 ) {
+    // FIXME: This should respect the per-column theme
+    ctx.fillStyle = outerTheme.bgHeader;
+    ctx.fillRect(0, 0, width, headerHeight);
+
     const xPad = 8;
     const yPad = 2;
 
@@ -432,14 +436,44 @@ function intersectRect(x1: number, y1: number, w1: number, h1: number, x2: numbe
     return x1 <= x2 + w2 && x2 <= x1 + w1 && y1 <= y2 + h2 && y2 <= y1 + h1;
 }
 
-function drawColumnContent(
+function clipDamage(
     ctx: CanvasRenderingContext2D,
-    c: MappedGridColumn,
-    headerHeight: number,
-    x: number,
-    width: number,
+    effectiveColumns: readonly MappedGridColumn[],
     height: number,
-    clipX: number,
+    headerHeight: number,
+    translateX: number,
+    translateY: number,
+    cellYOffset: number,
+    rows: number,
+    getRowHeight: (row: number) => number,
+    lastRowSticky: boolean,
+    damage: CellList | undefined
+): void {
+    if (damage === undefined || damage.length === 0) return;
+    walkColumns(
+        effectiveColumns,
+        cellYOffset,
+        translateX,
+        translateY,
+        headerHeight,
+        (c, drawX, colDrawY, clipX, startRow) => {
+            const diff = Math.max(0, clipX - drawX);
+            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh) => {
+                const isDamaged = damage.some(d => d[0] === c.sourceIndex && d[1] === row);
+                if (isDamaged) {
+                    ctx.rect(drawX + diff + 1, drawY + 1, c.width - diff - 1, rh - 1);
+                }
+            });
+        }
+    );
+    ctx.clip();
+}
+
+function drawCells(
+    ctx: CanvasRenderingContext2D,
+    effectiveColumns: readonly MappedGridColumn[],
+    height: number,
+    headerHeight: number,
     translateX: number,
     translateY: number,
     cellYOffset: number,
@@ -458,79 +492,42 @@ function drawColumnContent(
     imageLoader: ImageWindowLoader | undefined,
     hoverValues: HoverValues,
     outerTheme: Theme
-): { lastRowDrawn: number; newClipX: number; drawFocusRing?: () => void; drawn: number } {
-    const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
+): void {
+    walkColumns(
+        effectiveColumns,
+        cellYOffset,
+        translateX,
+        translateY,
+        headerHeight,
+        (c, drawX, colDrawY, clipX, startRow) => {
+            const diff = Math.max(0, clipX - drawX);
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(Math.max(drawX, clipX), headerHeight + 1, c.width - diff, height - headerHeight - 1);
+            ctx.clip();
 
-    let y = headerHeight + translateY;
-    let row = cellYOffset;
-    let lastRowDrawn = row;
-    let drawFocusRing: (() => void) | undefined;
+            const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
+            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
+                if (!isSticky && damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
+                    return;
+                }
+                if (
+                    !isSticky &&
+                    drawRegions.length > 0 &&
+                    !drawRegions.some(dr => intersectRect(drawX, drawY, c.width, rh, dr.x, dr.y, dr.width, dr.height))
+                ) {
+                    return;
+                }
 
-    let drawn = 0;
+                const rowSelected = selectedRows.hasIndex(row);
+                const rowDisabled = disabledRows.hasIndex(row);
 
-    // clip out the column just to make sure we dont clobby other columns
-    ctx.beginPath();
-    let translated = 0;
-    if (c.sticky) {
-        clipX = Math.max(clipX, x + c.width);
-        ctx.rect(x, headerHeight + 1, c.width, height - headerHeight - 1);
-        ctx.clip();
-    } else {
-        const diff = Math.min(0, x + translateX - clipX);
-        ctx.rect(Math.max(x + translateX, clipX), headerHeight + 1, c.width + diff, height - headerHeight - 1);
-        ctx.clip();
-        ctx.translate(translateX, 0);
-        translated = translateX;
-    }
-
-    let doSticky = lastRowSticky;
-    while (y < height || doSticky) {
-        const doingSticky = doSticky && y >= height;
-        if (doingSticky) {
-            doSticky = false;
-            row = rows - 1;
-        }
-        const rh = getRowHeight(row);
-
-        if (doingSticky) {
-            y = height - rh;
-        }
-
-        const isMovedStickyRow = doSticky && row === rows - 1;
-
-        const rowSelected = selectedRows.hasIndex(row);
-        const rowDisabled = disabledRows.hasIndex(row) && !isMovedStickyRow;
-
-        if (
-            doingSticky ||
-            drawRegions.length === 0 ||
-            drawRegions.some(drawRegion =>
-                intersectRect(
-                    x + translated,
-                    y,
-                    c.width,
-                    rh,
-                    drawRegion.x,
-                    drawRegion.y,
-                    drawRegion.width,
-                    drawRegion.height
-                )
-            )
-        ) {
-            const rowLocal = row;
-            if (
-                doingSticky ||
-                damage === undefined ||
-                damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) !== undefined
-            ) {
                 ctx.beginPath();
 
-                const isFocused =
-                    !isMovedStickyRow && selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
-                let highlighted =
-                    (!isMovedStickyRow && (rowSelected || isFocused)) || selectedColumns.hasIndex(c.sourceIndex);
+                const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
+                let highlighted = rowSelected || isFocused || selectedColumns.hasIndex(c.sourceIndex);
 
-                if (selectedCell?.range !== undefined && !isMovedStickyRow) {
+                if (selectedCell?.range !== undefined) {
                     const { range } = selectedCell;
                     if (
                         c.sourceIndex >= range.x &&
@@ -545,34 +542,33 @@ function drawColumnContent(
                 if (highlighted || rowDisabled) {
                     if (rowDisabled) {
                         ctx.fillStyle = theme.bgHeader;
-                        if (x === 0) {
-                            ctx.fillRect(x, y + 1, c.width, rh - 1);
+                        if (drawX === 0) {
+                            ctx.fillRect(drawX, drawY + 1, c.width, rh - 1);
                         } else {
-                            ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
+                            ctx.fillRect(drawX + 1, drawY + 1, c.width - 1, rh - 1);
                         }
                     }
                     if (highlighted) {
                         ctx.fillStyle = theme.accentLight;
-                        if (x === 0) {
-                            ctx.fillRect(x, y + 1, c.width, rh - 1);
+                        if (drawX === 0) {
+                            ctx.fillRect(drawX, drawY + 1, c.width, rh - 1);
                         } else {
-                            ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
+                            ctx.fillRect(drawX + 1, drawY + 1, c.width - 1, rh - 1);
                         }
                     }
                 } else {
-                    // eslint-disable-next-line no-loop-func
                     if (prelightCells?.find(pre => pre[0] === c.sourceIndex && pre[1] === row) !== undefined) {
                         ctx.fillStyle = theme.bgSearchResult;
-                        if (x === 0) {
-                            ctx.fillRect(x, y + 1, c.width, rh - 1);
+                        if (drawX === 0) {
+                            ctx.fillRect(drawX, drawY + 1, c.width, rh - 1);
                         } else {
-                            ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
+                            ctx.fillRect(drawX + 1, drawY + 1, c.width - 1, rh - 1);
                         }
                     }
                 }
 
                 const cell: InnerGridCell =
-                    !isMovedStickyRow && row < rows
+                    row < rows
                         ? getCellContent([c.sourceIndex, row])
                         : {
                               kind: GridCellKind.Loading,
@@ -585,14 +581,13 @@ function drawColumnContent(
 
                 const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
 
-                drawn++;
                 drawCell(
                     ctx,
                     row,
                     cell,
                     c.sourceIndex,
-                    x,
-                    y,
+                    drawX,
+                    drawY,
                     c.width,
                     rh,
                     highlighted,
@@ -603,45 +598,78 @@ function drawColumnContent(
                 );
 
                 ctx.globalAlpha = 1;
+            });
 
-                if (isFocused) {
-                    const localX = x;
-                    const localY = y;
-                    const localRowHeight = rh;
-                    const localRow = row;
-                    const localColWidth = c.width;
-                    const localTranslateX = c.sticky ? 0 : translateX;
-                    drawFocusRing = () => {
-                        ctx.translate(localTranslateX, 0);
-                        if (lastRowSticky && localRow !== rows - 1) {
-                            ctx.beginPath();
-                            const stickyHeight = getRowHeight(rows - 1);
-                            ctx.rect(0, 0, width, height - stickyHeight);
-                            ctx.clip();
-                        }
+            ctx.restore();
+        }
+    );
+}
 
-                        ctx.beginPath();
-                        ctx.rect(localX + 0.5, localY + 0.5, localColWidth, localRowHeight);
-                        ctx.strokeStyle = theme.accentColor;
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
-                    };
+function drawBlanks(
+    ctx: CanvasRenderingContext2D,
+    effectiveColumns: readonly MappedGridColumn[],
+    height: number,
+    headerHeight: number,
+    translateX: number,
+    translateY: number,
+    cellYOffset: number,
+    rows: number,
+    getRowHeight: (row: number) => number,
+    selectedRows: CompactSelection,
+    disabledRows: CompactSelection,
+    lastRowSticky: boolean,
+    drawRegions: readonly Rectangle[],
+    damage: CellList | undefined,
+    theme: Theme
+): void {
+    if (damage !== undefined) return;
+    walkColumns(
+        effectiveColumns,
+        cellYOffset,
+        translateX,
+        translateY,
+        headerHeight,
+        (c, drawX, colDrawY, clipX, startRow) => {
+            if (c !== effectiveColumns.slice(-1)[0]) return;
+            ctx.save();
+            ctx.beginPath();
+            drawX += c.width;
+            ctx.rect(Math.max(drawX, clipX), headerHeight + 1, 10000, height - headerHeight - 1);
+            ctx.clip();
+
+            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
+                if (
+                    !isSticky &&
+                    drawRegions.length > 0 &&
+                    !drawRegions.some(dr => intersectRect(drawX, drawY, 10000, rh, dr.x, dr.y, dr.width, dr.height))
+                ) {
+                    return;
                 }
-            }
-        }
 
-        if (doingSticky) {
-            break;
-        }
-        y += rh;
-        row++;
-        lastRowDrawn++;
-    }
+                const rowSelected = selectedRows.hasIndex(row);
+                const rowDisabled = disabledRows.hasIndex(row);
 
-    return { lastRowDrawn, newClipX: clipX, drawFocusRing, drawn };
+                ctx.beginPath();
+
+                if (rowDisabled) {
+                    ctx.fillStyle = theme.bgHeader;
+                    ctx.fillRect(drawX + 1, drawY + 1, 10000 - 1, rh - 1);
+                }
+                if (rowSelected) {
+                    ctx.fillStyle = theme.accentLight;
+                    ctx.fillRect(drawX + 1, drawY + 1, 10000 - 1, rh - 1);
+                }
+            });
+
+            ctx.restore();
+        }
+    );
 }
 
 export function drawGrid(
+    canvas: HTMLCanvasElement,
+    bufferCanvas: HTMLCanvasElement,
+    overlayCanvas: HTMLCanvasElement,
     width: number,
     height: number,
     cellXOffset: number,
@@ -668,7 +696,6 @@ export function drawGrid(
     prelightCells: CellList | undefined,
     imageLoader: ImageWindowLoader | undefined,
     lastBlitData: React.MutableRefObject<BlitData>,
-    canvas: HTMLCanvasElement,
     canBlit: boolean | undefined,
     damage: CellList | undefined,
     hoverValues: HoverValues,
@@ -681,6 +708,16 @@ export function drawGrid(
         canvas.height = height * dpr;
     }
 
+    if (bufferCanvas.width !== width * dpr || bufferCanvas.height !== height * dpr) {
+        bufferCanvas.width = width * dpr;
+        bufferCanvas.height = height * dpr;
+    }
+
+    overlayCanvas.width = width * dpr;
+    overlayCanvas.height = height * dpr;
+    // if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== height * dpr) {
+    // }
+
     const last = lastBlitData.current;
     if (
         canBlit === true &&
@@ -691,21 +728,30 @@ export function drawGrid(
     )
         return;
 
-    const ctx = canvas.getContext("2d", {
+    const targetCtx = canvas.getContext("2d", {
         alpha: false,
     });
-    if (ctx === null) return;
+    const overlayCtx = overlayCanvas.getContext("2d");
+    const bufferCtx = bufferCanvas.getContext("2d", {
+        alpha: false,
+    });
+    if (bufferCtx === null || overlayCtx === null || targetCtx === null) return;
 
     const getRowHeight = (r: number) => (typeof rowHeight === "number" ? rowHeight : rowHeight(r));
 
-    ctx.save();
-    ctx.beginPath(); // clear any path in the ctx
+    bufferCtx.save();
+    bufferCtx.beginPath();
+    overlayCtx.save();
+    overlayCtx.beginPath();
+    targetCtx.save();
+    targetCtx.beginPath(); // clear any path in the ctx
     if (dpr !== 1) {
-        ctx.scale(dpr, dpr);
+        bufferCtx.scale(dpr, dpr);
+        overlayCtx.scale(dpr, dpr);
+        targetCtx.scale(dpr, dpr);
     }
 
     let drawRegions: Rectangle[] = [];
-    let blittedYOnly = false;
 
     const effectiveCols = getEffectiveColumns(
         mappedColumns,
@@ -717,9 +763,9 @@ export function drawGrid(
     );
 
     if (canBlit === true) {
-        const { regions, yOnly } = blitLastFrame(
-            ctx,
-            canvas,
+        const { regions } = blitLastFrame(
+            bufferCtx,
+            bufferCanvas,
             last,
             cellXOffset,
             cellYOffset,
@@ -736,185 +782,99 @@ export function drawGrid(
             getRowHeight
         );
         drawRegions = regions;
-        blittedYOnly = yOnly;
     }
 
-    if (damage !== undefined) {
-        let row = cellYOffset;
-        let y = headerHeight + translateY;
-        ctx.beginPath();
-        let doSticky = lastRowSticky;
-        while (y < height || doSticky) {
-            const doingSticky = doSticky && y >= height;
-            if (doingSticky) {
-                doSticky = false;
-                row = rows - 1;
-            }
-            let x = 0;
-            const rh = getRowHeight(row);
+    clipDamage(
+        bufferCtx,
+        effectiveCols,
+        height,
+        headerHeight,
+        translateX,
+        translateY,
+        cellYOffset,
+        rows,
+        getRowHeight,
+        lastRowSticky,
+        damage
+    );
 
-            for (const c of effectiveCols) {
-                const rowLocal = row;
-                if (damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) !== undefined) {
-                    const tx = c.sticky ? 0 : translateX;
-                    if (rowLocal === rows - 1 && lastRowSticky) {
-                        ctx.rect(x + 1 + tx, height - rh + 1, c.width - 1, rh - 1);
-                    } else {
-                        ctx.rect(x + 1 + tx, y + 1, c.width - 1, rh - 1);
-                    }
-                }
-                x += c.width;
-            }
-
-            if (doingSticky) break;
-            row++;
-            y += rh;
-        }
-
-        ctx.clip();
-        ctx.beginPath();
-    }
-
-    const drawHeaders = !blittedYOnly && damage === undefined;
-    if (drawHeaders) {
-        ctx.fillStyle = theme.bgHeader;
-        ctx.fillRect(0, 0, width, headerHeight);
-        drawGridHeaders(
-            ctx,
-            effectiveCols,
-            width,
-            height,
-            translateX,
-            headerHeight,
-            selectedColumns,
-            hoveredCol,
-            dragAndDropState,
-            isResizing,
-            selectedCell,
-            theme,
-            spriteManager
-        );
-    }
+    drawGridHeaders(
+        overlayCtx,
+        effectiveCols,
+        width,
+        height,
+        translateX,
+        headerHeight,
+        selectedColumns,
+        hoveredCol,
+        dragAndDropState,
+        isResizing,
+        selectedCell,
+        theme,
+        spriteManager
+    );
 
     if (drawRegions.length > 0) {
-        ctx.beginPath();
+        bufferCtx.beginPath();
         for (const r of drawRegions) {
-            ctx.rect(r.x, r.y, r.width, r.height);
+            bufferCtx.rect(r.x, r.y, r.width, r.height);
         }
-        ctx.clip();
-        ctx.beginPath();
+        bufferCtx.clip();
+        bufferCtx.beginPath();
     }
 
-    ctx.fillStyle = theme.bgCell;
-    ctx.fillRect(0, headerHeight, width, height - headerHeight);
+    bufferCtx.fillStyle = theme.bgCell;
+    bufferCtx.fillRect(0, headerHeight, width, height - headerHeight);
 
-    // clip the headers
-    ctx.beginPath();
-    ctx.save();
-    ctx.rect(0, headerHeight + 1, width, height - headerHeight - 1);
-    ctx.clip();
-    ctx.beginPath();
+    bufferCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+    overlayCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
 
-    let x = 0;
-    let clipX = 0;
-    let row = 0;
-    ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
-    let drawFocus: (() => void) | undefined;
-    let drawnCells = 0;
-    for (const c of effectiveCols) {
-        ctx.save();
-        const { lastRowDrawn, newClipX, drawFocusRing, drawn } = drawColumnContent(
-            ctx,
-            c,
-            headerHeight,
-            x,
-            width,
-            height,
-            clipX,
-            translateX,
-            translateY,
-            cellYOffset,
-            rows,
-            getRowHeight,
-            getCellContent,
-            selectedRows,
-            disabledRows,
-            lastRowSticky,
-            drawRegions,
-            damage,
-            selectedCell,
-            selectedColumns,
-            prelightCells,
-            drawCustomCell,
-            imageLoader,
-            hoverValues,
-            theme
-        );
-        drawnCells += drawn;
-        ctx.restore();
+    drawCells(
+        bufferCtx,
+        effectiveCols,
+        height,
+        headerHeight,
+        translateX,
+        translateY,
+        cellYOffset,
+        rows,
+        getRowHeight,
+        getCellContent,
+        selectedRows,
+        disabledRows,
+        lastRowSticky,
+        drawRegions,
+        damage,
+        selectedCell,
+        selectedColumns,
+        prelightCells,
+        drawCustomCell,
+        imageLoader,
+        hoverValues,
+        theme
+    );
 
-        drawFocus = drawFocus ?? drawFocusRing;
-        row = Math.max(row, lastRowDrawn);
-        clipX = newClipX;
-        x += c.width;
-    }
+    drawBlanks(
+        bufferCtx,
+        effectiveCols,
+        height,
+        headerHeight,
+        translateX,
+        translateY,
+        cellYOffset,
+        rows,
+        getRowHeight,
+        selectedRows,
+        disabledRows,
+        lastRowSticky,
+        drawRegions,
+        damage,
+        theme
+    );
 
-    // console.log("Cells draw", drawnCells, drawRegions);
-
-    // fill blank rows to the right
-    if (selectedRows.length > 0 || disabledRows.length > 0) {
-        let y = headerHeight + translateY;
-        row = cellYOffset;
-
-        ctx.save();
-
-        let doSticky = lastRowSticky;
-        while (y < height || doSticky) {
-            const doingSticky = doSticky && y >= height;
-            if (doingSticky) {
-                doSticky = false;
-                row = rows - 1;
-            }
-            const rh = getRowHeight(row);
-
-            if (doingSticky) {
-                y = height - rh;
-            }
-
-            const rowSelected = selectedRows.hasIndex(row);
-            const rowDisabled = disabledRows.hasIndex(row);
-
-            if (!doSticky || row !== rows - 1) {
-                if (
-                    drawRegions.length === 0 ||
-                    drawRegions.some(drawRegion =>
-                        intersectRect(x, y, 100000, rh, drawRegion.x, drawRegion.y, drawRegion.width, drawRegion.height)
-                    )
-                ) {
-                    ctx.beginPath();
-
-                    if (rowDisabled) {
-                        ctx.fillStyle = theme.bgHeader;
-                        ctx.fillRect(x + 1, y + 1, 100000 - 1, rh - 1);
-                    }
-                    if (rowSelected) {
-                        ctx.fillStyle = theme.accentLight;
-                        ctx.fillRect(x + 1, y + 1, 100000 - 1, rh - 1);
-                    }
-                }
-            }
-
-            if (doingSticky) break;
-            y += rh;
-            row++;
-        }
-
-        ctx.restore();
-    }
-
-    ctx.restore();
+    // Draw our overlay buffer
     drawGridLines(
-        ctx,
+        overlayCtx,
         effectiveCols,
         cellYOffset,
         translateX,
@@ -928,27 +888,153 @@ export function drawGrid(
         theme
     );
 
-    if (drawFocus !== undefined) {
-        // clip the headers but the borders
-        ctx.beginPath();
-        ctx.save();
-        ctx.rect(0, headerHeight, width, height - headerHeight);
-        ctx.clip();
-
-        ctx.beginPath();
-        drawFocus();
-
-        ctx.restore();
-    }
+    drawFocusRing(
+        overlayCtx,
+        height,
+        cellYOffset,
+        translateX,
+        translateY,
+        effectiveCols,
+        theme,
+        headerHeight,
+        selectedCell,
+        getRowHeight,
+        lastRowSticky,
+        rows
+    );
 
     imageLoader?.setWindow({
         x: cellXOffset,
         y: cellYOffset,
         width: effectiveCols.length,
-        height: row - cellYOffset,
+        height: 100, // FIXME: row - cellYOffset,
     });
 
     lastBlitData.current = { cellXOffset, cellYOffset, translateX, translateY };
+    targetCtx.beginPath();
 
-    ctx.restore();
+    targetCtx.fillStyle = theme.bgCell;
+    targetCtx.fillRect(0, 0, width, height);
+
+    targetCtx.drawImage(bufferCanvas, 0, 0);
+    targetCtx.drawImage(overlayCanvas, 0, 0);
+
+    bufferCtx.restore();
+    targetCtx.restore();
+    overlayCtx.restore();
+}
+
+export function drawFocusRing(
+    ctx: CanvasRenderingContext2D,
+    height: number,
+    cellYOffset: number,
+    translateX: number,
+    translateY: number,
+    effectiveCols: readonly MappedGridColumn[],
+    theme: Theme,
+    headerHeight: number,
+    selectedCell: GridSelection | undefined,
+    getRowHeight: (row: number) => number,
+    lastRowSticky: boolean,
+    rows: number
+) {
+    if (selectedCell === undefined || effectiveCols.find(c => (c.sourceIndex === selectedCell.cell[0]) === undefined))
+        return;
+    const [targetCol, targetRow] = selectedCell.cell;
+
+    walkColumns(
+        effectiveCols,
+        cellYOffset,
+        translateX,
+        translateY,
+        headerHeight,
+        (col, drawX, colDrawY, clipX, startRow) => {
+            if (col.sourceIndex !== targetCol) return;
+
+            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh) => {
+                if (row !== targetRow) return;
+
+                ctx.save();
+                if (clipX > drawX) {
+                    ctx.beginPath();
+                    ctx.fill();
+                    ctx.clip();
+                }
+                ctx.beginPath();
+                ctx.rect(drawX + 0.5, drawY + 0.5, col.width, rh);
+                ctx.strokeStyle = theme.accentColor;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.restore();
+            });
+        }
+    );
+}
+
+type WalkRowsCallback = (drawY: number, row: number, rowHeight: number, isSticky: boolean) => void;
+
+export function walkRowsInCol(
+    startRow: number,
+    drawY: number,
+    height: number,
+    rows: number,
+    getRowHeight: (row: number) => number,
+    lastRowSticky: boolean,
+    cb: WalkRowsCallback
+): void {
+    let y = drawY;
+    let row = startRow;
+    let doSticky = lastRowSticky;
+    while (y < height || doSticky) {
+        const doingSticky = doSticky && y >= height;
+        if (doingSticky) {
+            doSticky = false;
+            row = rows - 1;
+        }
+        const rh = getRowHeight(row);
+
+        if (doingSticky) {
+            y = height - rh;
+        }
+
+        const isMovedStickyRow = doSticky && row === rows - 1;
+
+        if (!isMovedStickyRow) {
+            cb(y, row, rh, doingSticky);
+        }
+
+        if (doingSticky) {
+            break;
+        }
+        y += rh;
+        row++;
+    }
+}
+
+type WalkColsCallback = (col: MappedGridColumn, drawX: number, drawY: number, clipX: number, startRow: number) => void;
+
+export function walkColumns(
+    effectiveCols: readonly MappedGridColumn[],
+    cellYOffset: number,
+    translateX: number,
+    translateY: number,
+    headerHeight: number,
+    cb: WalkColsCallback
+): void {
+    let x = 0;
+    let clipX = 0; // this tracks the total width of sticky cols
+    const drawY = headerHeight + translateY;
+    for (const c of effectiveCols) {
+        let drawX: number;
+        if (c.sticky) {
+            drawX = clipX;
+        } else {
+            drawX = x + translateX;
+        }
+
+        cb(c, drawX, drawY, clipX, cellYOffset);
+
+        x += c.width;
+        clipX += c.sticky ? c.width : 0;
+    }
 }

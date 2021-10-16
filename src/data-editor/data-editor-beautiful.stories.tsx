@@ -407,7 +407,7 @@ export const ResizableColumns: React.VFC = () => {
 };
 
 export const AddData: React.VFC = () => {
-    const { cols, getCellContent, setCellValue } = useMockDataGenerator(6, false);
+    const { cols, getCellContent, setCellValue } = useMockDataGenerator(60, false);
 
     const [numRows, setNumRows] = React.useState(50);
 

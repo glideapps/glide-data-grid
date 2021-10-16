@@ -150,6 +150,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
     const [hoveredItem, setHoveredItem] = React.useState<Item | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
+    const [bufferCanvas] = React.useState(() => document.createElement("canvas"));
+    const [overlayCanvas] = React.useState(() => document.createElement("canvas"));
 
     const spriteManager = React.useMemo(() => new SpriteManager(), []);
 
@@ -355,6 +357,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         if (canvas === null) return;
 
         drawGrid(
+            canvas,
+            bufferCanvas,
+            overlayCanvas,
             width,
             height,
             cellXOffset,
@@ -381,7 +386,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             prelightCells,
             imageLoader.current,
             lastBlitData,
-            canvas,
             canBlit.current,
             damageRegion.current,
             hoverValues.current,
@@ -413,6 +417,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         drawCustomCell,
         prelightCells,
         spriteManager,
+        bufferCanvas,
+        overlayCanvas,
     ]);
 
     React.useEffect(() => {
