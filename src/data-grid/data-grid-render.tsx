@@ -141,13 +141,12 @@ function blitLastFrame(
         }
     }
 
-    if (deltaX !== 0 && deltaY !== 0)
-        return {
-            regions: [],
-            yOnly: false,
-        };
-
-    // drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
+    // if (deltaX !== 0) {
+    //     return {
+    //         regions: [],
+    //         yOnly: false,
+    //     };
+    // }
 
     const stickyRowHeight = lastRowSticky ? getRowHeight(rows - 1) : 0;
 
@@ -157,20 +156,27 @@ function blitLastFrame(
     if (blitWidth > 150 && blitHeight > 150) {
         blittedYOnly = deltaX === 0;
 
+        let args = {
+            sx: 0,
+            sy: 0,
+            sw: width * dpr,
+            sh: height * dpr,
+            dx: 0,
+            dy: 0,
+            dw: width,
+            dh: height,
+        };
+
         // blit Y
         if (deltaY > 0) {
             // scrolling up
-            ctx.drawImage(
-                canvas,
-                0,
-                (headerHeight + 1) * dpr,
-                width * dpr,
-                blitHeight * dpr,
-                0,
-                deltaY + headerHeight + 1,
-                width,
-                blitHeight
-            );
+            args = {
+                ...args,
+                sy: (headerHeight + 1) * dpr,
+                sh: blitHeight * dpr,
+                dy: deltaY + headerHeight + 1,
+                dh: blitHeight,
+            };
             drawRegions.push({
                 x: 0,
                 y: headerHeight,
@@ -179,17 +185,13 @@ function blitLastFrame(
             });
         } else if (deltaY < 0) {
             // scrolling down
-            ctx.drawImage(
-                canvas,
-                0,
-                (-deltaY + headerHeight + 1) * dpr,
-                width * dpr,
-                blitHeight * dpr,
-                0,
-                headerHeight + 1,
-                width,
-                blitHeight
-            );
+            args = {
+                ...args,
+                sy: (-deltaY + headerHeight + 1) * dpr,
+                sh: blitHeight * dpr,
+                dy: headerHeight + 1,
+                dh: blitHeight,
+            };
             drawRegions.push({
                 x: 0,
                 y: height + deltaY - stickyRowHeight,
@@ -201,17 +203,13 @@ function blitLastFrame(
         // blit X
         if (deltaX > 0) {
             // scrolling right
-            ctx.drawImage(
-                canvas,
-                stickyWidth * dpr,
-                0,
-                blitWidth * dpr,
-                height * dpr,
-                deltaX + stickyWidth,
-                0,
-                blitWidth,
-                height
-            );
+            args = {
+                ...args,
+                sx: stickyWidth * dpr,
+                sw: blitWidth * dpr,
+                dx: deltaX + stickyWidth,
+                dw: blitWidth,
+            };
             drawRegions.push({
                 x: stickyWidth - 1,
                 y: 0,
@@ -220,17 +218,13 @@ function blitLastFrame(
             });
         } else if (deltaX < 0) {
             // scrolling left
-            ctx.drawImage(
-                canvas,
-                (stickyWidth - deltaX) * dpr,
-                0,
-                blitWidth * dpr,
-                height * dpr,
-                stickyWidth,
-                0,
-                blitWidth,
-                height
-            );
+            args = {
+                ...args,
+                sx: (stickyWidth - deltaX) * dpr,
+                sw: blitWidth * dpr,
+                dx: stickyWidth,
+                dw: blitWidth,
+            };
             drawRegions.push({
                 x: width + deltaX,
                 y: 0,
@@ -239,13 +233,8 @@ function blitLastFrame(
             });
         }
 
-        if (drawRegions.length > 0) {
-            for (const r of drawRegions) {
-                ctx.rect(r.x, r.y, r.width, r.height);
-            }
-            ctx.clip();
-            ctx.beginPath();
-        }
+        // console.log(args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
+        ctx.drawImage(canvas, args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
     }
     ctx.imageSmoothingEnabled = true;
 
@@ -439,6 +428,10 @@ function drawGridHeaders(
     }
 }
 
+function intersectRect(x1: number, y1: number, w1: number, h1: number, x2: number, y2: number, w2: number, h2: number) {
+    return x1 <= x2 + w2 && x2 <= x1 + w1 && y1 <= y2 + h2 && y2 <= y1 + h1;
+}
+
 function drawColumnContent(
     ctx: CanvasRenderingContext2D,
     c: MappedGridColumn,
@@ -465,7 +458,7 @@ function drawColumnContent(
     imageLoader: ImageWindowLoader | undefined,
     hoverValues: HoverValues,
     outerTheme: Theme
-): { lastRowDrawn: number; newClipX: number; drawFocusRing?: () => void } {
+): { lastRowDrawn: number; newClipX: number; drawFocusRing?: () => void; drawn: number } {
     const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
 
     let y = headerHeight + translateY;
@@ -473,8 +466,11 @@ function drawColumnContent(
     let lastRowDrawn = row;
     let drawFocusRing: (() => void) | undefined;
 
+    let drawn = 0;
+
     // clip out the column just to make sure we dont clobby other columns
     ctx.beginPath();
+    let translated = 0;
     if (c.sticky) {
         clipX = Math.max(clipX, x + c.width);
         ctx.rect(x, headerHeight + 1, c.width, height - headerHeight - 1);
@@ -484,6 +480,7 @@ function drawColumnContent(
         ctx.rect(Math.max(x + translateX, clipX), headerHeight + 1, c.width + diff, height - headerHeight - 1);
         ctx.clip();
         ctx.translate(translateX, 0);
+        translated = translateX;
     }
 
     let doSticky = lastRowSticky;
@@ -507,10 +504,17 @@ function drawColumnContent(
         if (
             doingSticky ||
             drawRegions.length === 0 ||
-            drawRegions.find(
-                drawRegion =>
-                    (y >= drawRegion.y && y <= drawRegion.y + drawRegion.height) ||
-                    (drawRegion.y >= y && drawRegion.y <= y + rh)
+            drawRegions.some(drawRegion =>
+                intersectRect(
+                    x + translated,
+                    y,
+                    c.width,
+                    rh,
+                    drawRegion.x,
+                    drawRegion.y,
+                    drawRegion.width,
+                    drawRegion.height
+                )
             )
         ) {
             const rowLocal = row;
@@ -581,6 +585,7 @@ function drawColumnContent(
 
                 const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
 
+                drawn++;
                 drawCell(
                     ctx,
                     row,
@@ -633,7 +638,7 @@ function drawColumnContent(
         lastRowDrawn++;
     }
 
-    return { lastRowDrawn, newClipX: clipX, drawFocusRing };
+    return { lastRowDrawn, newClipX: clipX, drawFocusRing, drawn };
 }
 
 export function drawGrid(
@@ -770,17 +775,10 @@ export function drawGrid(
         ctx.beginPath();
     }
 
-    ctx.fillStyle = theme.bgCell;
-    ctx.fillRect(0, headerHeight, width, height - headerHeight);
-
     const drawHeaders = !blittedYOnly && damage === undefined;
     if (drawHeaders) {
-        // draw header background
         ctx.fillStyle = theme.bgHeader;
         ctx.fillRect(0, 0, width, headerHeight);
-    }
-
-    if (drawHeaders) {
         drawGridHeaders(
             ctx,
             effectiveCols,
@@ -798,6 +796,18 @@ export function drawGrid(
         );
     }
 
+    if (drawRegions.length > 0) {
+        ctx.beginPath();
+        for (const r of drawRegions) {
+            ctx.rect(r.x, r.y, r.width, r.height);
+        }
+        ctx.clip();
+        ctx.beginPath();
+    }
+
+    ctx.fillStyle = theme.bgCell;
+    ctx.fillRect(0, headerHeight, width, height - headerHeight);
+
     // clip the headers
     ctx.beginPath();
     ctx.save();
@@ -810,9 +820,10 @@ export function drawGrid(
     let row = 0;
     ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     let drawFocus: (() => void) | undefined;
+    let drawnCells = 0;
     for (const c of effectiveCols) {
         ctx.save();
-        const { lastRowDrawn, newClipX, drawFocusRing } = drawColumnContent(
+        const { lastRowDrawn, newClipX, drawFocusRing, drawn } = drawColumnContent(
             ctx,
             c,
             headerHeight,
@@ -839,6 +850,7 @@ export function drawGrid(
             hoverValues,
             theme
         );
+        drawnCells += drawn;
         ctx.restore();
 
         drawFocus = drawFocus ?? drawFocusRing;
@@ -846,6 +858,8 @@ export function drawGrid(
         clipX = newClipX;
         x += c.width;
     }
+
+    // console.log("Cells draw", drawnCells, drawRegions);
 
     // fill blank rows to the right
     if (selectedRows.length > 0 || disabledRows.length > 0) {
@@ -873,10 +887,8 @@ export function drawGrid(
             if (!doSticky || row !== rows - 1) {
                 if (
                     drawRegions.length === 0 ||
-                    drawRegions.find(
-                        drawRegion =>
-                            (y >= drawRegion.y && y <= drawRegion.y + drawRegion.height) ||
-                            (drawRegion.y >= y && drawRegion.y <= y + rh)
+                    drawRegions.some(drawRegion =>
+                        intersectRect(x, y, 100000, rh, drawRegion.x, drawRegion.y, drawRegion.width, drawRegion.height)
                     )
                 ) {
                     ctx.beginPath();

@@ -567,7 +567,13 @@ export const TenMillionCells: React.VFC = () => {
         <BeautifulWrapper
             title="Ten Million Cells"
             description={<Description>Data grid supports over 10 million cells. Go nuts with it.</Description>}>
-            <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={100_000} />
+            <DataEditor
+                {...defaultProps}
+                rowMarkers="number"
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={100_000}
+            />
         </BeautifulWrapper>
     );
 };
