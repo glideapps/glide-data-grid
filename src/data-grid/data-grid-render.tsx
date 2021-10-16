@@ -141,6 +141,12 @@ function blitLastFrame(
         }
     }
 
+    if (deltaX !== 0 && deltaY !== 0)
+        return {
+            regions: [],
+            yOnly: false,
+        };
+
     // drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
 
     const stickyRowHeight = lastRowSticky ? getRowHeight(rows - 1) : 0;
