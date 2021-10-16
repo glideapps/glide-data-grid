@@ -599,7 +599,9 @@ function drawColumnContent(
                     const localRowHeight = rh;
                     const localRow = row;
                     const localColWidth = c.width;
+                    const localTranslateX = c.sticky ? 0 : translateX;
                     drawFocusRing = () => {
+                        ctx.translate(localTranslateX, 0);
                         if (lastRowSticky && localRow !== rows - 1) {
                             ctx.beginPath();
                             const stickyHeight = getRowHeight(rows - 1);
@@ -663,9 +665,9 @@ export function drawGrid(
 ) {
     const dpr = Math.ceil(window.devicePixelRatio) ?? 1;
 
-    if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
-        canvas.width = Math.floor(width * dpr);
-        canvas.height = Math.floor(height * dpr);
+    if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
     }
 
     const last = lastBlitData.current;

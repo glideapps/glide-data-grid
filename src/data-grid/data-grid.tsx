@@ -443,8 +443,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
     const lastDrawRef = React.useRef(draw);
     React.useEffect(() => {
-        lastDrawRef.current = draw;
         draw();
+        lastDrawRef.current = draw;
     }, [draw]);
 
     const imageLoaded = React.useCallback(
