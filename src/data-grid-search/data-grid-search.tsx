@@ -320,7 +320,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     let resultString: string | undefined;
     if (searchStatus !== undefined) {
         if (searchStatus.results >= 1000) {
-            resultString = `thousands`;
+            resultString = `over 1000`;
         } else {
             resultString = `${searchStatus.results} result${searchStatus.results !== 1 ? "s" : ""}`;
         }
