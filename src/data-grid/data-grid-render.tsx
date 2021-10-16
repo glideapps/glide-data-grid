@@ -141,12 +141,12 @@ function blitLastFrame(
         }
     }
 
-    // if (deltaX !== 0) {
-    //     return {
-    //         regions: [],
-    //         yOnly: false,
-    //     };
-    // }
+    if (deltaX !== 0 && deltaY !== 0) {
+        return {
+            regions: [],
+            yOnly: false,
+        };
+    }
 
     const stickyRowHeight = lastRowSticky ? getRowHeight(rows - 1) : 0;
 
