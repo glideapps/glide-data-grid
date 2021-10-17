@@ -262,7 +262,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             const shiftKey = ev?.shiftKey === true;
             const ctrlKey = ev?.ctrlKey === true;
             const metaKey = ev?.metaKey === true;
-            const isTouch = ev instanceof TouchEvent;
+            const isTouch = ev !== undefined && !(ev instanceof MouseEvent);
 
             let result: GridMouseEventArgs;
             if (col === -1 || y < 0 || x < 0 || row === undefined || x > width || y > height) {
