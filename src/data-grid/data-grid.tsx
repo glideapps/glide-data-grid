@@ -506,7 +506,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             const canvas = ref.current;
             const eventTarget = eventTargetRef?.current;
             if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) return;
-            ev.preventDefault();
             let clientX: number;
             let clientY: number;
             if (ev instanceof MouseEvent) {

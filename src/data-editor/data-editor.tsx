@@ -1111,6 +1111,15 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     event.bounds !== undefined &&
                     isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, row - 1)]))
                 ) {
+                    if (
+                        (!lastRowSticky || row !== rows) &&
+                        (visibileRegion.y > col ||
+                            col > visibileRegion.y + visibileRegion.height ||
+                            visibileRegion.x > row ||
+                            row > visibileRegion.x + visibileRegion.width)
+                    ) {
+                        return;
+                    }
                     let key = String.fromCharCode(event.keyCode);
                     if (!event.shiftKey) {
                         key = key.toLowerCase();
@@ -1146,6 +1155,11 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             reselect,
             mangledOnCellEdited,
             adjustSelection,
+            lastRowSticky,
+            visibileRegion.y,
+            visibileRegion.height,
+            visibileRegion.x,
+            visibileRegion.width,
         ]
     );
 
