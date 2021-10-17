@@ -77,6 +77,7 @@ const BeautifulStyle = styled.div`
         .sizer-clip {
             border-radius: 12px;
             overflow: hidden;
+            transform: translateZ(0);
 
             height: 100%;
         }
