@@ -68,11 +68,42 @@ export enum GridCellKind {
     Protected = "protected",
 }
 
+export enum GridColumnIcon {
+    HeaderRowID = "headerRowID",
+    HeaderCode = "headerCode",
+    HeaderNumber = "headerNumber",
+    HeaderString = "headerString",
+    HeaderBoolean = "headerBoolean",
+    HeaderAudioUri = "headerAudioUri",
+    HeaderVideoUri = "headerVideoUri",
+    HeaderEmoji = "headerEmoji",
+    HeaderImage = "headerImage",
+    HeaderUri = "headerUri",
+    HeaderPhone = "headerPhone",
+    HeaderMarkdown = "headerMarkdown",
+    HeaderDate = "headerDate",
+    HeaderTime = "headerTime",
+    HeaderEmail = "headerEmail",
+    HeaderReference = "headerReference",
+    HeaderIfThenElse = "headerIfThenElse",
+    HeaderSingleValue = "headerSingleValue",
+    HeaderLookup = "headerLookup",
+    HeaderTextTemplate = "headerTextTemplate",
+    HeaderMath = "headerMath",
+    HeaderRollup = "headerRollup",
+    HeaderJoinStrings = "headerJoinStrings",
+    HeaderSplitString = "headerSplitString",
+    HeaderGeoDistance = "headerGeoDistance",
+    HeaderArray = "headerArray",
+    RowOwnerOverlay = "rowOwnerOverlay",
+    ProtectedColumnOverlay = "protectedColumnOverlay",
+}
+
 export interface GridColumn {
     readonly width: number;
     readonly title: string;
-    readonly icon?: HeaderIcon;
-    readonly overlayIcon?: HeaderIcon;
+    readonly icon?: GridColumnIcon | string;
+    readonly overlayIcon?: GridColumnIcon | string;
     readonly hasMenu?: boolean;
     readonly style?: "normal" | "highlight";
     readonly themeOverride?: Partial<Theme>;

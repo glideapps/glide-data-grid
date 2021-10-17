@@ -2,10 +2,9 @@ import { GridColumn } from "index";
 import { Theme } from "../common/styles";
 import { HeaderIconMap, sprites } from "./sprites";
 
-type Sprite = keyof HeaderIconMap;
-const spriteList = Object.keys(sprites) as Sprite[];
+export type HeaderIcon = keyof HeaderIconMap;
 
-export type HeaderIcon = Sprite;
+export type SpriteMap = Record<string | HeaderIcon, HeaderIconMap["headerArray"]>;
 
 export type SpriteVariant = "normal" | "selected" | "special" | "specialSelected";
 const variantList: SpriteVariant[] = ["normal", "selected", "special", "specialSelected"];
@@ -23,11 +22,19 @@ export class SpriteManager {
     private extraMap: string[] = [];
     private spriteCanvas: HTMLCanvasElement | undefined;
     private lastTheme: SpriteTheme | undefined;
+    private spriteList: string[];
+    private headerIcons: SpriteMap;
 
-    constructor(private headerIcons: HeaderIconMap = sprites) {}
+    constructor(headerIcons: SpriteMap | undefined) {
+        this.headerIcons = {
+            ...sprites,
+            ...(headerIcons ?? {}),
+        };
+        this.spriteList = Object.keys(this.headerIcons);
+    }
 
     public drawSprite(
-        sprite: Sprite,
+        sprite: HeaderIcon | string,
         variant: SpriteVariant,
         ctx: CanvasRenderingContext2D,
         x: number,
@@ -37,9 +44,12 @@ export class SpriteManager {
     ) {
         if (this.spriteCanvas === undefined) throw new Error();
 
+        const index = this.spriteList.indexOf(sprite);
+        if (index === -1) throw new Error("Unknown header icon");
+
         const extraIndex = this.extraMap.indexOf(theme.textDark);
 
-        const xOffset = spriteList.indexOf(sprite) * renderSize;
+        const xOffset = index * renderSize;
         const yOffset =
             (extraIndex !== -1 ? variantList.length + extraIndex : variantList.indexOf(variant)) * renderSize;
 
@@ -74,13 +84,13 @@ export class SpriteManager {
         this.lastTheme = themeExtract;
 
         this.spriteCanvas = document.createElement("canvas");
-        this.spriteCanvas.width = spriteList.length * renderSize;
+        this.spriteCanvas.width = this.spriteList.length * renderSize;
         this.spriteCanvas.height = (variantList.length + this.extraMap.length) * renderSize;
         const ctx = this.spriteCanvas.getContext("2d");
         if (ctx === null) return;
 
         let x = 0;
-        for (const key of spriteList) {
+        for (const key of this.spriteList) {
             const sprite = this.headerIcons[key];
 
             let y = 0;

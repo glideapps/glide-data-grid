@@ -16,12 +16,11 @@ import {
     InnerGridCellKind,
     CompactSelection,
 } from "./data-grid-types";
-import { SpriteManager } from "./data-grid-sprites";
+import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
 import { drawCell, drawGrid, makeBuffers } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
-import { HeaderIconMap } from "./sprites";
 
 export interface DataGridProps {
     readonly width: number;
@@ -82,7 +81,7 @@ export interface DataGridProps {
         dest: number;
     };
 
-    readonly headerIcons?: HeaderIconMap;
+    readonly headerIcons?: SpriteMap;
 }
 
 interface Props extends DataGridProps {
@@ -156,6 +155,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const [buffers] = React.useState(() => makeBuffers());
 
+    console.log(headerIcons);
     const spriteManager = React.useMemo(() => new SpriteManager(headerIcons), [headerIcons]);
 
     React.useEffect(() => {
