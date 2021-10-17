@@ -1155,7 +1155,7 @@ export const AllCellKinds: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(AutomaticRowMarkers as any).parameters = {
+(AllCellKinds as any).parameters = {
     options: {
         showPanel: false,
     },
