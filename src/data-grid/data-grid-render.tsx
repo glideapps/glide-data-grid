@@ -213,7 +213,7 @@ function blitLastFrame(
             drawRegions.push({
                 x: stickyWidth - 1,
                 y: 0,
-                width: deltaX + 1,
+                width: deltaX + 2, // extra width to account for first col not drawing a left side border
                 height: height,
             });
         } else if (deltaX < 0) {
@@ -231,6 +231,7 @@ function blitLastFrame(
                 width: -deltaX,
                 height: height,
             });
+            ctx.beginPath();
         }
 
         // console.log(args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
