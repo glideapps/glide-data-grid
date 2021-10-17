@@ -155,7 +155,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const [buffers] = React.useState(() => makeBuffers());
 
-    console.log(headerIcons);
     const spriteManager = React.useMemo(() => new SpriteManager(headerIcons), [headerIcons]);
 
     React.useEffect(() => {
