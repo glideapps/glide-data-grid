@@ -1,12 +1,11 @@
 import * as React from "react";
-import { Subtract } from "utility-types";
 import DataGridDnd, { DataGridDndProps } from "../data-grid-dnd/data-grid-dnd";
 import { Rectangle } from "../data-grid/data-grid-types";
 import ScrollRegion, { ScrollRegionUpdateArgs } from "../scroll-region/scroll-region";
 
-type Handled = Pick<DataGridDndProps, "width" | "height" | "eventTargetRef">;
+type Props = Omit<DataGridDndProps, "width" | "height" | "eventTargetRef">;
 
-export interface ScrollingDataGridProps extends Subtract<DataGridDndProps, Handled> {
+export interface ScrollingDataGridProps extends Props {
     readonly onVisibleRegionChanged?: (range: Rectangle, tx?: number, ty?: number) => void;
     readonly scrollToEnd?: boolean;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;

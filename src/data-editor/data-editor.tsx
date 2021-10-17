@@ -1,6 +1,5 @@
 import * as React from "react";
 import { assertNever, maybe } from "../common/support";
-import { Subtract } from "utility-types";
 import { clamp } from "lodash/fp";
 import DataGridOverlayEditor from "../data-grid-overlay-editor/data-grid-overlay-editor";
 import {
@@ -32,7 +31,7 @@ interface MouseState {
     readonly previousSelection?: GridSelection;
 }
 
-type Handled = Pick<
+type Props = Omit<
     DataGridSearchProps,
     | "canvasRef"
     | "cellXOffset"
@@ -64,7 +63,7 @@ type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
 type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parameters<T>) => TNewReturn;
 
-export interface DataEditorProps extends Subtract<DataGridSearchProps, Handled> {
+export interface DataEditorProps extends Props {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
     readonly onRowAppended?: () => void;
