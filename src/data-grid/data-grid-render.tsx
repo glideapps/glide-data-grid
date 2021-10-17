@@ -202,7 +202,7 @@ function blitLastFrame(
 
         // blit X
         if (deltaX > 0) {
-            // scrolling right
+            // pixels moving right
             args = {
                 ...args,
                 sx: stickyWidth * dpr,
@@ -217,7 +217,7 @@ function blitLastFrame(
                 height: height,
             });
         } else if (deltaX < 0) {
-            // scrolling left
+            // pixels moving left
             args = {
                 ...args,
                 sx: (stickyWidth - deltaX) * dpr,
@@ -256,7 +256,8 @@ function drawGridLines(
     getRowHeight: (row: number) => number,
     lastRowSticky: boolean,
     rows: number,
-    theme: Theme
+    theme: Theme,
+    verticalOnly: boolean = false
 ) {
     ctx.beginPath();
 
@@ -276,22 +277,24 @@ function drawGridLines(
         ctx.lineTo(width, stickyRowY);
     }
 
-    // horizontal lines
-    let y = headerHeight + 0.5;
-    let row = cellYOffset;
-    let isHeader = true;
-    const target = lastRowSticky ? height - stickyHeight : height;
-    while (y + translateY <= target) {
-        const ty = isHeader ? y : y + translateY;
-        // This shouldn't be needed it seems like... yet it is. We're not sure why.
-        if (!lastRowSticky || ty !== stickyRowY) {
-            ctx.moveTo(0, ty);
-            ctx.lineTo(width, ty);
-        }
+    if (verticalOnly !== true) {
+        // horizontal lines
+        let y = headerHeight + 0.5;
+        let row = cellYOffset;
+        let isHeader = true;
+        const target = lastRowSticky ? height - stickyHeight : height;
+        while (y + translateY <= target) {
+            const ty = isHeader ? y : y + translateY;
+            // This shouldn't be needed it seems like... yet it is. We're not sure why.
+            if (!lastRowSticky || row !== rows - 1) {
+                ctx.moveTo(0, ty);
+                ctx.lineTo(width, ty);
+            }
 
-        y += getRowHeight(row);
-        isHeader = false;
-        row++;
+            y += getRowHeight(row);
+            isHeader = false;
+            row++;
+        }
     }
 
     ctx.strokeStyle = theme.borderColor;
@@ -450,6 +453,11 @@ function clipDamage(
     damage: CellList | undefined
 ): void {
     if (damage === undefined || damage.length === 0) return;
+
+    const stickyRowHeight = lastRowSticky ? getRowHeight(rows - 1) : 0;
+
+    ctx.beginPath();
+
     walkColumns(
         effectiveColumns,
         cellYOffset,
@@ -458,10 +466,20 @@ function clipDamage(
         headerHeight,
         (c, drawX, colDrawY, clipX, startRow) => {
             const diff = Math.max(0, clipX - drawX);
-            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh) => {
+            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
                 const isDamaged = damage.some(d => d[0] === c.sourceIndex && d[1] === row);
                 if (isDamaged) {
-                    ctx.rect(drawX + diff + 1, drawY + 1, c.width - diff - 1, rh - 1);
+                    const top = drawY + 1;
+                    // const isSticky = lastRowSticky && row === rows - 1;
+                    const bottom = isSticky ? top + rh - 1 : Math.min(top + rh - 1, height - stickyRowHeight);
+                    const x = drawX + diff + 1;
+                    const y = top;
+                    const w = c.width - diff - 1;
+                    const h = bottom - top;
+
+                    if (h > 0) {
+                        ctx.rect(x, y, w, h);
+                    }
                 }
             });
         }
@@ -503,16 +521,15 @@ function drawCells(
             const diff = Math.max(0, clipX - drawX);
             ctx.save();
             ctx.beginPath();
-            ctx.rect(Math.max(drawX, clipX), headerHeight + 1, c.width - diff, height - headerHeight - 1);
+            ctx.rect(drawX + diff, headerHeight + 1, c.width - diff, height - headerHeight - 1);
             ctx.clip();
 
             const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
-            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
-                if (!isSticky && damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
+            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh) => {
+                if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
                     return;
                 }
                 if (
-                    !isSticky &&
                     drawRegions.length > 0 &&
                     !drawRegions.some(dr => intersectRect(drawX, drawY, c.width, rh, dr.x, dr.y, dr.width, dr.height))
                 ) {
@@ -666,6 +683,105 @@ function drawBlanks(
     );
 }
 
+function overdrawStickyBoundaries(
+    ctx: CanvasRenderingContext2D,
+    effectiveCols: readonly MappedGridColumn[],
+    width: number,
+    height: number,
+    headerHeight: number,
+    lastRowSticky: boolean,
+    rows: number,
+    getRowHeight: (row: number) => number,
+    theme: Theme
+) {
+    let drawX = 0;
+    for (const c of effectiveCols) {
+        if (c.sticky) {
+            drawX += c.width;
+        } else {
+            break;
+        }
+    }
+
+    if (drawX === 0) return;
+
+    ctx.moveTo(drawX + 0.5, 0);
+    ctx.lineTo(drawX + 0.5, height);
+
+    ctx.moveTo(0, headerHeight + 0.5);
+    ctx.lineTo(width, headerHeight + 0.5);
+
+    if (lastRowSticky) {
+        const h = getRowHeight(rows - 1);
+        ctx.moveTo(0, height - h + 0.5);
+        ctx.lineTo(width, height - h + 0.5);
+    }
+
+    ctx.strokeStyle = theme.bgCell;
+    ctx.stroke();
+
+    ctx.strokeStyle = theme.borderColor;
+    ctx.stroke();
+}
+
+function drawFocusRing(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    cellYOffset: number,
+    translateX: number,
+    translateY: number,
+    effectiveCols: readonly MappedGridColumn[],
+    theme: Theme,
+    headerHeight: number,
+    selectedCell: GridSelection | undefined,
+    getRowHeight: (row: number) => number,
+    lastRowSticky: boolean,
+    rows: number
+) {
+    if (selectedCell === undefined || effectiveCols.find(c => (c.sourceIndex === selectedCell.cell[0]) === undefined))
+        return;
+    const [targetCol, targetRow] = selectedCell.cell;
+
+    const isStickyRow = lastRowSticky && targetRow === rows - 1;
+    const stickRowHeight = lastRowSticky && !isStickyRow ? getRowHeight(rows - 1) : 0;
+
+    ctx.beginPath();
+    ctx.rect(0, headerHeight, width, height - headerHeight - stickRowHeight);
+    ctx.clip();
+
+    walkColumns(
+        effectiveCols,
+        cellYOffset,
+        translateX,
+        translateY,
+        headerHeight,
+        (col, drawX, colDrawY, clipX, startRow) => {
+            if (col.sourceIndex !== targetCol) {
+                return;
+            }
+
+            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh) => {
+                if (row !== targetRow) return;
+
+                ctx.save();
+                if (clipX > drawX) {
+                    const diff = Math.max(0, clipX - drawX);
+                    ctx.beginPath();
+                    ctx.rect(drawX + diff, drawY, col.width - diff + 1, rh + 1);
+                    ctx.clip();
+                }
+                ctx.beginPath();
+                ctx.rect(drawX + 0.5, drawY + 0.5, col.width, rh);
+                ctx.strokeStyle = theme.accentColor;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.restore();
+            });
+        }
+    );
+}
+
 export function drawGrid(
     canvas: HTMLCanvasElement,
     buffers: Buffers,
@@ -707,13 +823,7 @@ export function drawGrid(
         canvas.height = height * dpr;
     }
 
-    const bufferCanvas = buffers.backbuffer;
     const overlayCanvas = buffers.overlay;
-
-    if (bufferCanvas.width !== width * dpr || bufferCanvas.height !== height * dpr) {
-        bufferCanvas.width = width * dpr;
-        bufferCanvas.height = height * dpr;
-    }
 
     if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== headerHeight * dpr) {
         overlayCanvas.width = width * dpr;
@@ -736,25 +846,18 @@ export function drawGrid(
     const overlayCtx = overlayCanvas.getContext("2d", {
         alpha: false,
     });
-    const bufferCtx = bufferCanvas.getContext("2d", {
-        alpha: false,
-    });
-    if (bufferCtx === null || overlayCtx === null || targetCtx === null) return;
+    if (overlayCtx === null || targetCtx === null) return;
 
     const getRowHeight = (r: number) => (typeof rowHeight === "number" ? rowHeight : rowHeight(r));
 
-    bufferCtx.save();
-    bufferCtx.beginPath();
     overlayCtx.save();
     overlayCtx.beginPath();
     targetCtx.save();
     targetCtx.beginPath(); // clear any path in the ctx
 
     targetCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
-    bufferCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     overlayCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     if (dpr !== 1) {
-        bufferCtx.scale(dpr, dpr);
         overlayCtx.scale(dpr, dpr);
         targetCtx.scale(dpr, dpr);
     }
@@ -787,7 +890,7 @@ export function drawGrid(
         );
 
         targetCtx.fillStyle = theme.bgCell;
-        targetCtx.fillRect(0, 0, width, height);
+        targetCtx.fillRect(0, headerHeight + 1, width, height - headerHeight - 1);
 
         drawCells(
             targetCtx,
@@ -814,15 +917,14 @@ export function drawGrid(
             theme
         );
 
-        bufferCtx.restore();
         targetCtx.restore();
         overlayCtx.restore();
         return;
     }
     if (canBlit === true) {
         const { regions } = blitLastFrame(
-            bufferCtx,
-            bufferCanvas,
+            targetCtx,
+            canvas,
             last,
             cellXOffset,
             cellYOffset,
@@ -841,20 +943,32 @@ export function drawGrid(
         drawRegions = regions;
     }
 
+    overdrawStickyBoundaries(
+        targetCtx,
+        effectiveCols,
+        width,
+        height,
+        headerHeight,
+        lastRowSticky,
+        rows,
+        getRowHeight,
+        theme
+    );
+
     if (drawRegions.length > 0) {
-        bufferCtx.beginPath();
+        targetCtx.beginPath();
         for (const r of drawRegions) {
-            bufferCtx.rect(r.x, r.y, r.width, r.height);
+            targetCtx.rect(r.x, r.y, r.width, r.height);
         }
-        bufferCtx.clip();
-        bufferCtx.beginPath();
+        targetCtx.clip();
+        targetCtx.beginPath();
     }
 
-    bufferCtx.fillStyle = theme.bgCell;
-    bufferCtx.fillRect(0, headerHeight, width, height - headerHeight);
+    targetCtx.fillStyle = theme.bgCell;
+    targetCtx.fillRect(0, headerHeight, width, height - headerHeight);
 
     drawCells(
-        bufferCtx,
+        targetCtx,
         effectiveCols,
         height,
         headerHeight,
@@ -879,7 +993,7 @@ export function drawGrid(
     );
 
     drawBlanks(
-        bufferCtx,
+        targetCtx,
         effectiveCols,
         height,
         headerHeight,
@@ -895,62 +1009,6 @@ export function drawGrid(
         damage,
         theme
     );
-
-    if (!canBlit || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
-        drawGridHeaders(
-            overlayCtx,
-            effectiveCols,
-            width,
-            height,
-            translateX,
-            headerHeight,
-            selectedColumns,
-            hoveredCol,
-            dragAndDropState,
-            isResizing,
-            selectedCell,
-            theme,
-            spriteManager
-        );
-    }
-
-    imageLoader?.setWindow({
-        x: cellXOffset,
-        y: cellYOffset,
-        width: effectiveCols.length,
-        height: 100, // FIXME: row - cellYOffset,
-    });
-
-    lastBlitData.current = { cellXOffset, cellYOffset, translateX, translateY };
-    targetCtx.beginPath();
-
-    targetCtx.fillStyle = theme.bgCell;
-    targetCtx.fillRect(0, 0, width, height);
-
-    // remove scale for blit
-    bufferCtx.restore();
-    targetCtx.restore();
-    overlayCtx.restore();
-
-    targetCtx.imageSmoothingEnabled = false;
-    targetCtx.drawImage(
-        bufferCanvas,
-        0,
-        headerHeight * dpr,
-        width * dpr,
-        (height - headerHeight) * dpr,
-        0,
-        headerHeight * dpr,
-        width * dpr,
-        (height - headerHeight) * dpr
-    );
-    targetCtx.drawImage(overlayCanvas, 0, 0);
-    targetCtx.imageSmoothingEnabled = false;
-
-    targetCtx.save();
-    if (dpr !== 1) {
-        targetCtx.scale(dpr, dpr);
-    }
 
     drawGridLines(
         targetCtx,
@@ -983,60 +1041,56 @@ export function drawGrid(
         rows
     );
 
+    if (!canBlit || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
+        drawGridHeaders(
+            overlayCtx,
+            effectiveCols,
+            width,
+            height,
+            translateX,
+            headerHeight,
+            selectedColumns,
+            hoveredCol,
+            dragAndDropState,
+            isResizing,
+            selectedCell,
+            theme,
+            spriteManager
+        );
+
+        drawGridLines(
+            overlayCtx,
+            effectiveCols,
+            cellYOffset,
+            translateX,
+            translateY,
+            width,
+            height,
+            headerHeight,
+            getRowHeight,
+            lastRowSticky,
+            rows,
+            theme,
+            true
+        );
+    }
+
+    imageLoader?.setWindow({
+        x: cellXOffset,
+        y: cellYOffset,
+        width: effectiveCols.length,
+        height: 100, // FIXME: row - cellYOffset,
+    });
+
+    lastBlitData.current = { cellXOffset, cellYOffset, translateX, translateY };
+
+    // remove scale for blit
     targetCtx.restore();
-}
+    overlayCtx.restore();
 
-export function drawFocusRing(
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number,
-    cellYOffset: number,
-    translateX: number,
-    translateY: number,
-    effectiveCols: readonly MappedGridColumn[],
-    theme: Theme,
-    headerHeight: number,
-    selectedCell: GridSelection | undefined,
-    getRowHeight: (row: number) => number,
-    lastRowSticky: boolean,
-    rows: number
-) {
-    if (selectedCell === undefined || effectiveCols.find(c => (c.sourceIndex === selectedCell.cell[0]) === undefined))
-        return;
-    const [targetCol, targetRow] = selectedCell.cell;
-
-    ctx.beginPath();
-    const stickRowHeight = lastRowSticky ? getRowHeight(rows - 1) : 0;
-    ctx.rect(0, headerHeight, width, height - headerHeight - stickRowHeight);
-    ctx.clip();
-
-    walkColumns(
-        effectiveCols,
-        cellYOffset,
-        translateX,
-        translateY,
-        headerHeight,
-        (col, drawX, colDrawY, clipX, startRow) => {
-            if (col.sourceIndex !== targetCol) return;
-
-            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh) => {
-                if (row !== targetRow) return;
-
-                ctx.save();
-                if (clipX > drawX) {
-                    ctx.beginPath();
-                    ctx.fill();
-                    ctx.clip();
-                }
-                ctx.beginPath();
-                ctx.rect(drawX + 0.5, drawY + 0.5, col.width, rh);
-                ctx.strokeStyle = theme.accentColor;
-                ctx.lineWidth = 1;
-                ctx.stroke();
-                ctx.restore();
-            });
-        }
-    );
+    targetCtx.imageSmoothingEnabled = false;
+    targetCtx.drawImage(overlayCanvas, 0, 0);
+    targetCtx.imageSmoothingEnabled = false;
 }
 
 type WalkRowsCallback = (drawY: number, row: number, rowHeight: number, isSticky: boolean) => void;
@@ -1108,13 +1162,13 @@ export function walkColumns(
 }
 
 interface Buffers {
-    backbuffer: HTMLCanvasElement;
+    // backbuffer: HTMLCanvasElement;
     overlay: HTMLCanvasElement;
 }
 
 export function makeBuffers(): Buffers {
     return {
-        backbuffer: document.createElement("canvas"),
+        // backbuffer: document.createElement("canvas"),
         overlay: document.createElement("canvas"),
     };
 }
