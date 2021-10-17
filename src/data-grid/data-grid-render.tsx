@@ -526,7 +526,7 @@ function drawCells(
             ctx.clip();
 
             const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
-            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh) => {
+            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
                 if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
                     return;
                 }
@@ -554,6 +554,15 @@ function drawCells(
                         row < range.y + range.height
                     ) {
                         highlighted = true;
+                    }
+                }
+
+                if (isSticky) {
+                    ctx.fillStyle = theme.bgCell;
+                    if (drawX === 0) {
+                        ctx.fillRect(drawX, drawY + 1, c.width, rh - 1);
+                    } else {
+                        ctx.fillRect(drawX + 1, drawY + 1, c.width - 1, rh - 1);
                     }
                 }
 

@@ -435,7 +435,7 @@ export const AddData: React.VFC = () => {
                 trailingRowOptions={{
                     hint: "New row...",
                     sticky: true,
-                    tint: true,
+                    tint: false,
                 }}
                 rows={numRows}
                 onRowAppended={onRowAppended}
