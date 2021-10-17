@@ -14,6 +14,7 @@ interface BaseGridMouseEventArgs {
     readonly shiftKey: boolean;
     readonly ctrlKey: boolean;
     readonly metaKey: boolean;
+    readonly isTouch: boolean;
 }
 
 interface GridMouseCellEventArgs extends BaseGridMouseEventArgs {

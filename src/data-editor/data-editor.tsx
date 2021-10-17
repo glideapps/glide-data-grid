@@ -380,7 +380,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         } else {
                             setSelectedRows(CompactSelection.fromSingleSelection(newSlice));
                         }
-                    } else if (isMultiKey) {
+                    } else if (isMultiKey || args.isTouch) {
                         if (isSelected) {
                             setSelectedRows(selectedRows.remove(row));
                         } else {
