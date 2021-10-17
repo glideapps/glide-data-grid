@@ -1,7 +1,6 @@
 import { Theme } from "index";
 import isArray from "lodash/isArray";
 import { assertNever, proveType } from "../common/support";
-import { HeaderIcon } from "./data-grid-sprites";
 
 export interface GridSelection {
     readonly cell: readonly [number, number];
