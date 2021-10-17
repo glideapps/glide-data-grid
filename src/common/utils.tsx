@@ -57,7 +57,7 @@ export const disabledProps = css`
     pointer-events: none;
 `;
 
-export const EditPencil: React.FunctionComponent<SpriteProps> = (props: SpriteProps) => {
+export const EditPencil: React.FunctionComponent<Partial<SpriteProps>> = (props: Partial<SpriteProps>) => {
     const fg = props.fgColor ?? "currentColor";
     return (
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -83,7 +83,7 @@ export const EditPencil: React.FunctionComponent<SpriteProps> = (props: SpritePr
     );
 };
 
-export const Checkmark: React.FunctionComponent<SpriteProps> = (props: SpriteProps) => {
+export const Checkmark: React.FunctionComponent<Partial<SpriteProps>> = (props: Partial<SpriteProps>) => {
     const fg = props.fgColor ?? "currentColor";
 
     return (

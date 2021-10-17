@@ -529,7 +529,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 if (header.hasMenu === true && !(hoveredOnEdge ?? false)) {
                     const headerBounds = getBoundsForItem(canvas, col, undefined);
                     if (clientX > headerBounds.x + headerBounds.width - 40) {
-                        onHeaderMenuClick?.(col, headerBounds);
                         return;
                     }
                 }
@@ -537,15 +536,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
             onMouseDown?.(args);
         },
-        [
-            eventTargetRef,
-            getMouseArgsForPosition,
-            onMouseDown,
-            columns,
-            hoveredOnEdge,
-            getBoundsForItem,
-            onHeaderMenuClick,
-        ]
+        [columns, eventTargetRef, getBoundsForItem, getMouseArgsForPosition, hoveredOnEdge, onMouseDown]
     );
     useEventListener("touchstart", onMouseDownImpl, window, false);
     useEventListener("mousedown", onMouseDownImpl, window, false);
@@ -567,9 +558,33 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 clientX = ev.changedTouches[0].clientX;
                 clientY = ev.changedTouches[0].clientY;
             }
-            onMouseUp(getMouseArgsForPosition(canvas, clientX, clientY, ev));
+
+            const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
+
+            if (args.kind === "header") {
+                const [col] = args.location;
+                const header = columns[col];
+
+                if (header.hasMenu === true && !(hoveredOnEdge ?? false)) {
+                    const headerBounds = getBoundsForItem(canvas, col, undefined);
+                    if (clientX > headerBounds.x + headerBounds.width - 40) {
+                        onHeaderMenuClick?.(col, headerBounds);
+                        return;
+                    }
+                }
+            }
+
+            onMouseUp(args);
         },
-        [eventTargetRef, getMouseArgsForPosition, onMouseUp]
+        [
+            onMouseUp,
+            eventTargetRef,
+            getMouseArgsForPosition,
+            columns,
+            hoveredOnEdge,
+            getBoundsForItem,
+            onHeaderMenuClick,
+        ]
     );
     useEventListener("mouseup", onMouseUpImpl, window, false);
     useEventListener("touchend", onMouseUpImpl, window, false);
