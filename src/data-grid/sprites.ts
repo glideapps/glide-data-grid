@@ -1,9 +1,8 @@
-import { withDefault } from "collection-utils";
-import { IconProps } from "../common/utils";
+import { SpriteProps } from "../common/utils";
 
-const headerRowID = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerRowID = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
 
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -18,9 +17,9 @@ const headerRowID = (props: IconProps) => {
     `;
 };
 
-const headerCode = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerCode = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="2" y="2" width="16" height="16" rx="4" fill="${bg}" />
@@ -32,9 +31,9 @@ const headerCode = (props: IconProps) => {
     `;
 };
 
-const headerNumber = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerNumber = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M16.222 2H3.778C2.8 2 2 2.8 2 3.778v12.444C2 17.2 2.8 18 3.778 18h12.444c.978 0 1.77-.8 1.77-1.778L18 3.778C18 2.8 17.2 2 16.222 2z" fill="${bg}"/>
@@ -43,9 +42,9 @@ const headerNumber = (props: IconProps) => {
     `;
 };
 
-const headerString = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerString = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M16.222 2H3.778C2.8 2 2 2.8 2 3.778v12.444C2 17.2 2.8 18 3.778 18h12.444c.978 0 1.77-.8 1.77-1.778L18 3.778C18 2.8 17.2 2 16.222 2z" fill="${bg}"/>
@@ -54,9 +53,9 @@ const headerString = (props: IconProps) => {
     `;
 };
 
-const headerBoolean = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerBoolean = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -73,9 +72,9 @@ const headerBoolean = (props: IconProps) => {
     `;
 };
 
-const headerAudioUri = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerAudioUri = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M16.222 2H3.778C2.8 2 2 2.8 2 3.778v12.444C2 17.2 2.8 18 3.778 18h12.444c.978 0 1.77-.8 1.77-1.778L18 3.778C18 2.8 17.2 2 16.222 2z" fill="${bg}"/>
@@ -84,9 +83,9 @@ const headerAudioUri = (props: IconProps) => {
     `;
 };
 
-const headerVideoUri = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerVideoUri = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M16.222 2H3.778C2.8 2 2 2.8 2 3.778v12.444C2 17.2 2.8 18 3.778 18h12.444c.978 0 1.77-.8 1.77-1.778L18 3.778C18 2.8 17.2 2 16.222 2z" fill="${bg}"/>
@@ -95,9 +94,9 @@ const headerVideoUri = (props: IconProps) => {
     `;
 };
 
-const headerEmoji = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerEmoji = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M10 5a5 5 0 100 10 5 5 0 000-10zm0 9.167A4.171 4.171 0 015.833 10 4.171 4.171 0 0110 5.833 4.171 4.171 0 0114.167 10 4.171 4.171 0 0110 14.167z" fill="${fg}"/>
@@ -111,9 +110,9 @@ const headerEmoji = (props: IconProps) => {
     `;
 };
 
-const headerImage = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerImage = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M16.222 2H3.778C2.8 2 2 2.8 2 3.778v12.444C2 17.2 2.8 18 3.778 18h12.444c.978 0 1.77-.8 1.77-1.778L18 3.778C18 2.8 17.2 2 16.222 2z" fill="${bg}"/>
@@ -123,9 +122,9 @@ const headerImage = (props: IconProps) => {
     `;
 };
 
-const headerUri = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerUri = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M16.222 2H3.778C2.8 2 2 2.8 2 3.778v12.444C2 17.2 2.8 18 3.778 18h12.444c.978 0 1.77-.8 1.77-1.778L18 3.778C18 2.8 17.2 2 16.222 2z" fill="${bg}"/>
@@ -135,9 +134,9 @@ const headerUri = (props: IconProps) => {
     `;
 };
 
-const headerPhone = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerPhone = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path fill="${fg}" d="M3 3h14v14H3z"/>
@@ -146,9 +145,9 @@ const headerPhone = (props: IconProps) => {
     `;
 };
 
-const headerMarkdown = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerMarkdown = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M16.222 2H3.778C2.8 2 2 2.8 2 3.778v12.444C2 17.2 2.8 18 3.778 18h12.444c.978 0 1.77-.8 1.77-1.778L18 3.778C18 2.8 17.2 2 16.222 2z" fill="${bg}"/>
@@ -157,9 +156,9 @@ const headerMarkdown = (props: IconProps) => {
     `;
 };
 
-const headerDate = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerDate = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M16.222 2H3.778C2.8 2 2 2.8 2 3.778v12.444C2 17.2 2.8 18 3.778 18h12.444c.978 0 1.77-.8 1.77-1.778L18 3.778C18 2.8 17.2 2 16.222 2z" fill="${bg}"/>
@@ -168,9 +167,9 @@ const headerDate = (props: IconProps) => {
     `;
 };
 
-const headerTime = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerTime = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M16.222 2H3.778C2.8 2 2 2.8 2 3.778v12.444C2 17.2 2.8 18 3.778 18h12.444c.978 0 1.77-.8 1.77-1.778L18 3.778C18 2.8 17.2 2 16.222 2z" fill="${bg}"/>
@@ -180,9 +179,9 @@ const headerTime = (props: IconProps) => {
     `;
 };
 
-const headerEmail = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerEmail = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="2" y="2" width="16" height="16" rx="2" fill="${bg}"/>
@@ -192,9 +191,9 @@ const headerEmail = (props: IconProps) => {
     `;
 };
 
-const headerReference = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerReference = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="2" y="8" width="10" height="8" rx="2" fill="${bg}"/>
@@ -204,9 +203,9 @@ const headerReference = (props: IconProps) => {
     `;
 };
 
-const headerIfThenElse = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerIfThenElse = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path fill="${fg}" d="M4 3h12v14H4z"/>
@@ -215,9 +214,9 @@ const headerIfThenElse = (props: IconProps) => {
     `;
 };
 
-const headerSingleValue = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerSingleValue = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="2" y="2" width="16" height="16" rx="2" fill="${bg}"/>
@@ -226,9 +225,9 @@ const headerSingleValue = (props: IconProps) => {
     `;
 };
 
-const headerLookup = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerLookup = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="2" y="2" width="16" height="16" rx="2" fill="${bg}"/>
@@ -237,9 +236,9 @@ const headerLookup = (props: IconProps) => {
     `;
 };
 
-const headerTextTemplate = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerTextTemplate = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="2" y="2" width="16" height="16" rx="2" fill="${bg}"/>
@@ -248,9 +247,9 @@ const headerTextTemplate = (props: IconProps) => {
     `;
 };
 
-const headerMath = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerMath = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="2" y="2" width="16" height="16" rx="2" fill="${bg}"/>
@@ -262,9 +261,9 @@ const headerMath = (props: IconProps) => {
     `;
 };
 
-const headerRollup = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerRollup = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M16.222 2H3.778C2.8 2 2 2.8 2 3.778v12.444C2 17.2 2.8 18 3.778 18h12.444c.978 0 1.77-.8 1.77-1.778L18 3.778C18 2.8 17.2 2 16.222 2z" fill="${bg}"/>
@@ -273,9 +272,9 @@ const headerRollup = (props: IconProps) => {
     `;
 };
 
-const headerJoinStrings = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerJoinStrings = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="2" y="2" width="16" height="16" rx="2" fill="${bg}"/>
@@ -284,9 +283,9 @@ const headerJoinStrings = (props: IconProps) => {
     `;
 };
 
-const headerSplitString = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerSplitString = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="2" y="2" width="16" height="16" rx="2" fill="${bg}"/>
@@ -295,9 +294,9 @@ const headerSplitString = (props: IconProps) => {
     `;
 };
 
-const headerGeoDistance = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerGeoDistance = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M16.222 2H3.778C2.8 2 2 2.8 2 3.778v12.444C2 17.2 2.8 18 3.778 18h12.444c.978 0 1.77-.8 1.77-1.778L18 3.778C18 2.8 17.2 2 16.222 2z" fill="${bg}"/>
@@ -307,9 +306,9 @@ const headerGeoDistance = (props: IconProps) => {
     `;
 };
 
-const headerArray = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const headerArray = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="2" y="2" width="16" height="16" rx="2" fill="${bg}"/>
@@ -318,9 +317,9 @@ const headerArray = (props: IconProps) => {
     `;
 };
 
-const rowOwnerOverlay = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const rowOwnerOverlay = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M2 15v1h14v-2.5c0-.866-.442-1.55-.978-2.045-.529-.489-1.213-.857-1.9-1.131a12.094 12.094 0 00-2.478-.676A4 4 0 105 6a4 4 0 002.356 3.648c-.815.134-1.69.36-2.479.676-.686.274-1.37.642-1.9 1.13C2.443 11.95 2 12.635 2 13.5V15z" fill="${bg}" stroke="${fg}" stroke-width="2"/>
@@ -333,9 +332,9 @@ const rowOwnerOverlay = (props: IconProps) => {
     `;
 };
 
-const protectedColumnOverlay = (props: IconProps) => {
-    const fg = withDefault(props.fgColor, "white");
-    const bg = withDefault(props.bgColor, "currentColor");
+const protectedColumnOverlay = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
     return `
 <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M12.429 6.043v-.186a3.858 3.858 0 00-7.715 0v.186A2.148 2.148 0 003 8.143v5.714C3 15.038 3.962 16 5.143 16H12c1.18 0 2.143-.962 2.143-2.143V8.143c0-1.034-.738-1.9-1.714-2.1zM7.857 6v-.143c0-.396.318-.714.714-.714.397 0 .715.318.715.714V6H7.857z" fill="${bg}" stroke="${fg}" stroke-width="2"/>

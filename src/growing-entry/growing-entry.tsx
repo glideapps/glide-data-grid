@@ -1,7 +1,6 @@
 import * as React from "react";
 
 import { GrowingEntryStyle, ShadowBox, InputBox } from "./growing-entry-style";
-import { withDefault } from "collection-utils";
 import { assert } from "../common/support";
 
 interface Props
@@ -15,7 +14,7 @@ const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
 
     const inputRef = React.useRef<HTMLTextAreaElement | null>(null);
 
-    const useText = withDefault(value, "");
+    const useText = value ?? "";
 
     assert(onChange !== undefined, "GrowingEntry must be a controlled input area");
 

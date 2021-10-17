@@ -47,10 +47,9 @@ export function degreesToRadians(degrees: number) {
     return (degrees * PI) / 180;
 }
 
-export interface IconProps {
-    fgColor?: string;
-    bgColor?: string;
-    accentColor?: string;
+export interface SpriteProps {
+    fgColor: string;
+    bgColor: string;
 }
 
 export const disabledProps = css`
@@ -58,7 +57,7 @@ export const disabledProps = css`
     pointer-events: none;
 `;
 
-export const EditPencil: React.FunctionComponent<IconProps> = (props: IconProps) => {
+export const EditPencil: React.FunctionComponent<SpriteProps> = (props: SpriteProps) => {
     const fg = props.fgColor ?? "currentColor";
     return (
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -84,7 +83,7 @@ export const EditPencil: React.FunctionComponent<IconProps> = (props: IconProps)
     );
 };
 
-export const Checkmark: React.FunctionComponent<IconProps> = (props: IconProps) => {
+export const Checkmark: React.FunctionComponent<SpriteProps> = (props: SpriteProps) => {
     const fg = props.fgColor ?? "currentColor";
 
     return (
