@@ -749,13 +749,15 @@ export function drawGrid(
     overlayCtx.beginPath();
     targetCtx.save();
     targetCtx.beginPath(); // clear any path in the ctx
+
+    targetCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+    bufferCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+    overlayCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     if (dpr !== 1) {
         bufferCtx.scale(dpr, dpr);
         overlayCtx.scale(dpr, dpr);
         targetCtx.scale(dpr, dpr);
     }
-
-    let drawRegions: Rectangle[] = [];
 
     const effectiveCols = getEffectiveColumns(
         mappedColumns,
@@ -766,6 +768,57 @@ export function drawGrid(
         translateX
     );
 
+    let drawRegions: Rectangle[] = [];
+
+    // handle damage updates by directly drawing to the target to avoid large blits
+    if (damage !== undefined) {
+        clipDamage(
+            targetCtx,
+            effectiveCols,
+            height,
+            headerHeight,
+            translateX,
+            translateY,
+            cellYOffset,
+            rows,
+            getRowHeight,
+            lastRowSticky,
+            damage
+        );
+
+        targetCtx.fillStyle = theme.bgCell;
+        targetCtx.fillRect(0, 0, width, height);
+
+        drawCells(
+            targetCtx,
+            effectiveCols,
+            height,
+            headerHeight,
+            translateX,
+            translateY,
+            cellYOffset,
+            rows,
+            getRowHeight,
+            getCellContent,
+            selectedRows,
+            disabledRows,
+            lastRowSticky,
+            drawRegions,
+            damage,
+            selectedCell,
+            selectedColumns,
+            prelightCells,
+            drawCustomCell,
+            imageLoader,
+            hoverValues,
+            theme
+        );
+
+        bufferCtx.restore();
+        targetCtx.restore();
+        overlayCtx.restore();
+        return;
+    }
     if (canBlit === true) {
         const { regions } = blitLastFrame(
             bufferCtx,
@@ -788,20 +841,6 @@ export function drawGrid(
         drawRegions = regions;
     }
 
-    clipDamage(
-        bufferCtx,
-        effectiveCols,
-        height,
-        headerHeight,
-        translateX,
-        translateY,
-        cellYOffset,
-        rows,
-        getRowHeight,
-        lastRowSticky,
-        damage
-    );
-
     if (drawRegions.length > 0) {
         bufferCtx.beginPath();
         for (const r of drawRegions) {
@@ -813,9 +852,6 @@ export function drawGrid(
 
     bufferCtx.fillStyle = theme.bgCell;
     bufferCtx.fillRect(0, headerHeight, width, height - headerHeight);
-
-    bufferCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
-    overlayCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
 
     drawCells(
         bufferCtx,
@@ -896,8 +932,20 @@ export function drawGrid(
     targetCtx.restore();
     overlayCtx.restore();
 
-    targetCtx.drawImage(bufferCanvas, 0, 0);
+    targetCtx.imageSmoothingEnabled = false;
+    targetCtx.drawImage(
+        bufferCanvas,
+        0,
+        headerHeight * dpr,
+        width * dpr,
+        (height - headerHeight) * dpr,
+        0,
+        headerHeight * dpr,
+        width * dpr,
+        (height - headerHeight) * dpr
+    );
     targetCtx.drawImage(overlayCanvas, 0, 0);
+    targetCtx.imageSmoothingEnabled = false;
 
     targetCtx.save();
     if (dpr !== 1) {
