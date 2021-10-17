@@ -372,3 +372,5 @@ export const sprites = {
     rowOwnerOverlay,
     protectedColumnOverlay,
 };
+
+export type HeaderIconMap = Readonly<typeof sprites>;

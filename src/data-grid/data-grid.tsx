@@ -21,6 +21,7 @@ import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
 import { drawCell, drawGrid, makeBuffers } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
+import { HeaderIconMap } from "./sprites";
 
 export interface DataGridProps {
     readonly width: number;
@@ -80,6 +81,8 @@ export interface DataGridProps {
         src: number;
         dest: number;
     };
+
+    readonly headerIcons?: HeaderIconMap;
 }
 
 interface Props extends DataGridProps {
@@ -135,6 +138,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         allowResize,
         disabledRows,
         prelightCells,
+        headerIcons,
         drawCustomCell,
         onCellFocused,
     } = p;
@@ -152,7 +156,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const [buffers] = React.useState(() => makeBuffers());
 
-    const spriteManager = React.useMemo(() => new SpriteManager(), []);
+    const spriteManager = React.useMemo(() => new SpriteManager(headerIcons), [headerIcons]);
 
     React.useEffect(() => {
         const fn = async () => {

@@ -1,8 +1,8 @@
 import { GridColumn } from "index";
 import { Theme } from "../common/styles";
-import { sprites } from "./sprites";
+import { HeaderIconMap, sprites } from "./sprites";
 
-type Sprite = keyof typeof sprites;
+type Sprite = keyof HeaderIconMap;
 const spriteList = Object.keys(sprites) as Sprite[];
 
 export type HeaderIcon = Sprite;
@@ -23,6 +23,8 @@ export class SpriteManager {
     private extraMap: string[] = [];
     private spriteCanvas: HTMLCanvasElement | undefined;
     private lastTheme: SpriteTheme | undefined;
+
+    constructor(private headerIcons: HeaderIconMap = sprites) {}
 
     public drawSprite(
         sprite: Sprite,
@@ -79,7 +81,7 @@ export class SpriteManager {
 
         let x = 0;
         for (const key of spriteList) {
-            const sprite = sprites[key];
+            const sprite = this.headerIcons[key];
 
             let y = 0;
             for (const variant of variantList) {
