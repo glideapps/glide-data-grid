@@ -713,10 +713,10 @@ function overdrawStickyBoundaries(
         }
     }
 
-    if (drawX === 0) return;
-
-    ctx.moveTo(drawX + 0.5, 0);
-    ctx.lineTo(drawX + 0.5, height);
+    if (drawX !== 0) {
+        ctx.moveTo(drawX + 0.5, 0);
+        ctx.lineTo(drawX + 0.5, height);
+    }
 
     ctx.moveTo(0, headerHeight + 0.5);
     ctx.lineTo(width, headerHeight + 0.5);
