@@ -84,10 +84,10 @@ rowHeight: number | ((index: number) => number);
 `rowHeight` is the height of a row in the table. It defaults to `34`. By passing a function instead of a number you can give different heights to each row. The `index` is the zero-based absolute row index.
 
 ```ts
-rowMarkers?: boolean;
+rowMarkers?: "checkbox" | "number" | "both" | "none";
 ```
 
-`rowMarkers` determines whether to display the marker column on the very left. It defaults to `true`. Note that this column doesn't count as a table column, i.e. it has no index, and doesn't change column indexes.
+`rowMarkers` determines whether to display the marker column on the very left. It defaults to `none`. Note that this column doesn't count as a table column, i.e. it has no index, and doesn't change column indexes.
 
 ```ts
 rowMarkerWidth?: number;
