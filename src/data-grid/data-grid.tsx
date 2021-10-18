@@ -269,6 +269,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 const horizontal = x > width ? -1 : x < 0 ? 1 : 0;
                 const vertical = y > height ? 1 : y < 0 ? -1 : 0;
 
+                let isEdge = false;
+                if (col === -1 && row === -1) {
+                    const b = getBoundsForItem(canvas, mappedColumns.length - 1, undefined);
+                    isEdge = posX < b.x + b.width + edgeDetectionBuffer;
+                }
+
                 result = {
                     kind: "out-of-bounds",
                     location: [col !== -1 ? col : x < 0 ? 0 : mappedColumns.length - 1, row ?? rows - 1],
@@ -276,6 +282,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     shiftKey,
                     ctrlKey,
                     metaKey,
+                    isEdge,
                     isTouch,
                 };
             } else if (row === -1) {
@@ -618,7 +625,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 hoveredRef.current = args;
             }
 
-            setHoveredOnEdge(args.kind !== "out-of-bounds" && args.isEdge && allowResize === true);
+            setHoveredOnEdge(args.isEdge && allowResize === true);
 
             onMouseMove?.(ev);
         },

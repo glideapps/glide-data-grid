@@ -14,20 +14,19 @@ interface BaseGridMouseEventArgs {
     readonly ctrlKey: boolean;
     readonly metaKey: boolean;
     readonly isTouch: boolean;
+    readonly isEdge: boolean;
 }
 
 interface GridMouseCellEventArgs extends BaseGridMouseEventArgs {
     readonly kind: "cell";
     readonly location: readonly [number, number];
     readonly bounds: Rectangle;
-    readonly isEdge: boolean;
 }
 
 interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs {
     readonly kind: "header";
     readonly location: readonly [number, undefined];
     readonly bounds: Rectangle;
-    readonly isEdge: boolean;
 }
 
 interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {

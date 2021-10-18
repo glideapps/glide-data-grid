@@ -8,7 +8,7 @@ type Props = Omit<DataGridProps, "dragAndDropState" | "isResizing" | "isDragging
 export interface DataGridDndProps extends Props {
     readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
     readonly onColumnResized?: (column: GridColumn, newSize: number) => void;
-    readonly gridRef?: React.Ref<DataGridRef>;
+    readonly gridRef?: React.MutableRefObject<DataGridRef | null>;
     readonly maxColumnWidth?: number;
 }
 
@@ -26,7 +26,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         onMouseDown,
         onMouseUp,
         onItemHovered,
-        isDraggable,
+        isDraggable = false,
         columns,
         onColumnResized,
         gridRef,
@@ -50,8 +50,14 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         (args: GridMouseEventArgs) => {
             let shouldFireEvent = true;
             const [col] = args.location;
-            if (
-                !(isDraggable === true) &&
+            if (!isDraggable && args.kind === "out-of-bounds" && args.isEdge) {
+                const bounds = gridRef?.current?.getBounds(columns.length - 1, -1);
+                if (bounds !== undefined) {
+                    setResizeColStartX(bounds.x);
+                    setResizeCol(columns.length - 1);
+                }
+            } else if (
+                !isDraggable &&
                 (args.kind === "header" || args.kind === "cell") &&
                 (!firstColSticky || col > 0)
             ) {
@@ -66,7 +72,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             }
             if (shouldFireEvent) onMouseDown?.(args);
         },
-        [firstColSticky, isDraggable, onMouseDown, canDragCol]
+        [isDraggable, firstColSticky, onMouseDown, gridRef, columns.length, canDragCol]
     );
 
     const onMouseUpImpl = React.useCallback(
