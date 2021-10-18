@@ -21,7 +21,7 @@ const UriOverlayEditor: React.FunctionComponent<Props> = p => {
     }, []);
 
     if (editMode) {
-        return <GrowingEntry autoFocus={true} onKeyDown={onKeyDown} value={uri} onChange={onChange} />;
+        return <GrowingEntry highlight={true} autoFocus={true} onKeyDown={onKeyDown} value={uri} onChange={onChange} />;
     }
 
     return (
