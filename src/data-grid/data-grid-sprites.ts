@@ -67,8 +67,8 @@ export class SpriteManager {
         this.extraMap = [...extra];
 
         const themeExtract: SpriteTheme = {
-            bgColorLight: theme.bgCell,
-            fgColorDark: theme.textDark,
+            bgColorLight: theme.fgIconHeader,
+            fgColorDark: theme.bgIconHeader,
             acceptColor: theme.accentColor,
             columnHeaderBg: theme.bgHeader,
         };

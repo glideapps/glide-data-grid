@@ -195,7 +195,8 @@ export function drawNewRowCell(
         ctx.moveTo(x + cellXPad + xTranslate + lineSize * 0.5, y + height / 2 - lineSize * 0.5 - 0.5);
         ctx.lineTo(x + cellXPad + xTranslate + lineSize * 0.5, y + height / 2 + lineSize * 0.5 + 0.5);
         ctx.lineWidth = 2;
-        ctx.strokeStyle = theme.textLight;
+        ctx.strokeStyle = theme.bgIconHeader;
+        ctx.lineCap = "round";
         ctx.stroke();
     }
 
@@ -203,6 +204,14 @@ export function drawNewRowCell(
     ctx.fillText(data, 16 + x + cellXPad + 0.5, y + height / 2 + 4.5);
     ctx.beginPath();
 }
+
+/*
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.5" y="0.5" width="15" height="15" rx="3.5" fill="#4F5DFF"/>
+<path d="M3.65005 7.84995L6.37587 10.7304L11.9999 4.74995" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="0.5" y="0.5" width="15" height="15" rx="3.5" stroke="#2D3DED"/>
+</svg>
+*/
 
 function drawCheckbox(
     ctx: CanvasRenderingContext2D,
@@ -219,7 +228,7 @@ function drawCheckbox(
 
     if (checked) {
         ctx.beginPath();
-        roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 3);
+        roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 4);
 
         ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
         ctx.fill();
@@ -236,9 +245,9 @@ function drawCheckbox(
         ctx.stroke();
     } else {
         ctx.beginPath();
-        roundedRect(ctx, centerX - 8, centerY - 8, 16, 16, 2);
+        roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
 
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1;
         ctx.strokeStyle = theme.textLight;
         ctx.stroke();
     }
@@ -489,7 +498,7 @@ export function drawDrilldownCell(
         );
     });
 
-    ctx.strokeStyle = theme.borderDark;
+    ctx.strokeStyle = theme.drilldownBorder;
     ctx.lineWidth = 1;
     ctx.stroke();
 

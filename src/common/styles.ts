@@ -2,32 +2,35 @@ import baseStyled, { ThemedStyledInterface } from "styled-components";
 
 const dataEditorBaseTheme = {
     accentColor: "#4F5DFF",
-    accentMedium: "rgba(79,118,255,0.5)",
-    accentLight: "rgba(79, 93, 255, 0.1)",
+    accentLight: "rgba(62, 116, 253, 0.1)",
 
     textDark: "#313139",
     textMedium: "#737383",
     textLight: "#B2B2C0",
-    textHeader: "#737383",
-    textHeaderSelected: "#FFFFFF",
     textBubble: "#313139",
+
+    bgIconHeader: "#737383",
+    fgIconHeader: "#FFFFFF",
+    textHeader: "#313139",
+    textHeaderSelected: "#FFFFFF",
 
     bgCell: "#FFFFFF",
     bgCellMedium: "#FAFAFB",
-    bgHeader: "#EDEDF3",
-    bgHeaderHasFocus: "#D8D8E3",
+    bgHeader: "#F7F7F8",
+    bgHeaderHasFocus: "#E9E9EB",
+    bgHeaderHovered: "#EFEFF1",
 
     bgBubble: "#EDEDF3",
     bgBubbleSelected: "#FFFFFF",
 
     bgSearchResult: "#fff9e3",
 
-    borderColor: "rgba(45,45,45,0.16)",
-    borderDark: "rgba(0, 0, 0, 0)",
+    borderColor: "rgba(115, 116, 131, 0.16)",
+    drilldownBorder: "rgba(0, 0, 0, 0)",
 
     linkColor: "#4F5DFF",
 
-    headerFontStyle: "bold 14px",
+    headerFontStyle: "600 13px",
     baseFontStyle: "13px",
     fontFamily:
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",

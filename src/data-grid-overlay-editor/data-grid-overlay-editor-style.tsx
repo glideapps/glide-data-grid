@@ -41,7 +41,7 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
         }
     }
 
-    animation: glide_fade_in 60ms linear 1;
+    animation: glide_fade_in 60ms 1;
 
     .clip-region {
         display: flex;

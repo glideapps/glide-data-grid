@@ -67,6 +67,7 @@ export interface DataEditorProps extends Props {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
     readonly onRowAppended?: () => void;
+    readonly onHeaderClicked?: (colIndex: number) => void;
     readonly onCellClicked?: (cell: readonly [number, number]) => void;
 
     readonly trailingRowOptions?: {
@@ -130,6 +131,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         rows,
         getCellContent,
         onCellClicked,
+        onHeaderClicked,
         onCellEdited,
         onRowAppended,
         onColumnMoved,

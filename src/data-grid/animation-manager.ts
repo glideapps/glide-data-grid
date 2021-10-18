@@ -5,7 +5,7 @@ type StateItem = { item: Item; hoverAmount: number };
 export type HoverValues = readonly Readonly<StateItem>[];
 export type StepCallback = (values: HoverValues) => void;
 
-const hoverTime = 120;
+const hoverTime = 100;
 
 export class AnimationManager {
     constructor(private callback: StepCallback) {}

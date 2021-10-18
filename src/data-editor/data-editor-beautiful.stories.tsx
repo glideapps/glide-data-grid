@@ -1166,23 +1166,24 @@ export const AllCellKinds: React.VFC = () => {
 };
 
 const darkTheme = {
-    overlayName: "LightTheme",
-
     accentColor: "#8c96ff",
-    accentMedium: "#86a1ff7f",
     accentLight: "rgba(202, 206, 255, 0.253)",
 
     textDark: "#ffffff",
     textMedium: "#b8b8b8",
     textLight: "#a0a0a0",
+    textBubble: "#ffffff",
+
+    bgIconHeader: "#b8b8b8",
+    fgIconHeader: "#000000",
     textHeader: "#a1a1a1",
     textHeaderSelected: "#000000",
-    textBubble: "#ffffff",
 
     bgCell: "#16161b",
     bgCellMedium: "#202027",
     bgHeader: "#212121",
     bgHeaderHasFocus: "#474747",
+    bgHeaderHovered: "#404040",
 
     bgBubble: "#212121",
     bgBubbleSelected: "#000000",
@@ -1190,7 +1191,7 @@ const darkTheme = {
     bgSearchResult: "#423c24",
 
     borderColor: "rgba(225,225,225,0.2)",
-    borderDark: "rgba(225,225,225,0.4)",
+    drilldownBorder: "rgba(225,225,225,0.4)",
 
     linkColor: "#4F5DFF",
 
@@ -1201,23 +1202,24 @@ const darkTheme = {
 };
 
 const hotdogStand = {
-    overlayName: "LightTheme",
-
     accentColor: "#8c96ff",
-    accentMedium: "#86a1ff7f",
     accentLight: "rgba(202, 206, 255, 0.253)",
 
     textDark: "#ffffff",
     textMedium: "rgba(255, 255, 255, 0.9)",
     textLight: "rgba(255, 255, 255, 0.7)",
+    textBubble: "#000000",
+
+    bgIconHeader: "#880000",
+    fgIconHeader: "#ff5555",
     textHeader: "rgba(0, 0, 0, 0.9)",
     textHeaderSelected: "#000000",
-    textBubble: "#000000",
 
     bgCell: "#ff0000",
     bgCellMedium: "#ff4d4d",
     bgHeader: "#f3f300",
     bgHeaderHasFocus: "#eeee00",
+    bgHeaderHovered: "#e0e000",
 
     bgBubble: "#ffff00",
     bgBubbleSelected: "#ffff00",
@@ -1225,7 +1227,7 @@ const hotdogStand = {
     bgSearchResult: "#423c24",
 
     borderColor: "#ffff00",
-    borderDark: "#ffff00",
+    drilldownBorder: "#ffff00",
 
     linkColor: "#4F5DFF",
 

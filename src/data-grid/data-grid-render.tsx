@@ -350,12 +350,13 @@ function drawGridHeaders(
             ctx.translate(translateX, 0);
         }
 
+        const xOffset = c.sourceIndex === 0 ? 0 : 1;
         if (selected) {
             ctx.fillStyle = bgFillStyle;
-            ctx.fillRect(x + 1, 0, c.width - 1, headerHeight);
-        } else if (hasSelectedCell) {
-            ctx.fillStyle = theme.bgHeaderHasFocus;
-            ctx.fillRect(x + 1, 0, c.width - 1, headerHeight);
+            ctx.fillRect(x + xOffset, 0, c.width - xOffset, headerHeight);
+        } else if (hasSelectedCell || hovered) {
+            ctx.fillStyle = hovered ? theme.bgHeaderHovered : theme.bgHeaderHasFocus;
+            ctx.fillRect(x + xOffset, 0, c.width - 1, headerHeight);
         }
 
         ctx.beginPath();
@@ -363,7 +364,6 @@ function drawGridHeaders(
         ctx.clip();
 
         let drawX = x + xPad;
-        ctx.globalAlpha = hovered || selected ? 1 : 0.6;
         if (c.icon !== undefined) {
             let variant: SpriteVariant = selected ? "selected" : "normal";
             if (c.style === "highlight") {
@@ -391,7 +391,6 @@ function drawGridHeaders(
         ctx.font = `${theme.headerFontStyle} ${theme.fontFamily}`;
         ctx.fillStyle = fillStyle;
         ctx.fillText(c.title, drawX, headerHeight / 2 + 5);
-        ctx.globalAlpha = 1;
 
         if (hovered && c.hasMenu === true) {
             const fadeWidth = 35;
