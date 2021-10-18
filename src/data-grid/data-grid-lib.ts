@@ -383,8 +383,7 @@ export function drawDrilldownCell(
     for (const el of data) {
         if (renderX > x + width) break;
         const textWidth = measureTextWidth(el.text, ctx);
-        const imgWidth = el.img === undefined ? 0 : bubbleHeight - 8 + 4;
-        const renderWidth = textWidth + imgWidth + bubblePad * 2;
+        const renderWidth = textWidth + bubblePad * 2;
         renderBoxes.push({
             x: renderX,
             width: renderWidth,
@@ -394,9 +393,6 @@ export function drawDrilldownCell(
     }
 
     ctx.beginPath();
-    renderBoxes.forEach(rectInfo => {
-        roundedRect(ctx, rectInfo.x, y + (height - bubbleHeight) / 2, rectInfo.width, bubbleHeight, 6);
-    });
 
     ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
     ctx.shadowBlur = 1;
@@ -416,6 +412,7 @@ export function drawDrilldownCell(
     renderBoxes.forEach((rectInfo, i) => {
         const d = data[i];
         let drawX = rectInfo.x + bubblePad;
+        let drawWidth = rectInfo.width;
 
         if (d.img !== undefined) {
             const img = imageLoader.loadOrGetImage(d.img, col, row);
@@ -448,9 +445,11 @@ export function drawDrilldownCell(
                 );
 
                 drawX += imgSize + 4;
+                drawWidth += imgSize + 4;
             }
         }
 
+        roundedRect(ctx, rectInfo.x, y + (height - bubbleHeight) / 2, drawWidth, bubbleHeight, 6);
         ctx.beginPath();
         ctx.fillStyle = theme.fgColorDark;
         ctx.fillText(d.text, drawX, y + height / 2 + 4);
