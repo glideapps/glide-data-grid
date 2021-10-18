@@ -1,7 +1,7 @@
 name: Storybook Build and Deploy
 on:
     push:
-        branches: ["main"]
+        branches: ["more-storybook"]
         paths: ["src/**"]
 jobs:
     build-and-deploy:
@@ -19,7 +19,7 @@ jobs:
               uses: JamesIves/github-pages-deploy-action@3.6.2
               with:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  BRANCH: main
+                  BRANCH: gh-pages
                   FOLDER: storybook-build
                   CLEAN: true
                   TARGET_FOLDER: docs
