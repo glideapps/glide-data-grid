@@ -5,7 +5,7 @@
 Currently the Grid depends on there being a root level "portal" div in your HTML. Insert this snippet as the last child of your `<body>` tag:
 
 ```HTML
-<div id="portal" />
+<div id="portal" style="position: fixed; left: 0; top: 0; z-index: 9999;" />
 ```
 
 Once you've got that done, the easiest way to use the Data Grid is to wrap it inside a `DataEditorContainer` component:
