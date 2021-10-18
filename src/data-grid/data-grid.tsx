@@ -783,9 +783,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             // We don't want to steal the focus if we don't currently own the focus.
             if (ref.current === null || !ref.current.contains(document.activeElement)) return;
             if (el === null) {
-                canvasRef?.current?.focus();
+                canvasRef?.current?.focus({
+                    preventScroll: true,
+                });
             } else {
-                el.focus();
+                el.focus({
+                    preventScroll: true,
+                });
             }
             focusRef.current = el;
         },
@@ -802,9 +806,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 // no longer attached is enough to resolve the problem. In the future this
                 // should be replaced with something much more robust.
                 if (el === null || !document.contains(el)) {
-                    canvasRef?.current?.focus();
+                    canvasRef?.current?.focus({
+                        preventScroll: true,
+                    });
                 } else {
-                    el.focus();
+                    el.focus({
+                        preventScroll: true,
+                    });
                 }
             },
             getBounds: (col: number, row: number) => {
