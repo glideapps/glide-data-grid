@@ -104,6 +104,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         target: Rectangle;
         content: GridCell;
         cell: readonly [number, number];
+        highlight: boolean;
         forceEditMode: boolean;
     }>();
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -286,6 +287,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     target: bounds,
                     content,
                     cell: [col, row],
+                    highlight: initialValue === undefined,
                     forceEditMode: initialValue !== undefined,
                 });
             } else if (c.kind === GridCellKind.Boolean && c.allowEdit) {
@@ -344,6 +346,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     y: boundingRect.top + scrollRef.current.clientHeight - lastRowHeight - bounds.height,
                 },
                 content,
+                highlight: true,
                 cell: [col, row],
                 forceEditMode: true,
             });
