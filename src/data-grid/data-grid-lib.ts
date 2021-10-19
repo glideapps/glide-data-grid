@@ -451,7 +451,13 @@ export function drawDrilldownCell(
     for (const el of data) {
         if (renderX > x + width) break;
         const textWidth = measureTextWidth(el.text, ctx);
-        const imgWidth = el.img === undefined ? 0 : bubbleHeight - 8 + 4;
+        let imgWidth = 0;
+        if (el.img !== undefined) {
+            const img = imageLoader.loadOrGetImage(el.img, col, row);
+            if (img !== undefined) {
+                imgWidth = bubbleHeight - 8 + 4;
+            }
+        }
         const renderWidth = textWidth + imgWidth + bubblePad * 2;
         renderBoxes.push({
             x: renderX,
