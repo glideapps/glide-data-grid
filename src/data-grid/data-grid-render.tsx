@@ -563,7 +563,7 @@ function drawCells(
                 ctx.beginPath();
 
                 const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
-                let highlighted = rowSelected || isFocused || selectedColumns.hasIndex(c.sourceIndex);
+                let highlighted = isFocused || (!isSticky && (rowSelected || selectedColumns.hasIndex(c.sourceIndex)));
 
                 if (selectedCell?.range !== undefined) {
                     const { range } = selectedCell;

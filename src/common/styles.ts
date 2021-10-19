@@ -2,6 +2,7 @@ import baseStyled, { ThemedStyledInterface } from "styled-components";
 
 const dataEditorBaseTheme = {
     accentColor: "#4F5DFF",
+    accentFg: "#FFFFFF",
     accentLight: "rgba(62, 116, 253, 0.1)",
 
     textDark: "#313139",

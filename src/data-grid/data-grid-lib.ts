@@ -240,7 +240,7 @@ function drawCheckbox(
         ctx.lineTo(centerX - 8 + 6.37587, centerY - 8 + 10.7304);
         ctx.lineTo(centerX - 8 + 11.9999, centerY - 8 + 4.74995);
 
-        ctx.strokeStyle = theme.bgCell;
+        ctx.strokeStyle = theme.accentFg;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
         ctx.lineWidth = 1.9;
