@@ -235,7 +235,6 @@ function blitLastFrame(
             ctx.beginPath();
         }
 
-        // console.log(args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
         ctx.drawImage(canvas, args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
     }
     ctx.imageSmoothingEnabled = true;
@@ -309,17 +308,18 @@ function drawGridLines(
 function drawGridHeaders(
     ctx: CanvasRenderingContext2D,
     effectiveCols: readonly MappedGridColumn[],
+    hoveredCol: number | undefined,
     width: number,
     height: number,
     translateX: number,
     headerHeight: number,
     selectedColumns: CompactSelection,
-    hoveredCol: number | undefined,
     dragAndDropState: DragAndDropState | undefined,
     isResizing: boolean,
     selectedCell: GridSelection | undefined,
     outerTheme: Theme,
-    spriteManager: SpriteManager
+    spriteManager: SpriteManager,
+    hoverValues: HoverValues
 ) {
     // FIXME: This should respect the per-column theme
     ctx.fillStyle = outerTheme.bgHeader;
@@ -333,13 +333,17 @@ function drawGridHeaders(
     for (const c of effectiveCols) {
         const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
         const selected = selectedColumns.hasIndex(c.sourceIndex);
-        const hovered = hoveredCol === c.sourceIndex && dragAndDropState === undefined && !isResizing;
+        const noHover = dragAndDropState !== undefined || isResizing;
+        const hoveredBoolean = !noHover && hoveredCol === c.sourceIndex;
+        const hover = noHover
+            ? 0
+            : hoverValues.find(s => s.item[0] === c.sourceIndex && s.item[1] === undefined)?.hoverAmount ?? 0;
 
         const hasSelectedCell = selectedCell !== undefined && selectedCell.cell[0] === c.sourceIndex;
 
         const fillStyle = selected ? theme.textHeaderSelected : theme.textHeader;
 
-        let bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
+        const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
 
         ctx.save();
         if (c.sticky) {
@@ -355,10 +359,19 @@ function drawGridHeaders(
         if (selected) {
             ctx.fillStyle = bgFillStyle;
             ctx.fillRect(x + xOffset, 0, c.width - xOffset, headerHeight);
-        } else if (hasSelectedCell || hovered) {
-            bgFillStyle = hovered ? theme.bgHeaderHovered : theme.bgHeaderHasFocus;
-            ctx.fillStyle = bgFillStyle;
-            ctx.fillRect(x + xOffset, 0, c.width - xOffset, headerHeight);
+        } else if (hasSelectedCell || hover > 0) {
+            ctx.beginPath();
+            ctx.rect(x + xOffset, 0, c.width - xOffset, headerHeight);
+            if (hasSelectedCell) {
+                ctx.fillStyle = theme.bgHeaderHasFocus;
+                ctx.fill();
+            }
+            if (hover > 0) {
+                ctx.globalAlpha = hover;
+                ctx.fillStyle = theme.bgHeaderHovered;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
         }
 
         ctx.beginPath();
@@ -374,7 +387,6 @@ function drawGridHeaders(
             spriteManager.drawSprite(c.icon, variant, ctx, drawX, (headerHeight - 20) / 2, 20, theme);
 
             if (c.overlayIcon !== undefined) {
-                ctx.globalAlpha = 1;
                 spriteManager.drawSprite(
                     c.overlayIcon,
                     selected ? "selected" : "special",
@@ -384,7 +396,6 @@ function drawGridHeaders(
                     18,
                     theme
                 );
-                ctx.globalAlpha = hovered || selected ? 1 : 0.6;
             }
 
             drawX += 26;
@@ -394,7 +405,7 @@ function drawGridHeaders(
         ctx.fillStyle = fillStyle;
         ctx.fillText(c.title, drawX, headerHeight / 2 + 5);
 
-        if (hovered && c.hasMenu === true) {
+        if (hoveredBoolean && c.hasMenu === true) {
             const fadeWidth = 35;
             const fadeStart = x + c.width - fadeWidth;
             const grad = ctx.createLinearGradient(fadeStart, 0, fadeStart + fadeWidth, 0);
@@ -885,6 +896,41 @@ export function drawGrid(
 
     let drawRegions: Rectangle[] = [];
 
+    const drawHeaderTexture = () => {
+        drawGridHeaders(
+            overlayCtx,
+            effectiveCols,
+            hoveredCol,
+            width,
+            height,
+            translateX,
+            headerHeight,
+            selectedColumns,
+            dragAndDropState,
+            isResizing,
+            selectedCell,
+            theme,
+            spriteManager,
+            hoverValues
+        );
+
+        drawGridLines(
+            overlayCtx,
+            effectiveCols,
+            cellYOffset,
+            translateX,
+            translateY,
+            width,
+            height,
+            headerHeight,
+            getRowHeight,
+            lastRowSticky,
+            rows,
+            theme,
+            true
+        );
+    };
+
     // handle damage updates by directly drawing to the target to avoid large blits
     if (damage !== undefined) {
         clipDamage(
@@ -929,8 +975,19 @@ export function drawGrid(
             theme
         );
 
+        const doHeaders = damage.some(d => d[1] === undefined);
+
+        if (doHeaders) {
+            drawHeaderTexture();
+        }
         targetCtx.restore();
         overlayCtx.restore();
+
+        if (doHeaders) {
+            targetCtx.imageSmoothingEnabled = false;
+            targetCtx.drawImage(overlayCanvas, 0, 0);
+            targetCtx.imageSmoothingEnabled = false;
+        }
         return;
     }
     if (canBlit === true) {
@@ -1054,37 +1111,7 @@ export function drawGrid(
     );
 
     if (!canBlit || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
-        drawGridHeaders(
-            overlayCtx,
-            effectiveCols,
-            width,
-            height,
-            translateX,
-            headerHeight,
-            selectedColumns,
-            hoveredCol,
-            dragAndDropState,
-            isResizing,
-            selectedCell,
-            theme,
-            spriteManager
-        );
-
-        drawGridLines(
-            overlayCtx,
-            effectiveCols,
-            cellYOffset,
-            translateX,
-            translateY,
-            width,
-            height,
-            headerHeight,
-            getRowHeight,
-            lastRowSticky,
-            rows,
-            theme,
-            true
-        );
+        drawHeaderTexture();
     }
 
     imageLoader?.setWindow({
