@@ -356,6 +356,24 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         [getMangedCellContent, rowHeight, rows]
     );
 
+    const appendRow = React.useCallback(
+        (col: number) => {
+            onRowAppended?.();
+            scrollRef.current?.scrollBy(0, scrollRef.current.scrollHeight + 1000);
+            setGridSelection({
+                cell: [col, rows],
+                range: {
+                    x: col,
+                    y: rows,
+                    width: 1,
+                    height: 1,
+                },
+            });
+            focusOnRowFromTrailingBlankRow(col, rows - 1);
+        },
+        [focusOnRowFromTrailingBlankRow, onRowAppended, rows, setGridSelection]
+    );
+
     const lastSelectedRowRef = React.useRef<number>();
     const lastSelectedColRef = React.useRef<number>();
     const onMouseDown = React.useCallback(
@@ -397,24 +415,8 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                         setSelectedRows(CompactSelection.fromSingleSelection(row));
                         lastSelectedRowRef.current = row;
                     }
-                } else if (
-                    col >= rowMarkerOffset &&
-                    trailingRowOptions?.hint !== undefined &&
-                    showTrailingBlankRow &&
-                    row === rows
-                ) {
-                    onRowAppended?.();
-                    scrollRef.current?.scrollBy(0, scrollRef.current.scrollHeight + 1000);
-                    setGridSelection({
-                        cell: [col, rows],
-                        range: {
-                            x: col,
-                            y: rows,
-                            width: 1,
-                            height: 1,
-                        },
-                    });
-                    focusOnRowFromTrailingBlankRow(col, row - 1);
+                } else if (col >= rowMarkerOffset && showTrailingBlankRow && row === rows) {
+                    appendRow(col);
                 } else {
                     if (gridSelection?.cell[0] !== col || gridSelection.cell[1] !== row) {
                         const isLastStickyRow = lastRowSticky && row === rows;
@@ -506,7 +508,6 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             gridSelection,
             hasRowMarkers,
             rowMarkerOffset,
-            trailingRowOptions?.hint,
             showTrailingBlankRow,
             rows,
             rowMarkers,
@@ -515,8 +516,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             setSelectedColumns,
             selectedRows,
             setSelectedRows,
-            onRowAppended,
-            focusOnRowFromTrailingBlankRow,
+            appendRow,
             lastRowSticky,
             selectedColumns,
         ]
@@ -531,6 +531,10 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 window.clearInterval(scrollTimer.current);
             }
 
+            if (args.kind === "header") {
+                onHeaderClicked?.(args.location[0]);
+            }
+
             if (args.kind !== "cell" || gridSelection === undefined || mouse?.previousSelection?.cell === undefined)
                 return;
             const [col, row] = args.location;
@@ -540,7 +544,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 reselect(args.bounds);
             }
         },
-        [gridSelection, reselect]
+        [gridSelection, onHeaderClicked, reselect]
     );
 
     const onHeaderMenuClickInner = React.useCallback(
@@ -996,6 +1000,10 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     if (overlayOpen) {
                         setOverlay(undefined);
                         row++;
+                    } else if (row === rows && showTrailingBlankRow) {
+                        window.setTimeout(() => {
+                            appendRow(col);
+                        }, 0);
                     } else {
                         reselect(event.bounds);
                         event.cancel();
@@ -1156,6 +1164,8 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
             copyToClipboard,
             columns.length,
             rows,
+            showTrailingBlankRow,
+            appendRow,
             reselect,
             mangledOnCellEdited,
             adjustSelection,

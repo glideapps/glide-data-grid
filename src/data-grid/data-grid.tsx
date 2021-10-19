@@ -698,7 +698,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const onDragStartImpl = React.useCallback(
         (event: DragEvent) => {
             const canvas = ref.current;
-            if (canvas === null || !isDraggable === true) return;
+            if (canvas === null || !isDraggable === true) return false;
 
             let dragMime: string | undefined;
             let dragData: string | undefined;

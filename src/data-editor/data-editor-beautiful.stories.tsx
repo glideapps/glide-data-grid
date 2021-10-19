@@ -1435,6 +1435,11 @@ export const HeaderMenus: React.VFC = () => {
         setMenu({ col, bounds });
     }, []);
 
+    const onHeaderClicked = React.useCallback(() => {
+        // eslint-disable-next-line no-console
+        console.log("Header clicked");
+    }, []);
+
     return (
         <BeautifulWrapper
             title="Header menus"
@@ -1450,6 +1455,7 @@ export const HeaderMenus: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 onHeaderMenuClick={onHeaderMenuClick}
+                onHeaderClicked={onHeaderClicked}
                 columns={realCols}
                 onCellEdited={setCellValue}
                 onColumnResized={onColumnResized}
