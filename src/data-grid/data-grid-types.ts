@@ -417,6 +417,11 @@ export class CompactSelection {
         return this.items[0][0];
     };
 
+    last = (): number | undefined => {
+        if (this.items.length === 0) return undefined;
+        return this.items.slice(-1)[0][1];
+    };
+
     hasIndex = (index: number): boolean => {
         for (const [start, end] of this.items) {
             if (index >= start && index < end) return true;
