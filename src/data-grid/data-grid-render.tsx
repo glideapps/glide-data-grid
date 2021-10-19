@@ -26,6 +26,7 @@ import {
 } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "common/styles";
+import { parseToRgba } from "./color-parser";
 
 interface BlitData {
     readonly cellXOffset: number;
@@ -338,7 +339,7 @@ function drawGridHeaders(
 
         const fillStyle = selected ? theme.textHeaderSelected : theme.textHeader;
 
-        const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
+        let bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
 
         ctx.save();
         if (c.sticky) {
@@ -355,8 +356,9 @@ function drawGridHeaders(
             ctx.fillStyle = bgFillStyle;
             ctx.fillRect(x + xOffset, 0, c.width - xOffset, headerHeight);
         } else if (hasSelectedCell || hovered) {
-            ctx.fillStyle = hovered ? theme.bgHeaderHovered : theme.bgHeaderHasFocus;
-            ctx.fillRect(x + xOffset, 0, c.width - 1, headerHeight);
+            bgFillStyle = hovered ? theme.bgHeaderHovered : theme.bgHeaderHasFocus;
+            ctx.fillStyle = bgFillStyle;
+            ctx.fillRect(x + xOffset, 0, c.width - xOffset, headerHeight);
         }
 
         ctx.beginPath();
@@ -396,7 +398,8 @@ function drawGridHeaders(
             const fadeWidth = 35;
             const fadeStart = x + c.width - fadeWidth;
             const grad = ctx.createLinearGradient(fadeStart, 0, fadeStart + fadeWidth, 0);
-            grad.addColorStop(0, bgFillStyle + "00");
+            const [r, g, b] = parseToRgba(bgFillStyle);
+            grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0)`);
             grad.addColorStop(0.3, bgFillStyle);
             grad.addColorStop(1, bgFillStyle);
             ctx.fillStyle = grad;

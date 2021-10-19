@@ -180,9 +180,11 @@ export function drawNewRowCell(
     hoverAmount: number
 ) {
     ctx.beginPath();
+    ctx.globalAlpha = hoverAmount;
     ctx.rect(x, y, width, height);
-    ctx.fillStyle = `rgba(0, 0, 0, ${hoverAmount * 0.1})`;
+    ctx.fillStyle = theme.bgHeaderHovered;
     ctx.fill();
+    ctx.globalAlpha = 1;
     ctx.beginPath();
 
     const finalLineSize = 12;
@@ -234,9 +236,9 @@ function drawCheckbox(
         ctx.fill();
 
         ctx.beginPath();
-        ctx.moveTo(centerX - 6, centerY - 0.5);
-        ctx.lineTo(centerX - 2.5, centerY + 3);
-        ctx.lineTo(centerX + 5, centerY - 4);
+        ctx.moveTo(centerX - 8 + 3.65005, centerY - 8 + 7.84995);
+        ctx.lineTo(centerX - 8 + 6.37587, centerY - 8 + 10.7304);
+        ctx.lineTo(centerX - 8 + 11.9999, centerY - 8 + 4.74995);
 
         ctx.strokeStyle = theme.bgCell;
         ctx.lineJoin = "round";

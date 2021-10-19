@@ -12,8 +12,8 @@ const variantList: SpriteVariant[] = ["normal", "selected", "special", "specialS
 const renderSize = 40;
 
 interface SpriteTheme {
-    bgColorLight: string;
-    fgColorDark: string;
+    bgColor: string;
+    fgColor: string;
     acceptColor: string;
     columnHeaderBg: string;
 }
@@ -67,16 +67,16 @@ export class SpriteManager {
         this.extraMap = [...extra];
 
         const themeExtract: SpriteTheme = {
-            bgColorLight: theme.fgIconHeader,
-            fgColorDark: theme.bgIconHeader,
+            fgColor: theme.fgIconHeader,
+            bgColor: theme.bgIconHeader,
             acceptColor: theme.accentColor,
             columnHeaderBg: theme.bgHeader,
         };
         if (
             this.lastTheme?.acceptColor === themeExtract.acceptColor &&
-            this.lastTheme?.bgColorLight === themeExtract.bgColorLight &&
+            this.lastTheme?.bgColor === themeExtract.bgColor &&
             this.lastTheme?.columnHeaderBg === themeExtract.columnHeaderBg &&
-            this.lastTheme?.fgColorDark === themeExtract.fgColorDark
+            this.lastTheme?.fgColor === themeExtract.fgColor
         ) {
             return;
         }
@@ -95,8 +95,8 @@ export class SpriteManager {
 
             let y = 0;
             for (const variant of variantList) {
-                let fgColor = themeExtract.bgColorLight;
-                let bgColor = themeExtract.fgColorDark;
+                let fgColor = themeExtract.fgColor;
+                let bgColor = themeExtract.bgColor;
                 if (variant === "selected") {
                     bgColor = "white";
                     fgColor = themeExtract.acceptColor;
@@ -114,7 +114,7 @@ export class SpriteManager {
             }
 
             for (const ex of this.extraMap) {
-                const fgColor = themeExtract.bgColorLight;
+                const fgColor = themeExtract.fgColor;
                 const bgColor = ex;
                 const imgSource = new Image();
                 imgSource.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(sprite({ fgColor, bgColor }))}`;
