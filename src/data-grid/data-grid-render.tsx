@@ -402,21 +402,28 @@ function drawGridHeaders(
         }
 
         ctx.font = `${theme.headerFontStyle} ${theme.fontFamily}`;
-        ctx.fillStyle = fillStyle;
+        if (hoveredBoolean && c.hasMenu === true) {
+            const fadeWidth = 35;
+            const fadeStart = c.width - fadeWidth;
+            const fadeEnd = c.width - fadeWidth * 0.7;
+
+            const fadeStartPercent = fadeStart / c.width;
+            const fadeEndPercent = fadeEnd / c.width;
+
+            const grad = ctx.createLinearGradient(x, 0, x + c.width, 0);
+            const [r, g, b] = parseToRgba(fillStyle);
+
+            grad.addColorStop(0, fillStyle);
+            grad.addColorStop(fadeStartPercent, fillStyle);
+            grad.addColorStop(fadeEndPercent, `rgba(${r}, ${g}, ${b}, 0)`);
+            grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+            ctx.fillStyle = grad;
+        } else {
+            ctx.fillStyle = fillStyle;
+        }
         ctx.fillText(c.title, drawX, headerHeight / 2 + 5);
 
         if (hoveredBoolean && c.hasMenu === true) {
-            const fadeWidth = 35;
-            const fadeStart = x + c.width - fadeWidth;
-            const grad = ctx.createLinearGradient(fadeStart, 0, fadeStart + fadeWidth, 0);
-            const [r, g, b] = parseToRgba(bgFillStyle);
-            grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0)`);
-            grad.addColorStop(0.3, bgFillStyle);
-            grad.addColorStop(1, bgFillStyle);
-            ctx.fillStyle = grad;
-            ctx.rect(fadeStart, 0, fadeWidth, headerHeight);
-            ctx.fill();
-
             ctx.beginPath();
             const triangleX = x + c.width - 20;
             const triangleY = headerHeight / 2 - 3;

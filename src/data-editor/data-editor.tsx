@@ -356,20 +356,26 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         [getMangedCellContent, rowHeight, rows]
     );
 
+    const rowsRef = React.useRef(rows);
+    rowsRef.current = rows;
     const appendRow = React.useCallback(
         (col: number) => {
             onRowAppended?.();
-            scrollRef.current?.scrollBy(0, scrollRef.current.scrollHeight + 1000);
-            setGridSelection({
-                cell: [col, rows],
-                range: {
-                    x: col,
-                    y: rows,
-                    width: 1,
-                    height: 1,
-                },
-            });
-            focusOnRowFromTrailingBlankRow(col, rows - 1);
+            // Queue up to allow the consumer to react to the event and let us check if they did
+            window.setTimeout(() => {
+                if (rowsRef.current <= rows) return;
+                scrollRef.current?.scrollBy(0, scrollRef.current.scrollHeight + 1000);
+                setGridSelection({
+                    cell: [col, rows],
+                    range: {
+                        x: col,
+                        y: rows,
+                        width: 1,
+                        height: 1,
+                    },
+                });
+                focusOnRowFromTrailingBlankRow(col, rows - 1);
+            }, 0);
         },
         [focusOnRowFromTrailingBlankRow, onRowAppended, rows, setGridSelection]
     );
