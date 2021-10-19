@@ -361,9 +361,17 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const appendRow = React.useCallback(
         (col: number) => {
             onRowAppended?.();
-            // Queue up to allow the consumer to react to the event and let us check if they did
-            window.setTimeout(() => {
-                if (rowsRef.current <= rows) return;
+
+            let backoff = 0;
+            const doFocus = () => {
+                if (rowsRef.current <= rows) {
+                    if (backoff < 500) {
+                        window.setTimeout(doFocus, backoff);
+                    }
+                    backoff = 50 + backoff * 2;
+                    return;
+                }
+
                 scrollRef.current?.scrollBy(0, scrollRef.current.scrollHeight + 1000);
                 setGridSelection({
                     cell: [col, rows],
@@ -375,7 +383,9 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                     },
                 });
                 focusOnRowFromTrailingBlankRow(col, rows - 1);
-            }, 0);
+            };
+            // Queue up to allow the consumer to react to the event and let us check if they did
+            doFocus();
         },
         [focusOnRowFromTrailingBlankRow, onRowAppended, rows, setGridSelection]
     );
