@@ -1596,7 +1596,7 @@ export const RightElement: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(AddData as any).parameters = {
+(RightElement as any).parameters = {
     options: {
         showPanel: false,
     },
