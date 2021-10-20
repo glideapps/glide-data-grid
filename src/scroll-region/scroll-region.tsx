@@ -15,13 +15,27 @@ interface Props {
     readonly draggable: boolean;
     readonly scrollWidth: number;
     readonly scrollToEnd?: boolean;
+    readonly rightElementSticky?: boolean;
+    readonly rightElement?: React.ReactNode;
     readonly style?: React.CSSProperties;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
     readonly update: (args: ScrollRegionUpdateArgs) => void;
 }
 
 const ScrollRegion: React.FunctionComponent<Props> = p => {
-    const { className, scrollWidth, scrollHeight, style, children, update, scrollToEnd, scrollRef, draggable } = p;
+    const {
+        className,
+        scrollWidth,
+        scrollHeight,
+        style,
+        children,
+        update,
+        scrollToEnd,
+        scrollRef,
+        draggable,
+        rightElement,
+        rightElementSticky = false,
+    } = p;
 
     const innerStyle = React.useMemo<React.CSSProperties>(
         () => ({
@@ -64,6 +78,10 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
 
     const lastProps = React.useRef<{ width?: number; height?: number }>();
 
+    const nomEvent = React.useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+    }, []);
+
     return (
         <div style={style}>
             <AutoSizer>
@@ -83,7 +101,25 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
                                 draggable={draggable}
                                 className={"dvn-scroller " + className}
                                 onScroll={onScroll}>
-                                <div className="dvn-scroll-inner" style={innerStyle} />
+                                <div className="dvn-scroll-inner">
+                                    <div style={innerStyle} />
+                                    {rightElement !== undefined && (
+                                        <div
+                                            onMouseDown={nomEvent}
+                                            onMouseUp={nomEvent}
+                                            onMouseMove={nomEvent}
+                                            style={{
+                                                height: props.height,
+                                                position: "sticky",
+                                                top: 0,
+                                                marginBottom: -40,
+                                                right: rightElementSticky ? 0 : undefined,
+                                                pointerEvents: "auto",
+                                            }}>
+                                            {rightElement}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </ScrollRegionStyle>
                     );

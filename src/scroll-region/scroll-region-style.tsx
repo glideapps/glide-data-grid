@@ -8,7 +8,12 @@ export const ScrollRegionStyle = styled.div`
     }
 
     .dvn-scroll-inner {
+        display: flex;
         pointer-events: none;
+
+        > * {
+            flex-shrink: 0;
+        }
     }
 
     .dvn-underlay > * {

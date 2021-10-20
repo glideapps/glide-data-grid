@@ -1538,3 +1538,66 @@ export const CustomHeaderIcons: React.VFC = () => {
         showPanel: false,
     },
 };
+
+export const RightElement: React.VFC = () => {
+    const { cols, getCellContent, setCellValue } = useMockDataGenerator(60, false);
+
+    const [numRows, setNumRows] = React.useState(50);
+
+    const onRowAppended = React.useCallback(() => {
+        const newRow = numRows;
+        setNumRows(cv => cv + 1);
+        for (let c = 0; c < 6; c++) {
+            setCellValue([c, newRow], {
+                displayData: "",
+                data: "",
+            } as any);
+        }
+    }, [numRows, setCellValue]);
+
+    return (
+        <BeautifulWrapper
+            title="Right Element"
+            description={<Description>A DOM element may be added as a trailer to the grid.</Description>}>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rowMarkers={"both"}
+                onCellEdited={setCellValue}
+                trailingRowOptions={{
+                    hint: "New row...",
+                    sticky: true,
+                    tint: true,
+                }}
+                rows={numRows}
+                onRowAppended={onRowAppended}
+                rightElementSticky={true}
+                rightElement={
+                    <div
+                        style={{
+                            height: "100%",
+                            padding: "20px 20px 40px 20px",
+                            width: 200,
+                            color: "black",
+                            whiteSpace: "pre-wrap",
+                            backgroundColor: "rgba(240, 240, 250, 0.2)",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            boxShadow: "0 0 10px rgba(0, 0, 0, 0.15)",
+                            backdropFilter: "blur(12px)",
+                        }}>
+                        This is a real DOM element. You can put whatever you want here. You can also size it as big as
+                        you want. {"\n\n"}It also does not have to be sticky.
+                    </div>
+                }
+            />
+        </BeautifulWrapper>
+    );
+};
+(AddData as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};

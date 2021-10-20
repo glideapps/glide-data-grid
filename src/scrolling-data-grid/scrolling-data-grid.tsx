@@ -11,11 +11,21 @@ export interface ScrollingDataGridProps extends Props {
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
     readonly smoothScrollX?: boolean;
     readonly smoothScrollY?: boolean;
+    readonly rightElementSticky?: boolean;
+    readonly rightElement?: React.ReactNode;
 }
 
 const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const { columns, rows, rowHeight, headerHeight, firstColSticky } = p;
-    const { className, onVisibleRegionChanged, scrollToEnd, scrollRef, ...dataGridProps } = p;
+    const {
+        className,
+        onVisibleRegionChanged,
+        scrollToEnd,
+        scrollRef,
+        rightElement,
+        rightElementSticky,
+        ...dataGridProps
+    } = p;
     const { smoothScrollX, smoothScrollY } = p;
 
     const [clientWidth, setClientWidth] = React.useState<number>(10);
@@ -170,6 +180,8 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             draggable={dataGridProps.isDraggable === true}
             scrollWidth={width}
             scrollHeight={height}
+            rightElement={rightElement}
+            rightElementSticky={rightElementSticky}
             update={onScrollUpdate}
             scrollToEnd={scrollToEnd}>
             <DataGridDnd eventTargetRef={scrollRef} width={clientWidth} height={clientHeight} {...dataGridProps} />
