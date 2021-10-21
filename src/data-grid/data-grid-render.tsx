@@ -580,9 +580,9 @@ function drawCells(
                 if (isSticky) {
                     ctx.fillStyle = theme.bgCell;
                     if (drawX === 0) {
-                        ctx.fillRect(drawX, drawY + 1, c.width, rh - 1);
+                        ctx.fillRect(drawX, drawY, c.width, rh);
                     } else {
-                        ctx.fillRect(drawX + 1, drawY + 1, c.width - 1, rh - 1);
+                        ctx.fillRect(drawX, drawY, c.width, rh);
                     }
                 }
 
@@ -590,26 +590,26 @@ function drawCells(
                     if (rowDisabled) {
                         ctx.fillStyle = theme.bgHeader;
                         if (drawX === 0) {
-                            ctx.fillRect(drawX, drawY + 1, c.width, rh - 1);
+                            ctx.fillRect(drawX, drawY, c.width, rh);
                         } else {
-                            ctx.fillRect(drawX + 1, drawY + 1, c.width - 1, rh - 1);
+                            ctx.fillRect(drawX, drawY, c.width, rh);
                         }
                     }
                     if (highlighted) {
                         ctx.fillStyle = theme.accentLight;
                         if (drawX === 0) {
-                            ctx.fillRect(drawX, drawY + 1, c.width, rh - 1);
+                            ctx.fillRect(drawX, drawY, c.width, rh);
                         } else {
-                            ctx.fillRect(drawX + 1, drawY + 1, c.width - 1, rh - 1);
+                            ctx.fillRect(drawX, drawY, c.width, rh);
                         }
                     }
                 } else {
                     if (prelightCells?.find(pre => pre[0] === c.sourceIndex && pre[1] === row) !== undefined) {
                         ctx.fillStyle = theme.bgSearchResult;
                         if (drawX === 0) {
-                            ctx.fillRect(drawX, drawY + 1, c.width, rh - 1);
+                            ctx.fillRect(drawX, drawY, c.width, rh);
                         } else {
-                            ctx.fillRect(drawX + 1, drawY + 1, c.width - 1, rh - 1);
+                            ctx.fillRect(drawX, drawY, c.width, rh);
                         }
                     }
                 }

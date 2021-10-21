@@ -1242,6 +1242,19 @@ export const ThemeSupport: React.VFC = () => {
 
     const [theme, setTheme] = React.useState({});
 
+    const [numRows, setNumRows] = React.useState(1000);
+
+    const onRowAppended = React.useCallback(() => {
+        const newRow = numRows;
+        setNumRows(cv => cv + 1);
+        for (let c = 0; c < 6; c++) {
+            setCellValue([c, newRow], {
+                displayData: "",
+                data: "",
+            } as any);
+        }
+    }, [numRows, setCellValue]);
+
     return (
         <ThemeProvider theme={theme}>
             <BeautifulWrapper
@@ -1262,9 +1275,14 @@ export const ThemeSupport: React.VFC = () => {
                     {...defaultProps}
                     getCellContent={getCellContent}
                     columns={cols}
+                    onRowAppended={onRowAppended}
+                    trailingRowOptions={{
+                        tint: true,
+                        sticky: true,
+                    }}
                     onCellEdited={setCellValue}
                     onColumnResized={onColumnResized}
-                    rows={1_000}
+                    rows={numRows}
                 />
             </BeautifulWrapper>
         </ThemeProvider>
