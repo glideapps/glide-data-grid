@@ -1141,10 +1141,10 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
                 ) {
                     if (
                         (!lastRowSticky || row !== rows) &&
-                        (visibileRegion.y > col ||
-                            col > visibileRegion.y + visibileRegion.height ||
-                            visibileRegion.x > row ||
-                            row > visibileRegion.x + visibileRegion.width)
+                        (visibileRegion.y > row ||
+                            row > visibileRegion.y + visibileRegion.height ||
+                            visibileRegion.x > col ||
+                            col > visibileRegion.x + visibileRegion.width)
                     ) {
                         return;
                     }
