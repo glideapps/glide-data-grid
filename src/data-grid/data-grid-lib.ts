@@ -520,8 +520,8 @@ export function drawDrilldownCell(
                 const imgSize = bubbleHeight - 8;
                 let srcX = 0;
                 let srcY = 0;
-                let srcWidth = img.naturalWidth;
-                let srcHeight = img.naturalHeight;
+                let srcWidth = img.width;
+                let srcHeight = img.height;
 
                 if (srcWidth > srcHeight) {
                     // landscape
@@ -573,7 +573,7 @@ export function drawImage(
 
         if (img !== undefined) {
             const imgHeight = height - cellYPad * 2;
-            const imgWidth = img.naturalWidth * (imgHeight / img.naturalHeight);
+            const imgWidth = img.width * (imgHeight / img.height);
             ctx.drawImage(img, drawX, y + cellYPad, imgWidth, imgHeight);
 
             drawX += imgWidth + itemMargin;

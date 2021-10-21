@@ -74,7 +74,19 @@ export function drawCell(
         } else if (cell.kind === GridCellKind.Bubble) {
             drawBubbles(ctx, theme, cell.data, x, y, w, h, hoverAmount, highlighted);
         } else if (cell.kind === GridCellKind.Image && imageLoader !== undefined) {
-            drawImage(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, hoverAmount, imageLoader);
+            drawImage(
+                ctx,
+                theme,
+                cell.displayData ?? cell.data,
+                sourceIndex,
+                row,
+                x,
+                y,
+                w,
+                h,
+                hoverAmount,
+                imageLoader
+            );
         } else if (cell.kind === GridCellKind.RowID) {
             drawTextCell(ctx, theme, cell.data, x, y, w, h, hoverAmount, theme.textLight);
         } else if (cell.kind === GridCellKind.Protected) {

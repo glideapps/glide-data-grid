@@ -855,10 +855,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                         return cell.data?.toString() ?? "";
                     case GridCellKind.Drilldown:
                         return cell.data.map(d => d.text).join(", ");
+                    case GridCellKind.Image:
                     case GridCellKind.Bubble:
                         return cell.data.join(", ");
-                    case GridCellKind.Image:
-                        return cell.data.map((i, index) => <img key={index} src={i} />);
+                    // While this would seemingly be better, it triggers the browser to actually
+                    // download the image which we may not want. Sad :(
+                    // case GridCellKind.Image:
+                    //     return cell.data.map((i, index) => <img key={index} src={i} />);
                 }
 
                 return "";

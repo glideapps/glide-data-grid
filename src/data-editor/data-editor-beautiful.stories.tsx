@@ -201,9 +201,11 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
             icon: GridColumnIcon.HeaderImage,
             hasMenu: false,
             getContent: () => {
+                const n = Math.round(Math.random() * 100);
                 return {
                     kind: GridCellKind.Image,
-                    data: [`${faker.image.people()}?random=${Math.round(Math.random() * 1000)}`],
+                    data: [`https://picsum.photos/id/${n}/900/900`],
+                    displayData: [`https://picsum.photos/id/${n}/40/40`],
                     allowOverlay: true,
                     allowAdd: false,
                     readonly: true,
@@ -1069,7 +1071,7 @@ Try out [Glide](https://www.glideapps.com/)
                     data: [
                         {
                             text: faker.address.cityName(),
-                            img: `${faker.image.nature()}?random=${faker.datatype.number(100000)}`,
+                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100000)}`,
                         },
                         {
                             text: faker.address.cityName(),

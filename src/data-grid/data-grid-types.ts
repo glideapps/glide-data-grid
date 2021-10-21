@@ -274,6 +274,7 @@ interface NumberCell extends BaseGridCell {
 interface ImageCell extends BaseGridCell {
     readonly kind: GridCellKind.Image;
     readonly data: string[];
+    readonly displayData?: string[]; // used for small images for faster scrolling
     readonly allowAdd: boolean;
 }
 
