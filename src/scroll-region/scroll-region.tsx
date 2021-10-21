@@ -13,6 +13,7 @@ interface Props {
     readonly className?: string;
     readonly scrollHeight: number;
     readonly draggable: boolean;
+    readonly clientHeight: number;
     readonly scrollWidth: number;
     readonly scrollToEnd?: boolean;
     readonly rightElementSticky?: boolean;
@@ -31,6 +32,7 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
         children,
         update,
         scrollToEnd,
+        clientHeight,
         scrollRef,
         draggable,
         rightElement,
@@ -104,20 +106,24 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
                                 <div className="dvn-scroll-inner">
                                     <div style={innerStyle} />
                                     {rightElement !== undefined && (
-                                        <div
-                                            onMouseDown={nomEvent}
-                                            onMouseUp={nomEvent}
-                                            onMouseMove={nomEvent}
-                                            style={{
-                                                height: props.height,
-                                                position: "sticky",
-                                                top: 0,
-                                                marginBottom: -40,
-                                                right: rightElementSticky ? 0 : undefined,
-                                                pointerEvents: "auto",
-                                            }}>
-                                            {rightElement}
-                                        </div>
+                                        <>
+                                            <div className="dvn-spacer" />
+                                            <div
+                                                onMouseDown={nomEvent}
+                                                onMouseUp={nomEvent}
+                                                onMouseMove={nomEvent}
+                                                style={{
+                                                    height: props.height,
+                                                    maxHeight: clientHeight,
+                                                    position: "sticky",
+                                                    top: 0,
+                                                    marginBottom: -40,
+                                                    right: rightElementSticky ? 0 : undefined,
+                                                    pointerEvents: "auto",
+                                                }}>
+                                                {rightElement}
+                                            </div>
+                                        </>
                                     )}
                                 </div>
                             </div>

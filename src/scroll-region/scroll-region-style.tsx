@@ -14,6 +14,10 @@ export const ScrollRegionStyle = styled.div`
         > * {
             flex-shrink: 0;
         }
+
+        .dvn-spacer {
+            flex-grow: 1;
+        }
     }
 
     .dvn-underlay > * {

@@ -1540,9 +1540,9 @@ export const CustomHeaderIcons: React.VFC = () => {
 };
 
 export const RightElement: React.VFC = () => {
-    const { cols, getCellContent, setCellValue } = useMockDataGenerator(60, false);
+    const { cols, getCellContent, setCellValue } = useMockDataGenerator(12, false);
 
-    const [numRows, setNumRows] = React.useState(50);
+    const [numRows, setNumRows] = React.useState(30);
 
     const onRowAppended = React.useCallback(() => {
         const newRow = numRows;

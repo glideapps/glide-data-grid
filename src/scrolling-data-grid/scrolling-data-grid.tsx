@@ -180,6 +180,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             draggable={dataGridProps.isDraggable === true}
             scrollWidth={width}
             scrollHeight={height}
+            clientHeight={clientHeight}
             rightElement={rightElement}
             rightElementSticky={rightElementSticky}
             update={onScrollUpdate}
