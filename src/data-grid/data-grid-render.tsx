@@ -712,11 +712,11 @@ function drawBlanks(
 
                 if (rowDisabled) {
                     ctx.fillStyle = theme.bgHeader;
-                    ctx.fillRect(drawX + 1, drawY + 1, 10000 - 1, rh - 1);
+                    ctx.fillRect(drawX, drawY, 10000, rh);
                 }
                 if (rowSelected) {
                     ctx.fillStyle = theme.accentLight;
-                    ctx.fillRect(drawX + 1, drawY + 1, 10000 - 1, rh - 1);
+                    ctx.fillRect(drawX, drawY, 10000, rh);
                 }
             });
 
