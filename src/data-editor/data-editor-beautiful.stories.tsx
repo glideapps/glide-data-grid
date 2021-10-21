@@ -1305,6 +1305,8 @@ export const ThemePerColumn: React.VFC = () => {
             ...c[3],
             themeOverride: {
                 textDark: "#009CA6",
+                bgIconHeader: "#009CA6",
+                fgIconHeader: "#FF99FF",
             },
             style: "highlight",
         };

@@ -1,4 +1,5 @@
 import { GridColumn } from "index";
+import { assert } from "../common/support";
 import { Theme } from "../common/styles";
 import { HeaderIconMap, sprites } from "./sprites";
 
@@ -16,6 +17,16 @@ interface SpriteTheme {
     fgColor: string;
     acceptColor: string;
     columnHeaderBg: string;
+}
+
+function makeExtraMapIndex(theme: Theme) {
+    return `${theme.bgIconHeader}|${theme.fgIconHeader}`;
+}
+
+function getColorsForIndex(str: string): readonly [string, string] {
+    const r = str.split("|");
+    assert(r.length === 2);
+    return r as [string, string];
 }
 
 export class SpriteManager {
@@ -47,7 +58,7 @@ export class SpriteManager {
         const index = this.spriteList.indexOf(sprite);
         if (index === -1) throw new Error("Unknown header icon");
 
-        const extraIndex = this.extraMap.indexOf(theme.textDark);
+        const extraIndex = this.extraMap.indexOf(makeExtraMapIndex(theme));
 
         const xOffset = index * renderSize;
         const yOffset =
@@ -59,11 +70,12 @@ export class SpriteManager {
     public async buildSpriteMap(theme: Theme, cols: readonly GridColumn[]): Promise<void> {
         const extra = new Set<string>();
         for (const c of cols) {
-            if (c.themeOverride?.textDark !== undefined) {
-                extra.add(c.themeOverride.textDark);
+            if (c.themeOverride?.bgIconHeader !== undefined || c.themeOverride?.fgIconHeader !== undefined) {
+                const finalTheme = { ...theme, ...c.themeOverride };
+                extra.add(makeExtraMapIndex(finalTheme));
             }
         }
-        extra.delete(theme.textDark);
+        extra.delete(makeExtraMapIndex(theme));
         this.extraMap = [...extra];
 
         const themeExtract: SpriteTheme = {
@@ -114,8 +126,7 @@ export class SpriteManager {
             }
 
             for (const ex of this.extraMap) {
-                const fgColor = themeExtract.fgColor;
-                const bgColor = ex;
+                const [bgColor, fgColor] = getColorsForIndex(ex);
                 const imgSource = new Image();
                 imgSource.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(sprite({ fgColor, bgColor }))}`;
                 await imgSource.decode();

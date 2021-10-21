@@ -360,6 +360,7 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     rowsRef.current = rows;
     const appendRow = React.useCallback(
         (col: number) => {
+            // FIXME: Maybe this should optionally return a promise that we can await?
             onRowAppended?.();
 
             let backoff = 0;
