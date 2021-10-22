@@ -1649,17 +1649,17 @@ export const RightElement: React.VFC = () => {
     },
 };
 
-// let count = 0;
 export const RapidUpdates: React.VFC = () => {
     const { cols, getCellContent, setCellValueRaw } = useMockDataGenerator(100);
 
     const ref = React.useRef<DataEditorRef>(null);
-    const [count, setCount] = React.useState(0);
 
-    const countRef = React.useRef(count);
-    countRef.current = count;
+    const countRef = React.useRef(0);
+    const displayCountRef = React.useRef<HTMLElement>(null);
 
     React.useEffect(() => {
+        let rafID = 0;
+
         const sendUpdate = () => {
             const cells: {
                 cell: readonly [number, number];
@@ -1676,19 +1676,20 @@ export const RapidUpdates: React.VFC = () => {
                 });
                 cells.push({ cell: [col, row] });
             }
-            setCount(c => c + 10_000);
+            countRef.current += 10_000;
+            if (displayCountRef.current !== null) {
+                displayCountRef.current.textContent = `${countRef.current}`;
+            }
 
             ref.current?.updateCells(cells);
 
-            if (more) {
-                window.requestAnimationFrame(sendUpdate);
-            }
+            rafID = window.requestAnimationFrame(sendUpdate);
         };
 
-        let more = true;
         sendUpdate();
+
         return () => {
-            more = false;
+            cancelAnimationFrame(rafID);
         };
     }, [setCellValueRaw]);
 
@@ -1720,8 +1721,8 @@ export const RapidUpdates: React.VFC = () => {
                         more time your code can spend doing more valuable work.
                     </Description>
                     <MoreInfo>
-                        Updates processed: <KeyName>{count}</KeyName> We could do this faster but we wrote a really
-                        crappy data store for this demo which is actually slowing down the data grid.
+                        Updates processed: <KeyName ref={displayCountRef} /> We could do this faster but we wrote a
+                        really crappy data store for this demo which is actually slowing down the data grid.
                     </MoreInfo>
                 </>
             }>
