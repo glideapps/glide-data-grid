@@ -1306,9 +1306,30 @@ export const ThemePerColumn: React.VFC = () => {
             themeOverride: {
                 textDark: "#009CA6",
                 bgIconHeader: "#009CA6",
-                fgIconHeader: "#FF99FF",
+                accentColor: "#009CA6",
+                accentLight: "#009CA620",
+                fgIconHeader: "#FFFFFF",
             },
-            style: "highlight",
+        };
+        c[9] = {
+            ...c[9],
+            themeOverride: {
+                textDark: "#009CA6",
+                bgIconHeader: "#009CA6",
+                accentColor: "#009CA6",
+                accentLight: "#009CA620",
+                fgIconHeader: "#FFFFFF",
+            },
+        };
+        c[10] = {
+            ...c[10],
+            themeOverride: {
+                textDark: "#009CA6",
+                bgIconHeader: "#009CA6",
+                accentColor: "#009CA6",
+                accentLight: "#009CA620",
+                fgIconHeader: "#FFFFFF",
+            },
         };
         return c;
     }, [cols]);

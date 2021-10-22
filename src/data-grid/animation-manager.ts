@@ -153,7 +153,8 @@ export class AnimationManager {
                 this.currentHoveredItem.hoverAmount = clamp(this.currentHoveredItem.hoverAmount + delta, 0, 1);
             }
 
-            this.callback(this.getAnimatingItems());
+            const animating = this.getAnimatingItems();
+            this.callback(animating);
 
             this.cleanUpLeavingElements();
         }

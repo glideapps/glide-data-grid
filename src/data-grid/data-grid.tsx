@@ -159,8 +159,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
     React.useEffect(() => {
         const fn = async () => {
-            await spriteManager.buildSpriteMap(theme, columns);
-            lastDrawRef.current();
+            const changed = await spriteManager.buildSpriteMap(theme, columns);
+            if (changed) {
+                lastDrawRef.current();
+            }
         };
         void fn();
     }, [columns, spriteManager, theme]);

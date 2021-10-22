@@ -815,7 +815,7 @@ function drawFocusRing(
                 }
                 ctx.beginPath();
                 ctx.rect(drawX + 0.5, drawY + 0.5, col.width, rh);
-                ctx.strokeStyle = theme.accentColor;
+                ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
                 ctx.lineWidth = 1;
                 ctx.stroke();
                 ctx.restore();

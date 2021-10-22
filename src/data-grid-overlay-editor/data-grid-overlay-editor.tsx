@@ -9,7 +9,7 @@ import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style";
 import BubblesOverlayEditor from "./private/bubbles-overlay-editor";
 import DrilldownOverlayEditor from "./private/drilldown-overlay-editor";
 import ImageOverlayEditor, { OverlayImageEditorProps } from "./private/image-overlay-editor";
-import MarkdownOverlayEditor from "./private/markdown-overlay-editor";
+import { MarkdownOverlayEditor } from "./private/markdown-overlay-editor";
 import NumberOverlayEditor from "./private/number-overlay-editor";
 import UriOverlayEditor from "./private/uri-overlay-editor";
 
@@ -181,7 +181,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
         case GridCellKind.Markdown:
             editor = (
                 <MarkdownOverlayEditor
-                    onFinishEditing={onFinishEditing}
+                    onFinish={onClickOutside}
                     targetRect={target}
                     readonly={targetValue.readonly === true}
                     markdown={targetValue.data}

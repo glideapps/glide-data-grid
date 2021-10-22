@@ -1,4 +1,5 @@
 import { Rectangle } from "data-grid/data-grid-types";
+import { GrowingEntryStyle } from "../../growing-entry/growing-entry-style";
 import { styled } from "../../common/styles";
 
 interface Props {
@@ -20,6 +21,15 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
     justify-content: space-between;
     position: relative;
     color: ${p => p.theme.textDark};
+
+    ${GrowingEntryStyle} {
+        flex-shrink: 1;
+        min-width: 0;
+    }
+
+    .spacer {
+        flex: 1;
+    }
 
     .edit-icon {
         position: relative;

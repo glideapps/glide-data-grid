@@ -232,7 +232,7 @@ function drawCheckbox(
         ctx.beginPath();
         roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 4);
 
-        ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
+        ctx.fillStyle = highlighted ? theme.accentColor : theme.textLight;
         ctx.fill();
 
         ctx.beginPath();
@@ -369,9 +369,9 @@ export function drawBoolean(
     highlighted: boolean,
     canEdit: boolean
 ) {
-    const hoverEffect = 0.4;
+    const hoverEffect = 0.35;
 
-    ctx.globalAlpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.5;
+    ctx.globalAlpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
 
     drawCheckbox(ctx, theme, data, x, y, width, height, highlighted);
 
@@ -549,7 +549,7 @@ export function drawDrilldownCell(
         }
 
         ctx.beginPath();
-        ctx.fillStyle = theme.textDark;
+        ctx.fillStyle = theme.textBubble;
         ctx.fillText(d.text, drawX, y + height / 2 + 4);
     });
 }
