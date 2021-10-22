@@ -21,6 +21,7 @@ import { SimpleThemeWrapper } from "../stories/story-utils";
 import { useEventListener } from "../common/utils";
 import { useLayer } from "react-laag";
 import { SpriteMap } from "data-grid/data-grid-sprites";
+import { DataEditorRef, Theme } from "index";
 
 faker.seed(1337);
 
@@ -358,6 +359,10 @@ function useMockDataGenerator(numCols: number, readonly: boolean = true) {
         [getCellContent]
     );
 
+    const setCellValueRaw = React.useCallback(([col, row]: readonly [number, number], val: GridCell): void => {
+        cache.current.set(col, row, val);
+    }, []);
+
     const setCellValue = React.useCallback(
         ([col, row]: readonly [number, number], val: GridCell): void => {
             let current = cache.current.get(col, row);
@@ -375,7 +380,7 @@ function useMockDataGenerator(numCols: number, readonly: boolean = true) {
         [colsMap]
     );
 
-    return { cols, getCellContent, onColumnResized, setCellValue, getCellsForSelection };
+    return { cols, getCellContent, onColumnResized, setCellValue, getCellsForSelection, setCellValueRaw };
 }
 
 const defaultProps: Partial<DataEditorProps> = {
@@ -905,7 +910,6 @@ export const MultiSelectColumns: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-
 (MultiSelectColumns as any).parameters = {
     options: {
         showPanel: false,
@@ -1640,6 +1644,99 @@ export const RightElement: React.VFC = () => {
     );
 };
 (RightElement as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+// let count = 0;
+export const RapidUpdates: React.VFC = () => {
+    const { cols, getCellContent, setCellValueRaw } = useMockDataGenerator(100);
+
+    const ref = React.useRef<DataEditorRef>(null);
+    const [count, setCount] = React.useState(0);
+
+    const countRef = React.useRef(count);
+    countRef.current = count;
+
+    React.useEffect(() => {
+        const sendUpdate = () => {
+            const cells: {
+                cell: readonly [number, number];
+            }[] = [];
+            for (let x = 0; x < 10_000; x++) {
+                const col = Math.floor(Math.max(10, Math.random() * 100));
+                const row = Math.floor(Math.random() * 10_000);
+
+                setCellValueRaw([col, row], {
+                    kind: GridCellKind.Text,
+                    data: countRef.current.toString(),
+                    displayData: `${countRef.current / 10000}k`,
+                    allowOverlay: true,
+                });
+                cells.push({ cell: [col, row] });
+            }
+            setCount(c => c + 10_000);
+
+            ref.current?.updateCells(cells);
+
+            if (more) {
+                window.requestAnimationFrame(sendUpdate);
+            }
+        };
+
+        let more = true;
+        sendUpdate();
+        return () => {
+            more = false;
+        };
+    }, [setCellValueRaw]);
+
+    const drawCustom = React.useCallback(
+        (ctx: CanvasRenderingContext2D, cell: GridCell, _theme: Theme, rect: Rectangle) => {
+            if (cell.kind !== GridCellKind.Text) return false;
+
+            const { x, y, height } = rect;
+            const data = cell.displayData;
+
+            if (!cell.data.endsWith("0000")) return false;
+
+            ctx.fillStyle = !data.endsWith("5k") ? "#0fc035" : "#e01e1e";
+            ctx.fillText(data, x + 8 + 0.5, y + height / 2 + 4.5);
+
+            return true;
+        },
+        []
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Rapid updating"
+            description={
+                <>
+                    <Description>
+                        Data grid can support many thousands of updates per seconds. The data grid can easily update
+                        data faster than a human can read it, more importantly the faster the data grid can update, the
+                        more time your code can spend doing more valuable work.
+                    </Description>
+                    <MoreInfo>
+                        Updates processed: <KeyName>{count}</KeyName> We could do this faster but we wrote a really
+                        crappy data store for this demo which is actually slowing down the data grid.
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                ref={ref}
+                drawCustomCell={drawCustom}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={10_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(RapidUpdates as any).parameters = {
     options: {
         showPanel: false,
     },

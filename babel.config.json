@@ -12,4 +12,5 @@
     ],
     "plugins": ["@babel/plugin-proposal-class-properties"],
     "comments": false,
+    "sourceMaps": true
 }

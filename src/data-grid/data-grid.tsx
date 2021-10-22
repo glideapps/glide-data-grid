@@ -97,9 +97,15 @@ interface BlitData {
     readonly translateY: number;
 }
 
+export type DamageUpdateList = readonly {
+    cell: readonly [number, number];
+    // newValue: GridCell,
+}[];
+
 export interface DataGridRef {
     focus: () => void;
     getBounds: (col: number, row: number) => Rectangle | undefined;
+    damage: (cells: DamageUpdateList) => void;
 }
 
 const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forwardedRef) => {
@@ -467,17 +473,21 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         lastDrawRef.current = draw;
     }, [draw]);
 
-    const imageLoaded = React.useCallback(
-        (locations: readonly (readonly [number, number])[]) => {
-            canBlit.current = false;
-            damageRegion.current = locations;
-            draw();
-            damageRegion.current = undefined;
-        },
-        [draw]
-    );
+    const drawDamage = React.useCallback((locations: readonly (readonly [number, number])[]) => {
+        canBlit.current = false;
+        damageRegion.current = locations;
+        lastDrawRef.current();
+        damageRegion.current = undefined;
+    }, []);
 
-    imageLoader.current?.setCallback(imageLoaded);
+    const damage = React.useCallback((cells: DamageUpdateList) => {
+        canBlit.current = false;
+        damageRegion.current = cells.map(x => x.cell);
+        lastDrawRef.current();
+        damageRegion.current = undefined;
+    }, []);
+
+    imageLoader.current?.setCallback(drawDamage);
 
     const [hCol, hRow] = hoveredItem ?? [];
     const headerHovered = hCol !== undefined && hRow === undefined;
@@ -550,8 +560,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         },
         [columns, eventTargetRef, getBoundsForItem, getMouseArgsForPosition, hoveredOnEdge, onMouseDown]
     );
-    useEventListener("touchstart", onMouseDownImpl, window, false);
-    useEventListener("mousedown", onMouseDownImpl, window, false);
+    useEventListener("touchstart", onMouseDownImpl, window, true);
+    useEventListener("mousedown", onMouseDownImpl, window, true);
 
     const onMouseUpImpl = React.useCallback(
         (ev: MouseEvent | TouchEvent) => {
@@ -598,8 +608,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             onHeaderMenuClick,
         ]
     );
-    useEventListener("mouseup", onMouseUpImpl, window, false);
-    useEventListener("touchend", onMouseUpImpl, window, false);
+    useEventListener("mouseup", onMouseUpImpl, window, true);
+    useEventListener("touchend", onMouseUpImpl, window, true);
 
     const onAnimationFrame = React.useCallback<StepCallback>(values => {
         canBlit.current = false;
@@ -831,8 +841,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
                 return getBoundsForItem(canvasRef.current, col, row);
             },
+            damage,
         }),
-        [canvasRef, getBoundsForItem]
+        [canvasRef, damage, getBoundsForItem]
     );
 
     const accessibilityTree = useDebouncedMemo(

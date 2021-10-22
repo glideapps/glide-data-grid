@@ -362,8 +362,16 @@ function drawGridHeaders(
 
     let x = 0;
     let clipX = 0;
+    let font = `${outerTheme.headerFontStyle} ${outerTheme.fontFamily}`;
+    // Assinging the context font too much can be expensive, it can be worth it to minimze this
+    ctx.font = font;
     for (const c of effectiveCols) {
         const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
+        const f = `${theme.headerFontStyle} ${theme.fontFamily}`;
+        if (font !== f) {
+            ctx.font = f;
+            font = f;
+        }
         const selected = selectedColumns.hasIndex(c.sourceIndex);
         const noHover = dragAndDropState !== undefined || isResizing;
         const hoveredBoolean = !noHover && hoveredCol === c.sourceIndex;
@@ -433,7 +441,6 @@ function drawGridHeaders(
             drawX += 26;
         }
 
-        ctx.font = `${theme.headerFontStyle} ${theme.fontFamily}`;
         if (hoveredBoolean && c.hasMenu === true) {
             const fadeWidth = 35;
             const fadeStart = c.width - fadeWidth;
@@ -981,47 +988,55 @@ export function drawGrid(
 
     // handle damage updates by directly drawing to the target to avoid large blits
     if (damage !== undefined) {
-        clipDamage(
-            targetCtx,
-            effectiveCols,
-            height,
-            headerHeight,
-            translateX,
-            translateY,
-            cellYOffset,
-            rows,
-            getRowHeight,
-            lastRowSticky,
-            damage
+        damage = damage.filter(
+            x =>
+                x[1] === undefined ||
+                intersectRect(cellXOffset, cellYOffset, effectiveCols.length, 300, x[0], x[1], 1, 1)
         );
 
-        targetCtx.fillStyle = theme.bgCell;
-        targetCtx.fillRect(0, headerHeight + 1, width, height - headerHeight - 1);
+        if (damage.length > 0) {
+            clipDamage(
+                targetCtx,
+                effectiveCols,
+                height,
+                headerHeight,
+                translateX,
+                translateY,
+                cellYOffset,
+                rows,
+                getRowHeight,
+                lastRowSticky,
+                damage
+            );
 
-        drawCells(
-            targetCtx,
-            effectiveCols,
-            height,
-            headerHeight,
-            translateX,
-            translateY,
-            cellYOffset,
-            rows,
-            getRowHeight,
-            getCellContent,
-            selectedRows,
-            disabledRows,
-            lastRowSticky,
-            drawRegions,
-            damage,
-            selectedCell,
-            selectedColumns,
-            prelightCells,
-            drawCustomCell,
-            imageLoader,
-            hoverValues,
-            theme
-        );
+            targetCtx.fillStyle = theme.bgCell;
+            targetCtx.fillRect(0, headerHeight + 1, width, height - headerHeight - 1);
+
+            drawCells(
+                targetCtx,
+                effectiveCols,
+                height,
+                headerHeight,
+                translateX,
+                translateY,
+                cellYOffset,
+                rows,
+                getRowHeight,
+                getCellContent,
+                selectedRows,
+                disabledRows,
+                lastRowSticky,
+                drawRegions,
+                damage,
+                selectedCell,
+                selectedColumns,
+                prelightCells,
+                drawCustomCell,
+                imageLoader,
+                hoverValues,
+                theme
+            );
+        }
 
         const doHeaders = damage.some(d => d[1] === undefined);
 
@@ -1177,7 +1192,7 @@ export function drawGrid(
 
     targetCtx.imageSmoothingEnabled = false;
     targetCtx.drawImage(overlayCanvas, 0, 0);
-    targetCtx.imageSmoothingEnabled = false;
+    targetCtx.imageSmoothingEnabled = true;
 }
 
 type WalkRowsCallback = (drawY: number, row: number, rowHeight: number, isSticky: boolean) => void;

@@ -97,7 +97,11 @@ export interface DataEditorProps extends Props {
     readonly getCellContent: ReplaceReturnType<DataGridSearchProps["getCellContent"], GridCell>;
 }
 
-export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
+export interface DataEditorRef {
+    updateCells: DataGridRef["damage"];
+}
+
+const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorProps> = (p, forwardedRef) => {
     const [gridSelectionInner, setGridSelectionInner] = React.useState<GridSelection>();
     const [selectedColumnsInner, setSelectedColumnsInner] = React.useState<CompactSelection>(CompactSelection.empty());
     const [selectedRowsInner, setSelectedRowsInner] = React.useState(CompactSelection.empty());
@@ -174,6 +178,14 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
     const cellYOffset = visibileRegion.y;
 
     const gridRef = React.useRef<DataGridRef | null>(null);
+
+    React.useImperativeHandle(
+        forwardedRef,
+        () => ({
+            updateCells: (...args) => gridRef.current?.damage(...args),
+        }),
+        []
+    );
 
     const focus = React.useCallback((immediate?: boolean) => {
         if (immediate === true) {
@@ -1275,3 +1287,5 @@ export const DataEditor: React.FunctionComponent<DataEditorProps> = p => {
         </ThemeProvider>
     );
 };
+
+export const DataEditor = React.forwardRef(DataEditorImpl);
