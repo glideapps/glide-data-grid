@@ -58,7 +58,7 @@ export class SpriteManager {
         if (this.spriteCanvas === undefined) throw new Error();
 
         const spriteIndex = this.spriteList.indexOf(sprite);
-        if (spriteIndex === -1) throw new Error("Unknown header icon");
+        if (spriteIndex === -1) throw new Error(`Unknown header icon: ${sprite}`);
 
         const [bgColor, fgColor] = getColors(variant, theme);
         const variantIndex = this.colorMap.indexOf(makeExtraMapIndex(bgColor, fgColor));
