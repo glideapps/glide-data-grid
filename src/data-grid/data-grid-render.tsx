@@ -273,6 +273,14 @@ function drawGridLines(
     verticalOnly: boolean = false
 ) {
     ctx.beginPath();
+    // we need to under-draw the header background on its line to improve its contrast.
+    ctx.moveTo(0, headerHeight + 0.5);
+    ctx.lineTo(width, headerHeight + 0.5);
+    ctx.strokeStyle = theme.bgHeader;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.beginPath();
 
     // vertical lines
     let x = 0.5;
@@ -745,13 +753,22 @@ function overdrawStickyBoundaries(
         }
     }
 
+    ctx.beginPath();
+    ctx.moveTo(0, headerHeight + 0.5);
+    ctx.lineTo(width, headerHeight + 0.5);
+
+    ctx.strokeStyle = theme.bgHeader;
+    ctx.stroke();
+
+    ctx.strokeStyle = theme.borderColor;
+    ctx.stroke();
+
+    ctx.beginPath();
+
     if (drawX !== 0) {
         ctx.moveTo(drawX + 0.5, 0);
         ctx.lineTo(drawX + 0.5, height);
     }
-
-    ctx.moveTo(0, headerHeight + 0.5);
-    ctx.lineTo(width, headerHeight + 0.5);
 
     if (lastRowSticky) {
         const h = getRowHeight(rows - 1);
