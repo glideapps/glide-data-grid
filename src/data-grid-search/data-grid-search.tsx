@@ -8,7 +8,7 @@ import { InnerGridCell } from "index";
 
 // icons
 const UpArrow = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="button-icon">
+    <svg className="button-icon" viewBox="0 0 512 512">
         <path
             fill="none"
             stroke="currentColor"
@@ -20,7 +20,7 @@ const UpArrow = () => (
     </svg>
 );
 const DownArrow = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="button-icon" viewBox="0 0 512 512">
+    <svg className="button-icon" viewBox="0 0 512 512">
         <path
             fill="none"
             stroke="currentColor"
@@ -33,7 +33,7 @@ const DownArrow = () => (
 );
 
 const CloseX = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="button-icon" viewBox="0 0 512 512">
+    <svg className="button-icon" viewBox="0 0 512 512">
         <path
             fill="none"
             stroke="currentColor"

@@ -608,8 +608,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             onHeaderMenuClick,
         ]
     );
-    useEventListener("mouseup", onMouseUpImpl, window, true);
-    useEventListener("touchend", onMouseUpImpl, window, true);
+    useEventListener("mouseup", onMouseUpImpl, window, false);
+    useEventListener("touchend", onMouseUpImpl, window, false);
 
     const onAnimationFrame = React.useCallback<StepCallback>(values => {
         canBlit.current = false;

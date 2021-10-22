@@ -346,9 +346,9 @@ function useMockDataGenerator(numCols: number, readonly: boolean = true) {
         (selection: Rectangle): readonly (readonly GridCell[])[] => {
             const result: GridCell[][] = [];
 
-            for (let y = selection.y; y < selection.height; y++) {
+            for (let y = selection.y; y < selection.y + selection.height; y++) {
                 const row: GridCell[] = [];
-                for (let x = selection.x; x < selection.width; x++) {
+                for (let x = selection.x; x < selection.x + selection.width; x++) {
                     row.push(getCellContent([x, y]));
                 }
                 result.push(row);
@@ -1743,6 +1743,43 @@ export const RapidUpdates: React.VFC = () => {
     );
 };
 (RapidUpdates as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const CopySupport: React.VFC = () => {
+    const { cols, getCellContent, onColumnResized, setCellValue, getCellsForSelection } = useMockDataGenerator(10);
+
+    return (
+        <BeautifulWrapper
+            title="Copy support"
+            description={
+                <>
+                    <Description>
+                        Large amounts of data can be copied and customized using{" "}
+                        <PropName>getCellsForSelection</PropName>.
+                    </Description>
+                    <textarea
+                        placeholder="Copy something below and paste it here..."
+                        style={{ width: "100%", marginBottom: 20, borderRadius: 9, minHeight: 200, padding: 10 }}
+                    />
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                rowMarkers="both"
+                getCellsForSelection={getCellsForSelection}
+                columns={cols}
+                onCellEdited={setCellValue}
+                onColumnResized={onColumnResized}
+                rows={400}
+            />
+        </BeautifulWrapper>
+    );
+};
+(BuiltInSearch as any).parameters = {
     options: {
         showPanel: false,
     },

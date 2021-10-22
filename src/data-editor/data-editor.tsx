@@ -498,6 +498,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     } else {
                         setSelectedRows(CompactSelection.empty());
                     }
+                    focus();
                 } else {
                     const lastCol = lastSelectedColRef.current;
                     if (args.shiftKey && lastCol !== undefined && selectedColumns.hasIndex(lastCol)) {
