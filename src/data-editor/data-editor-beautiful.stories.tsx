@@ -1671,7 +1671,7 @@ export const RapidUpdates: React.VFC = () => {
                 setCellValueRaw([col, row], {
                     kind: GridCellKind.Text,
                     data: countRef.current.toString(),
-                    displayData: `${countRef.current / 10000}k`,
+                    displayData: `${x}k`,
                     allowOverlay: true,
                 });
                 cells.push({ cell: [col, row] });
