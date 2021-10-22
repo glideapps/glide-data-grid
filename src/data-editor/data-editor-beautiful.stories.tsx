@@ -1649,6 +1649,11 @@ export const RightElement: React.VFC = () => {
     },
 };
 
+let num: number = 1;
+function rand(): number {
+    return (num = (num * 16807) % 2147483647);
+}
+
 export const RapidUpdates: React.VFC = () => {
     const { cols, getCellContent, setCellValueRaw } = useMockDataGenerator(100);
 
@@ -1665,8 +1670,8 @@ export const RapidUpdates: React.VFC = () => {
                 cell: readonly [number, number];
             }[] = [];
             for (let x = 0; x < 10_000; x++) {
-                const col = Math.floor(Math.max(10, Math.random() * 100));
-                const row = Math.floor(Math.random() * 10_000);
+                const col = Math.max(10, rand() % 100);
+                const row = rand() % 10_000;
 
                 setCellValueRaw([col, row], {
                     kind: GridCellKind.Text,
