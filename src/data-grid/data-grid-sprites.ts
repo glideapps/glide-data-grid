@@ -3,7 +3,7 @@ import { assert } from "../common/support";
 import { Theme } from "../common/styles";
 import { HeaderIconMap, sprites } from "./sprites";
 
-export type HeaderIcon = keyof HeaderIconMap;
+type HeaderIcon = keyof HeaderIconMap;
 
 export type SpriteMap = Record<string | HeaderIcon, HeaderIconMap["headerArray"]>;
 

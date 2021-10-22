@@ -97,7 +97,7 @@ interface BlitData {
     readonly translateY: number;
 }
 
-export type DamageUpdateList = readonly {
+type DamageUpdateList = readonly {
     cell: readonly [number, number];
     // newValue: GridCell,
 }[];

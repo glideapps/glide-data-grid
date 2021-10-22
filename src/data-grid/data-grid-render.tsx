@@ -1197,7 +1197,7 @@ export function drawGrid(
 
 type WalkRowsCallback = (drawY: number, row: number, rowHeight: number, isSticky: boolean) => void;
 
-export function walkRowsInCol(
+function walkRowsInCol(
     startRow: number,
     drawY: number,
     height: number,
@@ -1237,7 +1237,7 @@ export function walkRowsInCol(
 
 type WalkColsCallback = (col: MappedGridColumn, drawX: number, drawY: number, clipX: number, startRow: number) => void;
 
-export function walkColumns(
+function walkColumns(
     effectiveCols: readonly MappedGridColumn[],
     cellYOffset: number,
     translateX: number,
