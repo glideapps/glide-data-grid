@@ -28,6 +28,18 @@ import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "common/styles";
 import { parseToRgba } from "./color-parser";
 
+// Future optimization opportunities
+// - Create a cache of a buffer used to render the full view of a partially displayed column so that when scrolling
+//   horizontally you can simply blit the pre-drawn column instead of continually paying the draw cost as it slides
+//   into view.
+// - Blit headers on horizontal scroll
+// - Don't redraw cells that are hovered if they don't respond to hover anyway
+// - Draw at 1:1 during scroll and then present HiDPI after scrolling ends
+// - Use webworker to load images, helpful with lots of large images
+// - Sprite map currently wastes a lot of canvas texture space
+// - It may be interesting to try creating "sufficient" canvases to just give each column its own canvas and compose
+//   that way. There may be significant gaints to be had there. This would also allow for fluid column DnD.
+
 interface BlitData {
     readonly cellXOffset: number;
     readonly cellYOffset: number;
