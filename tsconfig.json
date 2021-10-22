@@ -23,6 +23,7 @@
       "esModuleInterop": true,
       "noImplicitAny": true,
       "noUnusedParameters": true,
+      "declaration": true,
       "noUnusedLocals": true,
       "strict": true,
       "moduleResolution": "node",
