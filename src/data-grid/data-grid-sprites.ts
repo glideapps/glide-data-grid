@@ -7,17 +7,10 @@ export type HeaderIcon = keyof HeaderIconMap;
 
 export type SpriteMap = Record<string | HeaderIcon, HeaderIconMap["headerArray"]>;
 
-export type SpriteVariant = "normal" | "selected" | "special" | "specialSelected";
-const variantList: SpriteVariant[] = ["normal", "selected", "special", "specialSelected"];
+export type SpriteVariant = "normal" | "selected" | "special";
+const variantList: SpriteVariant[] = ["normal", "selected", "special"];
 
 const renderSize = 40;
-
-interface SpriteTheme {
-    bgColor: string;
-    fgColor: string;
-    acceptColor: string;
-    columnHeaderBg: string;
-}
 
 function makeExtraMapIndex(bgColor: string, fgColor: string) {
     return `${bgColor}|${fgColor}`;
@@ -32,7 +25,7 @@ function getColorsForIndex(str: string): readonly [string, string] {
 function getColors(variant: SpriteVariant, theme: Theme): readonly [string, string] {
     if (variant === "normal") {
         return [theme.bgIconHeader, theme.fgIconHeader];
-    } else if (variant === "selected" || variant === "specialSelected") {
+    } else if (variant === "selected") {
         return ["white", theme.accentColor];
     } else {
         return [theme.accentColor, theme.bgHeader];
