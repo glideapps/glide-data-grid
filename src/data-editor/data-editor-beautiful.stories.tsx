@@ -1760,6 +1760,7 @@ export const CopySupport: React.VFC = () => {
                         Large amounts of data can be copied and customized using{" "}
                         <PropName>getCellsForSelection</PropName>.
                     </Description>
+                    <MoreInfo>The data is copied into a format ready to be pasted into Excel or Google Sheets</MoreInfo>
                     <textarea
                         placeholder="Copy something below and paste it here..."
                         style={{ width: "100%", marginBottom: 20, borderRadius: 9, minHeight: 200, padding: 10 }}
