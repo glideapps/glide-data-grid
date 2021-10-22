@@ -127,17 +127,23 @@ export function getRowIndexForY(
 const cellXPad = 8;
 const cellYPad = 3;
 
-const textWidths = new Map<string, number>();
+const textWidths = new Map<string, Map<string, number> | undefined>();
 
 function measureTextWidth(s: string, ctx: CanvasRenderingContext2D): number {
     // return ctx.measureText(s).width;
-    let textWidth = textWidths.get(s);
-    if (textWidth === undefined) {
-        textWidth = ctx.measureText(s).width;
-        textWidths.set(s, textWidth);
+    let map = textWidths.get(ctx.font);
+    if (map === undefined) {
+        map = new Map();
+        textWidths.set(ctx.font, map);
     }
 
-    if (textWidths.size > 10000) {
+    let textWidth = map.get(s);
+    if (textWidth === undefined) {
+        textWidth = ctx.measureText(s).width;
+        map.set(s, textWidth);
+    }
+
+    if (map.size > 10000) {
         textWidths.clear();
     }
 
