@@ -16,7 +16,8 @@ export interface ScrollingDataGridProps extends Props {
 }
 
 const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
-    const { columns, rows, rowHeight, headerHeight, firstColSticky } = p;
+    const { columns, rows, rowHeight, headerHeight, firstColSticky, experimental } = p;
+    const { paddingRight, paddingBottom } = experimental ?? {};
     const {
         className,
         onVisibleRegionChanged,
@@ -182,6 +183,8 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             scrollHeight={height}
             clientHeight={clientHeight}
             rightElement={rightElement}
+            paddingBottom={paddingBottom}
+            paddingRight={paddingRight}
             rightElementSticky={rightElementSticky}
             update={onScrollUpdate}
             scrollToEnd={scrollToEnd}>

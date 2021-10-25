@@ -81,6 +81,11 @@ export interface DataGridProps {
         dest: number;
     };
 
+    readonly experimental?: {
+        readonly paddingRight?: number;
+        readonly paddingBottom?: number;
+    };
+
     readonly headerIcons?: SpriteMap;
 }
 
@@ -528,6 +533,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             const canvas = ref.current;
             const eventTarget = eventTargetRef?.current;
             if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) return;
+
             let clientX: number;
             let clientY: number;
             if (ev instanceof MouseEvent) {

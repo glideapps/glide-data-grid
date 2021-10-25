@@ -14,6 +14,8 @@ interface Props {
     readonly scrollHeight: number;
     readonly draggable: boolean;
     readonly clientHeight: number;
+    readonly paddingRight?: number;
+    readonly paddingBottom?: number;
     readonly scrollWidth: number;
     readonly scrollToEnd?: boolean;
     readonly rightElementSticky?: boolean;
@@ -36,6 +38,8 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
         scrollRef,
         draggable,
         rightElement,
+        paddingBottom = 0,
+        paddingRight = 0,
         rightElementSticky = false,
     } = p;
 
@@ -54,12 +58,12 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
         const el = scroller.current;
         if (el === null) return;
         update({
-            clientHeight: el.clientHeight,
-            clientWidth: el.clientWidth,
+            clientHeight: el.clientHeight - paddingBottom,
+            clientWidth: el.clientWidth - paddingRight,
             scrollLeft: Math.max(0, el.scrollLeft),
             scrollTop: Math.max(0, el.scrollTop),
         });
-    }, [update]);
+    }, [paddingBottom, paddingRight, update]);
 
     React.useEffect(() => {
         const el = scroller.current;
@@ -118,7 +122,8 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
                                                     position: "sticky",
                                                     top: 0,
                                                     marginBottom: -40,
-                                                    right: rightElementSticky ? 0 : undefined,
+                                                    marginRight: paddingRight,
+                                                    right: rightElementSticky ? paddingRight ?? 0 : undefined,
                                                     pointerEvents: "auto",
                                                 }}>
                                                 {rightElement}
