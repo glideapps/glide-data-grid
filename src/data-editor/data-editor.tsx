@@ -358,7 +358,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 forceEditMode: true,
             });
         },
-        [getMangedCellContent, rowHeight, rows]
+        [getMangedCellContent]
     );
 
     const focusCallback = React.useRef(focusOnRowFromTrailingBlankRow);
