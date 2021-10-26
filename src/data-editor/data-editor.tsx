@@ -323,7 +323,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (bounds === undefined || scrollRef.current === null) {
                 return;
             }
-            const lastRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
 
             let content = getMangedCellContent([col, row]);
             if (!content.allowOverlay) {
