@@ -43,6 +43,7 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
         rightElementSticky = false,
     } = p;
 
+    const dpr = window.devicePixelRatio;
     const innerStyle = React.useMemo<React.CSSProperties>(
         () => ({
             width: scrollWidth,
@@ -57,6 +58,7 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
     const onScroll = React.useCallback(() => {
         const el = scroller.current;
         if (el === null) return;
+
         update({
             clientHeight: el.clientHeight - paddingBottom,
             clientWidth: el.clientWidth - paddingRight,
@@ -118,7 +120,7 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
                                                 onMouseMove={nomEvent}
                                                 style={{
                                                     height: props.height,
-                                                    maxHeight: clientHeight,
+                                                    maxHeight: clientHeight - Math.ceil(dpr % 1),
                                                     position: "sticky",
                                                     top: 0,
                                                     marginBottom: -40,
