@@ -351,14 +351,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     break;
             }
 
-            // The bounds fetched above will almost certainly be wrong because a scroll is about to take place
-            // so instead we can just compute where the scroll will be landing us.
-            const boundingRect = scrollRef.current.getBoundingClientRect();
             setOverlay({
-                target: {
-                    ...bounds,
-                    y: boundingRect.top + scrollRef.current.clientHeight - lastRowHeight - bounds.height,
-                },
+                target: bounds,
                 content,
                 highlight: true,
                 cell: [col, row],
@@ -368,7 +362,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [getMangedCellContent, rowHeight, rows]
     );
 
+    const focusCallback = React.useRef(focusOnRowFromTrailingBlankRow);
+    const getCellContentRef = React.useRef(getCellContent);
     const rowsRef = React.useRef(rows);
+    focusCallback.current = focusOnRowFromTrailingBlankRow;
+    getCellContentRef.current = getCellContent;
     rowsRef.current = rows;
     const appendRow = React.useCallback(
         (col: number) => {
@@ -395,12 +393,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         height: 1,
                     },
                 });
-                focusOnRowFromTrailingBlankRow(col, rows - 1);
+                const cell = getCellContentRef.current([col - rowMarkerOffset, rows]);
+                if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true) {
+                    // wait for scroll to have a chance to process
+                    window.setTimeout(() => {
+                        focusCallback.current(col, rows);
+                    }, 0);
+                }
             };
             // Queue up to allow the consumer to react to the event and let us check if they did
             doFocus();
         },
-        [focusOnRowFromTrailingBlankRow, onRowAppended, rows, setGridSelection]
+        [onRowAppended, rowMarkerOffset, rows, setGridSelection]
     );
 
     const lastSelectedRowRef = React.useRef<number>();

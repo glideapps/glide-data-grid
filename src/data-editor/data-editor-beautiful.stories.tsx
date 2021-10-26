@@ -70,7 +70,7 @@ const BeautifulStyle = styled.div`
     .sizer {
         flex-grow: 1;
 
-        /* background-color: white; */
+        background-color: white;
 
         border-radius: 12px;
         box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
@@ -146,7 +146,7 @@ function createTextColumnInfo(index: number): GridColumnWithMockingInfo {
     return {
         title: `Column ${index}`,
         width: 120,
-        icon: GridColumnIcon.HeaderImage,
+        icon: GridColumnIcon.HeaderString,
         hasMenu: false,
         getContent: () => {
             const text = faker.lorem.word();
@@ -330,12 +330,12 @@ function useMockDataGenerator(numCols: number, readonly: boolean = true) {
             let val = cache.current.get(col, row);
             if (val === undefined) {
                 val = colsMap[col].getContent();
-                cache.current.set(col, row, val);
-            }
-            if (!readonly) {
-                if (isTextEditableGridCell(val)) {
-                    val = { ...val, readonly };
+                if (!readonly) {
+                    if (isTextEditableGridCell(val)) {
+                        val = { ...val, readonly };
+                    }
                 }
+                cache.current.set(col, row, val);
             }
             return val;
         },
@@ -373,7 +373,7 @@ function useMockDataGenerator(numCols: number, readonly: boolean = true) {
                 const copied = lossyCopyData(val, current);
                 cache.current.set(col, row, {
                     ...copied,
-                    displayData: copied.data?.toString() ?? "",
+                    displayData: typeof copied.data === "string" ? copied.data : (copied as any).displayData,
                 } as any);
             }
         },
@@ -417,21 +417,66 @@ export const ResizableColumns: React.VFC = () => {
     },
 };
 
+function clearCell(cell: GridCell): GridCell {
+    switch (cell.kind) {
+        case GridCellKind.Boolean: {
+            return {
+                ...cell,
+                data: false,
+            };
+        }
+        case GridCellKind.Image: {
+            return {
+                ...cell,
+                data: [],
+                displayData: [],
+            };
+        }
+        case GridCellKind.Drilldown:
+        case GridCellKind.Bubble: {
+            return {
+                ...cell,
+                data: [],
+            };
+        }
+        case GridCellKind.Uri:
+        case GridCellKind.Markdown: {
+            return {
+                ...cell,
+                data: "",
+            };
+        }
+        case GridCellKind.Text: {
+            return {
+                ...cell,
+                data: "",
+                displayData: "",
+            };
+        }
+        case GridCellKind.Number: {
+            return {
+                ...cell,
+                data: 0,
+                displayData: "",
+            };
+        }
+    }
+    return cell;
+}
+
 export const AddData: React.VFC = () => {
-    const { cols, getCellContent, setCellValue } = useMockDataGenerator(60, false);
+    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
 
     const [numRows, setNumRows] = React.useState(50);
 
     const onRowAppended = React.useCallback(() => {
         const newRow = numRows;
-        setNumRows(cv => cv + 1);
         for (let c = 0; c < 6; c++) {
-            setCellValue([c, newRow], {
-                displayData: "",
-                data: "",
-            } as any);
+            const cell = getCellContent([c, newRow]);
+            setCellValueRaw([c, newRow], clearCell(cell));
         }
-    }, [numRows, setCellValue]);
+        setNumRows(cv => cv + 1);
+    }, [getCellContent, numRows, setCellValueRaw]);
 
     return (
         <BeautifulWrapper
@@ -439,6 +484,7 @@ export const AddData: React.VFC = () => {
             description={<Description>Data can be added by typing into the trailing row.</Description>}>
             <DataEditor
                 {...defaultProps}
+                smoothScrollY={false}
                 getCellContent={getCellContent}
                 columns={cols}
                 rowMarkers={"both"}
