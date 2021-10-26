@@ -21,16 +21,14 @@ const UriOverlayEditor: React.FunctionComponent<Props> = p => {
     }, []);
 
     if (editMode) {
-        return <GrowingEntry autoFocus={true} onKeyDown={onKeyDown} value={uri} onChange={onChange} />;
+        return <GrowingEntry highlight={true} autoFocus={true} onKeyDown={onKeyDown} value={uri} onChange={onChange} />;
     }
 
     return (
         <UriOverlayEditorStyle>
-            <div className="link-area">
-                <a href={uri} target="_blank" rel="noopener noreferrer">
-                    {uri}
-                </a>
-            </div>
+            <a className="link-area" href={uri} target="_blank" rel="noopener noreferrer">
+                {uri}
+            </a>
             {!readonly && (
                 <div className="edit-icon" onClick={onEditClick}>
                     <EditPencil />

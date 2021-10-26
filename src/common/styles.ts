@@ -1,71 +1,46 @@
 import baseStyled, { ThemedStyledInterface } from "styled-components";
 
-// Light theme
-const builderThemeBase = {
-    overlayName: "LightTheme",
+const dataEditorBaseTheme = {
+    accentColor: "#4F5DFF",
+    accentFg: "#FFFFFF",
+    accentLight: "rgba(62, 116, 253, 0.1)",
 
-    // Derived from CoreTheme found in glide/app/src/sharedUI/styles.ts
-    b300: "rgba(79,118,255,0.5)",
-    b400: "#4F5DFF",
+    textDark: "#313139",
+    textMedium: "#737383",
+    textLight: "#B2B2C0",
+    textBubble: "#313139",
 
-    darkGrey: "#313139",
+    bgIconHeader: "#737383",
+    fgIconHeader: "#FFFFFF",
+    textHeader: "#313139",
+    textHeaderSelected: "#FFFFFF",
 
-    fgColorDarkest: "#000000",
-    fgColorDark: "#313139",
-    fgColorMedium: "#737383",
-    fgColorLight: "#B2B2C0",
+    bgCell: "#FFFFFF",
+    bgCellMedium: "#FAFAFB",
+    bgHeader: "#F7F7F8",
+    bgHeaderHasFocus: "#E9E9EB",
+    bgHeaderHovered: "#EFEFF1",
 
-    bgColorLight: "#FFFFFF",
+    bgBubble: "#EDEDF3",
+    bgBubbleSelected: "#FFFFFF",
 
-    borderColor: "rgba(45,45,45,0.16)",
+    bgSearchResult: "#fff9e3",
 
-    bgColorAltLight: "#FAFAFB",
-
-    acceptColor: "#4F5DFF",
+    borderColor: "rgba(115, 116, 131, 0.16)",
+    drilldownBorder: "rgba(0, 0, 0, 0)",
 
     linkColor: "#4F5DFF",
 
-    dataViewer: {
-        fgAddButton: "#4F5DFF",
-        bgColor: "#FFFFFF",
-        gridColor: "#FFFFFF",
-        leftMargin: "0px",
-        bgSelected: "rgba(79, 93, 255, 0.1)",
-        bgBubble: "#EDEDF3",
-        bgBubbleSelected: "#FFFFFF",
-        bgPrelight: "#fff9e3",
-
-        checkbox: {
-            checkedColor: "#4F5DFF",
-        },
-        columnHeader: {
-            bgColor: "#EDEDF3",
-            bgDark: "#D8D8E3",
-            fgColor: "#737383",
-            fgSelected: "#FFFFFF",
-            bgSelected: "#4F5DFF",
-
-            icon: {
-                bgColor: "#313139",
-                fgColor: "#FFFFFF",
-                bgColorSelected: "#FFFFFF",
-                fgColorSelected: "#4F5DFF",
-
-                userSpecific: {
-                    bgColor: "#4F5DFF",
-                    fgColor: "#FFFFFF",
-                    bgColorSelected: "#FFFFFF",
-                    fgColorSelected: "#4F5DFF",
-                },
-            },
-        },
-    },
+    headerFontStyle: "600 13px",
+    baseFontStyle: "13px",
+    fontFamily:
+        "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
 };
 
-export type Theme = typeof builderThemeBase;
+export type Theme = typeof dataEditorBaseTheme;
 
 export const styled = baseStyled as ThemedStyledInterface<Theme>;
 
-export function getBuilderTheme(): Theme {
-    return builderThemeBase;
+export function getDataEditorTheme(): Theme {
+    return dataEditorBaseTheme;
 }

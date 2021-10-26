@@ -6,8 +6,8 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
     top: 4px;
     right: 20px;
 
-    background-color: ${p => p.theme.bgColorLight};
-    color: ${p => p.theme.fgColorDark};
+    background-color: ${p => p.theme.bgCell};
+    color: ${p => p.theme.textDark};
 
     padding: 8px;
     border: 1px solid ${p => p.theme.borderColor};
@@ -32,12 +32,12 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
         left: 0;
         bottom: 0;
 
-        background-color: ${p => p.theme.fgColorLight};
+        background-color: ${p => p.theme.textLight};
     }
 
     input {
         width: 220px;
-        color: ${p => p.theme.fgColorDark};
+        color: ${p => p.theme.textDark};
         border: none;
         border-width: 0;
         outline: none;
@@ -56,10 +56,10 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        color: ${p => p.theme.fgColorMedium};
+        color: ${p => p.theme.textMedium};
 
         :hover {
-            color: ${p => p.theme.fgColorDark};
+            color: ${p => p.theme.textDark};
         }
 
         .button-icon {

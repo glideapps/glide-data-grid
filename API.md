@@ -5,7 +5,7 @@
 Currently the Grid depends on there being a root level "portal" div in your HTML. Insert this snippet as the last child of your `<body>` tag:
 
 ```HTML
-<div id="portal" />
+<div id="portal" style="position: fixed; left: 0; top: 0; z-index: 9999;" />
 ```
 
 Once you've got that done, the easiest way to use the Data Grid is to wrap it inside a `DataEditorContainer` component:
@@ -66,23 +66,10 @@ getCellContent: (cell: readonly [number, number]) => GridCell;
 ### Optional
 
 ```ts
-cellXOffset?: number;
-cellYOffset?: number;
-```
-
-`cellXOffset` and `cellYOffset` are the zero-based indexes of the leftmost column, and topmost row to display, respectively. Both should be provided if one is.
-
-```ts
-allowResize?: boolean;
-```
-
-`allowResize` is a boolean indicating whether to allow resizing the widths of columns. Default is `false`.
-
-```ts
 onVisibleRegionChanged?: (range: Rectangle) => void;
 ```
 
-`onVisibleRegionChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`. Note that you have to keep track of at least the `cellXOffset` and `cellYOffset`, for which the rectangle provides new values in `.x` and `.y`, respectively, and pass them back in as properties, otherwise your Grid will not scroll.
+`onVisibleRegionChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`.
 
 ```ts
 headerHeight: number;
@@ -97,10 +84,10 @@ rowHeight: number | ((index: number) => number);
 `rowHeight` is the height of a row in the table. It defaults to `34`. By passing a function instead of a number you can give different heights to each row. The `index` is the zero-based absolute row index.
 
 ```ts
-rowMarkers?: boolean;
+rowMarkers?: "checkbox" | "number" | "both" | "none";
 ```
 
-`rowMarkers` determines whether to display the marker column on the very left. It defaults to `true`. Note that this column doesn't count as a table column, i.e. it has no index, and doesn't change column indexes.
+`rowMarkers` determines whether to display the marker column on the very left. It defaults to `none`. Note that this column doesn't count as a table column, i.e. it has no index, and doesn't change column indexes.
 
 ```ts
 rowMarkerWidth?: number;
@@ -145,13 +132,15 @@ onItemHovered?: (args: GridMouseEventArgs) => void;
 `onItemHovered` is called when the user hovers over a cell, a header, or outside the grid.
 
 ```ts
-showTrailingBlankRow?: boolean;
-onRowAppended?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
+trailingRowOptions?: {
+    readonly tint?: boolean;
+    readonly hint?: string;
+    readonly sticky?: boolean;
+}
+onRowAppended?: (cell?: readonly [number, number], newValue?: EditableGridCell) => void;
 ```
 
-`showTrailingBlankRow` and `onRowAppended` control adding new rows at the bottom of the Grid. If `showTrailingBlankRow` is `true`, an empty, editable row will display at the bottom. If the user enters a value in one of its cells, `onRowAppended` is called, which is responsible for appending the new row.
-
-`showTrailingBlankRow` is `true` by default.
+`onRowAppended` controls adding new rows at the bottom of the Grid. If `onRowAppended` is defined, an empty, editable row will display at the bottom. If the user enters a value in one of its cells, `onRowAppended` is called, which is responsible for appending the new row. The appearance of the blank row can be configured using `trailingRowOptions`.
 
 ```ts
 getCellsForSelection?: (selection: GridSelection) => readonly (readonly GridCell[])[];
@@ -212,7 +201,7 @@ If the value is less than 50, it will be increased to 50. If it isn't set, the d
 
 ### Cell coordinates
 
-Many function properties take cell coordinates. Those are arrays of two numbers, namely the column index and the row index. Both are zero-based, and are absolute, i.e. independent of the region of cells currently displayed in the grid. For example, if `cellOffsetX` is `3` and `cellOffsetY` is `5`, then the coordinates of the cell displayed at the top left would be `[3, 5]`.
+Many function properties take cell coordinates. Those are arrays of two numbers, namely the column index and the row index. Both are zero-based, and are absolute, i.e. independent of the region of cells currently displayed in the grid.
 
 ### Rectangle
 

@@ -2,9 +2,13 @@ import { styled } from "../../common/styles";
 
 export const NumberOverlayEditorStyle = styled.div`
     display: flex;
-    color: ${p => p.theme.fgColorDark};
+    margin-top: 6px;
+    color: ${p => p.theme.textDark};
 
     > input {
-        color: ${p => p.theme.fgColorDark};
+        font-size: 13px;
+        padding: 0;
+        font-family: ${p => p.theme.fontFamily};
+        color: ${p => p.theme.textDark};
     }
 `;

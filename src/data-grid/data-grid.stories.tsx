@@ -3,7 +3,7 @@ import * as React from "react";
 import { StoryFn, StoryContext } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import DataGrid from "./data-grid";
-import { GridCellKind } from "./data-grid-types";
+import { CompactSelection, GridCellKind } from "./data-grid-types";
 
 export default {
     title: "Subcomponents/DataGrid",
@@ -23,7 +23,6 @@ export function Simplenotest() {
     let x = 0;
     return (
         <DataGrid
-            allowResize={true}
             width={600}
             height={500}
             cellXOffset={0}
@@ -43,6 +42,7 @@ export function Simplenotest() {
                 owned: true,
             })}
             firstColSticky={false}
+            lastRowSticky={false}
             isResizing={false}
             isDragging={false}
         />
@@ -53,7 +53,6 @@ export function SelectedCellnotest() {
     let x = 0;
     return (
         <DataGrid
-            allowResize={true}
             width={600}
             height={500}
             cellXOffset={0}
@@ -74,6 +73,7 @@ export function SelectedCellnotest() {
             })}
             selectedCell={{ cell: [2, 2], range: { x: 2, y: 2, width: 1, height: 1 } }}
             firstColSticky={false}
+            lastRowSticky={false}
             isResizing={false}
             isDragging={false}
         />
@@ -84,7 +84,6 @@ export function SelectedRownotest() {
     let x = 0;
     return (
         <DataGrid
-            allowResize={true}
             width={600}
             height={500}
             cellXOffset={0}
@@ -103,8 +102,9 @@ export function SelectedRownotest() {
                 allowOverlay: false,
                 owned: true,
             })}
-            selectedRows={[2, 4]}
+            selectedRows={CompactSelection.fromSingleSelection([2, 4])}
             firstColSticky={false}
+            lastRowSticky={false}
             isResizing={false}
             isDragging={false}
         />
@@ -115,7 +115,6 @@ export const SelectedColumnnotest = () => {
     let x = 0;
     return (
         <DataGrid
-            allowResize={true}
             width={600}
             height={500}
             cellXOffset={0}
@@ -136,6 +135,7 @@ export const SelectedColumnnotest = () => {
             })}
             selectedColumns={[2, 4]}
             firstColSticky={false}
+            lastRowSticky={false}
             isResizing={false}
             isDragging={false}
         />

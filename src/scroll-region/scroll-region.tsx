@@ -13,16 +13,37 @@ interface Props {
     readonly className?: string;
     readonly scrollHeight: number;
     readonly draggable: boolean;
+    readonly clientHeight: number;
+    readonly paddingRight?: number;
+    readonly paddingBottom?: number;
     readonly scrollWidth: number;
     readonly scrollToEnd?: boolean;
+    readonly rightElementSticky?: boolean;
+    readonly rightElement?: React.ReactNode;
     readonly style?: React.CSSProperties;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
     readonly update: (args: ScrollRegionUpdateArgs) => void;
 }
 
 const ScrollRegion: React.FunctionComponent<Props> = p => {
-    const { className, scrollWidth, scrollHeight, style, children, update, scrollToEnd, scrollRef, draggable } = p;
+    const {
+        className,
+        scrollWidth,
+        scrollHeight,
+        style,
+        children,
+        update,
+        scrollToEnd,
+        clientHeight,
+        scrollRef,
+        draggable,
+        rightElement,
+        paddingBottom = 0,
+        paddingRight = 0,
+        rightElementSticky = false,
+    } = p;
 
+    const dpr = window.devicePixelRatio;
     const innerStyle = React.useMemo<React.CSSProperties>(
         () => ({
             width: scrollWidth,
@@ -37,13 +58,14 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
     const onScroll = React.useCallback(() => {
         const el = scroller.current;
         if (el === null) return;
+
         update({
-            clientHeight: el.clientHeight,
-            clientWidth: el.clientWidth,
+            clientHeight: el.clientHeight - paddingBottom,
+            clientWidth: el.clientWidth - paddingRight,
             scrollLeft: Math.max(0, el.scrollLeft),
             scrollTop: Math.max(0, el.scrollTop),
         });
-    }, [update]);
+    }, [paddingBottom, paddingRight, update]);
 
     React.useEffect(() => {
         const el = scroller.current;
@@ -64,6 +86,10 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
 
     const lastProps = React.useRef<{ width?: number; height?: number }>();
 
+    const nomEvent = React.useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+    }, []);
+
     return (
         <div style={style}>
             <AutoSizer>
@@ -83,7 +109,30 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
                                 draggable={draggable}
                                 className={"dvn-scroller " + className}
                                 onScroll={onScroll}>
-                                <div className="dvn-scroll-inner" style={innerStyle} />
+                                <div className="dvn-scroll-inner">
+                                    <div style={innerStyle} />
+                                    {rightElement !== undefined && (
+                                        <>
+                                            <div className="dvn-spacer" />
+                                            <div
+                                                onMouseDown={nomEvent}
+                                                onMouseUp={nomEvent}
+                                                onMouseMove={nomEvent}
+                                                style={{
+                                                    height: props.height,
+                                                    maxHeight: clientHeight - Math.ceil(dpr % 1),
+                                                    position: "sticky",
+                                                    top: 0,
+                                                    marginBottom: -40,
+                                                    marginRight: paddingRight,
+                                                    right: rightElementSticky ? paddingRight ?? 0 : undefined,
+                                                    pointerEvents: "auto",
+                                                }}>
+                                                {rightElement}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </ScrollRegionStyle>
                     );

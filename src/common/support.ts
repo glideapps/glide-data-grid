@@ -14,17 +14,6 @@ export function assert(fact: boolean, message: string = "Assertion failed"): ass
 export function assertNever(_never: never): never {
     return panic("Hell froze over");
 }
-
-export function dontAwait(p: Promise<unknown>): void {
-    p.catch(e => {
-        throw e;
-    });
-}
-
-export function removeArrayItem<T>(arr: ReadonlyArray<T>, index: number): T[] {
-    return [...arr.slice(0, index), ...arr.slice(index + 1)];
-}
-
 export function maybe<T>(fn: () => T, defaultValue: T) {
     try {
         const result = fn();

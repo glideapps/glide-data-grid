@@ -4,17 +4,16 @@ import { StoryFn, StoryContext, useState, useCallback, useMemo } from "@storyboo
 import { BuilderThemeWrapper } from "../stories/story-utils";
 
 import {
-    ColumnSelection,
+    CompactSelection,
     EditableGridCell,
     GridCell,
     GridCellKind,
     GridColumn,
     GridSelection,
     Rectangle,
-    RowSelection,
 } from "../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
-import DataEditor from "./data-editor";
+import { DataEditor } from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
 export default {
@@ -78,6 +77,9 @@ function getDummyData([col, row]: readonly [number, number]): GridCell {
             data: `## Markdown has titles
 
 And supports newline chars and automatic wrapping text that just needs to be long enough to trigger it.
+
+
+[Google](https://google.com)
 
 - with
 - lists
@@ -162,14 +164,6 @@ function getDummyCols() {
 export function Simplenotest() {
     const [cols, setColumns] = useState(getDummyCols);
 
-    const [x, setX] = useState<number>(0);
-    const [y, setY] = useState<number>(0);
-
-    const onVisibleRegionChanged = useCallback((range: Rectangle) => {
-        setX(range.x);
-        setY(range.y);
-    }, []);
-
     const onColumnResized = useCallback(
         (col: GridColumn, newSize: number) => {
             const index = cols.indexOf(col);
@@ -198,14 +192,10 @@ export function Simplenotest() {
 
     return (
         <DataEditor
-            cellXOffset={x}
-            cellYOffset={y}
             getCellContent={getDummyData}
             getCellsForSelection={getCellsForSelection}
             columns={cols}
             rows={1000}
-            allowResize={true}
-            onVisibleRegionChanged={onVisibleRegionChanged}
             onColumnResized={onColumnResized}
         />
     );
@@ -259,7 +249,6 @@ export function RelationColumn() {
             getCellContent={getDummyRelationData}
             columns={cols}
             rows={1000}
-            allowResize={true}
             onColumnResized={onColumnResized}
             smoothScrollX={true}
             smoothScrollY={true}
@@ -311,7 +300,6 @@ export function Smooth() {
     return (
         <DataEditor
             getCellContent={getDummyData}
-            allowResize={true}
             onColumnResized={onColumnResized}
             columns={cols}
             rows={1000}
@@ -375,8 +363,6 @@ export function IdealSize() {
                     smoothScrollY={true}
                     rowHeight={50}
                     headerHeight={50}
-                    showTrailingBlankRow={false}
-                    rowMarkers={false}
                     rows={9}
                 />
             </DataEditorContainer>
@@ -407,8 +393,6 @@ export function DynamicAddRemoveColumns({ columnCount }: { columnCount: number }
             smoothScrollY={true}
             rowHeight={50}
             headerHeight={50}
-            showTrailingBlankRow={false}
-            rowMarkers={false}
             rows={9}
         />
     );
@@ -418,8 +402,8 @@ DynamicAddRemoveColumns.args = {
 };
 
 export function RowSelectionStateLivesOutside() {
-    const [selected_rows, setSelectedRows] = useState<RowSelection>([]);
-    const cb = (newRows: RowSelection | undefined) => {
+    const [selected_rows, setSelectedRows] = useState<CompactSelection | undefined>(undefined);
+    const cb = (newRows: CompactSelection | undefined) => {
         if (newRows != undefined) {
             setSelectedRows(newRows);
         }
@@ -441,8 +425,8 @@ export function RowSelectionStateLivesOutside() {
 }
 
 export function ColSelectionStateLivesOutside() {
-    const [selected_cols, setSelectedCols] = useState<RowSelection>([]);
-    const cb = (newRows: ColumnSelection | undefined) => {
+    const [selected_cols, setSelectedCols] = useState<CompactSelection>(CompactSelection.empty());
+    const cb = (newRows: CompactSelection | undefined) => {
         if (newRows != undefined) {
             setSelectedCols(newRows);
         }
@@ -485,7 +469,6 @@ export function GridSelectionOutOfRangeNoColumns() {
             getCellContent={getDummyData}
             columns={cols}
             rows={1000}
-            allowResize={true}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
             onColumnResized={(_col, newSize) => {
@@ -547,7 +530,6 @@ export function ResizableColumns() {
             isDraggable={false}
             smoothScrollX={true}
             smoothScrollY={true}
-            allowResize={true}
             onColumnResized={onColumnResized}
         />
     );
@@ -575,7 +557,6 @@ export function GridSelectionOutOfRangeLessColumnsThanSelection() {
             getCellContent={getDummyData}
             columns={cols}
             rows={1000}
-            allowResize={true}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
             onColumnResized={(_col, newSize) => {
@@ -609,11 +590,9 @@ export function GridAddNewRows() {
             getCellContent={getDummyData}
             columns={cols}
             rows={rowsCount}
-            allowResize={true}
             onRowAppended={onRowAppended}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
-            showTrailingBlankRow={true}
         />
     );
 }
@@ -632,8 +611,6 @@ export function GridNoTrailingBlankRow() {
             getCellContent={getDummyData}
             columns={cols}
             rows={100}
-            allowResize={true}
-            showTrailingBlankRow={false}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
         />
@@ -705,7 +682,6 @@ export function MarkdownEdits() {
             getCellContent={dummyCells}
             columns={dummyCols}
             rows={1000}
-            allowResize={true}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
         />

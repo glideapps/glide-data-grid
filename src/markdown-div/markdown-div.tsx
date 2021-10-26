@@ -5,7 +5,6 @@ import { MarkdownContainer } from "./private/markdown-container";
 
 export interface MarkdownDivProps {
     contents: string;
-    linkOnClick?: (url: string) => void;
     createNode?: (content: string) => DocumentFragment;
 }
 
@@ -16,7 +15,7 @@ export default class MarkdownDiv<TProps extends MarkdownDivProps, TState> extend
         const { targetElement } = this;
         if (targetElement === null) return;
 
-        const { contents, linkOnClick, createNode } = this.props;
+        const { contents, createNode } = this.props;
 
         const innerHTML: string = (marked as any)(contents);
 
@@ -32,14 +31,11 @@ export default class MarkdownDiv<TProps extends MarkdownDivProps, TState> extend
         }
         targetElement.appendChild(newChild);
 
-        if (linkOnClick !== undefined) {
-            const tags = targetElement.getElementsByTagName("a");
-            for (let i = 0; i < tags.length; i++) {
-                const tag = tags[i];
-                tag.onclick = () => {
-                    linkOnClick(tag.href);
-                };
-            }
+        const tags = targetElement.getElementsByTagName("a");
+        for (let i = 0; i < tags.length; i++) {
+            const tag = tags[i];
+            tag.target = "_blank";
+            tag.rel = "noreferrer noopener";
         }
     }
 

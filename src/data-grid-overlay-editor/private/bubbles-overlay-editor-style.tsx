@@ -14,8 +14,8 @@ export const BubblesOverlayEditorStyle = styled.div`
         padding: 0 8px;
         height: 20px;
 
-        background-color: ${p => p.theme.dataViewer.bgBubble};
-        color: ${p => p.theme.fgColorDark};
+        background-color: ${p => p.theme.bgBubble};
+        color: ${p => p.theme.textDark};
         margin: 2px;
     }
 

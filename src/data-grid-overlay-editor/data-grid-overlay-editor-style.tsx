@@ -12,44 +12,60 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
 
     --overlay-top: ${p => p.targetRect.y}px;
 
-    left: ${p => p.targetRect.x}px;
-    top: ${p => p.targetRect.y}px;
-    min-width: ${p => p.targetRect.width}px;
-    min-height: ${p => p.targetRect.height}px;
+    left: ${p => p.targetRect.x - 1}px;
+    top: ${p => p.targetRect.y - 1}px;
+    min-width: ${p => p.targetRect.width + 2}px;
+    min-height: ${p => p.targetRect.height + 2}px;
+    width: max-content;
     max-width: 400px;
     max-height: calc(100vh - ${p => p.targetRect.y + 10}px);
 
-    border: 2px solid ${p => p.theme.acceptColor};
-    background-color: ${p => p.theme.dataViewer.gridColor};
+    border-radius: 2px;
+    background-color: ${p => p.theme.bgCell};
 
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 0 1px ${p => p.theme.accentColor}, 0px 0px 1px rgba(62, 65, 86, 0.4),
+        0px 6px 12px rgba(62, 65, 86, 0.15);
 
-    font-family: Roboto, sans-serif;
+    font-family: ${p => p.theme.fontFamily};
     font-size: 13px;
 
-    padding: ${p => Math.max(0, (p.targetRect.height - 30) / 2)}px 6.5px 2px;
+    padding: ${p => Math.max(0, (p.targetRect.height - 28) / 2)}px 8.5px 3px;
 
-    display: flex;
+    @keyframes glide_fade_in {
+        from {
+            opacity: 0%;
+        }
 
-    overflow-y: auto;
-    overflow-x: hidden;
-
-    input {
-        width: 100%;
-
-        border: none;
-        border-width: 0;
-        outline: none;
+        to {
+            opacity: 100%;
+        }
     }
 
-    textarea {
-        border: none;
-        border-width: 0;
-        outline: none;
-    }
+    animation: glide_fade_in 60ms 1;
 
-    ${GrowingEntryStyle} {
-        height: 100%;
+    .clip-region {
+        display: flex;
+        flex-direction: column;
+        border-radius: 2px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        input {
+            width: 100%;
+
+            border: none;
+            border-width: 0;
+            outline: none;
+        }
+
+        textarea {
+            border: none;
+            border-width: 0;
+            outline: none;
+        }
+
+        ${GrowingEntryStyle} {
+            height: 100%;
+        }
     }
 
     text-align: start;

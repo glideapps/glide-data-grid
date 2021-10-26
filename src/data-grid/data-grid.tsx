@@ -2,18 +2,7 @@ import * as React from "react";
 import { Theme } from "../common/styles";
 import { withTheme } from "styled-components";
 import ImageWindowLoader from "../common/image-window-loader";
-import {
-    drawBoolean,
-    drawBubbles,
-    drawDrilldownCell,
-    drawImage,
-    drawProtectedCell,
-    drawTextCell,
-    getColumnIndexForX,
-    getEffectiveColumns,
-    getRowIndexForY,
-    roundedPoly,
-} from "./data-grid-lib";
+import { getColumnIndexForX, getEffectiveColumns, getRowIndexForY, useMappedColumns } from "./data-grid-lib";
 import {
     GridColumn,
     GridCell,
@@ -23,11 +12,15 @@ import {
     GridMouseEventArgs,
     GridDragEventArgs,
     GridKeyEventArgs,
+    InnerGridCell,
+    InnerGridCellKind,
+    CompactSelection,
 } from "./data-grid-types";
-import { dontAwait } from "../common/support";
-import { buildSpriteMap, drawSprite, SpriteVariant } from "./data-grid-sprites";
+import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
+import { drawCell, drawGrid, makeBuffers } from "./data-grid-render";
+import { AnimationManager, StepCallback } from "./animation-manager";
 
 export interface DataGridProps {
     readonly width: number;
@@ -40,6 +33,7 @@ export interface DataGridProps {
     readonly translateY?: number;
 
     readonly firstColSticky: boolean;
+    readonly lastRowSticky: boolean;
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
     readonly isDragging: boolean;
@@ -56,13 +50,15 @@ export interface DataGridProps {
 
     readonly className?: string;
 
-    readonly getCellContent: (cell: readonly [number, number]) => GridCell;
+    readonly getCellContent: (cell: readonly [number, number]) => InnerGridCell;
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
-    readonly selectedRows?: readonly number[];
-    readonly selectedColumns?: readonly number[];
+    readonly selectedRows?: CompactSelection;
+    readonly selectedColumns?: CompactSelection;
     readonly selectedCell?: GridSelection;
     readonly prelightCells?: readonly (readonly [number, number])[];
+
+    readonly disabledRows?: CompactSelection;
 
     readonly onItemHovered?: (args: GridMouseEventArgs) => void;
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
@@ -84,11 +80,20 @@ export interface DataGridProps {
         src: number;
         dest: number;
     };
+
+    readonly experimental?: {
+        readonly paddingRight?: number;
+        readonly paddingBottom?: number;
+    };
+
+    readonly headerIcons?: SpriteMap;
 }
 
 interface Props extends DataGridProps {
     readonly theme: Theme;
 }
+
+type Item = readonly [number, number | undefined];
 
 interface BlitData {
     readonly cellXOffset: number;
@@ -97,8 +102,15 @@ interface BlitData {
     readonly translateY: number;
 }
 
+type DamageUpdateList = readonly {
+    cell: readonly [number, number];
+    // newValue: GridCell,
+}[];
+
 export interface DataGridRef {
     focus: () => void;
+    getBounds: (col: number, row: number) => Rectangle | undefined;
+    damage: (cells: DamageUpdateList) => void;
 }
 
 const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forwardedRef) => {
@@ -119,6 +131,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         selectedCell,
         selectedColumns,
         firstColSticky,
+        lastRowSticky,
         onMouseDown,
         onMouseUp,
         onMouseMove,
@@ -133,7 +146,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         isDragging,
         isDraggable,
         allowResize,
+        disabledRows,
         prelightCells,
+        headerIcons,
         drawCustomCell,
         onCellFocused,
     } = p;
@@ -144,14 +159,26 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const imageLoader = React.useRef<ImageWindowLoader>();
     const canBlit = React.useRef<boolean>();
-    const damageRegion = React.useRef<readonly (readonly [number, number])[] | undefined>(undefined);
+    const damageRegion = React.useRef<readonly Item[] | undefined>(undefined);
+    const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
     const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
-    const [hoveredItem, setHoveredItem] = React.useState<readonly [number, number | undefined] | undefined>();
+    const [hoveredItem, setHoveredItem] = React.useState<Item | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
+    const [buffers] = React.useState(() => makeBuffers());
+
+    const spriteManager = React.useMemo(() => new SpriteManager(headerIcons), [headerIcons]);
 
     React.useEffect(() => {
-        dontAwait(buildSpriteMap(theme));
-    }, [theme]);
+        const fn = async () => {
+            const changed = await spriteManager.buildSpriteMap(theme, columns);
+            if (changed) {
+                lastDrawRef.current();
+            }
+        };
+        void fn();
+    }, [columns, spriteManager, theme]);
+
+    const mappedColumns = useMappedColumns(columns, firstColSticky);
 
     const getBoundsForItem = React.useCallback(
         (canvas: HTMLCanvasElement, col: number, row: number | undefined): Rectangle => {
@@ -164,7 +191,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 height: 0,
             };
             const effectiveCols = getEffectiveColumns(
-                columns,
+                mappedColumns,
                 cellXOffset,
                 width,
                 firstColSticky,
@@ -184,6 +211,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             if (row === undefined) {
                 result.y = rect.y;
                 result.height = headerHeight;
+            } else if (lastRowSticky && row === rows - 1) {
+                const stickyHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(row);
+                result.y = rect.y + (height - stickyHeight);
+                result.height = stickyHeight;
             } else {
                 for (let r = cellYOffset; r < row; r++) {
                     result.y += typeof rowHeight === "number" ? rowHeight : rowHeight(r);
@@ -193,18 +224,31 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
             return result;
         },
-        [cellXOffset, cellYOffset, columns, firstColSticky, headerHeight, rowHeight, width, translateX, translateY]
+        [
+            headerHeight,
+            translateY,
+            mappedColumns,
+            cellXOffset,
+            width,
+            firstColSticky,
+            translateX,
+            lastRowSticky,
+            rows,
+            rowHeight,
+            height,
+            cellYOffset,
+        ]
     );
 
     const getMouseArgsForPosition = React.useCallback(
-        (canvas: HTMLCanvasElement, posX: number, posY: number, ev?: MouseEvent): GridMouseEventArgs => {
+        (canvas: HTMLCanvasElement, posX: number, posY: number, ev?: MouseEvent | TouchEvent): GridMouseEventArgs => {
             const rect = canvas.getBoundingClientRect();
             const x = posX - rect.left;
             const y = posY - rect.top;
             const edgeDetectionBuffer = 5;
 
             const effectiveCols = getEffectiveColumns(
-                columns,
+                mappedColumns,
                 cellXOffset,
                 width,
                 firstColSticky,
@@ -217,20 +261,42 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
             // -1: header or above
             // undefined: offbottom
-            const row = getRowIndexForY(y, headerHeight, rows, rowHeight, cellYOffset, translateY);
+            const row = getRowIndexForY(
+                y,
+                height,
+                headerHeight,
+                rows,
+                rowHeight,
+                cellYOffset,
+                translateY,
+                lastRowSticky
+            );
 
             const shiftKey = ev?.shiftKey === true;
+            const ctrlKey = ev?.ctrlKey === true;
+            const metaKey = ev?.metaKey === true;
+            const isTouch = ev !== undefined && !(ev instanceof MouseEvent);
 
             let result: GridMouseEventArgs;
             if (col === -1 || y < 0 || x < 0 || row === undefined || x > width || y > height) {
                 const horizontal = x > width ? -1 : x < 0 ? 1 : 0;
                 const vertical = y > height ? 1 : y < 0 ? -1 : 0;
 
+                let isEdge = false;
+                if (col === -1 && row === -1) {
+                    const b = getBoundsForItem(canvas, mappedColumns.length - 1, undefined);
+                    isEdge = posX < b.x + b.width + edgeDetectionBuffer;
+                }
+
                 result = {
                     kind: "out-of-bounds",
-                    location: [col !== -1 ? col : x < 0 ? 0 : columns.length - 1, row ?? rows - 1],
+                    location: [col !== -1 ? col : x < 0 ? 0 : mappedColumns.length - 1, row ?? rows - 1],
                     direction: [horizontal, vertical],
                     shiftKey,
+                    ctrlKey,
+                    metaKey,
+                    isEdge,
+                    isTouch,
                 };
             } else if (row === -1) {
                 let bounds = getBoundsForItem(canvas, col, undefined);
@@ -250,6 +316,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                         bounds: bounds,
                         isEdge,
                         shiftKey,
+                        ctrlKey,
+                        metaKey,
+                        isTouch,
                     };
                 } else {
                     result = {
@@ -258,6 +327,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                         bounds: bounds,
                         isEdge,
                         shiftKey,
+                        ctrlKey,
+                        metaKey,
+                        isTouch,
                     };
                 }
             } else {
@@ -269,23 +341,27 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     bounds: bounds,
                     isEdge,
                     shiftKey,
+                    ctrlKey,
+                    metaKey,
+                    isTouch,
                 };
             }
             return result;
         },
         [
+            mappedColumns,
             cellXOffset,
-            cellYOffset,
-            columns,
-            firstColSticky,
-            getBoundsForItem,
-            headerHeight,
-            height,
-            rowHeight,
-            rows,
             width,
+            firstColSticky,
             translateX,
+            height,
+            headerHeight,
+            rows,
+            rowHeight,
+            cellYOffset,
             translateY,
+            lastRowSticky,
+            getBoundsForItem,
         ]
     );
 
@@ -303,604 +379,71 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         hoveredCol = hoveredItem[0];
     }
 
-    const drawCell = React.useCallback(
-        (
-            ctx: CanvasRenderingContext2D,
-            row: number,
-            cell: GridCell,
-            sourceIndex: number,
-            x: number,
-            y: number,
-            w: number,
-            h: number,
-            highlighted: boolean
-        ) => {
-            const drawn = drawCustomCell?.(ctx, cell, theme, { x, y, width: w, height: h }) === true;
-            if (!drawn) {
-                if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
-                    drawTextCell(ctx, theme, cell.displayData, x, y, w, h);
-                } else if (cell.kind === GridCellKind.Markdown || cell.kind === GridCellKind.Uri) {
-                    drawTextCell(ctx, theme, cell.data, x, y, w, h);
-                } else if (cell.kind === GridCellKind.Boolean) {
-                    if (cell.data || cell.showUnchecked) {
-                        drawBoolean(ctx, theme, cell.data, x, y, w, h, highlighted, cell.allowEdit);
-                    }
-                } else if (cell.kind === GridCellKind.Bubble) {
-                    drawBubbles(ctx, theme, cell.data, x, y, w, h, highlighted);
-                } else if (cell.kind === GridCellKind.Image && imageLoader.current !== undefined) {
-                    drawImage(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, imageLoader.current);
-                } else if (cell.kind === GridCellKind.RowID) {
-                    drawTextCell(ctx, theme, cell.data, x, y, w, h, theme.fgColorLight);
-                } else if (cell.kind === GridCellKind.Protected) {
-                    drawProtectedCell(ctx, theme, x, y, w, h, !highlighted);
-                } else if (cell.kind === GridCellKind.Drilldown && imageLoader.current !== undefined) {
-                    drawDrilldownCell(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, imageLoader.current);
-                }
-            }
-        },
-        [drawCustomCell, theme]
-    );
-
-    const timingValue = React.useRef({
-        count: 0,
-        time: 0,
-    });
-
     const draw = React.useCallback(() => {
-        const currentTime = timingValue.current;
         const canvas = ref.current;
         if (canvas === null) return;
 
-        const dpr = Math.ceil(window.devicePixelRatio) ?? 1;
-
-        if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
-            canvas.width = Math.floor(width * dpr);
-            canvas.height = Math.floor(height * dpr);
-        }
-
-        const last = lastBlitData.current;
-        if (
-            canBlit.current === true &&
-            cellXOffset === last.cellXOffset &&
-            cellYOffset === last.cellYOffset &&
-            translateX === last.translateX &&
-            translateY === last.translateY
-        )
-            return;
-
-        const ctx = canvas.getContext("2d", {
-            alpha: false,
-        });
-        if (ctx === null) return;
-
-        const start = window.performance.now();
-
-        const getRowHeight = (r: number) => (typeof rowHeight === "number" ? rowHeight : rowHeight(r));
-
-        ctx.save();
-        ctx.beginPath(); // clear any path in the ctx
-        if (dpr !== 1) {
-            ctx.scale(dpr, dpr);
-        }
-
-        const damage = damageRegion.current;
-        const drawRegions: Rectangle[] = [];
-        let blittedYOnly = false;
-
-        const effectiveCols = getEffectiveColumns(
-            columns,
-            cellXOffset,
+        drawGrid(
+            canvas,
+            buffers,
             width,
+            height,
+            cellXOffset,
+            cellYOffset,
+            Math.round(translateX),
+            Math.round(translateY),
+            columns,
+            mappedColumns,
             firstColSticky,
             dragAndDropState,
-            translateX
+            theme,
+            headerHeight,
+            selectedRows ?? CompactSelection.empty(),
+            disabledRows ?? CompactSelection.empty(),
+            rowHeight,
+            selectedColumns ?? CompactSelection.empty(),
+            hoveredCol,
+            isResizing,
+            selectedCell,
+            lastRowSticky,
+            rows,
+            getCellContent,
+            drawCustomCell,
+            prelightCells,
+            imageLoader.current,
+            lastBlitData,
+            canBlit.current,
+            damageRegion.current,
+            hoverValues.current,
+            spriteManager
         );
-
-        if (canBlit.current === true) {
-            ctx.imageSmoothingEnabled = false;
-            const minY = Math.min(last.cellYOffset, cellYOffset);
-            const maxY = Math.max(last.cellYOffset, cellYOffset);
-            let deltaY = 0;
-            for (let i = minY; i < maxY; i++) {
-                deltaY += getRowHeight(i);
-            }
-            if (cellYOffset > last.cellYOffset) {
-                deltaY = -deltaY;
-            }
-            deltaY += translateY - last.translateY;
-
-            const minX = Math.min(last.cellXOffset, cellXOffset);
-            const maxX = Math.max(last.cellXOffset, cellXOffset);
-            let deltaX = 0;
-            for (let i = minX; i < maxX; i++) {
-                deltaX += columns[i].width;
-            }
-            if (cellXOffset > last.cellXOffset) {
-                deltaX = -deltaX;
-            }
-            deltaX += translateX - last.translateX;
-
-            let stickyWidth = 0;
-            for (const c of effectiveCols) {
-                if (c.sticky) {
-                    stickyWidth += c.width + 1;
-                } else {
-                    break;
-                }
-            }
-
-            // drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
-
-            const blitWidth = width - stickyWidth - Math.abs(deltaX);
-            const blitHeight = height - headerHeight - Math.abs(deltaY) - 1;
-
-            if (blitWidth > 150 && blitHeight > 150) {
-                blittedYOnly = deltaX === 0;
-
-                // blit Y
-                if (deltaY > 0) {
-                    // scrolling up
-                    ctx.drawImage(
-                        canvas,
-                        0,
-                        (headerHeight + 1) * dpr,
-                        width * dpr,
-                        blitHeight * dpr,
-                        0,
-                        deltaY + headerHeight + 1,
-                        width,
-                        blitHeight
-                    );
-                    drawRegions.push({
-                        x: 0,
-                        y: headerHeight,
-                        width: width,
-                        height: deltaY + 1,
-                    });
-                } else if (deltaY < 0) {
-                    // scrolling down
-                    ctx.drawImage(
-                        canvas,
-                        0,
-                        (-deltaY + headerHeight + 1) * dpr,
-                        width * dpr,
-                        blitHeight * dpr,
-                        0,
-                        headerHeight + 1,
-                        width,
-                        blitHeight
-                    );
-                    drawRegions.push({
-                        x: 0,
-                        y: height + deltaY,
-                        width: width,
-                        height: -deltaY,
-                    });
-                }
-
-                // blit X
-                if (deltaX > 0) {
-                    // scrolling right
-                    ctx.drawImage(
-                        canvas,
-                        stickyWidth * dpr,
-                        0,
-                        blitWidth * dpr,
-                        height * dpr,
-                        deltaX + stickyWidth,
-                        0,
-                        blitWidth,
-                        height
-                    );
-                    drawRegions.push({
-                        x: stickyWidth - 1,
-                        y: 0,
-                        width: deltaX + 1,
-                        height: height,
-                    });
-                } else if (deltaX < 0) {
-                    // scrolling left
-                    ctx.drawImage(
-                        canvas,
-                        (stickyWidth - deltaX) * dpr,
-                        0,
-                        blitWidth * dpr,
-                        height * dpr,
-                        stickyWidth,
-                        0,
-                        blitWidth,
-                        height
-                    );
-                    drawRegions.push({
-                        x: width + deltaX,
-                        y: 0,
-                        width: -deltaX,
-                        height: height,
-                    });
-                }
-
-                if (drawRegions.length > 0) {
-                    for (const r of drawRegions) {
-                        ctx.rect(r.x, r.y, r.width, r.height);
-                    }
-                    ctx.clip();
-                    ctx.beginPath();
-                }
-            }
-            ctx.imageSmoothingEnabled = true;
-        }
-
-        if (damage !== undefined) {
-            let row = cellYOffset;
-            let y = headerHeight + translateY;
-            ctx.beginPath();
-            while (y < height) {
-                let x = 0;
-                const rh = getRowHeight(row);
-
-                for (const c of effectiveCols) {
-                    const rowLocal = row;
-                    if (damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) !== undefined) {
-                        const tx = c.sticky ? 0 : translateX;
-                        ctx.rect(x + 1 + tx, y + 1, c.width - 1, rh - 1);
-                    }
-                    x += c.width;
-                }
-
-                row++;
-                y += rh;
-            }
-
-            ctx.clip();
-            ctx.beginPath();
-        }
-
-        ctx.fillStyle = theme.dataViewer.gridColor;
-        ctx.fillRect(0, headerHeight, width, height - headerHeight);
-
-        if (!blittedYOnly && damage === undefined) {
-            // draw header background
-            ctx.fillStyle = theme.dataViewer.columnHeader.bgColor;
-            ctx.fillRect(0, 0, width, headerHeight);
-        }
-
-        // draw lines all at once
-        {
-            ctx.beginPath();
-
-            // vertical lines
-            let x = 0.5;
-            effectiveCols.forEach(c => {
-                x += c.width;
-                const tx = c.sticky ? x : x + translateX;
-                ctx.moveTo(tx, 0);
-                ctx.lineTo(tx, height);
-            });
-
-            // horizontal lines
-            let y = headerHeight + 0.5;
-            let row = cellYOffset;
-            let isHeader = true;
-            while (y + translateY <= height) {
-                const ty = isHeader ? y : y + translateY;
-                ctx.moveTo(0, ty);
-                ctx.lineTo(width, ty);
-
-                y += getRowHeight(row);
-                isHeader = false;
-                row++;
-            }
-
-            ctx.strokeStyle = theme.borderColor;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        }
-
-        const xPad = 8;
-        const yPad = 2;
-
-        // draw header contents
-        if (!blittedYOnly && damage === undefined) {
-            let x = 0;
-            let clipX = 0;
-            for (const c of effectiveCols) {
-                const selected = selectedColumns?.includes(c.sourceIndex);
-                const hovered = hoveredCol === c.sourceIndex && dragAndDropState === undefined && !isResizing;
-
-                const hasSelectedCell = selectedCell !== undefined && selectedCell.cell[0] === c.sourceIndex;
-
-                const fillStyle = selected
-                    ? theme.dataViewer.columnHeader.fgSelected
-                    : theme.dataViewer.columnHeader.fgColor;
-
-                const bgFillStyle = selected
-                    ? theme.dataViewer.columnHeader.bgSelected
-                    : hasSelectedCell
-                    ? theme.dataViewer.columnHeader.bgDark
-                    : theme.dataViewer.columnHeader.bgColor;
-
-                ctx.save();
-                if (c.sticky) {
-                    clipX = Math.max(clipX, x + c.width);
-                } else {
-                    ctx.beginPath();
-                    ctx.rect(clipX, 0, width, height);
-                    ctx.clip();
-                    ctx.translate(translateX, 0);
-                }
-
-                if (selected) {
-                    ctx.fillStyle = bgFillStyle;
-                    ctx.fillRect(x + 1, 0, c.width - 1, headerHeight);
-                } else if (hasSelectedCell) {
-                    ctx.fillStyle = theme.dataViewer.columnHeader.bgDark;
-                    ctx.fillRect(x + 1, 0, c.width - 1, headerHeight);
-                }
-
-                ctx.beginPath();
-                ctx.rect(x + xPad, yPad, c.width - xPad, headerHeight - yPad * 2);
-                ctx.clip();
-
-                let drawX = x + xPad;
-                ctx.globalAlpha = hovered || selected ? 1 : 0.6;
-                if (c.icon !== undefined) {
-                    let variant: SpriteVariant = selected ? "selected" : "normal";
-                    if (c.style === "highlight") {
-                        variant = selected ? "selected" : "special";
-                    }
-                    drawSprite(c.icon, variant, ctx, drawX, (headerHeight - 20) / 2, 20);
-
-                    if (c.overlayIcon !== undefined) {
-                        ctx.globalAlpha = 1;
-                        drawSprite(
-                            c.overlayIcon,
-                            selected ? "selected" : "special",
-                            ctx,
-                            drawX + 9,
-                            (headerHeight - 18) / 2 + 6,
-                            18
-                        );
-                        ctx.globalAlpha = hovered || selected ? 1 : 0.6;
-                    }
-
-                    drawX += 26;
-                }
-
-                ctx.font = "bold 14px Roboto, sans-serif";
-                ctx.fillStyle = fillStyle;
-                ctx.fillText(c.title, drawX, headerHeight / 2 + 5);
-                ctx.globalAlpha = 1;
-
-                if (hovered && c.hasMenu === true) {
-                    const fadeWidth = 35;
-                    const fadeStart = x + c.width - fadeWidth;
-                    const grad = ctx.createLinearGradient(fadeStart, 0, fadeStart + fadeWidth, 0);
-                    grad.addColorStop(0, bgFillStyle + "00");
-                    grad.addColorStop(0.3, bgFillStyle);
-                    grad.addColorStop(1, bgFillStyle);
-                    ctx.fillStyle = grad;
-                    ctx.rect(fadeStart, 0, fadeWidth, headerHeight);
-                    ctx.fill();
-
-                    ctx.beginPath();
-                    const triangleX = x + c.width - 20;
-                    const triangleY = headerHeight / 2 - 3;
-                    roundedPoly(
-                        ctx,
-                        [
-                            {
-                                x: triangleX,
-                                y: triangleY,
-                            },
-                            {
-                                x: triangleX + 11,
-                                y: triangleY,
-                            },
-                            {
-                                x: triangleX + 5.5,
-                                y: triangleY + 6,
-                            },
-                        ],
-                        1
-                    );
-
-                    ctx.fillStyle = fillStyle;
-                    ctx.fill();
-                }
-
-                ctx.restore();
-
-                x += c.width;
-            }
-        }
-
-        ctx.beginPath();
-        ctx.rect(0, headerHeight + 1, width, height - headerHeight - 1);
-        ctx.clip();
-        ctx.beginPath();
-
-        let x = 0;
-        let clipX = 0;
-        let row = 0;
-        ctx.font = "13px Roboto, sans-serif";
-        for (const c of effectiveCols) {
-            let y = headerHeight + translateY;
-            row = cellYOffset;
-
-            ctx.save();
-
-            const clipCol = (offset: number) => {
-                ctx.beginPath();
-                if (c.sticky) {
-                    clipX = Math.max(clipX, x + c.width);
-                    ctx.rect(x, headerHeight + 1, c.width + offset, height - headerHeight - 1);
-                    ctx.clip();
-                } else {
-                    const diff = Math.min(0, x + translateX - clipX);
-                    ctx.rect(
-                        Math.max(x + translateX, clipX),
-                        headerHeight + 1,
-                        c.width + diff + offset,
-                        height - headerHeight - 1
-                    );
-                    ctx.clip();
-                    ctx.translate(translateX, 0);
-                }
-            };
-            clipCol(0);
-
-            while (y < height) {
-                const rh = getRowHeight(row);
-                const rowSelected = selectedRows?.includes(row);
-
-                if (
-                    drawRegions.length === 0 ||
-                    drawRegions.find(
-                        drawRegion =>
-                            (y >= drawRegion.y && y <= drawRegion.y + drawRegion.height) ||
-                            (drawRegion.y >= y && drawRegion.y <= y + rh)
-                    )
-                ) {
-                    const rowLocal = row;
-                    if (
-                        damage === undefined ||
-                        damage.find(d => d[0] === c.sourceIndex && d[1] === rowLocal) !== undefined
-                    ) {
-                        ctx.beginPath();
-
-                        const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
-                        let highlighted = rowSelected || selectedColumns?.includes(c.sourceIndex) || isFocused;
-
-                        if (selectedCell?.range !== undefined) {
-                            const { range } = selectedCell;
-                            if (
-                                c.sourceIndex >= range.x &&
-                                c.sourceIndex < range.x + range.width &&
-                                row >= range.y &&
-                                row < range.y + range.height
-                            ) {
-                                highlighted = true;
-                            }
-                        }
-
-                        if (highlighted || rowSelected) {
-                            ctx.fillStyle = theme.dataViewer.bgSelected;
-                            if (x === 0) {
-                                ctx.fillRect(x, y + 1, c.width, rh - 1);
-                            } else {
-                                ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
-                            }
-                        } else {
-                            // eslint-disable-next-line no-loop-func
-                            if (prelightCells?.find(pre => pre[0] === c.sourceIndex && pre[1] === row) !== undefined) {
-                                ctx.fillStyle = theme.dataViewer.bgPrelight;
-                                if (x === 0) {
-                                    ctx.fillRect(x, y + 1, c.width, rh - 1);
-                                } else {
-                                    ctx.fillRect(x + 1, y + 1, c.width - 1, rh - 1);
-                                }
-                            }
-                        }
-
-                        const cell: GridCell =
-                            row < rows
-                                ? getCellContent([c.sourceIndex, row])
-                                : {
-                                      kind: GridCellKind.Loading,
-                                      allowOverlay: false,
-                                  };
-
-                        if (cell.style === "faded") {
-                            ctx.globalAlpha = 0.6;
-                        }
-
-                        drawCell(ctx, row, cell, c.sourceIndex, x, y, c.width, rh, highlighted);
-
-                        ctx.globalAlpha = 1;
-
-                        if (isFocused) {
-                            ctx.restore();
-                            ctx.save();
-
-                            ctx.beginPath();
-                            clipCol(1);
-
-                            ctx.beginPath();
-                            ctx.rect(x + 1, y + 1, c.width - 1, rh - 1);
-                            ctx.strokeStyle = theme.acceptColor;
-                            ctx.lineWidth = 2;
-                            ctx.stroke();
-
-                            ctx.restore();
-                            ctx.save();
-                            ctx.beginPath();
-                            clipCol(0);
-                        }
-                    }
-                }
-
-                y += rh;
-                row++;
-            }
-
-            ctx.restore();
-            x += c.width;
-        }
-
-        imageLoader.current?.setWindow({
-            x: cellXOffset,
-            y: cellYOffset,
-            width: effectiveCols.length,
-            height: row - cellYOffset,
-        });
-
-        lastBlitData.current = { cellXOffset, cellYOffset, translateX, translateY };
-
-        ctx.restore();
-
-        const end = window.performance.now();
-        const elapsedMs = end - start;
-        timingValue.current = {
-            count: currentTime.count + 1,
-            time: currentTime.time + elapsedMs,
-        };
-
-        // Do nothing with frame times for now, in the future we can use them to draw placeholders instead
-        // when rapid scrolling is underway.
-        // if (timingValue.current.count % 1000 === 0) {
-        //     alert(`Average Frame Time: ${timingValue.current.time / timingValue.current.count}`);
-        // }
     }, [
         width,
         height,
-        columns,
         cellXOffset,
-        firstColSticky,
+        cellYOffset,
         translateX,
         translateY,
+        columns,
+        mappedColumns,
+        firstColSticky,
         dragAndDropState,
-        theme.dataViewer.gridColor,
-        theme.dataViewer.columnHeader.bgColor,
-        theme.dataViewer.columnHeader.fgSelected,
-        theme.dataViewer.columnHeader.fgColor,
-        theme.dataViewer.columnHeader.bgSelected,
-        theme.dataViewer.columnHeader.bgDark,
-        theme.dataViewer.bgSelected,
-        theme.dataViewer.bgPrelight,
-        theme.borderColor,
-        theme.acceptColor,
-        cellYOffset,
-        rowHeight,
+        theme,
         headerHeight,
+        selectedRows,
+        disabledRows,
+        rowHeight,
         selectedColumns,
         hoveredCol,
         isResizing,
         selectedCell,
-        selectedRows,
+        lastRowSticky,
         rows,
         getCellContent,
-        drawCell,
+        drawCustomCell,
         prelightCells,
+        spriteManager,
+        buffers,
     ]);
 
     React.useEffect(() => {
@@ -929,21 +472,39 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         prelightCells,
     ]);
 
-    React.useEffect(draw, [draw]);
+    const lastDrawRef = React.useRef(draw);
+    React.useEffect(() => {
+        draw();
+        lastDrawRef.current = draw;
+    }, [draw]);
 
-    const imageLoaded = React.useCallback(
-        (locations: readonly (readonly [number, number])[]) => {
-            canBlit.current = false;
-            damageRegion.current = locations;
-            draw();
-            damageRegion.current = undefined;
-        },
-        [draw]
-    );
+    const drawDamage = React.useCallback((locations: readonly (readonly [number, number])[]) => {
+        canBlit.current = false;
+        damageRegion.current = locations;
+        lastDrawRef.current();
+        damageRegion.current = undefined;
+    }, []);
 
-    imageLoader.current?.setCallback(imageLoaded);
+    const damage = React.useCallback((cells: DamageUpdateList) => {
+        canBlit.current = false;
+        damageRegion.current = cells.map(x => x.cell);
+        lastDrawRef.current();
+        damageRegion.current = undefined;
+    }, []);
 
-    const headerHovered = hoveredItem?.[0] !== undefined && hoveredItem[1] === undefined;
+    imageLoader.current?.setCallback(drawDamage);
+
+    const [hCol, hRow] = hoveredItem ?? [];
+    const headerHovered = hCol !== undefined && hRow === undefined;
+    let clickableInnerCellHovered = false;
+    let editableBoolHovered = false;
+    if (hCol !== undefined && hRow !== undefined) {
+        const cell = getCellContent([hCol, hRow]);
+        clickableInnerCellHovered =
+            cell.kind === InnerGridCellKind.NewRow ||
+            (cell.kind === InnerGridCellKind.Marker && cell.markerKind !== "number");
+        editableBoolHovered = cell.kind === GridCellKind.Boolean && cell.allowEdit === true;
+    }
     const canDrag = hoveredOnEdge ?? false;
     const style = React.useMemo(
         () => ({
@@ -954,11 +515,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 ? "grabbing"
                 : canDrag || isResizing
                 ? "col-resize"
-                : headerHovered
+                : headerHovered || clickableInnerCellHovered || editableBoolHovered
                 ? "pointer"
                 : "default",
         }),
-        [width, height, canDrag, isResizing, isDragging, headerHovered]
+        [width, height, isDragging, canDrag, isResizing, headerHovered, clickableInnerCellHovered, editableBoolHovered]
     );
 
     const target = eventTargetRef?.current;
@@ -968,11 +529,26 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     }
 
     const onMouseDownImpl = React.useCallback(
-        (ev: MouseEvent) => {
+        (ev: MouseEvent | TouchEvent) => {
             const canvas = ref.current;
             const eventTarget = eventTargetRef?.current;
             if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) return;
-            const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
+
+            let clientX: number;
+            let clientY: number;
+            if (ev instanceof MouseEvent) {
+                clientX = ev.clientX;
+                clientY = ev.clientY;
+            } else {
+                clientX = ev.touches[0].clientX;
+                clientY = ev.touches[0].clientY;
+            }
+            if (ev.target === eventTarget && eventTarget !== null) {
+                const bounds = eventTarget.getBoundingClientRect();
+                if (clientX > bounds.left + eventTarget.clientWidth) return;
+            }
+
+            const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
 
             if (args.kind === "header") {
                 const [col] = args.location;
@@ -980,8 +556,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
                 if (header.hasMenu === true && !(hoveredOnEdge ?? false)) {
                     const headerBounds = getBoundsForItem(canvas, col, undefined);
-                    if (ev.clientX > headerBounds.x + headerBounds.width - 40) {
-                        onHeaderMenuClick?.(col, headerBounds);
+                    if (clientX > headerBounds.x + headerBounds.width - 40) {
                         return;
                     }
                 }
@@ -989,28 +564,71 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
             onMouseDown?.(args);
         },
+        [columns, eventTargetRef, getBoundsForItem, getMouseArgsForPosition, hoveredOnEdge, onMouseDown]
+    );
+    useEventListener("touchstart", onMouseDownImpl, window, true);
+    useEventListener("mousedown", onMouseDownImpl, window, true);
+
+    const onMouseUpImpl = React.useCallback(
+        (ev: MouseEvent | TouchEvent) => {
+            const canvas = ref.current;
+            if (onMouseUp === undefined) return;
+            const eventTarget = eventTargetRef?.current;
+            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) return;
+
+            ev.preventDefault();
+            let clientX: number;
+            let clientY: number;
+            if (ev instanceof MouseEvent) {
+                clientX = ev.clientX;
+                clientY = ev.clientY;
+            } else {
+                clientX = ev.changedTouches[0].clientX;
+                clientY = ev.changedTouches[0].clientY;
+            }
+
+            const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
+
+            if (args.kind === "header") {
+                const [col] = args.location;
+                const header = columns[col];
+
+                if (header.hasMenu === true && !(hoveredOnEdge ?? false)) {
+                    const headerBounds = getBoundsForItem(canvas, col, undefined);
+                    if (clientX > headerBounds.x + headerBounds.width - 40) {
+                        onHeaderMenuClick?.(col, headerBounds);
+                        return;
+                    }
+                }
+            }
+
+            onMouseUp(args);
+        },
         [
+            onMouseUp,
             eventTargetRef,
             getMouseArgsForPosition,
-            onMouseDown,
             columns,
             hoveredOnEdge,
             getBoundsForItem,
             onHeaderMenuClick,
         ]
     );
-    useEventListener("mousedown", onMouseDownImpl, window, true);
+    useEventListener("mouseup", onMouseUpImpl, window, false);
+    useEventListener("touchend", onMouseUpImpl, window, false);
 
-    const onMouseUpImpl = React.useCallback(
-        (ev: MouseEvent) => {
-            const canvas = ref.current;
-            if (canvas === null || onMouseUp === undefined) return;
+    const onAnimationFrame = React.useCallback<StepCallback>(values => {
+        canBlit.current = false;
+        damageRegion.current = values.map(x => x.item);
+        hoverValues.current = values;
+        lastDrawRef.current();
+        damageRegion.current = undefined;
+    }, []);
 
-            onMouseUp(getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev));
-        },
-        [getMouseArgsForPosition, onMouseUp]
-    );
-    useEventListener("mouseup", onMouseUpImpl, window, true);
+    const animationManager = React.useRef(new AnimationManager(onAnimationFrame));
+    React.useEffect(() => {
+        animationManager.current.setHovered(hoveredItem);
+    }, [hoveredItem]);
 
     const hoveredRef = React.useRef<GridMouseEventArgs>();
     const onMouseMoveImpl = React.useCallback(
@@ -1025,7 +643,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 hoveredRef.current = args;
             }
 
-            setHoveredOnEdge(args.kind !== "out-of-bounds" && args.isEdge && allowResize === true);
+            setHoveredOnEdge(args.isEdge && allowResize === true);
 
             onMouseMove?.(ev);
         },
@@ -1098,7 +716,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const onDragStartImpl = React.useCallback(
         (event: DragEvent) => {
             const canvas = ref.current;
-            if (canvas === null || !isDraggable === true) return;
+            if (canvas === null || !isDraggable === true) return false;
 
             let dragMime: string | undefined;
             let dragData: string | undefined;
@@ -1141,7 +759,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
                         const ctx = offscreen.getContext("2d");
                         if (ctx !== null) {
-                            ctx.fillStyle = theme.dataViewer.bgColor;
+                            ctx.fillStyle = theme.bgCell;
                             ctx.fillRect(0, 0, offscreen.width, offscreen.height);
                             drawCell(
                                 ctx,
@@ -1152,7 +770,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                                 0,
                                 boundsForDragTarget.width,
                                 boundsForDragTarget.height,
-                                false
+                                false,
+                                theme,
+                                drawCustomCell,
+                                imageLoader.current,
+                                1
                             );
                         }
 
@@ -1176,15 +798,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 event.preventDefault();
             }
         },
-        [
-            isDraggable,
-            getMouseArgsForPosition,
-            onDragStart,
-            getBoundsForItem,
-            theme.dataViewer.bgColor,
-            drawCell,
-            getCellContent,
-        ]
+        [isDraggable, getMouseArgsForPosition, onDragStart, getBoundsForItem, theme, getCellContent, drawCustomCell]
     );
     useEventListener("dragstart", onDragStartImpl, eventTargetRef?.current ?? null, false, false);
 
@@ -1192,11 +806,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const focusElement = React.useCallback(
         (el: HTMLElement | null) => {
             // We don't want to steal the focus if we don't currently own the focus.
-            if (!ref.current?.contains(document.activeElement)) return;
+            if (ref.current === null || !ref.current.contains(document.activeElement)) return;
             if (el === null) {
-                canvasRef?.current?.focus();
+                canvasRef?.current?.focus({
+                    preventScroll: true,
+                });
             } else {
-                el.focus();
+                el.focus({
+                    preventScroll: true,
+                });
             }
             focusRef.current = el;
         },
@@ -1213,19 +831,31 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 // no longer attached is enough to resolve the problem. In the future this
                 // should be replaced with something much more robust.
                 if (el === null || !document.contains(el)) {
-                    canvasRef?.current?.focus();
+                    canvasRef?.current?.focus({
+                        preventScroll: true,
+                    });
                 } else {
-                    el.focus();
+                    el.focus({
+                        preventScroll: true,
+                    });
                 }
             },
+            getBounds: (col: number, row: number) => {
+                if (canvasRef === undefined || canvasRef.current === null) {
+                    return undefined;
+                }
+
+                return getBoundsForItem(canvasRef.current, col, row);
+            },
+            damage,
         }),
-        [canvasRef]
+        [canvasRef, damage, getBoundsForItem]
     );
 
     const accessibilityTree = useDebouncedMemo(
         () => {
             const effectiveCols = getEffectiveColumns(
-                columns,
+                mappedColumns,
                 cellXOffset,
                 width,
                 firstColSticky,
@@ -1233,7 +863,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 translateX
             );
 
-            const getRowData = (cell: GridCell) => {
+            const getRowData = (cell: InnerGridCell) => {
                 switch (cell.kind) {
                     case GridCellKind.Boolean:
                     case GridCellKind.Markdown:
@@ -1244,17 +874,20 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                         return cell.data?.toString() ?? "";
                     case GridCellKind.Drilldown:
                         return cell.data.map(d => d.text).join(", ");
+                    case GridCellKind.Image:
                     case GridCellKind.Bubble:
                         return cell.data.join(", ");
-                    case GridCellKind.Image:
-                        return cell.data.map((i, index) => <img key={index} src={i} />);
+                    // While this would seemingly be better, it triggers the browser to actually
+                    // download the image which we may not want. Sad :(
+                    // case GridCellKind.Image:
+                    //     return cell.data.map((i, index) => <img key={index} src={i} />);
                 }
 
                 return "";
             };
 
             return (
-                <div role="grid" aria-rowcount={rows} aria-colcount={columns.length}>
+                <div role="grid" aria-rowcount={rows} aria-colcount={mappedColumns.length}>
                     <div role="rowgroup">
                         <div role="row" aria-rowindex={1} row-index={1}>
                             {effectiveCols.map(c => (
@@ -1310,7 +943,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         [
             cellXOffset,
             cellYOffset,
-            columns,
+            mappedColumns,
             dragAndDropState,
             firstColSticky,
             focusElement,

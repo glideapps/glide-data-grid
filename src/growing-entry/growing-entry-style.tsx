@@ -4,8 +4,8 @@ import { css } from "styled-components";
 const inputProps = css`
     font-size: 13px;
     line-height: 16px;
-    font-family: Roboto, sans-serif;
-    color: ${p => p.theme.fgColorDark};
+    font-family: ${p => p.theme.fontFamily};
+    color: ${p => p.theme.textDark};
     padding: 0;
     margin: 0;
 `;
@@ -21,13 +21,13 @@ export const InputBox = styled.textarea`
 
     resize: none;
     white-space: normal;
-    width: 100%;
+    min-width: 100%;
     overflow: hidden;
     border: 0;
     background-color: transparent;
 
     ::placeholder {
-        color: ${p => p.theme.fgColorLight};
+        color: ${p => p.theme.textLight};
     }
 
     ${inputProps}
@@ -37,15 +37,18 @@ export const ShadowBox = styled.div`
     visibility: hidden;
     white-space: pre-wrap;
     word-wrap: break-word;
-    overflow-wrap: break-word;
 
-    width: 100%;
+    width: max-content;
+    max-width: 100%;
+
+    min-width: 100%;
 
     ${inputProps}
+
+    padding-bottom: 2px;
 `;
 
 export const GrowingEntryStyle = styled.div`
     position: relative;
     margin-top: 6px;
-    width: 100%;
 `;

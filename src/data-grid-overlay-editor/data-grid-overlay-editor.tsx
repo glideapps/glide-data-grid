@@ -9,7 +9,7 @@ import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style";
 import BubblesOverlayEditor from "./private/bubbles-overlay-editor";
 import DrilldownOverlayEditor from "./private/drilldown-overlay-editor";
 import ImageOverlayEditor, { OverlayImageEditorProps } from "./private/image-overlay-editor";
-import MarkdownOverlayEditor from "./private/markdown-overlay-editor";
+import { MarkdownOverlayEditor } from "./private/markdown-overlay-editor";
 import NumberOverlayEditor from "./private/number-overlay-editor";
 import UriOverlayEditor from "./private/uri-overlay-editor";
 
@@ -20,12 +20,21 @@ interface Props {
     readonly content: GridCell;
     readonly onFinishEditing: (newCell: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly forceEditMode: boolean;
+    readonly highlight: boolean;
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
 }
 
 const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { target, content, onFinishEditing, forceEditMode, imageEditorOverride, markdownDivCreateNode } = p;
+    const {
+        target,
+        content,
+        onFinishEditing,
+        forceEditMode,
+        imageEditorOverride,
+        markdownDivCreateNode,
+        highlight,
+    } = p;
 
     const [tempValue, setTempValue] = React.useState<GridCell | undefined>(forceEditMode ? content : undefined);
 
@@ -62,7 +71,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
     );
     const onNumberValueChange = React.useCallback(
         (values: NumberFormatValues) => {
-            if (content.kind === GridCellKind.Number) {
+            if (content.kind === GridCellKind.Number && !Number.isNaN(values.floatValue)) {
                 setTempValue({
                     ...content,
                     data: values.floatValue,
@@ -119,7 +128,8 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
         case GridCellKind.Text:
             editor = (
                 <GrowingEntry
-                    autoFocus={true}
+                    highlight={highlight}
+                    autoFocus={targetValue.readonly !== true}
                     disabled={targetValue.readonly === true}
                     onKeyDown={onKeyDownMultiline}
                     value={targetValue.data}
@@ -143,6 +153,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
         case GridCellKind.Number:
             editor = (
                 <NumberOverlayEditor
+                    highlight={highlight}
                     disabled={targetValue.readonly === true}
                     value={targetValue.data}
                     onKeyDown={onKeyDown}
@@ -170,7 +181,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
         case GridCellKind.Markdown:
             editor = (
                 <MarkdownOverlayEditor
-                    onFinishEditing={onFinishEditing}
+                    onFinish={onClickOutside}
                     targetRect={target}
                     readonly={targetValue.readonly === true}
                     markdown={targetValue.data}
@@ -199,7 +210,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
     const portal = createPortal(
         <ClickOutsideContainer onClickOutside={onClickOutside}>
             <DataGridOverlayEditorStyle targetRect={target} onMouseDown={f} onClick={f}>
-                {editor}
+                <div className="clip-region">{editor}</div>
             </DataGridOverlayEditorStyle>
         </ClickOutsideContainer>,
         portalElement

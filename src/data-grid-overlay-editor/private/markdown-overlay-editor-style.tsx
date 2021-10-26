@@ -1,4 +1,5 @@
 import { Rectangle } from "data-grid/data-grid-types";
+import { GrowingEntryStyle } from "../../growing-entry/growing-entry-style";
 import { styled } from "../../common/styles";
 
 interface Props {
@@ -19,7 +20,16 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
     align-items: flex-start;
     justify-content: space-between;
     position: relative;
-    color: ${p => p.theme.fgColorDark};
+    color: ${p => p.theme.textDark};
+
+    ${GrowingEntryStyle} {
+        flex-shrink: 1;
+        min-width: 0;
+    }
+
+    .spacer {
+        flex: 1;
+    }
 
     .edit-icon {
         position: relative;
@@ -29,7 +39,7 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
         justify-content: center;
         align-items: center;
 
-        color: ${p => p.theme.b400};
+        color: ${p => p.theme.accentColor};
 
         padding: 0;
 
@@ -49,14 +59,15 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
 
     .edit-hover {
         :hover {
-            background-color: ${p => p.theme.b300};
+            background-color: ${p => p.theme.accentLight};
+            transition: background-color 150ms;
         }
     }
 
     .checkmark-hover {
         :hover {
             color: #ffffff;
-            background-color: ${p => p.theme.b400};
+            background-color: ${p => p.theme.accentColor};
         }
     }
 

@@ -1,68 +1,30 @@
 import { Theme } from "../common/styles";
 import ImageWindowLoader from "../common/image-window-loader";
-import { DrilldownCellData, GridCell, GridCellKind, GridColumn, isEditableGridCell } from "./data-grid-types";
+import { DrilldownCellData, GridColumn } from "./data-grid-types";
 import direction from "direction";
 // import { drawGenImageToCanvas } from "../../lib/gen-image-cache";
 import { degreesToRadians } from "../common/utils";
-import { assertNever } from "../common/support";
+import React from "react";
 
-interface MappedGridColumn extends GridColumn {
+export interface MappedGridColumn extends GridColumn {
     sourceIndex: number;
     sticky: boolean;
 }
 
-export function makeEditCell(cell: GridCell, forceBooleanOff: boolean = false): GridCell {
-    const isEditable = isEditableGridCell(cell);
-
-    switch (cell.kind) {
-        case GridCellKind.Boolean:
-            return {
-                ...cell,
-                data: false,
-                showUnchecked: forceBooleanOff ? false : cell.showUnchecked,
-            };
-        case GridCellKind.Text:
-            return {
-                ...cell,
-                data: "",
-                displayData: "",
-            };
-        case GridCellKind.Markdown:
-        case GridCellKind.Uri:
-        case GridCellKind.RowID:
-            return {
-                ...cell,
-                data: "",
-                allowOverlay: isEditable,
-            };
-        case GridCellKind.Protected:
-        case GridCellKind.Loading:
-            return cell;
-        case GridCellKind.Image:
-        case GridCellKind.Bubble:
-            return {
-                ...cell,
-                data: [],
-                allowOverlay: isEditable,
-            };
-        case GridCellKind.Number:
-            return {
-                ...cell,
-                data: undefined,
-                displayData: "",
-            };
-        case GridCellKind.Drilldown:
-            return {
-                ...cell,
-                data: [],
-            };
-        default:
-            assertNever(cell);
-    }
+export function useMappedColumns(columns: readonly GridColumn[], firstColSticky: boolean): readonly MappedGridColumn[] {
+    return React.useMemo(
+        () =>
+            columns.map((c, i) => ({
+                ...c,
+                sourceIndex: i,
+                sticky: firstColSticky && i === 0,
+            })),
+        [columns, firstColSticky]
+    );
 }
 
 export function getEffectiveColumns(
-    columns: readonly GridColumn[],
+    columns: readonly MappedGridColumn[],
     cellXOffset: number,
     width: number,
     firstColSticky: boolean,
@@ -72,21 +34,18 @@ export function getEffectiveColumns(
     },
     tx?: number
 ): readonly MappedGridColumn[] {
-    const mappedCols = columns.map((c, i) => ({
-        ...c,
-        sourceIndex: i,
-        sticky: firstColSticky && i === 0,
-    }));
-
+    let mappedCols = columns;
     if (dndState !== undefined) {
+        const writable = [...columns];
         const temp = mappedCols[dndState.src];
         if (dndState.src > dndState.dest) {
-            mappedCols.splice(dndState.src, 1);
-            mappedCols.splice(dndState.dest, 0, temp);
+            writable.splice(dndState.src, 1);
+            writable.splice(dndState.dest, 0, temp);
         } else {
-            mappedCols.splice(dndState.dest + 1, 0, temp);
-            mappedCols.splice(dndState.src, 1);
+            writable.splice(dndState.dest + 1, 0, temp);
+            writable.splice(dndState.src, 1);
         }
+        mappedCols = writable;
     }
 
     if (firstColSticky) {
@@ -132,22 +91,31 @@ export function getColumnIndexForX(
 
 export function getRowIndexForY(
     targetY: number,
+    height: number,
     headerHeight: number,
     rows: number,
     rowHeight: number | ((index: number) => number),
     cellYOffset: number,
-    translateY?: number
+    translateY: number,
+    lastRowSticky: boolean
 ): number | undefined {
     if (targetY <= headerHeight) return -1;
+
+    const lastRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows - 1);
+    if (lastRowSticky && targetY > height - lastRowHeight) {
+        return rows - 1;
+    }
+
+    const effectiveRows = rows - (lastRowSticky ? 1 : 0);
 
     const ty = targetY - (translateY ?? 0);
     if (typeof rowHeight === "number") {
         const target = Math.floor((ty - headerHeight) / rowHeight) + cellYOffset;
-        if (target >= rows) return undefined;
+        if (target >= effectiveRows) return undefined;
         return target;
     } else {
         let curY = headerHeight;
-        for (let i = cellYOffset; i < rows; i++) {
+        for (let i = cellYOffset; i < effectiveRows; i++) {
             const rh = rowHeight(i);
             if (ty <= curY + rh) return i;
             curY += rh;
@@ -159,17 +127,23 @@ export function getRowIndexForY(
 const cellXPad = 8;
 const cellYPad = 3;
 
-const textWidths = new Map<string, number>();
+const textWidths = new Map<string, Map<string, number> | undefined>();
 
 function measureTextWidth(s: string, ctx: CanvasRenderingContext2D): number {
     // return ctx.measureText(s).width;
-    let textWidth = textWidths.get(s);
-    if (textWidth === undefined) {
-        textWidth = ctx.measureText(s).width;
-        textWidths.set(s, textWidth);
+    let map = textWidths.get(ctx.font);
+    if (map === undefined) {
+        map = new Map();
+        textWidths.set(ctx.font, map);
     }
 
-    if (textWidths.size > 10000) {
+    let textWidth = map.get(s);
+    if (textWidth === undefined) {
+        textWidth = ctx.measureText(s).width;
+        map.set(s, textWidth);
+    }
+
+    if (map.size > 10000) {
         textWidths.clear();
     }
 
@@ -184,19 +158,140 @@ export function drawTextCell(
     y: number,
     width: number,
     height: number,
+    _hoverAmount: number,
     overrideColor?: string
 ) {
     data = data.split(/\r?\n/)[0].slice(0, Math.round(width / 4));
 
     const dir = direction(data);
 
-    ctx.fillStyle = overrideColor ?? theme.fgColorDark;
+    ctx.fillStyle = overrideColor ?? theme.textDark;
     if (dir === "rtl") {
         const textWidth = measureTextWidth(data, ctx);
         ctx.fillText(data, x + width - cellXPad - textWidth + 0.5, y + height / 2 + 4.5);
     } else {
         ctx.fillText(data, x + cellXPad + 0.5, y + height / 2 + 4.5);
     }
+}
+
+export function drawNewRowCell(
+    ctx: CanvasRenderingContext2D,
+    theme: Theme,
+    data: string,
+    isFirst: boolean,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    hoverAmount: number
+) {
+    ctx.beginPath();
+    ctx.globalAlpha = hoverAmount;
+    ctx.rect(x, y, width, height);
+    ctx.fillStyle = theme.bgHeaderHovered;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.beginPath();
+
+    const finalLineSize = 12;
+    const lineSize = isFirst ? finalLineSize : hoverAmount * finalLineSize;
+    const xTranslate = isFirst ? 0 : (1 - hoverAmount) * finalLineSize * 0.5;
+
+    if (lineSize > 0) {
+        ctx.moveTo(x + cellXPad + xTranslate, y + height / 2);
+        ctx.lineTo(x + cellXPad + xTranslate + lineSize, y + height / 2);
+        ctx.moveTo(x + cellXPad + xTranslate + lineSize * 0.5, y + height / 2 - lineSize * 0.5 - 0.5);
+        ctx.lineTo(x + cellXPad + xTranslate + lineSize * 0.5, y + height / 2 + lineSize * 0.5 + 0.5);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = theme.bgIconHeader;
+        ctx.lineCap = "round";
+        ctx.stroke();
+    }
+
+    ctx.fillStyle = theme.textMedium;
+    ctx.fillText(data, 16 + x + cellXPad + 0.5, y + height / 2 + 4.5);
+    ctx.beginPath();
+}
+
+/*
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.5" y="0.5" width="15" height="15" rx="3.5" fill="#4F5DFF"/>
+<path d="M3.65005 7.84995L6.37587 10.7304L11.9999 4.74995" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="0.5" y="0.5" width="15" height="15" rx="3.5" stroke="#2D3DED"/>
+</svg>
+*/
+
+function drawCheckbox(
+    ctx: CanvasRenderingContext2D,
+    theme: Theme,
+    checked: boolean,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    highlighted: boolean
+) {
+    const centerX = x + width / 2;
+    const centerY = y + height / 2;
+
+    if (checked) {
+        ctx.beginPath();
+        roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 4);
+
+        ctx.fillStyle = highlighted ? theme.accentColor : theme.textLight;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(centerX - 8 + 3.65005, centerY - 8 + 7.84995);
+        ctx.lineTo(centerX - 8 + 6.37587, centerY - 8 + 10.7304);
+        ctx.lineTo(centerX - 8 + 11.9999, centerY - 8 + 4.74995);
+
+        ctx.strokeStyle = theme.accentFg;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.lineWidth = 1.9;
+        ctx.stroke();
+    } else {
+        ctx.beginPath();
+        roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = theme.textLight;
+        ctx.stroke();
+    }
+}
+
+export function drawMarkerRowCell(
+    ctx: CanvasRenderingContext2D,
+    theme: Theme,
+    index: number,
+    checked: boolean,
+    markerKind: "checkbox" | "both" | "number",
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    hoverAmount: number
+) {
+    if (markerKind !== "number") {
+        ctx.globalAlpha = checked ? 1 : hoverAmount;
+        drawCheckbox(ctx, theme, checked, x, y, width, height, true);
+        ctx.globalAlpha = 1;
+    }
+    if (markerKind === "number" || (markerKind === "both" && !checked)) {
+        const text = (index + 1).toString();
+        ctx.font = `9px ${theme.fontFamily}`;
+        const w = measureTextWidth(text, ctx);
+
+        const start = x + (width - w) / 2;
+        if (markerKind === "both") {
+            ctx.globalAlpha = 1 - hoverAmount;
+        }
+        ctx.fillStyle = theme.textLight;
+        ctx.fillText(text, start, y + height / 2 + 4.5);
+        ctx.globalAlpha = 1;
+    }
+    ctx.globalAlpha = 1;
 }
 
 export function drawProtectedCell(
@@ -206,12 +301,13 @@ export function drawProtectedCell(
     y: number,
     width: number,
     height: number,
+    _hoverAmount: number,
     drawBackground: boolean
 ) {
     if (drawBackground) {
         ctx.beginPath();
         ctx.rect(x + 1, y + 1, width - 1, height - 1);
-        ctx.fillStyle = theme.bgColorAltLight;
+        ctx.fillStyle = theme.bgCellMedium;
         ctx.fill();
     }
 
@@ -237,7 +333,7 @@ export function drawProtectedCell(
     }
     ctx.lineWidth = 1.1;
     ctx.lineCap = "square";
-    ctx.strokeStyle = theme.fgColorMedium + "DD";
+    ctx.strokeStyle = theme.textLight;
     ctx.stroke();
 }
 
@@ -275,39 +371,15 @@ export function drawBoolean(
     y: number,
     width: number,
     height: number,
+    hoverAmount: number,
     highlighted: boolean,
     canEdit: boolean
 ) {
-    const centerX = x + width / 2;
-    const centerY = y + height / 2;
+    const hoverEffect = 0.35;
 
-    ctx.globalAlpha = canEdit ? 1 : 0.5;
+    ctx.globalAlpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
 
-    if (data) {
-        ctx.beginPath();
-        roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 3);
-
-        ctx.fillStyle = highlighted ? theme.acceptColor : theme.fgColorMedium;
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(centerX - 6, centerY - 0.5);
-        ctx.lineTo(centerX - 2.5, centerY + 3);
-        ctx.lineTo(centerX + 5, centerY - 4);
-
-        ctx.strokeStyle = theme.bgColorLight;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-        ctx.lineWidth = 1.9;
-        ctx.stroke();
-    } else {
-        ctx.beginPath();
-        roundedRect(ctx, centerX - 8, centerY - 8, 16, 16, 2);
-
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = theme.fgColorLight;
-        ctx.stroke();
-    }
+    drawCheckbox(ctx, theme, data, x, y, width, height, highlighted);
 
     ctx.globalAlpha = 1;
 }
@@ -322,6 +394,7 @@ export function drawBubbles(
     y: number,
     width: number,
     height: number,
+    _hoverAmount: number,
     highlighted: boolean
 ) {
     const bubbleHeight = 20;
@@ -352,12 +425,12 @@ export function drawBubbles(
             bubbleHeight / 2
         );
     });
-    ctx.fillStyle = highlighted ? theme.dataViewer.bgBubbleSelected : theme.dataViewer.bgBubble;
+    ctx.fillStyle = highlighted ? theme.bgBubbleSelected : theme.bgBubble;
     ctx.fill();
 
     renderBoxes.forEach((rectInfo, i) => {
         ctx.beginPath();
-        ctx.fillStyle = theme.fgColorDark;
+        ctx.fillStyle = theme.textBubble;
         ctx.fillText(data[i], rectInfo.x + bubblePad, y + height / 2 + 4);
     });
 }
@@ -372,6 +445,7 @@ export function drawDrilldownCell(
     y: number,
     width: number,
     height: number,
+    _hoverAmount: number,
     imageLoader: ImageWindowLoader
 ) {
     const bubbleHeight = 24;
@@ -383,7 +457,13 @@ export function drawDrilldownCell(
     for (const el of data) {
         if (renderX > x + width) break;
         const textWidth = measureTextWidth(el.text, ctx);
-        const imgWidth = el.img === undefined ? 0 : bubbleHeight - 8 + 4;
+        let imgWidth = 0;
+        if (el.img !== undefined) {
+            const img = imageLoader.loadOrGetImage(el.img, col, row);
+            if (img !== undefined) {
+                imgWidth = bubbleHeight - 8 + 4;
+            }
+        }
         const renderWidth = textWidth + imgWidth + bubblePad * 2;
         renderBoxes.push({
             x: renderX,
@@ -395,23 +475,46 @@ export function drawDrilldownCell(
 
     ctx.beginPath();
     renderBoxes.forEach(rectInfo => {
-        roundedRect(ctx, rectInfo.x, y + (height - bubbleHeight) / 2, rectInfo.width, bubbleHeight, 6);
+        roundedRect(
+            ctx,
+            Math.floor(rectInfo.x),
+            y + (height - bubbleHeight) / 2,
+            Math.floor(rectInfo.width),
+            bubbleHeight,
+            6
+        );
     });
 
     ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
     ctx.shadowBlur = 1;
-    ctx.fillStyle = theme.dataViewer.gridColor;
+    ctx.fillStyle = theme.bgCell;
     ctx.fill();
 
     ctx.shadowColor = "rgba(24, 25, 34, 0.2)";
     ctx.shadowOffsetY = 1;
     ctx.shadowBlur = 5;
-    ctx.fillStyle = theme.dataViewer.gridColor;
+    ctx.fillStyle = theme.bgCell;
     ctx.fill();
 
     ctx.shadowOffsetY = 0;
     ctx.shadowBlur = 0;
     ctx.shadowBlur = 0;
+
+    ctx.beginPath();
+    renderBoxes.forEach(rectInfo => {
+        roundedRect(
+            ctx,
+            Math.floor(rectInfo.x) + 0.5,
+            Math.floor(y + (height - bubbleHeight) / 2) + 0.5,
+            Math.round(rectInfo.width),
+            bubbleHeight,
+            6
+        );
+    });
+
+    ctx.strokeStyle = theme.drilldownBorder;
+    ctx.lineWidth = 1;
+    ctx.stroke();
 
     renderBoxes.forEach((rectInfo, i) => {
         const d = data[i];
@@ -423,8 +526,8 @@ export function drawDrilldownCell(
                 const imgSize = bubbleHeight - 8;
                 let srcX = 0;
                 let srcY = 0;
-                let srcWidth = img.naturalWidth;
-                let srcHeight = img.naturalHeight;
+                let srcWidth = img.width;
+                let srcHeight = img.height;
 
                 if (srcWidth > srcHeight) {
                     // landscape
@@ -452,7 +555,7 @@ export function drawDrilldownCell(
         }
 
         ctx.beginPath();
-        ctx.fillStyle = theme.fgColorDark;
+        ctx.fillStyle = theme.textBubble;
         ctx.fillText(d.text, drawX, y + height / 2 + 4);
     });
 }
@@ -467,6 +570,7 @@ export function drawImage(
     y: number,
     _width: number,
     height: number,
+    _hoverAmount: number,
     imageLoader: ImageWindowLoader
 ) {
     let drawX = x + cellXPad;
@@ -475,7 +579,7 @@ export function drawImage(
 
         if (img !== undefined) {
             const imgHeight = height - cellYPad * 2;
-            const imgWidth = img.naturalWidth * (imgHeight / img.naturalHeight);
+            const imgWidth = img.width * (imgHeight / img.height);
             ctx.drawImage(img, drawX, y + cellYPad, imgWidth, imgHeight);
 
             drawX += imgWidth + itemMargin;

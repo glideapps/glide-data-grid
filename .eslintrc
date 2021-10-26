@@ -16,7 +16,7 @@
         "no-console": "warn",
         "guard-for-in": "error",
         "no-empty": "error",
-        "no-shadow": "error",
+        "no-shadow": "off",
         "import/no-cycle": "off",
         "import/namespace": "off",
         "import/named": "off",
@@ -30,6 +30,7 @@
         "@typescript-eslint/camelcase": "off",
         "@typescript-eslint/interface-name-prefix": "off",
         "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-shadow": "error",
         "@typescript-eslint/no-misused-promises": [
             "error",
             {

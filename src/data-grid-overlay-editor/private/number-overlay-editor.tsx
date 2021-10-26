@@ -7,6 +7,7 @@ interface Props {
     disabled?: boolean;
     onKeyDown: (ev: React.KeyboardEvent<HTMLInputElement>) => void;
     onChange: (values: NumberFormatValues) => void;
+    highlight: boolean;
 }
 
 function getDecimalSeparator() {
@@ -23,11 +24,12 @@ function getThousandSeprator() {
 }
 
 const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { value, onChange, onKeyDown, disabled } = p;
+    const { value, onChange, onKeyDown, disabled, highlight } = p;
     return (
         <NumberOverlayEditorStyle>
             <NumberFormat
                 autoFocus={true}
+                onFocus={e => e.target.setSelectionRange(highlight ? 0 : e.target.value.length, e.target.value.length)}
                 disabled={disabled === true}
                 thousandSeparator={getThousandSeprator()}
                 decimalSeparator={getDecimalSeparator()}

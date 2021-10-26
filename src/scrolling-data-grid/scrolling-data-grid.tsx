@@ -1,22 +1,32 @@
 import * as React from "react";
-import { Subtract } from "utility-types";
 import DataGridDnd, { DataGridDndProps } from "../data-grid-dnd/data-grid-dnd";
 import { Rectangle } from "../data-grid/data-grid-types";
 import ScrollRegion, { ScrollRegionUpdateArgs } from "../scroll-region/scroll-region";
 
-type Handled = Pick<DataGridDndProps, "width" | "height" | "eventTargetRef">;
+type Props = Omit<DataGridDndProps, "width" | "height" | "eventTargetRef">;
 
-export interface ScrollingDataGridProps extends Subtract<DataGridDndProps, Handled> {
+export interface ScrollingDataGridProps extends Props {
     readonly onVisibleRegionChanged?: (range: Rectangle, tx?: number, ty?: number) => void;
     readonly scrollToEnd?: boolean;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
     readonly smoothScrollX?: boolean;
     readonly smoothScrollY?: boolean;
+    readonly rightElementSticky?: boolean;
+    readonly rightElement?: React.ReactNode;
 }
 
 const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
-    const { columns, rows, rowHeight, headerHeight, firstColSticky } = p;
-    const { className, onVisibleRegionChanged, scrollToEnd, scrollRef, ...dataGridProps } = p;
+    const { columns, rows, rowHeight, headerHeight, firstColSticky, experimental } = p;
+    const { paddingRight, paddingBottom } = experimental ?? {};
+    const {
+        className,
+        onVisibleRegionChanged,
+        scrollToEnd,
+        scrollRef,
+        rightElement,
+        rightElementSticky,
+        ...dataGridProps
+    } = p;
     const { smoothScrollX, smoothScrollY } = p;
 
     const [clientWidth, setClientWidth] = React.useState<number>(10);
@@ -25,8 +35,13 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const lastX = React.useRef<number | undefined>();
     const lastY = React.useRef<number | undefined>();
 
-    let width = 0;
-    columns.forEach(c => (width += c.width));
+    const width = React.useMemo(() => {
+        let r = 0;
+        for (const c of columns) {
+            r += c.width;
+        }
+        return r;
+    }, [columns]);
 
     let height = headerHeight;
     if (typeof rowHeight === "number") {
@@ -166,6 +181,11 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             draggable={dataGridProps.isDraggable === true}
             scrollWidth={width}
             scrollHeight={height}
+            clientHeight={clientHeight}
+            rightElement={rightElement}
+            paddingBottom={paddingBottom}
+            paddingRight={paddingRight}
+            rightElementSticky={rightElementSticky}
             update={onScrollUpdate}
             scrollToEnd={scrollToEnd}>
             <DataGridDnd eventTargetRef={scrollRef} width={clientWidth} height={clientHeight} {...dataGridProps} />

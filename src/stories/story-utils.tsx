@@ -2,7 +2,7 @@ import * as React from "react";
 import styled, { ThemeProvider } from "styled-components";
 import { StoryContext } from "@storybook/addons";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
-import { getBuilderTheme } from "../common/styles";
+import { getDataEditorTheme } from "../common/styles";
 
 interface Props {
     width: number;
@@ -15,8 +15,6 @@ interface Props {
 const BuilderWrapper = styled.div<Props>`
     display: flex;
     height: 100vh;
-
-    flex-direction: column;
 
     & > .content {
         display: block;
@@ -58,7 +56,7 @@ const SimpleWrapper = styled.div`
 `;
 
 export class BuilderThemeWrapper extends React.PureComponent<Props> {
-    private builderTheme = getBuilderTheme();
+    private builderTheme = getDataEditorTheme();
 
     public render(): React.ReactNode {
         const { context, ...rest } = this.props;
@@ -74,7 +72,7 @@ export class BuilderThemeWrapper extends React.PureComponent<Props> {
 }
 
 export const SimpleThemeWrapper: React.FC = p => {
-    const [builderTheme] = React.useState(getBuilderTheme);
+    const [builderTheme] = React.useState(getDataEditorTheme);
     return (
         <ThemeProvider theme={builderTheme}>
             <SimpleWrapper>

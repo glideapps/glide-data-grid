@@ -16,8 +16,8 @@ const DrilldownOverlayEditorStyle = styled.div`
         padding: 0 8px;
         height: 24px;
 
-        background-color: ${p => p.theme.dataViewer.gridColor};
-        color: ${p => p.theme.fgColorDark};
+        background-color: ${p => p.theme.bgCell};
+        color: ${p => p.theme.textDark};
         margin: 2px;
 
         border-radius: 6px;
