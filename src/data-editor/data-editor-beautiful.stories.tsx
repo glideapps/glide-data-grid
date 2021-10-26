@@ -398,7 +398,8 @@ export const ResizableColumns: React.VFC = () => {
             title="Resizable columns"
             description={
                 <Description>
-                    can resize columns by passing a <PropName>onColumnResized</PropName> prop
+                    You can resize columns by dragging their edges, as long as you respond to the{" "}
+                    <PropName>onColumnResized</PropName> prop.
                 </Description>
             }>
             <DataEditor
@@ -481,7 +482,14 @@ export const AddData: React.VFC = () => {
     return (
         <BeautifulWrapper
             title="Add data"
-            description={<Description>Data can be added by typing into the trailing row.</Description>}>
+            description={
+                <>
+                    <Description>Data can be added by clicking on the trailing row.</Description>
+                    <MoreInfo>
+                        Keyboard is also supported, just navigate past the last row and press <KeyName>Enter</KeyName>
+                    </MoreInfo>
+                </>
+            }>
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
@@ -569,7 +577,7 @@ export const ObserveVisibleRegion: React.VFC = () => {
             description={
                 <>
                     <Description>
-                        The visiible region can be observed using <PropName>onVisibileRegionChanged</PropName>
+                        The visible region can be observed using <PropName>onVisibileRegionChanged</PropName>
                     </Description>
                     <MoreInfo>
                         Then current visible region is x:<KeyName>{visibleRegion.x}</KeyName> y:
@@ -654,7 +662,7 @@ export const SmoothScrollingGrid: React.FC<SmoothScrollingGridProps> = p => {
                 <Description>
                     You can enable smooth scrolling with the <PropName>smoothScrollX</PropName> and{" "}
                     <PropName>smoothScrollY</PropName> props. Disabling smooth scrolling can dramatically increase
-                    performance with and improve visual stability during rapid scrolling.
+                    performance and improve visual stability during rapid scrolling.
                 </Description>
             }>
             <DataEditor
@@ -688,7 +696,12 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
     return (
         <BeautifulWrapper
             title="Add and remove columns"
-            description={<Description>You can add and remove columns at your disposal</Description>}>
+            description={
+                <>
+                    <Description>You can add and remove columns at your disposal</Description>
+                    <MoreInfo>Use the story&apos;s controls to change the number of columns</MoreInfo>
+                </>
+            }>
             <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={10_000} />
         </BeautifulWrapper>
     );
@@ -720,10 +733,16 @@ export const AutomaticRowMarkers: React.VFC = () => {
         <BeautifulWrapper
             title="Automatic Row Markers"
             description={
-                <Description>
-                    You can enable row markers with complex selection behavior using the <PropName>rowMarkers</PropName>{" "}
-                    prop
-                </Description>
+                <>
+                    <Description>
+                        You can enable row markers with complex selection behavior using the{" "}
+                        <PropName>rowMarkers</PropName> prop.
+                    </Description>
+                    <MoreInfo>
+                        Use <KeyName>⇧</KeyName> + click to make range selections, and <KeyName>Ctrl</KeyName> (
+                        <KeyName>⌘</KeyName> on Mac) + click to add/remove individual rows.
+                    </MoreInfo>
+                </>
             }>
             <DataEditor
                 {...defaultProps}
@@ -845,7 +864,8 @@ export const RearrangeColumns: React.VFC = () => {
             title="Rearrange Columns"
             description={
                 <Description>
-                    Columns can be rearranged by responding to the <PropName>onColumnMoved</PropName> callback.
+                    Columns can be rearranged by drag and dropping, as long as you respond to the{" "}
+                    <PropName>onColumnMoved</PropName> callback.
                 </Description>
             }>
             <DataEditor
@@ -877,10 +897,13 @@ export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
         <BeautifulWrapper
             title="Row and Header sizes"
             description={
-                <Description>
-                    The row size can be controlled with <PropName>rowHeight</PropName> and the header size with{" "}
-                    <PropName>headerHeight</PropName>.
-                </Description>
+                <>
+                    <Description>
+                        The row size can be controlled with <PropName>rowHeight</PropName> and the header size with{" "}
+                        <PropName>headerHeight</PropName>.
+                    </Description>
+                    <MoreInfo>Use the story&apos;s controls to resize them</MoreInfo>
+                </>
             }>
             <DataEditor
                 {...defaultProps}
@@ -1431,9 +1454,15 @@ export const BuiltInSearch: React.VFC = () => {
         <BeautifulWrapper
             title="Search is easy"
             description={
-                <Description>
-                    Search for any data in your grid by setting <PropName>showSearch</PropName>.
-                </Description>
+                <>
+                    <Description>
+                        Search for any data in your grid by setting <PropName>showSearch</PropName>.
+                    </Description>
+                    <MoreInfo>
+                        In this story, <KeyName>Ctrl</KeyName> (<KeyName>⌘</KeyName> on Mac) + <KeyName>f</KeyName>{" "}
+                        toggles the search bar. Make sure you&apos;re focused on the Data Grid!
+                    </MoreInfo>
+                </>
             }>
             <DataEditor
                 {...defaultProps}
@@ -1650,7 +1679,12 @@ export const RightElement: React.VFC = () => {
     return (
         <BeautifulWrapper
             title="Right Element"
-            description={<Description>A DOM element may be added as a trailer to the grid.</Description>}>
+            description={
+                <Description>
+                    A DOM element may be added as a trailer to the grid by using the <PropName>rightElement</PropName>{" "}
+                    prop.
+                </Description>
+            }>
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
@@ -1714,7 +1748,7 @@ export const RapidUpdates: React.VFC = () => {
             const cells: {
                 cell: readonly [number, number];
             }[] = [];
-            for (let x = 0; x < 10_000; x++) {
+            for (let x = 0; x < 5_000; x++) {
                 const col = Math.max(10, rand() % 100);
                 const row = rand() % 10_000;
 
@@ -1726,7 +1760,7 @@ export const RapidUpdates: React.VFC = () => {
                 });
                 cells.push({ cell: [col, row] });
             }
-            countRef.current += 10_000;
+            countRef.current += 5_000;
             if (displayCountRef.current !== null) {
                 displayCountRef.current.textContent = `${countRef.current}`;
             }
@@ -1750,7 +1784,7 @@ export const RapidUpdates: React.VFC = () => {
             const { x, y, height } = rect;
             const data = cell.displayData;
 
-            if (!cell.data.endsWith("0000")) return false;
+            if (!cell.data.endsWith("000")) return false;
 
             ctx.fillStyle = !data.endsWith("5k") ? "#0fc035" : "#e01e1e";
             ctx.fillText(data, x + 8 + 0.5, y + height / 2 + 4.5);
