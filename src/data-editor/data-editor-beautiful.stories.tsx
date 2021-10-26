@@ -514,8 +514,8 @@ export const SmallEditableGrid = () => {
             title="Editable Grid"
             description={
                 <Description>
-                    Data grid suDescriptionorts overlay editors for changing values. There are bespoke editors for
-                    numbers, strings, images, booleans, markdown, and uri.
+                    Data grid supports overlay editors for changing values. There are bespoke editors for numbers,
+                    strings, images, booleans, markdown, and uri.
                 </Description>
             }>
             <DataEditor
