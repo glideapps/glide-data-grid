@@ -319,7 +319,7 @@ function drawGridLines(
         while (y + translateY <= target) {
             const ty = isHeader ? y : y + translateY;
             // This shouldn't be needed it seems like... yet it is. We're not sure why.
-            if (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) < 0.5) {
+            if (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) > 0.5) {
                 ctx.moveTo(0, ty);
                 ctx.lineTo(width, ty);
             }
