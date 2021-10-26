@@ -484,7 +484,6 @@ export const AddData: React.VFC = () => {
             description={<Description>Data can be added by typing into the trailing row.</Description>}>
             <DataEditor
                 {...defaultProps}
-                smoothScrollY={false}
                 getCellContent={getCellContent}
                 columns={cols}
                 rowMarkers={"both"}
