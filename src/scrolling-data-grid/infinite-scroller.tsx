@@ -37,6 +37,11 @@ export const ScrollRegionStyle = styled.div`
         .dvn-spacer {
             flex-grow: 1;
         }
+
+        .dvn-stack {
+            display: flex;
+            flex-direction: column;
+        }
     }
 
     .dvn-underlay > * {
@@ -78,14 +83,6 @@ export const InfiniteScroller: React.FC<Props> = p => {
     const scroller = React.useRef<HTMLDivElement | null>(null);
 
     const dpr = window.devicePixelRatio;
-    const innerStyle = React.useMemo<React.CSSProperties>(
-        () => ({
-            width: scrollWidth,
-            height: scrollHeight,
-            contain: "size paint layout",
-        }),
-        [scrollWidth, scrollHeight]
-    );
 
     React.useEffect(() => {
         const el = scroller.current;
@@ -104,7 +101,11 @@ export const InfiniteScroller: React.FC<Props> = p => {
         const maxFakeY = scrollHeight - el.clientHeight;
         lastScrollY.current = newY;
 
-        if ((Math.abs(delta) > 2000 || newY === 0 || newY === scrollableHeight) && scrollHeight > el.scrollHeight + 5) {
+        if (
+            scrollableHeight > 0 &&
+            (Math.abs(delta) > 2000 || newY === 0 || newY === scrollableHeight) &&
+            scrollHeight > el.scrollHeight + 5
+        ) {
             const prog = newY / scrollableHeight;
             const recomputed = (scrollHeight - el.clientHeight) * prog;
             offsetY.current = recomputed - newY;
@@ -161,7 +162,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                                 className={"dvn-scroller " + className}
                                 onScroll={onScroll}>
                                 <div className="dvn-scroll-inner">
-                                    <div style={innerStyle} />
+                                    <div className="dvn-stack">{padders}</div>
                                     {rightElement !== undefined && (
                                         <>
                                             <div className="dvn-spacer" />

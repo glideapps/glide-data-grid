@@ -554,13 +554,43 @@ export const OneMillionRows: React.VFC = () => {
                 getCellsForSelection={getCellsForSelection}
                 columns={cols}
                 rowHeight={31}
-                rows={100_000_000}
+                rows={1_000_000}
                 rowMarkers="number"
             />
         </BeautifulWrapper>
     );
 };
 (OneMillionRows as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const SillyNumbers: React.VFC = () => {
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(6);
+
+    return (
+        <BeautifulWrapper
+            title="100 Million Rows"
+            description={
+                <Description>
+                    100 million rows is silly. Once we cross about 33 million pixels in height we can no longer trust
+                    the browser to scroll accurately.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                getCellsForSelection={getCellsForSelection}
+                columns={cols}
+                rowHeight={31}
+                rows={100_000_000}
+                rowMarkers="number"
+            />
+        </BeautifulWrapper>
+    );
+};
+(SillyNumbers as any).parameters = {
     options: {
         showPanel: false,
     },
