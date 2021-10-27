@@ -12,7 +12,6 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
-        if: github.ref != 'refs/heads/main'
         strategy:
             matrix:
                 node-version: [10.x]
