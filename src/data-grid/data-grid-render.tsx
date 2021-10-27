@@ -353,6 +353,7 @@ function drawGridHeaders(
     spriteManager: SpriteManager,
     hoverValues: HoverValues
 ) {
+    if (headerHeight === 0) return;
     // FIXME: This should respect the per-column theme
     ctx.fillStyle = outerTheme.bgHeader;
     ctx.fillRect(0, 0, width, headerHeight);
@@ -1191,9 +1192,11 @@ export function drawGrid(
     targetCtx.restore();
     overlayCtx.restore();
 
-    targetCtx.imageSmoothingEnabled = false;
-    targetCtx.drawImage(overlayCanvas, 0, 0);
-    targetCtx.imageSmoothingEnabled = true;
+    if (headerHeight > 0) {
+        targetCtx.imageSmoothingEnabled = false;
+        targetCtx.drawImage(overlayCanvas, 0, 0);
+        targetCtx.imageSmoothingEnabled = true;
+    }
 }
 
 type WalkRowsCallback = (drawY: number, row: number, rowHeight: number, isSticky: boolean) => void;
