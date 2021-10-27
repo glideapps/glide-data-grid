@@ -765,7 +765,7 @@ export const AutomaticRowMarkers: React.VFC = () => {
             description={
                 <>
                     <Description>
-                        You can enable row markers with complex selection behavior using the{" "}
+                        You can enable row markers with rich selection behavior using the{" "}
                         <PropName>rowMarkers</PropName> prop.
                     </Description>
                     <MoreInfo>
@@ -989,6 +989,8 @@ const KeyName = styled.kbd`
 export const MultiSelectColumns: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(100);
 
+    const [sel, setSel] = React.useState(CompactSelection.empty());
+
     return (
         <BeautifulWrapper
             title="Multi select columns"
@@ -1004,7 +1006,15 @@ export const MultiSelectColumns: React.VFC = () => {
                     </MoreInfo>
                 </>
             }>
-            <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={100_000} />
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                rowMarkers="both"
+                columns={cols}
+                rows={100_000}
+                selectedColumns={sel}
+                onSelectedColumnsChange={setSel}
+            />
         </BeautifulWrapper>
     );
 };
