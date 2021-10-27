@@ -5,7 +5,7 @@ name: Beta CI
 
 on:
     push:
-        tags: [v*]
+        tags: v*-*
 
 jobs:
     publish:
