@@ -566,6 +566,36 @@ export const OneMillionRows: React.VFC = () => {
     },
 };
 
+export const SillyNumbers: React.VFC = () => {
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(6);
+
+    return (
+        <BeautifulWrapper
+            title="100 Million Rows"
+            description={
+                <Description>
+                    100 million rows is silly. Once we cross about 33 million pixels in height we can no longer trust
+                    the browser to scroll accurately.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                getCellsForSelection={getCellsForSelection}
+                columns={cols}
+                rowHeight={31}
+                rows={100_000_000}
+                rowMarkers="number"
+            />
+        </BeautifulWrapper>
+    );
+};
+(SillyNumbers as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const ObserveVisibleRegion: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(100);
 
@@ -735,7 +765,7 @@ export const AutomaticRowMarkers: React.VFC = () => {
             description={
                 <>
                     <Description>
-                        You can enable row markers with complex selection behavior using the{" "}
+                        You can enable row markers with rich selection behavior using the{" "}
                         <PropName>rowMarkers</PropName> prop.
                     </Description>
                     <MoreInfo>
@@ -959,6 +989,8 @@ const KeyName = styled.kbd`
 export const MultiSelectColumns: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(100);
 
+    const [sel, setSel] = React.useState(CompactSelection.empty());
+
     return (
         <BeautifulWrapper
             title="Multi select columns"
@@ -974,7 +1006,15 @@ export const MultiSelectColumns: React.VFC = () => {
                     </MoreInfo>
                 </>
             }>
-            <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={100_000} />
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                rowMarkers="both"
+                columns={cols}
+                rows={100_000}
+                selectedColumns={sel}
+                onSelectedColumnsChange={setSel}
+            />
         </BeautifulWrapper>
     );
 };

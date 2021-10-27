@@ -379,6 +379,12 @@ export class CompactSelection {
         return CompactSelection.empty().add(selection);
     };
 
+    offset = (amount: number): CompactSelection => {
+        if (amount === 0) return this;
+        const newItems = this.items.map(x => [x[0] + amount, x[1] + amount] as const);
+        return new CompactSelection(newItems);
+    };
+
     add = (selection: number | Slice): CompactSelection => {
         const slice: Slice = typeof selection === "number" ? [selection, selection + 1] : selection;
 

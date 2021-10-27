@@ -93,7 +93,13 @@ rowMarkers?: "checkbox" | "number" | "both" | "none";
 rowMarkerWidth?: number;
 ```
 
-`rowMarkerWidth` is the width of the marker column on the very left. It defaults to `50`.
+`rowMarkerWidth` is the width of the marker column on the very left. By default it adapts based on the number of rows in your data set.
+
+```ts
+rowSelectionMode?: "auto" | "multi";
+```
+
+`rowSelectionMode` changes how selecting a row marker behaves. In auto mode it adapts to touch or mouse environments automatically, in multi-mode it always acts as if the multi key (Ctrl) is pressed.
 
 ```ts
 onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
