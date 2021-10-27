@@ -1,7 +1,7 @@
 import * as React from "react";
 import DataGridDnd, { DataGridDndProps } from "../data-grid-dnd/data-grid-dnd";
 import { Rectangle } from "../data-grid/data-grid-types";
-import ScrollRegion, { ScrollRegionUpdateArgs } from "../scroll-region/scroll-region";
+import { InfiniteScroller } from "./infinite-scroller";
 
 type Props = Omit<DataGridDndProps, "width" | "height" | "eventTargetRef">;
 
@@ -52,14 +52,14 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         }
     }
 
-    const lastArgs = React.useRef<ScrollRegionUpdateArgs>();
+    const lastArgs = React.useRef<Rectangle>();
 
     const processArgs = React.useCallback(() => {
         const args = lastArgs.current;
         if (args === undefined) return;
 
-        setClientHeight(args.clientHeight);
-        setClientWidth(args.clientWidth);
+        setClientHeight(args.height);
+        setClientWidth(args.width);
 
         let x = 0;
         let tx = 0;
@@ -70,19 +70,19 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
 
         for (const c of columns) {
             const cx = x - stickyColWidth;
-            if (args.scrollLeft >= cx + c.width) {
+            if (args.x >= cx + c.width) {
                 x += c.width;
                 cellX++;
                 cellRight++;
-            } else if (args.scrollLeft > cx) {
+            } else if (args.x > cx) {
                 x += c.width;
                 if (smoothScrollX) {
-                    tx += cx - args.scrollLeft;
+                    tx += cx - args.x;
                 } else {
                     cellX++;
                 }
                 cellRight++;
-            } else if (args.scrollLeft + args.clientWidth > cx) {
+            } else if (args.x + args.width > cx) {
                 x += c.width;
                 cellRight++;
             } else {
@@ -95,31 +95,31 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         let cellBottom = 0;
         if (typeof rowHeight === "number") {
             if (smoothScrollY) {
-                cellY = Math.floor(args.scrollTop / rowHeight);
-                ty = cellY * rowHeight - args.scrollTop;
+                cellY = Math.floor(args.y / rowHeight);
+                ty = cellY * rowHeight - args.y;
             } else {
-                cellY = Math.ceil(args.scrollTop / rowHeight);
+                cellY = Math.ceil(args.y / rowHeight);
             }
-            cellBottom = Math.ceil(args.clientHeight / rowHeight) + cellY;
+            cellBottom = Math.ceil(args.height / rowHeight) + cellY;
             if (ty < 0) cellBottom++;
         } else {
             let y = 0;
             for (let row = 0; row < rows; row++) {
                 const rh = rowHeight(row);
                 const cy = y + (smoothScrollY ? 0 : rh / 2);
-                if (args.scrollTop >= y + rh) {
+                if (args.y >= y + rh) {
                     y += rh;
                     cellY++;
                     cellBottom++;
-                } else if (args.scrollTop > cy) {
+                } else if (args.y > cy) {
                     y += rh;
                     if (smoothScrollY) {
-                        ty += cy - args.scrollTop;
+                        ty += cy - args.y;
                     } else {
                         cellY++;
                     }
                     cellBottom++;
-                } else if (args.scrollTop + args.clientHeight > rh / 2 + y) {
+                } else if (args.y + args.height > rh / 2 + y) {
                     y += rh;
                     cellBottom++;
                 } else {
@@ -163,7 +163,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     }, [columns, rowHeight, rows, onVisibleRegionChanged, firstColSticky, smoothScrollX, smoothScrollY]);
 
     const onScrollUpdate = React.useCallback(
-        (args: ScrollRegionUpdateArgs) => {
+        (args: Rectangle) => {
             lastArgs.current = args;
             processArgs();
         },
@@ -175,7 +175,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     }, [processArgs]);
 
     return (
-        <ScrollRegion
+        <InfiniteScroller
             scrollRef={scrollRef}
             className={className}
             draggable={dataGridProps.isDraggable === true}
@@ -189,7 +189,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             update={onScrollUpdate}
             scrollToEnd={scrollToEnd}>
             <DataGridDnd eventTargetRef={scrollRef} width={clientWidth} height={clientHeight} {...dataGridProps} />
-        </ScrollRegion>
+        </InfiniteScroller>
     );
 };
 

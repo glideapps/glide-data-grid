@@ -554,7 +554,7 @@ export const OneMillionRows: React.VFC = () => {
                 getCellsForSelection={getCellsForSelection}
                 columns={cols}
                 rowHeight={31}
-                rows={1_000_000}
+                rows={100_000_000}
                 rowMarkers="number"
             />
         </BeautifulWrapper>

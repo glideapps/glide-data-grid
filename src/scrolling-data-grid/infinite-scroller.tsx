@@ -1,47 +1,81 @@
+import { styled } from "../common/styles";
+import { Rectangle } from "index";
 import * as React from "react";
-import { ScrollRegionStyle } from "./scroll-region-style";
 import AutoSizer from "react-virtualized-auto-sizer";
-
-export interface ScrollRegionUpdateArgs {
-    readonly clientWidth: number;
-    readonly clientHeight: number;
-    readonly scrollLeft: number;
-    readonly scrollTop: number;
-}
+import { browserIsSafari } from "../common/browser-detect";
 
 interface Props {
     readonly className?: string;
-    readonly scrollHeight: number;
     readonly draggable: boolean;
-    readonly clientHeight: number;
     readonly paddingRight?: number;
     readonly paddingBottom?: number;
+    readonly clientHeight: number;
     readonly scrollWidth: number;
+    readonly scrollHeight: number;
     readonly scrollToEnd?: boolean;
     readonly rightElementSticky?: boolean;
     readonly rightElement?: React.ReactNode;
     readonly style?: React.CSSProperties;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
-    readonly update: (args: ScrollRegionUpdateArgs) => void;
+    readonly update: (region: Rectangle) => void;
 }
 
-const ScrollRegion: React.FunctionComponent<Props> = p => {
+export const ScrollRegionStyle = styled.div`
+    .dvn-scroller {
+        overflow: ${browserIsSafari ? "scroll" : "auto"};
+        transform: translate3d(0, 0, 0);
+    }
+
+    .dvn-scroll-inner {
+        display: flex;
+        pointer-events: none;
+
+        > * {
+            flex-shrink: 0;
+        }
+
+        .dvn-spacer {
+            flex-grow: 1;
+        }
+    }
+
+    .dvn-underlay > * {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+
+    canvas {
+        outline: none;
+
+        * {
+            height: 0;
+        }
+    }
+`;
+
+export const InfiniteScroller: React.FC<Props> = p => {
     const {
-        className,
-        scrollWidth,
-        scrollHeight,
-        style,
         children,
-        update,
-        scrollToEnd,
         clientHeight,
-        scrollRef,
+        scrollHeight,
+        scrollWidth,
+        update,
         draggable,
-        rightElement,
+        className,
         paddingBottom = 0,
         paddingRight = 0,
+        rightElement,
         rightElementSticky = false,
+        scrollRef,
+        scrollToEnd,
+        style,
     } = p;
+    const padders: React.ReactNode[] = [];
+
+    const offsetY = React.useRef(0);
+    const lastScrollY = React.useRef(0);
+    const scroller = React.useRef<HTMLDivElement | null>(null);
 
     const dpr = window.devicePixelRatio;
     const innerStyle = React.useMemo<React.CSSProperties>(
@@ -53,26 +87,42 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
         [scrollWidth, scrollHeight]
     );
 
-    const scroller = React.useRef<HTMLDivElement | null>(null);
-
-    const onScroll = React.useCallback(() => {
-        const el = scroller.current;
-        if (el === null) return;
-
-        update({
-            clientHeight: el.clientHeight - paddingBottom,
-            clientWidth: el.clientWidth - paddingRight,
-            scrollLeft: Math.max(0, el.scrollLeft),
-            scrollTop: Math.max(0, el.scrollTop),
-        });
-    }, [paddingBottom, paddingRight, update]);
-
     React.useEffect(() => {
         const el = scroller.current;
         if (el === null || scrollToEnd !== true) return;
 
         el.scrollLeft = el.scrollWidth - el.clientWidth;
     }, [scrollToEnd]);
+
+    const onScroll = React.useCallback(() => {
+        const el = scroller.current;
+        if (el === null) return;
+
+        const newY = el.scrollTop;
+        const delta = lastScrollY.current - newY;
+        const scrollableHeight = el.scrollHeight - el.clientHeight;
+        const maxFakeY = scrollHeight - el.clientHeight;
+        lastScrollY.current = newY;
+
+        if ((Math.abs(delta) > 2000 || newY === 0 || newY === scrollableHeight) && scrollHeight > el.scrollHeight + 5) {
+            const prog = newY / scrollableHeight;
+            const recomputed = (scrollHeight - el.clientHeight) * prog;
+            offsetY.current = recomputed - newY;
+        }
+
+        update({
+            x: el.scrollLeft,
+            y: Math.min(maxFakeY, newY + offsetY.current),
+            width: el.clientWidth - paddingRight,
+            height: el.clientHeight - paddingBottom,
+        });
+    }, [paddingBottom, paddingRight, scrollHeight, update]);
+
+    const lastProps = React.useRef<{ width?: number; height?: number }>();
+
+    const nomEvent = React.useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+    }, []);
 
     const setRefs = React.useCallback(
         (instance: HTMLDivElement | null) => {
@@ -84,11 +134,12 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
         [scrollRef]
     );
 
-    const lastProps = React.useRef<{ width?: number; height?: number }>();
-
-    const nomEvent = React.useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-    }, []);
+    let h = 0;
+    while (h < scrollHeight) {
+        const toAdd = Math.min(5_000_000, scrollHeight - h);
+        padders.push(<div style={{ width: scrollWidth, height: toAdd }} />);
+        h += toAdd;
+    }
 
     return (
         <div style={style}>
@@ -141,5 +192,3 @@ const ScrollRegion: React.FunctionComponent<Props> = p => {
         </div>
     );
 };
-
-export default ScrollRegion;
