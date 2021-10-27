@@ -135,10 +135,11 @@ export const InfiniteScroller: React.FC<Props> = p => {
         [scrollRef]
     );
 
+    let key = 0;
     let h = 0;
     while (h < scrollHeight) {
         const toAdd = Math.min(5_000_000, scrollHeight - h);
-        padders.push(<div style={{ width: scrollWidth, height: toAdd }} />);
+        padders.push(<div key={key++} style={{ width: scrollWidth, height: toAdd }} />);
         h += toAdd;
     }
 
