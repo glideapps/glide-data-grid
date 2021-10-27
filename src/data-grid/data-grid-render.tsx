@@ -894,6 +894,7 @@ export function drawGrid(
     hoverValues: HoverValues,
     spriteManager: SpriteManager
 ) {
+    if (width === 0 || height === 0) return;
     const dpr = Math.ceil(window.devicePixelRatio) ?? 1;
 
     if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
