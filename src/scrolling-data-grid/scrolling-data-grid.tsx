@@ -58,8 +58,6 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         const args = lastArgs.current;
         if (args === undefined) return;
 
-        console.log(args.y);
-
         setClientHeight(args.height);
         setClientWidth(args.width);
 
