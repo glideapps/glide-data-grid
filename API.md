@@ -173,10 +173,10 @@ trailingRowOptions?: {
     readonly hint?: string;
     readonly sticky?: boolean;
 }
-onRowAppended?: (cell?: readonly [number, number], newValue?: EditableGridCell) => void;
+onRowAppended?: () => void;
 ```
 
-`onRowAppended` controls adding new rows at the bottom of the Grid. If `onRowAppended` is defined, an empty, editable row will display at the bottom. If the user enters a value in one of its cells, `onRowAppended` is called, which is responsible for appending the new row. The appearance of the blank row can be configured using `trailingRowOptions`.
+`onRowAppended` controls adding new rows at the bottom of the Grid. If `onRowAppended` is defined, an empty row will display at the bottom. When the user clicks on one of its cells, `onRowAppended` is called, which is responsible for appending the new row. The appearance of the blank row can be configured using `trailingRowOptions`.
 
 ---
 
