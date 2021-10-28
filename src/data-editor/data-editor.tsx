@@ -1225,32 +1225,83 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 scrollRef.current?.contains(document.activeElement) ||
                 canvasRef.current?.contains(document.activeElement);
 
-            if (focused && gridSelection !== undefined) {
-                if (gridSelection !== undefined) {
-                    const text = await navigator.clipboard.readText();
+            let target = gridSelection?.cell;
+            if (target === undefined && selectedColumns.length === 1) {
+                target = [selectedColumns.first() ?? 0, 0];
+            }
+            if (target === undefined && selectedRows.length === 1) {
+                target = [rowMarkerOffset, selectedRows.first() ?? 0];
+            }
 
-                    const [gridCol, gridRow] = gridSelection.cell;
+            if (focused && target !== undefined) {
+                const text = await navigator.clipboard.readText();
 
-                    if (onPaste === undefined) {
-                        const cellData = getMangedCellContent(gridSelection.cell);
+                const [gridCol, gridRow] = target;
+
+                if (onPaste === undefined) {
+                    const cellData = getMangedCellContent(target);
+                    if (!isInnerOnlyCell(cellData) && isReadWriteCell(cellData) && cellData.readonly !== true) {
+                        switch (cellData.kind) {
+                            case GridCellKind.Text:
+                            case GridCellKind.Markdown:
+                            case GridCellKind.Uri: {
+                                mangledOnCellEdited?.(target, {
+                                    ...cellData,
+                                    data: text,
+                                });
+                                break;
+                            }
+                            case GridCellKind.Number: {
+                                const newNumber = Number.parseFloat(text);
+                                if (!Number.isNaN(newNumber)) {
+                                    mangledOnCellEdited?.(target, {
+                                        ...cellData,
+                                        data: newNumber,
+                                    });
+                                }
+                                break;
+                            }
+                            default:
+                                assertNever(cellData);
+                        }
+                    }
+                    return;
+                }
+
+                const data = unquote(text);
+
+                if (onPaste === false || (typeof onPaste === "function" && onPaste?.(target, data) !== true)) {
+                    return;
+                }
+
+                const damage: (readonly [number, number])[] = [];
+                for (let row = 0; row < data.length; row++) {
+                    const dataRow = data[row];
+                    if (row + gridRow >= rows) break;
+                    for (let col = 0; col < dataRow.length; col++) {
+                        const dataItem = dataRow[col];
+                        const index = [col + gridCol, row + gridRow] as const;
+                        const cellData = getMangedCellContent(index);
                         if (!isInnerOnlyCell(cellData) && isReadWriteCell(cellData) && cellData.readonly !== true) {
                             switch (cellData.kind) {
                                 case GridCellKind.Text:
                                 case GridCellKind.Markdown:
                                 case GridCellKind.Uri: {
-                                    mangledOnCellEdited?.(gridSelection.cell, {
+                                    mangledOnCellEdited?.(index, {
                                         ...cellData,
-                                        data: text,
+                                        data: dataItem,
                                     });
+                                    damage.push(index);
                                     break;
                                 }
                                 case GridCellKind.Number: {
-                                    const newNumber = Number.parseFloat(text);
+                                    const newNumber = Number.parseFloat(dataItem);
                                     if (!Number.isNaN(newNumber)) {
-                                        mangledOnCellEdited?.(gridSelection.cell, {
+                                        mangledOnCellEdited?.(index, {
                                             ...cellData,
                                             data: newNumber,
                                         });
+                                        damage.push(index);
                                     }
                                     break;
                                 }
@@ -1258,63 +1309,24 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                                     assertNever(cellData);
                             }
                         }
-                        return;
                     }
-
-                    const data = unquote(text);
-
-                    if (
-                        onPaste === false ||
-                        (typeof onPaste === "function" && onPaste?.(gridSelection.cell, data) !== true)
-                    ) {
-                        return;
-                    }
-
-                    const damage: (readonly [number, number])[] = [];
-                    for (let row = 0; row < data.length; row++) {
-                        const dataRow = data[row];
-                        if (row + gridRow >= rows) break;
-                        for (let col = 0; col < dataRow.length; col++) {
-                            const dataItem = dataRow[col];
-                            const index = [col + gridCol, row + gridRow] as const;
-                            const cellData = getMangedCellContent(index);
-                            if (!isInnerOnlyCell(cellData) && isReadWriteCell(cellData) && cellData.readonly !== true) {
-                                switch (cellData.kind) {
-                                    case GridCellKind.Text:
-                                    case GridCellKind.Markdown:
-                                    case GridCellKind.Uri: {
-                                        mangledOnCellEdited?.(index, {
-                                            ...cellData,
-                                            data: dataItem,
-                                        });
-                                        damage.push(index);
-                                        break;
-                                    }
-                                    case GridCellKind.Number: {
-                                        const newNumber = Number.parseFloat(dataItem);
-                                        if (!Number.isNaN(newNumber)) {
-                                            mangledOnCellEdited?.(index, {
-                                                ...cellData,
-                                                data: newNumber,
-                                            });
-                                            damage.push(index);
-                                        }
-                                        break;
-                                    }
-                                    default:
-                                        assertNever(cellData);
-                                }
-                            }
-                        }
-                    }
-                    gridRef.current?.damage(
-                        damage.map(c => ({
-                            cell: c,
-                        }))
-                    );
                 }
+                gridRef.current?.damage(
+                    damage.map(c => ({
+                        cell: c,
+                    }))
+                );
             }
-        }, [getMangedCellContent, gridSelection, mangledOnCellEdited, onPaste, rows]),
+        }, [
+            getMangedCellContent,
+            gridSelection,
+            mangledOnCellEdited,
+            onPaste,
+            rowMarkerOffset,
+            rows,
+            selectedColumns,
+            selectedRows,
+        ]),
         window,
         false,
         true
