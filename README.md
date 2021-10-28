@@ -1,3 +1,5 @@
+![Icon](./icon.png)
+
 <h1 align="center">
   <b>Glide <span style="color: #30CC5C">Data</span> Grid</b>
 </h1>
