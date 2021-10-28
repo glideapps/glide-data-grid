@@ -197,11 +197,12 @@ export function drawNewRowCell(
     const lineSize = isFirst ? finalLineSize : hoverAmount * finalLineSize;
     const xTranslate = isFirst ? 0 : (1 - hoverAmount) * finalLineSize * 0.5;
 
+    const padPlus = cellXPad + 4;
     if (lineSize > 0) {
-        ctx.moveTo(x + cellXPad + xTranslate, y + height / 2);
-        ctx.lineTo(x + cellXPad + xTranslate + lineSize, y + height / 2);
-        ctx.moveTo(x + cellXPad + xTranslate + lineSize * 0.5, y + height / 2 - lineSize * 0.5 - 0.5);
-        ctx.lineTo(x + cellXPad + xTranslate + lineSize * 0.5, y + height / 2 + lineSize * 0.5 + 0.5);
+        ctx.moveTo(x + padPlus + xTranslate, y + height / 2);
+        ctx.lineTo(x + padPlus + xTranslate + lineSize, y + height / 2);
+        ctx.moveTo(x + padPlus + xTranslate + lineSize * 0.5, y + height / 2 - lineSize * 0.5);
+        ctx.lineTo(x + padPlus + xTranslate + lineSize * 0.5, y + height / 2 + lineSize * 0.5);
         ctx.lineWidth = 2;
         ctx.strokeStyle = theme.bgIconHeader;
         ctx.lineCap = "round";
@@ -209,7 +210,7 @@ export function drawNewRowCell(
     }
 
     ctx.fillStyle = theme.textMedium;
-    ctx.fillText(data, 16 + x + cellXPad + 0.5, y + height / 2 + 4.5);
+    ctx.fillText(data, 24 + x + cellXPad + 0.5, y + height / 2 + 4.5);
     ctx.beginPath();
 }
 
