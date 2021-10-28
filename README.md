@@ -1,88 +1,92 @@
-# Glide Data Grid
+<h1 align="center">
+  <b>Glide <span style="color: #30CC5C">Data</span> Grid</b>
+</h1>
+<p align="center">A relatively small HTML5 Canvas based data editor supporting <b>millions</b> of rows, <b>rapid</b> updating, and fully <b>native scrolling</b>. We built <a href="https://grid.glideapps.com" target="_blank">Data Grid</a> as the basis for the <a href="https://docs.glideapps.com/all/reference/data-editor/introduction-to-the-data-editor" target="_blank">Glide Data Editor</a>.</p>
 
-We built [Data Grid](https://grid.glideapps.com) as the basis for the [Glide Data Editor](https://docs.glideapps.com/all/reference/data-editor/introduction-to-the-data-editor). It's a React component built on top of HTML Canvas.
+<p align="center"><a href="https://github.com/glideapps/glide-data-grid/releases" target="_blank"><img src="https://img.shields.io/badge/version-v3.0.0-blue?style=for-the-badge&logo=none" alt="grid version" /></a>&nbsp;<a href="https://reactjs.org/" target="_blank"><img src="https://img.shields.io/badge/React-16+-00ADD8?style=for-the-badge&logo=react" alt="react version" /></a>&nbsp;<a href="https://www.typescriptlang.org/" target="_blank"><img src="https://img.shields.io/badge/Typescript-grey?style=for-the-badge&logo=typescript" alt="react version" /></a>&nbsp;<a href="https://bundlephobia.com/package/@glideapps/glide-data-grid" target="_blank"><img src="https://img.shields.io/badge/Bundle_Size-48.7kb-success?style=for-the-badge&logo=none" alt="go cover" /></a>&nbsp;<img src="https://img.shields.io/badge/license-mit-red?style=for-the-badge&logo=none" alt="license" /></p>
 
-![Glide Data Grid](features.gif)
+![Data Grid](./data-grid.jpg)
+
+# 👩‍💻 Demo and features
+
+Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-data-grid)
+
+## Features
 
 -   **It scales to millions of rows**. Cells are rendered lazily on demand for memory efficiency.
 -   **Scrolling is extremely fast**. Native scrolling keeps everything buttery smooth.
--   **Supports multiple types of cells**. Numbers, text, markdown, bubble, image
+-   **Supports multiple types of cells**. Numbers, text, markdown, bubble, image, drilldown, uri
 -   **Fully Free & Open Source**. [MIT licensed](LICENSE) so you can use Grid in commerical projects.
 -   **Editing is built in**.
 -   **Resizable and movable columns**.
 -   **Variable sized rows**.
--   **Single- and multi-select**.
--   **Cell rendering can be customized**.
+-   **Single and multi-select rows, cells, and columns**.
+-   **Cell rendering can be fully customized**.
 
-### Setting Up Codespaces
+# ⚡ Quick Start
 
-If you'd like to set up glide data grid locally and contribute, the easiest way to get up and running
-is to use Codespaces if you have access to it. If you do not, simply cloning the repo and running `npm install` also works!
+First make sure you are using React 16 or greater. Then install the data grid:
 
-#### Steps
-
--   Cick the green dropdown labeled code, there should be two tabs: local and codespaces.
--   Click on codespaces.
--   If this is your first time, then create a new codespace. It will open a new browser tab and build the docker container for it - there will be a button to open the environment in VSCode if you'd prefer to run it that way
--   You should see a screen that says `Setting up your codespace` As soon as that's done, you should see a VSCode like UI with files on the left.
--   Open a terminal window (you should find it at the top under terminal) and run
-    `.devcontainer/install.sh`
-
-## Installation
-
-To add Grid to your own project:
-
-```shell
-$ npm install @glideapps/glide-data-grid
-# Install peer dependencies
-$ npm install direction marked react-responsive-carousel styled-components
+```
+npm i @glideapps/glide-data-grid
 ```
 
-## Simple usage
+You may also need to install the peer dependencies if you don't have them already:
 
-First you need to define your columns:
+```
+npm i direction lodash marked react-responsive-carousel styled-components
+```
+
+Create a new `DataEditor` wherever you need to display lots and lots of data
+
+```tsx
+// The container is not required, but is convenient for getting started
+<DataEditorContainer width={1000} height={700}>
+    <DataEditor getCellContent={getData} columns={columns} rows={numRows} />
+</DataEditorContainer>
+```
+
+Making your columns is easy
 
 ```ts
+// Grid columns may also provide icon, overlayIcon, menu, style, and theme overrides
 const columns: GridColumn[] = [
-    { title: "Number", width: 100 },
-    { title: "Square", width: 100 },
+    { title: "First Name", width: 100 },
+    { title: "Last Name", width: 100 },
 ];
 ```
 
-Next you need a function which, given column and row indexes, returns a cell to display. Here we have two columns, the first of which shows the index of the row, and the second the square of that number:
+Last provide data to the grid
 
 ```ts
+// If fetching data is slow you can use the DataEditor ref to send updates for cells
+// once data is loaded.
 function getData([col, row]: readonly [number, number]): GridCell {
-    let n: number;
+    const person = getData(row);
+
     if (col === 0) {
-        n = row;
+        return {
+            kind: GridCellKind.Text,
+            data: person.firstName,
+            allowOverlay: false,
+        };
     } else if (col === 1) {
-        n = row * row;
+        return {
+            kind: GridCellKind.Text,
+            data: person.lastName,
+            allowOverlay: false,
+        };
     } else {
-        throw new Error("This should not happen");
+        throw new Error();
     }
-    return {
-        kind: GridCellKind.Number,
-        data: n,
-        displayData: n.toString(),
-        allowOverlay: false,
-    };
 }
-```
-
-Now you can use Data Grid:
-
-```jsx
-<DataEditorContainer width={500} height={300}>
-    <DataEditor getCellContent={getData} columns={columns} rows={1000} />
-</DataEditorContainer>
 ```
 
 ## Full API documentation
 
 The full [API documentation is in the `API.md` file](API.md).
 
-## FAQ
+# 📒 FAQ
 
 **Nothing shows up!**
 
@@ -104,7 +108,7 @@ Data Grid is agnostic about the way you load/store/generate/mutate your data. Wh
 
 **Does it do sorting, searching, and filtering?**
 
-Search is included.
+Search is included. You provide the trigger, we do the search. [Example](https://glideapps.github.io/glide-data-grid/?path=/story/dataeditor--built-in-search) in our storybook.
 
 Filtering and sorting are something you would have to implement with your data source. There are hooks for adding column header menus if you want that.
 
@@ -116,7 +120,7 @@ Not yet, but there is some infrastructure for this internally already, and we ac
 
 **Can I render my own cells?**
 
-Yes, but the renderer has to use HTML Canvas.
+Yes, but the renderer has to use HTML Canvas. [Simple example](https://glideapps.github.io/glide-data-grid/?path=/story/dataeditor--draw-custom-cells) in our Storybook.
 
 **Why does Data Grid use HTML Canvas?**
 

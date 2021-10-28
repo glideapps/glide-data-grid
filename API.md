@@ -16,7 +16,7 @@ Once you've got that done, the easiest way to use the Data Grid is to wrap it in
 </DataEditorContainer>
 ```
 
-What the container does is give the Grid its size. The Grid itself has no intrinisic size. This is likely to change in a future version. If you'd rather not use the container and set a size yourself, the quickest way is by wrapping it in a div with CSS like this:
+What the container does is give the Grid its size. The Grid itself has no intrinisic size. If you'd rather not use the container and set a size yourself, the quickest way is by wrapping it in a div with CSS like this:
 
 ```CSS
 .gridWrapper > :first-child {
@@ -41,9 +41,9 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 Grid always passes col/row coordinate pairs in the format [col, row] and never [row, col]. This is to more accurately match an [x, y] world, even though most english speakers will tend to say "row col".
 
-## Properties
+## `DataEditor` Properties
 
-### Required
+## Required
 
 ```ts
 rows: number;
@@ -51,11 +51,15 @@ rows: number;
 
 `rows` is the number of rows to display.
 
+---
+
 ```ts
 columns: readonly GridColumn[];
 ```
 
 `columns` is an array of objects of type `GridColumn` describing the column headers. The length of the array is the number of columns to display.
+
+---
 
 ```ts
 getCellContent: (cell: readonly [number, number]) => GridCell;
@@ -63,7 +67,9 @@ getCellContent: (cell: readonly [number, number]) => GridCell;
 
 `getCellContent` returns an object of type `GridCell` describing the contents for the cell at the given coordinates.
 
-### Optional
+---
+
+## Optional
 
 ```ts
 onVisibleRegionChanged?: (range: Rectangle) => void;
@@ -71,11 +77,15 @@ onVisibleRegionChanged?: (range: Rectangle) => void;
 
 `onVisibleRegionChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`.
 
+---
+
 ```ts
 headerHeight: number;
 ```
 
 `headerHeight` is the height of the table header. It defaults to `36`.
+
+---
 
 ```ts
 rowHeight: number | ((index: number) => number);
@@ -83,11 +93,15 @@ rowHeight: number | ((index: number) => number);
 
 `rowHeight` is the height of a row in the table. It defaults to `34`. By passing a function instead of a number you can give different heights to each row. The `index` is the zero-based absolute row index.
 
+---
+
 ```ts
 rowMarkers?: "checkbox" | "number" | "both" | "none";
 ```
 
 `rowMarkers` determines whether to display the marker column on the very left. It defaults to `none`. Note that this column doesn't count as a table column, i.e. it has no index, and doesn't change column indexes.
+
+---
 
 ```ts
 rowMarkerWidth?: number;
@@ -95,11 +109,15 @@ rowMarkerWidth?: number;
 
 `rowMarkerWidth` is the width of the marker column on the very left. By default it adapts based on the number of rows in your data set.
 
+---
+
 ```ts
 rowSelectionMode?: "auto" | "multi";
 ```
 
 `rowSelectionMode` changes how selecting a row marker behaves. In auto mode it adapts to touch or mouse environments automatically, in multi-mode it always acts as if the multi key (Ctrl) is pressed.
+
+---
 
 ```ts
 onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
@@ -107,11 +125,15 @@ onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
 `onHeaderMenuClick` is called when the user clicks the menu button on a column header. `col` is the column index, and `screenPosition` is the bounds of the column header. You are responsible for drawing and handling the menu.
 
+---
+
 ```ts
 onColumnMoved?: (startIndex: number, endIndex: number) => void;
 ```
 
 `onColumnMoved` is called when the user finishes moving a column. `startIndex` is the index of the column that was moved, and `endIndex` is the index at which it should end up. Note that you have to effect the move of the column, and pass the reordered columns back in the `columns` property.
+
+---
 
 ```ts
 onColumnResized?: (column: GridColumn, newSize: number) => void;
@@ -119,11 +141,15 @@ onColumnResized?: (column: GridColumn, newSize: number) => void;
 
 `onColumnResized` is called when the user finishes resizing a column. `newSize` is the new size of the column. Note that you have change the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
 
+---
+
 ```ts
 onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
 ```
 
 `onCellEdited` is called when the user finishes editing a cell. Note that you are responsible for setting the new value of the cell.
+
+---
 
 ```ts
 onDeleteRows?: (rows: readonly number[]) => void;
@@ -131,11 +157,15 @@ onDeleteRows?: (rows: readonly number[]) => void;
 
 `onDeleteRows` is called when the user deletes one or more rows. `rows` is an array with the absolute indexes of the deletes rows. Note that it is on you to actually effect the deletion of those rows.
 
+---
+
 ```ts
 onItemHovered?: (args: GridMouseEventArgs) => void;
 ```
 
 `onItemHovered` is called when the user hovers over a cell, a header, or outside the grid.
+
+---
 
 ```ts
 trailingRowOptions?: {
@@ -148,11 +178,13 @@ onRowAppended?: (cell?: readonly [number, number], newValue?: EditableGridCell) 
 
 `onRowAppended` controls adding new rows at the bottom of the Grid. If `onRowAppended` is defined, an empty, editable row will display at the bottom. If the user enters a value in one of its cells, `onRowAppended` is called, which is responsible for appending the new row. The appearance of the blank row can be configured using `trailingRowOptions`.
 
+---
+
 ```ts
 getCellsForSelection?: (selection: GridSelection) => readonly (readonly GridCell[])[];
 ```
 
-`getCellsForSelection` is called when the user copies a selection to the clipboard. It must return a two-dimensional array (an array of rows, where each row is an array of cells) of the cells in the selection's rectangle. Note that the rectangle can include cells that are not currently visible.
+`getCellsForSelection` is called when the user copies a selection to the clipboard or the data editor needs to inspect data which may be outside the curently visible range. It must return a two-dimensional array (an array of rows, where each row is an array of cells) of the cells in the selection's rectangle. Note that the rectangle can include cells that are not currently visible.
 
 ```ts
 onCellClicked?: (cell: readonly [number, number]) => void;
@@ -160,17 +192,23 @@ onCellClicked?: (cell: readonly [number, number]) => void;
 
 `onCellClicked` is called whenever the user clicks a cell in the grid.
 
+---
+
 ```ts
 imageEditorOverride?: ImageEditorType;
 ```
 
 If `imageEditorOverride` is specified, then it will be used instead of the default image editor overlay, which is what the user sees when they double-click on an image cell.
 
+---
+
 ```ts
 markdownDivCreateNode?: (content: string) => DocumentFragment;
 ```
 
 IF `markdownDivCreateNode` is specified, then it will be used to render Markdown, instead of the default Markdown renderer used by the Grid. You'll want to use this if you need to process your Markdown for security purposes, or if you want to use a renderer with different Markdown features.
+
+---
 
 ```ts
 drawCustomCell?: (
@@ -183,11 +221,15 @@ drawCustomCell?: (
 
 You can specify `drawCustomCell` to enable rendering your own cells. The Grid will call this for every cell it needs to render. It should either render the cell and return `true`, or not render anything and return `false`, in which case the Grid will render the cell.
 
+---
+
 ```ts
 scrollToEnd?: boolean;
 ```
 
 When this property changes to `true`, the Grid will scroll all the way to the right. Glide uses that when the user clicks the "Add Column" button.
+
+---
 
 ```ts
 isDraggable?: boolean;
@@ -195,6 +237,8 @@ onDragStart?: (args: GridDragEventArgs) => void;
 ```
 
 If `isDraggable` is set, the whole Grid is draggable, and `onDragStart` will be called when dragging starts. You can use this to build a UI where the user can drag the Grid around.
+
+---
 
 ```ts
 maxColumnWidth?: number;
@@ -224,12 +268,13 @@ export interface Rectangle {
 
 ```ts
 export interface GridColumn {
-    readonly width: number;
-    readonly title: string;
-    readonly icon?: HeaderIcon;
-    readonly overlayIcon?: HeaderIcon;
-    readonly hasMenu?: boolean;
-    readonly style?: "normal" | "highlight";
+    readonly width: number; // The width of the column
+    readonly title: string; // The title of the column
+    readonly icon?: GridColumnIcon | string; // The icon
+    readonly overlayIcon?: GridColumnIcon | string; // An icon to draw on top (like a lock indicator)
+    readonly hasMenu?: boolean; // If the column should draw a menu triangle
+    readonly style?: "normal" | "highlight"; // Render as "highlighted" using the theme accent
+    readonly themeOverride?: Partial<Theme>; // Theme override for column and all cells in column
 }
 ```
 
@@ -273,13 +318,14 @@ interface NumberCell extends BaseGridCell {
 
 interface ImageCell extends BaseGridCell {
     readonly kind: GridCellKind.Image;
-    readonly data: string[];
+    readonly data: readonly string[];
+    readonly displayData?: readonly string[];
     readonly allowAdd: boolean;
 }
 
 interface BubbleCell extends BaseGridCell {
     readonly kind: GridCellKind.Bubble;
-    readonly data: string[];
+    readonly data: readonly string[];
 }
 
 export interface DrilldownCellData {
@@ -342,21 +388,23 @@ export enum GridCellKind {
 export type GridMouseEventArgs = GridMouseCellEventArgs | GridMouseHeaderEventArgs | GridMouseOutOfBoundsEventArgs;
 
 interface BaseGridMouseEventArgs {
-    shiftKey: boolean;
+    readonly shiftKey: boolean;
+    readonly ctrlKey: boolean;
+    readonly metaKey: boolean; // Command key
+    readonly isTouch: boolean;
+    readonly isEdge: boolean;
 }
 
 interface GridMouseCellEventArgs extends BaseGridMouseEventArgs {
     readonly kind: "cell";
     readonly location: readonly [number, number];
     readonly bounds: Rectangle;
-    readonly isEdge: boolean;
 }
 
 interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs {
     readonly kind: "header";
     readonly location: readonly [number, undefined];
     readonly bounds: Rectangle;
-    readonly isEdge: boolean;
 }
 
 interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {
