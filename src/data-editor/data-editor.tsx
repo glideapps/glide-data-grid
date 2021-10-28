@@ -1221,6 +1221,36 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     useEventListener(
         "paste",
         React.useCallback(async () => {
+            function pasteToCell(inner: InnerGridCell, target: readonly [number, number], toPaste: string): boolean {
+                if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
+                    switch (inner.kind) {
+                        case GridCellKind.Text:
+                        case GridCellKind.Markdown:
+                        case GridCellKind.Uri: {
+                            mangledOnCellEdited?.(target, {
+                                ...inner,
+                                data: toPaste,
+                            });
+                            return true;
+                        }
+                        case GridCellKind.Number: {
+                            const newNumber = Number.parseFloat(toPaste);
+                            if (!Number.isNaN(newNumber)) {
+                                mangledOnCellEdited?.(target, {
+                                    ...inner,
+                                    data: newNumber,
+                                });
+                                return true;
+                            }
+                            return false;
+                        }
+                        default:
+                            assertNever(inner);
+                    }
+                }
+                return false;
+            }
+
             const focused =
                 scrollRef.current?.contains(document.activeElement) ||
                 canvasRef.current?.contains(document.activeElement);
@@ -1240,31 +1270,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                 if (onPaste === undefined) {
                     const cellData = getMangedCellContent(target);
-                    if (!isInnerOnlyCell(cellData) && isReadWriteCell(cellData) && cellData.readonly !== true) {
-                        switch (cellData.kind) {
-                            case GridCellKind.Text:
-                            case GridCellKind.Markdown:
-                            case GridCellKind.Uri: {
-                                mangledOnCellEdited?.(target, {
-                                    ...cellData,
-                                    data: text,
-                                });
-                                break;
-                            }
-                            case GridCellKind.Number: {
-                                const newNumber = Number.parseFloat(text);
-                                if (!Number.isNaN(newNumber)) {
-                                    mangledOnCellEdited?.(target, {
-                                        ...cellData,
-                                        data: newNumber,
-                                    });
-                                }
-                                break;
-                            }
-                            default:
-                                assertNever(cellData);
-                        }
-                    }
+                    pasteToCell(cellData, target, text);
                     return;
                 }
 
@@ -1282,32 +1288,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         const dataItem = dataRow[col];
                         const index = [col + gridCol, row + gridRow] as const;
                         const cellData = getMangedCellContent(index);
-                        if (!isInnerOnlyCell(cellData) && isReadWriteCell(cellData) && cellData.readonly !== true) {
-                            switch (cellData.kind) {
-                                case GridCellKind.Text:
-                                case GridCellKind.Markdown:
-                                case GridCellKind.Uri: {
-                                    mangledOnCellEdited?.(index, {
-                                        ...cellData,
-                                        data: dataItem,
-                                    });
-                                    damage.push(index);
-                                    break;
-                                }
-                                case GridCellKind.Number: {
-                                    const newNumber = Number.parseFloat(dataItem);
-                                    if (!Number.isNaN(newNumber)) {
-                                        mangledOnCellEdited?.(index, {
-                                            ...cellData,
-                                            data: newNumber,
-                                        });
-                                        damage.push(index);
-                                    }
-                                    break;
-                                }
-                                default:
-                                    assertNever(cellData);
-                            }
+                        if (pasteToCell(cellData, index, dataItem)) {
+                            damage.push(index);
                         }
                     }
                 }
