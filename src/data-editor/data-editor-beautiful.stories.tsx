@@ -528,6 +528,7 @@ export const SmallEditableGrid = () => {
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
+                rowMarkers="both"
                 columns={cols}
                 rows={20}
                 onCellEdited={setCellValue}
