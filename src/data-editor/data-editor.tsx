@@ -1159,21 +1159,22 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             return s;
         }
 
-        let x = 0;
-        const none = x++;
-        const inString = x++;
-        const inStringPostQuote = x++;
+        enum State {
+            None,
+            inString,
+            inStringPostQuote,
+        }
 
         const result: string[][] = [];
         let current: string[] = [];
 
         let start = 0;
-        let state = none;
+        let state = State.None;
         str = str.trim().replace(/\r\n/g, "\n");
         let index = 0;
         for (const char of str) {
             switch (state) {
-                case none:
+                case State.None:
                     if (char === "\t" || char === "\n") {
                         current.push(str.slice(start, index));
                         start = index + 1;
@@ -1183,17 +1184,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             current = [];
                         }
                     } else if (char === `"`) {
-                        state = inString;
+                        state = State.inString;
                     }
                     break;
-                case inString:
+                case State.inString:
                     if (char === `"`) {
-                        state = inStringPostQuote;
+                        state = State.inStringPostQuote;
                     }
                     break;
-                case inStringPostQuote:
+                case State.inStringPostQuote:
                     if (char === '"') {
-                        state = inString;
+                        state = State.inString;
                     } else if (char === "\t" || char === "\n") {
                         current.push(descape(str.slice(start, index)));
                         start = index + 1;
@@ -1202,9 +1203,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             result.push(current);
                             current = [];
                         }
-                        state = none;
+                        state = State.None;
                     } else {
-                        state = none;
+                        state = State.None;
                     }
                     break;
             }
