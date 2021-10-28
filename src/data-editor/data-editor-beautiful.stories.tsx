@@ -1933,10 +1933,10 @@ export const PasteSupport: React.VFC = () => {
 Monday	Cats	https://google.com
 Tuesday	Turtles	https://google.com
 Wednesday	Bears	https://google.com
-Thursday	Lions	https://google.com
+Thursday	"L  ions"	https://google.com
 Friday	Pigs	https://google.com
 Saturday	"Turkeys and some ""quotes"" and
-a new line char ""more quotes""."	https://google.com`}
+a new line char ""more quotes"" plus a tab  ."	https://google.com`}
                         style={{ width: "100%", marginBottom: 20, borderRadius: 9, minHeight: 200, padding: 10 }}
                     />
                 </>
