@@ -17,6 +17,7 @@ import {
     InnerGridCellKind,
     CompactSelection,
     Slice,
+    isInnerOnlyCell,
 } from "../data-grid/data-grid-types";
 import copy from "copy-to-clipboard";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
@@ -26,6 +27,7 @@ import { ThemeProvider, useTheme } from "styled-components";
 import { getDataEditorTheme } from "../common/styles";
 import { DataGridRef } from "data-grid/data-grid";
 import noop from "lodash/noop";
+import { useEventListener } from "../common/utils";
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
@@ -96,6 +98,10 @@ export interface DataEditorProps extends Props {
 
     readonly getCellContent: ReplaceReturnType<DataGridSearchProps["getCellContent"], GridCell>;
     readonly rowSelectionMode?: "auto" | "multi";
+
+    readonly onPaste?:
+        | ((target: readonly [number, number], values: readonly (readonly string[])[]) => boolean)
+        | boolean;
 }
 
 export interface DataEditorRef {
@@ -142,6 +148,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnMoved,
         onDeleteRows,
         onDragStart,
+        onPaste,
         rowSelectionMode = "auto",
         onHeaderMenuClick,
         onItemHovered,
@@ -214,9 +221,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const mangledOnCellEdited = React.useCallback(
         (cell: readonly [number, number], newValue: EditableGridCell) => {
-            onCellEdited?.(cell, newValue);
+            onCellEdited?.([cell[0] - rowMarkerOffset, cell[1]], newValue);
         },
-        [onCellEdited]
+        [onCellEdited, rowMarkerOffset]
     );
 
     const mangledCols = React.useMemo(() => {
@@ -318,7 +325,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     forceEditMode: initialValue !== undefined,
                 });
             } else if (c.kind === GridCellKind.Boolean && c.allowEdit) {
-                mangledOnCellEdited?.([col - rowMarkerOffset, row], {
+                mangledOnCellEdited?.([col, row], {
                     ...c,
                     data: !c.data,
                 });
@@ -715,8 +722,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const copyToClipboard = React.useCallback((cells: readonly (readonly GridCell[])[]) => {
         function escape(str: string): string {
-            if (/\n|"/.test(str)) {
-                str = `"${str.replace(`"`, `""`)}"`;
+            if (/\n|"|\t/.test(str)) {
+                str = `"${str.replace(/"/g, `""`)}"`;
             }
             return str;
         }
@@ -931,10 +938,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (newValue: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => {
             if (gridSelection !== undefined && newValue !== undefined) {
                 // Fixme, this cast is dangerous
-                mangledOnCellEdited?.(
-                    [gridSelection.cell[0] - rowMarkerOffset, gridSelection.cell[1]],
-                    newValue as EditableGridCell
-                );
+                mangledOnCellEdited?.([gridSelection.cell[0], gridSelection.cell[1]], newValue as EditableGridCell);
             }
             focus(true);
             setOverlay(undefined);
@@ -945,7 +949,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 updateSelectedCell(gridSelection.cell[0] + movX, gridSelection.cell[1] + movY, isEditingTrailingRow);
             }
         },
-        [gridSelection, focus, mangledOnCellEdited, rowMarkerOffset, mangledRows, updateSelectedCell]
+        [gridSelection, focus, mangledOnCellEdited, mangledRows, updateSelectedCell]
     );
 
     const [selCol, selRow] = gridSelection?.cell ?? [];
@@ -966,8 +970,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             const fn = async () => {
                 const overlayOpen = overlay !== undefined;
                 const shiftKey = event.shiftKey;
-                const isDeleteKey = event.key === "Delete" || (browserIsOSX.value && event.key === "Backspace");
-                const isCopyKey = event.key === "c" && (event.metaKey || event.ctrlKey);
+                const isOSX = browserIsOSX.value;
+                const isDeleteKey = event.key === "Delete" || (isOSX && event.key === "Backspace");
 
                 if (event.key === "Escape") {
                     if (overlayOpen) {
@@ -992,54 +996,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return;
                 }
 
-                if (isCopyKey && getCellsForSelection !== undefined) {
-                    if (gridSelection !== undefined) {
-                        const [col, row] = gridSelection.cell;
-                        if (gridSelection.range !== undefined && getCellsForSelection !== undefined) {
-                            copyToClipboard(
-                                getCellsForSelection({
-                                    ...gridSelection.range,
-                                    x: gridSelection.range.x - rowMarkerOffset,
-                                })
-                            );
-                        } else {
-                            const cellValue = getCellContent([col - rowMarkerOffset, row]);
-                            copyToClipboard([[cellValue]]);
-                        }
-                    } else if (selectedRows !== undefined && selectedRows.length > 0) {
-                        const toCopy = Array.from(selectedRows);
-                        const cells = toCopy.map(
-                            rowIndex =>
-                                getCellsForSelection({
-                                    x: 0,
-                                    y: rowIndex,
-                                    width: columns.length,
-                                    height: 1,
-                                })[0]
-                        );
-                        copyToClipboard(cells);
-                    } else if (selectedColumns.length >= 1) {
-                        const results: (readonly (readonly GridCell[])[])[] = [];
-                        for (const col of selectedColumns) {
-                            results.push(
-                                getCellsForSelection({
-                                    x: col - rowMarkerOffset,
-                                    y: 0,
-                                    width: 1,
-                                    height: rows,
-                                })
-                            );
-                        }
-                        if (results.length === 1) {
-                            copyToClipboard(results[0]);
-                        }
-                        // FIXME: this is dumb
-                        const toCopy = results.reduce((pv, cv) => pv.map((row, index) => [...row, ...cv[index]]));
-
-                        copyToClipboard(toCopy);
-                    }
-                }
-
                 if (gridSelection === undefined) return;
                 let [col, row] = gridSelection.cell;
 
@@ -1054,31 +1010,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     } else {
                         reselect(event.bounds);
                         event.cancel();
-                    }
-                } else if (event.key === "v" && (event.metaKey || event.ctrlKey)) {
-                    try {
-                        const text = await navigator.clipboard.readText();
-                        const cellValue = getCellContent([col - rowMarkerOffset, row]);
-
-                        if (!isEditableGridCell(cellValue)) return;
-
-                        switch (cellValue.kind) {
-                            case GridCellKind.Text:
-                                mangledOnCellEdited?.([col - rowMarkerOffset, row], {
-                                    ...cellValue,
-                                    data: text,
-                                });
-                                break;
-                            case GridCellKind.Markdown:
-                            case GridCellKind.Uri:
-                                mangledOnCellEdited?.([col - rowMarkerOffset, row], {
-                                    ...cellValue,
-                                    data: text,
-                                });
-                                break;
-                        }
-                    } catch {
-                        // do nothing
                     }
                 } else if (event.key === "ArrowDown") {
                     setOverlay(undefined);
@@ -1124,7 +1055,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         // FIXME: Add way to show confirm modal
                         const del = true;
                         focus();
-                        const cell = [col - rowMarkerOffset, row] as const;
+                        const cell = [col, row] as const;
                         if (del) {
                             switch (cellValue.kind) {
                                 case GridCellKind.Text:
@@ -1198,7 +1129,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             overlay,
             selectedRows,
             gridSelection,
-            getCellsForSelection,
             getCellContent,
             rowMarkerOffset,
             updateSelectedCell,
@@ -1207,9 +1137,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             setSelectedColumns,
             focus,
             onDeleteRows,
-            selectedColumns,
-            copyToClipboard,
-            columns.length,
             rows,
             showTrailingBlankRow,
             appendRow,
@@ -1222,6 +1149,240 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             visibileRegion.x,
             visibileRegion.width,
         ]
+    );
+
+    function unquote(str: string): string[][] {
+        function descape(s: string): string {
+            if (s.startsWith('"') && s.endsWith('"')) {
+                s = s.slice(1, -1).replace(/""/g, '"');
+            }
+            return s;
+        }
+
+        enum State {
+            None,
+            inString,
+            inStringPostQuote,
+        }
+
+        const result: string[][] = [];
+        let current: string[] = [];
+
+        let start = 0;
+        let state = State.None;
+        str = str.trim().replace(/\r\n/g, "\n");
+        let index = 0;
+        for (const char of str) {
+            switch (state) {
+                case State.None:
+                    if (char === "\t" || char === "\n") {
+                        current.push(str.slice(start, index));
+                        start = index + 1;
+
+                        if (char === "\n") {
+                            result.push(current);
+                            current = [];
+                        }
+                    } else if (char === `"`) {
+                        state = State.inString;
+                    }
+                    break;
+                case State.inString:
+                    if (char === `"`) {
+                        state = State.inStringPostQuote;
+                    }
+                    break;
+                case State.inStringPostQuote:
+                    if (char === '"') {
+                        state = State.inString;
+                    } else if (char === "\t" || char === "\n") {
+                        current.push(descape(str.slice(start, index)));
+                        start = index + 1;
+
+                        if (char === "\n") {
+                            result.push(current);
+                            current = [];
+                        }
+                        state = State.None;
+                    } else {
+                        state = State.None;
+                    }
+                    break;
+            }
+
+            index++;
+        }
+        if (start < str.length) {
+            current.push(descape(str.slice(start, str.length)));
+        }
+        result.push(current);
+        return result;
+    }
+
+    useEventListener(
+        "paste",
+        React.useCallback(async () => {
+            function pasteToCell(inner: InnerGridCell, target: readonly [number, number], toPaste: string): boolean {
+                if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
+                    switch (inner.kind) {
+                        case GridCellKind.Text:
+                        case GridCellKind.Markdown:
+                        case GridCellKind.Uri: {
+                            mangledOnCellEdited?.(target, {
+                                ...inner,
+                                data: toPaste,
+                            });
+                            return true;
+                        }
+                        case GridCellKind.Number: {
+                            const newNumber = Number.parseFloat(toPaste);
+                            if (!Number.isNaN(newNumber)) {
+                                mangledOnCellEdited?.(target, {
+                                    ...inner,
+                                    data: newNumber,
+                                });
+                                return true;
+                            }
+                            return false;
+                        }
+                        default:
+                            assertNever(inner);
+                    }
+                }
+                return false;
+            }
+
+            const focused =
+                scrollRef.current?.contains(document.activeElement) ||
+                canvasRef.current?.contains(document.activeElement);
+
+            let target = gridSelection?.cell;
+            if (target === undefined && selectedColumns.length === 1) {
+                target = [selectedColumns.first() ?? 0, 0];
+            }
+            if (target === undefined && selectedRows.length === 1) {
+                target = [rowMarkerOffset, selectedRows.first() ?? 0];
+            }
+
+            if (focused && target !== undefined) {
+                const text = await navigator.clipboard.readText();
+
+                const [gridCol, gridRow] = target;
+
+                if (onPaste === undefined) {
+                    const cellData = getMangedCellContent(target);
+                    pasteToCell(cellData, target, text);
+                    return;
+                }
+
+                const data = unquote(text);
+
+                if (onPaste === false || (typeof onPaste === "function" && onPaste?.(target, data) !== true)) {
+                    return;
+                }
+
+                const damage: (readonly [number, number])[] = [];
+                for (let row = 0; row < data.length; row++) {
+                    const dataRow = data[row];
+                    if (row + gridRow >= rows) break;
+                    for (let col = 0; col < dataRow.length; col++) {
+                        const dataItem = dataRow[col];
+                        const index = [col + gridCol, row + gridRow] as const;
+                        const cellData = getMangedCellContent(index);
+                        if (pasteToCell(cellData, index, dataItem)) {
+                            damage.push(index);
+                        }
+                    }
+                }
+                gridRef.current?.damage(
+                    damage.map(c => ({
+                        cell: c,
+                    }))
+                );
+            }
+        }, [
+            getMangedCellContent,
+            gridSelection,
+            mangledOnCellEdited,
+            onPaste,
+            rowMarkerOffset,
+            rows,
+            selectedColumns,
+            selectedRows,
+        ]),
+        window,
+        false,
+        true
+    );
+
+    useEventListener(
+        "copy",
+        React.useCallback(() => {
+            const focused =
+                scrollRef.current?.contains(document.activeElement) ||
+                canvasRef.current?.contains(document.activeElement);
+
+            if (focused && getCellsForSelection) {
+                if (gridSelection !== undefined) {
+                    const [col, row] = gridSelection.cell;
+                    if (gridSelection.range !== undefined && getCellsForSelection !== undefined) {
+                        copyToClipboard(
+                            getCellsForSelection({
+                                ...gridSelection.range,
+                                x: gridSelection.range.x - rowMarkerOffset,
+                            })
+                        );
+                    } else {
+                        const cellValue = getCellContent([col - rowMarkerOffset, row]);
+                        copyToClipboard([[cellValue]]);
+                    }
+                } else if (selectedRows !== undefined && selectedRows.length > 0) {
+                    const toCopy = Array.from(selectedRows);
+                    const cells = toCopy.map(
+                        rowIndex =>
+                            getCellsForSelection({
+                                x: 0,
+                                y: rowIndex,
+                                width: columns.length,
+                                height: 1,
+                            })[0]
+                    );
+                    copyToClipboard(cells);
+                } else if (selectedColumns.length >= 1) {
+                    const results: (readonly (readonly GridCell[])[])[] = [];
+                    for (const col of selectedColumns) {
+                        results.push(
+                            getCellsForSelection({
+                                x: col - rowMarkerOffset,
+                                y: 0,
+                                width: 1,
+                                height: rows,
+                            })
+                        );
+                    }
+                    if (results.length === 1) {
+                        copyToClipboard(results[0]);
+                    }
+                    // FIXME: this is dumb
+                    const toCopy = results.reduce((pv, cv) => pv.map((row, index) => [...row, ...cv[index]]));
+
+                    copyToClipboard(toCopy);
+                }
+            }
+        }, [
+            columns.length,
+            copyToClipboard,
+            getCellContent,
+            getCellsForSelection,
+            gridSelection,
+            rowMarkerOffset,
+            rows,
+            selectedColumns,
+            selectedRows,
+        ]),
+        window,
+        true,
+        false
     );
 
     const onSearchResultsChanged = React.useCallback(

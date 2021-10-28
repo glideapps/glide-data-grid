@@ -186,11 +186,23 @@ getCellsForSelection?: (selection: GridSelection) => readonly (readonly GridCell
 
 `getCellsForSelection` is called when the user copies a selection to the clipboard or the data editor needs to inspect data which may be outside the curently visible range. It must return a two-dimensional array (an array of rows, where each row is an array of cells) of the cells in the selection's rectangle. Note that the rectangle can include cells that are not currently visible.
 
+---
+
 ```ts
 onCellClicked?: (cell: readonly [number, number]) => void;
 ```
 
 `onCellClicked` is called whenever the user clicks a cell in the grid.
+
+---
+
+```ts
+onPaste?: ((target: readonly [number, number], values: readonly (readonly string[])[]) => boolean) | boolean;
+```
+
+`onPaste` is called when data is pasted into the grid. If left undefined, the `DataEditor` will operate in a fallback mode and attempt to paste the text buffer into the current cell assuming the current cell is not readonly and can accept the data type. If `onPaste` is set to false or the function returns false, the grid will simply ignore paste. If `onPaste` evaluates to true the grid will attempt to split the data by tabs and newlines and paste into available cells.
+
+The grid will not attempt to add additional rows if more data is pasted then can fit. In that case it is advisable to simply return false from onPaste and handle the paste manually.
 
 ---
 
@@ -288,7 +300,7 @@ editing. That way you can, for example, display numbers in a specific format.
 The Grid supports the following kinds of cells:
 
 -   `TextCell` is just a string.
--   `ImageCell` is an image URI, displayed as a thumbnail.
+-   `ImageCell` is an image URI array, displayed as a thumbnail.
 -   `BooleanCell` is a checkbox.
 -   `Markdown` is markdown text, which is rendered nicely in the overlay on double-click.
 -   `UriCell` is a URI.
