@@ -723,7 +723,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const copyToClipboard = React.useCallback((cells: readonly (readonly GridCell[])[]) => {
         function escape(str: string): string {
             if (/\n|"/.test(str)) {
-                str = `"${str.replace(`"`, `""`)}"`;
+                str = `"${str.replace(/"/g, `""`)}"`;
             }
             return str;
         }
