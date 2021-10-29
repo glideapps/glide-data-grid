@@ -5,7 +5,7 @@ type StateItem = { item: Item; hoverAmount: number };
 export type HoverValues = readonly Readonly<StateItem>[];
 export type StepCallback = (values: HoverValues) => void;
 
-const hoverTime = 120;
+const hoverTime = 80;
 const epsilon = 1e-6;
 
 // Ported from webkit

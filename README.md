@@ -1,9 +1,10 @@
 <h1 align="center">
-  <b>Glide <span style="color: #30CC5C">Data</span> Grid</b>
+  <img src="./icon.png" width="224px"/><br/>
+  <b>Glide Data Grid</b>
 </h1>
 <p align="center">A relatively small HTML5 Canvas based data editor supporting <b>millions</b> of rows, <b>rapid</b> updating, and fully <b>native scrolling</b>. We built <a href="https://grid.glideapps.com" target="_blank">Data Grid</a> as the basis for the <a href="https://docs.glideapps.com/all/reference/data-editor/introduction-to-the-data-editor" target="_blank">Glide Data Editor</a>.</p>
 
-<p align="center"><a href="https://github.com/glideapps/glide-data-grid/releases" target="_blank"><img src="https://img.shields.io/badge/version-v3.0.0-blue?style=for-the-badge&logo=none" alt="grid version" /></a>&nbsp;<a href="https://reactjs.org/" target="_blank"><img src="https://img.shields.io/badge/React-16+-00ADD8?style=for-the-badge&logo=react" alt="react version" /></a>&nbsp;<a href="https://www.typescriptlang.org/" target="_blank"><img src="https://img.shields.io/badge/Typescript-grey?style=for-the-badge&logo=typescript" alt="react version" /></a>&nbsp;<a href="https://bundlephobia.com/package/@glideapps/glide-data-grid" target="_blank"><img src="https://img.shields.io/badge/Bundle_Size-48.7kb-success?style=for-the-badge&logo=none" alt="go cover" /></a>&nbsp;<img src="https://img.shields.io/badge/license-mit-red?style=for-the-badge&logo=none" alt="license" /></p>
+<p align="center"><a href="https://github.com/glideapps/glide-data-grid/releases" target="_blank"><img src="https://img.shields.io/badge/version-v3.0.0-blue?style=for-the-badge&logo=none" alt="grid version" /></a>&nbsp;<a href="https://reactjs.org/" target="_blank"><img src="https://img.shields.io/badge/React-16+-00ADD8?style=for-the-badge&logo=react" alt="react version" /></a>&nbsp;<a href="https://www.typescriptlang.org/" target="_blank"><img src="https://img.shields.io/badge/Typescript-grey?style=for-the-badge&logo=typescript" alt="react version" /></a>&nbsp;<a href="https://bundlephobia.com/package/@glideapps/glide-data-grid" target="_blank"><img src="https://img.shields.io/badge/Bundle_Size-48.7kb-success?style=for-the-badge&logo=none" alt="go cover" /></a>&nbsp;<img src="https://img.shields.io/badge/license-mit-red?style=for-the-badge&logo=none" alt="license" />&nbsp;<a href="https://www.glideapps.com/jobs" target="_blank"><img src="https://img.shields.io/badge/❤_Made_by-Glide-11CCE5?style=for-the-badge&logo=none" alt="glide" /></a></p>
 
 ![Data Grid](./data-grid.jpg)
 

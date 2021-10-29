@@ -823,7 +823,7 @@ function drawFocusRing(
     const [targetCol, targetRow] = selectedCell.cell;
 
     const isStickyRow = lastRowSticky && targetRow === rows - 1;
-    const stickRowHeight = lastRowSticky && !isStickyRow ? getRowHeight(rows - 1) : 0;
+    const stickRowHeight = lastRowSticky && !isStickyRow ? getRowHeight(rows - 1) - 1 : 0;
 
     ctx.beginPath();
     ctx.rect(0, headerHeight, width, height - headerHeight - stickRowHeight);
