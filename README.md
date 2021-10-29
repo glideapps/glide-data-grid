@@ -1,7 +1,6 @@
 <h1 align="center">
   <img src="./icon.png" width="224px"/><br/>
-  <b>Glide <svg width="60" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="0" y="20" fill="#30CC5C">Data</text></svg> Grid
-</b>
+  <b>Glide Data Grid</b>
 </h1>
 <p align="center">A relatively small HTML5 Canvas based data editor supporting <b>millions</b> of rows, <b>rapid</b> updating, and fully <b>native scrolling</b>. We built <a href="https://grid.glideapps.com" target="_blank">Data Grid</a> as the basis for the <a href="https://docs.glideapps.com/all/reference/data-editor/introduction-to-the-data-editor" target="_blank">Glide Data Editor</a>.</p>
 
