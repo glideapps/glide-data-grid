@@ -330,11 +330,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     data: !c.data,
                 });
                 setForceDraw(cv => (cv + 1) % 100); // I can't do math with triple digits so I always avoid it
-            } else {
-                onCellClicked?.([col - rowMarkerOffset, row]);
             }
         },
-        [getMangedCellContent, mangledOnCellEdited, onCellClicked, rowMarkerOffset, gridSelection]
+        [getMangedCellContent, mangledOnCellEdited, gridSelection]
     );
 
     const focusOnRowFromTrailingBlankRow = React.useCallback(
@@ -597,8 +595,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
                 reselect(args.bounds);
             }
+            onCellClicked?.([args.location[0] - rowMarkerOffset, args.location[1]])
         },
-        [gridSelection, onHeaderClicked, reselect, rowMarkerOffset]
+        [gridSelection, onCellClicked, onHeaderClicked, reselect, rowMarkerOffset]
     );
 
     const onHeaderMenuClickInner = React.useCallback(
