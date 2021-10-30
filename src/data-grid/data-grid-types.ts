@@ -64,6 +64,7 @@ export enum GridCellKind {
     Markdown = "markdown",
     Drilldown = "drilldown",
     Protected = "protected",
+    Custom = "custom",
 }
 
 export enum GridColumnIcon {
@@ -188,7 +189,8 @@ export function isEditableGridCell(cell: GridCell): cell is EditableGridCell {
         cell.kind === GridCellKind.Bubble ||
         cell.kind === GridCellKind.RowID ||
         cell.kind === GridCellKind.Protected ||
-        cell.kind === GridCellKind.Drilldown
+        cell.kind === GridCellKind.Drilldown ||
+        cell.kind === GridCellKind.Custom
     ) {
         return false;
     }
@@ -205,7 +207,8 @@ export function isTextEditableGridCell(cell: GridCell): cell is ReadWriteGridCel
         cell.kind === GridCellKind.Protected ||
         cell.kind === GridCellKind.Drilldown ||
         cell.kind === GridCellKind.Boolean ||
-        cell.kind === GridCellKind.Image
+        cell.kind === GridCellKind.Image ||
+        cell.kind === GridCellKind.Custom
     ) {
         return false;
     }
@@ -232,7 +235,14 @@ export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
     return true;
 }
 
-export type GridCell = EditableGridCell | BubbleCell | RowIDCell | LoadingCell | ProtectedCell | DrilldownCell;
+export type GridCell =
+    | EditableGridCell
+    | BubbleCell
+    | RowIDCell
+    | LoadingCell
+    | ProtectedCell
+    | DrilldownCell
+    | CustomCell;
 
 type InnerOnlyGridCell = NewRowCell | MarkerCell;
 export type InnerGridCell = GridCell | InnerOnlyGridCell;
@@ -281,6 +291,12 @@ interface ImageCell extends BaseGridCell {
 interface BubbleCell extends BaseGridCell {
     readonly kind: GridCellKind.Bubble;
     readonly data: string[];
+}
+
+interface CustomCell<T extends {} = {}> extends BaseGridCell {
+    readonly kind: GridCellKind.Custom;
+    readonly data: T;
+    readonly copyData: string;
 }
 
 export interface DrilldownCellData {

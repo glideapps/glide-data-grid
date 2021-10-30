@@ -595,7 +595,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
                 reselect(args.bounds);
             }
-            onCellClicked?.([args.location[0] - rowMarkerOffset, args.location[1]])
+            onCellClicked?.([args.location[0] - rowMarkerOffset, args.location[1]]);
         },
         [gridSelection, onCellClicked, onHeaderClicked, reselect, rowMarkerOffset]
     );
@@ -747,6 +747,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return "************";
                 case GridCellKind.Drilldown:
                     return cell.data.map(i => i.text).reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
+                case GridCellKind.Custom:
+                    return escape(cell.copyData);
                 default:
                     assertNever(cell);
             }
