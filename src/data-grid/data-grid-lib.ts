@@ -214,14 +214,6 @@ export function drawNewRowCell(
     ctx.beginPath();
 }
 
-/*
-<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="0.5" y="0.5" width="15" height="15" rx="3.5" fill="#4F5DFF"/>
-<path d="M3.65005 7.84995L6.37587 10.7304L11.9999 4.74995" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="0.5" y="0.5" width="15" height="15" rx="3.5" stroke="#2D3DED"/>
-</svg>
-*/
-
 function drawCheckbox(
     ctx: CanvasRenderingContext2D,
     theme: Theme,
