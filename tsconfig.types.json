@@ -11,5 +11,5 @@
         "emitDeclarationOnly": true,
         "sourceMap": false,
     },
-    "exclude": ["./src/**/*.stories.tsx", "./src/stories/*.tsx"]
+    "exclude": ["./src/**/*.stories.tsx", "./src/stories/*.tsx", "./src/docs/*.tsx"]
 }

@@ -133,7 +133,7 @@ export const SelectedColumnnotest = () => {
                 allowOverlay: false,
                 owned: true,
             })}
-            selectedColumns={[2, 4]}
+            selectedColumns={CompactSelection.fromSingleSelection([2, 4])}
             firstColSticky={false}
             lastRowSticky={false}
             isResizing={false}

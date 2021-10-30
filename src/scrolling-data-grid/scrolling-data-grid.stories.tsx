@@ -70,7 +70,7 @@ export function Simplenotest() {
             translateX={translateX}
             translateY={translateY}
             headerHeight={44}
-            allowResize={true}
+            lastRowSticky={false}
             rowHeight={34}
             onVisibleRegionChanged={onVisibleRegionChanged}
             columns={columns}
