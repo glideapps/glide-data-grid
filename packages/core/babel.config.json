@@ -1,0 +1,16 @@
+{
+    "presets": [
+        [
+            "@babel/env",
+            {
+                "modules": false,
+                "targets": ["last 2 versions", "not dead"]
+            }
+        ],
+        "@babel/preset-react",
+        "@babel/preset-typescript"
+    ],
+    "plugins": ["@babel/plugin-proposal-class-properties"],
+    "comments": false,
+    "sourceMaps": true
+}

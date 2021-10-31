@@ -10,7 +10,7 @@
     "plugins": ["react", "@typescript-eslint", "import"],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "tsconfig.json"
+        "project": "packages/core/tsconfig.json"
     },
     "rules": {
         "no-console": "warn",

@@ -1,0 +1,18 @@
+0 silly argv {
+0 silly argv   _: [ 'create' ],
+0 silly argv   lernaVersion: '4.0.0',
+0 silly argv   '$0': '/home/node/.npm/_npx/32639/bin/lerna',
+0 silly argv   name: 'glide-data-grid-cells'
+0 silly argv }
+1 notice cli v4.0.0
+2 verbose rootPath /workspaces/glide-data-grid
+3 error Error: canceled
+3 error     at Interface.<anonymous> (/home/node/.npm/_npx/32639/lib/node_modules/lerna/node_modules/read/lib/read.js:66:13)
+3 error     at Interface.emit (events.js:400:28)
+3 error     at Interface._ttyWrite (readline.js:910:16)
+3 error     at ReadStream.onkeypress (readline.js:235:10)
+3 error     at ReadStream.emit (events.js:400:28)
+3 error     at emitKeys (internal/readline/utils.js:358:14)
+3 error     at emitKeys.next (<anonymous>)
+3 error     at ReadStream.onData (readline.js:1179:36)
+3 error     at ReadStream.emit (events.js:400:28)

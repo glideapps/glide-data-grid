@@ -1,0 +1,35 @@
+{
+    "name": "@glideapps/glide-data-grid-cells",
+    "version": "3.0.2",
+    "description": "Extra cells for Glide Data Grid",
+    "keywords": [
+        "data",
+        "grid",
+        "table",
+        "cell"
+    ],
+    "author": "Glide",
+    "homepage": "https://github.com/glideapps/glide-data-grid#readme",
+    "license": "ISC",
+    "main": "src/index.ts",
+    "directories": {
+        "lib": "lib",
+        "test": "__tests__"
+    },
+    "files": [
+        "lib"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/glideapps/glide-data-grid.git"
+    },
+    "scripts": {
+        "test": "echo \"Error: run tests from root\" && exit 1"
+    },
+    "bugs": {
+        "url": "https://github.com/glideapps/glide-data-grid/issues"
+    },
+    "dependencies": {
+        "@glideapps/glide-data-grid": "^3.0.3"
+    }
+}
