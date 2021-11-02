@@ -10,7 +10,28 @@ on:
             - "!v*-*"
 
 jobs:
-    publish:
+    publish-core:
+        defaults:
+            run:
+                working-directory: ./core
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v1
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 10
+            - run: npm ci
+            - run: npm run lint
+            - run: npm run build-js
+            - run: npm run build-types
+            - uses: JS-DevTools/npm-publish@v1
+              with:
+                  token: ${{ secrets.NPM_TOKEN }}
+                  access: public
+    publish-cells:
+        defaults:
+            run:
+                working-directory: ./cells
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v1
