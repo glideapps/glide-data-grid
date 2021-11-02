@@ -9,7 +9,6 @@ pushd core
 npm ci
 jq ".version = $VERSION" package.json > package.json.tmp
 mv package.json.tmp package.json
-npm run build
 popd
 
 
