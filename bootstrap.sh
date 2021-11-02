@@ -14,6 +14,7 @@ function update {
 pushd core
 npm ci
 update ".version = $VERSION" package.json
+npm run build
 popd
 
 
