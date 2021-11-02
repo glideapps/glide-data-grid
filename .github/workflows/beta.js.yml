@@ -19,7 +19,9 @@ jobs:
             - uses: actions/setup-node@v1
               with:
                   node-version: 14
-            - run: npm ci
+            - name: bootstap
+              run: npm run bootstrap
+              working-directory: .
             - run: npm run lint
             - run: npm run build-js
             - run: npm run build-types
@@ -38,7 +40,9 @@ jobs:
             - uses: actions/setup-node@v1
               with:
                   node-version: 14
-            - run: npm ci
+            - name: bootstap
+              run: npm run bootstrap
+              working-directory: .
             - run: npm run lint
             - run: npm run build-js
             - run: npm run build-types
