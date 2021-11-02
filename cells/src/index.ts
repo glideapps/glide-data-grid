@@ -1,10 +1,10 @@
 import { GridCellKind, DataEditorProps } from "@glideapps/glide-data-grid";
-import StarCell from "star-cell";
+import StarCellRenderer from "./star-cell";
 import * as React from "react";
 
 type DrawCallback = NonNullable<DataEditorProps["drawCustomCell"]>;
 
-const cells = [StarCell];
+const cells = [StarCellRenderer];
 
 export function useExtraCells(): {
     drawCustomCell: DrawCallback;

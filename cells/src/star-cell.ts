@@ -4,10 +4,10 @@ import { CustomCellRenderer } from "types";
 interface StarCellProps {
     readonly kind: "star-cell";
     readonly rating: number;
-    readonly label: number;
+    readonly label?: string;
 }
 
-type StarCell = CustomCell<StarCellProps>;
+export type StarCell = CustomCell<StarCellProps>;
 
 const renderer: CustomCellRenderer<StarCell> = {
     isMatch: (cell: CustomCell): cell is StarCell => (cell.data as any).kind === "star-cell",
