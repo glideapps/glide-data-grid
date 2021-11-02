@@ -1,4 +1,4 @@
-import { DrilldownCellData } from "data-grid/data-grid-types";
+import { DrilldownCellData } from "../../data-grid/data-grid-types";
 import * as React from "react";
 import { styled } from "../../common/styles";
 

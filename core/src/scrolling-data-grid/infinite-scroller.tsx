@@ -1,5 +1,5 @@
 import { styled } from "../common/styles";
-import { Rectangle } from "index";
+import { Rectangle } from "..";
 import * as React from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { browserIsSafari } from "../common/browser-detect";

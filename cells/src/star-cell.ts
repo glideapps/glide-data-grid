@@ -1,5 +1,5 @@
 import { CustomCell } from "@glideapps/glide-data-grid";
-import { CustomCellRenderer } from "types";
+import { CustomCellRenderer } from "./types";
 
 interface StarCellProps {
     readonly kind: "star-cell";

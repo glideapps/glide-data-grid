@@ -1,4 +1,4 @@
-import { Rectangle } from "data-grid/data-grid-types";
+import { Rectangle } from "../../data-grid/data-grid-types";
 import { GrowingEntryStyle } from "../../growing-entry/growing-entry-style";
 import { styled } from "../../common/styles";
 

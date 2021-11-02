@@ -3,7 +3,7 @@ import MarkdownDiv from "../../markdown-div/markdown-div";
 import GrowingEntry from "../../growing-entry/growing-entry";
 import { MarkdownOverlayEditorStyle } from "./markdown-overlay-editor-style";
 import { EditPencil, Checkmark } from "../../common/utils";
-import { Rectangle } from "data-grid/data-grid-types";
+import { Rectangle } from "../../data-grid/data-grid-types";
 
 interface Props {
     readonly targetRect: Rectangle;

@@ -4,7 +4,7 @@ import { GridCell, GridCellKind, GridSelection, Rectangle } from "../data-grid/d
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
 import { assert } from "../common/support";
-import { InnerGridCell } from "index";
+import { InnerGridCell } from "..";
 
 // icons
 const UpArrow = () => (

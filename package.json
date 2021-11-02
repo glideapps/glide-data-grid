@@ -1,8 +1,9 @@
 {
     "name": "root",
-    "version": "1.0.0",
+    "version": "3.0.2",
     "scripts": {
         "bootstrap": "./bootstrap.sh",
+        "build": "./build-all.sh",
         "storybook": "start-storybook -p 9009 -s public",
         "build-storybook": "build-storybook -o storybook-build/"
     },

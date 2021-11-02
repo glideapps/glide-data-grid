@@ -1,4 +1,4 @@
-import { Theme } from "index";
+import { Theme } from "..";
 import isArray from "lodash/isArray";
 import { assertNever, proveType } from "../common/support";
 

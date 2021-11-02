@@ -1,4 +1,4 @@
-import { GridColumn } from "index";
+import { GridColumn } from "..";
 import { assert } from "../common/support";
 import { Theme } from "../common/styles";
 import { HeaderIconMap, sprites } from "./sprites";

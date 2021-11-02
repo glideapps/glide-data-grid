@@ -1,52 +1,52 @@
 {
-    "name": "@glideapps/glide-data-grid",
-    "version": "3.0.2",
-    "description": "Super fast, pure canvas Data Grid Editor",
-    "main": "dist/js/index.js",
-    "types": "dist/ts/index.d.ts",
-    "scripts": {
-        "build": "npm run build-js && npm run build-types",
-        "build-js": "babel --config-file ../babel.config.json ./src -d dist/js --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx",
-        "build-types": "tsc -p tsconfig.types.json",
-        "lint": "eslint src --ext .ts,.tsx"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/glideapps/glide-data-grid.git"
-    },
-    "keywords": [
-        "react",
-        "datagrid",
-        "data-grid",
-        "editor",
-        "reactjs",
-        "scrolling",
-        "data",
-        "table",
-        "cell",
-        "canvas"
-    ],
-    "author": "Glide",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/glideapps/glide-data-grid/issues"
-    },
-    "homepage": "https://github.com/glideapps/glide-data-grid#readme",
-    "dependencies": {
-        "copy-to-clipboard": "^3.1.0",
-        "react-number-format": "^4.4.1",
-        "react-virtualized-auto-sizer": "^1.0.2"
-    },
-    "peerDependencies": {
-        "direction": "^1.0.4",
-        "lodash": "^4.17.19",
-        "marked": "^0.7.0",
-        "react-responsive-carousel": "^3.2.7",
-        "react": "^16.12.0 || 17.x",
-        "react-dom": "^16.12.0 || 17.x",
-        "styled-components": "^5.2.0"
-    },
-    "devDependencies": {
-        "@babel/cli": "^7.16.0"
-    }
+  "name": "@glideapps/glide-data-grid",
+  "version": "3.0.2",
+  "description": "Super fast, pure canvas Data Grid Editor",
+  "main": "dist/js/index.js",
+  "types": "dist/ts/index.d.ts",
+  "scripts": {
+    "build": "npm run build-js && npm run build-types",
+    "build-js": "babel --config-file ../babel.config.json ./src -d dist/js --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx",
+    "build-types": "tsc -p tsconfig.types.json",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glideapps/glide-data-grid.git"
+  },
+  "keywords": [
+    "react",
+    "datagrid",
+    "data-grid",
+    "editor",
+    "reactjs",
+    "scrolling",
+    "data",
+    "table",
+    "cell",
+    "canvas"
+  ],
+  "author": "Glide",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/glideapps/glide-data-grid/issues"
+  },
+  "homepage": "https://github.com/glideapps/glide-data-grid#readme",
+  "dependencies": {
+    "copy-to-clipboard": "^3.1.0",
+    "react-number-format": "^4.4.1",
+    "react-virtualized-auto-sizer": "^1.0.2"
+  },
+  "peerDependencies": {
+    "direction": "^1.0.4",
+    "lodash": "^4.17.19",
+    "marked": "^0.7.0",
+    "react-responsive-carousel": "^3.2.7",
+    "react": "^16.12.0 || 17.x",
+    "react-dom": "^16.12.0 || 17.x",
+    "styled-components": "^5.2.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.16.0"
+  }
 }

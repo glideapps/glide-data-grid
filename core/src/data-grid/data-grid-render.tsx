@@ -1,4 +1,4 @@
-import ImageWindowLoader from "common/image-window-loader";
+import ImageWindowLoader from "../common/image-window-loader";
 import {
     GridSelection,
     isInnerOnlyCell,
@@ -25,7 +25,7 @@ import {
     roundedPoly,
 } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
-import { Theme } from "common/styles";
+import { Theme } from "../common/styles";
 import { parseToRgba } from "./color-parser";
 
 // Future optimization opportunities

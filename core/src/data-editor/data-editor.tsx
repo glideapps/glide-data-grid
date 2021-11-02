@@ -25,7 +25,7 @@ import { browserIsOSX } from "../common/browser-detect";
 import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
 import { ThemeProvider, useTheme } from "styled-components";
 import { getDataEditorTheme } from "../common/styles";
-import { DataGridRef } from "data-grid/data-grid";
+import { DataGridRef } from "../data-grid/data-grid";
 import noop from "lodash/noop";
 import { useEventListener } from "../common/utils";
 
