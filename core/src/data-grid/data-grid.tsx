@@ -74,7 +74,13 @@ export interface DataGridProps {
     readonly isDraggable?: boolean;
     readonly onDragStart?: (args: GridDragEventArgs) => void;
 
-    readonly drawCustomCell?: (ctx: CanvasRenderingContext2D, cell: GridCell, theme: Theme, rect: Rectangle) => boolean;
+    readonly drawCustomCell?: (
+        ctx: CanvasRenderingContext2D,
+        cell: GridCell,
+        theme: Theme,
+        rect: Rectangle,
+        hoverAmount: number
+    ) => boolean;
 
     readonly dragAndDropState?: {
         src: number;

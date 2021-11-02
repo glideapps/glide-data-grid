@@ -52,7 +52,13 @@ interface DragAndDropState {
     dest: number;
 }
 
-type DrawCustomCellCallback = (ctx: CanvasRenderingContext2D, cell: GridCell, theme: Theme, rect: Rectangle) => boolean;
+type DrawCustomCellCallback = (
+    ctx: CanvasRenderingContext2D,
+    cell: GridCell,
+    theme: Theme,
+    rect: Rectangle,
+    hoverAmount: number
+) => boolean;
 
 type CellList = readonly (readonly [number, number | undefined])[];
 
@@ -73,7 +79,7 @@ export function drawCell(
 ) {
     const drawn = isInnerOnlyCell(cell)
         ? false
-        : drawCustomCell?.(ctx, cell, theme, { x, y, width: w, height: h }) === true;
+        : drawCustomCell?.(ctx, cell, theme, { x, y, width: w, height: h }, hoverAmount) === true;
     if (!drawn) {
         if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
             drawTextCell(ctx, theme, cell.displayData, x, y, w, h, hoverAmount);

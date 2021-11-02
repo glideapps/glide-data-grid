@@ -9,11 +9,11 @@ const cells = [StarCellRenderer];
 export function useExtraCells(): {
     drawCustomCell: DrawCallback;
 } {
-    const drawCustomCell = React.useCallback<DrawCallback>((ctx, cell, theme, rect) => {
+    const drawCustomCell = React.useCallback<DrawCallback>((ctx, cell, theme, rect, hoverAmount) => {
         if (cell.kind !== GridCellKind.Custom) return false;
         for (const c of cells) {
             if (c.isMatch(cell)) {
-                return c.draw(ctx, cell, theme, rect);
+                return c.draw(ctx, cell, theme, rect, hoverAmount);
             }
         }
         return false;

@@ -124,9 +124,6 @@ export function getRowIndexForY(
     }
 }
 
-const cellXPad = 8;
-const cellYPad = 3;
-
 const textWidths = new Map<string, Map<string, number> | undefined>();
 
 function measureTextWidth(s: string, ctx: CanvasRenderingContext2D): number {
@@ -168,9 +165,9 @@ export function drawTextCell(
     ctx.fillStyle = overrideColor ?? theme.textDark;
     if (dir === "rtl") {
         const textWidth = measureTextWidth(data, ctx);
-        ctx.fillText(data, x + width - cellXPad - textWidth + 0.5, y + height / 2 + 4.5);
+        ctx.fillText(data, x + width - theme.cellHorizontalPadding - textWidth + 0.5, y + height / 2 + 4.5);
     } else {
-        ctx.fillText(data, x + cellXPad + 0.5, y + height / 2 + 4.5);
+        ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + height / 2 + 4.5);
     }
 }
 
@@ -197,7 +194,7 @@ export function drawNewRowCell(
     const lineSize = isFirst ? finalLineSize : hoverAmount * finalLineSize;
     const xTranslate = isFirst ? 0 : (1 - hoverAmount) * finalLineSize * 0.5;
 
-    const padPlus = cellXPad + 4;
+    const padPlus = theme.cellHorizontalPadding + 4;
     if (lineSize > 0) {
         ctx.moveTo(x + padPlus + xTranslate, y + height / 2);
         ctx.lineTo(x + padPlus + xTranslate + lineSize, y + height / 2);
@@ -210,7 +207,7 @@ export function drawNewRowCell(
     }
 
     ctx.fillStyle = theme.textMedium;
-    ctx.fillText(data, 24 + x + cellXPad + 0.5, y + height / 2 + 4.5);
+    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + height / 2 + 4.5);
     ctx.beginPath();
 }
 
@@ -307,7 +304,7 @@ export function drawProtectedCell(
     ctx.beginPath();
 
     const radius = 2.5;
-    let xStart = x + cellXPad + radius;
+    let xStart = x + theme.cellHorizontalPadding + radius;
     const center = y + height / 2;
     const p = Math.cos(degreesToRadians(30)) * radius;
     const q = Math.sin(degreesToRadians(30)) * radius;
@@ -393,7 +390,7 @@ export function drawBubbles(
     const bubbleHeight = 20;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
-    let renderX = x + cellXPad;
+    let renderX = x + theme.cellHorizontalPadding;
 
     const renderBoxes: { x: number; width: number }[] = [];
     for (const s of data) {
@@ -444,7 +441,7 @@ export function drawDrilldownCell(
     const bubbleHeight = 24;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
-    let renderX = x + cellXPad;
+    let renderX = x + theme.cellHorizontalPadding;
 
     const renderBoxes: { x: number; width: number }[] = [];
     for (const el of data) {
@@ -555,7 +552,7 @@ export function drawDrilldownCell(
 
 export function drawImage(
     ctx: CanvasRenderingContext2D,
-    _theme: Theme,
+    theme: Theme,
     data: string[],
     col: number,
     row: number,
@@ -566,14 +563,14 @@ export function drawImage(
     _hoverAmount: number,
     imageLoader: ImageWindowLoader
 ) {
-    let drawX = x + cellXPad;
+    let drawX = x + theme.cellHorizontalPadding;
     data.filter(s => s.length > 0).forEach(i => {
         const img = imageLoader.loadOrGetImage(i, col, row);
 
         if (img !== undefined) {
-            const imgHeight = height - cellYPad * 2;
+            const imgHeight = height - theme.cellVeritcalPadding * 2;
             const imgWidth = img.width * (imgHeight / img.height);
-            ctx.drawImage(img, drawX, y + cellYPad, imgWidth, imgHeight);
+            ctx.drawImage(img, drawX, y + theme.cellVeritcalPadding, imgWidth, imgHeight);
 
             drawX += imgWidth + itemMargin;
         }
