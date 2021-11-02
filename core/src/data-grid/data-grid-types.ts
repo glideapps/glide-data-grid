@@ -293,7 +293,7 @@ interface BubbleCell extends BaseGridCell {
     readonly data: string[];
 }
 
-interface CustomCell<T extends {} = {}> extends BaseGridCell {
+export interface CustomCell<T extends {} = {}> extends BaseGridCell {
     readonly kind: GridCellKind.Custom;
     readonly data: T;
     readonly copyData: string;

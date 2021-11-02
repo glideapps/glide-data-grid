@@ -1,0 +1,29 @@
+{
+    "name": "@glideapps/glide-data-grid-cells",
+    "version": "3.0.3",
+    "description": "Extra cells for glide-data-grid",
+    "main": "dist/js/index.js",
+    "types": "dist/ts/index.d.ts",
+    "scripts": {},
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/glideapps/glide-data-grid.git"
+    },
+    "author": "Glide",
+    "license": "MIT",
+    "keywords": [
+        "react",
+        "datagrid",
+        "data-grid",
+        "editor",
+        "reactjs",
+        "scrolling",
+        "data",
+        "table",
+        "cell",
+        "canvas"
+    ],
+    "dependencies": {
+        "@glideapps/glide-data-grid": "3.0.2"
+    }
+}
