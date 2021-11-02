@@ -30,6 +30,7 @@ jobs:
                   token: ${{ secrets.NPM_TOKEN }}
                   access: public
                   tag: beta
+                  package: ./core/package.json
     publish-cells:
         defaults:
             run:
@@ -51,3 +52,4 @@ jobs:
                   token: ${{ secrets.NPM_TOKEN }}
                   access: public
                   tag: beta
+                  package: ./cells/package.json
