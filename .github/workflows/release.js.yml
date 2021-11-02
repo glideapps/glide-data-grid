@@ -19,8 +19,10 @@ jobs:
             - uses: actions/checkout@v1
             - uses: actions/setup-node@v1
               with:
-                  node-version: 10
-            - run: npm ci
+                  node-version: 14
+            - name: Bootstrap
+              run: npm run bootstrap
+              working-directory: .
             - run: npm run lint
             - run: npm run build-js
             - run: npm run build-types
@@ -28,6 +30,7 @@ jobs:
               with:
                   token: ${{ secrets.NPM_TOKEN }}
                   access: public
+                  package: ./core/package.json
     publish-cells:
         defaults:
             run:
@@ -37,8 +40,10 @@ jobs:
             - uses: actions/checkout@v1
             - uses: actions/setup-node@v1
               with:
-                  node-version: 10
-            - run: npm ci
+                  node-version: 14
+            - name: Bootstrap
+              run: npm run bootstrap
+              working-directory: .
             - run: npm run lint
             - run: npm run build-js
             - run: npm run build-types
@@ -46,3 +51,4 @@ jobs:
               with:
                   token: ${{ secrets.NPM_TOKEN }}
                   access: public
+                  package: ./cells/package.json

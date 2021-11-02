@@ -19,7 +19,7 @@ jobs:
             - uses: actions/setup-node@v1
               with:
                   node-version: 14
-            - name: bootstap
+            - name: Bootstrap
               run: npm run bootstrap
               working-directory: .
             - run: npm run lint
@@ -41,7 +41,7 @@ jobs:
             - uses: actions/setup-node@v1
               with:
                   node-version: 14
-            - name: bootstap
+            - name: Bootstrap
               run: npm run bootstrap
               working-directory: .
             - run: npm run lint
