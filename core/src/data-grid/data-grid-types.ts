@@ -1,6 +1,7 @@
 import { Theme } from "..";
 import isArray from "lodash/isArray";
 import { assertNever, proveType } from "../common/support";
+import React from "react";
 
 export interface GridSelection {
     readonly cell: readonly [number, number];
@@ -292,6 +293,17 @@ interface BubbleCell extends BaseGridCell {
     readonly kind: GridCellKind.Bubble;
     readonly data: string[];
 }
+
+export type ProvideEditorCallback<T extends GridCell> = (
+    cell: T
+) =>
+    | React.FunctionComponent<{
+          readonly onChange: (newValue: T) => void;
+          readonly onFinishedEditing: () => void;
+          readonly isHighlighted: boolean;
+          readonly value: T;
+      }>
+    | undefined;
 
 export interface CustomCell<T extends {} = {}> extends BaseGridCell {
     readonly kind: GridCellKind.Custom;

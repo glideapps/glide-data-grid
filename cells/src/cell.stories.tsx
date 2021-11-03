@@ -122,7 +122,7 @@ const defaultProps: Partial<DataEditorProps> = {
 };
 
 export const ResizableColumns: React.VFC = () => {
-    const { drawCustomCell } = useExtraCells();
+    const { drawCustomCell, provideEditor } = useExtraCells();
 
     return (
         <BeautifulWrapper
@@ -136,11 +136,12 @@ export const ResizableColumns: React.VFC = () => {
             <DataEditor
                 {...defaultProps}
                 drawCustomCell={drawCustomCell}
+                provideEditor={provideEditor}
                 getCellContent={() =>
                     ({
                         kind: GridCellKind.Custom,
-                        allowOverlay: false,
-                        copyData: "",
+                        allowOverlay: true,
+                        copyData: "4",
                         data: {
                             kind: "star-cell",
                             label: "Test",

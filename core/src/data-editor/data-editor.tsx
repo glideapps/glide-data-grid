@@ -18,6 +18,7 @@ import {
     CompactSelection,
     Slice,
     isInnerOnlyCell,
+    ProvideEditorCallback,
 } from "../data-grid/data-grid-types";
 import copy from "copy-to-clipboard";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
@@ -86,6 +87,8 @@ export interface DataEditorProps extends Props {
 
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
+
+    readonly provideEditor?: ProvideEditorCallback<GridCell>;
 
     readonly onSelectedRowsChange?: (newRows: CompactSelection) => void;
 
@@ -159,6 +162,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onSelectedRowsChange: setSelectedRowsOuter,
         gridSelection: gridSelectionOuter,
         onGridSelectionChange,
+        provideEditor,
         trailingRowOptions,
         ...rest
     } = p;
@@ -1459,6 +1463,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             {overlay !== undefined && (
                 <DataGridOverlayEditor
                     {...overlay}
+                    provideEditor={provideEditor}
                     imageEditorOverride={imageEditorOverride}
                     onFinishEditing={onFinishEditing}
                     markdownDivCreateNode={markdownDivCreateNode}

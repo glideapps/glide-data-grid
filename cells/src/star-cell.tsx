@@ -1,5 +1,6 @@
 import { CustomCell } from "@glideapps/glide-data-grid";
 import { CustomCellRenderer } from "./types";
+import * as React from "react";
 
 interface StarCellProps {
     readonly kind: "star-cell";
@@ -56,6 +57,25 @@ const renderer: CustomCellRenderer<StarCell> = {
         ctx.fill();
         ctx.globalAlpha = 1;
         return true;
+    },
+    provideEditor: () => {
+        // eslint-disable-next-line react/display-name
+        return p => (
+            <input
+                value={p.value.data.rating}
+                onChange={e => {
+                    const newNumber = Number.parseInt(e.target.value) ?? p.value.data.rating;
+                    p.onChange({
+                        ...p.value,
+                        data: {
+                            ...p.value.data,
+                            rating: newNumber,
+                        },
+                        copyData: newNumber.toString(),
+                    });
+                }}
+            />
+        );
     },
 };
 

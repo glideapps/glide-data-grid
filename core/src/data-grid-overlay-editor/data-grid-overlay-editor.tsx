@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { NumberFormatValues } from "react-number-format";
 
 import ClickOutsideContainer from "../click-outside-container/click-outside-container";
-import { GridCell, GridCellKind, Rectangle } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, ProvideEditorCallback, Rectangle } from "../data-grid/data-grid-types";
 import GrowingEntry from "../growing-entry/growing-entry";
 import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style";
 import BubblesOverlayEditor from "./private/bubbles-overlay-editor";
@@ -15,7 +15,7 @@ import UriOverlayEditor from "./private/uri-overlay-editor";
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
-interface Props {
+export interface DataGridOverlayEditorProps {
     readonly target: Rectangle;
     readonly content: GridCell;
     readonly onFinishEditing: (newCell: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
@@ -23,9 +23,10 @@ interface Props {
     readonly highlight: boolean;
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
+    readonly provideEditor?: ProvideEditorCallback<GridCell>;
 }
 
-const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
+const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps> = p => {
     const {
         target,
         content,
@@ -34,6 +35,7 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
         imageEditorOverride,
         markdownDivCreateNode,
         highlight,
+        provideEditor,
     } = p;
 
     const [tempValue, setTempValue] = React.useState<GridCell | undefined>(forceEditMode ? content : undefined);
@@ -124,74 +126,86 @@ const DataGridOverlayEditor: React.FunctionComponent<Props> = p => {
 
     const targetValue = tempValue ?? content;
     let editor: React.ReactNode;
-    switch (targetValue.kind) {
-        case GridCellKind.Text:
-            editor = (
-                <GrowingEntry
-                    highlight={highlight}
-                    autoFocus={targetValue.readonly !== true}
-                    disabled={targetValue.readonly === true}
-                    onKeyDown={onKeyDownMultiline}
-                    value={targetValue.data}
-                    onChange={onStringValueChange}
-                />
-            );
-            break;
-        case GridCellKind.Uri:
-            editor = (
-                <UriOverlayEditor
-                    forceEditMode={forceEditMode}
-                    uri={targetValue.data}
-                    readonly={targetValue.readonly === true}
-                    onKeyDown={onKeyDown}
-                    onChange={onStringValueChange}
-                />
-            );
-            break;
-        case GridCellKind.Boolean:
-            break;
-        case GridCellKind.Number:
-            editor = (
-                <NumberOverlayEditor
-                    highlight={highlight}
-                    disabled={targetValue.readonly === true}
-                    value={targetValue.data}
-                    onKeyDown={onKeyDown}
-                    onChange={onNumberValueChange}
-                />
-            );
-            break;
-        case GridCellKind.Image:
-            editor = (
-                <ImageEditor
-                    urls={targetValue.data}
-                    canWrite={targetValue.allowAdd}
-                    onCancel={onClickOutside}
-                    onChange={onImageValueChange}
-                    onKeyDown={onKeyDown}
-                />
-            );
-            break;
-        case GridCellKind.Bubble:
-            editor = <BubblesOverlayEditor bubbles={targetValue.data} onKeyDown={onKeyDown} />;
-            break;
-        case GridCellKind.Drilldown:
-            editor = <DrilldownOverlayEditor drilldowns={targetValue.data} onKeyDown={onKeyDown} />;
-            break;
-        case GridCellKind.Markdown:
-            editor = (
-                <MarkdownOverlayEditor
-                    onFinish={onClickOutside}
-                    targetRect={target}
-                    readonly={targetValue.readonly === true}
-                    markdown={targetValue.data}
-                    onKeyDown={onKeyDownMultiline}
-                    onChange={onStringValueChange}
-                    forceEditMode={forceEditMode}
-                    createNode={markdownDivCreateNode}
-                />
-            );
-            break;
+    const CustomEditor = provideEditor?.(targetValue);
+    if (CustomEditor !== undefined) {
+        editor = (
+            <CustomEditor
+                isHighlighted={highlight}
+                onChange={setTempValue}
+                value={targetValue}
+                onFinishedEditing={onClickOutside}
+            />
+        );
+    } else {
+        switch (targetValue.kind) {
+            case GridCellKind.Text:
+                editor = (
+                    <GrowingEntry
+                        highlight={highlight}
+                        autoFocus={targetValue.readonly !== true}
+                        disabled={targetValue.readonly === true}
+                        onKeyDown={onKeyDownMultiline}
+                        value={targetValue.data}
+                        onChange={onStringValueChange}
+                    />
+                );
+                break;
+            case GridCellKind.Uri:
+                editor = (
+                    <UriOverlayEditor
+                        forceEditMode={forceEditMode}
+                        uri={targetValue.data}
+                        readonly={targetValue.readonly === true}
+                        onKeyDown={onKeyDown}
+                        onChange={onStringValueChange}
+                    />
+                );
+                break;
+            case GridCellKind.Boolean:
+                break;
+            case GridCellKind.Number:
+                editor = (
+                    <NumberOverlayEditor
+                        highlight={highlight}
+                        disabled={targetValue.readonly === true}
+                        value={targetValue.data}
+                        onKeyDown={onKeyDown}
+                        onChange={onNumberValueChange}
+                    />
+                );
+                break;
+            case GridCellKind.Image:
+                editor = (
+                    <ImageEditor
+                        urls={targetValue.data}
+                        canWrite={targetValue.allowAdd}
+                        onCancel={onClickOutside}
+                        onChange={onImageValueChange}
+                        onKeyDown={onKeyDown}
+                    />
+                );
+                break;
+            case GridCellKind.Bubble:
+                editor = <BubblesOverlayEditor bubbles={targetValue.data} onKeyDown={onKeyDown} />;
+                break;
+            case GridCellKind.Drilldown:
+                editor = <DrilldownOverlayEditor drilldowns={targetValue.data} onKeyDown={onKeyDown} />;
+                break;
+            case GridCellKind.Markdown:
+                editor = (
+                    <MarkdownOverlayEditor
+                        onFinish={onClickOutside}
+                        targetRect={target}
+                        readonly={targetValue.readonly === true}
+                        markdown={targetValue.data}
+                        onKeyDown={onKeyDownMultiline}
+                        onChange={onStringValueChange}
+                        forceEditMode={forceEditMode}
+                        createNode={markdownDivCreateNode}
+                    />
+                );
+                break;
+        }
     }
 
     const f = (ev: React.MouseEvent) => {
