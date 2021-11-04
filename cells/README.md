@@ -13,3 +13,4 @@ This is still under active development and may not be useful to you yet.
 Current cells
 
 -   Star (Rating) Cell
+-   Sparklines
