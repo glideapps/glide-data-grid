@@ -528,6 +528,10 @@ export function drawDrilldownCell(
                     srcY += (srcHeight - srcWidth) / 2;
                     srcHeight = srcWidth;
                 }
+                ctx.beginPath();
+                roundedRect(ctx, drawX, y + height / 2 - imgSize / 2, imgSize, imgSize, 3);
+                ctx.save();
+                ctx.clip();
                 ctx.drawImage(
                     img,
                     srcX,
@@ -539,6 +543,7 @@ export function drawDrilldownCell(
                     imgSize,
                     imgSize
                 );
+                ctx.restore();
 
                 drawX += imgSize + 4;
             }
