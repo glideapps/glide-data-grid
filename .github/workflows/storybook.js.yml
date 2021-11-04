@@ -2,7 +2,7 @@ name: Storybook Build and Deploy
 on:
     push:
         branches: ["main"]
-        paths: ["src/**"]
+        paths: ["core/**", "cells/**"]
 jobs:
     build-and-deploy:
         runs-on: ubuntu-latest
