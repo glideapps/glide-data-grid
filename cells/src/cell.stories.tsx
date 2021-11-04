@@ -3,7 +3,9 @@ import * as React from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor, DataEditorContainer, DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
 import { useExtraCells } from ".";
-import { StarCell } from "./star-cell";
+import { StarCell } from "./cells/star-cell";
+import { SparklineCell } from "./cells/sparkline-cell";
+import range from "lodash/range";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -102,12 +104,6 @@ const BeautifulWrapper: React.FC<BeautifulProps> = p => {
     );
 };
 
-const PropName = styled.span`
-    font-family: monospace;
-    font-weight: 500;
-    color: #ffe394;
-`;
-
 const Description = styled.p`
     font-size: 18px;
     flex-shrink: 0;
@@ -121,38 +117,55 @@ const defaultProps: Partial<DataEditorProps> = {
     rowMarkers: "none",
 };
 
-export const ResizableColumns: React.VFC = () => {
+let num: number = 1;
+function rand(): number {
+    return (num = (num * 16807) % 2147483647) / 2147483647;
+}
+
+export const StarColumn: React.VFC = () => {
     const { drawCustomCell, provideEditor } = useExtraCells();
 
     return (
-        <BeautifulWrapper
-            title="Resizable columns"
-            description={
-                <Description>
-                    You can resize columns by dragging their edges, as long as you respond to the{" "}
-                    <PropName>onColumnResized</PropName> prop.
-                </Description>
-            }>
+        <BeautifulWrapper title="Star column" description={<Description>Star extension column.</Description>}>
             <DataEditor
                 {...defaultProps}
                 drawCustomCell={drawCustomCell}
                 provideEditor={provideEditor}
-                getCellContent={() =>
-                    ({
+                getCellContent={cell => {
+                    const [col, row] = cell;
+                    if (col === 0) {
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "star-cell",
+                                label: "Test",
+                                rating: 4,
+                            },
+                        } as StarCell;
+                    }
+                    num = row + 1;
+                    return {
                         kind: GridCellKind.Custom,
                         allowOverlay: true,
                         copyData: "4",
                         data: {
-                            kind: "star-cell",
-                            label: "Test",
-                            rating: 4,
+                            kind: "sparkline-cell",
+                            values: range(0, 15).map(() => rand() * 50),
+                            color: row % 2 === 0 ? "#77c4c4" : "#D98466",
+                            yAxis: [0, 50],
                         },
-                    } as StarCell)
-                }
+                    } as SparklineCell;
+                }}
                 columns={[
                     {
-                        title: "Test",
+                        title: "Stars",
                         width: 200,
+                    },
+                    {
+                        title: "Sparkline",
+                        width: 150,
                     },
                 ]}
                 rows={500}
@@ -160,7 +173,7 @@ export const ResizableColumns: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(ResizableColumns as any).parameters = {
+(StarColumn as any).parameters = {
     options: {
         showPanel: false,
     },

@@ -20,8 +20,8 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import { SimpleThemeWrapper } from "../stories/story-utils";
 import { useEventListener } from "../common/utils";
 import { useLayer } from "react-laag";
-import { SpriteMap } from "data-grid/data-grid-sprites";
-import { DataEditorRef, Theme } from "index";
+import { SpriteMap } from "../data-grid/data-grid-sprites";
+import { DataEditorRef, Theme } from "..";
 
 faker.seed(1337);
 

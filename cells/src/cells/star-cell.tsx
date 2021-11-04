@@ -1,5 +1,5 @@
 import { CustomCell } from "@glideapps/glide-data-grid";
-import { CustomCellRenderer } from "./types";
+import { CustomCellRenderer } from "../types";
 import * as React from "react";
 import styled from "styled-components";
 
@@ -100,15 +100,15 @@ const renderer: CustomCellRenderer<StarCell> = {
                     <div
                         key={index}
                         className={p.value.data.rating < index + 1 ? "inactive" : "active"}
-                        onClick={() =>
+                        onClick={() => {
                             p.onChange({
                                 ...p.value,
                                 data: {
                                     ...p.value.data,
                                     rating: index + 1,
                                 },
-                            })
-                        }>
+                            });
+                        }}>
                         <StarSVG />
                     </div>
                 ))}
