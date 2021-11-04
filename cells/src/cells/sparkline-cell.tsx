@@ -25,7 +25,25 @@ const renderer: CustomCellRenderer<SparklineCell> = {
 
         const y = rect.y + 3;
         const height = rect.height - 6;
+        const width = rect.width - padX * 2;
 
+        // draw zero
+        if (minY <= 0 && maxY >= 0) {
+            const delta = maxY - minY;
+            const zeroY = height * (maxY / delta);
+
+            ctx.beginPath();
+            ctx.moveTo(drawX, y + zeroY);
+            ctx.lineTo(drawX + width, y + zeroY);
+
+            ctx.globalAlpha = 0.4;
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = theme.textLight;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
+        // draw line
         ctx.beginPath();
 
         const xStep = (rect.width - 16) / (values.length - 1);
@@ -49,8 +67,11 @@ const renderer: CustomCellRenderer<SparklineCell> = {
         ctx.lineWidth = 1 + hoverAmount * 0.5;
         ctx.stroke();
 
-        ctx.lineTo(rect.x + rect.width - padX, y + height);
-        ctx.lineTo(padX, y + height);
+        const delta = maxY - minY;
+        const zeroY = maxY <= 0 ? y : minY >= 0 ? y + height : y + height * (maxY / delta);
+
+        ctx.lineTo(rect.x + rect.width - padX, zeroY);
+        ctx.lineTo(rect.x + padX, zeroY);
         ctx.closePath();
 
         ctx.globalAlpha = 0.2 + 0.2 * hoverAmount;

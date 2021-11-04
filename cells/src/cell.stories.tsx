@@ -152,9 +152,9 @@ export const StarColumn: React.VFC = () => {
                         copyData: "4",
                         data: {
                             kind: "sparkline-cell",
-                            values: range(0, 15).map(() => rand() * 50),
+                            values: range(0, 15).map(() => rand() * 100 - 50),
                             color: row % 2 === 0 ? "#77c4c4" : "#D98466",
-                            yAxis: [0, 50],
+                            yAxis: [-50, 50],
                         },
                     } as SparklineCell;
                 }}
