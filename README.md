@@ -10,7 +10,7 @@
 
 # 👩‍💻 Demo and features
 
-Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-data-grid)
+Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-data-grid).
 
 ## Features
 
