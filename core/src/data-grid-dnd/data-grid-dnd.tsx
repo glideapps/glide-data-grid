@@ -1,7 +1,7 @@
 import clamp from "lodash/clamp";
 import * as React from "react";
 import DataGrid, { DataGridProps, DataGridRef } from "../data-grid/data-grid";
-import { GridColumn, GridMouseEventArgs } from "../data-grid/data-grid-types";
+import { GridColumn, GridMouseEventArgs, Rectangle } from "../data-grid/data-grid-types";
 
 type Props = Omit<DataGridProps, "dragAndDropState" | "isResizing" | "isDragging" | "onMouseMove" | "allowResize">;
 
@@ -20,18 +20,9 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
     const [dragActive, setDragActive] = React.useState(false);
     const [dragStartX, setDragStartX] = React.useState<number>();
 
-    const {
-        firstColSticky,
-        onColumnMoved,
-        onMouseDown,
-        onMouseUp,
-        onItemHovered,
-        isDraggable = false,
-        columns,
-        onColumnResized,
-        gridRef,
-        maxColumnWidth,
-    } = p;
+    const { onColumnMoved, onColumnResized, gridRef, maxColumnWidth, onHeaderMenuClick, ...rest } = p;
+
+    const { firstColSticky, onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns } = p;
 
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
@@ -75,8 +66,16 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         [isDraggable, firstColSticky, onMouseDown, gridRef, columns.length, canDragCol]
     );
 
+    const onHeaderMenuClickMangled = React.useCallback(
+        (col: number, screenPosition: Rectangle) => {
+            if (dragActive) return;
+            onHeaderMenuClick?.(col, screenPosition);
+        },
+        [dragActive, onHeaderMenuClick]
+    );
+
     const onMouseUpImpl = React.useCallback(
-        (args: GridMouseEventArgs) => {
+        (args: GridMouseEventArgs, isOutside: boolean) => {
             setDragCol(undefined);
             setDropCol(undefined);
             setDragStartX(undefined);
@@ -88,7 +87,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                     onColumnMoved?.(dragCol, dropCol);
                 }
             }
-            onMouseUp?.(args);
+            onMouseUp?.(args, isOutside);
         },
         [dragCol, dropCol, onColumnMoved, onMouseUp]
     );
@@ -123,8 +122,9 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
 
     return (
         <DataGrid
-            {...p}
+            {...rest}
             isResizing={resizeCol !== undefined}
+            onHeaderMenuClick={onHeaderMenuClickMangled}
             isDragging={dragActive}
             onItemHovered={onItemHoveredImpl}
             onMouseDown={onMouseDownImpl}

@@ -579,9 +579,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const onMouseUp = React.useCallback(
-        (args: GridMouseEventArgs) => {
+        (args: GridMouseEventArgs, isOutside: boolean) => {
             const mouse = mouseState.current;
             mouseState.current = undefined;
+            if (isOutside) return;
 
             if (scrollTimer.current !== undefined) {
                 window.clearInterval(scrollTimer.current);

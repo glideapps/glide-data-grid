@@ -62,7 +62,7 @@ export interface DataGridProps {
 
     readonly onItemHovered?: (args: GridMouseEventArgs) => void;
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
-    readonly onMouseUp?: (args: GridMouseEventArgs) => void;
+    readonly onMouseUp?: (args: GridMouseEventArgs, isOutside: boolean) => void;
 
     readonly onCellFocused?: (args: readonly [number, number]) => void;
 
@@ -578,11 +578,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const onMouseUpImpl = React.useCallback(
         (ev: MouseEvent | TouchEvent) => {
             const canvas = ref.current;
-            if (onMouseUp === undefined) return;
+            if (onMouseUp === undefined || canvas == null) return;
             const eventTarget = eventTargetRef?.current;
-            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) return;
 
-            ev.preventDefault();
+            const isOutside = ev.target !== canvas && ev.target !== eventTarget;
+
+            if (!isOutside) {
+                ev.preventDefault();
+            }
+
             let clientX: number;
             let clientY: number;
             if (ev instanceof MouseEvent) {
@@ -608,7 +612,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 }
             }
 
-            onMouseUp(args);
+            onMouseUp(args, isOutside);
         },
         [
             onMouseUp,
