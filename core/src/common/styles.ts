@@ -32,7 +32,7 @@ const dataEditorBaseTheme = {
     linkColor: "#4F5DFF",
 
     cellHorizontalPadding: 8,
-    cellVeritcalPadding: 3,
+    cellVerticalPadding: 3,
 
     headerFontStyle: "600 13px",
     baseFontStyle: "13px",

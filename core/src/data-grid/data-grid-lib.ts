@@ -568,9 +568,13 @@ export function drawImage(
         const img = imageLoader.loadOrGetImage(i, col, row);
 
         if (img !== undefined) {
-            const imgHeight = height - theme.cellVeritcalPadding * 2;
+            const imgHeight = height - theme.cellVerticalPadding * 2;
             const imgWidth = img.width * (imgHeight / img.height);
-            ctx.drawImage(img, drawX, y + theme.cellVeritcalPadding, imgWidth, imgHeight);
+            roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, 4);
+            ctx.save();
+            ctx.clip();
+            ctx.drawImage(img, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight);
+            ctx.restore();
 
             drawX += imgWidth + itemMargin;
         }
