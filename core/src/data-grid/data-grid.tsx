@@ -196,23 +196,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 width: 0,
                 height: 0,
             };
-            const effectiveCols = getEffectiveColumns(
-                mappedColumns,
-                cellXOffset,
-                width,
-                firstColSticky,
-                undefined,
-                translateX
-            );
 
-            for (const c of effectiveCols) {
-                result.width = c.width + 1;
-                if (c.sourceIndex === col) {
-                    if (!c.sticky) result.x += translateX;
-                    break;
+            if (!firstColSticky || col !== 0) {
+                const dir = cellXOffset > col ? -1 : 1;
+                result.x += (firstColSticky ? columns[0].width : 0) + translateX;
+                for (let i = cellXOffset; i !== col; i += dir) {
+                    result.x += columns[i].width * dir;
                 }
-                result.x += c.width;
             }
+            result.width = columns[col].width + 1;
 
             if (row === undefined) {
                 result.y = rect.y;
@@ -222,8 +214,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 result.y = rect.y + (height - stickyHeight);
                 result.height = stickyHeight;
             } else {
-                for (let r = cellYOffset; r < row; r++) {
-                    result.y += typeof rowHeight === "number" ? rowHeight : rowHeight(r);
+                const dir = cellYOffset > row ? -1 : 1;
+                for (let r = cellYOffset; r !== row; r += dir) {
+                    result.y += (typeof rowHeight === "number" ? rowHeight : rowHeight(r)) * dir;
                 }
                 result.height = (typeof rowHeight === "number" ? rowHeight : rowHeight(row)) + 1;
             }
@@ -233,13 +226,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         [
             headerHeight,
             translateY,
-            mappedColumns,
-            cellXOffset,
-            width,
             firstColSticky,
-            translateX,
+            columns,
             lastRowSticky,
             rows,
+            cellXOffset,
+            translateX,
             rowHeight,
             height,
             cellYOffset,

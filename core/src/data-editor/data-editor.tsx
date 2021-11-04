@@ -835,90 +835,44 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             if (scrollRef.current !== null) {
-                const { clientWidth, clientHeight } = scrollRef.current;
+                const grid = gridRef.current;
+                const canvas = canvasRef.current;
+                if (grid !== null && canvas !== null) {
+                    const bounds = grid.getBounds(col, row);
+                    const scrollBounds = canvas.getBoundingClientRect();
 
-                const maxXScrollToCol = (index: number) => {
-                    if (index <= 1) return 0;
-                    const widths = mangledCols.slice(undefined, index - 1).map(c => c.width);
-                    const total = widths.reduce((pv, cv) => pv + cv);
-                    return total + 1;
-                };
+                    if (bounds !== undefined) {
+                        let scrollX = 0;
+                        let scrollY = 0;
 
-                const minXScrollToCol = (index: number) => {
-                    const maxX = maxXScrollToCol(index);
-
-                    const availableSpace =
-                        clientWidth - (hasRowMarkers ? rowMarkerWidth : 0) - mangledCols[index].width;
-                    let offset = 0;
-                    for (let i = index - 1; i >= 0; i--) {
-                        if (availableSpace - (offset + mangledCols[i].width) < 0) break;
-
-                        offset += mangledCols[i].width;
-                    }
-
-                    return maxX - offset;
-                };
-
-                let visibleFullColumns = 0;
-                let t = hasRowMarkers ? rowMarkerWidth : 0;
-                for (let c = cellXOffset; c < columns.length; c++) {
-                    if (t + columns[c].width > clientWidth) break;
-
-                    visibleFullColumns++;
-                    t += columns[c].width;
-                }
-
-                let height = 0;
-                if (typeof rowHeight === "number") {
-                    height = Math.ceil((clientHeight - headerHeight) / rowHeight);
-                } else {
-                    let h = 0;
-                    let r = cellYOffset;
-                    while (h < clientHeight - headerHeight) {
-                        h += rowHeight(r);
-                        r++;
-                    }
-                    height = r - cellYOffset;
-                }
-
-                const visible = {
-                    x: cellXOffset + 1,
-                    y: cellYOffset,
-                    width: visibleFullColumns,
-                    height,
-                };
-
-                if (row >= visible.y + visible.height - 1) {
-                    const delta = row - (visible.y + visible.height - 2);
-                    if (typeof rowHeight === "number") {
-                        scrollRef.current.scrollBy(0, rowHeight * delta);
-                    } else {
-                        let r = visible.y + visible.height - 1;
-                        let toScroll = 0;
-                        for (let i = 0; i < delta; i++) {
-                            toScroll += rowHeight(r);
-                            r++;
+                        const sLeft = scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
+                        const sRight = scrollBounds.right;
+                        const sTop = scrollBounds.top + headerHeight;
+                        let trailingRowHeight = 0;
+                        if (lastRowSticky) {
+                            trailingRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
                         }
-                        scrollRef.current.scrollBy(0, toScroll);
-                    }
-                } else if (row < visible.y + 1) {
-                    const delta = visible.y + 1 - row;
-                    if (typeof rowHeight === "number") {
-                        scrollRef.current.scrollBy(0, -(rowHeight * delta));
-                    } else {
-                        let r = visible.y + 1;
-                        let toScroll = 0;
-                        while (r !== row) {
-                            toScroll += rowHeight(r);
-                            r--;
+                        const sBottom = scrollBounds.bottom - trailingRowHeight;
+
+                        if (sLeft > bounds.x) {
+                            scrollX = bounds.x - sLeft;
+                        } else if (sRight < bounds.x + bounds.width) {
+                            scrollX = bounds.x + bounds.width - sRight;
                         }
-                        scrollRef.current.scrollBy(0, -toScroll);
+
+                        if (sTop > bounds.y) {
+                            scrollY = bounds.y - sTop;
+                        } else if (sBottom < bounds.y + bounds.height) {
+                            scrollY = bounds.y + bounds.height - sBottom;
+                        }
+
+                        if (scrollX !== 0 || scrollY !== 0) {
+                            scrollRef.current.scrollTo(
+                                scrollX + scrollRef.current.scrollLeft,
+                                scrollY + scrollRef.current.scrollTop
+                            );
+                        }
                     }
-                } else if (col >= visible.x + visible.width) {
-                    scrollRef.current.scrollLeft = minXScrollToCol(col);
-                    // scrollRef.current.scrollBy(columns[1].width, 0);
-                } else if (col < visible.x) {
-                    scrollRef.current.scrollLeft = maxXScrollToCol(col);
                 }
             }
 
@@ -927,16 +881,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [
             mangledRows,
             rowMarkerOffset,
-            columns,
+            columns.length,
             gridSelection?.cell,
             setGridSelection,
-            hasRowMarkers,
             rowMarkerWidth,
-            cellXOffset,
-            cellYOffset,
             headerHeight,
+            lastRowSticky,
             rowHeight,
-            mangledCols,
+            rows,
         ]
     );
 
