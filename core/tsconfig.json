@@ -2,14 +2,14 @@
   "compilerOptions": {
       "allowSyntheticDefaultImports": true,
       "esModuleInterop": true,
-      "noImplicitAny": true,
-      "noUnusedParameters": true,
-      "noUnusedLocals": true,
-      "strict": true,
-      "moduleResolution": "node",
-      "target": "es6",
       "jsx": "react",
-      "typeRoots": ["./node_modules/@types"]
+      "moduleResolution": "node",
+      "noImplicitAny": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "strict": true,
+      "target": "es6",
+      "typeRoots": ["./node_modules/@types", "../node_modules/@types"]
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx"]
 }

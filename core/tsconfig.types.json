@@ -2,14 +2,14 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "dist/ts",
+        "allowJs": false,
         "declaration": true,
-        "types": ["react", "jest"],
+        "emitDeclarationOnly": true,
         "isolatedModules": false,
         "noEmit": false,
-        "allowJs": false,
-        "emitDeclarationOnly": true,
+        "outDir": "dist/ts",
         "sourceMap": false,
+        "types": ["react", "jest"],
     },
     "exclude": ["./src/**/*.stories.tsx", "./src/stories/*.tsx", "./src/docs/*.tsx"]
 }

@@ -1,5 +1,5 @@
 import { maybe } from "./support";
-import "jest";
+import { describe, test, expect } from "jest-without-globals";
 
 describe("maybe", () => {
     test("Returns when not crashing", () => {
