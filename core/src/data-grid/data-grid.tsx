@@ -32,7 +32,7 @@ export interface DataGridProps {
     readonly translateX?: number;
     readonly translateY?: number;
 
-    readonly firstColSticky: boolean;
+    readonly freezeColumns: number;
     readonly lastRowSticky: boolean;
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
@@ -136,7 +136,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         selectedRows,
         selectedCell,
         selectedColumns,
-        firstColSticky,
+        freezeColumns,
         lastRowSticky,
         onMouseDown,
         onMouseUp,
@@ -184,7 +184,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         void fn();
     }, [columns, spriteManager, theme]);
 
-    const mappedColumns = useMappedColumns(columns, firstColSticky);
+    const mappedColumns = useMappedColumns(columns, freezeColumns);
 
     const getBoundsForItem = React.useCallback(
         (canvas: HTMLCanvasElement, col: number, row: number | undefined): Rectangle => {
@@ -197,14 +197,18 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 height: 0,
             };
 
-            if (!firstColSticky || col !== 0) {
+            if (col >= freezeColumns) {
                 const dir = cellXOffset > col ? -1 : 1;
-                result.x += (firstColSticky ? columns[0].width : 0) + translateX;
+                const freezeWidth = mappedColumns
+                    .filter(c => c.sticky)
+                    .map(c => c.width)
+                    .reduce((pv, cv) => pv + cv, 0);
+                result.x += freezeWidth + translateX;
                 for (let i = cellXOffset; i !== col; i += dir) {
-                    result.x += columns[i].width * dir;
+                    result.x += mappedColumns[i].width * dir;
                 }
             }
-            result.width = columns[col].width + 1;
+            result.width = mappedColumns[col].width + 1;
 
             if (row === undefined) {
                 result.y = rect.y;
@@ -226,11 +230,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         [
             headerHeight,
             translateY,
-            firstColSticky,
-            columns,
+            freezeColumns,
             lastRowSticky,
             rows,
             cellXOffset,
+            mappedColumns,
             translateX,
             rowHeight,
             height,
@@ -245,14 +249,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             const y = posY - rect.top;
             const edgeDetectionBuffer = 5;
 
-            const effectiveCols = getEffectiveColumns(
-                mappedColumns,
-                cellXOffset,
-                width,
-                firstColSticky,
-                undefined,
-                translateX
-            );
+            const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, undefined, translateX);
 
             // -1 === off right edge
             const col = getColumnIndexForX(x, effectiveCols, translateX);
@@ -298,14 +295,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 };
             } else if (row === -1) {
                 let bounds = getBoundsForItem(canvas, col, undefined);
-                const firstAllowed = firstColSticky ? 1 : 0;
-                let isEdge =
-                    bounds !== undefined &&
-                    bounds.x + bounds.width - posX <= edgeDetectionBuffer &&
-                    col >= firstAllowed;
+                let isEdge = bounds !== undefined && bounds.x + bounds.width - posX <= edgeDetectionBuffer;
 
                 const previousCol = col - 1;
-                if (posX - bounds.x <= edgeDetectionBuffer && previousCol >= firstAllowed) {
+                if (posX - bounds.x <= edgeDetectionBuffer) {
                     isEdge = true;
                     bounds = getBoundsForItem(canvas, previousCol, undefined);
                     result = {
@@ -350,7 +343,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             mappedColumns,
             cellXOffset,
             width,
-            firstColSticky,
             translateX,
             height,
             headerHeight,
@@ -392,7 +384,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             Math.round(translateY),
             columns,
             mappedColumns,
-            firstColSticky,
             dragAndDropState,
             theme,
             headerHeight,
@@ -424,7 +415,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         translateY,
         columns,
         mappedColumns,
-        firstColSticky,
         dragAndDropState,
         theme,
         headerHeight,
@@ -464,7 +454,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         selectedRows,
         selectedColumns,
         selectedCell,
-        firstColSticky,
         dragAndDropState,
         hoveredCol,
         prelightCells,
@@ -856,14 +845,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
     const accessibilityTree = useDebouncedMemo(
         () => {
-            const effectiveCols = getEffectiveColumns(
-                mappedColumns,
-                cellXOffset,
-                width,
-                firstColSticky,
-                dragAndDropState,
-                translateX
-            );
+            const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
 
             const getRowData = (cell: InnerGridCell) => {
                 switch (cell.kind) {
@@ -947,7 +929,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             cellYOffset,
             mappedColumns,
             dragAndDropState,
-            firstColSticky,
             focusElement,
             getCellContent,
             selectedCell?.cell,

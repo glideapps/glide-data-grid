@@ -665,6 +665,7 @@ export const TenMillionCells: React.VFC = () => {
             <DataEditor
                 {...defaultProps}
                 rowMarkers="number"
+                freezeColumns={2}
                 getCellContent={getCellContent}
                 columns={cols}
                 rows={100_000}

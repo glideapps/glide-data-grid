@@ -16,7 +16,7 @@ export interface ScrollingDataGridProps extends Props {
 }
 
 const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
-    const { columns, rows, rowHeight, headerHeight, firstColSticky, experimental } = p;
+    const { columns, rows, rowHeight, headerHeight, freezeColumns, experimental } = p;
     const { paddingRight, paddingBottom } = experimental ?? {};
     const {
         className,
@@ -66,7 +66,10 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         let cellRight = 0;
         let cellX = 0;
 
-        const stickyColWidth = firstColSticky ? columns[0].width : 0;
+        const stickyColWidth = columns
+            .slice(0, freezeColumns)
+            .map(c => c.width)
+            .reduce((pv, cv) => pv + cv, 0);
 
         for (const c of columns) {
             const cx = x - stickyColWidth;
@@ -160,7 +163,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             lastX.current = tx;
             lastY.current = ty;
         }
-    }, [columns, rowHeight, rows, onVisibleRegionChanged, firstColSticky, smoothScrollX, smoothScrollY]);
+    }, [columns, rowHeight, rows, onVisibleRegionChanged, freezeColumns, smoothScrollX, smoothScrollY]);
 
     const onScrollUpdate = React.useCallback(
         (args: Rectangle) => {

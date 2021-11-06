@@ -166,11 +166,12 @@ function blitLastFrame(
     let stickyWidth = 0;
     for (const c of effectiveCols) {
         if (c.sticky) {
-            stickyWidth += c.width + 1;
+            stickyWidth += c.width;
         } else {
             break;
         }
     }
+    if (stickyWidth > 0) stickyWidth++;
 
     if (deltaX !== 0 && deltaY !== 0) {
         return {
@@ -878,7 +879,6 @@ export function drawGrid(
     translateY: number,
     columns: readonly GridColumn[],
     mappedColumns: readonly MappedGridColumn[],
-    firstColSticky: boolean,
     dragAndDropState: DragAndDropState | undefined,
     theme: Theme,
     headerHeight: number,
@@ -948,14 +948,7 @@ export function drawGrid(
         targetCtx.scale(dpr, dpr);
     }
 
-    const effectiveCols = getEffectiveColumns(
-        mappedColumns,
-        cellXOffset,
-        width,
-        firstColSticky,
-        dragAndDropState,
-        translateX
-    );
+    const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
 
     let drawRegions: Rectangle[] = [];
 

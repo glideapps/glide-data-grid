@@ -51,6 +51,7 @@ type Props = Omit<
     | "onKeyUp"
     | "onMouseDown"
     | "onMouseUp"
+    | "freezeColumns"
     | "onSearchResultsChanged"
     | "onVisibleRegionChanged"
     | "rowHeight"
@@ -104,6 +105,8 @@ export interface DataEditorProps extends Props {
 
     readonly enableDownfill?: boolean;
 
+    readonly freezeColumns?: DataGridSearchProps["freezeColumns"];
+
     readonly onPaste?:
         | ((target: readonly [number, number], values: readonly (readonly string[])[]) => boolean)
         | boolean;
@@ -155,6 +158,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onDeleteRows,
         onDragStart,
         onPaste,
+        freezeColumns = 0,
         rowSelectionMode = "auto",
         onHeaderMenuClick,
         onItemHovered,
@@ -1418,7 +1422,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 cellYOffset={cellYOffset ?? visibileRegion.y}
                 columns={mangledCols}
                 disabledRows={disabledRows}
-                firstColSticky={hasRowMarkers}
+                freezeColumns={freezeColumns + (hasRowMarkers ? 1 : 0)}
                 getCellContent={getMangedCellContent}
                 headerHeight={headerHeight}
                 lastRowSticky={lastRowSticky}

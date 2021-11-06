@@ -22,18 +22,18 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
 
     const { onColumnMoved, onColumnResized, gridRef, maxColumnWidth, onHeaderMenuClick, ...rest } = p;
 
-    const { firstColSticky, onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns, selectedColumns } = p;
+    const { freezeColumns, onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns, selectedColumns } = p;
 
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
             const [col] = args.location;
-            if (dragCol !== undefined && dropCol !== col && (!firstColSticky || col > 0)) {
+            if (dragCol !== undefined && dropCol !== col && col >= freezeColumns) {
                 setDragActive(true);
                 setDropCol(col);
             }
             onItemHovered?.(args);
         },
-        [dragCol, dropCol, firstColSticky, onItemHovered]
+        [dragCol, dropCol, freezeColumns, onItemHovered]
     );
 
     const canDragCol = onColumnMoved !== undefined;
@@ -47,11 +47,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                     setResizeColStartX(bounds.x);
                     setResizeCol(columns.length - 1);
                 }
-            } else if (
-                !isDraggable &&
-                (args.kind === "header" || args.kind === "cell") &&
-                (!firstColSticky || col > 0)
-            ) {
+            } else if (!isDraggable && (args.kind === "header" || args.kind === "cell") && col >= freezeColumns) {
                 if (args.isEdge) {
                     shouldFireEvent = false;
                     setResizeColStartX(args.bounds.x);
@@ -63,7 +59,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             }
             if (shouldFireEvent) onMouseDown?.(args);
         },
-        [isDraggable, firstColSticky, onMouseDown, gridRef, columns.length, canDragCol]
+        [isDraggable, freezeColumns, onMouseDown, gridRef, columns.length, canDragCol]
     );
 
     const onHeaderMenuClickMangled = React.useCallback(
