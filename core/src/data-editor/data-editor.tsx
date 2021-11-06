@@ -30,6 +30,12 @@ import { DataGridRef } from "../data-grid/data-grid";
 import noop from "lodash/noop";
 import { useEventListener } from "../common/utils";
 
+// TODO
+// - Multi resize columns
+// - Disable row/col
+// - Enter inside of a cell should restrict to selection, same for tab
+// - Ctrl + Enter to fill all
+
 interface MouseState {
     readonly previousSelection?: GridSelection;
 }
