@@ -1054,6 +1054,7 @@ export function drawGrid(
         }
         return;
     }
+
     if (canBlit === true) {
         const { regions } = blitLastFrame(
             targetCtx,

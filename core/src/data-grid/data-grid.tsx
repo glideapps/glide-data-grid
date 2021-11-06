@@ -160,7 +160,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
-    const cellXOffset = Math.max(0, Math.min(columns.length - 1, cellXOffsetReal));
+    const cellXOffset = Math.max(freezeColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const imageLoader = React.useRef<ImageWindowLoader>();
@@ -938,16 +938,39 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         100
     );
 
+    let stickyShadow: React.ReactNode;
+    if (mappedColumns[0].sticky) {
+        const stickyX = mappedColumns.map(c => (c.sticky ? c.width : 0)).reduce((pv, cv) => pv + cv, 0);
+        stickyShadow = (
+            <div
+                style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: stickyX,
+                    height: style.height,
+                    opacity: cellXOffset > freezeColumns || translateX !== 0 ? 1 : 0,
+                    pointerEvents: "none",
+                    boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
+                    transition: "opacity 150ms",
+                }}
+            />
+        );
+    }
+
     return (
-        <canvas
-            tabIndex={0}
-            onKeyDown={onKeyDownImpl}
-            onKeyUp={onKeyUpImpl}
-            className={className}
-            ref={refImpl}
-            style={style}>
-            {accessibilityTree}
-        </canvas>
+        <>
+            <canvas
+                tabIndex={0}
+                onKeyDown={onKeyDownImpl}
+                onKeyUp={onKeyUpImpl}
+                className={className}
+                ref={refImpl}
+                style={style}>
+                {accessibilityTree}
+            </canvas>
+            {stickyShadow}
+        </>
     );
 };
 

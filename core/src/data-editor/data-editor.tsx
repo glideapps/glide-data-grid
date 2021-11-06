@@ -198,15 +198,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const setSelectedColumns =
         setSelectedColumnsOuter !== undefined ? mangledSetSelectedColumns : setSelectedColumnsInner;
 
-    const [visibileRegion, setVisibleRegion] = React.useState<Rectangle & { tx?: number; ty?: number }>({
+    const [visibleRegion, setVisibleRegion] = React.useState<Rectangle & { tx?: number; ty?: number }>({
         x: 0,
         y: 0,
         width: 1,
         height: 1,
     });
 
-    const cellXOffset = visibileRegion.x;
-    const cellYOffset = visibileRegion.y;
+    const cellXOffset = visibleRegion.x + rowMarkerOffset;
+    const cellYOffset = visibleRegion.y;
 
     const gridRef = React.useRef<DataGridRef | null>(null);
 
@@ -620,14 +620,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const onVisibleRegionChangedImpl = React.useCallback(
-        (visibleRegion: Rectangle, tx?: number, ty?: number) => {
+        (region: Rectangle, tx?: number, ty?: number) => {
             const newRegion = {
-                ...visibleRegion,
-                x: visibleRegion.x - rowMarkerOffset,
-                height:
-                    showTrailingBlankRow && visibleRegion.y + visibleRegion.height >= rows
-                        ? visibleRegion.height - 1
-                        : visibleRegion.height,
+                ...region,
+                x: region.x - rowMarkerOffset,
+                height: showTrailingBlankRow && region.y + region.height >= rows ? region.height - 1 : region.height,
                 tx,
                 ty,
             };
@@ -1093,10 +1090,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 ) {
                     if (
                         (!lastRowSticky || row !== rows) &&
-                        (visibileRegion.y > row ||
-                            row > visibileRegion.y + visibileRegion.height ||
-                            visibileRegion.x > col ||
-                            col > visibileRegion.x + visibileRegion.width)
+                        (visibleRegion.y > row ||
+                            row > visibleRegion.y + visibleRegion.height ||
+                            visibleRegion.x > col ||
+                            col > visibleRegion.x + visibleRegion.width)
                     ) {
                         return;
                     }
@@ -1136,10 +1133,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             mangledOnCellEdited,
             adjustSelection,
             lastRowSticky,
-            visibileRegion.y,
-            visibileRegion.height,
-            visibileRegion.x,
-            visibileRegion.width,
+            visibleRegion.y,
+            visibleRegion.height,
+            visibleRegion.x,
+            visibleRegion.width,
         ]
     );
 
@@ -1413,16 +1410,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const mergedTheme = React.useMemo(() => {
         return { ...getDataEditorTheme(), ...theme };
     }, [theme]);
+
+    const mangledFreezeColumns = freezeColumns + (hasRowMarkers ? 1 : 0);
     return (
         <ThemeProvider theme={mergedTheme}>
             <DataGridSearch
                 {...rest}
                 canvasRef={canvasRef}
-                cellXOffset={(cellXOffset ?? visibileRegion.x) + rowMarkerOffset}
-                cellYOffset={cellYOffset ?? visibileRegion.y}
+                cellXOffset={cellXOffset}
+                cellYOffset={cellYOffset}
                 columns={mangledCols}
                 disabledRows={disabledRows}
-                freezeColumns={freezeColumns + (hasRowMarkers ? 1 : 0)}
+                freezeColumns={mangledFreezeColumns}
                 getCellContent={getMangedCellContent}
                 headerHeight={headerHeight}
                 lastRowSticky={lastRowSticky}
@@ -1443,8 +1442,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 selectedCell={gridSelection}
                 selectedColumns={selectedColumns}
                 selectedRows={selectedRows}
-                translateX={visibileRegion.tx}
-                translateY={visibileRegion.ty}
+                translateX={visibleRegion.tx}
+                translateY={visibleRegion.ty}
                 gridRef={gridRef}
             />
             {overlay !== undefined && (
