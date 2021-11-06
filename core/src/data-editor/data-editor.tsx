@@ -30,12 +30,6 @@ import { DataGridRef } from "../data-grid/data-grid";
 import noop from "lodash/noop";
 import { useEventListener } from "../common/utils";
 
-// TODO
-// - Multi resize columns
-// - Disable row/col
-// - Enter inside of a cell should restrict to selection, same for tab
-// - Ctrl + Enter to fill all
-
 interface MouseState {
     readonly previousSelection?: GridSelection;
 }
@@ -108,6 +102,8 @@ export interface DataEditorProps extends Props {
     readonly getCellContent: ReplaceReturnType<DataGridSearchProps["getCellContent"], GridCell>;
     readonly rowSelectionMode?: "auto" | "multi";
 
+    readonly enableDownfill?: boolean;
+
     readonly onPaste?:
         | ((target: readonly [number, number], values: readonly (readonly string[])[]) => boolean)
         | boolean;
@@ -153,6 +149,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onCellClicked,
         onHeaderClicked,
         onCellEdited,
+        enableDownfill = false,
         onRowAppended,
         onColumnMoved,
         onDeleteRows,
@@ -976,7 +973,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         reselect(event.bounds);
                         event.cancel();
                     }
-                } else if (event.keyCode === 68 && isPrimaryKey && gridSelection.range.height > 1) {
+                } else if (event.keyCode === 68 && isPrimaryKey && gridSelection.range.height > 1 && enableDownfill) {
                     // ctrl/cmd + d
                     const damage: (readonly [number, number])[] = [];
                     const r = gridSelection.range;
@@ -1118,6 +1115,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             overlay,
             selectedRows,
             gridSelection,
+            enableDownfill,
             getCellContent,
             rowMarkerOffset,
             updateSelectedCell,

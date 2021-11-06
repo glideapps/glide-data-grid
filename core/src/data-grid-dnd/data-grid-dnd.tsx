@@ -22,7 +22,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
 
     const { onColumnMoved, onColumnResized, gridRef, maxColumnWidth, onHeaderMenuClick, ...rest } = p;
 
-    const { firstColSticky, onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns } = p;
+    const { firstColSticky, onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns, selectedColumns } = p;
 
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
@@ -74,8 +74,18 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         [dragActive, onHeaderMenuClick]
     );
 
+    const lastResizeWidthRef = React.useRef(-1);
+
     const onMouseUpImpl = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
+            if (resizeCol !== undefined && selectedColumns?.hasIndex(resizeCol) === true) {
+                for (const c of selectedColumns) {
+                    if (c === resizeCol) continue;
+                    onColumnResized?.(columns[c], lastResizeWidthRef.current);
+                }
+            }
+
+            lastResizeWidthRef.current = -1;
             setDragCol(undefined);
             setDropCol(undefined);
             setDragStartX(undefined);
@@ -89,7 +99,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             }
             onMouseUp?.(args, isOutside);
         },
-        [dragCol, dropCol, onColumnMoved, onMouseUp]
+        [columns, dragCol, dropCol, onColumnMoved, onColumnResized, onMouseUp, resizeCol, selectedColumns]
     );
 
     const dragOffset = React.useMemo(() => {
@@ -115,9 +125,26 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                 const column = columns[resizeCol];
                 const newWidth = clamp(event.clientX - resizeColStartX, 50, maxColumnWidthValue);
                 onColumnResized?.(column, newWidth);
+                lastResizeWidthRef.current = newWidth;
+
+                if (resizeCol !== undefined && selectedColumns?.first() === resizeCol) {
+                    for (const c of selectedColumns) {
+                        if (c === resizeCol) continue;
+                        onColumnResized?.(columns[c], lastResizeWidthRef.current);
+                    }
+                }
             }
         },
-        [dragCol, dragStartX, resizeCol, resizeColStartX, columns, maxColumnWidthValue, onColumnResized]
+        [
+            dragCol,
+            dragStartX,
+            resizeCol,
+            resizeColStartX,
+            columns,
+            maxColumnWidthValue,
+            onColumnResized,
+            selectedColumns,
+        ]
     );
 
     return (
