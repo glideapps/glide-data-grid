@@ -244,6 +244,22 @@ When this property changes to `true`, the Grid will scroll all the way to the ri
 ---
 
 ```ts
+verticalBorder?: ((col: number) => boolean) | boolean;
+```
+
+Controls the drawing of the left hand vertical border of a column. If set to a boolean value it controls all borders. Defaults to `true`.
+
+---
+
+```ts
+freezeColumns?: number;
+```
+
+Set to a positive number to freeze columns on the left side of the grid during horizontal scrolling.
+
+---
+
+```ts
 isDraggable?: boolean;
 onDragStart?: (args: GridDragEventArgs) => void;
 ```
