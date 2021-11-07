@@ -415,6 +415,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             spriteManager
         );
     }, [
+        buffers,
         width,
         height,
         cellXOffset,
@@ -423,6 +424,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         translateY,
         columns,
         mappedColumns,
+        freezeColumns,
         dragAndDropState,
         theme,
         headerHeight,
@@ -440,7 +442,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         drawCustomCell,
         prelightCells,
         spriteManager,
-        buffers,
     ]);
 
     React.useEffect(() => {
