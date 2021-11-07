@@ -102,6 +102,8 @@ export interface DataEditorProps extends Props {
     readonly getCellContent: ReplaceReturnType<DataGridSearchProps["getCellContent"], GridCell>;
     readonly rowSelectionMode?: "auto" | "multi";
 
+    readonly enableDownfill?: boolean;
+
     readonly onPaste?:
         | ((target: readonly [number, number], values: readonly (readonly string[])[]) => boolean)
         | boolean;
@@ -147,6 +149,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onCellClicked,
         onHeaderClicked,
         onCellEdited,
+        enableDownfill = false,
         onRowAppended,
         onColumnMoved,
         onDeleteRows,
@@ -929,6 +932,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const overlayOpen = overlay !== undefined;
                 const shiftKey = event.shiftKey;
                 const isOSX = browserIsOSX.value;
+                const isPrimaryKey = isOSX ? event.metaKey : event.ctrlKey;
                 const isDeleteKey = event.key === "Delete" || (isOSX && event.key === "Backspace");
 
                 if (event.key === "Escape") {
@@ -969,33 +973,57 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         reselect(event.bounds);
                         event.cancel();
                     }
+                } else if (event.keyCode === 68 && isPrimaryKey && gridSelection.range.height > 1 && enableDownfill) {
+                    // ctrl/cmd + d
+                    const damage: (readonly [number, number])[] = [];
+                    const r = gridSelection.range;
+                    for (let x = 0; x < r.width; x++) {
+                        const fillCol = x + r.x;
+                        const fillVal = getMangedCellContent([fillCol, r.y]);
+                        if (isInnerOnlyCell(fillVal) || !isEditableGridCell(fillVal)) continue;
+                        for (let y = 1; y < r.height; y++) {
+                            const fillRow = y + r.y;
+                            const target = [fillCol, fillRow] as const;
+                            damage.push(target);
+                            mangledOnCellEdited?.(target, {
+                                ...fillVal,
+                            });
+                        }
+                    }
+
+                    gridRef.current?.damage(
+                        damage.map(c => ({
+                            cell: c,
+                        }))
+                    );
+                    event.cancel();
                 } else if (event.key === "ArrowDown") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        adjustSelection([0, 1]);
+                        adjustSelection([0, isPrimaryKey ? Number.MAX_SAFE_INTEGER : 1]);
                     } else {
-                        row++;
+                        row += isPrimaryKey ? Number.MAX_SAFE_INTEGER : 1;
                     }
                 } else if (event.key === "ArrowUp") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        adjustSelection([0, -1]);
+                        adjustSelection([0, isPrimaryKey ? Number.MIN_SAFE_INTEGER : -1]);
                     } else {
-                        row--;
+                        row += isPrimaryKey ? Number.MIN_SAFE_INTEGER : -1;
                     }
                 } else if (event.key === "ArrowRight") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        adjustSelection([1, 0]);
+                        adjustSelection([isPrimaryKey ? Number.MAX_SAFE_INTEGER : 1, 0]);
                     } else {
-                        col++;
+                        col += isPrimaryKey ? Number.MAX_SAFE_INTEGER : 1;
                     }
                 } else if (event.key === "ArrowLeft") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        adjustSelection([-1, 0]);
+                        adjustSelection([isPrimaryKey ? Number.MIN_SAFE_INTEGER : -1, 0]);
                     } else {
-                        col--;
+                        col += isPrimaryKey ? Number.MIN_SAFE_INTEGER : -1;
                     }
                 } else if (event.key === "Tab") {
                     setOverlay(undefined);
@@ -1087,6 +1115,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             overlay,
             selectedRows,
             gridSelection,
+            enableDownfill,
             getCellContent,
             rowMarkerOffset,
             updateSelectedCell,
@@ -1099,6 +1128,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             showTrailingBlankRow,
             appendRow,
             reselect,
+            getMangedCellContent,
             mangledOnCellEdited,
             adjustSelection,
             lastRowSticky,

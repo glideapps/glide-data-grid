@@ -223,7 +223,8 @@ export function isInnerOnlyCell(cell: InnerGridCell): cell is InnerOnlyGridCell 
 }
 
 export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
-    if (!isEditableGridCell(cell)) return false;
+    if (!isEditableGridCell(cell) || cell.kind === GridCellKind.Image || cell.kind === GridCellKind.Boolean)
+        return false;
 
     if (
         cell.kind === GridCellKind.Text ||
@@ -233,7 +234,7 @@ export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
     ) {
         return cell.readonly !== true;
     }
-    return true;
+    assertNever(cell);
 }
 
 export type GridCell =
