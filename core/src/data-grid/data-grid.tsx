@@ -946,15 +946,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         () => ({
             position: "absolute",
             top: 0,
-            left: 0,
-            width: stickyX,
+            left: stickyX,
+            width: style.width - stickyX,
             height: style.height,
             opacity: cellXOffset > freezeColumns || translateX !== 0 ? 1 : 0,
             pointerEvents: "none",
-            boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
+            boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
             transition: "opacity 150ms",
         }),
-        [cellXOffset, freezeColumns, stickyX, style.height, translateX]
+        [cellXOffset, freezeColumns, stickyX, style.height, style.width, translateX]
     );
 
     let stickyShadow: React.ReactNode;
