@@ -55,6 +55,7 @@ type Props = Omit<
     | "onSearchResultsChanged"
     | "onVisibleRegionChanged"
     | "rowHeight"
+    | "verticalBorder"
     | "scrollRef"
     | "searchColOffset"
     | "selectedCell"
@@ -106,6 +107,8 @@ export interface DataEditorProps extends Props {
     readonly enableDownfill?: boolean;
 
     readonly freezeColumns?: DataGridSearchProps["freezeColumns"];
+
+    readonly verticalBorder?: DataGridSearchProps["verticalBorder"] | boolean;
 
     readonly onPaste?:
         | ((target: readonly [number, number], values: readonly (readonly string[])[]) => boolean)
@@ -171,6 +174,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onGridSelectionChange,
         provideEditor,
         trailingRowOptions,
+        verticalBorder,
         ...rest
     } = p;
 
@@ -1411,6 +1415,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return { ...getDataEditorTheme(), ...theme };
     }, [theme]);
 
+    const mangedVerticalBorder = React.useCallback(
+        (col: number) => {
+            return typeof verticalBorder === "boolean"
+                ? verticalBorder
+                : verticalBorder?.(col - rowMarkerOffset) ?? true;
+        },
+        [rowMarkerOffset, verticalBorder]
+    );
+
     const mangledFreezeColumns = freezeColumns + (hasRowMarkers ? 1 : 0);
     return (
         <ThemeProvider theme={mergedTheme}>
@@ -1444,6 +1457,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 selectedRows={selectedRows}
                 translateX={visibleRegion.tx}
                 translateY={visibleRegion.ty}
+                verticalBorder={mangedVerticalBorder}
                 gridRef={gridRef}
             />
             {overlay !== undefined && (

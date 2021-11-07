@@ -1976,11 +1976,12 @@ export const FreezeColumns: React.VFC = () => {
             }>
             <DataEditor
                 {...defaultProps}
-                rowMarkers="number"
-                freezeColumns={2}
+                rowMarkers="both"
+                freezeColumns={1}
                 getCellContent={getCellContent}
                 columns={cols}
-                rows={100_000}
+                verticalBorder={c => c > 0}
+                rows={1_000}
             />
         </BeautifulWrapper>
     );

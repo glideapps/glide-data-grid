@@ -77,6 +77,8 @@ export interface DataGridProps {
     readonly onKeyDown?: (event: GridKeyEventArgs) => void;
     readonly onKeyUp?: (event: GridKeyEventArgs) => void;
 
+    readonly verticalBorder: (col: number) => boolean;
+
     readonly isDraggable?: boolean;
     readonly onDragStart?: (args: GridDragEventArgs) => void;
 
@@ -161,6 +163,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         disabledRows,
         prelightCells,
         headerIcons,
+        verticalBorder,
         drawCustomCell,
         onCellFocused,
     } = p;
@@ -387,12 +390,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             Math.round(translateY),
             columns,
             mappedColumns,
+            freezeColumns,
             dragAndDropState,
             theme,
             headerHeight,
             selectedRows ?? CompactSelection.empty(),
             disabledRows ?? CompactSelection.empty(),
             rowHeight,
+            verticalBorder,
             selectedColumns ?? CompactSelection.empty(),
             hoveredCol,
             isResizing,
@@ -424,6 +429,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         selectedRows,
         disabledRows,
         rowHeight,
+        verticalBorder,
         selectedColumns,
         hoveredCol,
         isResizing,
