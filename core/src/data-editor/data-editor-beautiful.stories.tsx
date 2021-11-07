@@ -665,7 +665,6 @@ export const TenMillionCells: React.VFC = () => {
             <DataEditor
                 {...defaultProps}
                 rowMarkers="number"
-                freezeColumns={2}
                 getCellContent={getCellContent}
                 columns={cols}
                 rows={100_000}
@@ -1958,6 +1957,35 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`}
     );
 };
 (PasteSupport as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const FreezeColumns: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(100);
+
+    return (
+        <BeautifulWrapper
+            title="Freeze columns"
+            description={
+                <Description>
+                    Columns at the start of your grid can be forzen in place by settings{" "}
+                    <PropName>freezeColumns</PropName> to a number greater than 0.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers="number"
+                freezeColumns={2}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={100_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(FreezeColumns as any).parameters = {
     options: {
         showPanel: false,
     },
