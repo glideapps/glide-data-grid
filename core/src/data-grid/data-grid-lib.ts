@@ -23,6 +23,16 @@ export function useMappedColumns(columns: readonly GridColumn[], freezeColumns: 
     );
 }
 
+export function getStickyWidth(columns: readonly MappedGridColumn[]): number {
+    let result = 0;
+    for (const c of columns) {
+        if (c.sticky) result += c.width;
+        else break;
+    }
+
+    return result;
+}
+
 export function getEffectiveColumns(
     columns: readonly MappedGridColumn[],
     cellXOffset: number,

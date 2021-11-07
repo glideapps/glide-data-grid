@@ -2,7 +2,13 @@ import * as React from "react";
 import { Theme } from "../common/styles";
 import { withTheme } from "styled-components";
 import ImageWindowLoader from "../common/image-window-loader";
-import { getColumnIndexForX, getEffectiveColumns, getRowIndexForY, useMappedColumns } from "./data-grid-lib";
+import {
+    getColumnIndexForX,
+    getEffectiveColumns,
+    getRowIndexForY,
+    getStickyWidth,
+    useMappedColumns,
+} from "./data-grid-lib";
 import {
     GridColumn,
     GridCell,
@@ -199,10 +205,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
             if (col >= freezeColumns) {
                 const dir = cellXOffset > col ? -1 : 1;
-                const freezeWidth = mappedColumns
-                    .filter(c => c.sticky)
-                    .map(c => c.width)
-                    .reduce((pv, cv) => pv + cv, 0);
+                const freezeWidth = getStickyWidth(mappedColumns);
                 result.x += freezeWidth + translateX;
                 for (let i = cellXOffset; i !== col; i += dir) {
                     result.x += mappedColumns[i].width * dir;
@@ -938,7 +941,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         100
     );
 
-    const stickyX = mappedColumns.map(c => (c.sticky ? c.width : 0)).reduce((pv, cv) => pv + cv, 0);
+    const stickyX = getStickyWidth(mappedColumns);
     const stickyShadowStyle = React.useMemo<React.CSSProperties>(
         () => ({
             position: "absolute",

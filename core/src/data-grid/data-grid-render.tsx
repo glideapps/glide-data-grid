@@ -21,6 +21,7 @@ import {
     drawProtectedCell,
     drawTextCell,
     getEffectiveColumns,
+    getStickyWidth,
     MappedGridColumn,
     roundedPoly,
 } from "./data-grid-lib";
@@ -163,14 +164,7 @@ function blitLastFrame(
     }
     deltaX += translateX - last.translateX;
 
-    let stickyWidth = 0;
-    for (const c of effectiveCols) {
-        if (c.sticky) {
-            stickyWidth += c.width;
-        } else {
-            break;
-        }
-    }
+    let stickyWidth = getStickyWidth(effectiveCols);
     if (stickyWidth > 0) stickyWidth++;
 
     if (deltaX !== 0 && deltaY !== 0) {
