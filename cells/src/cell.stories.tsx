@@ -144,6 +144,19 @@ export const StarColumn: React.VFC = () => {
                                 rating: 4,
                             },
                         } as StarCell;
+                    } else if (col === 1) {
+                        num = row + 1;
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "sparkline-cell",
+                                values: range(0, 15).map(() => rand() * 100 - 50),
+                                color: row % 2 === 0 ? "#77c4c4" : "#D98466",
+                                yAxis: [-50, 50],
+                            },
+                        } as SparklineCell;
                     }
                     num = row + 1;
                     return {
@@ -154,6 +167,7 @@ export const StarColumn: React.VFC = () => {
                             kind: "sparkline-cell",
                             values: range(0, 15).map(() => rand() * 100 - 50),
                             color: row % 2 === 0 ? "#77c4c4" : "#D98466",
+                            graphKind: "bar",
                             yAxis: [-50, 50],
                         },
                     } as SparklineCell;
@@ -165,6 +179,10 @@ export const StarColumn: React.VFC = () => {
                     },
                     {
                         title: "Sparkline",
+                        width: 150,
+                    },
+                    {
+                        title: "Sparkline (bars)",
                         width: 150,
                     },
                 ]}
