@@ -2,7 +2,13 @@ import * as React from "react";
 import { Theme } from "../common/styles";
 import { withTheme } from "styled-components";
 import ImageWindowLoader from "../common/image-window-loader";
-import { getColumnIndexForX, getEffectiveColumns, getRowIndexForY, useMappedColumns } from "./data-grid-lib";
+import {
+    getColumnIndexForX,
+    getEffectiveColumns,
+    getRowIndexForY,
+    getStickyWidth,
+    useMappedColumns,
+} from "./data-grid-lib";
 import {
     GridColumn,
     GridCell,
@@ -32,7 +38,7 @@ export interface DataGridProps {
     readonly translateX?: number;
     readonly translateY?: number;
 
-    readonly firstColSticky: boolean;
+    readonly freezeColumns: number;
     readonly lastRowSticky: boolean;
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
@@ -70,6 +76,8 @@ export interface DataGridProps {
 
     readonly onKeyDown?: (event: GridKeyEventArgs) => void;
     readonly onKeyUp?: (event: GridKeyEventArgs) => void;
+
+    readonly verticalBorder: (col: number) => boolean;
 
     readonly isDraggable?: boolean;
     readonly onDragStart?: (args: GridDragEventArgs) => void;
@@ -136,7 +144,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         selectedRows,
         selectedCell,
         selectedColumns,
-        firstColSticky,
+        freezeColumns,
         lastRowSticky,
         onMouseDown,
         onMouseUp,
@@ -155,12 +163,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         disabledRows,
         prelightCells,
         headerIcons,
+        verticalBorder,
         drawCustomCell,
         onCellFocused,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
-    const cellXOffset = Math.max(0, Math.min(columns.length - 1, cellXOffsetReal));
+    const cellXOffset = Math.max(freezeColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const imageLoader = React.useRef<ImageWindowLoader>();
@@ -184,7 +193,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         void fn();
     }, [columns, spriteManager, theme]);
 
-    const mappedColumns = useMappedColumns(columns, firstColSticky);
+    const mappedColumns = useMappedColumns(columns, freezeColumns);
 
     const getBoundsForItem = React.useCallback(
         (canvas: HTMLCanvasElement, col: number, row: number | undefined): Rectangle => {
@@ -197,14 +206,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 height: 0,
             };
 
-            if (!firstColSticky || col !== 0) {
+            if (col >= freezeColumns) {
                 const dir = cellXOffset > col ? -1 : 1;
-                result.x += (firstColSticky ? columns[0].width : 0) + translateX;
+                const freezeWidth = getStickyWidth(mappedColumns);
+                result.x += freezeWidth + translateX;
                 for (let i = cellXOffset; i !== col; i += dir) {
-                    result.x += columns[i].width * dir;
+                    result.x += mappedColumns[i].width * dir;
                 }
             }
-            result.width = columns[col].width + 1;
+            result.width = mappedColumns[col].width + 1;
 
             if (row === undefined) {
                 result.y = rect.y;
@@ -226,11 +236,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         [
             headerHeight,
             translateY,
-            firstColSticky,
-            columns,
+            freezeColumns,
             lastRowSticky,
             rows,
             cellXOffset,
+            mappedColumns,
             translateX,
             rowHeight,
             height,
@@ -245,14 +255,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             const y = posY - rect.top;
             const edgeDetectionBuffer = 5;
 
-            const effectiveCols = getEffectiveColumns(
-                mappedColumns,
-                cellXOffset,
-                width,
-                firstColSticky,
-                undefined,
-                translateX
-            );
+            const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, undefined, translateX);
 
             // -1 === off right edge
             const col = getColumnIndexForX(x, effectiveCols, translateX);
@@ -298,14 +301,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 };
             } else if (row === -1) {
                 let bounds = getBoundsForItem(canvas, col, undefined);
-                const firstAllowed = firstColSticky ? 1 : 0;
-                let isEdge =
-                    bounds !== undefined &&
-                    bounds.x + bounds.width - posX <= edgeDetectionBuffer &&
-                    col >= firstAllowed;
+                let isEdge = bounds !== undefined && bounds.x + bounds.width - posX <= edgeDetectionBuffer;
 
                 const previousCol = col - 1;
-                if (posX - bounds.x <= edgeDetectionBuffer && previousCol >= firstAllowed) {
+                if (posX - bounds.x <= edgeDetectionBuffer) {
                     isEdge = true;
                     bounds = getBoundsForItem(canvas, previousCol, undefined);
                     result = {
@@ -350,7 +349,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             mappedColumns,
             cellXOffset,
             width,
-            firstColSticky,
             translateX,
             height,
             headerHeight,
@@ -392,13 +390,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             Math.round(translateY),
             columns,
             mappedColumns,
-            firstColSticky,
+            freezeColumns,
             dragAndDropState,
             theme,
             headerHeight,
             selectedRows ?? CompactSelection.empty(),
             disabledRows ?? CompactSelection.empty(),
             rowHeight,
+            verticalBorder,
             selectedColumns ?? CompactSelection.empty(),
             hoveredCol,
             isResizing,
@@ -416,6 +415,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             spriteManager
         );
     }, [
+        buffers,
         width,
         height,
         cellXOffset,
@@ -424,13 +424,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         translateY,
         columns,
         mappedColumns,
-        firstColSticky,
+        freezeColumns,
         dragAndDropState,
         theme,
         headerHeight,
         selectedRows,
         disabledRows,
         rowHeight,
+        verticalBorder,
         selectedColumns,
         hoveredCol,
         isResizing,
@@ -441,7 +442,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         drawCustomCell,
         prelightCells,
         spriteManager,
-        buffers,
     ]);
 
     React.useEffect(() => {
@@ -464,7 +464,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         selectedRows,
         selectedColumns,
         selectedCell,
-        firstColSticky,
         dragAndDropState,
         hoveredCol,
         prelightCells,
@@ -856,14 +855,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
     const accessibilityTree = useDebouncedMemo(
         () => {
-            const effectiveCols = getEffectiveColumns(
-                mappedColumns,
-                cellXOffset,
-                width,
-                firstColSticky,
-                dragAndDropState,
-                translateX
-            );
+            const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
 
             const getRowData = (cell: InnerGridCell) => {
                 switch (cell.kind) {
@@ -947,7 +939,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             cellYOffset,
             mappedColumns,
             dragAndDropState,
-            firstColSticky,
             focusElement,
             getCellContent,
             selectedCell?.cell,
@@ -957,16 +948,40 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         100
     );
 
+    const stickyX = getStickyWidth(mappedColumns);
+    const stickyShadowStyle = React.useMemo<React.CSSProperties>(
+        () => ({
+            position: "absolute",
+            top: 0,
+            left: stickyX,
+            width: style.width - stickyX,
+            height: style.height,
+            opacity: cellXOffset > freezeColumns || translateX !== 0 ? 1 : 0,
+            pointerEvents: "none",
+            boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
+            transition: "opacity 150ms",
+        }),
+        [cellXOffset, freezeColumns, stickyX, style.height, style.width, translateX]
+    );
+
+    let stickyShadow: React.ReactNode;
+    if (mappedColumns[0].sticky) {
+        stickyShadow = <div style={stickyShadowStyle} />;
+    }
+
     return (
-        <canvas
-            tabIndex={0}
-            onKeyDown={onKeyDownImpl}
-            onKeyUp={onKeyUpImpl}
-            className={className}
-            ref={refImpl}
-            style={style}>
-            {accessibilityTree}
-        </canvas>
+        <>
+            <canvas
+                tabIndex={0}
+                onKeyDown={onKeyDownImpl}
+                onKeyUp={onKeyUpImpl}
+                className={className}
+                ref={refImpl}
+                style={style}>
+                {accessibilityTree}
+            </canvas>
+            {stickyShadow}
+        </>
     );
 };
 

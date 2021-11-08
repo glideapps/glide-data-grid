@@ -21,6 +21,7 @@ import {
     drawProtectedCell,
     drawTextCell,
     getEffectiveColumns,
+    getStickyWidth,
     MappedGridColumn,
     roundedPoly,
 } from "./data-grid-lib";
@@ -163,14 +164,8 @@ function blitLastFrame(
     }
     deltaX += translateX - last.translateX;
 
-    let stickyWidth = 0;
-    for (const c of effectiveCols) {
-        if (c.sticky) {
-            stickyWidth += c.width + 1;
-        } else {
-            break;
-        }
-    }
+    let stickyWidth = getStickyWidth(effectiveCols);
+    if (stickyWidth > 0) stickyWidth++;
 
     if (deltaX !== 0 && deltaY !== 0) {
         return {
@@ -285,6 +280,7 @@ function drawGridLines(
     height: number,
     headerHeight: number,
     getRowHeight: (row: number) => number,
+    verticalBorder: (col: number) => boolean,
     lastRowSticky: boolean,
     rows: number,
     theme: Theme,
@@ -302,12 +298,15 @@ function drawGridLines(
 
     // vertical lines
     let x = 0.5;
-    effectiveCols.forEach(c => {
+    for (let index = 0; index < effectiveCols.length; index++) {
+        const c = effectiveCols[index];
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
-        ctx.moveTo(tx, 0);
-        ctx.lineTo(tx, height);
-    });
+        if (index === effectiveCols.length - 1 || verticalBorder(index + 1)) {
+            ctx.moveTo(tx, 0);
+            ctx.lineTo(tx, height);
+        }
+    }
 
     const stickyHeight = getRowHeight(rows - 1);
     const stickyRowY = height - stickyHeight + 0.5;
@@ -878,13 +877,14 @@ export function drawGrid(
     translateY: number,
     columns: readonly GridColumn[],
     mappedColumns: readonly MappedGridColumn[],
-    firstColSticky: boolean,
+    freezeColumns: number,
     dragAndDropState: DragAndDropState | undefined,
     theme: Theme,
     headerHeight: number,
     selectedRows: CompactSelection,
     disabledRows: CompactSelection,
     rowHeight: number | ((index: number) => number),
+    verticalBorder: (col: number) => boolean,
     selectedColumns: CompactSelection,
     hoveredCol: number | undefined,
     isResizing: boolean,
@@ -948,14 +948,7 @@ export function drawGrid(
         targetCtx.scale(dpr, dpr);
     }
 
-    const effectiveCols = getEffectiveColumns(
-        mappedColumns,
-        cellXOffset,
-        width,
-        firstColSticky,
-        dragAndDropState,
-        translateX
-    );
+    const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
 
     let drawRegions: Rectangle[] = [];
 
@@ -987,6 +980,7 @@ export function drawGrid(
             height,
             headerHeight,
             getRowHeight,
+            verticalBorder,
             lastRowSticky,
             rows,
             theme,
@@ -999,7 +993,8 @@ export function drawGrid(
         damage = damage.filter(
             x =>
                 x[1] === undefined ||
-                intersectRect(cellXOffset, cellYOffset, effectiveCols.length, 300, x[0], x[1], 1, 1)
+                intersectRect(cellXOffset, cellYOffset, effectiveCols.length, 300, x[0], x[1], 1, 1) ||
+                intersectRect(0, cellYOffset, freezeColumns, 300, x[0], x[1], 1, 1)
         );
 
         if (damage.length > 0) {
@@ -1061,6 +1056,7 @@ export function drawGrid(
         }
         return;
     }
+
     if (canBlit === true) {
         const { regions } = blitLastFrame(
             targetCtx,
@@ -1160,6 +1156,7 @@ export function drawGrid(
         height,
         headerHeight,
         getRowHeight,
+        verticalBorder,
         lastRowSticky,
         rows,
         theme

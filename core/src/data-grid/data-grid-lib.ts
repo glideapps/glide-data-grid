@@ -11,23 +11,32 @@ export interface MappedGridColumn extends GridColumn {
     sticky: boolean;
 }
 
-export function useMappedColumns(columns: readonly GridColumn[], firstColSticky: boolean): readonly MappedGridColumn[] {
+export function useMappedColumns(columns: readonly GridColumn[], freezeColumns: number): readonly MappedGridColumn[] {
     return React.useMemo(
         () =>
             columns.map((c, i) => ({
                 ...c,
                 sourceIndex: i,
-                sticky: firstColSticky && i === 0,
+                sticky: i < freezeColumns,
             })),
-        [columns, firstColSticky]
+        [columns, freezeColumns]
     );
+}
+
+export function getStickyWidth(columns: readonly MappedGridColumn[]): number {
+    let result = 0;
+    for (const c of columns) {
+        if (c.sticky) result += c.width;
+        else break;
+    }
+
+    return result;
 }
 
 export function getEffectiveColumns(
     columns: readonly MappedGridColumn[],
     cellXOffset: number,
     width: number,
-    firstColSticky: boolean,
     dndState?: {
         src: number;
         dest: number;
@@ -48,8 +57,9 @@ export function getEffectiveColumns(
         mappedCols = writable;
     }
 
-    if (firstColSticky) {
-        width -= mappedCols[0].width;
+    const sticky = columns.filter(c => c.sticky);
+    if (sticky.length > 0) {
+        width -= sticky.map(c => c.width).reduce((pv, cv) => pv + cv, 0);
     }
     let endIndex = cellXOffset;
     let curX = tx ?? 0;
@@ -59,16 +69,7 @@ export function getEffectiveColumns(
         endIndex++;
     }
 
-    let effectiveCols = mappedCols.slice(cellXOffset, endIndex);
-
-    if (firstColSticky && cellXOffset !== 0) {
-        effectiveCols = [
-            {
-                ...mappedCols[0],
-            },
-            ...effectiveCols,
-        ];
-    }
+    const effectiveCols = [...sticky, ...mappedCols.slice(cellXOffset, endIndex).filter(c => !c.sticky)];
 
     return effectiveCols;
 }

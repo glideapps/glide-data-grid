@@ -207,6 +207,14 @@ The grid will not attempt to add additional rows if more data is pasted then can
 ---
 
 ```ts
+onRowMoved?: (startIndex: number, endIndex: number) => void;
+```
+
+Called whenever a row re-order operation is completed. Setting the callback enables re-ordering by dragging the first column of a row.
+
+---
+
+```ts
 imageEditorOverride?: ImageEditorType;
 ```
 
@@ -240,6 +248,22 @@ scrollToEnd?: boolean;
 ```
 
 When this property changes to `true`, the Grid will scroll all the way to the right. Glide uses that when the user clicks the "Add Column" button.
+
+---
+
+```ts
+verticalBorder?: ((col: number) => boolean) | boolean;
+```
+
+Controls the drawing of the left hand vertical border of a column. If set to a boolean value it controls all borders. Defaults to `true`.
+
+---
+
+```ts
+freezeColumns?: number;
+```
+
+Set to a positive number to freeze columns on the left side of the grid during horizontal scrolling.
 
 ---
 

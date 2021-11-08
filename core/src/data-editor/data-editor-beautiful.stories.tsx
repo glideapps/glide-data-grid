@@ -22,6 +22,7 @@ import { useEventListener } from "../common/utils";
 import { useLayer } from "react-laag";
 import { SpriteMap } from "../data-grid/data-grid-sprites";
 import { DataEditorRef, Theme } from "..";
+import range from "lodash/range";
 
 faker.seed(1337);
 
@@ -1957,6 +1958,104 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`}
     );
 };
 (PasteSupport as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const FreezeColumns: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(100);
+
+    return (
+        <BeautifulWrapper
+            title="Freeze columns"
+            description={
+                <Description>
+                    Columns at the start of your grid can be forzen in place by settings{" "}
+                    <PropName>freezeColumns</PropName> to a number greater than 0.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers="both"
+                freezeColumns={1}
+                getCellContent={getCellContent}
+                columns={cols}
+                verticalBorder={c => c > 0}
+                rows={1_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(FreezeColumns as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const ReorderRows: React.VFC = () => {
+    const cols = React.useMemo<GridColumn[]>(
+        () => [
+            {
+                title: "Col A",
+                width: 150,
+            },
+            {
+                title: "Col B",
+                width: 150,
+            },
+        ],
+        []
+    );
+
+    const [rowData, setRowData] = React.useState(() => {
+        return range(0, 50).map(x => [`A: ${x}`, `B: ${x}`]);
+    });
+
+    const getCellContent = React.useCallback<DataEditorProps["getCellContent"]>(
+        ([col, row]) => {
+            return {
+                kind: GridCellKind.Text,
+                allowOverlay: false,
+                data: rowData[row][col],
+                displayData: rowData[row][col],
+            };
+        },
+        [rowData]
+    );
+
+    const reorderRows = React.useCallback((from: number, to: number) => {
+        setRowData(cv => {
+            const d = [...cv];
+            const removed = d.splice(from, 1);
+            d.splice(to, 0, ...removed);
+            return d;
+        });
+    }, []);
+
+    return (
+        <BeautifulWrapper
+            title="Reorder Rows"
+            description={
+                <>
+                    <Description>
+                        Rows can be re-arranged by using the <PropName>onRowMoved</PropName> callback. When set the
+                        first row can be used to drag and drop.
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers={"number"}
+                onRowMoved={reorderRows}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={50}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ReorderRows as any).parameters = {
     options: {
         showPanel: false,
     },
