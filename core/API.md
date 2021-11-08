@@ -207,6 +207,14 @@ The grid will not attempt to add additional rows if more data is pasted then can
 ---
 
 ```ts
+onRowMoved?: (startIndex: number, endIndex: number) => void;
+```
+
+Called whenever a row re-order operation is completed. Setting the callback enables re-ordering by dragging the first column of a row.
+
+---
+
+```ts
 imageEditorOverride?: ImageEditorType;
 ```
 
