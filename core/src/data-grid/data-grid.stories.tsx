@@ -41,7 +41,8 @@ export function Simplenotest() {
                 allowOverlay: false,
                 owned: true,
             })}
-            firstColSticky={false}
+            freezeColumns={0}
+            verticalBorder={() => true}
             lastRowSticky={false}
             isResizing={false}
             isDragging={false}
@@ -72,7 +73,8 @@ export function SelectedCellnotest() {
                 owned: true,
             })}
             selectedCell={{ cell: [2, 2], range: { x: 2, y: 2, width: 1, height: 1 } }}
-            firstColSticky={false}
+            freezeColumns={0}
+            verticalBorder={() => true}
             lastRowSticky={false}
             isResizing={false}
             isDragging={false}
@@ -103,7 +105,8 @@ export function SelectedRownotest() {
                 owned: true,
             })}
             selectedRows={CompactSelection.fromSingleSelection([2, 4])}
-            firstColSticky={false}
+            freezeColumns={0}
+            verticalBorder={() => true}
             lastRowSticky={false}
             isResizing={false}
             isDragging={false}
@@ -134,7 +137,8 @@ export const SelectedColumnnotest = () => {
                 owned: true,
             })}
             selectedColumns={CompactSelection.fromSingleSelection([2, 4])}
-            firstColSticky={false}
+            freezeColumns={0}
+            verticalBorder={() => true}
             lastRowSticky={false}
             isResizing={false}
             isDragging={false}

@@ -122,11 +122,11 @@ function rand(): number {
     return (num = (num * 16807) % 2147483647) / 2147483647;
 }
 
-export const StarColumn: React.VFC = () => {
+export const CustomCells: React.VFC = () => {
     const { drawCustomCell, provideEditor } = useExtraCells();
 
     return (
-        <BeautifulWrapper title="Star column" description={<Description>Star extension column.</Description>}>
+        <BeautifulWrapper title="Custom cells" description={<Description>Some of our extension cells.</Description>}>
             <DataEditor
                 {...defaultProps}
                 drawCustomCell={drawCustomCell}
@@ -191,7 +191,7 @@ export const StarColumn: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(StarColumn as any).parameters = {
+(CustomCells as any).parameters = {
     options: {
         showPanel: false,
     },

@@ -75,7 +75,8 @@ export function Simplenotest() {
             onVisibleRegionChanged={onVisibleRegionChanged}
             columns={columns}
             getCellContent={getCellContent}
-            firstColSticky={true}
+            freezeColumns={0}
+            verticalBorder={() => true}
             smoothScrollX={true}
             smoothScrollY={true}
         />
