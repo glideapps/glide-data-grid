@@ -1091,6 +1091,25 @@ export function drawGrid(
         theme
     );
 
+    if (selectedCell !== undefined && selectedCell.cell[0] === freezeColumns - 1) {
+        // the overdraw may have nuked out our focus ring right edge.
+        drawFocusRing(
+            targetCtx,
+            width,
+            height,
+            cellYOffset,
+            translateX,
+            translateY,
+            effectiveCols,
+            theme,
+            headerHeight,
+            selectedCell,
+            getRowHeight,
+            lastRowSticky,
+            rows
+        );
+    }
+
     if (drawRegions.length > 0) {
         targetCtx.beginPath();
         for (const r of drawRegions) {

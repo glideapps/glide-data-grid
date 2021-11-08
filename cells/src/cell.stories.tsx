@@ -148,7 +148,7 @@ export const StarColumn: React.VFC = () => {
                         num = row + 1;
                         return {
                             kind: GridCellKind.Custom,
-                            allowOverlay: true,
+                            allowOverlay: false,
                             copyData: "4",
                             data: {
                                 kind: "sparkline-cell",
@@ -161,7 +161,7 @@ export const StarColumn: React.VFC = () => {
                     num = row + 1;
                     return {
                         kind: GridCellKind.Custom,
-                        allowOverlay: true,
+                        allowOverlay: false,
                         copyData: "4",
                         data: {
                             kind: "sparkline-cell",
