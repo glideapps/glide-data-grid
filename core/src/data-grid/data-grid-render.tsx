@@ -342,9 +342,82 @@ function drawGridLines(
     ctx.beginPath();
 }
 
+function drawGroups(
+    ctx: CanvasRenderingContext2D,
+    effectiveCols: readonly MappedGridColumn[],
+    width: number,
+    height: number,
+    translateX: number,
+    headerHeight: number,
+    outerTheme: Theme,
+    verticalBorder: (col: number) => boolean
+) {
+    const trueHeaderHeight = headerHeight / 2;
+    const xPad = 8;
+    let x = 0;
+    let clipX = 0;
+    for (let index = 0; index < effectiveCols.length; index++) {
+        const startCol = effectiveCols[index];
+        const group = startCol.group;
+
+        let end = index + 1;
+        let boxWidth = startCol.width;
+        if (startCol.sticky) {
+            clipX += boxWidth;
+        }
+        while (
+            end < effectiveCols.length &&
+            effectiveCols[end].group === group &&
+            effectiveCols[end].sticky === effectiveCols[index].sticky
+        ) {
+            const endCol = effectiveCols[end];
+            boxWidth += endCol.width;
+            end++;
+            index++;
+            if (endCol.sticky) {
+                clipX += endCol.width;
+            }
+        }
+
+        const t = startCol.sticky ? 0 : translateX;
+        const localX = x + t;
+
+        ctx.save();
+        ctx.beginPath();
+        const delta = startCol.sticky ? 0 : Math.max(0, clipX - localX);
+        ctx.rect(localX + delta, 0, boxWidth - delta, height);
+        ctx.clip();
+
+        ctx.fillStyle = outerTheme.textHeader;
+        if (group !== undefined) {
+            ctx.fillText(group, localX + delta + xPad, trueHeaderHeight / 2 + 5);
+        }
+
+        if (verticalBorder(startCol.sourceIndex)) {
+            ctx.beginPath();
+            ctx.moveTo(localX + delta + 0.5, 0);
+            ctx.lineTo(localX + delta + 0.5, trueHeaderHeight);
+            ctx.strokeStyle = outerTheme.borderColor;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        ctx.restore();
+
+        x += boxWidth;
+    }
+
+    ctx.moveTo(0, trueHeaderHeight + 0.5);
+    ctx.lineTo(width, trueHeaderHeight + 0.5);
+    ctx.strokeStyle = outerTheme.borderColor;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+}
+
 function drawGridHeaders(
     ctx: CanvasRenderingContext2D,
     effectiveCols: readonly MappedGridColumn[],
+    enableGroups: boolean,
     hoveredCol: number | undefined,
     width: number,
     height: number,
@@ -356,12 +429,15 @@ function drawGridHeaders(
     selectedCell: GridSelection | undefined,
     outerTheme: Theme,
     spriteManager: SpriteManager,
-    hoverValues: HoverValues
+    hoverValues: HoverValues,
+    verticalBorder: (col: number) => boolean
 ) {
     if (headerHeight === 0) return;
     // FIXME: This should respect the per-column theme
     ctx.fillStyle = outerTheme.bgHeader;
     ctx.fillRect(0, 0, width, headerHeight);
+
+    const trueHeaderHeight = enableGroups ? headerHeight / 2 : headerHeight;
 
     const xPad = 8;
     const yPad = 2;
@@ -401,13 +477,15 @@ function drawGridHeaders(
             ctx.translate(translateX, 0);
         }
 
+        const y = enableGroups ? headerHeight / 2 : 0;
+
         const xOffset = c.sourceIndex === 0 ? 0 : 1;
         if (selected) {
             ctx.fillStyle = bgFillStyle;
-            ctx.fillRect(x + xOffset, 0, c.width - xOffset, headerHeight);
+            ctx.fillRect(x + xOffset, y, c.width - xOffset, trueHeaderHeight);
         } else if (hasSelectedCell || hover > 0) {
             ctx.beginPath();
-            ctx.rect(x + xOffset, 0, c.width - xOffset, headerHeight);
+            ctx.rect(x + xOffset, y, c.width - xOffset, trueHeaderHeight);
             if (hasSelectedCell) {
                 ctx.fillStyle = theme.bgHeaderHasFocus;
                 ctx.fill();
@@ -430,7 +508,7 @@ function drawGridHeaders(
             if (c.style === "highlight") {
                 variant = selected ? "selected" : "special";
             }
-            spriteManager.drawSprite(c.icon, variant, ctx, drawX, (headerHeight - 20) / 2, 20, theme);
+            spriteManager.drawSprite(c.icon, variant, ctx, drawX, y + (trueHeaderHeight - 20) / 2, 20, theme);
 
             if (c.overlayIcon !== undefined) {
                 spriteManager.drawSprite(
@@ -438,7 +516,7 @@ function drawGridHeaders(
                     selected ? "selected" : "special",
                     ctx,
                     drawX + 9,
-                    (headerHeight - 18) / 2 + 6,
+                    y + ((trueHeaderHeight - 18) / 2 + 6),
                     18,
                     theme
                 );
@@ -466,12 +544,12 @@ function drawGridHeaders(
         } else {
             ctx.fillStyle = fillStyle;
         }
-        ctx.fillText(c.title, drawX, headerHeight / 2 + 5);
+        ctx.fillText(c.title, drawX, y + (trueHeaderHeight / 2 + 5));
 
         if (hoveredBoolean && c.hasMenu === true) {
             ctx.beginPath();
             const triangleX = x + c.width - 20;
-            const triangleY = headerHeight / 2 - 3;
+            const triangleY = y + (trueHeaderHeight / 2 - 3);
             roundedPoly(
                 ctx,
                 [
@@ -498,6 +576,10 @@ function drawGridHeaders(
         ctx.restore();
 
         x += c.width;
+    }
+
+    if (enableGroups) {
+        drawGroups(ctx, effectiveCols, width, height, translateX, headerHeight, outerTheme, verticalBorder);
     }
 }
 
@@ -877,6 +959,7 @@ export function drawGrid(
     translateY: number,
     columns: readonly GridColumn[],
     mappedColumns: readonly MappedGridColumn[],
+    enableGroups: boolean,
     freezeColumns: number,
     dragAndDropState: DragAndDropState | undefined,
     theme: Theme,
@@ -956,6 +1039,7 @@ export function drawGrid(
         drawGridHeaders(
             overlayCtx,
             effectiveCols,
+            enableGroups,
             hoveredCol,
             width,
             height,
@@ -967,9 +1051,15 @@ export function drawGrid(
             selectedCell,
             theme,
             spriteManager,
-            hoverValues
+            hoverValues,
+            verticalBorder
         );
 
+        if (enableGroups) {
+            overlayCtx.save();
+            overlayCtx.rect(0, headerHeight / 2, width, headerHeight / 2);
+            overlayCtx.clip();
+        }
         drawGridLines(
             overlayCtx,
             effectiveCols,
@@ -986,6 +1076,10 @@ export function drawGrid(
             theme,
             true
         );
+
+        if (enableGroups) {
+            overlayCtx.restore();
+        }
     };
 
     // handle damage updates by directly drawing to the target to avoid large blits

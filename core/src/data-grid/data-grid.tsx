@@ -48,6 +48,7 @@ export interface DataGridProps {
     readonly rows: number;
 
     readonly headerHeight: number;
+    readonly enableGroups: boolean;
     readonly rowHeight: number | ((index: number) => number);
 
     readonly canvasRef?: React.MutableRefObject<HTMLCanvasElement | null>;
@@ -142,6 +143,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         getCellContent,
         onHeaderMenuClick,
         selectedRows,
+        enableGroups,
         selectedCell,
         selectedColumns,
         freezeColumns,
@@ -390,6 +392,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             Math.round(translateY),
             columns,
             mappedColumns,
+            enableGroups,
             freezeColumns,
             dragAndDropState,
             theme,
@@ -424,6 +427,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         translateY,
         columns,
         mappedColumns,
+        enableGroups,
         freezeColumns,
         dragAndDropState,
         theme,

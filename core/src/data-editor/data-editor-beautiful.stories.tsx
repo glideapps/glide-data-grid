@@ -146,6 +146,7 @@ const BeautifulWrapper: React.FC<BeautifulProps> = p => {
 function createTextColumnInfo(index: number): GridColumnWithMockingInfo {
     return {
         title: `Column ${index}`,
+        group: `Group ${Math.round(index / 3)}`,
         width: 120,
         icon: GridColumnIcon.HeaderString,
         hasMenu: false,
@@ -167,6 +168,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
     const defaultColumns: GridColumnWithMockingInfo[] = [
         {
             title: "First name",
+            group: "Name",
             width: 120,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
@@ -183,6 +185,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
         },
         {
             title: "Last name",
+            group: "Name",
             width: 120,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
@@ -200,6 +203,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
         {
             title: "Avatar",
             width: 120,
+            group: "Info",
             icon: GridColumnIcon.HeaderImage,
             hasMenu: false,
             getContent: () => {
@@ -217,6 +221,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
         {
             title: "Email",
             width: 120,
+            group: "Info",
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
             getContent: () => {
@@ -233,6 +238,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
         {
             title: "Title",
             width: 120,
+            group: "Info",
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
             getContent: () => {
@@ -249,6 +255,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
         {
             title: "More Info",
             width: 120,
+            group: "Info",
             icon: GridColumnIcon.HeaderUri,
             hasMenu: false,
             getContent: () => {

@@ -41,6 +41,7 @@ type Props = Omit<
     | "cellYOffset"
     | "className"
     | "disabledRows"
+    | "enableGroups"
     | "firstColSticky"
     | "getCellContent"
     | "gridRef"
@@ -1424,11 +1425,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [rowMarkerOffset, verticalBorder]
     );
 
+    const enableGroups = React.useMemo(() => {
+        return columns.some(c => c.group !== undefined);
+    }, [columns]);
+
     const mangledFreezeColumns = freezeColumns + (hasRowMarkers ? 1 : 0);
     return (
         <ThemeProvider theme={mergedTheme}>
             <DataGridSearch
                 {...rest}
+                enableGroups={enableGroups}
                 canvasRef={canvasRef}
                 cellXOffset={cellXOffset}
                 cellYOffset={cellYOffset}
@@ -1436,7 +1442,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 disabledRows={disabledRows}
                 freezeColumns={mangledFreezeColumns}
                 getCellContent={getMangedCellContent}
-                headerHeight={headerHeight}
+                headerHeight={enableGroups ? headerHeight * 2 : headerHeight}
                 lastRowSticky={lastRowSticky}
                 onCellFocused={onCellFocused}
                 onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}
