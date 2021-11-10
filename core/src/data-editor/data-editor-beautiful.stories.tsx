@@ -143,10 +143,10 @@ const BeautifulWrapper: React.FC<BeautifulProps> = p => {
     );
 };
 
-function createTextColumnInfo(index: number): GridColumnWithMockingInfo {
+function createTextColumnInfo(index: number, group: boolean): GridColumnWithMockingInfo {
     return {
         title: `Column ${index}`,
-        group: `Group ${Math.round(index / 3)}`,
+        group: group ? `Group ${Math.round(index / 3)}` : undefined,
         width: 120,
         icon: GridColumnIcon.HeaderString,
         hasMenu: false,
@@ -164,11 +164,11 @@ function createTextColumnInfo(index: number): GridColumnWithMockingInfo {
     };
 }
 
-function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
+function getResizableColumns(amount: number, group: boolean): GridColumnWithMockingInfo[] {
     const defaultColumns: GridColumnWithMockingInfo[] = [
         {
             title: "First name",
-            group: "Name",
+            group: group ? "Name" : undefined,
             width: 120,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
@@ -185,7 +185,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
         },
         {
             title: "Last name",
-            group: "Name",
+            group: group ? "Name" : undefined,
             width: 120,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
@@ -203,7 +203,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
         {
             title: "Avatar",
             width: 120,
-            group: "Info",
+            group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderImage,
             hasMenu: false,
             getContent: () => {
@@ -221,7 +221,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
         {
             title: "Email",
             width: 120,
-            group: "Info",
+            group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
             getContent: () => {
@@ -238,7 +238,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
         {
             title: "Title",
             width: 120,
-            group: "Info",
+            group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
             getContent: () => {
@@ -255,7 +255,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
         {
             title: "More Info",
             width: 120,
-            group: "Info",
+            group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderUri,
             hasMenu: false,
             getContent: () => {
@@ -278,7 +278,7 @@ function getResizableColumns(amount: number): GridColumnWithMockingInfo[] {
     const extraColumnsAmount = amount - defaultColumns.length;
 
     const extraColumns = [...new Array(extraColumnsAmount)].map((_, index) =>
-        createTextColumnInfo(index + defaultColumns.length)
+        createTextColumnInfo(index + defaultColumns.length, group)
     );
 
     return [...defaultColumns, ...extraColumns];
@@ -308,14 +308,14 @@ class ContentCache {
     }
 }
 
-function useMockDataGenerator(numCols: number, readonly: boolean = true) {
+function useMockDataGenerator(numCols: number, readonly: boolean = true, group: boolean = false) {
     const cache = React.useRef<ContentCache>(new ContentCache());
 
-    const [colsMap, setColsMap] = React.useState(() => getResizableColumns(numCols));
+    const [colsMap, setColsMap] = React.useState(() => getResizableColumns(numCols, group));
 
     React.useEffect(() => {
-        setColsMap(getResizableColumns(numCols));
-    }, [numCols]);
+        setColsMap(getResizableColumns(numCols, group));
+    }, [group, numCols]);
 
     const onColumnResized = React.useCallback((column: GridColumn, newSize: number) => {
         setColsMap(prevColsMap => {
@@ -2063,6 +2063,33 @@ export const ReorderRows: React.VFC = () => {
     );
 };
 (ReorderRows as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const ColumnGroups: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(100000, true, true);
+
+    return (
+        <BeautifulWrapper
+            title="Column Grouping"
+            description={
+                <Description>
+                    Columns in the data grid may be grouped by setting their <PropName>group</PropName> property.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={1000}
+                rowMarkers="both"
+            />
+        </BeautifulWrapper>
+    );
+};
+(ColumnGroups as any).parameters = {
     options: {
         showPanel: false,
     },

@@ -349,7 +349,7 @@ function drawGroups(
     height: number,
     translateX: number,
     headerHeight: number,
-    outerTheme: Theme,
+    theme: Theme,
     verticalBorder: (col: number) => boolean
 ) {
     const trueHeaderHeight = headerHeight / 2;
@@ -388,7 +388,7 @@ function drawGroups(
         ctx.rect(localX + delta, 0, boxWidth - delta, height);
         ctx.clip();
 
-        ctx.fillStyle = outerTheme.textHeader;
+        ctx.fillStyle = theme.textGroupHeader ?? theme.textHeader;
         if (group !== undefined) {
             ctx.fillText(group, localX + delta + xPad, trueHeaderHeight / 2 + 5);
         }
@@ -397,7 +397,7 @@ function drawGroups(
             ctx.beginPath();
             ctx.moveTo(localX + delta + 0.5, 0);
             ctx.lineTo(localX + delta + 0.5, trueHeaderHeight);
-            ctx.strokeStyle = outerTheme.borderColor;
+            ctx.strokeStyle = theme.borderColor;
             ctx.lineWidth = 1;
             ctx.stroke();
         }
@@ -413,7 +413,7 @@ function drawGroups(
 
     ctx.moveTo(0, trueHeaderHeight + 0.5);
     ctx.lineTo(width, trueHeaderHeight + 0.5);
-    ctx.strokeStyle = outerTheme.borderColor;
+    ctx.strokeStyle = theme.borderColor;
     ctx.lineWidth = 1;
     ctx.stroke();
 }

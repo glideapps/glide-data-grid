@@ -580,6 +580,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             } else if (args.kind === "group-header") {
                 const [col] = args.location;
 
+                if (col < rowMarkerOffset) return;
+
                 const needle = mangledCols[col];
                 let start = col;
                 let end = col;
