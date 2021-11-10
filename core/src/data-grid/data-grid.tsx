@@ -301,7 +301,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     isEdge,
                     isTouch,
                 };
-            } else if (row === -1) {
+            } else if (row <= -1) {
                 let bounds = getBoundsForItem(canvas, col, undefined);
                 let isEdge = bounds !== undefined && bounds.x + bounds.width - posX <= edgeDetectionBuffer;
 
@@ -310,7 +310,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     isEdge = true;
                     bounds = getBoundsForItem(canvas, previousCol, undefined);
                     result = {
-                        kind: "header",
+                        kind: enableGroups && row === -2 ? "group-header" : "header",
                         location: [previousCol, undefined],
                         bounds: bounds,
                         isEdge,
@@ -321,7 +321,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     };
                 } else {
                     result = {
-                        kind: "header",
+                        kind: enableGroups && row === -2 ? "group-header" : "header",
                         location: [col, undefined],
                         bounds: bounds,
                         isEdge,
@@ -360,6 +360,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             translateY,
             lastRowSticky,
             getBoundsForItem,
+            enableGroups,
         ]
     );
 
