@@ -306,6 +306,7 @@ export interface Rectangle {
 export interface GridColumn {
     readonly width: number; // The width of the column
     readonly title: string; // The title of the column
+    readonly group?: string; // The group header the column should be under
     readonly icon?: GridColumnIcon | string; // The icon
     readonly overlayIcon?: GridColumnIcon | string; // An icon to draw on top (like a lock indicator)
     readonly hasMenu?: boolean; // If the column should draw a menu triangle
