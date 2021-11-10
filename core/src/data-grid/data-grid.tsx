@@ -475,21 +475,25 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         lastDrawRef.current = draw;
     }, [draw]);
 
-    const drawDamage = React.useCallback((locations: readonly (readonly [number, number])[]) => {
+    const imageLoaded = React.useCallback((locations: readonly (readonly [number, number])[]) => {
+        const last = canBlit.current;
         canBlit.current = false;
         damageRegion.current = locations;
         lastDrawRef.current();
         damageRegion.current = undefined;
+        canBlit.current = last;
     }, []);
 
     const damage = React.useCallback((cells: DamageUpdateList) => {
+        const last = canBlit.current;
         canBlit.current = false;
         damageRegion.current = cells.map(x => x.cell);
         lastDrawRef.current();
         damageRegion.current = undefined;
+        canBlit.current = last;
     }, []);
 
-    imageLoader.current?.setCallback(drawDamage);
+    imageLoader.current?.setCallback(imageLoaded);
 
     const [hCol, hRow] = hoveredItem ?? [];
     const headerHovered = hCol !== undefined && hRow === undefined;
@@ -619,11 +623,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     useEventListener("touchend", onMouseUpImpl, window, false);
 
     const onAnimationFrame = React.useCallback<StepCallback>(values => {
+        const last = canBlit.current;
         canBlit.current = false;
         damageRegion.current = values.map(x => x.item);
         hoverValues.current = values;
         lastDrawRef.current();
         damageRegion.current = undefined;
+        canBlit.current = last;
     }, []);
 
     const animationManager = React.useRef(new AnimationManager(onAnimationFrame));

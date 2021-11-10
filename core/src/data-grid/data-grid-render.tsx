@@ -902,7 +902,7 @@ export function drawGrid(
     spriteManager: SpriteManager
 ) {
     if (width === 0 || height === 0) return;
-    const dpr = Math.ceil(window.devicePixelRatio) ?? 1;
+    const dpr = Math.ceil(window.devicePixelRatio ?? 1);
 
     if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
         canvas.width = width * dpr;
@@ -1090,6 +1090,25 @@ export function drawGrid(
         getRowHeight,
         theme
     );
+
+    if (selectedCell !== undefined && selectedCell.cell[0] === freezeColumns - 1) {
+        // the overdraw may have nuked out our focus ring right edge.
+        drawFocusRing(
+            targetCtx,
+            width,
+            height,
+            cellYOffset,
+            translateX,
+            translateY,
+            effectiveCols,
+            theme,
+            headerHeight,
+            selectedCell,
+            getRowHeight,
+            lastRowSticky,
+            rows
+        );
+    }
 
     if (drawRegions.length > 0) {
         targetCtx.beginPath();

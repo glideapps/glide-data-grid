@@ -122,11 +122,11 @@ function rand(): number {
     return (num = (num * 16807) % 2147483647) / 2147483647;
 }
 
-export const StarColumn: React.VFC = () => {
+export const CustomCells: React.VFC = () => {
     const { drawCustomCell, provideEditor } = useExtraCells();
 
     return (
-        <BeautifulWrapper title="Star column" description={<Description>Star extension column.</Description>}>
+        <BeautifulWrapper title="Custom cells" description={<Description>Some of our extension cells.</Description>}>
             <DataEditor
                 {...defaultProps}
                 drawCustomCell={drawCustomCell}
@@ -144,16 +144,30 @@ export const StarColumn: React.VFC = () => {
                                 rating: 4,
                             },
                         } as StarCell;
+                    } else if (col === 1) {
+                        num = row + 1;
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: false,
+                            copyData: "4",
+                            data: {
+                                kind: "sparkline-cell",
+                                values: range(0, 15).map(() => rand() * 100 - 50),
+                                color: row % 2 === 0 ? "#77c4c4" : "#D98466",
+                                yAxis: [-50, 50],
+                            },
+                        } as SparklineCell;
                     }
                     num = row + 1;
                     return {
                         kind: GridCellKind.Custom,
-                        allowOverlay: true,
+                        allowOverlay: false,
                         copyData: "4",
                         data: {
                             kind: "sparkline-cell",
                             values: range(0, 15).map(() => rand() * 100 - 50),
                             color: row % 2 === 0 ? "#77c4c4" : "#D98466",
+                            graphKind: "bar",
                             yAxis: [-50, 50],
                         },
                     } as SparklineCell;
@@ -167,13 +181,17 @@ export const StarColumn: React.VFC = () => {
                         title: "Sparkline",
                         width: 150,
                     },
+                    {
+                        title: "Sparkline (bars)",
+                        width: 150,
+                    },
                 ]}
                 rows={500}
             />
         </BeautifulWrapper>
     );
 };
-(StarColumn as any).parameters = {
+(CustomCells as any).parameters = {
     options: {
         showPanel: false,
     },
