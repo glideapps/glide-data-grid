@@ -8,7 +8,11 @@ export interface GridSelection {
     readonly range: Readonly<Rectangle>;
 }
 
-export type GridMouseEventArgs = GridMouseCellEventArgs | GridMouseHeaderEventArgs | GridMouseOutOfBoundsEventArgs;
+export type GridMouseEventArgs =
+    | GridMouseCellEventArgs
+    | GridMouseHeaderEventArgs
+    | GridMouseOutOfBoundsEventArgs
+    | GridMouseGroupHeaderEventArgs;
 
 interface BaseGridMouseEventArgs {
     readonly shiftKey: boolean;
@@ -26,6 +30,12 @@ interface GridMouseCellEventArgs extends BaseGridMouseEventArgs {
 
 interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs {
     readonly kind: "header";
+    readonly location: readonly [number, undefined];
+    readonly bounds: Rectangle;
+}
+
+interface GridMouseGroupHeaderEventArgs extends BaseGridMouseEventArgs {
+    readonly kind: "group-header";
     readonly location: readonly [number, undefined];
     readonly bounds: Rectangle;
 }
@@ -102,6 +112,7 @@ export enum GridColumnIcon {
 export interface GridColumn {
     readonly width: number;
     readonly title: string;
+    readonly group?: string;
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
     readonly hasMenu?: boolean;
@@ -463,6 +474,13 @@ export class CompactSelection {
             if (index >= start && index < end) return true;
         }
         return false;
+    };
+
+    hasAll = (index: Slice): boolean => {
+        for (let x = index[0]; x < index[1]; x++) {
+            if (!this.hasIndex(x)) return false;
+        }
+        return true;
     };
 
     get length(): number {

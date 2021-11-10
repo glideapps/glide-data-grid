@@ -306,6 +306,7 @@ export interface Rectangle {
 export interface GridColumn {
     readonly width: number; // The width of the column
     readonly title: string; // The title of the column
+    readonly group?: string; // The group header the column should be under
     readonly icon?: GridColumnIcon | string; // The icon
     readonly overlayIcon?: GridColumnIcon | string; // An icon to draw on top (like a lock indicator)
     readonly hasMenu?: boolean; // If the column should draw a menu triangle
@@ -334,6 +335,7 @@ The Grid supports the following kinds of cells:
 -   `LoadingCell` is currently rendered empty, but should be used for data that's not loaded in yet.
 -   `ProtectedCell` is for data that the user isn't supposed to see, for example other user's passwords.
 -   `DrilldownCell` displays bubbles with a small thumbnail and text.
+-   `CustomCell` a cell designed to be used as a base type for all custom cells.
 
 ```ts
 export type GridCell = EditableGridCell | BubbleCell | RowIDCell | LoadingCell | ProtectedCell | DrilldownCell;
@@ -364,7 +366,7 @@ interface BubbleCell extends BaseGridCell {
     readonly data: readonly string[];
 }
 
-export interface DrilldownCellData {
+interface DrilldownCellData {
     readonly text: string;
     readonly img?: string;
 }
@@ -402,6 +404,12 @@ interface LoadingCell extends BaseGridCell {
 
 interface ProtectedCell extends BaseGridCell {
     readonly kind: GridCellKind.Protected;
+}
+
+interface CustomCell<T extends {} = {}> extends BaseGridCell {
+    readonly kind: GridCellKind.Custom;
+    readonly data: T;
+    readonly copyData: string;
 }
 
 export enum GridCellKind {

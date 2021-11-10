@@ -100,6 +100,7 @@ export function getRowIndexForY(
     translateY: number,
     lastRowSticky: boolean
 ): number | undefined {
+    if (targetY <= headerHeight / 2) return -2;
     if (targetY <= headerHeight) return -1;
 
     const lastRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows - 1);

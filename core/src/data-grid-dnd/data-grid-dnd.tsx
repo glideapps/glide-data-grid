@@ -68,7 +68,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                         setResizeColStartX(bounds.x);
                         setResizeCol(columns.length - 1);
                     }
-                } else if ((args.kind === "header" || args.kind === "cell") && col >= freezeColumns) {
+                } else if (args.kind === "header" && col >= freezeColumns) {
                     if (args.isEdge) {
                         shouldFireEvent = false;
                         setResizeColStartX(args.bounds.x);

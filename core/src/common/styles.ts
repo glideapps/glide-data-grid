@@ -1,6 +1,46 @@
 import baseStyled, { ThemedStyledInterface } from "styled-components";
 
-const dataEditorBaseTheme = {
+export interface Theme {
+    accentColor: string;
+    accentFg: string;
+    accentLight: string;
+
+    textDark: string;
+    textMedium: string;
+    textLight: string;
+    textBubble: string;
+
+    bgIconHeader: string;
+    fgIconHeader: string;
+    textHeader: string;
+    textGroupHeader?: string;
+    textHeaderSelected: string;
+
+    bgCell: string;
+    bgCellMedium: string;
+    bgHeader: string;
+    bgHeaderHasFocus: string;
+    bgHeaderHovered: string;
+
+    bgBubble: string;
+    bgBubbleSelected: string;
+
+    bgSearchResult: string;
+
+    borderColor: string;
+    drilldownBorder: string;
+
+    linkColor: string;
+
+    cellHorizontalPadding: number;
+    cellVerticalPadding: number;
+
+    headerFontStyle: string;
+    baseFontStyle: string;
+    fontFamily: string;
+}
+
+const dataEditorBaseTheme: Theme = {
     accentColor: "#4F5DFF",
     accentFg: "#FFFFFF",
     accentLight: "rgba(62, 116, 253, 0.1)",
@@ -13,6 +53,7 @@ const dataEditorBaseTheme = {
     bgIconHeader: "#737383",
     fgIconHeader: "#FFFFFF",
     textHeader: "#313139",
+    textGroupHeader: "#313139BB",
     textHeaderSelected: "#FFFFFF",
 
     bgCell: "#FFFFFF",
@@ -39,8 +80,6 @@ const dataEditorBaseTheme = {
     fontFamily:
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
 };
-
-export type Theme = typeof dataEditorBaseTheme;
 
 export const styled = baseStyled as ThemedStyledInterface<Theme>;
 
