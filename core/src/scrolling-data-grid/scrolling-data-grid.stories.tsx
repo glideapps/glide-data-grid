@@ -65,6 +65,7 @@ export function Simplenotest() {
     return (
         <GridScroller
             rows={10000}
+            enableGroups={false}
             cellXOffset={x}
             cellYOffset={y}
             translateX={translateX}

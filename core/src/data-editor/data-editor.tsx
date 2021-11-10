@@ -143,7 +143,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         getCellsForSelection,
         rowMarkers = "none",
         rowHeight = 34,
-        headerHeight = 36,
+        headerHeight: rawHeaderHeight = 36,
         rowMarkerWidth: rowMarkerWidthRaw,
         imageEditorOverride,
         markdownDivCreateNode,
@@ -185,6 +185,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const showTrailingBlankRow = onRowAppended !== undefined;
     const lastRowSticky = trailingRowOptions?.sticky === true;
 
+    const mangledFreezeColumns = freezeColumns + (hasRowMarkers ? 1 : 0);
+
     const gridSelection = gridSelectionOuter ?? gridSelectionInner;
     const setGridSelection = onGridSelectionChange ?? setGridSelectionInner;
     const selectedRows = selectedRowsOuter ?? selectedRowsInner;
@@ -199,6 +201,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [rowMarkerOffset, setSelectedColumnsOuter]
     );
+
+    const enableGroups = React.useMemo(() => {
+        return columns.some(c => c.group !== undefined);
+    }, [columns]);
+
+    const headerHeight = enableGroups ? rawHeaderHeight * 2 : rawHeaderHeight;
 
     const setSelectedColumns =
         setSelectedColumnsOuter !== undefined ? mangledSetSelectedColumns : setSelectedColumnsInner;
@@ -569,6 +577,39 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 setSelectedRows(CompactSelection.empty());
                 lastSelectedRowRef.current = undefined;
                 lastSelectedColRef.current = undefined;
+            } else if (args.kind === "group-header") {
+                const [col] = args.location;
+
+                const needle = mangledCols[col];
+                let start = col;
+                let end = col;
+                for (let i = col - 1; i >= rowMarkerOffset; i--) {
+                    if (needle.group !== mangledCols[i].group) break;
+                    start--;
+                }
+
+                for (let i = col + 1; i < mangledCols.length; i++) {
+                    if (needle.group !== mangledCols[i].group) break;
+                    end++;
+                }
+
+                setSelectedRows(CompactSelection.empty());
+                setGridSelection(undefined);
+                focus();
+
+                if (isMultiKey) {
+                    if (selectedColumns.hasAll([start, end + 1])) {
+                        let newVal = selectedColumns;
+                        for (let index = start; index <= end; index++) {
+                            newVal = newVal.remove(index);
+                        }
+                        setSelectedColumns(newVal);
+                    } else {
+                        setSelectedColumns(selectedColumns.add([start, end + 1]));
+                    }
+                } else {
+                    setSelectedColumns(CompactSelection.fromSingleSelection([start, end + 1]));
+                }
             }
         },
         [
@@ -587,6 +628,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             appendRow,
             lastRowSticky,
             selectedColumns,
+            mangledCols,
         ]
     );
 
@@ -1425,11 +1467,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [rowMarkerOffset, verticalBorder]
     );
 
-    const enableGroups = React.useMemo(() => {
-        return columns.some(c => c.group !== undefined);
-    }, [columns]);
-
-    const mangledFreezeColumns = freezeColumns + (hasRowMarkers ? 1 : 0);
     return (
         <ThemeProvider theme={mergedTheme}>
             <DataGridSearch
@@ -1442,7 +1479,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 disabledRows={disabledRows}
                 freezeColumns={mangledFreezeColumns}
                 getCellContent={getMangedCellContent}
-                headerHeight={enableGroups ? headerHeight * 2 : headerHeight}
+                headerHeight={headerHeight}
                 lastRowSticky={lastRowSticky}
                 onCellFocused={onCellFocused}
                 onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}

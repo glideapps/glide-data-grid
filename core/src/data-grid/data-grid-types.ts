@@ -476,6 +476,13 @@ export class CompactSelection {
         return false;
     };
 
+    hasAll = (index: Slice): boolean => {
+        for (let x = index[0]; x < index[1]; x++) {
+            if (!this.hasIndex(x)) return false;
+        }
+        return true;
+    };
+
     get length(): number {
         let len = 0;
         for (const [start, end] of this.items) {

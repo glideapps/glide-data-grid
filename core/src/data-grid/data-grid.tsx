@@ -651,11 +651,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
             if (!isSameItem(args, hoveredRef.current)) {
                 onItemHovered?.(args);
-                setHoveredItem(args.kind === "out-of-bounds" ? undefined : args.location);
+                setHoveredItem(
+                    args.kind === "out-of-bounds" || args.kind === "group-header" ? undefined : args.location
+                );
                 hoveredRef.current = args;
             }
 
-            setHoveredOnEdge(args.isEdge && allowResize === true);
+            setHoveredOnEdge(args.kind === "header" && args.isEdge && allowResize === true);
 
             onMouseMove?.(ev);
         },
