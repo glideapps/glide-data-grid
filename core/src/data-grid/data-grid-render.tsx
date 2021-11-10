@@ -407,6 +407,10 @@ function drawGroups(
         x += boxWidth;
     }
 
+    ctx.beginPath();
+    ctx.moveTo(x + 0.5, 0);
+    ctx.lineTo(x + 0.5, trueHeaderHeight);
+
     ctx.moveTo(0, trueHeaderHeight + 0.5);
     ctx.lineTo(width, trueHeaderHeight + 0.5);
     ctx.strokeStyle = outerTheme.borderColor;
