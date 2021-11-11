@@ -115,9 +115,9 @@ Filtering and sorting are something you would have to implement with your data s
 
 The reason we don't add filtering/sorting in by default is that these are usually very application-specific, and can often also be implemented more efficiently in the data source, via a database query, for example.
 
-**Can it do frozen rows/columns?**
+**Can it do frozen columns?**
 
-Not yet, but there is some infrastructure for this internally already, and we accept PRs.
+Yes!
 
 **Can I render my own cells?**
 
