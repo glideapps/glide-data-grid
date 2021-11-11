@@ -215,6 +215,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 for (let i = cellXOffset; i !== col; i += dir) {
                     result.x += mappedColumns[i].width * dir;
                 }
+            } else {
+                for (let i = 0; i < col; i++) {
+                    result.x += mappedColumns[i].width;
+                }
             }
             result.width = mappedColumns[col].width + 1;
 
