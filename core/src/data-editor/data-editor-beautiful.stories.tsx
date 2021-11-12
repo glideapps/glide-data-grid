@@ -616,7 +616,7 @@ export const ObserveVisibleRegion: React.VFC = () => {
             description={
                 <>
                     <Description>
-                        The visible region can be observed using <PropName>onVisibileRegionChanged</PropName>
+                        The visible region can be observed using <PropName>onVisibleRegionChanged</PropName>
                     </Description>
                     <MoreInfo>
                         Then current visible region is x:<KeyName>{visibleRegion.x}</KeyName> y:
