@@ -1978,7 +1978,7 @@ export const FreezeColumns: React.VFC = () => {
             title="Freeze columns"
             description={
                 <Description>
-                    Columns at the start of your grid can be forzen in place by settings{" "}
+                    Columns at the start of your grid can be frozen in place by settings{" "}
                     <PropName>freezeColumns</PropName> to a number greater than 0.
                 </Description>
             }>
