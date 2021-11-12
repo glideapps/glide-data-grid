@@ -556,6 +556,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             if (ev.target === eventTarget && eventTarget !== null) {
                 const bounds = eventTarget.getBoundingClientRect();
                 if (clientX > bounds.left + eventTarget.clientWidth) return;
+                if (clientY > bounds.top + eventTarget.clientHeight) return;
             }
 
             const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
