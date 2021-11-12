@@ -160,7 +160,13 @@ export const InfiniteScroller: React.FC<Props> = p => {
                                 ref={setRefs}
                                 style={props}
                                 draggable={draggable}
-                                className={"dvn-scroller " + className}
+                                onDragStart={e => {
+                                    if (!draggable) {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                    }
+                                }}
+                                className={"dvn-scroller " + (className ?? "")}
                                 onScroll={onScroll}>
                                 <div className="dvn-scroll-inner">
                                     <div className="dvn-stack">{padders}</div>
