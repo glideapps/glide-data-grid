@@ -57,9 +57,18 @@ export function getEffectiveColumns(
         mappedCols = writable;
     }
 
-    const sticky = columns.filter(c => c.sticky);
+    const sticky: MappedGridColumn[] = [];
+    for (const c of columns) {
+        if (c.sticky) {
+            sticky.push(c);
+        } else {
+            break;
+        }
+    }
     if (sticky.length > 0) {
-        width -= sticky.map(c => c.width).reduce((pv, cv) => pv + cv, 0);
+        for (const c of sticky) {
+            width -= c.width;
+        }
     }
     let endIndex = cellXOffset;
     let curX = tx ?? 0;
