@@ -48,7 +48,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                 setDropCol(col);
             } else if (dragRow !== undefined && row !== undefined) {
                 setDragRowActive(true);
-                setDropRow(row);
+                setDropRow(Math.max(0, row));
             } else {
                 onItemHovered?.(args);
             }
