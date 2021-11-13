@@ -547,6 +547,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             let clientX: number;
             let clientY: number;
             if (ev instanceof MouseEvent) {
+                if (ev.button !== 0) return;
                 clientX = ev.clientX;
                 clientY = ev.clientY;
             } else {
@@ -595,6 +596,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             let clientX: number;
             let clientY: number;
             if (ev instanceof MouseEvent) {
+                if (ev.button !== 0) return;
                 clientX = ev.clientX;
                 clientY = ev.clientY;
             } else {
