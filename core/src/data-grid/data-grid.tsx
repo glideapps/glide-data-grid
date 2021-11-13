@@ -190,10 +190,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const scrollingStopRef = React.useRef(-1);
     React.useEffect(() => {
         if (!browserIsFirefox || window.devicePixelRatio === 1) return;
-        setScrolling(true);
+        // We don't want to go into scroll mode for a single repaint
+        if (scrollingStopRef.current !== -1) {
+            setScrolling(true);
+        }
         window.clearTimeout(scrollingStopRef.current);
         scrollingStopRef.current = window.setTimeout(() => {
-            console.log("Unset");
             setScrolling(false);
             scrollingStopRef.current = -1;
         }, 200);
@@ -490,7 +492,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         selectedColumns,
         selectedCell,
         dragAndDropState,
-        hoveredCol,
         prelightCells,
         scrolling,
     ]);
