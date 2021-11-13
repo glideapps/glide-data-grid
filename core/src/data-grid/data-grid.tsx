@@ -100,6 +100,7 @@ export interface DataGridProps {
     readonly experimental?: {
         readonly paddingRight?: number;
         readonly paddingBottom?: number;
+        readonly disableFirefoxRescaling?: boolean;
     };
 
     readonly headerIcons?: SpriteMap;
@@ -188,8 +189,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const spriteManager = React.useMemo(() => new SpriteManager(headerIcons), [headerIcons]);
 
     const scrollingStopRef = React.useRef(-1);
+    const disableFirefoxRescaling = p.experimental?.disableFirefoxRescaling === true;
     React.useEffect(() => {
-        if (!browserIsFirefox || window.devicePixelRatio === 1) return;
+        if (!browserIsFirefox || window.devicePixelRatio === 1 || disableFirefoxRescaling) return;
         // We don't want to go into scroll mode for a single repaint
         if (scrollingStopRef.current !== -1) {
             setScrolling(true);
@@ -199,7 +201,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             setScrolling(false);
             scrollingStopRef.current = -1;
         }, 200);
-    }, [cellYOffset, cellXOffset, translateX, translateY]);
+    }, [cellYOffset, cellXOffset, translateX, translateY, disableFirefoxRescaling]);
 
     React.useEffect(() => {
         const fn = async () => {
