@@ -27,6 +27,7 @@ import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
 import { drawCell, drawGrid, makeBuffers } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
+import { browserIsFirefox } from "../common/browser-detect";
 
 export interface DataGridProps {
     readonly width: number;
@@ -177,6 +178,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const imageLoader = React.useRef<ImageWindowLoader>();
     const canBlit = React.useRef<boolean>();
     const damageRegion = React.useRef<readonly Item[] | undefined>(undefined);
+    const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
     const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
     const [hoveredItem, setHoveredItem] = React.useState<Item | undefined>();
@@ -184,6 +186,18 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const [buffers] = React.useState(() => makeBuffers());
 
     const spriteManager = React.useMemo(() => new SpriteManager(headerIcons), [headerIcons]);
+
+    const scrollingStopRef = React.useRef(-1);
+    React.useEffect(() => {
+        if (!browserIsFirefox || window.devicePixelRatio === 1) return;
+        setScrolling(true);
+        window.clearTimeout(scrollingStopRef.current);
+        scrollingStopRef.current = window.setTimeout(() => {
+            console.log("Unset");
+            setScrolling(false);
+            scrollingStopRef.current = -1;
+        }, 200);
+    }, [cellYOffset, cellXOffset, translateX, translateY]);
 
     React.useEffect(() => {
         const fn = async () => {
@@ -420,7 +434,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             canBlit.current,
             damageRegion.current,
             hoverValues.current,
-            spriteManager
+            spriteManager,
+            scrolling
         );
     }, [
         buffers,
@@ -451,6 +466,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         drawCustomCell,
         prelightCells,
         spriteManager,
+        scrolling,
     ]);
 
     React.useEffect(() => {
@@ -476,6 +492,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         dragAndDropState,
         hoveredCol,
         prelightCells,
+        scrolling,
     ]);
 
     const lastDrawRef = React.useRef(draw);
@@ -891,6 +908,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     case GridCellKind.Image:
                     case GridCellKind.Bubble:
                         return cell.data.join(", ");
+                    case GridCellKind.Custom:
+                        return cell.copyData;
                     // While this would seemingly be better, it triggers the browser to actually
                     // download the image which we may not want. Sad :(
                     // case GridCellKind.Image:

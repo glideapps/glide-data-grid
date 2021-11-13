@@ -470,7 +470,8 @@ export class CompactSelection {
     };
 
     hasIndex = (index: number): boolean => {
-        for (const [start, end] of this.items) {
+        for (let i = 0; i < this.items.length; i++) {
+            const [start, end] = this.items[i];
             if (index >= start && index < end) return true;
         }
         return false;

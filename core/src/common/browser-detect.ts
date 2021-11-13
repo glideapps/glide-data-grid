@@ -16,6 +16,7 @@ function lazy<T>(fn: () => T) {
     return new Lazy(fn);
 }
 
+export const browserIsFirefox = userAgent.includes("Firefox");
 export const browserIsSafari =
     userAgent.indexOf("Mac OS") > -1 && userAgent.indexOf("Safari") > -1 && userAgent.indexOf("Chrome") < 0;
 

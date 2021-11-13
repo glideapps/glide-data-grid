@@ -663,6 +663,7 @@ function drawCells(
     hoverValues: HoverValues,
     outerTheme: Theme
 ): void {
+    let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     walkColumns(
         effectiveColumns,
         cellYOffset,
@@ -776,9 +777,12 @@ function drawCells(
                 );
 
                 ctx.globalAlpha = 1;
+                toDraw--;
+                return toDraw <= 0;
             });
 
             ctx.restore();
+            return toDraw <= 0;
         }
     );
 }
@@ -986,10 +990,11 @@ export function drawGrid(
     canBlit: boolean | undefined,
     damage: CellList | undefined,
     hoverValues: HoverValues,
-    spriteManager: SpriteManager
+    spriteManager: SpriteManager,
+    scrolling: boolean
 ) {
     if (width === 0 || height === 0) return;
-    const dpr = Math.ceil(window.devicePixelRatio ?? 1);
+    const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
 
     if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
         canvas.width = width * dpr;
@@ -1319,7 +1324,7 @@ export function drawGrid(
     }
 }
 
-type WalkRowsCallback = (drawY: number, row: number, rowHeight: number, isSticky: boolean) => void;
+type WalkRowsCallback = (drawY: number, row: number, rowHeight: number, isSticky: boolean) => boolean | void;
 
 function walkRowsInCol(
     startRow: number,
@@ -1348,7 +1353,9 @@ function walkRowsInCol(
         const isMovedStickyRow = doSticky && row === rows - 1;
 
         if (!isMovedStickyRow) {
-            cb(y, row, rh, doingSticky);
+            if (cb(y, row, rh, doingSticky) === true) {
+                break;
+            }
         }
 
         if (doingSticky) {
@@ -1359,7 +1366,13 @@ function walkRowsInCol(
     }
 }
 
-type WalkColsCallback = (col: MappedGridColumn, drawX: number, drawY: number, clipX: number, startRow: number) => void;
+type WalkColsCallback = (
+    col: MappedGridColumn,
+    drawX: number,
+    drawY: number,
+    clipX: number,
+    startRow: number
+) => boolean | void;
 
 function walkColumns(
     effectiveCols: readonly MappedGridColumn[],
@@ -1380,7 +1393,9 @@ function walkColumns(
             drawX = x + translateX;
         }
 
-        cb(c, drawX, drawY, clipX, cellYOffset);
+        if (cb(c, drawX, drawY, clipX, cellYOffset) === true) {
+            break;
+        }
 
         x += c.width;
         clipX += c.sticky ? c.width : 0;
