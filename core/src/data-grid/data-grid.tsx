@@ -176,7 +176,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
     const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
-    const [hoveredItem, setHoveredItem] = React.useState<Item | undefined>();
+    const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, readonly [number, number]] | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const [buffers] = React.useState(() => makeBuffers());
 
@@ -334,6 +334,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                         ctrlKey,
                         metaKey,
                         isTouch,
+                        localEventX: posX - bounds.x,
+                        localEventY: posY - bounds.y,
                     };
                 } else {
                     result = {
@@ -345,6 +347,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                         ctrlKey,
                         metaKey,
                         isTouch,
+                        localEventX: posX - bounds.x,
+                        localEventY: posY - bounds.y,
                     };
                 }
             } else {
@@ -359,6 +363,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     ctrlKey,
                     metaKey,
                     isTouch,
+                    localEventX: posX - bounds.x,
+                    localEventY: posY - bounds.y,
                 };
             }
             return result;
@@ -389,11 +395,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         );
     }
 
+    const [hoveredItem] = hoveredItemInfo ?? [];
     let hoveredCol: number | undefined;
     if (hoveredItem?.[0] !== undefined && hoveredItem[1] === undefined) {
         hoveredCol = hoveredItem[0];
     }
 
+    const hoverInfoRef = React.useRef(hoveredItemInfo);
+    hoverInfoRef.current = hoveredItemInfo;
     const draw = React.useCallback(() => {
         const canvas = ref.current;
         if (canvas === null) return;
@@ -432,6 +441,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             canBlit.current,
             damageRegion.current,
             hoverValues.current,
+            hoverInfoRef.current,
             spriteManager,
             scrolling
         );
@@ -672,17 +682,27 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
             if (!isSameItem(args, hoveredRef.current)) {
                 onItemHovered?.(args);
-                setHoveredItem(
-                    args.kind === "out-of-bounds" || args.kind === "group-header" ? undefined : args.location
+                setHoveredItemInfo(
+                    args.kind === "out-of-bounds" || args.kind === "group-header"
+                        ? undefined
+                        : [args.location, [args.localEventX, args.localEventY]]
                 );
                 hoveredRef.current = args;
+            } else if (args.kind === "cell" || args.kind === "header") {
+                const newInfo: typeof hoverInfoRef.current = [args.location, [args.localEventX, args.localEventY]];
+                setHoveredItemInfo(newInfo);
+                hoverInfoRef.current = newInfo;
+
+                if (args.kind === "cell") {
+                    imageLoaded([args.location]);
+                }
             }
 
             setHoveredOnEdge(args.kind === "header" && args.isEdge && allowResize === true);
 
             onMouseMove?.(ev);
         },
-        [getMouseArgsForPosition, onItemHovered, allowResize, onMouseMove]
+        [getMouseArgsForPosition, allowResize, onMouseMove, onItemHovered, imageLoaded]
     );
     useEventListener("mousemove", onMouseMoveImpl, window, true);
 
@@ -809,7 +829,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                                 theme,
                                 drawCustomCell,
                                 imageLoader.current,
-                                1
+                                1,
+                                undefined
                             );
                         }
 

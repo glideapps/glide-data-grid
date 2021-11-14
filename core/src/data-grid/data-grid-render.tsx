@@ -41,6 +41,8 @@ import { parseToRgba } from "./color-parser";
 // - It may be interesting to try creating "sufficient" canvases to just give each column its own canvas and compose
 //   that way. There may be significant gaints to be had there. This would also allow for fluid column DnD.
 
+type HoverInfo = readonly [readonly [number, number | undefined], readonly [number, number]];
+
 interface BlitData {
     readonly cellXOffset: number;
     readonly cellYOffset: number;
@@ -68,8 +70,15 @@ export function drawCell(
     theme: Theme,
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader | undefined,
-    hoverAmount: number
+    hoverAmount: number,
+    hoverInfo: HoverInfo | undefined
 ) {
+    let hoverX: number | undefined;
+    let hoverY: number | undefined;
+    if (hoverInfo !== undefined && hoverInfo[0][0] === sourceIndex && hoverInfo[0][1] === row) {
+        hoverX = hoverInfo[1][0];
+        hoverY = hoverInfo[1][1];
+    }
     const drawn = isInnerOnlyCell(cell)
         ? false
         : drawCustomCell?.({ ctx, cell, theme, rect: { x, y, width: w, height: h }, hoverAmount }) === true;
@@ -80,7 +89,20 @@ export function drawCell(
             drawTextCell(ctx, theme, cell.data, x, y, w, h, hoverAmount);
         } else if (cell.kind === GridCellKind.Boolean) {
             if (cell.data || cell.showUnchecked) {
-                drawBoolean(ctx, theme, cell.data, x, y, w, h, hoverAmount, highlighted, cell.allowEdit);
+                drawBoolean(
+                    ctx,
+                    theme,
+                    cell.data,
+                    x,
+                    y,
+                    w,
+                    h,
+                    hoverAmount,
+                    highlighted,
+                    cell.allowEdit,
+                    hoverX,
+                    hoverY
+                );
             }
         } else if (cell.kind === GridCellKind.Bubble) {
             drawBubbles(ctx, theme, cell.data, x, y, w, h, hoverAmount, highlighted);
@@ -653,6 +675,7 @@ function drawCells(
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader | undefined,
     hoverValues: HoverValues,
+    hoverInfo: HoverInfo | undefined,
     outerTheme: Theme
 ): void {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
@@ -765,7 +788,8 @@ function drawCells(
                     theme,
                     drawCustomCell,
                     imageLoader,
-                    hoverValue?.hoverAmount ?? 0
+                    hoverValue?.hoverAmount ?? 0,
+                    hoverInfo
                 );
 
                 ctx.globalAlpha = 1;
@@ -982,6 +1006,7 @@ export function drawGrid(
     canBlit: boolean | undefined,
     damage: CellList | undefined,
     hoverValues: HoverValues,
+    hoverInfo: HoverInfo | undefined,
     spriteManager: SpriteManager,
     scrolling: boolean
 ) {
@@ -1132,6 +1157,7 @@ export function drawGrid(
                 drawCustomCell,
                 imageLoader,
                 hoverValues,
+                hoverInfo,
                 theme
             );
         }
@@ -1239,6 +1265,7 @@ export function drawGrid(
         drawCustomCell,
         imageLoader,
         hoverValues,
+        hoverInfo,
         theme
     );
 

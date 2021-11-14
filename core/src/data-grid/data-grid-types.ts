@@ -14,6 +14,11 @@ export type GridMouseEventArgs =
     | GridMouseOutOfBoundsEventArgs
     | GridMouseGroupHeaderEventArgs;
 
+interface PositionableMouseEventArgs {
+    readonly localEventX: number;
+    readonly localEventY: number;
+}
+
 interface BaseGridMouseEventArgs {
     readonly shiftKey: boolean;
     readonly ctrlKey: boolean;
@@ -22,13 +27,13 @@ interface BaseGridMouseEventArgs {
     readonly isEdge: boolean;
 }
 
-interface GridMouseCellEventArgs extends BaseGridMouseEventArgs {
+interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "cell";
     readonly location: readonly [number, number];
     readonly bounds: Rectangle;
 }
 
-interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs {
+interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "header";
     readonly location: readonly [number, undefined];
     readonly bounds: Rectangle;
@@ -295,7 +300,7 @@ interface TextCell extends BaseGridCell {
     readonly readonly?: boolean;
 }
 
-interface NumberCell extends BaseGridCell {
+export interface NumberCell extends BaseGridCell {
     readonly kind: GridCellKind.Number;
     readonly displayData: string;
     readonly data: number | undefined;

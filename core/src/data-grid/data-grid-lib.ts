@@ -228,10 +228,14 @@ function drawCheckbox(
     y: number,
     width: number,
     height: number,
-    highlighted: boolean
+    highlighted: boolean,
+    hoverX: number = -20,
+    hoverY: number = -20
 ) {
     const centerX = x + width / 2;
     const centerY = y + height / 2;
+
+    const hovered = Math.abs(hoverX - width / 2) < 10 && Math.abs(hoverY - height / 2) < 10;
 
     if (checked) {
         ctx.beginPath();
@@ -255,7 +259,7 @@ function drawCheckbox(
         roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
 
         ctx.lineWidth = 1;
-        ctx.strokeStyle = theme.textLight;
+        ctx.strokeStyle = hovered ? theme.textMedium : theme.textLight;
         ctx.stroke();
     }
 }
@@ -372,13 +376,15 @@ export function drawBoolean(
     height: number,
     hoverAmount: number,
     highlighted: boolean,
-    canEdit: boolean
+    canEdit: boolean,
+    hoverX: number | undefined,
+    hoverY: number | undefined
 ) {
     const hoverEffect = 0.35;
 
     ctx.globalAlpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
 
-    drawCheckbox(ctx, theme, data, x, y, width, height, highlighted);
+    drawCheckbox(ctx, theme, data, x, y, width, height, highlighted, hoverX, hoverY);
 
     ctx.globalAlpha = 1;
 }
