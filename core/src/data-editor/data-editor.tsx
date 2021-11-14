@@ -19,13 +19,14 @@ import {
     Slice,
     isInnerOnlyCell,
     ProvideEditorCallback,
+    DrawCustomCellCallback,
 } from "../data-grid/data-grid-types";
 import copy from "copy-to-clipboard";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
 import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
 import { ThemeProvider, useTheme } from "styled-components";
-import { getDataEditorTheme } from "../common/styles";
+import { getDataEditorTheme, Theme } from "../common/styles";
 import { DataGridRef } from "../data-grid/data-grid";
 import noop from "lodash/noop";
 import { useEventListener } from "../common/utils";
@@ -41,6 +42,7 @@ type Props = Omit<
     | "cellYOffset"
     | "className"
     | "disabledRows"
+    | "drawCustomCell"
     | "enableGroups"
     | "firstColSticky"
     | "getCellContent"
@@ -97,6 +99,19 @@ export interface DataEditorProps extends Props {
 
     readonly selectedColumns?: DataGridSearchProps["selectedColumns"];
     readonly onSelectedColumnsChange?: (newColumns: CompactSelection) => void;
+
+    /**
+     * @deprecated Use drawCell instead. This will be removed in a future version.
+     */
+    readonly drawCustomCell?: (
+        ctx: CanvasRenderingContext2D,
+        cell: GridCell,
+        theme: Theme,
+        rect: Rectangle,
+        hoverAmount: number
+    ) => boolean;
+
+    readonly drawCell?: DrawCustomCellCallback;
 
     readonly gridSelection?: GridSelection;
     readonly onGridSelectionChange?: (newSelection: GridSelection | undefined) => void;
@@ -159,6 +174,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         enableDownfill = false,
         onRowAppended,
         onColumnMoved,
+        drawCell,
+        drawCustomCell,
         onDeleteRows,
         onDragStart,
         onPaste,
@@ -1469,6 +1486,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [rowMarkerOffset, verticalBorder]
     );
 
+    const drawCustomCellMangled: typeof drawCell = React.useMemo(() => {
+        if (drawCell !== undefined) {
+            return drawCell;
+        } else if (drawCustomCell !== undefined) {
+            return a => drawCustomCell(a.ctx, a.cell, a.theme, a.rect, a.hoverAmount);
+        }
+
+        return undefined;
+    }, [drawCell, drawCustomCell]);
+
     return (
         <ThemeProvider theme={mergedTheme}>
             <DataGridSearch
@@ -1478,6 +1505,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 cellXOffset={cellXOffset}
                 cellYOffset={cellYOffset}
                 columns={mangledCols}
+                drawCustomCell={drawCustomCellMangled}
                 disabledRows={disabledRows}
                 freezeColumns={mangledFreezeColumns}
                 getCellContent={getMangedCellContent}

@@ -2,13 +2,13 @@ import ImageWindowLoader from "../common/image-window-loader";
 import {
     GridSelection,
     isInnerOnlyCell,
-    GridCell,
     GridCellKind,
     GridColumn,
     InnerGridCell,
     InnerGridCellKind,
     Rectangle,
     CompactSelection,
+    DrawCustomCellCallback,
 } from "./data-grid-types";
 import { HoverValues } from "./animation-manager";
 import {
@@ -53,14 +53,6 @@ interface DragAndDropState {
     dest: number;
 }
 
-type DrawCustomCellCallback = (
-    ctx: CanvasRenderingContext2D,
-    cell: GridCell,
-    theme: Theme,
-    rect: Rectangle,
-    hoverAmount: number
-) => boolean;
-
 type CellList = readonly (readonly [number, number | undefined])[];
 
 export function drawCell(
@@ -80,7 +72,7 @@ export function drawCell(
 ) {
     const drawn = isInnerOnlyCell(cell)
         ? false
-        : drawCustomCell?.(ctx, cell, theme, { x, y, width: w, height: h }, hoverAmount) === true;
+        : drawCustomCell?.({ ctx, cell, theme, rect: { x, y, width: w, height: h }, hoverAmount }) === true;
     if (!drawn) {
         if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
             drawTextCell(ctx, theme, cell.displayData, x, y, w, h, hoverAmount);

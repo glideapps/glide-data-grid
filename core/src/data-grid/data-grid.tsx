@@ -11,7 +11,6 @@ import {
 } from "./data-grid-lib";
 import {
     GridColumn,
-    GridCell,
     GridCellKind,
     Rectangle,
     GridSelection,
@@ -21,6 +20,7 @@ import {
     InnerGridCell,
     InnerGridCellKind,
     CompactSelection,
+    DrawCustomCellCallback,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -84,13 +84,7 @@ export interface DataGridProps {
     readonly isDraggable?: boolean;
     readonly onDragStart?: (args: GridDragEventArgs) => void;
 
-    readonly drawCustomCell?: (
-        ctx: CanvasRenderingContext2D,
-        cell: GridCell,
-        theme: Theme,
-        rect: Rectangle,
-        hoverAmount: number
-    ) => boolean;
+    readonly drawCustomCell?: DrawCustomCellCallback;
 
     readonly dragAndDropState?: {
         src: number;

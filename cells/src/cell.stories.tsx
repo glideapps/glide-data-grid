@@ -126,27 +126,27 @@ function rand(): number {
 const possibleTags = [
     {
         tag: "Bug",
-        color: "#ff3c3c",
+        color: "#ff4d4d35",
     },
     {
         tag: "Feature",
-        color: "#25a1a5",
+        color: "#35f8ff35",
     },
     {
         tag: "Enhancement",
-        color: "#37ad41",
+        color: "#48ff5735",
     },
     {
         tag: "First Issue",
-        color: "#436fff",
+        color: "#436fff35",
     },
     {
         tag: "PR",
-        color: "#768617",
+        color: "#e0ff3235",
     },
     {
         tag: "Assigned",
-        color: "#ff1eec",
+        color: "#ff1eec35",
     },
 ];
 
@@ -204,7 +204,7 @@ export const CustomCells: React.VFC = () => {
                     rand();
                     return {
                         kind: GridCellKind.Custom,
-                        allowOverlay: false,
+                        allowOverlay: true,
                         copyData: "4",
                         data: {
                             kind: "tags-cell",
@@ -237,7 +237,6 @@ export const CustomCells: React.VFC = () => {
                     },
                 ]}
                 rows={500}
-                rowHeight={64}
             />
         </BeautifulWrapper>
     );

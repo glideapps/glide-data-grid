@@ -63,6 +63,14 @@ interface DragHandler {
 
 export type GridDragEventArgs = GridMouseEventArgs & DragHandler;
 
+export type DrawCustomCellCallback = (args: {
+    ctx: CanvasRenderingContext2D;
+    cell: GridCell;
+    theme: Theme;
+    rect: Rectangle;
+    hoverAmount: number;
+}) => boolean;
+
 export enum GridCellKind {
     Uri = "uri",
     Text = "text",
