@@ -125,7 +125,7 @@ const renderer: CustomCellRenderer<TagsCell> = {
     provideEditor: () => {
         // eslint-disable-next-line react/display-name
         return p => {
-            const { onChange, onFinishedEditing, value } = p;
+            const { onChange, value } = p;
             const { possibleTags, tags } = value.data;
             return (
                 <EditorWrap>

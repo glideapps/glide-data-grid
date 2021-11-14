@@ -6,6 +6,7 @@ import { useExtraCells } from ".";
 import { StarCell } from "./cells/star-cell";
 import { SparklineCell } from "./cells/sparkline-cell";
 import range from "lodash/range";
+import uniq from "lodash/uniq";
 import { TagsCell } from "./cells/tags-cell";
 
 const SimpleWrapper = styled.div`
@@ -209,12 +210,12 @@ export const CustomCells: React.VFC = () => {
                         data: {
                             kind: "tags-cell",
                             possibleTags: possibleTags,
-                            tags: [
+                            tags: uniq([
                                 possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
                                 possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
                                 possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
                                 possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
-                            ],
+                            ]),
                         },
                     } as TagsCell;
                 }}
