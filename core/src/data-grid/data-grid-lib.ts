@@ -135,27 +135,25 @@ export function getRowIndexForY(
     }
 }
 
-const textWidths: Record<string, Record<string, number> | undefined> = {};
+let metricsSize = 0;
+let metricsCache: Record<string, TextMetrics | undefined> = {};
 
-function measureTextWidth(s: string, ctx: CanvasRenderingContext2D): number {
+export function measureTextCached(s: string, ctx: CanvasRenderingContext2D): TextMetrics {
     // return ctx.measureText(s).width;
-    let map = textWidths[ctx.font];
-    if (map === undefined) {
-        map = {};
-        textWidths[ctx.font] = map;
+    const key = `${s}_${ctx.font}`;
+    let metrics = metricsCache[key];
+    if (metrics === undefined) {
+        metrics = ctx.measureText(s);
+        metricsCache[key] = metrics;
+        metricsSize++;
     }
 
-    let textWidth = map[s];
-    if (textWidth === undefined) {
-        textWidth = ctx.measureText(s).width;
-        map[s] = textWidth;
+    if (metricsSize > 10000) {
+        metricsCache = {};
+        metricsSize = 0;
     }
 
-    if (map.size > 10000) {
-        textWidths[ctx.font] = {};
-    }
-
-    return textWidth;
+    return metrics;
 }
 
 export function drawTextCell(
@@ -175,7 +173,7 @@ export function drawTextCell(
 
     ctx.fillStyle = overrideColor ?? theme.textDark;
     if (dir === "rtl") {
-        const textWidth = measureTextWidth(data, ctx);
+        const textWidth = measureTextCached(data, ctx).width;
         ctx.fillText(data, x + width - theme.cellHorizontalPadding - textWidth + 0.5, y + height / 2 + 4.5);
     } else {
         ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + height / 2 + 4.5);
@@ -230,10 +228,14 @@ function drawCheckbox(
     y: number,
     width: number,
     height: number,
-    highlighted: boolean
+    highlighted: boolean,
+    hoverX: number = -20,
+    hoverY: number = -20
 ) {
     const centerX = x + width / 2;
     const centerY = y + height / 2;
+
+    const hovered = Math.abs(hoverX - width / 2) < 10 && Math.abs(hoverY - height / 2) < 10;
 
     if (checked) {
         ctx.beginPath();
@@ -257,7 +259,7 @@ function drawCheckbox(
         roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
 
         ctx.lineWidth = 1;
-        ctx.strokeStyle = theme.textLight;
+        ctx.strokeStyle = hovered ? theme.textMedium : theme.textLight;
         ctx.stroke();
     }
 }
@@ -282,7 +284,7 @@ export function drawMarkerRowCell(
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
         const text = (index + 1).toString();
         ctx.font = `9px ${theme.fontFamily}`;
-        const w = measureTextWidth(text, ctx);
+        const w = measureTextCached(text, ctx).width;
 
         const start = x + (width - w) / 2;
         if (markerKind === "both") {
@@ -374,13 +376,15 @@ export function drawBoolean(
     height: number,
     hoverAmount: number,
     highlighted: boolean,
-    canEdit: boolean
+    canEdit: boolean,
+    hoverX: number | undefined,
+    hoverY: number | undefined
 ) {
     const hoverEffect = 0.35;
 
     ctx.globalAlpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
 
-    drawCheckbox(ctx, theme, data, x, y, width, height, highlighted);
+    drawCheckbox(ctx, theme, data, x, y, width, height, highlighted, hoverX, hoverY);
 
     ctx.globalAlpha = 1;
 }
@@ -406,7 +410,7 @@ export function drawBubbles(
     const renderBoxes: { x: number; width: number }[] = [];
     for (const s of data) {
         if (renderX > x + width) break;
-        const textWidth = measureTextWidth(s, ctx);
+        const textWidth = measureTextCached(s, ctx).width;
         renderBoxes.push({
             x: renderX,
             width: textWidth,
@@ -457,7 +461,7 @@ export function drawDrilldownCell(
     const renderBoxes: { x: number; width: number }[] = [];
     for (const el of data) {
         if (renderX > x + width) break;
-        const textWidth = measureTextWidth(el.text, ctx);
+        const textWidth = measureTextCached(el.text, ctx).width;
         let imgWidth = 0;
         if (el.img !== undefined) {
             const img = imageLoader.loadOrGetImage(el.img, col, row);

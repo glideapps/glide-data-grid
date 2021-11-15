@@ -6,6 +6,8 @@ import { useExtraCells } from ".";
 import { StarCell } from "./cells/star-cell";
 import { SparklineCell } from "./cells/sparkline-cell";
 import range from "lodash/range";
+import uniq from "lodash/uniq";
+import { TagsCell } from "./cells/tags-cell";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -122,6 +124,33 @@ function rand(): number {
     return (num = (num * 16807) % 2147483647) / 2147483647;
 }
 
+const possibleTags = [
+    {
+        tag: "Bug",
+        color: "#ff4d4d35",
+    },
+    {
+        tag: "Feature",
+        color: "#35f8ff35",
+    },
+    {
+        tag: "Enhancement",
+        color: "#48ff5735",
+    },
+    {
+        tag: "First Issue",
+        color: "#436fff35",
+    },
+    {
+        tag: "PR",
+        color: "#e0ff3235",
+    },
+    {
+        tag: "Assigned",
+        color: "#ff1eec35",
+    },
+];
+
 export const CustomCells: React.VFC = () => {
     const { drawCustomCell, provideEditor } = useExtraCells();
 
@@ -157,20 +186,38 @@ export const CustomCells: React.VFC = () => {
                                 yAxis: [-50, 50],
                             },
                         } as SparklineCell;
+                    } else if (col === 2) {
+                        num = row + 1;
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: false,
+                            copyData: "4",
+                            data: {
+                                kind: "sparkline-cell",
+                                values: range(0, 15).map(() => rand() * 100 - 50),
+                                color: row % 2 === 0 ? "#77c4c4" : "#D98466",
+                                graphKind: "bar",
+                                yAxis: [-50, 50],
+                            },
+                        } as SparklineCell;
                     }
                     num = row + 1;
+                    rand();
                     return {
                         kind: GridCellKind.Custom,
-                        allowOverlay: false,
+                        allowOverlay: true,
                         copyData: "4",
                         data: {
-                            kind: "sparkline-cell",
-                            values: range(0, 15).map(() => rand() * 100 - 50),
-                            color: row % 2 === 0 ? "#77c4c4" : "#D98466",
-                            graphKind: "bar",
-                            yAxis: [-50, 50],
+                            kind: "tags-cell",
+                            possibleTags: possibleTags,
+                            tags: uniq([
+                                possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
+                                possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
+                                possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
+                                possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
+                            ]),
                         },
-                    } as SparklineCell;
+                    } as TagsCell;
                 }}
                 columns={[
                     {
@@ -184,6 +231,10 @@ export const CustomCells: React.VFC = () => {
                     {
                         title: "Sparkline (bars)",
                         width: 150,
+                    },
+                    {
+                        title: "Tags",
+                        width: 250,
                     },
                 ]}
                 rows={500}

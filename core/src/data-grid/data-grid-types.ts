@@ -14,6 +14,11 @@ export type GridMouseEventArgs =
     | GridMouseOutOfBoundsEventArgs
     | GridMouseGroupHeaderEventArgs;
 
+interface PositionableMouseEventArgs {
+    readonly localEventX: number;
+    readonly localEventY: number;
+}
+
 interface BaseGridMouseEventArgs {
     readonly shiftKey: boolean;
     readonly ctrlKey: boolean;
@@ -22,13 +27,13 @@ interface BaseGridMouseEventArgs {
     readonly isEdge: boolean;
 }
 
-interface GridMouseCellEventArgs extends BaseGridMouseEventArgs {
+interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "cell";
     readonly location: readonly [number, number];
     readonly bounds: Rectangle;
 }
 
-interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs {
+interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "header";
     readonly location: readonly [number, undefined];
     readonly bounds: Rectangle;
@@ -62,6 +67,14 @@ interface DragHandler {
 }
 
 export type GridDragEventArgs = GridMouseEventArgs & DragHandler;
+
+export type DrawCustomCellCallback = (args: {
+    ctx: CanvasRenderingContext2D;
+    cell: GridCell;
+    theme: Theme;
+    rect: Rectangle;
+    hoverAmount: number;
+}) => boolean;
 
 export enum GridCellKind {
     Uri = "uri",
@@ -272,36 +285,36 @@ interface BaseGridCell {
     readonly style?: "normal" | "faded";
 }
 
-interface LoadingCell extends BaseGridCell {
+export interface LoadingCell extends BaseGridCell {
     readonly kind: GridCellKind.Loading;
 }
 
-interface ProtectedCell extends BaseGridCell {
+export interface ProtectedCell extends BaseGridCell {
     readonly kind: GridCellKind.Protected;
 }
 
-interface TextCell extends BaseGridCell {
+export interface TextCell extends BaseGridCell {
     readonly kind: GridCellKind.Text;
     readonly displayData: string;
     readonly data: string;
     readonly readonly?: boolean;
 }
 
-interface NumberCell extends BaseGridCell {
+export interface NumberCell extends BaseGridCell {
     readonly kind: GridCellKind.Number;
     readonly displayData: string;
     readonly data: number | undefined;
     readonly readonly?: boolean;
 }
 
-interface ImageCell extends BaseGridCell {
+export interface ImageCell extends BaseGridCell {
     readonly kind: GridCellKind.Image;
     readonly data: string[];
     readonly displayData?: string[]; // used for small images for faster scrolling
     readonly allowAdd: boolean;
 }
 
-interface BubbleCell extends BaseGridCell {
+export interface BubbleCell extends BaseGridCell {
     readonly kind: GridCellKind.Bubble;
     readonly data: string[];
 }
@@ -328,12 +341,12 @@ export interface DrilldownCellData {
     readonly img?: string;
 }
 
-interface DrilldownCell extends BaseGridCell {
+export interface DrilldownCell extends BaseGridCell {
     readonly kind: GridCellKind.Drilldown;
     readonly data: readonly DrilldownCellData[];
 }
 
-interface BooleanCell extends BaseGridCell {
+export interface BooleanCell extends BaseGridCell {
     readonly kind: GridCellKind.Boolean;
     readonly data: boolean;
     readonly showUnchecked: boolean;
@@ -341,18 +354,18 @@ interface BooleanCell extends BaseGridCell {
     readonly allowOverlay: false;
 }
 
-interface RowIDCell extends BaseGridCell {
+export interface RowIDCell extends BaseGridCell {
     readonly kind: GridCellKind.RowID;
     readonly data: string;
 }
 
-interface MarkdownCell extends BaseGridCell {
+export interface MarkdownCell extends BaseGridCell {
     readonly kind: GridCellKind.Markdown;
     readonly data: string;
     readonly readonly?: boolean;
 }
 
-interface UriCell extends BaseGridCell {
+export interface UriCell extends BaseGridCell {
     readonly kind: GridCellKind.Uri;
     readonly data: string;
     readonly readonly?: boolean;
@@ -363,14 +376,14 @@ export enum InnerGridCellKind {
     Marker = "marker",
 }
 
-interface NewRowCell extends BaseGridCell {
+export interface NewRowCell extends BaseGridCell {
     readonly kind: InnerGridCellKind.NewRow;
     readonly hint: string;
     readonly isFirst: boolean;
     readonly allowOverlay: false;
 }
 
-interface MarkerCell extends BaseGridCell {
+export interface MarkerCell extends BaseGridCell {
     readonly kind: InnerGridCellKind.Marker;
     readonly allowOverlay: false;
     readonly row: number;

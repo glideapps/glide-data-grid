@@ -2,32 +2,19 @@ import ImageWindowLoader from "../common/image-window-loader";
 import {
     GridSelection,
     isInnerOnlyCell,
-    GridCell,
     GridCellKind,
     GridColumn,
     InnerGridCell,
-    InnerGridCellKind,
     Rectangle,
     CompactSelection,
+    DrawCustomCellCallback,
 } from "./data-grid-types";
 import { HoverValues } from "./animation-manager";
-import {
-    drawBoolean,
-    drawBubbles,
-    drawDrilldownCell,
-    drawImage,
-    drawMarkerRowCell,
-    drawNewRowCell,
-    drawProtectedCell,
-    drawTextCell,
-    getEffectiveColumns,
-    getStickyWidth,
-    MappedGridColumn,
-    roundedPoly,
-} from "./data-grid-lib";
+import { getEffectiveColumns, getStickyWidth, MappedGridColumn, roundedPoly } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
 import { parseToRgba } from "./color-parser";
+import { CellRenderers } from "./cells";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when scrolling
@@ -41,6 +28,8 @@ import { parseToRgba } from "./color-parser";
 // - It may be interesting to try creating "sufficient" canvases to just give each column its own canvas and compose
 //   that way. There may be significant gaints to be had there. This would also allow for fluid column DnD.
 
+type HoverInfo = readonly [readonly [number, number | undefined], readonly [number, number]];
+
 interface BlitData {
     readonly cellXOffset: number;
     readonly cellYOffset: number;
@@ -53,21 +42,13 @@ interface DragAndDropState {
     dest: number;
 }
 
-type DrawCustomCellCallback = (
-    ctx: CanvasRenderingContext2D,
-    cell: GridCell,
-    theme: Theme,
-    rect: Rectangle,
-    hoverAmount: number
-) => boolean;
-
 type CellList = readonly (readonly [number, number | undefined])[];
 
 export function drawCell(
     ctx: CanvasRenderingContext2D,
     row: number,
     cell: InnerGridCell,
-    sourceIndex: number,
+    col: number,
     x: number,
     y: number,
     w: number,
@@ -75,48 +56,22 @@ export function drawCell(
     highlighted: boolean,
     theme: Theme,
     drawCustomCell: DrawCustomCellCallback | undefined,
-    imageLoader: ImageWindowLoader | undefined,
-    hoverAmount: number
+    imageLoader: ImageWindowLoader,
+    hoverAmount: number,
+    hoverInfo: HoverInfo | undefined
 ) {
+    let hoverX: number | undefined;
+    let hoverY: number | undefined;
+    if (hoverInfo !== undefined && hoverInfo[0][0] === col && hoverInfo[0][1] === row) {
+        hoverX = hoverInfo[1][0];
+        hoverY = hoverInfo[1][1];
+    }
     const drawn = isInnerOnlyCell(cell)
         ? false
-        : drawCustomCell?.(ctx, cell, theme, { x, y, width: w, height: h }, hoverAmount) === true;
-    if (!drawn) {
-        if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
-            drawTextCell(ctx, theme, cell.displayData, x, y, w, h, hoverAmount);
-        } else if (cell.kind === GridCellKind.Markdown || cell.kind === GridCellKind.Uri) {
-            drawTextCell(ctx, theme, cell.data, x, y, w, h, hoverAmount);
-        } else if (cell.kind === GridCellKind.Boolean) {
-            if (cell.data || cell.showUnchecked) {
-                drawBoolean(ctx, theme, cell.data, x, y, w, h, hoverAmount, highlighted, cell.allowEdit);
-            }
-        } else if (cell.kind === GridCellKind.Bubble) {
-            drawBubbles(ctx, theme, cell.data, x, y, w, h, hoverAmount, highlighted);
-        } else if (cell.kind === GridCellKind.Image && imageLoader !== undefined) {
-            drawImage(
-                ctx,
-                theme,
-                cell.displayData ?? cell.data,
-                sourceIndex,
-                row,
-                x,
-                y,
-                w,
-                h,
-                hoverAmount,
-                imageLoader
-            );
-        } else if (cell.kind === GridCellKind.RowID) {
-            drawTextCell(ctx, theme, cell.data, x, y, w, h, hoverAmount, theme.textLight);
-        } else if (cell.kind === GridCellKind.Protected) {
-            drawProtectedCell(ctx, theme, x, y, w, h, hoverAmount, !highlighted);
-        } else if (cell.kind === GridCellKind.Drilldown && imageLoader !== undefined) {
-            drawDrilldownCell(ctx, theme, cell.data, sourceIndex, row, x, y, w, h, hoverAmount, imageLoader);
-        } else if (cell.kind === InnerGridCellKind.NewRow) {
-            drawNewRowCell(ctx, theme, cell.hint, cell.isFirst, x, y, w, h, hoverAmount);
-        } else if (cell.kind === InnerGridCellKind.Marker) {
-            drawMarkerRowCell(ctx, theme, cell.row, cell.checked, cell.markerKind, x, y, w, h, hoverAmount);
-        }
+        : drawCustomCell?.({ ctx, cell, theme, rect: { x, y, width: w, height: h }, hoverAmount }) === true;
+    if (!drawn && cell.kind !== GridCellKind.Custom) {
+        const r = CellRenderers[cell.kind];
+        r.render(ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader);
     }
 }
 
@@ -659,8 +614,9 @@ function drawCells(
     selectedColumns: CompactSelection,
     prelightCells: CellList | undefined,
     drawCustomCell: DrawCustomCellCallback | undefined,
-    imageLoader: ImageWindowLoader | undefined,
+    imageLoader: ImageWindowLoader,
     hoverValues: HoverValues,
+    hoverInfo: HoverInfo | undefined,
     outerTheme: Theme
 ): void {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
@@ -773,7 +729,8 @@ function drawCells(
                     theme,
                     drawCustomCell,
                     imageLoader,
-                    hoverValue?.hoverAmount ?? 0
+                    hoverValue?.hoverAmount ?? 0,
+                    hoverInfo
                 );
 
                 ctx.globalAlpha = 1;
@@ -985,11 +942,12 @@ export function drawGrid(
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
     drawCustomCell: DrawCustomCellCallback | undefined,
     prelightCells: CellList | undefined,
-    imageLoader: ImageWindowLoader | undefined,
+    imageLoader: ImageWindowLoader,
     lastBlitData: React.MutableRefObject<BlitData>,
     canBlit: boolean | undefined,
     damage: CellList | undefined,
     hoverValues: HoverValues,
+    hoverInfo: HoverInfo | undefined,
     spriteManager: SpriteManager,
     scrolling: boolean
 ) {
@@ -1140,6 +1098,7 @@ export function drawGrid(
                 drawCustomCell,
                 imageLoader,
                 hoverValues,
+                hoverInfo,
                 theme
             );
         }
@@ -1152,7 +1111,7 @@ export function drawGrid(
         targetCtx.restore();
         overlayCtx.restore();
 
-        if (doHeaders) {
+        if (doHeaders && headerHeight > 0) {
             targetCtx.imageSmoothingEnabled = false;
             targetCtx.drawImage(overlayCanvas, 0, 0);
             targetCtx.imageSmoothingEnabled = false;
@@ -1247,6 +1206,7 @@ export function drawGrid(
         drawCustomCell,
         imageLoader,
         hoverValues,
+        hoverInfo,
         theme
     );
 

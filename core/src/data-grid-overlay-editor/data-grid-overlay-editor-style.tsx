@@ -8,6 +8,9 @@ interface Props {
 export const DataGridOverlayEditorStyle = styled.div<Props>`
     position: absolute;
 
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     box-sizing: border-box;
 
     --overlay-top: ${p => p.targetRect.y}px;
@@ -46,9 +49,9 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
     .clip-region {
         display: flex;
         flex-direction: column;
-        border-radius: 2px;
         overflow-y: auto;
         overflow-x: hidden;
+        border-radius: 2px;
         input {
             width: 100%;
 
