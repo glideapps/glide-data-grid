@@ -138,6 +138,14 @@ export function getRowIndexForY(
 let metricsSize = 0;
 let metricsCache: Record<string, TextMetrics | undefined> = {};
 
+async function clearCacheOnLoad() {
+    await document.fonts.ready;
+    metricsSize = 0;
+    metricsCache = {};
+}
+
+void clearCacheOnLoad();
+
 export function measureTextCached(s: string, ctx: CanvasRenderingContext2D): TextMetrics {
     // return ctx.measureText(s).width;
     const key = `${s}_${ctx.font}`;

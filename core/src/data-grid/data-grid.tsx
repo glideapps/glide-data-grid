@@ -506,6 +506,17 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         lastDrawRef.current = draw;
     }, [draw]);
 
+    React.useEffect(() => {
+        const fn = async () => {
+            await document.fonts.ready;
+            const prev = canBlit.current;
+            canBlit.current = false;
+            lastDrawRef.current();
+            canBlit.current = prev;
+        };
+        void fn();
+    }, []);
+
     const damageInternal = React.useCallback((locations: readonly (readonly [number, number])[]) => {
         const last = canBlit.current;
         canBlit.current = false;
