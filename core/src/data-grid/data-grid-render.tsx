@@ -1111,7 +1111,7 @@ export function drawGrid(
         targetCtx.restore();
         overlayCtx.restore();
 
-        if (doHeaders) {
+        if (doHeaders && headerHeight > 0) {
             targetCtx.imageSmoothingEnabled = false;
             targetCtx.drawImage(overlayCanvas, 0, 0);
             targetCtx.imageSmoothingEnabled = false;
