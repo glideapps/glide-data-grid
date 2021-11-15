@@ -54,10 +54,19 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         },
         [onFinishEditing, tempValue]
     );
-
     const targetValue = tempValue ?? content;
+
+    const CustomEditor = React.useMemo(() => {
+        return provideEditor?.(content);
+    }, [content, provideEditor]);
+
+    const CellEditor = React.useMemo(() => {
+        if (content.kind === GridCellKind.Custom) return undefined;
+        const renderer = CellRenderers[content.kind];
+        return renderer.getEditor?.(content);
+    }, [content]);
+
     let editor: React.ReactNode;
-    const CustomEditor = provideEditor?.(targetValue);
     if (CustomEditor !== undefined) {
         editor = (
             <CustomEditor
@@ -67,24 +76,20 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 onFinishedEditing={onClickOutside}
             />
         );
-    } else if (targetValue.kind !== GridCellKind.Custom) {
-        const renderer = CellRenderers[targetValue.kind];
-        const CellEditor = renderer.getEditor?.(targetValue);
-        if (CellEditor !== undefined) {
-            editor = (
-                <CellEditor
-                    forceEditMode={forceEditMode}
-                    isHighlighted={highlight}
-                    onChange={setTempValue as any}
-                    value={targetValue}
-                    onFinishedEditing={onClickOutside}
-                    onKeyDown={onKeyDown}
-                    target={target}
-                    imageEditorOverride={imageEditorOverride}
-                    markdownDivCreateNode={markdownDivCreateNode}
-                />
-            );
-        }
+    } else if (CellEditor !== undefined) {
+        editor = (
+            <CellEditor
+                forceEditMode={forceEditMode}
+                isHighlighted={highlight}
+                onChange={setTempValue as any}
+                value={targetValue}
+                onFinishedEditing={onClickOutside}
+                onKeyDown={onKeyDown}
+                target={target}
+                imageEditorOverride={imageEditorOverride}
+                markdownDivCreateNode={markdownDivCreateNode}
+            />
+        );
     }
 
     const f = (ev: React.MouseEvent) => {
