@@ -28,6 +28,7 @@ import makeRange from "lodash/range";
 import { drawCell, drawGrid, makeBuffers } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
 import { browserIsFirefox } from "../common/browser-detect";
+import { CellRenderers } from "./cells";
 
 export interface DataGridProps {
     readonly width: number;
@@ -170,7 +171,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const cellXOffset = Math.max(freezeColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
-    const imageLoader = React.useRef<ImageWindowLoader>();
+    const imageLoader = React.useMemo<ImageWindowLoader>(() => new ImageWindowLoader(), []);
     const canBlit = React.useRef<boolean>();
     const damageRegion = React.useRef<readonly Item[] | undefined>(undefined);
     const [scrolling, setScrolling] = React.useState<boolean>(false);
@@ -436,7 +437,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             getCellContent,
             drawCustomCell,
             prelightCells,
-            imageLoader.current,
+            imageLoader,
             lastBlitData,
             canBlit.current,
             damageRegion.current,
@@ -469,6 +470,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         isResizing,
         selectedCell,
         lastRowSticky,
+        imageLoader,
         rows,
         getCellContent,
         drawCustomCell,
@@ -476,10 +478,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         spriteManager,
         scrolling,
     ]);
-
-    React.useEffect(() => {
-        imageLoader.current = new ImageWindowLoader();
-    }, []);
 
     canBlit.current = canBlit.current !== undefined;
     React.useEffect(() => {
@@ -508,7 +506,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         lastDrawRef.current = draw;
     }, [draw]);
 
-    const imageLoaded = React.useCallback((locations: readonly (readonly [number, number])[]) => {
+    const damageInternal = React.useCallback((locations: readonly (readonly [number, number])[]) => {
         const last = canBlit.current;
         canBlit.current = false;
         damageRegion.current = locations;
@@ -517,16 +515,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         canBlit.current = last;
     }, []);
 
-    const damage = React.useCallback((cells: DamageUpdateList) => {
-        const last = canBlit.current;
-        canBlit.current = false;
-        damageRegion.current = cells.map(x => x.cell);
-        lastDrawRef.current();
-        damageRegion.current = undefined;
-        canBlit.current = last;
-    }, []);
+    const damage = React.useCallback(
+        (cells: DamageUpdateList) => {
+            damageInternal(cells.map(x => x.cell));
+        },
+        [damageInternal]
+    );
 
-    imageLoader.current?.setCallback(imageLoaded);
+    imageLoader.setCallback(damageInternal);
 
     const [hCol, hRow] = hoveredItem ?? [];
     const headerHovered = hCol !== undefined && hRow === undefined;
@@ -670,8 +666,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
     const animationManager = React.useRef(new AnimationManager(onAnimationFrame));
     React.useEffect(() => {
-        animationManager.current.setHovered(hoveredItem);
-    }, [hoveredItem]);
+        const am = animationManager.current;
+        if (hoveredItem === undefined || hoveredItem[1] === undefined) {
+            am.setHovered(hoveredItem);
+            return;
+        }
+        const cell = getCellContent(hoveredItem as [number, number]);
+        am.setHovered(
+            cell.kind === GridCellKind.Custom || CellRenderers[cell.kind].needsHover ? hoveredItem : undefined
+        );
+    }, [getCellContent, hoveredItem]);
 
     const hoveredRef = React.useRef<GridMouseEventArgs>();
     const onMouseMoveImpl = React.useCallback(
@@ -694,7 +698,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 hoverInfoRef.current = newInfo;
 
                 if (args.kind === "cell") {
-                    imageLoaded([args.location]);
+                    const toCheck = getCellContent(args.location);
+                    if (toCheck.kind === GridCellKind.Custom || CellRenderers[toCheck.kind].needsHoverPosition) {
+                        damageInternal([args.location]);
+                    }
                 }
             }
 
@@ -702,7 +709,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
             onMouseMove?.(ev);
         },
-        [getMouseArgsForPosition, allowResize, onMouseMove, onItemHovered, imageLoaded]
+        [getMouseArgsForPosition, allowResize, onMouseMove, onItemHovered, getCellContent, damageInternal]
     );
     useEventListener("mousemove", onMouseMoveImpl, window, true);
 
@@ -828,7 +835,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                                 false,
                                 theme,
                                 drawCustomCell,
-                                imageLoader.current,
+                                imageLoader,
                                 1,
                                 undefined
                             );
@@ -854,7 +861,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 event.preventDefault();
             }
         },
-        [isDraggable, getMouseArgsForPosition, onDragStart, getBoundsForItem, theme, getCellContent, drawCustomCell]
+        [
+            isDraggable,
+            getMouseArgsForPosition,
+            onDragStart,
+            getBoundsForItem,
+            theme,
+            getCellContent,
+            drawCustomCell,
+            imageLoader,
+        ]
     );
     useEventListener("dragstart", onDragStartImpl, eventTargetRef?.current ?? null, false, false);
 
@@ -913,28 +929,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
 
             const getRowData = (cell: InnerGridCell) => {
-                switch (cell.kind) {
-                    case GridCellKind.Boolean:
-                    case GridCellKind.Markdown:
-                    case GridCellKind.Number:
-                    case GridCellKind.RowID:
-                    case GridCellKind.Text:
-                    case GridCellKind.Uri:
-                        return cell.data?.toString() ?? "";
-                    case GridCellKind.Drilldown:
-                        return cell.data.map(d => d.text).join(", ");
-                    case GridCellKind.Image:
-                    case GridCellKind.Bubble:
-                        return cell.data.join(", ");
-                    case GridCellKind.Custom:
-                        return cell.copyData;
-                    // While this would seemingly be better, it triggers the browser to actually
-                    // download the image which we may not want. Sad :(
-                    // case GridCellKind.Image:
-                    //     return cell.data.map((i, index) => <img key={index} src={i} />);
+                if (cell.kind === GridCellKind.Custom) {
+                    return cell.copyData;
+                } else {
+                    return CellRenderers[cell.kind].getAccessibilityString(cell);
                 }
-
-                return "";
             };
 
             return (

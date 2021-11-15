@@ -28,8 +28,8 @@ import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/ima
 import { ThemeProvider, useTheme } from "styled-components";
 import { getDataEditorTheme, Theme } from "../common/styles";
 import { DataGridRef } from "../data-grid/data-grid";
-import noop from "lodash/noop";
 import { useEventListener } from "../common/utils";
+import { CellRenderers } from "../data-grid/cells";
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
@@ -151,7 +151,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
     const scrollTimer = React.useRef<number>();
     const lastSent = React.useRef<[number, number]>();
-    const [forceDraw, setForceDraw] = React.useState<number>(0);
 
     const {
         isDraggable,
@@ -285,7 +284,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ([col, row]: readonly [number, number]): InnerGridCell => {
             const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
             const isRowMarkerCol = col === 0 && hasRowMarkers;
-            noop(forceDraw);
             if (isRowMarkerCol) {
                 if (isTrailing) {
                     return {
@@ -318,7 +316,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             showTrailingBlankRow,
             mangledRows,
             hasRowMarkers,
-            forceDraw,
             selectedRows,
             rowMarkers,
             rowMarkerOffset,
@@ -365,15 +362,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     highlight: initialValue === undefined,
                     forceEditMode: initialValue !== undefined,
                 });
-            } else if (c.kind === GridCellKind.Boolean && c.allowEdit) {
-                mangledOnCellEdited?.([col, row], {
-                    ...c,
-                    data: !c.data,
-                });
-                setForceDraw(cv => (cv + 1) % 100); // I can't do math with triple digits so I always avoid it
             }
         },
-        [getMangedCellContent, mangledOnCellEdited, gridSelection]
+        [getMangedCellContent, gridSelection]
     );
 
     const focusOnRowFromTrailingBlankRow = React.useCallback(
@@ -670,12 +661,33 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             const [col, row] = args.location;
             const [selectedCol, selectedRow] = gridSelection.cell;
             const [prevCol, prevRow] = mouse.previousSelection.cell;
+            const c = getMangedCellContent([col, row]);
+            const r = c.kind === GridCellKind.Custom ? undefined : CellRenderers[c.kind];
+            if (r !== undefined && r.onClick !== undefined) {
+                const newVal = r.onClick(c, args.localEventX, args.localEventY, args.bounds);
+                if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
+                    mangledOnCellEdited(args.location, newVal);
+                    gridRef.current?.damage([
+                        {
+                            cell: args.location,
+                        },
+                    ]);
+                }
+            }
             if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
                 reselect(args.bounds);
             }
             onCellClicked?.([args.location[0] - rowMarkerOffset, args.location[1]]);
         },
-        [gridSelection, onCellClicked, onHeaderClicked, reselect, rowMarkerOffset]
+        [
+            getMangedCellContent,
+            gridSelection,
+            mangledOnCellEdited,
+            onCellClicked,
+            onHeaderClicked,
+            reselect,
+            rowMarkerOffset,
+        ]
     );
 
     const onHeaderMenuClickInner = React.useCallback(
