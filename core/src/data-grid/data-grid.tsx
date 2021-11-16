@@ -32,20 +32,6 @@ import { browserIsFirefox } from "../common/browser-detect";
 import { CellRenderers } from "./cells";
 import { CellList } from "..";
 
-export function usePreviousValue<T>(current: T): T | undefined {
-    const prevRef = React.useRef<T>();
-    const currentRef = React.useRef<T>();
-
-    if (current !== currentRef.current) {
-        prevRef.current = currentRef.current;
-        currentRef.current = current;
-    }
-
-    return prevRef.current;
-}
-
-const emptyArray: CellList = [];
-
 export interface DataGridProps {
     readonly width: number;
     readonly height: number;
@@ -465,15 +451,19 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             scrolling
         );
 
-        if (damageRegion.current === undefined && canBlit.current === false) {
-            setAnimationList(result ?? emptyArray);
-        } else if (damageRegion.current !== undefined) {
+        if (damageRegion.current !== undefined) {
             setAnimationList(cv => {
-                if (cv === undefined) return result ?? emptyArray;
-                const undamagedAnimating = cv.filter(c => damageRegion.current?.includes(c) !== true);
-                if (undamagedAnimating.length === 0 && result?.length === 0) return emptyArray;
-                return union(result, undamagedAnimating);
+                if (cv.length === 0) return result ?? cv;
+                const toRemove = cv.filter(
+                    c =>
+                        damageRegion.current?.find(x => c[0] === x[0] && c[1] === x[1]) !== undefined &&
+                        result?.filter(x => c[0] === x[0] && c[1] === x[1]) === undefined
+                );
+                if (toRemove.length === 0) return cv;
+                return cv.filter(c => !toRemove.includes(c));
             });
+        } else if (damageRegion.current === undefined && canBlit.current === false) {
+            setAnimationList(cv => result ?? cv);
         } else if (result !== undefined && result.length > 0) {
             setAnimationList(cv => union(cv, result));
         }
@@ -557,15 +547,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         canBlit.current = last;
     }, []);
 
-    const previousAnimationList = usePreviousValue(animationList);
     React.useEffect(() => {
-        console.log("Animate");
-        const toDamage = union(animationList, previousAnimationList);
-        if (toDamage.length === 0) return;
-        window.requestAnimationFrame(() => {
-            damageInternal(toDamage);
-        });
-    }, [animationList, damageInternal, previousAnimationList]);
+        if (animationList.length === 0) return;
+        let cb: number;
+        const frame = () => {
+            damageInternal(animationList);
+            cb = window.requestAnimationFrame(frame);
+        };
+        cb = window.requestAnimationFrame(frame);
+        return () => window.cancelAnimationFrame(cb);
+    }, [animationList, damageInternal]);
 
     const damage = React.useCallback(
         (cells: DamageUpdateList) => {
