@@ -405,15 +405,23 @@ export const ResizableColumns: React.VFC = () => {
         <BeautifulWrapper
             title="Resizable columns"
             description={
-                <Description>
-                    You can resize columns by dragging their edges, as long as you respond to the{" "}
-                    <PropName>onColumnResized</PropName> prop.
-                </Description>
+                <>
+                    <Description>
+                        You can resize columns by dragging their edges, as long as you respond to the{" "}
+                        <PropName>onColumnResized</PropName> prop.
+                    </Description>
+                    <MoreInfo>
+                        By setting the <PropName>overscrollX</PropName> property extra space can be allocated at the end
+                        of the grid to allow for easier resizing of the final column. You can highlight multiple columns
+                        to resize them all at once.
+                    </MoreInfo>
+                </>
             }>
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
+                overscrollX={200}
                 rows={50}
                 onColumnResized={onColumnResized}
             />
