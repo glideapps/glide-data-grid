@@ -273,6 +273,8 @@ export type GridCell =
 type InnerOnlyGridCell = NewRowCell | MarkerCell;
 export type InnerGridCell = GridCell | InnerOnlyGridCell;
 
+export type CellList = readonly (readonly [number, number | undefined])[];
+
 export interface Rectangle {
     x: number;
     y: number;
@@ -282,6 +284,7 @@ export interface Rectangle {
 
 interface BaseGridCell {
     readonly allowOverlay: boolean;
+    readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
 }
 

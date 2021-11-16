@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
 import { ImageOverlayEditor } from "../..";
-import { drawImage } from "../data-grid-lib";
+import { drawImage, drawWithLastUpdate } from "../data-grid-lib";
 import { GridCellKind, ImageCell } from "../data-grid-types";
 import { InternalCellRenderer } from "./cell-types";
 
@@ -11,7 +11,9 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
     needsHover: false,
     needsHoverPosition: false,
     render: (ctx, theme, col, row, cell, x, y, w, h, _highlighted, hoverAmount, _hoverX, _hoverY, imageLoader) =>
-        drawImage(ctx, theme, cell.displayData ?? cell.data, col, row, x, y, w, h, hoverAmount, imageLoader),
+        drawWithLastUpdate(ctx, cell.lastUpdated, theme, x, y, w, h, () =>
+            drawImage(ctx, theme, cell.displayData ?? cell.data, col, row, x, y, w, h, hoverAmount, imageLoader)
+        ),
     onDelete: c => ({
         ...c,
         data: [],

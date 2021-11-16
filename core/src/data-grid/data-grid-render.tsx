@@ -8,6 +8,7 @@ import {
     Rectangle,
     CompactSelection,
     DrawCustomCellCallback,
+    CellList,
 } from "./data-grid-types";
 import { HoverValues } from "./animation-manager";
 import { getEffectiveColumns, getStickyWidth, MappedGridColumn, roundedPoly } from "./data-grid-lib";
@@ -42,8 +43,6 @@ interface DragAndDropState {
     dest: number;
 }
 
-type CellList = readonly (readonly [number, number | undefined])[];
-
 export function drawCell(
     ctx: CanvasRenderingContext2D,
     row: number,
@@ -59,7 +58,7 @@ export function drawCell(
     imageLoader: ImageWindowLoader,
     hoverAmount: number,
     hoverInfo: HoverInfo | undefined
-) {
+): boolean {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
     if (hoverInfo !== undefined && hoverInfo[0][0] === col && hoverInfo[0][1] === row) {
@@ -71,8 +70,9 @@ export function drawCell(
         : drawCustomCell?.({ ctx, cell, theme, rect: { x, y, width: w, height: h }, hoverAmount }) === true;
     if (!drawn && cell.kind !== GridCellKind.Custom) {
         const r = CellRenderers[cell.kind];
-        r.render(ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader);
+        return r.render(ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader);
     }
+    return false;
 }
 
 function blitLastFrame(
@@ -618,8 +618,9 @@ function drawCells(
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
     outerTheme: Theme
-): void {
+): CellList {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
+    const result: [number, number][] = [];
     walkColumns(
         effectiveColumns,
         cellYOffset,
@@ -716,22 +717,26 @@ function drawCells(
 
                 const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
 
-                drawCell(
-                    ctx,
-                    row,
-                    cell,
-                    c.sourceIndex,
-                    drawX,
-                    drawY,
-                    c.width,
-                    rh,
-                    highlighted,
-                    theme,
-                    drawCustomCell,
-                    imageLoader,
-                    hoverValue?.hoverAmount ?? 0,
-                    hoverInfo
-                );
+                if (
+                    drawCell(
+                        ctx,
+                        row,
+                        cell,
+                        c.sourceIndex,
+                        drawX,
+                        drawY,
+                        c.width,
+                        rh,
+                        highlighted,
+                        theme,
+                        drawCustomCell,
+                        imageLoader,
+                        hoverValue?.hoverAmount ?? 0,
+                        hoverInfo
+                    )
+                ) {
+                    result.push([c.sourceIndex, row]);
+                }
 
                 ctx.globalAlpha = 1;
                 toDraw--;
@@ -742,6 +747,8 @@ function drawCells(
             return toDraw <= 0;
         }
     );
+
+    return result;
 }
 
 function drawBlanks(
@@ -950,7 +957,7 @@ export function drawGrid(
     hoverInfo: HoverInfo | undefined,
     spriteManager: SpriteManager,
     scrolling: boolean
-) {
+): CellList | undefined {
     if (width === 0 || height === 0) return;
     const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
 
@@ -983,6 +990,8 @@ export function drawGrid(
         alpha: false,
     });
     if (overlayCtx === null || targetCtx === null) return;
+
+    let result: CellList | undefined;
 
     const getRowHeight = (r: number) => (typeof rowHeight === "number" ? rowHeight : rowHeight(r));
 
@@ -1076,7 +1085,7 @@ export function drawGrid(
             targetCtx.fillStyle = theme.bgCell;
             targetCtx.fillRect(0, headerHeight + 1, width, height - headerHeight - 1);
 
-            drawCells(
+            result = drawCells(
                 targetCtx,
                 effectiveCols,
                 height,
@@ -1116,7 +1125,8 @@ export function drawGrid(
             targetCtx.drawImage(overlayCanvas, 0, 0);
             targetCtx.imageSmoothingEnabled = false;
         }
-        return;
+        console.log("Damage", result);
+        return result;
     }
 
     if (canBlit === true) {
@@ -1184,7 +1194,7 @@ export function drawGrid(
     targetCtx.fillStyle = theme.bgCell;
     targetCtx.fillRect(0, headerHeight, width, height - headerHeight);
 
-    drawCells(
+    result = drawCells(
         targetCtx,
         effectiveCols,
         height,
@@ -1282,6 +1292,8 @@ export function drawGrid(
         targetCtx.drawImage(overlayCanvas, 0, 0);
         targetCtx.imageSmoothingEnabled = true;
     }
+
+    return result;
 }
 
 type WalkRowsCallback = (drawY: number, row: number, rowHeight: number, isSticky: boolean) => boolean | void;

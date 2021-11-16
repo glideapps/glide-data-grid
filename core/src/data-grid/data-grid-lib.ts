@@ -164,6 +164,36 @@ export function measureTextCached(s: string, ctx: CanvasRenderingContext2D): Tex
     return metrics;
 }
 
+export function drawWithLastUpdate(
+    ctx: CanvasRenderingContext2D,
+    lastUpdate: number | undefined,
+    theme: Theme,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    draw: () => void
+) {
+    let progress = Number.MAX_SAFE_INTEGER;
+    if (lastUpdate !== undefined) {
+        const fixme = performance.now();
+
+        progress = fixme - lastUpdate;
+
+        if (progress < 150) {
+            const fade = 1 - progress / 150;
+            ctx.globalAlpha = fade;
+            ctx.fillStyle = theme.bgSearchResult;
+            ctx.fillRect(x, y, width, height);
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    draw();
+
+    return progress < 150;
+}
+
 export function drawTextCell(
     ctx: CanvasRenderingContext2D,
     theme: Theme,

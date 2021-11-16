@@ -1,4 +1,4 @@
-import { drawBoolean } from "../data-grid-lib";
+import { drawBoolean, drawWithLastUpdate } from "../data-grid-lib";
 import { GridCellKind, BooleanCell } from "../data-grid-types";
 import { InternalCellRenderer } from "./cell-types";
 
@@ -8,7 +8,9 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     needsHover: true,
     needsHoverPosition: true,
     render: (ctx, theme, _col, _row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY) =>
-        drawBoolean(ctx, theme, cell.data, x, y, w, h, hoverAmount, highlighted, cell.allowEdit, hoverX, hoverY),
+        drawWithLastUpdate(ctx, cell.lastUpdated, theme, x, y, w, h, () =>
+            drawBoolean(ctx, theme, cell.data, x, y, w, h, hoverAmount, highlighted, cell.allowEdit, hoverX, hoverY)
+        ),
     onDelete: c => ({
         ...c,
         data: false,

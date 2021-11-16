@@ -25,10 +25,12 @@ import {
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
+import uniq from "lodash/uniq";
 import { drawCell, drawGrid, makeBuffers } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
 import { browserIsFirefox } from "../common/browser-detect";
 import { CellRenderers } from "./cells";
+import { CellList } from "..";
 
 export interface DataGridProps {
     readonly width: number;
@@ -402,13 +404,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         hoveredCol = hoveredItem[0];
     }
 
+    const [animationList, setAnimationList] = React.useState<CellList>();
+
     const hoverInfoRef = React.useRef(hoveredItemInfo);
     hoverInfoRef.current = hoveredItemInfo;
     const draw = React.useCallback(() => {
         const canvas = ref.current;
         if (canvas === null) return;
 
-        drawGrid(
+        const result = drawGrid(
             canvas,
             buffers,
             width,
@@ -446,6 +450,17 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             spriteManager,
             scrolling
         );
+
+        if (damageRegion.current === undefined && canBlit.current === false) {
+            setAnimationList(result);
+        } else if (damageRegion.current !== undefined) {
+            setAnimationList(cv => {
+                if (cv === undefined) return result;
+                return [...(result ?? []), ...cv.filter(c => damageRegion.current?.includes(c) !== true)];
+            });
+        } else {
+            setAnimationList(cv => uniq([...(cv ?? []), ...(result ?? [])]));
+        }
     }, [
         buffers,
         width,
@@ -517,7 +532,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         void fn();
     }, []);
 
-    const damageInternal = React.useCallback((locations: readonly (readonly [number, number])[]) => {
+    const damageInternal = React.useCallback((locations: CellList) => {
         const last = canBlit.current;
         canBlit.current = false;
         damageRegion.current = locations;
@@ -525,6 +540,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         damageRegion.current = undefined;
         canBlit.current = last;
     }, []);
+
+    React.useEffect(() => {
+        if (animationList === undefined || animationList.length === 0) return;
+        window.requestAnimationFrame(() => {
+            damageInternal(animationList);
+        });
+    }, [animationList, damageInternal]);
 
     const damage = React.useCallback(
         (cells: DamageUpdateList) => {

@@ -6,5 +6,5 @@ export const loadingCellRenderer: InternalCellRenderer<LoadingCell> = {
     kind: GridCellKind.Loading,
     needsHover: false,
     needsHoverPosition: false,
-    render: () => undefined,
+    render: () => false,
 };

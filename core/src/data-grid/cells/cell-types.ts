@@ -21,7 +21,7 @@ type DrawCallback<T extends InnerGridCell> = (
     hoverX: number | undefined,
     hoverY: number | undefined,
     imageLoader: ImageWindowLoader
-) => void;
+) => boolean;
 
 type ProvideEditorCallback<T extends InnerGridCell> = (
     cell: T

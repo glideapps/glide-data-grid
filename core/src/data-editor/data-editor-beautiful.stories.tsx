@@ -21,7 +21,7 @@ import { SimpleThemeWrapper } from "../stories/story-utils";
 import { useEventListener } from "../common/utils";
 import { useLayer } from "react-laag";
 import { SpriteMap } from "../data-grid/data-grid-sprites";
-import { DataEditorRef, Theme } from "..";
+import { DataEditorRef } from "..";
 import range from "lodash/range";
 
 faker.seed(1337);
@@ -382,6 +382,7 @@ function useMockDataGenerator(numCols: number, readonly: boolean = true, group: 
                 cache.current.set(col, row, {
                     ...copied,
                     displayData: typeof copied.data === "string" ? copied.data : (copied as any).displayData,
+                    lastUpdated: performance.now(),
                 } as any);
             }
         },
@@ -1848,6 +1849,7 @@ export const RapidUpdates: React.VFC = () => {
             const cells: {
                 cell: readonly [number, number];
             }[] = [];
+            const now = performance.now();
             for (let x = 0; x < 5_000; x++) {
                 const col = Math.max(10, rand() % 100);
                 const row = rand() % 10_000;
@@ -1857,6 +1859,7 @@ export const RapidUpdates: React.VFC = () => {
                     data: countRef.current.toString(),
                     displayData: `${x}k`,
                     allowOverlay: true,
+                    lastUpdated: now,
                 });
                 cells.push({ cell: [col, row] });
             }
@@ -1877,22 +1880,22 @@ export const RapidUpdates: React.VFC = () => {
         };
     }, [setCellValueRaw]);
 
-    const drawCustom = React.useCallback(
-        (ctx: CanvasRenderingContext2D, cell: GridCell, _theme: Theme, rect: Rectangle) => {
-            if (cell.kind !== GridCellKind.Text) return false;
+    // const drawCustom = React.useCallback(
+    //     (ctx: CanvasRenderingContext2D, cell: GridCell, _theme: Theme, rect: Rectangle) => {
+    //         if (cell.kind !== GridCellKind.Text) return false;
 
-            const { x, y, height } = rect;
-            const data = cell.displayData;
+    //         const { x, y, height } = rect;
+    //         const data = cell.displayData;
 
-            if (!cell.data.endsWith("000")) return false;
+    //         if (!cell.data.endsWith("000")) return false;
 
-            ctx.fillStyle = !data.endsWith("5k") ? "#0fc035" : "#e01e1e";
-            ctx.fillText(data, x + 8 + 0.5, y + height / 2 + 4.5);
+    //         ctx.fillStyle = !data.endsWith("5k") ? "#0fc035" : "#e01e1e";
+    //         ctx.fillText(data, x + 8 + 0.5, y + height / 2 + 4.5);
 
-            return true;
-        },
-        []
-    );
+    //         return true;
+    //     },
+    //     []
+    // );
 
     return (
         <BeautifulWrapper
@@ -1913,7 +1916,7 @@ export const RapidUpdates: React.VFC = () => {
             <DataEditor
                 {...defaultProps}
                 ref={ref}
-                drawCustomCell={drawCustom}
+                // drawCustomCell={drawCustom}
                 getCellContent={getCellContent}
                 columns={cols}
                 rows={10_000}
