@@ -11,6 +11,7 @@ export interface ScrollingDataGridProps extends Props {
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
     readonly smoothScrollX?: boolean;
     readonly smoothScrollY?: boolean;
+    readonly overscrollX?: number;
     readonly rightElementSticky?: boolean;
     readonly rightElement?: React.ReactNode;
 }
@@ -25,6 +26,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         scrollRef,
         rightElement,
         rightElementSticky,
+        overscrollX,
         ...dataGridProps
     } = p;
     const { smoothScrollX, smoothScrollY } = p;
@@ -36,12 +38,12 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const lastY = React.useRef<number | undefined>();
 
     const width = React.useMemo(() => {
-        let r = 0;
+        let r = Math.max(0, overscrollX ?? 0);
         for (const c of columns) {
             r += c.width;
         }
         return r;
-    }, [columns]);
+    }, [columns, overscrollX]);
 
     let height = headerHeight;
     if (typeof rowHeight === "number") {
