@@ -29,7 +29,7 @@ type ProvideEditorCallback<T extends InnerGridCell> = (
     | React.FunctionComponent<{
           readonly onChange: (newValue: T) => void;
           readonly onKeyDown: (event: React.KeyboardEvent) => void;
-          readonly onFinishedEditing: () => void;
+          readonly onFinishedEditing: (newValue?: T) => void;
           readonly isHighlighted: boolean;
           readonly value: T;
           readonly imageEditorOverride?: ImageEditorType;

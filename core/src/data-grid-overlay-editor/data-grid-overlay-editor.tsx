@@ -83,7 +83,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 isHighlighted={highlight}
                 onChange={setTempValue as any}
                 value={targetValue}
-                onFinishedEditing={onClickOutside}
+                onFinishedEditing={e => onFinishEditing(e as GridCell, [0, 0])}
                 onKeyDown={onKeyDown}
                 target={target}
                 imageEditorOverride={imageEditorOverride}

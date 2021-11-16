@@ -17,7 +17,7 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
         data: [],
     }),
     getEditor: () => p => {
-        const { onChange, onKeyDown, value, onFinishedEditing, imageEditorOverride } = p;
+        const { onKeyDown, value, onFinishedEditing, imageEditorOverride } = p;
 
         const ImageEditor = imageEditorOverride ?? ImageOverlayEditor;
 
@@ -27,11 +27,10 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
                 canWrite={value.allowAdd}
                 onCancel={onFinishedEditing}
                 onChange={newImage => {
-                    onChange({
+                    onFinishedEditing({
                         ...value,
                         data: [newImage],
                     });
-                    onFinishedEditing();
                 }}
                 onKeyDown={onKeyDown}
             />
