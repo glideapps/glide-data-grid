@@ -1,6 +1,6 @@
 {
   "name": "@glideapps/glide-data-grid",
-  "version": "3.1.0-beta4",
+  "version": "3.1.0-beta5",
   "description": "Super fast, pure canvas Data Grid Editor",
   "main": "dist/js/index.js",
   "types": "dist/ts/index.d.ts",
@@ -34,6 +34,7 @@
   },
   "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/core",
   "dependencies": {
+    "@babel/runtime": "^7.16.3",
     "react-number-format": "^4.4.1",
     "react-virtualized-auto-sizer": "^1.0.2"
   },

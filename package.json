@@ -1,6 +1,6 @@
 {
     "name": "root",
-    "version": "3.1.0-beta4",
+    "version": "3.1.0-beta5",
     "scripts": {
         "bootstrap": "./bootstrap.sh",
         "build": "./build-all.sh",
@@ -13,6 +13,7 @@
         "@babel/cli": "^7.16.0",
         "@babel/core": "^7.12.3",
         "@babel/plugin-proposal-class-properties": "^7.8.3",
+        "@babel/plugin-transform-runtime": "^7.16.0",
         "@babel/preset-env": "^7.8.4",
         "@babel/preset-react": "^7.8.3",
         "@babel/preset-typescript": "^7.9.0",
