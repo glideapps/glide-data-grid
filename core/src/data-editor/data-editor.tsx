@@ -1116,19 +1116,26 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         col++;
                     }
                 } else if (isDeleteKey) {
-                    const cellValue = getCellContent([col - rowMarkerOffset, row]);
-                    if (
-                        (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
-                        cellValue.kind === GridCellKind.Boolean
-                    ) {
-                        focus();
-                        const r = CellRenderers[cellValue.kind];
-                        const newVal = r.onDelete?.(cellValue);
-                        if (newVal !== undefined) {
-                            mangledOnCellEdited(gridSelection.cell, newVal as typeof cellValue);
-                            gridRef.current?.damage([{ cell: gridSelection.cell }]);
+                    const range = gridSelection.range;
+                    focus();
+                    const damaged: [number, number][] = [];
+                    for (let x = range.x; x < range.x + range.width; x++) {
+                        for (let y = range.y; y < range.y + range.height; y++) {
+                            const cellValue = getCellContent([x - rowMarkerOffset, y]);
+                            if (
+                                (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
+                                cellValue.kind === GridCellKind.Boolean
+                            ) {
+                                const r = CellRenderers[cellValue.kind];
+                                const newVal = r.onDelete?.(cellValue);
+                                if (newVal !== undefined) {
+                                    mangledOnCellEdited([x, y], newVal as typeof cellValue);
+                                    damaged.push([x, y]);
+                                }
+                            }
                         }
                     }
+                    gridRef.current?.damage(damaged.map(x => ({ cell: x })));
                 } else if (
                     !event.metaKey &&
                     !event.ctrlKey &&
