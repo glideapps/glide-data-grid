@@ -73,7 +73,7 @@ type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parame
 export interface DataEditorProps extends Props {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
-    readonly onRowAppended?: () => void;
+    readonly onRowAppended?: () => Promise<"top" | "bottom" | undefined> | void;
     readonly onHeaderClicked?: (colIndex: number) => void;
     readonly onCellClicked?: (cell: readonly [number, number]) => void;
 
@@ -417,9 +417,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     getCellContentRef.current = getCellContent;
     rowsRef.current = rows;
     const appendRow = React.useCallback(
-        (col: number) => {
+        async (col: number) => {
             // FIXME: Maybe this should optionally return a promise that we can await?
-            onRowAppended?.();
+            const appendResult = onRowAppended?.();
+
+            let bottom = true;
+            if (appendResult !== undefined) {
+                const r = await appendResult;
+                if (r === "top") bottom = false;
+            }
 
             let backoff = 0;
             const doFocus = () => {
@@ -431,21 +437,22 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return;
                 }
 
-                scrollRef.current?.scrollBy(0, scrollRef.current.scrollHeight + 1000);
+                const row = bottom ? rows : 0;
+                scrollRef.current?.scrollBy(0, (bottom ? 1 : -1) * scrollRef.current.scrollHeight + 1000);
                 setGridSelection({
-                    cell: [col, rows],
+                    cell: [col, row],
                     range: {
                         x: col,
-                        y: rows,
+                        y: row,
                         width: 1,
                         height: 1,
                     },
                 });
-                const cell = getCellContentRef.current([col - rowMarkerOffset, rows]);
+                const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
                 if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true) {
                     // wait for scroll to have a chance to process
                     window.setTimeout(() => {
-                        focusCallback.current(col, rows);
+                        focusCallback.current(col, row);
                     }, 0);
                 }
             };
@@ -497,7 +504,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         lastSelectedRowRef.current = row;
                     }
                 } else if (col >= rowMarkerOffset && showTrailingBlankRow && row === rows) {
-                    appendRow(col);
+                    void appendRow(col);
                 } else {
                     if (gridSelection?.cell[0] !== col || gridSelection.cell[1] !== row) {
                         const isLastStickyRow = lastRowSticky && row === rows;
@@ -1043,7 +1050,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         row++;
                     } else if (row === rows && showTrailingBlankRow) {
                         window.setTimeout(() => {
-                            appendRow(col);
+                            void appendRow(col);
                         }, 0);
                     } else {
                         reselect(event.bounds);

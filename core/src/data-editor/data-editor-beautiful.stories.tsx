@@ -521,6 +521,57 @@ export const AddData: React.VFC = () => {
     },
 };
 
+export const AddDataToTop: React.VFC = () => {
+    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
+
+    const [numRows, setNumRows] = React.useState(50);
+
+    const onRowAppended = React.useCallback(async () => {
+        const newRow = numRows;
+        for (let c = 0; c < 6; c++) {
+            const cell = getCellContent([c, newRow]);
+            setCellValueRaw([c, newRow], clearCell(cell));
+        }
+        setNumRows(cv => cv + 1);
+        return "top" as const;
+    }, [getCellContent, numRows, setCellValueRaw]);
+
+    return (
+        <BeautifulWrapper
+            title="Add data"
+            description={
+                <>
+                    <Description>
+                        You can return a different location to have the new row append take place.
+                    </Description>
+                    <MoreInfo>
+                        At this time this story still adds the data to the end because our fake data source is bad.
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rowMarkers={"both"}
+                onCellEdited={setCellValue}
+                trailingRowOptions={{
+                    hint: "New row...",
+                    sticky: true,
+                    tint: true,
+                }}
+                rows={numRows}
+                onRowAppended={onRowAppended}
+            />
+        </BeautifulWrapper>
+    );
+};
+(AddData as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const SmallEditableGrid = () => {
     const { cols, getCellContent, setCellValue } = useMockDataGenerator(6, false);
 
