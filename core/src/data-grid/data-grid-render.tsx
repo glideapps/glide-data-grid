@@ -618,7 +618,7 @@ function drawCells(
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
     outerTheme: Theme
-): CellList {
+): CellList | undefined {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     const result: [number, number][] = [];
     walkColumns(
@@ -748,7 +748,7 @@ function drawCells(
         }
     );
 
-    return result;
+    return result.length === 0 ? undefined : result;
 }
 
 function drawBlanks(
@@ -1125,7 +1125,6 @@ export function drawGrid(
             targetCtx.drawImage(overlayCanvas, 0, 0);
             targetCtx.imageSmoothingEnabled = false;
         }
-        console.log("Damage", result);
         return result;
     }
 

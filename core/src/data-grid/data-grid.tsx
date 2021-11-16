@@ -25,12 +25,26 @@ import {
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
-import uniq from "lodash/uniq";
+import union from "lodash/union";
 import { drawCell, drawGrid, makeBuffers } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
 import { browserIsFirefox } from "../common/browser-detect";
 import { CellRenderers } from "./cells";
 import { CellList } from "..";
+
+export function usePreviousValue<T>(current: T): T | undefined {
+    const prevRef = React.useRef<T>();
+    const currentRef = React.useRef<T>();
+
+    if (current !== currentRef.current) {
+        prevRef.current = currentRef.current;
+        currentRef.current = current;
+    }
+
+    return prevRef.current;
+}
+
+const emptyArray: CellList = [];
 
 export interface DataGridProps {
     readonly width: number;
@@ -404,7 +418,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         hoveredCol = hoveredItem[0];
     }
 
-    const [animationList, setAnimationList] = React.useState<CellList>();
+    const [animationList, setAnimationList] = React.useState<CellList>([]);
 
     const hoverInfoRef = React.useRef(hoveredItemInfo);
     hoverInfoRef.current = hoveredItemInfo;
@@ -452,14 +466,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         );
 
         if (damageRegion.current === undefined && canBlit.current === false) {
-            setAnimationList(result);
+            setAnimationList(result ?? emptyArray);
         } else if (damageRegion.current !== undefined) {
             setAnimationList(cv => {
-                if (cv === undefined) return result;
-                return [...(result ?? []), ...cv.filter(c => damageRegion.current?.includes(c) !== true)];
+                if (cv === undefined) return result ?? emptyArray;
+                const undamagedAnimating = cv.filter(c => damageRegion.current?.includes(c) !== true);
+                if (undamagedAnimating.length === 0 && result?.length === 0) return emptyArray;
+                return union(result, undamagedAnimating);
             });
-        } else {
-            setAnimationList(cv => uniq([...(cv ?? []), ...(result ?? [])]));
+        } else if (result !== undefined && result.length > 0) {
+            setAnimationList(cv => union(cv, result));
         }
     }, [
         buffers,
@@ -541,12 +557,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         canBlit.current = last;
     }, []);
 
+    const previousAnimationList = usePreviousValue(animationList);
     React.useEffect(() => {
-        if (animationList === undefined || animationList.length === 0) return;
+        console.log("Animate");
+        const toDamage = union(animationList, previousAnimationList);
+        if (toDamage.length === 0) return;
         window.requestAnimationFrame(() => {
-            damageInternal(animationList);
+            damageInternal(toDamage);
         });
-    }, [animationList, damageInternal]);
+    }, [animationList, damageInternal, previousAnimationList]);
 
     const damage = React.useCallback(
         (cells: DamageUpdateList) => {

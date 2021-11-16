@@ -977,7 +977,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 lastSent.current = undefined;
             }
 
-            scrollTo(row, col);
+            scrollTo(col, row);
 
             return true;
         },
