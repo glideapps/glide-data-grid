@@ -12,6 +12,10 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
     needsHoverPosition: false,
     render: (ctx, theme, _col, _row, cell, x, y, w, h, _highlighted, hoverAmount) =>
         drawTextCell(ctx, theme, cell.data, x, y, w, h, hoverAmount),
+    onDelete: c => ({
+        ...c,
+        data: "",
+    }),
     getEditor: () => p => {
         const { onChange, onKeyDown, value, target, onFinishedEditing, markdownDivCreateNode, forceEditMode } = p;
         return (

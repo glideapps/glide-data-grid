@@ -12,6 +12,10 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
     needsHoverPosition: false,
     render: (ctx, theme, col, row, cell, x, y, w, h, _highlighted, hoverAmount, _hoverX, _hoverY, imageLoader) =>
         drawImage(ctx, theme, cell.displayData ?? cell.data, col, row, x, y, w, h, hoverAmount, imageLoader),
+    onDelete: c => ({
+        ...c,
+        data: [],
+    }),
     getEditor: () => p => {
         const { onChange, onKeyDown, value, onFinishedEditing, imageEditorOverride } = p;
 

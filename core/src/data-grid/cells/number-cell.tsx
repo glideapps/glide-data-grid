@@ -12,6 +12,10 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
     needsHoverPosition: false,
     render: (ctx, theme, _col, _row, cell, x, y, w, h, _highlighted, hoverAmount) =>
         drawTextCell(ctx, theme, cell.displayData, x, y, w, h, hoverAmount),
+    onDelete: c => ({
+        ...c,
+        data: undefined,
+    }),
     getEditor: () => p => {
         const { isHighlighted, onChange, onKeyDown, value } = p;
         return (

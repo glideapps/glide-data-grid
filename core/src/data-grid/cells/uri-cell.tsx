@@ -12,6 +12,10 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
     needsHoverPosition: false,
     render: (ctx, theme, _col, _row, cell, x, y, w, h, _highlighted, hoverAmount) =>
         drawTextCell(ctx, theme, cell.data, x, y, w, h, hoverAmount),
+    onDelete: c => ({
+        ...c,
+        data: "",
+    }),
     getEditor: () => p => {
         const { onChange, onKeyDown, value, forceEditMode } = p;
         return (

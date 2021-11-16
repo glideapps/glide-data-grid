@@ -21,7 +21,6 @@ import {
     ProvideEditorCallback,
     DrawCustomCellCallback,
 } from "../data-grid/data-grid-types";
-import copy from "copy-to-clipboard";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
 import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
@@ -842,9 +841,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         };
 
         const str = cells.map(row => row.map(formatCell).join("\t")).join("\n");
-        copy(str, {
-            format: "text/plain",
-        });
+        void window.navigator.clipboard.writeText(str);
     }, []);
 
     const adjustSelection = React.useCallback(
@@ -1117,46 +1114,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
                         cellValue.kind === GridCellKind.Boolean
                     ) {
-                        // FIXME: Add way to show confirm modal
-                        const del = true;
                         focus();
-                        const cell = [col, row] as const;
-                        if (del) {
-                            switch (cellValue.kind) {
-                                case GridCellKind.Text:
-                                    mangledOnCellEdited?.(cell, {
-                                        ...cellValue,
-                                        data: "",
-                                    });
-                                    break;
-                                case GridCellKind.Markdown:
-                                case GridCellKind.Uri:
-                                    mangledOnCellEdited?.(cell, {
-                                        ...cellValue,
-                                        data: "",
-                                    });
-                                    break;
-                                case GridCellKind.Image:
-                                    mangledOnCellEdited?.(cell, {
-                                        ...cellValue,
-                                        data: [],
-                                    });
-                                    break;
-                                case GridCellKind.Boolean:
-                                    mangledOnCellEdited?.(cell, {
-                                        ...cellValue,
-                                        data: false,
-                                    });
-                                    break;
-                                case GridCellKind.Number:
-                                    mangledOnCellEdited?.(cell, {
-                                        ...cellValue,
-                                        data: undefined,
-                                    });
-                                    break;
-                                default:
-                                    assertNever(cellValue);
-                            }
+                        const r = CellRenderers[cellValue.kind];
+                        const newVal = r.onDelete?.(cellValue);
+                        if (newVal !== undefined) {
+                            mangledOnCellEdited(gridSelection.cell, newVal as typeof cellValue);
+                            gridRef.current?.damage([{ cell: gridSelection.cell }]);
                         }
                     }
                 } else if (

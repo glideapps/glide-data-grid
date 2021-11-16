@@ -12,6 +12,10 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
     needsHoverPosition: false,
     render: (ctx, theme, _col, _row, cell, x, y, w, h, _highlighted, hoverAmount) =>
         drawTextCell(ctx, theme, cell.displayData, x, y, w, h, hoverAmount),
+    onDelete: c => ({
+        ...c,
+        data: "",
+    }),
     getEditor: () => p => {
         const { isHighlighted, onChange, onKeyDown, value } = p;
         return (
