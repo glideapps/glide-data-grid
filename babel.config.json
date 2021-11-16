@@ -10,7 +10,9 @@
         "@babel/preset-react",
         "@babel/preset-typescript"
     ],
-    "plugins": ["@babel/plugin-proposal-class-properties", "@babel/plugin-transform-runtime"],
+    "plugins": ["@babel/plugin-proposal-class-properties", ["@babel/plugin-transform-runtime", {
+        "version": "7.16.3"
+      }]],
     "comments": false,
     "sourceMaps": true
 }
