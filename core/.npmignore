@@ -4,3 +4,5 @@ package-lock.json
 .eslintignore
 tsconfig.json
 tsconfig.types.json
+jest.config.js
+API.md
