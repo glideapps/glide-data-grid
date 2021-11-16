@@ -851,75 +851,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         void window.navigator.clipboard.writeText(str);
     }, []);
 
-    const adjustSelection = React.useCallback(
-        (direction: [number, number]) => {
-            if (gridSelection === undefined) return;
-
-            const [x, y] = direction;
-            const [col, row] = gridSelection.cell;
-            const oldRange = gridSelection.range;
-
-            let left = oldRange?.x ?? col;
-            let top = oldRange?.y ?? row;
-
-            let width = oldRange?.width ?? 1;
-            let height = oldRange?.height ?? 1;
-
-            const topDiff = top - row;
-            const leftDiff = left - col;
-
-            let isTop = topDiff === 0;
-            if (y < 0 && height === 1) isTop = false;
-            const heightDiff = isTop ? y : y * -1;
-
-            let isLeft = leftDiff === 0;
-            if (x < 0 && width === 1) isLeft = false;
-            const widthDiff = isLeft ? x : x * -1;
-
-            if (!isTop) {
-                top -= heightDiff;
-                height = Math.abs(top - row) + 1;
-            } else {
-                const maxHeight = rows - top;
-                height += heightDiff;
-                height = Math.min(maxHeight, height);
-            }
-
-            if (!isLeft) {
-                left -= widthDiff;
-                //Don't let it select the marker column
-                left = Math.max(rowMarkerOffset, left);
-                width = Math.abs(left - col) + 1;
-            } else {
-                width += widthDiff;
-            }
-
-            setGridSelection({
-                ...gridSelection,
-                range: {
-                    x: left,
-                    y: top,
-                    width: width,
-                    height: height,
-                },
-            });
-        },
-        [gridSelection, rowMarkerOffset, rows, setGridSelection]
-    );
-
-    const updateSelectedCell = React.useCallback(
-        (col: number, row: number, fromEditingTrailingRow: boolean = false): boolean => {
-            const rowMax = mangledRows - (fromEditingTrailingRow ? 0 : 1);
-            col = clamp(rowMarkerOffset, columns.length - 1 + rowMarkerOffset, col);
-            row = clamp(0, rowMax, row);
-
-            if (col === gridSelection?.cell[0] && row === gridSelection?.cell[1]) return false;
-            setGridSelection({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
-
-            if (lastSent.current !== undefined && lastSent.current[0] === col && lastSent.current[1] === row) {
-                lastSent.current = undefined;
-            }
-
+    const scrollTo = React.useCallback(
+        (col: number, row: number, dir: "horizontal" | "vertical" | "both" = "both") => {
             if (scrollRef.current !== null) {
                 const grid = gridRef.current;
                 const canvas = canvasRef.current;
@@ -952,6 +885,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             scrollY = bounds.y + bounds.height - sBottom;
                         }
 
+                        if (dir === "vertical") {
+                            scrollX = 0;
+                        } else if (dir === "horizontal") {
+                            scrollY = 0;
+                        }
+
                         if (scrollX !== 0 || scrollY !== 0) {
                             scrollRef.current.scrollTo(
                                 scrollX + scrollRef.current.scrollLeft,
@@ -961,21 +900,88 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
                 }
             }
+        },
+        [headerHeight, lastRowSticky, rowHeight, rowMarkerOffset, rowMarkerWidth, rows]
+    );
+
+    const adjustSelection = React.useCallback(
+        (direction: [number, number]) => {
+            if (gridSelection === undefined) return;
+
+            const [x, y] = direction;
+            const [col, row] = gridSelection.cell;
+            const oldRange = gridSelection.range;
+
+            let left = oldRange?.x ?? col;
+            let top = oldRange?.y ?? row;
+
+            let width = oldRange?.width ?? 1;
+            let height = oldRange?.height ?? 1;
+
+            const topDiff = top - row;
+            const leftDiff = left - col;
+
+            let isTop = topDiff === 0;
+            if (y < 0 && height === 1) isTop = false;
+            const heightDiff = isTop ? y : y * -1;
+
+            let isLeft = leftDiff === 0;
+            if (x < 0 && width === 1) isLeft = false;
+            const widthDiff = isLeft ? x : x * -1;
+
+            if (isTop) {
+                const maxHeight = rows - top;
+                height += heightDiff;
+                height = Math.min(maxHeight, height);
+                scrollTo(0, top + height - 1, "vertical");
+            } else {
+                top -= heightDiff;
+                height = Math.abs(top - row) + 1;
+                scrollTo(0, top, "vertical");
+            }
+
+            if (isLeft) {
+                width += widthDiff;
+                scrollTo(left + width - 1, 0, "horizontal");
+            } else {
+                left -= widthDiff;
+                //Don't let it select the marker column
+                left = Math.max(rowMarkerOffset, left);
+                width = Math.abs(left - col) + 1;
+                scrollTo(left, 0, "horizontal");
+            }
+
+            setGridSelection({
+                ...gridSelection,
+                range: {
+                    x: left,
+                    y: top,
+                    width: width,
+                    height: height,
+                },
+            });
+        },
+        [gridSelection, rowMarkerOffset, rows, scrollTo, setGridSelection]
+    );
+
+    const updateSelectedCell = React.useCallback(
+        (col: number, row: number, fromEditingTrailingRow: boolean = false): boolean => {
+            const rowMax = mangledRows - (fromEditingTrailingRow ? 0 : 1);
+            col = clamp(rowMarkerOffset, columns.length - 1 + rowMarkerOffset, col);
+            row = clamp(0, rowMax, row);
+
+            if (col === gridSelection?.cell[0] && row === gridSelection?.cell[1]) return false;
+            setGridSelection({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
+
+            if (lastSent.current !== undefined && lastSent.current[0] === col && lastSent.current[1] === row) {
+                lastSent.current = undefined;
+            }
+
+            scrollTo(col, row);
 
             return true;
         },
-        [
-            mangledRows,
-            rowMarkerOffset,
-            columns.length,
-            gridSelection?.cell,
-            setGridSelection,
-            rowMarkerWidth,
-            headerHeight,
-            lastRowSticky,
-            rowHeight,
-            rows,
-        ]
+        [mangledRows, rowMarkerOffset, columns.length, gridSelection?.cell, setGridSelection, scrollTo]
     );
 
     const onFinishEditing = React.useCallback(
