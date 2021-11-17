@@ -30,7 +30,6 @@
     "canvas"
   ],
   "dependencies": {
-    "@babel/runtime": "^7.12.3",
     "@glideapps/glide-data-grid": "3.1.0-beta6"
   },
   "devDependencies": {

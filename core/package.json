@@ -34,7 +34,6 @@
   },
   "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/core",
   "dependencies": {
-    "@babel/runtime": "^7.9.0",
     "react-number-format": "^4.4.1",
     "react-virtualized-auto-sizer": "^1.0.2"
   },
