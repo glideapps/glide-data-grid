@@ -1,7 +1,6 @@
 import { Theme } from "../common/styles";
 import { DrilldownCellData, GridColumn } from "./data-grid-types";
-import direction from "direction";
-import { degreesToRadians } from "../common/utils";
+import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs } from "./cells/cell-types";
 
