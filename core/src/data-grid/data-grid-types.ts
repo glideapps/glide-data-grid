@@ -2,6 +2,7 @@ import { Theme } from "..";
 import isArray from "lodash/isArray";
 import { assertNever, proveType } from "../common/support";
 import React from "react";
+import ImageWindowLoader from "../common/image-window-loader";
 
 export interface GridSelection {
     readonly cell: readonly [number, number];
@@ -74,6 +75,10 @@ export type DrawCustomCellCallback = (args: {
     theme: Theme;
     rect: Rectangle;
     hoverAmount: number;
+    hoverX: number | undefined;
+    hoverY: number | undefined;
+    highlighted: boolean;
+    imageLoader: ImageWindowLoader;
 }) => boolean;
 
 export enum GridCellKind {

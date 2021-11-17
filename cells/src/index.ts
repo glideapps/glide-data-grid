@@ -4,19 +4,20 @@ import SparklineCellRenderer from "./cells/sparkline-cell";
 import TagsCellRenderer from "./cells/tags-cell";
 import * as React from "react";
 
-type DrawCallback = NonNullable<DataEditorProps["drawCustomCell"]>;
+type DrawCallback = NonNullable<DataEditorProps["drawCell"]>;
 
 const cells = [StarCellRenderer, SparklineCellRenderer, TagsCellRenderer];
 
 export function useExtraCells(): {
-    drawCustomCell: DrawCallback;
+    drawCell: DrawCallback;
     provideEditor: ProvideEditorCallback<GridCell>;
 } {
-    const drawCustomCell = React.useCallback<DrawCallback>((ctx, cell, theme, rect, hoverAmount) => {
+    const drawCell = React.useCallback<DrawCallback>(args => {
+        const { cell } = args;
         if (cell.kind !== GridCellKind.Custom) return false;
         for (const c of cells) {
             if (c.isMatch(cell)) {
-                return c.draw(ctx, cell as any, theme, rect, hoverAmount);
+                return c.draw(args, cell as any);
             }
         }
         return false;
@@ -34,5 +35,5 @@ export function useExtraCells(): {
         return undefined;
     }, []);
 
-    return { drawCustomCell, provideEditor };
+    return { drawCell, provideEditor };
 }

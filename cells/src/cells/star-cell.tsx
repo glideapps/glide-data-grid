@@ -75,7 +75,8 @@ const EditorWrap = styled.div`
 
 const renderer: CustomCellRenderer<StarCell> = {
     isMatch: (cell: CustomCell): cell is StarCell => (cell.data as any).kind === "star-cell",
-    draw: (ctx, cell, theme, rect, hoverAmount) => {
+    draw: (args, cell) => {
+        const { ctx, theme, rect, hoverAmount } = args;
         const { rating } = cell.data;
         const padX = theme.cellHorizontalPadding;
         let drawX = padX;

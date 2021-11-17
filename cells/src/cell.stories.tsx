@@ -152,13 +152,13 @@ const possibleTags = [
 ];
 
 export const CustomCells: React.VFC = () => {
-    const { drawCustomCell, provideEditor } = useExtraCells();
+    const { drawCell, provideEditor } = useExtraCells();
 
     return (
         <BeautifulWrapper title="Custom cells" description={<Description>Some of our extension cells.</Description>}>
             <DataEditor
                 {...defaultProps}
-                drawCustomCell={drawCustomCell}
+                drawCell={drawCell}
                 provideEditor={provideEditor}
                 getCellContent={cell => {
                     const [col, row] = cell;
@@ -175,13 +175,15 @@ export const CustomCells: React.VFC = () => {
                         } as StarCell;
                     } else if (col === 1) {
                         num = row + 1;
+                        const values = range(0, 15).map(() => rand() * 100 - 50);
                         return {
                             kind: GridCellKind.Custom,
                             allowOverlay: false,
                             copyData: "4",
                             data: {
                                 kind: "sparkline-cell",
-                                values: range(0, 15).map(() => rand() * 100 - 50),
+                                values,
+                                displayValues: values.map(x => Math.round(x).toString()),
                                 color: row % 2 === 0 ? "#77c4c4" : "#D98466",
                                 yAxis: [-50, 50],
                             },

@@ -78,7 +78,8 @@ const EditorWrap = styled.div`
 
 const renderer: CustomCellRenderer<TagsCell> = {
     isMatch: (c): c is TagsCell => (c.data as any).kind === "tags-cell",
-    draw: (ctx, cell, theme, rect, _hoverAmount) => {
+    draw: (args, cell) => {
+        const { ctx, theme, rect } = args;
         const { possibleTags, tags } = cell.data;
 
         const drawArea: Rectangle = {
