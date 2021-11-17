@@ -19,7 +19,7 @@ popd
 
 
 pushd cells
-update ".dependencies.\"@glideapps/glide-data-grid\" = \"3.0.2\"" package.json
+update ".dependencies.\"@glideapps/glide-data-grid\" = \"3.1.0-beta5\"" package.json
 npm ci
 update ".dependencies.\"@glideapps/glide-data-grid\" = $VERSION" package.json
 update ".version = $VERSION" package.json

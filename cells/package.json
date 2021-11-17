@@ -1,43 +1,43 @@
 {
-    "name": "@glideapps/glide-data-grid-cells",
-    "version": "3.1.0-beta6",
-    "description": "Extra cells for glide-data-grid",
-    "main": "dist/js/index.js",
-    "types": "dist/ts/index.d.ts",
-    "scripts": {
-        "build": "npm run build-js && npm run build-types",
-        "build-js": "babel --config-file ../babel.config.json ./src -d dist/js --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx",
-        "build-types": "tsc -p tsconfig.types.json",
-        "lint": "eslint src --ext .ts,.tsx"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/glideapps/glide-data-grid.git"
-    },
-    "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/cells",
-    "author": "Glide",
-    "license": "MIT",
-    "keywords": [
-        "react",
-        "datagrid",
-        "data-grid",
-        "editor",
-        "reactjs",
-        "scrolling",
-        "data",
-        "table",
-        "cell",
-        "canvas"
-    ],
-    "dependencies": {
-        "@babel/runtime": "^7.12.3",
-        "@glideapps/glide-data-grid": "3.1.0-beta6"
-    },
-    "devDependencies": {
-        "@babel/cli": "^7.16.0",
-        "eslint": "^7.12.1",
-        "eslint-plugin-import": "^2.22.0",
-        "eslint-plugin-react": "^7.21.5",
-        "eslint-plugin-react-hooks": "^4.2.0"
-    }
+  "name": "@glideapps/glide-data-grid-cells",
+  "version": "3.1.0-beta6",
+  "description": "Extra cells for glide-data-grid",
+  "main": "dist/js/index.js",
+  "types": "dist/ts/index.d.ts",
+  "scripts": {
+    "build": "npm run build-js && npm run build-types",
+    "build-js": "babel --config-file ../babel.config.json ./src -d dist/js --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx",
+    "build-types": "tsc -p tsconfig.types.json",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glideapps/glide-data-grid.git"
+  },
+  "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/cells",
+  "author": "Glide",
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "datagrid",
+    "data-grid",
+    "editor",
+    "reactjs",
+    "scrolling",
+    "data",
+    "table",
+    "cell",
+    "canvas"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.12.3",
+    "@glideapps/glide-data-grid": "3.1.0-beta6"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.16.0",
+    "eslint": "^7.12.1",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^4.2.0"
+  }
 }
