@@ -73,6 +73,8 @@ export function drawCell(
               cell,
               theme,
               rect: { x, y, width: w, height: h },
+              col,
+              row,
               hoverAmount,
               hoverX,
               hoverY,
