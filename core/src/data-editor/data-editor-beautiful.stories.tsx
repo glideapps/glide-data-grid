@@ -1862,8 +1862,18 @@ export const RapidUpdates: React.VFC = () => {
 
                 setCellValueRaw([col, row], {
                     kind: GridCellKind.Text,
-                    data: countRef.current.toString(),
+                    data: x.toString(),
                     displayData: `${x}k`,
+                    themeOverride:
+                        x % 5 !== 0
+                            ? {
+                                  bgCell: "#f2fff4",
+                                  textDark: "#00d41c",
+                              }
+                            : {
+                                  bgCell: "#fff6f6",
+                                  textDark: "#d40000",
+                              },
                     allowOverlay: true,
                 });
                 cells.push({ cell: [col, row] });
@@ -1885,23 +1895,6 @@ export const RapidUpdates: React.VFC = () => {
         };
     }, [setCellValueRaw]);
 
-    const drawCustom = React.useCallback(
-        (ctx: CanvasRenderingContext2D, cell: GridCell, _theme: Theme, rect: Rectangle) => {
-            if (cell.kind !== GridCellKind.Text) return false;
-
-            const { x, y, height } = rect;
-            const data = cell.displayData;
-
-            if (!cell.data.endsWith("000")) return false;
-
-            ctx.fillStyle = !data.endsWith("5k") ? "#0fc035" : "#e01e1e";
-            ctx.fillText(data, x + 8 + 0.5, y + height / 2 + 4.5);
-
-            return true;
-        },
-        []
-    );
-
     return (
         <BeautifulWrapper
             title="Rapid updating"
@@ -1918,14 +1911,7 @@ export const RapidUpdates: React.VFC = () => {
                     </MoreInfo>
                 </>
             }>
-            <DataEditor
-                {...defaultProps}
-                ref={ref}
-                drawCustomCell={drawCustom}
-                getCellContent={getCellContent}
-                columns={cols}
-                rows={10_000}
-            />
+            <DataEditor {...defaultProps} ref={ref} getCellContent={getCellContent} columns={cols} rows={10_000} />
         </BeautifulWrapper>
     );
 };

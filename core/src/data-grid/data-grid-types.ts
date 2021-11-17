@@ -288,6 +288,7 @@ export interface Rectangle {
 interface BaseGridCell {
     readonly allowOverlay: boolean;
     readonly style?: "normal" | "faded";
+    readonly themeOverride?: Partial<Theme>;
 }
 
 export interface LoadingCell extends BaseGridCell {

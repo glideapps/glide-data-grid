@@ -643,7 +643,7 @@ function drawCells(
             ctx.rect(drawX + diff, headerHeight + 1, c.width - diff, height - headerHeight - 1);
             ctx.clip();
 
-            const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
+            const colTheme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
                 if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
                     return;
@@ -657,6 +657,16 @@ function drawCells(
 
                 const rowSelected = selectedRows.hasIndex(row);
                 const rowDisabled = disabledRows.hasIndex(row);
+
+                const cell: InnerGridCell =
+                    row < rows
+                        ? getCellContent([c.sourceIndex, row])
+                        : {
+                              kind: GridCellKind.Loading,
+                              allowOverlay: false,
+                          };
+
+                const theme = cell.themeOverride === undefined ? outerTheme : { ...colTheme, ...cell.themeOverride };
 
                 ctx.beginPath();
 
@@ -675,7 +685,7 @@ function drawCells(
                     }
                 }
 
-                if (isSticky) {
+                if (isSticky || theme.bgCell !== outerTheme.bgCell) {
                     ctx.fillStyle = theme.bgCell;
                     if (drawX === 0) {
                         ctx.fillRect(drawX, drawY, c.width, rh);
@@ -711,14 +721,6 @@ function drawCells(
                         }
                     }
                 }
-
-                const cell: InnerGridCell =
-                    row < rows
-                        ? getCellContent([c.sourceIndex, row])
-                        : {
-                              kind: GridCellKind.Loading,
-                              allowOverlay: false,
-                          };
 
                 if (cell.style === "faded") {
                     ctx.globalAlpha = 0.6;
