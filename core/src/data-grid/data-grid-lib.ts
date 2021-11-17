@@ -1,10 +1,9 @@
 import { Theme } from "../common/styles";
-import ImageWindowLoader from "../common/image-window-loader";
 import { DrilldownCellData, GridColumn } from "./data-grid-types";
 import direction from "direction";
-// import { drawGenImageToCanvas } from "../../lib/gen-image-cache";
 import { degreesToRadians } from "../common/utils";
 import React from "react";
+import { BaseDrawArgs } from "./cells/cell-types";
 
 export interface MappedGridColumn extends GridColumn {
     sourceIndex: number;
@@ -164,44 +163,26 @@ export function measureTextCached(s: string, ctx: CanvasRenderingContext2D): Tex
     return metrics;
 }
 
-export function drawTextCell(
-    ctx: CanvasRenderingContext2D,
-    theme: Theme,
-    data: string,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    _hoverAmount: number,
-    overrideColor?: string
-) {
-    data = data.split(/\r?\n/)[0].slice(0, Math.round(width / 4));
+export function drawTextCell(args: BaseDrawArgs, data: string, overrideColor?: string) {
+    const { ctx, x, y, w, h, theme } = args;
+    data = data.split(/\r?\n/)[0].slice(0, Math.round(w / 4));
 
     const dir = direction(data);
 
     ctx.fillStyle = overrideColor ?? theme.textDark;
     if (dir === "rtl") {
         const textWidth = measureTextCached(data, ctx).width;
-        ctx.fillText(data, x + width - theme.cellHorizontalPadding - textWidth + 0.5, y + height / 2 + 4.5);
+        ctx.fillText(data, x + w - theme.cellHorizontalPadding - textWidth + 0.5, y + h / 2 + 4.5);
     } else {
-        ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + height / 2 + 4.5);
+        ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2 + 4.5);
     }
 }
 
-export function drawNewRowCell(
-    ctx: CanvasRenderingContext2D,
-    theme: Theme,
-    data: string,
-    isFirst: boolean,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    hoverAmount: number
-) {
+export function drawNewRowCell(args: BaseDrawArgs, data: string, isFirst: boolean) {
+    const { ctx, x, y, w, h, hoverAmount, theme } = args;
     ctx.beginPath();
     ctx.globalAlpha = hoverAmount;
-    ctx.rect(x, y, width, height);
+    ctx.rect(x, y, w, h);
     ctx.fillStyle = theme.bgHeaderHovered;
     ctx.fill();
     ctx.globalAlpha = 1;
@@ -213,10 +194,10 @@ export function drawNewRowCell(
 
     const padPlus = theme.cellHorizontalPadding + 4;
     if (lineSize > 0) {
-        ctx.moveTo(x + padPlus + xTranslate, y + height / 2);
-        ctx.lineTo(x + padPlus + xTranslate + lineSize, y + height / 2);
-        ctx.moveTo(x + padPlus + xTranslate + lineSize * 0.5, y + height / 2 - lineSize * 0.5);
-        ctx.lineTo(x + padPlus + xTranslate + lineSize * 0.5, y + height / 2 + lineSize * 0.5);
+        ctx.moveTo(x + padPlus + xTranslate, y + h / 2);
+        ctx.lineTo(x + padPlus + xTranslate + lineSize, y + h / 2);
+        ctx.moveTo(x + padPlus + xTranslate + lineSize * 0.5, y + h / 2 - lineSize * 0.5);
+        ctx.lineTo(x + padPlus + xTranslate + lineSize * 0.5, y + h / 2 + lineSize * 0.5);
         ctx.lineWidth = 2;
         ctx.strokeStyle = theme.bgIconHeader;
         ctx.lineCap = "round";
@@ -224,7 +205,7 @@ export function drawNewRowCell(
     }
 
     ctx.fillStyle = theme.textMedium;
-    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + height / 2 + 4.5);
+    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + h / 2 + 4.5);
     ctx.beginPath();
 }
 
@@ -273,17 +254,12 @@ function drawCheckbox(
 }
 
 export function drawMarkerRowCell(
-    ctx: CanvasRenderingContext2D,
-    theme: Theme,
+    args: BaseDrawArgs,
     index: number,
     checked: boolean,
-    markerKind: "checkbox" | "both" | "number",
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    hoverAmount: number
+    markerKind: "checkbox" | "both" | "number"
 ) {
+    const { ctx, x, y, w: width, h: height, hoverAmount, theme } = args;
     if (markerKind !== "number") {
         ctx.globalAlpha = checked ? 1 : hoverAmount;
         drawCheckbox(ctx, theme, checked, x, y, width, height, true);
@@ -305,19 +281,11 @@ export function drawMarkerRowCell(
     ctx.globalAlpha = 1;
 }
 
-export function drawProtectedCell(
-    ctx: CanvasRenderingContext2D,
-    theme: Theme,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    _hoverAmount: number,
-    drawBackground: boolean
-) {
-    if (drawBackground) {
+export function drawProtectedCell(args: BaseDrawArgs) {
+    const { ctx, theme, x, y, w, h, highlighted } = args;
+    if (!highlighted) {
         ctx.beginPath();
-        ctx.rect(x + 1, y + 1, width - 1, height - 1);
+        ctx.rect(x + 1, y + 1, w - 1, h - 1);
         ctx.fillStyle = theme.bgCellMedium;
         ctx.fill();
     }
@@ -326,7 +294,7 @@ export function drawProtectedCell(
 
     const radius = 2.5;
     let xStart = x + theme.cellHorizontalPadding + radius;
-    const center = y + height / 2;
+    const center = y + h / 2;
     const p = Math.cos(degreesToRadians(30)) * radius;
     const q = Math.sin(degreesToRadians(30)) * radius;
 
@@ -374,42 +342,21 @@ function roundedRect(
     ctx.arcTo(x, y, x + radius.tl, y, radius.tl);
 }
 
-export function drawBoolean(
-    ctx: CanvasRenderingContext2D,
-    theme: Theme,
-    data: boolean,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    hoverAmount: number,
-    highlighted: boolean,
-    canEdit: boolean,
-    hoverX: number | undefined,
-    hoverY: number | undefined
-) {
+export function drawBoolean(args: BaseDrawArgs, data: boolean, canEdit: boolean) {
+    const { ctx, hoverAmount, theme, x, y, w, h, highlighted, hoverX, hoverY } = args;
     const hoverEffect = 0.35;
 
     ctx.globalAlpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
 
-    drawCheckbox(ctx, theme, data, x, y, width, height, highlighted, hoverX, hoverY);
+    drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY);
 
     ctx.globalAlpha = 1;
 }
 
 const itemMargin = 4;
 
-export function drawBubbles(
-    ctx: CanvasRenderingContext2D,
-    theme: Theme,
-    data: string[],
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    _hoverAmount: number,
-    highlighted: boolean
-) {
+export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
+    const { x, y, w, h, theme, ctx, highlighted } = args;
     const bubbleHeight = 20;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
@@ -417,7 +364,7 @@ export function drawBubbles(
 
     const renderBoxes: { x: number; width: number }[] = [];
     for (const s of data) {
-        if (renderX > x + width) break;
+        if (renderX > x + w) break;
         const textWidth = measureTextCached(s, ctx).width;
         renderBoxes.push({
             x: renderX,
@@ -432,7 +379,7 @@ export function drawBubbles(
         roundedRect(
             ctx,
             rectInfo.x,
-            y + (height - bubbleHeight) / 2,
+            y + (h - bubbleHeight) / 2,
             rectInfo.width + bubblePad * 2,
             bubbleHeight,
             bubbleHeight / 2
@@ -444,23 +391,12 @@ export function drawBubbles(
     renderBoxes.forEach((rectInfo, i) => {
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.fillText(data[i], rectInfo.x + bubblePad, y + height / 2 + 4);
+        ctx.fillText(data[i], rectInfo.x + bubblePad, y + h / 2 + 4);
     });
 }
 
-export function drawDrilldownCell(
-    ctx: CanvasRenderingContext2D,
-    theme: Theme,
-    data: readonly DrilldownCellData[],
-    col: number,
-    row: number,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    _hoverAmount: number,
-    imageLoader: ImageWindowLoader
-) {
+export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[]) {
+    const { x, y, w, h, theme, ctx, imageLoader, col, row } = args;
     const bubbleHeight = 24;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
@@ -468,7 +404,7 @@ export function drawDrilldownCell(
 
     const renderBoxes: { x: number; width: number }[] = [];
     for (const el of data) {
-        if (renderX > x + width) break;
+        if (renderX > x + w) break;
         const textWidth = measureTextCached(el.text, ctx).width;
         let imgWidth = 0;
         if (el.img !== undefined) {
@@ -491,7 +427,7 @@ export function drawDrilldownCell(
         roundedRect(
             ctx,
             Math.floor(rectInfo.x),
-            y + (height - bubbleHeight) / 2,
+            y + (h - bubbleHeight) / 2,
             Math.floor(rectInfo.width),
             bubbleHeight,
             6
@@ -518,7 +454,7 @@ export function drawDrilldownCell(
         roundedRect(
             ctx,
             Math.floor(rectInfo.x) + 0.5,
-            Math.floor(y + (height - bubbleHeight) / 2) + 0.5,
+            Math.floor(y + (h - bubbleHeight) / 2) + 0.5,
             Math.round(rectInfo.width),
             bubbleHeight,
             6
@@ -552,20 +488,10 @@ export function drawDrilldownCell(
                     srcHeight = srcWidth;
                 }
                 ctx.beginPath();
-                roundedRect(ctx, drawX, y + height / 2 - imgSize / 2, imgSize, imgSize, 3);
+                roundedRect(ctx, drawX, y + h / 2 - imgSize / 2, imgSize, imgSize, 3);
                 ctx.save();
                 ctx.clip();
-                ctx.drawImage(
-                    img,
-                    srcX,
-                    srcY,
-                    srcWidth,
-                    srcHeight,
-                    drawX,
-                    y + height / 2 - imgSize / 2,
-                    imgSize,
-                    imgSize
-                );
+                ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, drawX, y + h / 2 - imgSize / 2, imgSize, imgSize);
                 ctx.restore();
 
                 drawX += imgSize + 4;
@@ -574,29 +500,18 @@ export function drawDrilldownCell(
 
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.fillText(d.text, drawX, y + height / 2 + 4);
+        ctx.fillText(d.text, drawX, y + h / 2 + 4);
     });
 }
 
-export function drawImage(
-    ctx: CanvasRenderingContext2D,
-    theme: Theme,
-    data: string[],
-    col: number,
-    row: number,
-    x: number,
-    y: number,
-    _width: number,
-    height: number,
-    _hoverAmount: number,
-    imageLoader: ImageWindowLoader
-) {
+export function drawImage(args: BaseDrawArgs, data: readonly string[]) {
+    const { x, y, h, col, row, theme, ctx, imageLoader } = args;
     let drawX = x + theme.cellHorizontalPadding;
     data.filter(s => s.length > 0).forEach(i => {
         const img = imageLoader.loadOrGetImage(i, col, row);
 
         if (img !== undefined) {
-            const imgHeight = height - theme.cellVerticalPadding * 2;
+            const imgHeight = h - theme.cellVerticalPadding * 2;
             const imgWidth = img.width * (imgHeight / img.height);
             roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, 4);
             ctx.save();

@@ -7,6 +7,5 @@ export const protectedCellRenderer: InternalCellRenderer<ProtectedCell> = {
     kind: GridCellKind.Protected,
     needsHover: false,
     needsHoverPosition: false,
-    render: (ctx, theme, _col, _row, _cell, x, y, w, h, highlighted, hoverAmount) =>
-        drawProtectedCell(ctx, theme, x, y, w, h, hoverAmount, !highlighted),
+    render: drawProtectedCell,
 };

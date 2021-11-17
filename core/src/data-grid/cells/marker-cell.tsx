@@ -7,6 +7,5 @@ export const markerCellRenderer: InternalCellRenderer<MarkerCell> = {
     kind: InnerGridCellKind.Marker,
     needsHover: true,
     needsHoverPosition: false,
-    render: (ctx, theme, _col, _row, cell, x, y, w, h, _highlighted, hoverAmount) =>
-        drawMarkerRowCell(ctx, theme, cell.row, cell.checked, cell.markerKind, x, y, w, h, hoverAmount),
+    render: a => drawMarkerRowCell(a, a.cell.row, a.cell.checked, a.cell.markerKind),
 };

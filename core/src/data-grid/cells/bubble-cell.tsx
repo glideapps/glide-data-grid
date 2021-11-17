@@ -10,8 +10,7 @@ export const bubbleCellRenderer: InternalCellRenderer<BubbleCell> = {
     kind: GridCellKind.Bubble,
     needsHover: false,
     needsHoverPosition: false,
-    render: (ctx, theme, _col, _row, cell, x, y, w, h, highlighted, hoverAmount) =>
-        drawBubbles(ctx, theme, cell.data, x, y, w, h, hoverAmount, highlighted),
+    render: a => drawBubbles(a, a.cell.data),
     getEditor: () => p => {
         const { onKeyDown, value } = p;
         return <BubblesOverlayEditor bubbles={value.data} onKeyDown={onKeyDown} />;

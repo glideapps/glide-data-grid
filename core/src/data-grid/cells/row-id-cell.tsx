@@ -7,6 +7,5 @@ export const rowIDCellRenderer: InternalCellRenderer<RowIDCell> = {
     kind: GridCellKind.RowID,
     needsHover: false,
     needsHoverPosition: false,
-    render: (ctx, theme, _col, _row, cell, x, y, w, h, _highlighted, hoverAmount) =>
-        drawTextCell(ctx, theme, cell.data, x, y, w, h, hoverAmount, theme.textLight),
+    render: a => drawTextCell(a, a.cell.data, a.theme.textLight),
 };

@@ -6,22 +6,27 @@ export type HoverInfo = readonly [readonly [number, number | undefined], readonl
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
-type DrawCallback<T extends InnerGridCell> = (
-    ctx: CanvasRenderingContext2D,
-    theme: Theme,
-    col: number,
-    row: number,
-    cell: T,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    highlighted: boolean,
-    hoverAmount: number,
-    hoverX: number | undefined,
-    hoverY: number | undefined,
-    imageLoader: ImageWindowLoader
-) => void;
+export interface BaseDrawArgs {
+    ctx: CanvasRenderingContext2D;
+    theme: Theme;
+    col: number;
+    row: number;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    highlighted: boolean;
+    hoverAmount: number;
+    hoverX: number | undefined;
+    hoverY: number | undefined;
+    imageLoader: ImageWindowLoader;
+}
+
+interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {
+    cell: T;
+}
+
+type DrawCallback<T extends InnerGridCell> = (args: DrawArgs<T>) => void;
 
 type ProvideEditorCallback<T extends InnerGridCell> = (
     cell: T

@@ -71,7 +71,7 @@ export function drawCell(
         : drawCustomCell?.({ ctx, cell, theme, rect: { x, y, width: w, height: h }, hoverAmount }) === true;
     if (!drawn && cell.kind !== GridCellKind.Custom) {
         const r = CellRenderers[cell.kind];
-        r.render(ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader);
+        r.render({ ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader });
     }
 }
 

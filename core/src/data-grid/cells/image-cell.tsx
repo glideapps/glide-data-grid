@@ -10,8 +10,7 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
     kind: GridCellKind.Image,
     needsHover: false,
     needsHoverPosition: false,
-    render: (ctx, theme, col, row, cell, x, y, w, h, _highlighted, hoverAmount, _hoverX, _hoverY, imageLoader) =>
-        drawImage(ctx, theme, cell.displayData ?? cell.data, col, row, x, y, w, h, hoverAmount, imageLoader),
+    render: a => drawImage(a, a.cell.displayData ?? a.cell.data),
     onDelete: c => ({
         ...c,
         data: [],

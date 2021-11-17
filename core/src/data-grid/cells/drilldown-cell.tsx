@@ -10,8 +10,7 @@ export const drilldownCellRenderer: InternalCellRenderer<DrilldownCell> = {
     kind: GridCellKind.Drilldown,
     needsHover: false,
     needsHoverPosition: false,
-    render: (ctx, theme, col, row, cell, x, y, w, h, _highlighted, hoverAmount, _hoverX, _hoverY, imageLoader) =>
-        drawDrilldownCell(ctx, theme, cell.data, col, row, x, y, w, h, hoverAmount, imageLoader),
+    render: a => drawDrilldownCell(a, a.cell.data),
     getEditor: () => p => {
         const { onKeyDown, value } = p;
         return <DrilldownOverlayEditor drilldowns={value.data} onKeyDown={onKeyDown} />;

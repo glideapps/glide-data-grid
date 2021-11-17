@@ -10,8 +10,7 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
     kind: GridCellKind.Uri,
     needsHover: false,
     needsHoverPosition: false,
-    render: (ctx, theme, _col, _row, cell, x, y, w, h, _highlighted, hoverAmount) =>
-        drawTextCell(ctx, theme, cell.data, x, y, w, h, hoverAmount),
+    render: a => drawTextCell(a, a.cell.data),
     onDelete: c => ({
         ...c,
         data: "",

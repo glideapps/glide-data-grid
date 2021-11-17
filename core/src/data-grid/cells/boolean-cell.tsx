@@ -7,8 +7,7 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     kind: GridCellKind.Boolean,
     needsHover: true,
     needsHoverPosition: true,
-    render: (ctx, theme, _col, _row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY) =>
-        drawBoolean(ctx, theme, cell.data, x, y, w, h, hoverAmount, highlighted, cell.allowEdit, hoverX, hoverY),
+    render: a => drawBoolean(a, a.cell.data, a.cell.allowEdit),
     onDelete: c => ({
         ...c,
         data: false,
