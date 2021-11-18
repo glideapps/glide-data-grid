@@ -70,11 +70,14 @@ type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
 type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parameters<T>) => TNewReturn;
 
+type HeaderSelectionTrigger = "selection" | "drag" | "header" | "group";
+
 export interface DataEditorProps extends Props {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
     readonly onRowAppended?: () => Promise<"top" | "bottom" | undefined> | void;
     readonly onHeaderClicked?: (colIndex: number) => void;
+    readonly onGroupHeaderClicked?: (colIndex: number) => void;
     readonly onCellClicked?: (cell: readonly [number, number]) => void;
 
     readonly trailingRowOptions?: {
@@ -97,7 +100,7 @@ export interface DataEditorProps extends Props {
     readonly onSelectedRowsChange?: (newRows: CompactSelection) => void;
 
     readonly selectedColumns?: DataGridSearchProps["selectedColumns"];
-    readonly onSelectedColumnsChange?: (newColumns: CompactSelection) => void;
+    readonly onSelectedColumnsChange?: (newColumns: CompactSelection, trigger: HeaderSelectionTrigger) => void;
 
     /**
      * @deprecated Use drawCell instead. This will be removed in a future version.
@@ -168,6 +171,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         getCellContent,
         onCellClicked,
         onHeaderClicked,
+        onGroupHeaderClicked,
         onCellEdited,
         enableDownfill = false,
         onRowAppended,
@@ -210,9 +214,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const mangledOuterCols = selectedColumnsOuter?.offset(rowMarkerOffset);
     const selectedColumns = mangledOuterCols ?? selectedColumnsInner;
 
-    const mangledSetSelectedColumns = React.useCallback(
-        (newColumns: CompactSelection) => {
-            setSelectedColumnsOuter?.(newColumns.offset(-rowMarkerOffset));
+    const setSelectedColumns = React.useCallback(
+        (newColumns: CompactSelection, trigger: HeaderSelectionTrigger) => {
+            if (setSelectedColumnsOuter !== undefined) {
+                setSelectedColumnsOuter?.(newColumns.offset(-rowMarkerOffset), trigger);
+            } else {
+                setSelectedColumnsInner(newColumns);
+            }
         },
         [rowMarkerOffset, setSelectedColumnsOuter]
     );
@@ -222,9 +230,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     }, [columns]);
 
     const headerHeight = enableGroups ? rawHeaderHeight * 2 : rawHeaderHeight;
-
-    const setSelectedColumns =
-        setSelectedColumnsOuter !== undefined ? mangledSetSelectedColumns : setSelectedColumnsInner;
 
     const [visibleRegion, setVisibleRegion] = React.useState<Rectangle & { tx?: number; ty?: number }>({
         x: 0,
@@ -478,7 +483,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     setGridSelection(undefined);
                     setOverlay(undefined);
                     focus();
-                    setSelectedColumns(CompactSelection.empty());
+                    setSelectedColumns(CompactSelection.empty(), "selection");
                     const isSelected = selectedRows.hasIndex(row);
 
                     const lastHighlighted = lastSelectedRowRef.current;
@@ -537,7 +542,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             focus();
                         } else {
                             setGridSelection({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
-                            setSelectedColumns(CompactSelection.empty());
+                            setSelectedColumns(CompactSelection.empty(), "selection");
                             setSelectedRows(CompactSelection.empty());
                             lastSelectedRowRef.current = undefined;
                             setOverlay(undefined);
@@ -564,19 +569,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         const newSlice: Slice = [Math.min(lastCol, col), Math.max(lastCol, col) + 1];
 
                         if (isMultiKey) {
-                            setSelectedColumns(selectedColumns.add(newSlice));
+                            setSelectedColumns(selectedColumns.add(newSlice), "header");
                         } else {
-                            setSelectedColumns(CompactSelection.fromSingleSelection(newSlice));
+                            setSelectedColumns(CompactSelection.fromSingleSelection(newSlice), "header");
                         }
                     } else if (isMultiKey) {
                         if (selectedColumns.hasIndex(col)) {
-                            setSelectedColumns(selectedColumns.remove(col));
+                            setSelectedColumns(selectedColumns.remove(col), "header");
                         } else {
-                            setSelectedColumns(selectedColumns.add(col));
+                            setSelectedColumns(selectedColumns.add(col), "header");
                         }
                         lastSelectedColRef.current = col;
                     } else {
-                        setSelectedColumns(CompactSelection.fromSingleSelection(col));
+                        setSelectedColumns(CompactSelection.fromSingleSelection(col), "header");
                         lastSelectedColRef.current = col;
                     }
                     setSelectedRows(CompactSelection.empty());
@@ -587,7 +592,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 setGridSelection(undefined);
                 setOverlay(undefined);
                 focus();
-                setSelectedColumns(CompactSelection.empty());
+                setSelectedColumns(CompactSelection.empty(), "selection");
                 setSelectedRows(CompactSelection.empty());
                 lastSelectedRowRef.current = undefined;
                 lastSelectedColRef.current = undefined;
@@ -619,12 +624,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         for (let index = start; index <= end; index++) {
                             newVal = newVal.remove(index);
                         }
-                        setSelectedColumns(newVal);
+                        setSelectedColumns(newVal, "group");
                     } else {
-                        setSelectedColumns(selectedColumns.add([start, end + 1]));
+                        setSelectedColumns(selectedColumns.add([start, end + 1]), "group");
                     }
                 } else {
-                    setSelectedColumns(CompactSelection.fromSingleSelection([start, end + 1]));
+                    setSelectedColumns(CompactSelection.fromSingleSelection([start, end + 1]), "group");
                 }
             }
         },
@@ -662,6 +667,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 onHeaderClicked?.(args.location[0] - rowMarkerOffset);
             }
 
+            if (args.kind === "group-header") {
+                onGroupHeaderClicked?.(args.location[0] - rowMarkerOffset);
+            }
+
             if (args.kind !== "cell" || gridSelection === undefined || mouse?.previousSelection?.cell === undefined)
                 return;
             const [col, row] = args.location;
@@ -690,6 +699,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             gridSelection,
             mangledOnCellEdited,
             onCellClicked,
+            onGroupHeaderClicked,
             onHeaderClicked,
             reselect,
             rowMarkerOffset,
@@ -721,7 +731,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onColumnMovedImpl = React.useCallback(
         (startIndex: number, endIndex: number) => {
             onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset);
-            setSelectedColumns(CompactSelection.fromSingleSelection(endIndex));
+            setSelectedColumns(CompactSelection.fromSingleSelection(endIndex), "drag");
         },
         [onColumnMoved, rowMarkerOffset, setSelectedColumns]
     );
@@ -1031,7 +1041,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
                     setGridSelection(undefined);
                     setSelectedRows(CompactSelection.empty());
-                    setSelectedColumns(CompactSelection.empty());
+                    setSelectedColumns(CompactSelection.empty(), "selection");
                     return;
                 }
 
