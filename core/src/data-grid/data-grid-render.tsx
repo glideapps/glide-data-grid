@@ -317,7 +317,9 @@ function drawGroups(
     translateX: number,
     headerHeight: number,
     theme: Theme,
-    verticalBorder: (col: number) => boolean
+    spriteManager: SpriteManager,
+    verticalBorder: (col: number) => boolean,
+    getGroupDetails: (groupName: string) => { name: string; icon?: string }
 ) {
     const trueHeaderHeight = headerHeight / 2;
     const xPad = 8;
@@ -326,7 +328,7 @@ function drawGroups(
     ctx.textBaseline = "middle";
     for (let index = 0; index < effectiveCols.length; index++) {
         const startCol = effectiveCols[index];
-        const group = startCol.group;
+        const group = startCol.group === undefined ? undefined : getGroupDetails(startCol.group);
 
         let end = index + 1;
         let boxWidth = startCol.width;
@@ -335,7 +337,7 @@ function drawGroups(
         }
         while (
             end < effectiveCols.length &&
-            effectiveCols[end].group === group &&
+            effectiveCols[end].group === startCol.group &&
             effectiveCols[end].sticky === effectiveCols[index].sticky
         ) {
             const endCol = effectiveCols[end];
@@ -358,7 +360,20 @@ function drawGroups(
 
         ctx.fillStyle = theme.textGroupHeader ?? theme.textHeader;
         if (group !== undefined) {
-            ctx.fillText(group, localX + delta + xPad, trueHeaderHeight / 2 + 1);
+            let drawX = localX;
+            if (group.icon !== undefined) {
+                spriteManager.drawSprite(
+                    group.icon,
+                    "normal",
+                    ctx,
+                    drawX + delta + xPad,
+                    (trueHeaderHeight - 20) / 2,
+                    20,
+                    theme
+                );
+                drawX += 26;
+            }
+            ctx.fillText(group.name, drawX + delta + xPad, trueHeaderHeight / 2 + 1);
         }
 
         if (verticalBorder(startCol.sourceIndex)) {
@@ -403,7 +418,8 @@ function drawGridHeaders(
     outerTheme: Theme,
     spriteManager: SpriteManager,
     hoverValues: HoverValues,
-    verticalBorder: (col: number) => boolean
+    verticalBorder: (col: number) => boolean,
+    getGroupDetails: (groupName: string) => { name: string; icon?: string }
 ) {
     if (headerHeight === 0) return;
     // FIXME: This should respect the per-column theme
@@ -554,7 +570,18 @@ function drawGridHeaders(
 
     ctx.textBaseline = "alphabetic";
     if (enableGroups) {
-        drawGroups(ctx, effectiveCols, width, height, translateX, headerHeight, outerTheme, verticalBorder);
+        drawGroups(
+            ctx,
+            effectiveCols,
+            width,
+            height,
+            translateX,
+            headerHeight,
+            outerTheme,
+            spriteManager,
+            verticalBorder,
+            getGroupDetails
+        );
     }
 }
 
@@ -960,6 +987,7 @@ export function drawGrid(
     lastRowSticky: boolean,
     rows: number,
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
+    getGroupDetails: (groupName: string) => { name: string; icon?: string },
     drawCustomCell: DrawCustomCellCallback | undefined,
     prelightCells: CellList | undefined,
     imageLoader: ImageWindowLoader,
@@ -1039,7 +1067,8 @@ export function drawGrid(
             theme,
             spriteManager,
             hoverValues,
-            verticalBorder
+            verticalBorder,
+            getGroupDetails
         );
 
         if (enableGroups) {

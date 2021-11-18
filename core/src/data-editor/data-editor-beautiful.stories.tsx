@@ -2129,6 +2129,10 @@ export const ColumnGroups: React.VFC = () => {
                 getCellContent={getCellContent}
                 columns={cols}
                 rows={1000}
+                getGroupDetails={g => ({
+                    name: g,
+                    icon: GridColumnIcon.HeaderCode,
+                })}
                 rowMarkers="both"
             />
         </BeautifulWrapper>

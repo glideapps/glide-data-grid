@@ -60,6 +60,7 @@ export interface DataGridProps {
     readonly className?: string;
 
     readonly getCellContent: (cell: readonly [number, number]) => InnerGridCell;
+    readonly getGroupDetails?: (groupName: string) => { name: string; icon?: string };
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
     readonly selectedRows?: CompactSelection;
@@ -160,6 +161,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         isDraggable,
         allowResize,
         disabledRows,
+        getGroupDetails,
         prelightCells,
         headerIcons,
         verticalBorder,
@@ -435,6 +437,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             lastRowSticky,
             rows,
             getCellContent,
+            getGroupDetails ?? (name => ({ name })),
             drawCustomCell,
             prelightCells,
             imageLoader,
@@ -473,6 +476,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         imageLoader,
         rows,
         getCellContent,
+        getGroupDetails,
         drawCustomCell,
         prelightCells,
         spriteManager,

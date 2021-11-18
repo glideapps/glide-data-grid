@@ -467,7 +467,9 @@ export enum GridCellKind {
     Boolean = "boolean",
     Loading = "loading",
     Markdown = "markdown",
+    Drilldown = "drilldown",
     Protected = "protected",
+    Custom = "custom",
 }
 ```
 
