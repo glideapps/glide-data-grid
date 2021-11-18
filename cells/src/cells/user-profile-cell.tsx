@@ -1,4 +1,6 @@
-import { CustomCell, measureTextCached } from "@glideapps/glide-data-grid";
+/* eslint-disable react/display-name */
+import * as React from "react";
+import { CustomCell, measureTextCached, TextCellEntry } from "@glideapps/glide-data-grid";
 import { CustomCellRenderer } from "../types";
 
 interface UserProfileCellProps {
@@ -55,19 +57,40 @@ const renderer: CustomCellRenderer<UserProfileCell> = {
         if (name !== undefined) {
             ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
             ctx.fillStyle = theme.textDark;
-            const smolMetrics = measureTextCached("A", ctx);
-            ctx.fillText(
-                name,
-                drawX + radius * 2 + xPad,
-                rect.y + rect.height / 2 + smolMetrics.actualBoundingBoxAscent / 2
-            );
+            ctx.textBaseline = "middle";
+            ctx.fillText(name, drawX + radius * 2 + xPad, rect.y + rect.height / 2);
         }
 
         ctx.restore();
 
         return true;
     },
-    provideEditor: () => undefined,
+    provideEditor: () => p => {
+        const { isHighlighted, onChange, value, onFinishedEditing } = p;
+        return (
+            <TextCellEntry
+                highlight={isHighlighted}
+                autoFocus={true}
+                value={value.data.name ?? ""}
+                onKeyDown={e => {
+                    if (e.key === "Enter") {
+                        onFinishedEditing();
+                        e.stopPropagation();
+                        e.preventDefault();
+                    }
+                }}
+                onChange={e =>
+                    onChange({
+                        ...value,
+                        data: {
+                            ...value.data,
+                            name: e.target.value,
+                        },
+                    })
+                }
+            />
+        );
+    },
 };
 
 export default renderer;
