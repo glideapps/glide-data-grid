@@ -108,7 +108,9 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     const portal = createPortal(
         <ClickOutsideContainer onClickOutside={onClickOutside}>
             <DataGridOverlayEditorStyle targetRect={target} onMouseDown={f} onClick={f}>
-                <div className="clip-region">{editor}</div>
+                <div className="clip-region" onKeyDown={CustomEditor === undefined ? undefined : onKeyDown}>
+                    {editor}
+                </div>
             </DataGridOverlayEditorStyle>
         </ClickOutsideContainer>,
         portalElement
