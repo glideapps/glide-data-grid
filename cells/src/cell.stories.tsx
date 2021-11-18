@@ -8,6 +8,7 @@ import { SparklineCell } from "./cells/sparkline-cell";
 import range from "lodash/range";
 import uniq from "lodash/uniq";
 import { TagsCell } from "./cells/tags-cell";
+import { UserProfileCell } from "./cells/user-profile-cell";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -202,6 +203,24 @@ export const CustomCells: React.VFC = () => {
                                 yAxis: [-50, 50],
                             },
                         } as SparklineCell;
+                    } else if (col === 3) {
+                        num = row + 1;
+                        rand();
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "tags-cell",
+                                possibleTags: possibleTags,
+                                tags: uniq([
+                                    possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
+                                    possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
+                                    possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
+                                    possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
+                                ]),
+                            },
+                        } as TagsCell;
                     }
                     num = row + 1;
                     rand();
@@ -210,16 +229,13 @@ export const CustomCells: React.VFC = () => {
                         allowOverlay: true,
                         copyData: "4",
                         data: {
-                            kind: "tags-cell",
-                            possibleTags: possibleTags,
-                            tags: uniq([
-                                possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
-                                possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
-                                possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
-                                possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
-                            ]),
+                            kind: "user-profile-cell",
+                            image: row % 2 ? undefined : "https://i.redd.it/aqc1hwhalsz71.jpg",
+                            initial: "B",
+                            tint: "#F1D86E",
+                            name: row % 5 ? undefined : "Bee bb",
                         },
-                    } as TagsCell;
+                    } as UserProfileCell;
                 }}
                 columns={[
                     {
@@ -237,6 +253,10 @@ export const CustomCells: React.VFC = () => {
                     {
                         title: "Tags",
                         width: 250,
+                    },
+                    {
+                        title: "Profile",
+                        width: 150,
                     },
                 ]}
                 rows={500}

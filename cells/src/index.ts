@@ -2,11 +2,12 @@ import { GridCellKind, DataEditorProps, ProvideEditorCallback, GridCell } from "
 import StarCellRenderer from "./cells/star-cell";
 import SparklineCellRenderer from "./cells/sparkline-cell";
 import TagsCellRenderer from "./cells/tags-cell";
+import UserProfileCellRenderer from "./cells/user-profile-cell";
 import * as React from "react";
 
 type DrawCallback = NonNullable<DataEditorProps["drawCell"]>;
 
-const cells = [StarCellRenderer, SparklineCellRenderer, TagsCellRenderer];
+const cells = [StarCellRenderer, SparklineCellRenderer, TagsCellRenderer, UserProfileCellRenderer];
 
 export function useExtraCells(): {
     drawCell: DrawCallback;

@@ -11,4 +11,5 @@ export { default as DataEditorContainer } from "./data-editor-container/data-gri
 export type { Theme } from "./common/styles";
 export { parseToRgba } from "./data-grid/color-parser";
 export { measureTextCached } from "./data-grid/data-grid-lib";
+export { default as TextCellEntry } from "./growing-entry/growing-entry";
 export default DataEditor;
