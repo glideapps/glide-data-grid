@@ -11,8 +11,9 @@
                 "targets": {
                     "firefox": "60",
                     "chrome": "67",
-                    "safari": "13"
-                }
+                    "safari": "12.1"
+                },
+                "exclude": ["@babel/plugin-transform-template-literals"]
             }
         ],
         "@babel/preset-react",

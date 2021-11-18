@@ -66,19 +66,12 @@ const renderer: CustomCellRenderer<UserProfileCell> = {
         return true;
     },
     provideEditor: () => p => {
-        const { isHighlighted, onChange, value, onFinishedEditing } = p;
+        const { isHighlighted, onChange, value } = p;
         return (
             <TextCellEntry
                 highlight={isHighlighted}
                 autoFocus={true}
                 value={value.data.name ?? ""}
-                onKeyDown={e => {
-                    if (e.key === "Enter") {
-                        onFinishedEditing();
-                        e.stopPropagation();
-                        e.preventDefault();
-                    }
-                }}
                 onChange={e =>
                     onChange({
                         ...value,

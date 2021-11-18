@@ -21,7 +21,7 @@ import { SimpleThemeWrapper } from "../stories/story-utils";
 import { useEventListener } from "../common/utils";
 import { useLayer } from "react-laag";
 import { SpriteMap } from "../data-grid/data-grid-sprites";
-import { DataEditorRef, Theme } from "..";
+import { DataEditorRef } from "..";
 import range from "lodash/range";
 
 faker.seed(1337);
@@ -2129,12 +2129,86 @@ export const ColumnGroups: React.VFC = () => {
                 getCellContent={getCellContent}
                 columns={cols}
                 rows={1000}
+                getGroupDetails={g => ({
+                    name: g,
+                    icon: GridColumnIcon.HeaderCode,
+                })}
                 rowMarkers="both"
             />
         </BeautifulWrapper>
     );
 };
 (ColumnGroups as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+function useCollapsableColumnGroups(cols: readonly GridColumn[]) {
+    const [collapsed, setCollapsed] = React.useState<readonly string[]>([]);
+
+    const onGroupHeaderClicked = React.useCallback(
+        (colIndex: number) => {
+            const group = cols[colIndex].group ?? "";
+            setCollapsed(cv => (cv.includes(group) ? cv.filter(g => g !== group) : [...cv, group]));
+        },
+        [cols]
+    );
+
+    const [selectedColumns, setSelectedColumns] = React.useState<CompactSelection>(CompactSelection.empty());
+
+    const setCols = React.useCallback((newVal: CompactSelection, trigger: string) => {
+        if (trigger === "group") return;
+
+        setSelectedColumns(newVal);
+    }, []);
+
+    const columns = React.useMemo(() => {
+        return cols.map(c => {
+            if (!collapsed.includes(c.group ?? "")) return c;
+            return {
+                ...c,
+                width: 8,
+            };
+        });
+    }, [collapsed, cols]);
+
+    return {
+        columns,
+        onGroupHeaderClicked,
+        selectedColumns,
+        onSelectedColumnsChange: setCols,
+    };
+}
+
+export const ColumnGroupCollapse: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(100, true, true);
+
+    const groupHeaderArgs = useCollapsableColumnGroups(cols);
+
+    return (
+        <BeautifulWrapper
+            title="Group collapse"
+            description={
+                <>
+                    <Description>
+                        Through clever usage of <PropName>onGroupHeaderClicked</PropName> you can implement group
+                        collapsing. This is a very basic version however it is possible to go much further.
+                    </Description>
+                    <MoreInfo>Cells under a certain size will not attempt to render to save some frames.</MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                {...groupHeaderArgs}
+                getCellContent={getCellContent}
+                rows={1000}
+                rowMarkers="both"
+            />
+        </BeautifulWrapper>
+    );
+};
+(ColumnGroupCollapse as any).parameters = {
     options: {
         showPanel: false,
     },

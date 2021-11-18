@@ -231,6 +231,9 @@ IF `markdownDivCreateNode` is specified, then it will be used to render Markdown
 ---
 
 ```ts
+/**
+ * @deprecated Use drawCell instead. This will be removed in a future version.
+ */
 drawCustomCell?: (
     ctx: CanvasRenderingContext2D,
     cell: GridCell,
@@ -239,7 +242,25 @@ drawCustomCell?: (
 ) => boolean;
 ```
 
-You can specify `drawCustomCell` to enable rendering your own cells. The Grid will call this for every cell it needs to render. It should either render the cell and return `true`, or not render anything and return `false`, in which case the Grid will render the cell.
+Deprecated. Will be removed in a future version.
+
+---
+
+```ts
+drawCell?: (args: {
+    ctx: CanvasRenderingContext2D;
+    cell: GridCell;
+    theme: Theme;
+    rect: Rectangle;
+    hoverAmount: number;
+    hoverX: number | undefined;
+    hoverY: number | undefined;
+    highlighted: boolean;
+    imageLoader: ImageWindowLoader;
+}) => boolean;
+```
+
+You can specify `drawCell` to enable rendering your own cells. The Grid will call this for every cell it needs to render. It should either render the cell and return `true`, or not render anything and return `false`, in which case the Grid will render the cell.
 
 ---
 
@@ -282,6 +303,24 @@ maxColumnWidth?: number;
 
 If `maxColumnWidth` is set with a value greater than 50, then columns will have a maximum size of that many pixels.
 If the value is less than 50, it will be increased to 50. If it isn't set, the default value will be 500.
+
+---
+
+```ts
+readonly selectedColumns?: CompactSelection;
+readonly onSelectedColumnsChange?: (newColumns: CompactSelection, trigger: HeaderSelectionTrigger) => void;
+```
+
+Controls header selection. If not provided default header selection behavior will be applied.
+
+---
+
+```ts
+readonly selectedRows?: CompactSelection;
+readonly onSelectedRowsChange?: (newRows: CompactSelection) => void;
+```
+
+Controls row selection. If not provided default row selection behavior will be applied.
 
 ## Types
 
@@ -341,6 +380,12 @@ The Grid supports the following kinds of cells:
 export type GridCell = EditableGridCell | BubbleCell | RowIDCell | LoadingCell | ProtectedCell | DrilldownCell;
 
 export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell | UriCell | NumberCell;
+
+interface BaseGridCell {
+    readonly allowOverlay: boolean;
+    readonly style?: "normal" | "faded";
+    readonly themeOverride?: Partial<Theme>;
+}
 
 interface TextCell extends BaseGridCell {
     readonly kind: GridCellKind.Text;
@@ -422,7 +467,9 @@ export enum GridCellKind {
     Boolean = "boolean",
     Loading = "loading",
     Markdown = "markdown",
+    Drilldown = "drilldown",
     Protected = "protected",
+    Custom = "custom",
 }
 ```
 

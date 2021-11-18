@@ -60,6 +60,7 @@ export interface DataGridProps {
     readonly className?: string;
 
     readonly getCellContent: (cell: readonly [number, number]) => InnerGridCell;
+    readonly getGroupDetails?: (groupName: string) => { name: string; icon?: string };
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
     readonly selectedRows?: CompactSelection;
@@ -121,7 +122,7 @@ type DamageUpdateList = readonly {
 
 export interface DataGridRef {
     focus: () => void;
-    getBounds: (col: number, row: number) => Rectangle | undefined;
+    getBounds: (col: number, row?: number) => Rectangle | undefined;
     damage: (cells: DamageUpdateList) => void;
 }
 
@@ -160,6 +161,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         isDraggable,
         allowResize,
         disabledRows,
+        getGroupDetails,
         prelightCells,
         headerIcons,
         verticalBorder,
@@ -435,6 +437,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             lastRowSticky,
             rows,
             getCellContent,
+            getGroupDetails ?? (name => ({ name })),
             drawCustomCell,
             prelightCells,
             imageLoader,
@@ -473,6 +476,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         imageLoader,
         rows,
         getCellContent,
+        getGroupDetails,
         drawCustomCell,
         prelightCells,
         spriteManager,
@@ -923,7 +927,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     });
                 }
             },
-            getBounds: (col: number, row: number) => {
+            getBounds: (col: number, row?: number) => {
                 if (canvasRef === undefined || canvasRef.current === null) {
                     return undefined;
                 }

@@ -317,15 +317,18 @@ function drawGroups(
     translateX: number,
     headerHeight: number,
     theme: Theme,
-    verticalBorder: (col: number) => boolean
+    spriteManager: SpriteManager,
+    verticalBorder: (col: number) => boolean,
+    getGroupDetails: (groupName: string) => { name: string; icon?: string }
 ) {
     const trueHeaderHeight = headerHeight / 2;
     const xPad = 8;
     let x = 0;
     let clipX = 0;
+    ctx.textBaseline = "middle";
     for (let index = 0; index < effectiveCols.length; index++) {
         const startCol = effectiveCols[index];
-        const group = startCol.group;
+        const group = startCol.group === undefined ? undefined : getGroupDetails(startCol.group);
 
         let end = index + 1;
         let boxWidth = startCol.width;
@@ -334,7 +337,7 @@ function drawGroups(
         }
         while (
             end < effectiveCols.length &&
-            effectiveCols[end].group === group &&
+            effectiveCols[end].group === startCol.group &&
             effectiveCols[end].sticky === effectiveCols[index].sticky
         ) {
             const endCol = effectiveCols[end];
@@ -357,7 +360,20 @@ function drawGroups(
 
         ctx.fillStyle = theme.textGroupHeader ?? theme.textHeader;
         if (group !== undefined) {
-            ctx.fillText(group, localX + delta + xPad, trueHeaderHeight / 2 + 5);
+            let drawX = localX;
+            if (group.icon !== undefined) {
+                spriteManager.drawSprite(
+                    group.icon,
+                    "normal",
+                    ctx,
+                    drawX + delta + xPad,
+                    (trueHeaderHeight - 20) / 2,
+                    20,
+                    theme
+                );
+                drawX += 26;
+            }
+            ctx.fillText(group.name, drawX + delta + xPad, trueHeaderHeight / 2 + 1);
         }
 
         if (verticalBorder(startCol.sourceIndex)) {
@@ -383,6 +399,7 @@ function drawGroups(
     ctx.strokeStyle = theme.borderColor;
     ctx.lineWidth = 1;
     ctx.stroke();
+    ctx.textBaseline = "alphabetic";
 }
 
 function drawGridHeaders(
@@ -401,12 +418,14 @@ function drawGridHeaders(
     outerTheme: Theme,
     spriteManager: SpriteManager,
     hoverValues: HoverValues,
-    verticalBorder: (col: number) => boolean
+    verticalBorder: (col: number) => boolean,
+    getGroupDetails: (groupName: string) => { name: string; icon?: string }
 ) {
     if (headerHeight === 0) return;
     // FIXME: This should respect the per-column theme
     ctx.fillStyle = outerTheme.bgHeader;
     ctx.fillRect(0, 0, width, headerHeight);
+    ctx.textBaseline = "middle";
 
     const trueHeaderHeight = enableGroups ? headerHeight / 2 : headerHeight;
 
@@ -515,7 +534,7 @@ function drawGridHeaders(
         } else {
             ctx.fillStyle = fillStyle;
         }
-        ctx.fillText(c.title, drawX, y + (trueHeaderHeight / 2 + 5));
+        ctx.fillText(c.title, drawX, y + trueHeaderHeight / 2 + 1);
 
         if (hoveredBoolean && c.hasMenu === true) {
             ctx.beginPath();
@@ -549,8 +568,20 @@ function drawGridHeaders(
         x += c.width;
     }
 
+    ctx.textBaseline = "alphabetic";
     if (enableGroups) {
-        drawGroups(ctx, effectiveCols, width, height, translateX, headerHeight, outerTheme, verticalBorder);
+        drawGroups(
+            ctx,
+            effectiveCols,
+            width,
+            height,
+            translateX,
+            headerHeight,
+            outerTheme,
+            spriteManager,
+            verticalBorder,
+            getGroupDetails
+        );
     }
 }
 
@@ -730,22 +761,24 @@ function drawCells(
 
                 const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
 
-                drawCell(
-                    ctx,
-                    row,
-                    cell,
-                    c.sourceIndex,
-                    drawX,
-                    drawY,
-                    c.width,
-                    rh,
-                    highlighted,
-                    theme,
-                    drawCustomCell,
-                    imageLoader,
-                    hoverValue?.hoverAmount ?? 0,
-                    hoverInfo
-                );
+                if (c.width > 10) {
+                    drawCell(
+                        ctx,
+                        row,
+                        cell,
+                        c.sourceIndex,
+                        drawX,
+                        drawY,
+                        c.width,
+                        rh,
+                        highlighted,
+                        theme,
+                        drawCustomCell,
+                        imageLoader,
+                        hoverValue?.hoverAmount ?? 0,
+                        hoverInfo
+                    );
+                }
 
                 ctx.globalAlpha = 1;
                 toDraw--;
@@ -954,6 +987,7 @@ export function drawGrid(
     lastRowSticky: boolean,
     rows: number,
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
+    getGroupDetails: (groupName: string) => { name: string; icon?: string },
     drawCustomCell: DrawCustomCellCallback | undefined,
     prelightCells: CellList | undefined,
     imageLoader: ImageWindowLoader,
@@ -1033,7 +1067,8 @@ export function drawGrid(
             theme,
             spriteManager,
             hoverValues,
-            verticalBorder
+            verticalBorder,
+            getGroupDetails
         );
 
         if (enableGroups) {
