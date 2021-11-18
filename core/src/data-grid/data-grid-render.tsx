@@ -321,6 +321,7 @@ function drawGroups(
     const xPad = 8;
     let x = 0;
     let clipX = 0;
+    ctx.textBaseline = "middle";
     for (let index = 0; index < effectiveCols.length; index++) {
         const startCol = effectiveCols[index];
         const group = startCol.group;
@@ -355,7 +356,7 @@ function drawGroups(
 
         ctx.fillStyle = theme.textGroupHeader ?? theme.textHeader;
         if (group !== undefined) {
-            ctx.fillText(group, localX + delta + xPad, trueHeaderHeight / 2 + 5);
+            ctx.fillText(group, localX + delta + xPad, trueHeaderHeight / 2 + 1);
         }
 
         if (verticalBorder(startCol.sourceIndex)) {
@@ -381,6 +382,7 @@ function drawGroups(
     ctx.strokeStyle = theme.borderColor;
     ctx.lineWidth = 1;
     ctx.stroke();
+    ctx.textBaseline = "alphabetic";
 }
 
 function drawGridHeaders(
@@ -405,6 +407,7 @@ function drawGridHeaders(
     // FIXME: This should respect the per-column theme
     ctx.fillStyle = outerTheme.bgHeader;
     ctx.fillRect(0, 0, width, headerHeight);
+    ctx.textBaseline = "middle";
 
     const trueHeaderHeight = enableGroups ? headerHeight / 2 : headerHeight;
 
@@ -513,7 +516,7 @@ function drawGridHeaders(
         } else {
             ctx.fillStyle = fillStyle;
         }
-        ctx.fillText(c.title, drawX, y + (trueHeaderHeight / 2 + 5));
+        ctx.fillText(c.title, drawX, y + trueHeaderHeight / 2 + 1);
 
         if (hoveredBoolean && c.hasMenu === true) {
             ctx.beginPath();
@@ -547,6 +550,7 @@ function drawGridHeaders(
         x += c.width;
     }
 
+    ctx.textBaseline = "alphabetic";
     if (enableGroups) {
         drawGroups(ctx, effectiveCols, width, height, translateX, headerHeight, outerTheme, verticalBorder);
     }
