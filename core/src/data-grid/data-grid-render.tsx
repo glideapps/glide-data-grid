@@ -732,22 +732,24 @@ function drawCells(
 
                 const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
 
-                drawCell(
-                    ctx,
-                    row,
-                    cell,
-                    c.sourceIndex,
-                    drawX,
-                    drawY,
-                    c.width,
-                    rh,
-                    highlighted,
-                    theme,
-                    drawCustomCell,
-                    imageLoader,
-                    hoverValue?.hoverAmount ?? 0,
-                    hoverInfo
-                );
+                if (c.width > 10) {
+                    drawCell(
+                        ctx,
+                        row,
+                        cell,
+                        c.sourceIndex,
+                        drawX,
+                        drawY,
+                        c.width,
+                        rh,
+                        highlighted,
+                        theme,
+                        drawCustomCell,
+                        imageLoader,
+                        hoverValue?.hoverAmount ?? 0,
+                        hoverInfo
+                    );
+                }
 
                 ctx.globalAlpha = 1;
                 toDraw--;
