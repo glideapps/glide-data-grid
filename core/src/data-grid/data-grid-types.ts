@@ -74,6 +74,8 @@ export type DrawCustomCellCallback = (args: {
     cell: GridCell;
     theme: Theme;
     rect: Rectangle;
+    col: number;
+    row: number;
     hoverAmount: number;
     hoverX: number | undefined;
     hoverY: number | undefined;
