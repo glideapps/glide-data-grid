@@ -122,7 +122,7 @@ type DamageUpdateList = readonly {
 
 export interface DataGridRef {
     focus: () => void;
-    getBounds: (col: number, row: number) => Rectangle | undefined;
+    getBounds: (col: number, row?: number) => Rectangle | undefined;
     damage: (cells: DamageUpdateList) => void;
 }
 
@@ -927,7 +927,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                     });
                 }
             },
-            getBounds: (col: number, row: number) => {
+            getBounds: (col: number, row?: number) => {
                 if (canvasRef === undefined || canvasRef.current === null) {
                     return undefined;
                 }

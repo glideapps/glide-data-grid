@@ -135,6 +135,7 @@ export interface DataEditorProps extends Props {
 
 export interface DataEditorRef {
     updateCells: DataGridRef["damage"];
+    getBounds: DataGridRef["getBounds"];
 }
 
 const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorProps> = (p, forwardedRef) => {
@@ -247,6 +248,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         forwardedRef,
         () => ({
             updateCells: (...args) => gridRef.current?.damage(...args),
+            getBounds: (...args) => gridRef.current?.getBounds(...args),
         }),
         []
     );
