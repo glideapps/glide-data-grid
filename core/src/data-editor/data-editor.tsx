@@ -221,12 +221,22 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const setGridSelection = React.useCallback(
         (newVal: GridSelection | undefined) => {
             if (onGridSelectionChange !== undefined) {
-                onGridSelectionChange(newVal);
+                if (newVal === undefined) {
+                    onGridSelectionChange(undefined);
+                } else {
+                    onGridSelectionChange({
+                        cell: [newVal.cell[0] - rowMarkerOffset, newVal.cell[1]],
+                        range: {
+                            ...newVal.range,
+                            x: newVal.range.x - rowMarkerOffset,
+                        },
+                    });
+                }
             } else {
                 setGridSelectionInner(newVal);
             }
         },
-        [onGridSelectionChange]
+        [onGridSelectionChange, rowMarkerOffset]
     );
     const selectedRows = selectedRowsOuter ?? selectedRowsInner;
     const setSelectedRows = setSelectedRowsOuter ?? setSelectedRowsInner;
