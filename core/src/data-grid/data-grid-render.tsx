@@ -515,7 +515,7 @@ function drawGridHeaders(
             drawX += 26;
         }
 
-        if (hoveredBoolean && c.hasMenu === true) {
+        if (hoveredBoolean && c.hasMenu === true && c.width > 35) {
             const fadeWidth = 35;
             const fadeStart = c.width - fadeWidth;
             const fadeEnd = c.width - fadeWidth * 0.7;

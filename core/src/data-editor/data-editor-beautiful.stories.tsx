@@ -2165,10 +2165,15 @@ function useCollapsableColumnGroups(cols: readonly GridColumn[]) {
 
     const columns = React.useMemo(() => {
         return cols.map(c => {
-            if (!collapsed.includes(c.group ?? "")) return c;
+            if (!collapsed.includes(c.group ?? ""))
+                return {
+                    ...c,
+                    hasMenu: true,
+                };
             return {
                 ...c,
                 width: 8,
+                hasMenu: true,
             };
         });
     }, [collapsed, cols]);
