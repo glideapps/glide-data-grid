@@ -271,6 +271,7 @@ function drawGridLines(
     let x = 0.5;
     for (let index = 0; index < effectiveCols.length; index++) {
         const c = effectiveCols[index];
+        if (c.width === 0) continue;
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
         if (index === effectiveCols.length - 1 || verticalBorder(index + 1)) {
