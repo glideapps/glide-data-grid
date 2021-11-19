@@ -332,7 +332,7 @@ function drawGroups(
     ctx.textBaseline = "middle";
     for (let index = 0; index < effectiveCols.length; index++) {
         const startCol = effectiveCols[index];
-        const group = startCol.group === undefined ? undefined : getGroupDetails(startCol.group);
+        const group = getGroupDetails(startCol.group ?? "");
 
         const groupTheme = group?.overrideTheme === undefined ? theme : { ...theme, ...group.overrideTheme };
 
@@ -343,7 +343,7 @@ function drawGroups(
         }
         while (
             end < effectiveCols.length &&
-            effectiveCols[end].group === startCol.group &&
+            (effectiveCols[end].group ?? "") === (startCol.group ?? "") &&
             effectiveCols[end].sticky === effectiveCols[index].sticky
         ) {
             const endCol = effectiveCols[end];
@@ -448,7 +448,7 @@ function drawGridHeaders(
     // Assinging the context font too much can be expensive, it can be worth it to minimze this
     ctx.font = font;
     for (const c of effectiveCols) {
-        const groupTheme = c.group === undefined ? undefined : getGroupDetails(c.group).overrideTheme;
+        const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
         const theme =
             c.themeOverride === undefined && groupTheme === undefined
                 ? outerTheme
@@ -696,7 +696,7 @@ function drawCells(
             ctx.rect(drawX + diff, headerHeight + 1, c.width - diff, height - headerHeight - 1);
             ctx.clip();
 
-            const groupTheme = c.group === undefined ? undefined : getGroupDetails(c.group).overrideTheme;
+            const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
             const colTheme =
                 c.themeOverride === undefined && groupTheme === undefined
                     ? outerTheme

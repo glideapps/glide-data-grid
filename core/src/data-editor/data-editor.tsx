@@ -636,12 +636,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let start = col;
                 let end = col;
                 for (let i = col - 1; i >= rowMarkerOffset; i--) {
-                    if (needle.group !== mangledCols[i].group) break;
+                    if ((needle.group ?? "") !== (mangledCols[i].group ?? "")) break;
                     start--;
                 }
 
                 for (let i = col + 1; i < mangledCols.length; i++) {
-                    if (needle.group !== mangledCols[i].group) break;
+                    if ((needle.group ?? "") !== (mangledCols[i].group ?? "")) break;
                     end++;
                 }
 
