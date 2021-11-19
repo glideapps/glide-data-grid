@@ -25,7 +25,7 @@ import {
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
-import { drawCell, drawGrid, makeBuffers } from "./data-grid-render";
+import { drawCell, drawGrid, GroupDetailsCallback, makeBuffers } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
 import { browserIsFirefox } from "../common/browser-detect";
 import { CellRenderers } from "./cells";
@@ -60,7 +60,7 @@ export interface DataGridProps {
     readonly className?: string;
 
     readonly getCellContent: (cell: readonly [number, number]) => InnerGridCell;
-    readonly getGroupDetails?: (groupName: string) => { name: string; icon?: string };
+    readonly getGroupDetails?: GroupDetailsCallback;
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
     readonly selectedRows?: CompactSelection;

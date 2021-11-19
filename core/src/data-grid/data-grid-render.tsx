@@ -30,6 +30,10 @@ import { CellRenderers } from "./cells";
 
 type HoverInfo = readonly [readonly [number, number | undefined], readonly [number, number]];
 
+export type GroupDetailsCallback = (
+    groupName: string
+) => { name: string; icon?: string; overrideTheme?: Partial<Theme> };
+
 interface BlitData {
     readonly cellXOffset: number;
     readonly cellYOffset: number;
@@ -319,7 +323,7 @@ function drawGroups(
     theme: Theme,
     spriteManager: SpriteManager,
     verticalBorder: (col: number) => boolean,
-    getGroupDetails: (groupName: string) => { name: string; icon?: string }
+    getGroupDetails: GroupDetailsCallback
 ) {
     const trueHeaderHeight = headerHeight / 2;
     const xPad = 8;
@@ -419,7 +423,7 @@ function drawGridHeaders(
     spriteManager: SpriteManager,
     hoverValues: HoverValues,
     verticalBorder: (col: number) => boolean,
-    getGroupDetails: (groupName: string) => { name: string; icon?: string }
+    getGroupDetails: GroupDetailsCallback
 ) {
     if (headerHeight === 0) return;
     // FIXME: This should respect the per-column theme
@@ -648,6 +652,7 @@ function drawCells(
     rows: number,
     getRowHeight: (row: number) => number,
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
+    getGroupDetails: GroupDetailsCallback,
     selectedRows: CompactSelection,
     disabledRows: CompactSelection,
     lastRowSticky: boolean,
@@ -676,7 +681,11 @@ function drawCells(
             ctx.rect(drawX + diff, headerHeight + 1, c.width - diff, height - headerHeight - 1);
             ctx.clip();
 
-            const colTheme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
+            const groupTheme = c.group === undefined ? undefined : getGroupDetails(c.group).overrideTheme;
+            const colTheme =
+                c.themeOverride === undefined && groupTheme === undefined
+                    ? outerTheme
+                    : { ...outerTheme, ...groupTheme, ...c.themeOverride };
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
                 if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
                     return;
@@ -699,7 +708,7 @@ function drawCells(
                               allowOverlay: false,
                           };
 
-                const theme = cell.themeOverride === undefined ? outerTheme : { ...colTheme, ...cell.themeOverride };
+                const theme = cell.themeOverride === undefined ? colTheme : { ...colTheme, ...cell.themeOverride };
 
                 ctx.beginPath();
 
@@ -987,7 +996,7 @@ export function drawGrid(
     lastRowSticky: boolean,
     rows: number,
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
-    getGroupDetails: (groupName: string) => { name: string; icon?: string },
+    getGroupDetails: GroupDetailsCallback,
     drawCustomCell: DrawCustomCellCallback | undefined,
     prelightCells: CellList | undefined,
     imageLoader: ImageWindowLoader,
@@ -1136,6 +1145,7 @@ export function drawGrid(
                 rows,
                 getRowHeight,
                 getCellContent,
+                getGroupDetails,
                 selectedRows,
                 disabledRows,
                 lastRowSticky,
@@ -1244,6 +1254,7 @@ export function drawGrid(
         rows,
         getRowHeight,
         getCellContent,
+        getGroupDetails,
         selectedRows,
         disabledRows,
         lastRowSticky,
