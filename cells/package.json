@@ -1,6 +1,6 @@
 {
   "name": "@glideapps/glide-data-grid-cells",
-  "version": "3.1.1-alpha2",
+  "version": "3.1.1-alpha3",
   "description": "Extra cells for glide-data-grid",
   "main": "dist/js/index.js",
   "types": "dist/ts/index.d.ts",
@@ -30,7 +30,7 @@
     "canvas"
   ],
   "dependencies": {
-    "@glideapps/glide-data-grid": "3.1.1-alpha2"
+    "@glideapps/glide-data-grid": "3.1.1-alpha3"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
