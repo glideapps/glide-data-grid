@@ -317,7 +317,6 @@ function drawGroups(
     ctx: CanvasRenderingContext2D,
     effectiveCols: readonly MappedGridColumn[],
     width: number,
-    height: number,
     translateX: number,
     headerHeight: number,
     theme: Theme,
@@ -333,6 +332,8 @@ function drawGroups(
     for (let index = 0; index < effectiveCols.length; index++) {
         const startCol = effectiveCols[index];
         const group = startCol.group === undefined ? undefined : getGroupDetails(startCol.group);
+
+        const groupTheme = group?.overrideTheme === undefined ? theme : { ...theme, ...group.overrideTheme };
 
         let end = index + 1;
         let boxWidth = startCol.width;
@@ -359,10 +360,15 @@ function drawGroups(
         ctx.save();
         ctx.beginPath();
         const delta = startCol.sticky ? 0 : Math.max(0, clipX - localX);
-        ctx.rect(localX + delta, 0, boxWidth - delta, height);
+        ctx.rect(localX + delta, 0, boxWidth - delta, trueHeaderHeight);
         ctx.clip();
 
-        ctx.fillStyle = theme.textGroupHeader ?? theme.textHeader;
+        if (groupTheme.bgHeader !== theme.bgHeader) {
+            ctx.fillStyle = groupTheme.bgHeader;
+            ctx.fill();
+        }
+
+        ctx.fillStyle = groupTheme.textGroupHeader ?? groupTheme.textHeader;
         if (group !== undefined) {
             let drawX = localX;
             if (group.icon !== undefined) {
@@ -373,7 +379,7 @@ function drawGroups(
                     drawX + delta + xPad,
                     (trueHeaderHeight - 20) / 2,
                     20,
-                    theme
+                    groupTheme
                 );
                 drawX += 26;
             }
@@ -412,7 +418,6 @@ function drawGridHeaders(
     enableGroups: boolean,
     hoveredCol: number | undefined,
     width: number,
-    height: number,
     translateX: number,
     headerHeight: number,
     selectedColumns: CompactSelection,
@@ -442,7 +447,11 @@ function drawGridHeaders(
     // Assinging the context font too much can be expensive, it can be worth it to minimze this
     ctx.font = font;
     for (const c of effectiveCols) {
-        const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
+        const groupTheme = c.group === undefined ? undefined : getGroupDetails(c.group).overrideTheme;
+        const theme =
+            c.themeOverride === undefined && groupTheme === undefined
+                ? outerTheme
+                : { ...outerTheme, ...groupTheme, ...c.themeOverride };
         const f = `${theme.headerFontStyle} ${theme.fontFamily}`;
         if (font !== f) {
             ctx.font = f;
@@ -461,19 +470,25 @@ function drawGridHeaders(
 
         const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
 
+        const y = enableGroups ? headerHeight / 2 : 0;
+        const xOffset = c.sourceIndex === 0 ? 0 : 1;
+
         ctx.save();
         if (c.sticky) {
             clipX = Math.max(clipX, x + c.width);
         } else {
             ctx.beginPath();
-            ctx.rect(clipX, 0, width, height);
+            ctx.rect(clipX, headerHeight - trueHeaderHeight, width, trueHeaderHeight);
             ctx.clip();
+
+            if (theme.bgHeader !== outerTheme.bgHeader) {
+                ctx.fillStyle = theme.bgHeader;
+                ctx.fillRect(x, y, c.width, trueHeaderHeight);
+            }
+
             ctx.translate(translateX, 0);
         }
 
-        const y = enableGroups ? headerHeight / 2 : 0;
-
-        const xOffset = c.sourceIndex === 0 ? 0 : 1;
         if (selected) {
             ctx.fillStyle = bgFillStyle;
             ctx.fillRect(x + xOffset, y, c.width - xOffset, trueHeaderHeight);
@@ -578,7 +593,6 @@ function drawGridHeaders(
             ctx,
             effectiveCols,
             width,
-            height,
             translateX,
             headerHeight,
             outerTheme,
@@ -1066,7 +1080,6 @@ export function drawGrid(
             enableGroups,
             hoveredCol,
             width,
-            height,
             translateX,
             headerHeight,
             selectedColumns,
