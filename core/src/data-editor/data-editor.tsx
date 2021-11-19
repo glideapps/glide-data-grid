@@ -207,8 +207,27 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const mangledFreezeColumns = freezeColumns + (hasRowMarkers ? 1 : 0);
 
-    const gridSelection = gridSelectionOuter ?? gridSelectionInner;
-    const setGridSelection = onGridSelectionChange ?? setGridSelectionInner;
+    const gridSelectionOuterMangled: GridSelection | undefined =
+        gridSelectionOuter === undefined
+            ? undefined
+            : {
+                  cell: [gridSelectionOuter.cell[0] + rowMarkerOffset, gridSelectionOuter.cell[1]],
+                  range: {
+                      ...gridSelectionOuter.range,
+                      x: gridSelectionOuter.range.x + rowMarkerOffset,
+                  },
+              };
+    const gridSelection = gridSelectionOuterMangled ?? gridSelectionInner;
+    const setGridSelection = React.useCallback(
+        (newVal: GridSelection | undefined) => {
+            if (onGridSelectionChange !== undefined) {
+                onGridSelectionChange(newVal);
+            } else {
+                setGridSelectionInner(newVal);
+            }
+        },
+        [onGridSelectionChange]
+    );
     const selectedRows = selectedRowsOuter ?? selectedRowsInner;
     const setSelectedRows = setSelectedRowsOuter ?? setSelectedRowsInner;
 
