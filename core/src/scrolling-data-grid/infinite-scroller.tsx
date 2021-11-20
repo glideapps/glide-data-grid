@@ -15,6 +15,7 @@ interface Props {
     readonly scrollToEnd?: boolean;
     readonly rightElementSticky?: boolean;
     readonly rightElement?: React.ReactNode;
+    readonly minimap?: React.ReactNode;
     readonly style?: React.CSSProperties;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
     readonly update: (region: Rectangle) => void;
@@ -74,6 +75,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
         rightElementSticky = false,
         scrollRef,
         scrollToEnd,
+        minimap,
         style,
     } = p;
     const padders: React.ReactNode[] = [];
@@ -155,6 +157,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
 
                     return (
                         <ScrollRegionStyle>
+                            {minimap}
                             <div className="dvn-underlay">{children}</div>
                             <div
                                 ref={setRefs}

@@ -2218,3 +2218,31 @@ export const ColumnGroupCollapse: React.VFC = () => {
         showPanel: false,
     },
 };
+
+export const Minimap: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(100, true, true);
+
+    return (
+        <BeautifulWrapper
+            title="Minimap"
+            description={
+                <Description>
+                    A minimap can be enabled by setting the <PropName>showMinimap</PropName> property.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                showMinimap={true}
+                rows={300}
+                rowMarkers="both"
+            />
+        </BeautifulWrapper>
+    );
+};
+(ColumnGroups as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
