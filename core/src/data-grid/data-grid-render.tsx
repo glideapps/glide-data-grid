@@ -76,27 +76,28 @@ export function drawCell(
         hoverX = hoverInfo[1][0];
         hoverY = hoverInfo[1][1];
     }
-    const drawn = isInnerOnlyCell(cell)
-        ? false
-        : drawCustomCell?.({
-              ctx,
-              cell,
-              theme,
-              rect: { x, y, width: w, height: h },
-              col,
-              row,
-              hoverAmount,
-              hoverX,
-              hoverY,
-              highlighted,
-              imageLoader,
-          }) === true;
-    if (!drawn && cell.kind !== GridCellKind.Custom) {
-        const r = CellRenderers[cell.kind];
-        const args = { ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader };
-        return drawWithLastUpdate(args, cell.lastUpdated, () => r.render(args));
-    }
-    return false;
+    const args = { ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader };
+    return drawWithLastUpdate(args, cell.lastUpdated, () => {
+        const drawn = isInnerOnlyCell(cell)
+            ? false
+            : drawCustomCell?.({
+                  ctx,
+                  cell,
+                  theme,
+                  rect: { x, y, width: w, height: h },
+                  col,
+                  row,
+                  hoverAmount,
+                  hoverX,
+                  hoverY,
+                  highlighted,
+                  imageLoader,
+              }) === true;
+        if (!drawn && cell.kind !== GridCellKind.Custom) {
+            const r = CellRenderers[cell.kind];
+            r.render(args);
+        }
+    });
 }
 
 function blitLastFrame(
