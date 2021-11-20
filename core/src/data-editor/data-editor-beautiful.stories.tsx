@@ -382,6 +382,7 @@ function useMockDataGenerator(numCols: number, readonly: boolean = true, group: 
                 cache.current.set(col, row, {
                     ...copied,
                     displayData: typeof copied.data === "string" ? copied.data : (copied as any).displayData,
+                    lastUpdated: performance.now(),
                 } as any);
             }
         },
@@ -1856,6 +1857,7 @@ export const RapidUpdates: React.VFC = () => {
             const cells: {
                 cell: readonly [number, number];
             }[] = [];
+            const now = performance.now();
             for (let x = 0; x < 5_000; x++) {
                 const col = Math.max(10, rand() % 100);
                 const row = rand() % 10_000;
@@ -1875,6 +1877,7 @@ export const RapidUpdates: React.VFC = () => {
                                   textDark: "#d40000",
                               },
                     allowOverlay: true,
+                    lastUpdated: now,
                 });
                 cells.push({ cell: [col, row] });
             }

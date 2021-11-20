@@ -21,6 +21,7 @@ import {
     InnerGridCellKind,
     CompactSelection,
     DrawCustomCellCallback,
+    CellList,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -29,6 +30,7 @@ import { drawCell, drawGrid, GroupDetailsCallback, makeBuffers } from "./data-gr
 import { AnimationManager, StepCallback } from "./animation-manager";
 import { browserIsFirefox } from "../common/browser-detect";
 import { CellRenderers } from "./cells";
+import { useAnimationQueue } from "./use-animation-queue";
 
 export interface DataGridProps {
     readonly width: number;
@@ -404,6 +406,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         hoveredCol = hoveredItem[0];
     }
 
+    const enqueueRef = React.useRef((_item: Item) => {
+        // do nothing
+    });
     const hoverInfoRef = React.useRef(hoveredItemInfo);
     hoverInfoRef.current = hoveredItemInfo;
     const draw = React.useCallback(() => {
@@ -447,7 +452,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             hoverValues.current,
             hoverInfoRef.current,
             spriteManager,
-            scrolling
+            scrolling,
+            enqueueRef.current
         );
     }, [
         buffers,
@@ -521,7 +527,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         void fn();
     }, []);
 
-    const damageInternal = React.useCallback((locations: readonly (readonly [number, number])[]) => {
+    const damageInternal = React.useCallback((locations: CellList) => {
         const last = canBlit.current;
         canBlit.current = false;
         damageRegion.current = locations;
@@ -529,6 +535,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         damageRegion.current = undefined;
         canBlit.current = last;
     }, []);
+
+    const enqueue = useAnimationQueue(damageInternal);
+    enqueueRef.current = enqueue;
 
     const damage = React.useCallback(
         (cells: DamageUpdateList) => {
