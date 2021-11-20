@@ -2131,7 +2131,7 @@ export const ColumnGroups: React.VFC = () => {
                 rows={1000}
                 getGroupDetails={g => ({
                     name: g,
-                    icon: GridColumnIcon.HeaderCode,
+                    icon: g === "" ? undefined : GridColumnIcon.HeaderCode,
                 })}
                 rowMarkers="both"
             />
