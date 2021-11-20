@@ -162,6 +162,32 @@ export function measureTextCached(s: string, ctx: CanvasRenderingContext2D): Tex
     return metrics;
 }
 
+export function drawWithLastUpdate(
+    args: BaseDrawArgs,
+    lastUpdate: number | undefined,
+    frameTime: number,
+    draw: () => void
+) {
+    const { ctx, x, y, w: width, h: height, theme } = args;
+    let progress = Number.MAX_SAFE_INTEGER;
+    const animTime = 500;
+    if (lastUpdate !== undefined) {
+        progress = frameTime - lastUpdate;
+
+        if (progress < animTime) {
+            const fade = 1 - progress / animTime;
+            ctx.globalAlpha = fade;
+            ctx.fillStyle = theme.bgSearchResult;
+            ctx.fillRect(x, y, width, height);
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    draw();
+
+    return progress < animTime;
+}
+
 export function drawTextCell(args: BaseDrawArgs, data: string, overrideColor?: string) {
     const { ctx, x, y, w, h, theme } = args;
     data = data.split(/\r?\n/)[0].slice(0, Math.round(w / 4));

@@ -10,7 +10,13 @@ import {
     DrawCustomCellCallback,
 } from "./data-grid-types";
 import { HoverValues } from "./animation-manager";
-import { getEffectiveColumns, getStickyWidth, MappedGridColumn, roundedPoly } from "./data-grid-lib";
+import {
+    getEffectiveColumns,
+    getStickyWidth,
+    MappedGridColumn,
+    roundedPoly,
+    drawWithLastUpdate,
+} from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
 import { parseToRgba } from "./color-parser";
@@ -62,33 +68,37 @@ export function drawCell(
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader,
     hoverAmount: number,
-    hoverInfo: HoverInfo | undefined
-) {
+    hoverInfo: HoverInfo | undefined,
+    frameTime: number
+): boolean {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
     if (hoverInfo !== undefined && hoverInfo[0][0] === col && hoverInfo[0][1] === row) {
         hoverX = hoverInfo[1][0];
         hoverY = hoverInfo[1][1];
     }
-    const drawn = isInnerOnlyCell(cell)
-        ? false
-        : drawCustomCell?.({
-              ctx,
-              cell,
-              theme,
-              rect: { x, y, width: w, height: h },
-              col,
-              row,
-              hoverAmount,
-              hoverX,
-              hoverY,
-              highlighted,
-              imageLoader,
-          }) === true;
-    if (!drawn && cell.kind !== GridCellKind.Custom) {
-        const r = CellRenderers[cell.kind];
-        r.render({ ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader });
-    }
+    const args = { ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader };
+    return drawWithLastUpdate(args, cell.lastUpdated, frameTime, () => {
+        const drawn = isInnerOnlyCell(cell)
+            ? false
+            : drawCustomCell?.({
+                  ctx,
+                  cell,
+                  theme,
+                  rect: { x, y, width: w, height: h },
+                  col,
+                  row,
+                  hoverAmount,
+                  hoverX,
+                  hoverY,
+                  highlighted,
+                  imageLoader,
+              }) === true;
+        if (!drawn && cell.kind !== GridCellKind.Custom) {
+            const r = CellRenderers[cell.kind];
+            r.render(args);
+        }
+    });
 }
 
 function blitLastFrame(
@@ -680,9 +690,11 @@ function drawCells(
     imageLoader: ImageWindowLoader,
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
-    outerTheme: Theme
+    outerTheme: Theme,
+    enqueue: (item: [number, number | undefined]) => void
 ): void {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
+    const frameTime = performance.now();
     walkColumns(
         effectiveColumns,
         cellYOffset,
@@ -786,22 +798,27 @@ function drawCells(
                 const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
 
                 if (c.width > 10) {
-                    drawCell(
-                        ctx,
-                        row,
-                        cell,
-                        c.sourceIndex,
-                        drawX,
-                        drawY,
-                        c.width,
-                        rh,
-                        highlighted,
-                        theme,
-                        drawCustomCell,
-                        imageLoader,
-                        hoverValue?.hoverAmount ?? 0,
-                        hoverInfo
-                    );
+                    if (
+                        drawCell(
+                            ctx,
+                            row,
+                            cell,
+                            c.sourceIndex,
+                            drawX,
+                            drawY,
+                            c.width,
+                            rh,
+                            highlighted,
+                            theme,
+                            drawCustomCell,
+                            imageLoader,
+                            hoverValue?.hoverAmount ?? 0,
+                            hoverInfo,
+                            frameTime
+                        )
+                    ) {
+                        enqueue([c.sourceIndex, row]);
+                    }
                 }
 
                 ctx.globalAlpha = 1;
@@ -1021,7 +1038,8 @@ export function drawGrid(
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
     spriteManager: SpriteManager,
-    scrolling: boolean
+    scrolling: boolean,
+    enqueue: (item: [number, number | undefined]) => void
 ) {
     if (width === 0 || height === 0) return;
     const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
@@ -1172,7 +1190,8 @@ export function drawGrid(
                 imageLoader,
                 hoverValues,
                 hoverInfo,
-                theme
+                theme,
+                enqueue
             );
         }
 
@@ -1281,7 +1300,8 @@ export function drawGrid(
         imageLoader,
         hoverValues,
         hoverInfo,
-        theme
+        theme,
+        enqueue
     );
 
     drawBlanks(
