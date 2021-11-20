@@ -861,7 +861,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                                 drawCustomCell,
                                 imageLoader,
                                 1,
-                                undefined
+                                undefined,
+                                0
                             );
                         }
 

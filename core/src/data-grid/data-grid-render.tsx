@@ -68,7 +68,8 @@ export function drawCell(
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader,
     hoverAmount: number,
-    hoverInfo: HoverInfo | undefined
+    hoverInfo: HoverInfo | undefined,
+    frameTime: number
 ): boolean {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
@@ -77,7 +78,7 @@ export function drawCell(
         hoverY = hoverInfo[1][1];
     }
     const args = { ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader };
-    return drawWithLastUpdate(args, cell.lastUpdated, () => {
+    return drawWithLastUpdate(args, cell.lastUpdated, frameTime, () => {
         const drawn = isInnerOnlyCell(cell)
             ? false
             : drawCustomCell?.({
@@ -693,6 +694,7 @@ function drawCells(
     enqueue: (item: [number, number | undefined]) => void
 ): void {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
+    const frameTime = performance.now();
     walkColumns(
         effectiveColumns,
         cellYOffset,
@@ -811,7 +813,8 @@ function drawCells(
                             drawCustomCell,
                             imageLoader,
                             hoverValue?.hoverAmount ?? 0,
-                            hoverInfo
+                            hoverInfo,
+                            frameTime
                         )
                     ) {
                         enqueue([c.sourceIndex, row]);
