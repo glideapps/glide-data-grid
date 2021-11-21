@@ -127,7 +127,7 @@ function rand(): number {
 
 const possibleTags = [
     {
-        tag: "Bug and this is way too long for me to see what is happening blah blah blah",
+        tag: "Bug",
         color: "#ff4d4d35",
     },
     {
