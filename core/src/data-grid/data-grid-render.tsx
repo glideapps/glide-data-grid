@@ -704,6 +704,8 @@ function drawCells(
         (c, drawX, colDrawY, clipX, startRow) => {
             const diff = Math.max(0, clipX - drawX);
             ctx.save();
+            let font = `${outerTheme.baseFontStyle} ${outerTheme.fontFamily}`;
+            ctx.font = font;
             ctx.beginPath();
             ctx.rect(drawX + diff, headerHeight + 1, c.width - diff, height - headerHeight - 1);
             ctx.clip();
@@ -798,6 +800,11 @@ function drawCells(
                 const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
 
                 if (c.width > 10) {
+                    const cellFont = `${theme.baseFontStyle} ${theme.fontFamily}`;
+                    if (cellFont !== font) {
+                        ctx.font = cellFont;
+                        font = cellFont;
+                    }
                     if (
                         drawCell(
                             ctx,
