@@ -101,12 +101,10 @@ const renderer: CustomCellRenderer<TagsCell> = {
             const width = metrics.width + innerPad * 2;
             const textY = tagHeight / 2 + metrics.actualBoundingBoxAscent / 2;
 
-            if (x !== drawArea.x && x + width > drawArea.x + drawArea.width) {
-                if (row < rows) {
-                    row++;
-                    y += tagHeight + innerPad;
-                    x = drawArea.x;
-                }
+            if (x !== drawArea.x && x + width > drawArea.x + drawArea.width && row < rows) {
+                row++;
+                y += tagHeight + innerPad;
+                x = drawArea.x;
             }
 
             ctx.fillStyle = color;
@@ -118,7 +116,7 @@ const renderer: CustomCellRenderer<TagsCell> = {
             ctx.fillText(tag, x + innerPad, y + textY);
 
             x += width + 8;
-            if (x > drawArea.x + drawArea.width && row > rows) break;
+            if (x > drawArea.x + drawArea.width && row >= rows) break;
         }
 
         return true;
