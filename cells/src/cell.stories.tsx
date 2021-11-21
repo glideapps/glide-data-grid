@@ -127,7 +127,7 @@ function rand(): number {
 
 const possibleTags = [
     {
-        tag: "Bug",
+        tag: "Bug and this is way too long for me to see what is happening blah blah blah",
         color: "#ff4d4d35",
     },
     {
@@ -213,6 +213,7 @@ export const CustomCells: React.VFC = () => {
                             data: {
                                 kind: "tags-cell",
                                 possibleTags: possibleTags,
+                                readonly: row % 2 === 0,
                                 tags: uniq([
                                     possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
                                     possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,

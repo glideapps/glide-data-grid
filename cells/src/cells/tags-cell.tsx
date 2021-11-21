@@ -6,6 +6,7 @@ import { CustomCellRenderer } from "../types";
 interface TagsCellProps {
     readonly kind: "tags-cell";
     readonly tags: readonly string[];
+    readonly readonly?: boolean;
     readonly possibleTags: readonly {
         tag: string;
         color: string;
@@ -39,6 +40,12 @@ const EditorWrap = styled.div`
     padding-top: 6px;
     color: ${p => p.theme.textDark};
 
+    box-sizing: border-box;
+
+    * {
+        box-sizing: border-box;
+    }
+
     &&&& label {
         display: flex;
         cursor: pointer;
@@ -53,11 +60,10 @@ const EditorWrap = styled.div`
             margin-right: 6px;
             margin-bottom: 6px;
 
-            border-radius: 100px;
-            height: ${tagHeight}px;
-            padding: 0 ${innerPad}px;
+            border-radius: ${tagHeight / 2}px;
+            min-height: ${tagHeight}px;
+            padding: 2px ${innerPad}px;
             display: flex;
-            justify-content: center;
             align-items: center;
 
             font: 12px ${p => p.theme.fontFamily};
@@ -73,6 +79,14 @@ const EditorWrap = styled.div`
     }
     label:hover .pill {
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    &&&&.readonly label {
+        cursor: default;
+
+        .pill {
+            box-shadow: none !important;
+        }
     }
 `;
 
@@ -125,29 +139,31 @@ const renderer: CustomCellRenderer<TagsCell> = {
         // eslint-disable-next-line react/display-name
         return p => {
             const { onChange, value } = p;
-            const { possibleTags, tags } = value.data;
+            const { possibleTags, tags, readonly = false } = value.data;
             return (
-                <EditorWrap>
+                <EditorWrap className={readonly ? "readonly" : ""}>
                     {possibleTags.map(t => {
                         const selected = tags.indexOf(t.tag) !== -1;
                         return (
                             <label key={t.tag}>
-                                <input
-                                    type="checkbox"
-                                    checked={selected}
-                                    onChange={() => {
-                                        const newTags = selected ? tags.filter(x => x !== t.tag) : [...tags, t.tag];
-                                        onChange({
-                                            ...p.value,
-                                            data: {
-                                                ...value.data,
-                                                tags: newTags,
-                                            },
-                                        });
-                                    }}
-                                />
+                                {!readonly && (
+                                    <input
+                                        type="checkbox"
+                                        checked={selected}
+                                        onChange={() => {
+                                            const newTags = selected ? tags.filter(x => x !== t.tag) : [...tags, t.tag];
+                                            onChange({
+                                                ...p.value,
+                                                data: {
+                                                    ...value.data,
+                                                    tags: newTags,
+                                                },
+                                            });
+                                        }}
+                                    />
+                                )}
                                 <div
-                                    className={"pill " + (selected ? "selectd" : "unselected")}
+                                    className={"pill " + (selected ? "selected" : "unselected")}
                                     style={{ backgroundColor: selected ? t.color : undefined }}>
                                     {t.tag}
                                 </div>
