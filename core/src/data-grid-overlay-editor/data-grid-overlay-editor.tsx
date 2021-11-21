@@ -83,7 +83,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 isHighlighted={highlight}
                 onChange={setTempValue as any}
                 value={targetValue}
-                onFinishedEditing={e => onFinishEditing(e as GridCell, [0, 0])}
+                onFinishedEditing={e => onFinishEditing((e ?? tempValue) as GridCell | undefined, [0, 0])}
                 onKeyDown={onKeyDown}
                 target={target}
                 imageEditorOverride={imageEditorOverride}
@@ -91,10 +91,6 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
             />
         );
     }
-
-    const f = (ev: React.MouseEvent) => {
-        ev.stopPropagation();
-    };
 
     // Consider imperatively creating and adding the element to the dom?
     const portalElement = document.getElementById("portal");
@@ -107,7 +103,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     }
     const portal = createPortal(
         <ClickOutsideContainer onClickOutside={onClickOutside}>
-            <DataGridOverlayEditorStyle targetRect={target} onMouseDown={f} onClick={f}>
+            <DataGridOverlayEditorStyle targetRect={target}>
                 <div className="clip-region" onKeyDown={CustomEditor === undefined ? undefined : onKeyDown}>
                     {editor}
                 </div>

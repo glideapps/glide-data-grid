@@ -1028,9 +1028,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onFinishEditing = React.useCallback(
         (newValue: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => {
-            if (gridSelection !== undefined && newValue !== undefined) {
+            if (overlay?.cell !== undefined && newValue !== undefined) {
                 // Fixme, this cast is dangerous
-                mangledOnCellEdited?.([gridSelection.cell[0], gridSelection.cell[1]], newValue as EditableGridCell);
+                mangledOnCellEdited?.(overlay.cell, newValue as EditableGridCell);
+                window.requestAnimationFrame(() => {
+                    gridRef.current?.damage([
+                        {
+                            cell: overlay.cell,
+                        },
+                    ]);
+                });
             }
             focus(true);
             setOverlay(undefined);
@@ -1041,7 +1048,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 updateSelectedCell(gridSelection.cell[0] + movX, gridSelection.cell[1] + movY, isEditingTrailingRow);
             }
         },
-        [gridSelection, focus, mangledOnCellEdited, mangledRows, updateSelectedCell]
+        [overlay?.cell, focus, gridSelection, mangledOnCellEdited, mangledRows, updateSelectedCell]
     );
 
     const [selCol, selRow] = gridSelection?.cell ?? [];

@@ -70,6 +70,7 @@ export function Simplenotest() {
             cellYOffset={y}
             translateX={translateX}
             translateY={translateY}
+            lockColumns={0}
             headerHeight={44}
             lastRowSticky={false}
             rowHeight={34}
