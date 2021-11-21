@@ -12,6 +12,7 @@ type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 export interface DataGridOverlayEditorProps {
     readonly target: Rectangle;
     readonly content: GridCell;
+    readonly className?: string;
     readonly onFinishEditing: (newCell: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly forceEditMode: boolean;
     readonly highlight: boolean;
@@ -29,6 +30,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         imageEditorOverride,
         markdownDivCreateNode,
         highlight,
+        className,
         provideEditor,
     } = p;
 
@@ -102,7 +104,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         return null;
     }
     const portal = createPortal(
-        <ClickOutsideContainer onClickOutside={onClickOutside}>
+        <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
             <DataGridOverlayEditorStyle targetRect={target}>
                 <div className="clip-region" onKeyDown={CustomEditor === undefined ? undefined : onKeyDown}>
                     {editor}

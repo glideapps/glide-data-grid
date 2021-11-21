@@ -1581,6 +1581,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             {overlay !== undefined && (
                 <DataGridOverlayEditor
                     {...overlay}
+                    className={p.experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
                     provideEditor={provideEditor}
                     imageEditorOverride={imageEditorOverride}
                     onFinishEditing={onFinishEditing}
