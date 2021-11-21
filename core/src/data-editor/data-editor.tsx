@@ -48,6 +48,7 @@ type Props = Omit<
     | "gridRef"
     | "headerHeight"
     | "lastRowSticky"
+    | "lockColumns"
     | "onCellFocused"
     | "onKeyDown"
     | "onKeyUp"
@@ -1544,6 +1545,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 drawCustomCell={drawCustomCellMangled}
                 disabledRows={disabledRows}
                 freezeColumns={mangledFreezeColumns}
+                lockColumns={rowMarkerOffset}
                 getCellContent={getMangedCellContent}
                 headerHeight={headerHeight}
                 lastRowSticky={lastRowSticky}

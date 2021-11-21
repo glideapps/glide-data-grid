@@ -935,11 +935,14 @@ export const DrawCustomCells: React.VFC = () => {
 };
 
 export const RearrangeColumns: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(6);
+    const { cols, getCellContent } = useMockDataGenerator(60);
 
     // This is a dirty hack because the mock generator doesn't really support changing this. In a real data source
     // you should track indexes properly
-    const [sortableCols, setSortableCols] = React.useState(cols);
+    const [sortableCols, setSortableCols] = React.useState(() => {
+        num = 200;
+        return cols.map(c => ({ ...c, width: c.width + (rand() % 100) }));
+    });
 
     const onColMoved = React.useCallback((startIndex: number, endIndex: number): void => {
         setSortableCols(old => {
@@ -969,6 +972,8 @@ export const RearrangeColumns: React.VFC = () => {
             }>
             <DataEditor
                 {...defaultProps}
+                freezeColumns={1}
+                rowMarkers="both"
                 getCellContent={getCellContentMangled}
                 columns={sortableCols}
                 onColumnMoved={onColMoved}

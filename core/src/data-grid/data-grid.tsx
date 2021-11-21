@@ -1029,9 +1029,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         100
     );
 
-    const stickyX = getStickyWidth(mappedColumns);
-    const stickyShadowStyle = React.useMemo<React.CSSProperties>(
-        () => ({
+    const stickyX = getStickyWidth(mappedColumns, dragAndDropState);
+    const stickyShadowStyle = React.useMemo<React.CSSProperties>(() => {
+        return {
             position: "absolute",
             top: 0,
             left: stickyX,
@@ -1041,9 +1041,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             pointerEvents: "none",
             boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
             transition: "opacity 150ms",
-        }),
-        [cellXOffset, freezeColumns, stickyX, style.height, style.width, translateX]
-    );
+        };
+    }, [cellXOffset, freezeColumns, stickyX, style.height, style.width, translateX]);
 
     let stickyShadow: React.ReactNode;
     if (mappedColumns[0].sticky) {

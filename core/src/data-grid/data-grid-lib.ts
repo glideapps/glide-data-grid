@@ -21,9 +21,42 @@ export function useMappedColumns(columns: readonly GridColumn[], freezeColumns: 
     );
 }
 
-export function getStickyWidth(columns: readonly MappedGridColumn[]): number {
+function remapForDnDState(
+    columns: readonly MappedGridColumn[],
+    dndState?: {
+        src: number;
+        dest: number;
+    }
+) {
+    let mappedCols = columns;
+    if (dndState !== undefined) {
+        let writable = [...columns];
+        const temp = mappedCols[dndState.src];
+        if (dndState.src > dndState.dest) {
+            writable.splice(dndState.src, 1);
+            writable.splice(dndState.dest, 0, temp);
+        } else {
+            writable.splice(dndState.dest + 1, 0, temp);
+            writable.splice(dndState.src, 1);
+        }
+        writable = writable.map((c, i) => ({
+            ...c,
+            sticky: columns[i].sticky,
+        }));
+        mappedCols = writable;
+    }
+    return mappedCols;
+}
+
+export function getStickyWidth(
+    columns: readonly MappedGridColumn[],
+    dndState?: {
+        src: number;
+        dest: number;
+    }
+): number {
     let result = 0;
-    for (const c of columns) {
+    for (const c of remapForDnDState(columns, dndState)) {
         if (c.sticky) result += c.width;
         else break;
     }
@@ -41,22 +74,10 @@ export function getEffectiveColumns(
     },
     tx?: number
 ): readonly MappedGridColumn[] {
-    let mappedCols = columns;
-    if (dndState !== undefined) {
-        const writable = [...columns];
-        const temp = mappedCols[dndState.src];
-        if (dndState.src > dndState.dest) {
-            writable.splice(dndState.src, 1);
-            writable.splice(dndState.dest, 0, temp);
-        } else {
-            writable.splice(dndState.dest + 1, 0, temp);
-            writable.splice(dndState.src, 1);
-        }
-        mappedCols = writable;
-    }
+    const mappedCols = remapForDnDState(columns, dndState);
 
     const sticky: MappedGridColumn[] = [];
-    for (const c of columns) {
+    for (const c of mappedCols) {
         if (c.sticky) {
             sticky.push(c);
         } else {
