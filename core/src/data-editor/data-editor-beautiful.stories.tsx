@@ -2228,7 +2228,7 @@ export const ColumnGroupCollapse: React.VFC = () => {
 };
 
 export const Minimap: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(100, true, true);
+    const { cols, getCellContent } = useMockDataGenerator(1000, true, true);
 
     return (
         <BeautifulWrapper
@@ -2243,7 +2243,7 @@ export const Minimap: React.VFC = () => {
                 getCellContent={getCellContent}
                 columns={cols}
                 showMinimap={true}
-                rows={300}
+                rows={3000}
                 rowMarkers="both"
             />
         </BeautifulWrapper>

@@ -220,8 +220,8 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const h = aspect > 1 ? Math.ceil(maxSize / aspect) : maxSize;
     const hRatio = w / width;
     const vRatio = h / height;
-    const vWidth = Math.min(clientWidth * Math.max(hRatio, 0.02), w);
-    const vHeight = Math.min(clientHeight * Math.max(vRatio, 0.02), h);
+    const vWidth = Math.min(clientWidth * Math.max(hRatio, 0.01), w);
+    const vHeight = Math.min(clientHeight * Math.max(vRatio, 0.01), h);
     const left = ((scroller?.scrollLeft ?? 0) / (width - clientWidth)) * (w - vWidth);
     const top = ((scroller?.scrollTop ?? 0) / (height - clientHeight)) * (h - vHeight);
 
