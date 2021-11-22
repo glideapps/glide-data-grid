@@ -1084,15 +1084,44 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return;
                 }
 
-                if (
-                    isDeleteKey &&
-                    selectedRows !== undefined &&
-                    selectedRows.length !== 0 &&
-                    gridSelection === undefined
-                ) {
+                if (isDeleteKey && selectedRows.length !== 0 && gridSelection === undefined) {
                     focus();
                     onDeleteRows?.(Array.from(selectedRows));
                     setSelectedRows(CompactSelection.empty());
+                    return;
+                }
+
+                function deleteRange(range: Rectangle) {
+                    focus();
+                    const damaged: [number, number][] = [];
+                    for (let x = range.x; x < range.x + range.width; x++) {
+                        for (let y = range.y; y < range.y + range.height; y++) {
+                            const cellValue = getCellContent([x - rowMarkerOffset, y]);
+                            if (
+                                (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
+                                cellValue.kind === GridCellKind.Boolean
+                            ) {
+                                const r = CellRenderers[cellValue.kind];
+                                const newVal = r.onDelete?.(cellValue);
+                                if (newVal !== undefined) {
+                                    mangledOnCellEdited([x, y], newVal as typeof cellValue);
+                                    damaged.push([x, y]);
+                                }
+                            }
+                        }
+                    }
+                    gridRef.current?.damage(damaged.map(x => ({ cell: x })));
+                }
+
+                if (isDeleteKey && selectedColumns.length > 0 && gridSelection === undefined) {
+                    for (const col of selectedColumns) {
+                        deleteRange({
+                            x: col,
+                            y: 0,
+                            width: 1,
+                            height: rows,
+                        });
+                    }
                     return;
                 }
 
@@ -1172,25 +1201,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
                 } else if (isDeleteKey) {
                     const range = gridSelection.range;
-                    focus();
-                    const damaged: [number, number][] = [];
-                    for (let x = range.x; x < range.x + range.width; x++) {
-                        for (let y = range.y; y < range.y + range.height; y++) {
-                            const cellValue = getCellContent([x - rowMarkerOffset, y]);
-                            if (
-                                (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
-                                cellValue.kind === GridCellKind.Boolean
-                            ) {
-                                const r = CellRenderers[cellValue.kind];
-                                const newVal = r.onDelete?.(cellValue);
-                                if (newVal !== undefined) {
-                                    mangledOnCellEdited([x, y], newVal as typeof cellValue);
-                                    damaged.push([x, y]);
-                                }
-                            }
-                        }
-                    }
-                    gridRef.current?.damage(damaged.map(x => ({ cell: x })));
+                    deleteRange(range);
                 } else if (
                     !event.metaKey &&
                     !event.ctrlKey &&
@@ -1226,6 +1237,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             overlay,
             selectedRows,
             gridSelection,
+            selectedColumns,
             enableDownfill,
             getCellContent,
             rowMarkerOffset,
@@ -1235,12 +1247,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             setSelectedColumns,
             focus,
             onDeleteRows,
+            mangledOnCellEdited,
             rows,
             showTrailingBlankRow,
             appendRow,
             reselect,
             getMangedCellContent,
-            mangledOnCellEdited,
             adjustSelection,
             lastRowSticky,
             visibleRegion.y,
