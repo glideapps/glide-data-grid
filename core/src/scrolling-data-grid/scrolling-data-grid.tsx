@@ -102,10 +102,10 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         let cellRight = 0;
         let cellX = 0;
 
-        const stickyColWidth = columns
-            .slice(0, freezeColumns)
-            .map(c => c.width)
-            .reduce((pv, cv) => pv + cv, 0);
+        let stickyColWidth = 0;
+        for (let i = 0; i < freezeColumns; i++) {
+            stickyColWidth += columns[i].width;
+        }
 
         for (const c of columns) {
             const cx = x - stickyColWidth;

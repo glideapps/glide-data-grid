@@ -860,7 +860,7 @@ function drawBlanks(
         translateY,
         headerHeight,
         (c, drawX, colDrawY, clipX, startRow) => {
-            if (c !== effectiveColumns.slice(-1)[0]) return;
+            if (c !== effectiveColumns[effectiveColumns.length - 1]) return;
             ctx.save();
             ctx.beginPath();
             drawX += c.width;
@@ -1217,6 +1217,10 @@ export function drawGrid(
         return;
     }
 
+    if (!canBlit || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
+        drawHeaderTexture();
+    }
+
     if (canBlit === true) {
         const { regions } = blitLastFrame(
             targetCtx,
@@ -1359,10 +1363,6 @@ export function drawGrid(
         lastRowSticky,
         rows
     );
-
-    if (!canBlit || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
-        drawHeaderTexture();
-    }
 
     imageLoader?.setWindow({
         x: cellXOffset,

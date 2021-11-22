@@ -97,9 +97,14 @@ export function getEffectiveColumns(
         endIndex++;
     }
 
-    const effectiveCols = [...sticky, ...mappedCols.slice(cellXOffset, endIndex).filter(c => !c.sticky)];
+    for (let i = cellXOffset; i < endIndex; i++) {
+        const c = mappedCols[i];
+        if (!c.sticky) {
+            sticky.push(c);
+        }
+    }
 
-    return effectiveCols;
+    return sticky;
 }
 
 export function getColumnIndexForX(
