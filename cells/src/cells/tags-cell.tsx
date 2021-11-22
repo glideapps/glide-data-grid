@@ -113,7 +113,7 @@ const renderer: CustomCellRenderer<TagsCell> = {
             ctx.font = `12px ${theme.fontFamily}`;
             const metrics = measureTextCached(tag, ctx);
             const width = metrics.width + innerPad * 2;
-            const textY = tagHeight / 2 + metrics.actualBoundingBoxAscent / 2;
+            const textY = tagHeight / 2;
 
             if (x !== drawArea.x && x + width > drawArea.x + drawArea.width && row < rows) {
                 row++;

@@ -215,7 +215,6 @@ export function drawTextCell(args: BaseDrawArgs, data: string, overrideColor?: s
 
     const dir = direction(data);
 
-    ctx.textBaseline = "middle";
     ctx.fillStyle = overrideColor ?? theme.textDark;
     if (dir === "rtl") {
         const textWidth = measureTextCached(data, ctx).width;
@@ -223,7 +222,6 @@ export function drawTextCell(args: BaseDrawArgs, data: string, overrideColor?: s
     } else {
         ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
     }
-    ctx.textBaseline = "alphabetic";
 }
 
 export function drawNewRowCell(args: BaseDrawArgs, data: string, isFirst: boolean) {
@@ -253,9 +251,7 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, isFirst: boolea
     }
 
     ctx.fillStyle = theme.textMedium;
-    ctx.textBaseline = "middle";
     ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + h / 2);
-    ctx.textBaseline = "alphabetic";
     ctx.beginPath();
 }
 
@@ -325,9 +321,7 @@ export function drawMarkerRowCell(
             ctx.globalAlpha = 1 - hoverAmount;
         }
         ctx.fillStyle = theme.textLight;
-        ctx.textBaseline = "middle";
         ctx.fillText(text, start, y + height / 2);
-        ctx.textBaseline = "alphabetic";
         ctx.globalAlpha = 1;
     }
     ctx.globalAlpha = 1;
@@ -443,9 +437,7 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
     renderBoxes.forEach((rectInfo, i) => {
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.textBaseline = "middle";
         ctx.fillText(data[i], rectInfo.x + bubblePad, y + h / 2);
-        ctx.textBaseline = "alphabetic";
     });
 }
 
@@ -554,9 +546,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
 
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.textBaseline = "middle";
         ctx.fillText(d.text, drawX, y + h / 2);
-        ctx.textBaseline = "alphabetic";
     });
 }
 

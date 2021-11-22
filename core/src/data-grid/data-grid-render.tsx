@@ -339,7 +339,6 @@ function drawGroups(
     const xPad = 8;
     let x = 0;
     let clipX = 0;
-    ctx.textBaseline = "middle";
     for (let index = 0; index < effectiveCols.length; index++) {
         const startCol = effectiveCols[index];
         const group = getGroupDetails(startCol.group ?? "");
@@ -420,7 +419,6 @@ function drawGroups(
     ctx.strokeStyle = theme.borderColor;
     ctx.lineWidth = 1;
     ctx.stroke();
-    ctx.textBaseline = "alphabetic";
 }
 
 function drawGridHeaders(
@@ -445,7 +443,6 @@ function drawGridHeaders(
     // FIXME: This should respect the per-column theme
     ctx.fillStyle = outerTheme.bgHeader;
     ctx.fillRect(0, 0, width, headerHeight);
-    ctx.textBaseline = "middle";
 
     const trueHeaderHeight = enableGroups ? headerHeight / 2 : headerHeight;
 
@@ -598,7 +595,6 @@ function drawGridHeaders(
         x += c.width;
     }
 
-    ctx.textBaseline = "alphabetic";
     if (enableGroups) {
         drawGroups(
             ctx,
@@ -1087,6 +1083,9 @@ export function drawGrid(
     overlayCtx.beginPath();
     targetCtx.save();
     targetCtx.beginPath(); // clear any path in the ctx
+
+    overlayCtx.textBaseline = "middle";
+    targetCtx.textBaseline = "middle";
 
     targetCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     overlayCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
