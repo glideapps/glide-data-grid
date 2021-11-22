@@ -941,7 +941,7 @@ export const RearrangeColumns: React.VFC = () => {
     // you should track indexes properly
     const [sortableCols, setSortableCols] = React.useState(() => {
         num = 200;
-        return cols.map(c => ({ ...c, width: c.width + (rand() % 100) }));
+        return cols.map(c => ({ ...c, width: c.width + (rand() % 100), hasMenu: true }));
     });
 
     const onColMoved = React.useCallback((startIndex: number, endIndex: number): void => {

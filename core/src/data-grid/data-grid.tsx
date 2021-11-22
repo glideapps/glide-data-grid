@@ -655,7 +655,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
                 const [col] = args.location;
                 const header = columns[col];
 
-                if (header.hasMenu === true && !(hoveredOnEdge ?? false)) {
+                if (!isDragging && header.hasMenu === true && !(hoveredOnEdge ?? false)) {
                     const headerBounds = getBoundsForItem(canvas, col, undefined);
                     if (clientX > headerBounds.x + headerBounds.width - 40) {
                         onHeaderMenuClick?.(col, headerBounds);
@@ -671,6 +671,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             eventTargetRef,
             getMouseArgsForPosition,
             columns,
+            isDragging,
             hoveredOnEdge,
             getBoundsForItem,
             onHeaderMenuClick,
