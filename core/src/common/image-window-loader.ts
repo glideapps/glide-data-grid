@@ -5,7 +5,7 @@ interface LoadResult {
     img: HTMLImageElement | undefined;
     cancel?: () => void;
     url: string;
-    cells: Set<number>;
+    cells: number[];
 }
 
 const rowShift = 1 << 16;
@@ -20,6 +20,14 @@ function unpackNumberToColRow(packed: number): [number, number] {
     return [col, row];
 }
 
+function unpackCol(packed: number): number {
+    return packed % rowShift;
+}
+
+function unpackRow(packed: number, col: number): number {
+    return (packed - col) / rowShift;
+}
+
 class ImageWindowLoader {
     private imageLoaded: (locations: readonly (readonly [number, number])[]) => void = () => undefined;
     private loadedLocations: [number, number][] = [];
@@ -31,10 +39,12 @@ class ImageWindowLoader {
         height: 0,
     };
 
-    private isInWindow(col: number, row: number) {
+    private isInWindow = (packed: number) => {
+        const col = unpackCol(packed);
+        const row = unpackRow(packed, col);
         const w = this.window;
         return col >= w.x && col <= w.x + w.width && row >= w.y && row <= w.y + w.height;
-    }
+    };
 
     private cache: Record<string, LoadResult> = {};
 
@@ -48,24 +58,22 @@ class ImageWindowLoader {
     }, 20);
 
     private clearOutOfWindowImpl = () => {
-        const old = this.cache;
-        this.cache = {};
-        const whittled = Object.values(old).map(v => ({
-            ...v,
-            cells: new Set(Array.from(v.cells).filter(n => this.isInWindow(...unpackNumberToColRow(n)))),
-        }));
+        for (const key of Object.keys(this.cache)) {
+            const obj = this.cache[key];
 
-        whittled
-            .filter(v => v.cells.size > 0)
-            .forEach(v => {
-                this.cache[`${v.url}`] = v;
-            });
+            let keep = false;
+            for (const packed of obj.cells) {
+                if (this.isInWindow(packed)) {
+                    keep = true;
+                    break;
+                }
+            }
 
-        for (const v of whittled) {
-            if (v.cells.size === 0) {
-                v.cancel?.();
+            if (keep) {
+                obj.cells = obj.cells.filter(this.isInWindow);
             } else {
-                this.cache[v.url] = v;
+                obj.cancel?.();
+                delete this.cache[key];
             }
         }
     };
@@ -92,7 +100,10 @@ class ImageWindowLoader {
 
         const current = this.cache[key];
         if (current !== undefined) {
-            current.cells.add(packColRowToNumber(col, row));
+            const packed = packColRowToNumber(col, row);
+            if (current.img === undefined && !current.cells.includes(packed)) {
+                current.cells.push(packed);
+            }
             return current.img;
         } else {
             const img = new Image();
@@ -102,7 +113,7 @@ class ImageWindowLoader {
             let cancelled = false;
             const result: LoadResult = {
                 img: undefined,
-                cells: new Set([packColRowToNumber(col, row)]),
+                cells: [packColRowToNumber(col, row)],
                 url,
                 cancel: () => {
                     cancelled = true;
@@ -120,7 +131,7 @@ class ImageWindowLoader {
                 const toWrite = this.cache[key];
                 if (toWrite !== undefined && !errored && !cancelled) {
                     toWrite.img = img;
-                    for (const packed of Array.from(toWrite.cells)) {
+                    for (const packed of toWrite.cells) {
                         this.loadedLocations.push(unpackNumberToColRow(packed));
                     }
                     this.sendLoaded();
