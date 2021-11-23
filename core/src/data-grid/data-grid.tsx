@@ -52,6 +52,7 @@ export interface DataGridProps {
     readonly rows: number;
 
     readonly headerHeight: number;
+    readonly groupHeaderHeight: number;
     readonly enableGroups: boolean;
     readonly rowHeight: number | ((index: number) => number);
 
@@ -139,6 +140,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         cellXOffset: cellXOffsetReal,
         cellYOffset,
         headerHeight,
+        groupHeaderHeight,
         rowHeight,
         rows,
         getCellContent,
@@ -187,6 +189,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const [buffers] = React.useState(() => makeBuffers());
 
     const spriteManager = React.useMemo(() => new SpriteManager(headerIcons), [headerIcons]);
+    const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
     const scrollingStopRef = React.useRef(-1);
     const disableFirefoxRescaling = p.experimental?.disableFirefoxRescaling === true;
@@ -221,7 +224,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
 
             const result: Rectangle = {
                 x: rect.x,
-                y: rect.y + headerHeight + translateY,
+                y: rect.y + totalHeaderHeight + translateY,
                 width: 0,
                 height: 0,
             };
@@ -241,7 +244,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             result.width = mappedColumns[col].width + 1;
 
             if (row === undefined) {
-                result.y = rect.y;
+                result.y = rect.y + groupHeaderHeight;
                 result.height = headerHeight;
             } else if (lastRowSticky && row === rows - 1) {
                 const stickyHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(row);
@@ -258,14 +261,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             return result;
         },
         [
-            headerHeight,
+            totalHeaderHeight,
             translateY,
             freezeColumns,
+            mappedColumns,
             lastRowSticky,
             rows,
             cellXOffset,
-            mappedColumns,
             translateX,
+            groupHeaderHeight,
+            headerHeight,
             rowHeight,
             height,
             cellYOffset,
@@ -289,7 +294,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             const row = getRowIndexForY(
                 y,
                 height,
+                enableGroups,
                 headerHeight,
+                groupHeaderHeight,
                 rows,
                 rowHeight,
                 cellYOffset,
@@ -381,14 +388,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             width,
             translateX,
             height,
+            enableGroups,
             headerHeight,
+            groupHeaderHeight,
             rows,
             rowHeight,
             cellYOffset,
             translateY,
             lastRowSticky,
             getBoundsForItem,
-            enableGroups,
         ]
     );
 
@@ -432,6 +440,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             dragAndDropState,
             theme,
             headerHeight,
+            groupHeaderHeight,
             selectedRows ?? CompactSelection.empty(),
             disabledRows ?? CompactSelection.empty(),
             rowHeight,
@@ -471,6 +480,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         dragAndDropState,
         theme,
         headerHeight,
+        groupHeaderHeight,
         selectedRows,
         disabledRows,
         rowHeight,
@@ -480,12 +490,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         isResizing,
         selectedCell,
         lastRowSticky,
-        imageLoader,
         rows,
         getCellContent,
         getGroupDetails,
         drawCustomCell,
         prelightCells,
+        imageLoader,
         spriteManager,
         scrolling,
     ]);

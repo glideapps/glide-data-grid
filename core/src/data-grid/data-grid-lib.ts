@@ -126,15 +126,19 @@ export function getColumnIndexForX(
 export function getRowIndexForY(
     targetY: number,
     height: number,
+    hasGroups: boolean,
     headerHeight: number,
+    groupHeaderHeight: number,
     rows: number,
     rowHeight: number | ((index: number) => number),
     cellYOffset: number,
     translateY: number,
     lastRowSticky: boolean
 ): number | undefined {
-    if (targetY <= headerHeight / 2) return -2;
+    if (hasGroups && targetY <= groupHeaderHeight) return -2;
     if (targetY <= headerHeight) return -1;
+
+    const totalHeaderHeight = headerHeight + groupHeaderHeight;
 
     const lastRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows - 1);
     if (lastRowSticky && targetY > height - lastRowHeight) {
@@ -145,11 +149,11 @@ export function getRowIndexForY(
 
     const ty = targetY - (translateY ?? 0);
     if (typeof rowHeight === "number") {
-        const target = Math.floor((ty - headerHeight) / rowHeight) + cellYOffset;
+        const target = Math.floor((ty - totalHeaderHeight) / rowHeight) + cellYOffset;
         if (target >= effectiveRows) return undefined;
         return target;
     } else {
-        let curY = headerHeight;
+        let curY = totalHeaderHeight;
         for (let i = cellYOffset; i < effectiveRows; i++) {
             const rh = rowHeight(i);
             if (ty <= curY + rh) return i;

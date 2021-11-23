@@ -28,6 +28,7 @@ export interface Theme {
     bgSearchResult: string;
 
     borderColor: string;
+    horizontalBorderColor?: string;
     drilldownBorder: string;
 
     linkColor: string;
@@ -68,6 +69,7 @@ const dataEditorBaseTheme: Theme = {
     bgSearchResult: "#fff9e3",
 
     borderColor: "rgba(115, 116, 131, 0.16)",
+    horizontalBorderColor: "rgba(115, 116, 131, 0.16)",
     drilldownBorder: "rgba(0, 0, 0, 0)",
 
     linkColor: "#4F5DFF",

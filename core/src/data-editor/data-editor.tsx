@@ -47,6 +47,7 @@ type Props = Omit<
     | "getCellContent"
     | "gridRef"
     | "headerHeight"
+    | "groupHeaderHeight"
     | "lastRowSticky"
     | "lockColumns"
     | "onCellFocused"
@@ -87,6 +88,7 @@ export interface DataEditorProps extends Props {
         readonly sticky?: boolean;
     };
     readonly headerHeight?: number;
+    readonly groupHeaderHeight?: number;
 
     readonly rowMarkers?: "checkbox" | "number" | "both" | "none";
     readonly rowMarkerWidth?: number;
@@ -161,7 +163,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         getCellsForSelection,
         rowMarkers = "none",
         rowHeight = 34,
-        headerHeight: rawHeaderHeight = 36,
+        headerHeight = 36,
         rowMarkerWidth: rowMarkerWidthRaw,
         imageEditorOverride,
         markdownDivCreateNode,
@@ -183,6 +185,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onDeleteRows,
         onDragStart,
         onPaste,
+        groupHeaderHeight = headerHeight,
         freezeColumns = 0,
         rowSelectionMode = "auto",
         onHeaderMenuClick,
@@ -260,7 +263,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return columns.some(c => c.group !== undefined);
     }, [columns]);
 
-    const headerHeight = enableGroups ? rawHeaderHeight * 2 : rawHeaderHeight;
+    const totalHeaderHeight = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
 
     const [visibleRegion, setVisibleRegion] = React.useState<Rectangle & { tx?: number; ty?: number }>({
         x: 0,
@@ -908,7 +911,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                         const sLeft = scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
                         const sRight = scrollBounds.right;
-                        const sTop = scrollBounds.top + headerHeight;
+                        const sTop = scrollBounds.top + totalHeaderHeight;
                         let trailingRowHeight = 0;
                         if (lastRowSticky) {
                             trailingRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
@@ -943,7 +946,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
         },
-        [headerHeight, lastRowSticky, rowHeight, rowMarkerOffset, rowMarkerWidth, rows]
+        [totalHeaderHeight, lastRowSticky, rowHeight, rowMarkerOffset, rowMarkerWidth, rows]
     );
 
     const adjustSelection = React.useCallback(
@@ -1567,6 +1570,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 lockColumns={rowMarkerOffset}
                 getCellContent={getMangedCellContent}
                 headerHeight={headerHeight}
+                groupHeaderHeight={enableGroups ? groupHeaderHeight : 0}
                 lastRowSticky={lastRowSticky}
                 onCellFocused={onCellFocused}
                 onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}

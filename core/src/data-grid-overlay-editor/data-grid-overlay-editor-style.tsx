@@ -4,6 +4,7 @@ import { GrowingEntryStyle } from "../growing-entry/growing-entry-style";
 
 interface Props {
     targetRect: Rectangle;
+    pad: boolean;
 }
 export const DataGridOverlayEditorStyle = styled.div<Props>`
     position: absolute;
@@ -32,7 +33,7 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
     font-family: ${p => p.theme.fontFamily};
     font-size: 13px;
 
-    padding: ${p => Math.max(0, (p.targetRect.height - 28) / 2)}px 8.5px 3px;
+    ${p => p.pad && `padding: ${Math.max(0, (p.targetRect.height - 28) / 2)}px 8.5px 3px;`}
 
     @keyframes glide_fade_in {
         from {

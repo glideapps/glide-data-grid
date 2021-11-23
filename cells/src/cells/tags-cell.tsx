@@ -1,4 +1,4 @@
-import { CustomCell, Rectangle, measureTextCached } from "@glideapps/glide-data-grid";
+import { CustomCell, Rectangle, measureTextCached, GridCell, ProvideEditorCallback } from "@glideapps/glide-data-grid";
 import styled from "styled-components";
 import * as React from "react";
 import { CustomCellRenderer } from "../types";

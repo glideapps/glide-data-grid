@@ -2215,6 +2215,7 @@ export const ColumnGroupCollapse: React.VFC = () => {
                 {...defaultProps}
                 {...groupHeaderArgs}
                 getCellContent={getCellContent}
+                groupHeaderHeight={24}
                 rows={1000}
                 rowMarkers="both"
             />

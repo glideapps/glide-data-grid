@@ -113,7 +113,7 @@ function blitLastFrame(
     width: number,
     height: number,
     rows: number,
-    headerHeight: number,
+    totalHeaderHeight: number,
     dpr: number,
     columns: readonly GridColumn[],
     effectiveCols: readonly MappedGridColumn[],
@@ -158,7 +158,7 @@ function blitLastFrame(
     const stickyRowHeight = lastRowSticky ? getRowHeight(rows - 1) : 0;
 
     const blitWidth = width - stickyWidth - Math.abs(deltaX);
-    const blitHeight = height - headerHeight - stickyRowHeight - Math.abs(deltaY) - 1;
+    const blitHeight = height - totalHeaderHeight - stickyRowHeight - Math.abs(deltaY) - 1;
 
     if (blitWidth > 150 && blitHeight > 150) {
         blittedYOnly = deltaX === 0;
@@ -179,14 +179,14 @@ function blitLastFrame(
             // scrolling up
             args = {
                 ...args,
-                sy: (headerHeight + 1) * dpr,
+                sy: (totalHeaderHeight + 1) * dpr,
                 sh: blitHeight * dpr,
-                dy: deltaY + headerHeight + 1,
+                dy: deltaY + totalHeaderHeight + 1,
                 dh: blitHeight,
             };
             drawRegions.push({
                 x: 0,
-                y: headerHeight,
+                y: totalHeaderHeight,
                 width: width,
                 height: deltaY + 1,
             });
@@ -194,9 +194,9 @@ function blitLastFrame(
             // scrolling down
             args = {
                 ...args,
-                sy: (-deltaY + headerHeight + 1) * dpr,
+                sy: (-deltaY + totalHeaderHeight + 1) * dpr,
                 sh: blitHeight * dpr,
-                dy: headerHeight + 1,
+                dy: totalHeaderHeight + 1,
                 dh: blitHeight,
             };
             drawRegions.push({
@@ -259,7 +259,8 @@ function drawGridLines(
     translateY: number,
     width: number,
     height: number,
-    headerHeight: number,
+    groupHeaderHeight: number,
+    totalHeaderHeight: number,
     getRowHeight: (row: number) => number,
     verticalBorder: (col: number) => boolean,
     lastRowSticky: boolean,
@@ -267,10 +268,12 @@ function drawGridLines(
     theme: Theme,
     verticalOnly: boolean = false
 ) {
+    const hColor = theme.horizontalBorderColor ?? theme.borderColor;
+    const vColor = theme.borderColor;
     ctx.beginPath();
     // we need to under-draw the header background on its line to improve its contrast.
-    ctx.moveTo(0, headerHeight + 0.5);
-    ctx.lineTo(width, headerHeight + 0.5);
+    ctx.moveTo(0, totalHeaderHeight + 0.5);
+    ctx.lineTo(width, totalHeaderHeight + 0.5);
     ctx.strokeStyle = theme.bgHeader;
     ctx.lineWidth = 1;
     ctx.stroke();
@@ -285,8 +288,14 @@ function drawGridLines(
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
         if (index === effectiveCols.length - 1 || verticalBorder(index + 1)) {
-            ctx.moveTo(tx, 0);
+            ctx.moveTo(tx, groupHeaderHeight);
             ctx.lineTo(tx, height);
+        }
+
+        if (vColor !== hColor) {
+            ctx.strokeStyle = vColor;
+            ctx.stroke();
+            ctx.beginPath();
         }
     }
 
@@ -299,7 +308,7 @@ function drawGridLines(
 
     if (verticalOnly !== true) {
         // horizontal lines
-        let y = headerHeight + 0.5;
+        let y = totalHeaderHeight + 0.5;
         let row = cellYOffset;
         let isHeader = true;
         const target = lastRowSticky ? height - stickyHeight : height;
@@ -317,10 +326,8 @@ function drawGridLines(
         }
     }
 
-    ctx.strokeStyle = theme.borderColor;
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = hColor;
     ctx.stroke();
-
     ctx.beginPath();
 }
 
@@ -329,13 +336,12 @@ function drawGroups(
     effectiveCols: readonly MappedGridColumn[],
     width: number,
     translateX: number,
-    headerHeight: number,
+    groupHeaderHeight: number,
     theme: Theme,
     spriteManager: SpriteManager,
     verticalBorder: (col: number) => boolean,
     getGroupDetails: GroupDetailsCallback
 ) {
-    const trueHeaderHeight = headerHeight / 2;
     const xPad = 8;
     let x = 0;
     let clipX = 0;
@@ -370,7 +376,7 @@ function drawGroups(
         ctx.save();
         ctx.beginPath();
         const delta = startCol.sticky ? 0 : Math.max(0, clipX - localX);
-        ctx.rect(localX + delta, 0, boxWidth - delta, trueHeaderHeight);
+        ctx.rect(localX + delta, 0, boxWidth - delta, groupHeaderHeight);
         ctx.clip();
 
         if (groupTheme.bgHeader !== theme.bgHeader) {
@@ -387,19 +393,19 @@ function drawGroups(
                     "normal",
                     ctx,
                     drawX + delta + xPad,
-                    (trueHeaderHeight - 20) / 2,
+                    (groupHeaderHeight - 20) / 2,
                     20,
                     groupTheme
                 );
                 drawX += 26;
             }
-            ctx.fillText(group.name, drawX + delta + xPad, trueHeaderHeight / 2 + 1);
+            ctx.fillText(group.name, drawX + delta + xPad, groupHeaderHeight / 2 + 1);
         }
 
         if (verticalBorder(startCol.sourceIndex)) {
             ctx.beginPath();
             ctx.moveTo(localX + delta + 0.5, 0);
-            ctx.lineTo(localX + delta + 0.5, trueHeaderHeight);
+            ctx.lineTo(localX + delta + 0.5, groupHeaderHeight);
             ctx.strokeStyle = theme.borderColor;
             ctx.lineWidth = 1;
             ctx.stroke();
@@ -412,10 +418,10 @@ function drawGroups(
 
     ctx.beginPath();
     ctx.moveTo(x + 0.5, 0);
-    ctx.lineTo(x + 0.5, trueHeaderHeight);
+    ctx.lineTo(x + 0.5, groupHeaderHeight);
 
-    ctx.moveTo(0, trueHeaderHeight + 0.5);
-    ctx.lineTo(width, trueHeaderHeight + 0.5);
+    ctx.moveTo(0, groupHeaderHeight + 0.5);
+    ctx.lineTo(width, groupHeaderHeight + 0.5);
     ctx.strokeStyle = theme.borderColor;
     ctx.lineWidth = 1;
     ctx.stroke();
@@ -429,6 +435,7 @@ function drawGridHeaders(
     width: number,
     translateX: number,
     headerHeight: number,
+    groupHeaderHeight: number,
     selectedColumns: CompactSelection,
     dragAndDropState: DragAndDropState | undefined,
     isResizing: boolean,
@@ -439,12 +446,11 @@ function drawGridHeaders(
     verticalBorder: (col: number) => boolean,
     getGroupDetails: GroupDetailsCallback
 ) {
-    if (headerHeight === 0) return;
+    const totalHeaderHeight = headerHeight + groupHeaderHeight;
+    if (totalHeaderHeight <= 0) return;
     // FIXME: This should respect the per-column theme
     ctx.fillStyle = outerTheme.bgHeader;
-    ctx.fillRect(0, 0, width, headerHeight);
-
-    const trueHeaderHeight = enableGroups ? headerHeight / 2 : headerHeight;
+    ctx.fillRect(0, 0, width, totalHeaderHeight);
 
     const xPad = 8;
     const yPad = 2;
@@ -478,7 +484,7 @@ function drawGridHeaders(
 
         const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
 
-        const y = enableGroups ? headerHeight / 2 : 0;
+        const y = enableGroups ? groupHeaderHeight : 0;
         const xOffset = c.sourceIndex === 0 ? 0 : 1;
 
         ctx.save();
@@ -486,12 +492,12 @@ function drawGridHeaders(
             clipX = Math.max(clipX, x + c.width);
         } else {
             ctx.beginPath();
-            ctx.rect(clipX, headerHeight - trueHeaderHeight, width, trueHeaderHeight);
+            ctx.rect(clipX, groupHeaderHeight, width, headerHeight);
             ctx.clip();
 
             if (theme.bgHeader !== outerTheme.bgHeader) {
                 ctx.fillStyle = theme.bgHeader;
-                ctx.fillRect(x, y, c.width, trueHeaderHeight);
+                ctx.fillRect(x, y, c.width, headerHeight);
             }
 
             ctx.translate(translateX, 0);
@@ -499,10 +505,10 @@ function drawGridHeaders(
 
         if (selected) {
             ctx.fillStyle = bgFillStyle;
-            ctx.fillRect(x + xOffset, y, c.width - xOffset, trueHeaderHeight);
+            ctx.fillRect(x + xOffset, y, c.width - xOffset, headerHeight);
         } else if (hasSelectedCell || hover > 0) {
             ctx.beginPath();
-            ctx.rect(x + xOffset, y, c.width - xOffset, trueHeaderHeight);
+            ctx.rect(x + xOffset, y, c.width - xOffset, headerHeight);
             if (hasSelectedCell) {
                 ctx.fillStyle = theme.bgHeaderHasFocus;
                 ctx.fill();
@@ -516,7 +522,7 @@ function drawGridHeaders(
         }
 
         ctx.beginPath();
-        ctx.rect(x + xPad, yPad, c.width - xPad, headerHeight - yPad * 2);
+        ctx.rect(x + xPad, groupHeaderHeight + yPad, c.width - xPad, headerHeight - yPad * 2);
         ctx.clip();
 
         let drawX = x + xPad;
@@ -525,7 +531,7 @@ function drawGridHeaders(
             if (c.style === "highlight") {
                 variant = selected ? "selected" : "special";
             }
-            spriteManager.drawSprite(c.icon, variant, ctx, drawX, y + (trueHeaderHeight - 20) / 2, 20, theme);
+            spriteManager.drawSprite(c.icon, variant, ctx, drawX, y + (headerHeight - 20) / 2, 20, theme);
 
             if (c.overlayIcon !== undefined) {
                 spriteManager.drawSprite(
@@ -533,7 +539,7 @@ function drawGridHeaders(
                     selected ? "selected" : "special",
                     ctx,
                     drawX + 9,
-                    y + ((trueHeaderHeight - 18) / 2 + 6),
+                    y + ((headerHeight - 18) / 2 + 6),
                     18,
                     theme
                 );
@@ -561,12 +567,12 @@ function drawGridHeaders(
         } else {
             ctx.fillStyle = fillStyle;
         }
-        ctx.fillText(c.title, drawX, y + trueHeaderHeight / 2 + 1);
+        ctx.fillText(c.title, drawX, y + headerHeight / 2 + 1);
 
         if (hoveredBoolean && c.hasMenu === true) {
             ctx.beginPath();
             const triangleX = x + c.width - 20;
-            const triangleY = y + (trueHeaderHeight / 2 - 3);
+            const triangleY = y + (headerHeight / 2 - 3);
             roundedPoly(
                 ctx,
                 [
@@ -601,7 +607,7 @@ function drawGridHeaders(
             effectiveCols,
             width,
             translateX,
-            headerHeight,
+            groupHeaderHeight,
             outerTheme,
             spriteManager,
             verticalBorder,
@@ -618,7 +624,7 @@ function clipDamage(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
     height: number,
-    headerHeight: number,
+    totalHeaderHeight: number,
     translateX: number,
     translateY: number,
     cellYOffset: number,
@@ -638,7 +644,7 @@ function clipDamage(
         cellYOffset,
         translateX,
         translateY,
-        headerHeight,
+        totalHeaderHeight,
         (c, drawX, colDrawY, clipX, startRow) => {
             const diff = Math.max(0, clipX - drawX);
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
@@ -666,7 +672,7 @@ function drawCells(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
     height: number,
-    headerHeight: number,
+    totalHeaderHeight: number,
     translateX: number,
     translateY: number,
     cellYOffset: number,
@@ -696,14 +702,14 @@ function drawCells(
         cellYOffset,
         translateX,
         translateY,
-        headerHeight,
+        totalHeaderHeight,
         (c, drawX, colDrawY, clipX, startRow) => {
             const diff = Math.max(0, clipX - drawX);
             ctx.save();
             let font = `${outerTheme.baseFontStyle} ${outerTheme.fontFamily}`;
             ctx.font = font;
             ctx.beginPath();
-            ctx.rect(drawX + diff, headerHeight + 1, c.width - diff, height - headerHeight - 1);
+            ctx.rect(drawX + diff, totalHeaderHeight + 1, c.width - diff, height - totalHeaderHeight - 1);
             ctx.clip();
 
             const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
@@ -839,7 +845,7 @@ function drawBlanks(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
     height: number,
-    headerHeight: number,
+    totalHeaderHeight: number,
     translateX: number,
     translateY: number,
     cellYOffset: number,
@@ -858,13 +864,13 @@ function drawBlanks(
         cellYOffset,
         translateX,
         translateY,
-        headerHeight,
+        totalHeaderHeight,
         (c, drawX, colDrawY, clipX, startRow) => {
             if (c !== effectiveColumns[effectiveColumns.length - 1]) return;
             ctx.save();
             ctx.beginPath();
             drawX += c.width;
-            ctx.rect(Math.max(drawX, clipX), headerHeight + 1, 10000, height - headerHeight - 1);
+            ctx.rect(Math.max(drawX, clipX), totalHeaderHeight + 1, 10000, height - totalHeaderHeight - 1);
             ctx.clip();
 
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
@@ -901,7 +907,7 @@ function overdrawStickyBoundaries(
     effectiveCols: readonly MappedGridColumn[],
     width: number,
     height: number,
-    headerHeight: number,
+    totalHeaderHeight: number,
     lastRowSticky: boolean,
     rows: number,
     getRowHeight: (row: number) => number,
@@ -917,8 +923,8 @@ function overdrawStickyBoundaries(
     }
 
     ctx.beginPath();
-    ctx.moveTo(0, headerHeight + 0.5);
-    ctx.lineTo(width, headerHeight + 0.5);
+    ctx.moveTo(0, totalHeaderHeight + 0.5);
+    ctx.lineTo(width, totalHeaderHeight + 0.5);
 
     ctx.strokeStyle = theme.bgHeader;
     ctx.stroke();
@@ -955,7 +961,7 @@ function drawFocusRing(
     translateY: number,
     effectiveCols: readonly MappedGridColumn[],
     theme: Theme,
-    headerHeight: number,
+    totalHeaderHeight: number,
     selectedCell: GridSelection | undefined,
     getRowHeight: (row: number) => number,
     lastRowSticky: boolean,
@@ -969,7 +975,7 @@ function drawFocusRing(
     const stickRowHeight = lastRowSticky && !isStickyRow ? getRowHeight(rows - 1) - 1 : 0;
 
     ctx.beginPath();
-    ctx.rect(0, headerHeight, width, height - headerHeight - stickRowHeight);
+    ctx.rect(0, totalHeaderHeight, width, height - totalHeaderHeight - stickRowHeight);
     ctx.clip();
 
     walkColumns(
@@ -977,7 +983,7 @@ function drawFocusRing(
         cellYOffset,
         translateX,
         translateY,
-        headerHeight,
+        totalHeaderHeight,
         (col, drawX, colDrawY, clipX, startRow) => {
             if (col.sourceIndex !== targetCol) {
                 return;
@@ -1020,6 +1026,7 @@ export function drawGrid(
     dragAndDropState: DragAndDropState | undefined,
     theme: Theme,
     headerHeight: number,
+    groupHeaderHeight: number,
     selectedRows: CompactSelection,
     disabledRows: CompactSelection,
     rowHeight: number | ((index: number) => number),
@@ -1053,10 +1060,11 @@ export function drawGrid(
     }
 
     const overlayCanvas = buffers.overlay;
+    const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
-    if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== headerHeight * dpr) {
+    if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== totalHeaderHeight * dpr) {
         overlayCanvas.width = width * dpr;
-        overlayCanvas.height = headerHeight * dpr;
+        overlayCanvas.height = totalHeaderHeight * dpr;
     }
 
     const last = lastBlitData.current;
@@ -1107,6 +1115,7 @@ export function drawGrid(
             width,
             translateX,
             headerHeight,
+            groupHeaderHeight,
             selectedColumns,
             dragAndDropState,
             isResizing,
@@ -1118,11 +1127,6 @@ export function drawGrid(
             getGroupDetails
         );
 
-        if (enableGroups) {
-            overlayCtx.save();
-            overlayCtx.rect(0, headerHeight / 2, width, headerHeight / 2);
-            overlayCtx.clip();
-        }
         drawGridLines(
             overlayCtx,
             effectiveCols,
@@ -1131,7 +1135,8 @@ export function drawGrid(
             translateY,
             width,
             height,
-            headerHeight,
+            groupHeaderHeight,
+            totalHeaderHeight,
             getRowHeight,
             verticalBorder,
             lastRowSticky,
@@ -1139,10 +1144,6 @@ export function drawGrid(
             theme,
             true
         );
-
-        if (enableGroups) {
-            overlayCtx.restore();
-        }
     };
 
     // handle damage updates by directly drawing to the target to avoid large blits
@@ -1159,7 +1160,7 @@ export function drawGrid(
                 targetCtx,
                 effectiveCols,
                 height,
-                headerHeight,
+                totalHeaderHeight,
                 translateX,
                 translateY,
                 cellYOffset,
@@ -1170,13 +1171,13 @@ export function drawGrid(
             );
 
             targetCtx.fillStyle = theme.bgCell;
-            targetCtx.fillRect(0, headerHeight + 1, width, height - headerHeight - 1);
+            targetCtx.fillRect(0, totalHeaderHeight + 1, width, height - totalHeaderHeight - 1);
 
             drawCells(
                 targetCtx,
                 effectiveCols,
                 height,
-                headerHeight,
+                totalHeaderHeight,
                 translateX,
                 translateY,
                 cellYOffset,
@@ -1209,7 +1210,7 @@ export function drawGrid(
         targetCtx.restore();
         overlayCtx.restore();
 
-        if (doHeaders && headerHeight > 0) {
+        if (doHeaders && totalHeaderHeight > 0) {
             targetCtx.imageSmoothingEnabled = false;
             targetCtx.drawImage(overlayCanvas, 0, 0);
             targetCtx.imageSmoothingEnabled = false;
@@ -1234,7 +1235,7 @@ export function drawGrid(
             width,
             height,
             rows,
-            headerHeight,
+            totalHeaderHeight,
             dpr,
             columns,
             effectiveCols,
@@ -1248,7 +1249,7 @@ export function drawGrid(
         effectiveCols,
         width,
         height,
-        headerHeight,
+        totalHeaderHeight,
         lastRowSticky,
         rows,
         getRowHeight,
@@ -1266,7 +1267,7 @@ export function drawGrid(
             translateY,
             effectiveCols,
             theme,
-            headerHeight,
+            totalHeaderHeight,
             selectedCell,
             getRowHeight,
             lastRowSticky,
@@ -1284,13 +1285,13 @@ export function drawGrid(
     }
 
     targetCtx.fillStyle = theme.bgCell;
-    targetCtx.fillRect(0, headerHeight, width, height - headerHeight);
+    targetCtx.fillRect(0, totalHeaderHeight, width, height - totalHeaderHeight);
 
     drawCells(
         targetCtx,
         effectiveCols,
         height,
-        headerHeight,
+        totalHeaderHeight,
         translateX,
         translateY,
         cellYOffset,
@@ -1318,7 +1319,7 @@ export function drawGrid(
         targetCtx,
         effectiveCols,
         height,
-        headerHeight,
+        totalHeaderHeight,
         translateX,
         translateY,
         cellYOffset,
@@ -1340,7 +1341,8 @@ export function drawGrid(
         translateY,
         width,
         height,
-        headerHeight,
+        groupHeaderHeight,
+        totalHeaderHeight,
         getRowHeight,
         verticalBorder,
         lastRowSticky,
@@ -1357,7 +1359,7 @@ export function drawGrid(
         translateY,
         effectiveCols,
         theme,
-        headerHeight,
+        totalHeaderHeight,
         selectedCell,
         getRowHeight,
         lastRowSticky,
@@ -1377,7 +1379,7 @@ export function drawGrid(
     targetCtx.restore();
     overlayCtx.restore();
 
-    if (headerHeight > 0) {
+    if (totalHeaderHeight > 0) {
         targetCtx.imageSmoothingEnabled = false;
         targetCtx.drawImage(overlayCanvas, 0, 0);
         targetCtx.imageSmoothingEnabled = true;
@@ -1439,12 +1441,12 @@ function walkColumns(
     cellYOffset: number,
     translateX: number,
     translateY: number,
-    headerHeight: number,
+    totalHeaderHeight: number,
     cb: WalkColsCallback
 ): void {
     let x = 0;
     let clipX = 0; // this tracks the total width of sticky cols
-    const drawY = headerHeight + translateY;
+    const drawY = totalHeaderHeight + translateY;
     for (const c of effectiveCols) {
         let drawX: number;
         if (c.sticky) {

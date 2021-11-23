@@ -333,12 +333,14 @@ export interface BubbleCell extends BaseGridCell {
 export type ProvideEditorCallback<T extends GridCell> = (
     cell: T
 ) =>
-    | React.FunctionComponent<{
+    | (React.FunctionComponent<{
           readonly onChange: (newValue: T) => void;
           readonly onFinishedEditing: () => void;
           readonly isHighlighted: boolean;
           readonly value: T;
-      }>
+      }> & {
+          disablePadding?: boolean;
+      })
     | undefined;
 
 export interface CustomCell<T extends {} = {}> extends BaseGridCell {

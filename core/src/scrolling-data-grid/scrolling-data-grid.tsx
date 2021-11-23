@@ -50,7 +50,7 @@ const MinimapStyle = styled.div`
 `;
 
 const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
-    const { columns, rows, rowHeight, headerHeight, freezeColumns, experimental } = p;
+    const { columns, rows, rowHeight, headerHeight, groupHeaderHeight, enableGroups, freezeColumns, experimental } = p;
     const { paddingRight, paddingBottom } = experimental ?? {};
     const {
         className,
@@ -79,7 +79,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         return r;
     }, [columns, overscrollX]);
 
-    let height = headerHeight;
+    let height = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
     if (typeof rowHeight === "number") {
         height += rows * rowHeight;
     } else {
