@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Theme } from "../common/styles";
-import { withTheme } from "styled-components";
+import { useTheme } from "styled-components";
 import ImageWindowLoader from "../common/image-window-loader";
 import {
     getColumnIndexForX,
@@ -106,10 +106,6 @@ export interface DataGridProps {
     readonly headerIcons?: SpriteMap;
 }
 
-interface Props extends DataGridProps {
-    readonly theme: Theme;
-}
-
 type Item = readonly [number, number | undefined];
 
 interface BlitData {
@@ -130,12 +126,11 @@ export interface DataGridRef {
     damage: (cells: DamageUpdateList) => void;
 }
 
-const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forwardedRef) => {
+const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p, forwardedRef) => {
     const {
         width,
         height,
         className,
-        theme,
         columns,
         cellXOffset: cellXOffsetReal,
         cellYOffset,
@@ -177,6 +172,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     const translateY = p.translateY ?? 0;
     const cellXOffset = Math.max(freezeColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
+    const theme = useTheme() as Theme;
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const imageLoader = React.useMemo<ImageWindowLoader>(() => new ImageWindowLoader(), []);
     const canBlit = React.useRef<boolean>();
@@ -1041,9 +1037,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
         100
     );
 
-    const stickyX = getStickyWidth(mappedColumns, dragAndDropState);
-    const stickyShadowStyle = React.useMemo<React.CSSProperties>(() => {
-        return {
+    const stickyShadow = React.useMemo(() => {
+        if (!mappedColumns[0].sticky) {
+            return null;
+        }
+        const stickyX = getStickyWidth(mappedColumns, dragAndDropState);
+        const props: React.CSSProperties = {
             position: "absolute",
             top: 0,
             left: stickyX,
@@ -1054,12 +1053,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
             boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
             transition: "opacity 150ms",
         };
-    }, [cellXOffset, freezeColumns, stickyX, style.height, style.width, translateX]);
-
-    let stickyShadow: React.ReactNode;
-    if (mappedColumns[0].sticky) {
-        stickyShadow = <div style={stickyShadowStyle} />;
-    }
+        return <div style={props} />;
+    }, [cellXOffset, dragAndDropState, freezeColumns, mappedColumns, style.height, style.width, translateX]);
 
     return (
         <>
@@ -1077,4 +1072,4 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, Props> = (p, forward
     );
 };
 
-export default React.memo(withTheme(React.forwardRef(DataGrid)));
+export default React.memo(React.forwardRef(DataGrid));
