@@ -83,7 +83,7 @@ export type DrawCustomCellCallback = (args: {
     imageLoader: ImageWindowLoader;
 }) => boolean;
 
-export enum GridCellKind {
+export const enum GridCellKind {
     Uri = "uri",
     Text = "text",
     Image = "image",
@@ -98,7 +98,7 @@ export enum GridCellKind {
     Custom = "custom",
 }
 
-export enum GridColumnIcon {
+export const enum GridColumnIcon {
     HeaderRowID = "headerRowID",
     HeaderCode = "headerCode",
     HeaderNumber = "headerNumber",
@@ -384,7 +384,7 @@ export interface UriCell extends BaseGridCell {
     readonly readonly?: boolean;
 }
 
-export enum InnerGridCellKind {
+export const enum InnerGridCellKind {
     NewRow = "new-row",
     Marker = "marker",
 }

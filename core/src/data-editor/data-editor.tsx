@@ -1273,7 +1273,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             return s;
         }
 
-        enum State {
+        const enum State {
             None,
             inString,
             inStringPostQuote,
