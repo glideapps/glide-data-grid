@@ -3,12 +3,14 @@ import throttle from "lodash/throttle";
 
 interface LoadResult {
     img: HTMLImageElement | undefined;
-    cancel?: () => void;
+    cancel: () => void;
     url: string;
     cells: number[];
 }
 
 const rowShift = 1 << 16;
+
+const imgPool: HTMLImageElement[] = [];
 
 function packColRowToNumber(col: number, row: number) {
     return row * rowShift + col;
@@ -57,7 +59,7 @@ class ImageWindowLoader {
         this.loadedLocations = [];
     }, 20);
 
-    private clearOutOfWindowImpl = () => {
+    private clearOutOfWindow = () => {
         for (const key of Object.keys(this.cache)) {
             const obj = this.cache[key];
 
@@ -72,16 +74,11 @@ class ImageWindowLoader {
             if (keep) {
                 obj.cells = obj.cells.filter(this.isInWindow);
             } else {
-                obj.cancel?.();
+                obj.cancel();
                 delete this.cache[key];
             }
         }
     };
-
-    private clearOutOfWindow = throttle(this.clearOutOfWindowImpl, 600, {
-        leading: false,
-        trailing: true,
-    });
 
     public setWindow(window: Rectangle): void {
         if (
@@ -106,7 +103,7 @@ class ImageWindowLoader {
             }
             return current.img;
         } else {
-            const img = new Image();
+            const img = imgPool.pop() ?? new Image();
 
             img.src = url;
 
@@ -117,7 +114,7 @@ class ImageWindowLoader {
                 url,
                 cancel: () => {
                     cancelled = true;
-                    img.src = "";
+                    imgPool.unshift(img);
                 },
             };
 
