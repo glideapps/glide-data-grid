@@ -315,8 +315,9 @@ export function drawMarkerRowCell(
     markerKind: "checkbox" | "both" | "number"
 ) {
     const { ctx, x, y, w: width, h: height, hoverAmount, theme } = args;
-    if (markerKind !== "number") {
-        ctx.globalAlpha = checked ? 1 : hoverAmount;
+    const checkedboxAlpha = checked ? 1 : hoverAmount;
+    if (markerKind !== "number" && checkedboxAlpha > 0) {
+        ctx.globalAlpha = checkedboxAlpha;
         drawCheckbox(ctx, theme, checked, x, y, width, height, true);
         ctx.globalAlpha = 1;
     }
@@ -326,14 +327,15 @@ export function drawMarkerRowCell(
         const w = measureTextCached(text, ctx).width;
 
         const start = x + (width - w) / 2;
-        if (markerKind === "both") {
+        if (markerKind === "both" && hoverAmount !== 0) {
             ctx.globalAlpha = 1 - hoverAmount;
         }
         ctx.fillStyle = theme.textLight;
         ctx.fillText(text, start, y + height / 2);
-        ctx.globalAlpha = 1;
+        if (hoverAmount !== 0) {
+            ctx.globalAlpha = 1;
+        }
     }
-    ctx.globalAlpha = 1;
 }
 
 export function drawProtectedCell(args: BaseDrawArgs) {
@@ -562,7 +564,8 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
 export function drawImage(args: BaseDrawArgs, data: readonly string[]) {
     const { x, y, h, col, row, theme, ctx, imageLoader } = args;
     let drawX = x + theme.cellHorizontalPadding;
-    data.filter(s => s.length > 0).forEach(i => {
+    for (const i of data) {
+        if (i.length === 0) continue;
         const img = imageLoader.loadOrGetImage(i, col, row);
 
         if (img !== undefined) {
@@ -576,8 +579,7 @@ export function drawImage(args: BaseDrawArgs, data: readonly string[]) {
 
             drawX += imgWidth + itemMargin;
         }
-        // }
-    });
+    }
 }
 
 interface Point {
