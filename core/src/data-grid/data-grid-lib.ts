@@ -218,13 +218,17 @@ export function drawWithLastUpdate(
     return progress < animTime;
 }
 
-export function drawTextCell(args: BaseDrawArgs, data: string, overrideColor?: string) {
+export function prepTextCell(args: BaseDrawArgs, overrideColor?: string) {
+    const { ctx, theme } = args;
+    ctx.fillStyle = overrideColor ?? theme.textDark;
+}
+
+export function drawTextCell(args: BaseDrawArgs, data: string) {
     const { ctx, x, y, w, h, theme } = args;
     data = data.split(/\r?\n/)[0].slice(0, Math.round(w / 4));
 
     const dir = direction(data);
 
-    ctx.fillStyle = overrideColor ?? theme.textDark;
     if (dir === "rtl") {
         const textWidth = measureTextCached(data, ctx).width;
         ctx.fillText(data, x + w - theme.cellHorizontalPadding - textWidth + 0.5, y + h / 2);
@@ -308,6 +312,11 @@ function drawCheckbox(
     }
 }
 
+export function prepMarkerRowCell(args: BaseDrawArgs) {
+    const { ctx, theme } = args;
+    ctx.font = `9px ${theme.fontFamily}`;
+}
+
 export function drawMarkerRowCell(
     args: BaseDrawArgs,
     index: number,
@@ -323,7 +332,6 @@ export function drawMarkerRowCell(
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
         const text = (index + 1).toString();
-        ctx.font = `9px ${theme.fontFamily}`;
         const w = measureTextCached(text, ctx).width;
 
         const start = x + (width - w) / 2;

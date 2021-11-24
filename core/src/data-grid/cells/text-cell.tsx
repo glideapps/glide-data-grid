@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
 import GrowingEntry from "../../growing-entry/growing-entry";
-import { drawTextCell } from "../data-grid-lib";
+import { drawTextCell, prepTextCell } from "../data-grid-lib";
 import { GridCellKind, TextCell } from "../data-grid-types";
 import { InternalCellRenderer } from "./cell-types";
 
@@ -10,6 +10,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
     kind: GridCellKind.Text,
     needsHover: false,
     needsHoverPosition: false,
+    renderPrep: prepTextCell,
     render: a => drawTextCell(a, a.cell.displayData),
     onDelete: c => ({
         ...c,

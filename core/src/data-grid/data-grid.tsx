@@ -571,6 +571,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         () => ({
             width,
             height,
+            contain: "strict",
             display: "block",
             cursor: isDragging
                 ? "grabbing"

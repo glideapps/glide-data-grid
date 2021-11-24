@@ -69,16 +69,21 @@ export function drawCell(
     imageLoader: ImageWindowLoader,
     hoverAmount: number,
     hoverInfo: HoverInfo | undefined,
-    frameTime: number
-): boolean {
+    frameTime: number,
+    lastToken?: {} | undefined
+): {
+    lastToken: {} | undefined;
+    enqueue: [number, number] | undefined;
+} {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
     if (hoverInfo !== undefined && hoverInfo[0][0] === col && hoverInfo[0][1] === row) {
         hoverX = hoverInfo[1][0];
         hoverY = hoverInfo[1][1];
     }
+    let result: {} | undefined = undefined;
     const args = { ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader };
-    return drawWithLastUpdate(args, cell.lastUpdated, frameTime, () => {
+    const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, () => {
         const drawn = isInnerOnlyCell(cell)
             ? false
             : drawCustomCell?.({
@@ -96,9 +101,17 @@ export function drawCell(
               }) === true;
         if (!drawn && cell.kind !== GridCellKind.Custom) {
             const r = CellRenderers[cell.kind];
+            if (lastToken !== r) {
+                r.renderPrep?.(args);
+            }
             r.render(args);
+            result = r;
         }
     });
+    return {
+        lastToken: result,
+        enqueue: needsAnim ? [col, row] : undefined,
+    };
 }
 
 function blitLastFrame(
@@ -717,6 +730,7 @@ function drawCells(
                 c.themeOverride === undefined && groupTheme === undefined
                     ? outerTheme
                     : { ...outerTheme, ...groupTheme, ...c.themeOverride };
+            let lastToken: {} | undefined;
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
                 if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
                     return;
@@ -760,38 +774,25 @@ function drawCells(
 
                 if (isSticky || theme.bgCell !== outerTheme.bgCell) {
                     ctx.fillStyle = theme.bgCell;
-                    if (drawX === 0) {
-                        ctx.fillRect(drawX, drawY, c.width, rh);
-                    } else {
-                        ctx.fillRect(drawX, drawY, c.width, rh);
-                    }
+                    ctx.fillRect(drawX, drawY, c.width, rh);
+                    lastToken = undefined;
                 }
 
                 if (highlighted || rowDisabled) {
                     if (rowDisabled) {
                         ctx.fillStyle = theme.bgHeader;
-                        if (drawX === 0) {
-                            ctx.fillRect(drawX, drawY, c.width, rh);
-                        } else {
-                            ctx.fillRect(drawX, drawY, c.width, rh);
-                        }
+                        ctx.fillRect(drawX, drawY, c.width, rh);
                     }
                     if (highlighted) {
                         ctx.fillStyle = theme.accentLight;
-                        if (drawX === 0) {
-                            ctx.fillRect(drawX, drawY, c.width, rh);
-                        } else {
-                            ctx.fillRect(drawX, drawY, c.width, rh);
-                        }
+                        ctx.fillRect(drawX, drawY, c.width, rh);
                     }
+                    lastToken = undefined;
                 } else {
-                    if (prelightCells?.find(pre => pre[0] === c.sourceIndex && pre[1] === row) !== undefined) {
+                    if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row)) {
                         ctx.fillStyle = theme.bgSearchResult;
-                        if (drawX === 0) {
-                            ctx.fillRect(drawX, drawY, c.width, rh);
-                        } else {
-                            ctx.fillRect(drawX, drawY, c.width, rh);
-                        }
+                        ctx.fillRect(drawX, drawY, c.width, rh);
+                        lastToken = undefined;
                     }
                 }
 
@@ -807,26 +808,27 @@ function drawCells(
                         ctx.font = cellFont;
                         font = cellFont;
                     }
-                    if (
-                        drawCell(
-                            ctx,
-                            row,
-                            cell,
-                            c.sourceIndex,
-                            drawX,
-                            drawY,
-                            c.width,
-                            rh,
-                            highlighted,
-                            theme,
-                            drawCustomCell,
-                            imageLoader,
-                            hoverValue?.hoverAmount ?? 0,
-                            hoverInfo,
-                            frameTime
-                        )
-                    ) {
-                        enqueue([c.sourceIndex, row]);
+                    const drawResult = drawCell(
+                        ctx,
+                        row,
+                        cell,
+                        c.sourceIndex,
+                        drawX,
+                        drawY,
+                        c.width,
+                        rh,
+                        highlighted,
+                        theme,
+                        drawCustomCell,
+                        imageLoader,
+                        hoverValue?.hoverAmount ?? 0,
+                        hoverInfo,
+                        frameTime,
+                        lastToken
+                    );
+                    lastToken = drawResult.lastToken;
+                    if (drawResult.enqueue !== undefined) {
+                        enqueue(drawResult.enqueue);
                     }
                 }
 
