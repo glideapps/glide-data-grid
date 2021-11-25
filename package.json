@@ -1,6 +1,6 @@
 {
     "name": "root",
-    "version": "3.1.1-beta3",
+    "version": "3.1.1",
     "scripts": {
         "bootstrap": "./bootstrap.sh",
         "build": "./build-all.sh",
