@@ -47,7 +47,9 @@ type Props = Omit<
     | "getCellContent"
     | "gridRef"
     | "headerHeight"
+    | "groupHeaderHeight"
     | "lastRowSticky"
+    | "lockColumns"
     | "onCellFocused"
     | "onKeyDown"
     | "onKeyUp"
@@ -86,6 +88,7 @@ export interface DataEditorProps extends Props {
         readonly sticky?: boolean;
     };
     readonly headerHeight?: number;
+    readonly groupHeaderHeight?: number;
 
     readonly rowMarkers?: "checkbox" | "number" | "both" | "none";
     readonly rowMarkerWidth?: number;
@@ -160,7 +163,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         getCellsForSelection,
         rowMarkers = "none",
         rowHeight = 34,
-        headerHeight: rawHeaderHeight = 36,
+        headerHeight = 36,
         rowMarkerWidth: rowMarkerWidthRaw,
         imageEditorOverride,
         markdownDivCreateNode,
@@ -182,6 +185,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onDeleteRows,
         onDragStart,
         onPaste,
+        groupHeaderHeight = headerHeight,
         freezeColumns = 0,
         rowSelectionMode = "auto",
         onHeaderMenuClick,
@@ -207,8 +211,37 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const mangledFreezeColumns = freezeColumns + (hasRowMarkers ? 1 : 0);
 
-    const gridSelection = gridSelectionOuter ?? gridSelectionInner;
-    const setGridSelection = onGridSelectionChange ?? setGridSelectionInner;
+    const gridSelectionOuterMangled: GridSelection | undefined =
+        gridSelectionOuter === undefined
+            ? undefined
+            : {
+                  cell: [gridSelectionOuter.cell[0] + rowMarkerOffset, gridSelectionOuter.cell[1]],
+                  range: {
+                      ...gridSelectionOuter.range,
+                      x: gridSelectionOuter.range.x + rowMarkerOffset,
+                  },
+              };
+    const gridSelection = gridSelectionOuterMangled ?? gridSelectionInner;
+    const setGridSelection = React.useCallback(
+        (newVal: GridSelection | undefined) => {
+            if (onGridSelectionChange !== undefined) {
+                if (newVal === undefined) {
+                    onGridSelectionChange(undefined);
+                } else {
+                    onGridSelectionChange({
+                        cell: [newVal.cell[0] - rowMarkerOffset, newVal.cell[1]],
+                        range: {
+                            ...newVal.range,
+                            x: newVal.range.x - rowMarkerOffset,
+                        },
+                    });
+                }
+            } else {
+                setGridSelectionInner(newVal);
+            }
+        },
+        [onGridSelectionChange, rowMarkerOffset]
+    );
     const selectedRows = selectedRowsOuter ?? selectedRowsInner;
     const setSelectedRows = setSelectedRowsOuter ?? setSelectedRowsInner;
 
@@ -230,7 +263,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return columns.some(c => c.group !== undefined);
     }, [columns]);
 
-    const headerHeight = enableGroups ? rawHeaderHeight * 2 : rawHeaderHeight;
+    const totalHeaderHeight = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
 
     const [visibleRegion, setVisibleRegion] = React.useState<Rectangle & { tx?: number; ty?: number }>({
         x: 0,
@@ -607,12 +640,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let start = col;
                 let end = col;
                 for (let i = col - 1; i >= rowMarkerOffset; i--) {
-                    if (needle.group !== mangledCols[i].group) break;
+                    if ((needle.group ?? "") !== (mangledCols[i].group ?? "")) break;
                     start--;
                 }
 
                 for (let i = col + 1; i < mangledCols.length; i++) {
-                    if (needle.group !== mangledCols[i].group) break;
+                    if ((needle.group ?? "") !== (mangledCols[i].group ?? "")) break;
                     end++;
                 }
 
@@ -878,7 +911,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                         const sLeft = scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
                         const sRight = scrollBounds.right;
-                        const sTop = scrollBounds.top + headerHeight;
+                        const sTop = scrollBounds.top + totalHeaderHeight;
                         let trailingRowHeight = 0;
                         if (lastRowSticky) {
                             trailingRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
@@ -913,7 +946,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
         },
-        [headerHeight, lastRowSticky, rowHeight, rowMarkerOffset, rowMarkerWidth, rows]
+        [totalHeaderHeight, lastRowSticky, rowHeight, rowMarkerOffset, rowMarkerWidth, rows]
     );
 
     const adjustSelection = React.useCallback(
@@ -998,9 +1031,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onFinishEditing = React.useCallback(
         (newValue: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => {
-            if (gridSelection !== undefined && newValue !== undefined) {
+            if (overlay?.cell !== undefined && newValue !== undefined) {
                 // Fixme, this cast is dangerous
-                mangledOnCellEdited?.([gridSelection.cell[0], gridSelection.cell[1]], newValue as EditableGridCell);
+                mangledOnCellEdited?.(overlay.cell, newValue as EditableGridCell);
+                window.requestAnimationFrame(() => {
+                    gridRef.current?.damage([
+                        {
+                            cell: overlay.cell,
+                        },
+                    ]);
+                });
             }
             focus(true);
             setOverlay(undefined);
@@ -1011,7 +1051,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 updateSelectedCell(gridSelection.cell[0] + movX, gridSelection.cell[1] + movY, isEditingTrailingRow);
             }
         },
-        [gridSelection, focus, mangledOnCellEdited, mangledRows, updateSelectedCell]
+        [overlay?.cell, focus, gridSelection, mangledOnCellEdited, mangledRows, updateSelectedCell]
     );
 
     const [selCol, selRow] = gridSelection?.cell ?? [];
@@ -1047,15 +1087,44 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return;
                 }
 
-                if (
-                    isDeleteKey &&
-                    selectedRows !== undefined &&
-                    selectedRows.length !== 0 &&
-                    gridSelection === undefined
-                ) {
+                if (isDeleteKey && selectedRows.length !== 0 && gridSelection === undefined) {
                     focus();
                     onDeleteRows?.(Array.from(selectedRows));
                     setSelectedRows(CompactSelection.empty());
+                    return;
+                }
+
+                function deleteRange(range: Rectangle) {
+                    focus();
+                    const damaged: [number, number][] = [];
+                    for (let x = range.x; x < range.x + range.width; x++) {
+                        for (let y = range.y; y < range.y + range.height; y++) {
+                            const cellValue = getCellContent([x - rowMarkerOffset, y]);
+                            if (
+                                (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
+                                cellValue.kind === GridCellKind.Boolean
+                            ) {
+                                const r = CellRenderers[cellValue.kind];
+                                const newVal = r.onDelete?.(cellValue);
+                                if (newVal !== undefined) {
+                                    mangledOnCellEdited([x, y], newVal as typeof cellValue);
+                                    damaged.push([x, y]);
+                                }
+                            }
+                        }
+                    }
+                    gridRef.current?.damage(damaged.map(x => ({ cell: x })));
+                }
+
+                if (isDeleteKey && selectedColumns.length > 0 && gridSelection === undefined) {
+                    for (const col of selectedColumns) {
+                        deleteRange({
+                            x: col,
+                            y: 0,
+                            width: 1,
+                            height: rows,
+                        });
+                    }
                     return;
                 }
 
@@ -1135,25 +1204,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
                 } else if (isDeleteKey) {
                     const range = gridSelection.range;
-                    focus();
-                    const damaged: [number, number][] = [];
-                    for (let x = range.x; x < range.x + range.width; x++) {
-                        for (let y = range.y; y < range.y + range.height; y++) {
-                            const cellValue = getCellContent([x - rowMarkerOffset, y]);
-                            if (
-                                (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
-                                cellValue.kind === GridCellKind.Boolean
-                            ) {
-                                const r = CellRenderers[cellValue.kind];
-                                const newVal = r.onDelete?.(cellValue);
-                                if (newVal !== undefined) {
-                                    mangledOnCellEdited([x, y], newVal as typeof cellValue);
-                                    damaged.push([x, y]);
-                                }
-                            }
-                        }
-                    }
-                    gridRef.current?.damage(damaged.map(x => ({ cell: x })));
+                    deleteRange(range);
                 } else if (
                     !event.metaKey &&
                     !event.ctrlKey &&
@@ -1189,6 +1240,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             overlay,
             selectedRows,
             gridSelection,
+            selectedColumns,
             enableDownfill,
             getCellContent,
             rowMarkerOffset,
@@ -1198,12 +1250,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             setSelectedColumns,
             focus,
             onDeleteRows,
+            mangledOnCellEdited,
             rows,
             showTrailingBlankRow,
             appendRow,
             reselect,
             getMangedCellContent,
-            mangledOnCellEdited,
             adjustSelection,
             lastRowSticky,
             visibleRegion.y,
@@ -1221,7 +1273,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             return s;
         }
 
-        enum State {
+        const enum State {
             None,
             inString,
             inStringPostQuote,
@@ -1515,8 +1567,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 drawCustomCell={drawCustomCellMangled}
                 disabledRows={disabledRows}
                 freezeColumns={mangledFreezeColumns}
+                lockColumns={rowMarkerOffset}
                 getCellContent={getMangedCellContent}
                 headerHeight={headerHeight}
+                groupHeaderHeight={enableGroups ? groupHeaderHeight : 0}
                 lastRowSticky={lastRowSticky}
                 onCellFocused={onCellFocused}
                 onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}
@@ -1543,6 +1597,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             {overlay !== undefined && (
                 <DataGridOverlayEditor
                     {...overlay}
+                    className={p.experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
                     provideEditor={provideEditor}
                     imageEditorOverride={imageEditorOverride}
                     onFinishEditing={onFinishEditing}

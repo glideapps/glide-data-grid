@@ -382,6 +382,7 @@ function useMockDataGenerator(numCols: number, readonly: boolean = true, group: 
                 cache.current.set(col, row, {
                     ...copied,
                     displayData: typeof copied.data === "string" ? copied.data : (copied as any).displayData,
+                    lastUpdated: performance.now(),
                 } as any);
             }
         },
@@ -934,11 +935,14 @@ export const DrawCustomCells: React.VFC = () => {
 };
 
 export const RearrangeColumns: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(6);
+    const { cols, getCellContent } = useMockDataGenerator(60);
 
     // This is a dirty hack because the mock generator doesn't really support changing this. In a real data source
     // you should track indexes properly
-    const [sortableCols, setSortableCols] = React.useState(cols);
+    const [sortableCols, setSortableCols] = React.useState(() => {
+        num = 200;
+        return cols.map(c => ({ ...c, width: c.width + (rand() % 100) }));
+    });
 
     const onColMoved = React.useCallback((startIndex: number, endIndex: number): void => {
         setSortableCols(old => {
@@ -968,6 +972,8 @@ export const RearrangeColumns: React.VFC = () => {
             }>
             <DataEditor
                 {...defaultProps}
+                freezeColumns={1}
+                rowMarkers="both"
                 getCellContent={getCellContentMangled}
                 columns={sortableCols}
                 onColumnMoved={onColMoved}
@@ -1856,6 +1862,7 @@ export const RapidUpdates: React.VFC = () => {
             const cells: {
                 cell: readonly [number, number];
             }[] = [];
+            const now = performance.now();
             for (let x = 0; x < 5_000; x++) {
                 const col = Math.max(10, rand() % 100);
                 const row = rand() % 10_000;
@@ -1875,6 +1882,7 @@ export const RapidUpdates: React.VFC = () => {
                                   textDark: "#d40000",
                               },
                     allowOverlay: true,
+                    lastUpdated: now,
                 });
                 cells.push({ cell: [col, row] });
             }
@@ -2131,7 +2139,7 @@ export const ColumnGroups: React.VFC = () => {
                 rows={1000}
                 getGroupDetails={g => ({
                     name: g,
-                    icon: GridColumnIcon.HeaderCode,
+                    icon: g === "" ? undefined : GridColumnIcon.HeaderCode,
                 })}
                 rowMarkers="both"
             />
@@ -2165,10 +2173,15 @@ function useCollapsableColumnGroups(cols: readonly GridColumn[]) {
 
     const columns = React.useMemo(() => {
         return cols.map(c => {
-            if (!collapsed.includes(c.group ?? "")) return c;
+            if (!collapsed.includes(c.group ?? ""))
+                return {
+                    ...c,
+                    hasMenu: true,
+                };
             return {
                 ...c,
                 width: 8,
+                hasMenu: true,
             };
         });
     }, [collapsed, cols]);
@@ -2202,6 +2215,7 @@ export const ColumnGroupCollapse: React.VFC = () => {
                 {...defaultProps}
                 {...groupHeaderArgs}
                 getCellContent={getCellContent}
+                groupHeaderHeight={24}
                 rows={1000}
                 rowMarkers="both"
             />
@@ -2209,6 +2223,34 @@ export const ColumnGroupCollapse: React.VFC = () => {
     );
 };
 (ColumnGroupCollapse as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const Minimap: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(1000, true, true);
+
+    return (
+        <BeautifulWrapper
+            title="Minimap"
+            description={
+                <Description>
+                    A minimap can be enabled by setting the <PropName>showMinimap</PropName> property.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                showMinimap={true}
+                rows={3000}
+                rowMarkers="both"
+            />
+        </BeautifulWrapper>
+    );
+};
+(ColumnGroups as any).parameters = {
     options: {
         showPanel: false,
     },

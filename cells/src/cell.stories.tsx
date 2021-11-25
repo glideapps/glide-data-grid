@@ -213,6 +213,7 @@ export const CustomCells: React.VFC = () => {
                             data: {
                                 kind: "tags-cell",
                                 possibleTags: possibleTags,
+                                readonly: row % 2 === 0,
                                 tags: uniq([
                                     possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
                                     possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,

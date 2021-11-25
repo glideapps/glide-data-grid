@@ -37,7 +37,7 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
                     value={markdown}
                     onChange={onChange}
                 />
-                <div className={`edit-icon checkmark-hover ${addLeftPad}`} onClick={onFinish}>
+                <div className={`edit-icon checkmark-hover ${addLeftPad}`} onClick={() => onFinish()}>
                     <Checkmark />
                 </div>
             </MarkdownOverlayEditorStyle>

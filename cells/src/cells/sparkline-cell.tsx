@@ -115,7 +115,8 @@ const renderer: CustomCellRenderer<SparklineCell> = {
                 ctx.save();
                 ctx.font = `8px ${theme.fontFamily}`;
                 ctx.fillStyle = theme.textMedium;
-                ctx.fillText(displayValues[closest], drawX, rect.y + 12);
+                ctx.textBaseline = "top";
+                ctx.fillText(displayValues[closest], drawX, rect.y + theme.cellVerticalPadding);
                 ctx.restore();
             }
         }

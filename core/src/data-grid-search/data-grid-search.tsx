@@ -7,7 +7,7 @@ import { assert } from "../common/support";
 import { InnerGridCell } from "..";
 
 // icons
-const UpArrow = () => (
+const upArrow = (
     <svg className="button-icon" viewBox="0 0 512 512">
         <path
             fill="none"
@@ -19,7 +19,7 @@ const UpArrow = () => (
         />
     </svg>
 );
-const DownArrow = () => (
+const downArrow = (
     <svg className="button-icon" viewBox="0 0 512 512">
         <path
             fill="none"
@@ -32,7 +32,7 @@ const DownArrow = () => (
     </svg>
 );
 
-const CloseX = () => (
+const closeX = (
     <svg className="button-icon" viewBox="0 0 512 512">
         <path
             fill="none"
@@ -113,11 +113,13 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         [getCellContent, getCellsForSelection, searchColOffset]
     );
 
+    const cellYOffsetRef = React.useRef(cellYOffset);
+    cellYOffsetRef.current = cellYOffset;
     const beginSearch = React.useCallback(
         (str: string) => {
             const regex = new RegExp(str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1"), "i");
 
-            let startY = cellYOffset;
+            let startY = cellYOffsetRef.current;
 
             // Lets assume we can do 10 rows at a time
             // This is usually very safe and limits the damage for bad
@@ -212,20 +214,8 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
             cancelSearch();
             searchHandle.current = window.requestAnimationFrame(tick);
         },
-        [
-            cancelSearch,
-            cellYOffset,
-            columns.length,
-            getCellsForSelectionMangled,
-            onSearchResultsChanged,
-            rows,
-            searchColOffset,
-        ]
+        [cancelSearch, columns.length, getCellsForSelectionMangled, onSearchResultsChanged, rows, searchColOffset]
     );
-
-    const cancelEvent = React.useCallback((ev: React.MouseEvent) => {
-        ev.stopPropagation();
-    }, []);
 
     const onClose = React.useCallback(() => {
         onSearchClose?.();
@@ -303,13 +293,6 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         [onClose, onNext, onPrev]
     );
 
-    const rowsSearchedProgress = Math.floor(((searchStatus?.rowsSearched ?? 0) / rows) * 100);
-    const progressStyle: React.CSSProperties = React.useMemo(() => {
-        return {
-            width: `${rowsSearchedProgress}%`,
-        };
-    }, [rowsSearchedProgress]);
-
     // cancel search if the component is unmounted
     React.useEffect(() => {
         return () => {
@@ -317,21 +300,29 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         };
     }, [cancelSearch]);
 
-    let resultString: string | undefined;
-    if (searchStatus !== undefined) {
-        if (searchStatus.results >= 1000) {
-            resultString = `over 1000`;
-        } else {
-            resultString = `${searchStatus.results} result${searchStatus.results !== 1 ? "s" : ""}`;
+    const searchbox = React.useMemo(() => {
+        let resultString: string | undefined;
+        if (searchStatus !== undefined) {
+            if (searchStatus.results >= 1000) {
+                resultString = `over 1000`;
+            } else {
+                resultString = `${searchStatus.results} result${searchStatus.results !== 1 ? "s" : ""}`;
+            }
+            if (searchStatus.selectedIndex >= 0) {
+                resultString = `${searchStatus.selectedIndex + 1} of ${resultString}`;
+            }
         }
-        if (searchStatus.selectedIndex >= 0) {
-            resultString = `${searchStatus.selectedIndex + 1} of ${resultString}`;
-        }
-    }
 
-    return (
-        <>
-            <ScrollingDataGrid {...rest} onKeyDown={onKeyDown} prelightCells={searchResults} />
+        const cancelEvent = (ev: React.MouseEvent) => {
+            ev.stopPropagation();
+        };
+
+        const rowsSearchedProgress = Math.floor(((searchStatus?.rowsSearched ?? 0) / rows) * 100);
+        const progressStyle: React.CSSProperties = {
+            width: `${rowsSearchedProgress}%`,
+        };
+
+        return (
             <SearchWrapper
                 showSearch={showSearch}
                 onMouseDown={cancelEvent}
@@ -350,17 +341,17 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         tabIndex={showSearch ? undefined : -1}
                         onClick={onPrev}
                         disabled={(searchStatus?.results ?? 0) === 0}>
-                        <UpArrow />
+                        {upArrow}
                     </button>
                     <button
                         tabIndex={showSearch ? undefined : -1}
                         onClick={onNext}
                         disabled={(searchStatus?.results ?? 0) === 0}>
-                        <DownArrow />
+                        {downArrow}
                     </button>
                     {onSearchClose !== undefined && (
                         <button tabIndex={showSearch ? undefined : -1} onClick={onClose}>
-                            <CloseX />
+                            {closeX}
                         </button>
                     )}
                 </div>
@@ -373,6 +364,24 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                     </>
                 )}
             </SearchWrapper>
+        );
+    }, [
+        onClose,
+        onNext,
+        onPrev,
+        onSearchChange,
+        onSearchClose,
+        onSearchKeyDown,
+        rows,
+        searchStatus,
+        searchString,
+        showSearch,
+    ]);
+
+    return (
+        <>
+            <ScrollingDataGrid {...rest} onKeyDown={onKeyDown} prelightCells={searchResults} />
+            {searchbox}
         </>
     );
 };

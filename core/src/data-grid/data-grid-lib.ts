@@ -21,9 +21,42 @@ export function useMappedColumns(columns: readonly GridColumn[], freezeColumns: 
     );
 }
 
-export function getStickyWidth(columns: readonly MappedGridColumn[]): number {
+function remapForDnDState(
+    columns: readonly MappedGridColumn[],
+    dndState?: {
+        src: number;
+        dest: number;
+    }
+) {
+    let mappedCols = columns;
+    if (dndState !== undefined) {
+        let writable = [...columns];
+        const temp = mappedCols[dndState.src];
+        if (dndState.src > dndState.dest) {
+            writable.splice(dndState.src, 1);
+            writable.splice(dndState.dest, 0, temp);
+        } else {
+            writable.splice(dndState.dest + 1, 0, temp);
+            writable.splice(dndState.src, 1);
+        }
+        writable = writable.map((c, i) => ({
+            ...c,
+            sticky: columns[i].sticky,
+        }));
+        mappedCols = writable;
+    }
+    return mappedCols;
+}
+
+export function getStickyWidth(
+    columns: readonly MappedGridColumn[],
+    dndState?: {
+        src: number;
+        dest: number;
+    }
+): number {
     let result = 0;
-    for (const c of columns) {
+    for (const c of remapForDnDState(columns, dndState)) {
         if (c.sticky) result += c.width;
         else break;
     }
@@ -41,22 +74,10 @@ export function getEffectiveColumns(
     },
     tx?: number
 ): readonly MappedGridColumn[] {
-    let mappedCols = columns;
-    if (dndState !== undefined) {
-        const writable = [...columns];
-        const temp = mappedCols[dndState.src];
-        if (dndState.src > dndState.dest) {
-            writable.splice(dndState.src, 1);
-            writable.splice(dndState.dest, 0, temp);
-        } else {
-            writable.splice(dndState.dest + 1, 0, temp);
-            writable.splice(dndState.src, 1);
-        }
-        mappedCols = writable;
-    }
+    const mappedCols = remapForDnDState(columns, dndState);
 
     const sticky: MappedGridColumn[] = [];
-    for (const c of columns) {
+    for (const c of mappedCols) {
         if (c.sticky) {
             sticky.push(c);
         } else {
@@ -76,9 +97,14 @@ export function getEffectiveColumns(
         endIndex++;
     }
 
-    const effectiveCols = [...sticky, ...mappedCols.slice(cellXOffset, endIndex).filter(c => !c.sticky)];
+    for (let i = cellXOffset; i < endIndex; i++) {
+        const c = mappedCols[i];
+        if (!c.sticky) {
+            sticky.push(c);
+        }
+    }
 
-    return effectiveCols;
+    return sticky;
 }
 
 export function getColumnIndexForX(
@@ -100,15 +126,19 @@ export function getColumnIndexForX(
 export function getRowIndexForY(
     targetY: number,
     height: number,
+    hasGroups: boolean,
     headerHeight: number,
+    groupHeaderHeight: number,
     rows: number,
     rowHeight: number | ((index: number) => number),
     cellYOffset: number,
     translateY: number,
     lastRowSticky: boolean
 ): number | undefined {
-    if (targetY <= headerHeight / 2) return -2;
+    if (hasGroups && targetY <= groupHeaderHeight) return -2;
     if (targetY <= headerHeight) return -1;
+
+    const totalHeaderHeight = headerHeight + groupHeaderHeight;
 
     const lastRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows - 1);
     if (lastRowSticky && targetY > height - lastRowHeight) {
@@ -119,11 +149,11 @@ export function getRowIndexForY(
 
     const ty = targetY - (translateY ?? 0);
     if (typeof rowHeight === "number") {
-        const target = Math.floor((ty - headerHeight) / rowHeight) + cellYOffset;
+        const target = Math.floor((ty - totalHeaderHeight) / rowHeight) + cellYOffset;
         if (target >= effectiveRows) return undefined;
         return target;
     } else {
-        let curY = headerHeight;
+        let curY = totalHeaderHeight;
         for (let i = cellYOffset; i < effectiveRows; i++) {
             const rh = rowHeight(i);
             if (ty <= curY + rh) return i;
@@ -162,21 +192,49 @@ export function measureTextCached(s: string, ctx: CanvasRenderingContext2D): Tex
     return metrics;
 }
 
-export function drawTextCell(args: BaseDrawArgs, data: string, overrideColor?: string) {
+export function drawWithLastUpdate(
+    args: BaseDrawArgs,
+    lastUpdate: number | undefined,
+    frameTime: number,
+    draw: () => void
+) {
+    const { ctx, x, y, w: width, h: height, theme } = args;
+    let progress = Number.MAX_SAFE_INTEGER;
+    const animTime = 500;
+    if (lastUpdate !== undefined) {
+        progress = frameTime - lastUpdate;
+
+        if (progress < animTime) {
+            const fade = 1 - progress / animTime;
+            ctx.globalAlpha = fade;
+            ctx.fillStyle = theme.bgSearchResult;
+            ctx.fillRect(x, y, width, height);
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    draw();
+
+    return progress < animTime;
+}
+
+export function prepTextCell(args: BaseDrawArgs, overrideColor?: string) {
+    const { ctx, theme } = args;
+    ctx.fillStyle = overrideColor ?? theme.textDark;
+}
+
+export function drawTextCell(args: BaseDrawArgs, data: string) {
     const { ctx, x, y, w, h, theme } = args;
     data = data.split(/\r?\n/)[0].slice(0, Math.round(w / 4));
 
     const dir = direction(data);
 
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = overrideColor ?? theme.textDark;
     if (dir === "rtl") {
         const textWidth = measureTextCached(data, ctx).width;
         ctx.fillText(data, x + w - theme.cellHorizontalPadding - textWidth + 0.5, y + h / 2);
     } else {
         ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
     }
-    ctx.textBaseline = "alphabetic";
 }
 
 export function drawNewRowCell(args: BaseDrawArgs, data: string, isFirst: boolean) {
@@ -206,9 +264,7 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, isFirst: boolea
     }
 
     ctx.fillStyle = theme.textMedium;
-    ctx.textBaseline = "middle";
     ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + h / 2);
-    ctx.textBaseline = "alphabetic";
     ctx.beginPath();
 }
 
@@ -256,6 +312,11 @@ function drawCheckbox(
     }
 }
 
+export function prepMarkerRowCell(args: BaseDrawArgs) {
+    const { ctx, theme } = args;
+    ctx.font = `9px ${theme.fontFamily}`;
+}
+
 export function drawMarkerRowCell(
     args: BaseDrawArgs,
     index: number,
@@ -263,27 +324,26 @@ export function drawMarkerRowCell(
     markerKind: "checkbox" | "both" | "number"
 ) {
     const { ctx, x, y, w: width, h: height, hoverAmount, theme } = args;
-    if (markerKind !== "number") {
-        ctx.globalAlpha = checked ? 1 : hoverAmount;
+    const checkedboxAlpha = checked ? 1 : hoverAmount;
+    if (markerKind !== "number" && checkedboxAlpha > 0) {
+        ctx.globalAlpha = checkedboxAlpha;
         drawCheckbox(ctx, theme, checked, x, y, width, height, true);
         ctx.globalAlpha = 1;
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
         const text = (index + 1).toString();
-        ctx.font = `9px ${theme.fontFamily}`;
         const w = measureTextCached(text, ctx).width;
 
         const start = x + (width - w) / 2;
-        if (markerKind === "both") {
+        if (markerKind === "both" && hoverAmount !== 0) {
             ctx.globalAlpha = 1 - hoverAmount;
         }
         ctx.fillStyle = theme.textLight;
-        ctx.textBaseline = "middle";
         ctx.fillText(text, start, y + height / 2);
-        ctx.textBaseline = "alphabetic";
-        ctx.globalAlpha = 1;
+        if (hoverAmount !== 0) {
+            ctx.globalAlpha = 1;
+        }
     }
-    ctx.globalAlpha = 1;
 }
 
 export function drawProtectedCell(args: BaseDrawArgs) {
@@ -396,9 +456,7 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
     renderBoxes.forEach((rectInfo, i) => {
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.textBaseline = "middle";
         ctx.fillText(data[i], rectInfo.x + bubblePad, y + h / 2);
-        ctx.textBaseline = "alphabetic";
     });
 }
 
@@ -507,16 +565,15 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
 
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.textBaseline = "middle";
         ctx.fillText(d.text, drawX, y + h / 2);
-        ctx.textBaseline = "alphabetic";
     });
 }
 
 export function drawImage(args: BaseDrawArgs, data: readonly string[]) {
     const { x, y, h, col, row, theme, ctx, imageLoader } = args;
     let drawX = x + theme.cellHorizontalPadding;
-    data.filter(s => s.length > 0).forEach(i => {
+    for (const i of data) {
+        if (i.length === 0) continue;
         const img = imageLoader.loadOrGetImage(i, col, row);
 
         if (img !== undefined) {
@@ -530,8 +587,7 @@ export function drawImage(args: BaseDrawArgs, data: readonly string[]) {
 
             drawX += imgWidth + itemMargin;
         }
-        // }
-    });
+    }
 }
 
 interface Point {

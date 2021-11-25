@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
 import { MarkdownOverlayEditor } from "../../data-grid-overlay-editor/private/markdown-overlay-editor";
-import { drawTextCell } from "../data-grid-lib";
+import { drawTextCell, prepTextCell } from "../data-grid-lib";
 import { GridCellKind, MarkdownCell } from "../data-grid-types";
 import { InternalCellRenderer } from "./cell-types";
 
@@ -10,6 +10,7 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
     kind: GridCellKind.Markdown,
     needsHover: false,
     needsHoverPosition: false,
+    renderPrep: prepTextCell,
     render: a => drawTextCell(a, a.cell.data),
     onDelete: c => ({
         ...c,

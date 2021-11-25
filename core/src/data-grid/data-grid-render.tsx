@@ -10,7 +10,13 @@ import {
     DrawCustomCellCallback,
 } from "./data-grid-types";
 import { HoverValues } from "./animation-manager";
-import { getEffectiveColumns, getStickyWidth, MappedGridColumn, roundedPoly } from "./data-grid-lib";
+import {
+    getEffectiveColumns,
+    getStickyWidth,
+    MappedGridColumn,
+    roundedPoly,
+    drawWithLastUpdate,
+} from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
 import { parseToRgba } from "./color-parser";
@@ -29,6 +35,10 @@ import { CellRenderers } from "./cells";
 //   that way. There may be significant gaints to be had there. This would also allow for fluid column DnD.
 
 type HoverInfo = readonly [readonly [number, number | undefined], readonly [number, number]];
+
+export type GroupDetailsCallback = (
+    groupName: string
+) => { name: string; icon?: string; overrideTheme?: Partial<Theme> };
 
 interface BlitData {
     readonly cellXOffset: number;
@@ -58,33 +68,50 @@ export function drawCell(
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader,
     hoverAmount: number,
-    hoverInfo: HoverInfo | undefined
-) {
+    hoverInfo: HoverInfo | undefined,
+    frameTime: number,
+    lastToken?: {} | undefined
+): {
+    lastToken: {} | undefined;
+    enqueue: [number, number] | undefined;
+} {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
     if (hoverInfo !== undefined && hoverInfo[0][0] === col && hoverInfo[0][1] === row) {
         hoverX = hoverInfo[1][0];
         hoverY = hoverInfo[1][1];
     }
-    const drawn = isInnerOnlyCell(cell)
-        ? false
-        : drawCustomCell?.({
-              ctx,
-              cell,
-              theme,
-              rect: { x, y, width: w, height: h },
-              col,
-              row,
-              hoverAmount,
-              hoverX,
-              hoverY,
-              highlighted,
-              imageLoader,
-          }) === true;
-    if (!drawn && cell.kind !== GridCellKind.Custom) {
-        const r = CellRenderers[cell.kind];
-        r.render({ ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader });
-    }
+    let result: {} | undefined = undefined;
+    const args = { ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader };
+    const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, () => {
+        const drawn = isInnerOnlyCell(cell)
+            ? false
+            : drawCustomCell?.({
+                  ctx,
+                  cell,
+                  theme,
+                  rect: { x, y, width: w, height: h },
+                  col,
+                  row,
+                  hoverAmount,
+                  hoverX,
+                  hoverY,
+                  highlighted,
+                  imageLoader,
+              }) === true;
+        if (!drawn && cell.kind !== GridCellKind.Custom) {
+            const r = CellRenderers[cell.kind];
+            if (lastToken !== r) {
+                r.renderPrep?.(args);
+            }
+            r.render(args);
+            result = r;
+        }
+    });
+    return {
+        lastToken: result,
+        enqueue: needsAnim ? [col, row] : undefined,
+    };
 }
 
 function blitLastFrame(
@@ -99,7 +126,7 @@ function blitLastFrame(
     width: number,
     height: number,
     rows: number,
-    headerHeight: number,
+    totalHeaderHeight: number,
     dpr: number,
     columns: readonly GridColumn[],
     effectiveCols: readonly MappedGridColumn[],
@@ -144,7 +171,7 @@ function blitLastFrame(
     const stickyRowHeight = lastRowSticky ? getRowHeight(rows - 1) : 0;
 
     const blitWidth = width - stickyWidth - Math.abs(deltaX);
-    const blitHeight = height - headerHeight - stickyRowHeight - Math.abs(deltaY) - 1;
+    const blitHeight = height - totalHeaderHeight - stickyRowHeight - Math.abs(deltaY) - 1;
 
     if (blitWidth > 150 && blitHeight > 150) {
         blittedYOnly = deltaX === 0;
@@ -165,14 +192,14 @@ function blitLastFrame(
             // scrolling up
             args = {
                 ...args,
-                sy: (headerHeight + 1) * dpr,
+                sy: (totalHeaderHeight + 1) * dpr,
                 sh: blitHeight * dpr,
-                dy: deltaY + headerHeight + 1,
+                dy: deltaY + totalHeaderHeight + 1,
                 dh: blitHeight,
             };
             drawRegions.push({
                 x: 0,
-                y: headerHeight,
+                y: totalHeaderHeight,
                 width: width,
                 height: deltaY + 1,
             });
@@ -180,9 +207,9 @@ function blitLastFrame(
             // scrolling down
             args = {
                 ...args,
-                sy: (-deltaY + headerHeight + 1) * dpr,
+                sy: (-deltaY + totalHeaderHeight + 1) * dpr,
                 sh: blitHeight * dpr,
-                dy: headerHeight + 1,
+                dy: totalHeaderHeight + 1,
                 dh: blitHeight,
             };
             drawRegions.push({
@@ -245,7 +272,8 @@ function drawGridLines(
     translateY: number,
     width: number,
     height: number,
-    headerHeight: number,
+    groupHeaderHeight: number,
+    totalHeaderHeight: number,
     getRowHeight: (row: number) => number,
     verticalBorder: (col: number) => boolean,
     lastRowSticky: boolean,
@@ -253,10 +281,12 @@ function drawGridLines(
     theme: Theme,
     verticalOnly: boolean = false
 ) {
+    const hColor = theme.horizontalBorderColor ?? theme.borderColor;
+    const vColor = theme.borderColor;
     ctx.beginPath();
     // we need to under-draw the header background on its line to improve its contrast.
-    ctx.moveTo(0, headerHeight + 0.5);
-    ctx.lineTo(width, headerHeight + 0.5);
+    ctx.moveTo(0, totalHeaderHeight + 0.5);
+    ctx.lineTo(width, totalHeaderHeight + 0.5);
     ctx.strokeStyle = theme.bgHeader;
     ctx.lineWidth = 1;
     ctx.stroke();
@@ -267,11 +297,18 @@ function drawGridLines(
     let x = 0.5;
     for (let index = 0; index < effectiveCols.length; index++) {
         const c = effectiveCols[index];
+        if (c.width === 0) continue;
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
         if (index === effectiveCols.length - 1 || verticalBorder(index + 1)) {
-            ctx.moveTo(tx, 0);
+            ctx.moveTo(tx, groupHeaderHeight);
             ctx.lineTo(tx, height);
+        }
+
+        if (vColor !== hColor) {
+            ctx.strokeStyle = vColor;
+            ctx.stroke();
+            ctx.beginPath();
         }
     }
 
@@ -284,7 +321,7 @@ function drawGridLines(
 
     if (verticalOnly !== true) {
         // horizontal lines
-        let y = headerHeight + 0.5;
+        let y = totalHeaderHeight + 0.5;
         let row = cellYOffset;
         let isHeader = true;
         const target = lastRowSticky ? height - stickyHeight : height;
@@ -302,10 +339,8 @@ function drawGridLines(
         }
     }
 
-    ctx.strokeStyle = theme.borderColor;
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = hColor;
     ctx.stroke();
-
     ctx.beginPath();
 }
 
@@ -313,22 +348,21 @@ function drawGroups(
     ctx: CanvasRenderingContext2D,
     effectiveCols: readonly MappedGridColumn[],
     width: number,
-    height: number,
     translateX: number,
-    headerHeight: number,
+    groupHeaderHeight: number,
     theme: Theme,
     spriteManager: SpriteManager,
     verticalBorder: (col: number) => boolean,
-    getGroupDetails: (groupName: string) => { name: string; icon?: string }
+    getGroupDetails: GroupDetailsCallback
 ) {
-    const trueHeaderHeight = headerHeight / 2;
     const xPad = 8;
     let x = 0;
     let clipX = 0;
-    ctx.textBaseline = "middle";
     for (let index = 0; index < effectiveCols.length; index++) {
         const startCol = effectiveCols[index];
-        const group = startCol.group === undefined ? undefined : getGroupDetails(startCol.group);
+        const group = getGroupDetails(startCol.group ?? "");
+
+        const groupTheme = group?.overrideTheme === undefined ? theme : { ...theme, ...group.overrideTheme };
 
         let end = index + 1;
         let boxWidth = startCol.width;
@@ -337,7 +371,7 @@ function drawGroups(
         }
         while (
             end < effectiveCols.length &&
-            effectiveCols[end].group === startCol.group &&
+            (effectiveCols[end].group ?? "") === (startCol.group ?? "") &&
             effectiveCols[end].sticky === effectiveCols[index].sticky
         ) {
             const endCol = effectiveCols[end];
@@ -355,10 +389,15 @@ function drawGroups(
         ctx.save();
         ctx.beginPath();
         const delta = startCol.sticky ? 0 : Math.max(0, clipX - localX);
-        ctx.rect(localX + delta, 0, boxWidth - delta, height);
+        ctx.rect(localX + delta, 0, boxWidth - delta, groupHeaderHeight);
         ctx.clip();
 
-        ctx.fillStyle = theme.textGroupHeader ?? theme.textHeader;
+        if (groupTheme.bgHeader !== theme.bgHeader) {
+            ctx.fillStyle = groupTheme.bgHeader;
+            ctx.fill();
+        }
+
+        ctx.fillStyle = groupTheme.textGroupHeader ?? groupTheme.textHeader;
         if (group !== undefined) {
             let drawX = localX;
             if (group.icon !== undefined) {
@@ -367,19 +406,19 @@ function drawGroups(
                     "normal",
                     ctx,
                     drawX + delta + xPad,
-                    (trueHeaderHeight - 20) / 2,
+                    (groupHeaderHeight - 20) / 2,
                     20,
-                    theme
+                    groupTheme
                 );
                 drawX += 26;
             }
-            ctx.fillText(group.name, drawX + delta + xPad, trueHeaderHeight / 2 + 1);
+            ctx.fillText(group.name, drawX + delta + xPad, groupHeaderHeight / 2 + 1);
         }
 
         if (verticalBorder(startCol.sourceIndex)) {
             ctx.beginPath();
             ctx.moveTo(localX + delta + 0.5, 0);
-            ctx.lineTo(localX + delta + 0.5, trueHeaderHeight);
+            ctx.lineTo(localX + delta + 0.5, groupHeaderHeight);
             ctx.strokeStyle = theme.borderColor;
             ctx.lineWidth = 1;
             ctx.stroke();
@@ -392,14 +431,13 @@ function drawGroups(
 
     ctx.beginPath();
     ctx.moveTo(x + 0.5, 0);
-    ctx.lineTo(x + 0.5, trueHeaderHeight);
+    ctx.lineTo(x + 0.5, groupHeaderHeight);
 
-    ctx.moveTo(0, trueHeaderHeight + 0.5);
-    ctx.lineTo(width, trueHeaderHeight + 0.5);
+    ctx.moveTo(0, groupHeaderHeight + 0.5);
+    ctx.lineTo(width, groupHeaderHeight + 0.5);
     ctx.strokeStyle = theme.borderColor;
     ctx.lineWidth = 1;
     ctx.stroke();
-    ctx.textBaseline = "alphabetic";
 }
 
 function drawGridHeaders(
@@ -408,9 +446,9 @@ function drawGridHeaders(
     enableGroups: boolean,
     hoveredCol: number | undefined,
     width: number,
-    height: number,
     translateX: number,
     headerHeight: number,
+    groupHeaderHeight: number,
     selectedColumns: CompactSelection,
     dragAndDropState: DragAndDropState | undefined,
     isResizing: boolean,
@@ -419,15 +457,13 @@ function drawGridHeaders(
     spriteManager: SpriteManager,
     hoverValues: HoverValues,
     verticalBorder: (col: number) => boolean,
-    getGroupDetails: (groupName: string) => { name: string; icon?: string }
+    getGroupDetails: GroupDetailsCallback
 ) {
-    if (headerHeight === 0) return;
+    const totalHeaderHeight = headerHeight + groupHeaderHeight;
+    if (totalHeaderHeight <= 0) return;
     // FIXME: This should respect the per-column theme
     ctx.fillStyle = outerTheme.bgHeader;
-    ctx.fillRect(0, 0, width, headerHeight);
-    ctx.textBaseline = "middle";
-
-    const trueHeaderHeight = enableGroups ? headerHeight / 2 : headerHeight;
+    ctx.fillRect(0, 0, width, totalHeaderHeight);
 
     const xPad = 8;
     const yPad = 2;
@@ -438,7 +474,11 @@ function drawGridHeaders(
     // Assinging the context font too much can be expensive, it can be worth it to minimze this
     ctx.font = font;
     for (const c of effectiveCols) {
-        const theme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
+        const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
+        const theme =
+            c.themeOverride === undefined && groupTheme === undefined
+                ? outerTheme
+                : { ...outerTheme, ...groupTheme, ...c.themeOverride };
         const f = `${theme.headerFontStyle} ${theme.fontFamily}`;
         if (font !== f) {
             ctx.font = f;
@@ -457,25 +497,31 @@ function drawGridHeaders(
 
         const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
 
+        const y = enableGroups ? groupHeaderHeight : 0;
+        const xOffset = c.sourceIndex === 0 ? 0 : 1;
+
         ctx.save();
         if (c.sticky) {
             clipX = Math.max(clipX, x + c.width);
         } else {
             ctx.beginPath();
-            ctx.rect(clipX, 0, width, height);
+            ctx.rect(clipX, groupHeaderHeight, width, headerHeight);
             ctx.clip();
+
+            if (theme.bgHeader !== outerTheme.bgHeader) {
+                ctx.fillStyle = theme.bgHeader;
+                ctx.fillRect(x, y, c.width, headerHeight);
+            }
+
             ctx.translate(translateX, 0);
         }
 
-        const y = enableGroups ? headerHeight / 2 : 0;
-
-        const xOffset = c.sourceIndex === 0 ? 0 : 1;
         if (selected) {
             ctx.fillStyle = bgFillStyle;
-            ctx.fillRect(x + xOffset, y, c.width - xOffset, trueHeaderHeight);
+            ctx.fillRect(x + xOffset, y, c.width - xOffset, headerHeight);
         } else if (hasSelectedCell || hover > 0) {
             ctx.beginPath();
-            ctx.rect(x + xOffset, y, c.width - xOffset, trueHeaderHeight);
+            ctx.rect(x + xOffset, y, c.width - xOffset, headerHeight);
             if (hasSelectedCell) {
                 ctx.fillStyle = theme.bgHeaderHasFocus;
                 ctx.fill();
@@ -489,7 +535,7 @@ function drawGridHeaders(
         }
 
         ctx.beginPath();
-        ctx.rect(x + xPad, yPad, c.width - xPad, headerHeight - yPad * 2);
+        ctx.rect(x + xPad, groupHeaderHeight + yPad, c.width - xPad, headerHeight - yPad * 2);
         ctx.clip();
 
         let drawX = x + xPad;
@@ -498,7 +544,7 @@ function drawGridHeaders(
             if (c.style === "highlight") {
                 variant = selected ? "selected" : "special";
             }
-            spriteManager.drawSprite(c.icon, variant, ctx, drawX, y + (trueHeaderHeight - 20) / 2, 20, theme);
+            spriteManager.drawSprite(c.icon, variant, ctx, drawX, y + (headerHeight - 20) / 2, 20, theme);
 
             if (c.overlayIcon !== undefined) {
                 spriteManager.drawSprite(
@@ -506,7 +552,7 @@ function drawGridHeaders(
                     selected ? "selected" : "special",
                     ctx,
                     drawX + 9,
-                    y + ((trueHeaderHeight - 18) / 2 + 6),
+                    y + ((headerHeight - 18) / 2 + 6),
                     18,
                     theme
                 );
@@ -515,7 +561,7 @@ function drawGridHeaders(
             drawX += 26;
         }
 
-        if (hoveredBoolean && c.hasMenu === true) {
+        if (hoveredBoolean && c.hasMenu === true && c.width > 35) {
             const fadeWidth = 35;
             const fadeStart = c.width - fadeWidth;
             const fadeEnd = c.width - fadeWidth * 0.7;
@@ -534,12 +580,12 @@ function drawGridHeaders(
         } else {
             ctx.fillStyle = fillStyle;
         }
-        ctx.fillText(c.title, drawX, y + trueHeaderHeight / 2 + 1);
+        ctx.fillText(c.title, drawX, y + headerHeight / 2 + 1);
 
         if (hoveredBoolean && c.hasMenu === true) {
             ctx.beginPath();
             const triangleX = x + c.width - 20;
-            const triangleY = y + (trueHeaderHeight / 2 - 3);
+            const triangleY = y + (headerHeight / 2 - 3);
             roundedPoly(
                 ctx,
                 [
@@ -568,15 +614,13 @@ function drawGridHeaders(
         x += c.width;
     }
 
-    ctx.textBaseline = "alphabetic";
     if (enableGroups) {
         drawGroups(
             ctx,
             effectiveCols,
             width,
-            height,
             translateX,
-            headerHeight,
+            groupHeaderHeight,
             outerTheme,
             spriteManager,
             verticalBorder,
@@ -593,7 +637,7 @@ function clipDamage(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
     height: number,
-    headerHeight: number,
+    totalHeaderHeight: number,
     translateX: number,
     translateY: number,
     cellYOffset: number,
@@ -613,7 +657,7 @@ function clipDamage(
         cellYOffset,
         translateX,
         translateY,
-        headerHeight,
+        totalHeaderHeight,
         (c, drawX, colDrawY, clipX, startRow) => {
             const diff = Math.max(0, clipX - drawX);
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
@@ -641,13 +685,14 @@ function drawCells(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
     height: number,
-    headerHeight: number,
+    totalHeaderHeight: number,
     translateX: number,
     translateY: number,
     cellYOffset: number,
     rows: number,
     getRowHeight: (row: number) => number,
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
+    getGroupDetails: GroupDetailsCallback,
     selectedRows: CompactSelection,
     disabledRows: CompactSelection,
     lastRowSticky: boolean,
@@ -660,23 +705,32 @@ function drawCells(
     imageLoader: ImageWindowLoader,
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
-    outerTheme: Theme
+    outerTheme: Theme,
+    enqueue: (item: [number, number | undefined]) => void
 ): void {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
+    const frameTime = performance.now();
     walkColumns(
         effectiveColumns,
         cellYOffset,
         translateX,
         translateY,
-        headerHeight,
+        totalHeaderHeight,
         (c, drawX, colDrawY, clipX, startRow) => {
             const diff = Math.max(0, clipX - drawX);
             ctx.save();
+            let font = `${outerTheme.baseFontStyle} ${outerTheme.fontFamily}`;
+            ctx.font = font;
             ctx.beginPath();
-            ctx.rect(drawX + diff, headerHeight + 1, c.width - diff, height - headerHeight - 1);
+            ctx.rect(drawX + diff, totalHeaderHeight + 1, c.width - diff, height - totalHeaderHeight - 1);
             ctx.clip();
 
-            const colTheme = c.themeOverride === undefined ? outerTheme : { ...outerTheme, ...c.themeOverride };
+            const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
+            const colTheme =
+                c.themeOverride === undefined && groupTheme === undefined
+                    ? outerTheme
+                    : { ...outerTheme, ...groupTheme, ...c.themeOverride };
+            let lastToken: {} | undefined;
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
                 if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
                     return;
@@ -699,7 +753,7 @@ function drawCells(
                               allowOverlay: false,
                           };
 
-                const theme = cell.themeOverride === undefined ? outerTheme : { ...colTheme, ...cell.themeOverride };
+                const theme = cell.themeOverride === undefined ? colTheme : { ...colTheme, ...cell.themeOverride };
 
                 ctx.beginPath();
 
@@ -720,38 +774,25 @@ function drawCells(
 
                 if (isSticky || theme.bgCell !== outerTheme.bgCell) {
                     ctx.fillStyle = theme.bgCell;
-                    if (drawX === 0) {
-                        ctx.fillRect(drawX, drawY, c.width, rh);
-                    } else {
-                        ctx.fillRect(drawX, drawY, c.width, rh);
-                    }
+                    ctx.fillRect(drawX, drawY, c.width, rh);
+                    lastToken = undefined;
                 }
 
                 if (highlighted || rowDisabled) {
                     if (rowDisabled) {
                         ctx.fillStyle = theme.bgHeader;
-                        if (drawX === 0) {
-                            ctx.fillRect(drawX, drawY, c.width, rh);
-                        } else {
-                            ctx.fillRect(drawX, drawY, c.width, rh);
-                        }
+                        ctx.fillRect(drawX, drawY, c.width, rh);
                     }
                     if (highlighted) {
                         ctx.fillStyle = theme.accentLight;
-                        if (drawX === 0) {
-                            ctx.fillRect(drawX, drawY, c.width, rh);
-                        } else {
-                            ctx.fillRect(drawX, drawY, c.width, rh);
-                        }
+                        ctx.fillRect(drawX, drawY, c.width, rh);
                     }
+                    lastToken = undefined;
                 } else {
-                    if (prelightCells?.find(pre => pre[0] === c.sourceIndex && pre[1] === row) !== undefined) {
+                    if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row)) {
                         ctx.fillStyle = theme.bgSearchResult;
-                        if (drawX === 0) {
-                            ctx.fillRect(drawX, drawY, c.width, rh);
-                        } else {
-                            ctx.fillRect(drawX, drawY, c.width, rh);
-                        }
+                        ctx.fillRect(drawX, drawY, c.width, rh);
+                        lastToken = undefined;
                     }
                 }
 
@@ -762,7 +803,12 @@ function drawCells(
                 const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
 
                 if (c.width > 10) {
-                    drawCell(
+                    const cellFont = `${theme.baseFontStyle} ${theme.fontFamily}`;
+                    if (cellFont !== font) {
+                        ctx.font = cellFont;
+                        font = cellFont;
+                    }
+                    const drawResult = drawCell(
                         ctx,
                         row,
                         cell,
@@ -776,8 +822,14 @@ function drawCells(
                         drawCustomCell,
                         imageLoader,
                         hoverValue?.hoverAmount ?? 0,
-                        hoverInfo
+                        hoverInfo,
+                        frameTime,
+                        lastToken
                     );
+                    lastToken = drawResult.lastToken;
+                    if (drawResult.enqueue !== undefined) {
+                        enqueue(drawResult.enqueue);
+                    }
                 }
 
                 ctx.globalAlpha = 1;
@@ -795,7 +847,7 @@ function drawBlanks(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
     height: number,
-    headerHeight: number,
+    totalHeaderHeight: number,
     translateX: number,
     translateY: number,
     cellYOffset: number,
@@ -814,13 +866,13 @@ function drawBlanks(
         cellYOffset,
         translateX,
         translateY,
-        headerHeight,
+        totalHeaderHeight,
         (c, drawX, colDrawY, clipX, startRow) => {
-            if (c !== effectiveColumns.slice(-1)[0]) return;
+            if (c !== effectiveColumns[effectiveColumns.length - 1]) return;
             ctx.save();
             ctx.beginPath();
             drawX += c.width;
-            ctx.rect(Math.max(drawX, clipX), headerHeight + 1, 10000, height - headerHeight - 1);
+            ctx.rect(Math.max(drawX, clipX), totalHeaderHeight + 1, 10000, height - totalHeaderHeight - 1);
             ctx.clip();
 
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
@@ -857,7 +909,7 @@ function overdrawStickyBoundaries(
     effectiveCols: readonly MappedGridColumn[],
     width: number,
     height: number,
-    headerHeight: number,
+    totalHeaderHeight: number,
     lastRowSticky: boolean,
     rows: number,
     getRowHeight: (row: number) => number,
@@ -873,8 +925,8 @@ function overdrawStickyBoundaries(
     }
 
     ctx.beginPath();
-    ctx.moveTo(0, headerHeight + 0.5);
-    ctx.lineTo(width, headerHeight + 0.5);
+    ctx.moveTo(0, totalHeaderHeight + 0.5);
+    ctx.lineTo(width, totalHeaderHeight + 0.5);
 
     ctx.strokeStyle = theme.bgHeader;
     ctx.stroke();
@@ -911,7 +963,7 @@ function drawFocusRing(
     translateY: number,
     effectiveCols: readonly MappedGridColumn[],
     theme: Theme,
-    headerHeight: number,
+    totalHeaderHeight: number,
     selectedCell: GridSelection | undefined,
     getRowHeight: (row: number) => number,
     lastRowSticky: boolean,
@@ -925,7 +977,7 @@ function drawFocusRing(
     const stickRowHeight = lastRowSticky && !isStickyRow ? getRowHeight(rows - 1) - 1 : 0;
 
     ctx.beginPath();
-    ctx.rect(0, headerHeight, width, height - headerHeight - stickRowHeight);
+    ctx.rect(0, totalHeaderHeight, width, height - totalHeaderHeight - stickRowHeight);
     ctx.clip();
 
     walkColumns(
@@ -933,7 +985,7 @@ function drawFocusRing(
         cellYOffset,
         translateX,
         translateY,
-        headerHeight,
+        totalHeaderHeight,
         (col, drawX, colDrawY, clipX, startRow) => {
             if (col.sourceIndex !== targetCol) {
                 return;
@@ -976,6 +1028,7 @@ export function drawGrid(
     dragAndDropState: DragAndDropState | undefined,
     theme: Theme,
     headerHeight: number,
+    groupHeaderHeight: number,
     selectedRows: CompactSelection,
     disabledRows: CompactSelection,
     rowHeight: number | ((index: number) => number),
@@ -987,7 +1040,7 @@ export function drawGrid(
     lastRowSticky: boolean,
     rows: number,
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
-    getGroupDetails: (groupName: string) => { name: string; icon?: string },
+    getGroupDetails: GroupDetailsCallback,
     drawCustomCell: DrawCustomCellCallback | undefined,
     prelightCells: CellList | undefined,
     imageLoader: ImageWindowLoader,
@@ -997,7 +1050,8 @@ export function drawGrid(
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
     spriteManager: SpriteManager,
-    scrolling: boolean
+    scrolling: boolean,
+    enqueue: (item: [number, number | undefined]) => void
 ) {
     if (width === 0 || height === 0) return;
     const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
@@ -1008,10 +1062,11 @@ export function drawGrid(
     }
 
     const overlayCanvas = buffers.overlay;
+    const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
-    if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== headerHeight * dpr) {
+    if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== totalHeaderHeight * dpr) {
         overlayCanvas.width = width * dpr;
-        overlayCanvas.height = headerHeight * dpr;
+        overlayCanvas.height = totalHeaderHeight * dpr;
     }
 
     const last = lastBlitData.current;
@@ -1039,6 +1094,9 @@ export function drawGrid(
     targetCtx.save();
     targetCtx.beginPath(); // clear any path in the ctx
 
+    overlayCtx.textBaseline = "middle";
+    targetCtx.textBaseline = "middle";
+
     targetCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     overlayCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     if (dpr !== 1) {
@@ -1057,9 +1115,9 @@ export function drawGrid(
             enableGroups,
             hoveredCol,
             width,
-            height,
             translateX,
             headerHeight,
+            groupHeaderHeight,
             selectedColumns,
             dragAndDropState,
             isResizing,
@@ -1071,11 +1129,6 @@ export function drawGrid(
             getGroupDetails
         );
 
-        if (enableGroups) {
-            overlayCtx.save();
-            overlayCtx.rect(0, headerHeight / 2, width, headerHeight / 2);
-            overlayCtx.clip();
-        }
         drawGridLines(
             overlayCtx,
             effectiveCols,
@@ -1084,7 +1137,8 @@ export function drawGrid(
             translateY,
             width,
             height,
-            headerHeight,
+            groupHeaderHeight,
+            totalHeaderHeight,
             getRowHeight,
             verticalBorder,
             lastRowSticky,
@@ -1092,10 +1146,6 @@ export function drawGrid(
             theme,
             true
         );
-
-        if (enableGroups) {
-            overlayCtx.restore();
-        }
     };
 
     // handle damage updates by directly drawing to the target to avoid large blits
@@ -1112,7 +1162,7 @@ export function drawGrid(
                 targetCtx,
                 effectiveCols,
                 height,
-                headerHeight,
+                totalHeaderHeight,
                 translateX,
                 translateY,
                 cellYOffset,
@@ -1123,19 +1173,20 @@ export function drawGrid(
             );
 
             targetCtx.fillStyle = theme.bgCell;
-            targetCtx.fillRect(0, headerHeight + 1, width, height - headerHeight - 1);
+            targetCtx.fillRect(0, totalHeaderHeight + 1, width, height - totalHeaderHeight - 1);
 
             drawCells(
                 targetCtx,
                 effectiveCols,
                 height,
-                headerHeight,
+                totalHeaderHeight,
                 translateX,
                 translateY,
                 cellYOffset,
                 rows,
                 getRowHeight,
                 getCellContent,
+                getGroupDetails,
                 selectedRows,
                 disabledRows,
                 lastRowSticky,
@@ -1148,7 +1199,8 @@ export function drawGrid(
                 imageLoader,
                 hoverValues,
                 hoverInfo,
-                theme
+                theme,
+                enqueue
             );
         }
 
@@ -1160,12 +1212,16 @@ export function drawGrid(
         targetCtx.restore();
         overlayCtx.restore();
 
-        if (doHeaders && headerHeight > 0) {
+        if (doHeaders && totalHeaderHeight > 0) {
             targetCtx.imageSmoothingEnabled = false;
             targetCtx.drawImage(overlayCanvas, 0, 0);
             targetCtx.imageSmoothingEnabled = false;
         }
         return;
+    }
+
+    if (!canBlit || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
+        drawHeaderTexture();
     }
 
     if (canBlit === true) {
@@ -1181,7 +1237,7 @@ export function drawGrid(
             width,
             height,
             rows,
-            headerHeight,
+            totalHeaderHeight,
             dpr,
             columns,
             effectiveCols,
@@ -1195,7 +1251,7 @@ export function drawGrid(
         effectiveCols,
         width,
         height,
-        headerHeight,
+        totalHeaderHeight,
         lastRowSticky,
         rows,
         getRowHeight,
@@ -1213,7 +1269,7 @@ export function drawGrid(
             translateY,
             effectiveCols,
             theme,
-            headerHeight,
+            totalHeaderHeight,
             selectedCell,
             getRowHeight,
             lastRowSticky,
@@ -1231,19 +1287,20 @@ export function drawGrid(
     }
 
     targetCtx.fillStyle = theme.bgCell;
-    targetCtx.fillRect(0, headerHeight, width, height - headerHeight);
+    targetCtx.fillRect(0, totalHeaderHeight, width, height - totalHeaderHeight);
 
     drawCells(
         targetCtx,
         effectiveCols,
         height,
-        headerHeight,
+        totalHeaderHeight,
         translateX,
         translateY,
         cellYOffset,
         rows,
         getRowHeight,
         getCellContent,
+        getGroupDetails,
         selectedRows,
         disabledRows,
         lastRowSticky,
@@ -1256,14 +1313,15 @@ export function drawGrid(
         imageLoader,
         hoverValues,
         hoverInfo,
-        theme
+        theme,
+        enqueue
     );
 
     drawBlanks(
         targetCtx,
         effectiveCols,
         height,
-        headerHeight,
+        totalHeaderHeight,
         translateX,
         translateY,
         cellYOffset,
@@ -1285,7 +1343,8 @@ export function drawGrid(
         translateY,
         width,
         height,
-        headerHeight,
+        groupHeaderHeight,
+        totalHeaderHeight,
         getRowHeight,
         verticalBorder,
         lastRowSticky,
@@ -1302,16 +1361,12 @@ export function drawGrid(
         translateY,
         effectiveCols,
         theme,
-        headerHeight,
+        totalHeaderHeight,
         selectedCell,
         getRowHeight,
         lastRowSticky,
         rows
     );
-
-    if (!canBlit || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
-        drawHeaderTexture();
-    }
 
     imageLoader?.setWindow({
         x: cellXOffset,
@@ -1326,7 +1381,7 @@ export function drawGrid(
     targetCtx.restore();
     overlayCtx.restore();
 
-    if (headerHeight > 0) {
+    if (totalHeaderHeight > 0) {
         targetCtx.imageSmoothingEnabled = false;
         targetCtx.drawImage(overlayCanvas, 0, 0);
         targetCtx.imageSmoothingEnabled = true;
@@ -1388,12 +1443,12 @@ function walkColumns(
     cellYOffset: number,
     translateX: number,
     translateY: number,
-    headerHeight: number,
+    totalHeaderHeight: number,
     cb: WalkColsCallback
 ): void {
     let x = 0;
     let clipX = 0; // this tracks the total width of sticky cols
-    const drawY = headerHeight + translateY;
+    const drawY = totalHeaderHeight + translateY;
     for (const c of effectiveCols) {
         let drawX: number;
         if (c.sticky) {

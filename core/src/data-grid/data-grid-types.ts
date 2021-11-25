@@ -83,7 +83,7 @@ export type DrawCustomCellCallback = (args: {
     imageLoader: ImageWindowLoader;
 }) => boolean;
 
-export enum GridCellKind {
+export const enum GridCellKind {
     Uri = "uri",
     Text = "text",
     Image = "image",
@@ -98,7 +98,7 @@ export enum GridCellKind {
     Custom = "custom",
 }
 
-export enum GridColumnIcon {
+export const enum GridColumnIcon {
     HeaderRowID = "headerRowID",
     HeaderCode = "headerCode",
     HeaderNumber = "headerNumber",
@@ -280,6 +280,8 @@ export type GridCell =
 type InnerOnlyGridCell = NewRowCell | MarkerCell;
 export type InnerGridCell = GridCell | InnerOnlyGridCell;
 
+export type CellList = readonly (readonly [number, number | undefined])[];
+
 export interface Rectangle {
     x: number;
     y: number;
@@ -289,6 +291,7 @@ export interface Rectangle {
 
 interface BaseGridCell {
     readonly allowOverlay: boolean;
+    readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
 }
@@ -330,12 +333,14 @@ export interface BubbleCell extends BaseGridCell {
 export type ProvideEditorCallback<T extends GridCell> = (
     cell: T
 ) =>
-    | React.FunctionComponent<{
+    | (React.FunctionComponent<{
           readonly onChange: (newValue: T) => void;
           readonly onFinishedEditing: () => void;
           readonly isHighlighted: boolean;
           readonly value: T;
-      }>
+      }> & {
+          disablePadding?: boolean;
+      })
     | undefined;
 
 export interface CustomCell<T extends {} = {}> extends BaseGridCell {
@@ -379,7 +384,7 @@ export interface UriCell extends BaseGridCell {
     readonly readonly?: boolean;
 }
 
-export enum InnerGridCellKind {
+export const enum InnerGridCellKind {
     NewRow = "new-row",
     Marker = "marker",
 }

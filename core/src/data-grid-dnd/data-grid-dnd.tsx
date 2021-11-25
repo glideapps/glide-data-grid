@@ -11,6 +11,7 @@ export interface DataGridDndProps extends Props {
     readonly onColumnResized?: (column: GridColumn, newSize: number) => void;
     readonly gridRef?: React.MutableRefObject<DataGridRef | null>;
     readonly maxColumnWidth?: number;
+    readonly lockColumns: number;
 }
 
 const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
@@ -34,16 +35,17 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         maxColumnWidth,
         onHeaderMenuClick,
         onRowMoved,
+        lockColumns,
         getCellContent,
         ...rest
     } = p;
 
-    const { freezeColumns, onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns, selectedColumns } = p;
+    const { onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns, selectedColumns } = p;
 
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
             const [col, row] = args.location;
-            if (dragCol !== undefined && dropCol !== col && col >= freezeColumns) {
+            if (dragCol !== undefined && dropCol !== col && col >= lockColumns) {
                 setDragColActive(true);
                 setDropCol(col);
             } else if (dragRow !== undefined && row !== undefined) {
@@ -53,7 +55,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                 onItemHovered?.(args);
             }
         },
-        [dragCol, dragRow, dropCol, freezeColumns, onItemHovered]
+        [dragCol, dragRow, dropCol, onItemHovered, lockColumns]
     );
 
     const canDragCol = onColumnMoved !== undefined;
@@ -68,7 +70,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                         setResizeColStartX(bounds.x);
                         setResizeCol(columns.length - 1);
                     }
-                } else if (args.kind === "header" && col >= freezeColumns) {
+                } else if (args.kind === "header" && col >= lockColumns) {
                     if (args.isEdge) {
                         shouldFireEvent = false;
                         setResizeColStartX(args.bounds.x);
@@ -79,7 +81,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                     }
                 } else if (
                     args.kind === "cell" &&
-                    freezeColumns > 0 &&
+                    lockColumns > 0 &&
                     col === 0 &&
                     row !== undefined &&
                     onRowMoved !== undefined
@@ -90,7 +92,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             }
             if (shouldFireEvent) onMouseDown?.(args);
         },
-        [isDraggable, onMouseDown, freezeColumns, onRowMoved, gridRef, columns.length, canDragCol]
+        [isDraggable, onMouseDown, lockColumns, onRowMoved, gridRef, columns.length, canDragCol]
     );
 
     const onHeaderMenuClickMangled = React.useCallback(

@@ -12,6 +12,7 @@ type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 export interface DataGridOverlayEditorProps {
     readonly target: Rectangle;
     readonly content: GridCell;
+    readonly className?: string;
     readonly onFinishEditing: (newCell: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly forceEditMode: boolean;
     readonly highlight: boolean;
@@ -29,6 +30,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         imageEditorOverride,
         markdownDivCreateNode,
         highlight,
+        className,
         provideEditor,
     } = p;
 
@@ -66,8 +68,10 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         return renderer.getEditor?.(content);
     }, [content]);
 
+    let pad = true;
     let editor: React.ReactNode;
     if (CustomEditor !== undefined) {
+        pad = CustomEditor.disablePadding !== true;
         editor = (
             <CustomEditor
                 isHighlighted={highlight}
@@ -83,7 +87,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 isHighlighted={highlight}
                 onChange={setTempValue as any}
                 value={targetValue}
-                onFinishedEditing={e => onFinishEditing(e as GridCell, [0, 0])}
+                onFinishedEditing={e => onFinishEditing((e ?? tempValue) as GridCell | undefined, [0, 0])}
                 onKeyDown={onKeyDown}
                 target={target}
                 imageEditorOverride={imageEditorOverride}
@@ -91,10 +95,6 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
             />
         );
     }
-
-    const f = (ev: React.MouseEvent) => {
-        ev.stopPropagation();
-    };
 
     // Consider imperatively creating and adding the element to the dom?
     const portalElement = document.getElementById("portal");
@@ -106,8 +106,8 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         return null;
     }
     const portal = createPortal(
-        <ClickOutsideContainer onClickOutside={onClickOutside}>
-            <DataGridOverlayEditorStyle targetRect={target} onMouseDown={f} onClick={f}>
+        <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
+            <DataGridOverlayEditorStyle targetRect={target} pad={pad}>
                 <div className="clip-region" onKeyDown={CustomEditor === undefined ? undefined : onKeyDown}>
                     {editor}
                 </div>
