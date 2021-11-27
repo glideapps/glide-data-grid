@@ -457,7 +457,7 @@ interface CustomCell<T extends {} = {}> extends BaseGridCell {
     readonly copyData: string;
 }
 
-export const enum GridCellKind {
+export enum GridCellKind {
     Uri = "uri",
     Text = "text",
     Image = "image",
