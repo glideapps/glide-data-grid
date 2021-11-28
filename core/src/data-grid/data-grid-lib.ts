@@ -174,9 +174,8 @@ async function clearCacheOnLoad() {
 
 void clearCacheOnLoad();
 
-export function measureTextCached(s: string, ctx: CanvasRenderingContext2D): TextMetrics {
-    // return ctx.measureText(s).width;
-    const key = `${s}_${ctx.font}`;
+export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font?: string): TextMetrics {
+    const key = `${s}_${font ?? ctx.font}`;
     let metrics = metricsCache[key];
     if (metrics === undefined) {
         metrics = ctx.measureText(s);
@@ -230,7 +229,7 @@ export function drawTextCell(args: BaseDrawArgs, data: string) {
     const dir = direction(data);
 
     if (dir === "rtl") {
-        const textWidth = measureTextCached(data, ctx).width;
+        const textWidth = measureTextCached(data, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`).width;
         ctx.fillText(data, x + w - theme.cellHorizontalPadding - textWidth + 0.5, y + h / 2);
     } else {
         ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
@@ -332,7 +331,7 @@ export function drawMarkerRowCell(
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
         const text = (index + 1).toString();
-        const w = measureTextCached(text, ctx).width;
+        const w = measureTextCached(text, ctx, `9px ${theme.fontFamily}`).width;
 
         const start = x + (width - w) / 2;
         if (markerKind === "both" && hoverAmount !== 0) {
@@ -430,7 +429,7 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
     const renderBoxes: { x: number; width: number }[] = [];
     for (const s of data) {
         if (renderX > x + w) break;
-        const textWidth = measureTextCached(s, ctx).width;
+        const textWidth = measureTextCached(s, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`).width;
         renderBoxes.push({
             x: renderX,
             width: textWidth,
@@ -470,7 +469,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
     const renderBoxes: { x: number; width: number }[] = [];
     for (const el of data) {
         if (renderX > x + w) break;
-        const textWidth = measureTextCached(el.text, ctx).width;
+        const textWidth = measureTextCached(el.text, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`).width;
         let imgWidth = 0;
         if (el.img !== undefined) {
             const img = imageLoader.loadOrGetImage(el.img, col, row);
