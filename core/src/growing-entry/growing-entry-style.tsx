@@ -16,11 +16,13 @@ export const InputBox = styled.textarea`
     right: 0;
     top: 0;
     bottom: 0;
+    width: 100%;
+    height: 100%;
 
     border-radius: 0px;
 
     resize: none;
-    white-space: normal;
+    white-space: pre-wrap;
     min-width: 100%;
     overflow: hidden;
     border: 0;
