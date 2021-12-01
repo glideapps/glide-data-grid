@@ -62,6 +62,16 @@ const headerUri = (props: SpriteProps) => {
   `;
 };
 
+const renameIcon = (props: SpriteProps) => {
+    const bg = props.bgColor;
+    return `${iconHead}
+    <path stroke="${bg}" stroke-width="2" d="M12 3v14"/>
+    <path stroke="${bg}" stroke-width="2" stroke-linecap="round" d="M10 4h4m-4 12h4"/>
+    <path d="M11 14h4a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3h-4v2h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4v2ZM9.5 8H5a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4.5v2H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h4.5v2Z" fill="${bg}"/>
+  </svg>
+`;
+};
+
 const headerAudioUri = headerUri;
 
 const headerVideoUri = (props: SpriteProps) => {
@@ -305,6 +315,7 @@ export const sprites = {
     headerArray,
     rowOwnerOverlay,
     protectedColumnOverlay,
+    renameIcon,
 };
 
 export type HeaderIconMap = Readonly<typeof sprites>;

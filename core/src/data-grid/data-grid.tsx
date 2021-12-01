@@ -7,6 +7,7 @@ import {
     getEffectiveColumns,
     getRowIndexForY,
     getStickyWidth,
+    isGroupEqual,
     useMappedColumns,
 } from "./data-grid-lib";
 import {
@@ -22,11 +23,19 @@ import {
     CompactSelection,
     DrawCustomCellCallback,
     CellList,
+    Item,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
 import makeRange from "lodash/range";
-import { drawCell, drawGrid, GroupDetailsCallback, makeBuffers } from "./data-grid-render";
+import {
+    drawCell,
+    drawGrid,
+    getActionBoundsForGroup,
+    GroupDetailsCallback,
+    makeBuffers,
+    pointInRect,
+} from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
 import { browserIsFirefox } from "../common/browser-detect";
 import { CellRenderers } from "./cells";
@@ -105,8 +114,6 @@ export interface DataGridProps {
 
     readonly headerIcons?: SpriteMap;
 }
-
-type Item = readonly [number, number | undefined];
 
 interface BlitData {
     readonly cellXOffset: number;
@@ -214,8 +221,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const mappedColumns = useMappedColumns(columns, freezeColumns);
 
+    // row: -1 === columnHeader, -2 === groupHeader
     const getBoundsForItem = React.useCallback(
-        (canvas: HTMLCanvasElement, col: number, row: number | undefined): Rectangle => {
+        (canvas: HTMLCanvasElement, col: number, row: number): Rectangle => {
             const rect = canvas.getBoundingClientRect();
 
             const result: Rectangle = {
@@ -239,9 +247,49 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
             result.width = mappedColumns[col].width + 1;
 
-            if (row === undefined) {
+            if (row === -1) {
                 result.y = rect.y + groupHeaderHeight;
                 result.height = headerHeight;
+            } else if (row === -2) {
+                result.y = rect.y;
+                result.height = groupHeaderHeight;
+
+                let start = col;
+                const group = mappedColumns[col].group;
+                const sticky = mappedColumns[col].sticky;
+                while (
+                    start > 0 &&
+                    isGroupEqual(mappedColumns[start - 1].group, group) &&
+                    mappedColumns[start - 1].sticky === sticky
+                ) {
+                    const c = mappedColumns[start - 1];
+                    result.x -= c.width;
+                    result.width += c.width;
+                    start--;
+                }
+
+                let end = col;
+                while (
+                    end + 1 < mappedColumns.length &&
+                    isGroupEqual(mappedColumns[end + 1].group, group) &&
+                    mappedColumns[end + 1].sticky === sticky
+                ) {
+                    const c = mappedColumns[end + 1];
+                    result.width += c.width;
+                    end++;
+                }
+                if (!sticky) {
+                    const freezeWidth = getStickyWidth(mappedColumns);
+                    const clip = result.x - (rect.x + freezeWidth);
+                    if (clip < 0) {
+                        result.x -= clip;
+                        result.width += clip;
+                    }
+
+                    if (result.x + result.width > rect.right) {
+                        result.width = rect.right - result.x;
+                    }
+                }
             } else if (lastRowSticky && row === rows - 1) {
                 const stickyHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(row);
                 result.y = rect.y + (height - stickyHeight);
@@ -312,7 +360,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
                 let isEdge = false;
                 if (col === -1 && row === -1) {
-                    const b = getBoundsForItem(canvas, mappedColumns.length - 1, undefined);
+                    const b = getBoundsForItem(canvas, mappedColumns.length - 1, -1);
                     isEdge = posX < b.x + b.width + edgeDetectionBuffer;
                 }
 
@@ -327,17 +375,18 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isTouch,
                 };
             } else if (row <= -1) {
-                let bounds = getBoundsForItem(canvas, col, undefined);
+                let bounds = getBoundsForItem(canvas, col, row);
                 let isEdge = bounds !== undefined && bounds.x + bounds.width - posX <= edgeDetectionBuffer;
 
                 const previousCol = col - 1;
                 if (posX - bounds.x <= edgeDetectionBuffer && previousCol >= 0) {
                     isEdge = true;
-                    bounds = getBoundsForItem(canvas, previousCol, undefined);
+                    bounds = getBoundsForItem(canvas, previousCol, row);
                     result = {
                         kind: enableGroups && row === -2 ? "group-header" : "header",
-                        location: [previousCol, undefined],
+                        location: [previousCol, row] as any,
                         bounds: bounds,
+                        group: mappedColumns[previousCol].group ?? "",
                         isEdge,
                         shiftKey,
                         ctrlKey,
@@ -349,7 +398,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 } else {
                     result = {
                         kind: enableGroups && row === -2 ? "group-header" : "header",
-                        location: [col, undefined],
+                        group: mappedColumns[col].group ?? "",
+                        location: [col, row] as any,
                         bounds: bounds,
                         isEdge,
                         shiftKey,
@@ -406,10 +456,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     }
 
     const [hoveredItem] = hoveredItemInfo ?? [];
-    let hoveredCol: number | undefined;
-    if (hoveredItem?.[0] !== undefined && hoveredItem[1] === undefined) {
-        hoveredCol = hoveredItem[0];
-    }
 
     const enqueueRef = React.useRef((_item: Item) => {
         // do nothing
@@ -442,7 +488,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             rowHeight,
             verticalBorder,
             selectedColumns ?? CompactSelection.empty(),
-            hoveredCol,
             isResizing,
             selectedCell,
             lastRowSticky,
@@ -482,7 +527,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         rowHeight,
         verticalBorder,
         selectedColumns,
-        hoveredCol,
         isResizing,
         selectedCell,
         lastRowSticky,
@@ -556,7 +600,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     imageLoader.setCallback(damageInternal);
 
     const [hCol, hRow] = hoveredItem ?? [];
-    const headerHovered = hCol !== undefined && hRow === undefined;
+    const headerHovered = hCol !== undefined && hRow === -1;
+    const groupHeaderHovered = hCol !== undefined && hRow === -2;
     let clickableInnerCellHovered = false;
     let editableBoolHovered = false;
     if (hCol !== undefined && hRow !== undefined) {
@@ -567,21 +612,22 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         editableBoolHovered = cell.kind === GridCellKind.Boolean && cell.allowEdit === true;
     }
     const canDrag = hoveredOnEdge ?? false;
+    const cursor = isDragging
+        ? "grabbing"
+        : canDrag || isResizing
+        ? "col-resize"
+        : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
+        ? "pointer"
+        : "default";
     const style = React.useMemo(
         () => ({
             width,
             height,
             contain: "strict",
             display: "block",
-            cursor: isDragging
-                ? "grabbing"
-                : canDrag || isResizing
-                ? "col-resize"
-                : headerHovered || clickableInnerCellHovered || editableBoolHovered
-                ? "pointer"
-                : "default",
+            cursor,
         }),
-        [width, height, isDragging, canDrag, isResizing, headerHovered, clickableInnerCellHovered, editableBoolHovered]
+        [width, height, cursor]
     );
 
     const target = eventTargetRef?.current;
@@ -589,6 +635,39 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         // because we have an event target we need to set its cursor instead.
         target.style.cursor = style.cursor;
     }
+
+    const groupHeaderActionForEvent = React.useCallback(
+        (group: string, bounds: Rectangle, localEventX: number, localEventY: number) => {
+            if (getGroupDetails === undefined) return undefined;
+            const groupDesc = getGroupDetails(group);
+            if (groupDesc.actions !== undefined) {
+                const boxes = getActionBoundsForGroup(bounds, groupDesc.actions);
+                for (let i = 0; i < boxes.length; i++) {
+                    const box = boxes[i];
+                    if (pointInRect(box, localEventX + bounds.x, localEventY + box.y)) {
+                        return groupDesc.actions[i];
+                    }
+                }
+            }
+            return undefined;
+        },
+        [getGroupDetails]
+    );
+
+    const isOverHeaderMenu = React.useCallback(
+        (canvas: HTMLCanvasElement, col: number, clientX: number) => {
+            const header = columns[col];
+
+            if (!isDragging && header.hasMenu === true && !(hoveredOnEdge ?? false)) {
+                const headerBounds = getBoundsForItem(canvas, col, -1);
+                if (clientX > headerBounds.x + headerBounds.width - 40) {
+                    return headerBounds;
+                }
+            }
+            return undefined;
+        },
+        [columns, getBoundsForItem, hoveredOnEdge, isDragging]
+    );
 
     const onMouseDownImpl = React.useCallback(
         (ev: MouseEvent | TouchEvent) => {
@@ -614,21 +693,18 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
 
-            if (args.kind === "header") {
-                const [col] = args.location;
-                const header = columns[col];
-
-                if (header.hasMenu === true && !(hoveredOnEdge ?? false)) {
-                    const headerBounds = getBoundsForItem(canvas, col, undefined);
-                    if (clientX > headerBounds.x + headerBounds.width - 40) {
-                        return;
-                    }
+            if (args.kind === "header" && isOverHeaderMenu(canvas, args.location[0], clientX) !== undefined) {
+                return;
+            } else if (args.kind === "group-header") {
+                const action = groupHeaderActionForEvent(args.group, args.bounds, args.localEventX, args.localEventY);
+                if (action !== undefined) {
+                    return;
                 }
             }
 
             onMouseDown?.(args);
         },
-        [columns, eventTargetRef, getBoundsForItem, getMouseArgsForPosition, hoveredOnEdge, onMouseDown]
+        [eventTargetRef, getMouseArgsForPosition, groupHeaderActionForEvent, isOverHeaderMenu, onMouseDown]
     );
     useEventListener("touchstart", onMouseDownImpl, window, true);
     useEventListener("mousedown", onMouseDownImpl, window, true);
@@ -658,16 +734,18 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
 
-            if (args.kind === "header") {
+            if (args.kind === "header" && isOverHeaderMenu(canvas, args.location[0], clientX)) {
                 const [col] = args.location;
-                const header = columns[col];
-
-                if (!isDragging && header.hasMenu === true && !(hoveredOnEdge ?? false)) {
-                    const headerBounds = getBoundsForItem(canvas, col, undefined);
-                    if (clientX > headerBounds.x + headerBounds.width - 40) {
-                        onHeaderMenuClick?.(col, headerBounds);
-                        return;
-                    }
+                const headerBounds = isOverHeaderMenu(canvas, col, clientX);
+                if (headerBounds !== undefined) {
+                    onHeaderMenuClick?.(col, headerBounds);
+                    return;
+                }
+            } else if (args.kind === "group-header") {
+                const action = groupHeaderActionForEvent(args.group, args.bounds, args.localEventX, args.localEventY);
+                if (action !== undefined) {
+                    action.onClick(args);
+                    return;
                 }
             }
 
@@ -677,11 +755,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             onMouseUp,
             eventTargetRef,
             getMouseArgsForPosition,
-            columns,
-            isDragging,
-            hoveredOnEdge,
-            getBoundsForItem,
+            isOverHeaderMenu,
             onHeaderMenuClick,
+            groupHeaderActionForEvent,
         ]
     );
     useEventListener("mouseup", onMouseUpImpl, window, false);
@@ -700,7 +776,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const animationManager = React.useRef(new AnimationManager(onAnimationFrame));
     React.useEffect(() => {
         const am = animationManager.current;
-        if (hoveredItem === undefined || hoveredItem[1] === undefined) {
+        if (hoveredItem === undefined || hoveredItem[1] < 0) {
             am.setHovered(hoveredItem);
             return;
         }
@@ -720,12 +796,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             if (!isSameItem(args, hoveredRef.current)) {
                 onItemHovered?.(args);
                 setHoveredItemInfo(
-                    args.kind === "out-of-bounds" || args.kind === "group-header"
-                        ? undefined
-                        : [args.location, [args.localEventX, args.localEventY]]
+                    args.kind === "out-of-bounds" ? undefined : [args.location, [args.localEventX, args.localEventY]]
                 );
                 hoveredRef.current = args;
-            } else if (args.kind === "cell" || args.kind === "header") {
+            } else if (args.kind === "cell" || args.kind === "header" || args.kind === "group-header") {
                 const newInfo: typeof hoverInfoRef.current = [args.location, [args.localEventX, args.localEventY]];
                 setHoveredItemInfo(newInfo);
                 hoverInfoRef.current = newInfo;
@@ -735,6 +809,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     if (toCheck.kind === GridCellKind.Custom || CellRenderers[toCheck.kind].needsHoverPosition) {
                         damageInternal([args.location]);
                     }
+                } else if (args.kind === "group-header") {
+                    damageInternal([args.location]);
                 }
             }
 
@@ -951,7 +1027,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     return undefined;
                 }
 
-                return getBoundsForItem(canvasRef.current, col, row);
+                return getBoundsForItem(canvasRef.current, col, row ?? -1);
             },
             damage,
         }),

@@ -2122,7 +2122,7 @@ export const ReorderRows: React.VFC = () => {
 };
 
 export const ColumnGroups: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(100000, true, true);
+    const { cols, getCellContent } = useMockDataGenerator(20, true, true);
 
     return (
         <BeautifulWrapper
@@ -2135,6 +2135,7 @@ export const ColumnGroups: React.VFC = () => {
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
+                onGroupHeaderRenamed={(x, y) => window.alert(`Please rename group ${x} to ${y}`)}
                 columns={cols}
                 rows={1000}
                 getGroupDetails={g => ({

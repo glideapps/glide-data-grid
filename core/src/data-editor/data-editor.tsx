@@ -29,6 +29,8 @@ import { getDataEditorTheme, Theme } from "../common/styles";
 import { DataGridRef } from "../data-grid/data-grid";
 import { useEventListener } from "../common/utils";
 import { CellRenderers } from "../data-grid/cells";
+import { isGroupEqual } from "../data-grid/data-grid-lib";
+import { GroupRename } from "./group-rename";
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
@@ -80,6 +82,7 @@ export interface DataEditorProps extends Props {
     readonly onRowAppended?: () => Promise<"top" | "bottom" | undefined> | void;
     readonly onHeaderClicked?: (colIndex: number) => void;
     readonly onGroupHeaderClicked?: (colIndex: number) => void;
+    readonly onGroupHeaderRenamed?: (groupName: string, newVal: string) => void;
     readonly onCellClicked?: (cell: readonly [number, number]) => void;
 
     readonly trailingRowOptions?: {
@@ -176,6 +179,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onCellClicked,
         onHeaderClicked,
         onGroupHeaderClicked,
+        onGroupHeaderRenamed,
         onCellEdited,
         enableDownfill = false,
         onRowAppended,
@@ -189,6 +193,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         freezeColumns = 0,
         rowSelectionMode = "auto",
         onHeaderMenuClick,
+        getGroupDetails,
         onItemHovered,
         onVisibleRegionChanged,
         selectedColumns: selectedColumnsOuter,
@@ -640,12 +645,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let start = col;
                 let end = col;
                 for (let i = col - 1; i >= rowMarkerOffset; i--) {
-                    if ((needle.group ?? "") !== (mangledCols[i].group ?? "")) break;
+                    if (!isGroupEqual(needle.group, mangledCols[i].group)) break;
                     start--;
                 }
 
                 for (let i = col + 1; i < mangledCols.length; i++) {
-                    if ((needle.group ?? "") !== (mangledCols[i].group ?? "")) break;
+                    if (!isGroupEqual(needle.group, mangledCols[i].group)) break;
                     end++;
                 }
 
@@ -687,6 +692,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             mangledCols,
         ]
     );
+
+    const [renameGroup, setRenameGroup] = React.useState<{
+        group: string;
+        bounds: Rectangle;
+    }>();
 
     const onMouseUp = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
@@ -1536,13 +1546,38 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return { ...getDataEditorTheme(), ...theme };
     }, [theme]);
 
-    const mangedVerticalBorder = React.useCallback(
+    const mangledVerticalBorder = React.useCallback(
         (col: number) => {
             return typeof verticalBorder === "boolean"
                 ? verticalBorder
                 : verticalBorder?.(col - rowMarkerOffset) ?? true;
         },
         [rowMarkerOffset, verticalBorder]
+    );
+
+    const mangledGetGroupDetails = React.useCallback<NonNullable<DataEditorProps["getGroupDetails"]>>(
+        group => {
+            let result = getGroupDetails?.(group) ?? { name: group };
+            if (onGroupHeaderRenamed !== undefined && group !== "") {
+                result = {
+                    ...result,
+                    actions: [
+                        ...(result.actions ?? []),
+                        {
+                            title: "Rename",
+                            icon: "renameIcon",
+                            onClick: e =>
+                                setRenameGroup({
+                                    group: result.name,
+                                    bounds: e.bounds,
+                                }),
+                        },
+                    ],
+                };
+            }
+            return result;
+        },
+        [getGroupDetails, onGroupHeaderRenamed]
     );
 
     const drawCustomCellMangled: typeof drawCell = React.useMemo(() => {
@@ -1554,6 +1589,24 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
         return undefined;
     }, [drawCell, drawCustomCell]);
+
+    const renameGroupNode = React.useMemo(() => {
+        if (renameGroup === undefined || canvasRef.current === null) return null;
+        const { bounds, group } = renameGroup;
+        const canvasBounds = canvasRef.current.getBoundingClientRect();
+        return (
+            <GroupRename
+                bounds={bounds}
+                group={group}
+                canvasBounds={canvasBounds}
+                onClose={() => setRenameGroup(undefined)}
+                onFinish={newVal => {
+                    setRenameGroup(undefined);
+                    onGroupHeaderRenamed?.(group, newVal);
+                }}
+            />
+        );
+    }, [onGroupHeaderRenamed, renameGroup]);
 
     return (
         <ThemeProvider theme={mergedTheme}>
@@ -1569,6 +1622,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 freezeColumns={mangledFreezeColumns}
                 lockColumns={rowMarkerOffset}
                 getCellContent={getMangedCellContent}
+                getGroupDetails={mangledGetGroupDetails}
                 headerHeight={headerHeight}
                 groupHeaderHeight={enableGroups ? groupHeaderHeight : 0}
                 lastRowSticky={lastRowSticky}
@@ -1591,9 +1645,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 selectedRows={selectedRows}
                 translateX={visibleRegion.tx}
                 translateY={visibleRegion.ty}
-                verticalBorder={mangedVerticalBorder}
+                verticalBorder={mangledVerticalBorder}
                 gridRef={gridRef}
             />
+            {renameGroupNode}
             {overlay !== undefined && (
                 <DataGridOverlayEditor
                     {...overlay}

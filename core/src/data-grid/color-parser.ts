@@ -48,3 +48,8 @@ export function parseToRgba(color: string): [number, number, number, number] {
     cache[normalizedColor] = result;
     return result;
 }
+
+export function withAlpha(color: string, alpha: number): string {
+    const [r, g, b] = parseToRgba(color);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}

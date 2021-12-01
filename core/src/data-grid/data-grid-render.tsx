@@ -8,6 +8,10 @@ import {
     Rectangle,
     CompactSelection,
     DrawCustomCellCallback,
+    GridColumnIcon,
+    Item,
+    CellList,
+    GridMouseGroupHeaderEventArgs,
 } from "./data-grid-types";
 import { HoverValues } from "./animation-manager";
 import {
@@ -16,10 +20,11 @@ import {
     MappedGridColumn,
     roundedPoly,
     drawWithLastUpdate,
+    isGroupEqual,
 } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
-import { parseToRgba } from "./color-parser";
+import { withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
 
 // Future optimization opportunities
@@ -34,11 +39,20 @@ import { CellRenderers } from "./cells";
 // - It may be interesting to try creating "sufficient" canvases to just give each column its own canvas and compose
 //   that way. There may be significant gaints to be had there. This would also allow for fluid column DnD.
 
-type HoverInfo = readonly [readonly [number, number | undefined], readonly [number, number]];
+type HoverInfo = readonly [Item, readonly [number, number]];
 
-export type GroupDetailsCallback = (
-    groupName: string
-) => { name: string; icon?: string; overrideTheme?: Partial<Theme> };
+interface GroupDetails {
+    readonly name: string;
+    readonly icon?: string;
+    readonly overrideTheme?: Partial<Theme>;
+    readonly actions?: readonly {
+        readonly title: string;
+        readonly onClick: (e: GridMouseGroupHeaderEventArgs) => void;
+        readonly icon: GridColumnIcon | string;
+    }[];
+}
+
+export type GroupDetailsCallback = (groupName: string) => GroupDetails;
 
 interface BlitData {
     readonly cellXOffset: number;
@@ -51,8 +65,6 @@ interface DragAndDropState {
     src: number;
     dest: number;
 }
-
-type CellList = readonly (readonly [number, number | undefined])[];
 
 export function drawCell(
     ctx: CanvasRenderingContext2D,
@@ -344,12 +356,38 @@ function drawGridLines(
     ctx.beginPath();
 }
 
+export function getActionBoundsForGroup(
+    box: Rectangle,
+    actions: NonNullable<GroupDetails["actions"]>
+): readonly Rectangle[] {
+    const result: Rectangle[] = [];
+    let x = box.x + box.width - 26 * actions.length;
+    const y = box.y + box.height / 2 - 13;
+    const height = 26;
+    const width = 26;
+    for (let i = 0; i < actions.length; i++) {
+        result.push({
+            x,
+            y,
+            width,
+            height,
+        });
+        x += 26;
+    }
+    return result;
+}
+
+export function pointInRect(rect: Rectangle, x: number, y: number): boolean {
+    return x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
+}
+
 function drawGroups(
     ctx: CanvasRenderingContext2D,
     effectiveCols: readonly MappedGridColumn[],
     width: number,
     translateX: number,
     groupHeaderHeight: number,
+    hovered: HoverInfo | undefined,
     theme: Theme,
     spriteManager: SpriteManager,
     verticalBorder: (col: number) => boolean,
@@ -358,8 +396,10 @@ function drawGroups(
     const xPad = 8;
     let x = 0;
     let clipX = 0;
+    const [hCol, hRow] = hovered?.[0] ?? [];
     for (let index = 0; index < effectiveCols.length; index++) {
         const startCol = effectiveCols[index];
+        let isHovered = hRow === -2 && hCol === startCol.sourceIndex;
         const group = getGroupDetails(startCol.group ?? "");
 
         const groupTheme = group?.overrideTheme === undefined ? theme : { ...theme, ...group.overrideTheme };
@@ -371,10 +411,11 @@ function drawGroups(
         }
         while (
             end < effectiveCols.length &&
-            (effectiveCols[end].group ?? "") === (startCol.group ?? "") &&
+            isGroupEqual(effectiveCols[end].group, startCol.group) &&
             effectiveCols[end].sticky === effectiveCols[index].sticky
         ) {
             const endCol = effectiveCols[end];
+            isHovered = isHovered || (hRow === -2 && hCol === endCol.sourceIndex);
             boxWidth += endCol.width;
             end++;
             index++;
@@ -389,11 +430,13 @@ function drawGroups(
         ctx.save();
         ctx.beginPath();
         const delta = startCol.sticky ? 0 : Math.max(0, clipX - localX);
-        ctx.rect(localX + delta, 0, boxWidth - delta, groupHeaderHeight);
+        const w = boxWidth - delta;
+        ctx.rect(localX + delta, 0, w, groupHeaderHeight);
         ctx.clip();
 
-        if (groupTheme.bgHeader !== theme.bgHeader) {
-            ctx.fillStyle = groupTheme.bgHeader;
+        const fillColor = isHovered ? groupTheme.bgHeaderHovered : groupTheme.bgHeader;
+        if (fillColor !== theme.bgHeader) {
+            ctx.fillStyle = fillColor;
             ctx.fill();
         }
 
@@ -413,6 +456,55 @@ function drawGroups(
                 drawX += 26;
             }
             ctx.fillText(group.name, drawX + delta + xPad, groupHeaderHeight / 2 + 1);
+
+            if (group.actions !== undefined && isHovered) {
+                const boxX = localX + delta;
+                const clipWidth = w - Math.max(0, w + boxX - width);
+                const actionBoxes = getActionBoundsForGroup(
+                    { x: boxX, y: 0, width: clipWidth, height: groupHeaderHeight },
+                    group.actions
+                );
+
+                ctx.beginPath();
+                const fadeStartX = actionBoxes[0].x - 10;
+                const fadeWidth = boxX + clipWidth - fadeStartX;
+                ctx.rect(fadeStartX, 0, fadeWidth, groupHeaderHeight);
+                const grad = ctx.createLinearGradient(fadeStartX, 0, fadeStartX + fadeWidth, 0);
+                const trans = withAlpha(fillColor, 0);
+                grad.addColorStop(0, trans);
+                grad.addColorStop(10 / fadeWidth, fillColor);
+                grad.addColorStop(1, fillColor);
+                ctx.fillStyle = grad;
+
+                ctx.fill();
+
+                ctx.globalAlpha = 0.6;
+
+                // eslint-disable-next-line prefer-const
+                const [mouseX, mouseY] = hovered?.[1] ?? [-1, -1];
+                for (let i = 0; i < group.actions.length; i++) {
+                    const action = group.actions[i];
+                    const box = actionBoxes[i];
+                    const actionHovered = pointInRect(box, mouseX + boxX, mouseY);
+                    if (actionHovered) {
+                        ctx.globalAlpha = 1;
+                    }
+                    spriteManager.drawSprite(
+                        action.icon,
+                        "normal",
+                        ctx,
+                        box.x + box.width / 2 - 10,
+                        box.y + box.height / 2 - 10,
+                        20,
+                        groupTheme
+                    );
+                    if (actionHovered) {
+                        ctx.globalAlpha = 0.6;
+                    }
+                }
+
+                ctx.globalAlpha = 1;
+            }
         }
 
         if (verticalBorder(startCol.sourceIndex)) {
@@ -444,7 +536,7 @@ function drawGridHeaders(
     ctx: CanvasRenderingContext2D,
     effectiveCols: readonly MappedGridColumn[],
     enableGroups: boolean,
-    hoveredCol: number | undefined,
+    hovered: HoverInfo | undefined,
     width: number,
     translateX: number,
     headerHeight: number,
@@ -464,6 +556,8 @@ function drawGridHeaders(
     // FIXME: This should respect the per-column theme
     ctx.fillStyle = outerTheme.bgHeader;
     ctx.fillRect(0, 0, width, totalHeaderHeight);
+
+    const [hCol, hRow] = hovered?.[0] ?? [];
 
     const xPad = 8;
     const yPad = 2;
@@ -486,10 +580,10 @@ function drawGridHeaders(
         }
         const selected = selectedColumns.hasIndex(c.sourceIndex);
         const noHover = dragAndDropState !== undefined || isResizing;
-        const hoveredBoolean = !noHover && hoveredCol === c.sourceIndex;
+        const hoveredBoolean = !noHover && hRow === -1 && hCol === c.sourceIndex;
         const hover = noHover
             ? 0
-            : hoverValues.find(s => s.item[0] === c.sourceIndex && s.item[1] === undefined)?.hoverAmount ?? 0;
+            : hoverValues.find(s => s.item[0] === c.sourceIndex && s.item[1] === -1)?.hoverAmount ?? 0;
 
         const hasSelectedCell = selectedCell !== undefined && selectedCell.cell[0] === c.sourceIndex;
 
@@ -570,12 +664,12 @@ function drawGridHeaders(
             const fadeEndPercent = fadeEnd / c.width;
 
             const grad = ctx.createLinearGradient(x, 0, x + c.width, 0);
-            const [r, g, b] = parseToRgba(fillStyle);
+            const trans = withAlpha(fillStyle, 0);
 
             grad.addColorStop(0, fillStyle);
             grad.addColorStop(fadeStartPercent, fillStyle);
-            grad.addColorStop(fadeEndPercent, `rgba(${r}, ${g}, ${b}, 0)`);
-            grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+            grad.addColorStop(fadeEndPercent, trans);
+            grad.addColorStop(1, trans);
             ctx.fillStyle = grad;
         } else {
             ctx.fillStyle = fillStyle;
@@ -621,6 +715,7 @@ function drawGridHeaders(
             width,
             translateX,
             groupHeaderHeight,
+            hovered,
             outerTheme,
             spriteManager,
             verticalBorder,
@@ -706,7 +801,7 @@ function drawCells(
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
     outerTheme: Theme,
-    enqueue: (item: [number, number | undefined]) => void
+    enqueue: (item: Item) => void
 ): void {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
@@ -1034,7 +1129,6 @@ export function drawGrid(
     rowHeight: number | ((index: number) => number),
     verticalBorder: (col: number) => boolean,
     selectedColumns: CompactSelection,
-    hoveredCol: number | undefined,
     isResizing: boolean,
     selectedCell: GridSelection | undefined,
     lastRowSticky: boolean,
@@ -1051,7 +1145,7 @@ export function drawGrid(
     hoverInfo: HoverInfo | undefined,
     spriteManager: SpriteManager,
     scrolling: boolean,
-    enqueue: (item: [number, number | undefined]) => void
+    enqueue: (item: Item) => void
 ) {
     if (width === 0 || height === 0) return;
     const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
@@ -1113,7 +1207,7 @@ export function drawGrid(
             overlayCtx,
             effectiveCols,
             enableGroups,
-            hoveredCol,
+            hoverInfo,
             width,
             translateX,
             headerHeight,
@@ -1152,7 +1246,7 @@ export function drawGrid(
     if (damage !== undefined) {
         damage = damage.filter(
             x =>
-                x[1] === undefined ||
+                x[1] < 0 ||
                 intersectRect(cellXOffset, cellYOffset, effectiveCols.length, 300, x[0], x[1], 1, 1) ||
                 intersectRect(0, cellYOffset, freezeColumns, 300, x[0], x[1], 1, 1)
         );
@@ -1204,7 +1298,7 @@ export function drawGrid(
             );
         }
 
-        const doHeaders = damage.some(d => d[1] === undefined);
+        const doHeaders = damage.some(d => d[1] < 0);
 
         if (doHeaders) {
             drawHeaderTexture();

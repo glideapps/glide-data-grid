@@ -28,25 +28,27 @@ interface BaseGridMouseEventArgs {
     readonly isEdge: boolean;
 }
 
-interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
+export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "cell";
     readonly location: readonly [number, number];
     readonly bounds: Rectangle;
 }
 
-interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
+export interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "header";
-    readonly location: readonly [number, undefined];
+    readonly location: readonly [number, -1];
     readonly bounds: Rectangle;
+    readonly group: string;
 }
 
-interface GridMouseGroupHeaderEventArgs extends BaseGridMouseEventArgs {
+export interface GridMouseGroupHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "group-header";
-    readonly location: readonly [number, undefined];
+    readonly location: readonly [number, -2];
     readonly bounds: Rectangle;
+    readonly group: string;
 }
 
-interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {
+export interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {
     readonly kind: "out-of-bounds";
     readonly location: readonly [number, number];
     readonly direction: readonly [-1 | 0 | 1, -1 | 0 | 1];
@@ -128,6 +130,8 @@ export enum GridColumnIcon {
     RowOwnerOverlay = "rowOwnerOverlay",
     ProtectedColumnOverlay = "protectedColumnOverlay",
 }
+
+export type Item = readonly [number, number];
 
 export interface GridColumn {
     readonly width: number;
@@ -280,7 +284,7 @@ export type GridCell =
 type InnerOnlyGridCell = NewRowCell | MarkerCell;
 export type InnerGridCell = GridCell | InnerOnlyGridCell;
 
-export type CellList = readonly (readonly [number, number | undefined])[];
+export type CellList = readonly Item[];
 
 export interface Rectangle {
     x: number;

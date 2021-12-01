@@ -21,6 +21,10 @@ export function useMappedColumns(columns: readonly GridColumn[], freezeColumns: 
     );
 }
 
+export function isGroupEqual(left: string | undefined, right: string | undefined): boolean {
+    return (left ?? "") === (right ?? "");
+}
+
 function remapForDnDState(
     columns: readonly MappedGridColumn[],
     dndState?: {
