@@ -712,7 +712,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const onMouseUpImpl = React.useCallback(
         (ev: MouseEvent | TouchEvent) => {
             const canvas = ref.current;
-            if (onMouseUp === undefined || canvas == null) return;
+            if (onMouseUp === undefined || canvas === null) return;
             const eventTarget = eventTargetRef?.current;
 
             const isOutside = ev.target !== canvas && ev.target !== eventTarget;
@@ -1136,6 +1136,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     return (
         <>
             <canvas
+                data-testid="data-grid-canvas"
                 tabIndex={0}
                 onKeyDown={onKeyDownImpl}
                 onKeyUp={onKeyUpImpl}
