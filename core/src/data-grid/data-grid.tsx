@@ -569,6 +569,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     React.useEffect(() => {
         const fn = async () => {
+            if (document?.fonts?.ready === undefined) return;
             await document.fonts.ready;
             const prev = canBlit.current;
             canBlit.current = false;

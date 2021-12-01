@@ -84,7 +84,7 @@ describe("data-grid", () => {
 
         fireEvent.mouseUp(screen.getByTestId("data-grid-canvas"), {
             clientX: 300, // Col B
-            clientY: 36 + 32 * 5 + 16, // Row 1 (0 indexed)
+            clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
 
         expect(spy).toHaveBeenCalledWith(
@@ -95,6 +95,82 @@ describe("data-grid", () => {
                 localEventY: 16,
             }),
             false
+        );
+    });
+
+    test("Does not emit mousedown/up over header menu", () => {
+        const downSpy = jest.fn();
+        const upSpy = jest.fn();
+
+        render(
+            <ThemeProvider theme={getDataEditorTheme()}>
+                <DataGrid
+                    {...basicProps}
+                    columns={basicProps.columns.map(c => ({ ...c, hasMenu: true }))}
+                    onMouseUp={upSpy}
+                    onMouseDown={downSpy}
+                />
+            </ThemeProvider>
+        );
+
+        const el = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(el, {
+            clientX: 140,
+            clientY: 18,
+        });
+
+        fireEvent.mouseUp(el, {
+            clientX: 140,
+            clientY: 18,
+        });
+
+        expect(downSpy).not.toBeCalled();
+        expect(upSpy).not.toBeCalled();
+    });
+
+    test("Cell hovered", () => {
+        const spy = jest.fn();
+
+        render(
+            <ThemeProvider theme={getDataEditorTheme()}>
+                <DataGrid {...basicProps} onItemHovered={spy} />
+            </ThemeProvider>
+        );
+
+        const el = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseMove(el, {
+            clientX: 350, // Col C
+            clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
+        });
+
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                kind: "cell",
+                location: [2, 5],
+            })
+        );
+    });
+
+    test("Header hovered", () => {
+        const spy = jest.fn();
+
+        render(
+            <ThemeProvider theme={getDataEditorTheme()}>
+                <DataGrid {...basicProps} onItemHovered={spy} />
+            </ThemeProvider>
+        );
+
+        const el = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseMove(el, {
+            clientX: 350, // Col C
+            clientY: 16, // Header
+        });
+
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                kind: "header",
+                location: [2, -1],
+            })
         );
     });
 });
