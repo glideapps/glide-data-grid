@@ -20,6 +20,7 @@ import {
     isInnerOnlyCell,
     ProvideEditorCallback,
     DrawCustomCellCallback,
+    GridMouseCellEventArgs,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -76,6 +77,10 @@ type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parame
 
 type HeaderSelectionTrigger = "selection" | "drag" | "header" | "group";
 
+interface CellClickedEventArgs extends GridMouseCellEventArgs {
+    preventDefault: () => void;
+}
+
 export interface DataEditorProps extends Props {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
@@ -83,7 +88,7 @@ export interface DataEditorProps extends Props {
     readonly onHeaderClicked?: (colIndex: number) => void;
     readonly onGroupHeaderClicked?: (colIndex: number) => void;
     readonly onGroupHeaderRenamed?: (groupName: string, newVal: string) => void;
-    readonly onCellClicked?: (cell: readonly [number, number]) => void;
+    readonly onCellClicked?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;
 
     readonly trailingRowOptions?: {
         readonly tint?: boolean;
@@ -719,7 +724,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (args.kind !== "cell") {
                 return;
             }
-            if (gridSelection !== undefined && mouse?.previousSelection?.cell !== undefined) {
+            let prevented = false;
+            const preventDefault = () => {
+                prevented = true;
+            };
+            onCellClicked?.([args.location[0] - rowMarkerOffset, args.location[1]], { ...args, preventDefault });
+            if (gridSelection !== undefined && mouse?.previousSelection?.cell !== undefined && !prevented) {
                 const [col, row] = args.location;
                 const [selectedCol, selectedRow] = gridSelection.cell;
                 const [prevCol, prevRow] = mouse.previousSelection.cell;
@@ -740,7 +750,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     reselect(args.bounds);
                 }
             }
-            onCellClicked?.([args.location[0] - rowMarkerOffset, args.location[1]]);
         },
         [
             getMangedCellContent,
