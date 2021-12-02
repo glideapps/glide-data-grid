@@ -174,7 +174,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const lastSent = React.useRef<[number, number]>();
 
     const {
-        isDraggable,
+        isDraggable = false,
         getCellsForSelection,
         rowMarkers = "none",
         rowHeight = 34,
@@ -220,7 +220,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ...rest
     } = p;
 
-    const rowMarkerWidth = rowMarkerWidthRaw ?? rows > 10000 ? 48 : rows > 1000 ? 44 : rows > 100 ? 36 : 32;
+    const rowMarkerWidth = rowMarkerWidthRaw ?? (rows > 10000 ? 48 : rows > 1000 ? 44 : rows > 100 ? 36 : 32);
     const hasRowMarkers = rowMarkers !== "none";
     const rowMarkerOffset = hasRowMarkers ? 1 : 0;
     const showTrailingBlankRow = onRowAppended !== undefined;
@@ -1397,8 +1397,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             const focused =
-                scrollRef.current?.contains(document.activeElement) ||
-                canvasRef.current?.contains(document.activeElement);
+                scrollRef.current?.contains(document.activeElement) === true ||
+                canvasRef.current?.contains(document.activeElement) === true;
 
             let target = gridSelection?.cell;
             if (target === undefined && selectedColumns.length === 1) {
@@ -1463,8 +1463,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         "copy",
         React.useCallback(() => {
             const focused =
-                scrollRef.current?.contains(document.activeElement) ||
-                canvasRef.current?.contains(document.activeElement);
+                scrollRef.current?.contains(document.activeElement) === true ||
+                canvasRef.current?.contains(document.activeElement) === true;
 
             if (focused && getCellsForSelection) {
                 if (gridSelection !== undefined) {

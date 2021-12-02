@@ -884,7 +884,7 @@ function drawCells(
                     }
                     lastToken = undefined;
                 } else {
-                    if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row)) {
+                    if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
                         ctx.fillStyle = theme.bgSearchResult;
                         ctx.fillRect(drawX, drawY, c.width, rh);
                         lastToken = undefined;
@@ -1139,7 +1139,7 @@ export function drawGrid(
     prelightCells: CellList | undefined,
     imageLoader: ImageWindowLoader,
     lastBlitData: React.MutableRefObject<BlitData>,
-    canBlit: boolean | undefined,
+    canBlit: boolean,
     damage: CellList | undefined,
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,

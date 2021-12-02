@@ -5,7 +5,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export default class ClickOutsideContainer extends React.PureComponent<Props> {
-    private wrapperRef = React.createRef<any>();
+    private wrapperRef = React.createRef<HTMLDivElement>();
 
     public componentDidMount() {
         document.addEventListener(this.props.stopPropagation === true ? "click" : "mousedown", this.clickOutside, true);
@@ -18,7 +18,7 @@ export default class ClickOutsideContainer extends React.PureComponent<Props> {
     }
 
     private clickOutside = (event: MouseEvent) => {
-        if (this.wrapperRef.current !== null && !this.wrapperRef.current.contains(event.target)) {
+        if (this.wrapperRef.current !== null && !this.wrapperRef.current.contains(event.target as Node | null)) {
             let node = event.target as Element | null;
             while (node !== null) {
                 if (node.classList.contains("click-outside-ignore")) {

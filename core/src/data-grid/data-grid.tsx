@@ -165,7 +165,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         eventTargetRef,
         isResizing,
         isDragging,
-        isDraggable,
+        isDraggable = false,
         allowResize,
         disabledRows,
         getGroupDetails,
@@ -498,7 +498,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             prelightCells,
             imageLoader,
             lastBlitData,
-            canBlit.current,
+            canBlit.current ?? false,
             damageRegion.current,
             hoverValues.current,
             hoverInfoRef.current,
@@ -888,7 +888,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const onDragStartImpl = React.useCallback(
         (event: DragEvent) => {
             const canvas = ref.current;
-            if (canvas === null || !isDraggable === true) return false;
+            if (canvas === null || !isDraggable) return false;
 
             let dragMime: string | undefined;
             let dragData: string | undefined;

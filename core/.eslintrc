@@ -16,6 +16,7 @@
         "no-console": "warn",
         "guard-for-in": "error",
         "no-empty": "error",
+        "eqeqeq": ["error", "always"],
         "no-shadow": "off",
         "import/no-cycle": "off",
         "import/namespace": "off",
@@ -37,17 +38,10 @@
                 "checksVoidReturn": false
             }
         ],
+        "@typescript-eslint/strict-boolean-expressions": "error",
         "@typescript-eslint/ban-ts-comment": "off",
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "@typescript-eslint/ban-types": "off"
     },
-    "ignorePatterns": ["**/node_modules/*", "**/dist/*"],
-    "overrides": [
-        {
-            "files": ["*.ts"],
-            "rules": {
-                "@typescript-eslint/strict-boolean-expressions": "error"
-            }
-        }
-    ]
+    "ignorePatterns": ["**/node_modules/*", "**/dist/*"]
 }
