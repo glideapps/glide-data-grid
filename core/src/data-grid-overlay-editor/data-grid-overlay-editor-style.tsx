@@ -53,6 +53,8 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
         overflow-y: auto;
         overflow-x: hidden;
         border-radius: 2px;
+        overflow: hidden;
+
         input {
             width: 100%;
 
