@@ -390,49 +390,25 @@ function drawGroups(
     hovered: HoverInfo | undefined,
     theme: Theme,
     spriteManager: SpriteManager,
+    _hoverValues: HoverValues,
     verticalBorder: (col: number) => boolean,
-    getGroupDetails: GroupDetailsCallback
+    getGroupDetails: GroupDetailsCallback,
+    damage: CellList | undefined
 ) {
     const xPad = 8;
-    let x = 0;
-    let clipX = 0;
     const [hCol, hRow] = hovered?.[0] ?? [];
-    for (let index = 0; index < effectiveCols.length; index++) {
-        const startCol = effectiveCols[index];
-        let isHovered = hRow === -2 && hCol === startCol.sourceIndex;
-        const group = getGroupDetails(startCol.group ?? "");
 
-        const groupTheme = group?.overrideTheme === undefined ? theme : { ...theme, ...group.overrideTheme };
-
-        let end = index + 1;
-        let boxWidth = startCol.width;
-        if (startCol.sticky) {
-            clipX += boxWidth;
-        }
-        while (
-            end < effectiveCols.length &&
-            isGroupEqual(effectiveCols[end].group, startCol.group) &&
-            effectiveCols[end].sticky === effectiveCols[index].sticky
-        ) {
-            const endCol = effectiveCols[end];
-            isHovered = isHovered || (hRow === -2 && hCol === endCol.sourceIndex);
-            boxWidth += endCol.width;
-            end++;
-            index++;
-            if (endCol.sticky) {
-                clipX += endCol.width;
-            }
-        }
-
-        const t = startCol.sticky ? 0 : translateX;
-        const localX = x + t;
-
+    let finalX = 0;
+    walkGroups(effectiveCols, width, translateX, groupHeaderHeight, (span, groupName, x, y, w, h) => {
+        if (damage !== undefined && !damage.some(d => d[1] === -2 && d[0] >= span[0] && d[0] <= span[1])) return;
         ctx.save();
         ctx.beginPath();
-        const delta = startCol.sticky ? 0 : Math.max(0, clipX - localX);
-        const w = boxWidth - delta;
-        ctx.rect(localX + delta, 0, w, groupHeaderHeight);
+        ctx.rect(x, y, w, h);
         ctx.clip();
+
+        const group = getGroupDetails(groupName);
+        const groupTheme = group?.overrideTheme === undefined ? theme : { ...theme, ...group.overrideTheme };
+        const isHovered = hRow === -2 && hCol !== undefined && hCol >= span[0] && hCol <= span[1];
 
         const fillColor = isHovered ? groupTheme.bgHeaderHovered : groupTheme.bgHeader;
         if (fillColor !== theme.bgHeader) {
@@ -442,32 +418,27 @@ function drawGroups(
 
         ctx.fillStyle = groupTheme.textGroupHeader ?? groupTheme.textHeader;
         if (group !== undefined) {
-            let drawX = localX;
+            let drawX = x;
             if (group.icon !== undefined) {
                 spriteManager.drawSprite(
                     group.icon,
                     "normal",
                     ctx,
-                    drawX + delta + xPad,
+                    drawX + xPad,
                     (groupHeaderHeight - 20) / 2,
                     20,
                     groupTheme
                 );
                 drawX += 26;
             }
-            ctx.fillText(group.name, drawX + delta + xPad, groupHeaderHeight / 2 + 1);
+            ctx.fillText(group.name, drawX + xPad, groupHeaderHeight / 2 + 1);
 
             if (group.actions !== undefined && isHovered) {
-                const boxX = localX + delta;
-                const clipWidth = w - Math.max(0, w + boxX - width);
-                const actionBoxes = getActionBoundsForGroup(
-                    { x: boxX, y: 0, width: clipWidth, height: groupHeaderHeight },
-                    group.actions
-                );
+                const actionBoxes = getActionBoundsForGroup({ x, y, width: w, height: h }, group.actions);
 
                 ctx.beginPath();
                 const fadeStartX = actionBoxes[0].x - 10;
-                const fadeWidth = boxX + clipWidth - fadeStartX;
+                const fadeWidth = x + w - fadeStartX;
                 ctx.rect(fadeStartX, 0, fadeWidth, groupHeaderHeight);
                 const grad = ctx.createLinearGradient(fadeStartX, 0, fadeStartX + fadeWidth, 0);
                 const trans = withAlpha(fillColor, 0);
@@ -485,7 +456,7 @@ function drawGroups(
                 for (let i = 0; i < group.actions.length; i++) {
                     const action = group.actions[i];
                     const box = actionBoxes[i];
-                    const actionHovered = pointInRect(box, mouseX + boxX, mouseY);
+                    const actionHovered = pointInRect(box, mouseX + x, mouseY);
                     if (actionHovered) {
                         ctx.globalAlpha = 1;
                     }
@@ -507,10 +478,10 @@ function drawGroups(
             }
         }
 
-        if (verticalBorder(startCol.sourceIndex)) {
+        if (verticalBorder(span[0])) {
             ctx.beginPath();
-            ctx.moveTo(localX + delta + 0.5, 0);
-            ctx.lineTo(localX + delta + 0.5, groupHeaderHeight);
+            ctx.moveTo(x + 0.5, 0);
+            ctx.lineTo(x + 0.5, groupHeaderHeight);
             ctx.strokeStyle = theme.borderColor;
             ctx.lineWidth = 1;
             ctx.stroke();
@@ -518,12 +489,12 @@ function drawGroups(
 
         ctx.restore();
 
-        x += boxWidth;
-    }
+        finalX = x + w;
+    });
 
     ctx.beginPath();
-    ctx.moveTo(x + 0.5, 0);
-    ctx.lineTo(x + 0.5, groupHeaderHeight);
+    ctx.moveTo(finalX + 0.5, 0);
+    ctx.lineTo(finalX + 0.5, groupHeaderHeight);
 
     ctx.moveTo(0, groupHeaderHeight + 0.5);
     ctx.lineTo(width, groupHeaderHeight + 0.5);
@@ -549,11 +520,12 @@ function drawGridHeaders(
     spriteManager: SpriteManager,
     hoverValues: HoverValues,
     verticalBorder: (col: number) => boolean,
-    getGroupDetails: GroupDetailsCallback
+    getGroupDetails: GroupDetailsCallback,
+    damage: CellList | undefined
 ) {
     const totalHeaderHeight = headerHeight + groupHeaderHeight;
     if (totalHeaderHeight <= 0) return;
-    // FIXME: This should respect the per-column theme
+
     ctx.fillStyle = outerTheme.bgHeader;
     ctx.fillRect(0, 0, width, totalHeaderHeight);
 
@@ -562,12 +534,17 @@ function drawGridHeaders(
     const xPad = 8;
     const yPad = 2;
 
-    let x = 0;
-    let clipX = 0;
-    let font = `${outerTheme.headerFontStyle} ${outerTheme.fontFamily}`;
+    const font = `${outerTheme.headerFontStyle} ${outerTheme.fontFamily}`;
     // Assinging the context font too much can be expensive, it can be worth it to minimze this
     ctx.font = font;
-    for (const c of effectiveCols) {
+    walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x, _y, clipX) => {
+        if (damage !== undefined && !damage.some(d => d[1] === -1 && d[0] === c.sourceIndex)) return;
+        const diff = Math.max(0, clipX - x);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x + diff, groupHeaderHeight, c.width - diff, headerHeight);
+        ctx.clip();
+
         const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
         const theme =
             c.themeOverride === undefined && groupTheme === undefined
@@ -576,7 +553,6 @@ function drawGridHeaders(
         const f = `${theme.headerFontStyle} ${theme.fontFamily}`;
         if (font !== f) {
             ctx.font = f;
-            font = f;
         }
         const selected = selectedColumns.hasIndex(c.sourceIndex);
         const noHover = dragAndDropState !== undefined || isResizing;
@@ -593,22 +569,6 @@ function drawGridHeaders(
 
         const y = enableGroups ? groupHeaderHeight : 0;
         const xOffset = c.sourceIndex === 0 ? 0 : 1;
-
-        ctx.save();
-        if (c.sticky) {
-            clipX = Math.max(clipX, x + c.width);
-        } else {
-            ctx.beginPath();
-            ctx.rect(clipX, groupHeaderHeight, width, headerHeight);
-            ctx.clip();
-
-            if (theme.bgHeader !== outerTheme.bgHeader) {
-                ctx.fillStyle = theme.bgHeader;
-                ctx.fillRect(x, y, c.width, headerHeight);
-            }
-
-            ctx.translate(translateX, 0);
-        }
 
         if (selected) {
             ctx.fillStyle = bgFillStyle;
@@ -704,9 +664,7 @@ function drawGridHeaders(
         }
 
         ctx.restore();
-
-        x += c.width;
-    }
+    });
 
     if (enableGroups) {
         drawGroups(
@@ -718,8 +676,10 @@ function drawGridHeaders(
             hovered,
             outerTheme,
             spriteManager,
+            hoverValues,
             verticalBorder,
-            getGroupDetails
+            getGroupDetails,
+            damage
         );
     }
 }
@@ -731,7 +691,9 @@ function intersectRect(x1: number, y1: number, w1: number, h1: number, x2: numbe
 function clipDamage(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
+    width: number,
     height: number,
+    groupHeaderHeight: number,
     totalHeaderHeight: number,
     translateX: number,
     translateY: number,
@@ -747,6 +709,12 @@ function clipDamage(
 
     ctx.beginPath();
 
+    walkGroups(effectiveColumns, width, translateX, groupHeaderHeight, (span, _group, x, y, w, h) => {
+        if (damage.some(d => d[1] === -2 && d[0] >= span[0] && d[0] <= span[1])) {
+            ctx.rect(x, y, w, h);
+        }
+    });
+
     walkColumns(
         effectiveColumns,
         cellYOffset,
@@ -755,19 +723,22 @@ function clipDamage(
         totalHeaderHeight,
         (c, drawX, colDrawY, clipX, startRow) => {
             const diff = Math.max(0, clipX - drawX);
+
+            const finalX = drawX + diff + 1;
+            const finalWidth = c.width - diff - 1;
+            if (damage.some(d => d[0] === c.sourceIndex && (d[1] === -1 || d[1] === undefined))) {
+                ctx.rect(finalX, groupHeaderHeight, finalWidth, totalHeaderHeight - groupHeaderHeight);
+            }
+
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
                 const isDamaged = damage.some(d => d[0] === c.sourceIndex && d[1] === row);
                 if (isDamaged) {
                     const top = drawY + 1;
-                    // const isSticky = lastRowSticky && row === rows - 1;
                     const bottom = isSticky ? top + rh - 1 : Math.min(top + rh - 1, height - stickyRowHeight);
-                    const x = drawX + diff + 1;
-                    const y = top;
-                    const w = c.width - diff - 1;
                     const h = bottom - top;
 
                     if (h > 0) {
-                        ctx.rect(x, y, w, h);
+                        ctx.rect(finalX, top, finalWidth, h);
                     }
                 }
             });
@@ -1220,7 +1191,8 @@ export function drawGrid(
             spriteManager,
             hoverValues,
             verticalBorder,
-            getGroupDetails
+            getGroupDetails,
+            damage
         );
 
         drawGridLines(
@@ -1244,18 +1216,23 @@ export function drawGrid(
 
     // handle damage updates by directly drawing to the target to avoid large blits
     if (damage !== undefined) {
-        damage = damage.filter(
-            x =>
+        let doHeaders = false;
+        damage = damage.filter(x => {
+            doHeaders = doHeaders || x[1] < 0;
+            return (
                 x[1] < 0 ||
                 intersectRect(cellXOffset, cellYOffset, effectiveCols.length, 300, x[0], x[1], 1, 1) ||
                 intersectRect(0, cellYOffset, freezeColumns, 300, x[0], x[1], 1, 1)
-        );
+            );
+        });
 
         if (damage.length > 0) {
             clipDamage(
                 targetCtx,
                 effectiveCols,
+                width,
                 height,
+                groupHeaderHeight,
                 totalHeaderHeight,
                 translateX,
                 translateY,
@@ -1298,9 +1275,22 @@ export function drawGrid(
             );
         }
 
-        const doHeaders = damage.some(d => d[1] < 0);
-
         if (doHeaders) {
+            clipDamage(
+                overlayCtx,
+                effectiveCols,
+                width,
+                totalHeaderHeight,
+                groupHeaderHeight,
+                totalHeaderHeight,
+                translateX,
+                translateY,
+                cellYOffset,
+                rows,
+                getRowHeight,
+                lastRowSticky,
+                damage
+            );
             drawHeaderTexture();
         }
         targetCtx.restore();
@@ -1557,6 +1547,62 @@ function walkColumns(
 
         x += c.width;
         clipX += c.sticky ? c.width : 0;
+    }
+}
+
+type WalkGroupsCallback = (
+    colSpan: readonly [number, number],
+    group: string,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+) => void;
+function walkGroups(
+    effectiveCols: readonly MappedGridColumn[],
+    width: number,
+    translateX: number,
+    groupHeaderHeight: number,
+    cb: WalkGroupsCallback
+): void {
+    let x = 0;
+    let clipX = 0;
+    for (let index = 0; index < effectiveCols.length; index++) {
+        const startCol = effectiveCols[index];
+
+        let end = index + 1;
+        let boxWidth = startCol.width;
+        if (startCol.sticky) {
+            clipX += boxWidth;
+        }
+        while (
+            end < effectiveCols.length &&
+            isGroupEqual(effectiveCols[end].group, startCol.group) &&
+            effectiveCols[end].sticky === effectiveCols[index].sticky
+        ) {
+            const endCol = effectiveCols[end];
+            boxWidth += endCol.width;
+            end++;
+            index++;
+            if (endCol.sticky) {
+                clipX += endCol.width;
+            }
+        }
+
+        const t = startCol.sticky ? 0 : translateX;
+        const localX = x + t;
+        const delta = startCol.sticky ? 0 : Math.max(0, clipX - localX);
+        const w = Math.min(boxWidth - delta, width - (localX + delta));
+        cb(
+            [startCol.sourceIndex, effectiveCols[end - 1].sourceIndex],
+            startCol.group ?? "",
+            localX + delta,
+            0,
+            w,
+            groupHeaderHeight
+        );
+
+        x += boxWidth;
     }
 }
 
