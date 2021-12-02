@@ -716,26 +716,29 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 onGroupHeaderClicked?.(args.location[0] - rowMarkerOffset);
             }
 
-            if (args.kind !== "cell" || gridSelection === undefined || mouse?.previousSelection?.cell === undefined)
+            if (args.kind !== "cell") {
                 return;
-            const [col, row] = args.location;
-            const [selectedCol, selectedRow] = gridSelection.cell;
-            const [prevCol, prevRow] = mouse.previousSelection.cell;
-            const c = getMangedCellContent([col, row]);
-            const r = c.kind === GridCellKind.Custom ? undefined : CellRenderers[c.kind];
-            if (r !== undefined && r.onClick !== undefined) {
-                const newVal = r.onClick(c, args.localEventX, args.localEventY, args.bounds);
-                if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
-                    mangledOnCellEdited(args.location, newVal);
-                    gridRef.current?.damage([
-                        {
-                            cell: args.location,
-                        },
-                    ]);
-                }
             }
-            if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
-                reselect(args.bounds);
+            if (gridSelection !== undefined && mouse?.previousSelection?.cell !== undefined) {
+                const [col, row] = args.location;
+                const [selectedCol, selectedRow] = gridSelection.cell;
+                const [prevCol, prevRow] = mouse.previousSelection.cell;
+                const c = getMangedCellContent([col, row]);
+                const r = c.kind === GridCellKind.Custom ? undefined : CellRenderers[c.kind];
+                if (r !== undefined && r.onClick !== undefined) {
+                    const newVal = r.onClick(c, args.localEventX, args.localEventY, args.bounds);
+                    if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
+                        mangledOnCellEdited(args.location, newVal);
+                        gridRef.current?.damage([
+                            {
+                                cell: args.location,
+                            },
+                        ]);
+                    }
+                }
+                if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
+                    reselect(args.bounds);
+                }
             }
             onCellClicked?.([args.location[0] - rowMarkerOffset, args.location[1]]);
         },

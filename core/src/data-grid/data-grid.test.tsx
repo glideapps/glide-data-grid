@@ -1,7 +1,7 @@
 import { describe, test, expect } from "jest-without-globals";
 import * as React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
-import DataGrid, { DataGridProps } from "./data-grid";
+import DataGrid, { DataGridProps, DataGridRef } from "./data-grid";
 import { GridCellKind } from "./data-grid-types";
 import { ThemeProvider } from "styled-components";
 import { getDataEditorTheme } from "../common/styles";
@@ -70,6 +70,27 @@ describe("data-grid", () => {
             expect.objectContaining({
                 location: [1, 1],
                 kind: "cell",
+            })
+        );
+    });
+
+    test("OOB mouse down", () => {
+        const spy = jest.fn();
+        render(
+            <ThemeProvider theme={getDataEditorTheme()}>
+                <DataGrid {...basicProps} onMouseDown={spy} />
+            </ThemeProvider>
+        );
+
+        fireEvent.mouseDown(screen.getByTestId("data-grid-canvas"), {
+            clientX: 990, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                kind: "out-of-bounds",
             })
         );
     });
@@ -171,6 +192,85 @@ describe("data-grid", () => {
                 kind: "header",
                 location: [2, -1],
             })
+        );
+    });
+
+    test("Group header hovered", () => {
+        const spy = jest.fn();
+
+        render(
+            <ThemeProvider theme={getDataEditorTheme()}>
+                <DataGrid {...basicProps} onItemHovered={spy} enableGroups={true} groupHeaderHeight={28} />
+            </ThemeProvider>
+        );
+
+        const el = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseMove(el, {
+            clientX: 350, // Col C
+            clientY: 14, // Header
+        });
+
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                kind: "group-header",
+                location: [2, -2],
+            })
+        );
+    });
+
+    test("Simple damage", () => {
+        const spy = jest.fn(basicProps.getCellContent);
+        const ref = React.createRef<DataGridRef>();
+
+        render(
+            <ThemeProvider theme={getDataEditorTheme()}>
+                <DataGrid ref={ref} {...basicProps} getCellContent={spy} enableGroups={true} groupHeaderHeight={28} />
+            </ThemeProvider>
+        );
+
+        spy.mockClear();
+        expect(spy).not.toBeCalled();
+        ref.current?.damage([{ cell: [1, 1] }]);
+        expect(spy).toBeCalled();
+    });
+
+    test("Out of bounds damage", () => {
+        const spy = jest.fn(basicProps.getCellContent);
+        const ref = React.createRef<DataGridRef>();
+
+        render(
+            <ThemeProvider theme={getDataEditorTheme()}>
+                <DataGrid ref={ref} {...basicProps} getCellContent={spy} enableGroups={true} groupHeaderHeight={28} />
+            </ThemeProvider>
+        );
+
+        spy.mockClear();
+        expect(spy).not.toBeCalled();
+        ref.current?.damage([{ cell: [1, 900] }]);
+        expect(spy).not.toBeCalled();
+    });
+
+    test("Freeze column simple check", () => {
+        const spy = jest.fn();
+        render(
+            <ThemeProvider theme={getDataEditorTheme()}>
+                <DataGrid {...basicProps} freezeColumns={1} cellXOffset={3} onMouseUp={spy} />
+            </ThemeProvider>
+        );
+
+        fireEvent.mouseUp(screen.getByTestId("data-grid-canvas"), {
+            clientX: 50, // Col A
+            clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                location: [0, 5],
+                kind: "cell",
+                localEventX: 50,
+                localEventY: 16,
+            }),
+            false
         );
     });
 });
