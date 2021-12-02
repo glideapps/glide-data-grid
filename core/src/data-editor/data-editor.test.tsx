@@ -126,7 +126,7 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith([1, 1]);
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
     });
 
     test("Open and close overlay", async () => {

@@ -21,6 +21,8 @@ import {
     ProvideEditorCallback,
     DrawCustomCellCallback,
     GridMouseCellEventArgs,
+    GridMouseHeaderEventArgs,
+    GridMouseGroupHeaderEventArgs,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -77,16 +79,21 @@ type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parame
 
 type HeaderSelectionTrigger = "selection" | "drag" | "header" | "group";
 
-interface CellClickedEventArgs extends GridMouseCellEventArgs {
+interface PreventableEvent {
     preventDefault: () => void;
 }
+interface CellClickedEventArgs extends GridMouseCellEventArgs, PreventableEvent {}
+
+interface HeaderClickedEventArgs extends GridMouseHeaderEventArgs, PreventableEvent {}
+
+interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, PreventableEvent {}
 
 export interface DataEditorProps extends Props {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
     readonly onRowAppended?: () => Promise<"top" | "bottom" | undefined> | void;
-    readonly onHeaderClicked?: (colIndex: number) => void;
-    readonly onGroupHeaderClicked?: (colIndex: number) => void;
+    readonly onHeaderClicked?: (colIndex: number, event: HeaderClickedEventArgs) => void;
+    readonly onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
     readonly onGroupHeaderRenamed?: (groupName: string, newVal: string) => void;
     readonly onCellClicked?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;
 
@@ -709,25 +716,26 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             mouseState.current = undefined;
             if (isOutside) return;
 
+            let prevented = false;
+            const preventDefault = () => {
+                prevented = true;
+            };
+
             if (scrollTimer.current !== undefined) {
                 window.clearInterval(scrollTimer.current);
             }
 
             if (args.kind === "header") {
-                onHeaderClicked?.(args.location[0] - rowMarkerOffset);
+                onHeaderClicked?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
             }
 
             if (args.kind === "group-header") {
-                onGroupHeaderClicked?.(args.location[0] - rowMarkerOffset);
+                onGroupHeaderClicked?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
             }
 
             if (args.kind !== "cell") {
                 return;
             }
-            let prevented = false;
-            const preventDefault = () => {
-                prevented = true;
-            };
             onCellClicked?.([args.location[0] - rowMarkerOffset, args.location[1]], { ...args, preventDefault });
             if (gridSelection !== undefined && mouse?.previousSelection?.cell !== undefined && !prevented) {
                 const [col, row] = args.location;
