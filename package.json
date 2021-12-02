@@ -35,6 +35,7 @@
         "@types/react-dom": "^16.9.5",
         "@types/react-virtualized-auto-sizer": "^1.0.0",
         "@types/styled-components": "5.1.14",
+        "@types/testing-library__jest-dom": "^5.14.2",
         "@typescript-eslint/eslint-plugin": "^4.33.0",
         "@typescript-eslint/parser": "^4.33.0",
         "@typescript-eslint/typescript-estree": "^4.33.0",

@@ -12,5 +12,5 @@
         "sourceMap": false,
         "types": ["react", "jest"],
     },
-    "exclude": ["./src/**/*.stories.tsx", "./src/stories/*.tsx", "./src/docs/*.tsx", "./src/setupTests.ts", "./src/**/*.test.ts"]
+    "exclude": ["./src/**/*.stories.tsx", "./src/stories/*.tsx", "./src/docs/*.tsx", "./src/setupTests.ts", "./src/**/*.test.ts", "./src/**/*.test.tsx"]
 }
