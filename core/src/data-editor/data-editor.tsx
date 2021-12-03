@@ -226,8 +226,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const showTrailingBlankRow = onRowAppended !== undefined;
     const lastRowSticky = trailingRowOptions?.sticky === true;
 
-    const mangledFreezeColumns = freezeColumns + (hasRowMarkers ? 1 : 0);
-
     const gridSelectionOuterMangled: GridSelection | undefined =
         gridSelectionOuter === undefined
             ? undefined
@@ -1627,6 +1625,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             />
         );
     }, [onGroupHeaderRenamed, renameGroup]);
+
+    const mangledFreezeColumns = Math.min(mangledCols.length, freezeColumns + (hasRowMarkers ? 1 : 0));
 
     return (
         <ThemeProvider theme={mergedTheme}>
