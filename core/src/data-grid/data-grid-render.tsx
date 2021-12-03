@@ -550,6 +550,12 @@ function drawGridHeaders(
             c.themeOverride === undefined && groupTheme === undefined
                 ? outerTheme
                 : { ...outerTheme, ...groupTheme, ...c.themeOverride };
+
+        if (theme.bgHeader !== outerTheme.bgHeader) {
+            ctx.fillStyle = theme.bgHeader;
+            ctx.fill();
+        }
+
         const f = `${theme.headerFontStyle} ${theme.fontFamily}`;
         if (font !== f) {
             ctx.font = f;
