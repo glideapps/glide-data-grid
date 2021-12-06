@@ -139,10 +139,9 @@ export function getRowIndexForY(
     translateY: number,
     lastRowSticky: boolean
 ): number | undefined {
-    if (hasGroups && targetY <= groupHeaderHeight) return -2;
-    if (targetY <= headerHeight) return -1;
-
     const totalHeaderHeight = headerHeight + groupHeaderHeight;
+    if (hasGroups && targetY <= groupHeaderHeight) return -2;
+    if (targetY <= totalHeaderHeight) return -1;
 
     const lastRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows - 1);
     if (lastRowSticky && targetY > height - lastRowHeight) {

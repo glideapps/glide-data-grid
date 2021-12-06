@@ -195,6 +195,35 @@ describe("data-grid", () => {
         );
     });
 
+    test("Header hovered when scrolled", () => {
+        const spy = jest.fn();
+
+        render(
+            <ThemeProvider theme={getDataEditorTheme()}>
+                <DataGrid
+                    {...basicProps}
+                    groupHeaderHeight={32}
+                    enableGroups={true}
+                    cellYOffset={10}
+                    onItemHovered={spy}
+                />
+            </ThemeProvider>
+        );
+
+        const el = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseMove(el, {
+            clientX: 350, // Col C
+            clientY: 46, // Header
+        });
+
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                kind: "header",
+                location: [2, -1],
+            })
+        );
+    });
+
     test("Group header hovered", () => {
         const spy = jest.fn();
 
