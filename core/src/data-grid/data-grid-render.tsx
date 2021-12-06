@@ -1304,7 +1304,7 @@ export function drawGrid(
         if (doHeaders && totalHeaderHeight > 0) {
             targetCtx.imageSmoothingEnabled = false;
             targetCtx.drawImage(overlayCanvas, 0, 0);
-            targetCtx.imageSmoothingEnabled = false;
+            targetCtx.imageSmoothingEnabled = true;
         }
         return;
     }

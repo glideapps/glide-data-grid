@@ -1112,7 +1112,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             translateX,
             width,
         ],
-        100
+        200
     );
 
     const stickyShadow = React.useMemo(() => {
