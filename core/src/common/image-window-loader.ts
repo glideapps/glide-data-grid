@@ -16,18 +16,18 @@ function packColRowToNumber(col: number, row: number) {
     return row * rowShift + col;
 }
 
-function unpackNumberToColRow(packed: number): [number, number] {
-    const col = packed % rowShift;
-    const row = (packed - col) / rowShift;
-    return [col, row];
-}
-
 function unpackCol(packed: number): number {
     return packed % rowShift;
 }
 
 function unpackRow(packed: number, col: number): number {
     return (packed - col) / rowShift;
+}
+
+function unpackNumberToColRow(packed: number): [number, number] {
+    const col = unpackCol(packed);
+    const row = unpackRow(packed, col);
+    return [col, row];
 }
 
 class ImageWindowLoader {
@@ -60,11 +60,14 @@ class ImageWindowLoader {
     }, 20);
 
     private clearOutOfWindow = () => {
-        for (const key of Object.keys(this.cache)) {
+        const keys = Object.keys(this.cache);
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
             const obj = this.cache[key];
 
             let keep = false;
-            for (const packed of obj.cells) {
+            for (let j = 0; j < obj.cells.length; j++) {
+                const packed = obj.cells[j];
                 if (this.isInWindow(packed)) {
                     keep = true;
                     break;

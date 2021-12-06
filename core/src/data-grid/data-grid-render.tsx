@@ -81,11 +81,9 @@ export function drawCell(
     hoverAmount: number,
     hoverInfo: HoverInfo | undefined,
     frameTime: number,
-    lastToken?: {} | undefined
-): {
-    lastToken: {} | undefined;
-    enqueue: [number, number] | undefined;
-} {
+    lastToken?: {} | undefined,
+    enqueue?: (item: Item) => void
+): {} | undefined {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
     if (hoverInfo !== undefined && hoverInfo[0][0] === col && hoverInfo[0][1] === row) {
@@ -119,10 +117,8 @@ export function drawCell(
             result = r;
         }
     });
-    return {
-        lastToken: result,
-        enqueue: needsAnim ? [col, row] : undefined,
-    };
+    if (needsAnim) enqueue?.([col, row]);
+    return result;
 }
 
 function blitLastFrame(
@@ -187,7 +183,7 @@ function blitLastFrame(
     if (blitWidth > 150 && blitHeight > 150) {
         blittedYOnly = deltaX === 0;
 
-        let args = {
+        const args = {
             sx: 0,
             sy: 0,
             sw: width * dpr,
@@ -201,13 +197,11 @@ function blitLastFrame(
         // blit Y
         if (deltaY > 0) {
             // scrolling up
-            args = {
-                ...args,
-                sy: (totalHeaderHeight + 1) * dpr,
-                sh: blitHeight * dpr,
-                dy: deltaY + totalHeaderHeight + 1,
-                dh: blitHeight,
-            };
+            args.sy = (totalHeaderHeight + 1) * dpr;
+            args.sh = blitHeight * dpr;
+            args.dy = deltaY + totalHeaderHeight + 1;
+            args.dh = blitHeight;
+
             drawRegions.push({
                 x: 0,
                 y: totalHeaderHeight,
@@ -216,13 +210,11 @@ function blitLastFrame(
             });
         } else if (deltaY < 0) {
             // scrolling down
-            args = {
-                ...args,
-                sy: (-deltaY + totalHeaderHeight + 1) * dpr,
-                sh: blitHeight * dpr,
-                dy: totalHeaderHeight + 1,
-                dh: blitHeight,
-            };
+            args.sy = (-deltaY + totalHeaderHeight + 1) * dpr;
+            args.sh = blitHeight * dpr;
+            args.dy = totalHeaderHeight + 1;
+            args.dh = blitHeight;
+
             drawRegions.push({
                 x: 0,
                 y: height + deltaY - stickyRowHeight,
@@ -234,13 +226,11 @@ function blitLastFrame(
         // blit X
         if (deltaX > 0) {
             // pixels moving right
-            args = {
-                ...args,
-                sx: stickyWidth * dpr,
-                sw: blitWidth * dpr,
-                dx: deltaX + stickyWidth,
-                dw: blitWidth,
-            };
+            args.sx = stickyWidth * dpr;
+            args.sw = blitWidth * dpr;
+            args.dx = deltaX + stickyWidth;
+            args.dw = blitWidth;
+
             drawRegions.push({
                 x: stickyWidth - 1,
                 y: 0,
@@ -249,13 +239,11 @@ function blitLastFrame(
             });
         } else if (deltaX < 0) {
             // pixels moving left
-            args = {
-                ...args,
-                sx: (stickyWidth - deltaX) * dpr,
-                sw: blitWidth * dpr,
-                dx: stickyWidth,
-                dw: blitWidth,
-            };
+            args.sx = (stickyWidth - deltaX) * dpr;
+            args.sw = blitWidth * dpr;
+            args.dx = stickyWidth;
+            args.dw = blitWidth;
+
             drawRegions.push({
                 x: width + deltaX,
                 y: 0,
@@ -715,8 +703,12 @@ function clipDamage(
     ctx.beginPath();
 
     walkGroups(effectiveColumns, width, translateX, groupHeaderHeight, (span, _group, x, y, w, h) => {
-        if (damage.some(d => d[1] === -2 && d[0] >= span[0] && d[0] <= span[1])) {
-            ctx.rect(x, y, w, h);
+        for (let i = 0; i < damage.length; i++) {
+            const d = damage[i];
+            if (d[1] === -2 && d[0] >= span[0] && d[0] <= span[1]) {
+                ctx.rect(x, y, w, h);
+                break;
+            }
         }
     });
 
@@ -731,12 +723,23 @@ function clipDamage(
 
             const finalX = drawX + diff + 1;
             const finalWidth = c.width - diff - 1;
-            if (damage.some(d => d[0] === c.sourceIndex && (d[1] === -1 || d[1] === undefined))) {
-                ctx.rect(finalX, groupHeaderHeight, finalWidth, totalHeaderHeight - groupHeaderHeight);
+            for (let i = 0; i < damage.length; i++) {
+                const d = damage[i];
+                if (d[0] === c.sourceIndex && (d[1] === -1 || d[1] === undefined)) {
+                    ctx.rect(finalX, groupHeaderHeight, finalWidth, totalHeaderHeight - groupHeaderHeight);
+                    break;
+                }
             }
 
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
-                const isDamaged = damage.some(d => d[0] === c.sourceIndex && d[1] === row);
+                let isDamaged = false;
+                for (let i = 0; i < damage.length; i++) {
+                    const d = damage[i];
+                    if (d[0] === c.sourceIndex && d[1] === row) {
+                        isDamaged = true;
+                        break;
+                    }
+                }
                 if (isDamaged) {
                     const top = drawY + 1;
                     const bottom = isSticky ? top + rh - 1 : Math.min(top + rh - 1, height - stickyRowHeight);
@@ -803,14 +806,43 @@ function drawCells(
                     : { ...outerTheme, ...groupTheme, ...c.themeOverride };
             let lastToken: {} | undefined;
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
-                if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
-                    return;
+                // if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
+                //     return;
+                // }
+                // if (
+                //     drawRegions.length > 0 &&
+                //     !drawRegions.some(dr => intersectRect(drawX, drawY, c.width, rh, dr.x, dr.y, dr.width, dr.height))
+                // ) {
+                //     return;
+                // }
+
+                // These are dumb versions of the above. I cannot for the life of believe that this matters but this is
+                // the tightest part of the draw loop and the allocations above actually has a very measurable impact
+                // on performance. For the love of all that is unholy please keep checking this again in the future.
+                // As soon as this doesn't have any impact of note go back to the saner looking code. The smoke test
+                // here is to scroll to the bottom of a test case first, then scroll back up while profiling and see
+                // how many major GC collections you get. These allocate a lot of objects.
+                if (damage !== undefined) {
+                    let found = false;
+                    for (let i = 0; i < damage.length; i++) {
+                        const d = damage[i];
+                        if (d[0] === c.sourceIndex && d[1] === row) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) return;
                 }
-                if (
-                    drawRegions.length > 0 &&
-                    !drawRegions.some(dr => intersectRect(drawX, drawY, c.width, rh, dr.x, dr.y, dr.width, dr.height))
-                ) {
-                    return;
+                if (drawRegions.length > 0) {
+                    let found = false;
+                    for (let i = 0; i < drawRegions.length; i++) {
+                        const dr = drawRegions[i];
+                        if (intersectRect(drawX, drawY, c.width, rh, dr.x, dr.y, dr.width, dr.height)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) return;
                 }
 
                 const rowSelected = selectedRows.hasIndex(row);
@@ -895,12 +927,10 @@ function drawCells(
                         hoverValue?.hoverAmount ?? 0,
                         hoverInfo,
                         frameTime,
-                        lastToken
+                        lastToken,
+                        enqueue
                     );
-                    lastToken = drawResult.lastToken;
-                    if (drawResult.enqueue !== undefined) {
-                        enqueue(drawResult.enqueue);
-                    }
+                    lastToken = drawResult;
                 }
 
                 ctx.globalAlpha = 1;

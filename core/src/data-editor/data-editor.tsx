@@ -156,6 +156,11 @@ export interface DataEditorRef {
     getBounds: DataGridRef["getBounds"];
 }
 
+const loadingCell: GridCell = {
+    kind: GridCellKind.Loading,
+    allowOverlay: false,
+};
+
 const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorProps> = (p, forwardedRef) => {
     const [gridSelectionInner, setGridSelectionInner] = React.useState<GridSelection>();
     const [selectedColumnsInner, setSelectedColumnsInner] = React.useState<CompactSelection>(CompactSelection.empty());
@@ -340,10 +345,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             const isRowMarkerCol = col === 0 && hasRowMarkers;
             if (isRowMarkerCol) {
                 if (isTrailing) {
-                    return {
-                        kind: GridCellKind.Loading,
-                        allowOverlay: false,
-                    };
+                    return loadingCell;
                 }
                 return {
                     kind: InnerGridCellKind.Marker,
@@ -1578,7 +1580,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             let result = getGroupDetails?.(group) ?? { name: group };
             if (onGroupHeaderRenamed !== undefined && group !== "") {
                 result = {
-                    ...result,
+                    icon: result.icon,
+                    name: result.name,
+                    overrideTheme: result.overrideTheme,
                     actions: [
                         ...(result.actions ?? []),
                         {
