@@ -105,37 +105,35 @@ class ImageWindowLoader {
         } else {
             const img = imgPool.pop() ?? new Image();
 
-            img.src = url;
-
-            let cancelled = false;
+            let canceled = false;
             const result: LoadResult = {
                 img: undefined,
                 cells: [packColRowToNumber(col, row)],
                 url,
                 cancel: () => {
-                    cancelled = true;
+                    if (canceled) return;
+                    canceled = true;
                     imgPool.unshift(img);
                 },
             };
 
-            const load = async () => {
-                let errored = false;
+            // use request animation time to avoid paying src set costs during draw calls
+            requestAnimationFrame(async () => {
                 try {
+                    img.src = url;
                     await img.decode();
-                } catch {
-                    errored = true;
-                }
-                const toWrite = this.cache[key];
-                if (toWrite !== undefined && !errored && !cancelled) {
-                    toWrite.img = img;
-                    for (const packed of toWrite.cells) {
-                        this.loadedLocations.push(unpackNumberToColRow(packed));
+                    const toWrite = this.cache[key];
+                    if (toWrite !== undefined && !canceled) {
+                        toWrite.img = img;
+                        for (const packed of toWrite.cells) {
+                            this.loadedLocations.push(unpackNumberToColRow(packed));
+                        }
+                        this.sendLoaded();
                     }
-                    this.sendLoaded();
+                } catch (e) {
+                    result.cancel();
                 }
-            };
-
-            void load();
+            });
             this.cache[key] = result;
             return undefined;
         }
