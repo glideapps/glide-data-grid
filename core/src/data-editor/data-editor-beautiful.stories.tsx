@@ -6,6 +6,7 @@ import {
     GridCellKind,
     GridColumn,
     GridColumnIcon,
+    GridMouseEventArgs,
     isEditableGridCell,
     isTextEditableGridCell,
     lossyCopyData,
@@ -19,7 +20,7 @@ import styled, { ThemeProvider } from "styled-components";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { SimpleThemeWrapper } from "../stories/story-utils";
 import { useEventListener } from "../common/utils";
-import { useLayer } from "react-laag";
+import { IBounds, useLayer } from "react-laag";
 import { SpriteMap } from "../data-grid/data-grid-sprites";
 import { DataEditorRef } from "..";
 import range from "lodash/range";
@@ -60,6 +61,10 @@ const BeautifulStyle = styled.div`
     height: 100vh;
 
     font-family: sans-serif;
+
+    &.double {
+        height: 200vh;
+    }
 
     & > h1 {
         font-size: 50px;
@@ -120,12 +125,13 @@ const MoreInfo = styled.p`
 interface BeautifulProps {
     title: string;
     description?: React.ReactNode;
+    className?: string;
 }
 
 const BeautifulWrapper: React.FC<BeautifulProps> = p => {
-    const { title, children, description } = p;
+    const { title, children, description, className } = p;
     return (
-        <BeautifulStyle>
+        <BeautifulStyle className={className}>
             <h1>{title}</h1>
             {description}
             <div className="sizer">
@@ -2252,6 +2258,93 @@ export const Minimap: React.VFC = () => {
     );
 };
 (ColumnGroups as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+const zeroBounds = {
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+    bottom: 0,
+    right: 0,
+};
+
+export const Tooltips: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(6);
+
+    const [tooltip, setTooltip] = React.useState<{ val: string; bounds: IBounds } | undefined>();
+
+    const onItemHovered = React.useCallback((args: GridMouseEventArgs) => {
+        if (args.kind === "cell") {
+            setTooltip({
+                val: `Tooltip for ${args.location[0]}, ${args.location[1]}`,
+                bounds: {
+                    // translate to react-laag types
+                    left: args.bounds.x,
+                    top: args.bounds.y,
+                    width: args.bounds.width,
+                    height: args.bounds.height,
+                    right: args.bounds.x + args.bounds.width,
+                    bottom: args.bounds.y + args.bounds.height,
+                },
+            });
+        } else {
+            setTooltip(undefined);
+        }
+    }, []);
+
+    const isOpen = tooltip !== undefined;
+    const { renderLayer, layerProps } = useLayer({
+        isOpen,
+        triggerOffset: 4,
+        auto: true,
+        container: "portal",
+        trigger: {
+            getBounds: () => tooltip?.bounds ?? zeroBounds,
+        },
+    });
+
+    return (
+        <>
+            <BeautifulWrapper
+                title="Tooltips"
+                className="double"
+                description={
+                    <Description>
+                        Using the <PropName>onItemHovered</PropName> event makes it easy to create tooltips. This story
+                        is intentionally forced to scroll vertically so layout in scrolling documents can be confirmed.
+                    </Description>
+                }>
+                <DataEditor
+                    {...defaultProps}
+                    onItemHovered={onItemHovered}
+                    getCellContent={getCellContent}
+                    columns={cols}
+                    rows={1_000}
+                />
+            </BeautifulWrapper>
+            {isOpen &&
+                renderLayer(
+                    <div
+                        {...layerProps}
+                        style={{
+                            ...layerProps.style,
+                            padding: "8px 12px",
+                            color: "white",
+                            font: "500 13px Inter",
+                            backgroundColor: "rgba(0, 0, 0, 0.85)",
+                            borderRadius: 9,
+                        }}>
+                        {tooltip.val}
+                    </div>
+                )}
+        </>
+    );
+};
+(Tooltips as any).parameters = {
     options: {
         showPanel: false,
     },
