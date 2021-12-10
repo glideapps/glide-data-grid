@@ -1077,6 +1077,7 @@ function drawFocusRing(
     const isStickyRow = lastRowSticky && targetRow === rows - 1;
     const stickRowHeight = lastRowSticky && !isStickyRow ? getRowHeight(rows - 1) - 1 : 0;
 
+    ctx.save();
     ctx.beginPath();
     ctx.rect(0, totalHeaderHeight, width, height - totalHeaderHeight - stickRowHeight);
     ctx.clip();
@@ -1095,7 +1096,6 @@ function drawFocusRing(
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh) => {
                 if (row !== targetRow) return;
 
-                ctx.save();
                 if (clipX > drawX) {
                     const diff = Math.max(0, clipX - drawX);
                     ctx.beginPath();
@@ -1107,10 +1107,13 @@ function drawFocusRing(
                 ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
                 ctx.lineWidth = 1;
                 ctx.stroke();
-                ctx.restore();
+
+                return true;
             });
         }
     );
+
+    ctx.restore();
 }
 
 export function drawGrid(
