@@ -231,8 +231,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const showTrailingBlankRow = onRowAppended !== undefined;
     const lastRowSticky = trailingRowOptions?.sticky === true;
 
-    const gridSelectionOuterMangled: GridSelection | undefined =
-        gridSelectionOuter === undefined
+    const gridSelectionOuterMangled: GridSelection | undefined = React.useMemo(() => {
+        return gridSelectionOuter === undefined
             ? undefined
             : {
                   cell: [gridSelectionOuter.cell[0] + rowMarkerOffset, gridSelectionOuter.cell[1]],
@@ -241,6 +241,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                       x: gridSelectionOuter.range.x + rowMarkerOffset,
                   },
               };
+    }, [gridSelectionOuter, rowMarkerOffset]);
     const gridSelection = gridSelectionOuterMangled ?? gridSelectionInner;
     const setGridSelection = React.useCallback(
         (newVal: GridSelection | undefined) => {
