@@ -96,6 +96,7 @@ export type DrawHeaderCallback = (args: {
     isHovered: boolean;
     hasSelectedCell: boolean;
     spriteManager: SpriteManager;
+    menuBounds: Rectangle;
 }) => boolean;
 
 export enum GridCellKind {

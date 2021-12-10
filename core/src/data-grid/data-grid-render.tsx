@@ -491,6 +491,16 @@ function drawGroups(
     ctx.stroke();
 }
 
+const menuButtonSize = 30;
+export function getHeaderMenuBounds(x: number, y: number, width: number, height: number): Rectangle {
+    return {
+        x: x + width - menuButtonSize, // right align
+        y: Math.max(y, y + height / 2 - menuButtonSize / 2), // center vertically
+        width: menuButtonSize,
+        height: Math.min(menuButtonSize, height),
+    };
+}
+
 function drawHeader(
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -506,6 +516,7 @@ function drawHeader(
     spriteManager: SpriteManager,
     drawHeaderCallback: DrawHeaderCallback | undefined
 ) {
+    const menuBounds = getHeaderMenuBounds(x, y, width, height);
     if (drawHeaderCallback !== undefined) {
         if (
             drawHeaderCallback({
@@ -518,6 +529,7 @@ function drawHeader(
                 isHovered,
                 hasSelectedCell,
                 spriteManager,
+                menuBounds,
             })
         ) {
             return;
@@ -572,8 +584,8 @@ function drawHeader(
 
     if (isHovered && c.hasMenu === true) {
         ctx.beginPath();
-        const triangleX = x + width - 20;
-        const triangleY = y + (height / 2 - 3);
+        const triangleX = menuBounds.x + menuBounds.width / 2 - 5.5;
+        const triangleY = menuBounds.y + menuBounds.height / 2 - 3;
         roundedPoly(
             ctx,
             [

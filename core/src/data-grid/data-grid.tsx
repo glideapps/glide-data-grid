@@ -33,6 +33,7 @@ import {
     drawCell,
     drawGrid,
     getActionBoundsForGroup,
+    getHeaderMenuBounds,
     GroupDetailsCallback,
     makeBuffers,
     pointInRect,
@@ -661,12 +662,23 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     );
 
     const isOverHeaderMenu = React.useCallback(
-        (canvas: HTMLCanvasElement, col: number, clientX: number) => {
+        (canvas: HTMLCanvasElement, col: number, clientX: number, clientY: number) => {
             const header = columns[col];
 
             if (!isDragging && header.hasMenu === true && !(hoveredOnEdge ?? false)) {
                 const headerBounds = getBoundsForItem(canvas, col, -1);
-                if (clientX > headerBounds.x + headerBounds.width - 40) {
+                const menuBounds = getHeaderMenuBounds(
+                    headerBounds.x,
+                    headerBounds.y,
+                    headerBounds.width,
+                    headerBounds.height
+                );
+                if (
+                    clientX > menuBounds.x &&
+                    clientX < menuBounds.x + menuBounds.width &&
+                    clientY > menuBounds.y &&
+                    clientY < menuBounds.y + menuBounds.height
+                ) {
                     return headerBounds;
                 }
             }
@@ -699,7 +711,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
 
-            if (args.kind === "header" && isOverHeaderMenu(canvas, args.location[0], clientX) !== undefined) {
+            if (args.kind === "header" && isOverHeaderMenu(canvas, args.location[0], clientX, clientY) !== undefined) {
                 return;
             } else if (args.kind === "group-header") {
                 const action = groupHeaderActionForEvent(args.group, args.bounds, args.localEventX, args.localEventY);
@@ -740,9 +752,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
 
-            if (args.kind === "header" && isOverHeaderMenu(canvas, args.location[0], clientX)) {
+            if (args.kind === "header" && isOverHeaderMenu(canvas, args.location[0], clientX, clientY)) {
                 const [col] = args.location;
-                const headerBounds = isOverHeaderMenu(canvas, col, clientX);
+                const headerBounds = isOverHeaderMenu(canvas, col, clientX, clientY);
                 if (headerBounds !== undefined) {
                     onHeaderMenuClick?.(col, headerBounds);
                     return;
