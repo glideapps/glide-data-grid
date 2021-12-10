@@ -2,6 +2,7 @@ import * as React from "react";
 
 import {
     CompactSelection,
+    DrawHeaderCallback,
     GridCell,
     GridCellKind,
     GridColumn,
@@ -2257,7 +2258,7 @@ export const Minimap: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(ColumnGroups as any).parameters = {
+(Minimap as any).parameters = {
     options: {
         showPanel: false,
     },
@@ -2345,6 +2346,39 @@ export const Tooltips: React.VFC = () => {
     );
 };
 (Tooltips as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const CustomHeader: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(1000, true, true);
+
+    const drawHeader: DrawHeaderCallback = React.useCallback(args => {
+        const { ctx, rect } = args;
+        ctx.rect(rect.x, rect.y, rect.width, rect.height);
+        const lg = ctx.createLinearGradient(0, rect.y, 0, rect.y + rect.height);
+        lg.addColorStop(0, "#ff00d934");
+        lg.addColorStop(1, "#00a2ff34");
+        ctx.fillStyle = lg;
+        ctx.fill();
+        return false;
+    }, []);
+
+    return (
+        <BeautifulWrapper title="Custom Header" description={<Description>Make it as fancy as you like.</Description>}>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                drawHeader={drawHeader}
+                rows={3000}
+                rowMarkers="both"
+            />
+        </BeautifulWrapper>
+    );
+};
+(CustomHeader as any).parameters = {
     options: {
         showPanel: false,
     },

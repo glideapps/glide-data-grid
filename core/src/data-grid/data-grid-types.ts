@@ -3,6 +3,7 @@ import isArray from "lodash/isArray";
 import { assertNever, proveType } from "../common/support";
 import React from "react";
 import ImageWindowLoader from "../common/image-window-loader";
+import { SpriteManager } from "./data-grid-sprites";
 
 export interface GridSelection {
     readonly cell: readonly [number, number];
@@ -83,6 +84,18 @@ export type DrawCustomCellCallback = (args: {
     hoverY: number | undefined;
     highlighted: boolean;
     imageLoader: ImageWindowLoader;
+}) => boolean;
+
+export type DrawHeaderCallback = (args: {
+    ctx: CanvasRenderingContext2D;
+    column: GridColumn;
+    theme: Theme;
+    rect: Rectangle;
+    hoverAmount: number;
+    isSelected: boolean;
+    isHovered: boolean;
+    hasSelectedCell: boolean;
+    spriteManager: SpriteManager;
 }) => boolean;
 
 export enum GridCellKind {

@@ -24,6 +24,7 @@ import {
     DrawCustomCellCallback,
     CellList,
     Item,
+    DrawHeaderCallback,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -99,6 +100,7 @@ export interface DataGridProps {
     readonly onDragStart?: (args: GridDragEventArgs) => void;
 
     readonly drawCustomCell?: DrawCustomCellCallback;
+    readonly drawHeader?: DrawHeaderCallback;
 
     readonly dragAndDropState?: {
         src: number;
@@ -172,6 +174,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         prelightCells,
         headerIcons,
         verticalBorder,
+        drawHeader,
         drawCustomCell,
         onCellFocused,
     } = p;
@@ -495,6 +498,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getCellContent,
             getGroupDetails ?? (name => ({ name })),
             drawCustomCell,
+            drawHeader,
             prelightCells,
             imageLoader,
             lastBlitData,
@@ -534,6 +538,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         getCellContent,
         getGroupDetails,
         drawCustomCell,
+        drawHeader,
         prelightCells,
         imageLoader,
         spriteManager,

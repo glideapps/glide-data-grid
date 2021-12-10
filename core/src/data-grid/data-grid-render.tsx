@@ -26,6 +26,7 @@ import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
 import { withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
+import { DrawHeaderCallback } from "..";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when scrolling
@@ -490,6 +491,113 @@ function drawGroups(
     ctx.stroke();
 }
 
+function drawHeader(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    c: MappedGridColumn,
+    selected: boolean,
+    theme: Theme,
+    isHovered: boolean,
+    hasSelectedCell: boolean,
+    hoverAmount: number,
+    spriteManager: SpriteManager,
+    drawHeaderCallback: DrawHeaderCallback | undefined
+) {
+    if (drawHeaderCallback !== undefined) {
+        if (
+            drawHeaderCallback({
+                ctx,
+                theme,
+                rect: { x, y, width, height },
+                column: c,
+                isSelected: selected,
+                hoverAmount,
+                isHovered,
+                hasSelectedCell,
+                spriteManager,
+            })
+        ) {
+            return;
+        }
+    }
+    const xPad = 8;
+    const fillStyle = selected ? theme.textHeaderSelected : theme.textHeader;
+
+    let drawX = x + xPad;
+    if (c.icon !== undefined) {
+        let variant: SpriteVariant = selected ? "selected" : "normal";
+        if (c.style === "highlight") {
+            variant = selected ? "selected" : "special";
+        }
+        spriteManager.drawSprite(c.icon, variant, ctx, drawX, y + (height - 20) / 2, 20, theme);
+
+        if (c.overlayIcon !== undefined) {
+            spriteManager.drawSprite(
+                c.overlayIcon,
+                selected ? "selected" : "special",
+                ctx,
+                drawX + 9,
+                y + ((height - 18) / 2 + 6),
+                18,
+                theme
+            );
+        }
+
+        drawX += 26;
+    }
+
+    if (isHovered && c.hasMenu === true && width > 35) {
+        const fadeWidth = 35;
+        const fadeStart = width - fadeWidth;
+        const fadeEnd = width - fadeWidth * 0.7;
+
+        const fadeStartPercent = fadeStart / width;
+        const fadeEndPercent = fadeEnd / width;
+
+        const grad = ctx.createLinearGradient(x, 0, x + width, 0);
+        const trans = withAlpha(fillStyle, 0);
+
+        grad.addColorStop(0, fillStyle);
+        grad.addColorStop(fadeStartPercent, fillStyle);
+        grad.addColorStop(fadeEndPercent, trans);
+        grad.addColorStop(1, trans);
+        ctx.fillStyle = grad;
+    } else {
+        ctx.fillStyle = fillStyle;
+    }
+    ctx.fillText(c.title, drawX, y + height / 2 + 1);
+
+    if (isHovered && c.hasMenu === true) {
+        ctx.beginPath();
+        const triangleX = x + width - 20;
+        const triangleY = y + (height / 2 - 3);
+        roundedPoly(
+            ctx,
+            [
+                {
+                    x: triangleX,
+                    y: triangleY,
+                },
+                {
+                    x: triangleX + 11,
+                    y: triangleY,
+                },
+                {
+                    x: triangleX + 5.5,
+                    y: triangleY + 6,
+                },
+            ],
+            1
+        );
+
+        ctx.fillStyle = fillStyle;
+        ctx.fill();
+    }
+}
+
 function drawGridHeaders(
     ctx: CanvasRenderingContext2D,
     effectiveCols: readonly MappedGridColumn[],
@@ -508,7 +616,8 @@ function drawGridHeaders(
     hoverValues: HoverValues,
     verticalBorder: (col: number) => boolean,
     getGroupDetails: GroupDetailsCallback,
-    damage: CellList | undefined
+    damage: CellList | undefined,
+    drawHeaderCallback: DrawHeaderCallback | undefined
 ) {
     const totalHeaderHeight = headerHeight + groupHeaderHeight;
     if (totalHeaderHeight <= 0) return;
@@ -517,9 +626,6 @@ function drawGridHeaders(
     ctx.fillRect(0, 0, width, totalHeaderHeight);
 
     const [hCol, hRow] = hovered?.[0] ?? [];
-
-    const xPad = 8;
-    const yPad = 2;
 
     const font = `${outerTheme.headerFontStyle} ${outerTheme.fontFamily}`;
     // Assinging the context font too much can be expensive, it can be worth it to minimze this
@@ -556,8 +662,6 @@ function drawGridHeaders(
 
         const hasSelectedCell = selectedCell !== undefined && selectedCell.cell[0] === c.sourceIndex;
 
-        const fillStyle = selected ? theme.textHeaderSelected : theme.textHeader;
-
         const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
 
         const y = enableGroups ? groupHeaderHeight : 0;
@@ -581,81 +685,21 @@ function drawGridHeaders(
             }
         }
 
-        ctx.beginPath();
-        ctx.rect(x + xPad, groupHeaderHeight + yPad, c.width - xPad, headerHeight - yPad * 2);
-        ctx.clip();
-
-        let drawX = x + xPad;
-        if (c.icon !== undefined) {
-            let variant: SpriteVariant = selected ? "selected" : "normal";
-            if (c.style === "highlight") {
-                variant = selected ? "selected" : "special";
-            }
-            spriteManager.drawSprite(c.icon, variant, ctx, drawX, y + (headerHeight - 20) / 2, 20, theme);
-
-            if (c.overlayIcon !== undefined) {
-                spriteManager.drawSprite(
-                    c.overlayIcon,
-                    selected ? "selected" : "special",
-                    ctx,
-                    drawX + 9,
-                    y + ((headerHeight - 18) / 2 + 6),
-                    18,
-                    theme
-                );
-            }
-
-            drawX += 26;
-        }
-
-        if (hoveredBoolean && c.hasMenu === true && c.width > 35) {
-            const fadeWidth = 35;
-            const fadeStart = c.width - fadeWidth;
-            const fadeEnd = c.width - fadeWidth * 0.7;
-
-            const fadeStartPercent = fadeStart / c.width;
-            const fadeEndPercent = fadeEnd / c.width;
-
-            const grad = ctx.createLinearGradient(x, 0, x + c.width, 0);
-            const trans = withAlpha(fillStyle, 0);
-
-            grad.addColorStop(0, fillStyle);
-            grad.addColorStop(fadeStartPercent, fillStyle);
-            grad.addColorStop(fadeEndPercent, trans);
-            grad.addColorStop(1, trans);
-            ctx.fillStyle = grad;
-        } else {
-            ctx.fillStyle = fillStyle;
-        }
-        ctx.fillText(c.title, drawX, y + headerHeight / 2 + 1);
-
-        if (hoveredBoolean && c.hasMenu === true) {
-            ctx.beginPath();
-            const triangleX = x + c.width - 20;
-            const triangleY = y + (headerHeight / 2 - 3);
-            roundedPoly(
-                ctx,
-                [
-                    {
-                        x: triangleX,
-                        y: triangleY,
-                    },
-                    {
-                        x: triangleX + 11,
-                        y: triangleY,
-                    },
-                    {
-                        x: triangleX + 5.5,
-                        y: triangleY + 6,
-                    },
-                ],
-                1
-            );
-
-            ctx.fillStyle = fillStyle;
-            ctx.fill();
-        }
-
+        drawHeader(
+            ctx,
+            x,
+            y,
+            c.width,
+            headerHeight,
+            c,
+            selected,
+            theme,
+            hoveredBoolean,
+            hasSelectedCell,
+            hover,
+            spriteManager,
+            drawHeaderCallback
+        );
         ctx.restore();
     });
 
@@ -1145,6 +1189,7 @@ export function drawGrid(
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
     getGroupDetails: GroupDetailsCallback,
     drawCustomCell: DrawCustomCellCallback | undefined,
+    drawHeaderCallback: DrawHeaderCallback | undefined,
     prelightCells: CellList | undefined,
     imageLoader: ImageWindowLoader,
     lastBlitData: React.MutableRefObject<BlitData>,
@@ -1230,7 +1275,8 @@ export function drawGrid(
             hoverValues,
             verticalBorder,
             getGroupDetails,
-            damage
+            damage,
+            drawHeaderCallback
         );
 
         drawGridLines(
