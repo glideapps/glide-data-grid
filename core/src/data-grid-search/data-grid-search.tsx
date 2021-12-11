@@ -1,10 +1,9 @@
 // import AppIcon from "common/app-icon";
 import * as React from "react";
-import { GridCell, GridCellKind, GridSelection, Rectangle } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, GridSelection, Rectangle, InnerGridCell } from "../data-grid/data-grid-types";
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
 import { assert } from "../common/support";
-import { InnerGridCell } from "..";
 
 // icons
 const upArrow = (

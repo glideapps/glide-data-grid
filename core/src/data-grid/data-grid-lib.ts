@@ -60,7 +60,9 @@ export function getStickyWidth(
     }
 ): number {
     let result = 0;
-    for (const c of remapForDnDState(columns, dndState)) {
+    const remapped = remapForDnDState(columns, dndState);
+    for (let i = 0; i < remapped.length; i++) {
+        const c = remapped[i];
         if (c.sticky) result += c.width;
         else break;
     }

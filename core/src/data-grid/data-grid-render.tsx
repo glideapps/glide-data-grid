@@ -1,8 +1,7 @@
 import ImageWindowLoader from "../common/image-window-loader";
-import {
+import type {
     GridSelection,
-    isInnerOnlyCell,
-    GridCellKind,
+    DrawHeaderCallback,
     GridColumn,
     InnerGridCell,
     Rectangle,
@@ -13,6 +12,7 @@ import {
     CellList,
     GridMouseGroupHeaderEventArgs,
 } from "./data-grid-types";
+import { GridCellKind, isInnerOnlyCell } from "./data-grid-types";
 import { HoverValues } from "./animation-manager";
 import {
     getEffectiveColumns,
@@ -26,7 +26,6 @@ import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
 import { withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
-import { DrawHeaderCallback } from "..";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when scrolling

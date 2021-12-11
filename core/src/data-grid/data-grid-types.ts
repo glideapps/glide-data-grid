@@ -1,4 +1,4 @@
-import { Theme } from "..";
+import { Theme } from "../common/styles";
 import isArray from "lodash/isArray";
 import { assertNever, proveType } from "../common/support";
 import React from "react";

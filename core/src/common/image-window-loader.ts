@@ -1,4 +1,4 @@
-import { Rectangle } from "../data-grid/data-grid-types";
+import type { Rectangle } from "../data-grid/data-grid-types";
 import throttle from "lodash/throttle";
 
 interface LoadResult {
