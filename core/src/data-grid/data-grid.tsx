@@ -35,7 +35,6 @@ import {
     getActionBoundsForGroup,
     getHeaderMenuBounds,
     GroupDetailsCallback,
-    makeBuffers,
     pointInRect,
 } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
@@ -193,7 +192,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
     const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, readonly [number, number]] | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
-    const [buffers] = React.useState(() => makeBuffers());
+    const overlayRef = React.useRef<HTMLCanvasElement | null>(null);
 
     const spriteManager = React.useMemo(() => new SpriteManager(headerIcons), [headerIcons]);
     const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
@@ -468,11 +467,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     hoverInfoRef.current = hoveredItemInfo;
     const draw = React.useCallback(() => {
         const canvas = ref.current;
-        if (canvas === null) return;
+        const overlay = overlayRef.current;
+        if (canvas === null || overlay === null) return;
 
         drawGrid(
             canvas,
-            buffers,
+            {
+                overlay,
+            },
             width,
             height,
             cellXOffset,
@@ -512,7 +514,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             enqueueRef.current
         );
     }, [
-        buffers,
         width,
         height,
         cellXOffset,
@@ -1151,6 +1152,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         return <div style={props} />;
     }, [cellXOffset, dragAndDropState, freezeColumns, mappedColumns, style.height, style.width, translateX]);
 
+    const overlayStyle = React.useMemo<React.CSSProperties>(
+        () => ({
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: style.width,
+        }),
+        [style.width]
+    );
+
     return (
         <>
             <canvas
@@ -1163,6 +1174,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 style={style}>
                 {accessibilityTree}
             </canvas>
+            <canvas ref={overlayRef} style={overlayStyle} />
             {stickyShadow}
         </>
     );

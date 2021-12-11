@@ -1424,11 +1424,11 @@ export function drawGrid(
         targetCtx.restore();
         overlayCtx.restore();
 
-        if (doHeaders && totalHeaderHeight > 0) {
-            targetCtx.imageSmoothingEnabled = false;
-            targetCtx.drawImage(overlayCanvas, 0, 0);
-            targetCtx.imageSmoothingEnabled = true;
-        }
+        // if (doHeaders && totalHeaderHeight > 0) {
+        //     targetCtx.imageSmoothingEnabled = false;
+        //     targetCtx.drawImage(overlayCanvas, 0, 0);
+        //     targetCtx.imageSmoothingEnabled = true;
+        // }
         return;
     }
 
@@ -1499,7 +1499,7 @@ export function drawGrid(
     }
 
     targetCtx.fillStyle = theme.bgCell;
-    targetCtx.fillRect(0, totalHeaderHeight, width, height - totalHeaderHeight);
+    targetCtx.fillRect(0, 0, width, height);
 
     drawCells(
         targetCtx,
@@ -1593,11 +1593,11 @@ export function drawGrid(
     targetCtx.restore();
     overlayCtx.restore();
 
-    if (totalHeaderHeight > 0) {
-        targetCtx.imageSmoothingEnabled = false;
-        targetCtx.drawImage(overlayCanvas, 0, 0);
-        targetCtx.imageSmoothingEnabled = true;
-    }
+    // if (totalHeaderHeight > 0) {
+    //     targetCtx.imageSmoothingEnabled = false;
+    //     targetCtx.drawImage(overlayCanvas, 0, 0);
+    //     targetCtx.imageSmoothingEnabled = true;
+    // }
 }
 
 type WalkRowsCallback = (drawY: number, row: number, rowHeight: number, isSticky: boolean) => boolean | void;
@@ -1737,11 +1737,4 @@ function walkGroups(
 interface Buffers {
     // backbuffer: HTMLCanvasElement;
     overlay: HTMLCanvasElement;
-}
-
-export function makeBuffers(): Buffers {
-    return {
-        // backbuffer: document.createElement("canvas"),
-        overlay: document.createElement("canvas"),
-    };
 }
