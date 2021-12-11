@@ -792,7 +792,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         canBlit.current = last;
     }, []);
 
-    const animationManager = React.useRef(new AnimationManager(onAnimationFrame));
+    const animManagerValue = React.useMemo(() => new AnimationManager(onAnimationFrame), [onAnimationFrame]);
+    const animationManager = React.useRef(animManagerValue);
+    animationManager.current = animManagerValue;
     React.useEffect(() => {
         const am = animationManager.current;
         if (hoveredItem === undefined || hoveredItem[1] < 0) {

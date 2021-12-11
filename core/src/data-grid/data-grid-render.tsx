@@ -1034,6 +1034,7 @@ function drawCells(
 function drawBlanks(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
+    width: number,
     height: number,
     totalHeaderHeight: number,
     translateX: number,
@@ -1057,10 +1058,12 @@ function drawBlanks(
         totalHeaderHeight,
         (c, drawX, colDrawY, clipX, startRow) => {
             if (c !== effectiveColumns[effectiveColumns.length - 1]) return;
+            drawX += c.width;
+            const x = Math.max(drawX, clipX);
+            if (x > width) return;
             ctx.save();
             ctx.beginPath();
-            drawX += c.width;
-            ctx.rect(Math.max(drawX, clipX), totalHeaderHeight + 1, 10000, height - totalHeaderHeight - 1);
+            ctx.rect(x, totalHeaderHeight + 1, 10000, height - totalHeaderHeight - 1);
             ctx.clip();
 
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
@@ -1103,40 +1106,41 @@ function overdrawStickyBoundaries(
     getRowHeight: (row: number) => number,
     theme: Theme
 ) {
-    let drawX = 0;
-    for (const c of effectiveCols) {
-        if (c.sticky) {
-            drawX += c.width;
-        } else {
-            break;
-        }
-    }
-
+    const drawX = getStickyWidth(effectiveCols);
     ctx.beginPath();
+
+    // fill in header color behind header border
     ctx.moveTo(0, totalHeaderHeight + 0.5);
     ctx.lineTo(width, totalHeaderHeight + 0.5);
 
     ctx.strokeStyle = theme.bgHeader;
     ctx.stroke();
 
-    ctx.strokeStyle = theme.borderColor;
-    ctx.stroke();
-
     ctx.beginPath();
 
+    let doCell = false;
     if (drawX !== 0) {
         ctx.moveTo(drawX + 0.5, 0);
         ctx.lineTo(drawX + 0.5, height);
+        doCell = true;
     }
 
     if (lastRowSticky) {
         const h = getRowHeight(rows - 1);
         ctx.moveTo(0, height - h + 0.5);
         ctx.lineTo(width, height - h + 0.5);
+        doCell = true;
     }
 
-    ctx.strokeStyle = theme.bgCell;
-    ctx.stroke();
+    // fill in cell color behind other borders
+    if (doCell) {
+        ctx.strokeStyle = theme.bgCell;
+        ctx.stroke();
+    }
+
+    // overdraw borders for all
+    ctx.moveTo(0, totalHeaderHeight + 0.5);
+    ctx.lineTo(width, totalHeaderHeight + 0.5);
 
     ctx.strokeStyle = theme.borderColor;
     ctx.stroke();
@@ -1194,9 +1198,10 @@ function drawFocusRing(
                 ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
                 ctx.lineWidth = 1;
                 ctx.stroke();
-
                 return true;
             });
+
+            return true;
         }
     );
 
@@ -1423,11 +1428,6 @@ export function drawGrid(
         targetCtx.restore();
         overlayCtx.restore();
 
-        // if (doHeaders && totalHeaderHeight > 0) {
-        //     targetCtx.imageSmoothingEnabled = false;
-        //     targetCtx.drawImage(overlayCanvas, 0, 0);
-        //     targetCtx.imageSmoothingEnabled = true;
-        // }
         return;
     }
 
@@ -1531,6 +1531,7 @@ export function drawGrid(
     drawBlanks(
         targetCtx,
         effectiveCols,
+        width,
         height,
         totalHeaderHeight,
         translateX,
@@ -1588,15 +1589,8 @@ export function drawGrid(
 
     lastBlitData.current = { cellXOffset, cellYOffset, translateX, translateY };
 
-    // remove scale for blit
     targetCtx.restore();
     overlayCtx.restore();
-
-    // if (totalHeaderHeight > 0) {
-    //     targetCtx.imageSmoothingEnabled = false;
-    //     targetCtx.drawImage(overlayCanvas, 0, 0);
-    //     targetCtx.imageSmoothingEnabled = true;
-    // }
 }
 
 type WalkRowsCallback = (drawY: number, row: number, rowHeight: number, isSticky: boolean) => boolean | void;
@@ -1734,6 +1728,5 @@ function walkGroups(
 }
 
 interface Buffers {
-    // backbuffer: HTMLCanvasElement;
     overlay: HTMLCanvasElement;
 }

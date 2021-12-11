@@ -452,11 +452,13 @@ function mergeRanges(input: CompactSelectionRanges) {
     return stack;
 }
 
+let emptyCompactSelection: CompactSelection | undefined;
+
 export class CompactSelection {
-    private constructor(private items: CompactSelectionRanges) {}
+    private constructor(private readonly items: CompactSelectionRanges) {}
 
     static empty = (): CompactSelection => {
-        return new CompactSelection([]);
+        return emptyCompactSelection ?? (emptyCompactSelection = new CompactSelection([]));
     };
 
     static fromSingleSelection = (selection: number | Slice) => {
