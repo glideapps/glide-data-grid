@@ -37,7 +37,6 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         onRowMoved,
         lockColumns,
         getCellContent,
-        ...rest
     } = p;
 
     const { onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns, selectedColumns } = p;
@@ -220,7 +219,42 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
 
     return (
         <DataGrid
-            {...rest}
+            // I know the below could be done with ...rest, but it adds about 2-3% cpu load in the hot loop
+            // This doesn't matter much for most devices but it will matter for low power phones and such.
+            cellXOffset={p.cellXOffset}
+            cellYOffset={p.cellYOffset}
+            columns={p.columns}
+            enableGroups={p.enableGroups}
+            freezeColumns={p.freezeColumns}
+            groupHeaderHeight={p.groupHeaderHeight}
+            headerHeight={p.headerHeight}
+            height={p.height}
+            lastRowSticky={p.lastRowSticky}
+            rowHeight={p.rowHeight}
+            rows={p.rows}
+            verticalBorder={p.verticalBorder}
+            width={p.width}
+            canvasRef={p.canvasRef}
+            className={p.className}
+            disabledRows={p.disabledRows}
+            drawCustomCell={p.drawCustomCell}
+            drawHeader={p.drawHeader}
+            eventTargetRef={p.eventTargetRef}
+            experimental={p.experimental}
+            getGroupDetails={p.getGroupDetails}
+            headerIcons={p.headerIcons}
+            isDraggable={p.isDraggable}
+            onCellFocused={p.onCellFocused}
+            onDragStart={p.onDragStart}
+            onKeyDown={p.onKeyDown}
+            onKeyUp={p.onKeyUp}
+            prelightCells={p.prelightCells}
+            selectedCell={p.selectedCell}
+            selectedColumns={p.selectedColumns}
+            selectedRows={p.selectedRows}
+            translateX={p.translateX}
+            translateY={p.translateY}
+            // handled or mutated props
             getCellContent={getMangledCellContent}
             isResizing={resizeCol !== undefined}
             onHeaderMenuClick={onHeaderMenuClickMangled}
