@@ -840,19 +840,35 @@ function drawCells(
 ): void {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
+    let font: string | undefined;
     walkColumns(
         effectiveColumns,
         cellYOffset,
         translateX,
         translateY,
         totalHeaderHeight,
-        (c, drawX, colDrawY, clipX, startRow) => {
+        (c, drawX, colDrawStartY, clipX, startRow) => {
             const diff = Math.max(0, clipX - drawX);
+
+            const colDrawX = drawX + diff;
+            const colDrawY = totalHeaderHeight + 1;
+            const colWidth = c.width - diff;
+            const colHeight = height - totalHeaderHeight - 1;
+            if (drawRegions.length > 0) {
+                let found = false;
+                for (let i = 0; i < drawRegions.length; i++) {
+                    const dr = drawRegions[i];
+                    if (intersectRect(colDrawX, colDrawY, colWidth, colHeight, dr.x, dr.y, dr.width, dr.height)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) return;
+            }
+
             ctx.save();
-            let font = `${outerTheme.baseFontStyle} ${outerTheme.fontFamily}`;
-            ctx.font = font;
             ctx.beginPath();
-            ctx.rect(drawX + diff, totalHeaderHeight + 1, c.width - diff, height - totalHeaderHeight - 1);
+            ctx.rect(colDrawX, colDrawY, colWidth, colHeight);
             ctx.clip();
 
             const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
@@ -860,139 +876,155 @@ function drawCells(
                 c.themeOverride === undefined && groupTheme === undefined
                     ? outerTheme
                     : { ...outerTheme, ...groupTheme, ...c.themeOverride };
+            const colFont = `${colTheme.baseFontStyle} ${colTheme.fontFamily}`;
+            if (colFont !== font) {
+                font = colFont;
+                ctx.font = colFont;
+            }
             let lastToken: {} | undefined;
-            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
-                // if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
-                //     return;
-                // }
-                // if (
-                //     drawRegions.length > 0 &&
-                //     !drawRegions.some(dr => intersectRect(drawX, drawY, c.width, rh, dr.x, dr.y, dr.width, dr.height))
-                // ) {
-                //     return;
-                // }
+            walkRowsInCol(
+                startRow,
+                colDrawStartY,
+                height,
+                rows,
+                getRowHeight,
+                lastRowSticky,
+                (drawY, row, rh, isSticky) => {
+                    // if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
+                    //     return;
+                    // }
+                    // if (
+                    //     drawRegions.length > 0 &&
+                    //     !drawRegions.some(dr => intersectRect(drawX, drawY, c.width, rh, dr.x, dr.y, dr.width, dr.height))
+                    // ) {
+                    //     return;
+                    // }
 
-                // These are dumb versions of the above. I cannot for the life of believe that this matters but this is
-                // the tightest part of the draw loop and the allocations above actually has a very measurable impact
-                // on performance. For the love of all that is unholy please keep checking this again in the future.
-                // As soon as this doesn't have any impact of note go back to the saner looking code. The smoke test
-                // here is to scroll to the bottom of a test case first, then scroll back up while profiling and see
-                // how many major GC collections you get. These allocate a lot of objects.
-                if (damage !== undefined) {
-                    let found = false;
-                    for (let i = 0; i < damage.length; i++) {
-                        const d = damage[i];
-                        if (d[0] === c.sourceIndex && d[1] === row) {
-                            found = true;
-                            break;
+                    // These are dumb versions of the above. I cannot for the life of believe that this matters but this is
+                    // the tightest part of the draw loop and the allocations above actually has a very measurable impact
+                    // on performance. For the love of all that is unholy please keep checking this again in the future.
+                    // As soon as this doesn't have any impact of note go back to the saner looking code. The smoke test
+                    // here is to scroll to the bottom of a test case first, then scroll back up while profiling and see
+                    // how many major GC collections you get. These allocate a lot of objects.
+                    if (damage !== undefined) {
+                        let found = false;
+                        for (let i = 0; i < damage.length; i++) {
+                            const d = damage[i];
+                            if (d[0] === c.sourceIndex && d[1] === row) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) return;
+                    }
+                    if (drawRegions.length > 0) {
+                        let found = false;
+                        for (let i = 0; i < drawRegions.length; i++) {
+                            const dr = drawRegions[i];
+                            if (intersectRect(drawX, drawY, c.width, rh, dr.x, dr.y, dr.width, dr.height)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) return;
+                    }
+
+                    const rowSelected = selectedRows.hasIndex(row);
+                    const rowDisabled = disabledRows.hasIndex(row);
+
+                    const cell: InnerGridCell =
+                        row < rows
+                            ? getCellContent([c.sourceIndex, row])
+                            : {
+                                  kind: GridCellKind.Loading,
+                                  allowOverlay: false,
+                              };
+
+                    const theme = cell.themeOverride === undefined ? colTheme : { ...colTheme, ...cell.themeOverride };
+
+                    ctx.beginPath();
+
+                    const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
+                    let highlighted =
+                        isFocused || (!isSticky && (rowSelected || selectedColumns.hasIndex(c.sourceIndex)));
+
+                    if (selectedCell?.range !== undefined) {
+                        const { range } = selectedCell;
+                        if (
+                            c.sourceIndex >= range.x &&
+                            c.sourceIndex < range.x + range.width &&
+                            row >= range.y &&
+                            row < range.y + range.height
+                        ) {
+                            highlighted = true;
                         }
                     }
-                    if (!found) return;
-                }
-                if (drawRegions.length > 0) {
-                    let found = false;
-                    for (let i = 0; i < drawRegions.length; i++) {
-                        const dr = drawRegions[i];
-                        if (intersectRect(drawX, drawY, c.width, rh, dr.x, dr.y, dr.width, dr.height)) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) return;
-                }
 
-                const rowSelected = selectedRows.hasIndex(row);
-                const rowDisabled = disabledRows.hasIndex(row);
-
-                const cell: InnerGridCell =
-                    row < rows
-                        ? getCellContent([c.sourceIndex, row])
-                        : {
-                              kind: GridCellKind.Loading,
-                              allowOverlay: false,
-                          };
-
-                const theme = cell.themeOverride === undefined ? colTheme : { ...colTheme, ...cell.themeOverride };
-
-                ctx.beginPath();
-
-                const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
-                let highlighted = isFocused || (!isSticky && (rowSelected || selectedColumns.hasIndex(c.sourceIndex)));
-
-                if (selectedCell?.range !== undefined) {
-                    const { range } = selectedCell;
-                    if (
-                        c.sourceIndex >= range.x &&
-                        c.sourceIndex < range.x + range.width &&
-                        row >= range.y &&
-                        row < range.y + range.height
-                    ) {
-                        highlighted = true;
-                    }
-                }
-
-                if (isSticky || theme.bgCell !== outerTheme.bgCell) {
-                    ctx.fillStyle = theme.bgCell;
-                    ctx.fillRect(drawX, drawY, c.width, rh);
-                    lastToken = undefined;
-                }
-
-                if (highlighted || rowDisabled) {
-                    if (rowDisabled) {
-                        ctx.fillStyle = theme.bgHeader;
-                        ctx.fillRect(drawX, drawY, c.width, rh);
-                    }
-                    if (highlighted) {
-                        ctx.fillStyle = theme.accentLight;
-                        ctx.fillRect(drawX, drawY, c.width, rh);
-                    }
-                    lastToken = undefined;
-                } else {
-                    if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
-                        ctx.fillStyle = theme.bgSearchResult;
+                    if (isSticky || theme.bgCell !== outerTheme.bgCell) {
+                        ctx.fillStyle = theme.bgCell;
                         ctx.fillRect(drawX, drawY, c.width, rh);
                         lastToken = undefined;
                     }
-                }
 
-                if (cell.style === "faded") {
-                    ctx.globalAlpha = 0.6;
-                }
-
-                const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
-
-                if (c.width > 10) {
-                    const cellFont = `${theme.baseFontStyle} ${theme.fontFamily}`;
-                    if (cellFont !== font) {
-                        ctx.font = cellFont;
-                        font = cellFont;
+                    if (highlighted || rowDisabled) {
+                        if (rowDisabled) {
+                            ctx.fillStyle = theme.bgHeader;
+                            ctx.fillRect(drawX, drawY, c.width, rh);
+                        }
+                        if (highlighted) {
+                            ctx.fillStyle = theme.accentLight;
+                            ctx.fillRect(drawX, drawY, c.width, rh);
+                        }
+                        lastToken = undefined;
+                    } else {
+                        if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
+                            ctx.fillStyle = theme.bgSearchResult;
+                            ctx.fillRect(drawX, drawY, c.width, rh);
+                            lastToken = undefined;
+                        }
                     }
-                    const drawResult = drawCell(
-                        ctx,
-                        row,
-                        cell,
-                        c.sourceIndex,
-                        drawX,
-                        drawY,
-                        c.width,
-                        rh,
-                        highlighted,
-                        theme,
-                        drawCustomCell,
-                        imageLoader,
-                        hoverValue?.hoverAmount ?? 0,
-                        hoverInfo,
-                        frameTime,
-                        lastToken,
-                        enqueue
-                    );
-                    lastToken = drawResult;
-                }
 
-                ctx.globalAlpha = 1;
-                toDraw--;
-                return toDraw <= 0;
-            });
+                    if (cell.style === "faded") {
+                        ctx.globalAlpha = 0.6;
+                    }
+
+                    const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
+
+                    if (c.width > 10) {
+                        if (theme !== colTheme) {
+                            const cellFont = `${theme.baseFontStyle} ${theme.fontFamily}`;
+                            if (cellFont !== font) {
+                                ctx.font = cellFont;
+                                font = cellFont;
+                            }
+                        }
+                        const drawResult = drawCell(
+                            ctx,
+                            row,
+                            cell,
+                            c.sourceIndex,
+                            drawX,
+                            drawY,
+                            c.width,
+                            rh,
+                            highlighted,
+                            theme,
+                            drawCustomCell,
+                            imageLoader,
+                            hoverValue?.hoverAmount ?? 0,
+                            hoverInfo,
+                            frameTime,
+                            lastToken,
+                            enqueue
+                        );
+                        lastToken = drawResult;
+                    }
+
+                    ctx.globalAlpha = 1;
+                    toDraw--;
+                    return toDraw <= 0;
+                }
+            );
 
             ctx.restore();
             return toDraw <= 0;
