@@ -201,11 +201,12 @@ export function drawWithLastUpdate(
     args: BaseDrawArgs,
     lastUpdate: number | undefined,
     frameTime: number,
-    draw: () => void
+    draw: (forcePrep: boolean) => void
 ) {
     const { ctx, x, y, w: width, h: height, theme } = args;
     let progress = Number.MAX_SAFE_INTEGER;
     const animTime = 500;
+    let forcePrep = false;
     if (lastUpdate !== undefined) {
         progress = frameTime - lastUpdate;
 
@@ -215,10 +216,11 @@ export function drawWithLastUpdate(
             ctx.fillStyle = theme.bgSearchResult;
             ctx.fillRect(x, y, width, height);
             ctx.globalAlpha = 1;
+            forcePrep = true;
         }
     }
 
-    draw();
+    draw(forcePrep);
 
     return progress < animTime;
 }

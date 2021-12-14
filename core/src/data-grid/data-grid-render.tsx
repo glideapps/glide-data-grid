@@ -92,7 +92,7 @@ export function drawCell(
     }
     let result: {} | undefined = undefined;
     const args = { ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader };
-    const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, () => {
+    const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, forcePrep => {
         const drawn = isInnerOnlyCell(cell)
             ? false
             : drawCustomCell?.({
@@ -110,7 +110,7 @@ export function drawCell(
               }) === true;
         if (!drawn && cell.kind !== GridCellKind.Custom) {
             const r = CellRenderers[cell.kind];
-            if (lastToken !== r) {
+            if (lastToken !== r || forcePrep) {
                 r.renderPrep?.(args);
             }
             r.render(args);
