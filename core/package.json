@@ -8,7 +8,7 @@
     "require": "./dist/cjs/index.js"
   },
   "files": [
-    "*"
+    "dist"
   ],
   "types": "dist/ts/index.d.ts",
   "scripts": {

@@ -9,7 +9,7 @@
     "require": "./dist/cjs/index.js"
   },
   "files": [
-    "*"
+    "dist"
   ],
   "scripts": {
     "build": "npm run build-js && npm run build-types",
