@@ -1580,12 +1580,15 @@ export function drawGrid(
         rows
     );
 
-    imageLoader?.setWindow({
-        x: cellXOffset,
-        y: cellYOffset,
-        width: effectiveCols.length,
-        height: 100, // FIXME: row - cellYOffset,
-    });
+    imageLoader?.setWindow(
+        {
+            x: cellXOffset,
+            y: cellYOffset,
+            width: effectiveCols.length,
+            height: 100, // FIXME: row - cellYOffset,
+        },
+        freezeColumns
+    );
 
     lastBlitData.current = { cellXOffset, cellYOffset, translateX, translateY };
 

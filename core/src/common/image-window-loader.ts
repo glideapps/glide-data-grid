@@ -41,9 +41,12 @@ class ImageWindowLoader {
         height: 0,
     };
 
+    private freezeCols: number = 0;
+
     private isInWindow = (packed: number) => {
         const col = unpackCol(packed);
         const row = unpackRow(packed, col);
+        if (col < this.freezeCols) return true;
         const w = this.window;
         return col >= w.x && col <= w.x + w.width && row >= w.y && row <= w.y + w.height;
     };
@@ -83,15 +86,17 @@ class ImageWindowLoader {
         }
     };
 
-    public setWindow(window: Rectangle): void {
+    public setWindow(window: Rectangle, freezeCols: number): void {
         if (
             this.window.x === window.x &&
             this.window.y === window.y &&
             this.window.width === window.width &&
-            this.window.height === window.height
+            this.window.height === window.height &&
+            this.freezeCols === freezeCols
         )
             return;
         this.window = window;
+        this.freezeCols = freezeCols;
         this.clearOutOfWindow();
     }
 
