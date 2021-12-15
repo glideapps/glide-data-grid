@@ -84,12 +84,13 @@ export interface DataGridProps {
     readonly disabledRows?: CompactSelection;
 
     readonly onItemHovered?: (args: GridMouseEventArgs) => void;
+    readonly onMouseMove: (args: GridMouseEventArgs) => void;
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
     readonly onMouseUp?: (args: GridMouseEventArgs, isOutside: boolean) => void;
 
     readonly onCellFocused?: (args: readonly [number, number]) => void;
 
-    readonly onMouseMove?: (event: MouseEvent) => void;
+    readonly onMouseMoveRaw?: (event: MouseEvent) => void;
 
     readonly onKeyDown?: (event: GridKeyEventArgs) => void;
     readonly onKeyUp?: (event: GridKeyEventArgs) => void;
@@ -157,6 +158,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         lastRowSticky,
         onMouseDown,
         onMouseUp,
+        onMouseMoveRaw,
         onMouseMove,
         onItemHovered,
         dragAndDropState,
@@ -837,9 +839,18 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             setHoveredOnEdge(args.kind === "header" && args.isEdge && allowResize === true);
 
-            onMouseMove?.(ev);
+            onMouseMoveRaw?.(ev);
+            onMouseMove(args);
         },
-        [getMouseArgsForPosition, allowResize, onMouseMove, onItemHovered, getCellContent, damageInternal]
+        [
+            getMouseArgsForPosition,
+            allowResize,
+            onMouseMoveRaw,
+            onMouseMove,
+            onItemHovered,
+            getCellContent,
+            damageInternal,
+        ]
     );
     useEventListener("mousemove", onMouseMoveImpl, window, true);
 

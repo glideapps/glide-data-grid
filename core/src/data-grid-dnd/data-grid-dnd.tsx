@@ -3,7 +3,7 @@ import * as React from "react";
 import DataGrid, { DataGridProps, DataGridRef } from "../data-grid/data-grid";
 import { GridColumn, GridMouseEventArgs, Rectangle } from "../data-grid/data-grid-types";
 
-type Props = Omit<DataGridProps, "dragAndDropState" | "isResizing" | "isDragging" | "onMouseMove" | "allowResize">;
+type Props = Omit<DataGridProps, "dragAndDropState" | "isResizing" | "isDragging" | "onMouseMoveRaw" | "allowResize">;
 
 export interface DataGridDndProps extends Props {
     readonly onRowMoved?: (startIndex: number, endIndex: number) => void;
@@ -226,6 +226,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             columns={p.columns}
             enableGroups={p.enableGroups}
             freezeColumns={p.freezeColumns}
+            onMouseMove={p.onMouseMove}
             groupHeaderHeight={p.groupHeaderHeight}
             headerHeight={p.headerHeight}
             height={p.height}
@@ -264,7 +265,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             allowResize={onColumnResized !== undefined}
             onMouseUp={onMouseUpImpl}
             dragAndDropState={dragOffset}
-            onMouseMove={onMouseMove}
+            onMouseMoveRaw={onMouseMove}
             ref={gridRef}
         />
     );

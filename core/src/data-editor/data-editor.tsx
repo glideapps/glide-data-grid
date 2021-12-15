@@ -60,6 +60,7 @@ type Props = Omit<
     | "onKeyUp"
     | "onMouseDown"
     | "onMouseUp"
+    | "onMouseMove"
     | "freezeColumns"
     | "onSearchResultsChanged"
     | "onVisibleRegionChanged"
@@ -109,6 +110,7 @@ export interface DataEditorProps extends Props {
     readonly rowMarkerWidth?: number;
 
     readonly rowHeight?: DataGridSearchProps["rowHeight"];
+    readonly onMouseMove?: DataGridSearchProps["onMouseMove"];
 
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
@@ -205,6 +207,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         drawCustomCell,
         onDeleteRows,
         onDragStart,
+        onMouseMove,
         onPaste,
         groupHeaderHeight = headerHeight,
         freezeColumns = 0,
@@ -812,6 +815,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [onDragStart, rowMarkerOffset]
     );
 
+    const onMouseMoveImpl = React.useCallback(
+        (args: GridMouseEventArgs) => {
+            const a: GridMouseEventArgs = {
+                ...args,
+                location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
+            };
+            onMouseMove?.(a);
+        },
+        [onMouseMove, rowMarkerOffset]
+    );
+
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
             if (mouseState.current !== undefined && gridSelection !== undefined && !isDraggable) {
@@ -873,12 +887,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
 
-            onItemHovered?.(args);
+            onItemHovered?.({ ...args, location: [args.location[0] - rowMarkerOffset, args.location[1]] as any });
         },
         [
             gridSelection,
             isDraggable,
             onItemHovered,
+            rowMarkerOffset,
             lastRowSticky,
             rows,
             hasRowMarkers,
@@ -1656,6 +1671,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 onDragStart={onDragStartImpl}
                 onHeaderMenuClick={onHeaderMenuClickInner}
                 onItemHovered={onItemHoveredImpl}
+                onMouseMove={onMouseMoveImpl}
                 onKeyDown={onKeyDown}
                 onMouseDown={onMouseDown}
                 onMouseUp={onMouseUp}

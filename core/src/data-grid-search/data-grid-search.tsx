@@ -395,6 +395,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 lastRowSticky={p.lastRowSticky}
                 lockColumns={p.lockColumns}
                 rowHeight={p.rowHeight}
+                onMouseMove={p.onMouseMove}
                 rows={p.rows}
                 verticalBorder={p.verticalBorder}
                 canvasRef={p.canvasRef}
