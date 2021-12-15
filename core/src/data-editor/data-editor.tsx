@@ -1134,6 +1134,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
 
                 if (isDeleteKey && selectedRows.length !== 0 && gridSelection === undefined) {
+                    event.cancel();
                     focus();
                     onDeleteRows?.(Array.from(selectedRows));
                     setSelectedRows(CompactSelection.empty());
@@ -1163,6 +1164,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
 
                 if (isDeleteKey && selectedColumns.length > 0 && gridSelection === undefined) {
+                    event.cancel();
                     for (const col of selectedColumns) {
                         deleteRange({
                             x: col,
@@ -1249,6 +1251,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         col++;
                     }
                 } else if (isDeleteKey) {
+                    event.cancel();
                     const range = gridSelection.range;
                     deleteRange(range);
                 } else if (

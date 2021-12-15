@@ -56,7 +56,6 @@ const targetSearchTimeMS = 10;
 
 const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const {
-        onKeyDown,
         getCellsForSelection,
         onSearchResultsChanged,
         searchColOffset,
@@ -433,8 +432,8 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 smoothScrollY={p.smoothScrollY}
                 translateX={p.translateX}
                 translateY={p.translateY}
+                onKeyDown={p.onKeyDown}
                 // handled props
-                onKeyDown={onKeyDown}
                 prelightCells={searchResults}
             />
             {searchbox}
