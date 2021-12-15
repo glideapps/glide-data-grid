@@ -27,6 +27,7 @@ export function Simplenotest() {
             height={500}
             cellXOffset={0}
             cellYOffset={0}
+            onMouseMove={() => undefined}
             groupHeaderHeight={34}
             enableGroups={false}
             rows={1000}
@@ -59,6 +60,7 @@ export function SelectedCellnotest() {
             width={600}
             height={500}
             cellXOffset={0}
+            onMouseMove={() => undefined}
             cellYOffset={0}
             groupHeaderHeight={34}
             enableGroups={false}
@@ -90,6 +92,7 @@ export function SelectedRownotest() {
     let x = 0;
     return (
         <DataGrid
+            onMouseMove={() => undefined}
             width={600}
             height={500}
             cellXOffset={0}
@@ -124,6 +127,7 @@ export const SelectedColumnnotest = () => {
     let x = 0;
     return (
         <DataGrid
+            onMouseMove={() => undefined}
             width={600}
             height={500}
             cellXOffset={0}
