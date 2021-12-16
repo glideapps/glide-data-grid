@@ -13,7 +13,7 @@ jobs:
     publish-core:
         defaults:
             run:
-                working-directory: ./core
+                working-directory: ./packages/core
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v1
@@ -30,11 +30,11 @@ jobs:
               with:
                   token: ${{ secrets.NPM_TOKEN }}
                   access: public
-                  package: ./core/package.json
+                  package: ./packages/core/package.json
     publish-cells:
         defaults:
             run:
-                working-directory: ./cells
+                working-directory: ./packages/cells
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v1
@@ -51,4 +51,4 @@ jobs:
               with:
                   token: ${{ secrets.NPM_TOKEN }}
                   access: public
-                  package: ./cells/package.json
+                  package: ./packages/cells/package.json

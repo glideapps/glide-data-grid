@@ -4,7 +4,7 @@ set -e
 
 for DIR in core cells
 do
-    pushd $DIR
+    pushd packages/$DIR
     npm run lint && npm run build
     popd
 done

@@ -11,14 +11,14 @@ function update {
     mv $2.tmp $2
 }
 
-pushd core
+pushd packages/core
 npm ci
 update ".version = $VERSION" package.json
 npm run build
 popd
 
 
-pushd cells
+pushd packages/cells
 update ".dependencies.\"@glideapps/glide-data-grid\" = \"3.1.0-beta5\"" package.json
 npm ci
 update ".dependencies.\"@glideapps/glide-data-grid\" = $VERSION" package.json
