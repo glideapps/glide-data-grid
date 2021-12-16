@@ -44,7 +44,7 @@
   "bugs": {
     "url": "https://github.com/glideapps/glide-data-grid/issues"
   },
-  "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/core",
+  "homepage": "https://grid.glideapps.com",
   "dependencies": {
     "react-number-format": "^4.4.1",
     "react-virtualized-auto-sizer": "^1.0.2"

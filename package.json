@@ -6,7 +6,7 @@
         "build": "./build-all.sh",
         "storybook": "start-storybook -p 9009 -s public",
         "build-storybook": "build-storybook -o storybook-build/",
-        "test": "cd core && npm run test"
+        "test": "cd core && npm run test --"
     },
     "author": "Glide",
     "license": "MIT",
