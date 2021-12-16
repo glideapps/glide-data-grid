@@ -332,6 +332,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 onClick={cancelEvent}>
                 <div className="search-bar-inner">
                     <input
+                        data-testid="search-input"
                         ref={inputRef}
                         onChange={onSearchChange}
                         value={searchString}
@@ -362,7 +363,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 {searchStatus !== undefined && (
                     <>
                         <div className="search-status">
-                            <div>{resultString}</div>
+                            <div data-testid="search-result-area">{resultString}</div>
                         </div>
                         <div className="search-progress" style={progressStyle} />
                     </>

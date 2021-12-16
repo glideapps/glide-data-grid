@@ -658,6 +658,47 @@ describe("data-editor", () => {
         expect(spy).toBeCalled();
     });
 
+    test("Trigger search results", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} showSearch={true} onSearchClose={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        jest.useFakeTimers();
+        const searchInput = screen.getByTestId("search-input");
+        fireEvent.change(searchInput, {
+            target: {
+                value: "1, 2",
+            },
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        const searchResult = screen.getByTestId("search-result-area");
+
+        expect(searchResult).toHaveTextContent("111 results");
+
+        fireEvent.keyDown(searchInput, {
+            key: "Enter",
+        });
+        fireEvent.keyDown(searchInput, {
+            shiftKey: true,
+            key: "Enter",
+        });
+        fireEvent.keyDown(searchInput, {
+            key: "Escape",
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(spy).toHaveBeenCalled();
+    });
+
     test("Copy/paste", async () => {
         const spy = jest.fn();
         const pasteSpy = jest.fn((_target: any, _values: any) => true);
