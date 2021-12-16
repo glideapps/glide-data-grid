@@ -1,3 +1,7 @@
+# 3.2.1 Release Notes
+
+Correctness fix to avoid calling for out of range cells.
+
 # 3.2.0 Release Notes
 
 ## 🥳 New Features / Improvements
