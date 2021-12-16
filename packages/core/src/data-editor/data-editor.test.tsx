@@ -678,4 +678,25 @@ describe("data-editor", () => {
         await new Promise(resolve => setTimeout(resolve, 10));
         expect(pasteSpy).toBeCalledWith([1, 3], [["1, 2", "2, 2"]]);
     });
+
+    test("Hover header does not fetch invalid cell", async () => {
+        const spy = jest.fn(basicProps.getCellContent);
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} rowMarkers="both" getCellContent={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        spy.mockClear();
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        expect(spy).not.toHaveBeenCalled();
+    });
 });
