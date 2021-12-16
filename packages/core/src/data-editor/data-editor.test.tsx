@@ -460,6 +460,10 @@ describe("data-editor", () => {
             keyCode: 74,
         });
 
+        fireEvent.keyUp(canvas, {
+            keyCode: 74,
+        });
+
         const overlay = screen.getByDisplayValue("j");
         expect(overlay).toBeInTheDocument();
 
