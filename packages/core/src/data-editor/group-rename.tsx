@@ -33,6 +33,7 @@ export const GroupRename: React.VFC<Props> = p => {
             `}
             onClickOutside={onClose}>
             <input
+                data-testid="group-rename-input"
                 css={css`
                     flex-grow: 1;
                     border: none;

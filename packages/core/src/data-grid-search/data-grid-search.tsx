@@ -351,7 +351,10 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         {downArrow}
                     </button>
                     {onSearchClose !== undefined && (
-                        <button tabIndex={showSearch ? undefined : -1} onClick={onClose}>
+                        <button
+                            data-testid="search-close-button"
+                            tabIndex={showSearch ? undefined : -1}
+                            onClick={onClose}>
                             {closeX}
                         </button>
                     )}
