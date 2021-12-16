@@ -1,8 +1,9 @@
-import { Theme } from "..";
+import { Theme } from "../common/styles";
 import isArray from "lodash/isArray";
 import { assertNever, proveType } from "../common/support";
 import React from "react";
 import ImageWindowLoader from "../common/image-window-loader";
+import { SpriteManager } from "./data-grid-sprites";
 
 export interface GridSelection {
     readonly cell: readonly [number, number];
@@ -28,25 +29,27 @@ interface BaseGridMouseEventArgs {
     readonly isEdge: boolean;
 }
 
-interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
+export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "cell";
     readonly location: readonly [number, number];
     readonly bounds: Rectangle;
 }
 
-interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
+export interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "header";
-    readonly location: readonly [number, undefined];
+    readonly location: readonly [number, -1];
     readonly bounds: Rectangle;
+    readonly group: string;
 }
 
-interface GridMouseGroupHeaderEventArgs extends BaseGridMouseEventArgs {
+export interface GridMouseGroupHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "group-header";
-    readonly location: readonly [number, undefined];
+    readonly location: readonly [number, -2];
     readonly bounds: Rectangle;
+    readonly group: string;
 }
 
-interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {
+export interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {
     readonly kind: "out-of-bounds";
     readonly location: readonly [number, number];
     readonly direction: readonly [-1 | 0 | 1, -1 | 0 | 1];
@@ -81,6 +84,19 @@ export type DrawCustomCellCallback = (args: {
     hoverY: number | undefined;
     highlighted: boolean;
     imageLoader: ImageWindowLoader;
+}) => boolean;
+
+export type DrawHeaderCallback = (args: {
+    ctx: CanvasRenderingContext2D;
+    column: GridColumn;
+    theme: Theme;
+    rect: Rectangle;
+    hoverAmount: number;
+    isSelected: boolean;
+    isHovered: boolean;
+    hasSelectedCell: boolean;
+    spriteManager: SpriteManager;
+    menuBounds: Rectangle;
 }) => boolean;
 
 export enum GridCellKind {
@@ -128,6 +144,8 @@ export enum GridColumnIcon {
     RowOwnerOverlay = "rowOwnerOverlay",
     ProtectedColumnOverlay = "protectedColumnOverlay",
 }
+
+export type Item = readonly [number, number];
 
 export interface GridColumn {
     readonly width: number;
@@ -280,7 +298,7 @@ export type GridCell =
 type InnerOnlyGridCell = NewRowCell | MarkerCell;
 export type InnerGridCell = GridCell | InnerOnlyGridCell;
 
-export type CellList = readonly (readonly [number, number | undefined])[];
+export type CellList = readonly Item[];
 
 export interface Rectangle {
     x: number;
@@ -434,11 +452,13 @@ function mergeRanges(input: CompactSelectionRanges) {
     return stack;
 }
 
+let emptyCompactSelection: CompactSelection | undefined;
+
 export class CompactSelection {
-    private constructor(private items: CompactSelectionRanges) {}
+    private constructor(private readonly items: CompactSelectionRanges) {}
 
     static empty = (): CompactSelection => {
-        return new CompactSelection([]);
+        return emptyCompactSelection ?? (emptyCompactSelection = new CompactSelection([]));
     };
 
     static fromSingleSelection = (selection: number | Slice) => {

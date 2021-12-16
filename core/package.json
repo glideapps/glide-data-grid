@@ -1,15 +1,27 @@
 {
   "name": "@glideapps/glide-data-grid",
-  "version": "3.1.2",
+  "version": "3.2.0",
   "description": "Super fast, pure canvas Data Grid Editor",
+  "sideEffects": false,
+  "type": "module",
   "main": "dist/js/index.js",
+  "exports": {
+    "import": "./dist/js/index.js",
+    "require": "./dist/cjs/index.js"
+  },
+  "files": [
+    "dist"
+  ],
   "types": "dist/ts/index.d.ts",
   "scripts": {
-    "build": "npm run build-js && npm run build-types",
-    "build-js": "babel --config-file ../babel.config.json ./src -d dist/js --ignore 'src/setupTests.ts','src/docs','**/*.test.ts','**/*.test.tsx','**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx",
+    "build": "npm run build-js && npm run build-cjs && npm run build-types",
+    "build-js": "babel --config-file ../babel.config.json ./src -d dist/js --ignore 'src/setupTests.ts','src/docs','**/*.test.ts','**/*.test.tsx','**/*.stories.tsx','src/stories/*.tsx','**/*.d.ts' --extensions .ts,.tsx",
+    "build-cjs": "babel --config-file ../babel.cjs.json ./src -d dist/cjs --ignore 'src/setupTests.ts','src/docs','**/*.test.ts','**/*.test.tsx','**/*.stories.tsx','src/stories/*.tsx','**/*.d.ts' --extensions .ts,.tsx",
     "build-types": "tsc -p tsconfig.types.json",
-    "lint": "eslint src --ext .ts,.tsx",
-    "test": "jest"
+    "lint": "npm run cycle-check && eslint src --ext .ts,.tsx",
+    "cycle-check": "ts-helper -p ./tsconfig.json -r ./src/index.ts -c",
+    "test": "jest",
+    "check-package": "package-check"
   },
   "repository": {
     "type": "git",
@@ -47,9 +59,12 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
+    "@glideapps/ts-helper": "0.0.5",
+    "@skypack/package-check": "^0.2.2",
     "eslint": "^7.12.1",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-react": "^7.21.5",
-    "eslint-plugin-react-hooks": "^4.2.0"
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "jest": "^27.4.2"
   }
 }

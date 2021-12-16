@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
-import { ImageOverlayEditor } from "../..";
+import ImageOverlayEditor from "../../data-grid-overlay-editor/private/image-overlay-editor";
 import { drawImage } from "../data-grid-lib";
 import { GridCellKind, ImageCell } from "../data-grid-types";
 import { InternalCellRenderer } from "./cell-types";

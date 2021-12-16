@@ -21,6 +21,10 @@ export function useMappedColumns(columns: readonly GridColumn[], freezeColumns: 
     );
 }
 
+export function isGroupEqual(left: string | undefined, right: string | undefined): boolean {
+    return (left ?? "") === (right ?? "");
+}
+
 function remapForDnDState(
     columns: readonly MappedGridColumn[],
     dndState?: {
@@ -56,7 +60,9 @@ export function getStickyWidth(
     }
 ): number {
     let result = 0;
-    for (const c of remapForDnDState(columns, dndState)) {
+    const remapped = remapForDnDState(columns, dndState);
+    for (let i = 0; i < remapped.length; i++) {
+        const c = remapped[i];
         if (c.sticky) result += c.width;
         else break;
     }
@@ -135,10 +141,9 @@ export function getRowIndexForY(
     translateY: number,
     lastRowSticky: boolean
 ): number | undefined {
-    if (hasGroups && targetY <= groupHeaderHeight) return -2;
-    if (targetY <= headerHeight) return -1;
-
     const totalHeaderHeight = headerHeight + groupHeaderHeight;
+    if (hasGroups && targetY <= groupHeaderHeight) return -2;
+    if (targetY <= totalHeaderHeight) return -1;
 
     const lastRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows - 1);
     if (lastRowSticky && targetY > height - lastRowHeight) {
@@ -167,6 +172,7 @@ let metricsSize = 0;
 let metricsCache: Record<string, TextMetrics | undefined> = {};
 
 async function clearCacheOnLoad() {
+    if (document?.fonts?.ready === undefined) return;
     await document.fonts.ready;
     metricsSize = 0;
     metricsCache = {};
@@ -195,11 +201,12 @@ export function drawWithLastUpdate(
     args: BaseDrawArgs,
     lastUpdate: number | undefined,
     frameTime: number,
-    draw: () => void
+    draw: (forcePrep: boolean) => void
 ) {
     const { ctx, x, y, w: width, h: height, theme } = args;
     let progress = Number.MAX_SAFE_INTEGER;
     const animTime = 500;
+    let forcePrep = false;
     if (lastUpdate !== undefined) {
         progress = frameTime - lastUpdate;
 
@@ -209,10 +216,11 @@ export function drawWithLastUpdate(
             ctx.fillStyle = theme.bgSearchResult;
             ctx.fillRect(x, y, width, height);
             ctx.globalAlpha = 1;
+            forcePrep = true;
         }
     }
 
-    draw();
+    draw(forcePrep);
 
     return progress < animTime;
 }

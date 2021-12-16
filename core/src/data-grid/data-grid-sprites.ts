@@ -1,6 +1,6 @@
-import { GridColumn } from "..";
+import type { GridColumn } from "..";
 import { assert } from "../common/support";
-import { Theme } from "../common/styles";
+import type { Theme } from "../common/styles";
 import { HeaderIconMap, sprites } from "./sprites";
 
 type HeaderIcon = keyof HeaderIconMap;

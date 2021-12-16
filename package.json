@@ -1,11 +1,12 @@
 {
     "name": "root",
-    "version": "3.1.2",
+    "version": "3.2.0",
     "scripts": {
         "bootstrap": "./bootstrap.sh",
         "build": "./build-all.sh",
         "storybook": "start-storybook -p 9009 -s public",
-        "build-storybook": "build-storybook -o storybook-build/"
+        "build-storybook": "build-storybook -o storybook-build/",
+        "test": "cd core && npm run test"
     },
     "author": "Glide",
     "license": "MIT",
@@ -23,6 +24,7 @@
         "@storybook/addons": "^6.3.2",
         "@storybook/react": "^6.3.2",
         "@testing-library/jest-dom": "^5.15.0",
+        "@testing-library/react": "^12.1.2",
         "@types/cheerio": "^0.22.30",
         "@types/enzyme": "^3.10.10",
         "@types/enzyme-adapter-react-16": "^1.0.6",
@@ -33,10 +35,12 @@
         "@types/react-dom": "^16.9.5",
         "@types/react-virtualized-auto-sizer": "^1.0.0",
         "@types/styled-components": "5.1.14",
+        "@types/testing-library__jest-dom": "^5.14.2",
         "@typescript-eslint/eslint-plugin": "^4.33.0",
         "@typescript-eslint/parser": "^4.33.0",
         "@typescript-eslint/typescript-estree": "^4.33.0",
         "babel-loader": "^8.1.0",
+        "babel-plugin-styled-components": "^2.0.2",
         "enzyme": "^3.11.0",
         "enzyme-adapter-react-16": "^1.15.6",
         "eslint": "^7.12.1",
@@ -44,6 +48,7 @@
         "eslint-plugin-react": "^7.27.1",
         "eslint-plugin-react-hooks": "^4.3.0",
         "faker": "^5.5.3",
+        "jest-canvas-mock": "^2.3.1",
         "jest-without-globals": "0.0.3",
         "lodash": "^4.17.21",
         "marked": "^0.7.0",

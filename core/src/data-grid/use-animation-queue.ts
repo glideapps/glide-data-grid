@@ -1,6 +1,5 @@
 import * as React from "react";
-
-type Item = readonly [number, number | undefined];
+import { Item } from "./data-grid-types";
 
 function hasItem(arr: readonly Item[], item: Item) {
     for (let i = 0; i < arr.length; i++) {

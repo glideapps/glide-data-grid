@@ -404,7 +404,7 @@ DynamicAddRemoveColumns.args = {
 export function RowSelectionStateLivesOutside() {
     const [selected_rows, setSelectedRows] = useState<CompactSelection | undefined>(undefined);
     const cb = (newRows: CompactSelection | undefined) => {
-        if (newRows != undefined) {
+        if (newRows !== undefined) {
             setSelectedRows(newRows);
         }
     };
@@ -427,7 +427,7 @@ export function RowSelectionStateLivesOutside() {
 export function ColSelectionStateLivesOutside() {
     const [selected_cols, setSelectedCols] = useState<CompactSelection>(CompactSelection.empty());
     const cb = (newRows: CompactSelection | undefined) => {
-        if (newRows != undefined) {
+        if (newRows !== undefined) {
             setSelectedCols(newRows);
         }
     };

@@ -1,4 +1,4 @@
-import { Rectangle } from "../data-grid/data-grid-types";
+import type { Rectangle } from "../data-grid/data-grid-types";
 import throttle from "lodash/throttle";
 
 interface LoadResult {
@@ -16,18 +16,18 @@ function packColRowToNumber(col: number, row: number) {
     return row * rowShift + col;
 }
 
-function unpackNumberToColRow(packed: number): [number, number] {
-    const col = packed % rowShift;
-    const row = (packed - col) / rowShift;
-    return [col, row];
-}
-
 function unpackCol(packed: number): number {
     return packed % rowShift;
 }
 
 function unpackRow(packed: number, col: number): number {
     return (packed - col) / rowShift;
+}
+
+function unpackNumberToColRow(packed: number): [number, number] {
+    const col = unpackCol(packed);
+    const row = unpackRow(packed, col);
+    return [col, row];
 }
 
 class ImageWindowLoader {
@@ -41,9 +41,12 @@ class ImageWindowLoader {
         height: 0,
     };
 
+    private freezeCols: number = 0;
+
     private isInWindow = (packed: number) => {
         const col = unpackCol(packed);
         const row = unpackRow(packed, col);
+        if (col < this.freezeCols) return true;
         const w = this.window;
         return col >= w.x && col <= w.x + w.width && row >= w.y && row <= w.y + w.height;
     };
@@ -60,11 +63,14 @@ class ImageWindowLoader {
     }, 20);
 
     private clearOutOfWindow = () => {
-        for (const key of Object.keys(this.cache)) {
+        const keys = Object.keys(this.cache);
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
             const obj = this.cache[key];
 
             let keep = false;
-            for (const packed of obj.cells) {
+            for (let j = 0; j < obj.cells.length; j++) {
+                const packed = obj.cells[j];
                 if (this.isInWindow(packed)) {
                     keep = true;
                     break;
@@ -80,15 +86,17 @@ class ImageWindowLoader {
         }
     };
 
-    public setWindow(window: Rectangle): void {
+    public setWindow(window: Rectangle, freezeCols: number): void {
         if (
             this.window.x === window.x &&
             this.window.y === window.y &&
             this.window.width === window.width &&
-            this.window.height === window.height
+            this.window.height === window.height &&
+            this.freezeCols === freezeCols
         )
             return;
         this.window = window;
+        this.freezeCols = freezeCols;
         this.clearOutOfWindow();
     }
 
@@ -105,37 +113,35 @@ class ImageWindowLoader {
         } else {
             const img = imgPool.pop() ?? new Image();
 
-            img.src = url;
-
-            let cancelled = false;
+            let canceled = false;
             const result: LoadResult = {
                 img: undefined,
                 cells: [packColRowToNumber(col, row)],
                 url,
                 cancel: () => {
-                    cancelled = true;
+                    if (canceled) return;
+                    canceled = true;
                     imgPool.unshift(img);
                 },
             };
 
-            const load = async () => {
-                let errored = false;
+            // use request animation time to avoid paying src set costs during draw calls
+            requestAnimationFrame(async () => {
                 try {
+                    img.src = url;
                     await img.decode();
-                } catch {
-                    errored = true;
-                }
-                const toWrite = this.cache[key];
-                if (toWrite !== undefined && !errored && !cancelled) {
-                    toWrite.img = img;
-                    for (const packed of toWrite.cells) {
-                        this.loadedLocations.push(unpackNumberToColRow(packed));
+                    const toWrite = this.cache[key];
+                    if (toWrite !== undefined && !canceled) {
+                        toWrite.img = img;
+                        for (const packed of toWrite.cells) {
+                            this.loadedLocations.push(unpackNumberToColRow(packed));
+                        }
+                        this.sendLoaded();
                     }
-                    this.sendLoaded();
+                } catch (e) {
+                    result.cancel();
                 }
-            };
-
-            void load();
+            });
             this.cache[key] = result;
             return undefined;
         }

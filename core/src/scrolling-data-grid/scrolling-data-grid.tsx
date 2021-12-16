@@ -63,7 +63,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         showMinimap = false,
         ...dataGridProps
     } = p;
-    const { smoothScrollX, smoothScrollY } = p;
+    const { smoothScrollX = false, smoothScrollY = false } = p;
 
     const [clientWidth, setClientWidth] = React.useState<number>(10);
     const [clientHeight, setClientHeight] = React.useState<number>(10);

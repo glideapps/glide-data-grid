@@ -1,8 +1,8 @@
-import { OverlayImageEditorProps, Theme } from "../..";
-import ImageWindowLoader from "../../common/image-window-loader";
-import { InnerGridCell, Rectangle } from "../data-grid-types";
+import type { OverlayImageEditorProps, Theme } from "../..";
+import type ImageWindowLoader from "../../common/image-window-loader";
+import type { InnerGridCell, Rectangle, Item } from "../data-grid-types";
 
-export type HoverInfo = readonly [readonly [number, number | undefined], readonly [number, number]];
+export type HoverInfo = readonly [Item, readonly [number, number]];
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 

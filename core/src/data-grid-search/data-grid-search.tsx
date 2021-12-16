@@ -1,10 +1,9 @@
 // import AppIcon from "common/app-icon";
 import * as React from "react";
-import { GridCell, GridCellKind, GridSelection, Rectangle } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, GridSelection, Rectangle, InnerGridCell } from "../data-grid/data-grid-types";
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
 import { assert } from "../common/support";
-import { InnerGridCell } from "..";
 
 // icons
 const upArrow = (
@@ -57,15 +56,17 @@ const targetSearchTimeMS = 10;
 
 const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const {
-        onKeyDown,
         getCellsForSelection,
         onSearchResultsChanged,
         searchColOffset,
         showSearch = false,
         onSearchClose,
-        ...rest
+        canvasRef,
+        cellYOffset,
+        rows,
+        columns,
+        getCellContent,
     } = p;
-    const { canvasRef, cellYOffset, rows, columns, getCellContent } = p;
 
     const [searchString, setSearchString] = React.useState("");
     const [searchStatus, setSearchStatus] = React.useState<{
@@ -380,7 +381,61 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
     return (
         <>
-            <ScrollingDataGrid {...rest} onKeyDown={onKeyDown} prelightCells={searchResults} />
+            <ScrollingDataGrid
+                // Dear future developer. I am sorry.
+                cellXOffset={p.cellXOffset}
+                cellYOffset={p.cellYOffset}
+                columns={p.columns}
+                enableGroups={p.enableGroups}
+                freezeColumns={p.freezeColumns}
+                getCellContent={p.getCellContent}
+                groupHeaderHeight={p.groupHeaderHeight}
+                headerHeight={p.headerHeight}
+                lastRowSticky={p.lastRowSticky}
+                lockColumns={p.lockColumns}
+                rowHeight={p.rowHeight}
+                onMouseMove={p.onMouseMove}
+                rows={p.rows}
+                verticalBorder={p.verticalBorder}
+                canvasRef={p.canvasRef}
+                className={p.className}
+                disabledRows={p.disabledRows}
+                drawCustomCell={p.drawCustomCell}
+                drawHeader={p.drawHeader}
+                experimental={p.experimental}
+                getGroupDetails={p.getGroupDetails}
+                gridRef={p.gridRef}
+                headerIcons={p.headerIcons}
+                isDraggable={p.isDraggable}
+                maxColumnWidth={p.maxColumnWidth}
+                onCellFocused={p.onCellFocused}
+                onColumnMoved={p.onColumnMoved}
+                onColumnResized={p.onColumnResized}
+                onDragStart={p.onDragStart}
+                onHeaderMenuClick={p.onHeaderMenuClick}
+                onItemHovered={p.onItemHovered}
+                onKeyUp={p.onKeyUp}
+                onMouseDown={p.onMouseDown}
+                onMouseUp={p.onMouseUp}
+                onRowMoved={p.onRowMoved}
+                onVisibleRegionChanged={p.onVisibleRegionChanged}
+                overscrollX={p.overscrollX}
+                rightElement={p.rightElement}
+                rightElementSticky={p.rightElementSticky}
+                scrollRef={p.scrollRef}
+                scrollToEnd={p.scrollToEnd}
+                selectedCell={p.selectedCell}
+                selectedColumns={p.selectedColumns}
+                selectedRows={p.selectedRows}
+                showMinimap={p.showMinimap}
+                smoothScrollX={p.smoothScrollX}
+                smoothScrollY={p.smoothScrollY}
+                translateX={p.translateX}
+                translateY={p.translateY}
+                onKeyDown={p.onKeyDown}
+                // handled props
+                prelightCells={searchResults}
+            />
             {searchbox}
         </>
     );

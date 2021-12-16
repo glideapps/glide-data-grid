@@ -20,3 +20,4 @@ jobs:
                   node-version: ${{ matrix.node-version }}
             - run: npm run bootstrap
             - run: npm run build
+            - run: npm run test

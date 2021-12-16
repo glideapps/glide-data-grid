@@ -6,6 +6,7 @@
       "moduleResolution": "node",
       "noImplicitAny": true,
       "noUnusedLocals": true,
+      "skipLibCheck": true,
       "noUnusedParameters": true,
       "strict": true,
       "target": "es6",

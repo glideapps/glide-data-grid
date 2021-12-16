@@ -6,3 +6,4 @@ node_modules*
 .cache
 pubsub-debug.log
 storybook-build/
+coverage/
