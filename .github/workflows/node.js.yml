@@ -20,4 +20,9 @@ jobs:
                   node-version: ${{ matrix.node-version }}
             - run: npm run bootstrap
             - run: npm run build
-            - run: npm run test
+            - run: npm run test -- --coverage
+            - name: Coveralls
+              uses: coverallsapp/github-action@master
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  path-to-lcov: ./packages/code/coverage/lcov.info
