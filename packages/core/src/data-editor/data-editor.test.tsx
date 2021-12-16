@@ -174,6 +174,8 @@ function prep() {
         jest.runAllTimers();
     });
     jest.useRealTimers();
+
+    return scroller;
 }
 
 const Context: React.FC = p => {
@@ -698,5 +700,65 @@ describe("data-editor", () => {
         });
 
         expect(spy).not.toHaveBeenCalled();
+    });
+
+    test("Blit does not crash vertical scroll", async () => {
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} />, {
+            wrapper: Context,
+        });
+        const scroller = prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseMove(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        if (scroller !== null) {
+            jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
+                basicProps.columns.map(c => c.width).reduce((pv, cv) => pv + cv, 0)
+            );
+            jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
+            jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
+            jest.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 55);
+            fireEvent.scroll(scroller);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        expect(canvas).toBeInTheDocument();
+    });
+
+    test("Blit does not crash horizontal scroll", async () => {
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} />, {
+            wrapper: Context,
+        });
+        const scroller = prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseMove(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        if (scroller !== null) {
+            jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
+                basicProps.columns.map(c => c.width).reduce((pv, cv) => pv + cv, 0)
+            );
+            jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
+            jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 55);
+            jest.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 0);
+            fireEvent.scroll(scroller);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        expect(canvas).toBeInTheDocument();
     });
 });
