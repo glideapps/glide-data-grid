@@ -614,7 +614,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const groupHeaderHovered = hCol !== undefined && hRow === -2;
     let clickableInnerCellHovered = false;
     let editableBoolHovered = false;
-    if (hCol !== undefined && hRow !== undefined) {
+    if (hCol !== undefined && hRow !== undefined && hRow > 0) {
         const cell = getCellContent([hCol, hRow]);
         clickableInnerCellHovered =
             cell.kind === InnerGridCellKind.NewRow ||
