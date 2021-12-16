@@ -1,6 +1,6 @@
 {
   "name": "@glideapps/glide-data-grid",
-  "version": "3.1.3-beta5",
+  "version": "3.2.0",
   "description": "Super fast, pure canvas Data Grid Editor",
   "sideEffects": false,
   "type": "module",
