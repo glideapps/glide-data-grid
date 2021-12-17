@@ -659,6 +659,31 @@ describe("data-editor", () => {
         expect(overlay).not.toBeInTheDocument();
     });
 
+    test("Focus a11y cell", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const a11ycell = screen.getByTestId("glide-cell-0-5");
+        fireEvent.focus(a11ycell);
+
+        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [0, 5] }));
+    });
+
+    test("Click a11y cell", async () => {
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const a11ycell = screen.getByTestId("glide-cell-0-5");
+        fireEvent.click(a11ycell);
+    });
+
     test("Arrow left", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
@@ -974,6 +999,34 @@ describe("data-editor", () => {
                 ],
             ]
         );
+    });
+
+    test("Copy rows", async () => {
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} selectedRows={CompactSelection.fromSingleSelection([3, 6])} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+
+        fireEvent.copy(window);
+        expect(navigator.clipboard.writeText).toBeCalled();
+    });
+
+    test("Copy cols", async () => {
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} selectedColumns={CompactSelection.fromSingleSelection([3, 6])} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+
+        fireEvent.copy(window);
+        expect(navigator.clipboard.writeText).toBeCalled();
     });
 
     test("Hover header does not fetch invalid cell", async () => {
@@ -1513,6 +1566,130 @@ describe("data-editor", () => {
         });
 
         expect(spy).toBeCalledWith(1, 0);
+    });
+
+    test("Resize Column", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onColumnMoved={spy} onColumnResized={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 310, // Col B Right Edge
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 350,
+            clientY: 16,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 350,
+            clientY: 16,
+        });
+
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
+    });
+
+    test("Resize Multiple Column", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                selectedColumns={CompactSelection.fromSingleSelection([0, 5])}
+                onColumnMoved={spy}
+                onColumnResized={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 310, // Col B Right Edge
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 350,
+            clientY: 16,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 350,
+            clientY: 16,
+        });
+
+        expect(spy).toBeCalledTimes(5);
+    });
+
+    test("Resize Last Column", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                columns={basicProps.columns.slice(0, 2)}
+                onColumnMoved={spy}
+                onColumnResized={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 314, // Col B Right Edge
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 350,
+            clientY: 16,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 350,
+            clientY: 16,
+        });
+
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
+    });
+
+    test("Drag reorder row", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} rowMarkers="number" onRowMoved={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 10, // Col B Right Edge
+            clientY: 300, // Header
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 10,
+            clientY: 400,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 10,
+            clientY: 400,
+        });
+
+        expect(spy).toBeCalledWith(8, 11);
     });
 
     test("Select range with mouse", async () => {

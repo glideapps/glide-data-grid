@@ -1097,12 +1097,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                     const key = `${col},${row}`;
                                     const [fCol, fRow] = selectedCell?.cell ?? [];
                                     const focused = fCol === col && fRow === row;
+                                    const id = `glide-cell-${col}-${row}`;
                                     return (
                                         <div
                                             key={key}
                                             role="gridcell"
                                             aria-colindex={col + 1}
-                                            id={`glide-cell-${col}-${row}`}
+                                            id={id}
+                                            data-testid={id}
                                             onClick={() => {
                                                 const canvas = canvasRef?.current;
                                                 if (canvas === null || canvas === undefined) return;

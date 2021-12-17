@@ -22,7 +22,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/glideapps/glide-data-grid.git"
+    "url": "git+https://github.com/glideapps/glide-data-grid.git",
+    "directory": "packages/cells"
   },
   "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/cells",
   "author": "Glide",

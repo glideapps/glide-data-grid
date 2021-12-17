@@ -1485,20 +1485,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 scrollRef.current?.contains(document.activeElement) === true ||
                 canvasRef.current?.contains(document.activeElement) === true;
 
-            if (focused && getCellsForSelection) {
+            if (focused && getCellsForSelection !== undefined) {
                 if (gridSelection !== undefined) {
-                    const [col, row] = gridSelection.cell;
-                    if (gridSelection.range !== undefined && getCellsForSelection !== undefined) {
-                        copyToClipboard(
-                            getCellsForSelection({
-                                ...gridSelection.range,
-                                x: gridSelection.range.x - rowMarkerOffset,
-                            })
-                        );
-                    } else {
-                        const cellValue = getCellContent([col - rowMarkerOffset, row]);
-                        copyToClipboard([[cellValue]]);
-                    }
+                    copyToClipboard(
+                        getCellsForSelection({
+                            ...gridSelection.range,
+                            x: gridSelection.range.x - rowMarkerOffset,
+                        })
+                    );
                 } else if (selectedRows !== undefined && selectedRows.length > 0) {
                     const toCopy = Array.from(selectedRows);
                     const cells = toCopy.map(
@@ -1535,7 +1529,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         }, [
             columns.length,
             copyToClipboard,
-            getCellContent,
             getCellsForSelection,
             gridSelection,
             rowMarkerOffset,
