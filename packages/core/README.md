@@ -7,7 +7,7 @@
 [![Version](https://img.shields.io/badge/latest-v3.2.1-blue?style=for-the-badge&logo=none)](https://github.com/glideapps/glide-data-grid/releases)
 [![React 16+](https://img.shields.io/badge/React-16+-00ADD8?style=for-the-badge&logo=react)](https://reactjs.org)
 ![Code Coverage](https://img.shields.io/coveralls/github/glideapps/glide-data-grid?color=457aba&label=Cover&style=for-the-badge)
-[![Bundle Size](https://img.shields.io/coveralls/github/glideapps/glide-data-grid?color=457aba&label=Cover&style=for-the-badge)](https://bundlephobia.com/package/@glideapps/glide-data-grid)
+[![Bundle Size](https://img.shields.io/badge/Bundle-45.4kb-success?style=for-the-badge&logo=none)](https://bundlephobia.com/package/@glideapps/glide-data-grid)
 [![License MIT](https://img.shields.io/badge/license-mit-red?style=for-the-badge&logo=none)](https://github.com/glideapps/glide-data-grid/blob/main/LICENSE)
 [![Made By Glide](https://img.shields.io/badge/❤_Made_by-Glide-11CCE5?style=for-the-badge&logo=none)](https://www.glideapps.com/jobs)
 
