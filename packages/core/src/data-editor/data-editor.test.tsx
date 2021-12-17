@@ -1155,4 +1155,46 @@ describe("data-editor", () => {
 
         expect(spy).toBeCalledWith(undefined);
     });
+
+    test("DND Columns", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onColumnMoved={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 250,
+            clientY: 16,
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 200,
+            clientY: 16,
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 150,
+            clientY: 16,
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 100,
+            clientY: 16,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 100, // Col A
+            clientY: 16, // Header
+        });
+
+        expect(spy).toBeCalledWith(1, 0);
+    });
 });
