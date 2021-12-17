@@ -276,6 +276,37 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith(1, expect.anything());
     });
 
+    test("Group header sections", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                columns={basicProps.columns.map(c => ({ ...c, group: "A" }))}
+                onSelectedColumnsChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // GroupHeader
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // GroupHeader
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(CompactSelection.fromSingleSelection([0, 10]), expect.anything());
+    });
+
     test("Rename group header shows", async () => {
         const spy = jest.fn();
 
@@ -499,6 +530,44 @@ describe("data-editor", () => {
             key: "Escape",
         });
 
+        expect(overlay).not.toBeInTheDocument();
+    });
+
+    test("Send edit", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellEdited={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 74,
+        });
+
+        fireEvent.keyUp(canvas, {
+            keyCode: 74,
+        });
+
+        const overlay = screen.getByDisplayValue("j");
+        expect(overlay).toBeInTheDocument();
+
+        fireEvent.keyDown(overlay, {
+            key: "Enter",
+        });
+
+        expect(spy).toBeCalledWith([1, 1], expect.objectContaining({ data: "j" }));
         expect(overlay).not.toBeInTheDocument();
     });
 
@@ -1196,5 +1265,33 @@ describe("data-editor", () => {
         });
 
         expect(spy).toBeCalledWith(1, 0);
+    });
+
+    test("Select range with mosue", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2
+        });
+
+        spy.mockClear();
+        fireEvent.mouseMove(canvas, {
+            clientX: 600, // Col B
+            clientY: 36 + 32 * 12 + 16, // Row 2
+        });
+
+        expect(spy).toBeCalledWith({ cell: [1, 2], range: { height: 11, width: 3, x: 1, y: 2 } });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 600, // Col B
+            clientY: 36 + 32 * 12 + 16, // Row 2
+        });
     });
 });
