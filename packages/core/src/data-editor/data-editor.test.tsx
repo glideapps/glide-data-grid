@@ -320,6 +320,10 @@ describe("data-editor", () => {
         render(
             <DataEditor
                 {...basicProps}
+                getGroupDetails={g => ({
+                    name: g,
+                    icon: "headerCode",
+                })}
                 columns={basicProps.columns.map(c => ({ ...c, group: "A" }))}
                 onSelectedColumnsChange={spy}
             />,
@@ -996,6 +1000,18 @@ describe("data-editor", () => {
 
         await new Promise(resolve => setTimeout(resolve, 100));
 
+        if (scroller !== null) {
+            jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
+                basicProps.columns.map(c => c.width).reduce((pv, cv) => pv + cv, 0)
+            );
+            jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
+            jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
+            jest.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 0);
+            fireEvent.scroll(scroller);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         expect(canvas).toBeInTheDocument();
     });
 
@@ -1020,6 +1036,18 @@ describe("data-editor", () => {
             );
             jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
             jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 55);
+            jest.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 0);
+            fireEvent.scroll(scroller);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        if (scroller !== null) {
+            jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
+                basicProps.columns.map(c => c.width).reduce((pv, cv) => pv + cv, 0)
+            );
+            jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
+            jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
             jest.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 0);
             fireEvent.scroll(scroller);
         }
@@ -1571,5 +1599,34 @@ describe("data-editor", () => {
         }
 
         expect(spy).toHaveBeenCalled();
+    });
+
+    test("Minimap issues scroll", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} rowMarkers="both" showMinimap={true} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const minimap = screen.getByTestId("minimap-container");
+
+        fireEvent.mouseDown(minimap, {
+            clientX: 940,
+            clientY: 940,
+        });
+
+        fireEvent.mouseMove(minimap, {
+            buttons: 1,
+            clientX: 941,
+            clientY: 941,
+        });
+
+        fireEvent.mouseUp(minimap, {
+            clientX: 940,
+            clientY: 940,
+        });
+
+        expect(Element.prototype.scrollTo).toBeCalled();
     });
 });

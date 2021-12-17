@@ -356,7 +356,7 @@ export type Slice = readonly [number, number];
 export type CompactSelectionRanges = readonly Slice[];
 
 function mergeRanges(input: CompactSelectionRanges) {
-    if (input === undefined || input.length === 0) {
+    if (input.length === 0) {
         return [];
     }
     const ranges = [...input];
@@ -442,7 +442,7 @@ export class CompactSelection {
 
     last = (): number | undefined => {
         if (this.items.length === 0) return undefined;
-        return this.items.slice(-1)[0][1];
+        return this.items.slice(-1)[0][1] - 1;
     };
 
     hasIndex = (index: number): boolean => {

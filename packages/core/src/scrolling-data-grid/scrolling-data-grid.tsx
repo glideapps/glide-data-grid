@@ -247,6 +247,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         return (
             <MinimapStyle
                 style={{ width: w, height: h }}
+                data-testid="minimap-container"
                 onMouseMove={e => {
                     if (e.buttons !== 1) return;
                     handleMouse(e);
