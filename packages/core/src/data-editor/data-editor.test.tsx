@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach } from "jest-without-globals";
 import * as React from "react";
-import { render, fireEvent, screen, act } from "@testing-library/react";
+import { render, fireEvent, screen, act, createEvent } from "@testing-library/react";
 import { CompactSelection, DataEditor, DataEditorProps, GridCell, GridCellKind, GridSelection } from "..";
 
 jest.mock("react-virtualized-auto-sizer", () => {
@@ -55,6 +55,19 @@ const makeCell = (cell: readonly [number, number]): GridCell => {
             data: row % 2 === 0,
             allowEdit: true,
             showUnchecked: true,
+        };
+    } else if (col === 8) {
+        return {
+            kind: GridCellKind.Text,
+            allowOverlay: true,
+            data: `Data: ${col}, ${row}`,
+            displayData: `שלום ${col}, ${row}`,
+        };
+    } else if (col === 9) {
+        return {
+            kind: GridCellKind.Markdown,
+            allowOverlay: true,
+            data: `# Header: ${col}, ${row}`,
         };
     }
     return {
@@ -246,6 +259,30 @@ describe("data-editor", () => {
         fireEvent.mouseUp(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    });
+
+    test("Uneven rows cell click", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellClicked={spy} rowHeight={r => (r % 2 === 0 ? 32 : 64)} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 64 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 64 + 16, // Row 1 (0 indexed)
         });
 
         expect(spy).toHaveBeenCalled();
@@ -497,6 +534,44 @@ describe("data-editor", () => {
         expect(overlay).not.toBeInTheDocument();
     });
 
+    test("Open markdown overlay", async () => {
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 980, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 980, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 980, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 980, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        const overlay = screen.getByText("Header: 9, 1");
+        expect(overlay).toBeInTheDocument();
+
+        fireEvent.keyDown(canvas, {
+            key: "Escape",
+        });
+
+        expect(overlay).not.toBeInTheDocument();
+    });
+
     test("Open overlay with keypress", async () => {
         jest.useFakeTimers();
         render(<DataEditor {...basicProps} />, {
@@ -598,6 +673,34 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith(expect.objectContaining({ cell: [0, 1] }));
     });
 
+    test("Arrow shift left", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            shiftKey: true,
+            key: "ArrowLeft",
+        });
+
+        expect(spy).toBeCalledWith({ cell: [1, 1], range: { x: 0, y: 1, width: 2, height: 1 } });
+    });
+
     test("Arrow right", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
@@ -623,6 +726,34 @@ describe("data-editor", () => {
         });
 
         expect(spy).toBeCalledWith(expect.objectContaining({ cell: [2, 1] }));
+    });
+
+    test("Arrow shift right", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            shiftKey: true,
+            key: "ArrowRight",
+        });
+
+        expect(spy).toBeCalledWith({ cell: [1, 1], range: { x: 1, y: 1, width: 2, height: 1 } });
     });
 
     test("Tab navigation", async () => {
@@ -1092,6 +1223,45 @@ describe("data-editor", () => {
         });
     });
 
+    test("Fill down", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} enableDownfill={true} onCellEdited={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseDown(canvas, {
+            shiftKey: true,
+            clientX: 400, // Col C
+            clientY: 36 + 32 * 6 + 16, // Row 6 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            shiftKey: true,
+            clientX: 400, // Col C
+            clientY: 36 + 32 * 6 + 16, // Row 6 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 68,
+            ctrlKey: true,
+        });
+
+        expect(spy).toHaveBeenCalledTimes(8);
+    });
+
     test("Clear selection", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
@@ -1225,6 +1395,32 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith(undefined);
     });
 
+    test("Delete Column", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onCellEdited={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "Delete",
+        });
+
+        expect(spy).toBeCalledTimes(1000);
+    });
+
     test("DND Columns", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
@@ -1267,7 +1463,7 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith(1, 0);
     });
 
-    test("Select range with mosue", async () => {
+    test("Select range with mouse", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
@@ -1293,5 +1489,87 @@ describe("data-editor", () => {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
         });
+    });
+
+    test("Select all", async () => {
+        const spy = jest.fn();
+        const rowsSpy = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                rowMarkers="both"
+                onGridSelectionChange={spy}
+                onSelectedRowsChange={rowsSpy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 10,
+            clientY: 10,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 10,
+            clientY: 10,
+        });
+
+        expect(spy).toBeCalledWith(undefined);
+        expect(rowsSpy).toBeCalledWith(CompactSelection.fromSingleSelection([0, 1000]));
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 10,
+            clientY: 10,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 10,
+            clientY: 10,
+        });
+
+        spy.mockClear();
+        expect(rowsSpy).toBeCalledWith(CompactSelection.empty());
+    });
+
+    test("Draggable", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                rowMarkers="both"
+                onDragStart={e => {
+                    spy(e);
+                    e.setData("text/plain", "payload");
+                }}
+                isDraggable={true}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        const scroller = prep();
+        // const canvas = screen.getByTestId("data-grid-canvas");
+
+        if (scroller !== null) {
+            const mockEv = createEvent.dragStart(scroller);
+            Object.assign(mockEv, {
+                clientX: 100,
+                clientY: 100,
+                dataTransfer: {
+                    setData: () => undefined,
+                    setDragImage: () => undefined,
+                    effectAllowed: null,
+                },
+            });
+            fireEvent(scroller, mockEv);
+        }
+
+        expect(spy).toHaveBeenCalled();
     });
 });

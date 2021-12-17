@@ -17,10 +17,7 @@ export function useEventListener<K extends keyof HTMLElementEventMap>(
     // This allows our effect below to always get latest handler ...
     // ... without us needing to pass it in effect deps array ...
     // ... and potentially cause effect to re-run every render.
-    React.useEffect(() => {
-        savedHandler.current = handler;
-    }, [handler]);
-
+    savedHandler.current = handler;
     React.useEffect(
         () => {
             // Make sure element supports addEventListener
