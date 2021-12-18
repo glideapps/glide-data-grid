@@ -78,7 +78,7 @@ type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
 type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parameters<T>) => TNewReturn;
 
-type HeaderSelectionTrigger = "selection" | "drag" | "header" | "group";
+export type HeaderSelectionTrigger = "selection" | "drag" | "header" | "group";
 
 interface PreventableEvent {
     preventDefault: () => void;

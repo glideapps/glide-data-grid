@@ -1,7 +1,15 @@
 import { describe, test, expect, beforeEach } from "jest-without-globals";
 import * as React from "react";
 import { render, fireEvent, screen, act, createEvent } from "@testing-library/react";
-import { CompactSelection, DataEditor, DataEditorProps, GridCell, GridCellKind, GridSelection } from "..";
+import {
+    CompactSelection,
+    DataEditor,
+    DataEditorProps,
+    GridCell,
+    GridCellKind,
+    GridSelection,
+    HeaderSelectionTrigger,
+} from "..";
 
 jest.mock("react-virtualized-auto-sizer", () => {
     return {
@@ -214,6 +222,7 @@ const EventedDataEditor: React.VFC<DataEditorProps> = p => {
     const [sel, setSel] = React.useState<GridSelection>();
     const [extraRows, setExtraRows] = React.useState(0);
     const [selectedRows, setSelectedRows] = React.useState(p.selectedRows ?? CompactSelection.empty());
+    const [selectedCols, setSelectedCols] = React.useState(p.selectedColumns ?? CompactSelection.empty());
 
     const onGridSelectionChange = React.useCallback(
         (s: GridSelection | undefined) => {
@@ -236,13 +245,23 @@ const EventedDataEditor: React.VFC<DataEditorProps> = p => {
         [p]
     );
 
+    const onSelectedColumnsChange = React.useCallback(
+        (newVal: CompactSelection, trigger: HeaderSelectionTrigger) => {
+            setSelectedCols(newVal);
+            p.onSelectedColumnsChange?.(newVal, trigger);
+        },
+        [p]
+    );
+
     return (
         <DataEditor
             {...p}
             gridSelection={sel}
             selectedRows={selectedRows}
+            selectedColumns={selectedCols}
             onGridSelectionChange={onGridSelectionChange}
             onSelectedRowsChange={onSelectedRowsChange}
+            onSelectedColumnsChange={onSelectedColumnsChange}
             rows={p.rows + extraRows}
             onRowAppended={p.onRowAppended === undefined ? undefined : onRowAppened}
         />
@@ -327,7 +346,7 @@ describe("data-editor", () => {
 
         jest.useFakeTimers();
         render(
-            <DataEditor
+            <EventedDataEditor
                 {...basicProps}
                 getGroupDetails={g => ({
                     name: g,
@@ -349,6 +368,40 @@ describe("data-editor", () => {
         });
 
         fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // GroupHeader
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(CompactSelection.fromSingleSelection([0, 10]), expect.anything());
+
+        spy.mockClear();
+
+        fireEvent.mouseDown(canvas, {
+            ctrlKey: true,
+            clientX: 300, // Col B
+            clientY: 16, // GroupHeader
+        });
+
+        fireEvent.mouseUp(canvas, {
+            ctrlKey: true,
+            clientX: 300, // Col B
+            clientY: 16, // GroupHeader
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(CompactSelection.empty(), expect.anything());
+
+        spy.mockClear();
+
+        fireEvent.mouseDown(canvas, {
+            ctrlKey: true,
+            clientX: 300, // Col B
+            clientY: 16, // GroupHeader
+        });
+
+        fireEvent.mouseUp(canvas, {
+            ctrlKey: true,
             clientX: 300, // Col B
             clientY: 16, // GroupHeader
         });

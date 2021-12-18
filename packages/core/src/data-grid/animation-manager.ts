@@ -81,7 +81,7 @@ class Easing {
     }
 }
 
-const ease = new Easing(0.25, 0.1, 0.25, 1);
+export const ease = new Easing(0.25, 0.1, 0.25, 1);
 // const easeIn = new Easing(0.42, 0, 1, 1);
 // const easeOut = new Easing(0, 0, 0.58, 1);
 // const easeInOut = new Easing(0.42, 0, 0.58, 1);
