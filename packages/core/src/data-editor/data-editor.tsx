@@ -1,6 +1,6 @@
 import * as React from "react";
 import { assertNever, maybe } from "../common/support";
-import { clamp } from "lodash/fp";
+import clamp from "lodash/clamp";
 import DataGridOverlayEditor from "../data-grid-overlay-editor/data-grid-overlay-editor";
 import {
     EditableGridCell,
