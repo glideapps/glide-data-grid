@@ -1058,8 +1058,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const updateSelectedCell = React.useCallback(
         (col: number, row: number, fromEditingTrailingRow: boolean = false): boolean => {
             const rowMax = mangledRows - (fromEditingTrailingRow ? 0 : 1);
-            col = clamp(rowMarkerOffset, columns.length - 1 + rowMarkerOffset, col);
-            row = clamp(0, rowMax, row);
+            col = clamp(col, rowMarkerOffset, columns.length - 1 + rowMarkerOffset);
+            row = clamp(row, 0, rowMax);
 
             if (col === gridSelection?.cell[0] && row === gridSelection?.cell[1]) return false;
             setGridSelection({ cell: [col, row], range: { x: col, y: row, width: 1, height: 1 } });
