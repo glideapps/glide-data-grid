@@ -957,6 +957,9 @@ function drawCells(
                             for (let x = c.sourceIndex + 1; x < endCol; x++) {
                                 cellWidth += allColumns[x].width;
                             }
+                        } else {
+                            toDraw--;
+                            return;
                         }
                     }
 

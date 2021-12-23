@@ -2361,7 +2361,6 @@ export const SpanCell: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={mangledGetCellContent}
                 columns={cols}
-                showMinimap={true}
                 rows={3000}
                 rowMarkers="both"
             />
