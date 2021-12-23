@@ -11,7 +11,7 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
     needsHover: false,
     needsHoverPosition: false,
     renderPrep: prepTextCell,
-    render: a => drawTextCell(a, a.cell.data),
+    render: a => drawTextCell(a, a.cell.displayData ?? a.cell.data),
     onDelete: c => ({
         ...c,
         data: "",
