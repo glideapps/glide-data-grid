@@ -1288,7 +1288,11 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
                 return {
                     kind: GridCellKind.Uri,
                     data: url,
+                    displayData: faker.commerce.productDescription(),
                     allowOverlay: true,
+                    themeOverride: {
+                        textDark: "#4F5DFF",
+                    },
                 };
             },
         },
