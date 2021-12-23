@@ -813,6 +813,7 @@ function clipDamage(
 function drawCells(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
+    allColumns: readonly MappedGridColumn[],
     height: number,
     totalHeaderHeight: number,
     translateX: number,
@@ -942,7 +943,21 @@ function drawCells(
                                   allowOverlay: false,
                               };
 
+                    let cellX = drawX;
+                    let cellWidth = c.width;
                     if (cell.span !== undefined) {
+                        const [startCol, endCol] = cell.span;
+                        const firstNonSticky = effectiveColumns.find(x => !x.sticky)?.sourceIndex ?? 0;
+                        const renderFromCol = Math.max(startCol, firstNonSticky);
+                        if (endCol - startCol > 1 && Math.max(startCol, firstNonSticky) === c.sourceIndex) {
+                            for (let x = c.sourceIndex - 1; x > renderFromCol; x--) {
+                                cellX -= allColumns[x].width;
+                                cellWidth += allColumns[x].width;
+                            }
+                            for (let x = c.sourceIndex + 1; x < endCol; x++) {
+                                cellWidth += allColumns[x].width;
+                            }
+                        }
                     }
 
                     const theme = cell.themeOverride === undefined ? colTheme : { ...colTheme, ...cell.themeOverride };
@@ -967,24 +982,24 @@ function drawCells(
 
                     if (isSticky || theme.bgCell !== outerTheme.bgCell) {
                         ctx.fillStyle = theme.bgCell;
-                        ctx.fillRect(drawX, drawY, c.width, rh);
+                        ctx.fillRect(cellX, drawY, cellWidth, rh);
                         lastToken = undefined;
                     }
 
                     if (highlighted || rowDisabled) {
                         if (rowDisabled) {
                             ctx.fillStyle = theme.bgHeader;
-                            ctx.fillRect(drawX, drawY, c.width, rh);
+                            ctx.fillRect(cellX, drawY, cellWidth, rh);
                         }
                         if (highlighted) {
                             ctx.fillStyle = theme.accentLight;
-                            ctx.fillRect(drawX, drawY, c.width, rh);
+                            ctx.fillRect(cellX, drawY, cellWidth, rh);
                         }
                         lastToken = undefined;
                     } else {
                         if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
                             ctx.fillStyle = theme.bgSearchResult;
-                            ctx.fillRect(drawX, drawY, c.width, rh);
+                            ctx.fillRect(cellX, drawY, cellWidth, rh);
                             lastToken = undefined;
                         }
                     }
@@ -995,7 +1010,7 @@ function drawCells(
 
                     const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
 
-                    if (c.width > 10) {
+                    if (cellWidth > 10) {
                         if (theme !== colTheme) {
                             const cellFont = `${theme.baseFontStyle} ${theme.fontFamily}`;
                             if (cellFont !== font) {
@@ -1008,9 +1023,9 @@ function drawCells(
                             row,
                             cell,
                             c.sourceIndex,
-                            drawX,
+                            cellX,
                             drawY,
-                            c.width,
+                            cellWidth,
                             rh,
                             highlighted,
                             theme,
@@ -1387,6 +1402,7 @@ export function drawGrid(
             drawCells(
                 targetCtx,
                 effectiveCols,
+                mappedColumns,
                 height,
                 totalHeaderHeight,
                 translateX,
@@ -1509,6 +1525,7 @@ export function drawGrid(
     drawCells(
         targetCtx,
         effectiveCols,
+        mappedColumns,
         height,
         totalHeaderHeight,
         translateX,

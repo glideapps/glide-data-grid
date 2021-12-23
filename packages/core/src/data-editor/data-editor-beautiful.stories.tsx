@@ -2335,6 +2335,45 @@ export const Minimap: React.VFC = () => {
     },
 };
 
+export const SpanCell: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(1000, true, true);
+
+    const mangledGetCellContent = React.useCallback(
+        (cell): GridCell => {
+            const [, row] = cell;
+            if (row === 5) {
+                return {
+                    kind: GridCellKind.Text,
+                    allowOverlay: false,
+                    data: "Span Cell",
+                    span: [0, 999],
+                    displayData: "Span Cell",
+                };
+            }
+            return getCellContent(cell);
+        },
+        [getCellContent]
+    );
+
+    return (
+        <BeautifulWrapper title="Spans" description={<Description>FIXME.</Description>}>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={mangledGetCellContent}
+                columns={cols}
+                showMinimap={true}
+                rows={3000}
+                rowMarkers="both"
+            />
+        </BeautifulWrapper>
+    );
+};
+(Minimap as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 const zeroBounds = {
     left: 0,
     top: 0,
