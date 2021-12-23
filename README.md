@@ -90,17 +90,17 @@ function getData([col, row]: readonly [number, number]): GridCell {
 
 ## Full API documentation
 
-The full [API documentation is in the `API.md` file](core/API.md).
+The full [API documentation is in the `API.md` file](packages/core/API.md).
 
 # 📒 FAQ
 
 **Nothing shows up!**
 
-Please read the [Prerequisites section in the docs](core/API.md).
+Please read the [Prerequisites section in the docs](packages/core/API.md).
 
 **It crashes when I try to edit a cell!**
 
-Please read the [Prerequisites section in the docs](core/API.md).
+Please read the [Prerequisites section in the docs](packages/core/API.md).
 
 **Does it work with screen readers and other a11y tools?**
 
