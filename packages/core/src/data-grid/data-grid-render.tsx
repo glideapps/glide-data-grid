@@ -21,6 +21,8 @@ import {
     roundedPoly,
     drawWithLastUpdate,
     isGroupEqual,
+    cellIsSelected,
+    cellIsInRange,
 } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
@@ -1003,21 +1005,11 @@ function drawCells(
 
                     ctx.beginPath();
 
-                    const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
-                    let highlighted =
+                    const isFocused =
+                        cellIsSelected([c.sourceIndex, row], cell, selectedCell) ||
+                        cellIsInRange([c.sourceIndex, row], cell, selectedCell);
+                    const highlighted =
                         isFocused || (!isSticky && (rowSelected || selectedColumns.hasIndex(c.sourceIndex)));
-
-                    if (selectedCell?.range !== undefined) {
-                        const { range } = selectedCell;
-                        if (
-                            c.sourceIndex >= range.x &&
-                            c.sourceIndex < range.x + range.width &&
-                            row >= range.y &&
-                            row < range.y + range.height
-                        ) {
-                            highlighted = true;
-                        }
-                    }
 
                     if (isSticky || theme.bgCell !== outerTheme.bgCell) {
                         ctx.fillStyle = theme.bgCell;

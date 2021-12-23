@@ -1,8 +1,9 @@
 import { Theme } from "../common/styles";
-import { DrilldownCellData, GridColumn } from "./data-grid-types";
+import { DrilldownCellData, GridColumn, Item } from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs } from "./cells/cell-types";
+import { GridSelection, InnerGridCell } from "..";
 
 export interface MappedGridColumn extends GridColumn {
     sourceIndex: number;
@@ -23,6 +24,43 @@ export function useMappedColumns(columns: readonly GridColumn[], freezeColumns: 
 
 export function isGroupEqual(left: string | undefined, right: string | undefined): boolean {
     return (left ?? "") === (right ?? "");
+}
+
+export function cellIsSelected(location: Item, cell: InnerGridCell, selection: GridSelection | undefined): boolean {
+    if (selection === undefined) return false;
+
+    const [col, row] = selection.cell;
+    const [cellCol, cellRow] = location;
+    if (cellRow !== row) return false;
+
+    if (cell.span === undefined) {
+        return col === cellCol;
+    }
+
+    return col >= cell.span[0] && col <= cell.span[1];
+}
+
+export function cellIsInRange(location: Item, cell: InnerGridCell, selection: GridSelection | undefined): boolean {
+    if (selection === undefined) return false;
+
+    const startX = selection.range.x;
+    const endX = selection.range.x + selection.range.width - 1;
+    const startY = selection.range.y;
+    const endY = selection.range.y + selection.range.height - 1;
+
+    const [cellCol, cellRow] = location;
+    if (cellRow < startY || cellRow > endY) return false;
+
+    if (cell.span === undefined) {
+        return cellCol >= startX && cellCol <= endX;
+    }
+
+    const [spanStart, spanEnd] = cell.span;
+    return (
+        (spanStart >= startX && spanStart <= endX) ||
+        (spanEnd >= startX && spanStart <= endX) ||
+        (spanStart < startX && spanEnd > endX)
+    );
 }
 
 function remapForDnDState(
