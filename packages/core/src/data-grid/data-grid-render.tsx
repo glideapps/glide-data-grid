@@ -263,6 +263,7 @@ function blitLastFrame(
     };
 }
 
+// lines are effectively drawn on the top left edge of a cell.
 function drawGridLines(
     ctx: CanvasRenderingContext2D,
     effectiveCols: readonly MappedGridColumn[],
@@ -271,6 +272,7 @@ function drawGridLines(
     translateY: number,
     width: number,
     height: number,
+    spans: Rectangle[] | undefined,
     groupHeaderHeight: number,
     totalHeaderHeight: number,
     getRowHeight: (row: number) => number,
@@ -280,6 +282,15 @@ function drawGridLines(
     theme: Theme,
     verticalOnly: boolean = false
 ) {
+    if (spans !== undefined) {
+        ctx.beginPath();
+        ctx.save();
+        ctx.rect(0, 0, width, height);
+        for (const span of spans) {
+            ctx.rect(span.x + 1, span.y + 1, span.width - 1, span.height - 1);
+        }
+        ctx.clip("evenodd");
+    }
     const hColor = theme.horizontalBorderColor ?? theme.borderColor;
     const vColor = theme.borderColor;
     ctx.beginPath();
@@ -303,12 +314,11 @@ function drawGridLines(
             ctx.moveTo(tx, groupHeaderHeight);
             ctx.lineTo(tx, height);
         }
-
-        if (vColor !== hColor) {
-            ctx.strokeStyle = vColor;
-            ctx.stroke();
-            ctx.beginPath();
-        }
+    }
+    if (vColor !== hColor) {
+        ctx.strokeStyle = vColor;
+        ctx.stroke();
+        ctx.beginPath();
     }
 
     const stickyHeight = getRowHeight(rows - 1);
@@ -341,6 +351,10 @@ function drawGridLines(
     ctx.strokeStyle = hColor;
     ctx.stroke();
     ctx.beginPath();
+
+    if (spans !== undefined) {
+        ctx.restore();
+    }
 }
 
 export function getActionBoundsForGroup(
@@ -837,10 +851,12 @@ function drawCells(
     hoverInfo: HoverInfo | undefined,
     outerTheme: Theme,
     enqueue: (item: Item) => void
-): void {
+): Rectangle[] | undefined {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
     let font: string | undefined;
+    let result: Rectangle[] | undefined;
+    const handledSpans = new Set<string>();
     walkColumns(
         effectiveColumns,
         cellYOffset,
@@ -945,18 +961,38 @@ function drawCells(
 
                     let cellX = drawX;
                     let cellWidth = c.width;
+                    let mustReclip = false;
                     if (cell.span !== undefined) {
                         const [startCol, endCol] = cell.span;
-                        const firstNonSticky = effectiveColumns.find(x => !x.sticky)?.sourceIndex ?? 0;
+                        const firstNonSticky = allColumns.find(x => !x.sticky)?.sourceIndex ?? 0;
                         const renderFromCol = Math.max(startCol, firstNonSticky);
-                        if (endCol - startCol > 1 && Math.max(startCol, firstNonSticky) === c.sourceIndex) {
-                            for (let x = c.sourceIndex - 1; x > renderFromCol; x--) {
+                        const spanKey = `${row},${startCol},${endCol}`;
+                        if (!c.sticky && !handledSpans.has(spanKey)) {
+                            handledSpans.add(spanKey);
+                            for (let x = c.sourceIndex - 1; x >= renderFromCol; x--) {
                                 cellX -= allColumns[x].width;
                                 cellWidth += allColumns[x].width;
                             }
-                            for (let x = c.sourceIndex + 1; x < endCol; x++) {
+                            for (let x = c.sourceIndex + 1; x <= endCol; x++) {
                                 cellWidth += allColumns[x].width;
                             }
+                            ctx.restore();
+                            lastToken = undefined;
+                            ctx.save();
+                            ctx.beginPath();
+                            const d = Math.max(0, clipX - cellX);
+                            ctx.rect(cellX + d, drawY, cellWidth - d, rh);
+                            if (result === undefined) {
+                                result = [];
+                            }
+                            result.push({
+                                x: cellX + d,
+                                y: drawY,
+                                width: cellWidth - d,
+                                height: rh,
+                            });
+                            ctx.clip();
+                            mustReclip = true;
                         } else {
                             toDraw--;
                             return;
@@ -1045,6 +1081,13 @@ function drawCells(
 
                     ctx.globalAlpha = 1;
                     toDraw--;
+                    if (mustReclip) {
+                        ctx.restore();
+                        lastToken = undefined;
+                        reclip();
+                        font = colFont;
+                        ctx.font = colFont;
+                    }
                     return toDraw <= 0;
                 }
             );
@@ -1053,6 +1096,7 @@ function drawCells(
             return toDraw <= 0;
         }
     );
+    return result;
 }
 
 function drawBlanks(
@@ -1359,6 +1403,7 @@ export function drawGrid(
             translateY,
             width,
             height,
+            undefined,
             groupHeaderHeight,
             totalHeaderHeight,
             getRowHeight,
@@ -1525,7 +1570,7 @@ export function drawGrid(
     targetCtx.fillStyle = theme.bgCell;
     targetCtx.fillRect(0, 0, width, height);
 
-    drawCells(
+    const spans = drawCells(
         targetCtx,
         effectiveCols,
         mappedColumns,
@@ -1581,6 +1626,7 @@ export function drawGrid(
         translateY,
         width,
         height,
+        spans,
         groupHeaderHeight,
         totalHeaderHeight,
         getRowHeight,

@@ -369,7 +369,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     allowOverlay: false,
                 };
             } else {
-                return getCellContent([col - rowMarkerOffset, row]);
+                let result = getCellContent([col - rowMarkerOffset, row]);
+                if (rowMarkerOffset !== 0 && result.span !== undefined) {
+                    result = {
+                        ...result,
+                        span: [result.span[0] + rowMarkerOffset, result.span[1] + rowMarkerOffset],
+                    };
+                }
+                return result;
             }
         },
         [

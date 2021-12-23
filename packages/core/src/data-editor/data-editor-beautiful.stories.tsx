@@ -2345,9 +2345,9 @@ export const SpanCell: React.VFC = () => {
                 return {
                     kind: GridCellKind.Text,
                     allowOverlay: false,
-                    data: "Span Cell",
+                    data: "Span Cell that is very long and will go past the cell limits",
                     span: [0, 999],
-                    displayData: "Span Cell",
+                    displayData: "Span Cell that is very long and will go past the cell limits",
                 };
             }
             return getCellContent(cell);
