@@ -865,10 +865,13 @@ function drawCells(
                 if (!found) return;
             }
 
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(colDrawX, colDrawY, colWidth, colHeight);
-            ctx.clip();
+            const reclip = () => {
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(colDrawX, colDrawY, colWidth, colHeight);
+                ctx.clip();
+            };
+            reclip();
 
             const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
             const colTheme =
@@ -938,6 +941,9 @@ function drawCells(
                                   kind: GridCellKind.Loading,
                                   allowOverlay: false,
                               };
+
+                    if (cell.span !== undefined) {
+                    }
 
                     const theme = cell.themeOverride === undefined ? colTheme : { ...colTheme, ...cell.themeOverride };
 

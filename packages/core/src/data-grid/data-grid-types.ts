@@ -242,6 +242,7 @@ interface BaseGridCell {
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
+    readonly span?: readonly [number, number];
 }
 
 export interface LoadingCell extends BaseGridCell {
