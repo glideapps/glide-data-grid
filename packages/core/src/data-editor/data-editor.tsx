@@ -499,7 +499,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
 
                 const row = bottom ? rows : 0;
-                scrollRef.current?.scrollBy(0, (bottom ? 1 : -1) * scrollRef.current.scrollHeight + 1000);
+                scrollTo(col, row);
                 setGridSelection({
                     cell: [col, row],
                     range: {
