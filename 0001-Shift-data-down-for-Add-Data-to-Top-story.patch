@@ -1,0 +1,45 @@
+From 6905f38330ba7864ef0472e40227c1555057f044 Mon Sep 17 00:00:00 2001
+From: Peter <peter@config.com>
+Date: Fri, 14 Jan 2022 17:10:45 -0800
+Subject: [PATCH] Shift data down for "Add Data to Top" story
+
+---
+ .../data-editor/data-editor-beautiful.stories.tsx  | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/packages/core/src/data-editor/data-editor-beautiful.stories.tsx b/packages/core/src/data-editor/data-editor-beautiful.stories.tsx
+index 95ed6e5..a1bcdf8 100644
+--- a/packages/core/src/data-editor/data-editor-beautiful.stories.tsx
++++ b/packages/core/src/data-editor/data-editor-beautiful.stories.tsx
+@@ -614,10 +614,15 @@ export const AddDataToTop: React.VFC = () => {
+     const [numRows, setNumRows] = React.useState(50);
+ 
+     const onRowAppended = React.useCallback(async () => {
+-        const newRow = numRows;
++        // shift all of the existing cells down
++        for (let y = numRows; y > 0; y--) {
++          for (let x = 0; x < 6; x++) {
++            setCellValueRaw([x, y], getCellContent([x, y - 1]));
++          }
++        }
+         for (let c = 0; c < 6; c++) {
+-            const cell = getCellContent([c, newRow]);
+-            setCellValueRaw([c, newRow], clearCell(cell));
++            const cell = getCellContent([c, 0]);
++            setCellValueRaw([c, 0], clearCell(cell));
+         }
+         setNumRows(cv => cv + 1);
+         return "top" as const;
+@@ -631,9 +636,6 @@ export const AddDataToTop: React.VFC = () => {
+                     <Description>
+                         You can return a different location to have the new row append take place.
+                     </Description>
+-                    <MoreInfo>
+-                        At this time this story still adds the data to the end because our fake data source is bad.
+-                    </MoreInfo>
+                 </>
+             }>
+             <DataEditor
+-- 
+2.30.1 (Apple Git-130)
+
