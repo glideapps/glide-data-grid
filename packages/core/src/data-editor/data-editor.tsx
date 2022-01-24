@@ -97,6 +97,7 @@ export interface DataEditorProps extends Props {
     readonly onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
     readonly onGroupHeaderRenamed?: (groupName: string, newVal: string) => void;
     readonly onCellClicked?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;
+    readonly appendRowRef?: React.MutableRefObject<(col: number) => Promise<void> | null>; // {current?: (col: number) => void}; ???
 
     readonly trailingRowOptions?: {
         readonly tint?: boolean;
@@ -201,6 +202,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onGroupHeaderRenamed,
         onCellEdited,
         enableDownfill = false,
+        appendRowRef,
         onRowAppended,
         onColumnMoved,
         drawCell,
@@ -522,6 +524,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [onRowAppended, rowMarkerOffset, rows, setGridSelection]
     );
+    React.useEffect(() => {
+      if (appendRowRef) {
+        appendRowRef.current = appendRow
+      }
+    }, [appendRow, appendRowRef])
 
     const lastSelectedRowRef = React.useRef<number>();
     const lastSelectedColRef = React.useRef<number>();
