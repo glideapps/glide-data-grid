@@ -614,10 +614,15 @@ export const AddDataToTop: React.VFC = () => {
     const [numRows, setNumRows] = React.useState(50);
 
     const onRowAppended = React.useCallback(async () => {
-        const newRow = numRows;
+        // shift all of the existing cells down
+        for (let y = numRows; y > 0; y--) {
+          for (let x = 0; x < 6; x++) {
+            setCellValueRaw([x, y], getCellContent([x, y - 1]));
+          }
+        }
         for (let c = 0; c < 6; c++) {
-            const cell = getCellContent([c, newRow]);
-            setCellValueRaw([c, newRow], clearCell(cell));
+            const cell = getCellContent([c, 0]);
+            setCellValueRaw([c, 0], clearCell(cell));
         }
         setNumRows(cv => cv + 1);
         return "top" as const;
@@ -631,9 +636,6 @@ export const AddDataToTop: React.VFC = () => {
                     <Description>
                         You can return a different location to have the new row append take place.
                     </Description>
-                    <MoreInfo>
-                        At this time this story still adds the data to the end because our fake data source is bad.
-                    </MoreInfo>
                 </>
             }>
             <DataEditor
@@ -653,7 +655,7 @@ export const AddDataToTop: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(AddData as any).parameters = {
+(AddDataToTop as any).parameters = {
     options: {
         showPanel: false,
     },
