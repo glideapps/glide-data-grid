@@ -1223,7 +1223,7 @@ describe("data-editor", () => {
             jest.runAllTimers();
         });
 
-        expect(Element.prototype.scrollBy).toHaveBeenCalled();
+        expect(Element.prototype.scrollTo).toHaveBeenCalled();
     });
 
     test("Click row marker", async () => {
