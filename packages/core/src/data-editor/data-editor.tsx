@@ -471,6 +471,59 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [getMangedCellContent]
     );
 
+    const scrollTo = React.useCallback(
+        (col: number, row: number, dir: "horizontal" | "vertical" | "both" = "both") => {
+            if (scrollRef.current !== null) {
+                const grid = gridRef.current;
+                const canvas = canvasRef.current;
+                if (grid !== null && canvas !== null) {
+                    const bounds = grid.getBounds(col, row);
+                    const scrollBounds = canvas.getBoundingClientRect();
+
+                    if (bounds !== undefined) {
+                        let scrollX = 0;
+                        let scrollY = 0;
+
+                        const sLeft = scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
+                        const sRight = scrollBounds.right;
+                        const sTop = scrollBounds.top + totalHeaderHeight;
+                        let trailingRowHeight = 0;
+                        if (lastRowSticky) {
+                            trailingRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
+                        }
+                        const sBottom = scrollBounds.bottom - trailingRowHeight;
+
+                        if (sLeft > bounds.x) {
+                            scrollX = bounds.x - sLeft;
+                        } else if (sRight < bounds.x + bounds.width) {
+                            scrollX = bounds.x + bounds.width - sRight;
+                        }
+
+                        if (sTop > bounds.y) {
+                            scrollY = bounds.y - sTop;
+                        } else if (sBottom < bounds.y + bounds.height) {
+                            scrollY = bounds.y + bounds.height - sBottom;
+                        }
+
+                        if (dir === "vertical") {
+                            scrollX = 0;
+                        } else if (dir === "horizontal") {
+                            scrollY = 0;
+                        }
+
+                        if (scrollX !== 0 || scrollY !== 0) {
+                            scrollRef.current.scrollTo(
+                                scrollX + scrollRef.current.scrollLeft,
+                                scrollY + scrollRef.current.scrollTop
+                            );
+                        }
+                    }
+                }
+            }
+        },
+        [totalHeaderHeight, lastRowSticky, rowHeight, rowMarkerOffset, rowMarkerWidth, rows]
+    );
+
     const focusCallback = React.useRef(focusOnRowFromTrailingBlankRow);
     const getCellContentRef = React.useRef(getCellContent);
     const rowsRef = React.useRef(rows);
@@ -482,7 +535,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             // FIXME: Maybe this should optionally return a promise that we can await?
             const appendResult = onRowAppended?.();
 
-            let r;
+            let r: "top" | "bottom" | number | undefined = undefined;
             let bottom = true;
             if (appendResult !== undefined) {
                 r = await appendResult;
@@ -500,7 +553,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return;
                 }
 
-                const row = typeof r === 'number' ? r : (bottom ? rows : 0);
+                const row = typeof r === "number" ? r : bottom ? rows : 0;
                 scrollTo(col, row);
                 setGridSelection({
                     cell: [col, row],
@@ -522,7 +575,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             // Queue up to allow the consumer to react to the event and let us check if they did
             doFocus();
         },
-        [onRowAppended, rowMarkerOffset, rows, setGridSelection]
+        [onRowAppended, rowMarkerOffset, rows, scrollTo, setGridSelection]
     );
 
     const lastSelectedRowRef = React.useRef<number>();
@@ -943,59 +996,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         const str = cells.map(row => row.map(formatCell).join("\t")).join("\n");
         void window.navigator.clipboard.writeText(str);
     }, []);
-
-    const scrollTo = React.useCallback(
-        (col: number, row: number, dir: "horizontal" | "vertical" | "both" = "both") => {
-            if (scrollRef.current !== null) {
-                const grid = gridRef.current;
-                const canvas = canvasRef.current;
-                if (grid !== null && canvas !== null) {
-                    const bounds = grid.getBounds(col, row);
-                    const scrollBounds = canvas.getBoundingClientRect();
-
-                    if (bounds !== undefined) {
-                        let scrollX = 0;
-                        let scrollY = 0;
-
-                        const sLeft = scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
-                        const sRight = scrollBounds.right;
-                        const sTop = scrollBounds.top + totalHeaderHeight;
-                        let trailingRowHeight = 0;
-                        if (lastRowSticky) {
-                            trailingRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
-                        }
-                        const sBottom = scrollBounds.bottom - trailingRowHeight;
-
-                        if (sLeft > bounds.x) {
-                            scrollX = bounds.x - sLeft;
-                        } else if (sRight < bounds.x + bounds.width) {
-                            scrollX = bounds.x + bounds.width - sRight;
-                        }
-
-                        if (sTop > bounds.y) {
-                            scrollY = bounds.y - sTop;
-                        } else if (sBottom < bounds.y + bounds.height) {
-                            scrollY = bounds.y + bounds.height - sBottom;
-                        }
-
-                        if (dir === "vertical") {
-                            scrollX = 0;
-                        } else if (dir === "horizontal") {
-                            scrollY = 0;
-                        }
-
-                        if (scrollX !== 0 || scrollY !== 0) {
-                            scrollRef.current.scrollTo(
-                                scrollX + scrollRef.current.scrollLeft,
-                                scrollY + scrollRef.current.scrollTop
-                            );
-                        }
-                    }
-                }
-            }
-        },
-        [totalHeaderHeight, lastRowSticky, rowHeight, rowMarkerOffset, rowMarkerWidth, rows]
-    );
 
     const adjustSelection = React.useCallback(
         (direction: [number, number]) => {
