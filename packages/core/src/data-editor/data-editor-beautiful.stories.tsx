@@ -655,7 +655,7 @@ export const AddDataToTop: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(AddData as any).parameters = {
+(AddDataToTop as any).parameters = {
     options: {
         showPanel: false,
     },
