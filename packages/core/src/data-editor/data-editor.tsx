@@ -92,7 +92,7 @@ interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, Pre
 export interface DataEditorProps extends Props {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
-    readonly onRowAppended?: () => Promise<"top" | "bottom" | undefined> | void;
+    readonly onRowAppended?: () => Promise<"top" | "bottom" | number | undefined> | void;
     readonly onHeaderClicked?: (colIndex: number, event: HeaderClickedEventArgs) => void;
     readonly onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
     readonly onGroupHeaderRenamed?: (groupName: string, newVal: string) => void;
@@ -482,10 +482,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             // FIXME: Maybe this should optionally return a promise that we can await?
             const appendResult = onRowAppended?.();
 
+            let r;
             let bottom = true;
             if (appendResult !== undefined) {
-                const r = await appendResult;
+                r = await appendResult;
                 if (r === "top") bottom = false;
+                if (typeof r === "number") bottom = false;
             }
 
             let backoff = 0;
@@ -498,7 +500,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return;
                 }
 
-                const row = bottom ? rows : 0;
+                const row = typeof r === 'number' ? r : (bottom ? rows : 0);
                 scrollTo(col, row);
                 setGridSelection({
                     cell: [col, row],
