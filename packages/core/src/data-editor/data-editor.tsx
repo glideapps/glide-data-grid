@@ -97,7 +97,7 @@ export interface DataEditorProps extends Props {
     readonly onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
     readonly onGroupHeaderRenamed?: (groupName: string, newVal: string) => void;
     readonly onCellClicked?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;
-    readonly appendRowRef?: React.MutableRefObject<(col: number) => Promise<void> | null>; // {current?: (col: number) => void}; ???
+    readonly appendRowRef?: React.MutableRefObject<(col: number) => Promise<void> | null>;
 
     readonly trailingRowOptions?: {
         readonly tint?: boolean;
