@@ -659,6 +659,63 @@ export const AddDataToTop: React.VFC = () => {
     },
 };
 
+export const AppendRowRef: React.VFC = () => {
+    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
+
+    const [numRows, setNumRows] = React.useState(50);
+
+    const appendRowRef = React.useRef<any>(null);
+
+    const onClick = React.useCallback(() => {
+      const appendRow = appendRowRef.current;
+      appendRow(4)
+    }, [appendRowRef]);
+
+    const onRowAppended = React.useCallback(() => {
+        const newRow = numRows;
+        for (let c = 0; c < 6; c++) {
+            const cell = getCellContent([c, newRow]);
+            setCellValueRaw([c, newRow], clearCell(cell));
+        }
+        setNumRows(cv => cv + 1);
+    }, [getCellContent, numRows, setCellValueRaw]);
+
+    return (
+        <BeautifulWrapper
+            title="appendRowRef"
+            description={
+                <>
+                    <Description>Adding data can also be triggered from outside of <PropName>DataEditor</PropName></Description>
+                    <MoreInfo>
+                        By passing in an <PropName>appendRowRef</PropName> you can trigger the append elsewhere,
+                        like this <KeyName onClick={onClick}>Append</KeyName> button
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rowMarkers={"both"}
+                onCellEdited={setCellValue}
+                trailingRowOptions={{
+                    hint: "New row...",
+                    sticky: true,
+                    tint: true,
+                }}
+                rows={numRows}
+                appendRowRef={appendRowRef}
+                onRowAppended={onRowAppended}
+            />
+        </BeautifulWrapper>
+    );
+};
+(AppendRowRef as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const SmallEditableGrid = () => {
     const { cols, getCellContent, setCellValue } = useMockDataGenerator(6, false);
 
