@@ -71,13 +71,16 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     let pad = true;
     let editor: React.ReactNode;
     if (CustomEditor !== undefined) {
+        const onCustomFinishedEditing = React.useCallback((newValue?: any | undefined) => {
+            onFinishEditing(newValue !== undefined ? newValue : tempValue, [0, 0])
+        }, [onFinishEditing, tempValue]);
         pad = CustomEditor.disablePadding !== true;
         editor = (
             <CustomEditor
                 isHighlighted={highlight}
                 onChange={setTempValue}
                 value={targetValue}
-                onFinishedEditing={onClickOutside}
+                onFinishedEditing={onCustomFinishedEditing}
             />
         );
     } else if (CellEditor !== undefined) {
