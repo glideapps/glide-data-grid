@@ -282,13 +282,13 @@ export type ProvideEditorCallback<T extends GridCell> = (
     cell: T
 ) =>
     | (React.FunctionComponent<{
-        readonly onChange: (newValue: T) => void;
-        readonly onFinishedEditing: (newValue?: T) => void;
-        readonly isHighlighted: boolean;
-        readonly value: T;
-    }> & {
-        disablePadding?: boolean;
-    })
+          readonly onChange: (newValue: T) => void;
+          readonly onFinishedEditing: (newValue?: T) => void;
+          readonly isHighlighted: boolean;
+          readonly value: T;
+      }> & {
+          disablePadding?: boolean;
+      })
     | undefined;
 
 export interface CustomCell<T extends {} = {}> extends BaseGridCell {
@@ -385,7 +385,7 @@ function mergeRanges(input: CompactSelectionRanges) {
 let emptyCompactSelection: CompactSelection | undefined;
 
 export class CompactSelection {
-    private constructor(private readonly items: CompactSelectionRanges) { }
+    private constructor(private readonly items: CompactSelectionRanges) {}
 
     static empty = (): CompactSelection => {
         return emptyCompactSelection ?? (emptyCompactSelection = new CompactSelection([]));

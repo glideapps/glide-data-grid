@@ -40,6 +40,13 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         onFinishEditing(tempValue, [0, 0]);
     }, [tempValue, onFinishEditing]);
 
+    const onCustomFinishedEditing = React.useCallback(
+        (newValue?: GridCell) => {
+            onFinishEditing(newValue !== undefined ? newValue : tempValue, [0, 0]);
+        },
+        [onFinishEditing, tempValue]
+    );
+
     const onKeyDown = React.useCallback(
         (event: React.KeyboardEvent) => {
             if (event.key === "Escape") {
@@ -70,10 +77,8 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     let pad = true;
     let editor: React.ReactNode;
+
     if (CustomEditor !== undefined) {
-        const onCustomFinishedEditing = React.useCallback((newValue?: any | undefined) => {
-            onFinishEditing(newValue !== undefined ? newValue : tempValue, [0, 0])
-        }, [onFinishEditing, tempValue]);
         pad = CustomEditor.disablePadding !== true;
         editor = (
             <CustomEditor
