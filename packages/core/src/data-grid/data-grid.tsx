@@ -335,6 +335,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, undefined, translateX);
 
+            let button = 0;
+            if (ev instanceof MouseEvent) {
+                button = ev.button;
+            }
+
             // -1 === off right edge
             const col = getColumnIndexForX(x, effectiveCols, translateX);
 
@@ -378,6 +383,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     metaKey,
                     isEdge,
                     isTouch,
+                    button,
                 };
             } else if (row <= -1) {
                 let bounds = getBoundsForItem(canvas, col, row);
@@ -399,6 +405,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         isTouch,
                         localEventX: posX - bounds.x,
                         localEventY: posY - bounds.y,
+                        button,
                     };
                 } else {
                     result = {
@@ -413,6 +420,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         isTouch,
                         localEventX: posX - bounds.x,
                         localEventY: posY - bounds.y,
+                        button,
                     };
                 }
             } else {
@@ -429,6 +437,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isTouch,
                     localEventX: posX - bounds.x,
                     localEventY: posY - bounds.y,
+                    button,
                 };
             }
             return result;
@@ -699,7 +708,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             let clientX: number;
             let clientY: number;
             if (ev instanceof MouseEvent) {
-                if (ev.button !== 0) return;
                 clientX = ev.clientX;
                 clientY = ev.clientY;
             } else {
@@ -745,7 +753,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             let clientX: number;
             let clientY: number;
             if (ev instanceof MouseEvent) {
-                if (ev.button !== 0) return;
                 clientX = ev.clientX;
                 clientY = ev.clientY;
             } else {
@@ -759,13 +766,17 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 const [col] = args.location;
                 const headerBounds = isOverHeaderMenu(canvas, col, clientX, clientY);
                 if (headerBounds !== undefined) {
-                    onHeaderMenuClick?.(col, headerBounds);
+                    if (args.button === 0) {
+                        onHeaderMenuClick?.(col, headerBounds);
+                    }
                     return;
                 }
             } else if (args.kind === "group-header") {
                 const action = groupHeaderActionForEvent(args.group, args.bounds, args.localEventX, args.localEventY);
                 if (action !== undefined) {
-                    action.onClick(args);
+                    if (args.button === 0) {
+                        action.onClick(args);
+                    }
                     return;
                 }
             }
