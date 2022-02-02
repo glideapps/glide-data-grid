@@ -69,10 +69,10 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         return provideEditor?.(content);
     }, [content, provideEditor]);
 
-    const CellEditor = React.useMemo(() => {
-        if (content.kind === GridCellKind.Custom) return undefined;
+    const [CellEditor, useLabel] = React.useMemo(() => {
+        if (content.kind === GridCellKind.Custom) return [];
         const renderer = CellRenderers[content.kind];
-        return renderer.getEditor?.(content);
+        return [renderer.getEditor?.(content), renderer.useLabel];
     }, [content]);
 
     let pad = true;
@@ -115,7 +115,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     }
     const portal = createPortal(
         <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
-            <DataGridOverlayEditorStyle targetRect={target} pad={pad}>
+            <DataGridOverlayEditorStyle as={useLabel === true ? "label" : undefined} targetRect={target} pad={pad}>
                 <div className="clip-region" onKeyDown={CustomEditor === undefined ? undefined : onKeyDown}>
                     {editor}
                 </div>

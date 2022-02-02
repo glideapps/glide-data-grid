@@ -9,6 +9,7 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
     getAccessibilityString: c => c.data.join(", "),
     kind: GridCellKind.Image,
     needsHover: false,
+    useLabel: false,
     needsHoverPosition: false,
     render: a => drawImage(a, a.cell.displayData ?? a.cell.data),
     onDelete: c => ({

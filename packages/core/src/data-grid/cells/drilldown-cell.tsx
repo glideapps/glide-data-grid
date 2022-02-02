@@ -9,6 +9,7 @@ export const drilldownCellRenderer: InternalCellRenderer<DrilldownCell> = {
     getAccessibilityString: c => c.data.map(d => d.text).join(", "),
     kind: GridCellKind.Drilldown,
     needsHover: false,
+    useLabel: false,
     needsHoverPosition: false,
     render: a => drawDrilldownCell(a, a.cell.data),
     getEditor: () => p => {
