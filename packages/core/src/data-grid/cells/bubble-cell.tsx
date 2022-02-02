@@ -9,6 +9,7 @@ export const bubbleCellRenderer: InternalCellRenderer<BubbleCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",
     kind: GridCellKind.Bubble,
     needsHover: false,
+    useLabel: false,
     needsHoverPosition: false,
     render: a => drawBubbles(a, a.cell.data),
     getEditor: () => p => {

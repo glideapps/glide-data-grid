@@ -5,6 +5,7 @@ export const loadingCellRenderer: InternalCellRenderer<LoadingCell> = {
     getAccessibilityString: () => "",
     kind: GridCellKind.Loading,
     needsHover: false,
+    useLabel: false,
     needsHoverPosition: false,
     render: () => undefined,
 };
