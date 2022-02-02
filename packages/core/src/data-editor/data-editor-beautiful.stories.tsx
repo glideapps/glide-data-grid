@@ -38,7 +38,7 @@ function isTruthy(x: any): boolean {
 /**
  * Attempts to copy data between grid cells of any kind.
  */
-export function lossyCopyData<T extends EditableGridCell>(source: EditableGridCell, target: T): EditableGridCell {
+function lossyCopyData<T extends EditableGridCell>(source: EditableGridCell, target: T): EditableGridCell {
     const sourceData = source.data;
     if (typeof sourceData === typeof target.data) {
         return {
@@ -616,9 +616,9 @@ export const AddDataToTop: React.VFC = () => {
     const onRowAppended = React.useCallback(async () => {
         // shift all of the existing cells down
         for (let y = numRows; y > 0; y--) {
-          for (let x = 0; x < 6; x++) {
-            setCellValueRaw([x, y], getCellContent([x, y - 1]));
-          }
+            for (let x = 0; x < 6; x++) {
+                setCellValueRaw([x, y], getCellContent([x, y - 1]));
+            }
         }
         for (let c = 0; c < 6; c++) {
             const cell = getCellContent([c, 0]);
@@ -673,9 +673,9 @@ export const AddDataToMiddle: React.FC<AddDataToMiddleProps> = p => {
     const onRowAppended = React.useCallback(async () => {
         // shift rows below index down
         for (let y = numRows; y > index; y--) {
-          for (let x = 0; x < 6; x++) {
-            setCellValueRaw([x, y], getCellContent([x, y - 1]));
-          }
+            for (let x = 0; x < 6; x++) {
+                setCellValueRaw([x, y], getCellContent([x, y - 1]));
+            }
         }
         for (let c = 0; c < 6; c++) {
             const cell = getCellContent([c, index]);
@@ -694,7 +694,8 @@ export const AddDataToMiddle: React.FC<AddDataToMiddleProps> = p => {
                         You can return a different location to have the new row append take place.
                     </Description>
                     <MoreInfo>
-                        Note that <KeyName>insertIndex</KeyName> is zero-based while the number column on the left side of the grid is one-based, so inserting at index "4" creates a new row at "5"
+                        Note that <KeyName>insertIndex</KeyName> is zero-based while the number column on the left side
+                        of the grid is one-based, so inserting at index &quot;4&quot; creates a new row at &quot;5&quot;
                     </MoreInfo>
                 </>
             }>
