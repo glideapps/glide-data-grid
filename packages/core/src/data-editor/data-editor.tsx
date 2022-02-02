@@ -156,6 +156,7 @@ export interface DataEditorProps extends Props {
 export interface DataEditorRef {
     updateCells: DataGridRef["damage"];
     getBounds: DataGridRef["getBounds"];
+    scrollTo: (col: number, row: number, dir?: "horizontal" | "vertical" | "both") => void;
 }
 
 const loadingCell: GridCell = {
@@ -300,15 +301,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const cellYOffset = visibleRegion.y;
 
     const gridRef = React.useRef<DataGridRef | null>(null);
-
-    React.useImperativeHandle(
-        forwardedRef,
-        () => ({
-            updateCells: (...args) => gridRef.current?.damage(...args),
-            getBounds: (...args) => gridRef.current?.getBounds(...args),
-        }),
-        []
-    );
 
     const focus = React.useCallback((immediate?: boolean) => {
         if (immediate === true) {
@@ -472,7 +464,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const scrollTo = React.useCallback(
-        (col: number, row: number, dir: "horizontal" | "vertical" | "both" = "both") => {
+        (col: number, row: number, dir: "horizontal" | "vertical" | "both" = "both"): void => {
             if (scrollRef.current !== null) {
                 const grid = gridRef.current;
                 const canvas = canvasRef.current;
@@ -522,6 +514,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
         },
         [totalHeaderHeight, lastRowSticky, rowHeight, rowMarkerOffset, rowMarkerWidth, rows]
+    );
+
+    React.useImperativeHandle(
+        forwardedRef,
+        () => ({
+            updateCells: (...args) => gridRef.current?.damage(...args),
+            getBounds: (...args) => gridRef.current?.getBounds(...args),
+            scrollTo,
+        }),
+        [scrollTo]
     );
 
     const focusCallback = React.useRef(focusOnRowFromTrailingBlankRow);
