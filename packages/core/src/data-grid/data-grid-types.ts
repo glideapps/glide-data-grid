@@ -283,7 +283,7 @@ export type ProvideEditorCallback<T extends GridCell> = (
 ) =>
     | (React.FunctionComponent<{
           readonly onChange: (newValue: T) => void;
-          readonly onFinishedEditing: () => void;
+          readonly onFinishedEditing: (newValue?: T) => void;
           readonly isHighlighted: boolean;
           readonly value: T;
       }> & {
