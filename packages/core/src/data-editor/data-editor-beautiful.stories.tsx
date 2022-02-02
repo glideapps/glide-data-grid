@@ -1921,7 +1921,7 @@ export const CustomHeaderIcons: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(ThemePerColumn as any).parameters = {
+(CustomHeaderIcons as any).parameters = {
     options: {
         showPanel: false,
     },
