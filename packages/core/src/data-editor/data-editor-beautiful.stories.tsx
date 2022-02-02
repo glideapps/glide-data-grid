@@ -1750,6 +1750,55 @@ export const BuiltInSearch: React.VFC = () => {
     },
 };
 
+interface ImperativeScrollProps {
+    paddingY: number;
+}
+
+export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
+    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+
+    const ref = React.useRef<DataEditorRef>(null);
+
+    const onClick = () => {
+        ref.current?.scrollTo(4, 100, "both", 0, p.paddingY);
+    };
+
+    return (
+        <BeautifulWrapper
+            title="Imperative scrolling"
+            description={
+                <>
+                    <Description>
+                        You can imperatively scroll to a cell by calling <PropName>scrollTo</PropName> on a DataEditor
+                        ref.
+                    </Description>
+                    <MoreInfo>
+                        Click <button onClick={onClick}>Here</button> to scroll to column 4 row 100
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                ref={ref}
+                rowMarkers="number"
+                getCellContent={getCellContent}
+                columns={cols}
+                onCellEdited={setCellValue}
+                onColumnResized={onColumnResized}
+                rows={10_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ImperativeScroll as any).args = {
+    paddingY: 0,
+};
+(ImperativeScroll as any).parameters = {
+    options: {
+        showPanel: true,
+    },
+};
+
 const SimpleMenu = styled.div`
     width: 175px;
     padding: 8px 0;
