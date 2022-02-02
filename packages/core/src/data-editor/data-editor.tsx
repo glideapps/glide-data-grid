@@ -156,7 +156,7 @@ export interface DataEditorProps extends Props {
 export interface DataEditorRef {
     updateCells: DataGridRef["damage"];
     getBounds: DataGridRef["getBounds"];
-    scrollTo: (col: number, row: number, dir?: "horizontal" | "vertical" | "both") => void;
+    scrollTo: (col: number, row: number, dir?: "horizontal" | "vertical" | "both", paddingX?: number, paddingY?: number) => void;
 }
 
 const loadingCell: GridCell = {
@@ -464,7 +464,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const scrollTo = React.useCallback(
-        (col: number, row: number, dir: "horizontal" | "vertical" | "both" = "both"): void => {
+        (
+            col: number,
+            row: number,
+            dir: "horizontal" | "vertical" | "both" = "both",
+            paddingX: number = 0,
+            paddingY: number = 0
+        ): void => {
             if (scrollRef.current !== null) {
                 const grid = gridRef.current;
                 const canvas = canvasRef.current;
@@ -505,8 +511,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                         if (scrollX !== 0 || scrollY !== 0) {
                             scrollRef.current.scrollTo(
-                                scrollX + scrollRef.current.scrollLeft,
-                                scrollY + scrollRef.current.scrollTop
+                                scrollX + scrollRef.current.scrollLeft + paddingX,
+                                scrollY + scrollRef.current.scrollTop + paddingY
                             );
                         }
                     }
