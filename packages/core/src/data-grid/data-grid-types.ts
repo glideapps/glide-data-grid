@@ -26,6 +26,7 @@ interface BaseGridMouseEventArgs {
     readonly metaKey: boolean;
     readonly isTouch: boolean;
     readonly isEdge: boolean;
+    readonly button: number;
 }
 
 export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {

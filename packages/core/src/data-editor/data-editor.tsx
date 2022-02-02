@@ -98,6 +98,10 @@ export interface DataEditorProps extends Props {
     readonly onGroupHeaderRenamed?: (groupName: string, newVal: string) => void;
     readonly onCellClicked?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;
 
+    readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;
+    readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
+    readonly onCellContextMenu?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;
+
     readonly trailingRowOptions?: {
         readonly tint?: boolean;
         readonly hint?: string;
@@ -199,6 +203,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onCellClicked,
         onHeaderClicked,
         onGroupHeaderClicked,
+        onCellContextMenu,
+        onHeaderContextMenu,
+        onGroupHeaderContextMenu,
         onGroupHeaderRenamed,
         onCellEdited,
         enableDownfill = false,
@@ -584,6 +591,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const lastSelectedColRef = React.useRef<number>();
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
+            if (args.button !== 0) {
+                return;
+            }
             mouseState.current = {
                 previousSelection: gridSelection,
             };
@@ -787,37 +797,52 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             if (args.kind === "header") {
-                onHeaderClicked?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                if (args.button === 0) {
+                    onHeaderClicked?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                } else if (args.button === 2) {
+                    onHeaderContextMenu?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                }
             }
 
             if (args.kind === "group-header") {
-                onGroupHeaderClicked?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                if (args.button === 0) {
+                    onGroupHeaderClicked?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                } else if (args.button === 2) {
+                    onGroupHeaderContextMenu?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                }
             }
 
             if (args.kind !== "cell") {
                 return;
             }
-            onCellClicked?.([args.location[0] - rowMarkerOffset, args.location[1]], { ...args, preventDefault });
-            if (gridSelection !== undefined && mouse?.previousSelection?.cell !== undefined && !prevented) {
-                const [col, row] = args.location;
-                const [selectedCol, selectedRow] = gridSelection.cell;
-                const [prevCol, prevRow] = mouse.previousSelection.cell;
-                const c = getMangedCellContent([col, row]);
-                const r = c.kind === GridCellKind.Custom ? undefined : CellRenderers[c.kind];
-                if (r !== undefined && r.onClick !== undefined) {
-                    const newVal = r.onClick(c, args.localEventX, args.localEventY, args.bounds);
-                    if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
-                        mangledOnCellEdited(args.location, newVal);
-                        gridRef.current?.damage([
-                            {
-                                cell: args.location,
-                            },
-                        ]);
+            if (args.button === 0) {
+                onCellClicked?.([args.location[0] - rowMarkerOffset, args.location[1]], { ...args, preventDefault });
+                if (gridSelection !== undefined && mouse?.previousSelection?.cell !== undefined && !prevented) {
+                    const [col, row] = args.location;
+                    const [selectedCol, selectedRow] = gridSelection.cell;
+                    const [prevCol, prevRow] = mouse.previousSelection.cell;
+                    const c = getMangedCellContent([col, row]);
+                    const r = c.kind === GridCellKind.Custom ? undefined : CellRenderers[c.kind];
+                    if (r !== undefined && r.onClick !== undefined) {
+                        const newVal = r.onClick(c, args.localEventX, args.localEventY, args.bounds);
+                        if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
+                            mangledOnCellEdited(args.location, newVal);
+                            gridRef.current?.damage([
+                                {
+                                    cell: args.location,
+                                },
+                            ]);
+                        }
+                    }
+                    if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
+                        reselect(args.bounds);
                     }
                 }
-                if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
-                    reselect(args.bounds);
-                }
+            } else if (args.button === 2) {
+                onCellContextMenu?.([args.location[0] - rowMarkerOffset, args.location[1]], {
+                    ...args,
+                    preventDefault,
+                });
             }
         },
         [
@@ -825,8 +850,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             gridSelection,
             mangledOnCellEdited,
             onCellClicked,
+            onCellContextMenu,
             onGroupHeaderClicked,
+            onGroupHeaderContextMenu,
             onHeaderClicked,
+            onHeaderContextMenu,
             reselect,
             rowMarkerOffset,
         ]
