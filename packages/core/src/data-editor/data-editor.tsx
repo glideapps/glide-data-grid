@@ -156,7 +156,13 @@ export interface DataEditorProps extends Props {
 export interface DataEditorRef {
     updateCells: DataGridRef["damage"];
     getBounds: DataGridRef["getBounds"];
-    scrollTo: (col: number, row: number, dir?: "horizontal" | "vertical" | "both", paddingX?: number, paddingY?: number) => void;
+    scrollTo: (
+        col: number,
+        row: number,
+        dir?: "horizontal" | "vertical" | "both",
+        paddingX?: number,
+        paddingY?: number
+    ) => void;
 }
 
 const loadingCell: GridCell = {
@@ -475,10 +481,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const grid = gridRef.current;
                 const canvas = canvasRef.current;
                 if (grid !== null && canvas !== null) {
-                    const bounds = grid.getBounds(col, row);
+                    const rawBounds = grid.getBounds(col, row);
+
                     const scrollBounds = canvas.getBoundingClientRect();
 
-                    if (bounds !== undefined) {
+                    if (rawBounds !== undefined) {
+                        const bounds = {
+                            x: rawBounds.x - paddingX,
+                            y: rawBounds.y - paddingY,
+                            width: rawBounds.width + 2 * paddingX,
+                            height: rawBounds.height + 2 * paddingY,
+                        };
+
                         let scrollX = 0;
                         let scrollY = 0;
 
@@ -511,8 +525,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                         if (scrollX !== 0 || scrollY !== 0) {
                             scrollRef.current.scrollTo(
-                                scrollX + scrollRef.current.scrollLeft + paddingX,
-                                scrollY + scrollRef.current.scrollTop + paddingY
+                                scrollX + scrollRef.current.scrollLeft,
+                                scrollY + scrollRef.current.scrollTop
                             );
                         }
                     }
