@@ -37,7 +37,7 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
         }
     }
 
-    &.style {
+    &.gdg-style {
         border-radius: 2px;
         background-color: ${p => p.theme.bgCell};
         ${p => p.pad && `padding: ${Math.max(0, (p.targetRect.height - 28) / 2)}px 8.5px 3px;`}
