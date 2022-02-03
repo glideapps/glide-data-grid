@@ -24,16 +24,8 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
     max-width: 400px;
     max-height: calc(100vh - ${p => p.targetRect.y + 10}px);
 
-    border-radius: 2px;
-    background-color: ${p => p.theme.bgCell};
-
-    box-shadow: 0 0 0 1px ${p => p.theme.accentColor}, 0px 0px 1px rgba(62, 65, 86, 0.4),
-        0px 6px 12px rgba(62, 65, 86, 0.15);
-
     font-family: ${p => p.theme.fontFamily};
     font-size: 13px;
-
-    ${p => p.pad && `padding: ${Math.max(0, (p.targetRect.height - 28) / 2)}px 8.5px 3px;`}
 
     @keyframes glide_fade_in {
         from {
@@ -45,7 +37,16 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
         }
     }
 
-    animation: glide_fade_in 60ms 1;
+    &.style {
+        border-radius: 2px;
+        background-color: ${p => p.theme.bgCell};
+        ${p => p.pad && `padding: ${Math.max(0, (p.targetRect.height - 28) / 2)}px 8.5px 3px;`}
+
+        box-shadow: 0 0 0 1px ${p => p.theme.accentColor}, 0px 0px 1px rgba(62, 65, 86, 0.4),
+            0px 6px 12px rgba(62, 65, 86, 0.15);
+
+        animation: glide_fade_in 60ms 1;
+    }
 
     .clip-region {
         display: flex;
