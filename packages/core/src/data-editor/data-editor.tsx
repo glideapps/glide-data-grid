@@ -609,6 +609,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const lastSelectedRowRef = React.useRef<number>();
     const lastSelectedColRef = React.useRef<number>();
+
+    const lastMouseDownCellLocation = React.useRef<[number, number]>();
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
             if (args.button !== 0) {
@@ -617,10 +619,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             mouseState.current = {
                 previousSelection: gridSelection,
             };
+
+            lastMouseDownCellLocation.current = undefined;
+
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
             if (args.kind === "cell") {
                 lastSelectedColRef.current = undefined;
                 const [col, row] = args.location;
+
+                lastMouseDownCellLocation.current = [col, row];
+
                 if (col === 0 && hasRowMarkers) {
                     if ((showTrailingBlankRow === true && row === rows) || rowMarkers === "number") return;
                     setGridSelection(undefined);
@@ -836,9 +844,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return;
             }
             if (args.button === 0) {
-                onCellClicked?.([args.location[0] - rowMarkerOffset, args.location[1]], { ...args, preventDefault });
+                const [col, row] = args.location;
+                const [lastMouseDownCol, lastMouseDownRow] = lastMouseDownCellLocation.current ?? [];
+                if (lastMouseDownCol === col && lastMouseDownRow === row) {
+                    onCellClicked?.([col - rowMarkerOffset, row], {
+                        ...args,
+                        preventDefault,
+                    });
+                }
                 if (gridSelection !== undefined && mouse?.previousSelection?.cell !== undefined && !prevented) {
-                    const [col, row] = args.location;
                     const [selectedCol, selectedRow] = gridSelection.cell;
                     const [prevCol, prevRow] = mouse.previousSelection.cell;
                     const c = getMangedCellContent([col, row]);
