@@ -293,6 +293,52 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
     });
 
+    test("Doesn't emit cell click if mouseDown happened in a different cell", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellClicked={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B, ends at x = 310
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 320, // Col C, started at x = 310
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).not.toHaveBeenCalled();
+    });
+
+    test("Doesn't emit header click if mouseDown happened in a different cell", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onHeaderClicked={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B, ends at x = 310
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 320, // Col C, started at x = 310
+            clientY: 16, // Header
+        });
+
+        expect(spy).not.toHaveBeenCalled();
+    });
+
     test("Uneven rows cell click", async () => {
         const spy = jest.fn();
 

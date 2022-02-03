@@ -573,7 +573,7 @@ export const AddData: React.VFC = () => {
         }
         setNumRows(cv => cv + 1);
     }, [getCellContent, numRows, setCellValueRaw]);
-    
+
     return (
         <BeautifulWrapper
             title="Add data"

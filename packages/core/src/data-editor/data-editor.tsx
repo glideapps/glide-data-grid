@@ -609,6 +609,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const lastSelectedRowRef = React.useRef<number>();
     const lastSelectedColRef = React.useRef<number>();
+
+    const lastMouseDownCellLocation = React.useRef<[number, number]>();
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
             if (args.button !== 0) {
@@ -617,10 +619,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             mouseState.current = {
                 previousSelection: gridSelection,
             };
+
+            lastMouseDownCellLocation.current = undefined;
+
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
+            const [col, row] = args.location;
             if (args.kind === "cell") {
                 lastSelectedColRef.current = undefined;
-                const [col, row] = args.location;
+
+                lastMouseDownCellLocation.current = [col, row];
+
                 if (col === 0 && hasRowMarkers) {
                     if ((showTrailingBlankRow === true && row === rows) || rowMarkers === "number") return;
                     setGridSelection(undefined);
@@ -694,7 +702,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
                 }
             } else if (args.kind === "header") {
-                const [col] = args.location;
+                lastMouseDownCellLocation.current = [col, row];
                 setGridSelection(undefined);
                 setOverlay(undefined);
                 if (hasRowMarkers && col === 0) {
@@ -740,7 +748,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 lastSelectedRowRef.current = undefined;
                 lastSelectedColRef.current = undefined;
             } else if (args.kind === "group-header") {
-                const [col] = args.location;
+                lastMouseDownCellLocation.current = [col, row];
 
                 if (col < rowMarkerOffset) return;
 
@@ -816,8 +824,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 window.clearInterval(scrollTimer.current);
             }
 
+            const [lastMouseDownCol, lastMouseDownRow] = lastMouseDownCellLocation.current ?? [];
+            const [col, row] = args.location;
+
             if (args.kind === "header") {
-                if (args.button === 0) {
+                if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
                     onHeaderClicked?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
                 } else if (args.button === 2) {
                     onHeaderContextMenu?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
@@ -825,7 +836,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             if (args.kind === "group-header") {
-                if (args.button === 0) {
+                if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
                     onGroupHeaderClicked?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
                 } else if (args.button === 2) {
                     onGroupHeaderContextMenu?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
@@ -836,9 +847,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return;
             }
             if (args.button === 0) {
-                onCellClicked?.([args.location[0] - rowMarkerOffset, args.location[1]], { ...args, preventDefault });
+                if (lastMouseDownCol === col && lastMouseDownRow === row) {
+                    onCellClicked?.([col - rowMarkerOffset, row], {
+                        ...args,
+                        preventDefault,
+                    });
+                }
                 if (gridSelection !== undefined && mouse?.previousSelection?.cell !== undefined && !prevented) {
-                    const [col, row] = args.location;
                     const [selectedCol, selectedRow] = gridSelection.cell;
                     const [prevCol, prevRow] = mouse.previousSelection.cell;
                     const c = getMangedCellContent([col, row]);
