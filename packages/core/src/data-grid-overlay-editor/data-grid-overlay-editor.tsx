@@ -118,7 +118,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     const portal = createPortal(
         <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
             <DataGridOverlayEditorStyle
-                className={style ? "style" : "unstyle"}
+                className={style ? "gdg-style" : "gdg-unstyle"}
                 as={useLabel === true ? "label" : undefined}
                 targetRect={target}
                 pad={pad}>
