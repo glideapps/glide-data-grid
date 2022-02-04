@@ -942,7 +942,7 @@ interface AddColumnsProps {
     columnsCount: number;
 }
 
-export const AddColumns: React.FC<AddColumnsProps> = p => {
+export const AddColumns: React.VFC<AddColumnsProps> = p => {
     const { cols, getCellContent } = useMockDataGenerator(p.columnsCount);
 
     return (
@@ -1084,6 +1084,96 @@ export const DrawCustomCells: React.VFC = () => {
 (DrawCustomCells as any).parameters = {
     options: {
         showPanel: false,
+    },
+};
+interface ExperimentalMarginPaddingProps {
+    marginBottom: number;
+    marginRight: number;
+    paddingBottom: number;
+    paddingRight: number;
+}
+export const ExperimentalMarginPadding: React.FC<ExperimentalMarginPaddingProps> = p => {
+    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
+
+    const [numRows, setNumRows] = React.useState(50);
+
+    const onRowAppended = React.useCallback(() => {
+        const newRow = numRows;
+        for (let c = 0; c < 6; c++) {
+            const cell = getCellContent([c, newRow]);
+            setCellValueRaw([c, newRow], clearCell(cell));
+        }
+        setNumRows(cv => cv + 1);
+    }, [getCellContent, numRows, setCellValueRaw]);
+    
+    return (
+        <BeautifulWrapper
+            title="[Experimental] Margin and Padding"
+            description={
+                <>
+                    <Description>Margin and padding can be used to allow for extra scrolling</Description>
+                    <MoreInfo>
+                        Use <PropName>marginRight</PropName>, <PropName>marginBottom</PropName>, <PropName>paddingRight</PropName> and <PropName>paddingBottom</PropName> to control the drawing behavior
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rowMarkers={"both"}
+                onCellEdited={setCellValue}
+                trailingRowOptions={{
+                    hint: "New row...",
+                    sticky: true,
+                    tint: true,
+                }}
+                experimental={p}
+                rows={numRows}
+                onRowAppended={onRowAppended}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ExperimentalMarginPadding as any).args = {
+    marginBottom: 100,
+    marginRight: 100,
+    paddingBottom: 100,
+    paddingRight: 100,
+};
+(ExperimentalMarginPadding as any).argTypes = {
+    marginBottom: {
+        control: {
+            type: "number",
+            min: 0,
+            max: 300,
+        },
+    },
+    marginRight: {
+        control: {
+            type: "number",
+            min: 0,
+            max: 300,
+        },
+    },
+    paddingBottom: {
+        control: {
+            type: "number",
+            min: 0,
+            max: 300,
+        },
+    },
+    paddingRight: {
+        control: {
+            type: "number",
+            min: 0,
+            max: 300,
+        },
+    },
+};
+(ExperimentalMarginPadding as any).parameters = {
+    options: {
+        showPanel: true,
     },
 };
 
