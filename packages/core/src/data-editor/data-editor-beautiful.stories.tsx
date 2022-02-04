@@ -942,7 +942,7 @@ interface AddColumnsProps {
     columnsCount: number;
 }
 
-export const AddColumns: React.VFC<AddColumnsProps> = p => {
+export const AddColumns: React.FC<AddColumnsProps> = p => {
     const { cols, getCellContent } = useMockDataGenerator(p.columnsCount);
 
     return (
@@ -1092,7 +1092,7 @@ interface ExperimentalMarginPaddingProps {
     paddingBottom: number;
     paddingRight: number;
 }
-export const ExperimentalMarginPadding: React.FC<ExperimentalMarginPaddingProps> = p => {
+export const ExperimentalMarginPadding: React.VFC<ExperimentalMarginPaddingProps> = p => {
     const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
 
     const [numRows, setNumRows] = React.useState(50);
