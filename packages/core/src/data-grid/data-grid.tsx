@@ -109,6 +109,8 @@ export interface DataGridProps {
     };
 
     readonly experimental?: {
+        readonly marginRight?: number;
+        readonly marginBottom?: number;
         readonly paddingRight?: number;
         readonly paddingBottom?: number;
         readonly disableFirefoxRescaling?: boolean;

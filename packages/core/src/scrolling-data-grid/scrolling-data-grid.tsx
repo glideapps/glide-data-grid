@@ -51,7 +51,7 @@ const MinimapStyle = styled.div`
 
 const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const { columns, rows, rowHeight, headerHeight, groupHeaderHeight, enableGroups, freezeColumns, experimental } = p;
-    const { paddingRight, paddingBottom } = experimental ?? {};
+    const { marginRight, marginBottom, paddingRight, paddingBottom } = experimental ?? {};
     const {
         className,
         onVisibleRegionChanged,
@@ -274,12 +274,12 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             minimap={minimap}
             className={className}
             draggable={dataGridProps.isDraggable === true}
-            scrollWidth={width + (paddingRight ?? 0)}
-            scrollHeight={height + (paddingBottom ?? 0)}
+            scrollWidth={width + (marginRight ?? 0) + (paddingRight ?? 0)}
+            scrollHeight={height + (marginBottom ?? 0) + (paddingBottom ?? 0)}
             clientHeight={clientHeight}
             rightElement={rightElement}
-            paddingBottom={paddingBottom}
-            paddingRight={paddingRight}
+            marginBottom={marginBottom}
+            marginRight={marginRight}
             rightElementSticky={rightElementSticky}
             update={onScrollUpdate}
             scrollToEnd={scrollToEnd}>

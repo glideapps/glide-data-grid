@@ -7,8 +7,8 @@ import { browserIsSafari } from "../common/browser-detect";
 interface Props {
     readonly className?: string;
     readonly draggable: boolean;
-    readonly paddingRight?: number;
-    readonly paddingBottom?: number;
+    readonly marginRight?: number;
+    readonly marginBottom?: number;
     readonly clientHeight: number;
     readonly scrollWidth: number;
     readonly scrollHeight: number;
@@ -69,8 +69,8 @@ export const InfiniteScroller: React.FC<Props> = p => {
         update,
         draggable,
         className,
-        paddingBottom = 0,
-        paddingRight = 0,
+        marginBottom = 0,
+        marginRight = 0,
         rightElement,
         rightElementSticky = false,
         scrollRef,
@@ -116,10 +116,14 @@ export const InfiniteScroller: React.FC<Props> = p => {
         update({
             x: el.scrollLeft,
             y: Math.min(maxFakeY, newY + offsetY.current),
-            width: el.clientWidth - paddingRight,
-            height: el.clientHeight - paddingBottom,
+            width: el.clientWidth - marginRight,
+            height: el.clientHeight - marginBottom,
         });
-    }, [paddingBottom, paddingRight, scrollHeight, update]);
+    }, [marginBottom, marginRight, scrollHeight, update]);
+
+    React.useEffect(() => {
+        onScroll();
+    }, [onScroll, marginBottom, marginRight]);
 
     const lastProps = React.useRef<{ width?: number; height?: number }>();
 
@@ -186,8 +190,8 @@ export const InfiniteScroller: React.FC<Props> = p => {
                                                     position: "sticky",
                                                     top: 0,
                                                     marginBottom: -40,
-                                                    marginRight: paddingRight,
-                                                    right: rightElementSticky ? paddingRight ?? 0 : undefined,
+                                                    marginRight: marginRight,
+                                                    right: rightElementSticky ? marginRight ?? 0 : undefined,
                                                     pointerEvents: "auto",
                                                 }}>
                                                 {rightElement}
