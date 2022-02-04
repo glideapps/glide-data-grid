@@ -121,6 +121,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
         });
     }, [marginBottom, marginRight, scrollHeight, update]);
 
+    // Ensure the grid is updated when marginBottom and marginRight change
     React.useEffect(() => {
         onScroll();
     }, [onScroll, marginBottom, marginRight]);
