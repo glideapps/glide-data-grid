@@ -529,7 +529,7 @@ export const Overscroll: React.VFC<OverscrollProps> = p => {
             description={
                 <>
                     <Description>
-                        You can allocate extra space at the ends of the grid by seting the{" "}
+                        You can allocate extra space at the ends of the grid by setting the{" "}
                         <PropName>overscrollX</PropName> and <PropName>overscrollY</PropName> props
                     </Description>
                 </>
