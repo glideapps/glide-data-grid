@@ -121,6 +121,11 @@ export const InfiniteScroller: React.FC<Props> = p => {
         });
     }, [paddingBottom, paddingRight, scrollHeight, update]);
 
+    // Ensure the grid is updated when paddingBottom and paddingRight change
+    React.useEffect(() => {
+        onScroll();
+    }, [onScroll, paddingBottom, paddingRight]);
+
     const lastProps = React.useRef<{ width?: number; height?: number }>();
 
     const nomEvent = React.useCallback((e: React.MouseEvent) => {
