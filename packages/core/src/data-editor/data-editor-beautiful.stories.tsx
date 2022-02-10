@@ -501,6 +501,7 @@ export const ResizableColumns: React.VFC = () => {
                 getCellContent={getCellContent}
                 columns={cols}
                 overscrollX={200}
+                overscrollY={200}
                 rows={50}
                 onColumnResized={onColumnResized}
             />
@@ -510,6 +511,63 @@ export const ResizableColumns: React.VFC = () => {
 (ResizableColumns as any).parameters = {
     options: {
         showPanel: false,
+    },
+};
+
+interface OverscrollProps {
+    overscrollX: number;
+    overscrollY: number;
+}
+
+export const Overscroll: React.VFC<OverscrollProps> = p => {
+    const { overscrollX, overscrollY } = p;
+    const { cols, getCellContent } = useMockDataGenerator(20);
+
+    return (
+        <BeautifulWrapper
+            title="Overscroll"
+            description={
+                <>
+                    <Description>
+                        You can allocate extra space at the ends of the grid by seting the{" "}
+                        <PropName>overscrollX</PropName> and <PropName>overscrollY</PropName> props
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                overscrollX={overscrollX}
+                overscrollY={overscrollY}
+                rows={50}
+            />
+        </BeautifulWrapper>
+    );
+};
+(Overscroll as any).argTypes = {
+    overscrollX: {
+        control: {
+            type: "range",
+            min: 0,
+            max: 600,
+        },
+    },
+    overscrollY: {
+        control: {
+            type: "range",
+            min: 0,
+            max: 600,
+        },
+    },
+};
+(Overscroll as any).args = {
+    overscrollX: 200,
+    overscrollY: 200,
+};
+(Overscroll as any).parameters = {
+    options: {
+        showPanel: true,
     },
 };
 
@@ -573,7 +631,7 @@ export const AddData: React.VFC = () => {
         }
         setNumRows(cv => cv + 1);
     }, [getCellContent, numRows, setCellValueRaw]);
-    
+
     return (
         <BeautifulWrapper
             title="Add data"
