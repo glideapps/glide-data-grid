@@ -289,6 +289,7 @@ export type ProvideEditorCallback<T extends GridCell> = (
           readonly value: T;
       }> & {
           disablePadding?: boolean;
+          disableStyling?: boolean;
       })
     | undefined;
 

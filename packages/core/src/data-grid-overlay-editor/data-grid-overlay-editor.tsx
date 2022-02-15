@@ -77,9 +77,11 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     let pad = true;
     let editor: React.ReactNode;
+    let style = true;
 
     if (CustomEditor !== undefined) {
         pad = CustomEditor.disablePadding !== true;
+        style = CustomEditor.disableStyling !== true;
         editor = (
             <CustomEditor
                 isHighlighted={highlight}
@@ -115,7 +117,11 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     }
     const portal = createPortal(
         <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
-            <DataGridOverlayEditorStyle as={useLabel === true ? "label" : undefined} targetRect={target} pad={pad}>
+            <DataGridOverlayEditorStyle
+                className={style ? "gdg-style" : "gdg-unstyle"}
+                as={useLabel === true ? "label" : undefined}
+                targetRect={target}
+                pad={pad}>
                 <div className="clip-region" onKeyDown={CustomEditor === undefined ? undefined : onKeyDown}>
                     {editor}
                 </div>

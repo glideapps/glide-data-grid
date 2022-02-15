@@ -7,7 +7,7 @@ export type { MarkdownDivProps } from "./markdown-div/markdown-div";
 export { default as MarkdownDiv } from "./markdown-div/markdown-div";
 export * from "./data-editor/data-editor";
 export * from "./data-grid/data-grid-types";
-export { SpriteMap } from "./data-grid/data-grid-sprites";
+export type { SpriteMap } from "./data-grid/data-grid-sprites";
 export { default as DataEditorContainer } from "./data-editor-container/data-grid-container";
 export type { Theme } from "./common/styles";
 export { parseToRgba } from "./data-grid/color-parser";
