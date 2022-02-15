@@ -21,3 +21,7 @@ npm run i && npm run storybook
 ## Forking the data grid?
 
 Please consider submitting your work for review. We are a small project but we are super enthused when anyone comes by to help us build the best damned data grid on the internet.
+
+## Any contributions you make will be under the MIT Software License
+
+In short, when you submit code changes, your submissions are understood to be under the same MIT License that covers the project. Feel free to contact the maintainers if that's a concern.

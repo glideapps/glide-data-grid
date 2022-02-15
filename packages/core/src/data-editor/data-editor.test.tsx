@@ -363,6 +363,32 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
     });
 
+    test("Emits finished editing", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onFinishedEditing={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 74,
+        });
+
+        const overlay = screen.getByDisplayValue("j");
+
+        fireEvent.keyDown(overlay, {
+            key: "Enter",
+        });
+
+        expect(spy).toBeCalledWith({ allowOverlay: true, data: "j", displayData: "1, 1", kind: "text" }, [0, 1]);
+    });
+
     test("Emits header click", async () => {
         const spy = jest.fn();
 
