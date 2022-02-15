@@ -31,7 +31,7 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
         0px 6px 12px rgba(62, 65, 86, 0.15);
 
     font-family: ${p => p.theme.fontFamily};
-    font-size: 13px;
+    font-size: ${p => p.theme.fontSize};
 
     ${p => p.pad && `padding: ${Math.max(0, (p.targetRect.height - 28) / 2)}px 8.5px 3px;`}
 

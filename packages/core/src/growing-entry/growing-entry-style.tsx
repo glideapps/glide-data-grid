@@ -2,7 +2,7 @@ import { styled } from "../common/styles";
 import { css } from "styled-components";
 
 const inputProps = css`
-    font-size: 13px;
+    font-size: ${p => p.theme.fontSize};
     line-height: 16px;
     font-family: ${p => p.theme.fontFamily};
     color: ${p => p.theme.textDark};

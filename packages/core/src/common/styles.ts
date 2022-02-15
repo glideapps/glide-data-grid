@@ -39,6 +39,7 @@ export interface Theme {
     headerFontStyle: string;
     baseFontStyle: string;
     fontFamily: string;
+    fontSize: string;
 }
 
 const dataEditorBaseTheme: Theme = {
@@ -81,6 +82,7 @@ const dataEditorBaseTheme: Theme = {
     baseFontStyle: "13px",
     fontFamily:
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
+    fontSize: "13px",
 };
 
 export const styled = baseStyled as ThemedStyledInterface<Theme>;

@@ -6,7 +6,7 @@ export const NumberOverlayEditorStyle = styled.div`
     color: ${p => p.theme.textDark};
 
     > input {
-        font-size: 13px;
+        font-size: ${p => p.theme.fontSize};
         padding: 0;
         font-family: ${p => p.theme.fontFamily};
         color: ${p => p.theme.textDark};
