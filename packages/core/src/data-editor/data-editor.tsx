@@ -97,7 +97,7 @@ export interface DataEditorProps extends Props {
     readonly onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
     readonly onGroupHeaderRenamed?: (groupName: string, newVal: string) => void;
     readonly onCellClicked?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;
-
+    readonly onFinishedEditing?: (newValue: GridCell | undefined, movement: readonly [number, number]) => void;
     readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;
     readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
     readonly onCellContextMenu?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;
@@ -207,6 +207,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         rows,
         getCellContent,
         onCellClicked,
+        onFinishedEditing,
         onHeaderClicked,
         onGroupHeaderClicked,
         onCellContextMenu,
@@ -1148,8 +1149,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const isEditingTrailingRow = gridSelection.cell[1] === mangledRows - 1 && newValue !== undefined;
                 updateSelectedCell(gridSelection.cell[0] + movX, gridSelection.cell[1] + movY, isEditingTrailingRow);
             }
+            onFinishedEditing?.(newValue, movement);
         },
-        [overlay?.cell, focus, gridSelection, mangledOnCellEdited, mangledRows, updateSelectedCell]
+        [overlay?.cell, focus, gridSelection, onFinishedEditing, mangledOnCellEdited, mangledRows, updateSelectedCell]
     );
 
     const [selCol, selRow] = gridSelection?.cell ?? [];
