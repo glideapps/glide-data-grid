@@ -26,6 +26,7 @@ interface BaseGridMouseEventArgs {
     readonly metaKey: boolean;
     readonly isTouch: boolean;
     readonly isEdge: boolean;
+    readonly button: number;
 }
 
 export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
@@ -284,11 +285,12 @@ export type ProvideEditorCallback<T extends GridCell> = (
 ) =>
     | (React.FunctionComponent<{
           readonly onChange: (newValue: T) => void;
-          readonly onFinishedEditing: () => void;
+          readonly onFinishedEditing: (newValue?: T) => void;
           readonly isHighlighted: boolean;
           readonly value: T;
       }> & {
           disablePadding?: boolean;
+          disableStyling?: boolean;
       })
     | undefined;
 

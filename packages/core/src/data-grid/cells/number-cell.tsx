@@ -10,6 +10,7 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
     kind: GridCellKind.Number,
     needsHover: false,
     needsHoverPosition: false,
+    useLabel: true,
     renderPrep: prepTextCell,
     render: a => drawTextCell(a, a.cell.displayData),
     onDelete: c => ({

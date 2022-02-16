@@ -51,6 +51,7 @@ export interface InternalCellRenderer<T extends InnerGridCell> {
     readonly render: DrawCallback<T>;
     readonly needsHover: boolean;
     readonly needsHoverPosition: boolean;
+    readonly useLabel?: boolean;
     readonly onClick?: (cell: T, posX: number, posY: number, bounds: Rectangle) => T | undefined;
     readonly onDelete?: (cell: T) => T | undefined;
     readonly getAccessibilityString: (cell: T) => string;

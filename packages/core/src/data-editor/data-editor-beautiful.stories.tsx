@@ -38,7 +38,7 @@ function isTruthy(x: any): boolean {
 /**
  * Attempts to copy data between grid cells of any kind.
  */
-export function lossyCopyData<T extends EditableGridCell>(source: EditableGridCell, target: T): EditableGridCell {
+function lossyCopyData<T extends EditableGridCell>(source: EditableGridCell, target: T): EditableGridCell {
     const sourceData = source.data;
     if (typeof sourceData === typeof target.data) {
         return {
@@ -501,6 +501,7 @@ export const ResizableColumns: React.VFC = () => {
                 getCellContent={getCellContent}
                 columns={cols}
                 overscrollX={200}
+                overscrollY={200}
                 rows={50}
                 onColumnResized={onColumnResized}
             />
@@ -510,6 +511,63 @@ export const ResizableColumns: React.VFC = () => {
 (ResizableColumns as any).parameters = {
     options: {
         showPanel: false,
+    },
+};
+
+interface OverscrollProps {
+    overscrollX: number;
+    overscrollY: number;
+}
+
+export const Overscroll: React.VFC<OverscrollProps> = p => {
+    const { overscrollX, overscrollY } = p;
+    const { cols, getCellContent } = useMockDataGenerator(20);
+
+    return (
+        <BeautifulWrapper
+            title="Overscroll"
+            description={
+                <>
+                    <Description>
+                        You can allocate extra space at the ends of the grid by setting the{" "}
+                        <PropName>overscrollX</PropName> and <PropName>overscrollY</PropName> props
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                overscrollX={overscrollX}
+                overscrollY={overscrollY}
+                rows={50}
+            />
+        </BeautifulWrapper>
+    );
+};
+(Overscroll as any).argTypes = {
+    overscrollX: {
+        control: {
+            type: "range",
+            min: 0,
+            max: 600,
+        },
+    },
+    overscrollY: {
+        control: {
+            type: "range",
+            min: 0,
+            max: 600,
+        },
+    },
+};
+(Overscroll as any).args = {
+    overscrollX: 200,
+    overscrollY: 200,
+};
+(Overscroll as any).parameters = {
+    options: {
+        showPanel: true,
     },
 };
 
@@ -614,10 +672,15 @@ export const AddDataToTop: React.VFC = () => {
     const [numRows, setNumRows] = React.useState(50);
 
     const onRowAppended = React.useCallback(async () => {
-        const newRow = numRows;
+        // shift all of the existing cells down
+        for (let y = numRows; y > 0; y--) {
+            for (let x = 0; x < 6; x++) {
+                setCellValueRaw([x, y], getCellContent([x, y - 1]));
+            }
+        }
         for (let c = 0; c < 6; c++) {
-            const cell = getCellContent([c, newRow]);
-            setCellValueRaw([c, newRow], clearCell(cell));
+            const cell = getCellContent([c, 0]);
+            setCellValueRaw([c, 0], clearCell(cell));
         }
         setNumRows(cv => cv + 1);
         return "top" as const;
@@ -631,8 +694,66 @@ export const AddDataToTop: React.VFC = () => {
                     <Description>
                         You can return a different location to have the new row append take place.
                     </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rowMarkers={"both"}
+                onCellEdited={setCellValue}
+                trailingRowOptions={{
+                    hint: "New row...",
+                    sticky: true,
+                    tint: true,
+                }}
+                rows={numRows}
+                onRowAppended={onRowAppended}
+            />
+        </BeautifulWrapper>
+    );
+};
+(AddDataToTop as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+interface AddDataToMiddleProps {
+    insertIndex: number;
+}
+export const AddDataToMiddle: React.FC<AddDataToMiddleProps> = p => {
+    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
+
+    const [numRows, setNumRows] = React.useState(50);
+
+    const index = p.insertIndex;
+    const onRowAppended = React.useCallback(async () => {
+        // shift rows below index down
+        for (let y = numRows; y > index; y--) {
+            for (let x = 0; x < 6; x++) {
+                setCellValueRaw([x, y], getCellContent([x, y - 1]));
+            }
+        }
+        for (let c = 0; c < 6; c++) {
+            const cell = getCellContent([c, index]);
+            setCellValueRaw([c, index], clearCell(cell));
+        }
+        setNumRows(cv => cv + 1);
+        return index;
+    }, [getCellContent, numRows, setCellValueRaw, index]);
+
+    return (
+        <BeautifulWrapper
+            title="Add data to middle"
+            description={
+                <>
+                    <Description>
+                        You can return a different location to have the new row append take place.
+                    </Description>
                     <MoreInfo>
-                        At this time this story still adds the data to the end because our fake data source is bad.
+                        Note that <KeyName>insertIndex</KeyName> is zero-based while the number column on the left side
+                        of the grid is one-based, so inserting at index &quot;4&quot; creates a new row at &quot;5&quot;
                     </MoreInfo>
                 </>
             }>
@@ -653,9 +774,21 @@ export const AddDataToTop: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(AddData as any).parameters = {
+(AddDataToMiddle as any).args = {
+    insertIndex: 10,
+};
+(AddDataToMiddle as any).argTypes = {
+    insertIndex: {
+        control: {
+            type: "range",
+            min: 1,
+            max: 48,
+        },
+    },
+};
+(AddDataToMiddle as any).parameters = {
     options: {
-        showPanel: false,
+        showPanel: true,
     },
 };
 
@@ -1675,6 +1808,55 @@ export const BuiltInSearch: React.VFC = () => {
     },
 };
 
+interface ImperativeScrollProps {
+    paddingY: number;
+}
+
+export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
+    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+
+    const ref = React.useRef<DataEditorRef>(null);
+
+    const onClick = () => {
+        ref.current?.scrollTo(4, 100, "both", 0, p.paddingY);
+    };
+
+    return (
+        <BeautifulWrapper
+            title="Imperative scrolling"
+            description={
+                <>
+                    <Description>
+                        You can imperatively scroll to a cell by calling <PropName>scrollTo</PropName> on a DataEditor
+                        ref.
+                    </Description>
+                    <MoreInfo>
+                        Click <button onClick={onClick}>Here</button> to scroll to column 4 row 100
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                ref={ref}
+                rowMarkers="number"
+                getCellContent={getCellContent}
+                columns={cols}
+                onCellEdited={setCellValue}
+                onColumnResized={onColumnResized}
+                rows={10_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ImperativeScroll as any).args = {
+    paddingY: 0,
+};
+(ImperativeScroll as any).parameters = {
+    options: {
+        showPanel: true,
+    },
+};
+
 const SimpleMenu = styled.div`
     width: 175px;
     padding: 8px 0;
@@ -1846,7 +2028,7 @@ export const CustomHeaderIcons: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(ThemePerColumn as any).parameters = {
+(CustomHeaderIcons as any).parameters = {
     options: {
         showPanel: false,
     },

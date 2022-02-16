@@ -1042,12 +1042,10 @@ function drawCells(
                     const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
 
                     if (cellWidth > 10) {
-                        if (theme !== colTheme) {
-                            const cellFont = `${theme.baseFontStyle} ${theme.fontFamily}`;
-                            if (cellFont !== font) {
-                                ctx.font = cellFont;
-                                font = cellFont;
-                            }
+                        const cellFont = `${theme.baseFontStyle} ${theme.fontFamily}`;
+                        if (cellFont !== font) {
+                            ctx.font = cellFont;
+                            font = cellFont;
                         }
                         const drawResult = drawCell(
                             ctx,
