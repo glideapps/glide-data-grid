@@ -25,7 +25,7 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
     max-height: calc(100vh - ${p => p.targetRect.y + 10}px);
 
     font-family: ${p => p.theme.fontFamily};
-    font-size: 13px;
+    font-size: ${p => p.theme.editorFontSize};
 
     @keyframes glide_fade_in {
         from {
