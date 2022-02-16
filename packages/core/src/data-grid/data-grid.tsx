@@ -988,6 +988,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                 theme,
                                 drawCustomCell,
                                 imageLoader,
+                                spriteManager,
                                 1,
                                 undefined,
                                 0
@@ -1023,6 +1024,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getCellContent,
             drawCustomCell,
             imageLoader,
+            spriteManager,
         ]
     );
     useEventListener("dragstart", onDragStartImpl, eventTargetRef?.current ?? null, false, false);

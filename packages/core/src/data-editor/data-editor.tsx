@@ -106,6 +106,7 @@ export interface DataEditorProps extends Props {
         readonly tint?: boolean;
         readonly hint?: string;
         readonly sticky?: boolean;
+        readonly addIcon?: string;
     };
     readonly headerHeight?: number;
     readonly groupHeaderHeight?: number;
@@ -373,6 +374,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     hint: display,
                     isFirst,
                     allowOverlay: false,
+                    icon: trailingRowOptions?.addIcon,
                 };
             } else {
                 return getCellContent([col - rowMarkerOffset, row]);
@@ -386,6 +388,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowMarkers,
             rowMarkerOffset,
             trailingRowOptions?.hint,
+            trailingRowOptions?.addIcon,
             getCellContent,
         ]
     );

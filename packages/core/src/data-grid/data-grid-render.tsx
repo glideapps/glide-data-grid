@@ -78,6 +78,7 @@ export function drawCell(
     theme: Theme,
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader,
+    spriteManager: SpriteManager,
     hoverAmount: number,
     hoverInfo: HoverInfo | undefined,
     frameTime: number,
@@ -91,7 +92,23 @@ export function drawCell(
         hoverY = hoverInfo[1][1];
     }
     let result: {} | undefined = undefined;
-    const args = { ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader };
+    const args = {
+        ctx,
+        theme,
+        col,
+        row,
+        cell,
+        x,
+        y,
+        w,
+        h,
+        highlighted,
+        hoverAmount,
+        hoverX,
+        hoverY,
+        imageLoader,
+        spriteManager,
+    };
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, forcePrep => {
         const drawn = isInnerOnlyCell(cell)
             ? false
@@ -832,6 +849,7 @@ function drawCells(
     prelightCells: CellList | undefined,
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader,
+    spriteManager: SpriteManager,
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
     outerTheme: Theme,
@@ -1008,6 +1026,7 @@ function drawCells(
                             theme,
                             drawCustomCell,
                             imageLoader,
+                            spriteManager,
                             hoverValue?.hoverAmount ?? 0,
                             hoverInfo,
                             frameTime,
@@ -1398,6 +1417,7 @@ export function drawGrid(
                 prelightCells,
                 drawCustomCell,
                 imageLoader,
+                spriteManager,
                 hoverValues,
                 hoverInfo,
                 theme,
@@ -1520,6 +1540,7 @@ export function drawGrid(
         prelightCells,
         drawCustomCell,
         imageLoader,
+        spriteManager,
         hoverValues,
         hoverInfo,
         theme,

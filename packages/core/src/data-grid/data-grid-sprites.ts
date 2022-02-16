@@ -53,7 +53,8 @@ export class SpriteManager {
         x: number,
         y: number,
         size: number,
-        theme: Theme
+        theme: Theme,
+        alpha?: number
     ) {
         if (this.spriteCanvas === undefined) throw new Error();
 
@@ -66,7 +67,9 @@ export class SpriteManager {
         const xOffset = spriteIndex * renderSize;
         const yOffset = Math.max(0, variantIndex * renderSize);
 
+        ctx.globalAlpha = alpha ?? 1;
         ctx.drawImage(this.spriteCanvas, xOffset, yOffset, renderSize, renderSize, x, y, size, size);
+        ctx.globalAlpha = 1;
     }
 
     public async buildSpriteMap(theme: Theme, cols: readonly GridColumn[]): Promise<boolean> {
