@@ -12,7 +12,7 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
     padding: 8px;
     border: 1px solid ${p => p.theme.borderColor};
 
-    font-size: ${p => p.theme.fontSize};
+    font-size: ${p => p.theme.editorFontSize};
 
     transform: translateX(${p => (p.showSearch ? 0 : 400)}px);
     transition: transform 0.15s;

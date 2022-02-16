@@ -2,7 +2,7 @@ import { styled } from "../common/styles";
 import { css } from "styled-components";
 
 const inputProps = css`
-    font-size: ${p => p.theme.fontSize};
+    font-size: ${p => p.theme.editorFontSize};
     line-height: 16px;
     font-family: ${p => p.theme.fontFamily};
     color: ${p => p.theme.textDark};
