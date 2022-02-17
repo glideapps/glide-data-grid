@@ -244,8 +244,8 @@ export function drawTextCell(args: BaseDrawArgs, data: string) {
     }
 }
 
-export function drawNewRowCell(args: BaseDrawArgs, data: string, isFirst: boolean) {
-    const { ctx, x, y, w, h, hoverAmount, theme } = args;
+export function drawNewRowCell(args: BaseDrawArgs, data: string, isFirst: boolean, icon?: string) {
+    const { ctx, x, y, w, h, hoverAmount, theme, spriteManager } = args;
     ctx.beginPath();
     ctx.globalAlpha = hoverAmount;
     ctx.rect(x, y, w, h);
@@ -254,20 +254,29 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, isFirst: boolea
     ctx.globalAlpha = 1;
     ctx.beginPath();
 
-    const finalLineSize = 12;
-    const lineSize = isFirst ? finalLineSize : hoverAmount * finalLineSize;
-    const xTranslate = isFirst ? 0 : (1 - hoverAmount) * finalLineSize * 0.5;
+    if (icon !== undefined) {
+        const padding = 8;
+        const size = h - padding;
+        const px = x + padding / 2;
+        const py = y + padding / 2;
 
-    const padPlus = theme.cellHorizontalPadding + 4;
-    if (lineSize > 0) {
-        ctx.moveTo(x + padPlus + xTranslate, y + h / 2);
-        ctx.lineTo(x + padPlus + xTranslate + lineSize, y + h / 2);
-        ctx.moveTo(x + padPlus + xTranslate + lineSize * 0.5, y + h / 2 - lineSize * 0.5);
-        ctx.lineTo(x + padPlus + xTranslate + lineSize * 0.5, y + h / 2 + lineSize * 0.5);
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = theme.bgIconHeader;
-        ctx.lineCap = "round";
-        ctx.stroke();
+        spriteManager.drawSprite(icon, "normal", ctx, px, py, size, theme, isFirst ? 1 : hoverAmount);
+    } else {
+        const finalLineSize = 12;
+        const lineSize = isFirst ? finalLineSize : hoverAmount * finalLineSize;
+        const xTranslate = isFirst ? 0 : (1 - hoverAmount) * finalLineSize * 0.5;
+
+        const padPlus = theme.cellHorizontalPadding + 4;
+        if (lineSize > 0) {
+            ctx.moveTo(x + padPlus + xTranslate, y + h / 2);
+            ctx.lineTo(x + padPlus + xTranslate + lineSize, y + h / 2);
+            ctx.moveTo(x + padPlus + xTranslate + lineSize * 0.5, y + h / 2 - lineSize * 0.5);
+            ctx.lineTo(x + padPlus + xTranslate + lineSize * 0.5, y + h / 2 + lineSize * 0.5);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = theme.bgIconHeader;
+            ctx.lineCap = "round";
+            ctx.stroke();
+        }
     }
 
     ctx.fillStyle = theme.textMedium;

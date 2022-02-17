@@ -666,6 +666,52 @@ export const AddData: React.VFC = () => {
     },
 };
 
+export const TrailingRowOptions: React.VFC = () => {
+    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
+
+    const [numRows, setNumRows] = React.useState(50);
+
+    const onRowAppended = React.useCallback(() => {
+        const newRow = numRows;
+        for (let c = 0; c < 6; c++) {
+            const cell = getCellContent([c, newRow]);
+            setCellValueRaw([c, newRow], clearCell(cell));
+        }
+        setNumRows(cv => cv + 1);
+    }, [getCellContent, numRows, setCellValueRaw]);
+
+    return (
+        <BeautifulWrapper
+            title="Trailing row options"
+            description={
+                <Description>
+                    You can customize the trailing row by using the <PropName>trailingRowOptions</PropName> prop
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rowMarkers={"both"}
+                onCellEdited={setCellValue}
+                trailingRowOptions={{
+                    hint: "New row...",
+                    sticky: true,
+                    tint: true,
+                    addIcon: "headerRowID",
+                }}
+                rows={numRows}
+                onRowAppended={onRowAppended}
+            />
+        </BeautifulWrapper>
+    );
+};
+(TrailingRowOptions as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const AddDataToTop: React.VFC = () => {
     const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
 

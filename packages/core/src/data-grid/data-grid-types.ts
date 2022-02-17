@@ -344,6 +344,7 @@ export interface NewRowCell extends BaseGridCell {
     readonly hint: string;
     readonly isFirst: boolean;
     readonly allowOverlay: false;
+    readonly icon?: string;
 }
 
 export interface MarkerCell extends BaseGridCell {
