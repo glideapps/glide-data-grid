@@ -650,9 +650,9 @@ export const AddData: React.VFC = () => {
                 rowMarkers={"both"}
                 onCellEdited={setCellValue}
                 trailingRowOptions={{
-                    hint: "New row...",
                     sticky: true,
                     tint: true,
+                    hint: "New row...",
                 }}
                 rows={numRows}
                 onRowAppended={onRowAppended}
@@ -664,6 +664,18 @@ export const AddData: React.VFC = () => {
     options: {
         showPanel: false,
     },
+};
+
+const trailingRowOptionsColumnIndexesHint: Record<number, string> = {
+    2: "New row",
+    3: "Add",
+    5: "New",
+};
+
+const trailingRowOptionsColumnIndexesIcon: Record<number, string> = {
+    2: GridColumnIcon.HeaderArray,
+    3: GridColumnIcon.HeaderEmoji,
+    5: GridColumnIcon.HeaderNumber,
 };
 
 export const TrailingRowOptions: React.VFC = () => {
@@ -680,25 +692,34 @@ export const TrailingRowOptions: React.VFC = () => {
         setNumRows(cv => cv + 1);
     }, [getCellContent, numRows, setCellValueRaw]);
 
+    const columnsWithRowOptions: GridColumn[] = React.useMemo(() => {
+        return cols.map((c, idx) => ({
+            ...c,
+            trailingRowOptions: {
+                hint: trailingRowOptionsColumnIndexesHint[idx],
+                addIcon: trailingRowOptionsColumnIndexesIcon[idx],
+            },
+        }));
+    }, [cols]);
+
     return (
         <BeautifulWrapper
             title="Trailing row options"
             description={
                 <Description>
-                    You can customize the trailing row by using the <PropName>trailingRowOptions</PropName> prop
+                    You can customize the trailing row in each column by setting a{" "}
+                    <PropName>trailingRowOptions</PropName> in your columns.
                 </Description>
             }>
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
-                columns={cols}
+                columns={columnsWithRowOptions}
                 rowMarkers={"both"}
                 onCellEdited={setCellValue}
                 trailingRowOptions={{
-                    hint: "New row...",
-                    sticky: true,
                     tint: true,
-                    addIcon: "headerRowID",
+                    sticky: true,
                 }}
                 rows={numRows}
                 onRowAppended={onRowAppended}

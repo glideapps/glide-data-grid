@@ -368,13 +368,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             } else if (isTrailing) {
                 //If the grid is empty, we will return text
                 const isFirst = col === rowMarkerOffset;
-                const display = isFirst ? trailingRowOptions?.hint ?? "" : "";
+
+                const maybeFirstColumnHint = isFirst ? trailingRowOptions?.hint ?? "" : "";
+                const hint = columns[col].trailingRowOptions?.hint ?? maybeFirstColumnHint;
+
+                const icon = columns[col].trailingRowOptions?.addIcon ?? trailingRowOptions?.addIcon;
+
                 return {
                     kind: InnerGridCellKind.NewRow,
-                    hint: display,
-                    isFirst,
+                    hint,
                     allowOverlay: false,
-                    icon: trailingRowOptions?.addIcon,
+                    icon,
                 };
             } else {
                 return getCellContent([col - rowMarkerOffset, row]);
@@ -389,6 +393,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowMarkerOffset,
             trailingRowOptions?.hint,
             trailingRowOptions?.addIcon,
+            columns,
             getCellContent,
         ]
     );

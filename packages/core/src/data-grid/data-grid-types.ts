@@ -156,6 +156,10 @@ export interface GridColumn {
     readonly hasMenu?: boolean;
     readonly style?: "normal" | "highlight";
     readonly themeOverride?: Partial<Theme>;
+    readonly trailingRowOptions?: {
+        readonly hint?: string;
+        readonly addIcon?: string;
+    };
 }
 
 export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell;
@@ -342,7 +346,6 @@ export enum InnerGridCellKind {
 export interface NewRowCell extends BaseGridCell {
     readonly kind: InnerGridCellKind.NewRow;
     readonly hint: string;
-    readonly isFirst: boolean;
     readonly allowOverlay: false;
     readonly icon?: string;
 }

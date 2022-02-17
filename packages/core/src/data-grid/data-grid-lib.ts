@@ -244,7 +244,7 @@ export function drawTextCell(args: BaseDrawArgs, data: string) {
     }
 }
 
-export function drawNewRowCell(args: BaseDrawArgs, data: string, isFirst: boolean, icon?: string) {
+export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) {
     const { ctx, x, y, w, h, hoverAmount, theme, spriteManager } = args;
     ctx.beginPath();
     ctx.globalAlpha = hoverAmount;
@@ -254,17 +254,19 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, isFirst: boolea
     ctx.globalAlpha = 1;
     ctx.beginPath();
 
+    const alwaysShowIcon = data !== "";
+
     if (icon !== undefined) {
         const padding = 8;
         const size = h - padding;
         const px = x + padding / 2;
         const py = y + padding / 2;
 
-        spriteManager.drawSprite(icon, "normal", ctx, px, py, size, theme, isFirst ? 1 : hoverAmount);
+        spriteManager.drawSprite(icon, "normal", ctx, px, py, size, theme, alwaysShowIcon ? 1 : hoverAmount);
     } else {
         const finalLineSize = 12;
-        const lineSize = isFirst ? finalLineSize : hoverAmount * finalLineSize;
-        const xTranslate = isFirst ? 0 : (1 - hoverAmount) * finalLineSize * 0.5;
+        const lineSize = alwaysShowIcon ? finalLineSize : hoverAmount * finalLineSize;
+        const xTranslate = alwaysShowIcon ? 0 : (1 - hoverAmount) * finalLineSize * 0.5;
 
         const padPlus = theme.cellHorizontalPadding + 4;
         if (lineSize > 0) {
