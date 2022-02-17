@@ -1,6 +1,6 @@
 import type { OverlayImageEditorProps, Theme } from "../..";
 import type ImageWindowLoader from "../../common/image-window-loader";
-import { SpriteManager } from "../data-grid-sprites";
+import type { SpriteManager } from "../data-grid-sprites";
 import type { InnerGridCell, Rectangle, Item } from "../data-grid-types";
 
 export type HoverInfo = readonly [Item, readonly [number, number]];
