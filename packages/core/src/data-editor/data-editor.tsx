@@ -370,9 +370,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const isFirst = col === rowMarkerOffset;
 
                 const maybeFirstColumnHint = isFirst ? trailingRowOptions?.hint ?? "" : "";
-                const hint = columns[col].trailingRowOptions?.hint ?? maybeFirstColumnHint;
+                const hint = columns[col]?.trailingRowOptions?.hint ?? maybeFirstColumnHint;
 
-                const icon = columns[col].trailingRowOptions?.addIcon ?? trailingRowOptions?.addIcon;
+                const icon = columns[col]?.trailingRowOptions?.addIcon ?? trailingRowOptions?.addIcon;
 
                 return {
                     kind: InnerGridCellKind.NewRow,
