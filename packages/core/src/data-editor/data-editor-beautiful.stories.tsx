@@ -2522,7 +2522,16 @@ export const SpanCell: React.VFC = () => {
 
     const mangledGetCellContent = React.useCallback(
         (cell): GridCell => {
-            const [, row] = cell;
+            const [col, row] = cell;
+            if (row === 6 && col >= 3 && col <= 4) {
+                return {
+                    kind: GridCellKind.Text,
+                    allowOverlay: false,
+                    data: "Span Cell that is very long and will go past the cell limits",
+                    span: [3, 4],
+                    displayData: "Span Cell that is very long and will go past the cell limits",
+                };
+            }
             if (row === 5) {
                 return {
                     kind: GridCellKind.Text,
@@ -2537,12 +2546,31 @@ export const SpanCell: React.VFC = () => {
         [getCellContent]
     );
 
+    const getCellsForSelection = React.useCallback(
+        (selection: Rectangle): readonly (readonly GridCell[])[] => {
+            const result: GridCell[][] = [];
+
+            for (let y = selection.y; y < selection.y + selection.height; y++) {
+                const row: GridCell[] = [];
+                for (let x = selection.x; x < selection.x + selection.width; x++) {
+                    row.push(mangledGetCellContent([x, y]));
+                }
+                result.push(row);
+            }
+
+            return result;
+        },
+        [mangledGetCellContent]
+    );
+
     return (
         <BeautifulWrapper title="Spans" description={<Description>FIXME.</Description>}>
             <DataEditor
                 {...defaultProps}
                 getCellContent={mangledGetCellContent}
+                getCellsForSelection={getCellsForSelection}
                 columns={cols}
+                freezeColumns={2}
                 rows={3000}
                 rowMarkers="both"
             />

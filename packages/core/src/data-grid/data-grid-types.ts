@@ -463,6 +463,13 @@ export class CompactSelection {
         return true;
     };
 
+    some = (predicate: (index: number) => boolean): boolean => {
+        for (const i of this) {
+            if (predicate(i)) return true;
+        }
+        return false;
+    };
+
     get length(): number {
         let len = 0;
         for (const [start, end] of this.items) {
