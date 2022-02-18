@@ -2520,8 +2520,8 @@ export const Minimap: React.VFC = () => {
 export const SpanCell: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(100, true, true);
 
-    const mangledGetCellContent = React.useCallback(
-        (cell): GridCell => {
+    const mangledGetCellContent = React.useCallback<typeof getCellContent>(
+        cell => {
             const [col, row] = cell;
             if (row === 6 && col >= 3 && col <= 4) {
                 return {

@@ -44,6 +44,7 @@ interface MouseState {
 
 type Props = Omit<
     DataGridSearchProps,
+    | "accessibilityHeight"
     | "canvasRef"
     | "cellXOffset"
     | "cellYOffset"
@@ -464,7 +465,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     allowOverlay: false,
                 };
             } else {
-                let result = getCellContent([col - rowMarkerOffset, row]);
+                const outerCol = col - rowMarkerOffset;
+                let result = getCellContent([outerCol, row]);
                 if (rowMarkerOffset !== 0 && result.span !== undefined) {
                     result = {
                         ...result,
@@ -1011,7 +1013,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [onHeaderMenuClick, rowMarkerOffset]
     );
-
+    
     const onVisibleRegionChangedImpl = React.useCallback(
         (region: Rectangle, tx?: number, ty?: number) => {
             const newRegion = {
@@ -1480,7 +1482,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (shiftKey) {
                         adjustSelection([0, isPrimaryKey ? 2 : 1]);
                     } else {
-                        row += isPrimaryKey ? Number.MAX_SAFE_INTEGER : 1;
+                        if (isPrimaryKey) {
+                            row = rows - 1;
+                        } else {
+                            row += 1;
+                        }
                     }
                 } else if (event.key === "ArrowUp") {
                     setOverlay(undefined);
@@ -1918,6 +1924,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 canvasRef={canvasRef}
                 cellXOffset={cellXOffset}
                 cellYOffset={cellYOffset}
+                accessibilityHeight={visibleRegion.height}
                 columns={mangledCols}
                 drawCustomCell={drawCustomCellMangled}
                 disabledRows={disabledRows}

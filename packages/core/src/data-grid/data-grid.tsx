@@ -52,6 +52,8 @@ export interface DataGridProps {
     readonly translateX?: number;
     readonly translateY?: number;
 
+    readonly accessibilityHeight: number;
+
     readonly freezeColumns: number;
     readonly lastRowSticky: boolean;
     readonly allowResize?: boolean;
@@ -140,6 +142,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const {
         width,
         height,
+        accessibilityHeight,
         className,
         columns,
         cellXOffset: cellXOffsetReal,
@@ -1079,6 +1082,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const accessibilityTree = useDebouncedMemo(
         () => {
+            if (width < 50) return null;
             const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
 
             const getRowData = (cell: InnerGridCell) => {
@@ -1101,7 +1105,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         </div>
                     </div>
                     <div role="rowgroup">
-                        {makeRange(cellYOffset, Math.min(rows, cellYOffset + 50)).map(row => (
+                        {makeRange(cellYOffset, Math.min(rows, cellYOffset + accessibilityHeight)).map(row => (
                             <div role="row" key={row} aria-rowindex={row + 2} row-index={row + 2}>
                                 {effectiveCols.map(c => {
                                     const col = c.sourceIndex;
@@ -1146,15 +1150,21 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             );
         },
         [
-            cellXOffset,
-            cellYOffset,
+            width,
             mappedColumns,
+            cellXOffset,
             dragAndDropState,
+            translateX,
+            rows,
+            cellYOffset,
+            accessibilityHeight,
+            selectedCell?.cell,
             focusElement,
             getCellContent,
-            selectedCell?.cell,
-            translateX,
-            width,
+            canvasRef,
+            onKeyDown,
+            getBoundsForItem,
+            onCellFocused,
         ],
         200
     );

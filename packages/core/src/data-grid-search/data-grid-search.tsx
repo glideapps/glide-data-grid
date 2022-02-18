@@ -383,6 +383,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         <>
             <ScrollingDataGrid
                 // Dear future developer. I am sorry.
+                accessibilityHeight={p.accessibilityHeight}
                 cellXOffset={p.cellXOffset}
                 cellYOffset={p.cellYOffset}
                 columns={p.columns}
