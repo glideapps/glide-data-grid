@@ -26,6 +26,7 @@ Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-d
 -   **Editing is built in**.
 -   **Resizable and movable columns**.
 -   **Variable sized rows**.
+-   **Merged cells**.
 -   **Single and multi-select rows, cells, and columns**.
 -   **Cell rendering can be fully customized**.
 
