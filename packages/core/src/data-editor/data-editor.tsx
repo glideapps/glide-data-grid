@@ -114,6 +114,8 @@ export interface DataEditorProps extends Props {
     readonly rowMarkers?: "checkbox" | "number" | "both" | "none";
     readonly rowMarkerWidth?: number;
 
+    readonly spanRangeBehavior?: "default" | "allowPartial";
+
     readonly rowHeight?: DataGridSearchProps["rowHeight"];
     readonly onMouseMove?: DataGridSearchProps["onMouseMove"];
 
@@ -210,6 +212,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onCellClicked,
         onFinishedEditing,
         onHeaderClicked,
+        spanRangeBehavior = "default",
         onGroupHeaderClicked,
         onCellContextMenu,
         onHeaderContextMenu,
@@ -265,6 +268,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const expandSelection = React.useCallback(
         (newVal: GridSelection | undefined): GridSelection | undefined => {
+            if (spanRangeBehavior === "allowPartial") return newVal;
             if (newVal !== undefined && getCellsForSelection !== undefined) {
                 let isFilled = false;
                 do {
@@ -326,7 +330,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
             return newVal;
         },
-        [getCellsForSelection, rowMarkerOffset]
+        [getCellsForSelection, rowMarkerOffset, spanRangeBehavior]
     );
 
     const setGridSelection = React.useCallback(
