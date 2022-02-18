@@ -35,7 +35,7 @@ import { getDataEditorTheme, Theme } from "../common/styles";
 import { DataGridRef } from "../data-grid/data-grid";
 import { useEventListener } from "../common/utils";
 import { CellRenderers } from "../data-grid/cells";
-import { getStickyWidth, isGroupEqual } from "../data-grid/data-grid-lib";
+import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
 
 interface MouseState {
@@ -586,7 +586,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const grid = gridRef.current;
                 const canvas = canvasRef.current;
                 if (grid !== null && canvas !== null) {
-                    const rawBounds = grid.getBounds(col, row);
+                    const rawBounds = grid.getBounds(col + rowMarkerOffset, row);
 
                     const scrollBounds = canvas.getBoundingClientRect();
 
@@ -626,7 +626,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             scrollY = bounds.y + bounds.height - sBottom;
                         }
 
-                        if (dir === "vertical") {
+                        if (dir === "vertical" || col < freezeColumns) {
                             scrollX = 0;
                         } else if (dir === "horizontal") {
                             scrollY = 0;
@@ -642,7 +642,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
         },
-        [totalHeaderHeight, lastRowSticky, rowHeight, rowMarkerOffset, rowMarkerWidth, rows]
+        [rowMarkerOffset, rowMarkerWidth, totalHeaderHeight, lastRowSticky, freezeColumns, columns, rowHeight, rows]
     );
 
     React.useImperativeHandle(
@@ -1231,7 +1231,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (x !== 0) {
                 if (x === 2) {
                     right = mangledCols.length;
-                    scrollTo(right - rowMarkerOffset, 0, "horizontal");
+                    scrollTo(right - 1 - rowMarkerOffset, 0, "horizontal");
                 } else if (x === -2) {
                     left = rowMarkerOffset;
                     scrollTo(left - rowMarkerOffset, 0, "horizontal");
@@ -1266,7 +1266,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             if (done) scrollTo(left, 0, "horizontal");
                         }
                         if (!done) {
-                            right = Math.min(mangledCols.length, right + 1);
+                            right = Math.min(mangledCols.length - 1, right + 1);
                             scrollTo(right - rowMarkerOffset, 0, "horizontal");
                         }
                     } else if (x === -1) {
@@ -1285,7 +1285,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                                 right--;
                                 done = true;
                             }
-                            if (done) scrollTo(right, 0, "horizontal");
+                            if (done) scrollTo(right - rowMarkerOffset, 0, "horizontal");
                         } else {
                             left = Math.max(rowMarkerOffset, left - 1);
                             scrollTo(left - rowMarkerOffset, 0, "horizontal");
@@ -1325,7 +1325,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 lastSent.current = undefined;
             }
 
-            scrollTo(col, row);
+            scrollTo(col - rowMarkerOffset, row);
 
             return true;
         },
@@ -1481,28 +1481,28 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (shiftKey) {
                         adjustSelection([0, isPrimaryKey ? 2 : 1]);
                     } else {
-                        row += isPrimaryKey ? 2 : 1;
+                        row += isPrimaryKey ? Number.MAX_SAFE_INTEGER : 1;
                     }
                 } else if (event.key === "ArrowUp") {
                     setOverlay(undefined);
                     if (shiftKey) {
                         adjustSelection([0, isPrimaryKey ? -2 : -1]);
                     } else {
-                        row += isPrimaryKey ? -2 : -1;
+                        row += isPrimaryKey ? Number.MIN_SAFE_INTEGER : -1;
                     }
                 } else if (event.key === "ArrowRight") {
                     setOverlay(undefined);
                     if (shiftKey) {
                         adjustSelection([isPrimaryKey ? 2 : 1, 0]);
                     } else {
-                        col += isPrimaryKey ? 2 : 1;
+                        col += isPrimaryKey ? Number.MAX_SAFE_INTEGER : 1;
                     }
                 } else if (event.key === "ArrowLeft") {
                     setOverlay(undefined);
                     if (shiftKey) {
                         adjustSelection([isPrimaryKey ? -2 : -1, 0]);
                     } else {
-                        col += isPrimaryKey ? -2 : -1;
+                        col += isPrimaryKey ? Number.MIN_SAFE_INTEGER : -1;
                     }
                 } else if (event.key === "Tab") {
                     setOverlay(undefined);
