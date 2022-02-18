@@ -2518,7 +2518,7 @@ export const Minimap: React.VFC = () => {
 };
 
 export const SpanCell: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(1000, true, true);
+    const { cols, getCellContent } = useMockDataGenerator(100, true, true);
 
     const mangledGetCellContent = React.useCallback(
         (cell): GridCell => {
@@ -2537,7 +2537,7 @@ export const SpanCell: React.VFC = () => {
                     kind: GridCellKind.Text,
                     allowOverlay: false,
                     data: "Span Cell that is very long and will go past the cell limits",
-                    span: [0, 999],
+                    span: [0, 99],
                     displayData: "Span Cell that is very long and will go past the cell limits",
                 };
             }
@@ -2571,7 +2571,7 @@ export const SpanCell: React.VFC = () => {
                 getCellsForSelection={getCellsForSelection}
                 columns={cols}
                 freezeColumns={2}
-                rows={3000}
+                rows={300}
                 rowMarkers="both"
             />
         </BeautifulWrapper>

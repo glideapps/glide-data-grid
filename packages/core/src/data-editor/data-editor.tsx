@@ -1,6 +1,8 @@
 import * as React from "react";
 import { assertNever, maybe } from "../common/support";
 import { clamp } from "lodash/fp";
+import uniq from "lodash/uniq";
+import flatten from "lodash/flatten";
 import range from "lodash/range";
 import DataGridOverlayEditor from "../data-grid-overlay-editor/data-grid-overlay-editor";
 import {
@@ -33,7 +35,7 @@ import { getDataEditorTheme, Theme } from "../common/styles";
 import { DataGridRef } from "../data-grid/data-grid";
 import { useEventListener } from "../common/utils";
 import { CellRenderers } from "../data-grid/cells";
-import { isGroupEqual } from "../data-grid/data-grid-lib";
+import { getStickyWidth, isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
 
 interface MouseState {
@@ -89,6 +91,18 @@ interface CellClickedEventArgs extends GridMouseCellEventArgs, PreventableEvent 
 interface HeaderClickedEventArgs extends GridMouseHeaderEventArgs, PreventableEvent {}
 
 interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, PreventableEvent {}
+
+function getSpanStops(cells: readonly (readonly GridCell[])[]): number[] {
+    const disallowed = uniq(
+        flatten(
+            flatten(cells)
+                .filter(c => c.span !== undefined)
+                .map(c => range((c.span?.[0] ?? 0) + 1, (c.span?.[1] ?? 0) + 1))
+        )
+    );
+    return disallowed;
+    // return range(startCol, cells[0].length + startCol).filter(x => !disallowed.includes(x));
+}
 
 export interface DataEditorProps extends Props {
     readonly onDeleteRows?: (rows: readonly number[]) => void;
@@ -587,7 +601,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         let scrollX = 0;
                         let scrollY = 0;
 
-                        const sLeft = scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
+                        let frozenWidth = 0;
+                        for (let i = 0; i < freezeColumns; i++) {
+                            frozenWidth += columns[i].width;
+                        }
+                        const sLeft = frozenWidth + scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
                         const sRight = scrollBounds.right;
                         const sTop = scrollBounds.top + totalHeaderHeight;
                         let trailingRowHeight = 0;
@@ -1163,101 +1181,135 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         []
     );
 
+    // 1 === move one
+    // 2 === move to end
     const adjustSelection = React.useCallback(
-        (direction: [number, number]) => {
+        (direction: [0 | 1 | -1 | 2 | -2, 0 | 1 | -1 | 2 | -2]) => {
             if (gridSelection === undefined) return;
 
             const [x, y] = direction;
             const [col, row] = gridSelection.cell;
-            const oldRange = gridSelection.range;
+            const old = gridSelection.range;
+            let left = old.x;
+            let right = old.x + old.width;
+            let top = old.y;
+            let bottom = old.y + old.height;
 
-            let left = oldRange.x;
-            let right = oldRange.x + oldRange.width - 1;
-            let top = oldRange.y;
-
-            let height = oldRange?.height ?? 1;
-
-            const topDiff = top - row;
-
-            let isTop = topDiff === 0;
-            if (y < 0 && height === 1) isTop = false;
-            const heightDiff = isTop ? y : y * -1;
-
-            if (isTop) {
-                const maxHeight = rows - top;
-                height += heightDiff;
-                height = Math.min(maxHeight, height);
-                scrollTo(0, top + height - 1, "vertical");
-            } else {
-                top -= heightDiff;
-                height = Math.abs(top - row) + 1;
-                scrollTo(0, top, "vertical");
-            }
-
-            const rightDiff = right - col;
-            const leftDiff = col - left;
-            let dX = x;
-            if (x > 0) {
-                if (leftDiff > 0) {
-                    left += Math.min(x, leftDiff);
-                    dX -= Math.min(x, leftDiff);
+            // take care of vertical first in case new spans come in
+            if (y !== 0) {
+                if (y === 2) {
+                    // go to end
+                    bottom = rows;
+                    scrollTo(0, bottom, "vertical");
+                } else if (y === -2) {
+                    // go to start
+                    top = 0;
+                    scrollTo(0, top, "vertical");
+                } else if (y === 1) {
+                    // motion down
+                    if (top < row) {
+                        top++;
+                        scrollTo(0, top, "vertical");
+                    } else {
+                        bottom = Math.min(rows - 1, bottom + 1);
+                        scrollTo(0, bottom, "vertical");
+                    }
+                } else if (y === -1) {
+                    // motion up
+                    if (bottom > row + 1) {
+                        bottom--;
+                        scrollTo(0, bottom, "vertical");
+                    } else {
+                        top = Math.max(0, top - 1);
+                        scrollTo(0, top, "vertical");
+                    }
+                } else {
+                    assertNever(y);
                 }
-                right += dX;
-            } else if (x < 0) {
-                if (rightDiff > 0) {
-                    right -= Math.min(-x, rightDiff);
-                    dX += Math.min(-x, rightDiff);
-                }
-                left += dX;
-                left = Math.max(left, rowMarkerOffset);
             }
-
-            const proposal: GridSelection | undefined = {
-                ...gridSelection,
-                range: {
-                    x: left,
-                    y: top,
-                    width: right - left + 1,
-                    height: height,
-                },
-            };
 
             if (x !== 0) {
-                let expanded = expandSelection(proposal);
-                if (expanded !== undefined && x > 0 && leftDiff > 0 && expanded.range.x < proposal.range.x) {
-                    const underflow = proposal.range.x - expanded.range.x;
-                    expanded = expandSelection({
-                        cell: expanded.cell,
-                        range: {
-                            x: expanded.range.x,
-                            y: expanded.range.y,
-                            width: expanded.range.width + underflow,
-                            height: expanded.range.height,
-                        },
-                    });
-                } else if (
-                    expanded !== undefined &&
-                    x < 0 &&
-                    rightDiff > 0 &&
-                    expanded.range.width > proposal.range.width
-                ) {
-                    const underflow = proposal.range.width - expanded.range.width;
-                    expanded = expandSelection({
-                        cell: expanded.cell,
-                        range: {
-                            x: expanded.range.x - underflow,
-                            y: expanded.range.y,
-                            width: expanded.range.width + underflow,
-                            height: expanded.range.height,
-                        },
-                    });
+                if (x === 2) {
+                    right = mangledCols.length;
+                    scrollTo(right - rowMarkerOffset, 0, "horizontal");
+                } else if (x === -2) {
+                    left = rowMarkerOffset;
+                    scrollTo(left - rowMarkerOffset, 0, "horizontal");
+                } else {
+                    const disallowed =
+                        getCellsForSelection !== undefined
+                            ? getSpanStops(
+                                  getCellsForSelection({
+                                      x: left - rowMarkerOffset,
+                                      y: top,
+                                      width: right - left - rowMarkerOffset,
+                                      height: bottom - top,
+                                  })
+                              )
+                            : [];
+                    if (x === 1) {
+                        // motion right
+                        let done = false;
+                        if (left < col) {
+                            if (disallowed.length > 0) {
+                                const target = range(left + 1, col + 1).find(
+                                    n => !disallowed.includes(n - rowMarkerOffset)
+                                );
+                                if (target !== undefined) {
+                                    left = target;
+                                    done = true;
+                                }
+                            } else {
+                                left++;
+                                done = true;
+                            }
+                            if (done) scrollTo(left, 0, "horizontal");
+                        }
+                        if (!done) {
+                            right = Math.min(mangledCols.length, right + 1);
+                            scrollTo(right - rowMarkerOffset, 0, "horizontal");
+                        }
+                    } else if (x === -1) {
+                        // motion left
+                        let done = false;
+                        if (right > col + 1) {
+                            if (disallowed.length > 0) {
+                                const target = range(right - 1, col, -1).find(
+                                    n => !disallowed.includes(n - rowMarkerOffset)
+                                );
+                                if (target !== undefined) {
+                                    right = target;
+                                    done = true;
+                                }
+                            } else {
+                                right--;
+                                done = true;
+                            }
+                            if (done) scrollTo(right, 0, "horizontal");
+                        } else {
+                            left = Math.max(rowMarkerOffset, left - 1);
+                            scrollTo(left - rowMarkerOffset, 0, "horizontal");
+                        }
+                    } else {
+                        assertNever(x);
+                    }
                 }
-                setGridSelection(expanded, true);
-            } else {
-                setGridSelection(proposal, true);
             }
+
+            setGridSelection(
+                {
+                    cell: gridSelection.cell,
+                    range: {
+                        x: left,
+                        y: top,
+                        width: right - left,
+                        height: bottom - top,
+                    },
+                },
+                true
+            );
         },
-        [expandSelection, gridSelection, rowMarkerOffset, rows, scrollTo, setGridSelection]
+        [getCellsForSelection, gridSelection, mangledCols.length, rowMarkerOffset, rows, scrollTo, setGridSelection]
     );
 
     const updateSelectedCell = React.useCallback(
@@ -1427,30 +1479,30 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else if (event.key === "ArrowDown") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        adjustSelection([0, isPrimaryKey ? Number.MAX_SAFE_INTEGER : 1]);
+                        adjustSelection([0, isPrimaryKey ? 2 : 1]);
                     } else {
-                        row += isPrimaryKey ? Number.MAX_SAFE_INTEGER : 1;
+                        row += isPrimaryKey ? 2 : 1;
                     }
                 } else if (event.key === "ArrowUp") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        adjustSelection([0, isPrimaryKey ? Number.MIN_SAFE_INTEGER : -1]);
+                        adjustSelection([0, isPrimaryKey ? -2 : -1]);
                     } else {
-                        row += isPrimaryKey ? Number.MIN_SAFE_INTEGER : -1;
+                        row += isPrimaryKey ? -2 : -1;
                     }
                 } else if (event.key === "ArrowRight") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        adjustSelection([isPrimaryKey ? Number.MAX_SAFE_INTEGER : 1, 0]);
+                        adjustSelection([isPrimaryKey ? 2 : 1, 0]);
                     } else {
-                        col += isPrimaryKey ? Number.MAX_SAFE_INTEGER : 1;
+                        col += isPrimaryKey ? 2 : 1;
                     }
                 } else if (event.key === "ArrowLeft") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        adjustSelection([isPrimaryKey ? Number.MIN_SAFE_INTEGER : -1, 0]);
+                        adjustSelection([isPrimaryKey ? -2 : -1, 0]);
                     } else {
-                        col += isPrimaryKey ? Number.MIN_SAFE_INTEGER : -1;
+                        col += isPrimaryKey ? -2 : -1;
                     }
                 } else if (event.key === "Tab") {
                     setOverlay(undefined);
