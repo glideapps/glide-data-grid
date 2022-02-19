@@ -1,0 +1,59 @@
+{
+  "name": "@glideapps/glide-data-grid-cells",
+  "version": "3.3.0",
+  "description": "Extra cells for glide-data-grid",
+  "sideEffects": false,
+  "type": "module",
+  "main": "dist/js/index.js",
+  "types": "dist/ts/index.d.ts",
+  "exports": {
+    "import": "./dist/js/index.js",
+    "require": "./dist/cjs/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run build-js && npm run build-cjs && npm run build-types",
+    "build-js": "babel --config-file ../../babel.config.json ./src -d dist/js --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx",
+    "build-cjs": "babel --config-file ../../babel.cjs.json ./src -d dist/cjs --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx",
+    "build-types": "tsc -p tsconfig.types.json",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "NODE_OPTIONS='--experimental-vm-modules --experimental-modules' jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glideapps/glide-data-grid.git",
+    "directory": "packages/source"
+  },
+  "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/cells",
+  "author": "Glide",
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "datagrid",
+    "data-grid",
+    "editor",
+    "reactjs",
+    "scrolling",
+    "data",
+    "table",
+    "cell",
+    "canvas"
+  ],
+  "dependencies": {
+    "@glideapps/glide-data-grid": "3.3.0"
+  },
+  "peerDependencies": {
+    "lodash": "^4.17.19"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.16.0",
+    "styled-components": "^5.2.0",
+    "eslint": "^7.12.1",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "jest": "^27.4.2"
+  }
+}

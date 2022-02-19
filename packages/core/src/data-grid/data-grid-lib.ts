@@ -1,9 +1,8 @@
 import { Theme } from "../common/styles";
-import { DrilldownCellData, GridColumn, Item } from "./data-grid-types";
+import { DrilldownCellData, GridColumn, Item, GridSelection, InnerGridCell } from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs } from "./cells/cell-types";
-import { GridSelection, InnerGridCell } from "..";
 
 export interface MappedGridColumn extends GridColumn {
     sourceIndex: number;
