@@ -383,8 +383,10 @@ export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell
 
 interface BaseGridCell {
     readonly allowOverlay: boolean;
+    readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
+    readonly span?: readonly [number, number];
 }
 
 interface TextCell extends BaseGridCell {

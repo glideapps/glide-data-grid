@@ -93,10 +93,6 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         (selection: GridSelection): readonly (readonly InnerGridCell[])[] => {
             if (getCellsForSelection !== undefined) return getCellsForSelection(selection.range);
 
-            if (selection.range === undefined) {
-                return [[getCellContent(selection.cell)]];
-            }
-
             const range = selection.range;
 
             const result: InnerGridCell[][] = [];
@@ -387,6 +383,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         <>
             <ScrollingDataGrid
                 // Dear future developer. I am sorry.
+                accessibilityHeight={p.accessibilityHeight}
                 cellXOffset={p.cellXOffset}
                 cellYOffset={p.cellYOffset}
                 columns={p.columns}

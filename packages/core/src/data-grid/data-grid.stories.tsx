@@ -29,6 +29,7 @@ export function Simplenotest() {
             cellYOffset={0}
             onMouseMove={() => undefined}
             groupHeaderHeight={34}
+            accessibilityHeight={50}
             enableGroups={false}
             rows={1000}
             headerHeight={44}
@@ -61,6 +62,7 @@ export function SelectedCellnotest() {
             height={500}
             cellXOffset={0}
             onMouseMove={() => undefined}
+            accessibilityHeight={50}
             cellYOffset={0}
             groupHeaderHeight={34}
             enableGroups={false}
@@ -98,6 +100,7 @@ export function SelectedRownotest() {
             cellXOffset={0}
             cellYOffset={0}
             groupHeaderHeight={34}
+            accessibilityHeight={50}
             enableGroups={false}
             rows={1000}
             headerHeight={44}
@@ -132,6 +135,7 @@ export const SelectedColumnnotest = () => {
             height={500}
             cellXOffset={0}
             cellYOffset={0}
+            accessibilityHeight={50}
             groupHeaderHeight={34}
             enableGroups={false}
             rows={1000}
