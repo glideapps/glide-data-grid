@@ -1443,6 +1443,9 @@ export function drawGrid(
     if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
         canvas.width = width * dpr;
         canvas.height = height * dpr;
+
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
     }
 
     const overlayCanvas = buffers.overlay;
@@ -1451,6 +1454,9 @@ export function drawGrid(
     if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== totalHeaderHeight * dpr) {
         overlayCanvas.width = width * dpr;
         overlayCanvas.height = totalHeaderHeight * dpr;
+
+        overlayCanvas.style.width = width + "px";
+        overlayCanvas.style.height = totalHeaderHeight + "px";
     }
 
     const last = lastBlitData.current;

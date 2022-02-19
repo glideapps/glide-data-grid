@@ -130,6 +130,10 @@ export const InfiniteScroller: React.FC<Props> = p => {
         e.stopPropagation();
     }, []);
 
+    React.useEffect(() => {
+        onScroll();
+    }, [onScroll, paddingBottom, paddingRight]);
+
     const setRefs = React.useCallback(
         (instance: HTMLDivElement | null) => {
             scroller.current = instance;
