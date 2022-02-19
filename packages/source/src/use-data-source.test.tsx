@@ -63,6 +63,7 @@ const props: Props = {
         headerFontStyle: "600 13px",
         baseFontStyle: "13px",
         fontFamily: "Inter, Roboto, -apple-system, BlinkMacSystemFont",
+        editorFontStyle: "13px",
     },
 };
 
