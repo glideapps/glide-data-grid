@@ -1,3 +1,4 @@
+import { GridSelection } from "@glideapps/glide-data-grid";
 import React from "react";
 import { Props } from "./types";
 
@@ -5,9 +6,15 @@ export function useCollapsingGroups(
     props: Props
 ): Pick<
     Props,
-    "columns" | "onGroupHeaderClicked" | "onSelectedColumnsChange" | "onGridSelectionChange" | "getGroupDetails"
+    | "columns"
+    | "onGroupHeaderClicked"
+    | "onSelectedColumnsChange"
+    | "onGridSelectionChange"
+    | "getGroupDetails"
+    | "gridSelection"
 > {
     const [collapsed, setCollapsed] = React.useState<readonly string[]>([]);
+    const [gridSelectionInner, setGridSelectionsInner] = React.useState<GridSelection | undefined>(undefined);
 
     const {
         columns: columnsIn,
@@ -15,9 +22,12 @@ export function useCollapsingGroups(
         onSelectedColumnsChange: onSelectedColumnsChangeIn,
         onGridSelectionChange: onGridSelectionChangeIn,
         getGroupDetails: getGroupDetailsIn,
+        gridSelection: gridSelectionIn,
         freezeColumns = 0,
         theme,
     } = props;
+
+    const gridSelection = gridSelectionIn ?? gridSelectionInner;
 
     const spans = React.useMemo(() => {
         const result: [number, number][] = [];
@@ -102,7 +112,11 @@ export function useCollapsingGroups(
                     return cv;
                 });
             }
-            onGridSelectionChangeIn?.(s);
+            if (onGridSelectionChangeIn !== undefined) {
+                onGridSelectionChangeIn(s);
+            } else {
+                setGridSelectionsInner(s);
+            }
         },
         [columns, onGridSelectionChangeIn]
     );
@@ -124,5 +138,12 @@ export function useCollapsingGroups(
         [collapsed, getGroupDetailsIn, theme.bgHeaderHasFocus]
     );
 
-    return { columns, onGroupHeaderClicked, onSelectedColumnsChange, onGridSelectionChange, getGroupDetails };
+    return {
+        columns,
+        onGroupHeaderClicked,
+        onSelectedColumnsChange,
+        onGridSelectionChange,
+        getGroupDetails,
+        gridSelection,
+    };
 }

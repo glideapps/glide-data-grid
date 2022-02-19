@@ -50,7 +50,7 @@ export function useColumnSort(p: Props): Pick<Props, "getCellContent"> {
     const getCellContent = React.useCallback<typeof getCellContentIn>(
         ([col, row]) => {
             if (sortMap === undefined) return getCellContentIn([col, row]);
-            col = sortMap[col];
+            row = sortMap[row];
             return getCellContentIn([col, row]);
         },
         [getCellContentIn, sortMap]

@@ -21,5 +21,6 @@ export function useDataSource(p: Props): ResultType {
         onGridSelectionChange: p.onGridSelectionChange,
         onGroupHeaderClicked: p.onGroupHeaderClicked,
         onSelectedColumnsChange: p.onSelectedColumnsChange,
+        gridSelection: p.gridSelection,
     };
 }

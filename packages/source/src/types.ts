@@ -9,6 +9,7 @@ export type ResultType = Pick<
     | "onGridSelectionChange"
     | "onGroupHeaderClicked"
     | "onSelectedColumnsChange"
+    | "gridSelection"
 >;
 
 interface ExtraProps {

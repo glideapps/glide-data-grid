@@ -9,7 +9,10 @@ import {
     GridColumn,
     Theme,
 } from "@glideapps/glide-data-grid";
+import faker from "faker";
 import { useDataSource } from ".";
+
+faker.seed(1337);
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -159,6 +162,7 @@ const testTheme: Theme = {
 
     headerFontStyle: "600 13px",
     baseFontStyle: "13px",
+    editorFontSize: "13px",
     fontFamily:
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
 };
@@ -168,30 +172,62 @@ const cols: GridColumn[] = [
         title: "A",
         width: 200,
     },
+    {
+        title: "B",
+        width: 200,
+    },
+    {
+        title: "C",
+        width: 200,
+    },
 ];
 
 export const UseDataSource: React.VFC = () => {
+    const cache = React.useRef<Record<string, string>>({});
+    const [sort, setSort] = React.useState<number>();
     const args = useDataSource({
-        rows: 500,
-        sort: {
-            column: cols[0],
-        },
+        rows: 5000,
+        sort:
+            sort === undefined
+                ? undefined
+                : {
+                      column: cols[sort],
+                  },
         columns: cols,
         freezeColumns: 0,
         getCellContent: ([col, row]) => {
+            if (col === 0) {
+                return {
+                    kind: GridCellKind.Text,
+                    allowOverlay: true,
+                    data: `${col} x ${row}`,
+                    displayData: `${col} x ${row}`,
+                };
+            }
+
+            const key = `${col},${row}`;
+            if (cache.current[key] === undefined) {
+                cache.current[key] = faker.name.firstName() + " " + faker.name.lastName();
+            }
+            const d = cache.current[key];
+
             return {
                 kind: GridCellKind.Text,
-                allowOverlay: false,
-                data: `${col} x ${row}`,
-                displayData: `${col} x ${row}`,
+                allowOverlay: true,
+                data: d,
+                displayData: d,
             };
         },
         theme: testTheme,
     });
 
+    const onHeaderClick = React.useCallback((index: number) => {
+        setSort(index);
+    }, []);
+
     return (
         <BeautifulWrapper title="Custom cells" description={<Description>Some of our extension cells.</Description>}>
-            <DataEditor {...defaultProps} {...args} rows={500} />
+            <DataEditor {...defaultProps} {...args} onHeaderClicked={onHeaderClick} rows={500} />
         </BeautifulWrapper>
     );
 };
