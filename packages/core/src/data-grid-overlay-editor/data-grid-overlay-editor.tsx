@@ -40,6 +40,13 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         onFinishEditing(tempValue, [0, 0]);
     }, [tempValue, onFinishEditing]);
 
+    const onCustomFinishedEditing = React.useCallback(
+        (newValue?: GridCell) => {
+            onFinishEditing(newValue !== undefined ? newValue : tempValue, [0, 0]);
+        },
+        [onFinishEditing, tempValue]
+    );
+
     const onKeyDown = React.useCallback(
         (event: React.KeyboardEvent) => {
             if (event.key === "Escape") {
@@ -62,22 +69,25 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         return provideEditor?.(content);
     }, [content, provideEditor]);
 
-    const CellEditor = React.useMemo(() => {
-        if (content.kind === GridCellKind.Custom) return undefined;
+    const [CellEditor, useLabel] = React.useMemo(() => {
+        if (content.kind === GridCellKind.Custom) return [];
         const renderer = CellRenderers[content.kind];
-        return renderer.getEditor?.(content);
+        return [renderer.getEditor?.(content), renderer.useLabel];
     }, [content]);
 
     let pad = true;
     let editor: React.ReactNode;
+    let style = true;
+
     if (CustomEditor !== undefined) {
         pad = CustomEditor.disablePadding !== true;
+        style = CustomEditor.disableStyling !== true;
         editor = (
             <CustomEditor
                 isHighlighted={highlight}
                 onChange={setTempValue}
                 value={targetValue}
-                onFinishedEditing={onClickOutside}
+                onFinishedEditing={onCustomFinishedEditing}
             />
         );
     } else if (CellEditor !== undefined) {
@@ -107,7 +117,11 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     }
     const portal = createPortal(
         <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
-            <DataGridOverlayEditorStyle targetRect={target} pad={pad}>
+            <DataGridOverlayEditorStyle
+                className={style ? "gdg-style" : "gdg-unstyle"}
+                as={useLabel === true ? "label" : undefined}
+                targetRect={target}
+                pad={pad}>
                 <div className="clip-region" onKeyDown={CustomEditor === undefined ? undefined : onKeyDown}>
                     {editor}
                 </div>

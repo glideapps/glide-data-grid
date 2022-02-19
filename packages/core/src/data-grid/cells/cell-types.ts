@@ -1,5 +1,6 @@
 import type { OverlayImageEditorProps, Theme } from "../..";
 import type ImageWindowLoader from "../../common/image-window-loader";
+import type { SpriteManager } from "../data-grid-sprites";
 import type { InnerGridCell, Rectangle, Item } from "../data-grid-types";
 
 export type HoverInfo = readonly [Item, readonly [number, number]];
@@ -20,6 +21,7 @@ export interface BaseDrawArgs {
     hoverX: number | undefined;
     hoverY: number | undefined;
     imageLoader: ImageWindowLoader;
+    spriteManager: SpriteManager;
 }
 
 interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {
@@ -51,6 +53,7 @@ export interface InternalCellRenderer<T extends InnerGridCell> {
     readonly render: DrawCallback<T>;
     readonly needsHover: boolean;
     readonly needsHoverPosition: boolean;
+    readonly useLabel?: boolean;
     readonly onClick?: (cell: T, posX: number, posY: number, bounds: Rectangle) => T | undefined;
     readonly onDelete?: (cell: T) => T | undefined;
     readonly getAccessibilityString: (cell: T) => string;

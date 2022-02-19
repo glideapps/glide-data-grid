@@ -1,8 +1,9 @@
 import { Theme } from "../common/styles";
-import { DrilldownCellData, GridColumn } from "./data-grid-types";
+import { DrilldownCellData, GridColumn, Item } from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs } from "./cells/cell-types";
+import { GridSelection, InnerGridCell } from "..";
 
 export interface MappedGridColumn extends GridColumn {
     sourceIndex: number;
@@ -23,6 +24,43 @@ export function useMappedColumns(columns: readonly GridColumn[], freezeColumns: 
 
 export function isGroupEqual(left: string | undefined, right: string | undefined): boolean {
     return (left ?? "") === (right ?? "");
+}
+
+export function cellIsSelected(location: Item, cell: InnerGridCell, selection: GridSelection | undefined): boolean {
+    if (selection === undefined) return false;
+
+    const [col, row] = selection.cell;
+    const [cellCol, cellRow] = location;
+    if (cellRow !== row) return false;
+
+    if (cell.span === undefined) {
+        return col === cellCol;
+    }
+
+    return col >= cell.span[0] && col <= cell.span[1];
+}
+
+export function cellIsInRange(location: Item, cell: InnerGridCell, selection: GridSelection | undefined): boolean {
+    if (selection === undefined) return false;
+
+    const startX = selection.range.x;
+    const endX = selection.range.x + selection.range.width - 1;
+    const startY = selection.range.y;
+    const endY = selection.range.y + selection.range.height - 1;
+
+    const [cellCol, cellRow] = location;
+    if (cellRow < startY || cellRow > endY) return false;
+
+    if (cell.span === undefined) {
+        return cellCol >= startX && cellCol <= endX;
+    }
+
+    const [spanStart, spanEnd] = cell.span;
+    return (
+        (spanStart >= startX && spanStart <= endX) ||
+        (spanEnd >= startX && spanStart <= endX) ||
+        (spanStart < startX && spanEnd > endX)
+    );
 }
 
 function remapForDnDState(
@@ -244,8 +282,8 @@ export function drawTextCell(args: BaseDrawArgs, data: string) {
     }
 }
 
-export function drawNewRowCell(args: BaseDrawArgs, data: string, isFirst: boolean) {
-    const { ctx, x, y, w, h, hoverAmount, theme } = args;
+export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) {
+    const { ctx, x, y, w, h, hoverAmount, theme, spriteManager } = args;
     ctx.beginPath();
     ctx.globalAlpha = hoverAmount;
     ctx.rect(x, y, w, h);
@@ -254,20 +292,31 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, isFirst: boolea
     ctx.globalAlpha = 1;
     ctx.beginPath();
 
-    const finalLineSize = 12;
-    const lineSize = isFirst ? finalLineSize : hoverAmount * finalLineSize;
-    const xTranslate = isFirst ? 0 : (1 - hoverAmount) * finalLineSize * 0.5;
+    const alwaysShowIcon = data !== "";
 
-    const padPlus = theme.cellHorizontalPadding + 4;
-    if (lineSize > 0) {
-        ctx.moveTo(x + padPlus + xTranslate, y + h / 2);
-        ctx.lineTo(x + padPlus + xTranslate + lineSize, y + h / 2);
-        ctx.moveTo(x + padPlus + xTranslate + lineSize * 0.5, y + h / 2 - lineSize * 0.5);
-        ctx.lineTo(x + padPlus + xTranslate + lineSize * 0.5, y + h / 2 + lineSize * 0.5);
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = theme.bgIconHeader;
-        ctx.lineCap = "round";
-        ctx.stroke();
+    if (icon !== undefined) {
+        const padding = 8;
+        const size = h - padding;
+        const px = x + padding / 2;
+        const py = y + padding / 2;
+
+        spriteManager.drawSprite(icon, "normal", ctx, px, py, size, theme, alwaysShowIcon ? 1 : hoverAmount);
+    } else {
+        const finalLineSize = 12;
+        const lineSize = alwaysShowIcon ? finalLineSize : hoverAmount * finalLineSize;
+        const xTranslate = alwaysShowIcon ? 0 : (1 - hoverAmount) * finalLineSize * 0.5;
+
+        const padPlus = theme.cellHorizontalPadding + 4;
+        if (lineSize > 0) {
+            ctx.moveTo(x + padPlus + xTranslate, y + h / 2);
+            ctx.lineTo(x + padPlus + xTranslate + lineSize, y + h / 2);
+            ctx.moveTo(x + padPlus + xTranslate + lineSize * 0.5, y + h / 2 - lineSize * 0.5);
+            ctx.lineTo(x + padPlus + xTranslate + lineSize * 0.5, y + h / 2 + lineSize * 0.5);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = theme.bgIconHeader;
+            ctx.lineCap = "round";
+            ctx.stroke();
+        }
     }
 
     ctx.fillStyle = theme.textMedium;

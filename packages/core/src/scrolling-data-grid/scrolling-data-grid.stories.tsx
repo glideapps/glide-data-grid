@@ -69,6 +69,7 @@ export function Simplenotest() {
             enableGroups={false}
             cellXOffset={x}
             cellYOffset={y}
+            accessibilityHeight={50}
             translateX={translateX}
             translateY={translateY}
             lockColumns={0}

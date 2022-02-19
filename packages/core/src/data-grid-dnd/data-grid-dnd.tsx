@@ -61,32 +61,34 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
     const onMouseDownImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
             let shouldFireEvent = true;
-            const [col, row] = args.location;
-            if (!isDraggable) {
-                if (args.kind === "out-of-bounds" && args.isEdge) {
-                    const bounds = gridRef?.current?.getBounds(columns.length - 1, -1);
-                    if (bounds !== undefined) {
-                        setResizeColStartX(bounds.x);
-                        setResizeCol(columns.length - 1);
+            if (args.button === 0) {
+                const [col, row] = args.location;
+                if (!isDraggable) {
+                    if (args.kind === "out-of-bounds" && args.isEdge) {
+                        const bounds = gridRef?.current?.getBounds(columns.length - 1, -1);
+                        if (bounds !== undefined) {
+                            setResizeColStartX(bounds.x);
+                            setResizeCol(columns.length - 1);
+                        }
+                    } else if (args.kind === "header" && col >= lockColumns) {
+                        if (args.isEdge) {
+                            shouldFireEvent = false;
+                            setResizeColStartX(args.bounds.x);
+                            setResizeCol(col);
+                        } else if (args.kind === "header" && canDragCol) {
+                            setDragStartX(args.bounds.x);
+                            setDragCol(col);
+                        }
+                    } else if (
+                        args.kind === "cell" &&
+                        lockColumns > 0 &&
+                        col === 0 &&
+                        row !== undefined &&
+                        onRowMoved !== undefined
+                    ) {
+                        setDragStartY(args.bounds.y);
+                        setDragRow(row);
                     }
-                } else if (args.kind === "header" && col >= lockColumns) {
-                    if (args.isEdge) {
-                        shouldFireEvent = false;
-                        setResizeColStartX(args.bounds.x);
-                        setResizeCol(col);
-                    } else if (args.kind === "header" && canDragCol) {
-                        setDragStartX(args.bounds.x);
-                        setDragCol(col);
-                    }
-                } else if (
-                    args.kind === "cell" &&
-                    lockColumns > 0 &&
-                    col === 0 &&
-                    row !== undefined &&
-                    onRowMoved !== undefined
-                ) {
-                    setDragStartY(args.bounds.y);
-                    setDragRow(row);
                 }
             }
             if (shouldFireEvent) onMouseDown?.(args);
@@ -106,29 +108,31 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
 
     const onMouseUpImpl = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
-            if (resizeCol !== undefined && selectedColumns?.hasIndex(resizeCol) === true) {
-                for (const c of selectedColumns) {
-                    if (c === resizeCol) continue;
-                    onColumnResized?.(columns[c], lastResizeWidthRef.current);
+            if (args.button === 0) {
+                if (resizeCol !== undefined && selectedColumns?.hasIndex(resizeCol) === true) {
+                    for (const c of selectedColumns) {
+                        if (c === resizeCol) continue;
+                        onColumnResized?.(columns[c], lastResizeWidthRef.current);
+                    }
                 }
-            }
 
-            lastResizeWidthRef.current = -1;
-            setDragRow(undefined);
-            setDropRow(undefined);
-            setDragStartY(undefined);
-            setDragRowActive(false);
-            setDragCol(undefined);
-            setDropCol(undefined);
-            setDragStartX(undefined);
-            setDragColActive(false);
-            setResizeCol(undefined);
-            setResizeColStartX(undefined);
-            if (dragCol !== undefined && dropCol !== undefined) {
-                onColumnMoved?.(dragCol, dropCol);
-            }
-            if (dragRow !== undefined && dropRow !== undefined) {
-                onRowMoved?.(dragRow, dropRow);
+                lastResizeWidthRef.current = -1;
+                setDragRow(undefined);
+                setDropRow(undefined);
+                setDragStartY(undefined);
+                setDragRowActive(false);
+                setDragCol(undefined);
+                setDropCol(undefined);
+                setDragStartX(undefined);
+                setDragColActive(false);
+                setResizeCol(undefined);
+                setResizeColStartX(undefined);
+                if (dragCol !== undefined && dropCol !== undefined) {
+                    onColumnMoved?.(dragCol, dropCol);
+                }
+                if (dragRow !== undefined && dropRow !== undefined) {
+                    onRowMoved?.(dragRow, dropRow);
+                }
             }
             onMouseUp?.(args, isOutside);
         },
@@ -221,6 +225,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         <DataGrid
             // I know the below could be done with ...rest, but it adds about 2-3% cpu load in the hot loop
             // This doesn't matter much for most devices but it will matter for low power phones and such.
+            accessibilityHeight={p.accessibilityHeight}
             cellXOffset={p.cellXOffset}
             cellYOffset={p.cellYOffset}
             columns={p.columns}

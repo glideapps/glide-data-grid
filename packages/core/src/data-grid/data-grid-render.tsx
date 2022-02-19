@@ -21,6 +21,8 @@ import {
     roundedPoly,
     drawWithLastUpdate,
     isGroupEqual,
+    cellIsSelected,
+    cellIsInRange,
 } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
@@ -78,6 +80,7 @@ export function drawCell(
     theme: Theme,
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader,
+    spriteManager: SpriteManager,
     hoverAmount: number,
     hoverInfo: HoverInfo | undefined,
     frameTime: number,
@@ -91,7 +94,23 @@ export function drawCell(
         hoverY = hoverInfo[1][1];
     }
     let result: {} | undefined = undefined;
-    const args = { ctx, theme, col, row, cell, x, y, w, h, highlighted, hoverAmount, hoverX, hoverY, imageLoader };
+    const args = {
+        ctx,
+        theme,
+        col,
+        row,
+        cell,
+        x,
+        y,
+        w,
+        h,
+        highlighted,
+        hoverAmount,
+        hoverX,
+        hoverY,
+        imageLoader,
+        spriteManager,
+    };
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, forcePrep => {
         const drawn = isInnerOnlyCell(cell)
             ? false
@@ -263,6 +282,7 @@ function blitLastFrame(
     };
 }
 
+// lines are effectively drawn on the top left edge of a cell.
 function drawGridLines(
     ctx: CanvasRenderingContext2D,
     effectiveCols: readonly MappedGridColumn[],
@@ -271,6 +291,7 @@ function drawGridLines(
     translateY: number,
     width: number,
     height: number,
+    spans: Rectangle[] | undefined,
     groupHeaderHeight: number,
     totalHeaderHeight: number,
     getRowHeight: (row: number) => number,
@@ -280,6 +301,15 @@ function drawGridLines(
     theme: Theme,
     verticalOnly: boolean = false
 ) {
+    if (spans !== undefined) {
+        ctx.beginPath();
+        ctx.save();
+        ctx.rect(0, 0, width, height);
+        for (const span of spans) {
+            ctx.rect(span.x + 1, span.y + 1, span.width - 1, span.height - 1);
+        }
+        ctx.clip("evenodd");
+    }
     const hColor = theme.horizontalBorderColor ?? theme.borderColor;
     const vColor = theme.borderColor;
     ctx.beginPath();
@@ -303,12 +333,11 @@ function drawGridLines(
             ctx.moveTo(tx, groupHeaderHeight);
             ctx.lineTo(tx, height);
         }
-
-        if (vColor !== hColor) {
-            ctx.strokeStyle = vColor;
-            ctx.stroke();
-            ctx.beginPath();
-        }
+    }
+    if (vColor !== hColor) {
+        ctx.strokeStyle = vColor;
+        ctx.stroke();
+        ctx.beginPath();
     }
 
     const stickyHeight = getRowHeight(rows - 1);
@@ -341,6 +370,10 @@ function drawGridLines(
     ctx.strokeStyle = hColor;
     ctx.stroke();
     ctx.beginPath();
+
+    if (spans !== undefined) {
+        ctx.restore();
+    }
 }
 
 export function getActionBoundsForGroup(
@@ -810,9 +843,66 @@ function clipDamage(
     ctx.clip();
 }
 
+function getSpanBounds(
+    span: readonly [number, number],
+    cellX: number,
+    cellY: number,
+    cellW: number,
+    cellH: number,
+    column: MappedGridColumn,
+    allColumns: readonly MappedGridColumn[]
+): [Rectangle | undefined, Rectangle | undefined] {
+    const [startCol, endCol] = span;
+
+    let frozenRect: Rectangle | undefined;
+    let contentRect: Rectangle | undefined;
+
+    const firstNonSticky = allColumns.find(x => !x.sticky)?.sourceIndex ?? 0;
+    if (endCol > firstNonSticky) {
+        const renderFromCol = Math.max(startCol, firstNonSticky);
+        let tempX = cellX;
+        let tempW = cellW;
+        for (let x = column.sourceIndex - 1; x >= renderFromCol; x--) {
+            tempX -= allColumns[x].width;
+            tempW += allColumns[x].width;
+        }
+        for (let x = column.sourceIndex + 1; x <= endCol; x++) {
+            tempW += allColumns[x].width;
+        }
+        contentRect = {
+            x: tempX,
+            y: cellY,
+            width: tempW,
+            height: cellH,
+        };
+    }
+
+    if (firstNonSticky > startCol) {
+        const renderToCol = Math.min(endCol, firstNonSticky - 1);
+        let tempX = cellX;
+        let tempW = cellW;
+        for (let x = column.sourceIndex - 1; x >= startCol; x--) {
+            tempX -= allColumns[x].width;
+            tempW += allColumns[x].width;
+        }
+        for (let x = column.sourceIndex + 1; x <= renderToCol; x++) {
+            tempW += allColumns[x].width;
+        }
+        frozenRect = {
+            x: tempX,
+            y: cellY,
+            width: tempW,
+            height: cellH,
+        };
+    }
+
+    return [frozenRect, contentRect];
+}
+
 function drawCells(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
+    allColumns: readonly MappedGridColumn[],
     height: number,
     totalHeaderHeight: number,
     translateX: number,
@@ -832,14 +922,17 @@ function drawCells(
     prelightCells: CellList | undefined,
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader,
+    spriteManager: SpriteManager,
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
     outerTheme: Theme,
     enqueue: (item: Item) => void
-): void {
+): Rectangle[] | undefined {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
     let font: string | undefined;
+    let result: Rectangle[] | undefined;
+    const handledSpans = new Set<string>();
     walkColumns(
         effectiveColumns,
         cellYOffset,
@@ -865,10 +958,13 @@ function drawCells(
                 if (!found) return;
             }
 
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(colDrawX, colDrawY, colWidth, colHeight);
-            ctx.clip();
+            const reclip = () => {
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(colDrawX, colDrawY, colWidth, colHeight);
+                ctx.clip();
+            };
+            reclip();
 
             const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
             const colTheme =
@@ -939,46 +1035,84 @@ function drawCells(
                                   allowOverlay: false,
                               };
 
+                    let cellX = drawX;
+                    let cellWidth = c.width;
+                    let drawingSpan = false;
+                    let skipContents = false;
+                    if (cell.span !== undefined) {
+                        const [startCol, endCol] = cell.span;
+                        const spanKey = `${row},${startCol},${endCol},${c.sticky}`;
+                        if (!handledSpans.has(spanKey)) {
+                            const areas = getSpanBounds(cell.span, drawX, drawY, c.width, rh, c, allColumns);
+                            const area = c.sticky ? areas[0] : areas[1];
+                            if (!c.sticky && areas[0] !== undefined) {
+                                skipContents = true;
+                            }
+                            if (area !== undefined) {
+                                cellX = area.x;
+                                cellWidth = area.width;
+                                handledSpans.add(spanKey);
+                                ctx.restore();
+                                lastToken = undefined;
+                                ctx.save();
+                                ctx.beginPath();
+                                const d = Math.max(0, clipX - area.x);
+                                ctx.rect(area.x + d, drawY, area.width - d, rh);
+                                if (result === undefined) {
+                                    result = [];
+                                }
+                                result.push({
+                                    x: area.x + d,
+                                    y: drawY,
+                                    width: area.width - d,
+                                    height: rh,
+                                });
+                                ctx.clip();
+                                drawingSpan = true;
+                            }
+                        } else {
+                            toDraw--;
+                            return;
+                        }
+                    }
+
                     const theme = cell.themeOverride === undefined ? colTheme : { ...colTheme, ...cell.themeOverride };
 
                     ctx.beginPath();
 
-                    const isFocused = selectedCell?.cell[0] === c.sourceIndex && selectedCell?.cell[1] === row;
-                    let highlighted =
-                        isFocused || (!isSticky && (rowSelected || selectedColumns.hasIndex(c.sourceIndex)));
-
-                    if (selectedCell?.range !== undefined) {
-                        const { range } = selectedCell;
-                        if (
-                            c.sourceIndex >= range.x &&
-                            c.sourceIndex < range.x + range.width &&
-                            row >= range.y &&
-                            row < range.y + range.height
-                        ) {
-                            highlighted = true;
-                        }
-                    }
+                    const isFocused =
+                        cellIsSelected([c.sourceIndex, row], cell, selectedCell) ||
+                        cellIsInRange([c.sourceIndex, row], cell, selectedCell);
+                    const spanIsHighlighted =
+                        cell.span !== undefined &&
+                        selectedColumns.some(
+                            index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1]
+                        );
+                    const highlighted =
+                        spanIsHighlighted ||
+                        isFocused ||
+                        (!isSticky && (rowSelected || selectedColumns.hasIndex(c.sourceIndex)));
 
                     if (isSticky || theme.bgCell !== outerTheme.bgCell) {
                         ctx.fillStyle = theme.bgCell;
-                        ctx.fillRect(drawX, drawY, c.width, rh);
+                        ctx.fillRect(cellX, drawY, cellWidth, rh);
                         lastToken = undefined;
                     }
 
                     if (highlighted || rowDisabled) {
                         if (rowDisabled) {
                             ctx.fillStyle = theme.bgHeader;
-                            ctx.fillRect(drawX, drawY, c.width, rh);
+                            ctx.fillRect(cellX, drawY, cellWidth, rh);
                         }
                         if (highlighted) {
                             ctx.fillStyle = theme.accentLight;
-                            ctx.fillRect(drawX, drawY, c.width, rh);
+                            ctx.fillRect(cellX, drawY, cellWidth, rh);
                         }
                         lastToken = undefined;
                     } else {
                         if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
                             ctx.fillStyle = theme.bgSearchResult;
-                            ctx.fillRect(drawX, drawY, c.width, rh);
+                            ctx.fillRect(cellX, drawY, cellWidth, rh);
                             lastToken = undefined;
                         }
                     }
@@ -989,27 +1123,26 @@ function drawCells(
 
                     const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
 
-                    if (c.width > 10) {
-                        if (theme !== colTheme) {
-                            const cellFont = `${theme.baseFontStyle} ${theme.fontFamily}`;
-                            if (cellFont !== font) {
-                                ctx.font = cellFont;
-                                font = cellFont;
-                            }
+                    if (cellWidth > 10 && !skipContents) {
+                        const cellFont = `${theme.baseFontStyle} ${theme.fontFamily}`;
+                        if (cellFont !== font) {
+                            ctx.font = cellFont;
+                            font = cellFont;
                         }
                         const drawResult = drawCell(
                             ctx,
                             row,
                             cell,
                             c.sourceIndex,
-                            drawX,
+                            cellX,
                             drawY,
-                            c.width,
+                            cellWidth,
                             rh,
                             highlighted,
                             theme,
                             drawCustomCell,
                             imageLoader,
+                            spriteManager,
                             hoverValue?.hoverAmount ?? 0,
                             hoverInfo,
                             frameTime,
@@ -1021,6 +1154,13 @@ function drawCells(
 
                     ctx.globalAlpha = 1;
                     toDraw--;
+                    if (drawingSpan) {
+                        ctx.restore();
+                        lastToken = undefined;
+                        reclip();
+                        font = colFont;
+                        ctx.font = colFont;
+                    }
                     return toDraw <= 0;
                 }
             );
@@ -1029,6 +1169,7 @@ function drawCells(
             return toDraw <= 0;
         }
     );
+    return result;
 }
 
 function drawBlanks(
@@ -1154,16 +1295,20 @@ function drawFocusRing(
     translateX: number,
     translateY: number,
     effectiveCols: readonly MappedGridColumn[],
+    allColumns: readonly MappedGridColumn[],
     theme: Theme,
     totalHeaderHeight: number,
     selectedCell: GridSelection | undefined,
     getRowHeight: (row: number) => number,
+    getCellContent: (cell: readonly [number, number]) => InnerGridCell,
     lastRowSticky: boolean,
     rows: number
 ) {
     if (selectedCell === undefined || effectiveCols.find(c => (c.sourceIndex === selectedCell.cell[0]) === undefined))
         return;
     const [targetCol, targetRow] = selectedCell.cell;
+    const cell = getCellContent(selectedCell.cell);
+    const targetColSpan = cell.span ?? [targetCol, targetCol];
 
     const isStickyRow = lastRowSticky && targetRow === rows - 1;
     const stickRowHeight = lastRowSticky && !isStickyRow ? getRowHeight(rows - 1) - 1 : 0;
@@ -1180,21 +1325,37 @@ function drawFocusRing(
         translateY,
         totalHeaderHeight,
         (col, drawX, colDrawY, clipX, startRow) => {
-            if (col.sourceIndex !== targetCol) {
+            if (col.sticky && targetCol > col.sourceIndex) return;
+            if (col.sourceIndex < targetColSpan[0] || col.sourceIndex > targetColSpan[1]) {
                 return;
             }
 
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh) => {
                 if (row !== targetRow) return;
 
-                if (clipX > drawX) {
-                    const diff = Math.max(0, clipX - drawX);
+                let cellX = drawX;
+                let cellWidth = col.width;
+
+                if (cell.span !== undefined) {
+                    const areas = getSpanBounds(cell.span, drawX, drawY, col.width, rh, col, allColumns);
+                    const area = col.sticky ? areas[0] : areas[1];
+
+                    // eslint-disable-next-line no-console
+                    console.log(area);
+                    if (area !== undefined) {
+                        cellX = area.x;
+                        cellWidth = area.width;
+                    }
+                }
+
+                if (clipX > cellX && !col.sticky) {
+                    const diff = Math.max(0, clipX - cellX);
                     ctx.beginPath();
-                    ctx.rect(drawX + diff, drawY, col.width - diff + 1, rh + 1);
+                    ctx.rect(cellX + diff, drawY, cellWidth - diff + 1, rh + 1);
                     ctx.clip();
                 }
                 ctx.beginPath();
-                ctx.rect(drawX + 0.5, drawY + 0.5, col.width, rh);
+                ctx.rect(cellX + 0.5, drawY + 0.5, cellWidth, rh);
                 ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
                 ctx.lineWidth = 1;
                 ctx.stroke();
@@ -1335,6 +1496,7 @@ export function drawGrid(
             translateY,
             width,
             height,
+            undefined,
             groupHeaderHeight,
             totalHeaderHeight,
             getRowHeight,
@@ -1381,6 +1543,7 @@ export function drawGrid(
             drawCells(
                 targetCtx,
                 effectiveCols,
+                mappedColumns,
                 height,
                 totalHeaderHeight,
                 translateX,
@@ -1400,6 +1563,7 @@ export function drawGrid(
                 prelightCells,
                 drawCustomCell,
                 imageLoader,
+                spriteManager,
                 hoverValues,
                 hoverInfo,
                 theme,
@@ -1479,10 +1643,12 @@ export function drawGrid(
             translateX,
             translateY,
             effectiveCols,
+            mappedColumns,
             theme,
             totalHeaderHeight,
             selectedCell,
             getRowHeight,
+            getCellContent,
             lastRowSticky,
             rows
         );
@@ -1500,9 +1666,10 @@ export function drawGrid(
     targetCtx.fillStyle = theme.bgCell;
     targetCtx.fillRect(0, 0, width, height);
 
-    drawCells(
+    const spans = drawCells(
         targetCtx,
         effectiveCols,
+        mappedColumns,
         height,
         totalHeaderHeight,
         translateX,
@@ -1522,6 +1689,7 @@ export function drawGrid(
         prelightCells,
         drawCustomCell,
         imageLoader,
+        spriteManager,
         hoverValues,
         hoverInfo,
         theme,
@@ -1555,6 +1723,7 @@ export function drawGrid(
         translateY,
         width,
         height,
+        spans,
         groupHeaderHeight,
         totalHeaderHeight,
         getRowHeight,
@@ -1572,10 +1741,12 @@ export function drawGrid(
         translateX,
         translateY,
         effectiveCols,
+        mappedColumns,
         theme,
         totalHeaderHeight,
         selectedCell,
         getRowHeight,
+        getCellContent,
         lastRowSticky,
         rows
     );

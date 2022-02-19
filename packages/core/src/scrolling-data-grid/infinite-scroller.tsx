@@ -114,7 +114,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
         }
 
         update({
-            x: el.scrollLeft,
+            x: Math.max(0, el.scrollLeft),
             y: Math.min(maxFakeY, newY + offsetY.current),
             width: el.clientWidth - paddingRight,
             height: el.clientHeight - paddingBottom,

@@ -4,10 +4,10 @@
 </h1>
 <p align="center">A relatively small HTML5 Canvas based data editor supporting <b>millions</b> of rows, <b>rapid</b> updating, and fully <b>native scrolling</b>. We built <a href="https://grid.glideapps.com" target="_blank">Data Grid</a> as the basis for the <a href="https://docs.glideapps.com/all/reference/data-editor/introduction-to-the-data-editor" target="_blank">Glide Data Editor</a>.</p>
 
-[![Version](https://img.shields.io/badge/latest-v3.2.1-blue?style=for-the-badge&logo=none)](https://github.com/glideapps/glide-data-grid/releases)
+[![Version](https://img.shields.io/badge/latest-v3.3.0-blue?style=for-the-badge&logo=none)](https://github.com/glideapps/glide-data-grid/releases)
 [![React 16+](https://img.shields.io/badge/React-16+-00ADD8?style=for-the-badge&logo=react)](https://reactjs.org)
 ![Code Coverage](https://img.shields.io/coveralls/github/glideapps/glide-data-grid?color=457aba&label=Cover&style=for-the-badge)
-[![Bundle Size](https://img.shields.io/badge/Bundle-45.4kb-success?style=for-the-badge&logo=none)](https://bundlephobia.com/package/@glideapps/glide-data-grid)
+[![Bundle Size](https://img.shields.io/badge/Bundle-45.6kb-success?style=for-the-badge&logo=none)](https://bundlephobia.com/package/@glideapps/glide-data-grid)
 [![License MIT](https://img.shields.io/badge/license-mit-red?style=for-the-badge&logo=none)](https://github.com/glideapps/glide-data-grid/blob/main/LICENSE)
 [![Made By Glide](https://img.shields.io/badge/❤_Made_by-Glide-11CCE5?style=for-the-badge&logo=none)](https://www.glideapps.com/jobs)
 
@@ -26,6 +26,7 @@ Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-d
 -   **Editing is built in**.
 -   **Resizable and movable columns**.
 -   **Variable sized rows**.
+-   **Merged cells**.
 -   **Single and multi-select rows, cells, and columns**.
 -   **Cell rendering can be fully customized**.
 

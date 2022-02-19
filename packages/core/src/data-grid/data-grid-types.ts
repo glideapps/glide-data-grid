@@ -26,6 +26,7 @@ interface BaseGridMouseEventArgs {
     readonly metaKey: boolean;
     readonly isTouch: boolean;
     readonly isEdge: boolean;
+    readonly button: number;
 }
 
 export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
@@ -155,6 +156,10 @@ export interface GridColumn {
     readonly hasMenu?: boolean;
     readonly style?: "normal" | "highlight";
     readonly themeOverride?: Partial<Theme>;
+    readonly trailingRowOptions?: {
+        readonly hint?: string;
+        readonly addIcon?: string;
+    };
 }
 
 export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell;
@@ -242,6 +247,7 @@ interface BaseGridCell {
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
+    readonly span?: readonly [number, number];
 }
 
 export interface LoadingCell extends BaseGridCell {
@@ -283,11 +289,12 @@ export type ProvideEditorCallback<T extends GridCell> = (
 ) =>
     | (React.FunctionComponent<{
           readonly onChange: (newValue: T) => void;
-          readonly onFinishedEditing: () => void;
+          readonly onFinishedEditing: (newValue?: T) => void;
           readonly isHighlighted: boolean;
           readonly value: T;
       }> & {
           disablePadding?: boolean;
+          disableStyling?: boolean;
       })
     | undefined;
 
@@ -340,8 +347,8 @@ export enum InnerGridCellKind {
 export interface NewRowCell extends BaseGridCell {
     readonly kind: InnerGridCellKind.NewRow;
     readonly hint: string;
-    readonly isFirst: boolean;
     readonly allowOverlay: false;
+    readonly icon?: string;
 }
 
 export interface MarkerCell extends BaseGridCell {
@@ -458,6 +465,13 @@ export class CompactSelection {
             if (!this.hasIndex(x)) return false;
         }
         return true;
+    };
+
+    some = (predicate: (index: number) => boolean): boolean => {
+        for (const i of this) {
+            if (predicate(i)) return true;
+        }
+        return false;
     };
 
     get length(): number {

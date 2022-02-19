@@ -194,7 +194,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
     Image.prototype.decode = jest.fn();
 });
 
-function prep() {
+function prep(resetTimers: boolean = true) {
     const scroller = document.getElementsByClassName("dvn-scroller").item(0);
     if (scroller !== null) {
         jest.spyOn(scroller, "clientWidth", "get").mockImplementation(() => 1000);
@@ -204,7 +204,9 @@ function prep() {
     act(() => {
         jest.runAllTimers();
     });
-    jest.useRealTimers();
+    if (resetTimers) {
+        jest.useRealTimers();
+    }
 
     return scroller;
 }
@@ -269,6 +271,31 @@ const EventedDataEditor: React.VFC<DataEditorProps> = p => {
 };
 
 describe("data-editor", () => {
+    test("Focus a11y cell", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const a11ycell = screen.getByTestId("glide-cell-0-5");
+        fireEvent.focus(a11ycell);
+
+        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [0, 5] }));
+    });
+
+    test("Click a11y cell", async () => {
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const a11ycell = screen.getByTestId("glide-cell-0-5");
+        fireEvent.click(a11ycell);
+    });
+
     test("Emits cell click", async () => {
         const spy = jest.fn();
 
@@ -293,6 +320,52 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
     });
 
+    test("Doesn't emit cell click if mouseDown happened in a different cell", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellClicked={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B, ends at x = 310
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 320, // Col C, started at x = 310
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).not.toHaveBeenCalled();
+    });
+
+    test("Doesn't emit header click if mouseDown happened in a different cell", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onHeaderClicked={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B, ends at x = 310
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 320, // Col C, started at x = 310
+            clientY: 16, // Header
+        });
+
+        expect(spy).not.toHaveBeenCalled();
+    });
+
     test("Uneven rows cell click", async () => {
         const spy = jest.fn();
 
@@ -315,6 +388,32 @@ describe("data-editor", () => {
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    });
+
+    test("Emits finished editing", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onFinishedEditing={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 74,
+        });
+
+        const overlay = screen.getByDisplayValue("j");
+
+        fireEvent.keyDown(overlay, {
+            key: "Enter",
+        });
+
+        expect(spy).toBeCalledWith({ allowOverlay: true, data: "j", displayData: "1, 1", kind: "text" }, [0, 1]);
     });
 
     test("Emits header click", async () => {
@@ -710,31 +809,6 @@ describe("data-editor", () => {
 
         expect(spy).toBeCalledWith([1, 1], expect.objectContaining({ data: "j" }));
         expect(overlay).not.toBeInTheDocument();
-    });
-
-    test("Focus a11y cell", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
-            wrapper: Context,
-        });
-        prep();
-
-        const a11ycell = screen.getByTestId("glide-cell-0-5");
-        fireEvent.focus(a11ycell);
-
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [0, 5] }));
-    });
-
-    test("Click a11y cell", async () => {
-        jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} />, {
-            wrapper: Context,
-        });
-        prep();
-
-        const a11ycell = screen.getByTestId("glide-cell-0-5");
-        fireEvent.click(a11ycell);
     });
 
     test("Arrow left", async () => {
@@ -1223,7 +1297,7 @@ describe("data-editor", () => {
             jest.runAllTimers();
         });
 
-        expect(Element.prototype.scrollBy).toHaveBeenCalled();
+        expect(Element.prototype.scrollTo).toHaveBeenCalled();
     });
 
     test("Click row marker", async () => {

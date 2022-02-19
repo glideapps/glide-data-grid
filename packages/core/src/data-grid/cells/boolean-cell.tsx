@@ -6,6 +6,7 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "false",
     kind: GridCellKind.Boolean,
     needsHover: true,
+    useLabel: false,
     needsHoverPosition: true,
     render: a => drawBoolean(a, a.cell.data, a.cell.allowEdit),
     onDelete: c => ({

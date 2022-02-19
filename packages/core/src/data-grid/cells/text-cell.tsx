@@ -11,6 +11,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
     needsHover: false,
     needsHoverPosition: false,
     renderPrep: prepTextCell,
+    useLabel: true,
     render: a => drawTextCell(a, a.cell.displayData),
     onDelete: c => ({
         ...c,
