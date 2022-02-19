@@ -159,7 +159,15 @@ export interface DataEditorProps extends Props {
 
     readonly gridSelection?: GridSelection;
     readonly onGridSelectionChange?: (newSelection: GridSelection | undefined) => void;
-    readonly onVisibleRegionChanged?: (range: Rectangle, tx?: number, ty?: number) => void;
+    readonly onVisibleRegionChanged?: (
+        range: Rectangle,
+        tx?: number,
+        ty?: number,
+        extras?: {
+            selected?: readonly [number, number];
+            freezeRegion?: Rectangle;
+        }
+    ) => void;
 
     readonly getCellContent: ReplaceReturnType<DataGridSearchProps["getCellContent"], GridCell>;
     readonly rowSelectionMode?: "auto" | "multi";
@@ -394,7 +402,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const totalHeaderHeight = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
 
-    const [visibleRegion, setVisibleRegion] = React.useState<Rectangle & { tx?: number; ty?: number }>({
+    const [visibleRegion, setVisibleRegion] = React.useState<
+        Rectangle & {
+            tx?: number;
+            ty?: number;
+            extras?: {
+                selected?: readonly [number, number];
+                freezeRegion?: Rectangle;
+            };
+        }
+    >({
         x: 0,
         y: 0,
         width: 1,
@@ -439,6 +456,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ];
     }, [columns, rowMarkerWidth, rowMarkers]);
 
+    const visibleRegionRef = React.useRef(visibleRegion);
     const getMangedCellContent = React.useCallback(
         ([col, row]: readonly [number, number]): InnerGridCell => {
             const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
@@ -466,6 +484,22 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 };
             } else {
                 const outerCol = col - rowMarkerOffset;
+                const vr = visibleRegionRef.current;
+                const isOutsideMainArea =
+                    vr.x > outerCol || outerCol > vr.x + vr.width || vr.y > row || row > vr.y + vr.height;
+                const isSelected = outerCol === vr.extras?.selected?.[0] && row === vr.extras?.selected[1];
+                const isOutsideFreezeArea =
+                    vr.extras?.freezeRegion === undefined ||
+                    vr.extras.freezeRegion.x > outerCol ||
+                    outerCol > vr.extras.freezeRegion.x + vr.extras.freezeRegion.width ||
+                    vr.extras.freezeRegion.y > row ||
+                    row > vr.extras.freezeRegion.y + vr.extras.freezeRegion.height;
+                if (isOutsideMainArea && !isSelected && isOutsideFreezeArea) {
+                    return {
+                        kind: GridCellKind.Loading,
+                        allowOverlay: false,
+                    };
+                }
                 let result = getCellContent([outerCol, row]);
                 if (rowMarkerOffset !== 0 && result.span !== undefined) {
                     result = {
@@ -1013,20 +1047,37 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [onHeaderMenuClick, rowMarkerOffset]
     );
-    
+
     const onVisibleRegionChangedImpl = React.useCallback(
         (region: Rectangle, tx?: number, ty?: number) => {
+            let selected = gridSelection?.cell;
+            if (selected !== undefined) {
+                selected = [selected[0] - rowMarkerOffset, selected[1]];
+            }
             const newRegion = {
                 ...region,
                 x: region.x - rowMarkerOffset,
                 height: showTrailingBlankRow && region.y + region.height >= rows ? region.height - 1 : region.height,
                 tx,
                 ty,
+                extras: {
+                    selected,
+                    freezeRegion:
+                        freezeColumns === 0
+                            ? undefined
+                            : {
+                                  x: 0,
+                                  y: region.y,
+                                  width: freezeColumns,
+                                  height: region.height,
+                              },
+                },
             };
             setVisibleRegion(newRegion);
-            onVisibleRegionChanged?.(newRegion, tx, ty);
+            visibleRegionRef.current = newRegion;
+            onVisibleRegionChanged?.(newRegion, newRegion.tx, newRegion.ty, newRegion.extras);
         },
-        [onVisibleRegionChanged, rowMarkerOffset, rows, showTrailingBlankRow]
+        [freezeColumns, gridSelection?.cell, onVisibleRegionChanged, rowMarkerOffset, rows, showTrailingBlankRow]
     );
 
     const onColumnMovedImpl = React.useCallback(
