@@ -2564,7 +2564,19 @@ export const SpanCell: React.VFC = () => {
     );
 
     return (
-        <BeautifulWrapper title="Spans" description={<Description>FIXME.</Description>}>
+        <BeautifulWrapper
+            title="Spans"
+            description={
+                <Description>
+                    By setting the <PropName>span</PropName> of a cell you can create spans in your grid. All cells
+                    within a span must return consistent data for defined behavior.
+                    <MoreInfo>
+                        Spans will always be split if they span frozen and non-frozen columns. By default selections are
+                        always expanded to include a span. This can be disabled using the{" "}
+                        <PropName>spanRangeBehavior</PropName> prop.
+                    </MoreInfo>
+                </Description>
+            }>
             <DataEditor
                 {...defaultProps}
                 getCellContent={mangledGetCellContent}
@@ -2577,7 +2589,7 @@ export const SpanCell: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(Minimap as any).parameters = {
+(SpanCell as any).parameters = {
     options: {
         showPanel: false,
     },
