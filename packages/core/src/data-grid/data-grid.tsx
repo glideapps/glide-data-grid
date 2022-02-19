@@ -643,13 +643,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         : "default";
     const style = React.useMemo(
         () => ({
-            width,
-            height,
+            // width,
+            // height,
             contain: "strict",
             display: "block",
             cursor,
         }),
-        [width, height, cursor]
+        [cursor]
     );
 
     const target = eventTargetRef?.current;
@@ -1180,24 +1180,23 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             position: "absolute",
             top: 0,
             left: stickyX,
-            width: style.width - stickyX,
-            height: style.height,
+            width: width - stickyX,
+            height: height,
             opacity: cellXOffset > freezeColumns || translateX !== 0 ? 1 : 0,
             pointerEvents: "none",
             boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
             transition: "opacity 150ms",
         };
         return <div style={props} />;
-    }, [cellXOffset, dragAndDropState, freezeColumns, mappedColumns, style.height, style.width, translateX]);
+    }, [cellXOffset, dragAndDropState, freezeColumns, mappedColumns, height, width, translateX]);
 
     const overlayStyle = React.useMemo<React.CSSProperties>(
         () => ({
             position: "absolute",
             top: 0,
             left: 0,
-            width: style.width,
         }),
-        [style.width]
+        []
     );
 
     return (
