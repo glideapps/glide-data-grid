@@ -1263,7 +1263,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         top++;
                         scrollTo(0, top, "vertical");
                     } else {
-                        bottom = Math.min(rows - 1, bottom + 1);
+                        bottom = Math.min(rows, bottom + 1);
                         scrollTo(0, bottom, "vertical");
                     }
                 } else if (y === -1) {
@@ -1318,8 +1318,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             if (done) scrollTo(left, 0, "horizontal");
                         }
                         if (!done) {
-                            right = Math.min(mangledCols.length - 1, right + 1);
-                            scrollTo(right - rowMarkerOffset, 0, "horizontal");
+                            right = Math.min(mangledCols.length, right + 1);
+                            scrollTo(right - 1 - rowMarkerOffset, 0, "horizontal");
                         }
                     } else if (x === -1) {
                         // motion left
