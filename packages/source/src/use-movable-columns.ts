@@ -1,7 +1,6 @@
 import * as React from "react";
-import { GridColumn } from "@glideapps/glide-data-grid";
+import { DataEditorProps, GridColumn } from "@glideapps/glide-data-grid";
 import orderBy from "lodash/orderBy";
-import { Props } from "./types";
 
 function colToKey(c: GridColumn) {
     return `${c.group ?? ""}/${c.title}`;
@@ -31,15 +30,24 @@ function getSortIndexByKey(needle: GridColumn, current: readonly GridColumn[], k
     return -1;
 }
 
-export function useMoveableColumns(p: Props): Pick<Props, "columns" | "onColumnMoved"> {
-    const [keys, setKeys] = React.useState(() => p.columns.map(colToKey));
+type Props = Pick<DataEditorProps, "columns" | "onColumnMoved" | "getCellContent">;
+
+// this cannot actually be made transparent to the user. Doing so would break things like
+// selection rnages being rectangular. The mangled columns need to actually be returned to the
+// user so they can be referenced and understood correctly in other callbacks they may provide
+
+// Darn
+export function useMoveableColumns(p: Props): Required<Props> {
+    const { columns: columnsIn, getCellContent: getCellContentIn, onColumnMoved: onColumnMovedIn } = p;
+
+    const [keys, setKeys] = React.useState(() => columnsIn.map(colToKey));
 
     const columns = React.useMemo(() => {
-        return orderBy(p.columns, c => getSortIndexByKey(c, p.columns, keys));
-    }, [keys, p.columns]);
+        return orderBy(columnsIn, c => getSortIndexByKey(c, columnsIn, keys));
+    }, [keys, columnsIn]);
 
-    const onColumnMovedRef = React.useRef(p.onColumnMoved);
-    onColumnMovedRef.current = p.onColumnMoved;
+    const onColumnMovedRef = React.useRef(onColumnMovedIn);
+    onColumnMovedRef.current = onColumnMovedIn;
     const onColumnMoved = React.useCallback((startIndex: number, endIndex: number) => {
         setKeys(old => {
             const newCols = [...old];
@@ -52,12 +60,22 @@ export function useMoveableColumns(p: Props): Pick<Props, "columns" | "onColumnM
 
     React.useEffect(() => {
         setKeys(cv => {
-            return orderBy(p.columns, x => getSortIndexByKey(x, p.columns, cv)).map(colToKey);
+            return orderBy(columnsIn, x => getSortIndexByKey(x, columnsIn, cv)).map(colToKey);
         });
-    }, [p.columns]);
+    }, [columnsIn]);
+
+    const getCellContent = React.useCallback<typeof getCellContentIn>(
+        cell => {
+            const [col, row] = cell;
+            const index = getSortIndexByKey(columnsIn[col], columnsIn, keys);
+            return getCellContentIn([index, row]);
+        },
+        [keys, columnsIn, getCellContentIn]
+    );
 
     return {
         columns,
-        onColumnMoved: p.moveableColumns === true ? onColumnMoved : undefined,
+        onColumnMoved,
+        getCellContent,
     };
 }

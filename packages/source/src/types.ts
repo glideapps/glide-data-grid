@@ -4,7 +4,6 @@ export type ResultType = Pick<
     DataEditorProps,
     | "columns"
     | "getCellContent"
-    | "onColumnMoved"
     | "getGroupDetails"
     | "onGridSelectionChange"
     | "onGroupHeaderClicked"
