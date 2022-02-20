@@ -248,6 +248,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             eventTargetRef={p.eventTargetRef}
             experimental={p.experimental}
             getGroupDetails={p.getGroupDetails}
+            getRowThemeOverride={p.getRowThemeOverride}
             headerIcons={p.headerIcons}
             isDraggable={p.isDraggable}
             onCellFocused={p.onCellFocused}

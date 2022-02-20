@@ -34,6 +34,7 @@ import {
     drawGrid,
     getActionBoundsForGroup,
     getHeaderMenuBounds,
+    GetRowThemeCallback,
     GroupDetailsCallback,
     pointInRect,
 } from "./data-grid-render";
@@ -76,6 +77,7 @@ export interface DataGridProps {
 
     readonly getCellContent: (cell: readonly [number, number]) => InnerGridCell;
     readonly getGroupDetails?: GroupDetailsCallback;
+    readonly getRowThemeOverride?: GetRowThemeCallback;
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
     readonly selectedRows?: CompactSelection;
@@ -152,6 +154,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         rowHeight,
         rows,
         getCellContent,
+        getRowThemeOverride,
         onHeaderMenuClick,
         selectedRows,
         enableGroups,
@@ -514,6 +517,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             rows,
             getCellContent,
             getGroupDetails ?? (name => ({ name })),
+            getRowThemeOverride,
             drawCustomCell,
             drawHeader,
             prelightCells,
@@ -553,6 +557,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         rows,
         getCellContent,
         getGroupDetails,
+        getRowThemeOverride,
         drawCustomCell,
         drawHeader,
         prelightCells,

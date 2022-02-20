@@ -1823,6 +1823,44 @@ export const ThemePerColumn: React.VFC = () => {
     },
 };
 
+export const ThemePerRow: React.VFC = () => {
+    const { cols, getCellContent, onColumnResized, setCellValue } = useMockDataGenerator(5);
+
+    return (
+        <BeautifulWrapper
+            title="Theme per row"
+            description={
+                <>
+                    <Description>
+                        Each row can provide theme overrides for rendering that row using the{" "}
+                        <PropName>getRowThemeOverride</PropName> callback.
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                getRowThemeOverride={i =>
+                    i % 2 === 0
+                        ? undefined
+                        : {
+                              bgCell: "#f0f8ff",
+                          }
+                }
+                onCellEdited={setCellValue}
+                onColumnResized={onColumnResized}
+                rows={1_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ThemePerRow as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const BuiltInSearch: React.VFC = () => {
     const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
 

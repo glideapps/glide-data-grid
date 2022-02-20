@@ -54,6 +54,7 @@ interface GroupDetails {
 }
 
 export type GroupDetailsCallback = (groupName: string) => GroupDetails;
+export type GetRowThemeCallback = (row: number) => Partial<Theme> | undefined;
 
 interface BlitData {
     readonly cellXOffset: number;
@@ -912,6 +913,7 @@ function drawCells(
     getRowHeight: (row: number) => number,
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
     getGroupDetails: GroupDetailsCallback,
+    getRowThemeOverride: GetRowThemeCallback | undefined,
     selectedRows: CompactSelection,
     disabledRows: CompactSelection,
     lastRowSticky: boolean,
@@ -1076,7 +1078,11 @@ function drawCells(
                         }
                     }
 
-                    const theme = cell.themeOverride === undefined ? colTheme : { ...colTheme, ...cell.themeOverride };
+                    const rowTheme = getRowThemeOverride?.(row);
+                    const theme =
+                        cell.themeOverride === undefined && rowTheme === undefined
+                            ? colTheme
+                            : { ...colTheme, ...rowTheme, ...cell.themeOverride };
 
                     ctx.beginPath();
 
@@ -1183,6 +1189,7 @@ function drawBlanks(
     cellYOffset: number,
     rows: number,
     getRowHeight: (row: number) => number,
+    getRowTheme: GetRowThemeCallback | undefined,
     selectedRows: CompactSelection,
     disabledRows: CompactSelection,
     lastRowSticky: boolean,
@@ -1221,12 +1228,20 @@ function drawBlanks(
 
                 ctx.beginPath();
 
+                const rowTheme = getRowTheme?.(row);
+
+                const blankTheme = rowTheme === undefined ? theme : { ...theme, ...rowTheme };
+
+                if (blankTheme.bgCell !== theme.bgCell) {
+                    ctx.fillStyle = blankTheme.bgCell;
+                    ctx.fillRect(drawX, drawY, 10000, rh);
+                }
                 if (rowDisabled) {
-                    ctx.fillStyle = theme.bgHeader;
+                    ctx.fillStyle = blankTheme.bgHeader;
                     ctx.fillRect(drawX, drawY, 10000, rh);
                 }
                 if (rowSelected) {
-                    ctx.fillStyle = theme.accentLight;
+                    ctx.fillStyle = blankTheme.accentLight;
                     ctx.fillRect(drawX, drawY, 10000, rh);
                 }
             });
@@ -1397,6 +1412,7 @@ export function drawGrid(
     rows: number,
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
     getGroupDetails: GroupDetailsCallback,
+    getRowThemeOverride: GetRowThemeCallback | undefined,
     drawCustomCell: DrawCustomCellCallback | undefined,
     drawHeaderCallback: DrawHeaderCallback | undefined,
     prelightCells: CellList | undefined,
@@ -1553,6 +1569,7 @@ export function drawGrid(
                 getRowHeight,
                 getCellContent,
                 getGroupDetails,
+                getRowThemeOverride,
                 selectedRows,
                 disabledRows,
                 lastRowSticky,
@@ -1679,6 +1696,7 @@ export function drawGrid(
         getRowHeight,
         getCellContent,
         getGroupDetails,
+        getRowThemeOverride,
         selectedRows,
         disabledRows,
         lastRowSticky,
@@ -1707,6 +1725,7 @@ export function drawGrid(
         cellYOffset,
         rows,
         getRowHeight,
+        getRowThemeOverride,
         selectedRows,
         disabledRows,
         lastRowSticky,
