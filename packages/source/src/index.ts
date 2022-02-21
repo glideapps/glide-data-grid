@@ -18,5 +18,6 @@ export function useDataSource(p: Props): ResultType {
         onGroupHeaderClicked: p.onGroupHeaderClicked,
         onSelectedColumnsChange: p.onSelectedColumnsChange,
         gridSelection: p.gridSelection,
+        rows: p.rows,
     };
 }

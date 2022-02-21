@@ -1,13 +1,15 @@
 import { GridCell, GridCellKind } from "@glideapps/glide-data-grid";
-import orderBy from "lodash/orderBy";
+import range from "lodash/range";
 import * as React from "react";
 import { Props } from "./types";
 
-function cellToSortData(c: GridCell): string | boolean | number {
+function cellToSortData(c: GridCell): string {
     switch (c.kind) {
-        case GridCellKind.Boolean:
-        case GridCellKind.Markdown:
         case GridCellKind.Number:
+            return c.data?.toString() ?? "";
+        case GridCellKind.Boolean:
+            return c.data?.toString() ?? "";
+        case GridCellKind.Markdown:
         case GridCellKind.RowID:
         case GridCellKind.Text:
         case GridCellKind.Uri:
@@ -25,6 +27,12 @@ function cellToSortData(c: GridCell): string | boolean | number {
     }
 }
 
+export function compareRaw(a: string, b: string) {
+    if (a > b) return 1;
+    if (a === b) return 0;
+    return -1;
+}
+
 export function useColumnSort(p: Props): Pick<Props, "getCellContent"> {
     const { sort, rows, getCellContent: getCellContentIn } = p;
 
@@ -32,20 +40,22 @@ export function useColumnSort(p: Props): Pick<Props, "getCellContent"> {
 
     const sortMap = React.useMemo(() => {
         if (sortCol === undefined) return undefined;
-        const cells: GridCell[] = new Array(rows);
+        const vals: string[] = new Array(rows);
 
+        const index: [number, number] = [sortCol, 0];
         for (let i = 0; i < rows; i++) {
-            cells[i] = getCellContentIn([sortCol, i]);
+            index[1] = i;
+            vals[i] = cellToSortData(getCellContentIn(index));
         }
 
-        const sorted = orderBy(cells, cellToSortData);
-
-        const result: number[] = new Array(rows);
-        for (let i = 0; i < rows; i++) {
-            result[i] = cells.indexOf(sorted[i]);
+        let result: number[];
+        if (sort?.mode === "raw") {
+            result = range(rows).sort((a, b) => compareRaw(vals[a], vals[b]));
+        } else {
+            result = range(rows).sort((a, b) => vals[a].localeCompare(vals[b]));
         }
         return result;
-    }, [getCellContentIn, rows, sortCol]);
+    }, [getCellContentIn, rows, sort?.mode, sortCol]);
 
     const getCellContent = React.useCallback<typeof getCellContentIn>(
         ([col, row]) => {

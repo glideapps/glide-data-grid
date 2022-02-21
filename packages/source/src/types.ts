@@ -9,14 +9,15 @@ export type ResultType = Pick<
     | "onGroupHeaderClicked"
     | "onSelectedColumnsChange"
     | "gridSelection"
+    | "rows"
 >;
 
 interface ExtraProps {
     collapseGroups?: boolean;
     moveableColumns?: boolean;
-    rows: number;
     sort?: {
         column: GridColumn;
+        mode?: "default" | "raw";
     };
     freezeColumns: DataEditorProps["freezeColumns"];
     theme: Theme;

@@ -214,7 +214,7 @@ export const UseDataSource: React.VFC = () => {
 
     const [sort, setSort] = React.useState<number>();
     const args = useDataSource({
-        rows: 5000,
+        rows: 100_000,
         moveableColumns: true,
         sort:
             sort === undefined
@@ -239,7 +239,6 @@ export const UseDataSource: React.VFC = () => {
                 {...args}
                 onColumnMoved={moveArgs.onColumnMoved}
                 onHeaderClicked={onHeaderClick}
-                rows={500}
             />
         </BeautifulWrapper>
     );
