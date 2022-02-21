@@ -26,6 +26,7 @@ import {
     GridMouseCellEventArgs,
     GridMouseHeaderEventArgs,
     GridMouseGroupHeaderEventArgs,
+    GridColumn,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -123,7 +124,7 @@ export interface DataEditorProps extends Props {
         readonly hint?: string;
         readonly sticky?: boolean;
         readonly addIcon?: string;
-        readonly targetColumn?: number;
+        readonly targetColumn?: number | GridColumn;
     };
     readonly headerHeight?: number;
     readonly groupHeaderHeight?: number;
@@ -756,6 +757,29 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [onRowAppended, rowMarkerOffset, rows, scrollTo, setGridSelection]
     );
 
+    const getCustomNewRowTargetColumn = React.useCallback(
+        (col: number): number | undefined => {
+            const customTargetColumn =
+                columns[col]?.trailingRowOptions?.targetColumn ?? trailingRowOptions?.targetColumn;
+
+            if (typeof customTargetColumn === "number") {
+                const customTargetOffset = hasRowMarkers ? 1 : 0;
+                return customTargetColumn + customTargetOffset;
+            }
+
+            if (typeof customTargetColumn === "object") {
+                const maybeIndex = columns.indexOf(customTargetColumn);
+                if (maybeIndex >= 0) {
+                    const customTargetOffset = hasRowMarkers ? 1 : 0;
+                    return maybeIndex + customTargetOffset;
+                }
+            }
+
+            return undefined;
+        },
+        [columns, hasRowMarkers, trailingRowOptions?.targetColumn]
+    );
+
     const lastSelectedRowRef = React.useRef<number>();
     const lastSelectedColRef = React.useRef<number>();
 
@@ -809,12 +833,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         lastSelectedRowRef.current = row;
                     }
                 } else if (col >= rowMarkerOffset && showTrailingBlankRow && row === rows) {
-                    const customTargetColumn =
-                        columns[col]?.trailingRowOptions?.targetColumn ?? trailingRowOptions?.targetColumn;
-                    const customTargetOffset = hasRowMarkers ? 1 : 0;
-                    const correctedCustomTargetColumn =
-                        customTargetColumn !== undefined ? customTargetColumn + customTargetOffset : undefined;
-                    void appendRow(correctedCustomTargetColumn ?? col);
+                    const customTargetColumn = getCustomNewRowTargetColumn(col);
+                    void appendRow(customTargetColumn ?? col);
                 } else {
                     if (gridSelection?.cell[0] !== col || gridSelection.cell[1] !== row) {
                         const isLastStickyRow = lastRowSticky && row === rows;
@@ -957,8 +977,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             selectedRows,
             rowSelectionMode,
             setSelectedRows,
-            columns,
-            trailingRowOptions?.targetColumn,
+            getCustomNewRowTargetColumn,
             appendRow,
             lastRowSticky,
             selectedColumns,
@@ -1514,12 +1533,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         row++;
                     } else if (row === rows && showTrailingBlankRow) {
                         window.setTimeout(() => {
-                            const customTargetColumn =
-                                columns[col]?.trailingRowOptions?.targetColumn ?? trailingRowOptions?.targetColumn;
-                            const customTargetOffset = hasRowMarkers ? 1 : 0;
-                            const correctedCustomTargetColumn =
-                                customTargetColumn !== undefined ? customTargetColumn + customTargetOffset : undefined;
-                            void appendRow(correctedCustomTargetColumn ?? col);
+                            const customTargetColumn = getCustomNewRowTargetColumn(col);
+                            void appendRow(customTargetColumn ?? col);
                         }, 0);
                     } else {
                         reselect(event.bounds);
@@ -1640,9 +1655,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             mangledOnCellEdited,
             rows,
             showTrailingBlankRow,
-            columns,
-            trailingRowOptions?.targetColumn,
-            hasRowMarkers,
+            getCustomNewRowTargetColumn,
             appendRow,
             reselect,
             getMangedCellContent,
