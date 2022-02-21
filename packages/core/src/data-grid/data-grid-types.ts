@@ -159,6 +159,7 @@ export interface GridColumn {
     readonly trailingRowOptions?: {
         readonly hint?: string;
         readonly addIcon?: string;
+        readonly targetColumn?: number;
     };
 }
 
