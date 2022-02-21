@@ -1,14 +1,16 @@
-import { GridCell, GridCellKind, GridColumn, SizedGridColumn } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, GridColumn, isSizedGridColumn, SizedGridColumn } from "../data-grid/data-grid-types";
 import { DataEditorProps } from "./data-editor";
 import * as React from "react";
 import { CellRenderers } from "../data-grid/cells";
 import { Theme } from "../common/styles";
 
+const defaultSize = 150;
+
 function measureCell(ctx: CanvasRenderingContext2D, cell: GridCell): number {
-    if (cell.kind === GridCellKind.Custom) return 150;
+    if (cell.kind === GridCellKind.Custom) return defaultSize;
 
     const r = CellRenderers[cell.kind];
-    return r?.measure(ctx, cell) ?? 150;
+    return r?.measure(ctx, cell) ?? defaultSize;
 }
 
 export function useCellSizer(
@@ -18,14 +20,15 @@ export function useCellSizer(
     theme: Theme
 ): readonly SizedGridColumn[] {
     const rowsRef = React.useRef(rows);
-    rowsRef.current = rows;
     const getCellsForSelectionRef = React.useRef(getCellsForSelection);
-    getCellsForSelectionRef.current = getCellsForSelection;
     const themeRef = React.useRef(theme);
+    rowsRef.current = rows;
+    getCellsForSelectionRef.current = getCellsForSelection;
     themeRef.current = theme;
+
     return React.useMemo(() => {
-        if (!columns.some(c => c.width === undefined)) {
-            return columns as SizedGridColumn[];
+        if (columns.every(isSizedGridColumn)) {
+            return columns;
         }
 
         const offscreen = document.createElement("canvas");
@@ -34,13 +37,13 @@ export function useCellSizer(
         });
         if (ctx === null) {
             return columns.map(c => {
-                if (c.width !== undefined) return c;
+                if (isSizedGridColumn(c)) return c;
 
                 return {
                     ...c,
-                    width: 150,
+                    width: defaultSize,
                 };
-            }) as SizedGridColumn[];
+            });
         }
 
         ctx.font = `${themeRef.current.baseFontStyle} ${themeRef.current.fontFamily}`;
@@ -53,12 +56,12 @@ export function useCellSizer(
         });
 
         return columns.map((c, colIndex) => {
-            if (c.width !== undefined) return c;
+            if (isSizedGridColumn(c)) return c;
 
-            if (cells === undefined) {
+            if (cells === undefined || c.id === undefined) {
                 return {
                     ...c,
-                    width: 150,
+                    width: defaultSize,
                 };
             }
 
@@ -71,6 +74,6 @@ export function useCellSizer(
                 ...c,
                 width: Math.min(500, biggest),
             };
-        }) as SizedGridColumn[];
+        });
     }, [columns]);
 }
