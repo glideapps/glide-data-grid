@@ -7,5 +7,6 @@ export const loadingCellRenderer: InternalCellRenderer<LoadingCell> = {
     needsHover: false,
     useLabel: false,
     needsHoverPosition: false,
+    measure: () => 150,
     render: () => undefined,
 };

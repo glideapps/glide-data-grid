@@ -8,5 +8,6 @@ export const markerCellRenderer: InternalCellRenderer<MarkerCell> = {
     needsHover: true,
     needsHoverPosition: false,
     renderPrep: prepMarkerRowCell,
+    measure: () => 44,
     render: a => drawMarkerRowCell(a, a.cell.row, a.cell.checked, a.cell.markerKind),
 };

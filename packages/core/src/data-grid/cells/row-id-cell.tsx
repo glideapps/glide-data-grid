@@ -9,4 +9,5 @@ export const rowIDCellRenderer: InternalCellRenderer<RowIDCell> = {
     needsHoverPosition: false,
     renderPrep: a => prepTextCell(a, a.theme.textLight),
     render: a => drawTextCell(a, a.cell.data),
+    measure: (ctx, cell) => ctx.measureText(cell.data).width + 16,
 };

@@ -12,6 +12,7 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
     useLabel: false,
     needsHoverPosition: false,
     render: a => drawImage(a, a.cell.displayData ?? a.cell.data),
+    measure: (_ctx, cell) => cell.data.length * 50,
     onDelete: c => ({
         ...c,
         data: [],

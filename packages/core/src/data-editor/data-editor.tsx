@@ -26,6 +26,7 @@ import {
     GridMouseCellEventArgs,
     GridMouseHeaderEventArgs,
     GridMouseGroupHeaderEventArgs,
+    GridColumn,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -37,6 +38,7 @@ import { useEventListener } from "../common/utils";
 import { CellRenderers } from "../data-grid/cells";
 import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
+import { useCellSizer } from "./use-cell-sizer";
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
@@ -49,6 +51,7 @@ type Props = Omit<
     | "cellXOffset"
     | "cellYOffset"
     | "className"
+    | "columns"
     | "disabledRows"
     | "drawCustomCell"
     | "enableGroups"
@@ -117,6 +120,8 @@ export interface DataEditorProps extends Props {
     readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;
     readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
     readonly onCellContextMenu?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;
+
+    readonly columns: readonly GridColumn[];
 
     readonly trailingRowOptions?: {
         readonly tint?: boolean;
@@ -230,7 +235,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     } = p;
 
     const {
-        columns,
+        columns: columnsIn,
         rows,
         getCellContent,
         onCellClicked,
@@ -396,6 +401,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [rowMarkerOffset, setSelectedColumnsOuter]
     );
+
+    const theme = useTheme();
+    const mergedTheme = React.useMemo(() => {
+        return { ...getDataEditorTheme(), ...theme };
+    }, [theme]);
+
+    const columns = useCellSizer(columnsIn, rows, getCellsForSelection, mergedTheme);
 
     const enableGroups = React.useMemo(() => {
         return columns.some(c => c.group !== undefined);
@@ -1903,11 +1915,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         }
         return CompactSelection.empty();
     }, [mangledRows, showTrailingBlankRow, trailingRowOptions?.tint]);
-
-    const theme = useTheme();
-    const mergedTheme = React.useMemo(() => {
-        return { ...getDataEditorTheme(), ...theme };
-    }, [theme]);
 
     const mangledVerticalBorder = React.useCallback(
         (col: number) => {

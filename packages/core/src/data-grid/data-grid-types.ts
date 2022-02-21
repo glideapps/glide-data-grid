@@ -148,7 +148,7 @@ export enum GridColumnIcon {
 export type Item = readonly [number, number];
 
 export interface GridColumn {
-    readonly width: number;
+    readonly width?: number;
     readonly title: string;
     readonly group?: string;
     readonly icon?: GridColumnIcon | string;
@@ -161,6 +161,8 @@ export interface GridColumn {
         readonly addIcon?: string;
     };
 }
+
+export type SizedGridColumn = Omit<GridColumn, "width"> & { readonly width: number };
 
 export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell;
 

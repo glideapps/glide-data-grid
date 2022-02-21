@@ -225,7 +225,6 @@ function createTextColumnInfo(index: number, group: boolean): GridColumnWithMock
     return {
         title: `Column ${index}`,
         group: group ? `Group ${Math.round(index / 3)}` : undefined,
-        width: 120,
         icon: GridColumnIcon.HeaderString,
         hasMenu: false,
         getContent: () => {
@@ -247,7 +246,6 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
         {
             title: "First name",
             group: group ? "Name" : undefined,
-            width: 120,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
             getContent: () => {
@@ -264,7 +262,6 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
         {
             title: "Last name",
             group: group ? "Name" : undefined,
-            width: 120,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
             getContent: () => {
@@ -280,7 +277,6 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
         },
         {
             title: "Avatar",
-            width: 120,
             group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderImage,
             hasMenu: false,
@@ -298,7 +294,6 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
         },
         {
             title: "Email",
-            width: 120,
             group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
@@ -315,7 +310,6 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
         },
         {
             title: "Title",
-            width: 120,
             group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
@@ -332,14 +326,13 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
         },
         {
             title: "More Info",
-            width: 120,
             group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderUri,
             hasMenu: false,
             getContent: () => {
                 const url = faker.internet.url();
                 return {
-                    kind: GridCellKind.Markdown,
+                    kind: GridCellKind.Uri,
                     displayData: url,
                     data: url,
                     allowOverlay: true,
@@ -1219,7 +1212,7 @@ export const RearrangeColumns: React.VFC = () => {
     // you should track indexes properly
     const [sortableCols, setSortableCols] = React.useState(() => {
         num = 200;
-        return cols.map(c => ({ ...c, width: c.width + (rand() % 100) }));
+        return cols.map(c => ({ ...c, width: (c.width ?? 150) + (rand() % 100) }));
     });
 
     const onColMoved = React.useCallback((startIndex: number, endIndex: number): void => {
@@ -2389,7 +2382,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`}
 };
 
 export const FreezeColumns: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(100);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100);
 
     return (
         <BeautifulWrapper
@@ -2405,6 +2398,7 @@ export const FreezeColumns: React.VFC = () => {
                 rowMarkers="both"
                 freezeColumns={1}
                 getCellContent={getCellContent}
+                getCellsForSelection={getCellsForSelection}
                 columns={cols}
                 verticalBorder={c => c > 0}
                 rows={1_000}

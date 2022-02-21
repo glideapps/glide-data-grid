@@ -13,6 +13,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
     renderPrep: prepTextCell,
     useLabel: true,
     render: a => drawTextCell(a, a.cell.displayData),
+    measure: (ctx, cell) => ctx.measureText(cell.displayData).width + 16,
     onDelete: c => ({
         ...c,
         data: "",

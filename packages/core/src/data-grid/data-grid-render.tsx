@@ -2,7 +2,6 @@ import ImageWindowLoader from "../common/image-window-loader";
 import type {
     GridSelection,
     DrawHeaderCallback,
-    GridColumn,
     InnerGridCell,
     Rectangle,
     CompactSelection,
@@ -11,6 +10,7 @@ import type {
     Item,
     CellList,
     GridMouseGroupHeaderEventArgs,
+    SizedGridColumn,
 } from "./data-grid-types";
 import { GridCellKind, isInnerOnlyCell } from "./data-grid-types";
 import { HoverValues } from "./animation-manager";
@@ -155,7 +155,7 @@ function blitLastFrame(
     rows: number,
     totalHeaderHeight: number,
     dpr: number,
-    columns: readonly GridColumn[],
+    columns: readonly SizedGridColumn[],
     effectiveCols: readonly MappedGridColumn[],
     getRowHeight: (r: number) => number
 ) {
@@ -1393,7 +1393,7 @@ export function drawGrid(
     cellYOffset: number,
     translateX: number,
     translateY: number,
-    columns: readonly GridColumn[],
+    columns: readonly SizedGridColumn[],
     mappedColumns: readonly MappedGridColumn[],
     enableGroups: boolean,
     freezeColumns: number,

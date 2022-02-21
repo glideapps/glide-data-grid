@@ -8,6 +8,7 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     needsHover: true,
     useLabel: false,
     needsHoverPosition: true,
+    measure: () => 50,
     render: a => drawBoolean(a, a.cell.data, a.cell.allowEdit),
     onDelete: c => ({
         ...c,
