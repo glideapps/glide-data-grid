@@ -38,6 +38,10 @@ export function useColumnSort(p: Props): Pick<Props, "getCellContent"> {
 
     const sortCol = sort === undefined ? undefined : p.columns.indexOf(sort.column);
 
+    // This scales to about 100k rows. Beyond that things take a pretty noticeable amount of time
+    // The performance "issue" from here on out seems to be the lookup to get the value. Not sure
+    // what to do there. We need the indirection to produce the final sort map. Perhaps someone
+    // more clever than me will wander in and save most of that time.
     const sortMap = React.useMemo(() => {
         if (sortCol === undefined) return undefined;
         const vals: string[] = new Array(rows);
