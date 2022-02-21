@@ -69,7 +69,7 @@ export function useCellSizer(
 
             return {
                 ...c,
-                width: biggest,
+                width: Math.min(500, biggest),
             };
         }) as SizedGridColumn[];
     }, [columns]);
