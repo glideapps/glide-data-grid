@@ -17,6 +17,12 @@ export function useCellSizer(
     getCellsForSelection: DataEditorProps["getCellsForSelection"],
     theme: Theme
 ): readonly SizedGridColumn[] {
+    const rowsRef = React.useRef(rows);
+    rowsRef.current = rows;
+    const getCellsForSelectionRef = React.useRef(getCellsForSelection);
+    getCellsForSelectionRef.current = getCellsForSelection;
+    const themeRef = React.useRef(theme);
+    themeRef.current = theme;
     return React.useMemo(() => {
         if (!columns.some(c => c.width === undefined)) {
             return columns as SizedGridColumn[];
@@ -37,13 +43,13 @@ export function useCellSizer(
             }) as SizedGridColumn[];
         }
 
-        ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+        ctx.font = `${themeRef.current.baseFontStyle} ${themeRef.current.fontFamily}`;
 
-        const cells = getCellsForSelection?.({
+        const cells = getCellsForSelectionRef.current?.({
             x: 0,
             y: 0,
             width: columns.length,
-            height: Math.min(rows, 10),
+            height: Math.min(rowsRef.current, 10),
         });
 
         return columns.map((c, colIndex) => {
@@ -66,6 +72,5 @@ export function useCellSizer(
                 width: biggest,
             };
         }) as SizedGridColumn[];
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [columns]);
 }
