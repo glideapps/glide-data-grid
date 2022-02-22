@@ -678,6 +678,12 @@ const trailingRowOptionsColumnIndexesIcon: Record<number, string> = {
     5: GridColumnIcon.HeaderNumber,
 };
 
+const trailingRowOptionsColumnIndexesTarget: Record<number, number> = {
+    2: 0,
+    3: 0,
+    5: 0,
+};
+
 export const TrailingRowOptions: React.VFC = () => {
     const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
 
@@ -698,6 +704,7 @@ export const TrailingRowOptions: React.VFC = () => {
             trailingRowOptions: {
                 hint: trailingRowOptionsColumnIndexesHint[idx],
                 addIcon: trailingRowOptionsColumnIndexesIcon[idx],
+                targetColumn: trailingRowOptionsColumnIndexesTarget[idx],
             },
         }));
     }, [cols]);
