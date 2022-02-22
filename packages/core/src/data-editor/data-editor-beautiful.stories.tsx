@@ -984,7 +984,7 @@ export const ObserveVisibleRegion: React.VFC = () => {
 };
 
 export const OneHundredThousandCols: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(100000);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100000);
 
     return (
         <BeautifulWrapper
@@ -995,7 +995,13 @@ export const OneHundredThousandCols: React.VFC = () => {
                     but that&apos;s not important.
                 </Description>
             }>
-            <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={1000} />
+            <DataEditor
+                {...defaultProps}
+                getCellsForSelection={getCellsForSelection}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={1000}
+            />
         </BeautifulWrapper>
     );
 };

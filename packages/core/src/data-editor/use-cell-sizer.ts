@@ -26,15 +26,18 @@ export function useCellSizer(
     getCellsForSelectionRef.current = getCellsForSelection;
     themeRef.current = theme;
 
+    const [ctx] = React.useState(() => {
+        const offscreen = document.createElement("canvas");
+        return offscreen.getContext("2d", { alpha: false });
+    });
+
+    const memoMap = React.useRef<Record<string, number>>({});
+
     return React.useMemo(() => {
         if (columns.every(isSizedGridColumn)) {
             return columns;
         }
 
-        const offscreen = document.createElement("canvas");
-        const ctx = offscreen.getContext("2d", {
-            alpha: false,
-        });
         if (ctx === null) {
             return columns.map(c => {
                 if (isSizedGridColumn(c)) return c;
@@ -48,11 +51,13 @@ export function useCellSizer(
 
         ctx.font = `${themeRef.current.baseFontStyle} ${themeRef.current.fontFamily}`;
 
+        const computeRows = Math.max(1, 10 - Math.floor(columns.length / 10_000));
+
         const cells = getCellsForSelectionRef.current?.({
             x: 0,
             y: 0,
             width: columns.length,
-            height: Math.min(rowsRef.current, 10),
+            height: Math.min(rowsRef.current, computeRows),
         });
 
         return columns.map((c, colIndex) => {
@@ -62,6 +67,13 @@ export function useCellSizer(
                 return {
                     ...c,
                     width: defaultSize,
+                };
+            }
+
+            if (memoMap.current[c.id] !== undefined) {
+                return {
+                    ...c,
+                    width: memoMap.current[c.id],
                 };
             }
 
@@ -75,5 +87,5 @@ export function useCellSizer(
                 width: Math.min(500, biggest),
             };
         });
-    }, [columns]);
+    }, [columns, ctx]);
 }
