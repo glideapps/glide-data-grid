@@ -779,7 +779,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             if (typeof customTargetColumn === "object") {
-                const maybeIndex = columns.indexOf(customTargetColumn);
+                const maybeIndex = columnsIn.indexOf(customTargetColumn);
                 if (maybeIndex >= 0) {
                     const customTargetOffset = hasRowMarkers ? 1 : 0;
                     return maybeIndex + customTargetOffset;
@@ -788,7 +788,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             return undefined;
         },
-        [columns, hasRowMarkers, trailingRowOptions?.targetColumn]
+        [columns, columnsIn, hasRowMarkers, trailingRowOptions?.targetColumn]
     );
 
     const lastSelectedRowRef = React.useRef<number>();
