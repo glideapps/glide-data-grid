@@ -7,6 +7,11 @@ import { SpriteManager } from "./data-grid-sprites";
 export interface GridSelection {
     readonly cell: readonly [number, number];
     readonly range: Readonly<Rectangle>;
+    readonly highlights?: {
+        readonly range: Readonly<Rectangle>;
+        readonly color?: string;
+        readonly key?: string;
+    }[];
 }
 
 export type GridMouseEventArgs =

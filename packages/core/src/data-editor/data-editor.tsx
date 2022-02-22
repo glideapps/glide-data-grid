@@ -291,6 +291,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                       ...gridSelectionOuter.range,
                       x: gridSelectionOuter.range.x + rowMarkerOffset,
                   },
+                  highlights: gridSelectionOuter.highlights?.map(h => ({
+                      ...h,
+                      range: {
+                          ...h.range,
+                          x: h.range.x + rowMarkerOffset,
+                      },
+                  })),
               };
     }, [gridSelectionOuter, rowMarkerOffset]);
     const gridSelection = gridSelectionOuterMangled ?? gridSelectionInner;
@@ -353,6 +360,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                                 width: right - left + 1,
                                 height: r.height,
                             },
+                            highlights: newVal.highlights,
                         };
                     }
                 } while (!isFilled);
