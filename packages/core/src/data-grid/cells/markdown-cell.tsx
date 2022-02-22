@@ -11,6 +11,7 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
     needsHover: false,
     needsHoverPosition: false,
     renderPrep: prepTextCell,
+    measure: () => 200,
     render: a => drawTextCell(a, a.cell.data),
     onDelete: c => ({
         ...c,

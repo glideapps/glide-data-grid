@@ -1,15 +1,18 @@
 import { Theme } from "../common/styles";
-import { DrilldownCellData, GridColumn, Item, GridSelection, InnerGridCell } from "./data-grid-types";
+import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn } from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs } from "./cells/cell-types";
 
-export interface MappedGridColumn extends GridColumn {
+export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
     sticky: boolean;
 }
 
-export function useMappedColumns(columns: readonly GridColumn[], freezeColumns: number): readonly MappedGridColumn[] {
+export function useMappedColumns(
+    columns: readonly SizedGridColumn[],
+    freezeColumns: number
+): readonly MappedGridColumn[] {
     return React.useMemo(
         () =>
             columns.map((c, i) => ({

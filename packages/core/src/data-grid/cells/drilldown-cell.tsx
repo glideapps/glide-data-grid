@@ -11,6 +11,14 @@ export const drilldownCellRenderer: InternalCellRenderer<DrilldownCell> = {
     needsHover: false,
     useLabel: false,
     needsHoverPosition: false,
+    measure: (ctx, cell) => {
+        return (
+            cell.data.reduce(
+                (acc, data) => ctx.measureText(data.text).width + (data.img === undefined ? 0 : 20) + acc,
+                0
+            ) + 16
+        );
+    },
     render: a => drawDrilldownCell(a, a.cell.data),
     getEditor: () => p => {
         const { onKeyDown, value } = p;

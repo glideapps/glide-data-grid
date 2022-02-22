@@ -11,7 +11,6 @@ import {
     useMappedColumns,
 } from "./data-grid-lib";
 import {
-    GridColumn,
     GridCellKind,
     Rectangle,
     GridSelection,
@@ -25,6 +24,7 @@ import {
     CellList,
     Item,
     DrawHeaderCallback,
+    SizedGridColumn,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -61,7 +61,7 @@ export interface DataGridProps {
     readonly isResizing: boolean;
     readonly isDragging: boolean;
 
-    readonly columns: readonly GridColumn[];
+    readonly columns: readonly SizedGridColumn[];
     readonly rows: number;
 
     readonly headerHeight: number;

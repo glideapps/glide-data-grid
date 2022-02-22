@@ -9,6 +9,7 @@ import {
     GridCellKind,
     GridSelection,
     HeaderSelectionTrigger,
+    isSizedGridColumn,
 } from "..";
 
 jest.mock("react-virtualized-auto-sizer", () => {
@@ -1194,7 +1195,7 @@ describe("data-editor", () => {
 
         if (scroller !== null) {
             jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
-                basicProps.columns.map(c => c.width).reduce((pv, cv) => pv + cv, 0)
+                basicProps.columns.map(c => (isSizedGridColumn(c) ? c.width : 150)).reduce((pv, cv) => pv + cv, 0)
             );
             jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
             jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
@@ -1206,7 +1207,7 @@ describe("data-editor", () => {
 
         if (scroller !== null) {
             jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
-                basicProps.columns.map(c => c.width).reduce((pv, cv) => pv + cv, 0)
+                basicProps.columns.map(c => (isSizedGridColumn(c) ? c.width : 150)).reduce((pv, cv) => pv + cv, 0)
             );
             jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
             jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
@@ -1236,7 +1237,7 @@ describe("data-editor", () => {
 
         if (scroller !== null) {
             jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
-                basicProps.columns.map(c => c.width).reduce((pv, cv) => pv + cv, 0)
+                basicProps.columns.map(c => (isSizedGridColumn(c) ? c.width : 150)).reduce((pv, cv) => pv + cv, 0)
             );
             jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
             jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 55);
@@ -1248,7 +1249,7 @@ describe("data-editor", () => {
 
         if (scroller !== null) {
             jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
-                basicProps.columns.map(c => c.width).reduce((pv, cv) => pv + cv, 0)
+                basicProps.columns.map(c => (isSizedGridColumn(c) ? c.width : 150)).reduce((pv, cv) => pv + cv, 0)
             );
             jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
             jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);

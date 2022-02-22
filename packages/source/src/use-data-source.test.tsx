@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, test, expect } from "jest-without-globals";
 import { useDataSource } from "./index";
 import { Props } from "./types";
-import { GridCellKind, TextCell } from "@glideapps/glide-data-grid";
+import { GridCellKind, isSizedGridColumn, TextCell } from "@glideapps/glide-data-grid";
 
 const props: Props = {
     columns: [
@@ -75,7 +75,7 @@ const DataSourceMonkey = (p: Props) => {
             <ul data-testid="columns">
                 {columns.map(c => (
                     <li key={c.title}>
-                        Column {c.title} - {c.width}
+                        Column {c.title} - {isSizedGridColumn(c) ? c.width : "dynamic"}
                     </li>
                 ))}
             </ul>
