@@ -105,7 +105,6 @@ function getSpanStops(cells: readonly (readonly GridCell[])[]): number[] {
         )
     );
     return disallowed;
-    // return range(startCol, cells[0].length + startCol).filter(x => !disallowed.includes(x));
 }
 
 export interface DataEditorProps extends Props {
