@@ -1,6 +1,6 @@
 {
   "name": "@glideapps/glide-data-grid-cells",
-  "version": "3.4.0-alpha1",
+  "version": "3.4.0-beta1",
   "description": "Extra cells for glide-data-grid",
   "sideEffects": false,
   "type": "module",
@@ -42,7 +42,7 @@
     "canvas"
   ],
   "dependencies": {
-    "@glideapps/glide-data-grid": "3.4.0-alpha1"
+    "@glideapps/glide-data-grid": "3.4.0-beta1"
   },
   "peerDependencies": {
     "lodash": "^4.17.19"
