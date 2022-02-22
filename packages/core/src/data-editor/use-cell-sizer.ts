@@ -1,8 +1,8 @@
-import { GridCell, GridCellKind, GridColumn, isSizedGridColumn, SizedGridColumn } from "../data-grid/data-grid-types";
-import { DataEditorProps } from "./data-editor";
 import * as React from "react";
-import { CellRenderers } from "../data-grid/cells";
 import { Theme } from "../common/styles";
+import { CellRenderers } from "../data-grid/cells";
+import { GridCell, GridCellKind, GridColumn, isSizedGridColumn, SizedGridColumn } from "../data-grid/data-grid-types";
+import type { DataEditorProps } from "./data-editor";
 
 const defaultSize = 150;
 
