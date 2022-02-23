@@ -1004,16 +1004,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (args: GridMouseEventArgs, isOutside: boolean) => {
             const mouse = mouseState.current;
             mouseState.current = undefined;
+
+            if (scrollTimer.current !== undefined) {
+                window.clearInterval(scrollTimer.current);
+            }
             if (isOutside) return;
 
             let prevented = false;
             const preventDefault = () => {
                 prevented = true;
             };
-
-            if (scrollTimer.current !== undefined) {
-                window.clearInterval(scrollTimer.current);
-            }
 
             const [lastMouseDownCol, lastMouseDownRow] = lastMouseDownCellLocation.current ?? [];
             const [col, row] = args.location;
