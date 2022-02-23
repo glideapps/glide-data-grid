@@ -121,6 +121,9 @@ export const InfiniteScroller: React.FC<Props> = p => {
         });
     }, [paddingBottom, paddingRight, scrollHeight, update]);
 
+    const onScrollRef = React.useRef(onScroll);
+    onScrollRef.current = onScroll;
+
     const lastProps = React.useRef<{ width?: number; height?: number }>();
 
     const nomEvent = React.useCallback((e: React.MouseEvent) => {
@@ -151,7 +154,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                 {(props: { width?: number; height?: number }) => {
                     if (props.width === 0 || props.height === 0) return null;
                     if (lastProps.current?.height !== props.height || lastProps.current?.width !== props.width) {
-                        window.setTimeout(onScroll, 0);
+                        window.setTimeout(() => onScrollRef.current(), 0);
                         lastProps.current = props;
                     }
 
