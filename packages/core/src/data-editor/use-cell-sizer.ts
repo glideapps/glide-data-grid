@@ -82,9 +82,12 @@ export function useCellSizer(
             const average = sizes.reduce((a, b) => a + b) / sizes.length;
             const biggest = sizes.reduce((a, acc) => (a > average * 2 ? acc : Math.max(acc, a)));
 
+            const final = Math.min(500, Math.ceil(biggest));
+            memoMap.current[c.id] = final;
+
             return {
                 ...c,
-                width: Math.min(500, Math.ceil(biggest)),
+                width: final,
             };
         });
     }, [columns, ctx]);
