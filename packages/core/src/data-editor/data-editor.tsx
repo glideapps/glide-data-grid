@@ -502,21 +502,23 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 };
             } else {
                 const outerCol = col - rowMarkerOffset;
-                const vr = visibleRegionRef.current;
-                const isOutsideMainArea =
-                    vr.x > outerCol || outerCol > vr.x + vr.width || vr.y > row || row > vr.y + vr.height;
-                const isSelected = outerCol === vr.extras?.selected?.[0] && row === vr.extras?.selected[1];
-                const isOutsideFreezeArea =
-                    vr.extras?.freezeRegion === undefined ||
-                    vr.extras.freezeRegion.x > outerCol ||
-                    outerCol > vr.extras.freezeRegion.x + vr.extras.freezeRegion.width ||
-                    vr.extras.freezeRegion.y > row ||
-                    row > vr.extras.freezeRegion.y + vr.extras.freezeRegion.height;
-                if (isOutsideMainArea && !isSelected && isOutsideFreezeArea) {
-                    return {
-                        kind: GridCellKind.Loading,
-                        allowOverlay: false,
-                    };
+                if (p.experimental?.strict === true) {
+                    const vr = visibleRegionRef.current;
+                    const isOutsideMainArea =
+                        vr.x > outerCol || outerCol > vr.x + vr.width || vr.y > row || row > vr.y + vr.height;
+                    const isSelected = outerCol === vr.extras?.selected?.[0] && row === vr.extras?.selected[1];
+                    const isOutsideFreezeArea =
+                        vr.extras?.freezeRegion === undefined ||
+                        vr.extras.freezeRegion.x > outerCol ||
+                        outerCol > vr.extras.freezeRegion.x + vr.extras.freezeRegion.width ||
+                        vr.extras.freezeRegion.y > row ||
+                        row > vr.extras.freezeRegion.y + vr.extras.freezeRegion.height;
+                    if (isOutsideMainArea && !isSelected && isOutsideFreezeArea) {
+                        return {
+                            kind: GridCellKind.Loading,
+                            allowOverlay: false,
+                        };
+                    }
                 }
                 let result = getCellContent([outerCol, row]);
                 if (rowMarkerOffset !== 0 && result.span !== undefined) {
@@ -538,6 +540,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             trailingRowOptions?.hint,
             trailingRowOptions?.addIcon,
             columns,
+            p.experimental?.strict,
             getCellContent,
         ]
     );

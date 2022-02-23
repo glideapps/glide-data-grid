@@ -117,6 +117,7 @@ export interface DataGridProps {
         readonly paddingBottom?: number;
         readonly disableFirefoxRescaling?: boolean;
         readonly isSubGrid?: boolean;
+        readonly strict?: boolean;
     };
 
     readonly headerIcons?: SpriteMap;
