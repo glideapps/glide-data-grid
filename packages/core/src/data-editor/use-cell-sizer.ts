@@ -84,7 +84,7 @@ export function useCellSizer(
 
             return {
                 ...c,
-                width: Math.min(500, biggest),
+                width: Math.min(500, Math.ceil(biggest)),
             };
         });
     }, [columns, ctx]);
