@@ -67,10 +67,11 @@ export function useMoveableColumns(p: Props): Required<Props> {
     const getCellContent = React.useCallback<typeof getCellContentIn>(
         cell => {
             const [col, row] = cell;
-            const index = getSortIndexByKey(columnsIn[col], columnsIn, keys);
+            const needle = columns[col];
+            const index = columnsIn.indexOf(needle);
             return getCellContentIn([index, row]);
         },
-        [keys, columnsIn, getCellContentIn]
+        [columns, columnsIn, getCellContentIn]
     );
 
     return {

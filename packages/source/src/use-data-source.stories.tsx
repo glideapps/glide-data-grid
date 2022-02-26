@@ -180,6 +180,14 @@ const cols: GridColumn[] = [
         title: "C",
         width: 200,
     },
+    {
+        title: "D",
+        width: 200,
+    },
+    {
+        title: "E",
+        width: 200,
+    },
 ];
 
 export const UseDataSource: React.VFC = () => {
