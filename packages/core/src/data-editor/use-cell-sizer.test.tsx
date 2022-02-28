@@ -23,6 +23,18 @@ const A_COPY_OF_COLUMNS_THAT_ALSO_HAS_A_NEW_COLUMN_TITLED_C_THAT_WE_WILL_MEASURE
     },
 ];
 
+const A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE: GridColumn[] = [
+    {
+        title: "A",
+        width: 120,
+    },
+    {
+        title: "B",
+        width: 160,
+        icon: "headerCode",
+    },
+];
+
 type DataBuilder = (x: number, y: number) => string;
 
 function buildCellsForSelectionGetter(dataBuilder: DataBuilder): DataEditorProps["getCellsForSelection"] {
@@ -112,5 +124,32 @@ describe("use-cell-sizer", () => {
         expect(longColumnA?.width).toBe(30);
         expect(longColumnB?.width).toBe(160);
         expect(longColumnC?.width).toBe(64);
+    });
+
+    it("Returns the default sizes if getCellsForSelection is not provided", async () => {
+        const { result } = renderHook(() => useCellSizer(COLUMNS, 1000, undefined, theme));
+
+        const columnA = result.current.find(col => col.title === "A");
+        const columnB = result.current.find(col => col.title === "B");
+
+        expect(columnA).toBeDefined();
+        expect(columnB).toBeDefined();
+
+        // The default is 150, keep in sync with `defaultSize` in use-cell-sizer.ts
+        expect(columnA?.width).toBe(150);
+        expect(columnB?.width).toBe(160);
+    });
+
+    it("Does not measure anything if every column is sized", async () => {
+        const { result } = renderHook(() =>
+            useCellSizer(
+                A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE,
+                1000,
+                undefined,
+                theme
+            )
+        );
+
+        expect(result.current).toBe(A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE);
     });
 });
