@@ -26,6 +26,7 @@
         "@testing-library/jest-dom": "^5.15.0",
         "@testing-library/react": "^12.1.2",
         "@testing-library/react-hooks": "^7.0.2",
+        "@testing-library/user-event": "^13.5.0",
         "@types/cheerio": "^0.22.30",
         "@types/enzyme": "^3.10.10",
         "@types/enzyme-adapter-react-16": "^1.0.6",
