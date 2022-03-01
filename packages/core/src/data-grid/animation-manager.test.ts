@@ -3,7 +3,6 @@ import { AnimationManager, HoverValues } from "./animation-manager";
 const OG_RAF = window.requestAnimationFrame;
 const OG_CAF = window.cancelAnimationFrame;
 
-// TODO: Write actual tests for this.
 describe("Animation manager", () => {
     beforeEach(() => {
         // Mock rAF with setTimeout. Not perfect by any means, but at least it mocks the asynchronicity.
