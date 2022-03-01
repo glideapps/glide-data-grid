@@ -25,7 +25,7 @@ const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps> = p =
 
     const allowMove = filtered.length > 1;
     return (
-        <ImageOverlayEditorStyle onKeyDown={onKeyDown}>
+        <ImageOverlayEditorStyle onKeyDown={onKeyDown} data-testid="GDG-default-image-overlay-editor">
             <Carousel
                 showArrows={allowMove}
                 showThumbs={false}

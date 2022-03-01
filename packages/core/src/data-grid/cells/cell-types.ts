@@ -5,7 +5,7 @@ import type { InnerGridCell, Rectangle, Item } from "../data-grid-types";
 
 export type HoverInfo = readonly [Item, readonly [number, number]];
 
-type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
+export type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
 export interface BaseDrawArgs {
     ctx: CanvasRenderingContext2D;
