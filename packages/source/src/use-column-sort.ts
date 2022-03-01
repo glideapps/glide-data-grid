@@ -36,6 +36,7 @@ type Props = Pick<DataEditorProps, "getCellContent" | "rows" | "columns"> & {
     sort?: {
         column: GridColumn;
         mode?: "default" | "raw";
+        direction?: "asc" | "desc";
     };
 };
 type Result = Pick<DataEditorProps, "getCellContent">;
@@ -49,6 +50,7 @@ export function useColumnSort(p: Props): Result {
     // The performance "issue" from here on out seems to be the lookup to get the value. Not sure
     // what to do there. We need the indirection to produce the final sort map. Perhaps someone
     // more clever than me will wander in and save most of that time.
+    const dir = sort?.direction ?? "asc";
     const sortMap = React.useMemo(() => {
         if (sortCol === undefined) return undefined;
         const vals: string[] = new Array(rows);
@@ -65,8 +67,11 @@ export function useColumnSort(p: Props): Result {
         } else {
             result = range(rows).sort((a, b) => vals[a].localeCompare(vals[b]));
         }
+        if (dir === "desc") {
+            result.reverse();
+        }
         return result;
-    }, [getCellContentIn, rows, sort?.mode, sortCol]);
+    }, [getCellContentIn, rows, sort?.mode, dir, sortCol]);
 
     const getCellContent = React.useCallback<typeof getCellContentIn>(
         ([col, row]) => {

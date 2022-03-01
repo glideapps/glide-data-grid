@@ -233,6 +233,7 @@ export const UseDataSource: React.VFC = () => {
                 ? undefined
                 : {
                       column: moveArgs.columns[sort],
+                      direction: "desc",
                   },
     });
 
