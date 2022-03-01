@@ -1,11 +1,10 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, test, expect } from "jest-without-globals";
-import { useDataSource } from "./index";
-import { Props } from "./types";
 import { GridCellKind, isSizedGridColumn, TextCell } from "@glideapps/glide-data-grid";
+import { useColumnSort } from ".";
 
-const props: Props = {
+const props = {
     columns: [
         {
             title: "A",
@@ -17,7 +16,7 @@ const props: Props = {
         },
     ],
     freezeColumns: 0,
-    getCellContent: ([col, row]): TextCell => ({
+    getCellContent: ([col, row]: readonly [number, number]): TextCell => ({
         kind: GridCellKind.Text,
         allowOverlay: false,
         data: `${col}x${row}`,
@@ -67,8 +66,14 @@ const props: Props = {
     },
 };
 
-const DataSourceMonkey = (p: Props) => {
-    const { columns, getCellContent } = useDataSource(p);
+const DataSourceMonkey = (p: typeof props) => {
+    const columns = p.columns;
+    const { getCellContent } = useColumnSort({
+        columns: p.columns,
+        getCellContent: p.getCellContent,
+        rows: p.rows,
+        sort: undefined,
+    });
 
     return (
         <div>
