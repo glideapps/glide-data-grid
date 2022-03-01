@@ -10,7 +10,7 @@ import {
     Theme,
 } from "@glideapps/glide-data-grid";
 import faker from "faker";
-import { useDataSource, useMoveableColumns } from ".";
+import { useCollapsingGroups, useColumnSort, useMoveableColumns } from ".";
 
 faker.seed(1337);
 
@@ -193,6 +193,8 @@ const cols: GridColumn[] = [
 export const UseDataSource: React.VFC = () => {
     const cache = React.useRef<Record<string, string>>({});
 
+    const rows = 100_000;
+
     const moveArgs = useMoveableColumns({
         columns: cols,
         getCellContent: ([col, row]) => {
@@ -221,19 +223,23 @@ export const UseDataSource: React.VFC = () => {
     });
 
     const [sort, setSort] = React.useState<number>();
-    const args = useDataSource({
-        rows: 100_000,
-        moveableColumns: true,
+
+    const sortArgs = useColumnSort({
+        columns: moveArgs.columns,
+        getCellContent: moveArgs.getCellContent,
+        rows,
         sort:
             sort === undefined
                 ? undefined
                 : {
                       column: moveArgs.columns[sort],
                   },
+    });
+
+    const collapseArgs = useCollapsingGroups({
         columns: moveArgs.columns,
-        freezeColumns: 0,
-        getCellContent: moveArgs.getCellContent,
         theme: testTheme,
+        freezeColumns: 0,
     });
 
     const onHeaderClick = React.useCallback((index: number) => {
@@ -244,7 +250,10 @@ export const UseDataSource: React.VFC = () => {
         <BeautifulWrapper title="Custom cells" description={<Description>Some of our extension cells.</Description>}>
             <DataEditor
                 {...defaultProps}
-                {...args}
+                {...moveArgs}
+                {...sortArgs}
+                {...collapseArgs}
+                rows={rows}
                 onColumnMoved={moveArgs.onColumnMoved}
                 onHeaderClicked={onHeaderClick}
             />

@@ -1,7 +1,6 @@
-import { GridCell, GridCellKind } from "@glideapps/glide-data-grid";
+import { DataEditorProps, GridCell, GridCellKind, GridColumn } from "@glideapps/glide-data-grid";
 import range from "lodash/range";
 import * as React from "react";
-import { Props } from "./types";
 
 function cellToSortData(c: GridCell): string {
     switch (c.kind) {
@@ -33,7 +32,15 @@ export function compareRaw(a: string, b: string) {
     return -1;
 }
 
-export function useColumnSort(p: Props): Pick<Props, "getCellContent"> {
+type Props = Pick<DataEditorProps, "getCellContent" | "rows" | "columns"> & {
+    sort?: {
+        column: GridColumn;
+        mode?: "default" | "raw";
+    };
+};
+type Result = Pick<DataEditorProps, "getCellContent">;
+
+export function useColumnSort(p: Props): Result {
     const { sort, rows, getCellContent: getCellContentIn } = p;
 
     const sortCol = sort === undefined ? undefined : p.columns.indexOf(sort.column);

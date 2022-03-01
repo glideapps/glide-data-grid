@@ -1,18 +1,28 @@
-import { GridSelection } from "@glideapps/glide-data-grid";
+import { GridSelection, DataEditorProps, Theme } from "@glideapps/glide-data-grid";
 import React from "react";
-import { Props } from "./types";
 
-export function useCollapsingGroups(
-    props: Props
-): Pick<
-    Props,
+type Props = Pick<
+    DataEditorProps,
     | "columns"
     | "onGroupHeaderClicked"
     | "onSelectedColumnsChange"
     | "onGridSelectionChange"
     | "getGroupDetails"
     | "gridSelection"
-> {
+    | "freezeColumns"
+> & { theme: Theme };
+
+type Result = Pick<
+    DataEditorProps,
+    | "columns"
+    | "onGroupHeaderClicked"
+    | "onSelectedColumnsChange"
+    | "onGridSelectionChange"
+    | "getGroupDetails"
+    | "gridSelection"
+>;
+
+export function useCollapsingGroups(props: Props): Result {
     const [collapsed, setCollapsed] = React.useState<readonly string[]>([]);
     const [gridSelectionInner, setGridSelectionsInner] = React.useState<GridSelection | undefined>(undefined);
 
@@ -58,7 +68,6 @@ export function useCollapsingGroups(
     }, [collapsed, columnsIn, freezeColumns]);
 
     const columns = React.useMemo(() => {
-        if (props.collapseGroups !== true) return columnsIn;
         if (spans.length === 0) return columnsIn;
         return columnsIn.map((c, index) => {
             for (const [start, length] of spans) {
@@ -79,7 +88,7 @@ export function useCollapsingGroups(
             }
             return c;
         });
-    }, [props.collapseGroups, columnsIn, spans, theme.bgCellMedium]);
+    }, [columnsIn, spans, theme.bgCellMedium]);
 
     const onGroupHeaderClicked = React.useCallback<NonNullable<Props["onGroupHeaderClicked"]>>(
         (index, a) => {
