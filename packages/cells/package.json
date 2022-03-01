@@ -1,6 +1,6 @@
 {
   "name": "@glideapps/glide-data-grid-cells",
-  "version": "3.4.0-beta5",
+  "version": "3.4.0-beta6",
   "description": "Extra cells for glide-data-grid",
   "sideEffects": false,
   "type": "module",
@@ -41,7 +41,7 @@
     "canvas"
   ],
   "dependencies": {
-    "@glideapps/glide-data-grid": "3.4.0-beta5"
+    "@glideapps/glide-data-grid": "3.4.0-beta6"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
