@@ -783,7 +783,8 @@ function clipDamage(
     rows: number,
     getRowHeight: (row: number) => number,
     lastRowSticky: boolean,
-    damage: CellList | undefined
+    damage: CellList | undefined,
+    includeCells: boolean
 ): void {
     if (damage === undefined || damage.length === 0) return;
 
@@ -819,6 +820,8 @@ function clipDamage(
                     break;
                 }
             }
+
+            if (!includeCells) return;
 
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
                 let isDamaged = false;
@@ -1550,7 +1553,8 @@ export function drawGrid(
                 rows,
                 getRowHeight,
                 lastRowSticky,
-                damage
+                damage,
+                true
             );
 
             targetCtx.fillStyle = theme.bgCell;
@@ -1602,7 +1606,8 @@ export function drawGrid(
                 rows,
                 getRowHeight,
                 lastRowSticky,
-                damage
+                damage,
+                false
             );
             drawHeaderTexture();
         }
