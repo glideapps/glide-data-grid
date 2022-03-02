@@ -686,7 +686,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         (canvas: HTMLCanvasElement, col: number, clientX: number, clientY: number) => {
             const header = columns[col];
 
-            if (!isDragging && header.hasMenu === true && !(hoveredOnEdge ?? false)) {
+            if (!isDragging && !isResizing && header.hasMenu === true && !(hoveredOnEdge ?? false)) {
                 const headerBounds = getBoundsForItem(canvas, col, -1);
                 const menuBounds = getHeaderMenuBounds(
                     headerBounds.x,
@@ -705,7 +705,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
             return undefined;
         },
-        [columns, getBoundsForItem, hoveredOnEdge, isDragging]
+        [columns, getBoundsForItem, hoveredOnEdge, isDragging, isResizing]
     );
 
     const onMouseDownImpl = React.useCallback(
