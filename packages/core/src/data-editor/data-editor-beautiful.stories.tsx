@@ -1098,6 +1098,7 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
             }>
             <DataEditor
                 {...defaultProps}
+                rowMarkers="number"
                 getCellsForSelection={getCellsForSelection}
                 getCellContent={getCellContent}
                 columns={cols}
@@ -1113,7 +1114,7 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
     columnsCount: {
         control: {
             type: "range",
-            min: 6,
+            min: 2,
             max: 200,
         },
     },

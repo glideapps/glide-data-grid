@@ -373,6 +373,12 @@ function drawCheckbox(
 export function prepMarkerRowCell(args: BaseDrawArgs) {
     const { ctx, theme } = args;
     ctx.font = `9px ${theme.fontFamily}`;
+    ctx.textAlign = "center";
+}
+
+export function deprepMarkerRowCell(args: Pick<BaseDrawArgs, "ctx">) {
+    const { ctx } = args;
+    ctx.textAlign = "start";
 }
 
 export function drawMarkerRowCell(
@@ -390,9 +396,8 @@ export function drawMarkerRowCell(
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
         const text = (index + 1).toString();
-        const w = measureTextCached(text, ctx, `9px ${theme.fontFamily}`).width;
 
-        const start = x + (width - w) / 2;
+        const start = x + width / 2;
         if (markerKind === "both" && hoverAmount !== 0) {
             ctx.globalAlpha = 1 - hoverAmount;
         }

@@ -28,6 +28,7 @@ import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
 import { withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
+import { DeprepCallback } from "./cells/cell-types";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when scrolling
@@ -87,7 +88,7 @@ export function drawCell(
     frameTime: number,
     lastToken?: {} | undefined,
     enqueue?: (item: Item) => void
-): {} | undefined {
+): {} | DeprepCallback | undefined {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
     if (hoverInfo !== undefined && hoverInfo[0][0] === col && hoverInfo[0][1] === row) {
@@ -131,10 +132,13 @@ export function drawCell(
         if (!drawn && cell.kind !== GridCellKind.Custom) {
             const r = CellRenderers[cell.kind];
             if (lastToken !== r || forcePrep) {
+                if (typeof lastToken === "function") {
+                    lastToken(args);
+                }
                 r.renderPrep?.(args);
             }
             r.render(args);
-            result = r;
+            result = r?.renderDeprep ?? r;
         }
     });
     if (needsAnim) enqueue?.([col, row]);
@@ -981,7 +985,8 @@ function drawCells(
                 font = colFont;
                 ctx.font = colFont;
             }
-            let lastToken: {} | undefined;
+            let lastToken: {} | DeprepCallback | undefined;
+
             walkRowsInCol(
                 startRow,
                 colDrawStartY,
@@ -1058,6 +1063,7 @@ function drawCells(
                                 cellWidth = area.width;
                                 handledSpans.add(spanKey);
                                 ctx.restore();
+                                if (typeof lastToken === "function") lastToken({ ctx });
                                 lastToken = undefined;
                                 ctx.save();
                                 ctx.beginPath();
@@ -1105,6 +1111,7 @@ function drawCells(
                     if (isSticky || theme.bgCell !== outerTheme.bgCell) {
                         ctx.fillStyle = theme.bgCell;
                         ctx.fillRect(cellX, drawY, cellWidth, rh);
+                        if (typeof lastToken === "function") lastToken({ ctx });
                         lastToken = undefined;
                     }
 
@@ -1117,11 +1124,13 @@ function drawCells(
                             ctx.fillStyle = theme.accentLight;
                             ctx.fillRect(cellX, drawY, cellWidth, rh);
                         }
+                        if (typeof lastToken === "function") lastToken({ ctx });
                         lastToken = undefined;
                     } else {
                         if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
                             ctx.fillStyle = theme.bgSearchResult;
                             ctx.fillRect(cellX, drawY, cellWidth, rh);
+                            if (typeof lastToken === "function") lastToken({ ctx });
                             lastToken = undefined;
                         }
                     }
@@ -1165,6 +1174,7 @@ function drawCells(
                     toDraw--;
                     if (drawingSpan) {
                         ctx.restore();
+                        if (typeof lastToken === "function") lastToken({ ctx });
                         lastToken = undefined;
                         reclip();
                         font = colFont;
@@ -1358,8 +1368,6 @@ function drawFocusRing(
                     const areas = getSpanBounds(cell.span, drawX, drawY, col.width, rh, col, allColumns);
                     const area = col.sticky ? areas[0] : areas[1];
 
-                    // eslint-disable-next-line no-console
-                    console.log(area);
                     if (area !== undefined) {
                         cellX = area.x;
                         cellWidth = area.width;

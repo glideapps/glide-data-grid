@@ -29,7 +29,8 @@ interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {
 }
 
 type DrawCallback<T extends InnerGridCell> = (args: DrawArgs<T>) => void;
-type PrepCallback = (args: BaseDrawArgs) => void;
+export type PrepCallback = (args: BaseDrawArgs) => void;
+export type DeprepCallback = (args: Pick<BaseDrawArgs, "ctx">) => void;
 
 type ProvideEditorCallback<T extends InnerGridCell> = (
     cell: T
@@ -51,6 +52,7 @@ export interface InternalCellRenderer<T extends InnerGridCell> {
     readonly kind: T["kind"];
     readonly renderPrep?: PrepCallback;
     readonly render: DrawCallback<T>;
+    readonly renderDeprep?: DeprepCallback;
     readonly needsHover: boolean;
     readonly needsHoverPosition: boolean;
     readonly useLabel?: boolean;
