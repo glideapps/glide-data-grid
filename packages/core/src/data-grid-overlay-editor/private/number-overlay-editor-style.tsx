@@ -10,5 +10,6 @@ export const NumberOverlayEditorStyle = styled.div`
         padding: 0;
         font-family: ${p => p.theme.fontFamily};
         color: ${p => p.theme.textDark};
+        background-color: ${p => p.theme.bgCell};
     }
 `;
