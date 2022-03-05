@@ -1543,7 +1543,8 @@ export function drawGrid(
             return (
                 x[1] < 0 ||
                 intersectRect(cellXOffset, cellYOffset, effectiveCols.length, 300, x[0], x[1], 1, 1) ||
-                intersectRect(0, cellYOffset, freezeColumns, 300, x[0], x[1], 1, 1)
+                intersectRect(0, cellYOffset, freezeColumns, 300, x[0], x[1], 1, 1) ||
+                (lastRowSticky && intersectRect(cellXOffset, rows - 1, effectiveCols.length, 1, x[0], x[1], 1, 1))
             );
         });
 
