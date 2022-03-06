@@ -11,8 +11,8 @@ export default {
     decorators: [
         (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
             <div>
-                <BuilderThemeWrapper width={600} height={0} context={context}>
-                    {fn()}
+                <BuilderThemeWrapper width={1800} height={1000} context={context}>
+                    <div style={{ position: "relative" }}>{fn()}</div>
                 </BuilderThemeWrapper>
             </div>
         ),
@@ -21,23 +21,40 @@ export default {
 
 export function Simplenotest() {
     let x = 0;
+
+    const [y, setY] = React.useState(0);
+
+    React.useEffect(() => {
+        let handle = 0;
+        const cb = () => {
+            setY(cv => cv + 1);
+            handle = window.requestAnimationFrame(cb);
+        };
+
+        cb();
+
+        return () => window.cancelAnimationFrame(handle);
+    }, []);
+
     return (
         <DataGrid
-            width={600}
-            height={500}
+            width={1800}
+            height={1000}
             cellXOffset={0}
-            cellYOffset={0}
+            cellYOffset={y}
             onMouseMove={() => undefined}
-            groupHeaderHeight={34}
+            groupHeaderHeight={0}
             accessibilityHeight={50}
             enableGroups={false}
-            rows={1000}
+            rows={100000}
             headerHeight={44}
             rowHeight={34}
-            columns={["One", "Two", "Three", "Four", "Five", "Six", "Seven"].map(t => ({
-                title: t,
-                width: 122 + (x += 10),
-            }))}
+            columns={["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven"].map(
+                t => ({
+                    title: t,
+                    width: 122 + (x += 10),
+                })
+            )}
             getCellContent={([col, row]) => ({
                 kind: GridCellKind.Text,
                 displayData: `${col},${row} Testing things that are way too long`,
@@ -58,8 +75,8 @@ export function SelectedCellnotest() {
     let x = 0;
     return (
         <DataGrid
-            width={600}
-            height={500}
+            width={1800}
+            height={1000}
             cellXOffset={0}
             onMouseMove={() => undefined}
             accessibilityHeight={50}
@@ -95,8 +112,8 @@ export function SelectedRownotest() {
     return (
         <DataGrid
             onMouseMove={() => undefined}
-            width={600}
-            height={500}
+            width={1800}
+            height={1000}
             cellXOffset={0}
             cellYOffset={0}
             groupHeaderHeight={34}
@@ -131,8 +148,8 @@ export const SelectedColumnnotest = () => {
     return (
         <DataGrid
             onMouseMove={() => undefined}
-            width={600}
-            height={500}
+            width={1800}
+            height={1000}
             cellXOffset={0}
             cellYOffset={0}
             accessibilityHeight={50}

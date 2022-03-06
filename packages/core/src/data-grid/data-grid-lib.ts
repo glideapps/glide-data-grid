@@ -272,7 +272,11 @@ export function prepTextCell(args: BaseDrawArgs, overrideColor?: string) {
 
 export function drawTextCell(args: BaseDrawArgs, data: string) {
     const { ctx, x, y, w, h, theme } = args;
-    data = data.split(/\r?\n/)[0].slice(0, Math.round(w / 4));
+    data = data.split(/\r?\n/)[0];
+    const max = Math.round(w / 4);
+    if (data.length > max) {
+        data = data.slice(0, max);
+    }
 
     const dir = direction(data);
 
