@@ -31,15 +31,15 @@ import { CellRenderers } from "./cells";
 import { DeprepCallback } from "./cells/cell-types";
 
 // Future optimization opportunities
-// - Create a cache of a buffer used to render the full view of a partially displayed column so that when scrolling
-//   horizontally you can simply blit the pre-drawn column instead of continually paying the draw cost as it slides
-//   into view.
+// - Create a cache of a buffer used to render the full view of a partially displayed column so that when
+//   scrolling horizontally you can simply blit the pre-drawn column instead of continually paying the draw
+//   cost as it slides into view.
 // - Blit headers on horizontal scroll
 // - Use webworker to load images, helpful with lots of large images
 // - Sprite map currently wastes a lot of canvas texture space
-// - It may be interesting to try creating "sufficient" canvases to just give each column its own canvas and compose
-//   that way. There may be significant gaints to be had there. This would also allow for fluid column DnD.
-// - Instead of drawing the header canvas to the target canvas, maybe just direct blit it and let the browser composite
+// - Retain mode for drawing cells. Instead of drawing cells as we come across them, first build a data
+//   structure which contains all operations to perform, then sort them all by "prep" requirement, then do
+//   all like operations at once.
 
 type HoverInfo = readonly [Item, readonly [number, number]];
 
@@ -214,8 +214,8 @@ function blitLastFrame(
             sh: height * dpr,
             dx: 0,
             dy: 0,
-            dw: width,
-            dh: height,
+            dw: width * dpr,
+            dh: height * dpr,
         };
 
         // blit Y
@@ -223,8 +223,8 @@ function blitLastFrame(
             // scrolling up
             args.sy = (totalHeaderHeight + 1) * dpr;
             args.sh = blitHeight * dpr;
-            args.dy = deltaY + totalHeaderHeight + 1;
-            args.dh = blitHeight;
+            args.dy = (deltaY + totalHeaderHeight + 1) * dpr;
+            args.dh = blitHeight * dpr;
 
             drawRegions.push({
                 x: 0,
@@ -236,8 +236,8 @@ function blitLastFrame(
             // scrolling down
             args.sy = (-deltaY + totalHeaderHeight + 1) * dpr;
             args.sh = blitHeight * dpr;
-            args.dy = totalHeaderHeight + 1;
-            args.dh = blitHeight;
+            args.dy = (totalHeaderHeight + 1) * dpr;
+            args.dh = blitHeight * dpr;
 
             drawRegions.push({
                 x: 0,
@@ -252,8 +252,8 @@ function blitLastFrame(
             // pixels moving right
             args.sx = stickyWidth * dpr;
             args.sw = blitWidth * dpr;
-            args.dx = deltaX + stickyWidth;
-            args.dw = blitWidth;
+            args.dx = (deltaX + stickyWidth) * dpr;
+            args.dw = blitWidth * dpr;
 
             drawRegions.push({
                 x: stickyWidth - 1,
@@ -265,8 +265,8 @@ function blitLastFrame(
             // pixels moving left
             args.sx = (stickyWidth - deltaX) * dpr;
             args.sw = blitWidth * dpr;
-            args.dx = stickyWidth;
-            args.dw = blitWidth;
+            args.dx = stickyWidth * dpr;
+            args.dw = blitWidth * dpr;
 
             drawRegions.push({
                 x: width + deltaX,
@@ -277,7 +277,9 @@ function blitLastFrame(
             ctx.beginPath();
         }
 
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.drawImage(canvas, args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
+        ctx.scale(dpr, dpr);
     }
     ctx.imageSmoothingEnabled = true;
 
