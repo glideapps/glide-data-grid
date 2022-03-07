@@ -277,8 +277,27 @@ function blitLastFrame(
             ctx.beginPath();
         }
 
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.drawImage(canvas, args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
+        // ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.resetTransform();
+
+        console.log({
+            ch: canvas.height,
+            sy: Math.floor(args.sy),
+            sh: Math.ceil(args.sh),
+            dy: Math.floor(args.dy),
+            dh: Math.ceil(args.dh),
+        });
+        ctx.drawImage(
+            canvas,
+            Math.floor(args.sx),
+            Math.floor(args.sy),
+            Math.ceil(args.sw),
+            Math.ceil(args.sh),
+            Math.floor(args.dx),
+            Math.floor(args.dy),
+            Math.ceil(args.dw),
+            Math.ceil(args.dh)
+        );
         ctx.scale(dpr, dpr);
     }
     ctx.imageSmoothingEnabled = true;
@@ -1400,8 +1419,8 @@ function drawFocusRing(
 export function drawGrid(
     canvas: HTMLCanvasElement,
     buffers: Buffers,
-    width: number,
-    height: number,
+    widthIn: number,
+    heightIn: number,
     cellXOffset: number,
     cellYOffset: number,
     translateX: number,
@@ -1439,23 +1458,33 @@ export function drawGrid(
     scrolling: boolean,
     enqueue: (item: Item) => void
 ) {
-    if (width === 0 || height === 0) return;
-    const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
+    if (widthIn === 0 || heightIn === 0) return;
+    const dpr = scrolling ? 1 : window.devicePixelRatio ?? 1;
 
-    if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
+    const totalHeaderHeightRaw = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
+    const scaledWidth = Math.ceil(widthIn * dpr);
+    const scaledHeight = Math.ceil(heightIn * dpr);
+    const scaledHeaderHeight = Math.ceil(totalHeaderHeightRaw * dpr);
+    const width = scaledWidth / dpr;
+    const height = scaledHeight / dpr;
+    const totalHeaderHeight = scaledHeaderHeight / dpr;
+
+    if (canvas.width !== scaledWidth || canvas.height !== scaledHeight) {
+        // set "internal image/pixbuf size"
+        canvas.width = scaledWidth;
+        canvas.height = scaledHeight;
+
+        // set external actual size
         canvas.style.width = width + "px";
         canvas.style.height = height + "px";
     }
 
     const overlayCanvas = buffers.overlay;
-    const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
-    if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== totalHeaderHeight * dpr) {
-        overlayCanvas.width = width * dpr;
-        overlayCanvas.height = totalHeaderHeight * dpr;
+    if (overlayCanvas.width !== scaledWidth || overlayCanvas.height !== scaledHeaderHeight) {
+        overlayCanvas.width = scaledWidth;
+        overlayCanvas.height = scaledHeaderHeight;
 
         overlayCanvas.style.width = width + "px";
         overlayCanvas.style.height = totalHeaderHeight + "px";
