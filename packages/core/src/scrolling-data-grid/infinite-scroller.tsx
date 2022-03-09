@@ -27,6 +27,10 @@ export const ScrollRegionStyle = styled.div`
         transform: translate3d(0, 0, 0);
     }
 
+    .hidden {
+        visibility: hidden;
+    }
+
     .dvn-scroll-inner {
         display: flex;
         pointer-events: none;
@@ -146,9 +150,10 @@ export const InfiniteScroller: React.FC<Props> = p => {
 
     let key = 0;
     let h = 0;
+    padders.push(<div key={key++} style={{ width: scrollWidth, height: 0 }} />);
     while (h < scrollHeight) {
         const toAdd = Math.min(5_000_000, scrollHeight - h);
-        padders.push(<div key={key++} style={{ width: scrollWidth, height: toAdd }} />);
+        padders.push(<div key={key++} style={{ width: 0, height: toAdd }} />);
         h += toAdd;
     }
 
@@ -178,7 +183,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                                 }}
                                 className={"dvn-scroller " + (className ?? "")}
                                 onScroll={onScroll}>
-                                <div className="dvn-scroll-inner">
+                                <div className={"dvn-scroll-inner" + (rightElement === undefined ? " hidden" : "")}>
                                     <div className="dvn-stack">{padders}</div>
                                     {rightElement !== undefined && (
                                         <>

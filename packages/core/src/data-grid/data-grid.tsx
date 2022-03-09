@@ -115,7 +115,7 @@ export interface DataGridProps {
     readonly experimental?: {
         readonly paddingRight?: number;
         readonly paddingBottom?: number;
-        readonly disableFirefoxRescaling?: boolean;
+        readonly enableFirefoxRescaling?: boolean;
         readonly isSubGrid?: boolean;
         readonly strict?: boolean;
     };
@@ -207,8 +207,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
     const scrollingStopRef = React.useRef(-1);
-    const disableFirefoxRescaling = p.experimental?.disableFirefoxRescaling === true;
-    React.useEffect(() => {
+    const disableFirefoxRescaling = p.experimental?.enableFirefoxRescaling !== true;
+    React.useLayoutEffect(() => {
         if (!browserIsFirefox || window.devicePixelRatio === 1 || disableFirefoxRescaling) return;
         // We don't want to go into scroll mode for a single repaint
         if (scrollingStopRef.current !== -1) {
@@ -221,7 +221,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         }, 200);
     }, [cellYOffset, cellXOffset, translateX, translateY, disableFirefoxRescaling]);
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         const fn = async () => {
             const changed = await spriteManager.buildSpriteMap(theme, columns);
             if (changed) {
@@ -568,7 +568,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     ]);
 
     canBlit.current = canBlit.current !== undefined;
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         canBlit.current = false;
     }, [
         width,
@@ -589,12 +589,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     ]);
 
     const lastDrawRef = React.useRef(draw);
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         draw();
         lastDrawRef.current = draw;
     }, [draw]);
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         const fn = async () => {
             if (document?.fonts?.ready === undefined) return;
             await document.fonts.ready;
@@ -817,7 +817,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const animManagerValue = React.useMemo(() => new AnimationManager(onAnimationFrame), [onAnimationFrame]);
     const animationManager = React.useRef(animManagerValue);
     animationManager.current = animManagerValue;
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         const am = animationManager.current;
         if (hoveredItem === undefined || hoveredItem[1] < 0) {
             am.setHovered(hoveredItem);

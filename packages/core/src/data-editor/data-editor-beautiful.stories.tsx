@@ -27,6 +27,7 @@ import { DataEditorRef } from "..";
 import range from "lodash/range";
 import isArray from "lodash/isArray";
 import { assertNever } from "../common/support";
+import { browserIsFirefox } from "../common/browser-detect";
 
 faker.seed(1337);
 
@@ -161,6 +162,15 @@ const BeautifulStyle = styled.div`
             height: 100%;
         }
     }
+
+    &.firefox .sizer {
+        border-radius: 0;
+        box-shadow: unset;
+
+        .sizer-clip {
+            border-radius: 0;
+        }
+    }
 `;
 
 const PropName = styled.span`
@@ -203,7 +213,7 @@ interface BeautifulProps {
 const BeautifulWrapper: React.FC<BeautifulProps> = p => {
     const { title, children, description, className } = p;
     return (
-        <BeautifulStyle className={className}>
+        <BeautifulStyle className={className + (browserIsFirefox ? " firefox" : "")}>
             <h1>{title}</h1>
             {description}
             <div className="sizer">

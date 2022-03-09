@@ -26,7 +26,7 @@ import {
 } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
-import { withAlpha } from "./color-parser";
+import { blend, withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
 import { DeprepCallback } from "./cells/cell-types";
 
@@ -274,7 +274,6 @@ function blitLastFrame(
                 width: -deltaX,
                 height: height,
             });
-            ctx.beginPath();
         }
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -317,8 +316,8 @@ function drawGridLines(
         }
         ctx.clip("evenodd");
     }
-    const hColor = theme.horizontalBorderColor ?? theme.borderColor;
-    const vColor = theme.borderColor;
+    const hColor = blend(theme.horizontalBorderColor ?? theme.borderColor, theme.bgCell);
+    const vColor = blend(theme.borderColor, theme.bgCell);
     ctx.beginPath();
     // we need to under-draw the header background on its line to improve its contrast.
     ctx.moveTo(0, totalHeaderHeight + 0.5);
