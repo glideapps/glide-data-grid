@@ -26,7 +26,7 @@ import {
 } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
-import { blend, parseToRgba, withAlpha } from "./color-parser";
+import { parseToRgba, withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
 import { DeprepCallback } from "./cells/cell-types";
 
