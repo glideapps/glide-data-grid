@@ -1102,7 +1102,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             };
 
             return (
-                <div role="grid" aria-rowcount={rows} aria-colcount={mappedColumns.length}>
+                <div key="access-tree" role="grid" aria-rowcount={rows} aria-colcount={mappedColumns.length}>
                     <div role="rowgroup">
                         <div role="row" aria-rowindex={1} row-index={1}>
                             {effectiveCols.map(c => (

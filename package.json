@@ -6,6 +6,7 @@
         "build": "./build-all.sh",
         "storybook": "start-storybook -p 9009 -s public",
         "build-storybook": "build-storybook -o storybook-build/",
+        "prod-storybook": "npm run build-storybook && npx http-server storybook-build -p 9009",
         "test": "cd packages/core && npm run test --"
     },
     "author": "Glide",

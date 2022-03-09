@@ -26,7 +26,7 @@ import {
 } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
-import { blend, withAlpha } from "./color-parser";
+import { blend, parseToRgba, withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
 import { DeprepCallback } from "./cells/cell-types";
 
@@ -316,8 +316,14 @@ function drawGridLines(
         }
         ctx.clip("evenodd");
     }
-    const hColor = blend(theme.horizontalBorderColor ?? theme.borderColor, theme.bgCell);
-    const vColor = blend(theme.borderColor, theme.bgCell);
+    const hColorRaw = theme.horizontalBorderColor ?? theme.borderColor;
+    const vColorRaw = theme.borderColor;
+
+    const [, , , hAlpha] = parseToRgba(hColorRaw);
+    const hColor = withAlpha(hColorRaw, 1);
+    const [, , , vAlpha] = parseToRgba(hColorRaw);
+    const vColor = withAlpha(vColorRaw, 1);
+
     ctx.beginPath();
     // we need to under-draw the header background on its line to improve its contrast.
     ctx.moveTo(0, totalHeaderHeight + 0.5);
@@ -340,8 +346,9 @@ function drawGridLines(
             ctx.lineTo(tx, height);
         }
     }
-    if (vColor !== hColor) {
+    if (vColor !== hColor || vAlpha !== hAlpha) {
         ctx.strokeStyle = vColor;
+        if (vAlpha !== 1) ctx.globalAlpha = vAlpha;
         ctx.stroke();
         ctx.beginPath();
     }
@@ -374,8 +381,10 @@ function drawGridLines(
     }
 
     ctx.strokeStyle = hColor;
+    if (hAlpha !== 1) ctx.globalAlpha = hAlpha;
     ctx.stroke();
     ctx.beginPath();
+    if (hAlpha !== 1) ctx.globalAlpha = 1;
 
     if (spans !== undefined) {
         ctx.restore();
