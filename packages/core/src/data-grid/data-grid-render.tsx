@@ -57,6 +57,11 @@ interface GroupDetails {
 export type GroupDetailsCallback = (groupName: string) => GroupDetails;
 export type GetRowThemeCallback = (row: number) => Partial<Theme> | undefined;
 
+const loadingCell: InnerGridCell = {
+    kind: GridCellKind.Loading,
+    allowOverlay: false,
+};
+
 interface BlitData {
     readonly cellXOffset: number;
     readonly cellYOffset: number;
@@ -1059,13 +1064,7 @@ function drawCells(
                     const rowSelected = selectedRows.hasIndex(row);
                     const rowDisabled = disabledRows.hasIndex(row);
 
-                    const cell: InnerGridCell =
-                        row < rows
-                            ? getCellContent([c.sourceIndex, row])
-                            : {
-                                  kind: GridCellKind.Loading,
-                                  allowOverlay: false,
-                              };
+                    const cell: InnerGridCell = row < rows ? getCellContent([c.sourceIndex, row]) : loadingCell;
 
                     let cellX = drawX;
                     let cellWidth = c.width;
@@ -1193,7 +1192,9 @@ function drawCells(
                         lastToken = drawResult;
                     }
 
-                    ctx.globalAlpha = 1;
+                    if (cell.style === "faded") {
+                        ctx.globalAlpha = 1;
+                    }
                     toDraw--;
                     if (drawingSpan) {
                         ctx.restore();
