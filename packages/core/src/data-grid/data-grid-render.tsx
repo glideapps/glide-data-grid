@@ -960,7 +960,8 @@ function drawCells(
 ): Rectangle[] | undefined {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
-    let font: string | undefined;
+    let font = `${outerTheme.baseFontStyle} ${outerTheme.fontFamily}`;
+    ctx.font = font;
     let result: Rectangle[] | undefined;
     const handledSpans = new Set<string>();
     walkColumns(
@@ -1514,8 +1515,6 @@ export function drawGrid(
     overlayCtx.textBaseline = "middle";
     targetCtx.textBaseline = "middle";
 
-    targetCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
-    overlayCtx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     if (dpr !== 1) {
         overlayCtx.scale(dpr, dpr);
         targetCtx.scale(dpr, dpr);
