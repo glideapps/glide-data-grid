@@ -796,18 +796,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const lastSelectedRowRef = React.useRef<number>();
     const lastSelectedColRef = React.useRef<number>();
 
-    const lastMouseDownCellLocation = React.useRef<[number, number]>();
-    const onMouseDown = React.useCallback(
+    const handleSelect = React.useCallback(
         (args: GridMouseEventArgs) => {
-            if (args.button !== 0) {
-                return;
-            }
-            mouseState.current = {
-                previousSelection: gridSelection,
-            };
-
-            lastMouseDownCellLocation.current = undefined;
-
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
             const [col, row] = args.location;
             if (args.kind === "cell") {
@@ -978,24 +968,45 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
         },
         [
+            appendRow,
+            focus,
+            getCustomNewRowTargetColumn,
             gridSelection,
             hasRowMarkers,
-            rowMarkerOffset,
-            showTrailingBlankRow,
-            rows,
-            rowMarkers,
-            setGridSelection,
-            focus,
-            setSelectedColumns,
-            selectedRows,
-            rowSelectionMode,
-            setSelectedRows,
-            getCustomNewRowTargetColumn,
-            appendRow,
             lastRowSticky,
-            selectedColumns,
             mangledCols,
+            rowMarkerOffset,
+            rowMarkers,
+            rowSelectionMode,
+            rows,
+            selectedColumns,
+            selectedRows,
+            setGridSelection,
+            setSelectedColumns,
+            setSelectedRows,
+            showTrailingBlankRow,
         ]
+    );
+
+    const lastMouseDownCellLocation = React.useRef<[number, number]>();
+    const downScrollPosition = React.useRef(visibleRegion);
+    const onMouseDown = React.useCallback(
+        (args: GridMouseEventArgs) => {
+            downScrollPosition.current = visibleRegionRef.current;
+            if (args.button !== 0) {
+                return;
+            }
+            mouseState.current = {
+                previousSelection: gridSelection,
+            };
+
+            lastMouseDownCellLocation.current = undefined;
+
+            if (!args.isTouch) {
+                handleSelect(args);
+            }
+        },
+        [gridSelection, handleSelect]
     );
 
     const [renameGroup, setRenameGroup] = React.useState<{
@@ -1013,13 +1024,56 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
             if (isOutside) return;
 
+            const [col, row] = args.location;
+            const [lastMouseDownCol, lastMouseDownRow] = lastMouseDownCellLocation.current ?? [];
+
             let prevented = false;
             const preventDefault = () => {
                 prevented = true;
             };
 
-            const [lastMouseDownCol, lastMouseDownRow] = lastMouseDownCellLocation.current ?? [];
-            const [col, row] = args.location;
+            const handleMaybeClick = (a: GridMouseCellEventArgs): boolean => {
+                if (lastMouseDownCol === col && lastMouseDownRow === row) {
+                    onCellClicked?.([col - rowMarkerOffset, row], {
+                        ...a,
+                        preventDefault,
+                    });
+                }
+                if (gridSelection !== undefined && mouse?.previousSelection?.cell !== undefined && !prevented) {
+                    const [selectedCol, selectedRow] = gridSelection.cell;
+                    const [prevCol, prevRow] = mouse.previousSelection.cell;
+                    const c = getMangedCellContent([col, row]);
+                    const r = c.kind === GridCellKind.Custom ? undefined : CellRenderers[c.kind];
+                    if (r !== undefined && r.onClick !== undefined) {
+                        const newVal = r.onClick(c, a.localEventX, a.localEventY, a.bounds);
+                        if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
+                            mangledOnCellEdited(a.location, newVal);
+                            gridRef.current?.damage([
+                                {
+                                    cell: a.location,
+                                },
+                            ]);
+                        }
+                    }
+                    if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
+                        reselect(a.bounds);
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            if (args.isTouch) {
+                if (
+                    visibleRegionRef.current.x === downScrollPosition.current.x &&
+                    visibleRegionRef.current.y === downScrollPosition.current.y
+                ) {
+                    if (args.kind === "cell" && !handleMaybeClick(args)) {
+                        handleSelect(args);
+                    }
+                }
+                return;
+            }
 
             if (args.kind === "header") {
                 if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
@@ -1041,32 +1095,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return;
             }
             if (args.button === 0) {
-                if (lastMouseDownCol === col && lastMouseDownRow === row) {
-                    onCellClicked?.([col - rowMarkerOffset, row], {
-                        ...args,
-                        preventDefault,
-                    });
-                }
-                if (gridSelection !== undefined && mouse?.previousSelection?.cell !== undefined && !prevented) {
-                    const [selectedCol, selectedRow] = gridSelection.cell;
-                    const [prevCol, prevRow] = mouse.previousSelection.cell;
-                    const c = getMangedCellContent([col, row]);
-                    const r = c.kind === GridCellKind.Custom ? undefined : CellRenderers[c.kind];
-                    if (r !== undefined && r.onClick !== undefined) {
-                        const newVal = r.onClick(c, args.localEventX, args.localEventY, args.bounds);
-                        if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
-                            mangledOnCellEdited(args.location, newVal);
-                            gridRef.current?.damage([
-                                {
-                                    cell: args.location,
-                                },
-                            ]);
-                        }
-                    }
-                    if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
-                        reselect(args.bounds);
-                    }
-                }
+                handleMaybeClick(args);
             } else if (args.button === 2) {
                 onCellContextMenu?.([args.location[0] - rowMarkerOffset, args.location[1]], {
                     ...args,
@@ -1077,6 +1106,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [
             getMangedCellContent,
             gridSelection,
+            handleSelect,
             mangledOnCellEdited,
             onCellClicked,
             onCellContextMenu,
