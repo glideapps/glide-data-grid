@@ -54,7 +54,8 @@ export function withAlpha(color: string, alpha: number): string {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-export function blend(color: string, background: string): string {
+export function blend(color: string, background: string | undefined): string {
+    if (background === undefined) return color;
     const [r, g, b, a] = parseToRgba(color);
     if (a === 1) return color;
     const [br, bg, bb, ba] = parseToRgba(background);

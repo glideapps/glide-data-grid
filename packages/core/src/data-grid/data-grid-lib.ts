@@ -272,8 +272,12 @@ export function prepTextCell(args: BaseDrawArgs, overrideColor?: string) {
 
 export function drawTextCell(args: BaseDrawArgs, data: string) {
     const { ctx, x, y, w, h, theme } = args;
-    data = data.split(/\r?\n/)[0];
-    const max = Math.round(w / 4);
+    if (data.includes("\n")) {
+        // new lines are rare and split is relatively expensive compared to the search
+        // it pays off to not do the split contantly.
+        data = data.split(/\r?\n/)[0];
+    }
+    const max = w / 4; // no need to round, slice will just truncate this
     if (data.length > max) {
         data = data.slice(0, max);
     }

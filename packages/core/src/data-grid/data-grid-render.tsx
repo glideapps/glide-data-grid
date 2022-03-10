@@ -26,7 +26,7 @@ import {
 } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
-import { parseToRgba, withAlpha } from "./color-parser";
+import { blend, withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
 import { DeprepCallback } from "./cells/cell-types";
 
@@ -297,6 +297,7 @@ function drawGridLines(
     translateY: number,
     width: number,
     height: number,
+    drawRegions: Rectangle[] | undefined,
     spans: Rectangle[] | undefined,
     groupHeaderHeight: number,
     totalHeaderHeight: number,
@@ -316,18 +317,31 @@ function drawGridLines(
         }
         ctx.clip("evenodd");
     }
-    const hColorRaw = theme.horizontalBorderColor ?? theme.borderColor;
-    const vColorRaw = theme.borderColor;
+    const hColor = theme.horizontalBorderColor ?? theme.borderColor;
+    const vColor = theme.borderColor;
 
-    const [, , , hAlpha] = parseToRgba(hColorRaw);
-    const hColor = withAlpha(hColorRaw, 1);
-    const [, , , vAlpha] = parseToRgba(hColorRaw);
-    const vColor = withAlpha(vColorRaw, 1);
+    let minX = 0;
+    let maxX = width;
+    let minY = 0;
+    let maxY = height;
+
+    if (drawRegions !== undefined && drawRegions.length > 0) {
+        minX = Number.MAX_SAFE_INTEGER;
+        minY = Number.MAX_SAFE_INTEGER;
+        maxX = Number.MIN_SAFE_INTEGER;
+        maxY = Number.MIN_SAFE_INTEGER;
+        for (const r of drawRegions) {
+            minX = Math.min(minX, r.x - 1);
+            maxX = Math.max(maxX, r.x + r.width + 1);
+            minY = Math.min(minY, r.y - 1);
+            maxY = Math.max(maxY, r.y + r.height + 1);
+        }
+    }
 
     ctx.beginPath();
     // we need to under-draw the header background on its line to improve its contrast.
-    ctx.moveTo(0, totalHeaderHeight + 0.5);
-    ctx.lineTo(width, totalHeaderHeight + 0.5);
+    ctx.moveTo(minX, totalHeaderHeight + 0.5);
+    ctx.lineTo(maxX, totalHeaderHeight + 0.5);
     ctx.strokeStyle = theme.bgHeader;
     ctx.lineWidth = 1;
     ctx.stroke();
@@ -341,14 +355,13 @@ function drawGridLines(
         if (c.width === 0) continue;
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
-        if (index === effectiveCols.length - 1 || verticalBorder(index + 1)) {
-            ctx.moveTo(tx, groupHeaderHeight);
-            ctx.lineTo(tx, height);
+        if (tx >= minX && tx <= maxX && (index === effectiveCols.length - 1 || verticalBorder(index + 1))) {
+            ctx.moveTo(tx, Math.max(groupHeaderHeight, minY));
+            ctx.lineTo(tx, Math.min(height, maxY));
         }
     }
-    if (vColor !== hColor || vAlpha !== hAlpha) {
+    if (vColor !== hColor) {
         ctx.strokeStyle = vColor;
-        if (vAlpha !== 1) ctx.globalAlpha = vAlpha;
         ctx.stroke();
         ctx.beginPath();
     }
@@ -356,8 +369,8 @@ function drawGridLines(
     const stickyHeight = getRowHeight(rows - 1);
     const stickyRowY = height - stickyHeight + 0.5;
     if (lastRowSticky) {
-        ctx.moveTo(0, stickyRowY);
-        ctx.lineTo(width, stickyRowY);
+        ctx.moveTo(minX, stickyRowY);
+        ctx.lineTo(maxX, stickyRowY);
     }
 
     if (verticalOnly !== true) {
@@ -369,9 +382,9 @@ function drawGridLines(
         while (y + translateY <= target) {
             const ty = isHeader ? y : y + translateY;
             // This shouldn't be needed it seems like... yet it is. We're not sure why.
-            if (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) > 1) {
-                ctx.moveTo(0, ty);
-                ctx.lineTo(width, ty);
+            if (ty >= minY && ty <= maxY && (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) > 1)) {
+                ctx.moveTo(minX, ty);
+                ctx.lineTo(maxX, ty);
             }
 
             y += getRowHeight(row);
@@ -381,10 +394,8 @@ function drawGridLines(
     }
 
     ctx.strokeStyle = hColor;
-    if (hAlpha !== 1) ctx.globalAlpha = hAlpha;
     ctx.stroke();
     ctx.beginPath();
-    if (hAlpha !== 1) ctx.globalAlpha = 1;
 
     if (spans !== undefined) {
         ctx.restore();
@@ -1118,31 +1129,32 @@ function drawCells(
                         isFocused ||
                         (!isSticky && (rowSelected || selectedColumns.hasIndex(c.sourceIndex)));
 
+                    let fill: string | undefined;
                     if (isSticky || theme.bgCell !== outerTheme.bgCell) {
-                        ctx.fillStyle = theme.bgCell;
-                        ctx.fillRect(cellX, drawY, cellWidth, rh);
+                        fill = blend(theme.bgCell, fill);
                         if (typeof lastToken === "function") lastToken({ ctx });
                         lastToken = undefined;
                     }
 
                     if (highlighted || rowDisabled) {
                         if (rowDisabled) {
-                            ctx.fillStyle = theme.bgHeader;
-                            ctx.fillRect(cellX, drawY, cellWidth, rh);
+                            fill = blend(theme.bgHeader, fill);
                         }
                         if (highlighted) {
-                            ctx.fillStyle = theme.accentLight;
-                            ctx.fillRect(cellX, drawY, cellWidth, rh);
+                            fill = blend(theme.accentLight, fill);
                         }
                         if (typeof lastToken === "function") lastToken({ ctx });
                         lastToken = undefined;
                     } else {
                         if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
-                            ctx.fillStyle = theme.bgSearchResult;
-                            ctx.fillRect(cellX, drawY, cellWidth, rh);
+                            fill = blend(theme.bgSearchResult, fill);
                             if (typeof lastToken === "function") lastToken({ ctx });
                             lastToken = undefined;
                         }
+                    }
+                    if (fill !== undefined) {
+                        ctx.fillStyle = fill;
+                        ctx.fillRect(cellX, drawY, cellWidth, rh);
                     }
 
                     if (cell.style === "faded") {
@@ -1204,6 +1216,7 @@ function drawCells(
 function drawBlanks(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
+    allColumns: readonly MappedGridColumn[],
     width: number,
     height: number,
     totalHeaderHeight: number,
@@ -1220,7 +1233,11 @@ function drawBlanks(
     damage: CellList | undefined,
     theme: Theme
 ): void {
-    if (damage !== undefined) return;
+    if (
+        damage !== undefined ||
+        effectiveColumns[effectiveColumns.length - 1] !== allColumns[effectiveColumns.length - 1]
+    )
+        return;
     walkColumns(
         effectiveColumns,
         cellYOffset,
@@ -1540,6 +1557,7 @@ export function drawGrid(
             width,
             height,
             undefined,
+            undefined,
             groupHeaderHeight,
             totalHeaderHeight,
             getRowHeight,
@@ -1701,17 +1719,18 @@ export function drawGrid(
         );
     }
 
+    targetCtx.fillStyle = theme.bgCell;
     if (drawRegions.length > 0) {
         targetCtx.beginPath();
         for (const r of drawRegions) {
             targetCtx.rect(r.x, r.y, r.width, r.height);
         }
         targetCtx.clip();
+        targetCtx.fill();
         targetCtx.beginPath();
+    } else {
+        targetCtx.fillRect(0, 0, width, height);
     }
-
-    targetCtx.fillStyle = theme.bgCell;
-    targetCtx.fillRect(0, 0, width, height);
 
     const spans = drawCells(
         targetCtx,
@@ -1747,6 +1766,7 @@ export function drawGrid(
     drawBlanks(
         targetCtx,
         effectiveCols,
+        mappedColumns,
         width,
         height,
         totalHeaderHeight,
@@ -1772,6 +1792,7 @@ export function drawGrid(
         translateY,
         width,
         height,
+        drawRegions,
         spans,
         groupHeaderHeight,
         totalHeaderHeight,
