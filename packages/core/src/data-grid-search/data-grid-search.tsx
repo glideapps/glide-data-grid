@@ -68,6 +68,8 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         getCellContent,
     } = p;
 
+    const [searchID] = React.useState(() => "search-box-" + Math.round(Math.random() * 1000));
+
     const [searchString, setSearchString] = React.useState("");
     const [searchStatus, setSearchStatus] = React.useState<{
         rowsSearched: number;
@@ -328,6 +330,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 onClick={cancelEvent}>
                 <div className="search-bar-inner">
                     <input
+                        id={searchID}
                         data-testid="search-input"
                         ref={inputRef}
                         onChange={onSearchChange}
@@ -336,12 +339,14 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         onKeyDownCapture={onSearchKeyDown}
                     />
                     <button
+                        aria-label="Previous Result"
                         tabIndex={showSearch ? undefined : -1}
                         onClick={onPrev}
                         disabled={(searchStatus?.results ?? 0) === 0}>
                         {upArrow}
                     </button>
                     <button
+                        aria-label="Next Result"
                         tabIndex={showSearch ? undefined : -1}
                         onClick={onNext}
                         disabled={(searchStatus?.results ?? 0) === 0}>
@@ -349,6 +354,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                     </button>
                     {onSearchClose !== undefined && (
                         <button
+                            aria-label="Close Search"
                             data-testid="search-close-button"
                             tabIndex={showSearch ? undefined : -1}
                             onClick={onClose}>
@@ -356,13 +362,17 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         </button>
                     )}
                 </div>
-                {searchStatus !== undefined && (
+                {searchStatus !== undefined ? (
                     <>
                         <div className="search-status">
                             <div data-testid="search-result-area">{resultString}</div>
                         </div>
                         <div className="search-progress" style={progressStyle} />
                     </>
+                ) : (
+                    <div className="search-status">
+                        <label htmlFor={searchID}>Type to search</label>
+                    </div>
                 )}
             </SearchWrapper>
         );
@@ -377,6 +387,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         searchStatus,
         searchString,
         showSearch,
+        searchID,
     ]);
 
     return (

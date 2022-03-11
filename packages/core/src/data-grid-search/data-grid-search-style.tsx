@@ -22,7 +22,7 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
     }
 
     .search-status {
-        margin-top: 4px;
+        padding-top: 4px;
         font-size: 11px;
     }
 
