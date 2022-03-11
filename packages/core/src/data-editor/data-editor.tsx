@@ -546,7 +546,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const reselect = React.useCallback(
-        (bounds: Rectangle, initialValue?: string) => {
+        (bounds: Rectangle, fromKeyboard: boolean, initialValue?: string) => {
             if (gridSelection === undefined) return;
 
             const [col, row] = gridSelection.cell;
@@ -583,9 +583,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     highlight: initialValue === undefined,
                     forceEditMode: initialValue !== undefined,
                 });
+            } else if (c.kind === GridCellKind.Boolean && fromKeyboard) {
+                mangledOnCellEdited(gridSelection.cell, {
+                    ...c,
+                    data: !c.data,
+                });
+                gridRef.current?.damage([{ cell: gridSelection.cell }]);
             }
         },
-        [getMangedCellContent, gridSelection]
+        [getMangedCellContent, gridSelection, mangledOnCellEdited]
     );
 
     const focusOnRowFromTrailingBlankRow = React.useCallback(
@@ -1056,7 +1062,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }
                     }
                     if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
-                        reselect(a.bounds);
+                        reselect(a.bounds, false);
                         return true;
                     }
                 }
@@ -1580,7 +1586,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             void appendRow(customTargetColumn ?? col);
                         }, 0);
                     } else {
-                        reselect(event.bounds);
+                        reselect(event.bounds, true);
                         event.cancel();
                     }
                 } else if (event.keyCode === 68 && isPrimaryKey && gridSelection.range.height > 1 && enableDownfill) {
@@ -1670,7 +1676,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (!event.shiftKey) {
                         key = key.toLowerCase();
                     }
-                    reselect(event.bounds, key);
+                    reselect(event.bounds, true, key);
                     event.cancel();
                 }
 
