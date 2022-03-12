@@ -566,7 +566,7 @@ function getAndCacheDrilldownBorder(bgCell: string, border: string): HTMLCanvasE
     ctx.fillStyle = bgCell;
     ctx.fill();
 
-    ctx.shadowColor = "rgba(24, 25, 34, 0.2)";
+    ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
     ctx.shadowOffsetY = 1;
     ctx.shadowBlur = 5;
     ctx.fillStyle = bgCell;
