@@ -531,12 +531,69 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
     });
 }
 
+const drilldownCache: {
+    [key: string]: HTMLCanvasElement;
+} = {};
+
+function getAndCacheDrilldownBorder(bgCell: string, border: string): HTMLCanvasElement | null {
+    const key = `${bgCell},${border}`;
+    if (drilldownCache[key] !== undefined) {
+        return drilldownCache[key];
+    }
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d"); // alpha needed
+
+    if (ctx === null) return null;
+
+    const targetHeight = 24;
+    const shadowBlur = 5;
+    const middleWidth = 4;
+
+    const innerHeight = (targetHeight + shadowBlur * 2) * 2; // 68
+    canvas.width = innerHeight + middleWidth * 2; // 76
+    canvas.height = innerHeight;
+
+    ctx.scale(2, 2); // dummy mode just always go for hiDPI to start, fixme
+
+    drilldownCache[key] = canvas;
+
+    ctx.beginPath();
+    roundedRect(ctx, shadowBlur, shadowBlur, targetHeight + middleWidth, targetHeight, 6);
+
+    ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
+    ctx.shadowBlur = 1;
+    ctx.fillStyle = bgCell;
+    ctx.fill();
+
+    ctx.shadowColor = "rgba(24, 25, 34, 0.2)";
+    ctx.shadowOffsetY = 1;
+    ctx.shadowBlur = 5;
+    ctx.fillStyle = bgCell;
+    ctx.fill();
+
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 0;
+    ctx.shadowBlur = 0;
+
+    ctx.beginPath();
+    roundedRect(ctx, shadowBlur + 0.5, shadowBlur + 0.5, targetHeight + middleWidth, targetHeight, 6);
+
+    ctx.strokeStyle = border;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    return canvas;
+}
+
 export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[]) {
     const { x, y, w, h, theme, ctx, imageLoader, col, row } = args;
     const bubbleHeight = 24;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
     let renderX = x + theme.cellHorizontalPadding;
+
+    const tileMap = getAndCacheDrilldownBorder(theme.bgCell, theme.drilldownBorder);
 
     const renderBoxes: { x: number; width: number }[] = [];
     for (const el of data) {
@@ -558,48 +615,17 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
         renderX += renderWidth + bubbleMargin;
     }
 
-    ctx.beginPath();
-    renderBoxes.forEach(rectInfo => {
-        roundedRect(
-            ctx,
-            Math.floor(rectInfo.x),
-            y + (h - bubbleHeight) / 2,
-            Math.floor(rectInfo.width),
-            bubbleHeight,
-            6
-        );
-    });
-
-    ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
-    ctx.shadowBlur = 1;
-    ctx.fillStyle = theme.bgCell;
-    ctx.fill();
-
-    ctx.shadowColor = "rgba(24, 25, 34, 0.2)";
-    ctx.shadowOffsetY = 1;
-    ctx.shadowBlur = 5;
-    ctx.fillStyle = theme.bgCell;
-    ctx.fill();
-
-    ctx.shadowOffsetY = 0;
-    ctx.shadowBlur = 0;
-    ctx.shadowBlur = 0;
+    if (tileMap !== null) {
+        renderBoxes.forEach(rectInfo => {
+            const rx = Math.floor(rectInfo.x);
+            const rw = Math.floor(rectInfo.width);
+            ctx.drawImage(tileMap, 0, 0, 34, 68, rx - 5, y + h / 2 - 17, 17, 34);
+            ctx.drawImage(tileMap, 34, 0, 8, 68, rx + 12, y + h / 2 - 17, rw - 24, 34);
+            ctx.drawImage(tileMap, 76 - 34, 0, 34, 68, rx + rw - 12, y + h / 2 - 17, 17, 34);
+        });
+    }
 
     ctx.beginPath();
-    renderBoxes.forEach(rectInfo => {
-        roundedRect(
-            ctx,
-            Math.floor(rectInfo.x) + 0.5,
-            Math.floor(y + (h - bubbleHeight) / 2) + 0.5,
-            Math.round(rectInfo.width),
-            bubbleHeight,
-            6
-        );
-    });
-
-    ctx.strokeStyle = theme.drilldownBorder;
-    ctx.lineWidth = 1;
-    ctx.stroke();
 
     renderBoxes.forEach((rectInfo, i) => {
         const d = data[i];
