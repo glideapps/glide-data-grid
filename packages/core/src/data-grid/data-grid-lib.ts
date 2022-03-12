@@ -535,10 +535,34 @@ const drilldownCache: {
     [key: string]: HTMLCanvasElement;
 } = {};
 
-function getAndCacheDrilldownBorder(bgCell: string, border: string): HTMLCanvasElement | null {
-    const key = `${bgCell},${border}`;
+function getAndCacheDrilldownBorder(
+    bgCell: string,
+    border: string
+): {
+    el: HTMLCanvasElement;
+    height: number;
+    width: number;
+    middleWidth: number;
+    sideWidth: number;
+} | null {
+    const dpr = Math.ceil(window.devicePixelRatio);
+    const targetHeight = 24;
+    const shadowBlur = 5;
+    const middleWidth = 4;
+
+    const innerHeight = (targetHeight + shadowBlur * 2) * dpr; // 68
+    const innerWidth = innerHeight + middleWidth * dpr; // 76
+    const sideWidth = innerHeight / 2;
+
+    const key = `${bgCell},${border},${dpr}`;
     if (drilldownCache[key] !== undefined) {
-        return drilldownCache[key];
+        return {
+            el: drilldownCache[key],
+            height: innerHeight,
+            width: innerWidth,
+            middleWidth: middleWidth * dpr,
+            sideWidth,
+        };
     }
 
     const canvas = document.createElement("canvas");
@@ -546,15 +570,10 @@ function getAndCacheDrilldownBorder(bgCell: string, border: string): HTMLCanvasE
 
     if (ctx === null) return null;
 
-    const targetHeight = 24;
-    const shadowBlur = 5;
-    const middleWidth = 4;
-
-    const innerHeight = (targetHeight + shadowBlur * 2) * 2; // 68
-    canvas.width = innerHeight + middleWidth * 2; // 76
+    canvas.width = innerWidth;
     canvas.height = innerHeight;
 
-    ctx.scale(2, 2); // dummy mode just always go for hiDPI to start, fixme
+    ctx.scale(dpr, dpr); // dummy mode just always go for hiDPI to start, fixme
 
     drilldownCache[key] = canvas;
 
@@ -583,7 +602,7 @@ function getAndCacheDrilldownBorder(bgCell: string, border: string): HTMLCanvasE
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    return canvas;
+    return { el: canvas, height: innerHeight, width: innerWidth, sideWidth, middleWidth: middleWidth * dpr };
 }
 
 export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[]) {
@@ -616,12 +635,13 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
     }
 
     if (tileMap !== null) {
+        const { el, height, middleWidth, sideWidth, width } = tileMap;
         renderBoxes.forEach(rectInfo => {
             const rx = Math.floor(rectInfo.x);
             const rw = Math.floor(rectInfo.width);
-            ctx.drawImage(tileMap, 0, 0, 34, 68, rx - 5, y + h / 2 - 17, 17, 34);
-            ctx.drawImage(tileMap, 34, 0, 8, 68, rx + 12, y + h / 2 - 17, rw - 24, 34);
-            ctx.drawImage(tileMap, 76 - 34, 0, 34, 68, rx + rw - 12, y + h / 2 - 17, 17, 34);
+            ctx.drawImage(el, 0, 0, sideWidth, height, rx - 5, y + h / 2 - 17, 17, 34);
+            ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + 12, y + h / 2 - 17, rw - 24, 34);
+            ctx.drawImage(el, width - sideWidth, 0, sideWidth, height, rx + rw - 12, y + h / 2 - 17, 17, 34);
         });
     }
 
