@@ -639,9 +639,11 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
         renderBoxes.forEach(rectInfo => {
             const rx = Math.floor(rectInfo.x);
             const rw = Math.floor(rectInfo.width);
+            ctx.imageSmoothingEnabled = false;
             ctx.drawImage(el, 0, 0, sideWidth, height, rx - 5, y + h / 2 - 17, 17, 34);
             ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + 12, y + h / 2 - 17, rw - 24, 34);
             ctx.drawImage(el, width - sideWidth, 0, sideWidth, height, rx + rw - 12, y + h / 2 - 17, 17, 34);
+            ctx.imageSmoothingEnabled = true;
         });
     }
 

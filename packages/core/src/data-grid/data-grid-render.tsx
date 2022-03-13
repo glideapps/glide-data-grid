@@ -166,7 +166,7 @@ function blitLastFrame(
     dpr: number,
     columns: readonly SizedGridColumn[],
     effectiveCols: readonly MappedGridColumn[],
-    getRowHeight: (r: number) => number
+    getRowHeight: number | ((r: number) => number)
 ) {
     const drawRegions: Rectangle[] = [];
     let blittedYOnly = false;
@@ -175,8 +175,12 @@ function blitLastFrame(
     const minY = Math.min(last.cellYOffset, cellYOffset);
     const maxY = Math.max(last.cellYOffset, cellYOffset);
     let deltaY = 0;
-    for (let i = minY; i < maxY; i++) {
-        deltaY += getRowHeight(i);
+    if (typeof getRowHeight === "number") {
+        deltaY += (maxY - minY) * getRowHeight;
+    } else {
+        for (let i = minY; i < maxY; i++) {
+            deltaY += getRowHeight(i);
+        }
     }
     if (cellYOffset > last.cellYOffset) {
         deltaY = -deltaY;
@@ -204,7 +208,11 @@ function blitLastFrame(
         };
     }
 
-    const stickyRowHeight = lastRowSticky ? getRowHeight(rows - 1) : 0;
+    const stickyRowHeight = lastRowSticky
+        ? typeof getRowHeight === "number"
+            ? getRowHeight
+            : getRowHeight(rows - 1)
+        : 0;
 
     const blitWidth = width - stickyWidth - Math.abs(deltaX);
     const blitHeight = height - totalHeaderHeight - stickyRowHeight - Math.abs(deltaY) - 1;
@@ -1681,7 +1689,7 @@ export function drawGrid(
             dpr,
             columns,
             effectiveCols,
-            getRowHeight
+            rowHeight
         );
         drawRegions = regions;
     }

@@ -308,8 +308,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 result.height = stickyHeight;
             } else {
                 const dir = cellYOffset > row ? -1 : 1;
-                for (let r = cellYOffset; r !== row; r += dir) {
-                    result.y += (typeof rowHeight === "number" ? rowHeight : rowHeight(r)) * dir;
+                if (typeof rowHeight === "number") {
+                    const delta = row - cellYOffset;
+                    result.y += delta * rowHeight;
+                } else {
+                    for (let r = cellYOffset; r !== row; r += dir) {
+                        result.y += rowHeight(r) * dir;
+                    }
                 }
                 result.height = (typeof rowHeight === "number" ? rowHeight : rowHeight(row)) + 1;
             }
