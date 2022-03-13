@@ -53,6 +53,13 @@ Details of each property can be found by clicking on it.
 | [GridSelection](#gridselection) | The most basic representation of the selected cells in the data grid. |
 | [Theme](#theme) | The theme used by the data grid to get all color and font information |
 
+## Ref Methods
+| Name | Description |
+|--|--|
+| [updateCells](#updatecells) | Invalidates the rendering of a list of passed cells. |
+| [getBounds](#getbounds) | Gets the current screen-space bounds of a desired cell. |
+| [scrollTo](#scrollto) | Tells the data-grid to scroll to a particular location. |
+
 ## Required Props
 All data grids must set these props. These props are the bare minimum required to set up a functional data grid. Not all features will function with only these props but basic functionality will be present.
 
@@ -271,6 +278,44 @@ The data grid uses the `Theme` provided by the styled-components `ThemeProvider`
 | baseFontStyle | string | The font style used for cells by default, e.g. `13px` |
 | fontFamily | string | The font family used by the data grid. |
 | editorFontSize | string | The font size used by overlay editors. |
+
+---
+## updateCells
+
+Example usage:
+```ts
+dataGridRef.current.updateCells([
+    { cell: [10, 10]},
+    { cell: [11, 10]},
+    { cell: [12, 10]}
+]);
+```
+
+Causes the data grid to rerender these specific cells. Rerendering a single cell is significantly faster than invalidating the `getCellContent` callback as in the latter case all cells must be redrawn.
+
+---
+## getBounds
+
+```ts
+getBounds: (col: number, row?: number) => Rectangle | undefined;
+```
+
+`getBounds` returns the current bounding box of a cell. This does not need to be a currently rendered cell.
+
+---
+## scrollTo
+
+```ts
+scrollTo: (
+        col: number,
+        row: number,
+        dir?: "horizontal" | "vertical" | "both",
+        paddingX?: number,
+        paddingY?: number
+    ) => void;
+```
+
+Requests the data grid to scroll to a particular location. If only one direction is requested it will get as close as it can without scrolling the off axis. Padding can be applied to inset the cell by a certain amount.
 
 ---
 ## columns
