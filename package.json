@@ -1,11 +1,12 @@
 {
     "name": "root",
-    "version": "3.3.0",
+    "version": "3.4.0",
     "scripts": {
         "bootstrap": "./bootstrap.sh",
         "build": "./build-all.sh",
         "storybook": "start-storybook -p 9009 -s public",
         "build-storybook": "build-storybook -o storybook-build/",
+        "prod-storybook": "npm run build-storybook && npx http-server storybook-build -p 9009",
         "test": "cd packages/core && npm run test --"
     },
     "author": "Glide",
@@ -22,9 +23,11 @@
         "@storybook/addon-links": "^6.3.2",
         "@storybook/addon-storysource": "^6.3.2",
         "@storybook/addons": "^6.3.2",
-        "@storybook/react": "^6.3.2",
+        "@storybook/react": "^6.4.19",
         "@testing-library/jest-dom": "^5.15.0",
         "@testing-library/react": "^12.1.2",
+        "@testing-library/react-hooks": "^7.0.2",
+        "@testing-library/user-event": "^13.5.0",
         "@types/cheerio": "^0.22.30",
         "@types/enzyme": "^3.10.10",
         "@types/enzyme-adapter-react-16": "^1.0.6",
@@ -61,5 +64,6 @@
         "styled-components": "5.2.0",
         "ts-jest": "^27.0.7",
         "typescript": "^4.5.2"
-    }
+    },
+    "dependencies": {}
 }

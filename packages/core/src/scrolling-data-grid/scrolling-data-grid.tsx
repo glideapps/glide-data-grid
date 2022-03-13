@@ -99,9 +99,6 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         const args = lastArgs.current;
         if (args === undefined) return;
 
-        setClientHeight(args.height);
-        setClientWidth(args.width);
-
         let x = 0;
         let tx = 0;
         let cellRight = 0;
@@ -204,6 +201,9 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             lastX.current = tx;
             lastY.current = ty;
         }
+
+        setClientHeight(args.height);
+        setClientWidth(args.width);
     }, [columns, rowHeight, rows, onVisibleRegionChanged, freezeColumns, smoothScrollX, smoothScrollY]);
 
     const onScrollUpdate = React.useCallback(

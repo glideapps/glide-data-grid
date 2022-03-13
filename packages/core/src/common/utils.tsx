@@ -102,7 +102,7 @@ export function useDebouncedMemo<T>(factory: () => T, deps: React.DependencyList
 
     const debouncedSetState = React.useRef(debounce(setState, time));
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         debouncedSetState.current(() => factory());
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, deps);

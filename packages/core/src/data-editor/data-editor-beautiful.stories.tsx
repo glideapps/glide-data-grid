@@ -27,6 +27,7 @@ import { DataEditorRef } from "..";
 import range from "lodash/range";
 import isArray from "lodash/isArray";
 import { assertNever } from "../common/support";
+import { browserIsFirefox } from "../common/browser-detect";
 
 faker.seed(1337);
 
@@ -111,9 +112,9 @@ export default {
     ],
 };
 
-interface GridColumnWithMockingInfo extends GridColumn {
+type GridColumnWithMockingInfo = GridColumn & {
     getContent(): GridCell;
-}
+};
 
 function getGridColumn(columnWithMock: GridColumnWithMockingInfo): GridColumn {
     const { getContent, ...rest } = columnWithMock;
@@ -161,6 +162,15 @@ const BeautifulStyle = styled.div`
             height: 100%;
         }
     }
+
+    &.firefox .sizer {
+        border-radius: 0;
+        box-shadow: unset;
+
+        .sizer-clip {
+            border-radius: 0;
+        }
+    }
 `;
 
 const PropName = styled.span`
@@ -203,7 +213,7 @@ interface BeautifulProps {
 const BeautifulWrapper: React.FC<BeautifulProps> = p => {
     const { title, children, description, className } = p;
     return (
-        <BeautifulStyle className={className}>
+        <BeautifulStyle className={className + (browserIsFirefox ? " firefox" : "")}>
             <h1>{title}</h1>
             {description}
             <div className="sizer">
@@ -224,8 +234,8 @@ const BeautifulWrapper: React.FC<BeautifulProps> = p => {
 function createTextColumnInfo(index: number, group: boolean): GridColumnWithMockingInfo {
     return {
         title: `Column ${index}`,
+        id: `Column ${index}`,
         group: group ? `Group ${Math.round(index / 3)}` : undefined,
-        width: 120,
         icon: GridColumnIcon.HeaderString,
         hasMenu: false,
         getContent: () => {
@@ -246,8 +256,8 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
     const defaultColumns: GridColumnWithMockingInfo[] = [
         {
             title: "First name",
+            id: "First name",
             group: group ? "Name" : undefined,
-            width: 120,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
             getContent: () => {
@@ -263,8 +273,8 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
         },
         {
             title: "Last name",
+            id: "Last name",
             group: group ? "Name" : undefined,
-            width: 120,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
             getContent: () => {
@@ -280,7 +290,7 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
         },
         {
             title: "Avatar",
-            width: 120,
+            id: "Avatar",
             group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderImage,
             hasMenu: false,
@@ -298,7 +308,7 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
         },
         {
             title: "Email",
-            width: 120,
+            id: "Email",
             group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
@@ -315,7 +325,7 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
         },
         {
             title: "Title",
-            width: 120,
+            id: "Title",
             group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
@@ -332,14 +342,14 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
         },
         {
             title: "More Info",
-            width: 120,
+            id: "More Info",
             group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderUri,
             hasMenu: false,
             getContent: () => {
                 const url = faker.internet.url();
                 return {
-                    kind: GridCellKind.Markdown,
+                    kind: GridCellKind.Uri,
                     displayData: url,
                     data: url,
                     allowOverlay: true,
@@ -619,7 +629,10 @@ function clearCell(cell: GridCell): GridCell {
 }
 
 export const AddData: React.VFC = () => {
-    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
+    const { cols, getCellContent, setCellValueRaw, setCellValue, getCellsForSelection } = useMockDataGenerator(
+        60,
+        false
+    );
 
     const [numRows, setNumRows] = React.useState(50);
 
@@ -647,6 +660,7 @@ export const AddData: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
+                getCellsForSelection={getCellsForSelection}
                 rowMarkers={"both"}
                 onCellEdited={setCellValue}
                 trailingRowOptions={{
@@ -678,6 +692,12 @@ const trailingRowOptionsColumnIndexesIcon: Record<number, string> = {
     5: GridColumnIcon.HeaderNumber,
 };
 
+const trailingRowOptionsColumnIndexesTarget: Record<number, number> = {
+    2: 0,
+    3: 0,
+    5: 0,
+};
+
 export const TrailingRowOptions: React.VFC = () => {
     const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
 
@@ -698,6 +718,7 @@ export const TrailingRowOptions: React.VFC = () => {
             trailingRowOptions: {
                 hint: trailingRowOptionsColumnIndexesHint[idx],
                 addIcon: trailingRowOptionsColumnIndexesIcon[idx],
+                targetColumn: trailingRowOptionsColumnIndexesTarget[idx],
             },
         }));
     }, [cols]);
@@ -980,7 +1001,7 @@ export const ObserveVisibleRegion: React.VFC = () => {
 };
 
 export const OneHundredThousandCols: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(100000);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100000);
 
     return (
         <BeautifulWrapper
@@ -991,7 +1012,13 @@ export const OneHundredThousandCols: React.VFC = () => {
                     but that&apos;s not important.
                 </Description>
             }>
-            <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={1000} />
+            <DataEditor
+                {...defaultProps}
+                getCellsForSelection={getCellsForSelection}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={1000}
+            />
         </BeautifulWrapper>
     );
 };
@@ -1068,7 +1095,7 @@ interface AddColumnsProps {
 }
 
 export const AddColumns: React.FC<AddColumnsProps> = p => {
-    const { cols, getCellContent } = useMockDataGenerator(p.columnsCount);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(p.columnsCount);
 
     return (
         <BeautifulWrapper
@@ -1079,7 +1106,14 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
                     <MoreInfo>Use the story&apos;s controls to change the number of columns</MoreInfo>
                 </>
             }>
-            <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={10_000} />
+            <DataEditor
+                {...defaultProps}
+                rowMarkers="number"
+                getCellsForSelection={getCellsForSelection}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={10_000}
+            />
         </BeautifulWrapper>
     );
 };
@@ -1090,7 +1124,7 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
     columnsCount: {
         control: {
             type: "range",
-            min: 6,
+            min: 2,
             max: 200,
         },
     },
@@ -1213,14 +1247,11 @@ export const DrawCustomCells: React.VFC = () => {
 };
 
 export const RearrangeColumns: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(60);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(60);
 
     // This is a dirty hack because the mock generator doesn't really support changing this. In a real data source
     // you should track indexes properly
-    const [sortableCols, setSortableCols] = React.useState(() => {
-        num = 200;
-        return cols.map(c => ({ ...c, width: c.width + (rand() % 100) }));
-    });
+    const [sortableCols, setSortableCols] = React.useState(cols);
 
     const onColMoved = React.useCallback((startIndex: number, endIndex: number): void => {
         setSortableCols(old => {
@@ -1253,6 +1284,7 @@ export const RearrangeColumns: React.VFC = () => {
                 freezeColumns={1}
                 rowMarkers="both"
                 getCellContent={getCellContentMangled}
+                getCellsForSelection={getCellsForSelection}
                 columns={sortableCols}
                 onColumnMoved={onColMoved}
                 rows={1_000}
@@ -1271,7 +1303,7 @@ interface RowAndHeaderSizesProps {
     headerHeight: number;
 }
 export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
-    const { cols, getCellContent } = useMockDataGenerator(6);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(6);
 
     const [selectedRows, setSelectedRows] = React.useState<CompactSelection>();
 
@@ -1293,6 +1325,7 @@ export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
                 headerHeight={p.headerHeight}
                 selectedRows={selectedRows}
                 onSelectedRowsChange={setSelectedRows}
+                getCellsForSelection={getCellsForSelection}
                 rowMarkers={"number"}
                 getCellContent={getCellContent}
                 columns={cols}
@@ -1339,7 +1372,7 @@ const KeyName = styled.kbd`
 `;
 
 export const MultiSelectColumns: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(100);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100);
 
     const [sel, setSel] = React.useState(CompactSelection.empty());
 
@@ -1361,6 +1394,7 @@ export const MultiSelectColumns: React.VFC = () => {
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
+                getCellsForSelection={getCellsForSelection}
                 rowMarkers="both"
                 columns={cols}
                 rows={100_000}
@@ -1823,6 +1857,45 @@ export const ThemePerColumn: React.VFC = () => {
     },
 };
 
+export const ThemePerRow: React.VFC = () => {
+    const { cols, getCellContent, onColumnResized, setCellValue, getCellsForSelection } = useMockDataGenerator(5);
+
+    return (
+        <BeautifulWrapper
+            title="Theme per row"
+            description={
+                <>
+                    <Description>
+                        Each row can provide theme overrides for rendering that row using the{" "}
+                        <PropName>getRowThemeOverride</PropName> callback.
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                getCellsForSelection={getCellsForSelection}
+                getRowThemeOverride={i =>
+                    i % 2 === 0
+                        ? undefined
+                        : {
+                              bgCell: "#f0f8ff",
+                          }
+                }
+                onCellEdited={setCellValue}
+                onColumnResized={onColumnResized}
+                rows={1_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ThemePerRow as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const BuiltInSearch: React.VFC = () => {
     const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
 
@@ -2102,7 +2175,7 @@ export const CustomHeaderIcons: React.VFC = () => {
 };
 
 export const RightElement: React.VFC = () => {
-    const { cols, getCellContent, setCellValue } = useMockDataGenerator(12, false);
+    const { cols, getCellContent, setCellValue, getCellsForSelection } = useMockDataGenerator(12, false);
 
     const [numRows, setNumRows] = React.useState(30);
 
@@ -2130,6 +2203,7 @@ export const RightElement: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
+                getCellsForSelection={getCellsForSelection}
                 rowMarkers={"both"}
                 onCellEdited={setCellValue}
                 trailingRowOptions={{
@@ -2175,7 +2249,7 @@ function rand(): number {
 }
 
 export const RapidUpdates: React.VFC = () => {
-    const { cols, getCellContent, setCellValueRaw } = useMockDataGenerator(100);
+    const { cols, getCellContent, setCellValueRaw, getCellsForSelection } = useMockDataGenerator(100);
 
     const ref = React.useRef<DataEditorRef>(null);
 
@@ -2246,7 +2320,14 @@ export const RapidUpdates: React.VFC = () => {
                     </MoreInfo>
                 </>
             }>
-            <DataEditor {...defaultProps} ref={ref} getCellContent={getCellContent} columns={cols} rows={10_000} />
+            <DataEditor
+                {...defaultProps}
+                ref={ref}
+                getCellContent={getCellContent}
+                getCellsForSelection={getCellsForSelection}
+                columns={cols}
+                rows={10_000}
+            />
         </BeautifulWrapper>
     );
 };
@@ -2351,7 +2432,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`}
 };
 
 export const FreezeColumns: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(100);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100);
 
     return (
         <BeautifulWrapper
@@ -2367,6 +2448,7 @@ export const FreezeColumns: React.VFC = () => {
                 rowMarkers="both"
                 freezeColumns={1}
                 getCellContent={getCellContent}
+                getCellsForSelection={getCellsForSelection}
                 columns={cols}
                 verticalBorder={c => c > 0}
                 rows={1_000}
@@ -2449,7 +2531,7 @@ export const ReorderRows: React.VFC = () => {
 };
 
 export const ColumnGroups: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(20, true, true);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(20, true, true);
 
     return (
         <BeautifulWrapper
@@ -2464,6 +2546,7 @@ export const ColumnGroups: React.VFC = () => {
                 getCellContent={getCellContent}
                 onGroupHeaderRenamed={(x, y) => window.alert(`Please rename group ${x} to ${y}`)}
                 columns={cols}
+                getCellsForSelection={getCellsForSelection}
                 rows={1000}
                 getGroupDetails={g => ({
                     name: g,
@@ -2579,6 +2662,84 @@ export const Minimap: React.VFC = () => {
     );
 };
 (Minimap as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const SpanCell: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(100, true, true);
+
+    const mangledGetCellContent = React.useCallback<typeof getCellContent>(
+        cell => {
+            const [col, row] = cell;
+            if (row === 6 && col >= 3 && col <= 4) {
+                return {
+                    kind: GridCellKind.Text,
+                    allowOverlay: false,
+                    data: "Span Cell that is very long and will go past the cell limits",
+                    span: [3, 4],
+                    displayData: "Span Cell that is very long and will go past the cell limits",
+                };
+            }
+            if (row === 5) {
+                return {
+                    kind: GridCellKind.Text,
+                    allowOverlay: false,
+                    data: "Span Cell that is very long and will go past the cell limits",
+                    span: [0, 99],
+                    displayData: "Span Cell that is very long and will go past the cell limits",
+                };
+            }
+            return getCellContent(cell);
+        },
+        [getCellContent]
+    );
+
+    const getCellsForSelection = React.useCallback(
+        (selection: Rectangle): readonly (readonly GridCell[])[] => {
+            const result: GridCell[][] = [];
+
+            for (let y = selection.y; y < selection.y + selection.height; y++) {
+                const row: GridCell[] = [];
+                for (let x = selection.x; x < selection.x + selection.width; x++) {
+                    row.push(mangledGetCellContent([x, y]));
+                }
+                result.push(row);
+            }
+
+            return result;
+        },
+        [mangledGetCellContent]
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Spans"
+            description={
+                <Description>
+                    By setting the <PropName>span</PropName> of a cell you can create spans in your grid. All cells
+                    within a span must return consistent data for defined behavior.
+                    <MoreInfo>
+                        Spans will always be split if they span frozen and non-frozen columns. By default selections are
+                        always expanded to include a span. This can be disabled using the{" "}
+                        <PropName>spanRangeBehavior</PropName> prop.
+                    </MoreInfo>
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={mangledGetCellContent}
+                getCellsForSelection={getCellsForSelection}
+                columns={cols}
+                freezeColumns={2}
+                rows={300}
+                rowMarkers="both"
+            />
+        </BeautifulWrapper>
+    );
+};
+(SpanCell as any).parameters = {
     options: {
         showPanel: false,
     },
@@ -2701,5 +2862,61 @@ export const CustomHeader: React.VFC = () => {
 (CustomHeader as any).parameters = {
     options: {
         showPanel: false,
+    },
+};
+
+interface PaddingProps {
+    paddingRight: number;
+    paddingBottom: number;
+}
+
+export const Padding: React.VFC<PaddingProps> = p => {
+    const { paddingRight, paddingBottom } = p;
+    const { cols, getCellContent } = useMockDataGenerator(20);
+
+    return (
+        <BeautifulWrapper
+            title="Padding"
+            description={
+                <>
+                    <Description>
+                        You can add padding at the ends of the grid by setting the <PropName>paddingRight</PropName> and{" "}
+                        <PropName>paddingBottom</PropName> props
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                experimental={{ paddingRight, paddingBottom }}
+                rows={50}
+            />
+        </BeautifulWrapper>
+    );
+};
+(Padding as any).argTypes = {
+    paddingRight: {
+        control: {
+            type: "range",
+            min: 0,
+            max: 600,
+        },
+    },
+    paddingBottom: {
+        control: {
+            type: "range",
+            min: 0,
+            max: 600,
+        },
+    },
+};
+(Padding as any).args = {
+    paddingRight: 200,
+    paddingBottom: 200,
+};
+(Padding as any).parameters = {
+    options: {
+        showPanel: true,
     },
 };

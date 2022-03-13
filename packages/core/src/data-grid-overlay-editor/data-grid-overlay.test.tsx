@@ -57,7 +57,7 @@ describe("data-grid-overlay", () => {
         render(<NumberOverlayEditor highlight={false} onChange={spy} value={35} onKeyDown={spy} />);
     });
 
-    test("Uri overlay editor", async () => {
+    test("Smoke test uri overlay editor", async () => {
         const spy = jest.fn();
 
         render(

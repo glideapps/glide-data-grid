@@ -147,8 +147,7 @@ export enum GridColumnIcon {
 
 export type Item = readonly [number, number];
 
-export interface GridColumn {
-    readonly width: number;
+interface BaseGridColumn {
     readonly title: string;
     readonly group?: string;
     readonly icon?: GridColumnIcon | string;
@@ -159,8 +158,26 @@ export interface GridColumn {
     readonly trailingRowOptions?: {
         readonly hint?: string;
         readonly addIcon?: string;
+        readonly targetColumn?: number | GridColumn;
     };
 }
+
+export function isSizedGridColumn(c: GridColumn): c is SizedGridColumn {
+    return "width" in c;
+}
+
+export interface SizedGridColumn extends BaseGridColumn {
+    readonly width: number;
+    readonly id?: string;
+}
+
+interface AutoGridColumn extends BaseGridColumn {
+    readonly id: string;
+}
+
+export type GridColumn = SizedGridColumn | AutoGridColumn;
+
+// export type SizedGridColumn = Omit<GridColumn, "width"> & { readonly width: number };
 
 export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell;
 
@@ -247,6 +264,7 @@ interface BaseGridCell {
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
+    readonly span?: readonly [number, number];
 }
 
 export interface LoadingCell extends BaseGridCell {
@@ -464,6 +482,13 @@ export class CompactSelection {
             if (!this.hasIndex(x)) return false;
         }
         return true;
+    };
+
+    some = (predicate: (index: number) => boolean): boolean => {
+        for (const i of this) {
+            if (predicate(i)) return true;
+        }
+        return false;
     };
 
     get length(): number {

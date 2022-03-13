@@ -42,6 +42,7 @@ const basicProps: DataGridProps = {
     }),
     groupHeaderHeight: 0,
     headerHeight: 36,
+    accessibilityHeight: 50,
     height: 1000,
     width: 1000,
     isDragging: false,

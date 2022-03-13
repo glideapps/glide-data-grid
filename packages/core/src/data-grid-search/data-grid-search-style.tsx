@@ -22,7 +22,7 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
     }
 
     .search-status {
-        margin-top: 4px;
+        padding-top: 4px;
         font-size: 11px;
     }
 
@@ -38,6 +38,7 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
     input {
         width: 220px;
         color: ${p => p.theme.textDark};
+        background-color: ${p => p.theme.bgCell};
         border: none;
         border-width: 0;
         outline: none;

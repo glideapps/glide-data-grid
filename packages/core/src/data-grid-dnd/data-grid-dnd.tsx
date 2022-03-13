@@ -225,6 +225,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         <DataGrid
             // I know the below could be done with ...rest, but it adds about 2-3% cpu load in the hot loop
             // This doesn't matter much for most devices but it will matter for low power phones and such.
+            accessibilityHeight={p.accessibilityHeight}
             cellXOffset={p.cellXOffset}
             cellYOffset={p.cellYOffset}
             columns={p.columns}
@@ -247,6 +248,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             eventTargetRef={p.eventTargetRef}
             experimental={p.experimental}
             getGroupDetails={p.getGroupDetails}
+            getRowThemeOverride={p.getRowThemeOverride}
             headerIcons={p.headerIcons}
             isDraggable={p.isDraggable}
             onCellFocused={p.onCellFocused}

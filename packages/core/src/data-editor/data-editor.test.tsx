@@ -9,6 +9,7 @@ import {
     GridCellKind,
     GridSelection,
     HeaderSelectionTrigger,
+    isSizedGridColumn,
 } from "..";
 
 jest.mock("react-virtualized-auto-sizer", () => {
@@ -194,7 +195,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
     Image.prototype.decode = jest.fn();
 });
 
-function prep() {
+function prep(resetTimers: boolean = true) {
     const scroller = document.getElementsByClassName("dvn-scroller").item(0);
     if (scroller !== null) {
         jest.spyOn(scroller, "clientWidth", "get").mockImplementation(() => 1000);
@@ -204,7 +205,9 @@ function prep() {
     act(() => {
         jest.runAllTimers();
     });
-    jest.useRealTimers();
+    if (resetTimers) {
+        jest.useRealTimers();
+    }
 
     return scroller;
 }
@@ -269,6 +272,31 @@ const EventedDataEditor: React.VFC<DataEditorProps> = p => {
 };
 
 describe("data-editor", () => {
+    test("Focus a11y cell", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const a11ycell = screen.getByTestId("glide-cell-0-5");
+        fireEvent.focus(a11ycell);
+
+        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [0, 5] }));
+    });
+
+    test("Click a11y cell", async () => {
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const a11ycell = screen.getByTestId("glide-cell-0-5");
+        fireEvent.click(a11ycell);
+    });
+
     test("Emits cell click", async () => {
         const spy = jest.fn();
 
@@ -784,31 +812,6 @@ describe("data-editor", () => {
         expect(overlay).not.toBeInTheDocument();
     });
 
-    test("Focus a11y cell", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
-            wrapper: Context,
-        });
-        prep();
-
-        const a11ycell = screen.getByTestId("glide-cell-0-5");
-        fireEvent.focus(a11ycell);
-
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [0, 5] }));
-    });
-
-    test("Click a11y cell", async () => {
-        jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} />, {
-            wrapper: Context,
-        });
-        prep();
-
-        const a11ycell = screen.getByTestId("glide-cell-0-5");
-        fireEvent.click(a11ycell);
-    });
-
     test("Arrow left", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
@@ -1192,7 +1195,7 @@ describe("data-editor", () => {
 
         if (scroller !== null) {
             jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
-                basicProps.columns.map(c => c.width).reduce((pv, cv) => pv + cv, 0)
+                basicProps.columns.map(c => (isSizedGridColumn(c) ? c.width : 150)).reduce((pv, cv) => pv + cv, 0)
             );
             jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
             jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
@@ -1204,7 +1207,7 @@ describe("data-editor", () => {
 
         if (scroller !== null) {
             jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
-                basicProps.columns.map(c => c.width).reduce((pv, cv) => pv + cv, 0)
+                basicProps.columns.map(c => (isSizedGridColumn(c) ? c.width : 150)).reduce((pv, cv) => pv + cv, 0)
             );
             jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
             jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
@@ -1234,7 +1237,7 @@ describe("data-editor", () => {
 
         if (scroller !== null) {
             jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
-                basicProps.columns.map(c => c.width).reduce((pv, cv) => pv + cv, 0)
+                basicProps.columns.map(c => (isSizedGridColumn(c) ? c.width : 150)).reduce((pv, cv) => pv + cv, 0)
             );
             jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
             jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 55);
@@ -1246,7 +1249,7 @@ describe("data-editor", () => {
 
         if (scroller !== null) {
             jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
-                basicProps.columns.map(c => c.width).reduce((pv, cv) => pv + cv, 0)
+                basicProps.columns.map(c => (isSizedGridColumn(c) ? c.width : 150)).reduce((pv, cv) => pv + cv, 0)
             );
             jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
             jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);

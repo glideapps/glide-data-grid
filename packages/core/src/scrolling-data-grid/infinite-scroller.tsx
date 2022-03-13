@@ -27,6 +27,10 @@ export const ScrollRegionStyle = styled.div`
         transform: translate3d(0, 0, 0);
     }
 
+    .hidden {
+        visibility: hidden;
+    }
+
     .dvn-scroll-inner {
         display: flex;
         pointer-events: none;
@@ -121,11 +125,18 @@ export const InfiniteScroller: React.FC<Props> = p => {
         });
     }, [paddingBottom, paddingRight, scrollHeight, update]);
 
+    const onScrollRef = React.useRef(onScroll);
+    onScrollRef.current = onScroll;
+
     const lastProps = React.useRef<{ width?: number; height?: number }>();
 
     const nomEvent = React.useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
     }, []);
+
+    React.useEffect(() => {
+        onScroll();
+    }, [onScroll, paddingBottom, paddingRight]);
 
     const setRefs = React.useCallback(
         (instance: HTMLDivElement | null) => {
@@ -139,9 +150,10 @@ export const InfiniteScroller: React.FC<Props> = p => {
 
     let key = 0;
     let h = 0;
+    padders.push(<div key={key++} style={{ width: scrollWidth, height: 0 }} />);
     while (h < scrollHeight) {
         const toAdd = Math.min(5_000_000, scrollHeight - h);
-        padders.push(<div key={key++} style={{ width: scrollWidth, height: toAdd }} />);
+        padders.push(<div key={key++} style={{ width: 0, height: toAdd }} />);
         h += toAdd;
     }
 
@@ -151,7 +163,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                 {(props: { width?: number; height?: number }) => {
                     if (props.width === 0 || props.height === 0) return null;
                     if (lastProps.current?.height !== props.height || lastProps.current?.width !== props.width) {
-                        window.setTimeout(onScroll, 0);
+                        window.setTimeout(() => onScrollRef.current(), 0);
                         lastProps.current = props;
                     }
 
@@ -171,7 +183,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                                 }}
                                 className={"dvn-scroller " + (className ?? "")}
                                 onScroll={onScroll}>
-                                <div className="dvn-scroll-inner">
+                                <div className={"dvn-scroll-inner" + (rightElement === undefined ? " hidden" : "")}>
                                     <div className="dvn-stack">{padders}</div>
                                     {rightElement !== undefined && (
                                         <>

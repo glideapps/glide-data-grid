@@ -34,7 +34,7 @@ class ImageWindowLoader {
     private imageLoaded: (locations: readonly (readonly [number, number])[]) => void = () => undefined;
     private loadedLocations: [number, number][] = [];
 
-    private window: Rectangle = {
+    private visibleWindow: Rectangle = {
         x: 0,
         y: 0,
         width: 0,
@@ -46,8 +46,8 @@ class ImageWindowLoader {
     private isInWindow = (packed: number) => {
         const col = unpackCol(packed);
         const row = unpackRow(packed, col);
-        if (col < this.freezeCols) return true;
-        const w = this.window;
+        const w = this.visibleWindow;
+        if (col < this.freezeCols && row >= w.y && row <= w.y + w.height) return true;
         return col >= w.x && col <= w.x + w.width && row >= w.y && row <= w.y + w.height;
     };
 
@@ -86,27 +86,27 @@ class ImageWindowLoader {
         }
     };
 
-    public setWindow(window: Rectangle, freezeCols: number): void {
+    public setWindow(newWindow: Rectangle, freezeCols: number): void {
         if (
-            this.window.x === window.x &&
-            this.window.y === window.y &&
-            this.window.width === window.width &&
-            this.window.height === window.height &&
+            this.visibleWindow.x === newWindow.x &&
+            this.visibleWindow.y === newWindow.y &&
+            this.visibleWindow.width === newWindow.width &&
+            this.visibleWindow.height === newWindow.height &&
             this.freezeCols === freezeCols
         )
             return;
-        this.window = window;
+        this.visibleWindow = newWindow;
         this.freezeCols = freezeCols;
         this.clearOutOfWindow();
     }
 
     public loadOrGetImage(url: string, col: number, row: number): HTMLImageElement | undefined {
-        const key = `${url}`;
+        const key = url;
 
         const current = this.cache[key];
         if (current !== undefined) {
             const packed = packColRowToNumber(col, row);
-            if (current.img === undefined && !current.cells.includes(packed)) {
+            if (!current.cells.includes(packed)) {
                 current.cells.push(packed);
             }
             return current.img;
@@ -125,10 +125,12 @@ class ImageWindowLoader {
                 },
             };
 
+            const loadPromise = new Promise(r => (img.onload = () => r(null)));
             // use request animation time to avoid paying src set costs during draw calls
             requestAnimationFrame(async () => {
                 try {
                     img.src = url;
+                    await loadPromise;
                     await img.decode();
                     const toWrite = this.cache[key];
                     if (toWrite !== undefined && !canceled) {

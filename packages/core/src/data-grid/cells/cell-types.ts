@@ -5,7 +5,7 @@ import type { InnerGridCell, Rectangle, Item } from "../data-grid-types";
 
 export type HoverInfo = readonly [Item, readonly [number, number]];
 
-type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
+export type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
 export interface BaseDrawArgs {
     ctx: CanvasRenderingContext2D;
@@ -29,7 +29,8 @@ interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {
 }
 
 type DrawCallback<T extends InnerGridCell> = (args: DrawArgs<T>) => void;
-type PrepCallback = (args: BaseDrawArgs) => void;
+export type PrepCallback = (args: BaseDrawArgs) => void;
+export type DeprepCallback = (args: Pick<BaseDrawArgs, "ctx">) => void;
 
 type ProvideEditorCallback<T extends InnerGridCell> = (
     cell: T
@@ -51,9 +52,11 @@ export interface InternalCellRenderer<T extends InnerGridCell> {
     readonly kind: T["kind"];
     readonly renderPrep?: PrepCallback;
     readonly render: DrawCallback<T>;
+    readonly renderDeprep?: DeprepCallback;
     readonly needsHover: boolean;
     readonly needsHoverPosition: boolean;
     readonly useLabel?: boolean;
+    readonly measure: (ctx: CanvasRenderingContext2D, cell: T) => number;
     readonly onClick?: (cell: T, posX: number, posY: number, bounds: Rectangle) => T | undefined;
     readonly onDelete?: (cell: T) => T | undefined;
     readonly getAccessibilityString: (cell: T) => string;

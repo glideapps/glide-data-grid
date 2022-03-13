@@ -1,15 +1,18 @@
 import { Theme } from "../common/styles";
-import { DrilldownCellData, GridColumn } from "./data-grid-types";
+import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn } from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs } from "./cells/cell-types";
 
-export interface MappedGridColumn extends GridColumn {
+export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
     sticky: boolean;
 }
 
-export function useMappedColumns(columns: readonly GridColumn[], freezeColumns: number): readonly MappedGridColumn[] {
+export function useMappedColumns(
+    columns: readonly SizedGridColumn[],
+    freezeColumns: number
+): readonly MappedGridColumn[] {
     return React.useMemo(
         () =>
             columns.map((c, i) => ({
@@ -23,6 +26,43 @@ export function useMappedColumns(columns: readonly GridColumn[], freezeColumns: 
 
 export function isGroupEqual(left: string | undefined, right: string | undefined): boolean {
     return (left ?? "") === (right ?? "");
+}
+
+export function cellIsSelected(location: Item, cell: InnerGridCell, selection: GridSelection | undefined): boolean {
+    if (selection === undefined) return false;
+
+    const [col, row] = selection.cell;
+    const [cellCol, cellRow] = location;
+    if (cellRow !== row) return false;
+
+    if (cell.span === undefined) {
+        return col === cellCol;
+    }
+
+    return col >= cell.span[0] && col <= cell.span[1];
+}
+
+export function cellIsInRange(location: Item, cell: InnerGridCell, selection: GridSelection | undefined): boolean {
+    if (selection === undefined) return false;
+
+    const startX = selection.range.x;
+    const endX = selection.range.x + selection.range.width - 1;
+    const startY = selection.range.y;
+    const endY = selection.range.y + selection.range.height - 1;
+
+    const [cellCol, cellRow] = location;
+    if (cellRow < startY || cellRow > endY) return false;
+
+    if (cell.span === undefined) {
+        return cellCol >= startX && cellCol <= endX;
+    }
+
+    const [spanStart, spanEnd] = cell.span;
+    return (
+        (spanStart >= startX && spanStart <= endX) ||
+        (spanEnd >= startX && spanStart <= endX) ||
+        (spanStart < startX && spanEnd > endX)
+    );
 }
 
 function remapForDnDState(
@@ -232,7 +272,15 @@ export function prepTextCell(args: BaseDrawArgs, overrideColor?: string) {
 
 export function drawTextCell(args: BaseDrawArgs, data: string) {
     const { ctx, x, y, w, h, theme } = args;
-    data = data.split(/\r?\n/)[0].slice(0, Math.round(w / 4));
+    if (data.includes("\n")) {
+        // new lines are rare and split is relatively expensive compared to the search
+        // it pays off to not do the split contantly.
+        data = data.split(/\r?\n/)[0];
+    }
+    const max = w / 4; // no need to round, slice will just truncate this
+    if (data.length > max) {
+        data = data.slice(0, max);
+    }
 
     const dir = direction(data);
 
@@ -333,6 +381,12 @@ function drawCheckbox(
 export function prepMarkerRowCell(args: BaseDrawArgs) {
     const { ctx, theme } = args;
     ctx.font = `9px ${theme.fontFamily}`;
+    ctx.textAlign = "center";
+}
+
+export function deprepMarkerRowCell(args: Pick<BaseDrawArgs, "ctx">) {
+    const { ctx } = args;
+    ctx.textAlign = "start";
 }
 
 export function drawMarkerRowCell(
@@ -350,9 +404,8 @@ export function drawMarkerRowCell(
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
         const text = (index + 1).toString();
-        const w = measureTextCached(text, ctx, `9px ${theme.fontFamily}`).width;
 
-        const start = x + (width - w) / 2;
+        const start = x + width / 2;
         if (markerKind === "both" && hoverAmount !== 0) {
             ctx.globalAlpha = 1 - hoverAmount;
         }
@@ -478,12 +531,88 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
     });
 }
 
+const drilldownCache: {
+    [key: string]: HTMLCanvasElement;
+} = {};
+
+function getAndCacheDrilldownBorder(
+    bgCell: string,
+    border: string
+): {
+    el: HTMLCanvasElement;
+    height: number;
+    width: number;
+    middleWidth: number;
+    sideWidth: number;
+} | null {
+    const dpr = Math.ceil(window.devicePixelRatio);
+    const targetHeight = 24;
+    const shadowBlur = 5;
+    const middleWidth = 4;
+
+    const innerHeight = (targetHeight + shadowBlur * 2) * dpr; // 68
+    const innerWidth = innerHeight + middleWidth * dpr; // 76
+    const sideWidth = innerHeight / 2;
+
+    const key = `${bgCell},${border},${dpr}`;
+    if (drilldownCache[key] !== undefined) {
+        return {
+            el: drilldownCache[key],
+            height: innerHeight,
+            width: innerWidth,
+            middleWidth: middleWidth * dpr,
+            sideWidth,
+        };
+    }
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d"); // alpha needed
+
+    if (ctx === null) return null;
+
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+
+    ctx.scale(dpr, dpr); // dummy mode just always go for hiDPI to start, fixme
+
+    drilldownCache[key] = canvas;
+
+    ctx.beginPath();
+    roundedRect(ctx, shadowBlur, shadowBlur, targetHeight + middleWidth, targetHeight, 6);
+
+    ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
+    ctx.shadowBlur = 1;
+    ctx.fillStyle = bgCell;
+    ctx.fill();
+
+    ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
+    ctx.shadowOffsetY = 1;
+    ctx.shadowBlur = 5;
+    ctx.fillStyle = bgCell;
+    ctx.fill();
+
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 0;
+    ctx.shadowBlur = 0;
+
+    ctx.beginPath();
+    roundedRect(ctx, shadowBlur + 0.5, shadowBlur + 0.5, targetHeight + middleWidth, targetHeight, 6);
+
+    ctx.strokeStyle = border;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    return { el: canvas, height: innerHeight, width: innerWidth, sideWidth, middleWidth: middleWidth * dpr };
+}
+
 export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[]) {
     const { x, y, w, h, theme, ctx, imageLoader, col, row } = args;
     const bubbleHeight = 24;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
     let renderX = x + theme.cellHorizontalPadding;
+
+    const tileMap = getAndCacheDrilldownBorder(theme.bgCell, theme.drilldownBorder);
 
     const renderBoxes: { x: number; width: number }[] = [];
     for (const el of data) {
@@ -505,48 +634,20 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
         renderX += renderWidth + bubbleMargin;
     }
 
-    ctx.beginPath();
-    renderBoxes.forEach(rectInfo => {
-        roundedRect(
-            ctx,
-            Math.floor(rectInfo.x),
-            y + (h - bubbleHeight) / 2,
-            Math.floor(rectInfo.width),
-            bubbleHeight,
-            6
-        );
-    });
-
-    ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
-    ctx.shadowBlur = 1;
-    ctx.fillStyle = theme.bgCell;
-    ctx.fill();
-
-    ctx.shadowColor = "rgba(24, 25, 34, 0.2)";
-    ctx.shadowOffsetY = 1;
-    ctx.shadowBlur = 5;
-    ctx.fillStyle = theme.bgCell;
-    ctx.fill();
-
-    ctx.shadowOffsetY = 0;
-    ctx.shadowBlur = 0;
-    ctx.shadowBlur = 0;
+    if (tileMap !== null) {
+        const { el, height, middleWidth, sideWidth, width } = tileMap;
+        renderBoxes.forEach(rectInfo => {
+            const rx = Math.floor(rectInfo.x);
+            const rw = Math.floor(rectInfo.width);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(el, 0, 0, sideWidth, height, rx - 5, y + h / 2 - 17, 17, 34);
+            ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + 12, y + h / 2 - 17, rw - 24, 34);
+            ctx.drawImage(el, width - sideWidth, 0, sideWidth, height, rx + rw - 12, y + h / 2 - 17, 17, 34);
+            ctx.imageSmoothingEnabled = true;
+        });
+    }
 
     ctx.beginPath();
-    renderBoxes.forEach(rectInfo => {
-        roundedRect(
-            ctx,
-            Math.floor(rectInfo.x) + 0.5,
-            Math.floor(y + (h - bubbleHeight) / 2) + 0.5,
-            Math.round(rectInfo.width),
-            bubbleHeight,
-            6
-        );
-    });
-
-    ctx.strokeStyle = theme.drilldownBorder;
-    ctx.lineWidth = 1;
-    ctx.stroke();
 
     renderBoxes.forEach((rectInfo, i) => {
         const d = data[i];

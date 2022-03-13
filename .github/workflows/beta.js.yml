@@ -53,3 +53,25 @@ jobs:
                   access: public
                   tag: beta
                   package: ./packages/cells/package.json
+    publish-source:
+        defaults:
+            run:
+                working-directory: ./packages/source
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v1
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 14
+            - name: Bootstrap
+              run: npm run bootstrap
+              working-directory: .
+            - run: npm run lint
+            - run: npm run build-js
+            - run: npm run build-types
+            - uses: JS-DevTools/npm-publish@v1
+              with:
+                  token: ${{ secrets.NPM_TOKEN }}
+                  access: public
+                  tag: beta
+                  package: ./packages/source/package.json

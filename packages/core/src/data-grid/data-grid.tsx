@@ -11,7 +11,6 @@ import {
     useMappedColumns,
 } from "./data-grid-lib";
 import {
-    GridColumn,
     GridCellKind,
     Rectangle,
     GridSelection,
@@ -25,6 +24,7 @@ import {
     CellList,
     Item,
     DrawHeaderCallback,
+    SizedGridColumn,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -34,6 +34,7 @@ import {
     drawGrid,
     getActionBoundsForGroup,
     getHeaderMenuBounds,
+    GetRowThemeCallback,
     GroupDetailsCallback,
     pointInRect,
 } from "./data-grid-render";
@@ -52,13 +53,15 @@ export interface DataGridProps {
     readonly translateX?: number;
     readonly translateY?: number;
 
+    readonly accessibilityHeight: number;
+
     readonly freezeColumns: number;
     readonly lastRowSticky: boolean;
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
     readonly isDragging: boolean;
 
-    readonly columns: readonly GridColumn[];
+    readonly columns: readonly SizedGridColumn[];
     readonly rows: number;
 
     readonly headerHeight: number;
@@ -74,6 +77,7 @@ export interface DataGridProps {
 
     readonly getCellContent: (cell: readonly [number, number]) => InnerGridCell;
     readonly getGroupDetails?: GroupDetailsCallback;
+    readonly getRowThemeOverride?: GetRowThemeCallback;
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
     readonly selectedRows?: CompactSelection;
@@ -111,8 +115,9 @@ export interface DataGridProps {
     readonly experimental?: {
         readonly paddingRight?: number;
         readonly paddingBottom?: number;
-        readonly disableFirefoxRescaling?: boolean;
+        readonly enableFirefoxRescaling?: boolean;
         readonly isSubGrid?: boolean;
+        readonly strict?: boolean;
     };
 
     readonly headerIcons?: SpriteMap;
@@ -140,6 +145,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const {
         width,
         height,
+        accessibilityHeight,
         className,
         columns,
         cellXOffset: cellXOffsetReal,
@@ -149,6 +155,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         rowHeight,
         rows,
         getCellContent,
+        getRowThemeOverride,
         onHeaderMenuClick,
         selectedRows,
         enableGroups,
@@ -200,8 +207,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
     const scrollingStopRef = React.useRef(-1);
-    const disableFirefoxRescaling = p.experimental?.disableFirefoxRescaling === true;
-    React.useEffect(() => {
+    const disableFirefoxRescaling = p.experimental?.enableFirefoxRescaling !== true;
+    React.useLayoutEffect(() => {
         if (!browserIsFirefox || window.devicePixelRatio === 1 || disableFirefoxRescaling) return;
         // We don't want to go into scroll mode for a single repaint
         if (scrollingStopRef.current !== -1) {
@@ -214,7 +221,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         }, 200);
     }, [cellYOffset, cellXOffset, translateX, translateY, disableFirefoxRescaling]);
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         const fn = async () => {
             const changed = await spriteManager.buildSpriteMap(theme, columns);
             if (changed) {
@@ -301,8 +308,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 result.height = stickyHeight;
             } else {
                 const dir = cellYOffset > row ? -1 : 1;
-                for (let r = cellYOffset; r !== row; r += dir) {
-                    result.y += (typeof rowHeight === "number" ? rowHeight : rowHeight(r)) * dir;
+                if (typeof rowHeight === "number") {
+                    const delta = row - cellYOffset;
+                    result.y += delta * rowHeight;
+                } else {
+                    for (let r = cellYOffset; r !== row; r += dir) {
+                        result.y += rowHeight(r) * dir;
+                    }
                 }
                 result.height = (typeof rowHeight === "number" ? rowHeight : rowHeight(row)) + 1;
             }
@@ -511,6 +523,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             rows,
             getCellContent,
             getGroupDetails ?? (name => ({ name })),
+            getRowThemeOverride,
             drawCustomCell,
             drawHeader,
             prelightCells,
@@ -550,6 +563,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         rows,
         getCellContent,
         getGroupDetails,
+        getRowThemeOverride,
         drawCustomCell,
         drawHeader,
         prelightCells,
@@ -559,7 +573,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     ]);
 
     canBlit.current = canBlit.current !== undefined;
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         canBlit.current = false;
     }, [
         width,
@@ -580,12 +594,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     ]);
 
     const lastDrawRef = React.useRef(draw);
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         draw();
         lastDrawRef.current = draw;
     }, [draw]);
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         const fn = async () => {
             if (document?.fonts?.ready === undefined) return;
             await document.fonts.ready;
@@ -640,13 +654,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         : "default";
     const style = React.useMemo(
         () => ({
-            width,
-            height,
+            // width,
+            // height,
             contain: "strict",
             display: "block",
             cursor,
         }),
-        [width, height, cursor]
+        [cursor]
     );
 
     const target = eventTargetRef?.current;
@@ -677,7 +691,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         (canvas: HTMLCanvasElement, col: number, clientX: number, clientY: number) => {
             const header = columns[col];
 
-            if (!isDragging && header.hasMenu === true && !(hoveredOnEdge ?? false)) {
+            if (!isDragging && !isResizing && header.hasMenu === true && !(hoveredOnEdge ?? false)) {
                 const headerBounds = getBoundsForItem(canvas, col, -1);
                 const menuBounds = getHeaderMenuBounds(
                     headerBounds.x,
@@ -696,7 +710,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
             return undefined;
         },
-        [columns, getBoundsForItem, hoveredOnEdge, isDragging]
+        [columns, getBoundsForItem, hoveredOnEdge, isDragging, isResizing]
     );
 
     const onMouseDownImpl = React.useCallback(
@@ -808,7 +822,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const animManagerValue = React.useMemo(() => new AnimationManager(onAnimationFrame), [onAnimationFrame]);
     const animationManager = React.useRef(animManagerValue);
     animationManager.current = animManagerValue;
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         const am = animationManager.current;
         if (hoveredItem === undefined || hoveredItem[1] < 0) {
             am.setHovered(hoveredItem);
@@ -1081,6 +1095,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const accessibilityTree = useDebouncedMemo(
         () => {
+            if (width < 50) return null;
             const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
 
             const getRowData = (cell: InnerGridCell) => {
@@ -1092,7 +1107,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             };
 
             return (
-                <div role="grid" aria-rowcount={rows} aria-colcount={mappedColumns.length}>
+                <div key="access-tree" role="grid" aria-rowcount={rows} aria-colcount={mappedColumns.length}>
                     <div role="rowgroup">
                         <div role="row" aria-rowindex={1} row-index={1}>
                             {effectiveCols.map(c => (
@@ -1103,7 +1118,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         </div>
                     </div>
                     <div role="rowgroup">
-                        {makeRange(cellYOffset, Math.min(rows, cellYOffset + 50)).map(row => (
+                        {makeRange(cellYOffset, Math.min(rows, cellYOffset + accessibilityHeight)).map(row => (
                             <div role="row" key={row} aria-rowindex={row + 2} row-index={row + 2}>
                                 {effectiveCols.map(c => {
                                     const col = c.sourceIndex;
@@ -1148,15 +1163,21 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             );
         },
         [
-            cellXOffset,
-            cellYOffset,
+            width,
             mappedColumns,
+            cellXOffset,
             dragAndDropState,
+            translateX,
+            rows,
+            cellYOffset,
+            accessibilityHeight,
+            selectedCell?.cell,
             focusElement,
             getCellContent,
-            selectedCell?.cell,
-            translateX,
-            width,
+            canvasRef,
+            onKeyDown,
+            getBoundsForItem,
+            onCellFocused,
         ],
         200
     );
@@ -1170,24 +1191,23 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             position: "absolute",
             top: 0,
             left: stickyX,
-            width: style.width - stickyX,
-            height: style.height,
+            width: width - stickyX,
+            height: height,
             opacity: cellXOffset > freezeColumns || translateX !== 0 ? 1 : 0,
             pointerEvents: "none",
             boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
             transition: "opacity 150ms",
         };
         return <div style={props} />;
-    }, [cellXOffset, dragAndDropState, freezeColumns, mappedColumns, style.height, style.width, translateX]);
+    }, [cellXOffset, dragAndDropState, freezeColumns, mappedColumns, height, width, translateX]);
 
     const overlayStyle = React.useMemo<React.CSSProperties>(
         () => ({
             position: "absolute",
             top: 0,
             left: 0,
-            width: style.width,
         }),
-        [style.width]
+        []
     );
 
     return (
