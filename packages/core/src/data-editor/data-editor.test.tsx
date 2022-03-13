@@ -1958,4 +1958,40 @@ describe("data-editor", () => {
 
         expect(Element.prototype.scrollTo).toBeCalled();
     });
+
+    test("Click cell does not double-emit selectedrows/columns", async () => {
+        const gridSelectionSpy = jest.fn();
+        const selectedRowsSpy = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                onGridSelectionChange={gridSelectionSpy}
+                onSelectedRowsChange={selectedRowsSpy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        expect(gridSelectionSpy).toBeCalledWith({ cell: [1, 2], range: { height: 1, width: 1, x: 1, y: 2 } });
+        expect(selectedRowsSpy).not.toHaveBeenCalled();
+        gridSelectionSpy.mockClear();
+
+        fireEvent.keyDown(canvas, {
+            key: "Escape",
+        });
+    });
 });
