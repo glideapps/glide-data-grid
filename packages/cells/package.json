@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
+    "@types/react": "16.14.21",
     "eslint": "^7.12.1",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-react": "^7.21.5",
