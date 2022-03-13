@@ -241,7 +241,7 @@ interface GridSelection {
 
 The `cell` is the [col, row] formatted cell which will have the focus ring drawn around it. The `range` should always include the `cell` and represents additional cells which can be edited via copy, delete and other events. The `range` may or may not include partial spans depending on the [`spanRangeBehavior`](#spanrangebehavior) set.
 
---
+---
 ## Theme
 
 The data grid uses the `Theme` provided by the styled-components `ThemeProvider`. This is used to style editors as well as the grid itself. The theme interface is flat. The data grid comes with a built in theme which it will use to fill in any missing values.
