@@ -1,36 +1,36 @@
 # 3.4.0 Release Notes
 
-## New Features
+## **New Features**
 
-### 🌉 Span Support
+### 🌉 **Span Support**
 
 Cells can now be spanned across multiple columns. Spans are defined by setting the `span` property on GridCells. Requests for GridCells which are part of the same span must return the same information or undefined behavior will occur.
 
-### 📦 Sources package released
+### 📦 **Sources package released**
 
 `glide-data-grid-source` has been released alongside this release of `glide-data-grid`. The source package contains useful hooks which can be used to easily add collapsing column groups, sorting columns, and re-arrangeable columns onto existing data sources. You can try out all of these features on the new [project homepage](https://grid.glideapps.com) which exposes all of these features by using the source package. 
 
-### 🎨 getRowThemeOverride
+### 🎨 **getRowThemeOverride**
 
 Prior to the introduction of `getRowThemeOverride` the only way to implement striped rows in the data grid was to set a theme override for each cell. No longer. Striped rows are as easy as a single callback with mod 2.
 
-### 🦣🐁 Automatic column sizing
+### 🦣🐁 **Automatic column sizing**
 
 The data grid is now capable of automatically sizing every column in the sheet. Simply leave out the previously required `width` parameter and instead replace it with the `id` parameter. The `id` must be stable and not simply the index of the column to avoid weird drag and drop behavior or performance issues.
 
 Auto sized columns are sized be measuring the width of their first 10 cells. Fewer cells may be measured if the number of columns begins to exceed a 10 thousand columns.
 
-### 🦊🏁 Firefox performance improvements
+### 🦊🏁 **Firefox performance improvements**
 
 Through the magic of banging our heads against a wall repeatedly we have managed to bring firefox performance more in line with that of chrome. Even very large grids should scroll at or very near to 60fps in 3.4.0. Due to this the `experimental.disableFirefoxRescaling` has been replaced with `experimental.enableFirefoxRescaling` to reflect that this performance enhancement is now disabled by default. The data grid now renders between 2 and 10 times faster on firefox with large grids, depending on workload and GPU.
 
-### 🔬 Minor features
+### 🔬 **Minor features**
 
 - Support for insert to custom row index
 - Add experimental flag for strict mode. In strict mode getCellContent never calls for cells outside the range of the last visible region sent to onVisibleRegionChanged
 - Drilldown cells now render much faster
 
-## Bug Fixes
+## **Bug Fixes**
 
 - Fix issue where drag scrolling may not stop when mouse click releases.
 - Images in firefox will no longer flicker when recycling an image element
