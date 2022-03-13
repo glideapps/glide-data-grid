@@ -1,6 +1,6 @@
 {
   "name": "@glideapps/glide-data-grid-source",
-  "version": "3.4.0-rc2",
+  "version": "3.4.0",
   "description": "Useful data source hooks for Glide Data Grid",
   "sideEffects": false,
   "type": "module",
@@ -42,7 +42,7 @@
     "canvas"
   ],
   "dependencies": {
-    "@glideapps/glide-data-grid": "3.4.0-rc2"
+    "@glideapps/glide-data-grid": "3.4.0"
   },
   "peerDependencies": {
     "lodash": "^4.17.19"
