@@ -401,8 +401,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const mangledOuterCols = selectedColumnsOuter?.offset(rowMarkerOffset);
     const selectedColumns = mangledOuterCols ?? selectedColumnsInner;
 
+    const selectedColumnsRef = React.useRef(selectedColumns);
+    selectedColumnsRef.current = selectedColumns;
     const setSelectedColumns = React.useCallback(
         (newColumns: CompactSelection, trigger: HeaderSelectionTrigger) => {
+            if (selectedColumnsRef.current.equals(newColumns)) return;
             if (setSelectedColumnsOuter !== undefined) {
                 setSelectedColumnsOuter?.(newColumns.offset(-rowMarkerOffset), trigger);
             } else {
