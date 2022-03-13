@@ -41,7 +41,8 @@
     "canvas"
   ],
   "dependencies": {
-    "@glideapps/glide-data-grid": "3.4.0"
+    "@glideapps/glide-data-grid": "3.4.0",
+    "react-select": "^5.2.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
