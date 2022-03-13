@@ -115,6 +115,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [onGridSelectionChange](#gridselection) | Emitted whenever the `gridSelection` should change. |
 | [onSelectedColumnsChange](#selectedcolumns) | Emitted whenever the `selectedColumns` should change. |
 | [onSelectedRowsChange](#selectedrows) | Emitted whenever the `selectedRows` should change. |
+| [onSelectionCleared](#onselectioncleared) | Emitted when the selection is explicitly cleared. |
 | [selectedColumns](#selectedcolumns) | The currently selected columns. |
 | [selectedRows](#selectedrows) | The currently selected rows. |
 
@@ -622,6 +623,15 @@ readonly onSelectedRowsChange?: (newRows: CompactSelection) => void;
 ```
 
 Controls row selection. If not provided default row selection behavior will be applied.
+
+---
+## onSelectionCleared
+
+```ts
+onSelectionCleared?: () => void;
+```
+
+Emitted when the current selection is cleared, usually when the user presses "Escape". `rowSelection`, `columnSelection`, and `gridSelection` should all be empty when this event is emitted. This event only emits when the user explicitly attempts to clear the selection.
 
 ---
 ## imageEditorOverride
