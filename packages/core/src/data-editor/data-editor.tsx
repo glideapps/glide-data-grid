@@ -937,6 +937,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 focus();
                 setSelectedColumns(CompactSelection.empty(), "selection");
                 setSelectedRows(CompactSelection.empty());
+                onSelectionCleared?.();
                 lastSelectedRowRef.current = undefined;
                 lastSelectedColRef.current = undefined;
             } else if (args.kind === "group-header") {
@@ -984,6 +985,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             hasRowMarkers,
             lastRowSticky,
             mangledCols,
+            onSelectionCleared,
             rowMarkerOffset,
             rowMarkers,
             rowSelectionMode,
