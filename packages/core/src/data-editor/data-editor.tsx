@@ -1616,7 +1616,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     );
                     event.cancel();
                 } else if (event.keyCode === 82 && isPrimaryKey && gridSelection.range.width > 1 && enableRightfill) {
-                    // ctrl/cmd + d
+                    // ctrl/cmd + r
                     const damage: (readonly [number, number])[] = [];
                     const r = gridSelection.range;
                     for (let y = 0; y < r.height; y++) {
