@@ -4,6 +4,7 @@ import SparklineCellRenderer from "./cells/sparkline-cell";
 import TagsCellRenderer from "./cells/tags-cell";
 import UserProfileCellRenderer from "./cells/user-profile-cell";
 import DropdownCellRenderer from "./cells/dropdown-cell";
+import ArticleCellRenderer from "./cells/article-cell";
 import * as React from "react";
 
 type DrawCallback = NonNullable<DataEditorProps["drawCell"]>;
@@ -14,6 +15,7 @@ const cells = [
     TagsCellRenderer,
     UserProfileCellRenderer,
     DropdownCellRenderer,
+    ArticleCellRenderer,
 ];
 
 export function useExtraCells(): {

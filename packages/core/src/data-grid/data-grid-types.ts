@@ -1,6 +1,7 @@
 import { Theme } from "../common/styles";
 import { assertNever, proveType } from "../common/support";
-import React from "react";
+import has from "lodash/has";
+import React, { CSSProperties } from "react";
 import ImageWindowLoader from "../common/image-window-loader";
 import { SpriteManager } from "./data-grid-sprites";
 
@@ -301,19 +302,38 @@ export interface BubbleCell extends BaseGridCell {
     readonly data: string[];
 }
 
-export type ProvideEditorCallback<T extends GridCell> = (
-    cell: T
-) =>
-    | (React.FunctionComponent<{
-          readonly onChange: (newValue: T) => void;
-          readonly onFinishedEditing: (newValue?: T) => void;
-          readonly isHighlighted: boolean;
-          readonly value: T;
-      }> & {
+export type ProvideEditorComponent<T extends GridCell> = React.FunctionComponent<{
+    readonly onChange: (newValue: T) => void;
+    readonly onFinishedEditing: (newValue?: T) => void;
+    readonly isHighlighted: boolean;
+    readonly value: T;
+}>;
+
+type ObjectEditorCallbackResult<T extends GridCell> = {
+    editor: ProvideEditorComponent<T>;
+    styleOverride: CSSProperties;
+    disablePadding?: boolean;
+    disableStyling?: boolean;
+};
+
+type ProvideEditorCallbackResult<T extends GridCell> =
+    | (ProvideEditorComponent<T> & {
           disablePadding?: boolean;
           disableStyling?: boolean;
       })
+    | ObjectEditorCallbackResult<T>
     | undefined;
+
+export function isObjectEditorCallbackResult<T extends GridCell>(
+    obj: ProvideEditorCallbackResult<T>
+): obj is ObjectEditorCallbackResult<T> {
+    if (has(obj, "editor")) {
+        return true;
+    }
+    return false;
+}
+
+export type ProvideEditorCallback<T extends GridCell> = (cell: T) => ProvideEditorCallbackResult<T>;
 
 export interface CustomCell<T extends {} = {}> extends BaseGridCell {
     readonly kind: GridCellKind.Custom;

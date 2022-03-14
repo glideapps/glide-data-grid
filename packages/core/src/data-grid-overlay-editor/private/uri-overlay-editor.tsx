@@ -34,7 +34,7 @@ const UriOverlayEditor: React.FunctionComponent<Props> = p => {
                     <EditPencil />
                 </div>
             )}
-            <textarea autoFocus={true} onKeyDown={onKeyDown} />
+            <textarea className="gdg-input" autoFocus={true} onKeyDown={onKeyDown} />
         </UriOverlayEditorStyle>
     );
 };

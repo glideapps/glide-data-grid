@@ -29,6 +29,7 @@ const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
         <NumberOverlayEditorStyle>
             <NumberFormat
                 autoFocus={true}
+                className="gdg-input"
                 onFocus={e => e.target.setSelectionRange(highlight ? 0 : e.target.value.length, e.target.value.length)}
                 disabled={disabled === true}
                 thousandSeparator={getThousandSeprator()}

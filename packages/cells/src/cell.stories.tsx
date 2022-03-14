@@ -10,6 +10,7 @@ import uniq from "lodash/uniq";
 import { TagsCell } from "./cells/tags-cell";
 import { UserProfileCell } from "./cells/user-profile-cell";
 import { DropdownCell } from "./cells/dropdown-cell";
+import { ArticleCell } from "./cells/article-cell-types";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -252,6 +253,19 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
+                    } else if (col === 6) {
+                        num = row + 1;
+                        rand();
+                        const d: ArticleCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "article-cell",
+                                markdown: "## This is a test",
+                            },
+                        };
+                        return d;
                     }
                     throw new Error("Fail");
                 }}
@@ -278,6 +292,10 @@ export const CustomCells: React.VFC = () => {
                     },
                     {
                         title: "Dropdown",
+                        width: 150,
+                    },
+                    {
+                        title: "Article",
                         width: 150,
                     },
                 ]}

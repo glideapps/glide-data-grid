@@ -15,7 +15,7 @@ const BubblesOverlayEditor: React.FunctionComponent<Props> = p => {
                     {b}
                 </div>
             ))}
-            <textarea autoFocus={true} onKeyDown={onKeyDown} />
+            <textarea className="gdg-input" autoFocus={true} onKeyDown={onKeyDown} />
         </BubblesOverlayEditorStyle>
     );
 };
