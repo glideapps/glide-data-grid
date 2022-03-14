@@ -500,7 +500,7 @@ export class CompactSelection {
             const left = other.items[i];
             const right = this.items[i];
 
-            if (left[0] !== right[0] || left[1] || right[1]) return false;
+            if (left[0] !== right[0] || left[1] !== right[1]) return false;
         }
 
         return true;
