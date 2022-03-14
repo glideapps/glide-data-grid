@@ -311,7 +311,7 @@ export type ProvideEditorComponent<T extends GridCell> = React.FunctionComponent
 
 type ObjectEditorCallbackResult<T extends GridCell> = {
     editor: ProvideEditorComponent<T>;
-    styleOverride: CSSProperties;
+    styleOverride?: CSSProperties;
     disablePadding?: boolean;
     disableStyling?: boolean;
 };

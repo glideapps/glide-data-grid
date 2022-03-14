@@ -6,13 +6,11 @@ import { CustomCellRenderer } from "../types";
 
 interface CustomMenuProps extends MenuProps<any> {}
 
-export class CustomMenu extends React.Component<CustomMenuProps> {
-    render() {
-        const { Menu } = components;
-        const { children, ...props } = this.props;
-        return <Menu {...props}>{children}</Menu>;
-    }
-}
+const CustomMenu: React.FC<CustomMenuProps> = p => {
+    const { Menu } = components;
+    const { children, ...rest } = p;
+    return <Menu {...rest}>{children}</Menu>;
+};
 
 interface DropdownCellProps {
     readonly kind: "dropdown-cell";
@@ -29,56 +27,49 @@ const Wrap = styled.div`
     align-items: stretch;
 `;
 
-const editor: ProvideEditorCallback<DropdownCell> = () => {
-    // eslint-disable-next-line react/display-name
-    const result: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
-        const { value: cell, onFinishedEditing } = p;
-        const { allowedValues, value: valueIn } = cell.data;
+const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
+    const { value: cell, onFinishedEditing } = p;
+    const { allowedValues, value: valueIn } = cell.data;
 
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const [value, setValue] = React.useState(valueIn);
+    const [value, setValue] = React.useState(valueIn);
 
-        return (
-            <Wrap>
-                <Select
-                    value={{ value, label: value }}
-                    styles={{
-                        control: base => ({
-                            ...base,
-                            border: 0,
-                            boxShadow: "none",
-                        }),
-                    }}
-                    menuPortalTarget={document.getElementById("portal")}
-                    autoFocus={true}
-                    openMenuOnFocus={true}
-                    components={{
-                        DropdownIndicator: () => null,
-                        IndicatorSeparator: () => null,
-                        Menu: props => <CustomMenu className={"click-outside-ignore"} {...props} />,
-                    }}
-                    options={allowedValues.map(x => ({
-                        value: x,
-                        label: x,
-                    }))}
-                    onChange={e => {
-                        if (e === null) return;
-                        setValue(e.value);
-                        onFinishedEditing({
-                            ...cell,
-                            data: {
-                                ...cell.data,
-                                value: e.value,
-                            },
-                        });
-                    }}
-                />
-            </Wrap>
-        );
-    };
-    result.disablePadding = true;
-
-    return result;
+    return (
+        <Wrap>
+            <Select
+                value={{ value, label: value }}
+                styles={{
+                    control: base => ({
+                        ...base,
+                        border: 0,
+                        boxShadow: "none",
+                    }),
+                }}
+                menuPortalTarget={document.getElementById("portal")}
+                autoFocus={true}
+                openMenuOnFocus={true}
+                components={{
+                    DropdownIndicator: () => null,
+                    IndicatorSeparator: () => null,
+                    Menu: props => <CustomMenu className={"click-outside-ignore"} {...props} />,
+                }}
+                options={allowedValues.map(x => ({
+                    value: x,
+                    label: x,
+                }))}
+                onChange={e => {
+                    if (e === null) return;
+                    setValue(e.value);
+                    onFinishedEditing({
+                        ...cell,
+                        data: {
+                            ...cell.data,
+                            value: e.value,
+                        },
+                    });
+                }}
+            />
+        </Wrap>
+    );
 };
 
 const renderer: CustomCellRenderer<DropdownCell> = {
@@ -91,7 +82,10 @@ const renderer: CustomCellRenderer<DropdownCell> = {
 
         return true;
     },
-    provideEditor: editor,
+    provideEditor: () => ({
+        editor: Editor,
+        disablePadding: true,
+    }),
 };
 
 export default renderer;
