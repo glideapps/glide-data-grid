@@ -1719,6 +1719,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             gridSelection,
             selectedColumns,
             enableDownfill,
+            enableRightfill,
             getCellContent,
             rowMarkerOffset,
             updateSelectedCell,
