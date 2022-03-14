@@ -98,6 +98,10 @@ const BeautifulStyle = styled.div`
             margin-top: 40px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
         }
+
+        p {
+            font-size: 18px;
+        }
     }
 `;
 
