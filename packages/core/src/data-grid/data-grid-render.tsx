@@ -1368,9 +1368,9 @@ function drawFocusRing(
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
     lastRowSticky: boolean,
     rows: number
-) {
+): (() => void) | undefined {
     if (selectedCell === undefined || effectiveCols.find(c => (c.sourceIndex === selectedCell.cell[0]) === undefined))
-        return;
+        return undefined;
     const [targetCol, targetRow] = selectedCell.cell;
     const cell = getCellContent(selectedCell.cell);
     const targetColSpan = cell.span ?? [targetCol, targetCol];
@@ -1378,10 +1378,7 @@ function drawFocusRing(
     const isStickyRow = lastRowSticky && targetRow === rows - 1;
     const stickRowHeight = lastRowSticky && !isStickyRow ? getRowHeight(rows - 1) - 1 : 0;
 
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, totalHeaderHeight, width, height - totalHeaderHeight - stickRowHeight);
-    ctx.clip();
+    let drawCb: (() => void) | undefined = undefined;
 
     walkColumns(
         effectiveCols,
@@ -1411,17 +1408,19 @@ function drawFocusRing(
                     }
                 }
 
-                if (clipX > cellX && !col.sticky) {
-                    const diff = Math.max(0, clipX - cellX);
+                drawCb = () => {
+                    if (clipX > cellX && !col.sticky) {
+                        const diff = Math.max(0, clipX - cellX);
+                        ctx.beginPath();
+                        ctx.rect(cellX + diff, drawY, cellWidth - diff + 1, rh + 1);
+                        ctx.clip();
+                    }
                     ctx.beginPath();
-                    ctx.rect(cellX + diff, drawY, cellWidth - diff + 1, rh + 1);
-                    ctx.clip();
-                }
-                ctx.beginPath();
-                ctx.rect(cellX + 0.5, drawY + 0.5, cellWidth, rh);
-                ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
-                ctx.lineWidth = 1;
-                ctx.stroke();
+                    ctx.rect(cellX + 0.5, drawY + 0.5, cellWidth, rh);
+                    ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                };
                 return true;
             });
 
@@ -1429,7 +1428,22 @@ function drawFocusRing(
         }
     );
 
-    ctx.restore();
+    if (drawCb === undefined) return undefined;
+
+    const result = () => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, totalHeaderHeight, width, height - totalHeaderHeight - stickRowHeight);
+        ctx.clip();
+
+        drawCb?.();
+
+        ctx.restore();
+    };
+
+    result();
+
+    return result;
 }
 
 export function drawGrid(
@@ -1706,26 +1720,24 @@ export function drawGrid(
         theme
     );
 
-    if (selectedCell !== undefined && selectedCell.cell[0] === freezeColumns - 1) {
-        // the overdraw may have nuked out our focus ring right edge.
-        drawFocusRing(
-            targetCtx,
-            width,
-            height,
-            cellYOffset,
-            translateX,
-            translateY,
-            effectiveCols,
-            mappedColumns,
-            theme,
-            totalHeaderHeight,
-            selectedCell,
-            getRowHeight,
-            getCellContent,
-            lastRowSticky,
-            rows
-        );
-    }
+    // the overdraw may have nuked out our focus ring right edge.
+    const focusRedraw = drawFocusRing(
+        targetCtx,
+        width,
+        height,
+        cellYOffset,
+        translateX,
+        translateY,
+        effectiveCols,
+        mappedColumns,
+        theme,
+        totalHeaderHeight,
+        selectedCell,
+        getRowHeight,
+        getCellContent,
+        lastRowSticky,
+        rows
+    );
 
     targetCtx.fillStyle = theme.bgCell;
     if (drawRegions.length > 0) {
@@ -1811,23 +1823,7 @@ export function drawGrid(
         theme
     );
 
-    drawFocusRing(
-        targetCtx,
-        width,
-        height,
-        cellYOffset,
-        translateX,
-        translateY,
-        effectiveCols,
-        mappedColumns,
-        theme,
-        totalHeaderHeight,
-        selectedCell,
-        getRowHeight,
-        getCellContent,
-        lastRowSticky,
-        rows
-    );
+    focusRedraw?.();
 
     imageLoader?.setWindow(
         {
