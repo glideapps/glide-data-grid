@@ -747,7 +747,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             onMouseDown?.(args);
-            ev.preventDefault();
+            if (!args.isTouch) {
+                // preventing default in touch events stops scroll
+                ev.preventDefault();
+            }
         },
         [eventTargetRef, getMouseArgsForPosition, groupHeaderActionForEvent, isOverHeaderMenu, onMouseDown]
     );
@@ -762,10 +765,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             const isOutside = ev.target !== canvas && ev.target !== eventTarget;
 
-            if (!isOutside) {
-                ev.preventDefault();
-            }
-
             let clientX: number;
             let clientY: number;
             if (ev instanceof MouseEvent) {
@@ -777,6 +776,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
+
+            if (!isOutside && ev.cancelable) {
+                ev.preventDefault();
+            }
 
             if (args.kind === "header" && isOverHeaderMenu(canvas, args.location[0], clientX, clientY)) {
                 const [col] = args.location;

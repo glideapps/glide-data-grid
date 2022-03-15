@@ -1090,13 +1090,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             };
 
             if (args.isTouch) {
-                if (
-                    visibleRegionRef.current.x === downScrollPosition.current.x &&
-                    visibleRegionRef.current.y === downScrollPosition.current.y
-                ) {
-                    if (args.kind === "cell" && !handleMaybeClick(args)) {
+                const vr = visibleRegionRef.current;
+                if (vr.x !== downScrollPosition.current.x || vr.y !== downScrollPosition.current.y) {
+                    // we scrolled, abort
+                    return;
+                }
+                if (args.kind === "cell") {
+                    // click that cell
+                    if (!handleMaybeClick(args)) {
                         handleSelect(args);
                     }
+                } else {
+                    handleSelect(args);
                 }
                 return;
             }
@@ -1117,16 +1122,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
 
-            if (args.kind !== "cell") {
-                return;
-            }
-            if (args.button === 0) {
-                handleMaybeClick(args);
-            } else if (args.button === 2) {
-                onCellContextMenu?.([args.location[0] - rowMarkerOffset, args.location[1]], {
-                    ...args,
-                    preventDefault,
-                });
+            if (args.kind === "cell") {
+                if (args.button === 0) {
+                    handleMaybeClick(args);
+                } else if (args.button === 2) {
+                    onCellContextMenu?.([args.location[0] - rowMarkerOffset, args.location[1]], {
+                        ...args,
+                        preventDefault,
+                    });
+                }
             }
         },
         [
