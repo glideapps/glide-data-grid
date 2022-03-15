@@ -26,6 +26,7 @@ interface BaseGridMouseEventArgs {
     readonly ctrlKey: boolean;
     readonly metaKey: boolean;
     readonly isTouch: boolean;
+    readonly isLongTouch?: boolean;
     readonly isEdge: boolean;
     readonly button: number;
 }

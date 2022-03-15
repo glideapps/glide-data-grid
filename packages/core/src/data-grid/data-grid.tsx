@@ -203,6 +203,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const overlayRef = React.useRef<HTMLCanvasElement | null>(null);
 
+    const [lastWasTouch, setLastWasTouch] = React.useState(false);
+    const lastWasTouchRef = React.useRef(lastWasTouch);
+    lastWasTouchRef.current = lastWasTouch;
+
     const spriteManager = React.useMemo(() => new SpriteManager(headerIcons), [headerIcons]);
     const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
@@ -535,6 +539,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             hoverInfoRef.current,
             spriteManager,
             scrolling,
+            lastWasTouch,
             enqueueRef.current
         );
     }, [
@@ -570,6 +575,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         imageLoader,
         spriteManager,
         scrolling,
+        lastWasTouch,
     ]);
 
     canBlit.current = canBlit.current !== undefined;
@@ -587,6 +593,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         verticalBorder,
         getCellContent,
         selectedRows,
+        lastWasTouch,
         selectedColumns,
         selectedCell,
         dragAndDropState,
@@ -714,6 +721,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         [columns, getBoundsForItem, hoveredOnEdge, isDragging, isResizing]
     );
 
+    const downTime = React.useRef(0);
     const onMouseDownImpl = React.useCallback(
         (ev: MouseEvent | TouchEvent) => {
             const canvas = ref.current;
@@ -736,6 +744,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
+
+            if (args.isTouch) {
+                downTime.current = Date.now();
+            }
+            if (lastWasTouchRef.current !== args.isTouch) {
+                setLastWasTouch(args.isTouch);
+            }
 
             if (args.kind === "header" && isOverHeaderMenu(canvas, args.location[0], clientX, clientY) !== undefined) {
                 return;
@@ -775,7 +790,18 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 clientY = ev.changedTouches[0].clientY;
             }
 
-            const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
+            let args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
+
+            if (args.isTouch && downTime.current !== 0 && Date.now() - downTime.current > 500) {
+                args = {
+                    ...args,
+                    isLongTouch: true,
+                };
+            }
+
+            if (lastWasTouchRef.current !== args.isTouch) {
+                setLastWasTouch(args.isTouch);
+            }
 
             if (!isOutside && ev.cancelable) {
                 ev.preventDefault();

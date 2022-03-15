@@ -838,7 +838,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     const isSelected = selectedRows.hasIndex(row);
 
                     const lastHighlighted = lastSelectedRowRef.current;
-                    if (args.shiftKey && lastHighlighted !== undefined && selectedRows.hasIndex(lastHighlighted)) {
+                    if (
+                        (args.shiftKey || args.isLongTouch === true) &&
+                        lastHighlighted !== undefined &&
+                        selectedRows.hasIndex(lastHighlighted)
+                    ) {
                         const newSlice: Slice = [Math.min(lastHighlighted, row), Math.max(lastHighlighted, row) + 1];
 
                         if (isMultiKey || rowSelectionMode === "multi") {
@@ -869,7 +873,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         const startedFromLastSticky =
                             lastRowSticky && gridSelection !== undefined && gridSelection.cell[1] === rows;
 
-                        if (args.shiftKey && gridSelection !== undefined && !startedFromLastSticky) {
+                        if (
+                            (args.shiftKey || args.isLongTouch === true) &&
+                            gridSelection !== undefined &&
+                            !startedFromLastSticky
+                        ) {
                             if (isLastStickyRow) {
                                 // If we're making a selection and shift click in to the last sticky row,
                                 // just drop the event. Don't kill the selection.
@@ -923,7 +931,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     focus();
                 } else {
                     const lastCol = lastSelectedColRef.current;
-                    if (args.shiftKey && lastCol !== undefined && selectedColumns.hasIndex(lastCol)) {
+                    if (
+                        (args.shiftKey || args.isLongTouch === true) &&
+                        lastCol !== undefined &&
+                        selectedColumns.hasIndex(lastCol)
+                    ) {
                         const newSlice: Slice = [Math.min(lastCol, col), Math.max(lastCol, col) + 1];
 
                         if (isMultiKey) {
@@ -1015,16 +1027,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const lastMouseDownCellLocation = React.useRef<[number, number]>();
-    const touchDownArgs = React.useRef({
-        visibleRegion,
-        startTime: 0,
-    });
+    const touchDownArgs = React.useRef(visibleRegion);
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
-            touchDownArgs.current = {
-                visibleRegion: visibleRegionRef.current,
-                startTime: Date.now(),
-            };
+            touchDownArgs.current = visibleRegionRef.current;
             if (args.button !== 0) {
                 return;
             }
@@ -1097,15 +1103,25 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             if (args.isTouch) {
                 const vr = visibleRegionRef.current;
-                const touchVr = touchDownArgs.current.visibleRegion;
+                const touchVr = touchDownArgs.current;
                 if (vr.x !== touchVr.x || vr.y !== touchVr.y) {
                     // we scrolled, abort
                     return;
                 }
-                if (touchDownArgs.current.startTime > 0 && Date.now() - touchDownArgs.current.startTime > 500) {
-                    args = {
-                        ...args,
-                        shiftKey: true,
+                // take care of context menus first if long pressed item is already selected
+                if (args.isLongTouch === true) {
+                    if (args.kind === "cell" && gridSelection?.cell[0] === col && gridSelection?.cell[1] === row) {
+                        onCellContextMenu?.([args.location[0] - rowMarkerOffset, args.location[1]], {
+                            ...args,
+                            preventDefault,
+                        });
+                        return;
+                    } else if (args.kind === "header" && selectedColumns.hasIndex(col)) {
+                        onHeaderContextMenu?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                        return;
+                    } else if (args.kind === "group-header") {
+                        onGroupHeaderContextMenu?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                        return;
                     }
                 }
                 if (args.kind === "cell") {
@@ -1159,6 +1175,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onHeaderContextMenu,
             reselect,
             rowMarkerOffset,
+            selectedColumns,
         ]
     );
 
