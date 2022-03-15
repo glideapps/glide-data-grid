@@ -197,7 +197,7 @@ export interface DataEditorProps extends Props {
 export interface DataEditorRef {
     updateCells: DataGridRef["damage"];
     getBounds: DataGridRef["getBounds"];
-    emit: (eventName: EmitEvents) => void;
+    emit: (eventName: EmitEvents) => Promise<void>;
     scrollTo: (
         col: number,
         row: number,
@@ -2113,7 +2113,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         () => ({
             updateCells: (...args) => gridRef.current?.damage(...args),
             getBounds: (...args) => gridRef.current?.getBounds(...args),
-            emit: e => {
+            emit: async e => {
                 switch (e) {
                     case "delete":
                         onKeyDown({
@@ -2152,7 +2152,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         onCopy();
                         break;
                     case "paste":
-                        void onPasteInternal();
+                        await onPasteInternal();
                         break;
                 }
             },
