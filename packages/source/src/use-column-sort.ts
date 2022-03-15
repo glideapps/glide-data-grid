@@ -46,7 +46,11 @@ type Result = Pick<DataEditorProps, "getCellContent"> & {
 export function useColumnSort(p: Props): Result {
     const { sort, rows, getCellContent: getCellContentIn } = p;
 
-    const sortCol = sort === undefined ? undefined : p.columns.indexOf(sort.column);
+    let sortCol =
+        sort === undefined
+            ? undefined
+            : p.columns.findIndex(c => sort.column === c || (c.id !== undefined && sort.column.id === c.id));
+    if (sortCol === -1) sortCol = undefined;
 
     // This scales to about 100k rows. Beyond that things take a pretty noticeable amount of time
     // The performance "issue" from here on out seems to be the lookup to get the value. Not sure
