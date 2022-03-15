@@ -191,7 +191,7 @@ const cols: GridColumn[] = [
 ];
 
 export const UseDataSource: React.VFC = () => {
-    const cache = React.useRef<Record<string, string>>({});
+    const cache = React.useRef<Record<string, string | number>>({});
 
     const rows = 100_000;
 
@@ -206,12 +206,29 @@ export const UseDataSource: React.VFC = () => {
                     displayData: `${col} x ${row}`,
                 };
             }
-
             const key = `${col},${row}`;
+
+            if (col === 1) {
+                if (cache.current[key] === undefined) {
+                    cache.current[key] = faker.datatype.number({
+                        min: 0,
+                        max: 1000,
+                    });
+                }
+                const number = cache.current[key] as number;
+
+                return {
+                    kind: GridCellKind.Number,
+                    allowOverlay: true,
+                    data: number,
+                    displayData: number.toString(),
+                };
+            }
+
             if (cache.current[key] === undefined) {
                 cache.current[key] = faker.name.firstName() + " " + faker.name.lastName();
             }
-            const d = cache.current[key];
+            const d = cache.current[key] as string;
 
             return {
                 kind: GridCellKind.Text,

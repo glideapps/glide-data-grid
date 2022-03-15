@@ -2,10 +2,10 @@ import { DataEditorProps, GridCell, GridCellKind, GridColumn } from "@glideapps/
 import range from "lodash/range";
 import * as React from "react";
 
-function cellToSortData(c: GridCell): string {
+function cellToSortData(c: GridCell): string | number {
     switch (c.kind) {
         case GridCellKind.Number:
-            return c.data?.toString() ?? "";
+            return c.data ?? "";
         case GridCellKind.Boolean:
             return c.data?.toString() ?? "";
         case GridCellKind.Markdown:
@@ -26,7 +26,7 @@ function cellToSortData(c: GridCell): string {
     }
 }
 
-export function compareRaw(a: string, b: string) {
+export function compareRaw(a: string | number, b: string | number) {
     if (a > b) return 1;
     if (a === b) return 0;
     return -1;
@@ -55,7 +55,7 @@ export function useColumnSort(p: Props): Result {
     const dir = sort?.direction ?? "asc";
     const sortMap = React.useMemo(() => {
         if (sortCol === undefined) return undefined;
-        const vals: string[] = new Array(rows);
+        const vals: any[] = new Array(rows);
 
         const index: [number, number] = [sortCol, 0];
         for (let i = 0; i < rows; i++) {
@@ -67,7 +67,9 @@ export function useColumnSort(p: Props): Result {
         if (sort?.mode === "raw") {
             result = range(rows).sort((a, b) => compareRaw(vals[a], vals[b]));
         } else {
-            result = range(rows).sort((a, b) => vals[a].localeCompare(vals[b]));
+            result = range(rows).sort((a, b) =>
+                vals[a].data?.toString().localeCompare(vals[b].data?.toString(), undefined, { numeric: true })
+            );
         }
         if (dir === "desc") {
             result.reverse();
