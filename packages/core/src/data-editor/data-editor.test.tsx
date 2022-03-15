@@ -1495,6 +1495,45 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledTimes(8);
     });
 
+    test("Fill right", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} enableRightfill={true} onCellEdited={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseDown(canvas, {
+            shiftKey: true,
+            clientX: 400, // Col C
+            clientY: 36 + 32 * 6 + 16, // Row 6 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            shiftKey: true,
+            clientX: 400, // Col C
+            clientY: 36 + 32 * 6 + 16, // Row 6 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 82,
+            ctrlKey: true,
+        });
+
+        expect(spy).toHaveBeenCalledTimes(5);
+    });
+
     test("Clear selection", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();

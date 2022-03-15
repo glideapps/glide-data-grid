@@ -181,6 +181,7 @@ export interface DataEditorProps extends Props {
     readonly rowSelectionMode?: "auto" | "multi";
 
     readonly enableDownfill?: boolean;
+    readonly enableRightfill?: boolean;
 
     readonly freezeColumns?: DataGridSearchProps["freezeColumns"];
 
@@ -251,6 +252,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onGroupHeaderRenamed,
         onCellEdited,
         enableDownfill = false,
+        enableRightfill = false,
         onRowAppended,
         onColumnMoved,
         drawCell,
@@ -1632,6 +1634,30 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }))
                     );
                     event.cancel();
+                } else if (event.keyCode === 82 && isPrimaryKey && gridSelection.range.width > 1 && enableRightfill) {
+                    // ctrl/cmd + r
+                    const damage: (readonly [number, number])[] = [];
+                    const r = gridSelection.range;
+                    for (let y = 0; y < r.height; y++) {
+                        const fillRow = y + r.y;
+                        const fillVal = getMangedCellContent([r.x, fillRow]);
+                        if (isInnerOnlyCell(fillVal) || !isEditableGridCell(fillVal)) continue;
+                        for (let x = 1; x < r.width; x++) {
+                            const fillCol = x + r.x;
+                            const target = [fillCol, fillRow] as const;
+                            damage.push(target);
+                            mangledOnCellEdited?.(target, {
+                                ...fillVal,
+                            });
+                        }
+                    }
+
+                    gridRef.current?.damage(
+                        damage.map(c => ({
+                            cell: c,
+                        }))
+                    );
+                    event.cancel();
                 } else if (event.key === "ArrowDown") {
                     setOverlay(undefined);
                     if (shiftKey) {
@@ -1712,6 +1738,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             gridSelection,
             selectedColumns,
             enableDownfill,
+            enableRightfill,
             getCellContent,
             rowMarkerOffset,
             updateSelectedCell,

@@ -135,6 +135,7 @@ Most data grids will want to set the majority of these props one way or another.
 | Name | Description |
 |------------|-----------------------|
 | [enableDownfill](#enabledownfill) | Enables the downfill keyboard shortcut, Ctrl/Cmd+D. Fills the current selection with the contents of the first row of the range. |
+| [enableRightfill](#enabledownfill) | Enables the downfill keyboard shortcut, Ctrl/Cmd+R. Fills the current selection with the contents of the first column of the range. |
 | [maxColumnWidth](#maxcolumnwidth) | Sets the maximum width the user can resize a column to. |
 | [onCellClicked](#oncellclicked) | Emitted when a cell is clicked. |
 | [onCellContextMenu](#oncellcontextmenu) | Emitted when a cell should show a context menu. Usually right click. |
@@ -708,9 +709,10 @@ onRowAppended?: () => void;
 
 ```ts
 enableDownfill?: boolean;
+enableRightfill?: boolean;
 ```
 
-Enables the downfill command. When a `range` is selected and the downfill command is invoked (Ctrl/Cmd+d), the data from the first row of the range will be downfilled into the rows below it, ignoring cells which are not editable.
+Enables the downfill and rightfill commands. When a `range` is selected and the downfill command is invoked (Ctrl/Cmd+d), the data from the first row of the range will be downfilled into the rows below it, ignoring cells which are not editable. When the rightfill command (Ctrl/Cmd+R) is invoked the contents of the first column are copied right to the rest of the range.
 
 ---
 ## maxColumnWidth
