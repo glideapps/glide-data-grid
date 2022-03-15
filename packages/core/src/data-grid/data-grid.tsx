@@ -747,11 +747,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             onMouseDown?.(args);
+            ev.preventDefault();
         },
         [eventTargetRef, getMouseArgsForPosition, groupHeaderActionForEvent, isOverHeaderMenu, onMouseDown]
     );
-    useEventListener("touchstart", onMouseDownImpl, window, true);
-    useEventListener("mousedown", onMouseDownImpl, window, true);
+    useEventListener("touchstart", onMouseDownImpl, window, false);
+    useEventListener("mousedown", onMouseDownImpl, window, false);
 
     const onMouseUpImpl = React.useCallback(
         (ev: MouseEvent | TouchEvent) => {
