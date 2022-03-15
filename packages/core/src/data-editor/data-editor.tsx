@@ -87,6 +87,8 @@ type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parame
 
 export type HeaderSelectionTrigger = "selection" | "drag" | "header" | "group";
 
+type EmitEvents = "copy" | "paste" | "delete" | "fill-right" | "fill-down";
+
 interface PreventableEvent {
     preventDefault: () => void;
 }
@@ -195,6 +197,7 @@ export interface DataEditorProps extends Props {
 export interface DataEditorRef {
     updateCells: DataGridRef["damage"];
     getBounds: DataGridRef["getBounds"];
+    emit: (eventName: EmitEvents) => void;
     scrollTo: (
         col: number,
         row: number,
@@ -725,16 +728,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
         },
         [rowMarkerOffset, rowMarkerWidth, totalHeaderHeight, lastRowSticky, freezeColumns, columns, rowHeight, rows]
-    );
-
-    React.useImperativeHandle(
-        forwardedRef,
-        () => ({
-            updateCells: (...args) => gridRef.current?.damage(...args),
-            getBounds: (...args) => gridRef.current?.getBounds(...args),
-            scrollTo,
-        }),
-        [scrollTo]
     );
 
     const focusCallback = React.useRef(focusOnRowFromTrailingBlankRow);
@@ -1572,6 +1565,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const isOSX = browserIsOSX.value;
                 const isPrimaryKey = isOSX ? event.metaKey : event.ctrlKey;
                 const isDeleteKey = event.key === "Delete" || (isOSX && event.key === "Backspace");
+                const vr = visibleRegionRef.current;
 
                 if (event.key === "Escape") {
                     if (overlayOpen) {
@@ -1744,10 +1738,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 ) {
                     if (
                         (!lastRowSticky || row !== rows) &&
-                        (visibleRegion.y > row ||
-                            row > visibleRegion.y + visibleRegion.height ||
-                            visibleRegion.x > col ||
-                            col > visibleRegion.x + visibleRegion.width)
+                        (vr.y > row || row > vr.y + vr.height || vr.x > col || col > vr.x + vr.width)
                     ) {
                         return;
                     }
@@ -1791,10 +1782,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             getMangedCellContent,
             adjustSelection,
             lastRowSticky,
-            visibleRegion.y,
-            visibleRegion.height,
-            visibleRegion.x,
-            visibleRegion.width,
         ]
     );
 
@@ -1866,170 +1853,162 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return result;
     }
 
-    useEventListener(
-        "paste",
-        React.useCallback(async () => {
-            function pasteToCell(inner: InnerGridCell, target: readonly [number, number], toPaste: string): boolean {
-                if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
-                    switch (inner.kind) {
-                        case GridCellKind.Text:
-                        case GridCellKind.Markdown:
-                        case GridCellKind.Uri: {
+    const onPasteInternal = React.useCallback(async () => {
+        function pasteToCell(inner: InnerGridCell, target: readonly [number, number], toPaste: string): boolean {
+            if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
+                switch (inner.kind) {
+                    case GridCellKind.Text:
+                    case GridCellKind.Markdown:
+                    case GridCellKind.Uri: {
+                        mangledOnCellEdited?.(target, {
+                            ...inner,
+                            data: toPaste,
+                        });
+                        return true;
+                    }
+                    case GridCellKind.Number: {
+                        const newNumber = Number.parseFloat(toPaste);
+                        if (!Number.isNaN(newNumber)) {
                             mangledOnCellEdited?.(target, {
                                 ...inner,
-                                data: toPaste,
+                                data: newNumber,
                             });
                             return true;
                         }
-                        case GridCellKind.Number: {
-                            const newNumber = Number.parseFloat(toPaste);
-                            if (!Number.isNaN(newNumber)) {
-                                mangledOnCellEdited?.(target, {
-                                    ...inner,
-                                    data: newNumber,
-                                });
-                                return true;
-                            }
-                            return false;
-                        }
-                        default:
-                            assertNever(inner);
+                        return false;
+                    }
+                    default:
+                        assertNever(inner);
+                }
+            }
+            return false;
+        }
+
+        const focused =
+            scrollRef.current?.contains(document.activeElement) === true ||
+            canvasRef.current?.contains(document.activeElement) === true;
+
+        let target = gridSelection?.cell;
+        if (target === undefined && selectedColumns.length === 1) {
+            target = [selectedColumns.first() ?? 0, 0];
+        }
+        if (target === undefined && selectedRows.length === 1) {
+            target = [rowMarkerOffset, selectedRows.first() ?? 0];
+        }
+
+        if (focused && target !== undefined) {
+            const text = await navigator.clipboard.readText();
+
+            const [gridCol, gridRow] = target;
+
+            if (onPaste === undefined) {
+                const cellData = getMangedCellContent(target);
+                pasteToCell(cellData, target, text);
+                return;
+            }
+
+            const data = unquote(text);
+
+            if (onPaste === false || (typeof onPaste === "function" && onPaste?.(target, data) !== true)) {
+                return;
+            }
+
+            const damage: (readonly [number, number])[] = [];
+            for (let row = 0; row < data.length; row++) {
+                const dataRow = data[row];
+                if (row + gridRow >= rows) break;
+                for (let col = 0; col < dataRow.length; col++) {
+                    const dataItem = dataRow[col];
+                    const index = [col + gridCol, row + gridRow] as const;
+                    const cellData = getMangedCellContent(index);
+                    if (pasteToCell(cellData, index, dataItem)) {
+                        damage.push(index);
                     }
                 }
-                return false;
             }
+            gridRef.current?.damage(
+                damage.map(c => ({
+                    cell: c,
+                }))
+            );
+        }
+    }, [
+        getMangedCellContent,
+        gridSelection,
+        mangledOnCellEdited,
+        onPaste,
+        rowMarkerOffset,
+        rows,
+        selectedColumns,
+        selectedRows,
+    ]);
 
-            const focused =
-                scrollRef.current?.contains(document.activeElement) === true ||
-                canvasRef.current?.contains(document.activeElement) === true;
+    useEventListener("paste", onPasteInternal, window, false, true);
 
-            let target = gridSelection?.cell;
-            if (target === undefined && selectedColumns.length === 1) {
-                target = [selectedColumns.first() ?? 0, 0];
-            }
-            if (target === undefined && selectedRows.length === 1) {
-                target = [rowMarkerOffset, selectedRows.first() ?? 0];
-            }
+    const onCopy = React.useCallback(() => {
+        const focused =
+            scrollRef.current?.contains(document.activeElement) === true ||
+            canvasRef.current?.contains(document.activeElement) === true;
 
-            if (focused && target !== undefined) {
-                const text = await navigator.clipboard.readText();
-
-                const [gridCol, gridRow] = target;
-
-                if (onPaste === undefined) {
-                    const cellData = getMangedCellContent(target);
-                    pasteToCell(cellData, target, text);
-                    return;
-                }
-
-                const data = unquote(text);
-
-                if (onPaste === false || (typeof onPaste === "function" && onPaste?.(target, data) !== true)) {
-                    return;
-                }
-
-                const damage: (readonly [number, number])[] = [];
-                for (let row = 0; row < data.length; row++) {
-                    const dataRow = data[row];
-                    if (row + gridRow >= rows) break;
-                    for (let col = 0; col < dataRow.length; col++) {
-                        const dataItem = dataRow[col];
-                        const index = [col + gridCol, row + gridRow] as const;
-                        const cellData = getMangedCellContent(index);
-                        if (pasteToCell(cellData, index, dataItem)) {
-                            damage.push(index);
-                        }
-                    }
-                }
-                gridRef.current?.damage(
-                    damage.map(c => ({
-                        cell: c,
-                    }))
+        if (focused && getCellsForSelection !== undefined) {
+            if (gridSelection !== undefined) {
+                copyToClipboard(
+                    getCellsForSelection({
+                        ...gridSelection.range,
+                        x: gridSelection.range.x - rowMarkerOffset,
+                    }),
+                    range(
+                        gridSelection.range.x - rowMarkerOffset,
+                        gridSelection.range.x + gridSelection.range.width - rowMarkerOffset
+                    )
                 );
-            }
-        }, [
-            getMangedCellContent,
-            gridSelection,
-            mangledOnCellEdited,
-            onPaste,
-            rowMarkerOffset,
-            rows,
-            selectedColumns,
-            selectedRows,
-        ]),
-        window,
-        false,
-        true
-    );
-
-    useEventListener(
-        "copy",
-        React.useCallback(() => {
-            const focused =
-                scrollRef.current?.contains(document.activeElement) === true ||
-                canvasRef.current?.contains(document.activeElement) === true;
-
-            if (focused && getCellsForSelection !== undefined) {
-                if (gridSelection !== undefined) {
-                    copyToClipboard(
+            } else if (selectedRows !== undefined && selectedRows.length > 0) {
+                const toCopy = Array.from(selectedRows);
+                const cells = toCopy.map(
+                    rowIndex =>
                         getCellsForSelection({
-                            ...gridSelection.range,
-                            x: gridSelection.range.x - rowMarkerOffset,
-                        }),
-                        range(
-                            gridSelection.range.x - rowMarkerOffset,
-                            gridSelection.range.x + gridSelection.range.width - rowMarkerOffset
-                        )
+                            x: 0,
+                            y: rowIndex,
+                            width: columns.length,
+                            height: 1,
+                        })[0]
+                );
+                copyToClipboard(cells, range(columns.length));
+            } else if (selectedColumns.length >= 1) {
+                const results: (readonly (readonly GridCell[])[])[] = [];
+                const cols: number[] = [];
+                for (const col of selectedColumns) {
+                    results.push(
+                        getCellsForSelection({
+                            x: col - rowMarkerOffset,
+                            y: 0,
+                            width: 1,
+                            height: rows,
+                        })
                     );
-                } else if (selectedRows !== undefined && selectedRows.length > 0) {
-                    const toCopy = Array.from(selectedRows);
-                    const cells = toCopy.map(
-                        rowIndex =>
-                            getCellsForSelection({
-                                x: 0,
-                                y: rowIndex,
-                                width: columns.length,
-                                height: 1,
-                            })[0]
-                    );
-                    copyToClipboard(cells, range(columns.length));
-                } else if (selectedColumns.length >= 1) {
-                    const results: (readonly (readonly GridCell[])[])[] = [];
-                    const cols: number[] = [];
-                    for (const col of selectedColumns) {
-                        results.push(
-                            getCellsForSelection({
-                                x: col - rowMarkerOffset,
-                                y: 0,
-                                width: 1,
-                                height: rows,
-                            })
-                        );
-                        cols.push(col - rowMarkerOffset);
-                    }
-                    if (results.length === 1) {
-                        copyToClipboard(results[0], cols);
-                    }
-                    // FIXME: this is dumb
-                    const toCopy = results.reduce((pv, cv) => pv.map((row, index) => [...row, ...cv[index]]));
-
-                    copyToClipboard(toCopy, cols);
+                    cols.push(col - rowMarkerOffset);
                 }
+                if (results.length === 1) {
+                    copyToClipboard(results[0], cols);
+                }
+                // FIXME: this is dumb
+                const toCopy = results.reduce((pv, cv) => pv.map((row, index) => [...row, ...cv[index]]));
+
+                copyToClipboard(toCopy, cols);
             }
-        }, [
-            columns.length,
-            copyToClipboard,
-            getCellsForSelection,
-            gridSelection,
-            rowMarkerOffset,
-            rows,
-            selectedColumns,
-            selectedRows,
-        ]),
-        window,
-        true,
-        false
-    );
+        }
+    }, [
+        columns.length,
+        copyToClipboard,
+        getCellsForSelection,
+        gridSelection,
+        rowMarkerOffset,
+        rows,
+        selectedColumns,
+        selectedRows,
+    ]);
+
+    useEventListener("copy", onCopy, window, true, false);
 
     const onSearchResultsChanged = React.useCallback(
         (results: readonly (readonly [number, number])[], navIndex: number) => {
@@ -2128,6 +2107,59 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     }, [onGroupHeaderRenamed, renameGroup]);
 
     const mangledFreezeColumns = Math.min(mangledCols.length, freezeColumns + (hasRowMarkers ? 1 : 0));
+
+    React.useImperativeHandle(
+        forwardedRef,
+        () => ({
+            updateCells: (...args) => gridRef.current?.damage(...args),
+            getBounds: (...args) => gridRef.current?.getBounds(...args),
+            emit: e => {
+                switch (e) {
+                    case "delete":
+                        onKeyDown({
+                            bounds: undefined,
+                            cancel: () => undefined,
+                            ctrlKey: false,
+                            key: "Delete",
+                            keyCode: 46,
+                            metaKey: false,
+                            shiftKey: false,
+                        });
+                        break;
+                    case "fill-right":
+                        onKeyDown({
+                            bounds: undefined,
+                            cancel: () => undefined,
+                            ctrlKey: true,
+                            key: "r",
+                            keyCode: 82,
+                            metaKey: false,
+                            shiftKey: false,
+                        });
+                        break;
+                    case "fill-down":
+                        onKeyDown({
+                            bounds: undefined,
+                            cancel: () => undefined,
+                            ctrlKey: true,
+                            key: "d",
+                            keyCode: 68,
+                            metaKey: false,
+                            shiftKey: false,
+                        });
+                        break;
+                    case "copy":
+                        onCopy();
+                        break;
+                    case "paste":
+                        void onPasteInternal();
+                        break;
+                }
+            },
+            scrollTo,
+        }),
+        [onCopy, onKeyDown, onPasteInternal, scrollTo]
+    );
 
     return (
         <ThemeProvider theme={mergedTheme}>
