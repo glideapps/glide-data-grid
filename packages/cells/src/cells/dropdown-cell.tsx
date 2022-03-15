@@ -28,14 +28,18 @@ const Wrap = styled.div`
 `;
 
 const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
-    const { value: cell, onFinishedEditing } = p;
+    const { value: cell, onFinishedEditing, initialValue } = p;
     const { allowedValues, value: valueIn } = cell.data;
 
     const [value, setValue] = React.useState(valueIn);
+    const [inputValue, setInputValue] = React.useState(initialValue ?? "");
 
     return (
         <Wrap>
             <Select
+                inputValue={inputValue}
+                onInputChange={setInputValue}
+                menuPlacement={"auto"}
                 value={{ value, label: value }}
                 styles={{
                     control: base => ({
@@ -85,6 +89,14 @@ const renderer: CustomCellRenderer<DropdownCell> = {
     provideEditor: () => ({
         editor: Editor,
         disablePadding: true,
+        deletedValue: v => ({
+            ...v,
+            copyData: "",
+            data: {
+                ...v.data,
+                value: "",
+            },
+        }),
     }),
 };
 

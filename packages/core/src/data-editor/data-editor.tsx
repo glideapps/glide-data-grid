@@ -27,6 +27,7 @@ import {
     GridMouseHeaderEventArgs,
     GridMouseGroupHeaderEventArgs,
     GridColumn,
+    isObjectEditorCallbackResult,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -219,6 +220,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const [overlay, setOverlay] = React.useState<{
         target: Rectangle;
         content: GridCell;
+        initialValue: string | undefined;
         cell: readonly [number, number];
         highlight: boolean;
         forceEditMode: boolean;
@@ -600,6 +602,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 setOverlay({
                     target: bounds,
                     content,
+                    initialValue,
                     cell: [col, row],
                     highlight: initialValue === undefined,
                     forceEditMode: initialValue !== undefined,
@@ -651,6 +654,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             setOverlay({
                 target: bounds,
                 content,
+                initialValue: undefined,
                 highlight: true,
                 cell: [col, row],
                 forceEditMode: true,
@@ -1593,16 +1597,22 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     for (let x = r.x; x < r.x + r.width; x++) {
                         for (let y = r.y; y < r.y + r.height; y++) {
                             const cellValue = getCellContent([x - rowMarkerOffset, y]);
-                            if (
+                            let newVal: InnerGridCell | undefined = undefined;
+                            if (cellValue.kind === GridCellKind.Custom) {
+                                const editor = provideEditor?.(cellValue);
+                                if (isObjectEditorCallbackResult(editor)) {
+                                    newVal = editor?.deletedValue?.(cellValue);
+                                }
+                            } else if (
                                 (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
                                 cellValue.kind === GridCellKind.Boolean
                             ) {
                                 const toDelete = CellRenderers[cellValue.kind];
-                                const newVal = toDelete.onDelete?.(cellValue);
-                                if (newVal !== undefined) {
-                                    mangledOnCellEdited([x, y], newVal as typeof cellValue);
-                                    damaged.push([x, y]);
-                                }
+                                newVal = toDelete.onDelete?.(cellValue);
+                            }
+                            if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
+                                mangledOnCellEdited([x, y], newVal);
+                                damaged.push([x, y]);
                             }
                         }
                     }
@@ -1773,6 +1783,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onSelectionCleared,
             focus,
             onDeleteRows,
+            provideEditor,
             mangledOnCellEdited,
             rows,
             showTrailingBlankRow,

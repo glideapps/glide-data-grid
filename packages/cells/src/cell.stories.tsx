@@ -163,6 +163,8 @@ export const CustomCells: React.VFC = () => {
                 {...defaultProps}
                 drawCell={drawCell}
                 provideEditor={provideEditor}
+                // eslint-disable-next-line no-console
+                onCellEdited={(...args) => console.log("Edit Cell", ...args)}
                 getCellContent={cell => {
                     const [col, row] = cell;
                     if (col === 0) {
