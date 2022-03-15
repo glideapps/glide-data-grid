@@ -1102,20 +1102,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     // we scrolled, abort
                     return;
                 }
+                if (touchDownArgs.current.startTime > 0 && Date.now() - touchDownArgs.current.startTime > 500) {
+                    args = {
+                        ...args,
+                        shiftKey: true,
+                    }
+                }
                 if (args.kind === "cell") {
                     // click that cell
                     if (!handleMaybeClick(args)) {
                         handleSelect(args);
                     }
                 } else {
-                    if (touchDownArgs.current.startTime > 0 && Date.now() - touchDownArgs.current.startTime > 500) {
-                        handleSelect({
-                            ...args,
-                            shiftKey: true,
-                        });
-                    } else {
-                        handleSelect(args);
-                    }
+                    handleSelect(args);
                 }
                 return;
             }
