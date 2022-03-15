@@ -389,13 +389,26 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [onGridSelectionChange, rowMarkerOffset, expandSelection]
     );
     const selectedRows = selectedRowsOuter ?? selectedRowsInner;
-    const setSelectedRows = setSelectedRowsOuter ?? setSelectedRowsInner;
+    const setSelectedRowsCb = setSelectedRowsOuter ?? setSelectedRowsInner;
+
+    const selectedRowsRef = React.useRef(selectedRows);
+    selectedRowsRef.current = selectedRows;
+    const setSelectedRows = React.useCallback(
+        (newRows: CompactSelection) => {
+            if (selectedRowsRef.current.equals(newRows)) return;
+            setSelectedRowsCb(newRows);
+        },
+        [setSelectedRowsCb]
+    );
 
     const mangledOuterCols = selectedColumnsOuter?.offset(rowMarkerOffset);
     const selectedColumns = mangledOuterCols ?? selectedColumnsInner;
 
+    const selectedColumnsRef = React.useRef(selectedColumns);
+    selectedColumnsRef.current = selectedColumns;
     const setSelectedColumns = React.useCallback(
         (newColumns: CompactSelection, trigger: HeaderSelectionTrigger) => {
+            if (selectedColumnsRef.current.equals(newColumns)) return;
             if (setSelectedColumnsOuter !== undefined) {
                 setSelectedColumnsOuter?.(newColumns.offset(-rowMarkerOffset), trigger);
             } else {

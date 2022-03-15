@@ -491,6 +491,21 @@ export class CompactSelection {
         return false;
     };
 
+    equals = (other: CompactSelection): boolean => {
+        if (other === this) return true;
+
+        if (other.items.length !== this.items.length) return false;
+
+        for (let i = 0; i < this.items.length; i++) {
+            const left = other.items[i];
+            const right = this.items[i];
+
+            if (left[0] !== right[0] || left[1] !== right[1]) return false;
+        }
+
+        return true;
+    };
+
     get length(): number {
         let len = 0;
         for (const [start, end] of this.items) {
