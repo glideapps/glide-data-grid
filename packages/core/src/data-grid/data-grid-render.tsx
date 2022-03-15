@@ -585,7 +585,8 @@ function drawHeader(
     hasSelectedCell: boolean,
     hoverAmount: number,
     spriteManager: SpriteManager,
-    drawHeaderCallback: DrawHeaderCallback | undefined
+    drawHeaderCallback: DrawHeaderCallback | undefined,
+    touchMode: boolean
 ) {
     const menuBounds = getHeaderMenuBounds(x, y, width, height);
     if (drawHeaderCallback !== undefined) {
@@ -608,6 +609,8 @@ function drawHeader(
     }
     const xPad = 8;
     const fillStyle = selected ? theme.textHeaderSelected : theme.textHeader;
+
+    const shouldDrawMenu = c.hasMenu === true && (isHovered || (touchMode && selected));
 
     let drawX = x + xPad;
     if (c.icon !== undefined) {
@@ -632,7 +635,7 @@ function drawHeader(
         drawX += 26;
     }
 
-    if (isHovered && c.hasMenu === true && width > 35) {
+    if (shouldDrawMenu && c.hasMenu === true && width > 35) {
         const fadeWidth = 35;
         const fadeStart = width - fadeWidth;
         const fadeEnd = width - fadeWidth * 0.7;
@@ -653,7 +656,7 @@ function drawHeader(
     }
     ctx.fillText(c.title, drawX, y + height / 2 + 1);
 
-    if (isHovered && c.hasMenu === true) {
+    if (shouldDrawMenu && c.hasMenu === true) {
         ctx.beginPath();
         const triangleX = menuBounds.x + menuBounds.width / 2 - 5.5;
         const triangleY = menuBounds.y + menuBounds.height / 2 - 3;
@@ -700,7 +703,8 @@ function drawGridHeaders(
     verticalBorder: (col: number) => boolean,
     getGroupDetails: GroupDetailsCallback,
     damage: CellList | undefined,
-    drawHeaderCallback: DrawHeaderCallback | undefined
+    drawHeaderCallback: DrawHeaderCallback | undefined,
+    touchMode: boolean
 ) {
     const totalHeaderHeight = headerHeight + groupHeaderHeight;
     if (totalHeaderHeight <= 0) return;
@@ -781,7 +785,8 @@ function drawGridHeaders(
             hasSelectedCell,
             hover,
             spriteManager,
-            drawHeaderCallback
+            drawHeaderCallback,
+            touchMode
         );
         ctx.restore();
     });
@@ -1486,6 +1491,7 @@ export function drawGrid(
     hoverInfo: HoverInfo | undefined,
     spriteManager: SpriteManager,
     scrolling: boolean,
+    touchMode: boolean,
     enqueue: (item: Item) => void
 ) {
     if (width === 0 || height === 0) return;
@@ -1567,7 +1573,8 @@ export function drawGrid(
             verticalBorder,
             getGroupDetails,
             damage,
-            drawHeaderCallback
+            drawHeaderCallback,
+            touchMode
         );
 
         drawGridLines(
