@@ -1015,10 +1015,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const lastMouseDownCellLocation = React.useRef<[number, number]>();
-    const downScrollPosition = React.useRef(visibleRegion);
+    const touchDownArgs = React.useRef({
+        visibleRegion,
+        startTime: 0,
+    });
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
-            downScrollPosition.current = visibleRegionRef.current;
+            touchDownArgs.current = {
+                visibleRegion: visibleRegionRef.current,
+                startTime: Date.now(),
+            };
             if (args.button !== 0) {
                 return;
             }
@@ -1091,7 +1097,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             if (args.isTouch) {
                 const vr = visibleRegionRef.current;
-                if (vr.x !== downScrollPosition.current.x || vr.y !== downScrollPosition.current.y) {
+                const touchVr = touchDownArgs.current.visibleRegion;
+                if (vr.x !== touchVr.x || vr.y !== touchVr.y) {
                     // we scrolled, abort
                     return;
                 }
@@ -1101,7 +1108,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         handleSelect(args);
                     }
                 } else {
-                    handleSelect(args);
+                    if (touchDownArgs.current.startTime > 0 && Date.now() - touchDownArgs.current.startTime > 500) {
+                        handleSelect({
+                            ...args,
+                            shiftKey: true,
+                        });
+                    } else {
+                        handleSelect(args);
+                    }
                 }
                 return;
             }
