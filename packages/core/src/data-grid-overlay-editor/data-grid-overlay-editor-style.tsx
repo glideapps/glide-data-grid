@@ -56,22 +56,21 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
         border-radius: 2px;
         overflow: hidden;
 
-        input {
-            width: 100%;
-
-            border: none;
-            border-width: 0;
-            outline: none;
-        }
-
-        textarea {
-            border: none;
-            border-width: 0;
-            outline: none;
-        }
-
         ${GrowingEntryStyle} {
             height: 100%;
+        }
+
+        & input.gdg-input {
+            width: 100%;
+            border: none;
+            border-width: 0;
+            outline: none;
+        }
+
+        & textarea.gdg-input {
+            border: none;
+            border-width: 0;
+            outline: none;
         }
     }
 

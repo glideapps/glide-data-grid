@@ -35,6 +35,7 @@ const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
             <ShadowBox className={className}>{useText + "\n"}</ShadowBox>
             <InputBox
                 {...rest}
+                className={(rest.className ?? "") + " gdg-input"}
                 ref={inputRef}
                 onKeyDown={onKeyDown}
                 value={useText}

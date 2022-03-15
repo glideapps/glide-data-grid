@@ -9,6 +9,8 @@ import range from "lodash/range";
 import uniq from "lodash/uniq";
 import { TagsCell } from "./cells/tags-cell";
 import { UserProfileCell } from "./cells/user-profile-cell";
+import { DropdownCell } from "./cells/dropdown-cell";
+import { ArticleCell } from "./cells/article-cell-types";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -222,21 +224,50 @@ export const CustomCells: React.VFC = () => {
                                 ]),
                             },
                         } as TagsCell;
+                    } else if (col === 4) {
+                        num = row + 1;
+                        rand();
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "user-profile-cell",
+                                image: row % 2 ? undefined : "https://i.redd.it/aqc1hwhalsz71.jpg",
+                                initial: "B",
+                                tint: "#F1D86E",
+                                name: row % 5 ? undefined : "Bee bb",
+                            },
+                        } as UserProfileCell;
+                    } else if (col === 5) {
+                        num = row + 1;
+                        rand();
+                        const d: DropdownCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "dropdown-cell",
+                                allowedValues: ["Good", "Better", "Best"],
+                                value: "Good",
+                            },
+                        };
+                        return d;
+                    } else if (col === 6) {
+                        num = row + 1;
+                        rand();
+                        const d: ArticleCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "article-cell",
+                                markdown: "## This is a test",
+                            },
+                        };
+                        return d;
                     }
-                    num = row + 1;
-                    rand();
-                    return {
-                        kind: GridCellKind.Custom,
-                        allowOverlay: true,
-                        copyData: "4",
-                        data: {
-                            kind: "user-profile-cell",
-                            image: row % 2 ? undefined : "https://i.redd.it/aqc1hwhalsz71.jpg",
-                            initial: "B",
-                            tint: "#F1D86E",
-                            name: row % 5 ? undefined : "Bee bb",
-                        },
-                    } as UserProfileCell;
+                    throw new Error("Fail");
                 }}
                 columns={[
                     {
@@ -257,6 +288,14 @@ export const CustomCells: React.VFC = () => {
                     },
                     {
                         title: "Profile",
+                        width: 150,
+                    },
+                    {
+                        title: "Dropdown",
+                        width: 150,
+                    },
+                    {
+                        title: "Article",
                         width: 150,
                     },
                 ]}

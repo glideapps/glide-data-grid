@@ -3,7 +3,13 @@ import { createPortal } from "react-dom";
 
 import ClickOutsideContainer from "../click-outside-container/click-outside-container";
 import { CellRenderers } from "../data-grid/cells";
-import { GridCell, GridCellKind, ProvideEditorCallback, Rectangle } from "../data-grid/data-grid-types";
+import {
+    GridCell,
+    GridCellKind,
+    isObjectEditorCallbackResult,
+    ProvideEditorCallback,
+    Rectangle,
+} from "../data-grid/data-grid-types";
 import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style";
 import { OverlayImageEditorProps } from "./private/image-overlay-editor";
 
@@ -65,7 +71,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     );
     const targetValue = tempValue ?? content;
 
-    const CustomEditor = React.useMemo(() => {
+    const customEditor = React.useMemo(() => {
         return provideEditor?.(content);
     }, [content, provideEditor]);
 
@@ -78,12 +84,18 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     let pad = true;
     let editor: React.ReactNode;
     let style = true;
+    let styleOverride: React.CSSProperties | undefined;
 
-    if (CustomEditor !== undefined) {
-        pad = CustomEditor.disablePadding !== true;
-        style = CustomEditor.disableStyling !== true;
+    if (customEditor !== undefined) {
+        pad = customEditor.disablePadding !== true;
+        style = customEditor.disableStyling !== true;
+        const isObjectEditor = isObjectEditorCallbackResult(customEditor);
+        if (isObjectEditor) {
+            styleOverride = customEditor.styleOverride;
+        }
+        const Editor = isObjectEditor ? customEditor.editor : customEditor;
         editor = (
-            <CustomEditor
+            <Editor
                 isHighlighted={highlight}
                 onChange={setTempValue}
                 value={targetValue}
@@ -115,14 +127,16 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         );
         return null;
     }
+
     const portal = createPortal(
         <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
             <DataGridOverlayEditorStyle
                 className={style ? "gdg-style" : "gdg-unstyle"}
+                style={styleOverride}
                 as={useLabel === true ? "label" : undefined}
                 targetRect={target}
                 pad={pad}>
-                <div className="clip-region" onKeyDown={CustomEditor === undefined ? undefined : onKeyDown}>
+                <div className="clip-region" onKeyDown={customEditor === undefined ? undefined : onKeyDown}>
                     {editor}
                 </div>
             </DataGridOverlayEditorStyle>

@@ -148,6 +148,7 @@ const renderer: CustomCellRenderer<TagsCell> = {
                             <label key={t.tag}>
                                 {!readonly && (
                                     <input
+                                        className="gdg-input"
                                         type="checkbox"
                                         checked={selected}
                                         onChange={() => {

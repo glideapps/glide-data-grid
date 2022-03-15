@@ -46,7 +46,7 @@ const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps> = p =
                     <EditPencil />
                 </button>
             )}
-            <textarea autoFocus={true} onKeyDown={onKeyDown} />
+            <textarea className="gdg-input" autoFocus={true} onKeyDown={onKeyDown} />
         </ImageOverlayEditorStyle>
     );
 };

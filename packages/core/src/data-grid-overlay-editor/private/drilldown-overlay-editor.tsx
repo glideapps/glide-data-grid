@@ -58,7 +58,7 @@ const DrilldownOverlayEditor: React.FunctionComponent<Props> = p => {
                     <div>{d.text}</div>
                 </div>
             ))}
-            <textarea autoFocus={true} onKeyDown={onKeyDown} />
+            <textarea className="gdg-input" autoFocus={true} onKeyDown={onKeyDown} />
         </DrilldownOverlayEditorStyle>
     );
 };
