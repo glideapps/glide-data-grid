@@ -150,6 +150,8 @@ export interface DataEditorProps extends Props {
     readonly selectedColumns?: DataGridSearchProps["selectedColumns"];
     readonly onSelectedColumnsChange?: (newColumns: CompactSelection, trigger: HeaderSelectionTrigger) => void;
 
+    readonly onSelectionCleared?: () => void;
+
     /**
      * @deprecated Use drawCell instead. This will be removed in a future version.
      */
@@ -263,6 +265,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onHeaderMenuClick,
         getGroupDetails,
         onItemHovered,
+        onSelectionCleared,
         onVisibleRegionChanged,
         selectedColumns: selectedColumnsOuter,
         onSelectedColumnsChange: setSelectedColumnsOuter,
@@ -934,6 +937,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 focus();
                 setSelectedColumns(CompactSelection.empty(), "selection");
                 setSelectedRows(CompactSelection.empty());
+                onSelectionCleared?.();
                 lastSelectedRowRef.current = undefined;
                 lastSelectedColRef.current = undefined;
             } else if (args.kind === "group-header") {
@@ -981,6 +985,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             hasRowMarkers,
             lastRowSticky,
             mangledCols,
+            onSelectionCleared,
             rowMarkerOffset,
             rowMarkers,
             rowSelectionMode,
@@ -1527,6 +1532,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     setGridSelection(undefined, false);
                     setSelectedRows(CompactSelection.empty());
                     setSelectedColumns(CompactSelection.empty(), "selection");
+                    onSelectionCleared?.();
                     return;
                 }
 
@@ -1699,6 +1705,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             setGridSelection,
             setSelectedRows,
             setSelectedColumns,
+            onSelectionCleared,
             focus,
             onDeleteRows,
             mangledOnCellEdited,
