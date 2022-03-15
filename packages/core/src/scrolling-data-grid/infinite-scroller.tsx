@@ -101,7 +101,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
         const el = scroller.current;
         if (el === null) return;
 
-        const newY = el.scrollTop;
+        const newY = Math.max(0, el.scrollTop);
         const delta = lastScrollY.current - newY;
         const scrollableHeight = el.scrollHeight - el.clientHeight;
         const maxFakeY = Math.max(0, scrollHeight - el.clientHeight);
