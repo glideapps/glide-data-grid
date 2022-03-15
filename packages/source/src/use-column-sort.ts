@@ -39,7 +39,9 @@ type Props = Pick<DataEditorProps, "getCellContent" | "rows" | "columns"> & {
         direction?: "asc" | "desc";
     };
 };
-type Result = Pick<DataEditorProps, "getCellContent">;
+type Result = Pick<DataEditorProps, "getCellContent"> & {
+    getOriginalIndex: (index: number) => number;
+};
 
 export function useColumnSort(p: Props): Result {
     const { sort, rows, getCellContent: getCellContentIn } = p;
@@ -73,6 +75,14 @@ export function useColumnSort(p: Props): Result {
         return result;
     }, [getCellContentIn, rows, sort?.mode, dir, sortCol]);
 
+    const getOriginalIndex = React.useCallback(
+        (index: number): number => {
+            if (sortMap === undefined) return index;
+            return sortMap[index];
+        },
+        [sortMap]
+    );
+
     const getCellContent = React.useCallback<typeof getCellContentIn>(
         ([col, row]) => {
             if (sortMap === undefined) return getCellContentIn([col, row]);
@@ -83,10 +93,11 @@ export function useColumnSort(p: Props): Result {
     );
 
     if (sortMap === undefined) {
-        return { getCellContent: p.getCellContent };
+        return { getCellContent: p.getCellContent, getOriginalIndex };
     }
 
     return {
+        getOriginalIndex,
         getCellContent,
     };
 }

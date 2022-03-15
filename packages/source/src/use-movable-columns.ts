@@ -3,7 +3,7 @@ import { DataEditorProps, GridColumn } from "@glideapps/glide-data-grid";
 import orderBy from "lodash/orderBy";
 
 function colToKey(c: GridColumn) {
-    return `${c.group ?? ""}/${c.title}`;
+    return c.id ?? `${c.group ?? ""}/${c.title}`;
 }
 
 function looseCompareCol(a: GridColumn, b: GridColumn | string): boolean {
