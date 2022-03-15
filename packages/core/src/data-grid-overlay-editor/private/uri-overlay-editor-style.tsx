@@ -8,9 +8,13 @@ export const UriOverlayEditorStyle = styled.div`
     align-items: center;
     padding-top: 2px;
 
+    min-height: 21px;
+
     .link-area {
         flex-grow: 1;
         flex-shrink: 1;
+
+        cursor: pointer;
 
         margin-right: 8px;
         overflow: hidden;
