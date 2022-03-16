@@ -7,7 +7,7 @@ import { SimpleThemeWrapper } from "../stories/story-utils";
 import { DocWrapper, Highlight, Marked, Wrapper } from "./doc-wrapper";
 
 export default {
-    title: "Docs",
+    title: "Glide-Data-Grid/Docs",
     decorators: [
         (Story: React.ComponentType) => (
             <SimpleThemeWrapper>
@@ -129,7 +129,7 @@ const data: DummyItem[] = [
     },
 ];
 
-export const GettingStarted: React.VFC = () => {
+export const ColumnGrouping: React.VFC = () => {
     const getContent = React.useCallback((cell: readonly [number, number]): GridCell => {
         const [col, row] = cell;
         const dataRow = data[row];
@@ -137,33 +137,33 @@ export const GettingStarted: React.VFC = () => {
         const d = dataRow[indexes[col]];
         return {
             kind: GridCellKind.Text,
-            allowOverlay: false,
+            allowOverlay: true,
             displayData: d,
             data: d,
         };
     }, []);
-
-    const [rowMarkers, setRowMarkers] = React.useState(false);
-    const [smoothScroll, setSmoothScroll] = React.useState(false);
-    const [verticalBorder, setVerticalBorder] = React.useState(true);
 
     const columns = React.useMemo<GridColumn[]>(() => {
         return [
             {
                 title: "Name",
                 id: "name",
+                group: "Core",
             },
             {
                 title: "Company",
                 id: "company",
+                group: "Core",
             },
             {
                 title: "Email",
                 id: "email",
+                group: "Extra",
             },
             {
                 title: "Phone",
                 id: "phone",
+                group: "Extra",
             },
         ];
     }, []);
@@ -172,136 +172,46 @@ export const GettingStarted: React.VFC = () => {
         <DocWrapper>
             <Marked>
                 {`
-# Getting Started
+# Column Grouping
 
-> You can do this!
-
-Let's build a very simply data grid, first we need some data. Let's start with something hard coded.`}
+Columns can be grouped by assinging them a group. Easy peasy.`}
             </Marked>
             <Highlight>
                 {`
-const data = [
-    {
-      "name": "Hines Fowler",
-      "company": "BUZZNESS",
-      "email": "hinesfowler@buzzness.com",
-      "phone": "+1 (869) 405-3127"
-    },
-    ...rest
-]
-`}
-            </Highlight>
-            <Marked>
-                {`
-We will also need some columns`}
-            </Marked>
-            <Highlight>
-                {`
-const columns: GridColumn[] = [
-    {
-        title: "Name",
-        id: "name"
-    },
-    {
-        title: "Company",
-        id: "company"
-    },
-    {
-        title: "Email",
-        id: "email"
-    },
-    {
-        title: "Phone",
-        id: "phone"
-    }
-]
-`}
-            </Highlight>
-            <Marked>
-                {`
-Each of our columns will automatically size based on its contents. If we want to we can fix the size of some columns by setting the width parameter.
-
-Lastly we need a data fetch callback. This callback should be memoized using \`React.useCallback\` or be a static function.`}
-            </Marked>
-            <Highlight>
-                {`
-const getContent = React.useCallback((cell: readonly [number, number]): GridCell => {
-    const [col, row] = cell;
-    const dataRow = data[row];
-    // dumb but simple way to do this
-    const indexes: (keyof DummyItem)[] = ["name", "company", "email", "phone"];
-    const d = dataRow[indexes[col]]
-    return {
-        kind: GridCellKind.Text,
-        allowOverlay: false,
-        displayData: d,
-        data: d,
-    };
+const columns = React.useMemo<GridColumn[]>(() => {
+    return [
+        {
+            title: "Name",
+            id: "name",
+            group: "Core",
+        },
+        {
+            title: "Company",
+            id: "company",
+            group: "Core",
+        },
+        {
+            title: "Email",
+            id: "email",
+            group: "Extra",
+        },
+        {
+            title: "Phone",
+            id: "phone",
+            group: "Extra",
+        },
+    ];
 }, []);
 `}
             </Highlight>
-            <Marked>
-                {`
-Ok let's put it all together!`}
-            </Marked>
-            <Highlight>
-                {`
-return <DataEditorContainer width={900} height={200}>
-    <DataEditor getCellContent={getContent} columns={columns} rows={data.length} />
-</DataEditorContainer>
-`}
-            </Highlight>
-            <Wrapper height={200}>
+            <Wrapper height={500}>
                 <DataEditor getCellContent={getContent} columns={columns} rows={data.length} />
-            </Wrapper>
-            <Marked>
-                {`
-Great job!
-
-# Going further
-
-There is so much more we can do. Just to list a few
-
-- Header icons
-- Smooth scrolling
-- Header menus
-- Grouping
-- Row markers
-- Freeze Columns
-- Column reordering and resizing
-- Cell spans
-- Search
-- Copy/paste support
-
-Let's play with a few`}
-            </Marked>
-            <label style={{ display: "block" }}>
-                <input type="checkbox" checked={rowMarkers} onChange={e => setRowMarkers(e.target.checked)} /> Row
-                Markers
-            </label>
-            <label style={{ display: "block" }}>
-                <input type="checkbox" checked={smoothScroll} onChange={e => setSmoothScroll(e.target.checked)} />{" "}
-                Smooth Scroll
-            </label>
-            <label style={{ display: "block" }}>
-                <input type="checkbox" checked={verticalBorder} onChange={e => setVerticalBorder(e.target.checked)} />{" "}
-                Vetical Borders
-            </label>
-            <Wrapper height={200}>
-                <DataEditor
-                    getCellContent={getContent}
-                    verticalBorder={verticalBorder}
-                    smoothScrollX={smoothScroll}
-                    smoothScrollY={smoothScroll}
-                    rowMarkers={rowMarkers ? "both" : "none"}
-                    columns={columns}
-                    rows={data.length}
-                />
             </Wrapper>
         </DocWrapper>
     );
 };
-(GettingStarted as any).parameters = {
+(ColumnGrouping as any).storyName = "07. Column Grouping";
+(ColumnGrouping as any).parameters = {
     options: {
         showPanel: false,
     },

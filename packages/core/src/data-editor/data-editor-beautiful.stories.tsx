@@ -101,7 +101,7 @@ function lossyCopyData<T extends EditableGridCell>(source: EditableGridCell, tar
 }
 
 export default {
-    title: "DataEditor",
+    title: "Glide-Data-Grid/DataEditor Demos",
 
     decorators: [
         (Story: React.ComponentType) => (

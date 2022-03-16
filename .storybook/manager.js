@@ -20,7 +20,7 @@ addons.setConfig({
     initialActive: "sidebar",
     sidebar: {
         showRoots: true,
-        collapsedRoots: ["Subcomponents"],
+        collapsedRoots: ["Subcomponents", "TestCases"],
     },
     toolbar: {
         title: { hidden: false },
