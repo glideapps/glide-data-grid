@@ -36,7 +36,7 @@ const SimpleThemeWrapper: React.FC = p => {
 };
 
 export default {
-    title: "useDataSource",
+    title: "Extra Packages/Source",
 
     decorators: [
         (Story: React.ComponentType) => (

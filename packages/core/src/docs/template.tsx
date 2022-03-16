@@ -7,7 +7,7 @@ import { SimpleThemeWrapper } from "../stories/story-utils";
 import { DocWrapper, Highlight, Marked, Wrapper } from "./doc-wrapper";
 
 export default {
-    title: "Docs",
+    title: "Glide-Data-Grid/Docs",
     decorators: [
         (Story: React.ComponentType) => (
             <SimpleThemeWrapper>
@@ -67,6 +67,7 @@ const columns: GridColumn[] = [
         </DocWrapper>
     );
 };
+(Template as any).storyName = "00. Template";
 (Template as any).parameters = {
     options: {
         showPanel: false,

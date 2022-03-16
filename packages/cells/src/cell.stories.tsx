@@ -34,7 +34,7 @@ const SimpleThemeWrapper: React.FC = p => {
 };
 
 export default {
-    title: "Extra Cells",
+    title: "Extra Packages/Cells",
 
     decorators: [
         (Story: React.ComponentType) => (

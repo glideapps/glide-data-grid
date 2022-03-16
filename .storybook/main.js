@@ -2,7 +2,7 @@ const path = require("path");
 
 module.exports = {
     stories: ["../**/*.stories.tsx"],
-    addons: ["@storybook/addon-links", "@storybook/addon-controls"],
+    addons: ["@storybook/addon-links", "@storybook/addon-controls", "./addons/expand-all/register.js"],
     devtool: "source-map",
     webpackFinal: async (config, { configType }) => {
         config.module.rules.push({
