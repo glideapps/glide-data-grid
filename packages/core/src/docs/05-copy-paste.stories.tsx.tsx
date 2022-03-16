@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import { EditableGridCell, GridCell, GridCellKind, GridColumn, Rectangle } from "../data-grid/data-grid-types";
-import { DataEditor, DataEditorProps, DataEditorRef } from "../data-editor/data-editor";
+import { EditableGridCell, GridCell, GridCellKind, GridColumn } from "../data-grid/data-grid-types";
+import { DataEditor, DataEditorProps } from "../data-editor/data-editor";
 
 import { SimpleThemeWrapper } from "../stories/story-utils";
 import { DocWrapper, Highlight, Marked, Wrapper } from "./doc-wrapper";
