@@ -17,7 +17,7 @@ import { DataEditor } from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
 export default {
-    title: "DataEditor/TestCases",
+    title: "Tests/TestCases",
 
     decorators: [
         (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (

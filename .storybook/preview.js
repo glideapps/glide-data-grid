@@ -3,10 +3,12 @@ import { addParameters } from "@storybook/react";
 addParameters({
     options: {
         showRoots: true,
-        storySort: (a, b) => a[1].id.localeCompare(b[1].id, undefined, { numeric: true }),
+        storySort: (a, b) => {
+            return a[1].name.localeCompare(b[1].name, undefined, { numeric: true });
+        },
     },
 });
 
 export const parameters = {
-    layout: 'fullscreen',
-  };
+    layout: "fullscreen",
+};

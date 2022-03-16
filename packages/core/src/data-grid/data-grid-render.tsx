@@ -1149,6 +1149,11 @@ function drawCells(
                         lastToken = undefined;
                     }
 
+                    if (theme.textDark !== outerTheme.textDark) {
+                        if (typeof lastToken === "function") lastToken({ ctx });
+                        lastToken = undefined;
+                    }
+
                     if (highlighted || rowDisabled) {
                         if (rowDisabled) {
                             fill = blend(theme.bgHeader, fill);

@@ -7,7 +7,7 @@ import { SimpleThemeWrapper } from "../stories/story-utils";
 import { DocWrapper, Highlight, Marked, Wrapper } from "./doc-wrapper";
 
 export default {
-    title: "Docs",
+    title: "Glide-Data-Grid/Docs",
     decorators: [
         (Story: React.ComponentType) => (
             <SimpleThemeWrapper>
@@ -48,13 +48,13 @@ export const GridColumns: React.VFC = () => {
 
 > The \`GridColumn[]\` passed to the \`DataEditor\` in the \`columns\` property should be memoized to avoid excessive re-rendering. These samples may not do this for the sake of brevity.
 
-There are only two mandatory properties for each \`GridColumn\`: \`title\` and \`width\`. The width is a number which represents the width of the column in pixels.`}
+There are only two mandatory properties for each \`GridColumn\`: \`title\` and \`id\`. The id should be a stable id and not the index of the column. Additionally a \`width\` property can be provided which represents the width of the column in pixels. If a width is provided the id may be omited. This may change in a future version.`}
             </Marked>
             <Highlight>
                 {`
 const columns: GridColumn[] = [
-    { title: "First", width: 150 },
-    { title: "Second", width: 150 }
+    { title: "First", id: "first", width: 150 },
+    { title: "Second", id: "second", width: 150 }
 ];
 
 <DataEditor {...rest} columns={columns} />
@@ -73,11 +73,11 @@ Default header icons are available. They can also be reaplced by passing a new m
             <Highlight>
                 {`
 const columns: GridColumn[] = [
-    { title: "Name", width: 250, icon: GridColumnIcon.HeaderString, 
+    { title: "Name", id: "name", width: 250, icon: GridColumnIcon.HeaderString, 
       overlayIcon: GridColumnIcon.RowOwnerOverlay 
     },
-    { title: "Age", width: 100, icon: GridColumnIcon.HeaderNumber },
-    { title: "Avatar", width: 80, icon: GridColumnIcon.HeaderImage },
+    { title: "Age", id: "age", width: 100, icon: GridColumnIcon.HeaderNumber },
+    { title: "Avatar", id: "avatar", width: 80, icon: GridColumnIcon.HeaderImage },
 ];
 
 <DataEditor {...rest} columns={columns} />
@@ -109,13 +109,13 @@ Headers can be provided with individual theme overrides which themes both the he
             <Highlight>
                 {`
 const columns: GridColumn[] = [
-    { title: "Name", width: 250, icon: GridColumnIcon.HeaderString },
-    { title: "Age", width: 100, icon: GridColumnIcon.HeaderNumber, themeOverride: {
+    { title: "Name", id="name", width: 250, icon: GridColumnIcon.HeaderString },
+    { title: "Age", id="age", width: 100, icon: GridColumnIcon.HeaderNumber, themeOverride: {
         bgIconHeader: "#00967d",
         textDark: "#00c5a4",
         textHeader: "#00c5a4",
     } },
-    { title: "Avatar", width: 80, icon: GridColumnIcon.HeaderImage },
+    { title: "Avatar", id="avatar", width: 80, icon: GridColumnIcon.HeaderImage },
 ];
 
 <DataEditor {...rest} columns={columns} />
@@ -144,6 +144,7 @@ const columns: GridColumn[] = [
         </DocWrapper>
     );
 };
+(GridColumns as any).storyName = "03. Grid Columns";
 (GridColumns as any).parameters = {
     options: {
         showPanel: false,
