@@ -28,8 +28,16 @@ interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {
     cell: T;
 }
 
+// intentionally mutable
+export interface PrepResult {
+    font?: string;
+    fillStyle?: string;
+    renderer: {};
+    deprep?: (args: Pick<BaseDrawArgs, "ctx">) => void;
+}
+
 type DrawCallback<T extends InnerGridCell> = (args: DrawArgs<T>) => void;
-export type PrepCallback = (args: BaseDrawArgs) => void;
+export type PrepCallback = (args: BaseDrawArgs, lastPrep?: PrepResult) => Partial<PrepResult>;
 export type DeprepCallback = (args: Pick<BaseDrawArgs, "ctx">) => void;
 
 type ProvideEditorCallback<T extends InnerGridCell> = (
