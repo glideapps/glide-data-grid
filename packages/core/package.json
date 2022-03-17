@@ -1,6 +1,6 @@
 {
   "name": "@glideapps/glide-data-grid",
-  "version": "3.5.0-alpha1",
+  "version": "3.4.99-marked-test2",
   "description": "Super fast, pure canvas Data Grid Editor",
   "sideEffects": false,
   "type": "module",
@@ -58,6 +58,11 @@
     "react": "^16.12.0 || 17.x",
     "react-dom": "^16.12.0 || 17.x",
     "styled-components": "^5.2.0"
+  },
+  "peerDependenciesMeta": {
+    "marked": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
