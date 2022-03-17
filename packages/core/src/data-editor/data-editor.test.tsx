@@ -2040,4 +2040,67 @@ describe("data-editor", () => {
         expect(selectedRowsSpy).not.toHaveBeenCalled();
         expect(selectedColsSpy).not.toHaveBeenCalled();
     });
+
+    test("Span expansion", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+
+        const getCellContent: typeof basicProps["getCellContent"] = c => {
+            const [col, row] = c;
+
+            if (row === 3 && col >= 2 && col <= 3) {
+                const cell = {
+                    ...basicProps.getCellContent([2, 3]),
+                    span: [2, 3] as const,
+                };
+                return cell;
+            }
+
+            return basicProps.getCellContent(c);
+        };
+
+        const getCellsForSelection: typeof basicProps["getCellsForSelection"] = rect => {
+            const result: GridCell[][] = [];
+            for (let y = rect.y; y < rect.y + rect.height; y++) {
+                const row: GridCell[] = [];
+                for (let x = rect.x; x < rect.x + rect.width; x++) {
+                    row.push(getCellContent([x, y]));
+                }
+                result.push(row);
+            }
+            return result;
+        };
+
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                getCellContent={getCellContent}
+                getCellsForSelection={getCellsForSelection}
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 350, // Col C
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            shiftKey: true,
+            key: "ArrowDown",
+        });
+
+        expect(spy).toBeCalledWith({ cell: [2, 2], range: { x: 2, y: 2, width: 2, height: 2 } });
+    });
 });

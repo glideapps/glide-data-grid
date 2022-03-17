@@ -96,6 +96,8 @@ function lossyCopyData<T extends EditableGridCell>(source: EditableGridCell, tar
             ...target,
             data: source.data?.toString() ?? "",
         };
+    } else if (target.kind === GridCellKind.Custom) {
+        return target;
     }
     assertNever(target);
 }
