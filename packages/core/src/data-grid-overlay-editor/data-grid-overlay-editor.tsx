@@ -19,6 +19,7 @@ export interface DataGridOverlayEditorProps {
     readonly target: Rectangle;
     readonly content: GridCell;
     readonly className?: string;
+    readonly initialValue?: string;
     readonly onFinishEditing: (newCell: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly forceEditMode: boolean;
     readonly highlight: boolean;
@@ -33,6 +34,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         content,
         onFinishEditing,
         forceEditMode,
+        initialValue,
         imageEditorOverride,
         markdownDivCreateNode,
         highlight,
@@ -41,14 +43,48 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     } = p;
 
     const [tempValue, setTempValue] = React.useState<GridCell | undefined>(forceEditMode ? content : undefined);
+    const finished = React.useRef(false);
+    const customMotion = React.useRef<[-1 | 0 | 1, -1 | 0 | 1] | undefined>(undefined);
 
     const onClickOutside = React.useCallback(() => {
         onFinishEditing(tempValue, [0, 0]);
+        finished.current = true;
     }, [tempValue, onFinishEditing]);
 
     const onCustomFinishedEditing = React.useCallback(
-        (newValue?: GridCell) => {
-            onFinishEditing(newValue !== undefined ? newValue : tempValue, [0, 0]);
+        (newValue: GridCell | undefined) => {
+            newValue = newValue ?? tempValue;
+            onFinishEditing(newValue, customMotion.current ?? [0, 0]);
+            finished.current = true;
+        },
+        [onFinishEditing, tempValue]
+    );
+
+    const onKeyDownCustom = React.useCallback(
+        async (event: React.KeyboardEvent) => {
+            let save = false;
+            if (event.key === "Escape") {
+                event.stopPropagation();
+                event.preventDefault();
+                customMotion.current = [0, 0];
+            } else if (event.key === "Enter" && !event.shiftKey) {
+                event.stopPropagation();
+                event.preventDefault();
+                customMotion.current = [0, 1];
+                save = true;
+            } else if (event.key === "Tab") {
+                event.stopPropagation();
+                event.preventDefault();
+                customMotion.current = [event.shiftKey ? -1 : 1, 0];
+                save = true;
+            }
+
+            await new Promise(r => window.setTimeout(r, 0));
+
+            if (!finished.current && customMotion.current !== undefined) {
+                onFinishEditing(save ? tempValue : undefined, customMotion.current);
+                finished.current = true;
+            }
         },
         [onFinishEditing, tempValue]
     );
@@ -57,6 +93,8 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         (event: React.KeyboardEvent) => {
             if (event.key === "Escape") {
                 onFinishEditing(undefined, [0, 0]);
+                event.stopPropagation();
+                event.preventDefault();
             } else if (event.key === "Enter" && !event.shiftKey) {
                 onFinishEditing(tempValue, [0, 1]);
                 event.stopPropagation();
@@ -93,12 +131,13 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         if (isObjectEditor) {
             styleOverride = customEditor.styleOverride;
         }
-        const Editor = isObjectEditor ? customEditor.editor : customEditor;
+        const CustomEditor = isObjectEditor ? customEditor.editor : customEditor;
         editor = (
-            <Editor
+            <CustomEditor
                 isHighlighted={highlight}
                 onChange={setTempValue}
                 value={targetValue}
+                initialValue={initialValue}
                 onFinishedEditing={onCustomFinishedEditing}
             />
         );
@@ -136,7 +175,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 as={useLabel === true ? "label" : undefined}
                 targetRect={target}
                 pad={pad}>
-                <div className="clip-region" onKeyDown={customEditor === undefined ? undefined : onKeyDown}>
+                <div className="clip-region" onKeyDown={customEditor === undefined ? undefined : onKeyDownCustom}>
                     {editor}
                 </div>
             </DataGridOverlayEditorStyle>

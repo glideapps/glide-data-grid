@@ -183,7 +183,7 @@ export type GridColumn = SizedGridColumn | AutoGridColumn;
 
 export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell;
 
-export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell | UriCell | NumberCell;
+export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell | UriCell | NumberCell | CustomCell;
 
 export type EditableGridCellKind = EditableGridCell["kind"];
 
@@ -193,8 +193,7 @@ export function isEditableGridCell(cell: GridCell): cell is EditableGridCell {
         cell.kind === GridCellKind.Bubble ||
         cell.kind === GridCellKind.RowID ||
         cell.kind === GridCellKind.Protected ||
-        cell.kind === GridCellKind.Drilldown ||
-        cell.kind === GridCellKind.Custom
+        cell.kind === GridCellKind.Drilldown
     ) {
         return false;
     }
@@ -233,7 +232,8 @@ export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
         cell.kind === GridCellKind.Text ||
         cell.kind === GridCellKind.Number ||
         cell.kind === GridCellKind.Markdown ||
-        cell.kind === GridCellKind.Uri
+        cell.kind === GridCellKind.Uri ||
+        cell.kind === GridCellKind.Custom
     ) {
         return cell.readonly !== true;
     }
@@ -308,10 +308,12 @@ export type ProvideEditorComponent<T extends GridCell> = React.FunctionComponent
     readonly onFinishedEditing: (newValue?: T) => void;
     readonly isHighlighted: boolean;
     readonly value: T;
+    readonly initialValue?: string;
 }>;
 
 type ObjectEditorCallbackResult<T extends GridCell> = {
     editor: ProvideEditorComponent<T>;
+    deletedValue?: (toDelete: T) => T;
     styleOverride?: CSSProperties;
     disablePadding?: boolean;
     disableStyling?: boolean;
@@ -340,6 +342,7 @@ export interface CustomCell<T extends {} = {}> extends BaseGridCell {
     readonly kind: GridCellKind.Custom;
     readonly data: T;
     readonly copyData: string;
+    readonly readonly?: boolean;
 }
 
 export interface DrilldownCellData {
