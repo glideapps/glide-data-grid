@@ -585,7 +585,7 @@ function getAndCacheDrilldownBorder(
     ctx.fillStyle = bgCell;
     ctx.fill();
 
-    ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
+    ctx.shadowColor = "rgba(24, 25, 34, 0.3)";
     ctx.shadowOffsetY = 1;
     ctx.shadowBlur = 5;
     ctx.fillStyle = bgCell;
@@ -640,9 +640,21 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
             const rx = Math.floor(rectInfo.x);
             const rw = Math.floor(rectInfo.width);
             ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(el, 0, 0, sideWidth, height, rx - 5, y + h / 2 - 17, 17, 34);
-            ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + 12, y + h / 2 - 17, rw - 24, 34);
-            ctx.drawImage(el, width - sideWidth, 0, sideWidth, height, rx + rw - 12, y + h / 2 - 17, 17, 34);
+            const maxSideWidth = Math.min(17, rw / 2 + 5);
+            ctx.drawImage(el, 0, 0, sideWidth, height, rx - 5, y + h / 2 - 17, maxSideWidth, 34);
+            if (rectInfo.width > 24)
+                ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + 12, y + h / 2 - 17, rw - 24, 34);
+            ctx.drawImage(
+                el,
+                width - sideWidth,
+                0,
+                sideWidth,
+                height,
+                rx + rw - (maxSideWidth - 5),
+                y + h / 2 - 17,
+                maxSideWidth,
+                34
+            );
             ctx.imageSmoothingEnabled = true;
         });
     }
