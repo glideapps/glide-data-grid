@@ -1,16 +1,17 @@
 {
-  "compilerOptions": {
-      "allowSyntheticDefaultImports": true,
-      "esModuleInterop": true,
-      "jsx": "react",
-      "moduleResolution": "node",
-      "noImplicitAny": true,
-      "noUnusedLocals": true,
-      "skipLibCheck": true,
-      "noUnusedParameters": true,
-      "strict": true,
-      "target": "es6",
-      "typeRoots": ["./node_modules/@types", "../node_modules/@types"]
-  },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx"]
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "jsx": "react",
+        "moduleResolution": "node",
+        "noImplicitAny": true,
+        "module": "esnext",
+        "noUnusedLocals": true,
+        "skipLibCheck": true,
+        "noUnusedParameters": true,
+        "strict": true,
+        "target": "es6",
+        "typeRoots": ["./node_modules/@types", "../node_modules/@types"]
+    },
+    "include": ["./src/**/*.ts", "./src/**/*.tsx"]
 }

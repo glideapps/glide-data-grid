@@ -1,17 +1,19 @@
 import React from "react";
 import { MarkdownContainer } from "./private/markdown-container";
 
-let markedFn: ((input: string) => string | undefined) | undefined;
-try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const ns = require("marked");
-    if (typeof ns === "function") {
-        markedFn = ns;
-    } else if (typeof ns.marked === "function") {
-        markedFn = ns.marked;
+async function loadMarked() {
+    let markedFn: ((input: string) => string | undefined) | undefined;
+    try {
+        const ns = await import("marked");
+        if (typeof ns === "function") {
+            markedFn = ns;
+        } else if (typeof ns.marked === "function") {
+            markedFn = ns.marked;
+        }
+    } catch (er) {
+        markedFn = undefined;
     }
-} catch (er) {
-    markedFn = undefined;
+    return markedFn;
 }
 
 export interface MarkdownDivProps {
@@ -21,6 +23,12 @@ export interface MarkdownDivProps {
 
 export default class MarkdownDiv<TProps extends MarkdownDivProps, TState> extends React.PureComponent<TProps, TState> {
     private targetElement: HTMLElement | null = null;
+    private marked: ((input: string) => string | undefined) | undefined = undefined;
+
+    async componentDidMount() {
+        this.marked = await loadMarked();
+        this.forceUpdate();
+    }
 
     private renderMarkdownIntoDiv() {
         const { targetElement } = this;
@@ -28,7 +36,7 @@ export default class MarkdownDiv<TProps extends MarkdownDivProps, TState> extend
 
         const { contents, createNode } = this.props;
 
-        const innerHTML: string | undefined = markedFn?.(contents);
+        const innerHTML: string | undefined = this.marked?.(contents);
         if (innerHTML === undefined) return;
 
         const childRange = document.createRange();
