@@ -100,7 +100,7 @@ export function drawCell(
         hoverX = hoverInfo[1][0];
         hoverY = hoverInfo[1][1];
     }
-    let result: PrepResult | undefined = lastPrep;
+    let result: PrepResult | undefined = undefined;
     const args = {
         ctx,
         theme,
@@ -145,6 +145,10 @@ export function drawCell(
             if (partialPrepResult !== undefined) {
                 partialPrepResult.renderer = r;
                 result = partialPrepResult as PrepResult;
+            } else {
+                result = {
+                    renderer: r,
+                };
             }
         }
     });
