@@ -295,13 +295,15 @@ export function drawTextCell(args: BaseDrawArgs, data: string) {
         data = data.slice(0, max);
     }
 
-    const dir = direction(data);
+    if (data.length > 0) {
+        const dir = direction(data);
 
-    if (dir === "rtl") {
-        const textWidth = measureTextCached(data, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`).width;
-        ctx.fillText(data, x + w - theme.cellHorizontalPadding - textWidth + 0.5, y + h / 2);
-    } else {
-        ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+        if (dir === "rtl") {
+            const textWidth = measureTextCached(data, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`).width;
+            ctx.fillText(data, x + w - theme.cellHorizontalPadding - textWidth + 0.5, y + h / 2);
+        } else {
+            ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+        }
     }
 }
 
