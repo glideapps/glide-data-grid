@@ -11,6 +11,7 @@ import {
     HeaderSelectionTrigger,
     isSizedGridColumn,
 } from "..";
+import { DataEditorRef } from "./data-editor";
 
 jest.mock("react-virtualized-auto-sizer", () => {
     return {
@@ -221,7 +222,8 @@ const Context: React.FC = p => {
     );
 };
 
-const EventedDataEditor: React.VFC<DataEditorProps> = p => {
+// eslint-disable-next-line react/display-name
+const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, ref) => {
     const [sel, setSel] = React.useState<GridSelection>();
     const [extraRows, setExtraRows] = React.useState(0);
     const [selectedRows, setSelectedRows] = React.useState(p.selectedRows ?? CompactSelection.empty());
@@ -259,6 +261,7 @@ const EventedDataEditor: React.VFC<DataEditorProps> = p => {
     return (
         <DataEditor
             {...p}
+            ref={ref}
             gridSelection={sel}
             selectedRows={selectedRows}
             selectedColumns={selectedCols}
@@ -269,7 +272,7 @@ const EventedDataEditor: React.VFC<DataEditorProps> = p => {
             onRowAppended={p.onRowAppended === undefined ? undefined : onRowAppened}
         />
     );
-};
+});
 
 describe("data-editor", () => {
     test("Focus a11y cell", async () => {
@@ -2102,5 +2105,160 @@ describe("data-editor", () => {
         });
 
         expect(spy).toBeCalledWith({ cell: [2, 2], range: { x: 2, y: 2, width: 2, height: 2 } });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "ArrowDown",
+        });
+
+        expect(spy).toBeCalledWith({ cell: [2, 3], range: { x: 2, y: 3, width: 2, height: 1 } });
+    });
+
+    test("Imperative Handle works", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        act(() => {
+            ref.current?.emit("delete");
+            ref.current?.emit("fill-right");
+            ref.current?.emit("fill-down");
+            ref.current?.emit("copy");
+            ref.current?.emit("paste");
+
+            ref.current?.scrollTo(5, 10);
+            ref.current?.updateCells([{ cell: [0, 0] }]);
+        });
+    });
+
+    test("Ctrl Arrow keys", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "ArrowDown",
+            ctrlKey: true,
+        });
+
+        const cols = basicProps.columns.length;
+
+        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [1, 999] }));
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "ArrowRight",
+            ctrlKey: true,
+        });
+
+        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [cols - 1, 999] }));
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "ArrowUp",
+            ctrlKey: true,
+        });
+
+        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [cols - 1, 0] }));
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "ArrowLeft",
+            ctrlKey: true,
+        });
+
+        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [0, 0] }));
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "ArrowDown",
+            ctrlKey: true,
+            shiftKey: true,
+        });
+
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({ cell: [0, 0], range: { x: 0, y: 0, width: 1, height: 1000 } })
+        );
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "ArrowRight",
+            ctrlKey: true,
+            shiftKey: true,
+        });
+
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({ cell: [0, 0], range: { x: 0, y: 0, width: cols, height: 1000 } })
+        );
+
+        // spy.mockClear();
+        // fireEvent.keyDown(canvas, {
+        //     key: "ArrowUp",
+        //     ctrlKey: true,
+        //     shiftKey: true,
+        // });
+
+        // expect(spy).toBeCalledWith(
+        //     expect.objectContaining({ cell: [0, 0], range: { x: 0, y: 0, width: cols, height: 1 } })
+        // );
+
+        // spy.mockClear();
+        // fireEvent.keyDown(canvas, {
+        //     key: "ArrowLeft",
+        //     ctrlKey: true,
+        //     shiftKey: true,
+        // });
+
+        // expect(spy).toBeCalledWith(
+        //     expect.objectContaining({ cell: [0, 0], range: { x: 0, y: 0, width: 1, height: 1 } })
+        // );
+    });
+
+    test("Select range with mouse going out of bounds", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        const columns = basicProps.columns.slice(0, 2);
+        render(<EventedDataEditor {...basicProps} columns={columns} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2
+        });
+
+        spy.mockClear();
+        fireEvent.mouseMove(canvas, {
+            clientX: 600, // Col B
+            clientY: 36 + 32 * 12 + 16, // Row 2
+        });
+
+        expect(spy).toBeCalledWith({ cell: [1, 2], range: { height: 11, width: 1, x: 1, y: 2 } });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 600, // Col B
+            clientY: 36 + 32 * 12 + 16, // Row 2
+        });
     });
 });
