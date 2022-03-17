@@ -28,7 +28,7 @@ import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
 import { blend, withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
-import { DeprepCallback } from "./cells/cell-types";
+import { PrepResult } from "./cells/cell-types";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when
@@ -91,16 +91,16 @@ export function drawCell(
     hoverAmount: number,
     hoverInfo: HoverInfo | undefined,
     frameTime: number,
-    lastToken?: {} | undefined,
+    lastPrep?: PrepResult,
     enqueue?: (item: Item) => void
-): {} | DeprepCallback | undefined {
+): PrepResult | undefined {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
     if (hoverInfo !== undefined && hoverInfo[0][0] === col && hoverInfo[0][1] === row) {
         hoverX = hoverInfo[1][0];
         hoverY = hoverInfo[1][1];
     }
-    let result: {} | undefined = undefined;
+    let result: PrepResult | undefined = undefined;
     const args = {
         ctx,
         theme,
@@ -118,7 +118,7 @@ export function drawCell(
         imageLoader,
         spriteManager,
     };
-    const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, forcePrep => {
+    const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
         const drawn = isInnerOnlyCell(cell)
             ? false
             : drawCustomCell?.({
@@ -136,14 +136,20 @@ export function drawCell(
               }) === true;
         if (!drawn && cell.kind !== GridCellKind.Custom) {
             const r = CellRenderers[cell.kind];
-            if (lastToken !== r || forcePrep) {
-                if (typeof lastToken === "function") {
-                    lastToken(args);
-                }
-                r.renderPrep?.(args);
+            if (lastPrep?.renderer !== r) {
+                lastPrep?.deprep?.(args);
+                lastPrep = undefined;
             }
+            const partialPrepResult = r.renderPrep?.(args, lastPrep);
             r.render(args);
-            result = r?.renderDeprep ?? r;
+            if (partialPrepResult !== undefined) {
+                partialPrepResult.renderer = r;
+                result = partialPrepResult as PrepResult;
+            } else {
+                result = {
+                    renderer: r,
+                };
+            }
         }
     });
     if (needsAnim) enqueue?.([col, row]);
@@ -946,6 +952,19 @@ function getSpanBounds(
     return [frozenRect, contentRect];
 }
 
+// preppable items:
+// - font
+// - fillStyle
+
+// Column draw loop prep cycle
+// - Prep item
+// - Prep sets props
+// - Prep returns list of cared about props
+// - Draw item
+// - Loop may set some items, if present in args list, set undefined
+// - Prep next item, giving previous result
+// - If next item type is different, de-prep
+// - Result per column
 function drawCells(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
@@ -1025,7 +1044,7 @@ function drawCells(
                 font = colFont;
                 ctx.font = colFont;
             }
-            let lastToken: {} | DeprepCallback | undefined;
+            let prepResult: PrepResult | undefined = undefined;
 
             walkRowsInCol(
                 startRow,
@@ -1097,8 +1116,7 @@ function drawCells(
                                 cellWidth = area.width;
                                 handledSpans.add(spanKey);
                                 ctx.restore();
-                                if (typeof lastToken === "function") lastToken({ ctx });
-                                lastToken = undefined;
+                                prepResult = undefined;
                                 ctx.save();
                                 ctx.beginPath();
                                 const d = Math.max(0, clipX - area.x);
@@ -1145,13 +1163,6 @@ function drawCells(
                     let fill: string | undefined;
                     if (isSticky || theme.bgCell !== outerTheme.bgCell) {
                         fill = blend(theme.bgCell, fill);
-                        if (typeof lastToken === "function") lastToken({ ctx });
-                        lastToken = undefined;
-                    }
-
-                    if (theme.textDark !== outerTheme.textDark) {
-                        if (typeof lastToken === "function") lastToken({ ctx });
-                        lastToken = undefined;
                     }
 
                     if (highlighted || rowDisabled) {
@@ -1161,17 +1172,16 @@ function drawCells(
                         if (highlighted) {
                             fill = blend(theme.accentLight, fill);
                         }
-                        if (typeof lastToken === "function") lastToken({ ctx });
-                        lastToken = undefined;
                     } else {
                         if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
                             fill = blend(theme.bgSearchResult, fill);
-                            if (typeof lastToken === "function") lastToken({ ctx });
-                            lastToken = undefined;
                         }
                     }
                     if (fill !== undefined) {
                         ctx.fillStyle = fill;
+                        if (prepResult !== undefined) {
+                            prepResult.fillStyle = fill;
+                        }
                         ctx.fillRect(cellX, drawY, cellWidth, rh);
                     }
 
@@ -1187,7 +1197,7 @@ function drawCells(
                             ctx.font = cellFont;
                             font = cellFont;
                         }
-                        const drawResult = drawCell(
+                        prepResult = drawCell(
                             ctx,
                             row,
                             cell,
@@ -1204,10 +1214,9 @@ function drawCells(
                             hoverValue?.hoverAmount ?? 0,
                             hoverInfo,
                             frameTime,
-                            lastToken,
+                            prepResult,
                             enqueue
                         );
-                        lastToken = drawResult;
                     }
 
                     if (cell.style === "faded") {
@@ -1216,8 +1225,8 @@ function drawCells(
                     toDraw--;
                     if (drawingSpan) {
                         ctx.restore();
-                        if (typeof lastToken === "function") lastToken({ ctx });
-                        lastToken = undefined;
+                        prepResult?.deprep?.({ ctx });
+                        prepResult = undefined;
                         reclip();
                         font = colFont;
                         ctx.font = colFont;

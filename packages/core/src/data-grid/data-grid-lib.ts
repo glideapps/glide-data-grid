@@ -2,7 +2,7 @@ import { Theme } from "../common/styles";
 import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn } from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
-import { BaseDrawArgs } from "./cells/cell-types";
+import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -241,12 +241,12 @@ export function drawWithLastUpdate(
     args: BaseDrawArgs,
     lastUpdate: number | undefined,
     frameTime: number,
-    draw: (forcePrep: boolean) => void
+    lastPrep: PrepResult | undefined,
+    draw: () => void
 ) {
     const { ctx, x, y, w: width, h: height, theme } = args;
     let progress = Number.MAX_SAFE_INTEGER;
     const animTime = 500;
-    let forcePrep = false;
     if (lastUpdate !== undefined) {
         progress = frameTime - lastUpdate;
 
@@ -256,18 +256,31 @@ export function drawWithLastUpdate(
             ctx.fillStyle = theme.bgSearchResult;
             ctx.fillRect(x, y, width, height);
             ctx.globalAlpha = 1;
-            forcePrep = true;
+            if (lastPrep !== undefined) {
+                lastPrep.fillStyle = theme.bgSearchResult;
+            }
         }
     }
 
-    draw(forcePrep);
+    draw();
 
     return progress < animTime;
 }
 
-export function prepTextCell(args: BaseDrawArgs, overrideColor?: string) {
+export function prepTextCell(
+    args: BaseDrawArgs,
+    lastPrep: PrepResult | undefined,
+    overrideColor?: string
+): Partial<PrepResult> {
     const { ctx, theme } = args;
-    ctx.fillStyle = overrideColor ?? theme.textDark;
+    const result: Partial<PrepResult> = lastPrep ?? {};
+
+    const newFill = overrideColor ?? theme.textDark;
+    if (newFill !== result.fillStyle) {
+        ctx.fillStyle = newFill;
+        result.fillStyle = newFill;
+    }
+    return result;
 }
 
 export function drawTextCell(args: BaseDrawArgs, data: string) {
@@ -378,10 +391,16 @@ function drawCheckbox(
     }
 }
 
-export function prepMarkerRowCell(args: BaseDrawArgs) {
+export function prepMarkerRowCell(args: BaseDrawArgs, lastPrep: PrepResult | undefined): Partial<PrepResult> {
     const { ctx, theme } = args;
-    ctx.font = `9px ${theme.fontFamily}`;
+    const newFont = `9px ${theme.fontFamily}`;
+    const result: Partial<PrepResult> = lastPrep ?? {};
+    if (result?.font !== newFont) {
+        ctx.font = newFont;
+        result.font = newFont;
+    }
     ctx.textAlign = "center";
+    return result;
 }
 
 export function deprepMarkerRowCell(args: Pick<BaseDrawArgs, "ctx">) {
