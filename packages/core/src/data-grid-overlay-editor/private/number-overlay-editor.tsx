@@ -1,6 +1,7 @@
 import * as React from "react";
 import { NumberOverlayEditorStyle } from "./number-overlay-editor-style";
-import NumberFormat, { NumberFormatValues } from "react-number-format";
+import type { NumberFormatValues } from "react-number-format";
+import NumberFormat from "react-number-format";
 
 interface Props {
     value: number | undefined;
