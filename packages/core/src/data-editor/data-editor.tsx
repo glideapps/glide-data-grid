@@ -63,6 +63,7 @@ type Props = Omit<
     | "groupHeaderHeight"
     | "lastRowSticky"
     | "lockColumns"
+    | "firstColAccessible"
     | "onCellFocused"
     | "onKeyDown"
     | "onKeyUp"
@@ -1565,7 +1566,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (event: GridKeyEventArgs) => {
             const fn = async () => {
                 const overlayOpen = overlay !== undefined;
-                const shiftKey = event.shiftKey;
+                const { altKey, shiftKey } = event;
                 const isOSX = browserIsOSX.value;
                 const isPrimaryKey = isOSX ? event.metaKey : event.ctrlKey;
                 const isDeleteKey = event.key === "Delete" || (isOSX && event.key === "Backspace");
@@ -1699,9 +1700,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else if (event.key === "ArrowDown") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        adjustSelection([0, isPrimaryKey ? 2 : 1]);
+                        // ctrl + alt is used as a screen reader command, let's not nuke it.
+                        adjustSelection([0, isPrimaryKey && !altKey ? 2 : 1]);
                     } else {
-                        if (isPrimaryKey) {
+                        if (isPrimaryKey && !altKey) {
                             row = rows - 1;
                         } else {
                             row += 1;
@@ -1710,23 +1712,26 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else if (event.key === "ArrowUp") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        adjustSelection([0, isPrimaryKey ? -2 : -1]);
+                        // ctrl + alt is used as a screen reader command, let's not nuke it.
+                        adjustSelection([0, isPrimaryKey && !altKey ? -2 : -1]);
                     } else {
-                        row += isPrimaryKey ? Number.MIN_SAFE_INTEGER : -1;
+                        row += isPrimaryKey && !altKey ? Number.MIN_SAFE_INTEGER : -1;
                     }
                 } else if (event.key === "ArrowRight") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        adjustSelection([isPrimaryKey ? 2 : 1, 0]);
+                        // ctrl + alt is used as a screen reader command, let's not nuke it.
+                        adjustSelection([isPrimaryKey && !altKey ? 2 : 1, 0]);
                     } else {
-                        col += isPrimaryKey ? Number.MAX_SAFE_INTEGER : 1;
+                        col += isPrimaryKey && !altKey ? Number.MAX_SAFE_INTEGER : 1;
                     }
                 } else if (event.key === "ArrowLeft") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        adjustSelection([isPrimaryKey ? -2 : -1, 0]);
+                        // ctrl + alt is used as a screen reader command, let's not nuke it.
+                        adjustSelection([isPrimaryKey && !altKey ? -2 : -1, 0]);
                     } else {
-                        col += isPrimaryKey ? Number.MIN_SAFE_INTEGER : -1;
+                        col += isPrimaryKey && !altKey ? Number.MIN_SAFE_INTEGER : -1;
                     }
                 } else if (event.key === "Tab") {
                     setOverlay(undefined);
@@ -2135,6 +2140,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             keyCode: 46,
                             metaKey: false,
                             shiftKey: false,
+                            altKey: false,
                         });
                         break;
                     case "fill-right":
@@ -2146,6 +2152,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             keyCode: 82,
                             metaKey: false,
                             shiftKey: false,
+                            altKey: false,
                         });
                         break;
                     case "fill-down":
@@ -2157,6 +2164,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             keyCode: 68,
                             metaKey: false,
                             shiftKey: false,
+                            altKey: false,
                         });
                         break;
                     case "copy":
@@ -2186,6 +2194,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 disabledRows={disabledRows}
                 freezeColumns={mangledFreezeColumns}
                 lockColumns={rowMarkerOffset}
+                firstColAccessible={rowMarkerOffset === 0}
                 getCellContent={getMangedCellContent}
                 getGroupDetails={mangledGetGroupDetails}
                 headerHeight={headerHeight}

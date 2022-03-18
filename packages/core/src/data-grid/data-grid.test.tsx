@@ -33,6 +33,7 @@ const basicProps: DataGridProps = {
     ],
     enableGroups: false,
     freezeColumns: 0,
+    firstColAccessible: true,
     onMouseMove: () => undefined,
     getCellContent: cell => ({
         kind: GridCellKind.Text,

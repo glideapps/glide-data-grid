@@ -61,6 +61,7 @@ export interface GridKeyEventArgs {
     readonly bounds: Rectangle | undefined;
     readonly key: string;
     readonly keyCode: number;
+    readonly altKey: boolean;
     readonly shiftKey: boolean;
     readonly ctrlKey: boolean;
     readonly metaKey: boolean;

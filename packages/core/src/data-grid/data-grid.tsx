@@ -57,6 +57,7 @@ export interface DataGridProps {
 
     readonly freezeColumns: number;
     readonly lastRowSticky: boolean;
+    readonly firstColAccessible: boolean;
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
     readonly isDragging: boolean;
@@ -169,6 +170,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         onMouseMove,
         onItemHovered,
         dragAndDropState,
+        firstColAccessible,
         onKeyDown,
         onKeyUp,
         canvasRef,
@@ -929,6 +931,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 ctrlKey: event.ctrlKey,
                 metaKey: event.metaKey,
                 shiftKey: event.shiftKey,
+                altKey: event.altKey,
                 key: event.key,
                 keyCode: event.keyCode,
             });
@@ -955,6 +958,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 ctrlKey: event.ctrlKey,
                 metaKey: event.metaKey,
                 shiftKey: event.shiftKey,
+                altKey: event.altKey,
                 key: event.key,
                 keyCode: event.keyCode,
             });
@@ -1127,7 +1131,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const accessibilityTree = useDebouncedMemo(
         () => {
             if (width < 50) return null;
-            const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
+            let effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
+            const colOffset = firstColAccessible ? 0 : -1;
+            if (!firstColAccessible && effectiveCols[0]?.sourceIndex === 0) {
+                effectiveCols = effectiveCols.slice(1);
+            }
 
             const getRowData = (cell: InnerGridCell) => {
                 if (cell.kind === GridCellKind.Custom) {
@@ -1138,19 +1146,26 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             };
 
             return (
-                <div key="access-tree" role="grid" aria-rowcount={rows} aria-colcount={mappedColumns.length}>
-                    <div role="rowgroup">
-                        <div role="row" aria-rowindex={1} row-index={1}>
+                <table
+                    key="access-tree"
+                    role="grid"
+                    aria-rowcount={rows + 1}
+                    aria-colcount={mappedColumns.length + colOffset}>
+                    <thead role="rowgroup">
+                        <tr role="row" aria-rowindex={1} row-index={1}>
                             {effectiveCols.map(c => (
-                                <div role="columnheader" aria-colindex={c.sourceIndex + 1} key={c.sourceIndex}>
+                                <th
+                                    role="columnheader"
+                                    aria-colindex={c.sourceIndex + 1 + colOffset}
+                                    key={c.sourceIndex}>
                                     {c.title}
-                                </div>
+                                </th>
                             ))}
-                        </div>
-                    </div>
-                    <div role="rowgroup">
+                        </tr>
+                    </thead>
+                    <tbody role="rowgroup">
                         {makeRange(cellYOffset, Math.min(rows, cellYOffset + accessibilityHeight)).map(row => (
-                            <div role="row" key={row} aria-rowindex={row + 2} row-index={row + 2}>
+                            <tr role="row" key={row} aria-rowindex={row + 2} row-index={row + 2}>
                                 {effectiveCols.map(c => {
                                     const col = c.sourceIndex;
                                     const key = `${col},${row}`;
@@ -1158,10 +1173,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                     const focused = fCol === col && fRow === row;
                                     const id = `glide-cell-${col}-${row}`;
                                     return (
-                                        <div
+                                        <td
                                             key={key}
                                             role="gridcell"
-                                            aria-colindex={col + 1}
+                                            aria-colindex={col + 1 + colOffset}
                                             id={id}
                                             data-testid={id}
                                             onClick={() => {
@@ -1175,6 +1190,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                                     keyCode: 13,
                                                     metaKey: false,
                                                     shiftKey: false,
+                                                    altKey: false,
                                                 });
                                             }}
                                             onFocusCapture={e => {
@@ -1184,13 +1200,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                             ref={focused ? focusElement : undefined}
                                             tabIndex={-1}>
                                             {getRowData(getCellContent([col, row]))}
-                                        </div>
+                                        </td>
                                     );
                                 })}
-                            </div>
+                            </tr>
                         ))}
-                    </div>
-                </div>
+                    </tbody>
+                </table>
             );
         },
         [

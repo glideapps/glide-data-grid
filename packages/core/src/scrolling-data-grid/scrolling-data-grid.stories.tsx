@@ -73,6 +73,7 @@ export function Simplenotest() {
             translateX={translateX}
             translateY={translateY}
             lockColumns={0}
+            firstColAccessible={true}
             groupHeaderHeight={34}
             headerHeight={44}
             lastRowSticky={false}

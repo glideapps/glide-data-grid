@@ -63,6 +63,7 @@ export function Simplenotest() {
                 owned: true,
             })}
             freezeColumns={0}
+            firstColAccessible={true}
             verticalBorder={() => true}
             lastRowSticky={false}
             isResizing={false}
@@ -99,6 +100,7 @@ export function SelectedCellnotest() {
             })}
             selectedCell={{ cell: [2, 2], range: { x: 2, y: 2, width: 1, height: 1 } }}
             freezeColumns={0}
+            firstColAccessible={true}
             verticalBorder={() => true}
             lastRowSticky={false}
             isResizing={false}
@@ -135,6 +137,7 @@ export function SelectedRownotest() {
             })}
             selectedRows={CompactSelection.fromSingleSelection([2, 4])}
             freezeColumns={0}
+            firstColAccessible={true}
             verticalBorder={() => true}
             lastRowSticky={false}
             isResizing={false}
@@ -171,6 +174,7 @@ export const SelectedColumnnotest = () => {
             })}
             selectedColumns={CompactSelection.fromSingleSelection([2, 4])}
             freezeColumns={0}
+            firstColAccessible={true}
             verticalBorder={() => true}
             lastRowSticky={false}
             isResizing={false}
