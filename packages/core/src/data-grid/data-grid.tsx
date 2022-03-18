@@ -1144,12 +1144,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     return CellRenderers[cell.kind].getAccessibilityString(cell);
                 }
             };
+            const [fCol, fRow] = selectedCell?.cell ?? [];
+            const range = selectedCell?.range;
 
             return (
                 <table
                     key="access-tree"
                     role="grid"
                     aria-rowcount={rows + 1}
+                    aria-multiselectable="true"
                     aria-colcount={mappedColumns.length + colOffset}>
                     <thead role="rowgroup">
                         <tr role="row" aria-rowindex={1} row-index={1}>
@@ -1169,14 +1172,20 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                 {effectiveCols.map(c => {
                                     const col = c.sourceIndex;
                                     const key = `${col},${row}`;
-                                    const [fCol, fRow] = selectedCell?.cell ?? [];
                                     const focused = fCol === col && fRow === row;
+                                    const selected =
+                                        range !== undefined &&
+                                        col >= range.x &&
+                                        col < range.x + range.width &&
+                                        row >= range.y &&
+                                        row < range.y + range.height;
                                     const id = `glide-cell-${col}-${row}`;
                                     return (
                                         <td
                                             key={key}
                                             role="gridcell"
                                             aria-colindex={col + 1 + colOffset}
+                                            aria-selected={selected}
                                             id={id}
                                             data-testid={id}
                                             onClick={() => {
@@ -1218,7 +1227,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             rows,
             cellYOffset,
             accessibilityHeight,
-            selectedCell?.cell,
+            selectedCell,
             focusElement,
             getCellContent,
             canvasRef,
