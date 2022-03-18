@@ -40,6 +40,7 @@ import { CellRenderers } from "../data-grid/cells";
 import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
 import { useCellSizer } from "./use-cell-sizer";
+import { isHotkey } from "../common/is-hotkey";
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
@@ -1636,10 +1637,33 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (gridSelection === undefined) return;
                 let [col, row] = gridSelection.cell;
 
-                if (event.key === "Enter" && event.bounds !== undefined) {
+                if (isHotkey("primary+ ", event)) {
+                    if (selectedColumns.hasIndex(col)) {
+                        setSelectedColumns(selectedColumns.remove(col), "selection");
+                    } else {
+                        setSelectedColumns(selectedColumns.add(col), "selection");
+                        setGridSelection(undefined, false);
+                        setSelectedRows(CompactSelection.empty());
+                    }
+                } else if (isHotkey("shift+ ", event)) {
+                    if (selectedRows.hasIndex(row)) {
+                        setSelectedRows(selectedRows.remove(row));
+                    } else {
+                        setSelectedRows(selectedRows.add(row));
+                        setGridSelection(undefined, false);
+                        setSelectedColumns(CompactSelection.empty(), "selection");
+                    }
+                } else if (
+                    (isHotkey("Enter", event) || isHotkey(" ", event) || isHotkey("shift+Enter", event)) &&
+                    event.bounds !== undefined
+                ) {
                     if (overlayOpen) {
                         setOverlay(undefined);
-                        row++;
+                        if (isHotkey("Enter", event)) {
+                            row++;
+                        } else if (isHotkey("shift+Enter", event)) {
+                            row--;
+                        }
                     } else if (row === rows && showTrailingBlankRow) {
                         window.setTimeout(() => {
                             const customTargetColumn = getCustomNewRowTargetColumn(col);
@@ -1649,7 +1673,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         reselect(event.bounds, true);
                         event.cancel();
                     }
-                } else if (event.keyCode === 68 && isPrimaryKey && gridSelection.range.height > 1 && enableDownfill) {
+                } else if (isHotkey("primary+_68", event) && gridSelection.range.height > 1 && enableDownfill) {
                     // ctrl/cmd + d
                     const damage: (readonly [number, number])[] = [];
                     const r = gridSelection.range;
@@ -1673,7 +1697,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }))
                     );
                     event.cancel();
-                } else if (event.keyCode === 82 && isPrimaryKey && gridSelection.range.width > 1 && enableRightfill) {
+                } else if (isHotkey("primary+_82", event) && gridSelection.range.width > 1 && enableRightfill) {
                     // ctrl/cmd + r
                     const damage: (readonly [number, number])[] = [];
                     const r = gridSelection.range;

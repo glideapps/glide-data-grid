@@ -95,8 +95,8 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 onFinishEditing(undefined, [0, 0]);
                 event.stopPropagation();
                 event.preventDefault();
-            } else if (event.key === "Enter" && !event.shiftKey) {
-                onFinishEditing(tempValue, [0, 1]);
+            } else if (event.key === "Enter" && !event.ctrlKey) {
+                onFinishEditing(tempValue, [0, event.shiftKey ? -1 : 1]);
                 event.stopPropagation();
                 event.preventDefault();
             } else if (event.key === "Tab") {
