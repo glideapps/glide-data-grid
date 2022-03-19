@@ -5,9 +5,19 @@ import React, { CSSProperties } from "react";
 import ImageWindowLoader from "../common/image-window-loader";
 import { SpriteManager } from "./data-grid-sprites";
 
+// Thoughts:
+// rows/columns are called out as selected, but when selected they must also be added
+// to the range. Handling delete events may have different desired outcomes depending on
+// how the range came to be selected. The rows/columns properties retain this essential
+// information.
 export interface GridSelection {
-    readonly cell: readonly [number, number];
-    readonly range: Readonly<Rectangle>;
+    readonly selection?: {
+        readonly cell: readonly [number, number];
+        readonly range: Readonly<Rectangle>;
+        readonly rangeStack: readonly Readonly<Rectangle>[]; // lowest to highest, does not include range
+    };
+    readonly columns: CompactSelection;
+    readonly rows: CompactSelection;
 }
 
 export type GridMouseEventArgs =

@@ -456,6 +456,9 @@ export function GridSelectionOutOfRangeNoColumns() {
     const [selected, setSelected] = useState<GridSelection | undefined>({
         cell: [2, 8],
         range: { width: 1, height: 1, x: 2, y: 8 },
+        rangeStack: [],
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
     });
 
     const [cols, setCols] = useState(dummyCols);
@@ -544,6 +547,9 @@ export function GridSelectionOutOfRangeLessColumnsThanSelection() {
     const [selected, setSelected] = useState<GridSelection | undefined>({
         cell: [2, 8],
         range: { width: 1, height: 1, x: 2, y: 8 },
+        rangeStack: [],
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
     });
 
     const [cols, setCols] = useState(dummyCols);
@@ -671,6 +677,9 @@ export function MarkdownEdits() {
     const [selected, setSelected] = useState<GridSelection | undefined>({
         cell: [2, 8],
         range: { width: 1, height: 1, x: 2, y: 8 },
+        rangeStack: [],
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
     });
 
     const onSelected = useCallback((newSel?: GridSelection) => {

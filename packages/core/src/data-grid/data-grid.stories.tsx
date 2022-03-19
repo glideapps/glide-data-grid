@@ -98,7 +98,13 @@ export function SelectedCellnotest() {
                 allowOverlay: false,
                 owned: true,
             })}
-            selectedCell={{ cell: [2, 2], range: { x: 2, y: 2, width: 1, height: 1 } }}
+            selection={{
+                cell: [2, 2],
+                range: { x: 2, y: 2, width: 1, height: 1 },
+                rangeStack: [],
+                columns: CompactSelection.empty(),
+                rows: CompactSelection.empty(),
+            }}
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}

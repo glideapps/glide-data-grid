@@ -257,7 +257,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             onKeyDown={p.onKeyDown}
             onKeyUp={p.onKeyUp}
             prelightCells={p.prelightCells}
-            selectedCell={p.selectedCell}
+            selection={p.selection}
             selectedColumns={p.selectedColumns}
             selectedRows={p.selectedRows}
             translateX={p.translateX}

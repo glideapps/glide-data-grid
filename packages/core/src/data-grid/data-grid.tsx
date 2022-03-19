@@ -81,9 +81,7 @@ export interface DataGridProps {
     readonly getRowThemeOverride?: GetRowThemeCallback;
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
-    readonly selectedRows?: CompactSelection;
-    readonly selectedColumns?: CompactSelection;
-    readonly selectedCell?: GridSelection;
+    readonly selection?: GridSelection;
     readonly prelightCells?: readonly (readonly [number, number])[];
 
     readonly disabledRows?: CompactSelection;
@@ -160,7 +158,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         onHeaderMenuClick,
         selectedRows,
         enableGroups,
-        selectedCell,
+        selection: selectedCell,
         selectedColumns,
         freezeColumns,
         lastRowSticky,

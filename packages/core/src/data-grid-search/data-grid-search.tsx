@@ -1,6 +1,13 @@
 // import AppIcon from "common/app-icon";
 import * as React from "react";
-import { GridCell, GridCellKind, GridSelection, Rectangle, InnerGridCell } from "../data-grid/data-grid-types";
+import {
+    GridCell,
+    GridCellKind,
+    GridSelection,
+    Rectangle,
+    InnerGridCell,
+    CompactSelection,
+} from "../data-grid/data-grid-types";
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
 import { assert } from "../common/support";
@@ -143,6 +150,9 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         width: columns.length - searchColOffset,
                         height: Math.min(searchStride, rowsLeft, rows - startY),
                     },
+                    rangeStack: [],
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
                 });
 
                 let added = false;
@@ -439,7 +449,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 rightElementSticky={p.rightElementSticky}
                 scrollRef={p.scrollRef}
                 scrollToEnd={p.scrollToEnd}
-                selectedCell={p.selectedCell}
+                selection={p.selection}
                 selectedColumns={p.selectedColumns}
                 selectedRows={p.selectedRows}
                 showMinimap={p.showMinimap}
