@@ -933,19 +933,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         const newSlice: Slice = [Math.min(lastCol, col), Math.max(lastCol, col) + 1];
 
                         if (isMultiKey) {
-                            setSelectedColumns(selectedColumns.add(newSlice));
+                            setSelectedColumns(undefined, newSlice, isMultiKey);
                         } else {
-                            setSelectedColumns(CompactSelection.fromSingleSelection(newSlice));
+                            setSelectedColumns(CompactSelection.fromSingleSelection(newSlice), undefined, isMultiKey);
                         }
                     } else if (isMultiKey) {
                         if (selectedColumns.hasIndex(col)) {
-                            setSelectedColumns(selectedColumns.remove(col));
+                            setSelectedColumns(selectedColumns.remove(col), undefined, isMultiKey);
                         } else {
-                            setSelectedColumns(selectedColumns.add(col));
+                            setSelectedColumns(undefined, col, isMultiKey);
                         }
                         lastSelectedColRef.current = col;
                     } else {
-                        setSelectedColumns(CompactSelection.fromSingleSelection(col));
+                        setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, isMultiKey);
                         lastSelectedColRef.current = col;
                     }
                     lastSelectedRowRef.current = undefined;
@@ -985,12 +985,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         for (let index = start; index <= end; index++) {
                             newVal = newVal.remove(index);
                         }
-                        setSelectedColumns(newVal);
+                        setSelectedColumns(newVal, undefined, isMultiKey);
                     } else {
-                        setSelectedColumns(selectedColumns.add([start, end + 1]));
+                        setSelectedColumns(undefined, [start, end + 1], isMultiKey);
                     }
                 } else {
-                    setSelectedColumns(CompactSelection.fromSingleSelection([start, end + 1]));
+                    setSelectedColumns(CompactSelection.fromSingleSelection([start, end + 1]), undefined, isMultiKey);
                 }
             }
         },
@@ -1218,7 +1218,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onColumnMovedImpl = React.useCallback(
         (startIndex: number, endIndex: number) => {
             onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset);
-            setSelectedColumns(CompactSelection.fromSingleSelection(endIndex));
+            setSelectedColumns(CompactSelection.fromSingleSelection(endIndex), undefined, true);
         },
         [onColumnMoved, rowMarkerOffset, setSelectedColumns]
     );
@@ -1655,9 +1655,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                 if (isHotkey("primary+ ", event)) {
                     if (selectedColumns.hasIndex(col)) {
-                        setSelectedColumns(selectedColumns.remove(col));
+                        setSelectedColumns(selectedColumns.remove(col), undefined, true);
                     } else {
-                        setSelectedColumns(selectedColumns.add(col));
+                        setSelectedColumns(undefined, col, true);
                     }
                 } else if (isHotkey("primary+a", event)) {
                     // do nothing

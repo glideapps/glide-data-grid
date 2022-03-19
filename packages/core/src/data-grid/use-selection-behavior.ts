@@ -25,7 +25,7 @@ export function useSelectionBehavior(
                 newVal = {
                     current: {
                         ...current,
-                        rangeStack: [],
+                        rangeStack: gridSelection.current?.rangeStack ?? [],
                     },
                     columns: CompactSelection.empty(),
                     rows: CompactSelection.empty(),
@@ -37,7 +37,7 @@ export function useSelectionBehavior(
                             ? undefined
                             : {
                                   ...current,
-                                  rangeStack: [],
+                                  rangeStack: gridSelection.current?.rangeStack ?? [],
                               },
                     columns: columnBehavior === "exclusive" ? CompactSelection.empty() : gridSelection.columns,
                     rows: rowBehavior === "exclusive" ? CompactSelection.empty() : gridSelection.rows,
@@ -60,6 +60,7 @@ export function useSelectionBehavior(
     const setSelectedRows = React.useCallback(
         (newRows: CompactSelection | undefined, append: Slice | number | undefined, allowInclusive: boolean): void => {
             newRows = newRows ?? gridSelection.rows;
+            allowInclusive = allowInclusive || gridSelection.current === undefined;
             if (append !== undefined) {
                 newRows = newRows.add(append);
             }
@@ -99,19 +100,40 @@ export function useSelectionBehavior(
     );
 
     const setSelectedColumns = React.useCallback(
-        (newCols: CompactSelection): void => {
+        (newCols: CompactSelection | undefined, append: number | Slice | undefined, allowInclusive: boolean): void => {
+            newCols = newCols ?? gridSelection.columns;
+            allowInclusive = allowInclusive || gridSelection.current === undefined;
+            if (append !== undefined) {
+                newCols = newCols.add(append);
+            }
             let newVal: GridSelection;
             if (columnBehavior === "exclusive" && newCols.length !== 0) {
                 newVal = {
                     current: undefined,
-                    columns: newCols,
                     rows: CompactSelection.empty(),
+                    columns: newCols,
                 };
             } else {
+                const rangeInclusive = allowInclusive && rangeBehavior === "inclusive";
+                const rowInclusive = allowInclusive && rowBehavior === "inclusive";
+                let current = !rangeInclusive ? undefined : gridSelection.current;
+                if (rangeInclusive && current === undefined && append !== undefined) {
+                    const col = typeof append === "number" ? append : append[0];
+                    current = {
+                        cell: [col, 0],
+                        range: {
+                            x: col,
+                            y: 0,
+                            width: 1,
+                            height: 1,
+                        },
+                        rangeStack: [],
+                    };
+                }
                 newVal = {
-                    current: rangeBehavior === "exclusive" ? undefined : gridSelection.current,
+                    current,
+                    rows: rowInclusive ? gridSelection.rows : CompactSelection.empty(),
                     columns: newCols,
-                    rows: rowBehavior === "exclusive" ? CompactSelection.empty() : gridSelection.rows,
                 };
             }
             setGridSelection(newVal, false);
