@@ -4,7 +4,7 @@ import { StoryFn, StoryContext } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import GridScroller from "./scrolling-data-grid";
 import { styled } from "../common/styles";
-import { GridCell, GridCellKind, Rectangle } from "../data-grid/data-grid-types";
+import { CompactSelection, GridCell, GridCellKind, Rectangle } from "../data-grid/data-grid-types";
 
 const InnerContainer = styled.div`
     width: 100%;
@@ -73,6 +73,11 @@ export function Simplenotest() {
             translateX={translateX}
             translateY={translateY}
             lockColumns={0}
+            selection={{
+                current: undefined,
+                rows: CompactSelection.empty(),
+                columns: CompactSelection.empty(),
+            }}
             firstColAccessible={true}
             groupHeaderHeight={34}
             headerHeight={44}

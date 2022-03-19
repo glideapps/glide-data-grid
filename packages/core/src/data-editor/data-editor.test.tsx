@@ -8,7 +8,6 @@ import {
     GridCell,
     GridCellKind,
     GridSelection,
-    HeaderSelectionTrigger,
     isSizedGridColumn,
 } from "..";
 import { DataEditorRef } from "./data-editor";
@@ -226,11 +225,9 @@ const Context: React.FC = p => {
 const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, ref) => {
     const [sel, setSel] = React.useState<GridSelection>();
     const [extraRows, setExtraRows] = React.useState(0);
-    const [selectedRows, setSelectedRows] = React.useState(p.selectedRows ?? CompactSelection.empty());
-    const [selectedCols, setSelectedCols] = React.useState(p.selectedColumns ?? CompactSelection.empty());
 
     const onGridSelectionChange = React.useCallback(
-        (s: GridSelection | undefined) => {
+        (s: GridSelection) => {
             setSel(s);
             p.onGridSelectionChange?.(s);
         },
@@ -242,32 +239,12 @@ const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, r
         p.onRowAppended?.();
     }, [p]);
 
-    const onSelectedRowsChange = React.useCallback(
-        (newVal: CompactSelection) => {
-            setSelectedRows(newVal);
-            p.onSelectedRowsChange?.(newVal);
-        },
-        [p]
-    );
-
-    const onSelectedColumnsChange = React.useCallback(
-        (newVal: CompactSelection, trigger: HeaderSelectionTrigger) => {
-            setSelectedCols(newVal);
-            p.onSelectedColumnsChange?.(newVal, trigger);
-        },
-        [p]
-    );
-
     return (
         <DataEditor
             {...p}
             ref={ref}
             gridSelection={sel}
-            selectedRows={selectedRows}
-            selectedColumns={selectedCols}
             onGridSelectionChange={onGridSelectionChange}
-            onSelectedRowsChange={onSelectedRowsChange}
-            onSelectedColumnsChange={onSelectedColumnsChange}
             rows={p.rows + extraRows}
             onRowAppended={p.onRowAppended === undefined ? undefined : onRowAppened}
         />
@@ -456,7 +433,7 @@ describe("data-editor", () => {
                     icon: "headerCode",
                 })}
                 columns={basicProps.columns.map(c => ({ ...c, group: "A" }))}
-                onSelectedColumnsChange={spy}
+                onGridSelectionChange={spy}
             />,
             {
                 wrapper: Context,
@@ -648,7 +625,11 @@ describe("data-editor", () => {
             <DataEditor
                 {...basicProps}
                 onDeleteRows={spy}
-                selectedRows={CompactSelection.fromSingleSelection(2)}
+                gridSelection={{
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.fromSingleSelection(2),
+                    current: undefined,
+                }}
                 rowMarkers="both"
             />,
             {
@@ -1134,9 +1115,19 @@ describe("data-editor", () => {
 
     test("Copy rows", async () => {
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} selectedRows={CompactSelection.fromSingleSelection([3, 6])} />, {
-            wrapper: Context,
-        });
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                gridSelection={{
+                    current: undefined,
+                    rows: CompactSelection.fromSingleSelection([3, 6]),
+                    columns: CompactSelection.empty(),
+                }}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
@@ -1148,9 +1139,19 @@ describe("data-editor", () => {
 
     test("Copy cols", async () => {
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} selectedColumns={CompactSelection.fromSingleSelection([3, 6])} />, {
-            wrapper: Context,
-        });
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                gridSelection={{
+                    columns: CompactSelection.fromSingleSelection([3, 6]),
+                    rows: CompactSelection.empty(),
+                    current: undefined,
+                }}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
@@ -1307,7 +1308,7 @@ describe("data-editor", () => {
     test("Click row marker", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onSelectedRowsChange={spy} rowMarkers="both" />, {
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} rowMarkers="both" />, {
             wrapper: Context,
         });
         prep();
@@ -1330,7 +1331,7 @@ describe("data-editor", () => {
     test("Shift click row marker", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onSelectedRowsChange={spy} rowMarkers="both" />, {
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} rowMarkers="both" />, {
             wrapper: Context,
         });
         prep();
@@ -1366,7 +1367,7 @@ describe("data-editor", () => {
     test("Ctrl click row marker", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onSelectedRowsChange={spy} rowMarkers="both" />, {
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} rowMarkers="both" />, {
             wrapper: Context,
         });
         prep();
@@ -1771,7 +1772,11 @@ describe("data-editor", () => {
         render(
             <EventedDataEditor
                 {...basicProps}
-                selectedColumns={CompactSelection.fromSingleSelection([0, 5])}
+                gridSelection={{
+                    columns: CompactSelection.fromSingleSelection([0, 5]),
+                    rows: CompactSelection.empty(),
+                    current: undefined,
+                }}
                 onColumnMoved={spy}
                 onColumnResized={spy}
             />,
@@ -1892,19 +1897,10 @@ describe("data-editor", () => {
 
     test("Select all", async () => {
         const spy = jest.fn();
-        const rowsSpy = jest.fn();
         jest.useFakeTimers();
-        render(
-            <EventedDataEditor
-                {...basicProps}
-                rowMarkers="both"
-                onGridSelectionChange={spy}
-                onSelectedRowsChange={rowsSpy}
-            />,
-            {
-                wrapper: Context,
-            }
-        );
+        render(<EventedDataEditor {...basicProps} rowMarkers="both" onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
@@ -1919,7 +1915,6 @@ describe("data-editor", () => {
         });
 
         expect(spy).toBeCalledWith(undefined);
-        expect(rowsSpy).toBeCalledWith(CompactSelection.fromSingleSelection([0, 1000]));
 
         fireEvent.mouseDown(canvas, {
             clientX: 10,
@@ -1931,8 +1926,7 @@ describe("data-editor", () => {
             clientY: 10,
         });
 
-        spy.mockClear();
-        expect(rowsSpy).toBeCalledWith(CompactSelection.empty());
+        expect(spy).toBeCalledWith(CompactSelection.empty());
     });
 
     test("Draggable", async () => {
@@ -2003,20 +1997,10 @@ describe("data-editor", () => {
 
     test("Click cell does not double-emit selectedrows/columns", async () => {
         const gridSelectionSpy = jest.fn();
-        const selectedRowsSpy = jest.fn();
-        const selectedColsSpy = jest.fn();
         jest.useFakeTimers();
-        render(
-            <EventedDataEditor
-                {...basicProps}
-                onGridSelectionChange={gridSelectionSpy}
-                onSelectedRowsChange={selectedRowsSpy}
-                onSelectedColumnsChange={selectedColsSpy}
-            />,
-            {
-                wrapper: Context,
-            }
-        );
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={gridSelectionSpy} />, {
+            wrapper: Context,
+        });
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
@@ -2031,8 +2015,6 @@ describe("data-editor", () => {
         });
 
         expect(gridSelectionSpy).toBeCalledWith({ cell: [1, 2], range: { height: 1, width: 1, x: 1, y: 2 } });
-        expect(selectedRowsSpy).not.toHaveBeenCalled();
-        expect(selectedColsSpy).not.toHaveBeenCalled();
         gridSelectionSpy.mockClear();
 
         fireEvent.keyDown(canvas, {
@@ -2040,8 +2022,6 @@ describe("data-editor", () => {
         });
 
         expect(gridSelectionSpy).toBeCalledWith(undefined);
-        expect(selectedRowsSpy).not.toHaveBeenCalled();
-        expect(selectedColsSpy).not.toHaveBeenCalled();
     });
 
     test("Span expansion", async () => {

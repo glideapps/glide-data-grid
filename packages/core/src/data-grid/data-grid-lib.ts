@@ -1,5 +1,5 @@
 import { Theme } from "../common/styles";
-import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn } from "./data-grid-types";
+import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn, Rectangle } from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
@@ -42,13 +42,11 @@ export function cellIsSelected(location: Item, cell: InnerGridCell, selection: G
     return col >= cell.span[0] && col <= cell.span[1];
 }
 
-export function cellIsInRange(location: Item, cell: InnerGridCell, selection: GridSelection): boolean {
-    if (selection.current === undefined) return false;
-
-    const startX = selection.current.range.x;
-    const endX = selection.current.range.x + selection.current.range.width - 1;
-    const startY = selection.current.range.y;
-    const endY = selection.current.range.y + selection.current.range.height - 1;
+function cellIsInRect(location: Item, cell: InnerGridCell, rect: Rectangle): boolean {
+    const startX = rect.x;
+    const endX = rect.x + rect.width - 1;
+    const startY = rect.y;
+    const endY = rect.y + rect.height - 1;
 
     const [cellCol, cellRow] = location;
     if (cellRow < startY || cellRow > endY) return false;
@@ -63,6 +61,13 @@ export function cellIsInRange(location: Item, cell: InnerGridCell, selection: Gr
         (spanEnd >= startX && spanStart <= endX) ||
         (spanStart < startX && spanEnd > endX)
     );
+}
+
+export function cellIsInRange(location: Item, cell: InnerGridCell, selection: GridSelection): boolean {
+    if (selection.current === undefined) return false;
+
+    if (cellIsInRect(location, cell, selection.current.range)) return true;
+    return selection.current.rangeStack.some(r => cellIsInRect(location, cell, r));
 }
 
 function remapForDnDState(

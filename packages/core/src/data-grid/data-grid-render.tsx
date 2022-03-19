@@ -984,7 +984,7 @@ function drawCells(
     lastRowSticky: boolean,
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
-    selectedCell: GridSelection,
+    selection: GridSelection,
     selectedColumns: CompactSelection,
     prelightCells: CellList | undefined,
     drawCustomCell: DrawCustomCellCallback | undefined,
@@ -1148,8 +1148,8 @@ function drawCells(
                     ctx.beginPath();
 
                     const isFocused =
-                        cellIsSelected([c.sourceIndex, row], cell, selectedCell) ||
-                        cellIsInRange([c.sourceIndex, row], cell, selectedCell);
+                        cellIsSelected([c.sourceIndex, row], cell, selection) ||
+                        cellIsInRange([c.sourceIndex, row], cell, selection);
                     const spanIsHighlighted =
                         cell.span !== undefined &&
                         selectedColumns.some(
