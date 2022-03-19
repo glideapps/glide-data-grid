@@ -100,9 +100,10 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
     const getCellsForSelectionMangled = React.useCallback(
         (selection: GridSelection): readonly (readonly InnerGridCell[])[] => {
-            if (getCellsForSelection !== undefined) return getCellsForSelection(selection.range);
+            if (selection.current === undefined) return [];
+            if (getCellsForSelection !== undefined) return getCellsForSelection(selection.current.range);
 
-            const range = selection.range;
+            const range = selection.current.range;
 
             const result: InnerGridCell[][] = [];
             for (let row = range.y; row < range.y + range.height; row++) {
@@ -143,14 +144,16 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 const tStart = performance.now();
                 const rowsLeft = rows - rowsSearched;
                 const data = getCellsForSelectionMangled({
-                    cell: [0, 0],
-                    range: {
-                        x: 0,
-                        y: startY,
-                        width: columns.length - searchColOffset,
-                        height: Math.min(searchStride, rowsLeft, rows - startY),
+                    current: {
+                        cell: [0, 0],
+                        range: {
+                            x: 0,
+                            y: startY,
+                            width: columns.length - searchColOffset,
+                            height: Math.min(searchStride, rowsLeft, rows - startY),
+                        },
+                        rangeStack: [],
                     },
-                    rangeStack: [],
                     columns: CompactSelection.empty(),
                     rows: CompactSelection.empty(),
                 });
@@ -450,8 +453,6 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 scrollRef={p.scrollRef}
                 scrollToEnd={p.scrollToEnd}
                 selection={p.selection}
-                selectedColumns={p.selectedColumns}
-                selectedRows={p.selectedRows}
                 showMinimap={p.showMinimap}
                 smoothScrollX={p.smoothScrollX}
                 smoothScrollY={p.smoothScrollY}

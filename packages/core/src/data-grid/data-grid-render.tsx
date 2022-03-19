@@ -753,7 +753,7 @@ function drawGridHeaders(
             ? 0
             : hoverValues.find(s => s.item[0] === c.sourceIndex && s.item[1] === -1)?.hoverAmount ?? 0;
 
-        const hasSelectedCell = selectedCell !== undefined && selectedCell.cell[0] === c.sourceIndex;
+        const hasSelectedCell = selectedCell?.current !== undefined && selectedCell.current.cell[0] === c.sourceIndex;
 
         const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
 
@@ -984,7 +984,7 @@ function drawCells(
     lastRowSticky: boolean,
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
-    selectedCell: GridSelection | undefined,
+    selectedCell: GridSelection,
     selectedColumns: CompactSelection,
     prelightCells: CellList | undefined,
     drawCustomCell: DrawCustomCellCallback | undefined,
@@ -1382,16 +1382,19 @@ function drawFocusRing(
     allColumns: readonly MappedGridColumn[],
     theme: Theme,
     totalHeaderHeight: number,
-    selectedCell: GridSelection | undefined,
+    selectedCell: GridSelection,
     getRowHeight: (row: number) => number,
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,
     lastRowSticky: boolean,
     rows: number
 ): (() => void) | undefined {
-    if (selectedCell === undefined || effectiveCols.find(c => (c.sourceIndex === selectedCell.cell[0]) === undefined))
+    if (
+        selectedCell.current === undefined ||
+        effectiveCols.find(c => (c.sourceIndex === selectedCell.current?.cell[0]) === undefined)
+    )
         return undefined;
-    const [targetCol, targetRow] = selectedCell.cell;
-    const cell = getCellContent(selectedCell.cell);
+    const [targetCol, targetRow] = selectedCell.current.cell;
+    const cell = getCellContent(selectedCell.current.cell);
     const targetColSpan = cell.span ?? [targetCol, targetCol];
 
     const isStickyRow = lastRowSticky && targetRow === rows - 1;
@@ -1488,7 +1491,7 @@ export function drawGrid(
     verticalBorder: (col: number) => boolean,
     selectedColumns: CompactSelection,
     isResizing: boolean,
-    selectedCell: GridSelection | undefined,
+    selectedCell: GridSelection,
     lastRowSticky: boolean,
     rows: number,
     getCellContent: (cell: readonly [number, number]) => InnerGridCell,

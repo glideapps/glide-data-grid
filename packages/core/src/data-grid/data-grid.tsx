@@ -81,7 +81,7 @@ export interface DataGridProps {
     readonly getRowThemeOverride?: GetRowThemeCallback;
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
-    readonly selection?: GridSelection;
+    readonly selection: GridSelection;
     readonly prelightCells?: readonly (readonly [number, number])[];
 
     readonly disabledRows?: CompactSelection;
@@ -156,10 +156,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         getCellContent,
         getRowThemeOverride,
         onHeaderMenuClick,
-        selectedRows,
         enableGroups,
-        selection: selectedCell,
-        selectedColumns,
+        selection,
         freezeColumns,
         lastRowSticky,
         onMouseDown,
@@ -516,13 +514,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             theme,
             headerHeight,
             groupHeaderHeight,
-            selectedRows ?? CompactSelection.empty(),
+            selection.rows,
             disabledRows ?? CompactSelection.empty(),
             rowHeight,
             verticalBorder,
-            selectedColumns ?? CompactSelection.empty(),
+            selection.columns,
             isResizing,
-            selectedCell,
+            selection,
             lastRowSticky,
             rows,
             getCellContent,
@@ -557,13 +555,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         theme,
         headerHeight,
         groupHeaderHeight,
-        selectedRows,
         disabledRows,
         rowHeight,
         verticalBorder,
-        selectedColumns,
         isResizing,
-        selectedCell,
+        selection,
         lastRowSticky,
         rows,
         getCellContent,
@@ -592,10 +588,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         isResizing,
         verticalBorder,
         getCellContent,
-        selectedRows,
         lastWasTouch,
-        selectedColumns,
-        selectedCell,
+        selection,
         dragAndDropState,
         prelightCells,
         scrolling,
@@ -916,8 +910,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             if (canvas === null) return;
 
             let bounds: Rectangle | undefined;
-            if (selectedCell !== undefined) {
-                bounds = getBoundsForItem(canvas, selectedCell.cell[0], selectedCell.cell[1]);
+            if (selection.current !== undefined) {
+                bounds = getBoundsForItem(canvas, selection.current.cell[0], selection.current.cell[1]);
             }
 
             onKeyDown?.({
@@ -934,7 +928,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 keyCode: event.keyCode,
             });
         },
-        [onKeyDown, selectedCell, getBoundsForItem]
+        [onKeyDown, selection, getBoundsForItem]
     );
 
     const onKeyUpImpl = React.useCallback(
@@ -943,8 +937,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             if (canvas === null) return;
 
             let bounds: Rectangle | undefined;
-            if (selectedCell !== undefined) {
-                bounds = getBoundsForItem(canvas, selectedCell.cell[0], selectedCell.cell[1]);
+            if (selection.current !== undefined) {
+                bounds = getBoundsForItem(canvas, selection.current.cell[0], selection.current.cell[1]);
             }
 
             onKeyUp?.({
@@ -961,7 +955,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 keyCode: event.keyCode,
             });
         },
-        [onKeyUp, selectedCell, getBoundsForItem]
+        [onKeyUp, selection, getBoundsForItem]
     );
 
     const refImpl = React.useCallback(
@@ -1142,8 +1136,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     return CellRenderers[cell.kind].getAccessibilityString(cell);
                 }
             };
-            const [fCol, fRow] = selectedCell?.cell ?? [];
-            const range = selectedCell?.range;
+            const [fCol, fRow] = selection.current?.cell ?? [];
+            const range = selection.current?.range;
 
             return (
                 <table
@@ -1225,7 +1219,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             rows,
             cellYOffset,
             accessibilityHeight,
-            selectedCell,
+            selection,
             focusElement,
             getCellContent,
             canvasRef,

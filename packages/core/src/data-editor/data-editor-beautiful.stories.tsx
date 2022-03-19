@@ -1140,8 +1140,6 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
 export const AutomaticRowMarkers: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
-    const [selectedRows, setSelectedRows] = React.useState(CompactSelection.empty());
-
     return (
         <BeautifulWrapper
             title="Automatic Row Markers"
@@ -1159,8 +1157,6 @@ export const AutomaticRowMarkers: React.VFC = () => {
             }>
             <DataEditor
                 {...defaultProps}
-                selectedRows={selectedRows}
-                onSelectedRowsChange={setSelectedRows}
                 rowMarkers={"both"}
                 getCellContent={getCellContent}
                 columns={cols}
@@ -1307,8 +1303,6 @@ interface RowAndHeaderSizesProps {
 export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
     const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(6);
 
-    const [selectedRows, setSelectedRows] = React.useState<CompactSelection>();
-
     return (
         <BeautifulWrapper
             title="Row and Header sizes"
@@ -1325,8 +1319,6 @@ export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
                 {...defaultProps}
                 rowHeight={p.rowHeight}
                 headerHeight={p.headerHeight}
-                selectedRows={selectedRows}
-                onSelectedRowsChange={setSelectedRows}
                 getCellsForSelection={getCellsForSelection}
                 rowMarkers={"number"}
                 getCellContent={getCellContent}
@@ -1376,8 +1368,6 @@ const KeyName = styled.kbd`
 export const MultiSelectColumns: React.VFC = () => {
     const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100);
 
-    const [sel, setSel] = React.useState(CompactSelection.empty());
-
     return (
         <BeautifulWrapper
             title="Multi select columns"
@@ -1400,8 +1390,6 @@ export const MultiSelectColumns: React.VFC = () => {
                 rowMarkers="both"
                 columns={cols}
                 rows={100_000}
-                selectedColumns={sel}
-                onSelectedColumnsChange={setSel}
             />
         </BeautifulWrapper>
     );

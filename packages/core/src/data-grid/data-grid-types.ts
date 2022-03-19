@@ -11,7 +11,7 @@ import { SpriteManager } from "./data-grid-sprites";
 // how the range came to be selected. The rows/columns properties retain this essential
 // information.
 export interface GridSelection {
-    readonly selection?: {
+    readonly current?: {
         readonly cell: readonly [number, number];
         readonly range: Readonly<Rectangle>;
         readonly rangeStack: readonly Readonly<Rectangle>[]; // lowest to highest, does not include range
