@@ -24,10 +24,11 @@ import {
     ProvideEditorCallback,
     DrawCustomCellCallback,
     GridMouseCellEventArgs,
-    GridMouseHeaderEventArgs,
-    GridMouseGroupHeaderEventArgs,
     GridColumn,
     isObjectEditorCallbackResult,
+    GroupHeaderClickedEventArgs,
+    HeaderClickedEventArgs,
+    CellClickedEventArgs,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -89,18 +90,7 @@ type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
 type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parameters<T>) => TNewReturn;
 
-export type HeaderSelectionTrigger = "selection" | "drag" | "header" | "group";
-
 type EmitEvents = "copy" | "paste" | "delete" | "fill-right" | "fill-down";
-
-interface PreventableEvent {
-    preventDefault: () => void;
-}
-interface CellClickedEventArgs extends GridMouseCellEventArgs, PreventableEvent {}
-
-interface HeaderClickedEventArgs extends GridMouseHeaderEventArgs, PreventableEvent {}
-
-export interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, PreventableEvent {}
 
 function getSpanStops(cells: readonly (readonly GridCell[])[]): number[] {
     const disallowed = uniq(

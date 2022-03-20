@@ -26,6 +26,15 @@ export type GridMouseEventArgs =
     | GridMouseOutOfBoundsEventArgs
     | GridMouseGroupHeaderEventArgs;
 
+interface PreventableEvent {
+    preventDefault: () => void;
+}
+export interface CellClickedEventArgs extends GridMouseCellEventArgs, PreventableEvent {}
+
+export interface HeaderClickedEventArgs extends GridMouseHeaderEventArgs, PreventableEvent {}
+
+export interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, PreventableEvent {}
+
 interface PositionableMouseEventArgs {
     readonly localEventX: number;
     readonly localEventY: number;

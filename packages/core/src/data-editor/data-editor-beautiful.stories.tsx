@@ -9,12 +9,12 @@ import {
     GridColumn,
     GridColumnIcon,
     GridMouseEventArgs,
-    GridMouseGroupHeaderEventArgs,
+    GroupHeaderClickedEventArgs,
     isEditableGridCell,
     isTextEditableGridCell,
     Rectangle,
 } from "../data-grid/data-grid-types";
-import { DataEditor, DataEditorProps, GroupHeaderClickedEventArgs } from "./data-editor";
+import { DataEditor, DataEditorProps } from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
 import faker from "faker";
