@@ -291,7 +291,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         rangeSelectionBlending = "exclusive",
         columnSelectionBlending = "exclusive",
         rowSelectionBlending = "exclusive",
-        onDelete,
+        onDelete: onDeleteIn,
         onDragStart,
         onMouseMove,
         onPaste,
@@ -406,6 +406,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
         },
         [onGridSelectionChange, rowMarkerOffset, expandSelection]
+    );
+
+    const onDelete = React.useCallback<NonNullable<DataEditorProps["onDelete"]>>(
+        sel => {
+            if (onDeleteIn !== undefined) {
+                return onDeleteIn(shiftSelection(sel, -rowMarkerOffset));
+            }
+            return true;
+        },
+        [onDeleteIn, rowMarkerOffset]
     );
 
     const [setCurrent, setSelectedRows, setSelectedColumns] = useSelectionBehavior(

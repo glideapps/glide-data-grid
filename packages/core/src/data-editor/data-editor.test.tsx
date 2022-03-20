@@ -659,6 +659,47 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalled();
     });
 
+    test("Delete range", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                onDelete={spy}
+                gridSelection={{
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
+                    current: {
+                        cell: [2, 2],
+                        range: { x: 2, y: 2, width: 4, height: 10 },
+                        rangeStack: [],
+                    },
+                }}
+                rowMarkers="both"
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.keyDown(canvas, {
+            key: "Delete",
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+            current: {
+                cell: [2, 2],
+                range: { x: 2, y: 2, width: 4, height: 10 },
+                rangeStack: [],
+            },
+        });
+    });
+
     test("Open and close overlay", async () => {
         jest.useFakeTimers();
         render(<DataEditor {...basicProps} />, {
