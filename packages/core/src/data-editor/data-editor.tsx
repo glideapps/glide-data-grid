@@ -41,7 +41,7 @@ import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
 import { useCellSizer } from "./use-cell-sizer";
 import { isHotkey } from "../common/is-hotkey";
-import { useSelectionBehavior } from "../data-grid/use-selection-behavior";
+import { SelectionBehavior, useSelectionBehavior } from "../data-grid/use-selection-behavior";
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
@@ -167,6 +167,11 @@ export interface DataEditorProps extends Props {
 
     readonly spanRangeBehavior?: "default" | "allowPartial";
 
+    readonly columnSelectionBehavior?: SelectionBehavior;
+    readonly rowSelectionBehavior?: SelectionBehavior;
+    readonly rangeSelectionBehavior?: SelectionBehavior;
+    readonly rangeMultiselect?: boolean;
+
     readonly rowHeight?: DataGridSearchProps["rowHeight"];
     readonly onMouseMove?: DataGridSearchProps["onMouseMove"];
 
@@ -288,6 +293,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnMoved,
         drawCell,
         drawCustomCell,
+        rangeMultiselect = false,
+        rangeSelectionBehavior = "exclusive",
+        rowSelectionBehavior = "exclusive",
+        columnSelectionBehavior = "exclusive",
         onDeleteRows,
         onDragStart,
         onMouseMove,
@@ -408,9 +417,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const [setCurrent, setSelectedRows, setSelectedColumns] = useSelectionBehavior(
         gridSelection,
         setGridSelection,
-        "inclusive",
-        "inclusive",
-        "inclusive"
+        rangeSelectionBehavior,
+        columnSelectionBehavior,
+        rowSelectionBehavior,
+        rangeMultiselect
     );
 
     const theme = useTheme();
