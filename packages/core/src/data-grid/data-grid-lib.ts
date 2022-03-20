@@ -63,11 +63,17 @@ function cellIsInRect(location: Item, cell: InnerGridCell, rect: Rectangle): boo
     );
 }
 
-export function cellIsInRange(location: Item, cell: InnerGridCell, selection: GridSelection): boolean {
-    if (selection.current === undefined) return false;
+export function cellIsInRange(location: Item, cell: InnerGridCell, selection: GridSelection): number {
+    let result = 0;
+    if (selection.current === undefined) return result;
 
-    if (cellIsInRect(location, cell, selection.current.range)) return true;
-    return selection.current.rangeStack.some(r => cellIsInRect(location, cell, r));
+    if (cellIsInRect(location, cell, selection.current.range)) result++;
+    for (const r of selection.current.rangeStack) {
+        if (cellIsInRect(location, cell, r)) {
+            result++;
+        }
+    }
+    return result;
 }
 
 function remapForDnDState(

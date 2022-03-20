@@ -1147,29 +1147,35 @@ function drawCells(
 
                     ctx.beginPath();
 
-                    const isFocused =
-                        cellIsSelected([c.sourceIndex, row], cell, selection) ||
-                        cellIsInRange([c.sourceIndex, row], cell, selection);
+                    const cellIndex = [c.sourceIndex, row] as const;
+                    const isSelected = cellIsSelected(cellIndex, cell, selection);
+                    let rangeCount = cellIsInRange(cellIndex, cell, selection);
                     const spanIsHighlighted =
                         cell.span !== undefined &&
                         selectedColumns.some(
                             index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1]
                         );
-                    const highlighted =
-                        spanIsHighlighted ||
-                        isFocused ||
-                        (!isSticky && (rowSelected || selectedColumns.hasIndex(c.sourceIndex)));
+                    if (isSelected) {
+                        rangeCount = Math.max(rangeCount, 1);
+                    }
+                    if (spanIsHighlighted) {
+                        rangeCount++;
+                    }
+                    if (!isSelected) {
+                        if (rowSelected) rangeCount++;
+                        if (selectedColumns.hasIndex(c.sourceIndex)) rangeCount++;
+                    }
 
                     let fill: string | undefined;
                     if (isSticky || theme.bgCell !== outerTheme.bgCell) {
                         fill = blend(theme.bgCell, fill);
                     }
 
-                    if (highlighted || rowDisabled) {
+                    if (rangeCount > 0 || rowDisabled) {
                         if (rowDisabled) {
                             fill = blend(theme.bgHeader, fill);
                         }
-                        if (highlighted) {
+                        for (let i = 0; i < rangeCount; i++) {
                             fill = blend(theme.accentLight, fill);
                         }
                     } else {
@@ -1206,7 +1212,7 @@ function drawCells(
                             drawY,
                             cellWidth,
                             rh,
-                            highlighted,
+                            rangeCount > 0,
                             theme,
                             drawCustomCell,
                             imageLoader,

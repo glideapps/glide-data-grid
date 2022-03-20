@@ -765,7 +765,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     },
                     false,
                     false,
-                    false
+                    "edit"
                 );
 
                 const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
@@ -835,21 +835,21 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         const newSlice: Slice = [Math.min(lastHighlighted, row), Math.max(lastHighlighted, row) + 1];
 
                         if (isMultiKey || rowSelectionMode === "multi") {
-                            setSelectedRows(undefined, newSlice, isMultiKey);
+                            setSelectedRows(undefined, newSlice, true);
                         } else {
                             setSelectedRows(CompactSelection.fromSingleSelection(newSlice), undefined, isMultiKey);
                         }
                     } else if (isMultiKey || args.isTouch || rowSelectionMode === "multi") {
                         if (isSelected) {
-                            setSelectedRows(selectedRows.remove(row), undefined, isMultiKey);
+                            setSelectedRows(selectedRows.remove(row), undefined, true);
                         } else {
-                            setSelectedRows(undefined, row, isMultiKey);
+                            setSelectedRows(undefined, row, true);
                             lastSelectedRowRef.current = row;
                         }
                     } else if (isSelected && selectedRows.length === 1) {
-                        setSelectedRows(CompactSelection.empty(), undefined, isMultiKey);
+                        setSelectedRows(CompactSelection.empty(), undefined, false);
                     } else {
-                        setSelectedRows(undefined, row, isMultiKey);
+                        setSelectedRows(CompactSelection.fromSingleSelection(row), undefined, false);
                         lastSelectedRowRef.current = row;
                     }
                 } else if (col >= rowMarkerOffset && showTrailingBlankRow && row === rows) {
@@ -890,8 +890,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                                     },
                                 },
                                 true,
-                                false,
-                                isMultiKey
+                                isMultiKey,
+                                "click"
                             );
                             lastSelectedRowRef.current = undefined;
                             focus();
@@ -903,7 +903,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                                 },
                                 true,
                                 isMultiKey,
-                                isMultiKey
+                                "click"
                             );
                             lastSelectedRowRef.current = undefined;
                             setOverlay(undefined);
@@ -1276,7 +1276,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     },
                     true,
                     false,
-                    true
+                    "drag"
                 );
 
                 if (args.kind === "out-of-bounds" && scrollRef.current !== null) {
@@ -1497,7 +1497,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 },
                 true,
                 false,
-                true
+                "keyboard-select"
             );
         },
         [getCellsForSelection, gridSelection, mangledCols.length, rowMarkerOffset, rows, scrollTo, setCurrent]
@@ -1517,7 +1517,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 },
                 true,
                 false,
-                true
+                "keyboard-nav"
             );
 
             if (lastSent.current !== undefined && lastSent.current[0] === col && lastSent.current[1] === row) {
@@ -1573,7 +1573,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 },
                 true,
                 false,
-                true
+                "keyboard-nav"
             );
         },
         [selCol, selRow, setCurrent]
