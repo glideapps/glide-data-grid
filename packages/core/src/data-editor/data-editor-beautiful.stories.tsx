@@ -663,12 +663,6 @@ export const AddData: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
-                rangeMultiSelect={true}
-                columnSelectionBlending="mixed"
-                rowSelectionBlending="mixed"
-                rangeSelectionBlending="mixed"
-                rowMultiSelect={false}
-                columnMultiSelect={false}
                 getCellsForSelection={getCellsForSelection}
                 rowMarkers={"both"}
                 onCellEdited={setCellValue}
@@ -2543,7 +2537,6 @@ export const ColumnGroups: React.VFC = () => {
                 getCellContent={getCellContent}
                 onGroupHeaderRenamed={(x, y) => window.alert(`Please rename group ${x} to ${y}`)}
                 columns={cols}
-                columnMultiSelect={false}
                 getCellsForSelection={getCellsForSelection}
                 rows={1000}
                 getGroupDetails={g => ({
