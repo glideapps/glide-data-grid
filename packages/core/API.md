@@ -120,7 +120,6 @@ Most data grids will want to set the majority of these props one way or another.
 | [rangeSelectionBlending](#rangeselectionblending) | Controls how range selections may be mixed with other selection types. |
 | [columnSelectionBlending](#rangeselectionblending) | Controls how column selections may be mixed with other selection types. |
 | [rowSelectionBlending](#rangeselectionblending) | Controls how row selections may be mixed with other selection types. |
-| [onDelete](#ondelete) | Emitted when the user attempst to delete the current selection. |
 
 ## Editing
 | Name | Description |
