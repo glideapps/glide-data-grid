@@ -1149,21 +1149,21 @@ function drawCells(
 
                     const cellIndex = [c.sourceIndex, row] as const;
                     const isSelected = cellIsSelected(cellIndex, cell, selection);
-                    let rangeCount = cellIsInRange(cellIndex, cell, selection);
+                    let accentCount = cellIsInRange(cellIndex, cell, selection);
                     const spanIsHighlighted =
                         cell.span !== undefined &&
                         selectedColumns.some(
                             index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1]
                         );
                     if (isSelected) {
-                        rangeCount = Math.max(rangeCount, 1);
+                        accentCount = Math.max(accentCount, 1);
                     }
                     if (spanIsHighlighted) {
-                        rangeCount++;
+                        accentCount++;
                     }
                     if (!isSelected) {
-                        if (rowSelected) rangeCount++;
-                        if (selectedColumns.hasIndex(c.sourceIndex)) rangeCount++;
+                        if (rowSelected) accentCount++;
+                        if (selectedColumns.hasIndex(c.sourceIndex)) accentCount++;
                     }
 
                     let fill: string | undefined;
@@ -1171,11 +1171,11 @@ function drawCells(
                         fill = blend(theme.bgCell, fill);
                     }
 
-                    if (rangeCount > 0 || rowDisabled) {
+                    if (accentCount > 0 || rowDisabled) {
                         if (rowDisabled) {
                             fill = blend(theme.bgHeader, fill);
                         }
-                        for (let i = 0; i < rangeCount; i++) {
+                        for (let i = 0; i < accentCount; i++) {
                             fill = blend(theme.accentLight, fill);
                         }
                     } else {
@@ -1212,7 +1212,7 @@ function drawCells(
                             drawY,
                             cellWidth,
                             rh,
-                            rangeCount > 0,
+                            accentCount > 0,
                             theme,
                             drawCustomCell,
                             imageLoader,

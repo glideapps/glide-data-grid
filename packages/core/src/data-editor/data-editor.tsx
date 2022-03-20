@@ -976,7 +976,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     end++;
                 }
 
-                setGridSelection(emptyGridSelection, false);
                 focus();
 
                 if (isMultiKey) {
@@ -1637,7 +1636,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     gridRef.current?.damage(damaged.map(x => ({ cell: x })));
                 }
 
-                if (isDeleteKey && selectedColumns.length > 0 && gridSelection === undefined) {
+                if (isDeleteKey && selectedColumns.length > 0 && gridSelection.current === undefined) {
                     event.cancel();
                     for (const col of selectedColumns) {
                         deleteRange({

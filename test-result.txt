@@ -1,0 +1,1127 @@
+
+> root@3.5.0-alpha2 test /home/jason/code/glide-data-grid
+> cd packages/core && npm run test --
+
+
+> @glideapps/glide-data-grid@3.5.0-alpha2 test /home/jason/code/glide-data-grid/packages/core
+> jest
+
+ts-jest[versions] (WARN) Module jest is not installed. If you're experiencing issues, consider installing a supported version (>=27.0.0 <28.0.0-0).
+ts-jest[versions] (WARN) Module jest is not installed. If you're experiencing issues, consider installing a supported version (>=27.0.0 <28.0.0-0).
+ts-jest[versions] (WARN) Module jest is not installed. If you're experiencing issues, consider installing a supported version (>=27.0.0 <28.0.0-0).
+ts-jest[versions] (WARN) Module jest is not installed. If you're experiencing issues, consider installing a supported version (>=27.0.0 <28.0.0-0).
+ts-jest[versions] (WARN) Module jest is not installed. If you're experiencing issues, consider installing a supported version (>=27.0.0 <28.0.0-0).
+ts-jest[versions] (WARN) Module jest is not installed. If you're experiencing issues, consider installing a supported version (>=27.0.0 <28.0.0-0).
+ts-jest[versions] (WARN) Module jest is not installed. If you're experiencing issues, consider installing a supported version (>=27.0.0 <28.0.0-0).
+ts-jest[versions] (WARN) Module jest is not installed. If you're experiencing issues, consider installing a supported version (>=27.0.0 <28.0.0-0).
+ts-jest[versions] (WARN) Module jest is not installed. If you're experiencing issues, consider installing a supported version (>=27.0.0 <28.0.0-0).
+ts-jest[versions] (WARN) Module jest is not installed. If you're experiencing issues, consider installing a supported version (>=27.0.0 <28.0.0-0).
+ts-jest[versions] (WARN) Module jest is not installed. If you're experiencing issues, consider installing a supported version (>=27.0.0 <28.0.0-0).
+PASS src/data-grid/animation-manager.test.ts (6.995 s)
+PASS src/common/common.test.ts (6.975 s)
+PASS src/data-grid/use-animation-queue.test.ts (7.127 s)
+PASS src/data-grid/cells/cells.test.tsx (7.241 s)
+PASS src/data-grid/data-grid-types.test.ts (7.253 s)
+PASS src/data-editor/use-cell-sizer.test.tsx (7.264 s)
+PASS src/click-outside-container/click-outside-container.test.tsx (7.407 s)
+PASS src/data-grid-overlay-editor/data-grid-overlay.test.tsx (7.658 s)
+PASS src/data-grid/data-grid.test.tsx (8.495 s)
+(node:12815) UnhandledPromiseRejectionWarning: TypeError: Cannot read property 'createElement' of undefined
+    at new Image (/home/jason/code/glide-data-grid/packages/core/node_modules/jsdom/lib/jsdom/browser/Window.js:671:34)
+    at SpriteManager.<anonymous> (/home/jason/code/glide-data-grid/packages/core/src/data-grid/data-grid-sprites.ts:101:39)
+    at Generator.next (<anonymous>)
+    at fulfilled (/home/jason/code/glide-data-grid/packages/core/src/data-grid/data-grid-sprites.ts:5:58)
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:12815) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). To terminate the node process on unhandled promise rejection, use the CLI flag `--unhandled-rejections=strict` (see https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode). (rejection id: 27)
+(node:12815) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.
+FAIL src/data-editor/data-editor.test.tsx (12.346 s)
+  ● Console
+
+    console.error
+      Warning: Can't perform a React state update on an unmounted component. This is a no-op, but it indicates a memory leak in your application. To fix, cancel all subscriptions and asynchronous tasks in a useEffect cleanup function.
+          at DataGrid (/home/jason/code/glide-data-grid/packages/core/src/data-grid/data-grid.tsx:145:9)
+          at DataGridDnd (/home/jason/code/glide-data-grid/packages/core/src/data-grid-dnd/data-grid-dnd.tsx:18:57)
+          at div
+          at div
+          at styled.div (/home/jason/code/glide-data-grid/node_modules/styled-components/src/models/StyledComponent.js:155:27)
+          at default (/home/jason/code/glide-data-grid/packages/core/src/data-editor/data-editor.test.tsx:18:21)
+          at div
+          at InfiniteScroller (/home/jason/code/glide-data-grid/packages/core/src/scrolling-data-grid/infinite-scroller.tsx:69:9)
+          at GridScroller (/home/jason/code/glide-data-grid/packages/core/src/scrolling-data-grid/scrolling-data-grid.tsx:54:13)
+          at DataGridSearch (/home/jason/code/glide-data-grid/packages/core/src/data-grid-search/data-grid-search.tsx:66:9)
+          at Object.<anonymous>.exports.ThemeProvider (/home/jason/code/glide-data-grid/node_modules/styled-components/src/models/ServerStyleSheet.js:66:13)
+          at DataEditorImpl (/home/jason/code/glide-data-grid/packages/core/src/data-editor/data-editor.tsx:245:63)
+          at /home/jason/code/glide-data-grid/packages/core/src/data-editor/data-editor.test.tsx:226:33
+          at Context (/home/jason/code/glide-data-grid/packages/core/src/data-editor/data-editor.test.tsx:218:16)
+
+      at printWarning (../../node_modules/react-dom/cjs/react-dom.development.js:67:30)
+      at error (../../node_modules/react-dom/cjs/react-dom.development.js:43:5)
+      at warnAboutUpdateOnUnmountedFiberInDEV (../../node_modules/react-dom/cjs/react-dom.development.js:23914:9)
+      at scheduleUpdateOnFiber (../../node_modules/react-dom/cjs/react-dom.development.js:21840:5)
+      at dispatchAction (../../node_modules/react-dom/cjs/react-dom.development.js:16139:5)
+      at invokeFunc (node_modules/lodash/debounce.js:95:19)
+      at trailingEdge (node_modules/lodash/debounce.js:144:14)
+      at timerExpired (node_modules/lodash/debounce.js:132:14)
+
+    console.error
+      Warning: An update to ForwardRef(DataGrid) inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at DataGrid (/home/jason/code/glide-data-grid/packages/core/src/data-grid/data-grid.tsx:145:9)
+          at DataGridDnd (/home/jason/code/glide-data-grid/packages/core/src/data-grid-dnd/data-grid-dnd.tsx:18:57)
+          at div
+          at div
+          at styled.div (/home/jason/code/glide-data-grid/node_modules/styled-components/src/models/StyledComponent.js:155:27)
+          at default (/home/jason/code/glide-data-grid/packages/core/src/data-editor/data-editor.test.tsx:18:21)
+          at div
+          at InfiniteScroller (/home/jason/code/glide-data-grid/packages/core/src/scrolling-data-grid/infinite-scroller.tsx:69:9)
+          at GridScroller (/home/jason/code/glide-data-grid/packages/core/src/scrolling-data-grid/scrolling-data-grid.tsx:54:13)
+          at DataGridSearch (/home/jason/code/glide-data-grid/packages/core/src/data-grid-search/data-grid-search.tsx:66:9)
+          at Object.<anonymous>.exports.ThemeProvider (/home/jason/code/glide-data-grid/node_modules/styled-components/src/models/ServerStyleSheet.js:66:13)
+          at DataEditorImpl (/home/jason/code/glide-data-grid/packages/core/src/data-editor/data-editor.tsx:245:63)
+          at Context (/home/jason/code/glide-data-grid/packages/core/src/data-editor/data-editor.test.tsx:218:16)
+
+      at printWarning (../../node_modules/react-dom/cjs/react-dom.development.js:67:30)
+      at error (../../node_modules/react-dom/cjs/react-dom.development.js:43:5)
+      at warnIfNotCurrentlyActingUpdatesInDEV (../../node_modules/react-dom/cjs/react-dom.development.js:24064:9)
+      at dispatchAction (../../node_modules/react-dom/cjs/react-dom.development.js:16135:9)
+      at invokeFunc (node_modules/lodash/debounce.js:95:19)
+      at trailingEdge (node_modules/lodash/debounce.js:144:14)
+      at timerExpired (node_modules/lodash/debounce.js:132:14)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+  ● data-editor › Focus a11y cell
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    Expected: ObjectContaining {"cell": [0, 5]}
+    Received: {"columns": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}, "current": {"cell": [0, 5], "range": {"height": 1, "width": 1, "x": 0, "y": 5}, "rangeStack": []}, "rows": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}}
+
+    Number of calls: 1
+
+      264 |         fireEvent.focus(a11ycell);
+      265 |
+    > 266 |         expect(spy).toBeCalledWith(expect.objectContaining({ cell: [0, 5] }));
+          |                     ^
+      267 |     });
+      268 |
+      269 |     test("Click a11y cell", async () => {
+
+      at src/data-editor/data-editor.test.tsx:266:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:255:40)
+
+  ● data-editor › Group header sections
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [[0, 10]], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}, Anything
+    Received
+           1
+            - CompactSelection {
+            + Object {
+            +   "columns": CompactSelection {
+                  "add": [Function anonymous],
+                  "equals": [Function anonymous],
+                  "first": [Function anonymous],
+                  "hasAll": [Function anonymous],
+                  "hasIndex": [Function anonymous],
+            -   "items": Array [
+            -     Array [
+            -       0,
+            -       10,
+            -     ],
+            -   ],
+            +     "items": Array [],
+            +     "last": [Function anonymous],
+            +     "offset": [Function anonymous],
+            +     "remove": [Function anonymous],
+            +     "some": [Function anonymous],
+            +   },
+            +   "current": undefined,
+            +   "rows": CompactSelection {
+            +     "add": [Function anonymous],
+            +     "equals": [Function anonymous],
+            +     "first": [Function anonymous],
+            +     "hasAll": [Function anonymous],
+            +     "hasIndex": [Function anonymous],
+            +     "items": Array [],
+                  "last": [Function anonymous],
+                  "offset": [Function anonymous],
+                  "remove": [Function anonymous],
+                  "some": [Function anonymous],
+            +   },
+              },
+           2
+            @@ -1,6 +1,7 @@
+            - CompactSelection {
+            + Object {
+            +   "columns": CompactSelection {
+                  "add": [Function anonymous],
+                  "equals": [Function anonymous],
+                  "first": [Function anonymous],
+                  "hasAll": [Function anonymous],
+                  "hasIndex": [Function anonymous],
+            @@ -12,6 +13,20 @@
+                  ],
+                  "last": [Function anonymous],
+                  "offset": [Function anonymous],
+                  "remove": [Function anonymous],
+                  "some": [Function anonymous],
+            +   },
+            +   "current": undefined,
+            +   "rows": CompactSelection {
+            +     "add": [Function anonymous],
+            +     "equals": [Function anonymous],
+            +     "first": [Function anonymous],
+            +     "hasAll": [Function anonymous],
+            +     "hasIndex": [Function anonymous],
+            +     "items": Array [],
+            +     "last": [Function anonymous],
+            +     "offset": [Function anonymous],
+            +     "remove": [Function anonymous],
+            +     "some": [Function anonymous],
+            +   },
+              },
+
+    Number of calls: 2
+
+      454 |
+      455 |         expect(spy).toHaveBeenCalled();
+    > 456 |         expect(spy).toHaveBeenCalledWith(CompactSelection.fromSingleSelection([0, 10]), expect.anything());
+          |                     ^
+      457 |
+      458 |         spy.mockClear();
+      459 |
+
+      at src/data-editor/data-editor.test.tsx:456:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:424:46)
+
+  ● data-editor › Arrow left
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    Expected: ObjectContaining {"cell": [0, 1]}
+    Received: {"columns": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}, "current": {"cell": [0, 1], "range": {"height": 1, "width": 1, "x": 0, "y": 1}, "rangeStack": []}, "rows": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}}
+
+    Number of calls: 1
+
+      821 |         });
+      822 |
+    > 823 |         expect(spy).toBeCalledWith(expect.objectContaining({ cell: [0, 1] }));
+          |                     ^
+      824 |     });
+      825 |
+      826 |     test("Arrow shift left", async () => {
+
+      at src/data-editor/data-editor.test.tsx:823:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:799:35)
+
+  ● data-editor › Arrow shift left
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      Object {
+    +   "columns": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+    +   },
+    +   "current": Object {
+          "cell": Array [
+            1,
+            1,
+          ],
+          "range": Object {
+            "height": 1,
+            "width": 2,
+            "x": 0,
+            "y": 1,
+    +     },
+    +     "rangeStack": Array [],
+    +   },
+    +   "rows": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+        },
+      },
+
+    Number of calls: 1
+
+      849 |         });
+      850 |
+    > 851 |         expect(spy).toBeCalledWith({ cell: [1, 1], range: { x: 0, y: 1, width: 2, height: 1 } });
+          |                     ^
+      852 |     });
+      853 |
+      854 |     test("Arrow right", async () => {
+
+      at src/data-editor/data-editor.test.tsx:851:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:826:41)
+
+  ● data-editor › Arrow right
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    Expected: ObjectContaining {"cell": [2, 1]}
+    Received: {"columns": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}, "current": {"cell": [2, 1], "range": {"height": 1, "width": 1, "x": 2, "y": 1}, "rangeStack": []}, "rows": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}}
+
+    Number of calls: 1
+
+      876 |         });
+      877 |
+    > 878 |         expect(spy).toBeCalledWith(expect.objectContaining({ cell: [2, 1] }));
+          |                     ^
+      879 |     });
+      880 |
+      881 |     test("Arrow shift right", async () => {
+
+      at src/data-editor/data-editor.test.tsx:878:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:854:36)
+
+  ● data-editor › Arrow shift right
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      Object {
+    +   "columns": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+    +   },
+    +   "current": Object {
+          "cell": Array [
+            1,
+            1,
+          ],
+          "range": Object {
+            "height": 1,
+            "width": 2,
+            "x": 1,
+            "y": 1,
+    +     },
+    +     "rangeStack": Array [],
+    +   },
+    +   "rows": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+        },
+      },
+
+    Number of calls: 1
+
+      904 |         });
+      905 |
+    > 906 |         expect(spy).toBeCalledWith({ cell: [1, 1], range: { x: 1, y: 1, width: 2, height: 1 } });
+          |                     ^
+      907 |     });
+      908 |
+      909 |     test("Tab navigation", async () => {
+
+      at src/data-editor/data-editor.test.tsx:906:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:881:42)
+
+  ● data-editor › Tab navigation
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    Expected: ObjectContaining {"cell": [2, 1]}
+    Received: {"columns": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}, "current": {"cell": [2, 1], "range": {"height": 1, "width": 1, "x": 2, "y": 1}, "rangeStack": []}, "rows": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}}
+
+    Number of calls: 1
+
+      931 |         });
+      932 |
+    > 933 |         expect(spy).toBeCalledWith(expect.objectContaining({ cell: [2, 1] }));
+          |                     ^
+      934 |
+      935 |         spy.mockClear();
+      936 |         fireEvent.keyDown(canvas, {
+
+      at src/data-editor/data-editor.test.tsx:933:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:909:39)
+
+  ● data-editor › Arrow down
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    Expected: ObjectContaining {"cell": [1, 2]}
+    Received: {"columns": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}, "current": {"cell": [1, 2], "range": {"height": 1, "width": 1, "x": 1, "y": 2}, "rangeStack": []}, "rows": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}}
+
+    Number of calls: 1
+
+      966 |         });
+      967 |
+    > 968 |         expect(spy).toBeCalledWith(expect.objectContaining({ cell: [1, 2] }));
+          |                     ^
+      969 |     });
+      970 |
+      971 |     test("Arrow up", async () => {
+
+      at src/data-editor/data-editor.test.tsx:968:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:944:35)
+
+  ● data-editor › Arrow up
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    Expected: ObjectContaining {"cell": [1, 1]}
+    Received: {"columns": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}, "current": {"cell": [1, 1], "range": {"height": 1, "width": 1, "x": 1, "y": 1}, "rangeStack": []}, "rows": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}}
+
+    Number of calls: 1
+
+      993 |         });
+      994 |
+    > 995 |         expect(spy).toBeCalledWith(expect.objectContaining({ cell: [1, 1] }));
+          |                     ^
+      996 |     });
+      997 |
+      998 |     test("Search close", async () => {
+
+      at src/data-editor/data-editor.test.tsx:995:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:971:33)
+
+  ● data-editor › Copy/paste
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    Expected: ObjectContaining {"cell": [1, 2], "range": {"height": 1, "width": 2, "x": 1, "y": 2}}
+    Received: {"columns": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}, "current": {"cell": [1, 2], "range": {"height": 1, "width": 2, "x": 1, "y": 2}, "rangeStack": []}, "rows": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}}
+
+    Number of calls: 1
+
+      1080 |         });
+      1081 |
+    > 1082 |         expect(spy).toBeCalledWith(
+           |                     ^
+      1083 |             expect.objectContaining({ cell: [1, 2], range: { x: 1, y: 2, width: 2, height: 1 } })
+      1084 |         );
+      1085 |
+
+      at src/data-editor/data-editor.test.tsx:1082:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1052:35)
+
+  ● data-editor › Copy rows
+
+    expect(jest.fn()).toBeCalled()
+
+    Expected number of calls: >= 1
+    Received number of calls:    0
+
+      1135 |
+      1136 |         fireEvent.copy(window);
+    > 1137 |         expect(navigator.clipboard.writeText).toBeCalled();
+           |                                               ^
+      1138 |     });
+      1139 |
+      1140 |     test("Copy cols", async () => {
+
+      at src/data-editor/data-editor.test.tsx:1137:47
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1116:34)
+
+  ● data-editor › Copy cols
+
+    expect(jest.fn()).toBeCalled()
+
+    Expected number of calls: >= 1
+    Received number of calls:    0
+
+      1159 |
+      1160 |         fireEvent.copy(window);
+    > 1161 |         expect(navigator.clipboard.writeText).toBeCalled();
+           |                                               ^
+      1162 |     });
+      1163 |
+      1164 |     test("Hover header does not fetch invalid cell", async () => {
+
+      at src/data-editor/data-editor.test.tsx:1161:47
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1140:34)
+
+  ● data-editor › Click row marker
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+    @@ -1,6 +1,20 @@
+    - CompactSelection {
+    + Object {
+    +   "columns": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+    +   },
+    +   "current": undefined,
+    +   "rows": CompactSelection {
+          "add": [Function anonymous],
+          "equals": [Function anonymous],
+          "first": [Function anonymous],
+          "hasAll": [Function anonymous],
+          "hasIndex": [Function anonymous],
+    @@ -12,6 +26,7 @@
+          ],
+          "last": [Function anonymous],
+          "offset": [Function anonymous],
+          "remove": [Function anonymous],
+          "some": [Function anonymous],
+    +   },
+      },
+
+    Number of calls: 1
+
+      1326 |         });
+      1327 |
+    > 1328 |         expect(spy).toHaveBeenCalledWith(CompactSelection.fromSingleSelection(2));
+           |                     ^
+      1329 |     });
+      1330 |
+      1331 |     test("Shift click row marker", async () => {
+
+      at src/data-editor/data-editor.test.tsx:1328:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1308:41)
+
+  ● data-editor › Shift click row marker
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+    @@ -1,6 +1,20 @@
+    - CompactSelection {
+    + Object {
+    +   "columns": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+    +   },
+    +   "current": undefined,
+    +   "rows": CompactSelection {
+          "add": [Function anonymous],
+          "equals": [Function anonymous],
+          "first": [Function anonymous],
+          "hasAll": [Function anonymous],
+          "hasIndex": [Function anonymous],
+    @@ -12,6 +26,7 @@
+          ],
+          "last": [Function anonymous],
+          "offset": [Function anonymous],
+          "remove": [Function anonymous],
+          "some": [Function anonymous],
+    +   },
+      },
+
+    Number of calls: 1
+
+      1362 |         });
+      1363 |
+    > 1364 |         expect(spy).toHaveBeenCalledWith(CompactSelection.fromSingleSelection([2, 6]));
+           |                     ^
+      1365 |     });
+      1366 |
+      1367 |     test("Ctrl click row marker", async () => {
+
+      at src/data-editor/data-editor.test.tsx:1364:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1331:47)
+
+  ● data-editor › Ctrl click row marker
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+    @@ -1,6 +1,20 @@
+    - CompactSelection {
+    + Object {
+    +   "columns": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+    +   },
+    +   "current": undefined,
+    +   "rows": CompactSelection {
+          "add": [Function anonymous],
+          "equals": [Function anonymous],
+          "first": [Function anonymous],
+          "hasAll": [Function anonymous],
+          "hasIndex": [Function anonymous],
+    @@ -16,6 +30,7 @@
+          ],
+          "last": [Function anonymous],
+          "offset": [Function anonymous],
+          "remove": [Function anonymous],
+          "some": [Function anonymous],
+    +   },
+      },
+
+    Number of calls: 1
+
+      1398 |         });
+      1399 |
+    > 1400 |         expect(spy).toHaveBeenCalledWith(CompactSelection.fromSingleSelection(2).add(5));
+           |                     ^
+      1401 |
+      1402 |         spy.mockClear();
+      1403 |
+
+      at src/data-editor/data-editor.test.tsx:1400:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1367:46)
+
+  ● data-editor › Shift click grid selection
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      Object {
+    +   "columns": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+    +   },
+    +   "current": Object {
+          "cell": Array [
+            1,
+            2,
+          ],
+          "range": Object {
+            "height": 5,
+            "width": 2,
+            "x": 1,
+            "y": 2,
+    +     },
+    +     "rangeStack": Array [],
+    +   },
+    +   "rows": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+        },
+      },
+
+    Number of calls: 1
+
+      1450 |         });
+      1451 |
+    > 1452 |         expect(spy).toHaveBeenCalledWith({
+           |                     ^
+      1453 |             cell: [1, 2],
+      1454 |             range: {
+      1455 |                 x: 1,
+
+      at src/data-editor/data-editor.test.tsx:1452:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1419:51)
+
+  ● data-editor › Clear selection
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    Expected: undefined
+    Received: {"columns": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}, "current": undefined, "rows": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}}
+
+    Number of calls: 1
+
+      1578 |         });
+      1579 |
+    > 1580 |         expect(spy).toBeCalledWith(undefined);
+           |                     ^
+      1581 |     });
+      1582 |
+      1583 |     test("Delete range", async () => {
+
+      at src/data-editor/data-editor.test.tsx:1580:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1541:40)
+
+  ● data-editor › Click out of bounds
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    Expected: undefined
+    Received: {"columns": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}, "current": undefined, "rows": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}}
+
+    Number of calls: 1
+
+      1669 |         });
+      1670 |
+    > 1671 |         expect(spy).toBeCalledWith(undefined);
+           |                     ^
+      1672 |     });
+      1673 |
+      1674 |     test("Delete Column", async () => {
+
+      at src/data-editor/data-editor.test.tsx:1671:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1623:44)
+
+  ● data-editor › Delete Column
+
+    expect(jest.fn()).toBeCalledTimes(expected)
+
+    Expected number of calls: 1000
+    Received number of calls: 0
+
+      1695 |         });
+      1696 |
+    > 1697 |         expect(spy).toBeCalledTimes(1000);
+           |                     ^
+      1698 |     });
+      1699 |
+      1700 |     test("DND Columns", async () => {
+
+      at src/data-editor/data-editor.test.tsx:1697:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1674:38)
+
+  ● data-editor › Resize Multiple Column
+
+    expect(jest.fn()).toBeCalledTimes(expected)
+
+    Expected number of calls: 5
+    Received number of calls: 1
+
+      1803 |         });
+      1804 |
+    > 1805 |         expect(spy).toBeCalledTimes(5);
+           |                     ^
+      1806 |     });
+      1807 |
+      1808 |     test("Resize Last Column", async () => {
+
+      at src/data-editor/data-editor.test.tsx:1805:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1769:47)
+
+  ● data-editor › Select range with mouse
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      Object {
+    +   "columns": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+    +   },
+    +   "current": Object {
+          "cell": Array [
+            1,
+            2,
+          ],
+          "range": Object {
+            "height": 11,
+            "width": 3,
+            "x": 1,
+            "y": 2,
+    +     },
+    +     "rangeStack": Array [],
+    +   },
+    +   "rows": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+        },
+      },
+
+    Number of calls: 1
+
+      1888 |         });
+      1889 |
+    > 1890 |         expect(spy).toBeCalledWith({ cell: [1, 2], range: { height: 11, width: 3, x: 1, y: 2 } });
+           |                     ^
+      1891 |
+      1892 |         fireEvent.mouseUp(canvas, {
+      1893 |             clientX: 600, // Col B
+
+      at src/data-editor/data-editor.test.tsx:1890:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1870:48)
+
+  ● data-editor › Select all
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    Expected: undefined
+    Received: {"columns": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}, "current": undefined, "rows": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [[0, 1000]], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}}
+
+    Number of calls: 1
+
+      1915 |         });
+      1916 |
+    > 1917 |         expect(spy).toBeCalledWith(undefined);
+           |                     ^
+      1918 |
+      1919 |         fireEvent.mouseDown(canvas, {
+      1920 |             clientX: 10,
+
+      at src/data-editor/data-editor.test.tsx:1917:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1898:35)
+
+  ● data-editor › Click cell does not double-emit selectedrows/columns
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      Object {
+    +   "columns": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+    +   },
+    +   "current": Object {
+          "cell": Array [
+            1,
+            2,
+          ],
+          "range": Object {
+            "height": 1,
+            "width": 1,
+            "x": 1,
+            "y": 2,
+    +     },
+    +     "rangeStack": Array [],
+    +   },
+    +   "rows": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+        },
+      },
+
+    Number of calls: 1
+
+      2015 |         });
+      2016 |
+    > 2017 |         expect(gridSelectionSpy).toBeCalledWith({ cell: [1, 2], range: { height: 1, width: 1, x: 1, y: 2 } });
+           |                                  ^
+      2018 |         gridSelectionSpy.mockClear();
+      2019 |
+      2020 |         fireEvent.keyDown(canvas, {
+
+      at src/data-editor/data-editor.test.tsx:2017:34
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:1998:77)
+
+  ● data-editor › Span expansion
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      Object {
+    +   "columns": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+    +   },
+    +   "current": Object {
+          "cell": Array [
+            2,
+            2,
+          ],
+          "range": Object {
+            "height": 2,
+            "width": 2,
+            "x": 2,
+            "y": 2,
+    +     },
+    +     "rangeStack": Array [],
+    +   },
+    +   "rows": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+        },
+      },
+
+    Number of calls: 1
+
+      2085 |         });
+      2086 |
+    > 2087 |         expect(spy).toBeCalledWith({ cell: [2, 2], range: { x: 2, y: 2, width: 2, height: 2 } });
+           |                     ^
+      2088 |
+      2089 |         spy.mockClear();
+      2090 |         fireEvent.keyDown(canvas, {
+
+      at src/data-editor/data-editor.test.tsx:2087:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:2027:39)
+
+  ● data-editor › Ctrl Arrow keys
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    Expected: ObjectContaining {"cell": [1, 999]}
+    Received: {"columns": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}, "current": {"cell": [1, 999], "range": {"height": 1, "width": 1, "x": 1, "y": 999}, "rangeStack": []}, "rows": {"add": [Function anonymous], "equals": [Function anonymous], "first": [Function anonymous], "hasAll": [Function anonymous], "hasIndex": [Function anonymous], "items": [], "last": [Function anonymous], "offset": [Function anonymous], "remove": [Function anonymous], "some": [Function anonymous]}}
+
+    Number of calls: 1
+
+      2143 |         const cols = basicProps.columns.length;
+      2144 |
+    > 2145 |         expect(spy).toBeCalledWith(expect.objectContaining({ cell: [1, 999] }));
+           |                     ^
+      2146 |
+      2147 |         spy.mockClear();
+      2148 |         fireEvent.keyDown(canvas, {
+
+      at src/data-editor/data-editor.test.tsx:2145:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:2118:40)
+
+  ● data-editor › Select range with mouse going out of bounds
+
+    expect(jest.fn()).toBeCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      Object {
+    +   "columns": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+    +   },
+    +   "current": Object {
+          "cell": Array [
+            1,
+            2,
+          ],
+          "range": Object {
+            "height": 11,
+            "width": 1,
+            "x": 1,
+            "y": 2,
+    +     },
+    +     "rangeStack": Array [],
+    +   },
+    +   "rows": CompactSelection {
+    +     "add": [Function anonymous],
+    +     "equals": [Function anonymous],
+    +     "first": [Function anonymous],
+    +     "hasAll": [Function anonymous],
+    +     "hasIndex": [Function anonymous],
+    +     "items": Array [],
+    +     "last": [Function anonymous],
+    +     "offset": [Function anonymous],
+    +     "remove": [Function anonymous],
+    +     "some": [Function anonymous],
+        },
+      },
+
+    Number of calls: 1
+
+      2235 |         });
+      2236 |
+    > 2237 |         expect(spy).toBeCalledWith({ cell: [1, 2], range: { height: 11, width: 1, x: 1, y: 2 } });
+           |                     ^
+      2238 |
+      2239 |         fireEvent.mouseUp(canvas, {
+      2240 |             clientX: 600, // Col B
+
+      at src/data-editor/data-editor.test.tsx:2237:21
+      at src/data-editor/data-editor.test.tsx:27:71
+      at Object.<anonymous>.__awaiter (src/data-editor/data-editor.test.tsx:23:12)
+      at Object.<anonymous> (src/data-editor/data-editor.test.tsx:2216:68)
+
+Test Suites: 1 failed, 9 passed, 10 total
+Tests:       26 failed, 66 passed, 92 total
+Snapshots:   0 total
+Time:        13.481 s, estimated 14 s
+Ran all test suites.
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! @glideapps/glide-data-grid@3.5.0-alpha2 test: `jest`
+npm ERR! Exit status 1
+npm ERR! 
+npm ERR! Failed at the @glideapps/glide-data-grid@3.5.0-alpha2 test script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /home/jason/.npm/_logs/2022-03-20T01_00_22_335Z-debug.log
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! root@3.5.0-alpha2 test: `cd packages/core && npm run test --`
+npm ERR! Exit status 1
+npm ERR! 
+npm ERR! Failed at the root@3.5.0-alpha2 test script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /home/jason/.npm/_logs/2022-03-20T01_00_22_352Z-debug.log

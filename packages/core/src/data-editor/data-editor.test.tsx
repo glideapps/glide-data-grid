@@ -223,7 +223,7 @@ const Context: React.FC = p => {
 
 // eslint-disable-next-line react/display-name
 const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, ref) => {
-    const [sel, setSel] = React.useState<GridSelection>();
+    const [sel, setSel] = React.useState<GridSelection | undefined>(p.gridSelection);
     const [extraRows, setExtraRows] = React.useState(0);
 
     const onGridSelectionChange = React.useCallback(
@@ -263,7 +263,11 @@ describe("data-editor", () => {
         const a11ycell = screen.getByTestId("glide-cell-0-5");
         fireEvent.focus(a11ycell);
 
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [0, 5] }));
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [0, 5] }),
+            })
+        );
     });
 
     test("Click a11y cell", async () => {
@@ -452,8 +456,11 @@ describe("data-editor", () => {
             clientY: 16, // GroupHeader
         });
 
-        expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith(CompactSelection.fromSingleSelection([0, 10]), expect.anything());
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.fromSingleSelection([0, 10]),
+            rows: CompactSelection.empty(),
+        });
 
         spy.mockClear();
 
@@ -470,7 +477,10 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith(CompactSelection.empty(), expect.anything());
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+        });
 
         spy.mockClear();
 
@@ -487,7 +497,10 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith(CompactSelection.fromSingleSelection([0, 10]), expect.anything());
+        expect(spy).toHaveBeenCalledWith({
+            rows: CompactSelection.empty(),
+            columns: CompactSelection.fromSingleSelection([0, 10]),
+        });
     });
 
     test("Rename group header shows", async () => {
@@ -820,7 +833,7 @@ describe("data-editor", () => {
             key: "ArrowLeft",
         });
 
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [0, 1] }));
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [0, 1] }) }));
     });
 
     test("Arrow shift left", async () => {
@@ -848,7 +861,11 @@ describe("data-editor", () => {
             key: "ArrowLeft",
         });
 
-        expect(spy).toBeCalledWith({ cell: [1, 1], range: { x: 0, y: 1, width: 2, height: 1 } });
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [1, 1], range: { x: 0, y: 1, width: 2, height: 1 } }),
+            })
+        );
     });
 
     test("Arrow right", async () => {
@@ -875,7 +892,7 @@ describe("data-editor", () => {
             key: "ArrowRight",
         });
 
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [2, 1] }));
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [2, 1] }) }));
     });
 
     test("Arrow shift right", async () => {
@@ -903,7 +920,11 @@ describe("data-editor", () => {
             key: "ArrowRight",
         });
 
-        expect(spy).toBeCalledWith({ cell: [1, 1], range: { x: 1, y: 1, width: 2, height: 1 } });
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [1, 1], range: { x: 1, y: 1, width: 2, height: 1 } }),
+            })
+        );
     });
 
     test("Tab navigation", async () => {
@@ -930,7 +951,7 @@ describe("data-editor", () => {
             key: "Tab",
         });
 
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [2, 1] }));
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [2, 1] }) }));
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -938,7 +959,7 @@ describe("data-editor", () => {
             shiftKey: true,
         });
 
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [1, 1] }));
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 1] }) }));
     });
 
     test("Arrow down", async () => {
@@ -965,7 +986,7 @@ describe("data-editor", () => {
             key: "ArrowDown",
         });
 
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [1, 2] }));
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 2] }) }));
     });
 
     test("Arrow up", async () => {
@@ -992,7 +1013,7 @@ describe("data-editor", () => {
             key: "ArrowUp",
         });
 
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [1, 1] }));
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 1] }) }));
     });
 
     test("Search close", async () => {
@@ -1080,7 +1101,9 @@ describe("data-editor", () => {
         });
 
         expect(spy).toBeCalledWith(
-            expect.objectContaining({ cell: [1, 2], range: { x: 1, y: 2, width: 2, height: 1 } })
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [1, 2], range: { x: 1, y: 2, width: 2, height: 1 } }),
+            })
         );
 
         fireEvent.copy(window);
@@ -1091,7 +1114,7 @@ describe("data-editor", () => {
             key: "ArrowDown",
         });
 
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [1, 3] }));
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 3] }) }));
 
         fireEvent.paste(window);
         await new Promise(resolve => setTimeout(resolve, 10));
@@ -1325,7 +1348,10 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
         });
 
-        expect(spy).toHaveBeenCalledWith(CompactSelection.fromSingleSelection(2));
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection(2),
+        });
     });
 
     test("Shift click row marker", async () => {
@@ -1361,7 +1387,10 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
         });
 
-        expect(spy).toHaveBeenCalledWith(CompactSelection.fromSingleSelection([2, 6]));
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection([2, 6]),
+        });
     });
 
     test("Ctrl click row marker", async () => {
@@ -1397,7 +1426,10 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
         });
 
-        expect(spy).toHaveBeenCalledWith(CompactSelection.fromSingleSelection(2).add(5));
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection(2).add(5),
+        });
 
         spy.mockClear();
 
@@ -1413,7 +1445,10 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
         });
 
-        expect(spy).toHaveBeenCalledWith(CompactSelection.fromSingleSelection(2));
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection(2),
+        });
     });
 
     test("Shift click grid selection", async () => {
@@ -1449,15 +1484,20 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 6 + 16, // Row 6 (0 indexed)
         });
 
-        expect(spy).toHaveBeenCalledWith({
-            cell: [1, 2],
-            range: {
-                x: 1,
-                y: 2,
-                width: 2,
-                height: 5,
-            },
-        });
+        expect(spy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                current: {
+                    cell: [1, 2],
+                    range: {
+                        x: 1,
+                        y: 2,
+                        width: 2,
+                        height: 5,
+                    },
+                    rangeStack: [],
+                },
+            })
+        );
     });
 
     test("Fill down", async () => {
@@ -1577,7 +1617,10 @@ describe("data-editor", () => {
             key: "Escape",
         });
 
-        expect(spy).toBeCalledWith(undefined);
+        expect(spy).toBeCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+        });
     });
 
     test("Delete range", async () => {
@@ -1668,7 +1711,10 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 6 + 16, // Row 6 (0 indexed)
         });
 
-        expect(spy).toBeCalledWith(undefined);
+        expect(spy).toBeCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+        });
     });
 
     test("Delete Column", async () => {
@@ -1777,7 +1823,6 @@ describe("data-editor", () => {
                     rows: CompactSelection.empty(),
                     current: undefined,
                 }}
-                onColumnMoved={spy}
                 onColumnResized={spy}
             />,
             {
@@ -1887,7 +1932,11 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 12 + 16, // Row 2
         });
 
-        expect(spy).toBeCalledWith({ cell: [1, 2], range: { height: 11, width: 3, x: 1, y: 2 } });
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                current: { cell: [1, 2], range: { height: 11, width: 3, x: 1, y: 2 }, rangeStack: [] },
+            })
+        );
 
         fireEvent.mouseUp(canvas, {
             clientX: 600, // Col B
@@ -1914,7 +1963,10 @@ describe("data-editor", () => {
             clientY: 10,
         });
 
-        expect(spy).toBeCalledWith(undefined);
+        expect(spy).toBeCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection([0, 1000]),
+        });
 
         fireEvent.mouseDown(canvas, {
             clientX: 10,
@@ -1926,7 +1978,10 @@ describe("data-editor", () => {
             clientY: 10,
         });
 
-        expect(spy).toBeCalledWith(CompactSelection.empty());
+        expect(spy).toBeCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+        });
     });
 
     test("Draggable", async () => {
@@ -2014,14 +2069,21 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
         });
 
-        expect(gridSelectionSpy).toBeCalledWith({ cell: [1, 2], range: { height: 1, width: 1, x: 1, y: 2 } });
+        expect(gridSelectionSpy).toBeCalledWith(
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [1, 2], range: { height: 1, width: 1, x: 1, y: 2 } }),
+            })
+        );
         gridSelectionSpy.mockClear();
 
         fireEvent.keyDown(canvas, {
             key: "Escape",
         });
 
-        expect(gridSelectionSpy).toBeCalledWith(undefined);
+        expect(gridSelectionSpy).toBeCalledWith({
+            rows: CompactSelection.empty(),
+            columns: CompactSelection.empty(),
+        });
     });
 
     test("Span expansion", async () => {
@@ -2084,14 +2146,22 @@ describe("data-editor", () => {
             key: "ArrowDown",
         });
 
-        expect(spy).toBeCalledWith({ cell: [2, 2], range: { x: 2, y: 2, width: 2, height: 2 } });
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [2, 2], range: { x: 2, y: 2, width: 2, height: 2 } }),
+            })
+        );
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
             key: "ArrowDown",
         });
 
-        expect(spy).toBeCalledWith({ cell: [2, 3], range: { x: 2, y: 3, width: 2, height: 1 } });
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [2, 3], range: { x: 2, y: 3, width: 2, height: 1 } }),
+            })
+        );
     });
 
     test("Imperative Handle works", async () => {
@@ -2142,7 +2212,7 @@ describe("data-editor", () => {
 
         const cols = basicProps.columns.length;
 
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [1, 999] }));
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 999] }) }));
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -2150,7 +2220,9 @@ describe("data-editor", () => {
             ctrlKey: true,
         });
 
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [cols - 1, 999] }));
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({ current: expect.objectContaining({ cell: [cols - 1, 999] }) })
+        );
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -2158,7 +2230,9 @@ describe("data-editor", () => {
             ctrlKey: true,
         });
 
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [cols - 1, 0] }));
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({ current: expect.objectContaining({ cell: [cols - 1, 0] }) })
+        );
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -2166,7 +2240,7 @@ describe("data-editor", () => {
             ctrlKey: true,
         });
 
-        expect(spy).toBeCalledWith(expect.objectContaining({ cell: [0, 0] }));
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [0, 0] }) }));
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -2176,7 +2250,9 @@ describe("data-editor", () => {
         });
 
         expect(spy).toBeCalledWith(
-            expect.objectContaining({ cell: [0, 0], range: { x: 0, y: 0, width: 1, height: 1000 } })
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [0, 0], range: { x: 0, y: 0, width: 1, height: 1000 } }),
+            })
         );
 
         spy.mockClear();
@@ -2187,7 +2263,9 @@ describe("data-editor", () => {
         });
 
         expect(spy).toBeCalledWith(
-            expect.objectContaining({ cell: [0, 0], range: { x: 0, y: 0, width: cols, height: 1000 } })
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [0, 0], range: { x: 0, y: 0, width: cols, height: 1000 } }),
+            })
         );
 
         // spy.mockClear();
@@ -2234,7 +2312,11 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 12 + 16, // Row 2
         });
 
-        expect(spy).toBeCalledWith({ cell: [1, 2], range: { height: 11, width: 1, x: 1, y: 2 } });
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [1, 2], range: { height: 11, width: 1, x: 1, y: 2 } }),
+            })
+        );
 
         fireEvent.mouseUp(canvas, {
             clientX: 600, // Col B
