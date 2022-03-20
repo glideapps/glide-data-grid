@@ -2543,6 +2543,7 @@ export const ColumnGroups: React.VFC = () => {
                 getCellContent={getCellContent}
                 onGroupHeaderRenamed={(x, y) => window.alert(`Please rename group ${x} to ${y}`)}
                 columns={cols}
+                columnMultiSelect={false}
                 getCellsForSelection={getCellsForSelection}
                 rows={1000}
                 getGroupDetails={g => ({

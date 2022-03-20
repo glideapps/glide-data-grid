@@ -1032,7 +1032,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const handleGroupHeaderSelection = React.useCallback(
         (args: GridMouseEventArgs) => {
-            if (args.kind !== "group-header") {
+            if (args.kind !== "group-header" || !columnMultiSelect) {
                 return;
             }
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
@@ -1070,7 +1070,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 setSelectedColumns(CompactSelection.fromSingleSelection([start, end + 1]), undefined, isMultiKey);
             }
         },
-        [focus, gridSelection.columns, mangledCols, rowMarkerOffset, setSelectedColumns]
+        [columnMultiSelect, focus, gridSelection.columns, mangledCols, rowMarkerOffset, setSelectedColumns]
     );
 
     const onMouseUp = React.useCallback(
