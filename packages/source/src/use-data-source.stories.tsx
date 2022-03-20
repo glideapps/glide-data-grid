@@ -171,22 +171,27 @@ const cols: GridColumn[] = [
     {
         title: "A",
         width: 200,
+        group: "Group 1",
     },
     {
         title: "B",
         width: 200,
+        group: "Group 1",
     },
     {
         title: "C",
         width: 200,
+        group: "Group 2",
     },
     {
         title: "D",
         width: 200,
+        group: "Group 2",
     },
     {
         title: "E",
         width: 200,
+        group: "Group 2",
     },
 ];
 
@@ -248,7 +253,7 @@ export const UseDataSource: React.VFC = () => {
     }, []);
 
     return (
-        <BeautifulWrapper title="Custom cells" description={<Description>Some of our extension cells.</Description>}>
+        <BeautifulWrapper title="Custom source extensions" description={<Description>Fixme.</Description>}>
             <DataEditor
                 {...defaultProps}
                 {...moveArgs}

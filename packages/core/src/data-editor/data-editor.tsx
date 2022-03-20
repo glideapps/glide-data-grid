@@ -100,7 +100,7 @@ interface CellClickedEventArgs extends GridMouseCellEventArgs, PreventableEvent 
 
 interface HeaderClickedEventArgs extends GridMouseHeaderEventArgs, PreventableEvent {}
 
-interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, PreventableEvent {}
+export interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, PreventableEvent {}
 
 function getSpanStops(cells: readonly (readonly GridCell[])[]): number[] {
     const disallowed = uniq(
@@ -961,6 +961,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     lastSelectedRowRef.current = undefined;
                     focus();
                 }
+            } else if (args.kind === "group-header") {
+                lastMouseDownCellLocation.current = [col, row];
             } else if (args.kind === "out-of-bounds") {
                 setGridSelection(emptyGridSelection, false);
                 setOverlay(undefined);
@@ -968,39 +970,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 onSelectionCleared?.();
                 lastSelectedRowRef.current = undefined;
                 lastSelectedColRef.current = undefined;
-            } else if (args.kind === "group-header") {
-                lastMouseDownCellLocation.current = [col, row];
-
-                if (col < rowMarkerOffset) return;
-
-                const needle = mangledCols[col];
-                let start = col;
-                let end = col;
-                for (let i = col - 1; i >= rowMarkerOffset; i--) {
-                    if (!isGroupEqual(needle.group, mangledCols[i].group)) break;
-                    start--;
-                }
-
-                for (let i = col + 1; i < mangledCols.length; i++) {
-                    if (!isGroupEqual(needle.group, mangledCols[i].group)) break;
-                    end++;
-                }
-
-                focus();
-
-                if (isMultiKey) {
-                    if (selectedColumns.hasAll([start, end + 1])) {
-                        let newVal = selectedColumns;
-                        for (let index = start; index <= end; index++) {
-                            newVal = newVal.remove(index);
-                        }
-                        setSelectedColumns(newVal, undefined, isMultiKey);
-                    } else {
-                        setSelectedColumns(undefined, [start, end + 1], isMultiKey);
-                    }
-                } else {
-                    setSelectedColumns(CompactSelection.fromSingleSelection([start, end + 1]), undefined, isMultiKey);
-                }
             }
         },
         [
@@ -1010,7 +979,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             gridSelection,
             hasRowMarkers,
             lastRowSticky,
-            mangledCols,
             onSelectionCleared,
             rowMarkerOffset,
             rowMarkers,
@@ -1049,6 +1017,49 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         group: string;
         bounds: Rectangle;
     }>();
+
+    const handleGroupHeaderSelection = React.useCallback(
+        (args: GridMouseEventArgs) => {
+            if (args.kind !== "group-header") {
+                return;
+            }
+            const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
+            const [col] = args.location;
+            const selectedColumns = gridSelection.columns;
+
+            if (col < rowMarkerOffset) return;
+
+            const needle = mangledCols[col];
+            let start = col;
+            let end = col;
+            for (let i = col - 1; i >= rowMarkerOffset; i--) {
+                if (!isGroupEqual(needle.group, mangledCols[i].group)) break;
+                start--;
+            }
+
+            for (let i = col + 1; i < mangledCols.length; i++) {
+                if (!isGroupEqual(needle.group, mangledCols[i].group)) break;
+                end++;
+            }
+
+            focus();
+
+            if (isMultiKey) {
+                if (selectedColumns.hasAll([start, end + 1])) {
+                    let newVal = selectedColumns;
+                    for (let index = start; index <= end; index++) {
+                        newVal = newVal.remove(index);
+                    }
+                    setSelectedColumns(newVal, undefined, isMultiKey);
+                } else {
+                    setSelectedColumns(undefined, [start, end + 1], isMultiKey);
+                }
+            } else {
+                setSelectedColumns(CompactSelection.fromSingleSelection([start, end + 1]), undefined, isMultiKey);
+            }
+        },
+        [focus, gridSelection.columns, mangledCols, rowMarkerOffset, setSelectedColumns]
+    );
 
     const onMouseUp = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
@@ -1152,6 +1163,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (args.kind === "group-header") {
                 if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
                     onGroupHeaderClicked?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                    if (!prevented) {
+                        handleGroupHeaderSelection(args);
+                    }
                 } else if (args.button === 2) {
                     onGroupHeaderContextMenu?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
                 }
@@ -1171,6 +1185,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [
             getMangedCellContent,
             gridSelection,
+            handleGroupHeaderSelection,
             handleSelect,
             mangledOnCellEdited,
             onCellClicked,

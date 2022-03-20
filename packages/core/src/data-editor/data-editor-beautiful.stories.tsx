@@ -9,11 +9,12 @@ import {
     GridColumn,
     GridColumnIcon,
     GridMouseEventArgs,
+    GridMouseGroupHeaderEventArgs,
     isEditableGridCell,
     isTextEditableGridCell,
     Rectangle,
 } from "../data-grid/data-grid-types";
-import { DataEditor, DataEditorProps } from "./data-editor";
+import { DataEditor, DataEditorProps, GroupHeaderClickedEventArgs } from "./data-editor";
 import DataEditorContainer from "../data-editor-container/data-grid-container";
 
 import faker from "faker";
@@ -2557,9 +2558,10 @@ function useCollapsableColumnGroups(cols: readonly GridColumn[]) {
     const [collapsed, setCollapsed] = React.useState<readonly string[]>([]);
 
     const onGroupHeaderClicked = React.useCallback(
-        (colIndex: number) => {
+        (colIndex: number, args: GroupHeaderClickedEventArgs) => {
             const group = cols[colIndex].group ?? "";
             setCollapsed(cv => (cv.includes(group) ? cv.filter(g => g !== group) : [...cv, group]));
+            args.preventDefault();
         },
         [cols]
     );
