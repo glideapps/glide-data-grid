@@ -663,6 +663,12 @@ export const AddData: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
+                rangeMultiSelect={true}
+                columnSelectionBlending="mixed"
+                rowSelectionBlending="mixed"
+                rangeSelectionBlending="mixed"
+                rowMultiSelect={false}
+                columnMultiSelect={false}
                 getCellsForSelection={getCellsForSelection}
                 rowMarkers={"both"}
                 onCellEdited={setCellValue}

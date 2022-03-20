@@ -637,7 +637,7 @@ describe("data-editor", () => {
         render(
             <DataEditor
                 {...basicProps}
-                onDeleteRows={spy}
+                onDelete={spy}
                 gridSelection={{
                     columns: CompactSelection.empty(),
                     rows: CompactSelection.fromSingleSelection(2),
@@ -1393,6 +1393,48 @@ describe("data-editor", () => {
         });
     });
 
+    test("Shift click row marker - no multi-select", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor {...basicProps} rowMultiSelect={false} onGridSelectionChange={spy} rowMarkers="both" />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        spy.mockClear();
+
+        fireEvent.mouseDown(canvas, {
+            shiftKey: true,
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            shiftKey: true,
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection(5),
+        });
+    });
+
     test("Ctrl click row marker", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
@@ -1448,6 +1490,67 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection(2),
+        });
+    });
+
+    test("Ctrl click row marker - no multi", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor {...basicProps} rowMultiSelect={false} onGridSelectionChange={spy} rowMarkers="both" />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        spy.mockClear();
+
+        fireEvent.mouseDown(canvas, {
+            ctrlKey: true,
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            ctrlKey: true,
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection(5),
+        });
+
+        spy.mockClear();
+
+        fireEvent.mouseDown(canvas, {
+            ctrlKey: true,
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            ctrlKey: true,
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
         });
     });
 

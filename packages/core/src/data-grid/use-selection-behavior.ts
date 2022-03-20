@@ -3,16 +3,16 @@ import { CompactSelection, GridSelection, Slice } from "./data-grid-types";
 
 type SetCallback = (newVal: GridSelection, expand: boolean) => void;
 
-export type SelectionBehavior = "exclusive" | "mixed";
+export type SelectionBlending = "exclusive" | "mixed";
 
 type SelectionTrigger = "click" | "drag" | "keyboard-nav" | "keyboard-select" | "edit";
 
 export function useSelectionBehavior(
     gridSelection: GridSelection,
     setGridSelection: SetCallback,
-    rangeBehavior: SelectionBehavior,
-    columnBehavior: SelectionBehavior,
-    rowBehavior: SelectionBehavior,
+    rangeBehavior: SelectionBlending,
+    columnBehavior: SelectionBlending,
+    rowBehavior: SelectionBlending,
     rangeMultiselection: boolean
 ) {
     // if append is true, the current range will be added to the rangeStack

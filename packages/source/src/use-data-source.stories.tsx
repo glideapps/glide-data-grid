@@ -202,7 +202,7 @@ export const UseDataSource: React.VFC = () => {
 
     const moveArgs = useMoveableColumns({
         columns: cols,
-        getCellContent: ([col, row]) => {
+        getCellContent: React.useCallback(([col, row]) => {
             if (col === 0) {
                 return {
                     kind: GridCellKind.Text,
@@ -224,7 +224,7 @@ export const UseDataSource: React.VFC = () => {
                 data: d,
                 displayData: d,
             };
-        },
+        }, []),
     });
 
     const [sort, setSort] = React.useState<number>();
