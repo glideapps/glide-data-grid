@@ -1093,6 +1093,68 @@ export const SmoothScrollingGrid: React.FC<SmoothScrollingGridProps> = p => {
     },
 };
 
+interface InputBlendingGridProps {
+    rangeBlending: "mixed" | "exclusive";
+    columnBlending: "mixed" | "exclusive";
+    rowBlending: "mixed" | "exclusive";
+    rangeMultiSelect: boolean;
+    columnMultiSelect: boolean;
+    rowMultiSelect: boolean;
+}
+
+export const InputBlending: React.FC<InputBlendingGridProps> = p => {
+    const { cols, getCellContent } = useMockDataGenerator(30);
+
+    return (
+        <BeautifulWrapper
+            title="Input blending"
+            description={
+                <Description>
+                    Input blending can be enabled or disable between row, column, and range selections. Multi-selections
+                    can also be enabled or disabled with the same level of granularity.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers="both"
+                rangeMultiSelect={p.rangeMultiSelect}
+                columnMultiSelect={p.columnMultiSelect}
+                rowMultiSelect={p.rowMultiSelect}
+                rangeSelectionBlending={p.rangeBlending}
+                columnSelectionBlending={p.columnBlending}
+                rowSelectionBlending={p.rowBlending}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={10_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(InputBlending as any).args = {
+    rangeBlending: "mixed",
+    columnBlending: "mixed",
+    rowBlending: "mixed",
+    rangeMultiSelect: false,
+    columnMultiSelect: true,
+    rowMultiSelect: true,
+};
+(InputBlending as any).argTypes = {
+    rangeBlending: {
+        control: { type: "select", options: ["mixed", "exclusive"] },
+    },
+    columnBlending: {
+        control: { type: "select", options: ["mixed", "exclusive"] },
+    },
+    rowBlending: {
+        control: { type: "select", options: ["mixed", "exclusive"] },
+    },
+};
+(InputBlending as any).parameters = {
+    options: {
+        showPanel: true,
+    },
+};
+
 interface AddColumnsProps {
     columnsCount: number;
 }

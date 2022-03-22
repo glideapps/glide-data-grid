@@ -1034,6 +1034,8 @@ function drawCells(
             };
             reclip();
 
+            const colSelected = selectedColumns.hasIndex(c.sourceIndex);
+
             const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
             const colTheme =
                 c.themeOverride === undefined && groupTheme === undefined
@@ -1163,7 +1165,7 @@ function drawCells(
                     }
                     if (!isSelected) {
                         if (rowSelected) accentCount++;
-                        if (selectedColumns.hasIndex(c.sourceIndex)) accentCount++;
+                        if (colSelected && !isSticky) accentCount++;
                     }
 
                     let fill: string | undefined;

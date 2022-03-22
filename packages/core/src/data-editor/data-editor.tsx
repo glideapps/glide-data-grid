@@ -127,6 +127,38 @@ function shiftSelection(input: GridSelection, offset: number): GridSelection {
     };
 }
 
+interface Keybinds {
+    readonly selectAll: boolean;
+    readonly selectRow: boolean;
+    readonly selectColumn: boolean;
+    readonly downFill: boolean;
+    readonly rightFill: boolean;
+    readonly upFill: boolean;
+    readonly leftFill: boolean;
+    readonly pageUp: boolean;
+    readonly pageDown: boolean;
+    readonly clear: boolean;
+    readonly copy: boolean;
+    readonly paste: boolean;
+    readonly search: boolean;
+}
+
+const keybindingDefaults: Keybinds = {
+    selectAll: true,
+    selectRow: true,
+    selectColumn: true,
+    downFill: false,
+    rightFill: false,
+    upFill: false,
+    leftFill: false,
+    pageUp: false,
+    pageDown: false,
+    clear: true,
+    copy: true,
+    paste: true,
+    search: false,
+};
+
 export interface DataEditorProps extends Props {
     readonly onDelete?: (selection: GridSelection) => boolean | GridSelection;
     readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
@@ -202,8 +234,7 @@ export interface DataEditorProps extends Props {
     readonly getCellContent: ReplaceReturnType<DataGridSearchProps["getCellContent"], GridCell>;
     readonly rowSelectionMode?: "auto" | "multi";
 
-    readonly enableDownfill?: boolean;
-    readonly enableRightfill?: boolean;
+    readonly keybindings?: Partial<Keybinds>;
 
     readonly freezeColumns?: DataGridSearchProps["freezeColumns"];
 
@@ -279,8 +310,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onGroupHeaderContextMenu,
         onGroupHeaderRenamed,
         onCellEdited,
-        enableDownfill = false,
-        enableRightfill = false,
+        keybindings: keybindingsIn,
         onRowAppended,
         onColumnMoved,
         drawCell,
@@ -310,6 +340,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         verticalBorder,
         ...rest
     } = p;
+
+    const keybindings = React.useMemo(() => {
+        return keybindingsIn === undefined
+            ? keybindingDefaults
+            : {
+                  ...keybindingDefaults,
+                  ...keybindingsIn,
+              };
+    }, [keybindingsIn]);
 
     const rowMarkerWidth = rowMarkerWidthRaw ?? (rows > 10000 ? 48 : rows > 1000 ? 44 : rows > 100 ? 36 : 32);
     const hasRowMarkers = rowMarkers !== "none";
@@ -1742,7 +1781,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         reselect(event.bounds, true);
                         event.cancel();
                     }
-                } else if (isHotkey("primary+_68", event) && gridSelection.current.range.height > 1 && enableDownfill) {
+                } else if (
+                    isHotkey("primary+_68", event) &&
+                    gridSelection.current.range.height > 1 &&
+                    keybindings.downFill
+                ) {
                     // ctrl/cmd + d
                     const damage: (readonly [number, number])[] = [];
                     const r = gridSelection.current.range;
@@ -1766,7 +1809,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }))
                     );
                     event.cancel();
-                } else if (isHotkey("primary+_82", event) && gridSelection.current.range.width > 1 && enableRightfill) {
+                } else if (
+                    isHotkey("primary+_82", event) &&
+                    gridSelection.current.range.width > 1 &&
+                    keybindings.rightFill
+                ) {
                     // ctrl/cmd + r
                     const damage: (readonly [number, number])[] = [];
                     const r = gridSelection.current.range;
@@ -1864,8 +1911,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [
             overlay,
             gridSelection,
-            enableDownfill,
-            enableRightfill,
+            keybindings,
             getCellContent,
             rowMarkerOffset,
             updateSelectedCell,
