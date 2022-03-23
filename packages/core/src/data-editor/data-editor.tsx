@@ -315,6 +315,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         keybindings: keybindingsIn,
         onRowAppended,
         onColumnMoved,
+        highlightRegions: highlightRegionsIn,
         drawCell,
         drawCustomCell,
         rangeMultiSelect = false,
@@ -495,6 +496,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     }, [theme]);
 
     const columns = useCellSizer(columnsIn, rows, getCellsForSeletionDirect, mergedTheme);
+
+    const highlightRegions = React.useMemo(() => {
+        if (highlightRegionsIn === undefined) return undefined;
+        if (rowMarkerOffset === 0) return highlightRegionsIn;
+        return highlightRegionsIn.map(r => ({
+            color: r.color,
+            range: {
+                ...r.range,
+                x: r.range.x + rowMarkerOffset,
+            },
+        }));
+    }, [highlightRegionsIn, rowMarkerOffset]);
 
     const enableGroups = React.useMemo(() => {
         return columns.some(c => c.group !== undefined);
@@ -2448,6 +2461,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 getCellContent={getMangedCellContent}
                 showSearch={showSearch}
                 onSearchClose={onSearchClose}
+                highlightRegions={highlightRegions}
                 getCellsForSelection={getCellsForSelection}
                 getGroupDetails={mangledGetGroupDetails}
                 headerHeight={headerHeight}

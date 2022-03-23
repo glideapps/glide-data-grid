@@ -3,6 +3,7 @@ import { Theme } from "../common/styles";
 import { useTheme } from "styled-components";
 import ImageWindowLoader from "../common/image-window-loader";
 import {
+    computeBounds,
     getColumnIndexForX,
     getEffectiveColumns,
     getRowIndexForY,
@@ -36,6 +37,7 @@ import {
     getHeaderMenuBounds,
     GetRowThemeCallback,
     GroupDetailsCallback,
+    Highlight,
     pointInRect,
 } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
@@ -83,6 +85,7 @@ export interface DataGridProps {
 
     readonly selection: GridSelection;
     readonly prelightCells?: readonly (readonly [number, number])[];
+    readonly highlightRegions?: readonly Highlight[];
 
     readonly disabledRows?: CompactSelection;
 
@@ -169,6 +172,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         firstColAccessible,
         onKeyDown,
         onKeyUp,
+        highlightRegions,
         canvasRef,
         onDragStart,
         eventTargetRef,
@@ -240,103 +244,43 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         (canvas: HTMLCanvasElement, col: number, row: number): Rectangle => {
             const rect = canvas.getBoundingClientRect();
 
-            const result: Rectangle = {
-                x: rect.x,
-                y: rect.y + totalHeaderHeight + translateY,
-                width: 0,
-                height: 0,
-            };
+            const result = computeBounds(
+                col,
+                row,
+                width,
+                height,
+                groupHeaderHeight,
+                totalHeaderHeight,
+                cellXOffset,
+                cellYOffset,
+                translateX,
+                translateY,
+                rows,
+                freezeColumns,
+                lastRowSticky,
+                mappedColumns,
+                rowHeight
+            );
 
-            if (col >= freezeColumns) {
-                const dir = cellXOffset > col ? -1 : 1;
-                const freezeWidth = getStickyWidth(mappedColumns);
-                result.x += freezeWidth + translateX;
-                for (let i = cellXOffset; i !== col; i += dir) {
-                    result.x += mappedColumns[i].width * dir;
-                }
-            } else {
-                for (let i = 0; i < col; i++) {
-                    result.x += mappedColumns[i].width;
-                }
-            }
-            result.width = mappedColumns[col].width + 1;
-
-            if (row === -1) {
-                result.y = rect.y + groupHeaderHeight;
-                result.height = headerHeight;
-            } else if (row === -2) {
-                result.y = rect.y;
-                result.height = groupHeaderHeight;
-
-                let start = col;
-                const group = mappedColumns[col].group;
-                const sticky = mappedColumns[col].sticky;
-                while (
-                    start > 0 &&
-                    isGroupEqual(mappedColumns[start - 1].group, group) &&
-                    mappedColumns[start - 1].sticky === sticky
-                ) {
-                    const c = mappedColumns[start - 1];
-                    result.x -= c.width;
-                    result.width += c.width;
-                    start--;
-                }
-
-                let end = col;
-                while (
-                    end + 1 < mappedColumns.length &&
-                    isGroupEqual(mappedColumns[end + 1].group, group) &&
-                    mappedColumns[end + 1].sticky === sticky
-                ) {
-                    const c = mappedColumns[end + 1];
-                    result.width += c.width;
-                    end++;
-                }
-                if (!sticky) {
-                    const freezeWidth = getStickyWidth(mappedColumns);
-                    const clip = result.x - (rect.x + freezeWidth);
-                    if (clip < 0) {
-                        result.x -= clip;
-                        result.width += clip;
-                    }
-
-                    if (result.x + result.width > rect.right) {
-                        result.width = rect.right - result.x;
-                    }
-                }
-            } else if (lastRowSticky && row === rows - 1) {
-                const stickyHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(row);
-                result.y = rect.y + (height - stickyHeight);
-                result.height = stickyHeight;
-            } else {
-                const dir = cellYOffset > row ? -1 : 1;
-                if (typeof rowHeight === "number") {
-                    const delta = row - cellYOffset;
-                    result.y += delta * rowHeight;
-                } else {
-                    for (let r = cellYOffset; r !== row; r += dir) {
-                        result.y += rowHeight(r) * dir;
-                    }
-                }
-                result.height = (typeof rowHeight === "number" ? rowHeight : rowHeight(row)) + 1;
-            }
+            result.x += rect.x;
+            result.y += rect.y;
 
             return result;
         },
         [
-            totalHeaderHeight,
-            translateY,
-            freezeColumns,
-            mappedColumns,
-            lastRowSticky,
-            rows,
-            cellXOffset,
-            translateX,
-            groupHeaderHeight,
-            headerHeight,
-            rowHeight,
+            width,
             height,
+            groupHeaderHeight,
+            totalHeaderHeight,
+            cellXOffset,
             cellYOffset,
+            translateX,
+            translateY,
+            rows,
+            freezeColumns,
+            lastRowSticky,
+            mappedColumns,
+            rowHeight,
         ]
     );
 
@@ -529,6 +473,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             drawCustomCell,
             drawHeader,
             prelightCells,
+            highlightRegions,
             imageLoader,
             lastBlitData,
             canBlit.current ?? false,
@@ -555,11 +500,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         theme,
         headerHeight,
         groupHeaderHeight,
+        selection,
         disabledRows,
         rowHeight,
         verticalBorder,
         isResizing,
-        selection,
         lastRowSticky,
         rows,
         getCellContent,
@@ -568,6 +513,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         drawCustomCell,
         drawHeader,
         prelightCells,
+        highlightRegions,
         imageLoader,
         spriteManager,
         scrolling,

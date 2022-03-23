@@ -43,6 +43,11 @@ import { PrepResult } from "./cells/cell-types";
 
 type HoverInfo = readonly [Item, readonly [number, number]];
 
+export interface Highlight {
+    readonly color: string;
+    readonly range: Rectangle;
+}
+
 interface GroupDetails {
     readonly name: string;
     readonly icon?: string;
@@ -987,6 +992,7 @@ function drawCells(
     selection: GridSelection,
     selectedColumns: CompactSelection,
     prelightCells: CellList | undefined,
+    highlightRegions: readonly Highlight[] | undefined,
     drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader,
     spriteManager: SpriteManager,
@@ -1185,6 +1191,21 @@ function drawCells(
                             fill = blend(theme.bgSearchResult, fill);
                         }
                     }
+
+                    if (highlightRegions !== undefined) {
+                        for (const region of highlightRegions) {
+                            const r = region.range;
+                            if (
+                                r.x <= c.sourceIndex &&
+                                c.sourceIndex < r.x + r.width &&
+                                r.y <= row &&
+                                row < r.y + r.height
+                            ) {
+                                fill = blend(region.color, fill);
+                            }
+                        }
+                    }
+
                     if (fill !== undefined) {
                         ctx.fillStyle = fill;
                         if (prepResult !== undefined) {
@@ -1508,6 +1529,7 @@ export function drawGrid(
     drawCustomCell: DrawCustomCellCallback | undefined,
     drawHeaderCallback: DrawHeaderCallback | undefined,
     prelightCells: CellList | undefined,
+    highlightRegions: readonly Highlight[] | undefined,
     imageLoader: ImageWindowLoader,
     lastBlitData: React.MutableRefObject<BlitData>,
     canBlit: boolean,
@@ -1679,6 +1701,7 @@ export function drawGrid(
                 selectedCell,
                 selectedColumns,
                 prelightCells,
+                highlightRegions,
                 drawCustomCell,
                 imageLoader,
                 spriteManager,
@@ -1806,6 +1829,7 @@ export function drawGrid(
         selectedCell,
         selectedColumns,
         prelightCells,
+        highlightRegions,
         drawCustomCell,
         imageLoader,
         spriteManager,

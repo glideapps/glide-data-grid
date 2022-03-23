@@ -9,6 +9,7 @@ import {
     GridColumn,
     GridColumnIcon,
     GridMouseEventArgs,
+    GridSelection,
     GroupHeaderClickedEventArgs,
     isEditableGridCell,
     isTextEditableGridCell,
@@ -2986,5 +2987,60 @@ export const Padding: React.VFC<PaddingProps> = p => {
 (Padding as any).parameters = {
     options: {
         showPanel: true,
+    },
+};
+
+export const HighlightCells: React.VFC = () => {
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100);
+
+    const [gridSelection, setGridSelection] = React.useState<GridSelection>({
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
+    });
+
+    const highlights = React.useMemo<DataEditorProps["highlightRegions"]>(() => {
+        if (gridSelection.current === undefined) return undefined;
+        const [col, row] = gridSelection.current.cell;
+        return [
+            {
+                color: "#44BB0022",
+                range: {
+                    x: col + 2,
+                    y: row,
+                    width: 1,
+                    height: 1,
+                },
+            },
+        ];
+    }, [gridSelection]);
+
+    return (
+        <BeautifulWrapper
+            title="HighlightCells"
+            description={
+                <Description>
+                    Columns at the start of your grid can be frozen in place by settings{" "}
+                    <PropName>freezeColumns</PropName> to a number greater than 0.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers="both"
+                freezeColumns={1}
+                highlightRegions={highlights}
+                gridSelection={gridSelection}
+                onGridSelectionChange={setGridSelection}
+                getCellContent={getCellContent}
+                getCellsForSelection={getCellsForSelection}
+                columns={cols}
+                verticalBorder={c => c > 0}
+                rows={1_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(FreezeColumns as any).parameters = {
+    options: {
+        showPanel: false,
     },
 };
