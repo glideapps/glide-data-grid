@@ -3007,6 +3007,15 @@ export const HighlightCells: React.VFC = () => {
                 range: {
                     x: col + 2,
                     y: row,
+                    width: 10,
+                    height: 10,
+                },
+            },
+            {
+                color: "#b000b021",
+                range: {
+                    x: col,
+                    y: row + 2,
                     width: 1,
                     height: 1,
                 },
@@ -3019,8 +3028,8 @@ export const HighlightCells: React.VFC = () => {
             title="HighlightCells"
             description={
                 <Description>
-                    Columns at the start of your grid can be frozen in place by settings{" "}
-                    <PropName>freezeColumns</PropName> to a number greater than 0.
+                    The <PropName>highlightRegions</PropName> prop can be set to provide additional hinting or context
+                    for the current selection.
                 </Description>
             }>
             <DataEditor
@@ -3039,7 +3048,7 @@ export const HighlightCells: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(FreezeColumns as any).parameters = {
+(HighlightCells as any).parameters = {
     options: {
         showPanel: false,
     },

@@ -8,7 +8,6 @@ import {
     getEffectiveColumns,
     getRowIndexForY,
     getStickyWidth,
-    isGroupEqual,
     useMappedColumns,
 } from "./data-grid-lib";
 import {
@@ -534,6 +533,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         isResizing,
         verticalBorder,
         getCellContent,
+        highlightRegions,
         lastWasTouch,
         selection,
         dragAndDropState,

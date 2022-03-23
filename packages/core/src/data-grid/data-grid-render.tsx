@@ -23,6 +23,7 @@ import {
     isGroupEqual,
     cellIsSelected,
     cellIsInRange,
+    computeBounds,
 } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
@@ -1400,6 +1401,179 @@ function overdrawStickyBoundaries(
     ctx.stroke();
 }
 
+function drawHighlightRings(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    cellXOffset: number,
+    cellYOffset: number,
+    translateX: number,
+    translateY: number,
+    mappedColumns: readonly MappedGridColumn[],
+    freezeColumns: number,
+    headerHeight: number,
+    groupHeaderHeight: number,
+    rowHeight: number | ((index: number) => number),
+    lastRowSticky: boolean,
+    rows: number,
+    highlightRegions: readonly Highlight[] | undefined
+): (() => void) | undefined {
+    if (highlightRegions === undefined || highlightRegions.length === 0) return undefined;
+    const drawRects = highlightRegions.map(h => {
+        const r = h.range;
+        const topLeftBounds = computeBounds(
+            r.x,
+            r.y,
+            width,
+            height,
+            groupHeaderHeight,
+            headerHeight + groupHeaderHeight,
+            cellXOffset,
+            cellYOffset,
+            translateX,
+            translateY,
+            rows,
+            freezeColumns,
+            lastRowSticky,
+            mappedColumns,
+            rowHeight
+        );
+        if (r.width === 1 && r.height === 1) {
+            if (r.x < freezeColumns) {
+                return [{ color: h.color, rect: topLeftBounds }, undefined];
+            }
+            return [undefined, { color: h.color, rect: topLeftBounds }];
+        }
+
+        const bottomRightBounds = computeBounds(
+            r.x + r.width - 1,
+            r.y + r.height - 1,
+            width,
+            height,
+            groupHeaderHeight,
+            headerHeight + groupHeaderHeight,
+            cellXOffset,
+            cellYOffset,
+            translateX,
+            translateY,
+            rows,
+            freezeColumns,
+            lastRowSticky,
+            mappedColumns,
+            rowHeight
+        );
+        if (r.x < freezeColumns && r.x + r.width >= freezeColumns) {
+            const freezeSectionRightBounds = computeBounds(
+                freezeColumns - 1,
+                r.y + r.height - 1,
+                width,
+                height,
+                groupHeaderHeight,
+                headerHeight + groupHeaderHeight,
+                cellXOffset,
+                cellYOffset,
+                translateX,
+                translateY,
+                rows,
+                freezeColumns,
+                lastRowSticky,
+                mappedColumns,
+                rowHeight
+            );
+            const unfreezeSectionleftBounds = computeBounds(
+                freezeColumns,
+                r.y + r.height - 1,
+                width,
+                height,
+                groupHeaderHeight,
+                headerHeight + groupHeaderHeight,
+                cellXOffset,
+                cellYOffset,
+                translateX,
+                translateY,
+                rows,
+                freezeColumns,
+                lastRowSticky,
+                mappedColumns,
+                rowHeight
+            );
+
+            return [
+                {
+                    color: h.color,
+                    rect: {
+                        x: topLeftBounds.x,
+                        y: topLeftBounds.y,
+                        width: freezeSectionRightBounds.x + freezeSectionRightBounds.width - topLeftBounds.x,
+                        height: freezeSectionRightBounds.y + freezeSectionRightBounds.height - topLeftBounds.y,
+                    },
+                },
+                {
+                    color: h.color,
+                    rect: {
+                        x: unfreezeSectionleftBounds.x,
+                        y: unfreezeSectionleftBounds.y,
+                        width: bottomRightBounds.x + bottomRightBounds.width - unfreezeSectionleftBounds.x,
+                        height: bottomRightBounds.y + bottomRightBounds.height - unfreezeSectionleftBounds.y,
+                    },
+                },
+            ];
+        } else {
+            return [
+                undefined,
+                {
+                    color: h.color,
+                    rect: {
+                        x: topLeftBounds.x,
+                        y: topLeftBounds.y,
+                        width: bottomRightBounds.x + bottomRightBounds.width - topLeftBounds.x,
+                        height: bottomRightBounds.y + bottomRightBounds.height - topLeftBounds.y,
+                    },
+                },
+            ];
+        }
+    });
+
+    const stickyWidth = getStickyWidth(mappedColumns);
+
+    const drawCb = () => {
+        ctx.beginPath();
+        ctx.save();
+        ctx.setLineDash([7, 5]);
+        ctx.lineWidth = 2;
+        for (const dr of drawRects) {
+            const [freezeSection] = dr;
+            if (freezeSection !== undefined) {
+                ctx.strokeStyle = withAlpha(freezeSection.color, 1);
+                ctx.strokeRect(
+                    freezeSection.rect.x + 1,
+                    freezeSection.rect.y + 1,
+                    freezeSection.rect.width - 2,
+                    freezeSection.rect.height - 2
+                );
+            }
+        }
+        ctx.rect(stickyWidth, 0, width, height);
+        ctx.clip();
+        for (const dr of drawRects) {
+            const [, unfreezeSection] = dr;
+            if (unfreezeSection) {
+                ctx.strokeStyle = withAlpha(unfreezeSection.color, 1);
+                ctx.strokeRect(
+                    unfreezeSection.rect.x + 1,
+                    unfreezeSection.rect.y + 1,
+                    unfreezeSection.rect.width - 2,
+                    unfreezeSection.rect.height - 2
+                );
+            }
+        }
+        ctx.restore();
+    };
+
+    drawCb();
+    return drawCb;
+}
+
 function drawFocusRing(
     ctx: CanvasRenderingContext2D,
     width: number,
@@ -1794,6 +1968,24 @@ export function drawGrid(
         rows
     );
 
+    const highlightRedraw = drawHighlightRings(
+        targetCtx,
+        width,
+        height,
+        cellXOffset,
+        cellYOffset,
+        translateX,
+        translateY,
+        mappedColumns,
+        freezeColumns,
+        headerHeight,
+        groupHeaderHeight,
+        rowHeight,
+        lastRowSticky,
+        rows,
+        highlightRegions
+    );
+
     targetCtx.fillStyle = theme.bgCell;
     if (drawRegions.length > 0) {
         targetCtx.beginPath();
@@ -1880,6 +2072,7 @@ export function drawGrid(
     );
 
     focusRedraw?.();
+    highlightRedraw?.();
 
     imageLoader?.setWindow(
         {

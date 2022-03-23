@@ -898,7 +898,7 @@ export function computeBounds(
         const freezeWidth = getStickyWidth(mappedColumns);
         result.x += freezeWidth + translateX;
         for (let i = cellXOffset; i !== col; i += dir) {
-            result.x += mappedColumns[i].width * dir;
+            result.x += mappedColumns[dir === 1 ? i : i - 1].width * dir;
         }
     } else {
         for (let i = 0; i < col; i++) {
