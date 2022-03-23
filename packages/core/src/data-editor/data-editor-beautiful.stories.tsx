@@ -1117,6 +1117,20 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
             <DataEditor
                 {...defaultProps}
                 rowMarkers="both"
+                keybindings={{
+                    clear: true,
+                    copy: true,
+                    downFill: true,
+                    rightFill: true,
+                    pageDown: true,
+                    pageUp: true,
+                    paste: true,
+                    search: true,
+                    selectAll: true,
+                    selectColumn: true,
+                    selectRow: true,
+                }}
+                useSimpleGetCellsForSelection={true}
                 rangeMultiSelect={p.rangeMultiSelect}
                 columnMultiSelect={p.columnMultiSelect}
                 rowMultiSelect={p.rowMultiSelect}

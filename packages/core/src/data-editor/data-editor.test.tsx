@@ -1177,6 +1177,78 @@ describe("data-editor", () => {
         );
     });
 
+    test("Copy/paste with simple getCellsForSelection", async () => {
+        const spy = jest.fn();
+        const pasteSpy = jest.fn((_target: any, _values: any) => true);
+        jest.useFakeTimers();
+        const { getCellsForSelection, ...rest } = basicProps;
+        render(
+            <EventedDataEditor
+                {...rest}
+                useSimpleGetCellsForSelection={true}
+                onGridSelectionChange={spy}
+                onPaste={(...args) => pasteSpy(...args)}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "ArrowRight",
+            shiftKey: true,
+        });
+
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [1, 2], range: { x: 1, y: 2, width: 2, height: 1 } }),
+            })
+        );
+
+        fireEvent.copy(window);
+        expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "ArrowDown",
+        });
+
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 3] }) }));
+
+        fireEvent.paste(window);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(pasteSpy).toBeCalledWith(
+            [1, 3],
+            [
+                ["Sunday", "Dogs", "https://google.com"],
+                ["Monday", "Cats", "https://google.com"],
+                ["Tuesday", "Turtles", "https://google.com"],
+                ["Wednesday", "Bears", "https://google.com"],
+                ["Thursday", "L  ions", "https://google.com"],
+                ["Friday", "Pigs", "https://google.com"],
+                [
+                    "Saturday",
+                    'Turkeys and some "quotes" and\na new line char "more quotes" plus a tab  .',
+                    "https://google.com",
+                ],
+            ]
+        );
+    });
+
     test("Copy rows", async () => {
         jest.useFakeTimers();
         render(
@@ -1647,9 +1719,18 @@ describe("data-editor", () => {
     test("Fill down", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} enableDownfill={true} onCellEdited={spy} />, {
-            wrapper: Context,
-        });
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                keybindings={{
+                    downFill: true,
+                }}
+                onCellEdited={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
@@ -1686,7 +1767,7 @@ describe("data-editor", () => {
     test("Fill right", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} enableRightfill={true} onCellEdited={spy} />, {
+        render(<EventedDataEditor {...basicProps} keybindings={{ rightFill: true }} onCellEdited={spy} />, {
             wrapper: Context,
         });
         prep();
@@ -2465,6 +2546,295 @@ describe("data-editor", () => {
         fireEvent.mouseUp(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
+        });
+    });
+
+    test("Select all", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} keybindings={{ selectAll: true }} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.keyDown(canvas, {
+            key: "a",
+            ctrlKey: true,
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+            current: {
+                cell: [0, 0],
+                range: {
+                    x: 0,
+                    y: 0,
+                    width: 10,
+                    height: 1000,
+                },
+                rangeStack: [],
+            },
+        });
+    });
+
+    test("Select column with blending", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                rowSelectionBlending="mixed"
+                columnSelectionBlending="mixed"
+                rangeSelectionBlending="mixed"
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: " ",
+            ctrlKey: true,
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.fromSingleSelection(1),
+            rows: CompactSelection.empty(),
+            current: {
+                cell: [1, 1],
+                range: {
+                    x: 1,
+                    y: 1,
+                    width: 1,
+                    height: 1,
+                },
+                rangeStack: [],
+            },
+        });
+    });
+
+    test("Select column", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: " ",
+            ctrlKey: true,
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.fromSingleSelection(1),
+            rows: CompactSelection.empty(),
+            current: undefined,
+        });
+    });
+
+    test("Select row with blending", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                rowSelectionBlending="mixed"
+                columnSelectionBlending="mixed"
+                rangeSelectionBlending="mixed"
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: " ",
+            shiftKey: true,
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection(1),
+            current: {
+                cell: [1, 1],
+                range: {
+                    x: 1,
+                    y: 1,
+                    width: 1,
+                    height: 1,
+                },
+                rangeStack: [],
+            },
+        });
+    });
+
+    test("Select row", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: " ",
+            shiftKey: true,
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection(1),
+            current: undefined,
+        });
+    });
+
+    test("Select range with mouse then permissive move", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 600, // Col B
+            clientY: 36 + 32 * 12 + 16, // Row 2
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 600, // Col B
+            clientY: 36 + 32 * 12 + 16, // Row 2
+        });
+
+        spy.mockClear();
+
+        fireEvent.keyDown(canvas, {
+            key: "ArrowLeft",
+            altKey: true,
+        });
+
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                current: {
+                    cell: [0, 2],
+                    range: { height: 1, width: 1, x: 0, y: 2 },
+                    rangeStack: [{ height: 11, width: 3, x: 1, y: 2 }],
+                },
+            })
+        );
+    });
+
+    test("Close overlay with enter key", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor
+                experimental={{
+                    strict: true,
+                }}
+                {...basicProps}
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "Enter",
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "Enter",
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+            current: {
+                cell: [1, 2],
+                range: {
+                    x: 1,
+                    y: 2,
+                    width: 1,
+                    height: 1,
+                },
+                rangeStack: [],
+            },
         });
     });
 });
