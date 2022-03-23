@@ -1542,29 +1542,29 @@ function drawHighlightRings(
         ctx.setLineDash([7, 5]);
         ctx.lineWidth = 2;
         for (const dr of drawRects) {
-            const [freezeSection] = dr;
-            if (freezeSection !== undefined) {
-                ctx.strokeStyle = withAlpha(freezeSection.color, 1);
-                ctx.strokeRect(
-                    freezeSection.rect.x + 1,
-                    freezeSection.rect.y + 1,
-                    freezeSection.rect.width - 2,
-                    freezeSection.rect.height - 2
-                );
+            const [s] = dr;
+            if (
+                s !== undefined &&
+                intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
+            ) {
+                ctx.strokeStyle = withAlpha(s.color, 1);
+                ctx.strokeRect(s.rect.x + 1, s.rect.y + 1, s.rect.width - 2, s.rect.height - 2);
             }
         }
-        ctx.rect(stickyWidth, 0, width, height);
-        ctx.clip();
+        let clipped = false;
         for (const dr of drawRects) {
-            const [, unfreezeSection] = dr;
-            if (unfreezeSection) {
-                ctx.strokeStyle = withAlpha(unfreezeSection.color, 1);
-                ctx.strokeRect(
-                    unfreezeSection.rect.x + 1,
-                    unfreezeSection.rect.y + 1,
-                    unfreezeSection.rect.width - 2,
-                    unfreezeSection.rect.height - 2
-                );
+            const [, s] = dr;
+            if (
+                s !== undefined &&
+                intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
+            ) {
+                if (!clipped && s.rect.x < stickyWidth) {
+                    ctx.rect(stickyWidth, 0, width, height);
+                    ctx.clip();
+                    clipped = true;
+                }
+                ctx.strokeStyle = withAlpha(s.color, 1);
+                ctx.strokeRect(s.rect.x + 1, s.rect.y + 1, s.rect.width - 2, s.rect.height - 2);
             }
         }
         ctx.restore();
