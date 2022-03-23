@@ -68,6 +68,7 @@ type Props = Omit<
     | "lastRowSticky"
     | "lockColumns"
     | "firstColAccessible"
+    | "getCellsForSelection"
     | "onCellFocused"
     | "onKeyDown"
     | "onKeyUp"
@@ -232,11 +233,12 @@ export interface DataEditorProps extends Props {
         }
     ) => void;
 
-    readonly useSimpleGetCellsForSelection?: boolean;
     readonly getCellContent: ReplaceReturnType<DataGridSearchProps["getCellContent"], GridCell>;
     readonly rowSelectionMode?: "auto" | "multi";
 
     readonly keybindings?: Partial<Keybinds>;
+
+    readonly getCellsForSelection?: DataGridSearchProps["getCellsForSelection"] | true;
 
     readonly freezeColumns?: DataGridSearchProps["freezeColumns"];
 
@@ -332,7 +334,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         freezeColumns = 0,
         rowSelectionMode = "auto",
         onHeaderMenuClick,
-        useSimpleGetCellsForSelection = false,
         getGroupDetails,
         onSearchClose: onSearchCloseIn,
         onItemHovered,
@@ -381,7 +382,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const [getCellsForSelection, getCellsForSeletionDirect] = useCellsForSelection(
         getCellsForSelectionIn,
         getCellContent,
-        useSimpleGetCellsForSelection,
         rowMarkerOffset
     );
 

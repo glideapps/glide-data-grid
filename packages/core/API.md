@@ -366,10 +366,12 @@ Set to a positive number to freeze columns on the left side of the grid during h
 ## getCellsForSelection
 
 ```ts
-getCellsForSelection?: (selection: Rectangle) => readonly (readonly GridCell[])[];
+getCellsForSelection?: true | (selection: Rectangle) => readonly (readonly GridCell[])[];
 ```
 
 `getCellsForSelection` is called when the user copies a selection to the clipboard or the data editor needs to inspect data which may be outside the curently visible range. It must return a two-dimensional array (an array of rows, where each row is an array of cells) of the cells in the selection's rectangle. Note that the rectangle can include cells that are not currently visible.
+
+If `true` is passed instead of a callback, the data grid will internally use the `getCellContent` callback to provide a basic implementation of `getCellsForSelection`. This can make it easier to light up more data grid functionality, but may have negative side effects if your data source is not able to handle being queried for data outside the normal window.
 
 ---
 ## markdownDivCreateNode

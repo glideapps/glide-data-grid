@@ -1,17 +1,17 @@
 import * as React from "react";
+import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { GridCell, GridCellKind } from "../data-grid/data-grid-types";
 import type { DataEditorProps } from "./data-editor";
 
-type CellsForSelectionCallback = NonNullable<DataEditorProps["getCellsForSelection"]>;
+type CellsForSelectionCallback = NonNullable<DataGridSearchProps["getCellsForSelection"]>;
 export function useCellsForSelection(
-    getCellsForSelectionIn: CellsForSelectionCallback | undefined,
+    getCellsForSelectionIn: CellsForSelectionCallback | true | undefined,
     getCellContent: DataEditorProps["getCellContent"],
-    allowSimple: boolean,
     rowMarkerOffset: number
 ) {
     const getCellsForSelectionDirectWhenValid = React.useCallback<CellsForSelectionCallback>(
         rect => {
-            if (getCellsForSelectionIn === undefined && allowSimple) {
+            if (getCellsForSelectionIn === true) {
                 const result: GridCell[][] = [];
 
                 for (let y = rect.y; y < rect.y + rect.height; y++) {
@@ -33,10 +33,10 @@ export function useCellsForSelection(
             }
             return getCellsForSelectionIn?.(rect) ?? [];
         },
-        [getCellContent, getCellsForSelectionIn, allowSimple]
+        [getCellContent, getCellsForSelectionIn]
     );
     const getCellsForSelectionDirect =
-        getCellsForSelectionIn !== undefined || allowSimple ? getCellsForSelectionDirectWhenValid : undefined;
+        getCellsForSelectionIn !== undefined ? getCellsForSelectionDirectWhenValid : undefined;
     const getCellsForSelectionMangled = React.useCallback<CellsForSelectionCallback>(
         rect => {
             if (getCellsForSelectionDirect === undefined) return [];
@@ -57,8 +57,7 @@ export function useCellsForSelection(
         [getCellsForSelectionDirect, rowMarkerOffset]
     );
 
-    const getCellsForSelection =
-        getCellsForSelectionIn !== undefined || allowSimple ? getCellsForSelectionMangled : undefined;
+    const getCellsForSelection = getCellsForSelectionIn !== undefined ? getCellsForSelectionMangled : undefined;
 
     return [getCellsForSelection, getCellsForSelectionDirect] as const;
 }

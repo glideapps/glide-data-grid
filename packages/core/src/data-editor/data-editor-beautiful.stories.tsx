@@ -1131,7 +1131,7 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
                     selectColumn: true,
                     selectRow: true,
                 }}
-                useSimpleGetCellsForSelection={true}
+                getCellsForSelection={true}
                 rangeMultiSelect={p.rangeMultiSelect}
                 columnMultiSelect={p.columnMultiSelect}
                 rowMultiSelect={p.rowMultiSelect}
