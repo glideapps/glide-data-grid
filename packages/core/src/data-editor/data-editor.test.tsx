@@ -1361,9 +1361,25 @@ describe("data-editor", () => {
 
     test("Blit does not crash horizontal scroll", async () => {
         jest.useFakeTimers();
-        render(<DataEditor {...basicProps} />, {
-            wrapper: Context,
-        });
+        render(
+            <DataEditor
+                highlightRegions={[
+                    {
+                        color: "#12345623",
+                        range: {
+                            x: 2,
+                            y: 2,
+                            width: 3,
+                            height: 10,
+                        },
+                    },
+                ]}
+                {...basicProps}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
         const scroller = prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");

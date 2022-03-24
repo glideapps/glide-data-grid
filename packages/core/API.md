@@ -120,6 +120,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [rangeSelectionBlending](#rangeselectionblending) | Controls how range selections may be mixed with other selection types. |
 | [columnSelectionBlending](#rangeselectionblending) | Controls how column selections may be mixed with other selection types. |
 | [rowSelectionBlending](#rangeselectionblending) | Controls how row selections may be mixed with other selection types. |
+| [highlightRegions](#highlightregions) | Adds additional highlights to the data grid for showing contextually important cells. |
 
 ## Editing
 | Name | Description |
@@ -646,6 +647,20 @@ rowSelectionBlending?: "exclusive" | "mixed"; // default exclusive
 ```
 
 Controls which types of selections can exist at the same time in the grid. If selection blending is set to exclusive, the grid will clear other types of selections when the exclusive selection is made. By default row, column, and range selections are exclusive.
+
+---
+## highlightRegions
+
+```ts
+interface Highlight {
+    readonly color: string;
+    readonly range: Rectangle;
+}
+
+highlightRegions?: readonly Highlight[];
+```
+
+Highlight regions are regions on the grid which get drawn with a background color and a dashed line around the region. The color string must be css parseable and the opacity will be removed for the drawing of the dashed line. Opacity should be used to allow overlapping selections to properly blend in background colors.
 
 ---
 ## onDelete
