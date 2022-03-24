@@ -137,8 +137,6 @@ Most data grids will want to set the majority of these props one way or another.
 ## Input Interaction
 | Name | Description |
 |------------|-----------------------|
-| [enableDownfill](#enabledownfill) | Enables the downfill keyboard shortcut, Ctrl/Cmd+D. Fills the current selection with the contents of the first row of the range. |
-| [enableRightfill](#enabledownfill) | Enables the downfill keyboard shortcut, Ctrl/Cmd+R. Fills the current selection with the contents of the first column of the range. |
 | [maxColumnWidth](#maxcolumnwidth) | Sets the maximum width the user can resize a column to. |
 | [onCellClicked](#oncellclicked) | Emitted when a cell is clicked. |
 | [onCellContextMenu](#oncellcontextmenu) | Emitted when a cell should show a context menu. Usually right click. |
@@ -167,6 +165,29 @@ Most data grids will want to set the majority of these props one way or another.
 | Name | Description |
 |------------|-----------------------|
 | drawCustomCell |  Use `drawCell` |
+
+# Keybindings
+
+| Key Combo | Default | Flag | Description |
+|---|----|---|---|
+| Arrow | ✔️ | N/A | Moves the currently selected cell and clears other selections |
+| Shift + Arrow | ✔️ | N/A | Extends the current selection range in the direction pressed. |
+| Alt + Arrow | ✔️ | N/A | Moves the currently selected cell and retains the current selection |
+| Ctrl/Cmd + Arrow \| Home/End | ✔️ | N/A | Move the selection as far as possible in the direction pressed. |
+| Ctrl/Cmd + Shift + Arrow | ✔️ | N/A | Extends the selection as far as possible in the direction pressed. |
+| Shift + Home/End | ✔️ | N/A | Extends the selection as far as possible in the direction pressed. |
+| Ctrl/Cmd + A | ✔️ | `selectAll` | Selects all cells. |
+| Shift + Space | ✔️ | `selectRow` | Selecs the current row. |
+| Ctrl/Cmd + Space | ✔️ | `selectCol` | Selects the current col. |
+| PageUp/PageDown | ❌ | `pageUp`/`pageDown` | Moves the current selection up/down by one page. |
+| Escape | ✔️ | `clear` | Clear the current selection. |
+| Ctrl/Cmd + D | ❌ | `downFill` | Data from the first row of the range will be down filled into the rows below it |
+| Ctrl/Cmd + R | ❌ | `rightFill` | Data from the first column of the range will be right filled into the columns next to it |
+| Ctrl/Cmd + C | ✔️ | `copy` | Copies the current selection. |
+| Ctrl/Cmd + V | ✔️ | `paste` | Pastes the current buffer into the grid. |
+| Ctrl/Cmd + F | ❌ | `search` | Opens the search interface. |
+| Ctrl/Cmd + Home/End | ✔️ | `first`/`last` | Move the selection to the first/last cell in the data grid. |
+| Ctrl/Cmd + Shift + Home/End | ✔️ | `first`/`last` | Extend the selection to the first/last cell in the data grid. |
 
 # Full API Docs
 
@@ -740,16 +761,6 @@ onRowAppended?: () => void;
 ```
 
 `onRowAppended` controls adding new rows at the bottom of the Grid. If `onRowAppended` is defined, an empty row will display at the bottom. When the user clicks on one of its cells, `onRowAppended` is called, which is responsible for appending the new row. The appearance of the blank row can be configured using `trailingRowOptions`.
-
----
-## enableDownfill
-
-```ts
-enableDownfill?: boolean;
-enableRightfill?: boolean;
-```
-
-Enables the downfill and rightfill commands. When a `range` is selected and the downfill command is invoked (Ctrl/Cmd+d), the data from the first row of the range will be downfilled into the rows below it, ignoring cells which are not editable. When the rightfill command (Ctrl/Cmd+R) is invoked the contents of the first column are copied right to the rest of the range.
 
 ---
 ## maxColumnWidth
