@@ -1181,11 +1181,10 @@ describe("data-editor", () => {
         const spy = jest.fn();
         const pasteSpy = jest.fn((_target: any, _values: any) => true);
         jest.useFakeTimers();
-        const { getCellsForSelection, ...rest } = basicProps;
         render(
             <EventedDataEditor
-                {...rest}
-                useSimpleGetCellsForSelection={true}
+                {...basicProps}
+                getCellsForSelection={true}
                 onGridSelectionChange={spy}
                 onPaste={(...args) => pasteSpy(...args)}
             />,
