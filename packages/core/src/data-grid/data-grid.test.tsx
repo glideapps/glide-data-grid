@@ -2,7 +2,7 @@ import { describe, test, expect } from "jest-without-globals";
 import * as React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
 import DataGrid, { DataGridProps, DataGridRef } from "./data-grid";
-import { GridCellKind } from "./data-grid-types";
+import { CompactSelection, GridCellKind } from "./data-grid-types";
 import { ThemeProvider } from "styled-components";
 import { getDataEditorTheme } from "../common/styles";
 
@@ -33,6 +33,11 @@ const basicProps: DataGridProps = {
     ],
     enableGroups: false,
     freezeColumns: 0,
+    selection: {
+        current: undefined,
+        rows: CompactSelection.empty(),
+        columns: CompactSelection.empty(),
+    },
     firstColAccessible: true,
     onMouseMove: () => undefined,
     getCellContent: cell => ({

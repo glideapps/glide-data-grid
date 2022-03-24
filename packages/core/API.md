@@ -113,18 +113,21 @@ Most data grids will want to set the majority of these props one way or another.
 | [gridSelection](#gridselection) | The current selection active in the data grid. Includes both the selection cell and the selected range. |
 | [spanRangeBehavior](#spanrangebehavior) | Determines if the `gridSelection` should allow partial spans or not. |
 | [onGridSelectionChange](#gridselection) | Emitted whenever the `gridSelection` should change. |
-| [onSelectedColumnsChange](#selectedcolumns) | Emitted whenever the `selectedColumns` should change. |
-| [onSelectedRowsChange](#selectedrows) | Emitted whenever the `selectedRows` should change. |
 | [onSelectionCleared](#onselectioncleared) | Emitted when the selection is explicitly cleared. |
-| [selectedColumns](#selectedcolumns) | The currently selected columns. |
-| [selectedRows](#selectedrows) | The currently selected rows. |
+| [rangeMultiSelect](#rangemultiselect) | Controls if multiple ranges can be selected at once. |
+| [columnMultiSelect](#rangemultiselect) | Controls if multiple columns can be selected at once. |
+| [rowMultiSelect](#rangemultiselect) | Controls if multiple rows can be selected at aonce. |
+| [rangeSelectionBlending](#rangeselectionblending) | Controls how range selections may be mixed with other selection types. |
+| [columnSelectionBlending](#rangeselectionblending) | Controls how column selections may be mixed with other selection types. |
+| [rowSelectionBlending](#rangeselectionblending) | Controls how row selections may be mixed with other selection types. |
+| [highlightRegions](#highlightregions) | Adds additional highlights to the data grid for showing contextually important cells. |
 
 ## Editing
 | Name | Description |
 |------------|-----------------------|
 | [imageEditorOverride](#imageeditoroverride) | Used to provide an override to the default image editor for the data grid. `provideEditor` may be a better choice for most people. |
 | [onCellEdited](#oncelledited) | Emitted whenever a cell edit is completed. |
-| [onDeleteRows](#ondeleterows) | Emitted whenever the user has requested the deletion of rows. |
+| [onDelete](#ondelete) | Emitted whenever the user has requested the deletion of the selection. |
 | [onFinishedEditing](#onfinishedediting) | Emitted when editing has finished, regardless of data changing or not. |
 | [onGroupHeaderRenamed](#ongroupheaderrenamed) | Emitted whe the user wishes to rename a group. |
 | [onPaste](#onpaste) | Emitted any time data is pasted to the grid. Allows controlling paste behavior. |
@@ -134,8 +137,6 @@ Most data grids will want to set the majority of these props one way or another.
 ## Input Interaction
 | Name | Description |
 |------------|-----------------------|
-| [enableDownfill](#enabledownfill) | Enables the downfill keyboard shortcut, Ctrl/Cmd+D. Fills the current selection with the contents of the first row of the range. |
-| [enableRightfill](#enabledownfill) | Enables the downfill keyboard shortcut, Ctrl/Cmd+R. Fills the current selection with the contents of the first column of the range. |
 | [maxColumnWidth](#maxcolumnwidth) | Sets the maximum width the user can resize a column to. |
 | [onCellClicked](#oncellclicked) | Emitted when a cell is clicked. |
 | [onCellContextMenu](#oncellcontextmenu) | Emitted when a cell should show a context menu. Usually right click. |
@@ -164,6 +165,29 @@ Most data grids will want to set the majority of these props one way or another.
 | Name | Description |
 |------------|-----------------------|
 | drawCustomCell |  Use `drawCell` |
+
+# Keybindings
+
+| Key Combo | Default | Flag | Description |
+|---|----|---|---|
+| Arrow | ✔️ | N/A | Moves the currently selected cell and clears other selections |
+| Shift + Arrow | ✔️ | N/A | Extends the current selection range in the direction pressed. |
+| Alt + Arrow | ✔️ | N/A | Moves the currently selected cell and retains the current selection |
+| Ctrl/Cmd + Arrow \| Home/End | ✔️ | N/A | Move the selection as far as possible in the direction pressed. |
+| Ctrl/Cmd + Shift + Arrow | ✔️ | N/A | Extends the selection as far as possible in the direction pressed. |
+| Shift + Home/End | ✔️ | N/A | Extends the selection as far as possible in the direction pressed. |
+| Ctrl/Cmd + A | ✔️ | `selectAll` | Selects all cells. |
+| Shift + Space | ✔️ | `selectRow` | Selecs the current row. |
+| Ctrl/Cmd + Space | ✔️ | `selectCol` | Selects the current col. |
+| PageUp/PageDown | ❌ | `pageUp`/`pageDown` | Moves the current selection up/down by one page. |
+| Escape | ✔️ | `clear` | Clear the current selection. |
+| Ctrl/Cmd + D | ❌ | `downFill` | Data from the first row of the range will be down filled into the rows below it |
+| Ctrl/Cmd + R | ❌ | `rightFill` | Data from the first column of the range will be right filled into the columns next to it |
+| Ctrl/Cmd + C | ✔️ | `copy` | Copies the current selection. |
+| Ctrl/Cmd + V | ✔️ | `paste` | Pastes the current buffer into the grid. |
+| Ctrl/Cmd + F | ❌ | `search` | Opens the search interface. |
+| Ctrl/Cmd + Home/End | ✔️ | `first`/`last` | Move the selection to the first/last cell in the data grid. |
+| Ctrl/Cmd + Shift + Home/End | ✔️ | `first`/`last` | Extend the selection to the first/last cell in the data grid. |
 
 # Full API Docs
 
@@ -232,12 +256,19 @@ export type GridColumn = SizedGridColumn | AutoGridColumn;
 ---
 ## GridSelection
 
-`GridSelection` is the most basic representation of the selected cells in the data grid. It accounts for the selected cell and the range of cells selected as well. It is the selection which is modified by keyboard and mouse interaction when clicking on the cells themselves.
+`GridSelection` is the most basic representation of the selected cells, rows, and columns in the data grid. The `current` property accounts for the selected cell and the range of cells selected as well. It is the selection which is modified by keyboard and mouse interaction when clicking on the cells themselves.
+
+The `rows` and `columns` properties both account for the columns or rows which have been explicitly selected by the user. Selecting a range which encompases the entire set of cells within a column/row does not implicitly set it into this part of the collection. This allows for distinguishing between cases when the user wishes to delete all contents of a row/column and delete the row/column itself.
 
 ```ts
 interface GridSelection {
-    readonly cell: readonly [number, number];
-    readonly range: Readonly<Rectangle>;
+    readonly current?: {
+        readonly cell: readonly [number, number];
+        readonly range: Readonly<Rectangle>;
+        readonly rangeStack: readonly Readonly<Rectangle>[];
+    };
+    readonly columns: CompactSelection;
+    readonly rows: CompactSelection;
 }
 ```
 
@@ -357,10 +388,12 @@ Set to a positive number to freeze columns on the left side of the grid during h
 ## getCellsForSelection
 
 ```ts
-getCellsForSelection?: (selection: GridSelection) => readonly (readonly GridCell[])[];
+getCellsForSelection?: true | (selection: Rectangle) => readonly (readonly GridCell[])[];
 ```
 
 `getCellsForSelection` is called when the user copies a selection to the clipboard or the data editor needs to inspect data which may be outside the curently visible range. It must return a two-dimensional array (an array of rows, where each row is an array of cells) of the cells in the selection's rectangle. Note that the rectangle can include cells that are not currently visible.
+
+If `true` is passed instead of a callback, the data grid will internally use the `getCellContent` callback to provide a basic implementation of `getCellsForSelection`. This can make it easier to light up more data grid functionality, but may have negative side effects if your data source is not able to handle being queried for data outside the normal window.
 
 ---
 ## markdownDivCreateNode
@@ -606,26 +639,6 @@ If set to `default` the `gridSelection` will always be expanded to fully include
 If `allowPartial` is set no inflation behavior will be enforced.
 
 ---
-## selectedColumns
-
-```ts
-readonly selectedColumns?: CompactSelection;
-readonly onSelectedColumnsChange?: (newColumns: CompactSelection, trigger: HeaderSelectionTrigger) => void;
-```
-
-Controls header selection. If not provided default header selection behavior will be applied.
-
----
-## selectedRows
-
-```ts
-readonly selectedRows?: CompactSelection;
-readonly onSelectedRowsChange?: (newRows: CompactSelection) => void;
-```
-
-Controls row selection. If not provided default row selection behavior will be applied.
-
----
 ## onSelectionCleared
 
 ```ts
@@ -633,6 +646,51 @@ onSelectionCleared?: () => void;
 ```
 
 Emitted when the current selection is cleared, usually when the user presses "Escape". `rowSelection`, `columnSelection`, and `gridSelection` should all be empty when this event is emitted. This event only emits when the user explicitly attempts to clear the selection.
+
+---
+## rangeMultiSelect
+
+```ts
+rangeMultiSelect?: boolean; // default false
+columnMultiSelect?: boolean; // default true
+rowMultiSelect?: boolean; // default true
+```
+
+Controls if multi-selection is allowed. If disabled, shift/ctrl/command clicking will work as if no modifiers are pressed.
+
+---
+## rangeSelectionBlending
+
+```ts
+rangeSelectionBlending?: "exclusive" | "mixed"; // default exclusive
+columnSelectionBlending?: "exclusive" | "mixed"; // default exclusive
+rowSelectionBlending?: "exclusive" | "mixed"; // default exclusive
+```
+
+Controls which types of selections can exist at the same time in the grid. If selection blending is set to exclusive, the grid will clear other types of selections when the exclusive selection is made. By default row, column, and range selections are exclusive.
+
+---
+## highlightRegions
+
+```ts
+interface Highlight {
+    readonly color: string;
+    readonly range: Rectangle;
+}
+
+highlightRegions?: readonly Highlight[];
+```
+
+Highlight regions are regions on the grid which get drawn with a background color and a dashed line around the region. The color string must be css parseable and the opacity will be removed for the drawing of the dashed line. Opacity should be used to allow overlapping selections to properly blend in background colors.
+
+---
+## onDelete
+
+```ts
+onDelete?: (selection: GridSelection) => GridSelection | boolean;
+```
+
+`onDelete` is called when the user deletes one or more rows. `gridSelection` is current selection. If the callback returns false, deletion will not happen. If it returns true, all cells inside all selected rows, columns and ranges will be deleted. If the callback returns a GridSelection, the newly returned selection will be deleted instead.
 
 ---
 ## imageEditorOverride
@@ -703,16 +761,6 @@ onRowAppended?: () => void;
 ```
 
 `onRowAppended` controls adding new rows at the bottom of the Grid. If `onRowAppended` is defined, an empty row will display at the bottom. When the user clicks on one of its cells, `onRowAppended` is called, which is responsible for appending the new row. The appearance of the blank row can be configured using `trailingRowOptions`.
-
----
-## enableDownfill
-
-```ts
-enableDownfill?: boolean;
-enableRightfill?: boolean;
-```
-
-Enables the downfill and rightfill commands. When a `range` is selected and the downfill command is invoked (Ctrl/Cmd+d), the data from the first row of the range will be downfilled into the rows below it, ignoring cells which are not editable. When the rightfill command (Ctrl/Cmd+R) is invoked the contents of the first column are copied right to the rest of the range.
 
 ---
 ## maxColumnWidth

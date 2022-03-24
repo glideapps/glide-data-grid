@@ -312,8 +312,8 @@ export function Smooth() {
 export function ManualControl() {
     const [gridSelection, setGridSelection] = useState<GridSelection | undefined>(undefined);
 
-    const cb = (newVal: GridSelection | undefined) => {
-        if ((newVal?.cell[0] ?? 0) % 2 === 0) {
+    const cb = (newVal: GridSelection) => {
+        if ((newVal.current?.cell[0] ?? 0) % 2 === 0) {
             setGridSelection(newVal);
         }
     };
@@ -401,51 +401,51 @@ DynamicAddRemoveColumns.args = {
     columnCount: 2,
 };
 
-export function RowSelectionStateLivesOutside() {
-    const [selected_rows, setSelectedRows] = useState<CompactSelection | undefined>(undefined);
-    const cb = (newRows: CompactSelection | undefined) => {
-        if (newRows !== undefined) {
-            setSelectedRows(newRows);
-        }
-    };
+// export function RowSelectionStateLivesOutside() {
+//     const [selected_rows, setSelectedRows] = useState<CompactSelection | undefined>(undefined);
+//     const cb = (newRows: CompactSelection | undefined) => {
+//         if (newRows !== undefined) {
+//             setSelectedRows(newRows);
+//         }
+//     };
 
-    return (
-        <DataEditor
-            selectedRows={selected_rows}
-            onSelectedRowsChange={cb}
-            isDraggable={true}
-            onDragStart={args => {
-                args.setData("text", "testing");
-            }}
-            getCellContent={getData}
-            columns={columns}
-            rows={1000}
-        />
-    );
-}
+//     return (
+//         <DataEditor
+//             selectedRows={selected_rows}
+//             onSelectedRowsChange={cb}
+//             isDraggable={true}
+//             onDragStart={args => {
+//                 args.setData("text", "testing");
+//             }}
+//             getCellContent={getData}
+//             columns={columns}
+//             rows={1000}
+//         />
+//     );
+// }
 
-export function ColSelectionStateLivesOutside() {
-    const [selected_cols, setSelectedCols] = useState<CompactSelection>(CompactSelection.empty());
-    const cb = (newRows: CompactSelection | undefined) => {
-        if (newRows !== undefined) {
-            setSelectedCols(newRows);
-        }
-    };
+// export function ColSelectionStateLivesOutside() {
+//     const [selected_cols, setSelectedCols] = useState<CompactSelection>(CompactSelection.empty());
+//     const cb = (newRows: CompactSelection | undefined) => {
+//         if (newRows !== undefined) {
+//             setSelectedCols(newRows);
+//         }
+//     };
 
-    return (
-        <DataEditor
-            selectedColumns={selected_cols}
-            onSelectedColumnsChange={cb}
-            isDraggable={true}
-            onDragStart={args => {
-                args.setData("text", "testing");
-            }}
-            getCellContent={getData}
-            columns={columns}
-            rows={1000}
-        />
-    );
-}
+//     return (
+//         <DataEditor
+//             selectedColumns={selected_cols}
+//             onSelectedColumnsChange={cb}
+//             isDraggable={true}
+//             onDragStart={args => {
+//                 args.setData("text", "testing");
+//             }}
+//             getCellContent={getData}
+//             columns={columns}
+//             rows={1000}
+//         />
+//     );
+// }
 
 export function GridSelectionOutOfRangeNoColumns() {
     const dummyCols = useMemo(
@@ -454,8 +454,9 @@ export function GridSelectionOutOfRangeNoColumns() {
     );
 
     const [selected, setSelected] = useState<GridSelection | undefined>({
-        cell: [2, 8],
-        range: { width: 1, height: 1, x: 2, y: 8 },
+        current: { cell: [2, 8], range: { width: 1, height: 1, x: 2, y: 8 }, rangeStack: [] },
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
     });
 
     const [cols, setCols] = useState(dummyCols);
@@ -542,8 +543,9 @@ export function GridSelectionOutOfRangeLessColumnsThanSelection() {
     );
 
     const [selected, setSelected] = useState<GridSelection | undefined>({
-        cell: [2, 8],
-        range: { width: 1, height: 1, x: 2, y: 8 },
+        current: { cell: [2, 8], range: { width: 1, height: 1, x: 2, y: 8 }, rangeStack: [] },
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
     });
 
     const [cols, setCols] = useState(dummyCols);
@@ -669,8 +671,9 @@ export function MarkdownEdits() {
     }, []);
 
     const [selected, setSelected] = useState<GridSelection | undefined>({
-        cell: [2, 8],
-        range: { width: 1, height: 1, x: 2, y: 8 },
+        current: { cell: [2, 8], range: { width: 1, height: 1, x: 2, y: 8 }, rangeStack: [] },
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
     });
 
     const onSelected = useCallback((newSel?: GridSelection) => {

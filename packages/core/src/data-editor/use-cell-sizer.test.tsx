@@ -1,6 +1,7 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { DataEditorProps, GridCell, GridCellKind, GridColumn, Rectangle } from "..";
+import { GridCell, GridCellKind, GridColumn, Rectangle } from "..";
 import { getDataEditorTheme } from "../common/styles";
+import { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { useCellSizer } from "./use-cell-sizer";
 
 const COLUMNS: GridColumn[] = [
@@ -37,7 +38,7 @@ const A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE: 
 
 type DataBuilder = (x: number, y: number) => string;
 
-function buildCellsForSelectionGetter(dataBuilder: DataBuilder): DataEditorProps["getCellsForSelection"] {
+function buildCellsForSelectionGetter(dataBuilder: DataBuilder): DataGridSearchProps["getCellsForSelection"] {
     const getCellsForSelection = (selection: Rectangle): readonly (readonly GridCell[])[] => {
         const result: GridCell[][] = [];
 

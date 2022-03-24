@@ -9,6 +9,8 @@ import {
     GridColumn,
     GridColumnIcon,
     GridMouseEventArgs,
+    GridSelection,
+    GroupHeaderClickedEventArgs,
     isEditableGridCell,
     isTextEditableGridCell,
     Rectangle,
@@ -1092,6 +1094,82 @@ export const SmoothScrollingGrid: React.FC<SmoothScrollingGridProps> = p => {
     },
 };
 
+interface InputBlendingGridProps {
+    rangeBlending: "mixed" | "exclusive";
+    columnBlending: "mixed" | "exclusive";
+    rowBlending: "mixed" | "exclusive";
+    rangeMultiSelect: boolean;
+    columnMultiSelect: boolean;
+    rowMultiSelect: boolean;
+}
+
+export const InputBlending: React.FC<InputBlendingGridProps> = p => {
+    const { cols, getCellContent } = useMockDataGenerator(30);
+
+    return (
+        <BeautifulWrapper
+            title="Input blending"
+            description={
+                <Description>
+                    Input blending can be enabled or disable between row, column, and range selections. Multi-selections
+                    can also be enabled or disabled with the same level of granularity.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers="both"
+                keybindings={{
+                    clear: true,
+                    copy: true,
+                    downFill: true,
+                    rightFill: true,
+                    pageDown: true,
+                    pageUp: true,
+                    paste: true,
+                    search: true,
+                    selectAll: true,
+                    selectColumn: true,
+                    selectRow: true,
+                }}
+                getCellsForSelection={true}
+                rangeMultiSelect={p.rangeMultiSelect}
+                columnMultiSelect={p.columnMultiSelect}
+                rowMultiSelect={p.rowMultiSelect}
+                rangeSelectionBlending={p.rangeBlending}
+                columnSelectionBlending={p.columnBlending}
+                rowSelectionBlending={p.rowBlending}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={10_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(InputBlending as any).args = {
+    rangeBlending: "mixed",
+    columnBlending: "mixed",
+    rowBlending: "mixed",
+    rangeMultiSelect: false,
+    columnMultiSelect: true,
+    rowMultiSelect: true,
+};
+(InputBlending as any).argTypes = {
+    rangeBlending: {
+        control: { type: "select", options: ["mixed", "exclusive"] },
+    },
+    columnBlending: {
+        control: { type: "select", options: ["mixed", "exclusive"] },
+    },
+    rowBlending: {
+        control: { type: "select", options: ["mixed", "exclusive"] },
+    },
+};
+(InputBlending as any).parameters = {
+    options: {
+        showPanel: true,
+    },
+};
+
 interface AddColumnsProps {
     columnsCount: number;
 }
@@ -1140,8 +1218,6 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
 export const AutomaticRowMarkers: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
-    const [selectedRows, setSelectedRows] = React.useState(CompactSelection.empty());
-
     return (
         <BeautifulWrapper
             title="Automatic Row Markers"
@@ -1159,8 +1235,6 @@ export const AutomaticRowMarkers: React.VFC = () => {
             }>
             <DataEditor
                 {...defaultProps}
-                selectedRows={selectedRows}
-                onSelectedRowsChange={setSelectedRows}
                 rowMarkers={"both"}
                 getCellContent={getCellContent}
                 columns={cols}
@@ -1307,8 +1381,6 @@ interface RowAndHeaderSizesProps {
 export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
     const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(6);
 
-    const [selectedRows, setSelectedRows] = React.useState<CompactSelection>();
-
     return (
         <BeautifulWrapper
             title="Row and Header sizes"
@@ -1325,8 +1397,6 @@ export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
                 {...defaultProps}
                 rowHeight={p.rowHeight}
                 headerHeight={p.headerHeight}
-                selectedRows={selectedRows}
-                onSelectedRowsChange={setSelectedRows}
                 getCellsForSelection={getCellsForSelection}
                 rowMarkers={"number"}
                 getCellContent={getCellContent}
@@ -1376,8 +1446,6 @@ const KeyName = styled.kbd`
 export const MultiSelectColumns: React.VFC = () => {
     const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100);
 
-    const [sel, setSel] = React.useState(CompactSelection.empty());
-
     return (
         <BeautifulWrapper
             title="Multi select columns"
@@ -1400,8 +1468,6 @@ export const MultiSelectColumns: React.VFC = () => {
                 rowMarkers="both"
                 columns={cols}
                 rows={100_000}
-                selectedColumns={sel}
-                onSelectedColumnsChange={setSel}
             />
         </BeautifulWrapper>
     );
@@ -2569,9 +2635,10 @@ function useCollapsableColumnGroups(cols: readonly GridColumn[]) {
     const [collapsed, setCollapsed] = React.useState<readonly string[]>([]);
 
     const onGroupHeaderClicked = React.useCallback(
-        (colIndex: number) => {
+        (colIndex: number, args: GroupHeaderClickedEventArgs) => {
             const group = cols[colIndex].group ?? "";
             setCollapsed(cv => (cv.includes(group) ? cv.filter(g => g !== group) : [...cv, group]));
+            args.preventDefault();
         },
         [cols]
     );
@@ -2920,5 +2987,69 @@ export const Padding: React.VFC<PaddingProps> = p => {
 (Padding as any).parameters = {
     options: {
         showPanel: true,
+    },
+};
+
+export const HighlightCells: React.VFC = () => {
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100);
+
+    const [gridSelection, setGridSelection] = React.useState<GridSelection>({
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
+    });
+
+    const highlights = React.useMemo<DataEditorProps["highlightRegions"]>(() => {
+        if (gridSelection.current === undefined) return undefined;
+        const [col, row] = gridSelection.current.cell;
+        return [
+            {
+                color: "#44BB0022",
+                range: {
+                    x: col + 2,
+                    y: row,
+                    width: 10,
+                    height: 10,
+                },
+            },
+            {
+                color: "#b000b021",
+                range: {
+                    x: col,
+                    y: row + 2,
+                    width: 1,
+                    height: 1,
+                },
+            },
+        ];
+    }, [gridSelection]);
+
+    return (
+        <BeautifulWrapper
+            title="HighlightCells"
+            description={
+                <Description>
+                    The <PropName>highlightRegions</PropName> prop can be set to provide additional hinting or context
+                    for the current selection.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers="both"
+                freezeColumns={1}
+                highlightRegions={highlights}
+                gridSelection={gridSelection}
+                onGridSelectionChange={setGridSelection}
+                getCellContent={getCellContent}
+                getCellsForSelection={getCellsForSelection}
+                columns={cols}
+                verticalBorder={c => c > 0}
+                rows={1_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(HighlightCells as any).parameters = {
+    options: {
+        showPanel: false,
     },
 };

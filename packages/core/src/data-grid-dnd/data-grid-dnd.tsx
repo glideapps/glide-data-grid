@@ -39,7 +39,8 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         getCellContent,
     } = p;
 
-    const { onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns, selectedColumns } = p;
+    const { onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns, selection } = p;
+    const selectedColumns = selection.columns;
 
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
@@ -238,6 +239,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             lastRowSticky={p.lastRowSticky}
             rowHeight={p.rowHeight}
             rows={p.rows}
+            highlightRegions={p.highlightRegions}
             verticalBorder={p.verticalBorder}
             width={p.width}
             canvasRef={p.canvasRef}
@@ -257,9 +259,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             onKeyDown={p.onKeyDown}
             onKeyUp={p.onKeyUp}
             prelightCells={p.prelightCells}
-            selectedCell={p.selectedCell}
-            selectedColumns={p.selectedColumns}
-            selectedRows={p.selectedRows}
+            selection={p.selection}
             translateX={p.translateX}
             translateY={p.translateY}
             // handled or mutated props

@@ -1,6 +1,6 @@
 // import AppIcon from "common/app-icon";
 import * as React from "react";
-import { GridCell, GridCellKind, GridSelection, Rectangle, InnerGridCell } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, Rectangle } from "../data-grid/data-grid-types";
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
 import { assert } from "../common/support";
@@ -47,7 +47,6 @@ const closeX = (
 export interface DataGridSearchProps extends Omit<ScrollingDataGridProps, "prelightCells"> {
     readonly getCellsForSelection?: (selection: Rectangle) => readonly (readonly GridCell[])[];
     readonly onSearchResultsChanged?: (results: readonly (readonly [number, number])[], navIndex: number) => void;
-    readonly searchColOffset: number;
     readonly showSearch?: boolean;
     readonly onSearchClose?: () => void;
 }
@@ -58,14 +57,12 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const {
         getCellsForSelection,
         onSearchResultsChanged,
-        searchColOffset,
         showSearch = false,
         onSearchClose,
         canvasRef,
         cellYOffset,
         rows,
         columns,
-        getCellContent,
     } = p;
 
     const [searchID] = React.useState(() => "search-box-" + Math.round(Math.random() * 1000));
@@ -91,27 +88,6 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         }
     }, []);
 
-    const getCellsForSelectionMangled = React.useCallback(
-        (selection: GridSelection): readonly (readonly InnerGridCell[])[] => {
-            if (getCellsForSelection !== undefined) return getCellsForSelection(selection.range);
-
-            const range = selection.range;
-
-            const result: InnerGridCell[][] = [];
-            for (let row = range.y; row < range.y + range.height; row++) {
-                const inner: InnerGridCell[] = [];
-                for (let col = range.x; col < range.x + range.width; col++) {
-                    inner.push(getCellContent([col + searchColOffset, row]));
-                }
-
-                result.push(inner);
-            }
-
-            return result;
-        },
-        [getCellContent, getCellsForSelection, searchColOffset]
-    );
-
     const cellYOffsetRef = React.useRef(cellYOffset);
     cellYOffsetRef.current = cellYOffset;
     const beginSearch = React.useCallback(
@@ -135,15 +111,13 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
             const tick = () => {
                 const tStart = performance.now();
                 const rowsLeft = rows - rowsSearched;
-                const data = getCellsForSelectionMangled({
-                    cell: [0, 0],
-                    range: {
+                const data =
+                    getCellsForSelection?.({
                         x: 0,
                         y: startY,
-                        width: columns.length - searchColOffset,
+                        width: columns.length,
                         height: Math.min(searchStride, rowsLeft, rows - startY),
-                    },
-                });
+                    }) ?? [];
 
                 let added = false;
                 data.forEach((d, row) =>
@@ -171,7 +145,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         }
 
                         if (testString !== undefined && regex.test(testString)) {
-                            runningResult.push([col + searchColOffset, row + startY]);
+                            runningResult.push([col, row + startY]);
                             added = true;
                         }
                     })
@@ -213,7 +187,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
             cancelSearch();
             searchHandle.current = window.requestAnimationFrame(tick);
         },
-        [cancelSearch, columns.length, getCellsForSelectionMangled, onSearchResultsChanged, rows, searchColOffset]
+        [cancelSearch, columns.length, getCellsForSelection, onSearchResultsChanged, rows]
     );
 
     const onClose = React.useCallback(() => {
@@ -409,6 +383,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 rowHeight={p.rowHeight}
                 onMouseMove={p.onMouseMove}
                 rows={p.rows}
+                highlightRegions={p.highlightRegions}
                 verticalBorder={p.verticalBorder}
                 canvasRef={p.canvasRef}
                 className={p.className}
@@ -439,9 +414,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 rightElementSticky={p.rightElementSticky}
                 scrollRef={p.scrollRef}
                 scrollToEnd={p.scrollToEnd}
-                selectedCell={p.selectedCell}
-                selectedColumns={p.selectedColumns}
-                selectedRows={p.selectedRows}
+                selection={p.selection}
                 showMinimap={p.showMinimap}
                 smoothScrollX={p.smoothScrollX}
                 smoothScrollY={p.smoothScrollY}
