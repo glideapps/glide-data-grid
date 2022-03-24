@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "npm run build-js && npm run build-cjs && npm run build-types",
-    "build-js": "babel --config-file ../../babel.config.json ./src -d dist/js --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx",
+    "build-js": "babel --config-file ../../babel.config.json ./src -d dist/js --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx; tsc-esm -p tsconfig.esm.json",
     "build-cjs": "babel --config-file ../../babel.cjs.json ./src -d dist/cjs --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx",
     "build-types": "tsc -p tsconfig.types.json",
     "lint": "eslint src --ext .ts,.tsx",
