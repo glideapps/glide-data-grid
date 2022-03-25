@@ -20,6 +20,7 @@
         "styled-components": "5.2.0"
     },
     "devDependencies": {
+        "@types/babel__core": "^7.1.19",
         "@types/node": "17.0.23",
         "@types/react": "17.0.42",
         "babel-plugin-styled-components": "^2.0.6",

@@ -1,6 +1,13 @@
 #!/bin/bash
 
-pushd next-gdg
-rm -rf node_modules/@glideapps/glide-data-grid/dist
-cp -r ../../packages/core/dist node_modules/@glideapps/glide-data-grid/dist
-popd
+set -e
+
+for DIR in "next-gdg" "cra5-gdg" "cra4-gdg"
+do
+    pushd $DIR
+    npm ci
+    rm -rf node_modules/@glideapps/glide-data-grid/dist
+    cp -r ../../packages/core/dist node_modules/@glideapps/glide-data-grid/dist
+    npm run build
+    popd
+done
