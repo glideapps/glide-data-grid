@@ -7,7 +7,8 @@
         "storybook": "start-storybook -p 9009 -s public",
         "build-storybook": "build-storybook -o storybook-build/",
         "prod-storybook": "npm run build-storybook && npx http-server storybook-build -p 9009",
-        "test": "cd packages/core && npm run test --"
+        "test": "cd packages/core && npm run test --",
+        "test-projects": "cd test-projects/ && ./bootstrap-projects.sh"
     },
     "author": "Glide",
     "license": "MIT",
@@ -63,6 +64,7 @@
         "react-virtualized": "^9.21.0",
         "styled-components": "5.2.0",
         "ts-jest": "^27.0.7",
+        "tsc-esm-fix": "^2.7.8",
         "typescript": "^4.5.2"
     },
     "dependencies": {}
