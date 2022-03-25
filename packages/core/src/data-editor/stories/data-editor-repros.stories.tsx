@@ -1,12 +1,12 @@
 import * as React from "react";
 
 import { StoryFn, StoryContext, useState, useMemo } from "@storybook/addons";
-import { BuilderThemeWrapper } from "../stories/story-utils";
+import { BuilderThemeWrapper } from "../../stories/story-utils";
 
-import { GridCell, GridCellKind } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind } from "../../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { DataEditor } from "./data-editor";
-import DataEditorContainer from "../data-editor-container/data-grid-container";
+import { DataEditor } from "../data-editor";
+import DataEditorContainer from "../../data-editor-container/data-grid-container";
 import styled from "styled-components";
 
 export default {

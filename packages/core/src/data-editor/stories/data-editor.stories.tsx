@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { StoryFn, StoryContext, useState, useCallback, useMemo } from "@storybook/addons";
-import { BuilderThemeWrapper } from "../stories/story-utils";
+import { BuilderThemeWrapper } from "../../stories/story-utils";
 
 import {
     CompactSelection,
@@ -11,10 +11,10 @@ import {
     GridColumn,
     GridSelection,
     Rectangle,
-} from "../data-grid/data-grid-types";
+} from "../../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { DataEditor } from "./data-editor";
-import DataEditorContainer from "../data-editor-container/data-grid-container";
+import { DataEditor } from "../data-editor";
+import DataEditorContainer from "../../data-editor-container/data-grid-container";
 
 export default {
     title: "Tests/TestCases",
