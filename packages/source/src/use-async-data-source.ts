@@ -87,7 +87,7 @@ export function useAsyncDataSource<TRowType>(
                     range(firstPage, lastPage + 1).filter(i => !loadingRef.current.hasIndex(i)),
                     maxConcurrency
                 )) {
-                    await Promise.allSettled(pageChunk.map(loadPage));
+                    await Promise.all(pageChunk.map(loadPage));
                 }
 
                 const result: GridCell[][] = [];
