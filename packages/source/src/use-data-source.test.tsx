@@ -103,6 +103,6 @@ describe("use-data-source", () => {
 
         const zeroZero = screen.getByTestId("cell-0-0");
 
-        expect(zeroZero.textContent).toBe("Test fails");
+        expect(zeroZero.textContent).toBe("0x0");
     });
 });

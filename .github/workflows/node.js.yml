@@ -21,6 +21,7 @@ jobs:
             - run: npm run bootstrap
             - run: npm run build
             - run: npm run test -- --coverage
+            - run: npm run test-source
             - run: npm run test-projects
             - name: Coveralls
               uses: coverallsapp/github-action@master
