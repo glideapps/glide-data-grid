@@ -410,12 +410,17 @@ Set to a positive number to freeze columns on the left side of the grid during h
 ## getCellsForSelection
 
 ```ts
-getCellsForSelection?: true | (selection: Rectangle) => readonly (readonly GridCell[])[];
+type CellArray = readonly (readonly GridCell[])[];
+type GetCellsThunk = () => Promise<CellArray>;
+
+getCellsForSelection?: true | (selection: Rectangle) => CellArray | GetCellsThunk;
 ```
 
 `getCellsForSelection` is called when the user copies a selection to the clipboard or the data editor needs to inspect data which may be outside the curently visible range. It must return a two-dimensional array (an array of rows, where each row is an array of cells) of the cells in the selection's rectangle. Note that the rectangle can include cells that are not currently visible.
 
 If `true` is passed instead of a callback, the data grid will internally use the `getCellContent` callback to provide a basic implementation of `getCellsForSelection`. This can make it easier to light up more data grid functionality, but may have negative side effects if your data source is not able to handle being queried for data outside the normal window.
+
+If `getCellsForSelection` returns a thunk, the data may be loaded asynchronously, however the data grid may be unable to properly react to column spans when performing range selections. Copying large amounts of data out of the grid will depend on the performance of the thunk as well.
 
 ---
 
