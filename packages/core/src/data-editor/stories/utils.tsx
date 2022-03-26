@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import {
+    CellArray,
     EditableGridCell,
     GridCell,
     GridCellKind,
@@ -8,6 +9,7 @@ import {
     GridColumnIcon,
     isEditableGridCell,
     isTextEditableGridCell,
+    Item,
     Rectangle,
 } from "../../data-grid/data-grid-types";
 import DataEditorContainer from "../../data-editor-container/data-grid-container";
@@ -402,7 +404,7 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
     }, [colsMap]);
 
     const getCellContent = React.useCallback(
-        ([col, row]: readonly [number, number]): GridCell => {
+        ([col, row]: Item): GridCell => {
             let val = cache.current.get(col, row);
             if (val === undefined) {
                 val = colsMap[col].getContent();
@@ -419,7 +421,7 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
     );
 
     const getCellsForSelection = React.useCallback(
-        (selection: Rectangle): readonly (readonly GridCell[])[] => {
+        (selection: Rectangle): CellArray => {
             const result: GridCell[][] = [];
 
             for (let y = selection.y; y < selection.y + selection.height; y++) {
@@ -435,12 +437,12 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
         [getCellContent]
     );
 
-    const setCellValueRaw = React.useCallback(([col, row]: readonly [number, number], val: GridCell): void => {
+    const setCellValueRaw = React.useCallback(([col, row]: Item, val: GridCell): void => {
         cache.current.set(col, row, val);
     }, []);
 
     const setCellValue = React.useCallback(
-        ([col, row]: readonly [number, number], val: GridCell): void => {
+        ([col, row]: Item, val: GridCell): void => {
             let current = cache.current.get(col, row);
             if (current === undefined) {
                 current = colsMap[col].getContent();

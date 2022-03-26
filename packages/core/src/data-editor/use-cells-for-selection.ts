@@ -1,13 +1,14 @@
 import * as React from "react";
 import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
-import { GridCell, GridCellKind } from "../data-grid/data-grid-types";
+import { CellArray, GridCell, GridCellKind } from "../data-grid/data-grid-types";
 import type { DataEditorProps } from "./data-editor";
 
 type CellsForSelectionCallback = NonNullable<DataGridSearchProps["getCellsForSelection"]>;
 export function useCellsForSelection(
     getCellsForSelectionIn: CellsForSelectionCallback | true | undefined,
     getCellContent: DataEditorProps["getCellContent"],
-    rowMarkerOffset: number
+    rowMarkerOffset: number,
+    abortController: AbortController
 ) {
     const getCellsForSelectionDirectWhenValid = React.useCallback<CellsForSelectionCallback>(
         rect => {
@@ -31,9 +32,9 @@ export function useCellsForSelection(
 
                 return result;
             }
-            return getCellsForSelectionIn?.(rect) ?? [];
+            return getCellsForSelectionIn?.(rect, abortController.signal) ?? [];
         },
-        [getCellContent, getCellsForSelectionIn]
+        [abortController.signal, getCellContent, getCellsForSelectionIn]
     );
     const getCellsForSelectionDirect =
         getCellsForSelectionIn !== undefined ? getCellsForSelectionDirectWhenValid : undefined;
@@ -47,14 +48,20 @@ export function useCellsForSelection(
             if (newRect.x < 0) {
                 newRect.x = 0;
                 newRect.width--;
-                return getCellsForSelectionDirect(newRect).map(row => [
-                    { kind: GridCellKind.Loading, allowOverlay: false },
-                    ...row,
-                ]);
+                const r = getCellsForSelectionDirect(newRect, abortController.signal);
+
+                if (typeof r === "function") {
+                    return async () =>
+                        (await r()).map<CellArray[0]>(row => [
+                            { kind: GridCellKind.Loading, allowOverlay: false },
+                            ...row,
+                        ]);
+                }
+                return r.map(row => [{ kind: GridCellKind.Loading, allowOverlay: false }, ...row]);
             }
-            return getCellsForSelectionDirect(newRect);
+            return getCellsForSelectionDirect(newRect, abortController.signal);
         },
-        [getCellsForSelectionDirect, rowMarkerOffset]
+        [abortController.signal, getCellsForSelectionDirect, rowMarkerOffset]
     );
 
     const getCellsForSelection = getCellsForSelectionIn !== undefined ? getCellsForSelectionMangled : undefined;

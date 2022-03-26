@@ -1,4 +1,9 @@
 import "@testing-library/jest-dom";
-import "jest-canvas-mock";
+import { jest } from "jest-without-globals";
 
-Image.prototype.decode = () => new Promise(resolve => window.setTimeout(resolve, 10));
+jest.mock("styled-components", () => {
+    const actual = jest.requireActual("styled-components") as typeof import("styled-components");
+    const styled = actual.default;
+
+    return Object.assign(styled, actual);
+});

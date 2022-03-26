@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { EditableGridCell, GridCell, GridCellKind, GridColumn } from "../data-grid/data-grid-types";
+import { EditableGridCell, GridCell, GridCellKind, GridColumn, Item } from "../data-grid/data-grid-types";
 import { DataEditor } from "../data-editor/data-editor";
 
 import { SimpleThemeWrapper } from "../stories/story-utils";
@@ -235,7 +235,7 @@ export const EditingData: React.VFC = () => {
         },
     ]);
 
-    const getContent = React.useCallback((cell: readonly [number, number]): GridCell => {
+    const getContent = React.useCallback((cell: Item): GridCell => {
         const [col, row] = cell;
         const dataRow = dataRef.current[row];
         const indexes: (keyof DummyItem)[] = ["name", "company", "email", "phone"];
@@ -248,7 +248,7 @@ export const EditingData: React.VFC = () => {
         };
     }, []);
 
-    const getFixedContent = React.useCallback((cell: readonly [number, number]): GridCell => {
+    const getFixedContent = React.useCallback((cell: Item): GridCell => {
         const [col, row] = cell;
         const dataRow = fixedData[row];
         const indexes: (keyof DummyItem)[] = ["name", "company", "email", "phone"];
@@ -261,7 +261,7 @@ export const EditingData: React.VFC = () => {
         };
     }, []);
 
-    const onCellEdited = React.useCallback((cell: readonly [number, number], newValue: EditableGridCell) => {
+    const onCellEdited = React.useCallback((cell: Item, newValue: EditableGridCell) => {
         if (newValue.kind !== GridCellKind.Text) {
             // we only have text cells, might as well just die here.
             return;
@@ -304,7 +304,7 @@ Editing data is handled via callbacks. Taking the getting started example as a s
             </Marked>
             <Highlight>
                 {`
-const getContent = React.useCallback((cell: readonly [number, number]): GridCell => {
+const getContent = React.useCallback((cell: Item): GridCell => {
     const [col, row] = cell;
     const dataRow = data[row];
     const indexes: (keyof DummyItem)[] = ["name", "company", "email", "phone"];
@@ -334,7 +334,7 @@ Implementing the \`onCellEdited\` callback allows responding to cell edit events
             </Marked>
             <Highlight>
                 {`
-const onCellEdited = React.useCallback((cell: readonly [number, number], newValue: EditableGridCell) => {
+const onCellEdited = React.useCallback((cell: Item, newValue: EditableGridCell) => {
     if (newValue.kind !== GridCellKind.Text) {
         // we only have text cells, might as well just die here.
         return;

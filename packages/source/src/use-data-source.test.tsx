@@ -1,7 +1,7 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, test, expect } from "jest-without-globals";
-import { GridCellKind, isSizedGridColumn, TextCell } from "@glideapps/glide-data-grid";
+import { GridCellKind, isSizedGridColumn, TextCell, Item } from "@glideapps/glide-data-grid";
 import { useColumnSort } from ".";
 
 const props = {
@@ -16,7 +16,7 @@ const props = {
         },
     ],
     freezeColumns: 0,
-    getCellContent: ([col, row]: readonly [number, number]): TextCell => ({
+    getCellContent: ([col, row]: Item): TextCell => ({
         kind: GridCellKind.Text,
         allowOverlay: false,
         data: `${col}x${row}`,
@@ -103,6 +103,6 @@ describe("use-data-source", () => {
 
         const zeroZero = screen.getByTestId("cell-0-0");
 
-        expect(zeroZero.textContent).toBe("Test fails");
+        expect(zeroZero.textContent).toBe("0x0");
     });
 });

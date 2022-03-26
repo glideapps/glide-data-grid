@@ -3,7 +3,7 @@ import type ImageWindowLoader from "../../common/image-window-loader";
 import type { SpriteManager } from "../data-grid-sprites";
 import type { InnerGridCell, Rectangle, Item } from "../data-grid-types";
 
-export type HoverInfo = readonly [Item, readonly [number, number]];
+export type HoverInfo = readonly [Item, Item];
 
 export type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 

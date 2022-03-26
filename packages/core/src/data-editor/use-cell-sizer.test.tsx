@@ -2,6 +2,7 @@ import { renderHook } from "@testing-library/react-hooks";
 import { GridCell, GridCellKind, GridColumn, Rectangle } from "..";
 import { getDataEditorTheme } from "../common/styles";
 import { DataGridSearchProps } from "../data-grid-search/data-grid-search";
+import { CellArray } from "../data-grid/data-grid-types";
 import { useCellSizer } from "./use-cell-sizer";
 
 const COLUMNS: GridColumn[] = [
@@ -39,7 +40,7 @@ const A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE: 
 type DataBuilder = (x: number, y: number) => string;
 
 function buildCellsForSelectionGetter(dataBuilder: DataBuilder): DataGridSearchProps["getCellsForSelection"] {
-    const getCellsForSelection = (selection: Rectangle): readonly (readonly GridCell[])[] => {
+    const getCellsForSelection = (selection: Rectangle): CellArray => {
         const result: GridCell[][] = [];
 
         for (let y = selection.y; y < selection.y + selection.height; y++) {
@@ -69,9 +70,13 @@ const getLongCellsForSelection = buildCellsForSelectionGetter(
 
 const theme = getDataEditorTheme();
 
+const abortController = new AbortController();
+
 describe("use-cell-sizer", () => {
     it("Measures a simple cell", async () => {
-        const { result } = renderHook(() => useCellSizer(COLUMNS, 1000, getShortCellsForSelection, theme));
+        const { result } = renderHook(() =>
+            useCellSizer(COLUMNS, 1000, getShortCellsForSelection, theme, abortController)
+        );
 
         const columnA = result.current.find(col => col.title === "A");
         const columnB = result.current.find(col => col.title === "B");
@@ -86,7 +91,8 @@ describe("use-cell-sizer", () => {
 
     it("Measures new columns when they arrive, doesn't re-measure existing ones", async () => {
         const { result, rerender } = renderHook(
-            ({ getCellsForSelection, columns }) => useCellSizer(columns, 1000, getCellsForSelection, theme),
+            ({ getCellsForSelection, columns }) =>
+                useCellSizer(columns, 1000, getCellsForSelection, theme, abortController),
             {
                 initialProps: {
                     getCellsForSelection: getShortCellsForSelection,
@@ -128,7 +134,7 @@ describe("use-cell-sizer", () => {
     });
 
     it("Returns the default sizes if getCellsForSelection is not provided", async () => {
-        const { result } = renderHook(() => useCellSizer(COLUMNS, 1000, undefined, theme));
+        const { result } = renderHook(() => useCellSizer(COLUMNS, 1000, undefined, theme, abortController));
 
         const columnA = result.current.find(col => col.title === "A");
         const columnB = result.current.find(col => col.title === "B");
@@ -147,7 +153,8 @@ describe("use-cell-sizer", () => {
                 A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE,
                 1000,
                 undefined,
-                theme
+                theme,
+                abortController
             )
         );
 

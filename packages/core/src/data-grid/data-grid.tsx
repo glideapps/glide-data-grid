@@ -77,13 +77,13 @@ export interface DataGridProps {
 
     readonly className?: string;
 
-    readonly getCellContent: (cell: readonly [number, number]) => InnerGridCell;
+    readonly getCellContent: (cell: Item) => InnerGridCell;
     readonly getGroupDetails?: GroupDetailsCallback;
     readonly getRowThemeOverride?: GetRowThemeCallback;
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
     readonly selection: GridSelection;
-    readonly prelightCells?: readonly (readonly [number, number])[];
+    readonly prelightCells?: readonly Item[];
     readonly highlightRegions?: readonly Highlight[];
 
     readonly disabledRows?: CompactSelection;
@@ -93,7 +93,7 @@ export interface DataGridProps {
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
     readonly onMouseUp?: (args: GridMouseEventArgs, isOutside: boolean) => void;
 
-    readonly onCellFocused?: (args: readonly [number, number]) => void;
+    readonly onCellFocused?: (args: Item) => void;
 
     readonly onMouseMoveRaw?: (event: MouseEvent) => void;
 
@@ -132,7 +132,7 @@ interface BlitData {
 }
 
 type DamageUpdateList = readonly {
-    cell: readonly [number, number];
+    cell: Item;
     // newValue: GridCell,
 }[];
 
@@ -200,7 +200,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
     const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
-    const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, readonly [number, number]] | undefined>();
+    const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, Item] | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const overlayRef = React.useRef<HTMLCanvasElement | null>(null);
 

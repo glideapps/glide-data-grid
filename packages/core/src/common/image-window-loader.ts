@@ -1,4 +1,4 @@
-import type { Rectangle } from "../data-grid/data-grid-types";
+import type { Item, Rectangle } from "../data-grid/data-grid-types";
 import throttle from "lodash/throttle";
 
 interface LoadResult {
@@ -31,7 +31,7 @@ function unpackNumberToColRow(packed: number): [number, number] {
 }
 
 class ImageWindowLoader {
-    private imageLoaded: (locations: readonly (readonly [number, number])[]) => void = () => undefined;
+    private imageLoaded: (locations: readonly Item[]) => void = () => undefined;
     private loadedLocations: [number, number][] = [];
 
     private visibleWindow: Rectangle = {
@@ -53,7 +53,7 @@ class ImageWindowLoader {
 
     private cache: Record<string, LoadResult> = {};
 
-    public setCallback(imageLoaded: (locations: readonly (readonly [number, number])[]) => void) {
+    public setCallback(imageLoaded: (locations: readonly Item[]) => void) {
         this.imageLoaded = imageLoaded;
     }
 

@@ -10,7 +10,7 @@ import {
     GridCellKind,
     GridColumn,
     GridSelection,
-    Rectangle,
+    Item,
 } from "../../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor } from "../data-editor";
@@ -34,7 +34,7 @@ export default {
     ],
 };
 
-function getDummyData([col, row]: readonly [number, number]): GridCell {
+function getDummyData([col, row]: Item): GridCell {
     if (col === 0) {
         return {
             kind: GridCellKind.RowID,
@@ -177,23 +177,10 @@ export function Simplenotest() {
         [cols]
     );
 
-    const getCellsForSelection = useCallback((selection: Rectangle) => {
-        const cells: GridCell[][] = [];
-        for (let yCoord = selection.y; yCoord < selection.y + selection.height; yCoord++) {
-            const rowCells: GridCell[] = [];
-            for (let xCoord = selection.x; xCoord < selection.x + selection.width; xCoord++) {
-                rowCells.push(getDummyData([xCoord, yCoord]));
-            }
-            cells.push(rowCells);
-        }
-
-        return cells;
-    }, []);
-
     return (
         <DataEditor
             getCellContent={getDummyData}
-            getCellsForSelection={getCellsForSelection}
+            getCellsForSelection={true}
             columns={cols}
             rows={1000}
             onColumnResized={onColumnResized}
@@ -212,7 +199,7 @@ function getDummyRelationColumn(): GridColumn[] {
     ];
 }
 
-function getDummyRelationData([col, row]: readonly [number, number]): GridCell {
+function getDummyRelationData([col, row]: Item): GridCell {
     return {
         kind: GridCellKind.Drilldown,
         data: [
@@ -261,7 +248,7 @@ const columns: GridColumn[] = [
     { title: "Square", width: 100 },
 ];
 
-function getData([col, row]: readonly [number, number]): GridCell {
+function getData([col, row]: Item): GridCell {
     const n = Math.pow(row, col + 1);
 
     return {
@@ -633,7 +620,7 @@ export function MarkdownEdits() {
         ];
     }, []);
 
-    const dummyCells = useCallback(([col, _row]: readonly [number, number]) => {
+    const dummyCells = useCallback(([col, _row]: Item) => {
         if (col === 0) {
             const editable: EditableGridCell = {
                 data: "text",

@@ -8,7 +8,7 @@ Cells can now be spanned across multiple columns. Spans are defined by setting t
 
 ### 📦 **Sources package released**
 
-`glide-data-grid-source` has been released alongside this release of `glide-data-grid`. The source package contains useful hooks which can be used to easily add collapsing column groups, sorting columns, and re-arrangeable columns onto existing data sources. You can try out all of these features on the new [project homepage](https://grid.glideapps.com) which exposes all of these features by using the source package. 
+`glide-data-grid-source` has been released alongside this release of `glide-data-grid`. The source package contains useful hooks which can be used to easily add collapsing column groups, sorting columns, and re-arrangeable columns onto existing data sources. You can try out all of these features on the new [project homepage](https://grid.glideapps.com) which exposes all of these features by using the source package.
 
 ### 🎨 **getRowThemeOverride**
 
@@ -26,24 +26,24 @@ Through the magic of banging our heads against a wall repeatedly we have managed
 
 ### 🔬 **Minor features**
 
-- Support for insert to custom row index
-- Add experimental flag for strict mode. In strict mode getCellContent never calls for cells outside the range of the last visible region sent to onVisibleRegionChanged
-- Drilldown cells now render much faster
+-   Support for insert to custom row index
+-   Add experimental flag for strict mode. In strict mode getCellContent never calls for cells outside the range of the last visible region sent to onVisibleRegionChanged
+-   Drilldown cells now render much faster
 
 ## **Bug Fixes**
 
-- Fix issue where drag scrolling may not stop when mouse click releases.
-- Images in firefox will no longer flicker when recycling an image element
-- Prevent header menu click events when resizing
-- Fix issue where header could sometimes be blanked when rapidly moving the mouse
-- Fix theming issues in some overlay editors and search interface
-- Fix padding changes causing weird flickering artifacts
-- Touch scrolling no longer selects cells as you scroll
-- Boolean cells can again be checked/unchecked with the keyboard
+-   Fix issue where drag scrolling may not stop when mouse click releases.
+-   Images in firefox will no longer flicker when recycling an image element
+-   Prevent header menu click events when resizing
+-   Fix issue where header could sometimes be blanked when rapidly moving the mouse
+-   Fix theming issues in some overlay editors and search interface
+-   Fix padding changes causing weird flickering artifacts
+-   Touch scrolling no longer selects cells as you scroll
+-   Boolean cells can again be checked/unchecked with the keyboard
 
 # 3.3.0 Release Notes
 
-## 🎊 **New Features** 
+## 🎊 **New Features**
 
 ### **OverscrollY now supported in addition to OverscrollX**
 
@@ -60,21 +60,22 @@ The data grid can be scrolled to a cell programmatically by calling `scrollTo` o
 ### **Add Right click Menus anywhere, anytime**
 
 Easily implement right click menus for the data grid with these three new APIs:
-- `readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;`
-- `readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;`
-- `readonly onCellContextMenu?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;`
 
-### **onFinishedEditing callback now available at root level** 
-`readonly onFinishedEditing?: (newValue: GridCell | undefined, movement: readonly [number, number]) => void;`
+-   `readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;`
+-   `readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;`
+-   `readonly onCellContextMenu?: (cell: Item, event: CellClickedEventArgs) => void;`
+
+### **onFinishedEditing callback now available at root level**
+
+`readonly onFinishedEditing?: (newValue: GridCell | undefined, movement: Item) => void;`
 
 This event fires even if the cell value itself is not changed. Big thank you @krisolchova for your wonderful contribution (which included tests!).
 
+## 🐛 **Bug Fixes**
 
-## 🐛  **Bug Fixes** 
-
-- PaddingX/Y are now properly accounted for in scrolling situations. | @pzcfg 
-- Multiple storybook fixes. | @pzcfg @ivoelbert 
-- Marked dependency has been updated to the latest version from a very old version.
+-   PaddingX/Y are now properly accounted for in scrolling situations. | @pzcfg
+-   Multiple storybook fixes. | @pzcfg @ivoelbert
+-   Marked dependency has been updated to the latest version from a very old version.
 
 # 3.2.1 Release Notes
 
@@ -349,7 +350,7 @@ Certain strings would not get properly escaped when copying out of the DataEdito
 New API!
 
 ```ts
-onPaste?: ((target: readonly [number, number], values: readonly (readonly string[])[]) => boolean) | boolean;
+onPaste?: ((target: Item, values: readonly (readonly string[])[]) => boolean) | boolean;
 ```
 
 `onPaste` is called when data is pasted into the grid. If left undefined, the `DataEditor` will operate in a fallback mode and attempt to paste the text buffer into the current cell assuming the current cell is not readonly and can accept the data type. If `onPaste` is set to false or the function returns false, the grid will simply ignore paste. If `onPaste` evaluates to true the grid will attempt to split the data by tabs and newlines and paste into available cells.
