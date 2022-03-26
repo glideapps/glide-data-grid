@@ -2,7 +2,15 @@ import * as React from "react";
 import { Theme } from "../common/styles";
 import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { CellRenderers } from "../data-grid/cells";
-import { GridCell, GridCellKind, GridColumn, isSizedGridColumn, SizedGridColumn } from "../data-grid/data-grid-types";
+import {
+    CellArray,
+    GridCell,
+    GridCellKind,
+    GridColumn,
+    isSizedGridColumn,
+    resolveCellsThunk,
+    SizedGridColumn,
+} from "../data-grid/data-grid-types";
 
 const defaultSize = 150;
 
@@ -17,7 +25,8 @@ export function useCellSizer(
     columns: readonly GridColumn[],
     rows: number,
     getCellsForSelection: DataGridSearchProps["getCellsForSelection"],
-    theme: Theme
+    theme: Theme,
+    abortController: AbortController
 ): readonly SizedGridColumn[] {
     const rowsRef = React.useRef(rows);
     const getCellsForSelectionRef = React.useRef(getCellsForSelection);
@@ -32,6 +41,32 @@ export function useCellSizer(
     });
 
     const memoMap = React.useRef<Record<string, number>>({});
+
+    const [selectedData, setSelectionData] = React.useState<CellArray | undefined>();
+
+    // because the selectedData is updated AFTER the columns are updated
+    // if the columns ever update again they get stale selected data. This sucks.
+    // Fix
+    React.useEffect(() => {
+        const getCells = getCellsForSelectionRef.current;
+        if (getCells === undefined) return;
+        const computeRows = Math.max(1, 10 - Math.floor(columns.length / 10_000));
+        const computeArea = {
+            x: 0,
+            y: 0,
+            width: columns.length,
+            height: Math.min(rowsRef.current, computeRows),
+        };
+        const fn = async () => {
+            const getResult = getCells(computeArea, abortController.signal);
+            if (typeof getResult === "object") {
+                setSelectionData(getResult);
+            } else {
+                setSelectionData(await resolveCellsThunk(getResult));
+            }
+        };
+        void fn();
+    }, [abortController.signal, columns]);
 
     return React.useMemo(() => {
         if (columns.every(isSizedGridColumn)) {
@@ -51,19 +86,10 @@ export function useCellSizer(
 
         ctx.font = `${themeRef.current.baseFontStyle} ${themeRef.current.fontFamily}`;
 
-        const computeRows = Math.max(1, 10 - Math.floor(columns.length / 10_000));
-
-        const cells = getCellsForSelectionRef.current?.({
-            x: 0,
-            y: 0,
-            width: columns.length,
-            height: Math.min(rowsRef.current, computeRows),
-        });
-
         return columns.map((c, colIndex) => {
             if (isSizedGridColumn(c)) return c;
 
-            if (cells === undefined || c.id === undefined) {
+            if (selectedData === undefined || c.id === undefined) {
                 return {
                     ...c,
                     width: defaultSize,
@@ -77,7 +103,10 @@ export function useCellSizer(
                 };
             }
 
-            const sizes = cells.map(row => row[colIndex]).map(cell => measureCell(ctx, cell));
+            const sizes: number[] = [];
+            if (selectedData !== undefined) {
+                sizes.push(...selectedData.map(row => row[colIndex]).map(cell => measureCell(ctx, cell)));
+            }
             sizes.push(ctx.measureText(c.title).width + 16 + (c.icon === undefined ? 0 : 28));
             const average = sizes.reduce((a, b) => a + b) / sizes.length;
             const biggest = sizes.reduce((a, acc) => (a > average * 2 ? acc : Math.max(acc, a)));
@@ -90,5 +119,5 @@ export function useCellSizer(
                 width: final,
             };
         });
-    }, [columns, ctx]);
+    }, [columns, ctx, selectedData]);
 }

@@ -141,17 +141,7 @@ const basicProps: DataEditorProps = {
         },
     ],
     getCellContent: makeCell,
-    getCellsForSelection: rect => {
-        const result: GridCell[][] = [];
-        for (let y = rect.y; y < rect.y + rect.height; y++) {
-            const row: GridCell[] = [];
-            for (let x = rect.x; x < rect.x + rect.width; x++) {
-                row.push(makeCell([x, y]));
-            }
-            result.push(row);
-        }
-        return result;
-    },
+    getCellsForSelection: true,
     groupHeaderHeight: 32,
     headerHeight: 36,
     rowHeight: 32,
@@ -1149,6 +1139,7 @@ describe("data-editor", () => {
         );
 
         fireEvent.copy(window);
+        await new Promise(resolve => setTimeout(resolve, 10));
         expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
 
         spy.mockClear();
@@ -1220,6 +1211,7 @@ describe("data-editor", () => {
         );
 
         fireEvent.copy(window);
+        await new Promise(resolve => setTimeout(resolve, 10));
         expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
 
         spy.mockClear();
@@ -1270,6 +1262,7 @@ describe("data-editor", () => {
         jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
 
         fireEvent.copy(window);
+        await new Promise(resolve => setTimeout(resolve, 10));
         expect(navigator.clipboard.writeText).toBeCalled();
     });
 
@@ -1294,6 +1287,7 @@ describe("data-editor", () => {
         jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
 
         fireEvent.copy(window);
+        await new Promise(resolve => setTimeout(resolve, 10));
         expect(navigator.clipboard.writeText).toBeCalled();
     });
 
@@ -2345,23 +2339,11 @@ describe("data-editor", () => {
             return basicProps.getCellContent(c);
         };
 
-        const getCellsForSelection: typeof basicProps["getCellsForSelection"] = rect => {
-            const result: GridCell[][] = [];
-            for (let y = rect.y; y < rect.y + rect.height; y++) {
-                const row: GridCell[] = [];
-                for (let x = rect.x; x < rect.x + rect.width; x++) {
-                    row.push(getCellContent([x, y]));
-                }
-                result.push(row);
-            }
-            return result;
-        };
-
         render(
             <EventedDataEditor
                 {...basicProps}
                 getCellContent={getCellContent}
-                getCellsForSelection={getCellsForSelection}
+                getCellsForSelection={true}
                 onGridSelectionChange={spy}
             />,
             {

@@ -11,7 +11,6 @@ import {
     GridColumn,
     GridSelection,
     Item,
-    Rectangle,
 } from "../../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor } from "../data-editor";
@@ -178,23 +177,10 @@ export function Simplenotest() {
         [cols]
     );
 
-    const getCellsForSelection = useCallback((selection: Rectangle) => {
-        const cells: GridCell[][] = [];
-        for (let yCoord = selection.y; yCoord < selection.y + selection.height; yCoord++) {
-            const rowCells: GridCell[] = [];
-            for (let xCoord = selection.x; xCoord < selection.x + selection.width; xCoord++) {
-                rowCells.push(getDummyData([xCoord, yCoord]));
-            }
-            cells.push(rowCells);
-        }
-
-        return cells;
-    }, []);
-
     return (
         <DataEditor
             getCellContent={getDummyData}
-            getCellsForSelection={getCellsForSelection}
+            getCellsForSelection={true}
             columns={cols}
             rows={1000}
             onColumnResized={onColumnResized}

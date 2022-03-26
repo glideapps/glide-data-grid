@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import {
+    CellArray,
     EditableGridCell,
     GridCell,
     GridCellKind,
@@ -420,7 +421,7 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
     );
 
     const getCellsForSelection = React.useCallback(
-        (selection: Rectangle): readonly (readonly GridCell[])[] => {
+        (selection: Rectangle): CellArray => {
             const result: GridCell[][] = [];
 
             for (let y = selection.y; y < selection.y + selection.height; y++) {

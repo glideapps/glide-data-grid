@@ -1,6 +1,6 @@
 // import AppIcon from "common/app-icon";
 import * as React from "react";
-import { GridCell, GridCellKind, Item, Rectangle } from "../data-grid/data-grid-types";
+import { CellArray, GetCellsThunk, GridCellKind, Item, Rectangle } from "../data-grid/data-grid-types";
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
 import { assert } from "../common/support";
@@ -45,7 +45,7 @@ const closeX = (
 );
 
 export interface DataGridSearchProps extends Omit<ScrollingDataGridProps, "prelightCells"> {
-    readonly getCellsForSelection?: (selection: Rectangle) => readonly (readonly GridCell[])[];
+    readonly getCellsForSelection?: (selection: Rectangle, abortSignal: AbortSignal) => GetCellsThunk | CellArray;
     readonly onSearchResultsChanged?: (results: readonly Item[], navIndex: number) => void;
     readonly showSearch?: boolean;
     readonly onSearchClose?: () => void;
@@ -77,6 +77,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const searchStatusRef = React.useRef(searchStatus);
     searchStatusRef.current = searchStatus;
 
+    const abortControllerRef = React.useRef(new AbortController());
     const inputRef = React.useRef<HTMLInputElement | null>(null);
     const searchHandle = React.useRef<number>();
     const [searchResults, setSearchResults] = React.useState<readonly Item[]>([]);
@@ -85,6 +86,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         if (searchHandle.current !== undefined) {
             window.cancelAnimationFrame(searchHandle.current);
             searchHandle.current = undefined;
+            abortControllerRef.current.abort();
         }
     }, []);
 
@@ -108,16 +110,23 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
             const runningResult: [number, number][] = [];
 
-            const tick = () => {
+            const tick = async () => {
+                if (getCellsForSelection === undefined) return;
                 const tStart = performance.now();
                 const rowsLeft = rows - rowsSearched;
-                const data =
-                    getCellsForSelection?.({
+                let data = getCellsForSelection(
+                    {
                         x: 0,
                         y: startY,
                         width: columns.length,
                         height: Math.min(searchStride, rowsLeft, rows - startY),
-                    }) ?? [];
+                    },
+                    abortControllerRef.current.signal
+                );
+
+                if (typeof data === "function") {
+                    data = await data();
+                }
 
                 let added = false;
                 data.forEach((d, row) =>

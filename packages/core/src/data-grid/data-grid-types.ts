@@ -167,6 +167,8 @@ export enum GridColumnIcon {
     ProtectedColumnOverlay = "protectedColumnOverlay",
 }
 
+export type CellArray = readonly (readonly GridCell[])[];
+
 export type Item = readonly [number, number];
 
 interface BaseGridColumn {
@@ -196,6 +198,13 @@ export interface SizedGridColumn extends BaseGridColumn {
 interface AutoGridColumn extends BaseGridColumn {
     readonly id: string;
 }
+
+export async function resolveCellsThunk(thunk: GetCellsThunk | CellArray): Promise<CellArray> {
+    if (typeof thunk === "object") return thunk;
+    return await thunk();
+}
+
+export type GetCellsThunk = () => Promise<CellArray>;
 
 export type GridColumn = SizedGridColumn | AutoGridColumn;
 

@@ -30,6 +30,7 @@ import {
     HeaderClickedEventArgs,
     CellClickedEventArgs,
     Item,
+    resolveCellsThunk,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -378,14 +379,24 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     }, [gridSelectionOuter, rowMarkerOffset]);
     const gridSelection = gridSelectionOuterMangled ?? gridSelectionInner;
 
+    const abortControllerRef = React.useRef(new AbortController());
+    React.useEffect(() => {
+        return () => {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            abortControllerRef?.current.abort();
+        };
+    }, []);
+
     const [getCellsForSelection, getCellsForSeletionDirect] = useCellsForSelection(
         getCellsForSelectionIn,
         getCellContent,
-        rowMarkerOffset
+        rowMarkerOffset,
+        abortControllerRef.current
     );
 
     const expandSelection = React.useCallback(
         (newVal: GridSelection): GridSelection => {
+            const origVal = newVal;
             if (spanRangeBehavior === "allowPartial" || newVal.current === undefined) return newVal;
             if (getCellsForSelection !== undefined) {
                 let isFilled = false;
@@ -394,32 +405,51 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     const r: Rectangle = newVal.current?.range;
                     const cells: (readonly GridCell[])[] = [];
                     if (r.width > 2) {
-                        const leftCells = getCellsForSelection({
-                            x: r.x,
-                            y: r.y,
-                            width: 1,
-                            height: r.height,
-                        });
+                        const leftCells = getCellsForSelection(
+                            {
+                                x: r.x,
+                                y: r.y,
+                                width: 1,
+                                height: r.height,
+                            },
+                            abortControllerRef.current.signal
+                        );
+
+                        if (typeof leftCells === "function") {
+                            return origVal;
+                        }
 
                         cells.push(...leftCells);
 
-                        const rightCells = getCellsForSelection({
-                            x: r.x + r.width - 1,
-                            y: r.y,
-                            width: 1,
-                            height: r.height,
-                        });
+                        const rightCells = getCellsForSelection(
+                            {
+                                x: r.x + r.width - 1,
+                                y: r.y,
+                                width: 1,
+                                height: r.height,
+                            },
+                            abortControllerRef.current.signal
+                        );
+
+                        if (typeof rightCells === "function") {
+                            return origVal;
+                        }
 
                         cells.push(...rightCells);
                     } else {
-                        cells.push(
-                            ...getCellsForSelection({
+                        const rCells = getCellsForSelection(
+                            {
                                 x: r.x,
                                 y: r.y,
                                 width: r.width,
                                 height: r.height,
-                            })
+                            },
+                            abortControllerRef.current.signal
                         );
+                        if (typeof rCells === "function") {
+                            return origVal;
+                        }
+                        cells.push(...rCells);
                     }
 
                     let left = r.x - rowMarkerOffset;
@@ -494,7 +524,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return { ...getDataEditorTheme(), ...theme };
     }, [theme]);
 
-    const columns = useCellSizer(columnsIn, rows, getCellsForSeletionDirect, mergedTheme);
+    const columns = useCellSizer(columnsIn, rows, getCellsForSeletionDirect, mergedTheme, abortControllerRef.current);
 
     const highlightRegions = React.useMemo(() => {
         if (highlightRegionsIn === undefined) return undefined;
@@ -1539,17 +1569,22 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     right = col + 1;
                     scrollTo(left - rowMarkerOffset, 0, "horizontal");
                 } else {
-                    const disallowed =
-                        getCellsForSelection !== undefined
-                            ? getSpanStops(
-                                  getCellsForSelection({
-                                      x: left,
-                                      y: top,
-                                      width: right - left - rowMarkerOffset,
-                                      height: bottom - top,
-                                  })
-                              )
-                            : [];
+                    let disallowed: number[] = [];
+                    if (getCellsForSelection !== undefined) {
+                        const cells = getCellsForSelection(
+                            {
+                                x: left,
+                                y: top,
+                                width: right - left - rowMarkerOffset,
+                                height: bottom - top,
+                            },
+                            abortControllerRef.current.signal
+                        );
+
+                        if (typeof cells === "object") {
+                            disallowed = getSpanStops(cells);
+                        }
+                    }
                     if (x === 1) {
                         // motion right
                         let done = false;
@@ -2223,7 +2258,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     useEventListener("paste", onPasteInternal, window, false, true);
 
-    const onCopy = React.useCallback(() => {
+    const onCopy = React.useCallback(async () => {
         if (!keybindings.copy) return;
         const focused =
             scrollRef.current?.contains(document.activeElement) === true ||
@@ -2235,7 +2270,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         if (focused && getCellsForSelection !== undefined) {
             if (gridSelection.current !== undefined) {
                 copyToClipboard(
-                    getCellsForSelection(gridSelection.current.range),
+                    await resolveCellsThunk(
+                        getCellsForSelection(gridSelection.current.range, abortControllerRef.current.signal)
+                    ),
                     range(
                         gridSelection.current.range.x - rowMarkerOffset,
                         gridSelection.current.range.x + gridSelection.current.range.width - rowMarkerOffset
@@ -2244,26 +2281,39 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             } else if (selectedRows !== undefined && selectedRows.length > 0) {
                 const toCopy = Array.from(selectedRows);
                 const cells = toCopy.map(
-                    rowIndex =>
-                        getCellsForSelection({
-                            x: rowMarkerOffset,
-                            y: rowIndex,
-                            width: columnsIn.length - rowMarkerOffset,
-                            height: 1,
-                        })[0]
+                    async rowIndex =>
+                        (
+                            await resolveCellsThunk(
+                                getCellsForSelection(
+                                    {
+                                        x: rowMarkerOffset,
+                                        y: rowIndex,
+                                        width: columnsIn.length - rowMarkerOffset,
+                                        height: 1,
+                                    },
+                                    abortControllerRef.current.signal
+                                )
+                            )
+                        )[0]
                 );
-                copyToClipboard(cells, range(columnsIn.length));
+                const settled = await Promise.all(cells);
+                copyToClipboard(settled, range(columnsIn.length));
             } else if (selectedColumns.length >= 1) {
                 const results: (readonly (readonly GridCell[])[])[] = [];
                 const cols: number[] = [];
                 for (const col of selectedColumns) {
                     results.push(
-                        getCellsForSelection({
-                            x: col,
-                            y: 0,
-                            width: 1,
-                            height: rows,
-                        })
+                        await resolveCellsThunk(
+                            getCellsForSelection(
+                                {
+                                    x: col,
+                                    y: 0,
+                                    width: 1,
+                                    height: rows,
+                                },
+                                abortControllerRef.current.signal
+                            )
+                        )
                     );
                     cols.push(col - rowMarkerOffset);
                 }
@@ -2430,7 +2480,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         });
                         break;
                     case "copy":
-                        onCopy();
+                        await onCopy();
                         break;
                     case "paste":
                         await onPasteInternal();

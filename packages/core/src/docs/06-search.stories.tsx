@@ -173,14 +173,14 @@ export const Search: React.VFC = () => {
                 {`
 # Search
 
-Search is a controlled property in Glide Data Grid. Triggering the search interface is up to the application but once triggered search is handled interally on the data grid.`}
+Search is a controlled property in Glide Data Grid. Triggering the search interface is up to the application but once triggered search is handled interally on the data grid. Search always depends on a properly implemented \`getCellsForSelection\`.`}
             </Marked>
             <Highlight>
                 {`
 const [showSearch, setShowSearch] = React.useState(false);
 const onSearchClose = React.useCallback(() => setShowSearch(false), []);
 
-return <DataEditor {...rest} showSearch={showSearch} onSearchClose={onSearchClose}  />
+return <DataEditor {...rest} showSearch={showSearch} getCellsForSelection={true} onSearchClose={onSearchClose}  />
 `}
             </Highlight>
             <button onClick={() => setShowSearch(true)}>Show Search</button>
@@ -189,6 +189,27 @@ return <DataEditor {...rest} showSearch={showSearch} onSearchClose={onSearchClos
                     showSearch={showSearch}
                     onSearchClose={onSearchClose}
                     getCellContent={getContent}
+                    getCellsForSelection={true}
+                    columns={columns}
+                    rows={data.length}
+                />
+            </Wrapper>
+            <Marked>
+                {`
+# Automatic Search
+
+Search can also be handled by the data grid automatically if you enable the search keybinding.`}
+            </Marked>
+            <Highlight>
+                {`
+return <DataEditor {...rest} keybindings={{search: true}} getCellsForSelection={true}  />
+`}
+            </Highlight>
+            <Wrapper height={200}>
+                <DataEditor
+                    keybindings={{ search: true }}
+                    getCellContent={getContent}
+                    getCellsForSelection={true}
                     columns={columns}
                     rows={data.length}
                 />

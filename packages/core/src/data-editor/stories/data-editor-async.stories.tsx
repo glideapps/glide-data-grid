@@ -7,11 +7,13 @@ import {
     GridColumn,
     Rectangle,
     Item,
+    CellArray,
 } from "../../data-grid/data-grid-types";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 import { DataEditor, DataEditorProps, DataEditorRef } from "../data-editor";
 import { BeautifulWrapper, Description } from "./utils";
 import range from "lodash/range";
+import chunk from "lodash/chunk";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -29,13 +31,14 @@ type RowCallback<T> = (range: Item) => Promise<readonly T[]>;
 type RowToCell<T> = (row: T, col: number) => GridCell;
 type RowEditedCallback<T> = (cell: Item, newVal: EditableGridCell, rowData: T) => T | undefined;
 function useAsyncData<TRowType>(
-    minPage: number,
+    pageSize: number,
+    maxConcurrency: number,
     getRowData: RowCallback<TRowType>,
     toCell: RowToCell<TRowType>,
     onEdited: RowEditedCallback<TRowType>,
     gridRef: React.MutableRefObject<DataEditorRef | null>
-): Pick<DataEditorProps, "getCellContent" | "onVisibleRegionChanged" | "onCellEdited"> {
-    minPage = Math.max(minPage, 1);
+): Pick<DataEditorProps, "getCellContent" | "onVisibleRegionChanged" | "onCellEdited" | "getCellsForSelection"> {
+    pageSize = Math.max(pageSize, 1);
     const loadingRef = React.useRef(CompactSelection.empty());
     const dataRef = React.useRef<TRowType[]>([]);
 
@@ -68,8 +71,8 @@ function useAsyncData<TRowType>(
     const loadPage = React.useCallback(
         async (page: number) => {
             loadingRef.current = loadingRef.current.add(page);
-            const startIndex = page * minPage;
-            const d = await getRowData([startIndex, (page + 1) * minPage]);
+            const startIndex = page * pageSize;
+            const d = await getRowData([startIndex, (page + 1) * pageSize]);
 
             const vr = visiblePagesRef.current;
 
@@ -85,18 +88,47 @@ function useAsyncData<TRowType>(
             }
             gridRef.current?.updateCells(damageList);
         },
-        [getRowData, gridRef, minPage]
+        [getRowData, gridRef, pageSize]
+    );
+
+    const getCellsForSelection = React.useCallback(
+        (r: Rectangle): (() => Promise<CellArray>) => {
+            return async () => {
+                const firstPage = Math.max(0, Math.floor(r.y / pageSize));
+                const lastPage = Math.floor((r.y + r.height) / pageSize);
+
+                for (const pageChunk of chunk(
+                    range(firstPage, lastPage + 1).filter(i => !loadingRef.current.hasIndex(i)),
+                    maxConcurrency
+                )) {
+                    await Promise.allSettled(pageChunk.map(loadPage));
+                }
+
+                const result: GridCell[][] = [];
+
+                for (let y = r.y; y < r.y + r.height; y++) {
+                    const row: GridCell[] = [];
+                    for (let x = r.x; x < r.x + r.width; x++) {
+                        row.push(getCellContent([x, y]));
+                    }
+                    result.push(row);
+                }
+
+                return result;
+            };
+        },
+        [getCellContent, loadPage, maxConcurrency, pageSize]
     );
 
     React.useEffect(() => {
         const r = visiblePages;
-        const firstPage = Math.max(0, Math.floor((r.y - minPage / 2) / minPage));
-        const lastPage = Math.floor((r.y + r.height + minPage / 2) / minPage);
+        const firstPage = Math.max(0, Math.floor((r.y - pageSize / 2) / pageSize));
+        const lastPage = Math.floor((r.y + r.height + pageSize / 2) / pageSize);
         for (const page of range(firstPage, lastPage + 1)) {
             if (loadingRef.current.hasIndex(page)) continue;
             void loadPage(page);
         }
-    }, [loadPage, minPage, visiblePages]);
+    }, [loadPage, pageSize, visiblePages]);
 
     const onCellEdited = React.useCallback(
         (cell: Item, newVal: EditableGridCell) => {
@@ -116,6 +148,7 @@ function useAsyncData<TRowType>(
         getCellContent,
         onVisibleRegionChanged,
         onCellEdited,
+        getCellsForSelection,
     };
 }
 
@@ -143,6 +176,7 @@ export const ServerSideData: React.VFC = () => {
 
     const args = useAsyncData<string[]>(
         50,
+        5,
         getRowData,
         React.useCallback(
             (rowData, col) => ({
@@ -173,14 +207,7 @@ export const ServerSideData: React.VFC = () => {
                     network transactions should work the same.
                 </Description>
             }>
-            <DataEditor
-                ref={ref}
-                {...args}
-                columns={columns}
-                rows={3000}
-                getCellsForSelection={true}
-                rowMarkers="both"
-            />
+            <DataEditor ref={ref} {...args} columns={columns} rows={3000} rowMarkers="both" />
         </BeautifulWrapper>
     );
 };

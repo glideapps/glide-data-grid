@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import {
+    CellArray,
     CompactSelection,
     DrawHeaderCallback,
     GridCell,
@@ -230,6 +231,7 @@ export const AddData: React.VFC = () => {
                 columns={cols}
                 getCellsForSelection={getCellsForSelection}
                 rowMarkers={"both"}
+                onPaste={true}
                 onCellEdited={setCellValue}
                 trailingRowOptions={{
                     sticky: true,
@@ -1564,6 +1566,7 @@ export const BuiltInSearch: React.VFC = () => {
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
+                getCellsForSelection={true}
                 columns={cols}
                 onCellEdited={setCellValue}
                 onColumnResized={onColumnResized}
@@ -2330,7 +2333,7 @@ export const SpanCell: React.VFC = () => {
     );
 
     const getCellsForSelection = React.useCallback(
-        (selection: Rectangle): readonly (readonly GridCell[])[] => {
+        (selection: Rectangle): CellArray => {
             const result: GridCell[][] = [];
 
             for (let y = selection.y; y < selection.y + selection.height; y++) {
