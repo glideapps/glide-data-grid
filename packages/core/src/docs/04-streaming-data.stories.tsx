@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { GridCell, GridCellKind, GridColumn } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, GridColumn, Item } from "../data-grid/data-grid-types";
 import { DataEditor, DataEditorRef } from "../data-editor/data-editor";
 
 import { SimpleThemeWrapper } from "../stories/story-utils";
@@ -270,7 +270,7 @@ export const StreamingData: React.VFC = () => {
         },
     ]);
 
-    const getContent = React.useCallback((cell: readonly [number, number]): GridCell => {
+    const getContent = React.useCallback((cell: Item): GridCell => {
         const [col, row] = cell;
         const dataRow = dataRef.current[row];
         const indexes: (keyof DummyItem)[] = ["name", "company", "email", "phone"];
@@ -283,7 +283,7 @@ export const StreamingData: React.VFC = () => {
         };
     }, []);
 
-    const getContentHighlighted = React.useCallback((cell: readonly [number, number]): GridCell => {
+    const getContentHighlighted = React.useCallback((cell: Item): GridCell => {
         const [col, row] = cell;
         const dataRow = highlightDataRef.current[row];
         const indexes: (keyof DummyItem)[] = ["name", "company", "email", "phone"];
@@ -400,7 +400,7 @@ If \`getContent\` is updated to also return the last time a cell was updated the
             </Marked>
             <Highlight>
                 {`
-const getContent = React.useCallback((cell: readonly [number, number]): GridCell => {
+const getContent = React.useCallback((cell: Item): GridCell => {
     const [col, row] = cell;
     const data = fetchDataFromBackend(col, row);
     return {

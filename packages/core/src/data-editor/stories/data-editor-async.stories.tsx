@@ -6,6 +6,7 @@ import {
     GridCellKind,
     GridColumn,
     Rectangle,
+    Item,
 } from "../../data-grid/data-grid-types";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 import { DataEditor, DataEditorProps, DataEditorRef } from "../data-editor";
@@ -24,9 +25,9 @@ export default {
     ],
 };
 
-type RowCallback<T> = (range: readonly [number, number]) => Promise<readonly T[]>;
+type RowCallback<T> = (range: Item) => Promise<readonly T[]>;
 type RowToCell<T> = (row: T, col: number) => GridCell;
-type RowEditedCallback<T> = (cell: readonly [number, number], newVal: EditableGridCell, rowData: T) => T | undefined;
+type RowEditedCallback<T> = (cell: Item, newVal: EditableGridCell, rowData: T) => T | undefined;
 function useAsyncData<TRowType>(
     minPage: number,
     getRowData: RowCallback<TRowType>,
@@ -98,7 +99,7 @@ function useAsyncData<TRowType>(
     }, [loadPage, minPage, visiblePages]);
 
     const onCellEdited = React.useCallback(
-        (cell: readonly [number, number], newVal: EditableGridCell) => {
+        (cell: Item, newVal: EditableGridCell) => {
             const [, row] = cell;
             const current = dataRef.current[row];
             if (current === undefined) return;
@@ -121,7 +122,7 @@ function useAsyncData<TRowType>(
 export const ServerSideData: React.VFC = () => {
     const ref = React.useRef<DataEditorRef | null>(null);
 
-    const getRowData = React.useCallback(async (r: readonly [number, number]) => {
+    const getRowData = React.useCallback(async (r: Item) => {
         await new Promise(res => setTimeout(res, 300));
         const result = range(r[0], r[1]).map(rowIndex => [`1, ${rowIndex}`, `2, ${rowIndex}`]);
         return result;

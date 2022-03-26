@@ -9,6 +9,7 @@ import {
     GridCellKind,
     GridSelection,
     isSizedGridColumn,
+    Item,
 } from "..";
 import { DataEditorRef } from "./data-editor";
 
@@ -20,7 +21,7 @@ jest.mock("react-virtualized-auto-sizer", () => {
     };
 });
 
-const makeCell = (cell: readonly [number, number]): GridCell => {
+const makeCell = (cell: Item): GridCell => {
     const [col, row] = cell;
     if (col === 0) {
         return {

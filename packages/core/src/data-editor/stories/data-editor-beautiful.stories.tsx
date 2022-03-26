@@ -11,6 +11,7 @@ import {
     GridSelection,
     GroupHeaderClickedEventArgs,
     isEditableGridCell,
+    Item,
     Rectangle,
 } from "../../data-grid/data-grid-types";
 import { DataEditor, DataEditorProps } from "../data-editor";
@@ -902,7 +903,7 @@ export const RearrangeColumns: React.VFC = () => {
     }, []);
 
     const getCellContentMangled = React.useCallback(
-        ([col, row]: readonly [number, number]): GridCell => {
+        ([col, row]: Item): GridCell => {
             const remappedCol = cols.findIndex(c => c.title === sortableCols[col].title);
             return getCellContent([remappedCol, row]);
         },
@@ -1236,7 +1237,7 @@ function useAllMockedKinds() {
     }, [colsMap]);
 
     const getCellContent = React.useCallback(
-        ([col, row]: readonly [number, number]): GridCell => {
+        ([col, row]: Item): GridCell => {
             let val = cache.current.get(col, row);
             if (val === undefined) {
                 val = colsMap[col].getContent();
@@ -1249,7 +1250,7 @@ function useAllMockedKinds() {
     );
 
     const setCellValue = React.useCallback(
-        ([col, row]: readonly [number, number], val: GridCell): void => {
+        ([col, row]: Item, val: GridCell): void => {
             let current = cache.current.get(col, row);
             if (current === undefined) {
                 current = colsMap[col].getContent();
@@ -1892,7 +1893,7 @@ export const RapidUpdates: React.VFC = () => {
 
         const sendUpdate = () => {
             const cells: {
-                cell: readonly [number, number];
+                cell: Item;
             }[] = [];
             const now = performance.now();
             for (let x = 0; x < 5_000; x++) {

@@ -29,6 +29,7 @@ import {
     GroupHeaderClickedEventArgs,
     HeaderClickedEventArgs,
     CellClickedEventArgs,
+    Item,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -163,16 +164,16 @@ const keybindingDefaults: Keybinds = {
 
 export interface DataEditorProps extends Props {
     readonly onDelete?: (selection: GridSelection) => boolean | GridSelection;
-    readonly onCellEdited?: (cell: readonly [number, number], newValue: EditableGridCell) => void;
+    readonly onCellEdited?: (cell: Item, newValue: EditableGridCell) => void;
     readonly onRowAppended?: () => Promise<"top" | "bottom" | number | undefined> | void;
     readonly onHeaderClicked?: (colIndex: number, event: HeaderClickedEventArgs) => void;
     readonly onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
     readonly onGroupHeaderRenamed?: (groupName: string, newVal: string) => void;
-    readonly onCellClicked?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;
-    readonly onFinishedEditing?: (newValue: GridCell | undefined, movement: readonly [number, number]) => void;
+    readonly onCellClicked?: (cell: Item, event: CellClickedEventArgs) => void;
+    readonly onFinishedEditing?: (newValue: GridCell | undefined, movement: Item) => void;
     readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;
     readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
-    readonly onCellContextMenu?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;
+    readonly onCellContextMenu?: (cell: Item, event: CellClickedEventArgs) => void;
 
     readonly columns: readonly GridColumn[];
 
@@ -228,7 +229,7 @@ export interface DataEditorProps extends Props {
         tx?: number,
         ty?: number,
         extras?: {
-            selected?: readonly [number, number];
+            selected?: Item;
             freezeRegion?: Rectangle;
         }
     ) => void;
@@ -244,9 +245,7 @@ export interface DataEditorProps extends Props {
 
     readonly verticalBorder?: DataGridSearchProps["verticalBorder"] | boolean;
 
-    readonly onPaste?:
-        | ((target: readonly [number, number], values: readonly (readonly string[])[]) => boolean)
-        | boolean;
+    readonly onPaste?: ((target: Item, values: readonly (readonly string[])[]) => boolean) | boolean;
 }
 
 export interface DataEditorRef {
@@ -279,7 +278,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         target: Rectangle;
         content: GridCell;
         initialValue: string | undefined;
-        cell: readonly [number, number];
+        cell: Item;
         highlight: boolean;
         forceEditMode: boolean;
     }>();
@@ -520,7 +519,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             tx?: number;
             ty?: number;
             extras?: {
-                selected?: readonly [number, number];
+                selected?: Item;
                 freezeRegion?: Rectangle;
             };
         }
@@ -549,7 +548,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const mangledRows = showTrailingBlankRow ? rows + 1 : rows;
 
     const mangledOnCellEdited = React.useCallback(
-        (cell: readonly [number, number], newValue: EditableGridCell) => {
+        (cell: Item, newValue: EditableGridCell) => {
             onCellEdited?.([cell[0] - rowMarkerOffset, cell[1]], newValue);
         },
         [onCellEdited, rowMarkerOffset]
@@ -571,7 +570,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const visibleRegionRef = React.useRef(visibleRegion);
     const getMangedCellContent = React.useCallback(
-        ([col, row]: readonly [number, number]): InnerGridCell => {
+        ([col, row]: Item): InnerGridCell => {
             const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
             const isRowMarkerCol = col === 0 && hasRowMarkers;
             if (isRowMarkerCol) {
@@ -1707,7 +1706,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const [selCol, selRow] = currentCell ?? [];
     const onCellFocused = React.useCallback(
-        (cell: readonly [number, number]) => {
+        (cell: Item) => {
             if (selCol === cell[0] && selRow === cell[1]) return;
             setCurrent(
                 {
@@ -1877,7 +1876,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     gridSelection.current.range.height > 1
                 ) {
                     // ctrl/cmd + d
-                    const damage: (readonly [number, number])[] = [];
+                    const damage: Item[] = [];
                     const r = gridSelection.current.range;
                     for (let x = 0; x < r.width; x++) {
                         const fillCol = x + r.x;
@@ -1905,7 +1904,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     gridSelection.current.range.width > 1
                 ) {
                     // ctrl/cmd + r
-                    const damage: (readonly [number, number])[] = [];
+                    const damage: Item[] = [];
                     const r = gridSelection.current.range;
                     for (let y = 0; y < r.height; y++) {
                         const fillRow = y + r.y;
@@ -2140,7 +2139,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onPasteInternal = React.useCallback(async () => {
         if (!keybindings.paste) return;
-        function pasteToCell(inner: InnerGridCell, target: readonly [number, number], toPaste: string): boolean {
+        function pasteToCell(inner: InnerGridCell, target: Item, toPaste: string): boolean {
             if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
                 switch (inner.kind) {
                     case GridCellKind.Text:
@@ -2201,7 +2200,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return;
             }
 
-            const damage: (readonly [number, number])[] = [];
+            const damage: Item[] = [];
             for (let row = 0; row < data.length; row++) {
                 const dataRow = data[row];
                 if (row + gridRow >= rows) break;
@@ -2290,7 +2289,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     useEventListener("copy", onCopy, window, true, false);
 
     const onSearchResultsChanged = React.useCallback(
-        (results: readonly (readonly [number, number])[], navIndex: number) => {
+        (results: readonly Item[], navIndex: number) => {
             if (results.length === 0 || navIndex === -1) return;
 
             const [col, row] = results[navIndex];

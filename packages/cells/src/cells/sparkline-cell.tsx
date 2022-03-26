@@ -6,7 +6,7 @@ interface SparklineCellProps {
     readonly graphKind?: "line" | "bar";
     readonly values: readonly number[];
     readonly displayValues?: readonly string[];
-    readonly yAxis: readonly [number, number];
+    readonly yAxis: Item;
     readonly color?: string;
 }
 

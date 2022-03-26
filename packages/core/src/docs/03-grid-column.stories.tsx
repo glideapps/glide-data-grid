@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { GridCell, GridCellKind, GridColumnIcon } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, GridColumnIcon, Item } from "../data-grid/data-grid-types";
 import { DataEditor } from "../data-editor/data-editor";
 
 import { SimpleThemeWrapper } from "../stories/story-utils";
@@ -18,7 +18,7 @@ export default {
 };
 
 export const GridColumns: React.VFC = () => {
-    const basicGetCellContent = React.useCallback((cell: readonly [number, number]): GridCell => {
+    const basicGetCellContent = React.useCallback((cell: Item): GridCell => {
         return {
             kind: GridCellKind.Text,
             allowOverlay: false,

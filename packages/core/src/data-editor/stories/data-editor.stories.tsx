@@ -10,6 +10,7 @@ import {
     GridCellKind,
     GridColumn,
     GridSelection,
+    Item,
     Rectangle,
 } from "../../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -34,7 +35,7 @@ export default {
     ],
 };
 
-function getDummyData([col, row]: readonly [number, number]): GridCell {
+function getDummyData([col, row]: Item): GridCell {
     if (col === 0) {
         return {
             kind: GridCellKind.RowID,
@@ -212,7 +213,7 @@ function getDummyRelationColumn(): GridColumn[] {
     ];
 }
 
-function getDummyRelationData([col, row]: readonly [number, number]): GridCell {
+function getDummyRelationData([col, row]: Item): GridCell {
     return {
         kind: GridCellKind.Drilldown,
         data: [
@@ -261,7 +262,7 @@ const columns: GridColumn[] = [
     { title: "Square", width: 100 },
 ];
 
-function getData([col, row]: readonly [number, number]): GridCell {
+function getData([col, row]: Item): GridCell {
     const n = Math.pow(row, col + 1);
 
     return {
@@ -633,7 +634,7 @@ export function MarkdownEdits() {
         ];
     }, []);
 
-    const dummyCells = useCallback(([col, _row]: readonly [number, number]) => {
+    const dummyCells = useCallback(([col, _row]: Item) => {
         if (col === 0) {
             const editable: EditableGridCell = {
                 data: "text",

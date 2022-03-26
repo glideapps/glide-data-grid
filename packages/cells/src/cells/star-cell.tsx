@@ -23,7 +23,7 @@ const starPoints = [
     [38.77, 39.55],
 ];
 
-function pathStar(ctx: CanvasRenderingContext2D, center: readonly [number, number], size: number) {
+function pathStar(ctx: CanvasRenderingContext2D, center: Item, size: number) {
     let moved = false;
     for (const p of starPoints) {
         const x = (p[0] - 50) * (size / 100) + center[0];

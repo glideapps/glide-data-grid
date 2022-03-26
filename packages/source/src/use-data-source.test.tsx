@@ -16,7 +16,7 @@ const props = {
         },
     ],
     freezeColumns: 0,
-    getCellContent: ([col, row]: readonly [number, number]): TextCell => ({
+    getCellContent: ([col, row]: Item): TextCell => ({
         kind: GridCellKind.Text,
         allowOverlay: false,
         data: `${col}x${row}`,

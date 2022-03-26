@@ -42,7 +42,7 @@ import { PrepResult } from "./cells/cell-types";
 //   structure which contains all operations to perform, then sort them all by "prep" requirement, then do
 //   all like operations at once.
 
-type HoverInfo = readonly [Item, readonly [number, number]];
+type HoverInfo = readonly [Item, Item];
 
 export interface Highlight {
     readonly color: string;
@@ -903,7 +903,7 @@ function clipDamage(
 }
 
 function getSpanBounds(
-    span: readonly [number, number],
+    span: Item,
     cellX: number,
     cellY: number,
     cellW: number,
@@ -982,7 +982,7 @@ function drawCells(
     cellYOffset: number,
     rows: number,
     getRowHeight: (row: number) => number,
-    getCellContent: (cell: readonly [number, number]) => InnerGridCell,
+    getCellContent: (cell: Item) => InnerGridCell,
     getGroupDetails: GroupDetailsCallback,
     getRowThemeOverride: GetRowThemeCallback | undefined,
     selectedRows: CompactSelection,
@@ -1587,7 +1587,7 @@ function drawFocusRing(
     totalHeaderHeight: number,
     selectedCell: GridSelection,
     getRowHeight: (row: number) => number,
-    getCellContent: (cell: readonly [number, number]) => InnerGridCell,
+    getCellContent: (cell: Item) => InnerGridCell,
     lastRowSticky: boolean,
     rows: number
 ): (() => void) | undefined {
@@ -1697,7 +1697,7 @@ export function drawGrid(
     selectedCell: GridSelection,
     lastRowSticky: boolean,
     rows: number,
-    getCellContent: (cell: readonly [number, number]) => InnerGridCell,
+    getCellContent: (cell: Item) => InnerGridCell,
     getGroupDetails: GroupDetailsCallback,
     getRowThemeOverride: GetRowThemeCallback | undefined,
     drawCustomCell: DrawCustomCellCallback | undefined,
@@ -2168,14 +2168,7 @@ function walkColumns(
     }
 }
 
-type WalkGroupsCallback = (
-    colSpan: readonly [number, number],
-    group: string,
-    x: number,
-    y: number,
-    width: number,
-    height: number
-) => void;
+type WalkGroupsCallback = (colSpan: Item, group: string, x: number, y: number, width: number, height: number) => void;
 function walkGroups(
     effectiveCols: readonly MappedGridColumn[],
     width: number,

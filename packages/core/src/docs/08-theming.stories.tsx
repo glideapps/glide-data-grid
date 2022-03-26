@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { GridCell, GridCellKind, GridColumn } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, GridColumn, Item } from "../data-grid/data-grid-types";
 import { DataEditor } from "../data-editor/data-editor";
 
 import { SimpleThemeWrapper } from "../stories/story-utils";
@@ -132,7 +132,7 @@ const data: DummyItem[] = [
 ];
 
 export const Theming: React.VFC = () => {
-    const getContent = React.useCallback((cell: readonly [number, number]): GridCell => {
+    const getContent = React.useCallback((cell: Item): GridCell => {
         const [col, row] = cell;
         const dataRow = data[row];
         const indexes: (keyof DummyItem)[] = ["name", "company", "email", "phone"];
@@ -145,7 +145,7 @@ export const Theming: React.VFC = () => {
         };
     }, []);
 
-    const getContentThemed = React.useCallback((cell: readonly [number, number]): GridCell => {
+    const getContentThemed = React.useCallback((cell: Item): GridCell => {
         const [col, row] = cell;
         const dataRow = data[row];
         const indexes: (keyof DummyItem)[] = ["name", "company", "email", "phone"];
@@ -368,7 +368,7 @@ return <DataEditor {...rest} getRowThemeOverride={getRowThemeOverride} />
             <Marked>{`### Cell themes`}</Marked>
             <Highlight>
                 {`
-const getContent = React.useCallback((cell: readonly [number, number]): GridCell => {
+const getContent = React.useCallback((cell: Item): GridCell => {
     let theme: Partial<Theme> | undefined = undefined;
     if (col === 1 && row === 1) {
         theme = {

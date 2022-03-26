@@ -1,6 +1,6 @@
 // import AppIcon from "common/app-icon";
 import * as React from "react";
-import { GridCell, GridCellKind, Rectangle } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, Item, Rectangle } from "../data-grid/data-grid-types";
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
 import { assert } from "../common/support";
@@ -46,7 +46,7 @@ const closeX = (
 
 export interface DataGridSearchProps extends Omit<ScrollingDataGridProps, "prelightCells"> {
     readonly getCellsForSelection?: (selection: Rectangle) => readonly (readonly GridCell[])[];
-    readonly onSearchResultsChanged?: (results: readonly (readonly [number, number])[], navIndex: number) => void;
+    readonly onSearchResultsChanged?: (results: readonly Item[], navIndex: number) => void;
     readonly showSearch?: boolean;
     readonly onSearchClose?: () => void;
 }
@@ -79,7 +79,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
     const inputRef = React.useRef<HTMLInputElement | null>(null);
     const searchHandle = React.useRef<number>();
-    const [searchResults, setSearchResults] = React.useState<readonly (readonly [number, number])[]>([]);
+    const [searchResults, setSearchResults] = React.useState<readonly Item[]>([]);
 
     const cancelSearch = React.useCallback(() => {
         if (searchHandle.current !== undefined) {

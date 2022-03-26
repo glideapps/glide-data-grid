@@ -3,7 +3,7 @@ import * as React from "react";
 import { StoryFn, StoryContext, useState, useMemo } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../../stories/story-utils";
 
-import { GridCell, GridCellKind } from "../../data-grid/data-grid-types";
+import { GridCell, GridCellKind, Item } from "../../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor } from "../data-editor";
 import DataEditorContainer from "../../data-editor-container/data-grid-container";
@@ -27,7 +27,7 @@ export default {
     ],
 };
 
-const bug70Gen = ([, row]: readonly [number, number]): GridCell => ({
+const bug70Gen = ([, row]: Item): GridCell => ({
     allowOverlay: true,
     kind: GridCellKind.Number,
     data: row,
@@ -64,7 +64,7 @@ export function Bug70() {
     );
 }
 
-const filterColumnsGen = ([col, row]: readonly [number, number]): GridCell => ({
+const filterColumnsGen = ([col, row]: Item): GridCell => ({
     allowOverlay: true,
     kind: GridCellKind.Text,
     data: `${col} - ${row}`,

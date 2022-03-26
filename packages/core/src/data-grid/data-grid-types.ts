@@ -12,7 +12,7 @@ import { SpriteManager } from "./data-grid-sprites";
 // information.
 export interface GridSelection {
     readonly current?: {
-        readonly cell: readonly [number, number];
+        readonly cell: Item;
         readonly range: Readonly<Rectangle>;
         readonly rangeStack: readonly Readonly<Rectangle>[]; // lowest to highest, does not include range
     };
@@ -52,7 +52,7 @@ interface BaseGridMouseEventArgs {
 
 export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "cell";
-    readonly location: readonly [number, number];
+    readonly location: Item;
     readonly bounds: Rectangle;
 }
 
@@ -72,7 +72,7 @@ export interface GridMouseGroupHeaderEventArgs extends BaseGridMouseEventArgs, P
 
 export interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {
     readonly kind: "out-of-bounds";
-    readonly location: readonly [number, number];
+    readonly location: Item;
     readonly direction: readonly [-1 | 0 | 1, -1 | 0 | 1];
 }
 
@@ -286,7 +286,7 @@ interface BaseGridCell {
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
-    readonly span?: readonly [number, number];
+    readonly span?: Item;
 }
 
 export interface LoadingCell extends BaseGridCell {
@@ -420,7 +420,7 @@ export interface MarkerCell extends BaseGridCell {
     readonly markerKind: "checkbox" | "number" | "both";
 }
 
-export type Slice = readonly [number, number];
+export type Slice = Item;
 export type CompactSelectionRanges = readonly Slice[];
 
 function mergeRanges(input: CompactSelectionRanges) {
