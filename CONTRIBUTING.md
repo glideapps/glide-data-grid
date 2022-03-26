@@ -22,6 +22,10 @@ npm run i && npm run storybook
 
 Please consider submitting your work for review. We are a small project but we are super enthused when anyone comes by to help us build the best damned data grid on the internet.
 
+## Contributing new cells
+
+If you wish to contribute new cells, please add them to the `cells` package. There are already other cells in that package which can be used as an example. If your cell editor requires additional third party dependencies please consider using a React.lazy to allow for code splitting.
+
 ## Any contributions you make will be under the MIT Software License
 
 In short, when you submit code changes, your submissions are understood to be under the same MIT License that covers the project. Feel free to contact the maintainers if that's a concern.
