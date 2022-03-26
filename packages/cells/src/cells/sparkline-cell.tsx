@@ -1,4 +1,4 @@
-import { CustomCell, parseToRgba } from "@glideapps/glide-data-grid";
+import { CustomCell, parseToRgba, Item } from "@glideapps/glide-data-grid";
 import { CustomCellRenderer } from "../types";
 
 interface SparklineCellProps {

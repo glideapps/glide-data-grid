@@ -1,4 +1,4 @@
-import { CustomCell } from "@glideapps/glide-data-grid";
+import { CustomCell, Item } from "@glideapps/glide-data-grid";
 import { CustomCellRenderer } from "../types";
 import * as React from "react";
 import styled from "styled-components";
