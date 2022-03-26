@@ -42,6 +42,7 @@ export function useCellSizer(
 
     const memoMap = React.useRef<Record<string, number>>({});
 
+    const lastColumns = React.useRef<typeof columns>();
     const [selectedData, setSelectionData] = React.useState<CellArray | undefined>();
 
     // because the selectedData is updated AFTER the columns are updated
@@ -59,11 +60,14 @@ export function useCellSizer(
         };
         const fn = async () => {
             const getResult = getCells(computeArea, abortController.signal);
+            let toSet: CellArray;
             if (typeof getResult === "object") {
-                setSelectionData(getResult);
+                toSet = getResult;
             } else {
-                setSelectionData(await resolveCellsThunk(getResult));
+                toSet = await resolveCellsThunk(getResult);
             }
+            lastColumns.current = columns;
+            setSelectionData(toSet);
         };
         void fn();
     }, [abortController.signal, columns]);
@@ -89,7 +93,7 @@ export function useCellSizer(
         return columns.map((c, colIndex) => {
             if (isSizedGridColumn(c)) return c;
 
-            if (selectedData === undefined || c.id === undefined) {
+            if (selectedData === undefined || lastColumns.current !== columns || c.id === undefined) {
                 return {
                     ...c,
                     width: defaultSize,
