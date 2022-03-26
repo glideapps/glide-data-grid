@@ -207,8 +207,8 @@ export const UseDataSource: React.VFC = () => {
                 return {
                     kind: GridCellKind.Text,
                     allowOverlay: true,
-                    data: `${col} x ${row}`,
-                    displayData: `${col} x ${row}`,
+                    data: `${row}`,
+                    displayData: `${row}`,
                 };
             }
 
@@ -239,6 +239,7 @@ export const UseDataSource: React.VFC = () => {
                 : {
                       column: moveArgs.columns[sort],
                       direction: "desc",
+                      mode: "smart",
                   },
     });
 
