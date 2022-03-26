@@ -45,10 +45,7 @@ export function useCellSizer(
     const lastColumns = React.useRef<typeof columns>();
     const [selectedData, setSelectionData] = React.useState<CellArray | undefined>();
 
-    // because the selectedData is updated AFTER the columns are updated
-    // if the columns ever update again they get stale selected data. This sucks.
-    // Fix
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         const getCells = getCellsForSelectionRef.current;
         if (getCells === undefined) return;
         const computeRows = Math.max(1, 10 - Math.floor(columns.length / 10_000));
