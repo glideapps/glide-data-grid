@@ -21,7 +21,7 @@ popd
 for DIR in "cells" "source"
 do
     pushd packages/$DIR
-    update ".dependencies.\"@glideapps/glide-data-grid\" = \"3.1.0-beta5\"" package.json
+    update ".dependencies.\"@glideapps/glide-data-grid\" = \"3.4.1\"" package.json
     npm ci
     update ".dependencies.\"@glideapps/glide-data-grid\" = $VERSION" package.json
     update ".version = $VERSION" package.json
