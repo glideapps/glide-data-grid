@@ -121,9 +121,9 @@ Most data grids will want to set the majority of these props one way or another.
 | [spanRangeBehavior](#spanrangebehavior)            | Determines if the `gridSelection` should allow partial spans or not.                                    |
 | [onGridSelectionChange](#gridselection)            | Emitted whenever the `gridSelection` should change.                                                     |
 | [onSelectionCleared](#onselectioncleared)          | Emitted when the selection is explicitly cleared.                                                       |
-| [rangeMultiSelect](#rangemultiselect)              | Controls if multiple ranges can be selected at once.                                                    |
-| [columnMultiSelect](#rangemultiselect)             | Controls if multiple columns can be selected at once.                                                   |
-| [rowMultiSelect](#rangemultiselect)                | Controls if multiple rows can be selected at aonce.                                                     |
+| [rangeSelect](#rangeselect)                        | Controls if multiple ranges can be selected at once.                                                    |
+| [columnSelect](#rangeselect)                       | Controls if multiple columns can be selected at once.                                                   |
+| [rowSelect](#rangeselect)                          | Controls if multiple rows can be selected at aonce.                                                     |
 | [rangeSelectionBlending](#rangeselectionblending)  | Controls how range selections may be mixed with other selection types.                                  |
 | [columnSelectionBlending](#rangeselectionblending) | Controls how column selections may be mixed with other selection types.                                 |
 | [rowSelectionBlending](#rangeselectionblending)    | Controls how row selections may be mixed with other selection types.                                    |
@@ -698,15 +698,17 @@ Emitted when the current selection is cleared, usually when the user presses "Es
 
 ---
 
-## rangeMultiSelect
+## rangeSelect
 
 ```ts
-rangeMultiSelect?: boolean; // default false
-columnMultiSelect?: boolean; // default true
-rowMultiSelect?: boolean; // default true
+rangeSelect?: "none" | "cell" | "rect" | "multi-cell" | "multi-rect"; // default rect
+columnSelect?: "none" | "single" | "multi"; // default multi
+rowSelect?: "none" | "single" | "multi"; // default multi
 ```
 
 Controls if multi-selection is allowed. If disabled, shift/ctrl/command clicking will work as if no modifiers are pressed.
+
+When range select is set to cell, only one cell may be selected at a time. When set to rect one one rect at a time. The multi variants allow for multiples of the rect or cell to be selected.
 
 ---
 

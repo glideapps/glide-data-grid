@@ -13,34 +13,45 @@ export function useSelectionBehavior(
     rangeBehavior: SelectionBlending,
     columnBehavior: SelectionBlending,
     rowBehavior: SelectionBlending,
-    rangeMultiselection: boolean
+    rangeSelect: "none" | "cell" | "rect" | "multi-cell" | "multi-rect"
 ) {
     // if append is true, the current range will be added to the rangeStack
     const setCurrent = React.useCallback(
         (
-            current: Pick<NonNullable<GridSelection["current"]>, "cell" | "range"> | undefined,
+            value: Pick<NonNullable<GridSelection["current"]>, "cell" | "range"> | undefined,
             expand: boolean,
             append: boolean,
             trigger: SelectionTrigger
         ) => {
-            append = append && rangeMultiselection;
+            if ((rangeSelect === "cell" || rangeSelect === "multi-cell") && value !== undefined) {
+                value = {
+                    ...value,
+                    range: {
+                        x: value.cell[0],
+                        y: value.cell[1],
+                        width: 1,
+                        height: 1,
+                    },
+                };
+            }
+            const addLastRange = append && (rangeSelect === "multi-rect" || rangeSelect === "multi-cell");
             const allowColumnCoSelect =
                 columnBehavior === "mixed" && rangeBehavior === "mixed" && (append || trigger === "drag");
             const allowRowCoSelect =
                 rowBehavior === "mixed" && rangeBehavior === "mixed" && (append || trigger === "drag");
             let newVal: GridSelection = {
                 current:
-                    current === undefined
+                    value === undefined
                         ? undefined
                         : {
-                              ...current,
+                              ...value,
                               rangeStack: trigger === "drag" ? gridSelection.current?.rangeStack ?? [] : [],
                           },
                 columns: allowColumnCoSelect ? gridSelection.columns : CompactSelection.empty(),
                 rows: allowRowCoSelect ? gridSelection.rows : CompactSelection.empty(),
             };
 
-            if (append && newVal.current !== undefined && gridSelection.current !== undefined) {
+            if (addLastRange && newVal.current !== undefined && gridSelection.current !== undefined) {
                 newVal = {
                     ...newVal,
                     current: {
@@ -51,7 +62,7 @@ export function useSelectionBehavior(
             }
             setGridSelection(newVal, expand);
         },
-        [columnBehavior, gridSelection, rangeBehavior, rangeMultiselection, rowBehavior, setGridSelection]
+        [columnBehavior, gridSelection, rangeBehavior, rangeSelect, rowBehavior, setGridSelection]
     );
 
     const setSelectedRows = React.useCallback(

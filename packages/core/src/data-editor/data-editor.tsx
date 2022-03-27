@@ -196,9 +196,9 @@ export interface DataEditorProps extends Props {
     readonly rangeSelectionBlending?: SelectionBlending;
     readonly columnSelectionBlending?: SelectionBlending;
     readonly rowSelectionBlending?: SelectionBlending;
-    readonly rangeMultiSelect?: boolean;
-    readonly columnMultiSelect?: boolean;
-    readonly rowMultiSelect?: boolean;
+    readonly rangeSelect?: "none" | "cell" | "rect" | "multi-cell" | "multi-rect";
+    readonly columnSelect?: "none" | "single" | "multi";
+    readonly rowSelect?: "none" | "single" | "multi";
 
     readonly rowHeight?: DataGridSearchProps["rowHeight"];
     readonly onMouseMove?: DataGridSearchProps["onMouseMove"];
@@ -320,9 +320,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         highlightRegions: highlightRegionsIn,
         drawCell,
         drawCustomCell,
-        rangeMultiSelect = false,
-        columnMultiSelect = true,
-        rowMultiSelect = true,
+        rangeSelect = "rect",
+        columnSelect = "multi",
+        rowSelect = "multi",
         rangeSelectionBlending = "exclusive",
         columnSelectionBlending = "exclusive",
         rowSelectionBlending = "exclusive",
@@ -516,7 +516,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         rangeSelectionBlending,
         columnSelectionBlending,
         rowSelectionBlending,
-        rangeMultiSelect
+        rangeSelect
     );
 
     const theme = useTheme();
@@ -929,8 +929,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const handleSelect = React.useCallback(
         (args: GridMouseEventArgs) => {
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
-            const isMultiRow = isMultiKey && rowMultiSelect;
-            const isMultiCol = isMultiKey && columnMultiSelect;
+            const isMultiRow = isMultiKey && rowSelect === "multi";
+            const isMultiCol = isMultiKey && columnSelect === "multi";
             const [col, row] = args.location;
             const selectedColumns = gridSelection.columns;
             const selectedRows = gridSelection.rows;
@@ -941,14 +941,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 lastMouseDownCellLocation.current = [col, row];
 
                 if (col === 0 && hasRowMarkers) {
-                    if ((showTrailingBlankRow === true && row === rows) || rowMarkers === "number") return;
+                    if (
+                        (showTrailingBlankRow === true && row === rows) ||
+                        rowMarkers === "number" ||
+                        rowSelect === "none"
+                    )
+                        return;
                     setOverlay(undefined);
                     focus();
                     const isSelected = selectedRows.hasIndex(row);
 
                     const lastHighlighted = lastSelectedRowRef.current;
                     if (
-                        rowMultiSelect &&
+                        rowSelect === "multi" &&
                         (args.shiftKey || args.isLongTouch === true) &&
                         lastHighlighted !== undefined &&
                         selectedRows.hasIndex(lastHighlighted)
@@ -968,9 +973,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             lastSelectedRowRef.current = row;
                         }
                     } else if (isSelected && selectedRows.length === 1) {
-                        setSelectedRows(CompactSelection.empty(), undefined, false);
+                        setSelectedRows(CompactSelection.empty(), undefined, isMultiKey);
                     } else {
-                        setSelectedRows(CompactSelection.fromSingleSelection(row), undefined, false);
+                        setSelectedRows(CompactSelection.fromSingleSelection(row), undefined, isMultiKey);
                         lastSelectedRowRef.current = row;
                     }
                 } else if (col >= rowMarkerOffset && showTrailingBlankRow && row === rows) {
@@ -1038,7 +1043,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (hasRowMarkers && col === 0) {
                     lastSelectedRowRef.current = undefined;
                     lastSelectedColRef.current = undefined;
-                    if (rowMultiSelect) {
+                    if (rowSelect === "multi") {
                         if (selectedRows.length !== rows) {
                             setSelectedRows(CompactSelection.fromSingleSelection([0, rows]), undefined, isMultiKey);
                         } else {
@@ -1049,7 +1054,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else {
                     const lastCol = lastSelectedColRef.current;
                     if (
-                        columnMultiSelect &&
+                        columnSelect === "multi" &&
                         (args.shiftKey || args.isLongTouch === true) &&
                         lastCol !== undefined &&
                         selectedColumns.hasIndex(lastCol)
@@ -1057,19 +1062,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         const newSlice: Slice = [Math.min(lastCol, col), Math.max(lastCol, col) + 1];
 
                         if (isMultiCol) {
-                            setSelectedColumns(undefined, newSlice, isMultiCol);
+                            setSelectedColumns(undefined, newSlice, isMultiKey);
                         } else {
-                            setSelectedColumns(CompactSelection.fromSingleSelection(newSlice), undefined, isMultiCol);
+                            setSelectedColumns(CompactSelection.fromSingleSelection(newSlice), undefined, isMultiKey);
                         }
                     } else if (isMultiCol) {
                         if (selectedColumns.hasIndex(col)) {
-                            setSelectedColumns(selectedColumns.remove(col), undefined, isMultiCol);
+                            setSelectedColumns(selectedColumns.remove(col), undefined, isMultiKey);
                         } else {
-                            setSelectedColumns(undefined, col, isMultiCol);
+                            setSelectedColumns(undefined, col, isMultiKey);
                         }
                         lastSelectedColRef.current = col;
-                    } else {
-                        setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, isMultiCol);
+                    } else if (columnSelect !== "none") {
+                        setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, isMultiKey);
                         lastSelectedColRef.current = col;
                     }
                     lastSelectedRowRef.current = undefined;
@@ -1088,7 +1093,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [
             appendRow,
-            columnMultiSelect,
+            columnSelect,
             focus,
             getCustomNewRowTargetColumn,
             gridSelection,
@@ -1097,7 +1102,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onSelectionCleared,
             rowMarkerOffset,
             rowMarkers,
-            rowMultiSelect,
+            rowSelect,
             rowSelectionMode,
             rows,
             setCurrent,
@@ -1136,7 +1141,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const handleGroupHeaderSelection = React.useCallback(
         (args: GridMouseEventArgs) => {
-            if (args.kind !== "group-header" || !columnMultiSelect) {
+            if (args.kind !== "group-header" || columnSelect !== "multi") {
                 return;
             }
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
@@ -1174,7 +1179,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 setSelectedColumns(CompactSelection.fromSingleSelection([start, end + 1]), undefined, isMultiKey);
             }
         },
-        [columnMultiSelect, focus, gridSelection.columns, mangledCols, rowMarkerOffset, setSelectedColumns]
+        [columnSelect, focus, gridSelection.columns, mangledCols, rowMarkerOffset, setSelectedColumns]
     );
 
     const onMouseUp = React.useCallback(
@@ -1358,9 +1363,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onColumnMovedImpl = React.useCallback(
         (startIndex: number, endIndex: number) => {
             onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset);
-            setSelectedColumns(CompactSelection.fromSingleSelection(endIndex), undefined, true);
+            if (columnSelect !== "none") {
+                setSelectedColumns(CompactSelection.fromSingleSelection(endIndex), undefined, true);
+            }
         },
-        [onColumnMoved, rowMarkerOffset, setSelectedColumns]
+        [columnSelect, onColumnMoved, rowMarkerOffset, setSelectedColumns]
     );
 
     const onDragStartImpl = React.useCallback(
@@ -1386,7 +1393,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
-            if (mouseState.current !== undefined && gridSelection.current !== undefined && !isDraggable) {
+            if (
+                mouseState.current !== undefined &&
+                gridSelection.current !== undefined &&
+                !isDraggable &&
+                (rangeSelect === "rect" || rangeSelect === "multi-rect")
+            ) {
                 const [selectedCol, selectedRow] = gridSelection.current.cell;
                 // eslint-disable-next-line prefer-const
                 let [col, row] = args.location;
@@ -1455,6 +1467,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [
             gridSelection,
             isDraggable,
+            rangeSelect,
             onItemHovered,
             rowMarkerOffset,
             lastRowSticky,
@@ -1874,17 +1887,25 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let [col, row] = gridSelection.current.cell;
                 let freeMove = false;
 
-                if (keybindings.selectColumn && isHotkey("primary+ ", event)) {
+                if (keybindings.selectColumn && isHotkey("primary+ ", event) && columnSelect !== "none") {
                     if (selectedColumns.hasIndex(col)) {
                         setSelectedColumns(selectedColumns.remove(col), undefined, true);
                     } else {
-                        setSelectedColumns(undefined, col, true);
+                        if (columnSelect === "single") {
+                            setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, true);
+                        } else {
+                            setSelectedColumns(undefined, col, true);
+                        }
                     }
-                } else if (keybindings.selectRow && isHotkey("shift+ ", event)) {
+                } else if (keybindings.selectRow && isHotkey("shift+ ", event) && rowSelect !== "none") {
                     if (selectedRows.hasIndex(row)) {
                         setSelectedRows(selectedRows.remove(row), undefined, true);
                     } else {
-                        setSelectedRows(undefined, row, true);
+                        if (rowSelect === "single") {
+                            setSelectedRows(CompactSelection.fromSingleSelection(row), undefined, true);
+                        } else {
+                            setSelectedRows(undefined, row, true);
+                        }
                     }
                 } else if (
                     (isHotkey("Enter", event) || isHotkey(" ", event) || isHotkey("shift+Enter", event)) &&
@@ -1984,7 +2005,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     adjustSelection([2, 2]);
                 } else if (event.key === "ArrowDown") {
                     setOverlay(undefined);
-                    if (shiftKey) {
+                    if (shiftKey && (rangeSelect === "rect" || rangeSelect === "multi-rect")) {
                         // ctrl + alt is used as a screen reader command, let's not nuke it.
                         adjustSelection([0, isPrimaryKey && !altKey ? 2 : 1]);
                     } else {
@@ -2000,7 +2021,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else if (event.key === "ArrowUp" || event.key === "Home") {
                     const asPrimary = event.key === "Home" || isPrimaryKey;
                     setOverlay(undefined);
-                    if (shiftKey) {
+                    if (shiftKey && (rangeSelect === "rect" || rangeSelect === "multi-rect")) {
                         // ctrl + alt is used as a screen reader command, let's not nuke it.
                         adjustSelection([0, asPrimary && !altKey ? -2 : -1]);
                     } else {
@@ -2012,7 +2033,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else if (event.key === "ArrowRight" || event.key === "End") {
                     const asPrimary = event.key === "End" || isPrimaryKey;
                     setOverlay(undefined);
-                    if (shiftKey) {
+                    if (shiftKey && (rangeSelect === "rect" || rangeSelect === "multi-rect")) {
                         // ctrl + alt is used as a screen reader command, let's not nuke it.
                         adjustSelection([asPrimary && !altKey ? 2 : 1, 0]);
                     } else {
@@ -2023,7 +2044,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
                 } else if (event.key === "ArrowLeft") {
                     setOverlay(undefined);
-                    if (shiftKey) {
+                    if (shiftKey && (rangeSelect === "rect" || rangeSelect === "multi-rect")) {
                         // ctrl + alt is used as a screen reader command, let's not nuke it.
                         adjustSelection([isPrimaryKey && !altKey ? -2 : -1, 0]);
                     } else {
@@ -2081,6 +2102,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             keybindings.first,
             keybindings.last,
             keybindings.clear,
+            columnSelect,
+            rowSelect,
             getCellContent,
             rowMarkerOffset,
             updateSelectedCell,
@@ -2101,6 +2124,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             reselect,
             getMangedCellContent,
             adjustSelection,
+            rangeSelect,
             lastRowSticky,
         ]
     );

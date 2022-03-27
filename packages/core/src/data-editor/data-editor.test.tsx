@@ -1520,7 +1520,7 @@ describe("data-editor", () => {
         const spy = jest.fn();
         jest.useFakeTimers();
         render(
-            <EventedDataEditor {...basicProps} rowMultiSelect={false} onGridSelectionChange={spy} rowMarkers="both" />,
+            <EventedDataEditor {...basicProps} rowSelect={"single"} onGridSelectionChange={spy} rowMarkers="both" />,
             {
                 wrapper: Context,
             }
@@ -1620,7 +1620,7 @@ describe("data-editor", () => {
         const spy = jest.fn();
         jest.useFakeTimers();
         render(
-            <EventedDataEditor {...basicProps} rowMultiSelect={false} onGridSelectionChange={spy} rowMarkers="both" />,
+            <EventedDataEditor {...basicProps} rowSelect={"single"} onGridSelectionChange={spy} rowMarkers="both" />,
             {
                 wrapper: Context,
             }

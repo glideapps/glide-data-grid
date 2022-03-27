@@ -664,9 +664,9 @@ interface InputBlendingGridProps {
     rangeBlending: "mixed" | "exclusive";
     columnBlending: "mixed" | "exclusive";
     rowBlending: "mixed" | "exclusive";
-    rangeMultiSelect: boolean;
-    columnMultiSelect: boolean;
-    rowMultiSelect: boolean;
+    rangeMultiSelect: "none" | "cell" | "rect" | "multi-cell" | "multi-rect";
+    columnMultiSelect: "none" | "single" | "multi";
+    rowMultiSelect: "none" | "single" | "multi";
 }
 
 export const InputBlending: React.FC<InputBlendingGridProps> = p => {
@@ -683,7 +683,7 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
             }>
             <DataEditor
                 {...defaultProps}
-                rowMarkers="both"
+                rowMarkers={p.rowMultiSelect === "none" ? "number" : "both"}
                 keybindings={{
                     clear: true,
                     copy: true,
@@ -698,9 +698,9 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
                     selectRow: true,
                 }}
                 getCellsForSelection={true}
-                rangeMultiSelect={p.rangeMultiSelect}
-                columnMultiSelect={p.columnMultiSelect}
-                rowMultiSelect={p.rowMultiSelect}
+                rangeSelect={p.rangeMultiSelect}
+                columnSelect={p.columnMultiSelect}
+                rowSelect={p.rowMultiSelect}
                 rangeSelectionBlending={p.rangeBlending}
                 columnSelectionBlending={p.columnBlending}
                 rowSelectionBlending={p.rowBlending}
@@ -715,9 +715,9 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
     rangeBlending: "mixed",
     columnBlending: "mixed",
     rowBlending: "mixed",
-    rangeMultiSelect: false,
-    columnMultiSelect: true,
-    rowMultiSelect: true,
+    rangeMultiSelect: "rect",
+    columnMultiSelect: "multi",
+    rowMultiSelect: "multi",
 };
 (InputBlending as any).argTypes = {
     rangeBlending: {
@@ -728,6 +728,15 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
     },
     rowBlending: {
         control: { type: "select", options: ["mixed", "exclusive"] },
+    },
+    rangeMultiSelect: {
+        control: { type: "select", options: ["none", "cell", "rect", "multi-cell", "multi-rect"] },
+    },
+    columnMultiSelect: {
+        control: { type: "select", options: ["none", "single", "multi"] },
+    },
+    rowMultiSelect: {
+        control: { type: "select", options: ["none", "single", "multi"] },
     },
 };
 (InputBlending as any).parameters = {
