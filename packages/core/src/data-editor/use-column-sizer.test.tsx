@@ -85,7 +85,7 @@ describe("use-column-sizer", () => {
         expect(columnB).toBeDefined();
 
         // Keep in sync with the `displayData` up there.
-        expect(columnA?.width).toBe(30);
+        expect(columnA?.width).toBe(33);
         expect(columnB?.width).toBe(160);
     });
 
@@ -110,7 +110,7 @@ describe("use-column-sizer", () => {
         expect(shortColumnC).not.toBeDefined();
 
         // Keep in sync with getShortCellsForSelection up there.
-        expect(shortColumnA?.width).toBe(30);
+        expect(shortColumnA?.width).toBe(33);
         expect(shortColumnB?.width).toBe(160);
 
         // Re render with longer text and a new column with title C
@@ -128,9 +128,9 @@ describe("use-column-sizer", () => {
         expect(longColumnC).toBeDefined();
 
         // Keep in sync with getLongCellsForSelection up there.
-        expect(longColumnA?.width).toBe(30);
+        expect(longColumnA?.width).toBe(33);
         expect(longColumnB?.width).toBe(160);
-        expect(longColumnC?.width).toBe(64);
+        expect(longColumnC?.width).toBe(67);
     });
 
     it("Returns the default sizes if getCellsForSelection is not provided", async () => {

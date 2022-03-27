@@ -50,20 +50,41 @@ export function useColumnSizer(
     React.useLayoutEffect(() => {
         const getCells = getCellsForSelectionRef.current;
         if (getCells === undefined) return;
-        const computeRows = Math.max(1, 10 - Math.floor(columns.length / 10_000));
+        let computeRows = Math.max(1, 10 - Math.floor(columns.length / 10_000));
+        let tailRows = 0;
+        if (computeRows < rowsRef.current && computeRows > 1) {
+            computeRows--;
+            tailRows = 1;
+        }
+
         const computeArea = {
             x: 0,
             y: 0,
             width: columns.length,
             height: Math.min(rowsRef.current, computeRows),
         };
+
+        const tailComputeArea = {
+            x: 0,
+            y: rowsRef.current - 1,
+            width: columns.length,
+            height: Math.min(rowsRef.current, computeRows),
+        };
         const fn = async () => {
             const getResult = getCells(computeArea, abortController.signal);
+            const tailGetResult = tailRows > 0 ? getCells(tailComputeArea, abortController.signal) : undefined;
             let toSet: CellArray;
             if (typeof getResult === "object") {
                 toSet = getResult;
             } else {
                 toSet = await resolveCellsThunk(getResult);
+            }
+            if (tailGetResult !== undefined) {
+                if (typeof tailGetResult === "object") {
+                    toSet = [...toSet, ...tailGetResult];
+                } else {
+                    toSet = [...toSet, ...(await resolveCellsThunk(tailGetResult))];
+                }
             }
             lastColumns.current = columns;
             setSelectionData(toSet);
