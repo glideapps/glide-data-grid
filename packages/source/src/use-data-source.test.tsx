@@ -114,6 +114,10 @@ describe("use-data-source", () => {
         expect(compareSmart("a", "b")).toBe(-1);
         expect(compareSmart("a", "a")).toBe(0);
         expect(compareSmart("b", "a")).toBe(1);
+        expect(compareSmart("x190.2", "x21.2")).toBe(-1);
+        expect(compareSmart("190.2", "21.2")).toBe(1);
+        expect(compareSmart("21.2", "190.2")).toBe(-1);
+        expect(compareSmart("19.2", "19.5")).toBe(-1);
         expect(compareSmart("100", "20")).toBe(1);
         expect(compareSmart("x100", "x20")).toBe(-1);
     });

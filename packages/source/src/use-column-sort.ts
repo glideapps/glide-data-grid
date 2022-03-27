@@ -29,7 +29,7 @@ function cellToSortData(c: GridCell): string {
 function tryParse(val: string | number): number | string {
     if (typeof val === "number") return val;
     if (val.length > 0) {
-        const x = parseInt(val);
+        const x = parseFloat(val);
         if (!isNaN(x)) {
             val = x;
         }
