@@ -1624,7 +1624,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                                 done = true;
                             }
                             if (done) scrollTo(right - rowMarkerOffset, 0, "horizontal");
-                        } else {
+                        }
+                        if (!done) {
                             left = Math.max(rowMarkerOffset, left - 1);
                             scrollTo(left - rowMarkerOffset, 0, "horizontal");
                         }
