@@ -14,5 +14,6 @@ export { default as DataEditorContainer } from "./data-editor-container/data-gri
 export { parseToRgba } from "./data-grid/color-parser";
 export { measureTextCached } from "./data-grid/data-grid-lib";
 export { getDataEditorTheme as getDefaultTheme } from "./common/styles";
+export { useColumnSizer } from "./data-editor/use-column-sizer";
 
 export default DataEditor;

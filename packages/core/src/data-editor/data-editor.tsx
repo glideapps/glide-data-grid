@@ -42,7 +42,7 @@ import { useEventListener } from "../common/utils";
 import { CellRenderers } from "../data-grid/cells";
 import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
-import { useCellSizer } from "./use-cell-sizer";
+import { useColumnSizer } from "./use-column-sizer";
 import { isHotkey } from "../common/is-hotkey";
 import { SelectionBlending, useSelectionBehavior } from "../data-grid/use-selection-behavior";
 import { useCellsForSelection } from "./use-cells-for-selection";
@@ -68,6 +68,8 @@ type Props = Omit<
     | "headerHeight"
     | "groupHeaderHeight"
     | "lastRowSticky"
+    | "minColumnWidth"
+    | "maxColumnWidth"
     | "lockColumns"
     | "firstColAccessible"
     | "getCellsForSelection"
@@ -202,6 +204,9 @@ export interface DataEditorProps extends Props {
 
     readonly rowHeight?: DataGridSearchProps["rowHeight"];
     readonly onMouseMove?: DataGridSearchProps["onMouseMove"];
+
+    readonly minColumnWidth?: DataGridSearchProps["minColumnWidth"];
+    readonly maxColumnWidth?: DataGridSearchProps["maxColumnWidth"];
 
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
@@ -342,11 +347,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onVisibleRegionChanged,
         gridSelection: gridSelectionOuter,
         onGridSelectionChange,
+        minColumnWidth: minColumnWidthIn = 50,
+        maxColumnWidth: maxColumnWidthIn = 500,
         provideEditor,
         trailingRowOptions,
         verticalBorder,
         ...rest
     } = p;
+
+    const minColumnWidth = Math.max(minColumnWidthIn, 20);
+    const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
 
     const keybindings = React.useMemo(() => {
         return keybindingsIn === undefined
@@ -524,7 +534,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return { ...getDataEditorTheme(), ...theme };
     }, [theme]);
 
-    const columns = useCellSizer(columnsIn, rows, getCellsForSeletionDirect, mergedTheme, abortControllerRef.current);
+    const columns = useColumnSizer(
+        columnsIn,
+        rows,
+        getCellsForSeletionDirect,
+        minColumnWidth,
+        maxColumnWidth,
+        mergedTheme,
+        abortControllerRef.current
+    );
 
     const highlightRegions = React.useMemo(() => {
         if (highlightRegionsIn === undefined) return undefined;
@@ -2533,6 +2551,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 lockColumns={rowMarkerOffset}
                 firstColAccessible={rowMarkerOffset === 0}
                 getCellContent={getMangedCellContent}
+                minColumnWidth={minColumnWidth}
+                maxColumnWidth={maxColumnWidth}
                 showSearch={showSearch}
                 onSearchClose={onSearchClose}
                 highlightRegions={highlightRegions}

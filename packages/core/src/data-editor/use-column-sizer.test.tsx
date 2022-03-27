@@ -3,7 +3,7 @@ import { GridCell, GridCellKind, GridColumn, Rectangle } from "..";
 import { getDataEditorTheme } from "../common/styles";
 import { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { CellArray } from "../data-grid/data-grid-types";
-import { useCellSizer } from "./use-cell-sizer";
+import { useColumnSizer } from "./use-column-sizer";
 
 const COLUMNS: GridColumn[] = [
     {
@@ -72,10 +72,10 @@ const theme = getDataEditorTheme();
 
 const abortController = new AbortController();
 
-describe("use-cell-sizer", () => {
+describe("use-column-sizer", () => {
     it("Measures a simple cell", async () => {
         const { result } = renderHook(() =>
-            useCellSizer(COLUMNS, 1000, getShortCellsForSelection, theme, abortController)
+            useColumnSizer(COLUMNS, 1000, getShortCellsForSelection, 20, 500, theme, abortController)
         );
 
         const columnA = result.current.find(col => col.title === "A");
@@ -92,7 +92,7 @@ describe("use-cell-sizer", () => {
     it("Measures new columns when they arrive, doesn't re-measure existing ones", async () => {
         const { result, rerender } = renderHook(
             ({ getCellsForSelection, columns }) =>
-                useCellSizer(columns, 1000, getCellsForSelection, theme, abortController),
+                useColumnSizer(columns, 1000, getCellsForSelection, 20, 500, theme, abortController),
             {
                 initialProps: {
                     getCellsForSelection: getShortCellsForSelection,
@@ -134,7 +134,7 @@ describe("use-cell-sizer", () => {
     });
 
     it("Returns the default sizes if getCellsForSelection is not provided", async () => {
-        const { result } = renderHook(() => useCellSizer(COLUMNS, 1000, undefined, theme, abortController));
+        const { result } = renderHook(() => useColumnSizer(COLUMNS, 1000, undefined, 20, 500, theme, abortController));
 
         const columnA = result.current.find(col => col.title === "A");
         const columnB = result.current.find(col => col.title === "B");
@@ -149,10 +149,12 @@ describe("use-cell-sizer", () => {
 
     it("Does not measure anything if every column is sized", async () => {
         const { result } = renderHook(() =>
-            useCellSizer(
+            useColumnSizer(
                 A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE,
                 1000,
                 undefined,
+                50,
+                500,
                 theme,
                 abortController
             )

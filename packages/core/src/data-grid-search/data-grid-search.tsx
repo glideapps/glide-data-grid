@@ -405,6 +405,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 gridRef={p.gridRef}
                 headerIcons={p.headerIcons}
                 isDraggable={p.isDraggable}
+                minColumnWidth={p.minColumnWidth}
                 maxColumnWidth={p.maxColumnWidth}
                 onCellFocused={p.onCellFocused}
                 onColumnMoved={p.onColumnMoved}

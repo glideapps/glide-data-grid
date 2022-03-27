@@ -147,6 +147,7 @@ Most data grids will want to set the majority of these props one way or another.
 | Name                                                  | Description                                                                                                                                                                         |
 | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [maxColumnWidth](#maxcolumnwidth)                     | Sets the maximum width the user can resize a column to.                                                                                                                             |
+| [minColumnWidth](#maxcolumnwidth)                     | Sets the mnimum width the user can resize a column to.                                                                                                                             |
 | [onCellClicked](#oncellclicked)                       | Emitted when a cell is clicked.                                                                                                                                                     |
 | [onCellContextMenu](#oncellcontextmenu)               | Emitted when a cell should show a context menu. Usually right click.                                                                                                                |
 | [onColumnMoved](#oncolumnmoved)                       | Emitted when a column has been dragged to a new location.                                                                                                                           |
@@ -830,6 +831,7 @@ onRowAppended?: () => void;
 
 ```ts
 maxColumnWidth?: number;
+minColumnWidth?: number;
 ```
 
 If `maxColumnWidth` is set with a value greater than 50, then columns will have a maximum size of that many pixels.

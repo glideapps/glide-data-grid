@@ -21,10 +21,12 @@ function measureCell(ctx: CanvasRenderingContext2D, cell: GridCell): number {
     return r?.measure(ctx, cell) ?? defaultSize;
 }
 
-export function useCellSizer(
+export function useColumnSizer(
     columns: readonly GridColumn[],
     rows: number,
     getCellsForSelection: DataGridSearchProps["getCellsForSelection"],
+    minColumnWidth: number,
+    maxColumnWidth: number,
     theme: Theme,
     abortController: AbortController
 ): readonly SizedGridColumn[] {
@@ -112,7 +114,7 @@ export function useCellSizer(
             const average = sizes.reduce((a, b) => a + b) / sizes.length;
             const biggest = sizes.reduce((a, acc) => (a > average * 2 ? acc : Math.max(acc, a)));
 
-            const final = Math.min(500, Math.ceil(biggest));
+            const final = Math.max(minColumnWidth, Math.min(maxColumnWidth, Math.ceil(biggest)));
             memoMap.current[c.id] = final;
 
             return {
@@ -120,5 +122,5 @@ export function useCellSizer(
                 width: final,
             };
         });
-    }, [columns, ctx, selectedData]);
+    }, [columns, ctx, maxColumnWidth, minColumnWidth, selectedData]);
 }
