@@ -1064,7 +1064,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
                 return {
                     kind: GridCellKind.RowID,
                     data: faker.datatype.uuid(),
-                    allowOverlay: false,
+                    allowOverlay: true,
                 };
             },
         },

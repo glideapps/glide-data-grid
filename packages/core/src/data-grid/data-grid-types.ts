@@ -395,6 +395,7 @@ export interface BooleanCell extends BaseGridCell {
 export interface RowIDCell extends BaseGridCell {
     readonly kind: GridCellKind.RowID;
     readonly data: string;
+    readonly readonly?: boolean;
 }
 
 export interface MarkdownCell extends BaseGridCell {
