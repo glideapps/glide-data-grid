@@ -25,6 +25,8 @@ import {
     Item,
     DrawHeaderCallback,
     SizedGridColumn,
+    isReadWriteCell,
+    isInnerOnlyCell,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -1097,6 +1099,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                             {effectiveCols.map(c => (
                                 <th
                                     role="columnheader"
+                                    aria-selected={selection.columns.hasIndex(c.sourceIndex)}
                                     aria-colindex={c.sourceIndex + 1 + colOffset}
                                     key={c.sourceIndex}>
                                     {c.title}
@@ -1106,7 +1109,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     </thead>
                     <tbody role="rowgroup">
                         {makeRange(cellYOffset, Math.min(rows, cellYOffset + accessibilityHeight)).map(row => (
-                            <tr role="row" key={row} aria-rowindex={row + 2} row-index={row + 2}>
+                            <tr
+                                role="row"
+                                aria-selected={selection.rows.hasIndex(row)}
+                                key={row}
+                                aria-rowindex={row + 2}
+                                row-index={row + 2}>
                                 {effectiveCols.map(c => {
                                     const col = c.sourceIndex;
                                     const key = `${col},${row}`;
@@ -1118,12 +1126,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                         row >= range.y &&
                                         row < range.y + range.height;
                                     const id = `glide-cell-${col}-${row}`;
+                                    const cellContent = getCellContent([col, row]);
                                     return (
                                         <td
                                             key={key}
                                             role="gridcell"
                                             aria-colindex={col + 1 + colOffset}
                                             aria-selected={selected}
+                                            aria-readonly={
+                                                isInnerOnlyCell(cellContent) || !isReadWriteCell(cellContent)
+                                            }
                                             id={id}
                                             data-testid={id}
                                             onClick={() => {
@@ -1146,7 +1158,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                             }}
                                             ref={focused ? focusElement : undefined}
                                             tabIndex={-1}>
-                                            {getRowData(getCellContent([col, row]))}
+                                            {getRowData(cellContent)}
                                         </td>
                                     );
                                 })}
