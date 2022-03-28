@@ -2022,6 +2022,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     setOverlay(undefined);
                     adjustSelection([2, 2]);
                 } else if (event.key === "ArrowDown") {
+                    if (event.ctrlKey && event.altKey) {
+                        return;
+                    }
                     setOverlay(undefined);
                     if (shiftKey && (rangeSelect === "rect" || rangeSelect === "multi-rect")) {
                         // ctrl + alt is used as a screen reader command, let's not nuke it.
@@ -2081,6 +2084,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else if (
                     !event.metaKey &&
                     !event.ctrlKey &&
+                    gridSelection.current !== undefined &&
                     String.fromCharCode(event.keyCode).match(/(\w|\s)/g) &&
                     event.bounds !== undefined &&
                     isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, row - 1)]))

@@ -314,6 +314,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 <div className="search-bar-inner">
                     <input
                         id={searchID}
+                        aria-hidden={!showSearch}
                         data-testid="search-input"
                         ref={inputRef}
                         onChange={onSearchChange}
@@ -323,6 +324,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                     />
                     <button
                         aria-label="Previous Result"
+                        aria-hidden={!showSearch}
                         tabIndex={showSearch ? undefined : -1}
                         onClick={onPrev}
                         disabled={(searchStatus?.results ?? 0) === 0}>
@@ -330,6 +332,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                     </button>
                     <button
                         aria-label="Next Result"
+                        aria-hidden={!showSearch}
                         tabIndex={showSearch ? undefined : -1}
                         onClick={onNext}
                         disabled={(searchStatus?.results ?? 0) === 0}>
@@ -338,6 +341,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                     {onSearchClose !== undefined && (
                         <button
                             aria-label="Close Search"
+                            aria-hidden={!showSearch}
                             data-testid="search-close-button"
                             tabIndex={showSearch ? undefined : -1}
                             onClick={onClose}>
