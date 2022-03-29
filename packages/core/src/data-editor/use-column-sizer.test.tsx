@@ -63,10 +63,15 @@ function buildCellsForSelectionGetter(dataBuilder: DataBuilder): DataGridSearchP
     return getCellsForSelection;
 }
 
-const getShortCellsForSelection = buildCellsForSelectionGetter((x, y) => `column ${x} row ${y}`);
-const getLongCellsForSelection = buildCellsForSelectionGetter(
-    (x, y) => `This cell is in column number ${x} and row number ${y}`
+const getShortCellsForSelection = jest.fn(buildCellsForSelectionGetter((x, y) => `column ${x} row ${y}`));
+const getLongCellsForSelection = jest.fn(
+    buildCellsForSelectionGetter((x, y) => `This cell is in column number ${x} and row number ${y}`)
 );
+
+beforeEach(() => {
+    getShortCellsForSelection.mockClear();
+    getLongCellsForSelection.mockClear();
+});
 
 const theme = getDataEditorTheme();
 
@@ -85,8 +90,33 @@ describe("use-column-sizer", () => {
         expect(columnB).toBeDefined();
 
         // Keep in sync with the `displayData` up there.
-        expect(columnA?.width).toBe(33);
+        expect(columnA?.width).toBe(32);
         expect(columnB?.width).toBe(160);
+    });
+
+    it("Measures the last row", async () => {
+        renderHook(() => useColumnSizer(COLUMNS, 1000, getShortCellsForSelection, 20, 500, theme, abortController));
+
+        expect(getShortCellsForSelection).toBeCalledTimes(2);
+        expect(getShortCellsForSelection).toHaveBeenNthCalledWith(
+            1,
+            {
+                x: 0,
+                y: 0,
+                width: 2,
+                height: 9,
+            },
+            expect.anything()
+        );
+        expect(getShortCellsForSelection).toHaveBeenLastCalledWith(
+            {
+                x: 0,
+                y: 999,
+                width: 2,
+                height: 1,
+            },
+            expect.anything()
+        );
     });
 
     it("Measures new columns when they arrive, doesn't re-measure existing ones", async () => {
@@ -110,7 +140,7 @@ describe("use-column-sizer", () => {
         expect(shortColumnC).not.toBeDefined();
 
         // Keep in sync with getShortCellsForSelection up there.
-        expect(shortColumnA?.width).toBe(33);
+        expect(shortColumnA?.width).toBe(32);
         expect(shortColumnB?.width).toBe(160);
 
         // Re render with longer text and a new column with title C
@@ -128,9 +158,9 @@ describe("use-column-sizer", () => {
         expect(longColumnC).toBeDefined();
 
         // Keep in sync with getLongCellsForSelection up there.
-        expect(longColumnA?.width).toBe(33);
+        expect(longColumnA?.width).toBe(32);
         expect(longColumnB?.width).toBe(160);
-        expect(longColumnC?.width).toBe(67);
+        expect(longColumnC?.width).toBe(66);
     });
 
     it("Returns the default sizes if getCellsForSelection is not provided", async () => {

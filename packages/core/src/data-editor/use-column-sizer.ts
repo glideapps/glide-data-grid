@@ -68,7 +68,7 @@ export function useColumnSizer(
             x: 0,
             y: rowsRef.current - 1,
             width: columns.length,
-            height: Math.min(rowsRef.current, computeRows),
+            height: 1,
         };
         const fn = async () => {
             const getResult = getCells(computeArea, abortController.signal);
