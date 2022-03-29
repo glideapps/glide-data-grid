@@ -47,6 +47,8 @@ import { isHotkey } from "../common/is-hotkey";
 import { SelectionBlending, useSelectionBehavior } from "../data-grid/use-selection-behavior";
 import { useCellsForSelection } from "./use-cells-for-selection";
 
+let idCounter = 0;
+
 interface MouseState {
     readonly previousSelection?: GridSelection;
 }
@@ -1799,6 +1801,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [columnSelect, focus, scrollTo, selCol, selRow, setCurrent, setSelectedColumns]
     );
 
+    const overlayID = React.useMemo(() => {
+        return `gdg-overlay-${idCounter++}`;
+    }, []);
+
     const onKeyDown = React.useCallback(
         (event: GridKeyEventArgs) => {
             const fn = async () => {
@@ -1820,23 +1826,34 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
                     return;
                 } else if (isHotkey("primary+a", event) && keybindings.selectAll) {
-                    setGridSelection(
-                        {
-                            columns: CompactSelection.empty(),
-                            rows: CompactSelection.empty(),
-                            current: {
-                                cell: gridSelection.current?.cell ?? [rowMarkerOffset, 0],
-                                range: {
-                                    x: rowMarkerOffset,
-                                    y: 0,
-                                    width: columnsIn.length,
-                                    height: rows,
+                    if (!overlayOpen) {
+                        setGridSelection(
+                            {
+                                columns: CompactSelection.empty(),
+                                rows: CompactSelection.empty(),
+                                current: {
+                                    cell: gridSelection.current?.cell ?? [rowMarkerOffset, 0],
+                                    range: {
+                                        x: rowMarkerOffset,
+                                        y: 0,
+                                        width: columnsIn.length,
+                                        height: rows,
+                                    },
+                                    rangeStack: [],
                                 },
-                                rangeStack: [],
                             },
-                        },
-                        false
-                    );
+                            false
+                        );
+                    } else {
+                        const el = document.getElementById(overlayID);
+                        if (el !== null) {
+                            const s = window.getSelection();
+                            const r = document.createRange();
+                            r.selectNodeContents(el);
+                            s?.removeAllRanges();
+                            s?.addRange(r);
+                        }
+                    }
                     event.cancel();
                     return;
                 } else if (isHotkey("primary+f", event) && keybindings.search) {
@@ -2144,6 +2161,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onSelectionCleared,
             columnsIn.length,
             rows,
+            overlayID,
             focus,
             provideEditor,
             mangledOnCellEdited,
@@ -2600,6 +2618,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             {overlay !== undefined && (
                 <DataGridOverlayEditor
                     {...overlay}
+                    id={overlayID}
                     className={p.experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
                     provideEditor={provideEditor}
                     imageEditorOverride={imageEditorOverride}

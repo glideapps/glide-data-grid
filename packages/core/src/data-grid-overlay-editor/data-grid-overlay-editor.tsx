@@ -19,6 +19,7 @@ export interface DataGridOverlayEditorProps {
     readonly target: Rectangle;
     readonly content: GridCell;
     readonly className?: string;
+    readonly id: string;
     readonly initialValue?: string;
     readonly onFinishEditing: (newCell: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly forceEditMode: boolean;
@@ -39,6 +40,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         markdownDivCreateNode,
         highlight,
         className,
+        id,
         provideEditor,
     } = p;
 
@@ -170,6 +172,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     const portal = createPortal(
         <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
             <DataGridOverlayEditorStyle
+                id={id}
                 className={style ? "gdg-style" : "gdg-unstyle"}
                 style={styleOverride}
                 as={useLabel === true ? "label" : undefined}
