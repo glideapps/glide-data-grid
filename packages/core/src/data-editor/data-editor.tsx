@@ -1774,18 +1774,29 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const [selCol, selRow] = currentCell ?? [];
     const onCellFocused = React.useCallback(
         (cell: Item) => {
-            if (selCol === cell[0] && selRow === cell[1]) return;
+            const [col, row] = cell;
+
+            if (row === -1) {
+                if (columnSelect !== "none") {
+                    setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, false);
+                    focus();
+                }
+                return;
+            }
+
+            if (selCol === col && selRow === row) return;
             setCurrent(
                 {
                     cell,
-                    range: { x: cell[0], y: cell[1], width: 1, height: 1 },
+                    range: { x: col, y: row, width: 1, height: 1 },
                 },
                 true,
                 false,
                 "keyboard-nav"
             );
+            scrollTo(col, row);
         },
-        [selCol, selRow, setCurrent]
+        [columnSelect, focus, scrollTo, selCol, selRow, setCurrent, setSelectedColumns]
     );
 
     const onKeyDown = React.useCallback(

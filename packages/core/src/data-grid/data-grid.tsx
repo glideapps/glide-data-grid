@@ -1101,6 +1101,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                     role="columnheader"
                                     aria-selected={selection.columns.hasIndex(c.sourceIndex)}
                                     aria-colindex={c.sourceIndex + 1 + colOffset}
+                                    tabIndex={-1}
+                                    onFocus={e => {
+                                        if (e.target === focusRef.current) return;
+                                        return onCellFocused?.([c.sourceIndex, -1]);
+                                    }}
                                     key={c.sourceIndex}>
                                     {c.title}
                                 </th>
