@@ -51,6 +51,7 @@ let idCounter = 0;
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
+    readonly fillHandle?: boolean;
 }
 
 type Props = Omit<
@@ -77,6 +78,7 @@ type Props = Omit<
     | "getCellsForSelection"
     | "onCellFocused"
     | "onKeyDown"
+    | "isFilling"
     | "onKeyUp"
     | "onMouseDown"
     | "onMouseUp"
@@ -292,7 +294,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         forceEditMode: boolean;
     }>();
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
-    const mouseState = React.useRef<MouseState>();
+    const [mouseState, setMouseState] = React.useState<MouseState>();
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
     const scrollTimer = React.useRef<number>();
     const lastSent = React.useRef<[number, number]>();
@@ -1143,9 +1145,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (args.button !== 0) {
                 return;
             }
-            mouseState.current = {
+            setMouseState({
                 previousSelection: gridSelection,
-            };
+                fillHandle: args.kind === "cell" && args.isFillHandle,
+            });
 
             lastMouseDownCellLocation.current = undefined;
 
@@ -1204,10 +1207,35 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [columnSelect, focus, gridSelection.columns, mangledCols, rowMarkerOffset, setSelectedColumns]
     );
 
+    const fillDown = React.useCallback(() => {
+        if (gridSelection.current === undefined) return;
+        const damage: Item[] = [];
+        const r = gridSelection.current.range;
+        for (let x = 0; x < r.width; x++) {
+            const fillCol = x + r.x;
+            const fillVal = getMangedCellContent([fillCol, r.y]);
+            if (isInnerOnlyCell(fillVal) || !isEditableGridCell(fillVal)) continue;
+            for (let y = 1; y < r.height; y++) {
+                const fillRow = y + r.y;
+                const target = [fillCol, fillRow] as const;
+                damage.push(target);
+                mangledOnCellEdited?.(target, {
+                    ...fillVal,
+                });
+            }
+        }
+
+        gridRef.current?.damage(
+            damage.map(c => ({
+                cell: c,
+            }))
+        );
+    }, [getMangedCellContent, gridSelection, mangledOnCellEdited]);
+
     const onMouseUp = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
-            const mouse = mouseState.current;
-            mouseState.current = undefined;
+            const mouse = mouseState;
+            setMouseState(undefined);
 
             if (scrollTimer.current !== undefined) {
                 window.clearInterval(scrollTimer.current);
@@ -1229,7 +1257,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         preventDefault,
                     });
                 }
-                if (
+                if (mouse?.fillHandle === true) {
+                    fillDown();
+                } else if (
                     gridSelection.current !== undefined &&
                     mouse?.previousSelection?.current?.cell !== undefined &&
                     !prevented
@@ -1327,20 +1357,22 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
         },
         [
-            getMangedCellContent,
+            mouseState,
             gridSelection,
-            handleGroupHeaderSelection,
-            handleSelect,
+            onCellClicked,
+            rowMarkerOffset,
+            fillDown,
+            getMangedCellContent,
             mangledOnCellEdited,
             onCellActivated,
-            onCellClicked,
-            onCellContextMenu,
-            onGroupHeaderClicked,
-            onGroupHeaderContextMenu,
-            onHeaderClicked,
-            onHeaderContextMenu,
             reselect,
-            rowMarkerOffset,
+            onCellContextMenu,
+            onHeaderContextMenu,
+            onGroupHeaderContextMenu,
+            handleSelect,
+            onHeaderClicked,
+            onGroupHeaderClicked,
+            handleGroupHeaderSelection,
         ]
     );
 
@@ -1418,7 +1450,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
             if (
-                mouseState.current !== undefined &&
+                mouseState !== undefined &&
                 gridSelection.current !== undefined &&
                 !isDraggable &&
                 (rangeSelect === "rect" || rangeSelect === "multi-rect")
@@ -1489,6 +1521,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onItemHovered?.({ ...args, location: [args.location[0] - rowMarkerOffset, args.location[1]] as any });
         },
         [
+            mouseState,
             gridSelection,
             isDraggable,
             rangeSelect,
@@ -1984,27 +2017,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     gridSelection.current.range.height > 1
                 ) {
                     // ctrl/cmd + d
-                    const damage: Item[] = [];
-                    const r = gridSelection.current.range;
-                    for (let x = 0; x < r.width; x++) {
-                        const fillCol = x + r.x;
-                        const fillVal = getMangedCellContent([fillCol, r.y]);
-                        if (isInnerOnlyCell(fillVal) || !isEditableGridCell(fillVal)) continue;
-                        for (let y = 1; y < r.height; y++) {
-                            const fillRow = y + r.y;
-                            const target = [fillCol, fillRow] as const;
-                            damage.push(target);
-                            mangledOnCellEdited?.(target, {
-                                ...fillVal,
-                            });
-                        }
-                    }
-
-                    gridRef.current?.damage(
-                        damage.map(c => ({
-                            cell: c,
-                        }))
-                    );
+                    fillDown();
                     event.cancel();
                 } else if (
                     keybindings.rightFill &&
@@ -2163,6 +2176,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowMarkerOffset,
             updateSelectedCell,
             setGridSelection,
+            fillDown,
             onSelectionCleared,
             columnsIn.length,
             rows,
@@ -2605,6 +2619,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 onDragStart={onDragStartImpl}
                 onHeaderMenuClick={onHeaderMenuClickInner}
                 onItemHovered={onItemHoveredImpl}
+                isFilling={mouseState?.fillHandle === true}
                 onMouseMove={onMouseMoveImpl}
                 onKeyDown={onKeyDown}
                 onMouseDown={onMouseDown}

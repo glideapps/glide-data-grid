@@ -1648,13 +1648,7 @@ function drawFocusRing(
 
                     if (fillHandle) {
                         ctx.beginPath();
-                        ctx.rect(cellX + cellWidth - 2.5, drawY + rh - 2.5, 6, 6);
-
-                        ctx.strokeStyle = col.themeOverride?.bgCell ?? theme.bgCell;
-                        ctx.stroke();
-
-                        ctx.beginPath();
-                        ctx.rect(cellX + cellWidth - 2, drawY + rh - 2, 5, 5);
+                        ctx.rect(cellX + cellWidth - 4, drawY + rh - 4, 4, 4);
                         ctx.fillStyle = col.themeOverride?.accentColor ?? theme.accentColor;
                         ctx.fill();
                     }

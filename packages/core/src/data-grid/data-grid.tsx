@@ -64,6 +64,7 @@ export interface DataGridProps {
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
     readonly isDragging: boolean;
+    readonly isFilling: boolean;
 
     readonly columns: readonly SizedGridColumn[];
     readonly rows: number;
@@ -164,6 +165,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         getRowThemeOverride,
         onHeaderMenuClick,
         enableGroups,
+        isFilling,
         selection,
         freezeColumns,
         lastRowSticky,
@@ -388,6 +390,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             } else {
                 const bounds = getBoundsForItem(canvas, col, row);
                 const isEdge = bounds !== undefined && bounds.x + bounds.width - posX < edgeDetectionBuffer;
+                const isFillHandle =
+                    fillHandle &&
+                    bounds !== undefined &&
+                    bounds.x + bounds.width - posX < 5 &&
+                    bounds.y + bounds.height - posY < 5;
                 result = {
                     kind: "cell",
                     location: [col, row],
@@ -395,6 +402,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isEdge,
                     shiftKey,
                     ctrlKey,
+                    isFillHandle,
                     metaKey,
                     isTouch,
                     localEventX: posX - bounds.x,
@@ -419,6 +427,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             translateY,
             lastRowSticky,
             getBoundsForItem,
+            fillHandle,
         ]
     );
 
@@ -604,7 +613,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         ? "grabbing"
         : canDrag || isResizing
         ? "col-resize"
-        : overFill
+        : overFill || isFilling
         ? "crosshair"
         : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
         ? "pointer"
@@ -850,10 +859,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 const x = ev.clientX;
                 const y = ev.clientY;
                 setOverFill(
-                    x >= sb.x + sb.width - 4 &&
-                        x <= sb.x + sb.width + 2 &&
-                        y >= sb.y + sb.height - 4 &&
-                        y <= sb.y + sb.height + 2
+                    x >= sb.x + sb.width - 6 &&
+                        x <= sb.x + sb.width &&
+                        y >= sb.y + sb.height - 6 &&
+                        y <= sb.y + sb.height
                 );
             } else {
                 setOverFill(false);
