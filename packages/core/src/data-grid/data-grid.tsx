@@ -585,6 +585,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     imageLoader.setCallback(damageInternal);
 
+    const [overFill, setOverFill] = React.useState(false);
+
     const [hCol, hRow] = hoveredItem ?? [];
     const headerHovered = hCol !== undefined && hRow === -1;
     const groupHeaderHovered = hCol !== undefined && hRow === -2;
@@ -596,13 +598,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             cell.kind === InnerGridCellKind.NewRow ||
             (cell.kind === InnerGridCellKind.Marker && cell.markerKind !== "number");
         editableBoolHovered = cell.kind === GridCellKind.Boolean && cell.allowEdit === true;
-        if (fillHandle && columns[hCol].width)
     }
     const canDrag = hoveredOnEdge ?? false;
     const cursor = isDragging
         ? "grabbing"
         : canDrag || isResizing
         ? "col-resize"
+        : overFill
+        ? "crosshair"
         : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
         ? "pointer"
         : "default";
@@ -841,17 +844,35 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             setHoveredOnEdge(args.kind === "header" && args.isEdge && allowResize === true);
 
+            if (fillHandle && selection.current !== undefined) {
+                const [col, row] = selection.current.cell;
+                const sb = getBoundsForItem(canvas, col, row);
+                const x = ev.clientX;
+                const y = ev.clientY;
+                setOverFill(
+                    x >= sb.x + sb.width - 4 &&
+                        x <= sb.x + sb.width + 2 &&
+                        y >= sb.y + sb.height - 4 &&
+                        y <= sb.y + sb.height + 2
+                );
+            } else {
+                setOverFill(false);
+            }
+
             onMouseMoveRaw?.(ev);
             onMouseMove(args);
         },
         [
             getMouseArgsForPosition,
             allowResize,
+            fillHandle,
+            selection,
             onMouseMoveRaw,
             onMouseMove,
             onItemHovered,
             getCellContent,
             damageInternal,
+            getBoundsForItem,
         ]
     );
     useEventListener("mousemove", onMouseMoveImpl, window, true);
