@@ -88,6 +88,8 @@ export interface DataGridProps {
     readonly prelightCells?: readonly Item[];
     readonly highlightRegions?: readonly Highlight[];
 
+    readonly fillHandle?: boolean;
+
     readonly disabledRows?: CompactSelection;
 
     readonly onItemHovered?: (args: GridMouseEventArgs) => void;
@@ -154,6 +156,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         cellXOffset: cellXOffsetReal,
         cellYOffset,
         headerHeight,
+        fillHandle = true,
         groupHeaderHeight,
         rowHeight,
         rows,
@@ -202,7 +205,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
     const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
-    const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, Item] | undefined>();
+    const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, readonly [number, number]] | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const overlayRef = React.useRef<HTMLCanvasElement | null>(null);
 
@@ -440,52 +443,51 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         const overlay = overlayRef.current;
         if (canvas === null || overlay === null) return;
 
-        drawGrid(
-            canvas,
-            {
-                overlay,
-            },
-            width,
-            height,
-            cellXOffset,
-            cellYOffset,
-            Math.round(translateX),
-            Math.round(translateY),
-            columns,
-            mappedColumns,
-            enableGroups,
-            freezeColumns,
-            dragAndDropState,
-            theme,
-            headerHeight,
-            groupHeaderHeight,
-            selection.rows,
-            disabledRows ?? CompactSelection.empty(),
-            rowHeight,
-            verticalBorder,
-            selection.columns,
-            isResizing,
-            selection,
-            lastRowSticky,
-            rows,
-            getCellContent,
-            getGroupDetails ?? (name => ({ name })),
-            getRowThemeOverride,
-            drawCustomCell,
-            drawHeader,
-            prelightCells,
-            highlightRegions,
-            imageLoader,
-            lastBlitData,
-            canBlit.current ?? false,
-            damageRegion.current,
-            hoverValues.current,
-            hoverInfoRef.current,
-            spriteManager,
-            scrolling,
-            lastWasTouch,
-            enqueueRef.current
-        );
+        drawGrid({
+            canvas: canvas,
+            buffers: { overlay },
+            width: width,
+            height: height,
+            cellXOffset: cellXOffset,
+            cellYOffset: cellYOffset,
+            translateX: Math.round(translateX),
+            translateY: Math.round(translateY),
+            columns: columns,
+            mappedColumns: mappedColumns,
+            enableGroups: enableGroups,
+            freezeColumns: freezeColumns,
+            dragAndDropState: dragAndDropState,
+            theme: theme,
+            headerHeight: headerHeight,
+            groupHeaderHeight: groupHeaderHeight,
+            selectedRows: selection.rows,
+            disabledRows: disabledRows ?? CompactSelection.empty(),
+            rowHeight: rowHeight,
+            verticalBorder: verticalBorder,
+            selectedColumns: selection.columns,
+            isResizing: isResizing,
+            selectedCell: selection,
+            fillHandle: fillHandle,
+            lastRowSticky: lastRowSticky,
+            rows: rows,
+            getCellContent: getCellContent,
+            getGroupDetails: getGroupDetails ?? (name => ({ name })),
+            getRowThemeOverride: getRowThemeOverride,
+            drawCustomCell: drawCustomCell,
+            drawHeaderCallback: drawHeader,
+            prelightCells: prelightCells,
+            highlightRegions: highlightRegions,
+            imageLoader: imageLoader,
+            lastBlitData: lastBlitData,
+            canBlit: canBlit.current ?? false,
+            damage: damageRegion.current,
+            hoverValues: hoverValues.current,
+            hoverInfo: hoverInfoRef.current,
+            spriteManager: spriteManager,
+            scrolling: scrolling,
+            touchMode: lastWasTouch,
+            enqueue: enqueueRef.current,
+        });
     }, [
         width,
         height,
@@ -506,6 +508,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         rowHeight,
         verticalBorder,
         isResizing,
+        fillHandle,
         lastRowSticky,
         rows,
         getCellContent,
@@ -593,6 +596,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             cell.kind === InnerGridCellKind.NewRow ||
             (cell.kind === InnerGridCellKind.Marker && cell.markerKind !== "number");
         editableBoolHovered = cell.kind === GridCellKind.Boolean && cell.allowEdit === true;
+        if (fillHandle && columns[hCol].width)
     }
     const canDrag = hoveredOnEdge ?? false;
     const cursor = isDragging
