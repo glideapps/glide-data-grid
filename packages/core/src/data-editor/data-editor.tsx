@@ -175,6 +175,7 @@ export interface DataEditorProps extends Props {
     readonly onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
     readonly onGroupHeaderRenamed?: (groupName: string, newVal: string) => void;
     readonly onCellClicked?: (cell: Item, event: CellClickedEventArgs) => void;
+    readonly onCellActivated?: (cell: Item) => void;
     readonly onFinishedEditing?: (newValue: GridCell | undefined, movement: Item) => void;
     readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;
     readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
@@ -311,6 +312,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         rows,
         getCellContent,
         onCellClicked,
+        onCellActivated,
         onFinishedEditing,
         onHeaderClicked,
         spanRangeBehavior = "default",
@@ -1248,6 +1250,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }
                     }
                     if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
+                        onCellActivated?.([col, row]);
                         reselect(a.bounds, false);
                         return true;
                     }
@@ -1329,6 +1332,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             handleGroupHeaderSelection,
             handleSelect,
             mangledOnCellEdited,
+            onCellActivated,
             onCellClicked,
             onCellContextMenu,
             onGroupHeaderClicked,
@@ -1970,6 +1974,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             void appendRow(customTargetColumn ?? col);
                         }, 0);
                     } else {
+                        onCellActivated?.([col, row]);
                         reselect(event.bounds, true);
                         event.cancel();
                     }
@@ -2172,6 +2177,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             showTrailingBlankRow,
             getCustomNewRowTargetColumn,
             appendRow,
+            onCellActivated,
             reselect,
             getMangedCellContent,
             adjustSelection,
