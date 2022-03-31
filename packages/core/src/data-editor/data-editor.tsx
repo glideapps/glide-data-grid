@@ -1988,7 +1988,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             void appendRow(customTargetColumn ?? col);
                         }, 0);
                     } else {
-                        onCellActivated?.([col, row]);
+                        onCellActivated?.([col - rowMarkerOffset, row]);
                         reselect(event.bounds, true);
                         event.cancel();
                     }
