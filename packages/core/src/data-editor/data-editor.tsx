@@ -1207,30 +1207,33 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [columnSelect, focus, gridSelection.columns, mangledCols, rowMarkerOffset, setSelectedColumns]
     );
 
-    const fillDown = React.useCallback(() => {
-        if (gridSelection.current === undefined) return;
-        const damage: Item[] = [];
-        const r = gridSelection.current.range;
-        for (let x = 0; x < r.width; x++) {
-            const fillCol = x + r.x;
-            const fillVal = getMangedCellContent([fillCol, r.y]);
-            if (isInnerOnlyCell(fillVal) || !isEditableGridCell(fillVal)) continue;
-            for (let y = 1; y < r.height; y++) {
-                const fillRow = y + r.y;
-                const target = [fillCol, fillRow] as const;
-                damage.push(target);
-                mangledOnCellEdited?.(target, {
-                    ...fillVal,
-                });
+    const fillDown = React.useCallback(
+        (reverse: boolean) => {
+            if (gridSelection.current === undefined) return;
+            const damage: Item[] = [];
+            const r = gridSelection.current.range;
+            for (let x = 0; x < r.width; x++) {
+                const fillCol = x + r.x;
+                const fillVal = getMangedCellContent([fillCol, reverse ? r.y + r.height - 1 : r.y]);
+                if (isInnerOnlyCell(fillVal) || !isEditableGridCell(fillVal)) continue;
+                for (let y = 1; y < r.height; y++) {
+                    const fillRow = reverse ? r.y + r.height - (y + 1) : y + r.y;
+                    const target = [fillCol, fillRow] as const;
+                    damage.push(target);
+                    mangledOnCellEdited?.(target, {
+                        ...fillVal,
+                    });
+                }
             }
-        }
 
-        gridRef.current?.damage(
-            damage.map(c => ({
-                cell: c,
-            }))
-        );
-    }, [getMangedCellContent, gridSelection, mangledOnCellEdited]);
+            gridRef.current?.damage(
+                damage.map(c => ({
+                    cell: c,
+                }))
+            );
+        },
+        [getMangedCellContent, gridSelection, mangledOnCellEdited]
+    );
 
     const onMouseUp = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
@@ -1257,32 +1260,34 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         preventDefault,
                     });
                 }
-                if (mouse?.fillHandle === true) {
-                    fillDown();
-                } else if (
-                    gridSelection.current !== undefined &&
-                    mouse?.previousSelection?.current?.cell !== undefined &&
-                    !prevented
-                ) {
-                    const [selectedCol, selectedRow] = gridSelection.current.cell;
-                    const [prevCol, prevRow] = mouse.previousSelection.current.cell;
-                    const c = getMangedCellContent([col, row]);
-                    const r = c.kind === GridCellKind.Custom ? undefined : CellRenderers[c.kind];
-                    if (r !== undefined && r.onClick !== undefined) {
-                        const newVal = r.onClick(c, a.localEventX, a.localEventY, a.bounds);
-                        if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
-                            mangledOnCellEdited(a.location, newVal);
-                            gridRef.current?.damage([
-                                {
-                                    cell: a.location,
-                                },
-                            ]);
+                if (gridSelection.current !== undefined) {
+                    if (mouse?.fillHandle === true) {
+                        fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
+                    } else if (
+                        gridSelection.current !== undefined &&
+                        mouse?.previousSelection?.current?.cell !== undefined &&
+                        !prevented
+                    ) {
+                        const [selectedCol, selectedRow] = gridSelection.current.cell;
+                        const [prevCol, prevRow] = mouse.previousSelection.current.cell;
+                        const c = getMangedCellContent([col, row]);
+                        const r = c.kind === GridCellKind.Custom ? undefined : CellRenderers[c.kind];
+                        if (r !== undefined && r.onClick !== undefined) {
+                            const newVal = r.onClick(c, a.localEventX, a.localEventY, a.bounds);
+                            if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
+                                mangledOnCellEdited(a.location, newVal);
+                                gridRef.current?.damage([
+                                    {
+                                        cell: a.location,
+                                    },
+                                ]);
+                            }
                         }
-                    }
-                    if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
-                        onCellActivated?.([col, row]);
-                        reselect(a.bounds, false);
-                        return true;
+                        if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
+                            onCellActivated?.([col, row]);
+                            reselect(a.bounds, false);
+                            return true;
+                        }
                     }
                 }
                 return false;
@@ -2017,7 +2022,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     gridSelection.current.range.height > 1
                 ) {
                     // ctrl/cmd + d
-                    fillDown();
+                    fillDown(false);
                     event.cancel();
                 } else if (
                     keybindings.rightFill &&

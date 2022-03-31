@@ -157,7 +157,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         cellXOffset: cellXOffsetReal,
         cellYOffset,
         headerHeight,
-        fillHandle = true,
+        fillHandle = false,
         groupHeaderHeight,
         rowHeight,
         rows,
@@ -393,8 +393,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 const isFillHandle =
                     fillHandle &&
                     bounds !== undefined &&
-                    bounds.x + bounds.width - posX < 5 &&
-                    bounds.y + bounds.height - posY < 5;
+                    bounds.x + bounds.width - posX < 6 &&
+                    bounds.y + bounds.height - posY < 6;
                 result = {
                     kind: "cell",
                     location: [col, row],

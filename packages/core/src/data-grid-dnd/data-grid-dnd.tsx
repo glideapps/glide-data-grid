@@ -235,6 +235,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             freezeColumns={p.freezeColumns}
             onMouseMove={p.onMouseMove}
             groupHeaderHeight={p.groupHeaderHeight}
+            fillHandle={p.fillHandle}
             headerHeight={p.headerHeight}
             height={p.height}
             lastRowSticky={p.lastRowSticky}

@@ -31,6 +31,7 @@ const basicProps: DataGridProps = {
             width: 190,
         },
     ],
+    isFilling: false,
     enableGroups: false,
     freezeColumns: 0,
     selection: {
