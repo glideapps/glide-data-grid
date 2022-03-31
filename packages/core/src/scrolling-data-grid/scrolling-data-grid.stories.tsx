@@ -70,6 +70,7 @@ export function Simplenotest() {
             cellXOffset={x}
             cellYOffset={y}
             minColumnWidth={50}
+            isFocused={true}
             isFilling={false}
             maxColumnWidth={500}
             accessibilityHeight={50}
