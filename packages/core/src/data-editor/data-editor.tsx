@@ -79,6 +79,7 @@ type Props = Omit<
     | "onCellFocused"
     | "onKeyDown"
     | "isFilling"
+    | "onCanvasFocused"
     | "onKeyUp"
     | "onMouseDown"
     | "onMouseUp"
@@ -2593,11 +2594,31 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [onCopy, onKeyDown, onPasteInternal, scrollTo]
     );
 
+    const onCanvasFocused = React.useCallback(() => {
+        if (gridSelection.current === undefined) {
+            setCurrent(
+                {
+                    cell: [rowMarkerOffset, 0],
+                    range: {
+                        x: rowMarkerOffset,
+                        y: 0,
+                        width: 1,
+                        height: 1,
+                    },
+                },
+                true,
+                false,
+                "keyboard-select"
+            );
+        }
+    }, [gridSelection, rowMarkerOffset, setCurrent]);
+
     return (
         <ThemeProvider theme={mergedTheme}>
             <DataGridSearch
                 {...rest}
                 enableGroups={enableGroups}
+                onCanvasFocused={onCanvasFocused}
                 canvasRef={canvasRef}
                 cellXOffset={cellXOffset}
                 cellYOffset={cellYOffset}

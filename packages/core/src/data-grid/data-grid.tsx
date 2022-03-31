@@ -98,6 +98,7 @@ export interface DataGridProps {
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
     readonly onMouseUp?: (args: GridMouseEventArgs, isOutside: boolean) => void;
 
+    readonly onCanvasFocused?: () => void;
     readonly onCellFocused?: (args: Item) => void;
 
     readonly onMouseMoveRaw?: (event: MouseEvent) => void;
@@ -166,6 +167,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         onHeaderMenuClick,
         enableGroups,
         isFilling,
+        onCanvasFocused,
         selection,
         freezeColumns,
         lastRowSticky,
@@ -1262,6 +1264,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 tabIndex={0}
                 onKeyDown={onKeyDownImpl}
                 onKeyUp={onKeyUpImpl}
+                onFocus={onCanvasFocused}
                 className={className}
                 ref={refImpl}
                 style={style}>
