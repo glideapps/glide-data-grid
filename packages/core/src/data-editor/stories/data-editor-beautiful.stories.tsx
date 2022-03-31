@@ -232,6 +232,7 @@ export const AddData: React.VFC = () => {
                 getCellsForSelection={getCellsForSelection}
                 rowMarkers={"both"}
                 onPaste={true}
+                fillHandle={true}
                 onCellEdited={setCellValue}
                 trailingRowOptions={{
                     sticky: true,

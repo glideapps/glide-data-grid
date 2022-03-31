@@ -233,8 +233,12 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             columns={p.columns}
             enableGroups={p.enableGroups}
             freezeColumns={p.freezeColumns}
+            onCanvasFocused={p.onCanvasFocused}
+            onCanvasBlur={p.onCanvasBlur}
+            isFocused={p.isFocused}
             onMouseMove={p.onMouseMove}
             groupHeaderHeight={p.groupHeaderHeight}
+            fillHandle={p.fillHandle}
             headerHeight={p.headerHeight}
             height={p.height}
             lastRowSticky={p.lastRowSticky}
@@ -246,6 +250,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             canvasRef={p.canvasRef}
             className={p.className}
             disabledRows={p.disabledRows}
+            isFilling={p.isFilling}
             firstColAccessible={p.firstColAccessible}
             drawCustomCell={p.drawCustomCell}
             drawHeader={p.drawHeader}

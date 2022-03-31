@@ -64,6 +64,8 @@ export interface DataGridProps {
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
     readonly isDragging: boolean;
+    readonly isFilling: boolean;
+    readonly isFocused: boolean;
 
     readonly columns: readonly SizedGridColumn[];
     readonly rows: number;
@@ -88,6 +90,8 @@ export interface DataGridProps {
     readonly prelightCells?: readonly Item[];
     readonly highlightRegions?: readonly Highlight[];
 
+    readonly fillHandle?: boolean;
+
     readonly disabledRows?: CompactSelection;
 
     readonly onItemHovered?: (args: GridMouseEventArgs) => void;
@@ -95,6 +99,8 @@ export interface DataGridProps {
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
     readonly onMouseUp?: (args: GridMouseEventArgs, isOutside: boolean) => void;
 
+    readonly onCanvasFocused?: () => void;
+    readonly onCanvasBlur?: () => void;
     readonly onCellFocused?: (args: Item) => void;
 
     readonly onMouseMoveRaw?: (event: MouseEvent) => void;
@@ -154,6 +160,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         cellXOffset: cellXOffsetReal,
         cellYOffset,
         headerHeight,
+        fillHandle = false,
         groupHeaderHeight,
         rowHeight,
         rows,
@@ -161,6 +168,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         getRowThemeOverride,
         onHeaderMenuClick,
         enableGroups,
+        isFilling,
+        onCanvasFocused,
+        onCanvasBlur,
+        isFocused,
         selection,
         freezeColumns,
         lastRowSticky,
@@ -202,7 +213,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
     const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
-    const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, Item] | undefined>();
+    const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, readonly [number, number]] | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const overlayRef = React.useRef<HTMLCanvasElement | null>(null);
 
@@ -385,6 +396,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             } else {
                 const bounds = getBoundsForItem(canvas, col, row);
                 const isEdge = bounds !== undefined && bounds.x + bounds.width - posX < edgeDetectionBuffer;
+                const isFillHandle =
+                    fillHandle &&
+                    bounds !== undefined &&
+                    bounds.x + bounds.width - posX < 6 &&
+                    bounds.y + bounds.height - posY < 6;
                 result = {
                     kind: "cell",
                     location: [col, row],
@@ -392,6 +408,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isEdge,
                     shiftKey,
                     ctrlKey,
+                    isFillHandle,
                     metaKey,
                     isTouch,
                     localEventX: posX - bounds.x,
@@ -416,6 +433,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             translateY,
             lastRowSticky,
             getBoundsForItem,
+            fillHandle,
         ]
     );
 
@@ -440,17 +458,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         const overlay = overlayRef.current;
         if (canvas === null || overlay === null) return;
 
-        drawGrid(
+        drawGrid({
             canvas,
-            {
-                overlay,
-            },
+            buffers: { overlay },
             width,
             height,
             cellXOffset,
             cellYOffset,
-            Math.round(translateX),
-            Math.round(translateY),
+            translateX: Math.round(translateX),
+            translateY: Math.round(translateY),
             columns,
             mappedColumns,
             enableGroups,
@@ -459,33 +475,35 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             theme,
             headerHeight,
             groupHeaderHeight,
-            selection.rows,
-            disabledRows ?? CompactSelection.empty(),
+            selectedRows: selection.rows,
+            disabledRows: disabledRows ?? CompactSelection.empty(),
             rowHeight,
             verticalBorder,
-            selection.columns,
+            selectedColumns: selection.columns,
             isResizing,
-            selection,
+            isFocused,
+            selectedCell: selection,
+            fillHandle,
             lastRowSticky,
             rows,
             getCellContent,
-            getGroupDetails ?? (name => ({ name })),
+            getGroupDetails: getGroupDetails ?? (name => ({ name })),
             getRowThemeOverride,
             drawCustomCell,
-            drawHeader,
+            drawHeaderCallback: drawHeader,
             prelightCells,
             highlightRegions,
             imageLoader,
             lastBlitData,
-            canBlit.current ?? false,
-            damageRegion.current,
-            hoverValues.current,
-            hoverInfoRef.current,
+            canBlit: canBlit.current ?? false,
+            damage: damageRegion.current,
+            hoverValues: hoverValues.current,
+            hoverInfo: hoverInfoRef.current,
             spriteManager,
             scrolling,
-            lastWasTouch,
-            enqueueRef.current
-        );
+            touchMode: lastWasTouch,
+            enqueue: enqueueRef.current,
+        });
     }, [
         width,
         height,
@@ -500,12 +518,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         dragAndDropState,
         theme,
         headerHeight,
+        isFocused,
         groupHeaderHeight,
         selection,
         disabledRows,
         rowHeight,
         verticalBorder,
         isResizing,
+        fillHandle,
         lastRowSticky,
         rows,
         getCellContent,
@@ -532,6 +552,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         headerHeight,
         rowHeight,
         rows,
+        isFocused,
         isResizing,
         verticalBorder,
         getCellContent,
@@ -582,6 +603,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     imageLoader.setCallback(damageInternal);
 
+    const [overFill, setOverFill] = React.useState(false);
+
     const [hCol, hRow] = hoveredItem ?? [];
     const headerHovered = hCol !== undefined && hRow === -1;
     const groupHeaderHovered = hCol !== undefined && hRow === -2;
@@ -599,6 +622,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         ? "grabbing"
         : canDrag || isResizing
         ? "col-resize"
+        : overFill || isFilling
+        ? "crosshair"
         : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
         ? "pointer"
         : "default";
@@ -837,17 +862,35 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             setHoveredOnEdge(args.kind === "header" && args.isEdge && allowResize === true);
 
+            if (fillHandle && selection.current !== undefined) {
+                const [col, row] = selection.current.cell;
+                const sb = getBoundsForItem(canvas, col, row);
+                const x = ev.clientX;
+                const y = ev.clientY;
+                setOverFill(
+                    x >= sb.x + sb.width - 6 &&
+                        x <= sb.x + sb.width &&
+                        y >= sb.y + sb.height - 6 &&
+                        y <= sb.y + sb.height
+                );
+            } else {
+                setOverFill(false);
+            }
+
             onMouseMoveRaw?.(ev);
             onMouseMove(args);
         },
         [
             getMouseArgsForPosition,
             allowResize,
+            fillHandle,
+            selection,
             onMouseMoveRaw,
             onMouseMove,
             onItemHovered,
             getCellContent,
             damageInternal,
+            getBoundsForItem,
         ]
     );
     useEventListener("mousemove", onMouseMoveImpl, window, true);
@@ -1228,6 +1271,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 tabIndex={0}
                 onKeyDown={onKeyDownImpl}
                 onKeyUp={onKeyUpImpl}
+                onFocus={onCanvasFocused}
+                onBlur={onCanvasBlur}
                 className={className}
                 ref={refImpl}
                 style={style}>

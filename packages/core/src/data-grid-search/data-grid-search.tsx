@@ -389,7 +389,12 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 freezeColumns={p.freezeColumns}
                 getCellContent={p.getCellContent}
                 groupHeaderHeight={p.groupHeaderHeight}
+                onCanvasFocused={p.onCanvasFocused}
+                onCanvasBlur={p.onCanvasBlur}
+                isFocused={p.isFocused}
                 headerHeight={p.headerHeight}
+                isFilling={p.isFilling}
+                fillHandle={p.fillHandle}
                 lastRowSticky={p.lastRowSticky}
                 firstColAccessible={p.firstColAccessible}
                 lockColumns={p.lockColumns}

@@ -54,6 +54,7 @@ export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, Position
     readonly kind: "cell";
     readonly location: Item;
     readonly bounds: Rectangle;
+    readonly isFillHandle: boolean;
 }
 
 export interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
