@@ -2607,7 +2607,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onCanvasFocused = React.useCallback(() => {
         setIsFocusedDebounced.current(true);
 
-        if (gridSelection.current === undefined) {
+        if (
+            gridSelection.current === undefined &&
+            gridSelection.columns.length === 0 &&
+            gridSelection.rows.length === 0
+        ) {
             setCurrent(
                 {
                     cell: [rowMarkerOffset, cellYOffset],
