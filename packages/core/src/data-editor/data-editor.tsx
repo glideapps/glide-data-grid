@@ -4,6 +4,7 @@ import clamp from "lodash/clamp";
 import uniq from "lodash/uniq";
 import flatten from "lodash/flatten";
 import range from "lodash/range";
+import debounce from "lodash/debounce";
 import DataGridOverlayEditor from "../data-grid-overlay-editor/data-grid-overlay-editor";
 import {
     EditableGridCell,
@@ -79,7 +80,9 @@ type Props = Omit<
     | "onCellFocused"
     | "onKeyDown"
     | "isFilling"
+    | "isFocused"
     | "onCanvasFocused"
+    | "onCanvasBlur"
     | "onKeyUp"
     | "onMouseDown"
     | "onMouseUp"
@@ -1816,34 +1819,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [overlay?.cell, focus, gridSelection, onFinishedEditing, mangledOnCellEdited, mangledRows, updateSelectedCell]
     );
 
-    const [selCol, selRow] = currentCell ?? [];
-    const onCellFocused = React.useCallback(
-        (cell: Item) => {
-            const [col, row] = cell;
-
-            if (row === -1) {
-                if (columnSelect !== "none") {
-                    setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, false);
-                    focus();
-                }
-                return;
-            }
-
-            if (selCol === col && selRow === row) return;
-            setCurrent(
-                {
-                    cell,
-                    range: { x: col, y: row, width: 1, height: 1 },
-                },
-                true,
-                false,
-                "keyboard-nav"
-            );
-            scrollTo(col, row);
-        },
-        [columnSelect, focus, scrollTo, selCol, selRow, setCurrent, setSelectedColumns]
-    );
-
     const overlayID = React.useMemo(() => {
         return `gdg-overlay-${idCounter++}`;
     }, []);
@@ -2594,14 +2569,51 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [onCopy, onKeyDown, onPasteInternal, scrollTo]
     );
 
+    const [selCol, selRow] = currentCell ?? [];
+    const onCellFocused = React.useCallback(
+        (cell: Item) => {
+            const [col, row] = cell;
+
+            if (row === -1) {
+                if (columnSelect !== "none") {
+                    setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, false);
+                    focus();
+                }
+                return;
+            }
+
+            if (selCol === col && selRow === row) return;
+            setCurrent(
+                {
+                    cell,
+                    range: { x: col, y: row, width: 1, height: 1 },
+                },
+                true,
+                false,
+                "keyboard-nav"
+            );
+            scrollTo(col, row);
+        },
+        [columnSelect, focus, scrollTo, selCol, selRow, setCurrent, setSelectedColumns]
+    );
+
+    const [isFocused, setIsFocused] = React.useState(false);
+    const setIsFocusedDebounced = React.useRef(
+        debounce((val: boolean) => {
+            setIsFocused(val);
+        }, 5)
+    );
+
     const onCanvasFocused = React.useCallback(() => {
+        setIsFocusedDebounced.current(true);
+
         if (gridSelection.current === undefined) {
             setCurrent(
                 {
-                    cell: [rowMarkerOffset, 0],
+                    cell: [rowMarkerOffset, cellYOffset],
                     range: {
                         x: rowMarkerOffset,
-                        y: 0,
+                        y: cellYOffset,
                         width: 1,
                         height: 1,
                     },
@@ -2611,7 +2623,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 "keyboard-select"
             );
         }
-    }, [gridSelection, rowMarkerOffset, setCurrent]);
+    }, [cellYOffset, gridSelection, rowMarkerOffset, setCurrent]);
+
+    const onFocusOut = React.useCallback(() => {
+        setIsFocusedDebounced.current(false);
+    }, []);
 
     return (
         <ThemeProvider theme={mergedTheme}>
@@ -2619,6 +2635,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 {...rest}
                 enableGroups={enableGroups}
                 onCanvasFocused={onCanvasFocused}
+                onCanvasBlur={onFocusOut}
                 canvasRef={canvasRef}
                 cellXOffset={cellXOffset}
                 cellYOffset={cellYOffset}
@@ -2638,6 +2655,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 getCellsForSelection={getCellsForSelection}
                 getGroupDetails={mangledGetGroupDetails}
                 headerHeight={headerHeight}
+                isFocused={isFocused}
                 groupHeaderHeight={enableGroups ? groupHeaderHeight : 0}
                 lastRowSticky={lastRowSticky}
                 onCellFocused={onCellFocused}

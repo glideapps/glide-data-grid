@@ -987,6 +987,7 @@ function drawCells(
     getRowThemeOverride: GetRowThemeCallback | undefined,
     selectedRows: CompactSelection,
     disabledRows: CompactSelection,
+    isFocused: boolean,
     lastRowSticky: boolean,
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
@@ -1164,7 +1165,9 @@ function drawCells(
                         selectedColumns.some(
                             index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1]
                         );
-                    if (isSelected) {
+                    if (isSelected && !isFocused) {
+                        accentCount = 0;
+                    } else if (isSelected) {
                         accentCount = Math.max(accentCount, 1);
                     }
                     if (spanIsHighlighted) {
@@ -1701,6 +1704,7 @@ interface DrawGridArg {
     readonly verticalBorder: (col: number) => boolean;
     readonly selectedColumns: CompactSelection;
     readonly isResizing: boolean;
+    readonly isFocused: boolean;
     readonly selectedCell: GridSelection;
     readonly fillHandle: boolean;
     readonly lastRowSticky: boolean;
@@ -1755,6 +1759,7 @@ export function drawGrid(arg: DrawGridArg) {
         getCellContent,
         getGroupDetails,
         getRowThemeOverride,
+        isFocused,
         drawCustomCell,
         drawHeaderCallback,
         prelightCells,
@@ -1924,6 +1929,7 @@ export function drawGrid(arg: DrawGridArg) {
                 getRowThemeOverride,
                 selectedRows,
                 disabledRows,
+                isFocused,
                 lastRowSticky,
                 drawRegions,
                 damage,
@@ -2071,6 +2077,7 @@ export function drawGrid(arg: DrawGridArg) {
         getRowThemeOverride,
         selectedRows,
         disabledRows,
+        isFocused,
         lastRowSticky,
         drawRegions,
         damage,

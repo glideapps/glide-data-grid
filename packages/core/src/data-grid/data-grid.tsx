@@ -65,6 +65,7 @@ export interface DataGridProps {
     readonly isResizing: boolean;
     readonly isDragging: boolean;
     readonly isFilling: boolean;
+    readonly isFocused: boolean;
 
     readonly columns: readonly SizedGridColumn[];
     readonly rows: number;
@@ -99,6 +100,7 @@ export interface DataGridProps {
     readonly onMouseUp?: (args: GridMouseEventArgs, isOutside: boolean) => void;
 
     readonly onCanvasFocused?: () => void;
+    readonly onCanvasBlur?: () => void;
     readonly onCellFocused?: (args: Item) => void;
 
     readonly onMouseMoveRaw?: (event: MouseEvent) => void;
@@ -168,6 +170,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         enableGroups,
         isFilling,
         onCanvasFocused,
+        onCanvasBlur,
+        isFocused,
         selection,
         freezeColumns,
         lastRowSticky,
@@ -455,47 +459,48 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         if (canvas === null || overlay === null) return;
 
         drawGrid({
-            canvas: canvas,
+            canvas,
             buffers: { overlay },
-            width: width,
-            height: height,
-            cellXOffset: cellXOffset,
-            cellYOffset: cellYOffset,
+            width,
+            height,
+            cellXOffset,
+            cellYOffset,
             translateX: Math.round(translateX),
             translateY: Math.round(translateY),
-            columns: columns,
-            mappedColumns: mappedColumns,
-            enableGroups: enableGroups,
-            freezeColumns: freezeColumns,
-            dragAndDropState: dragAndDropState,
-            theme: theme,
-            headerHeight: headerHeight,
-            groupHeaderHeight: groupHeaderHeight,
+            columns,
+            mappedColumns,
+            enableGroups,
+            freezeColumns,
+            dragAndDropState,
+            theme,
+            headerHeight,
+            groupHeaderHeight,
             selectedRows: selection.rows,
             disabledRows: disabledRows ?? CompactSelection.empty(),
-            rowHeight: rowHeight,
-            verticalBorder: verticalBorder,
+            rowHeight,
+            verticalBorder,
             selectedColumns: selection.columns,
-            isResizing: isResizing,
+            isResizing,
+            isFocused,
             selectedCell: selection,
-            fillHandle: fillHandle,
-            lastRowSticky: lastRowSticky,
-            rows: rows,
-            getCellContent: getCellContent,
+            fillHandle,
+            lastRowSticky,
+            rows,
+            getCellContent,
             getGroupDetails: getGroupDetails ?? (name => ({ name })),
-            getRowThemeOverride: getRowThemeOverride,
-            drawCustomCell: drawCustomCell,
+            getRowThemeOverride,
+            drawCustomCell,
             drawHeaderCallback: drawHeader,
-            prelightCells: prelightCells,
-            highlightRegions: highlightRegions,
-            imageLoader: imageLoader,
-            lastBlitData: lastBlitData,
+            prelightCells,
+            highlightRegions,
+            imageLoader,
+            lastBlitData,
             canBlit: canBlit.current ?? false,
             damage: damageRegion.current,
             hoverValues: hoverValues.current,
             hoverInfo: hoverInfoRef.current,
-            spriteManager: spriteManager,
-            scrolling: scrolling,
+            spriteManager,
+            scrolling,
             touchMode: lastWasTouch,
             enqueue: enqueueRef.current,
         });
@@ -513,6 +518,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         dragAndDropState,
         theme,
         headerHeight,
+        isFocused,
         groupHeaderHeight,
         selection,
         disabledRows,
@@ -546,6 +552,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         headerHeight,
         rowHeight,
         rows,
+        isFocused,
         isResizing,
         verticalBorder,
         getCellContent,
@@ -1265,6 +1272,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 onKeyDown={onKeyDownImpl}
                 onKeyUp={onKeyUpImpl}
                 onFocus={onCanvasFocused}
+                onBlur={onCanvasBlur}
                 className={className}
                 ref={refImpl}
                 style={style}>
