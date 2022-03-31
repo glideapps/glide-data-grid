@@ -12,6 +12,7 @@ import {
 } from "../data-grid/data-grid-types";
 import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style";
 import { OverlayImageEditorProps } from "./private/image-overlay-editor";
+import { useStayOnScreen } from "./use-stay-on-screen";
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
@@ -121,6 +122,8 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         return [renderer.getEditor?.(content), renderer.useLabel];
     }, [content]);
 
+    const { ref, style: stayOnScreenStyle } = useStayOnScreen();
+
     let pad = true;
     let editor: React.ReactNode;
     let style = true;
@@ -159,6 +162,8 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         );
     }
 
+    styleOverride = { ...styleOverride, ...stayOnScreenStyle };
+
     // Consider imperatively creating and adding the element to the dom?
     const portalElement = document.getElementById("portal");
     if (portalElement === null) {
@@ -172,6 +177,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     const portal = createPortal(
         <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
             <DataGridOverlayEditorStyle
+                ref={ref}
                 id={id}
                 className={style ? "gdg-style" : "gdg-unstyle"}
                 style={styleOverride}
