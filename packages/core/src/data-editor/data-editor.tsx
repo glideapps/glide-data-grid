@@ -2408,10 +2408,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onCanvasFocused = React.useCallback(() => {
         setIsFocusedDebounced.current(true);
 
+        // check for mouse state, don't do anything if the user is clicked to focus.
         if (
             gridSelection.current === undefined &&
             gridSelection.columns.length === 0 &&
-            gridSelection.rows.length === 0
+            gridSelection.rows.length === 0 &&
+            mouseState === undefined
         ) {
             setCurrent(
                 {
@@ -2428,7 +2430,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 "keyboard-select"
             );
         }
-    }, [cellYOffset, gridSelection, rowMarkerOffset, setCurrent]);
+    }, [cellYOffset, gridSelection, mouseState, rowMarkerOffset, setCurrent]);
 
     const onFocusOut = React.useCallback(() => {
         setIsFocusedDebounced.current(false);
