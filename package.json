@@ -2,6 +2,7 @@
     "name": "root",
     "version": "4.0.0-alpha4",
     "scripts": {
+        "start": "npm run storybook",
         "bootstrap": "./bootstrap.sh",
         "build": "./build-all.sh",
         "storybook": "start-storybook -p 9009 -s public",
