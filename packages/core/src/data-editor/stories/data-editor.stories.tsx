@@ -14,7 +14,6 @@ import {
 } from "../../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor } from "../data-editor";
-import DataEditorContainer from "../../data-editor-container/data-grid-container";
 
 export default {
     title: "Tests/TestCases",
@@ -24,9 +23,7 @@ export default {
             <AutoSizer>
                 {(props: { width?: number; height?: number }) => (
                     <BuilderThemeWrapper width={props.width ?? 1000} height={props.height ?? 800} context={context}>
-                        <DataEditorContainer width={props.width ?? 1000} height={props.height ?? 800}>
-                            {fn()}
-                        </DataEditorContainer>
+                        {fn()}
                     </BuilderThemeWrapper>
                 )}
             </AutoSizer>
@@ -179,6 +176,7 @@ export function Simplenotest() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             getCellsForSelection={true}
             columns={cols}
@@ -233,6 +231,7 @@ export function RelationColumn() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyRelationData}
             columns={cols}
             rows={1000}
@@ -260,7 +259,7 @@ function getData([col, row]: Item): GridCell {
 }
 
 export function Minimal() {
-    return <DataEditor getCellContent={getData} columns={columns} rows={1000} />;
+    return <DataEditor width="100%" getCellContent={getData} columns={columns} rows={1000} />;
 }
 
 export function Smooth() {
@@ -286,6 +285,7 @@ export function Smooth() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             onColumnResized={onColumnResized}
             columns={cols}
@@ -307,6 +307,7 @@ export function ManualControl() {
 
     return (
         <DataEditor
+            width="100%"
             gridSelection={gridSelection}
             onGridSelectionChange={cb}
             getCellContent={getData}
@@ -319,6 +320,7 @@ export function ManualControl() {
 export function Draggable() {
     return (
         <DataEditor
+            width="100%"
             isDraggable={true}
             onDragStart={args => {
                 args.setData("text", "testing");
@@ -338,21 +340,21 @@ export function IdealSize() {
     ];
     return (
         <div style={{ width: 500, height: 500, position: "relative" }}>
-            <DataEditorContainer width={500} height={500}>
-                <DataEditor
-                    isDraggable={true}
-                    onDragStart={args => {
-                        args.setData("text", "testing");
-                    }}
-                    getCellContent={getData}
-                    columns={cols}
-                    smoothScrollX={true}
-                    smoothScrollY={true}
-                    rowHeight={50}
-                    headerHeight={50}
-                    rows={9}
-                />
-            </DataEditorContainer>
+            <DataEditor
+                width={500}
+                height={500}
+                isDraggable={true}
+                onDragStart={args => {
+                    args.setData("text", "testing");
+                }}
+                getCellContent={getData}
+                columns={cols}
+                smoothScrollX={true}
+                smoothScrollY={true}
+                rowHeight={50}
+                headerHeight={50}
+                rows={9}
+            />
         </div>
     );
 }
@@ -373,6 +375,7 @@ export function DynamicAddRemoveColumns({ columnCount }: { columnCount: number }
 
     return (
         <DataEditor
+            width="100%"
             isDraggable={true}
             getCellContent={getData}
             columns={cols}
@@ -387,52 +390,6 @@ export function DynamicAddRemoveColumns({ columnCount }: { columnCount: number }
 DynamicAddRemoveColumns.args = {
     columnCount: 2,
 };
-
-// export function RowSelectionStateLivesOutside() {
-//     const [selected_rows, setSelectedRows] = useState<CompactSelection | undefined>(undefined);
-//     const cb = (newRows: CompactSelection | undefined) => {
-//         if (newRows !== undefined) {
-//             setSelectedRows(newRows);
-//         }
-//     };
-
-//     return (
-//         <DataEditor
-//             selectedRows={selected_rows}
-//             onSelectedRowsChange={cb}
-//             isDraggable={true}
-//             onDragStart={args => {
-//                 args.setData("text", "testing");
-//             }}
-//             getCellContent={getData}
-//             columns={columns}
-//             rows={1000}
-//         />
-//     );
-// }
-
-// export function ColSelectionStateLivesOutside() {
-//     const [selected_cols, setSelectedCols] = useState<CompactSelection>(CompactSelection.empty());
-//     const cb = (newRows: CompactSelection | undefined) => {
-//         if (newRows !== undefined) {
-//             setSelectedCols(newRows);
-//         }
-//     };
-
-//     return (
-//         <DataEditor
-//             selectedColumns={selected_cols}
-//             onSelectedColumnsChange={cb}
-//             isDraggable={true}
-//             onDragStart={args => {
-//                 args.setData("text", "testing");
-//             }}
-//             getCellContent={getData}
-//             columns={columns}
-//             rows={1000}
-//         />
-//     );
-// }
 
 export function GridSelectionOutOfRangeNoColumns() {
     const dummyCols = useMemo(
@@ -454,6 +411,7 @@ export function GridSelectionOutOfRangeNoColumns() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             columns={cols}
             rows={1000}
@@ -512,6 +470,7 @@ export function ResizableColumns() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             columns={cols}
             rows={20}
@@ -543,6 +502,7 @@ export function GridSelectionOutOfRangeLessColumnsThanSelection() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             columns={cols}
             rows={1000}
@@ -576,6 +536,7 @@ export function GridAddNewRows() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             columns={cols}
             rows={rowsCount}
@@ -597,6 +558,7 @@ export function GridNoTrailingBlankRow() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             columns={cols}
             rows={100}
@@ -669,6 +631,7 @@ export function MarkdownEdits() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={dummyCells}
             columns={dummyCols}
             rows={1000}
@@ -682,6 +645,7 @@ export const CanEditBoolean = () => {
     const [vals, setVals] = useState<[boolean, boolean]>([false, false]);
     return (
         <DataEditor
+            width="100%"
             columns={[
                 {
                     title: "Editable",
@@ -726,6 +690,7 @@ export const SimpleEditable = () => {
 
     return (
         <DataEditor
+            width="100%"
             columns={[
                 {
                     title: "Column A",

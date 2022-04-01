@@ -35,6 +35,7 @@ import {
     getGridColumn,
     GridColumnWithMockingInfo,
     ContentCache,
+    BeautifulStyle,
 } from "./utils";
 
 export default {
@@ -54,6 +55,8 @@ const defaultProps: Partial<DataEditorProps> = {
     smoothScrollY: true,
     isDraggable: false,
     rowMarkers: "none",
+    width: "100%",
+    height: "100%",
 };
 
 export const ResizableColumns: React.VFC = () => {
@@ -2723,6 +2726,31 @@ export const HighlightCells: React.VFC = () => {
     );
 };
 (HighlightCells as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const LayoutIntegration: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(1000, true, true);
+
+    return (
+        <BeautifulStyle>
+            <h1>Layout Integration</h1>
+            <Description>Trying the grid in different situations</Description>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={10}
+                rowMarkers="both"
+                height={200}
+            />
+            <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={10} rowMarkers="both" />
+        </BeautifulStyle>
+    );
+};
+(CustomHeader as any).parameters = {
     options: {
         showPanel: false,
     },

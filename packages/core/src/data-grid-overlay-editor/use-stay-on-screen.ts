@@ -1,15 +1,8 @@
 import * as React from "react";
 
-function useRefState(): [HTMLElement | undefined, React.RefCallback<HTMLElement | null>] {
-    const [refState, setRefState] = React.useState<HTMLElement | undefined>();
-    const refFunc = (el: null) => {
-        if (el === null) {
-            setRefState(undefined);
-        } else {
-            setRefState(el);
-        }
-    };
-    return [refState, refFunc];
+export function useRefState(): [HTMLElement | undefined, React.RefCallback<HTMLElement | null>] {
+    const [refState, setRefState] = React.useState<HTMLElement | null>();
+    return [refState ?? undefined, setRefState];
 }
 
 interface StayOnScreen {

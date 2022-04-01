@@ -6,7 +6,6 @@ import { BuilderThemeWrapper } from "../../stories/story-utils";
 import { GridCell, GridCellKind, Item } from "../../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor } from "../data-editor";
-import DataEditorContainer from "../../data-editor-container/data-grid-container";
 import styled from "styled-components";
 
 export default {
@@ -17,9 +16,7 @@ export default {
             <AutoSizer>
                 {(props: { width?: number; height?: number }) => (
                     <BuilderThemeWrapper width={props.width ?? 1000} height={props.height ?? 800} context={context}>
-                        <DataEditorContainer width={props.width ?? 1000} height={props.height ?? 800}>
-                            {fn()}
-                        </DataEditorContainer>
+                        {fn()}
                     </BuilderThemeWrapper>
                 )}
             </AutoSizer>
@@ -57,9 +54,14 @@ export function Bug70() {
             <a href="https://github.com/glideapps/glide-data-grid/issues/70" target="_blank" rel="noreferrer">
                 Original report
             </a>
-            <DataEditorContainer width={500} height={500}>
-                <DataEditor rows={100} columns={cols} getCellContent={bug70Gen} onCellEdited={ignore} />
-            </DataEditorContainer>
+            <DataEditor
+                width={500}
+                height={500}
+                rows={100}
+                columns={cols}
+                getCellContent={bug70Gen}
+                onCellEdited={ignore}
+            />
         </Bug70Style>
     );
 }
@@ -97,15 +99,15 @@ export function FilterColumns() {
     return (
         <div>
             <input value={searchText} onChange={onInputChange} />
-            <DataEditorContainer width={1000} height={500}>
-                <DataEditor
-                    rows={100}
-                    columns={cols}
-                    getCellContent={filterColumnsGen}
-                    smoothScrollX={true}
-                    smoothScrollY={true}
-                />
-            </DataEditorContainer>
+            <DataEditor
+                width={1000}
+                height={500}
+                rows={100}
+                columns={cols}
+                getCellContent={filterColumnsGen}
+                smoothScrollX={true}
+                smoothScrollY={true}
+            />
         </div>
     );
 }

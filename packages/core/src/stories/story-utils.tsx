@@ -15,12 +15,14 @@ interface Props {
 const BuilderWrapper = styled.div<Props>`
     display: flex;
     height: 100vh;
+    width: 100vw;
+    position: relative;
 
     & > .content {
         display: block;
 
         width: ${p => p.width}px;
-        min-height: ${p => p.height}px;
+        height: ${p => p.height}px;
         align-self: center;
 
         position: relative;

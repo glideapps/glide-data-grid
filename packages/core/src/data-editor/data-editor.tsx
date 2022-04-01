@@ -39,7 +39,7 @@ import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/ima
 import { ThemeProvider, useTheme } from "styled-components";
 import { getDataEditorTheme, Theme } from "../common/styles";
 import { DataGridRef } from "../data-grid/data-grid";
-import { useEventListener } from "../common/utils";
+import { getScrollBarWidth, useEventListener } from "../common/utils";
 import { CellRenderers } from "../data-grid/cells";
 import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
@@ -48,6 +48,7 @@ import { isHotkey } from "../common/is-hotkey";
 import { SelectionBlending, useSelectionBehavior } from "../data-grid/use-selection-behavior";
 import { useCellsForSelection } from "./use-cells-for-selection";
 import { unquote, expandSelection, copyToClipboard } from "./data-editors-fns";
+import { DataEditorContainer } from "../data-editor-container/data-grid-container";
 
 let idCounter = 0;
 
@@ -203,6 +204,9 @@ export interface DataEditorProps extends Props {
     readonly rowMarkers?: "checkbox" | "number" | "both" | "none";
     readonly rowMarkerWidth?: number;
 
+    readonly width?: number | string;
+    readonly height?: number | string;
+
     readonly spanRangeBehavior?: "default" | "allowPartial";
 
     readonly rangeSelectionBlending?: SelectionBlending;
@@ -315,6 +319,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     } = p;
 
     const {
+        width,
+        height,
         columns: columnsIn,
         rows,
         getCellContent,
@@ -2428,68 +2434,91 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         setIsFocusedDebounced.current(false);
     }, []);
 
+    const [idealWidth, idealHeight] = React.useMemo(() => {
+        let h: number | undefined = 500;
+        const scrollbarWidth = getScrollBarWidth();
+        if (typeof rowHeight === "number") {
+            h = totalHeaderHeight + rows * rowHeight;
+        }
+
+        let w = mangledCols.reduce((acc, x) => x.width + acc, 0);
+
+        const yscroll = h > 500;
+        const xscroll = w > 800;
+
+        if (xscroll && !yscroll) {
+            h = Math.min(500, h + scrollbarWidth);
+        } else if (yscroll && !xscroll) {
+            w = Math.min(800, w + scrollbarWidth);
+        }
+
+        return [`${Math.min(800, w)}px`, `${Math.min(500, h)}px`];
+    }, [mangledCols, rowHeight, rows, totalHeaderHeight]);
+
     return (
         <ThemeProvider theme={mergedTheme}>
-            <DataGridSearch
-                {...rest}
-                enableGroups={enableGroups}
-                onCanvasFocused={onCanvasFocused}
-                onCanvasBlur={onFocusOut}
-                canvasRef={canvasRef}
-                cellXOffset={cellXOffset}
-                cellYOffset={cellYOffset}
-                accessibilityHeight={visibleRegion.height}
-                columns={mangledCols}
-                drawCustomCell={drawCustomCellMangled}
-                disabledRows={disabledRows}
-                freezeColumns={mangledFreezeColumns}
-                lockColumns={rowMarkerOffset}
-                firstColAccessible={rowMarkerOffset === 0}
-                getCellContent={getMangedCellContent}
-                minColumnWidth={minColumnWidth}
-                maxColumnWidth={maxColumnWidth}
-                showSearch={showSearch}
-                onSearchClose={onSearchClose}
-                highlightRegions={highlightRegions}
-                getCellsForSelection={getCellsForSelection}
-                getGroupDetails={mangledGetGroupDetails}
-                headerHeight={headerHeight}
-                isFocused={isFocused}
-                groupHeaderHeight={enableGroups ? groupHeaderHeight : 0}
-                lastRowSticky={lastRowSticky}
-                onCellFocused={onCellFocused}
-                onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}
-                onDragStart={onDragStartImpl}
-                onHeaderMenuClick={onHeaderMenuClickInner}
-                onItemHovered={onItemHoveredImpl}
-                isFilling={mouseState?.fillHandle === true}
-                onMouseMove={onMouseMoveImpl}
-                onKeyDown={onKeyDown}
-                onMouseDown={onMouseDown}
-                onMouseUp={onMouseUp}
-                onSearchResultsChanged={onSearchResultsChanged}
-                onVisibleRegionChanged={onVisibleRegionChangedImpl}
-                rowHeight={rowHeight}
-                rows={mangledRows}
-                scrollRef={scrollRef}
-                selection={gridSelection}
-                translateX={visibleRegion.tx}
-                translateY={visibleRegion.ty}
-                verticalBorder={mangledVerticalBorder}
-                gridRef={gridRef}
-            />
-            {renameGroupNode}
-            {overlay !== undefined && (
-                <DataGridOverlayEditor
-                    {...overlay}
-                    id={overlayID}
-                    className={p.experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
-                    provideEditor={provideEditor}
-                    imageEditorOverride={imageEditorOverride}
-                    onFinishEditing={onFinishEditing}
-                    markdownDivCreateNode={markdownDivCreateNode}
+            <DataEditorContainer width={width ?? idealWidth} height={height ?? idealHeight}>
+                <DataGridSearch
+                    {...rest}
+                    enableGroups={enableGroups}
+                    onCanvasFocused={onCanvasFocused}
+                    onCanvasBlur={onFocusOut}
+                    canvasRef={canvasRef}
+                    cellXOffset={cellXOffset}
+                    cellYOffset={cellYOffset}
+                    accessibilityHeight={visibleRegion.height}
+                    columns={mangledCols}
+                    drawCustomCell={drawCustomCellMangled}
+                    disabledRows={disabledRows}
+                    freezeColumns={mangledFreezeColumns}
+                    lockColumns={rowMarkerOffset}
+                    firstColAccessible={rowMarkerOffset === 0}
+                    getCellContent={getMangedCellContent}
+                    minColumnWidth={minColumnWidth}
+                    maxColumnWidth={maxColumnWidth}
+                    showSearch={showSearch}
+                    onSearchClose={onSearchClose}
+                    highlightRegions={highlightRegions}
+                    getCellsForSelection={getCellsForSelection}
+                    getGroupDetails={mangledGetGroupDetails}
+                    headerHeight={headerHeight}
+                    isFocused={isFocused}
+                    groupHeaderHeight={enableGroups ? groupHeaderHeight : 0}
+                    lastRowSticky={lastRowSticky}
+                    onCellFocused={onCellFocused}
+                    onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}
+                    onDragStart={onDragStartImpl}
+                    onHeaderMenuClick={onHeaderMenuClickInner}
+                    onItemHovered={onItemHoveredImpl}
+                    isFilling={mouseState?.fillHandle === true}
+                    onMouseMove={onMouseMoveImpl}
+                    onKeyDown={onKeyDown}
+                    onMouseDown={onMouseDown}
+                    onMouseUp={onMouseUp}
+                    onSearchResultsChanged={onSearchResultsChanged}
+                    onVisibleRegionChanged={onVisibleRegionChangedImpl}
+                    rowHeight={rowHeight}
+                    rows={mangledRows}
+                    scrollRef={scrollRef}
+                    selection={gridSelection}
+                    translateX={visibleRegion.tx}
+                    translateY={visibleRegion.ty}
+                    verticalBorder={mangledVerticalBorder}
+                    gridRef={gridRef}
                 />
-            )}
+                {renameGroupNode}
+                {overlay !== undefined && (
+                    <DataGridOverlayEditor
+                        {...overlay}
+                        id={overlayID}
+                        className={p.experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
+                        provideEditor={provideEditor}
+                        imageEditorOverride={imageEditorOverride}
+                        onFinishEditing={onFinishEditing}
+                        markdownDivCreateNode={markdownDivCreateNode}
+                    />
+                )}
+            </DataEditorContainer>
         </ThemeProvider>
     );
 };
