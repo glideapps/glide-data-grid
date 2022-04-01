@@ -1,5 +1,5 @@
 import React from "react";
-import DataEditor, { DataEditorContainer, DataEditorProps, GridCellKind, GridColumn } from "@glideapps/glide-data-grid";
+import DataEditor, { DataEditorProps, GridCellKind, GridColumn } from "@glideapps/glide-data-grid";
 
 export default function Grid() {
     const getData = React.useCallback<DataEditorProps["getCellContent"]>(
@@ -31,9 +31,5 @@ export default function Grid() {
         []
     );
 
-    return (
-        <DataEditorContainer width={800} height={500}>
-            <DataEditor getCellContent={getData} columns={cols} rows={100} />
-        </DataEditorContainer>
-    );
+    return <DataEditor width={800} height={500} getCellContent={getData} columns={cols} rows={100} />;
 }
