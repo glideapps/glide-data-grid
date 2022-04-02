@@ -550,7 +550,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     }, [columns, rowMarkerWidth, rowMarkers]);
 
     const visibleRegionRef = React.useRef(visibleRegion);
-    const getMangedCellContent = React.useCallback(
+    const getMangledCellContent = React.useCallback(
         ([col, row]: Item): InnerGridCell => {
             const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
             const isRowMarkerCol = col === 0 && hasRowMarkers;
@@ -630,7 +630,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (gridSelection.current === undefined) return;
 
             const [col, row] = gridSelection.current.cell;
-            const c = getMangedCellContent([col, row]);
+            const c = getMangledCellContent([col, row]);
             if (c.kind !== GridCellKind.Boolean && c.allowOverlay) {
                 let content = c;
                 if (initialValue !== undefined) {
@@ -672,7 +672,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 gridRef.current?.damage([{ cell: gridSelection.current.cell }]);
             }
         },
-        [getMangedCellContent, gridSelection, mangledOnCellEdited]
+        [getMangledCellContent, gridSelection, mangledOnCellEdited]
     );
 
     const focusOnRowFromTrailingBlankRow = React.useCallback(
@@ -682,7 +682,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return;
             }
 
-            let content = getMangedCellContent([col, row]);
+            let content = getMangledCellContent([col, row]);
             if (!content.allowOverlay) {
                 return;
             }
@@ -717,7 +717,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 forceEditMode: true,
             });
         },
-        [getMangedCellContent]
+        [getMangledCellContent]
     );
 
     const scrollTo = React.useCallback(
@@ -1141,7 +1141,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             const r = gridSelection.current.range;
             for (let x = 0; x < r.width; x++) {
                 const fillCol = x + r.x;
-                const fillVal = getMangedCellContent([fillCol, reverse ? r.y + r.height - 1 : r.y]);
+                const fillVal = getMangledCellContent([fillCol, reverse ? r.y + r.height - 1 : r.y]);
                 if (isInnerOnlyCell(fillVal) || !isEditableGridCell(fillVal)) continue;
                 for (let y = 1; y < r.height; y++) {
                     const fillRow = reverse ? r.y + r.height - (y + 1) : y + r.y;
@@ -1159,7 +1159,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }))
             );
         },
-        [getMangedCellContent, gridSelection, mangledOnCellEdited]
+        [getMangledCellContent, gridSelection, mangledOnCellEdited]
     );
 
     const onMouseUp = React.useCallback(
@@ -1197,7 +1197,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     ) {
                         const [selectedCol, selectedRow] = gridSelection.current.cell;
                         const [prevCol, prevRow] = mouse.previousSelection.current.cell;
-                        const c = getMangedCellContent([col, row]);
+                        const c = getMangledCellContent([col, row]);
                         const r = c.kind === GridCellKind.Custom ? undefined : CellRenderers[c.kind];
                         if (r !== undefined && r.onClick !== undefined) {
                             const newVal = r.onClick(c, a.localEventX, a.localEventY, a.bounds);
@@ -1294,7 +1294,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onCellClicked,
             rowMarkerOffset,
             fillDown,
-            getMangedCellContent,
+            getMangledCellContent,
             mangledOnCellEdited,
             onCellActivated,
             reselect,
@@ -1889,7 +1889,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     const r = gridSelection.current.range;
                     for (let y = 0; y < r.height; y++) {
                         const fillRow = y + r.y;
-                        const fillVal = getMangedCellContent([r.x, fillRow]);
+                        const fillVal = getMangledCellContent([r.x, fillRow]);
                         if (isInnerOnlyCell(fillVal) || !isEditableGridCell(fillVal)) continue;
                         for (let x = 1; x < r.width; x++) {
                             const fillCol = x + r.x;
@@ -2053,7 +2053,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             appendRow,
             onCellActivated,
             reselect,
-            getMangedCellContent,
+            getMangledCellContent,
             adjustSelection,
             rangeSelect,
             lastRowSticky,
@@ -2112,7 +2112,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             const [gridCol, gridRow] = target;
 
             if (onPaste === undefined) {
-                const cellData = getMangedCellContent(target);
+                const cellData = getMangledCellContent(target);
                 pasteToCell(cellData, target, text);
                 return;
             }
@@ -2130,7 +2130,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 for (let col = 0; col < dataRow.length; col++) {
                     const dataItem = dataRow[col];
                     const index = [col + gridCol, row + gridRow] as const;
-                    const cellData = getMangedCellContent(index);
+                    const cellData = getMangledCellContent(index);
                     if (pasteToCell(cellData, index, dataItem)) {
                         damage.push(index);
                     }
@@ -2142,7 +2142,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }))
             );
         }
-    }, [getMangedCellContent, gridSelection, keybindings.paste, mangledOnCellEdited, onPaste, rowMarkerOffset, rows]);
+    }, [getMangledCellContent, gridSelection, keybindings.paste, mangledOnCellEdited, onPaste, rowMarkerOffset, rows]);
 
     useEventListener("paste", onPasteInternal, window, false, true);
 
@@ -2478,7 +2478,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     freezeColumns={mangledFreezeColumns}
                     lockColumns={rowMarkerOffset}
                     firstColAccessible={rowMarkerOffset === 0}
-                    getCellContent={getMangedCellContent}
+                    getCellContent={getMangledCellContent}
                     minColumnWidth={minColumnWidth}
                     maxColumnWidth={maxColumnWidth}
                     showSearch={showSearch}
