@@ -1,5 +1,6 @@
-import { CustomCell } from "@glideapps/glide-data-grid";
+import { CustomCell, measureTextCached } from "@glideapps/glide-data-grid";
 import * as React from "react";
+import { roundedRect } from "../draw-fns";
 import { CustomCellRenderer } from "../types";
 
 interface RangeCellProps {
@@ -9,31 +10,13 @@ interface RangeCellProps {
     readonly max: number;
     readonly step: number;
     readonly label?: string;
+    readonly measureLabel?: string;
     readonly readonly?: boolean;
-}
-
-function roundedRect(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    radius: number
-) {
-    ctx.moveTo(x + radius, y);
-    ctx.arcTo(x + width, y, x + width, y + radius, radius);
-    ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
-    ctx.arcTo(x, y + height, x, y + height - radius, radius);
-    ctx.arcTo(x, y, x + radius, y, radius);
 }
 
 export type RangeCell = CustomCell<RangeCellProps>;
 
-const RANGE_WIDTH = 80;
-const RANGE_HEIGHT = 8;
-// Sure.
-const GRADIENT_EPSILON = 0.0001;
-const TEXT_Y_OFFSET = 5;
+const RANGE_HEIGHT = 6;
 
 const inputStyle: React.CSSProperties = {
     height: "35px",
@@ -43,32 +26,57 @@ const renderer: CustomCellRenderer<RangeCell> = {
     isMatch: (c): c is RangeCell => (c.data as any).kind === "range-cell",
     draw: (args, cell) => {
         const { ctx, theme, rect } = args;
-        const { min, max, value, label } = cell.data;
+        const { min, max, value, label, measureLabel } = cell.data;
 
-        const height = rect.height - 2 * theme.cellVerticalPadding;
         const x = rect.x + theme.cellHorizontalPadding;
-        const y = rect.y + height / 2;
+        const yMid = rect.y + rect.height / 2;
 
         const rangeSize = max - min;
         const fillRatio = (value - min) / rangeSize;
 
-        const gradient = ctx.createLinearGradient(x, y, x + RANGE_WIDTH, y);
+        ctx.save();
+        let labelWidth = 0;
+        if (label !== undefined) {
+            ctx.font = `12px ${theme.fontFamily}`; // fixme this is slow
+            labelWidth =
+                measureTextCached(measureLabel ?? label, ctx, `12px ${theme.fontFamily}`).width +
+                theme.cellHorizontalPadding;
+        }
+
+        const rangeWidth = rect.width - theme.cellHorizontalPadding * 2 - labelWidth;
+
+        const gradient = ctx.createLinearGradient(x, yMid, x + rangeWidth, yMid);
 
         gradient.addColorStop(0, theme.accentColor);
         gradient.addColorStop(fillRatio, theme.accentColor);
-        gradient.addColorStop(fillRatio + GRADIENT_EPSILON, theme.bgBubble);
+        gradient.addColorStop(fillRatio, theme.bgBubble);
         gradient.addColorStop(1, theme.bgBubble);
 
         ctx.beginPath();
         ctx.fillStyle = gradient;
-        roundedRect(ctx, x, y, RANGE_WIDTH, RANGE_HEIGHT, RANGE_HEIGHT / 2);
+        roundedRect(ctx, x, yMid - RANGE_HEIGHT / 2, rangeWidth, RANGE_HEIGHT, RANGE_HEIGHT / 2);
         ctx.fill();
 
+        ctx.beginPath();
+        roundedRect(
+            ctx,
+            x + 0.5,
+            yMid - RANGE_HEIGHT / 2 + 0.5,
+            rangeWidth - 1,
+            RANGE_HEIGHT - 1,
+            (RANGE_HEIGHT - 1) / 2
+        );
+        ctx.strokeStyle = theme.accentLight;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
         if (label !== undefined) {
-            ctx.font = `12px ${theme.fontFamily}`;
+            ctx.textAlign = "right";
             ctx.fillStyle = theme.textDark;
-            ctx.fillText(label, x + RANGE_WIDTH + RANGE_HEIGHT, y + TEXT_Y_OFFSET);
+            ctx.fillText(label, rect.x + rect.width - theme.cellHorizontalPadding, yMid);
         }
+
+        ctx.restore();
 
         return true;
     },

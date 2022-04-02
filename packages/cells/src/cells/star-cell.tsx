@@ -79,7 +79,7 @@ const renderer: CustomCellRenderer<StarCell> = {
         const { ctx, theme, rect, hoverAmount } = args;
         const { rating } = cell.data;
         const padX = theme.cellHorizontalPadding;
-        let drawX = padX;
+        let drawX = rect.x + padX;
         const stars = Math.min(5, Math.ceil(rating));
         drawX += 8;
         ctx.beginPath();

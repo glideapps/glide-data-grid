@@ -265,6 +265,7 @@ export const CustomCells: React.VFC = () => {
                     } else if (col === 6) {
                         num = row + 1;
                         rand();
+                        const v = rand();
                         const d: RangeCell = {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
@@ -273,9 +274,10 @@ export const CustomCells: React.VFC = () => {
                                 kind: "range-cell",
                                 min: 10,
                                 max: 30,
-                                value: 15,
+                                value: 10 + Math.round(v * 20),
                                 step: 1,
-                                label: "15%",
+                                label: `${Math.round(v * 100)}%`,
+                                measureLabel: "100%",
                             },
                         };
                         return d;
