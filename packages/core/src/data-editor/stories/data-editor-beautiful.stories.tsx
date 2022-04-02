@@ -2773,3 +2773,32 @@ export const LayoutIntegration: React.VFC = () => {
         showPanel: false,
     },
 };
+
+export const PreventDiagonalScroll: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(200);
+
+    return (
+        <BeautifulWrapper
+            title="Prevent Diagonal Scroll"
+            description={
+                <>
+                    <Description>
+                        Diagonal scrolling can be prevented by setting <PropName>preventDiagonalScrolling</PropName>.
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                preventDiagonalScrolling={true}
+                rows={5000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(PreventDiagonalScroll as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
