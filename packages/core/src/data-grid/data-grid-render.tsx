@@ -1681,6 +1681,45 @@ function drawFocusRing(
     return result;
 }
 
+function getLastRow(
+    effectiveColumns: readonly MappedGridColumn[],
+    height: number,
+    totalHeaderHeight: number,
+    translateX: number,
+    translateY: number,
+    cellYOffset: number,
+    rows: number,
+    getRowHeight: (row: number) => number,
+    lastRowSticky: boolean
+): number {
+    let result = 0;
+    walkColumns(
+        effectiveColumns,
+        cellYOffset,
+        translateX,
+        translateY,
+        totalHeaderHeight,
+        (_c, __drawX, colDrawY, _clipX, startRow) => {
+            walkRowsInCol(
+                startRow,
+                colDrawY,
+                height,
+                rows,
+                getRowHeight,
+                lastRowSticky,
+                (_drawY, row, _rh, isSticky) => {
+                    if (!isSticky) {
+                        result = Math.max(row, result);
+                    }
+                }
+            );
+
+            return true;
+        }
+    );
+    return result;
+}
+
 interface DrawGridArg {
     readonly canvas: HTMLCanvasElement;
     readonly buffers: Buffers;
@@ -2137,12 +2176,24 @@ export function drawGrid(arg: DrawGridArg) {
     focusRedraw?.();
     highlightRedraw?.();
 
+    const lastRowDrawn = getLastRow(
+        effectiveCols,
+        height,
+        totalHeaderHeight,
+        translateX,
+        translateY,
+        cellYOffset,
+        rows,
+        getRowHeight,
+        lastRowSticky
+    );
+
     imageLoader?.setWindow(
         {
             x: cellXOffset,
             y: cellYOffset,
             width: effectiveCols.length,
-            height: 100, // FIXME: row - cellYOffset,
+            height: lastRowDrawn - cellYOffset,
         },
         freezeColumns
     );
