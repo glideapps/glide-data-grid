@@ -6,12 +6,22 @@ interface WrapperProps {
     height: number | string;
 }
 
-const Wrapper = styled.div`
+function toCss(x: number | string) {
+    if (typeof x === "string") return x;
+    return `${x}px`;
+}
+
+const Wrapper = styled.div<{ innerWidth: string; innerHeight: string }>`
     overflow: hidden;
     position: relative;
 
     min-width: 10px;
     min-height: 10px;
+    max-width: 100%;
+    max-height: 100%;
+
+    width: ${p => p.innerWidth};
+    height: ${p => p.innerHeight};
 
     overflow: hidden;
     overflow: clip;
@@ -32,7 +42,7 @@ interface Props extends WrapperProps, React.HTMLAttributes<HTMLDivElement> {}
 export const DataEditorContainer: React.FunctionComponent<React.PropsWithChildren<Props>> = p => {
     const { width, height, children, ...rest } = p;
     return (
-        <Wrapper style={{ width, height }} {...rest}>
+        <Wrapper innerHeight={toCss(height)} innerWidth={toCss(width)} {...rest}>
             {children}
         </Wrapper>
     );

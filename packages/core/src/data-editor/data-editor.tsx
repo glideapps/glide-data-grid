@@ -206,6 +206,7 @@ export interface DataEditorProps extends Props {
 
     readonly width?: number | string;
     readonly height?: number | string;
+    readonly className?: string;
 
     readonly spanRangeBehavior?: "default" | "allowPartial";
 
@@ -331,6 +332,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         spanRangeBehavior = "default",
         onGroupHeaderClicked,
         onCellContextMenu,
+        className,
         onHeaderContextMenu,
         getCellsForSelection: getCellsForSelectionIn,
         onGroupHeaderContextMenu,
@@ -2441,25 +2443,26 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         const scrollbarWidth = getScrollBarWidth();
         if (typeof rowHeight === "number") {
             h = totalHeaderHeight + rows * rowHeight;
+        } else {
+            let avg = 0;
+            const toAverage = Math.min(rows, 10);
+            for (let i = 0; i < toAverage; i++) {
+                avg += rowHeight(i);
+            }
+            avg = Math.floor(avg / toAverage);
+
+            h = totalHeaderHeight + rows * avg;
         }
+        h += scrollbarWidth;
 
-        let w = mangledCols.reduce((acc, x) => x.width + acc, 0);
+        const w = mangledCols.reduce((acc, x) => x.width + acc, 0) + scrollbarWidth;
 
-        const yscroll = h > 500;
-        const xscroll = w > 800;
-
-        if (xscroll && !yscroll) {
-            h = Math.min(500, h + scrollbarWidth);
-        } else if (yscroll && !xscroll) {
-            w = Math.min(800, w + scrollbarWidth);
-        }
-
-        return [`${Math.min(800, w)}px`, `${Math.min(500, h)}px`];
+        return [`${w}px`, `${h}px`];
     }, [mangledCols, rowHeight, rows, totalHeaderHeight]);
 
     return (
         <ThemeProvider theme={mergedTheme}>
-            <DataEditorContainer width={width ?? idealWidth} height={height ?? idealHeight}>
+            <DataEditorContainer className={className} width={width ?? idealWidth} height={height ?? idealHeight}>
                 <DataGridSearch
                     {...rest}
                     enableGroups={enableGroups}

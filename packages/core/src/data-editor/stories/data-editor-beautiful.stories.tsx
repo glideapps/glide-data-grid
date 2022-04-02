@@ -55,8 +55,6 @@ const defaultProps: Partial<DataEditorProps> = {
     smoothScrollY: true,
     isDraggable: false,
     rowMarkers: "none",
-    width: "100%",
-    height: "100%",
 };
 
 export const ResizableColumns: React.VFC = () => {
@@ -2740,6 +2738,7 @@ export const LayoutIntegration: React.VFC = () => {
             <Description>Trying the grid in different situations</Description>
             <DataEditor
                 {...defaultProps}
+                className="Test"
                 getCellContent={getCellContent}
                 columns={cols}
                 rows={10}
@@ -2747,6 +2746,16 @@ export const LayoutIntegration: React.VFC = () => {
                 height={200}
             />
             <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={10} rowMarkers="both" />
+            <div style={{ display: "flex", height: "300px" }}>
+                <DataEditor
+                    {...defaultProps}
+                    getCellContent={getCellContent}
+                    columns={cols}
+                    rows={10}
+                    rowMarkers="both"
+                />
+                <div style={{ flexShrink: 0 }}>This is some text what happens here?</div>
+            </div>
         </BeautifulStyle>
     );
 };
