@@ -11,6 +11,7 @@ import { TagsCell } from "./cells/tags-cell";
 import { UserProfileCell } from "./cells/user-profile-cell";
 import { DropdownCell } from "./cells/dropdown-cell";
 import { ArticleCell } from "./cells/article-cell-types";
+import { RangeCell } from "./cells/range-cell";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -264,6 +265,25 @@ export const CustomCells: React.VFC = () => {
                     } else if (col === 6) {
                         num = row + 1;
                         rand();
+                        const v = rand();
+                        const d: RangeCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "range-cell",
+                                min: 10,
+                                max: 30,
+                                value: 10 + Math.round(v * 20),
+                                step: 1,
+                                label: `${Math.round(v * 100)}%`,
+                                measureLabel: "100%",
+                            },
+                        };
+                        return d;
+                    } else if (col === 7) {
+                        num = row + 1;
+                        rand();
                         const d: ArticleCell = {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
@@ -304,6 +324,10 @@ export const CustomCells: React.VFC = () => {
                     },
                     {
                         title: "Article",
+                        width: 150,
+                    },
+                    {
+                        title: "Range",
                         width: 150,
                     },
                 ]}

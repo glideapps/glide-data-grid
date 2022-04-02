@@ -111,6 +111,7 @@ class ImageWindowLoader {
             }
             return current.img;
         } else {
+            let loaded = false;
             const img = imgPool.pop() ?? new Image();
 
             let canceled = false;
@@ -121,7 +122,11 @@ class ImageWindowLoader {
                 cancel: () => {
                     if (canceled) return;
                     canceled = true;
-                    imgPool.unshift(img);
+                    if (imgPool.length < 12) {
+                        imgPool.unshift(img); // never retain more than 12
+                    } else if (!loaded) {
+                        img.src = "";
+                    }
                 },
             };
 
@@ -138,6 +143,7 @@ class ImageWindowLoader {
                         for (const packed of toWrite.cells) {
                             this.loadedLocations.push(unpackNumberToColRow(packed));
                         }
+                        loaded = true;
                         this.sendLoaded();
                     }
                 } catch (e) {
