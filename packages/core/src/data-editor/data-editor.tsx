@@ -1211,7 +1211,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             }
                         }
                         if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
-                            onCellActivated?.([col, row]);
+                            onCellActivated?.([col - rowMarkerOffset, row]);
                             reselect(a.bounds, false);
                             return true;
                         }
