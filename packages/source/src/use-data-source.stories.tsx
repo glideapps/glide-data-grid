@@ -120,6 +120,7 @@ const defaultProps: Partial<DataEditorProps> = {
     smoothScrollY: true,
     isDraggable: false,
     rowMarkers: "none",
+    width: "100%",
 };
 
 const testTheme: Theme = {

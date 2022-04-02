@@ -55,6 +55,7 @@ const defaultProps: Partial<DataEditorProps> = {
     smoothScrollY: true,
     isDraggable: false,
     rowMarkers: "none",
+    width: "100%",
 };
 
 export const ResizableColumns: React.VFC = () => {
