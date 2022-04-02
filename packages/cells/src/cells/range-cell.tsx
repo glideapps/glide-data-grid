@@ -19,7 +19,13 @@ export type RangeCell = CustomCell<RangeCellProps>;
 const RANGE_HEIGHT = 6;
 
 const inputStyle: React.CSSProperties = {
-    height: "35px",
+    marginRight: 8,
+};
+
+const wrapperStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    flexGrow: 1,
 };
 
 const renderer: CustomCellRenderer<RangeCell> = {
@@ -101,15 +107,18 @@ const renderer: CustomCellRenderer<RangeCell> = {
             };
 
             return (
-                <input
-                    style={inputStyle}
-                    type="range"
-                    value={strValue}
-                    min={strMin}
-                    max={strMax}
-                    step={strStep}
-                    onChange={onChange}
-                />
+                <label style={wrapperStyle}>
+                    <input
+                        style={inputStyle}
+                        type="range"
+                        value={strValue}
+                        min={strMin}
+                        max={strMax}
+                        step={strStep}
+                        onChange={onChange}
+                    />
+                    {strValue}
+                </label>
             );
         };
     },
