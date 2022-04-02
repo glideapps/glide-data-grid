@@ -47,10 +47,7 @@ npm i lodash marked react-responsive-carousel styled-components
 Create a new `DataEditor` wherever you need to display lots and lots of data
 
 ```tsx
-// The container is not required, but is convenient for getting started
-<DataEditorContainer width={1000} height={700}>
-    <DataEditor getCellContent={getData} columns={columns} rows={numRows} />
-</DataEditorContainer>
+<DataEditor getCellContent={getData} columns={columns} rows={numRows} />
 ```
 
 Making your columns is easy

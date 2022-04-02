@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import * as React from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { DataEditor, DataEditorContainer, DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
+import { DataEditor, DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
 import { useExtraCells } from ".";
 import { StarCell } from "./cells/star-cell";
 import { SparklineCell } from "./cells/sparkline-cell";
@@ -98,9 +98,14 @@ const BeautifulWrapper: React.FC<BeautifulProps> = p => {
                 <div className="sizer-clip">
                     <AutoSizer>
                         {(props: { width?: number; height?: number }) => (
-                            <DataEditorContainer width={props.width ?? 100} height={props.height ?? 100}>
+                            <div
+                                style={{
+                                    position: "relative",
+                                    width: props.width ?? 100,
+                                    height: props.height ?? 100,
+                                }}>
                                 {children}
-                            </DataEditorContainer>
+                            </div>
                         )}
                     </AutoSizer>
                 </div>

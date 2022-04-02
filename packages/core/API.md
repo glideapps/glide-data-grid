@@ -8,21 +8,10 @@ Currently the Grid depends on there being a root level "portal" div in your HTML
 <div id="portal" style="position: fixed; left: 0; top: 0; z-index: 9999;" />
 ```
 
-Once you've got that done, the easiest way to use the Data Grid is to wrap it inside a `DataEditorContainer` component:
+Once you've got that done, the easiest way to use the Data Grid is to give it a fixed size:
 
 ```jsx
-<DataEditorContainer width={500} height={300}>
-    <DataEditor {...props} />
-</DataEditorContainer>
-```
-
-What the container does is give the Grid its size. The Grid itself has no intrinisic size. If you'd rather not use the container and set a size yourself, the quickest way is by wrapping it in a div with CSS like this:
-
-```CSS
-.gridWrapper > :first-child {
-  width: 800px;
-  height: 500px;
-}
+<DataEditor  width={500} height={300} {...props} />
 ```
 
 ## Changes to your data
