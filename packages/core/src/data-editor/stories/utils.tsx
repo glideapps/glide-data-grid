@@ -152,6 +152,10 @@ export const BeautifulStyle = styled.div`
             border-radius: 0;
         }
     }
+
+    .white {
+        background-color: white;
+    }
 `;
 
 export const PropName = styled.span`
