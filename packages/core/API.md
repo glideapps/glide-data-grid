@@ -137,9 +137,9 @@ Most data grids will want to set the majority of these props one way or another.
 | Name                                                  | Description                                                                                                                                                                         |
 | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [maxColumnWidth](#maxcolumnwidth)                     | Sets the maximum width the user can resize a column to.                                                                                                                             |
-| [minColumnWidth](#maxcolumnwidth)                     | Sets the mnimum width the user can resize a column to.                                                                                                                             |
+| [minColumnWidth](#maxcolumnwidth)                     | Sets the mnimum width the user can resize a column to.                                                                                                                              |
 | [onCellClicked](#oncellclicked)                       | Emitted when a cell is clicked.                                                                                                                                                     |
-| [onCellActivated](#oncellactivated)                   | Emitted when a cell is activated, by pressing Enter, Space or double clicking it.                                                                                                                                                     |
+| [onCellActivated](#oncellactivated)                   | Emitted when a cell is activated, by pressing Enter, Space or double clicking it.                                                                                                   |
 | [onCellContextMenu](#oncellcontextmenu)               | Emitted when a cell should show a context menu. Usually right click.                                                                                                                |
 | [onColumnMoved](#oncolumnmoved)                       | Emitted when a column has been dragged to a new location.                                                                                                                           |
 | [onColumnResized](#oncolumnresized)                   | Emitted when a column has been resized to a new size.                                                                                                                               |
@@ -151,6 +151,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [onItemHovered](#onitemhovered)                       | Emitted when the hovered item changes.                                                                                                                                              |
 | [onMouseMove](#onmousemove)                           | Emitted whenever the mouse moves. Be careful, can cause performance issues.                                                                                                         |
 | [onRowMoved](#onrowmoved)                             | Emitted when a row has been dragged to a new location.                                                                                                                              |
+| [preventDiagonalScrolling](#preventdiagonalscrolling) | Prevents diagonal scrolling                                                                                                                                                         |
 | [rowSelectionMode](#rowselectionmode)                 | Determines if row selection requires a modifier key to enable multi-selection or not.                                                                                               |
 | [showMinimap](#showminimap)                           | Shows the interactive minimap of the grid.                                                                                                                                          |
 | [scrollToEnd](#scrolltoend)                           | When set to true, the grid will scroll to the end. The ref has a better method to do this and this prop should not be used but it will remain supported for the foreseeable future. |
@@ -961,6 +962,16 @@ onRowMoved?: (startIndex: number, endIndex: number) => void;
 ```
 
 Called whenever a row re-order operation is completed. Setting the callback enables re-ordering by dragging the first column of a row.
+
+---
+
+## preventDiagonalScrolling
+
+```ts
+preventDiagonalScrolling?: booling;
+```
+
+Set to true to prevent any diagonal scrolling.
 
 ---
 
