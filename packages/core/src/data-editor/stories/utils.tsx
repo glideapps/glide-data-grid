@@ -12,7 +12,6 @@ import {
     Item,
     Rectangle,
 } from "../../data-grid/data-grid-types";
-import DataEditorContainer from "../../data-editor-container/data-grid-container";
 
 import faker from "faker";
 import styled from "styled-components";
@@ -104,7 +103,7 @@ export function getGridColumn(columnWithMock: GridColumnWithMockingInfo): GridCo
     return rest;
 }
 
-const BeautifulStyle = styled.div`
+export const BeautifulStyle = styled.div`
     background-color: #2790b9;
     background: linear-gradient(90deg, #2790b9, #2070a9);
     color: white;
@@ -202,9 +201,14 @@ export const BeautifulWrapper: React.FC<BeautifulProps> = p => {
                 <div className="sizer-clip">
                     <AutoSizer>
                         {(props: { width?: number; height?: number }) => (
-                            <DataEditorContainer width={props.width ?? 100} height={props.height ?? 100}>
+                            <div
+                                style={{
+                                    position: "relative",
+                                    width: props.width ?? 100,
+                                    height: props.height ?? 100,
+                                }}>
                                 {children}
-                            </DataEditorContainer>
+                            </div>
                         )}
                     </AutoSizer>
                 </div>

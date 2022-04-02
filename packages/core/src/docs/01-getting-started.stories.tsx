@@ -242,13 +242,11 @@ const getContent = React.useCallback((cell: Item): GridCell => {
                 {`
 > Avoid excessive changes to the identity of the \`getCellContent\` callback as the grid will re-render from scratch every time it changes.
 
-That is all the basic requirements put together. Because the grid is a self-contained scrollable region a container is provided for simple hard coded sizing. Reactive sizing is also possible but requires a bit of css ignored here.`}
+That is all the basic requirements put together.`}
             </Marked>
             <Highlight>
                 {`
-return <DataEditorContainer width={900} height={200}>
-    <DataEditor getCellContent={getContent} columns={columns} rows={data.length} />
-</DataEditorContainer>
+return <DataEditor getCellContent={getContent} columns={columns} rows={data.length} />;
 `}
             </Highlight>
             <Wrapper height={200}>

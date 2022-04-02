@@ -8,21 +8,10 @@ Currently the Grid depends on there being a root level "portal" div in your HTML
 <div id="portal" style="position: fixed; left: 0; top: 0; z-index: 9999;" />
 ```
 
-Once you've got that done, the easiest way to use the Data Grid is to wrap it inside a `DataEditorContainer` component:
+Once you've got that done, the easiest way to use the Data Grid is to give it a fixed size:
 
 ```jsx
-<DataEditorContainer width={500} height={300}>
-    <DataEditor {...props} />
-</DataEditorContainer>
-```
-
-What the container does is give the Grid its size. The Grid itself has no intrinisic size. If you'd rather not use the container and set a size yourself, the quickest way is by wrapping it in a div with CSS like this:
-
-```CSS
-.gridWrapper > :first-child {
-  width: 800px;
-  height: 500px;
-}
+<DataEditor  width={500} height={300} {...props} />
 ```
 
 ## Changes to your data
@@ -128,6 +117,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [columnSelectionBlending](#rangeselectionblending) | Controls how column selections may be mixed with other selection types.                                 |
 | [rowSelectionBlending](#rangeselectionblending)    | Controls how row selections may be mixed with other selection types.                                    |
 | [highlightRegions](#highlightregions)              | Adds additional highlights to the data grid for showing contextually important cells.                   |
+| [fillHandle](#fillhandle)                          | Controls the presence of the fill indicator                                                             |
 
 ## Editing
 
@@ -738,6 +728,16 @@ highlightRegions?: readonly Highlight[];
 ```
 
 Highlight regions are regions on the grid which get drawn with a background color and a dashed line around the region. The color string must be css parseable and the opacity will be removed for the drawing of the dashed line. Opacity should be used to allow overlapping selections to properly blend in background colors.
+
+---
+
+## fillHandle
+
+```ts
+fillHandle?: boolean;
+```
+
+Controls the visibility of the fill handle used for filling cells with the mouse.
 
 ---
 

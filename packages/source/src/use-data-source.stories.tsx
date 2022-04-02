@@ -1,14 +1,7 @@
 import styled from "styled-components";
 import * as React from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import {
-    DataEditor,
-    DataEditorContainer,
-    DataEditorProps,
-    GridCellKind,
-    GridColumn,
-    Theme,
-} from "@glideapps/glide-data-grid";
+import { DataEditor, DataEditorProps, GridCellKind, GridColumn, Theme } from "@glideapps/glide-data-grid";
 import faker from "faker";
 import { useCollapsingGroups, useColumnSort, useMoveableColumns } from ".";
 
@@ -100,9 +93,14 @@ const BeautifulWrapper: React.FC<BeautifulProps> = p => {
                 <div className="sizer-clip">
                     <AutoSizer>
                         {(props: { width?: number; height?: number }) => (
-                            <DataEditorContainer width={props.width ?? 100} height={props.height ?? 100}>
+                            <div
+                                style={{
+                                    position: "relative",
+                                    width: props.width ?? 100,
+                                    height: props.height ?? 100,
+                                }}>
                                 {children}
-                            </DataEditorContainer>
+                            </div>
                         )}
                     </AutoSizer>
                 </div>
@@ -122,6 +120,7 @@ const defaultProps: Partial<DataEditorProps> = {
     smoothScrollY: true,
     isDraggable: false,
     rowMarkers: "none",
+    width: "100%",
 };
 
 const testTheme: Theme = {

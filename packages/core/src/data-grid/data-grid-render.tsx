@@ -987,6 +987,7 @@ function drawCells(
     getRowThemeOverride: GetRowThemeCallback | undefined,
     selectedRows: CompactSelection,
     disabledRows: CompactSelection,
+    isFocused: boolean,
     lastRowSticky: boolean,
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
@@ -1164,7 +1165,9 @@ function drawCells(
                         selectedColumns.some(
                             index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1]
                         );
-                    if (isSelected) {
+                    if (isSelected && !isFocused) {
+                        accentCount = 0;
+                    } else if (isSelected) {
                         accentCount = Math.max(accentCount, 1);
                     }
                     if (spanIsHighlighted) {
@@ -1589,6 +1592,7 @@ function drawFocusRing(
     getRowHeight: (row: number) => number,
     getCellContent: (cell: Item) => InnerGridCell,
     lastRowSticky: boolean,
+    fillHandle: boolean,
     rows: number
 ): (() => void) | undefined {
     if (
@@ -1635,9 +1639,8 @@ function drawFocusRing(
 
                 drawCb = () => {
                     if (clipX > cellX && !col.sticky) {
-                        const diff = Math.max(0, clipX - cellX);
                         ctx.beginPath();
-                        ctx.rect(cellX + diff, drawY, cellWidth - diff + 1, rh + 1);
+                        ctx.rect(clipX, 0, width - clipX, height);
                         ctx.clip();
                     }
                     ctx.beginPath();
@@ -1645,6 +1648,13 @@ function drawFocusRing(
                     ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
                     ctx.lineWidth = 1;
                     ctx.stroke();
+
+                    if (fillHandle) {
+                        ctx.beginPath();
+                        ctx.rect(cellX + cellWidth - 4, drawY + rh - 4, 4, 4);
+                        ctx.fillStyle = col.themeOverride?.accentColor ?? theme.accentColor;
+                        ctx.fill();
+                    }
                 };
                 return true;
             });
@@ -1671,50 +1681,100 @@ function drawFocusRing(
     return result;
 }
 
-export function drawGrid(
-    canvas: HTMLCanvasElement,
-    buffers: Buffers,
-    width: number,
-    height: number,
-    cellXOffset: number,
-    cellYOffset: number,
-    translateX: number,
-    translateY: number,
-    columns: readonly SizedGridColumn[],
-    mappedColumns: readonly MappedGridColumn[],
-    enableGroups: boolean,
-    freezeColumns: number,
-    dragAndDropState: DragAndDropState | undefined,
-    theme: Theme,
-    headerHeight: number,
-    groupHeaderHeight: number,
-    selectedRows: CompactSelection,
-    disabledRows: CompactSelection,
-    rowHeight: number | ((index: number) => number),
-    verticalBorder: (col: number) => boolean,
-    selectedColumns: CompactSelection,
-    isResizing: boolean,
-    selectedCell: GridSelection,
-    lastRowSticky: boolean,
-    rows: number,
-    getCellContent: (cell: Item) => InnerGridCell,
-    getGroupDetails: GroupDetailsCallback,
-    getRowThemeOverride: GetRowThemeCallback | undefined,
-    drawCustomCell: DrawCustomCellCallback | undefined,
-    drawHeaderCallback: DrawHeaderCallback | undefined,
-    prelightCells: CellList | undefined,
-    highlightRegions: readonly Highlight[] | undefined,
-    imageLoader: ImageWindowLoader,
-    lastBlitData: React.MutableRefObject<BlitData>,
-    canBlit: boolean,
-    damage: CellList | undefined,
-    hoverValues: HoverValues,
-    hoverInfo: HoverInfo | undefined,
-    spriteManager: SpriteManager,
-    scrolling: boolean,
-    touchMode: boolean,
-    enqueue: (item: Item) => void
-) {
+interface DrawGridArg {
+    readonly canvas: HTMLCanvasElement;
+    readonly buffers: Buffers;
+    readonly width: number;
+    readonly height: number;
+    readonly cellXOffset: number;
+    readonly cellYOffset: number;
+    readonly translateX: number;
+    readonly translateY: number;
+    readonly columns: readonly SizedGridColumn[];
+    readonly mappedColumns: readonly MappedGridColumn[];
+    readonly enableGroups: boolean;
+    readonly freezeColumns: number;
+    readonly dragAndDropState: DragAndDropState | undefined;
+    readonly theme: Theme;
+    readonly headerHeight: number;
+    readonly groupHeaderHeight: number;
+    readonly selectedRows: CompactSelection;
+    readonly disabledRows: CompactSelection;
+    readonly rowHeight: number | ((index: number) => number);
+    readonly verticalBorder: (col: number) => boolean;
+    readonly selectedColumns: CompactSelection;
+    readonly isResizing: boolean;
+    readonly isFocused: boolean;
+    readonly selectedCell: GridSelection;
+    readonly fillHandle: boolean;
+    readonly lastRowSticky: boolean;
+    readonly rows: number;
+    readonly getCellContent: (cell: Item) => InnerGridCell;
+    readonly getGroupDetails: GroupDetailsCallback;
+    readonly getRowThemeOverride: GetRowThemeCallback | undefined;
+    readonly drawCustomCell: DrawCustomCellCallback | undefined;
+    readonly drawHeaderCallback: DrawHeaderCallback | undefined;
+    readonly prelightCells: CellList | undefined;
+    readonly highlightRegions: readonly Highlight[] | undefined;
+    readonly imageLoader: ImageWindowLoader;
+    readonly lastBlitData: React.MutableRefObject<BlitData>;
+    readonly canBlit: boolean;
+    readonly damage: CellList | undefined;
+    readonly hoverValues: HoverValues;
+    readonly hoverInfo: HoverInfo | undefined;
+    readonly spriteManager: SpriteManager;
+    readonly scrolling: boolean;
+    readonly touchMode: boolean;
+    readonly enqueue: (item: Item) => void;
+}
+
+export function drawGrid(arg: DrawGridArg) {
+    const {
+        canvas,
+        buffers,
+        width,
+        height,
+        cellXOffset,
+        cellYOffset,
+        translateX,
+        translateY,
+        columns,
+        mappedColumns,
+        enableGroups,
+        freezeColumns,
+        dragAndDropState,
+        theme,
+        headerHeight,
+        groupHeaderHeight,
+        selectedRows,
+        disabledRows,
+        rowHeight,
+        verticalBorder,
+        selectedColumns,
+        isResizing,
+        selectedCell,
+        fillHandle,
+        lastRowSticky,
+        rows,
+        getCellContent,
+        getGroupDetails,
+        getRowThemeOverride,
+        isFocused,
+        drawCustomCell,
+        drawHeaderCallback,
+        prelightCells,
+        highlightRegions,
+        imageLoader,
+        lastBlitData,
+        canBlit,
+        hoverValues,
+        hoverInfo,
+        spriteManager,
+        scrolling,
+        touchMode,
+        enqueue,
+    } = arg;
+    let { damage } = arg;
     if (width === 0 || height === 0) return;
     const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
 
@@ -1869,6 +1929,7 @@ export function drawGrid(
                 getRowThemeOverride,
                 selectedRows,
                 disabledRows,
+                isFocused,
                 lastRowSticky,
                 drawRegions,
                 damage,
@@ -1965,6 +2026,7 @@ export function drawGrid(
         getRowHeight,
         getCellContent,
         lastRowSticky,
+        fillHandle,
         rows
     );
 
@@ -2015,6 +2077,7 @@ export function drawGrid(
         getRowThemeOverride,
         selectedRows,
         disabledRows,
+        isFocused,
         lastRowSticky,
         drawRegions,
         damage,

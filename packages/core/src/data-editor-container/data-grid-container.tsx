@@ -2,16 +2,31 @@ import { styled } from "../common/styles";
 import * as React from "react";
 
 interface WrapperProps {
-    width: number;
-    height: number;
+    width: number | string;
+    height: number | string;
 }
 
-const Wrapper = styled.div<WrapperProps>`
+function toCss(x: number | string) {
+    if (typeof x === "string") return x;
+    return `${x}px`;
+}
+
+const Wrapper = styled.div<{ innerWidth: string; innerHeight: string }>`
     overflow: hidden;
     position: relative;
 
-    width: ${p => p.width}px;
-    height: ${p => p.height}px;
+    min-width: 10px;
+    min-height: 10px;
+    max-width: 100%;
+    max-height: 100%;
+
+    width: ${p => p.innerWidth};
+    height: ${p => p.innerHeight};
+
+    overflow: hidden;
+    overflow: clip;
+
+    contain: strict;
 
     > :first-child {
         position: absolute;
@@ -24,13 +39,11 @@ const Wrapper = styled.div<WrapperProps>`
 
 interface Props extends WrapperProps, React.HTMLAttributes<HTMLDivElement> {}
 
-const DataEditorContainer: React.FunctionComponent<React.PropsWithChildren<Props>> = p => {
+export const DataEditorContainer: React.FunctionComponent<React.PropsWithChildren<Props>> = p => {
     const { width, height, children, ...rest } = p;
     return (
-        <Wrapper width={width} height={height} {...rest}>
+        <Wrapper innerHeight={toCss(height)} innerWidth={toCss(width)} {...rest}>
             {children}
         </Wrapper>
     );
 };
-
-export default DataEditorContainer;

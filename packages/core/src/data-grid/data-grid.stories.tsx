@@ -47,7 +47,9 @@ export function Simplenotest() {
             width={1800}
             height={1000}
             cellXOffset={0}
+            isFocused={true}
             cellYOffset={y}
+            isFilling={false}
             onMouseMove={() => undefined}
             groupHeaderHeight={0}
             accessibilityHeight={50}
@@ -86,8 +88,10 @@ export function SelectedCellnotest() {
             width={1800}
             height={1000}
             cellXOffset={0}
+            isFocused={true}
             onMouseMove={() => undefined}
             accessibilityHeight={50}
+            isFilling={false}
             cellYOffset={0}
             groupHeaderHeight={34}
             enableGroups={false}
@@ -133,8 +137,10 @@ export function SelectedRownotest() {
             height={1000}
             cellXOffset={0}
             cellYOffset={0}
+            isFocused={true}
             groupHeaderHeight={34}
             accessibilityHeight={50}
+            isFilling={false}
             enableGroups={false}
             rows={1000}
             headerHeight={44}
@@ -174,7 +180,9 @@ export const SelectedColumnnotest = () => {
             height={1000}
             cellXOffset={0}
             cellYOffset={0}
+            isFocused={true}
             accessibilityHeight={50}
+            isFilling={false}
             groupHeaderHeight={34}
             enableGroups={false}
             rows={1000}

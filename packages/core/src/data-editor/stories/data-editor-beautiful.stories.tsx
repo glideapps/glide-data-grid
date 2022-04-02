@@ -35,6 +35,7 @@ import {
     getGridColumn,
     GridColumnWithMockingInfo,
     ContentCache,
+    BeautifulStyle,
 } from "./utils";
 
 export default {
@@ -54,6 +55,7 @@ const defaultProps: Partial<DataEditorProps> = {
     smoothScrollY: true,
     isDraggable: false,
     rowMarkers: "none",
+    width: "100%",
 };
 
 export const ResizableColumns: React.VFC = () => {
@@ -245,6 +247,61 @@ export const AddData: React.VFC = () => {
     );
 };
 (AddData as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const FillHandle: React.VFC = () => {
+    const { cols, getCellContent, setCellValueRaw, setCellValue, getCellsForSelection } = useMockDataGenerator(
+        60,
+        false
+    );
+
+    const [numRows, setNumRows] = React.useState(50);
+
+    const onRowAppended = React.useCallback(() => {
+        const newRow = numRows;
+        for (let c = 0; c < 6; c++) {
+            const cell = getCellContent([c, newRow]);
+            setCellValueRaw([c, newRow], clearCell(cell));
+        }
+        setNumRows(cv => cv + 1);
+    }, [getCellContent, numRows, setCellValueRaw]);
+
+    return (
+        <BeautifulWrapper
+            title="Add data"
+            description={
+                <>
+                    <Description>Fill handles can be used to downfill data with the mouse.</Description>
+                    <MoreInfo>
+                        Just click and drag, the top row will be copied down. Enable using the{" "}
+                        <PropName>fillHandle</PropName> prop.
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                getCellsForSelection={getCellsForSelection}
+                rowMarkers={"both"}
+                onPaste={true}
+                fillHandle={true}
+                onCellEdited={setCellValue}
+                trailingRowOptions={{
+                    sticky: true,
+                    tint: true,
+                    hint: "New row...",
+                }}
+                rows={numRows}
+                onRowAppended={onRowAppended}
+            />
+        </BeautifulWrapper>
+    );
+};
+(FillHandle as any).parameters = {
     options: {
         showPanel: false,
     },
@@ -2668,6 +2725,42 @@ export const HighlightCells: React.VFC = () => {
     );
 };
 (HighlightCells as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const LayoutIntegration: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(1000, true, true);
+
+    return (
+        <BeautifulStyle>
+            <h1>Layout Integration</h1>
+            <Description>Trying the grid in different situations</Description>
+            <DataEditor
+                {...defaultProps}
+                className="Test"
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={10}
+                rowMarkers="both"
+                height={200}
+            />
+            <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={10} rowMarkers="both" />
+            <div style={{ display: "flex", height: "300px" }}>
+                <DataEditor
+                    {...defaultProps}
+                    getCellContent={getCellContent}
+                    columns={cols}
+                    rows={10}
+                    rowMarkers="both"
+                />
+                <div style={{ flexShrink: 0 }}>This is some text what happens here?</div>
+            </div>
+        </BeautifulStyle>
+    );
+};
+(CustomHeader as any).parameters = {
     options: {
         showPanel: false,
     },

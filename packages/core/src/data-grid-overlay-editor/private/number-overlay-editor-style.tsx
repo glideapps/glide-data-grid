@@ -2,7 +2,7 @@ import { styled } from "../../common/styles";
 
 export const NumberOverlayEditorStyle = styled.div`
     display: flex;
-    margin-top: 6px;
+    margin: 6px 0 3px;
     color: ${p => p.theme.textDark};
 
     > input {

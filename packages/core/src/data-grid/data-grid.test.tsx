@@ -9,6 +9,7 @@ import { getDataEditorTheme } from "../common/styles";
 const basicProps: DataGridProps = {
     cellXOffset: 0,
     cellYOffset: 0,
+    isFocused: true,
     columns: [
         {
             title: "A",
@@ -31,6 +32,7 @@ const basicProps: DataGridProps = {
             width: 190,
         },
     ],
+    isFilling: false,
     enableGroups: false,
     freezeColumns: 0,
     selection: {
