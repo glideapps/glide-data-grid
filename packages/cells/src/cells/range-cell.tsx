@@ -35,6 +35,10 @@ const RANGE_HEIGHT = 8;
 const GRADIENT_EPSILON = 0.0001;
 const TEXT_Y_OFFSET = 5;
 
+const inputStyle: React.CSSProperties = {
+    height: "35px",
+};
+
 const renderer: CustomCellRenderer<RangeCell> = {
     isMatch: (c): c is RangeCell => (c.data as any).kind === "range-cell",
     draw: (args, cell) => {
@@ -88,7 +92,17 @@ const renderer: CustomCellRenderer<RangeCell> = {
                 });
             };
 
-            return <input type="range" value={strValue} min={strMin} max={strMax} step={strStep} onChange={onChange} />;
+            return (
+                <input
+                    style={inputStyle}
+                    type="range"
+                    value={strValue}
+                    min={strMin}
+                    max={strMax}
+                    step={strStep}
+                    onChange={onChange}
+                />
+            );
         };
     },
 };

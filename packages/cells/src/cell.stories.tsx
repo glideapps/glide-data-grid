@@ -259,19 +259,6 @@ export const CustomCells: React.VFC = () => {
                     } else if (col === 6) {
                         num = row + 1;
                         rand();
-                        const d: ArticleCell = {
-                            kind: GridCellKind.Custom,
-                            allowOverlay: true,
-                            copyData: "4",
-                            data: {
-                                kind: "article-cell",
-                                markdown: "## This is a test",
-                            },
-                        };
-                        return d;
-                    } else if (col === 7) {
-                        num = row + 1;
-                        rand();
                         const d: RangeCell = {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
@@ -283,6 +270,19 @@ export const CustomCells: React.VFC = () => {
                                 value: 15,
                                 step: 1,
                                 label: "15%",
+                            },
+                        };
+                        return d;
+                    } else if (col === 7) {
+                        num = row + 1;
+                        rand();
+                        const d: ArticleCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "article-cell",
+                                markdown: "## This is a test",
                             },
                         };
                         return d;
