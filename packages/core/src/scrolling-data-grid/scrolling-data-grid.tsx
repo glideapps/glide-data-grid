@@ -15,6 +15,7 @@ export interface ScrollingDataGridProps extends Props {
     readonly smoothScrollY?: boolean;
     readonly overscrollX?: number;
     readonly overscrollY?: number;
+    readonly preventDiagonalScrolling?: boolean;
     readonly rightElementSticky?: boolean;
     readonly rightElement?: React.ReactNode;
     readonly showMinimap?: boolean;
@@ -58,6 +59,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         onVisibleRegionChanged,
         scrollToEnd,
         scrollRef,
+        preventDiagonalScrolling,
         rightElement,
         rightElementSticky,
         overscrollX,
@@ -278,6 +280,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             scrollRef={scrollRef}
             minimap={minimap}
             className={className}
+            preventDiagonalScrolling={preventDiagonalScrolling}
             draggable={dataGridProps.isDraggable === true}
             scrollWidth={width + (paddingRight ?? 0)}
             scrollHeight={height + (paddingBottom ?? 0)}
