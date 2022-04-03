@@ -207,7 +207,7 @@ export const ServerSideData: React.VFC = () => {
                     network transactions should work the same.
                 </Description>
             }>
-            <DataEditor ref={ref} {...args} columns={columns} rows={3000} rowMarkers="both" />
+            <DataEditor ref={ref} {...args} width="100%" columns={columns} rows={3000} rowMarkers="both" />
         </BeautifulWrapper>
     );
 };
