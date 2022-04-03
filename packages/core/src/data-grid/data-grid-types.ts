@@ -5,9 +5,19 @@ import React, { CSSProperties } from "react";
 import ImageWindowLoader from "../common/image-window-loader";
 import { SpriteManager } from "./data-grid-sprites";
 
+// Thoughts:
+// rows/columns are called out as selected, but when selected they must also be added
+// to the range. Handling delete events may have different desired outcomes depending on
+// how the range came to be selected. The rows/columns properties retain this essential
+// information.
 export interface GridSelection {
-    readonly cell: readonly [number, number];
-    readonly range: Readonly<Rectangle>;
+    readonly current?: {
+        readonly cell: Item;
+        readonly range: Readonly<Rectangle>;
+        readonly rangeStack: readonly Readonly<Rectangle>[]; // lowest to highest, does not include range
+    };
+    readonly columns: CompactSelection;
+    readonly rows: CompactSelection;
 }
 
 export type GridMouseEventArgs =
@@ -15,6 +25,15 @@ export type GridMouseEventArgs =
     | GridMouseHeaderEventArgs
     | GridMouseOutOfBoundsEventArgs
     | GridMouseGroupHeaderEventArgs;
+
+interface PreventableEvent {
+    preventDefault: () => void;
+}
+export interface CellClickedEventArgs extends GridMouseCellEventArgs, PreventableEvent {}
+
+export interface HeaderClickedEventArgs extends GridMouseHeaderEventArgs, PreventableEvent {}
+
+export interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, PreventableEvent {}
 
 interface PositionableMouseEventArgs {
     readonly localEventX: number;
@@ -33,8 +52,9 @@ interface BaseGridMouseEventArgs {
 
 export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "cell";
-    readonly location: readonly [number, number];
+    readonly location: Item;
     readonly bounds: Rectangle;
+    readonly isFillHandle: boolean;
 }
 
 export interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
@@ -53,7 +73,7 @@ export interface GridMouseGroupHeaderEventArgs extends BaseGridMouseEventArgs, P
 
 export interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {
     readonly kind: "out-of-bounds";
-    readonly location: readonly [number, number];
+    readonly location: Item;
     readonly direction: readonly [-1 | 0 | 1, -1 | 0 | 1];
 }
 
@@ -61,6 +81,7 @@ export interface GridKeyEventArgs {
     readonly bounds: Rectangle | undefined;
     readonly key: string;
     readonly keyCode: number;
+    readonly altKey: boolean;
     readonly shiftKey: boolean;
     readonly ctrlKey: boolean;
     readonly metaKey: boolean;
@@ -147,6 +168,8 @@ export enum GridColumnIcon {
     ProtectedColumnOverlay = "protectedColumnOverlay",
 }
 
+export type CellArray = readonly (readonly GridCell[])[];
+
 export type Item = readonly [number, number];
 
 interface BaseGridColumn {
@@ -177,13 +200,20 @@ interface AutoGridColumn extends BaseGridColumn {
     readonly id: string;
 }
 
+export async function resolveCellsThunk(thunk: GetCellsThunk | CellArray): Promise<CellArray> {
+    if (typeof thunk === "object") return thunk;
+    return await thunk();
+}
+
+export type GetCellsThunk = () => Promise<CellArray>;
+
 export type GridColumn = SizedGridColumn | AutoGridColumn;
 
 // export type SizedGridColumn = Omit<GridColumn, "width"> & { readonly width: number };
 
 export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell;
 
-export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell | UriCell | NumberCell;
+export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell | UriCell | NumberCell | CustomCell;
 
 export type EditableGridCellKind = EditableGridCell["kind"];
 
@@ -193,8 +223,7 @@ export function isEditableGridCell(cell: GridCell): cell is EditableGridCell {
         cell.kind === GridCellKind.Bubble ||
         cell.kind === GridCellKind.RowID ||
         cell.kind === GridCellKind.Protected ||
-        cell.kind === GridCellKind.Drilldown ||
-        cell.kind === GridCellKind.Custom
+        cell.kind === GridCellKind.Drilldown
     ) {
         return false;
     }
@@ -233,7 +262,8 @@ export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
         cell.kind === GridCellKind.Text ||
         cell.kind === GridCellKind.Number ||
         cell.kind === GridCellKind.Markdown ||
-        cell.kind === GridCellKind.Uri
+        cell.kind === GridCellKind.Uri ||
+        cell.kind === GridCellKind.Custom
     ) {
         return cell.readonly !== true;
     }
@@ -266,7 +296,7 @@ interface BaseGridCell {
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
-    readonly span?: readonly [number, number];
+    readonly span?: Item;
 }
 
 export interface LoadingCell extends BaseGridCell {
@@ -308,10 +338,12 @@ export type ProvideEditorComponent<T extends GridCell> = React.FunctionComponent
     readonly onFinishedEditing: (newValue?: T) => void;
     readonly isHighlighted: boolean;
     readonly value: T;
+    readonly initialValue?: string;
 }>;
 
 type ObjectEditorCallbackResult<T extends GridCell> = {
     editor: ProvideEditorComponent<T>;
+    deletedValue?: (toDelete: T) => T;
     styleOverride?: CSSProperties;
     disablePadding?: boolean;
     disableStyling?: boolean;
@@ -340,6 +372,7 @@ export interface CustomCell<T extends {} = {}> extends BaseGridCell {
     readonly kind: GridCellKind.Custom;
     readonly data: T;
     readonly copyData: string;
+    readonly readonly?: boolean;
 }
 
 export interface DrilldownCellData {
@@ -363,6 +396,7 @@ export interface BooleanCell extends BaseGridCell {
 export interface RowIDCell extends BaseGridCell {
     readonly kind: GridCellKind.RowID;
     readonly data: string;
+    readonly readonly?: boolean;
 }
 
 export interface MarkdownCell extends BaseGridCell {
@@ -397,7 +431,7 @@ export interface MarkerCell extends BaseGridCell {
     readonly markerKind: "checkbox" | "number" | "both";
 }
 
-export type Slice = readonly [number, number];
+export type Slice = Item;
 export type CompactSelectionRanges = readonly Slice[];
 
 function mergeRanges(input: CompactSelectionRanges) {

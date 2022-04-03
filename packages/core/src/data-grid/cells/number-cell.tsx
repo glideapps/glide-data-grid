@@ -1,9 +1,12 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
-import NumberOverlayEditor from "../../data-grid-overlay-editor/private/number-overlay-editor";
 import { drawTextCell, prepTextCell } from "../data-grid-lib";
 import { GridCellKind, NumberCell } from "../data-grid-types";
 import { InternalCellRenderer } from "./cell-types";
+
+const NumberOverlayEditor = React.lazy(
+    async () => await import("../../data-grid-overlay-editor/private/number-overlay-editor")
+);
 
 export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",
@@ -21,18 +24,20 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
     getEditor: () => p => {
         const { isHighlighted, onChange, onKeyDown, value } = p;
         return (
-            <NumberOverlayEditor
-                highlight={isHighlighted}
-                disabled={value.readonly === true}
-                value={value.data}
-                onKeyDown={onKeyDown}
-                onChange={x =>
-                    onChange({
-                        ...value,
-                        data: x.floatValue,
-                    })
-                }
-            />
+            <React.Suspense fallback={null}>
+                <NumberOverlayEditor
+                    highlight={isHighlighted}
+                    disabled={value.readonly === true}
+                    value={value.data}
+                    onKeyDown={onKeyDown}
+                    onChange={x =>
+                        onChange({
+                            ...value,
+                            data: x.floatValue,
+                        })
+                    }
+                />
+            </React.Suspense>
         );
     },
 };

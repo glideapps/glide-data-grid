@@ -1,4 +1,4 @@
-import { CustomCell } from "@glideapps/glide-data-grid";
+import { CustomCell, Item } from "@glideapps/glide-data-grid";
 import { CustomCellRenderer } from "../types";
 import * as React from "react";
 import styled from "styled-components";
@@ -23,7 +23,7 @@ const starPoints = [
     [38.77, 39.55],
 ];
 
-function pathStar(ctx: CanvasRenderingContext2D, center: readonly [number, number], size: number) {
+function pathStar(ctx: CanvasRenderingContext2D, center: Item, size: number) {
     let moved = false;
     for (const p of starPoints) {
         const x = (p[0] - 50) * (size / 100) + center[0];
@@ -79,7 +79,7 @@ const renderer: CustomCellRenderer<StarCell> = {
         const { ctx, theme, rect, hoverAmount } = args;
         const { rating } = cell.data;
         const padX = theme.cellHorizontalPadding;
-        let drawX = padX;
+        let drawX = rect.x + padX;
         const stars = Math.min(5, Math.ceil(rating));
         drawX += 8;
         ctx.beginPath();

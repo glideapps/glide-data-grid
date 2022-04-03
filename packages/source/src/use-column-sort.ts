@@ -26,7 +26,32 @@ function cellToSortData(c: GridCell): string {
     }
 }
 
-export function compareRaw(a: string, b: string) {
+function tryParse(val: string | number): number | string {
+    if (typeof val === "number") return val;
+    if (val.length > 0) {
+        const x = parseFloat(val);
+        if (!isNaN(x)) {
+            val = x;
+        }
+    }
+    return val;
+}
+
+export function compareSmart(a: string | number, b: string | number): number {
+    a = tryParse(a);
+    b = tryParse(b);
+    if (typeof a === "string" && typeof b === "string") {
+        return a.localeCompare(b);
+    } else if (typeof a === "number" && typeof b === "number") {
+        if (a === b) return 0;
+        return a > b ? 1 : -1;
+    } else if (a == b) {
+        return 0;
+    }
+    return a > b ? 1 : -1;
+}
+
+export function compareRaw(a: string | number, b: string | number) {
     if (a > b) return 1;
     if (a === b) return 0;
     return -1;
@@ -35,7 +60,7 @@ export function compareRaw(a: string, b: string) {
 type Props = Pick<DataEditorProps, "getCellContent" | "rows" | "columns"> & {
     sort?: {
         column: GridColumn;
-        mode?: "default" | "raw";
+        mode?: "default" | "raw" | "smart";
         direction?: "asc" | "desc";
     };
 };
@@ -70,6 +95,8 @@ export function useColumnSort(p: Props): Result {
         let result: number[];
         if (sort?.mode === "raw") {
             result = range(rows).sort((a, b) => compareRaw(vals[a], vals[b]));
+        } else if (sort?.mode === "smart") {
+            result = range(rows).sort((a, b) => compareSmart(vals[a], vals[b]));
         } else {
             result = range(rows).sort((a, b) => vals[a].localeCompare(vals[b]));
         }

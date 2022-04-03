@@ -4,11 +4,11 @@
 </h1>
 <p align="center">A relatively small HTML5 Canvas based data editor supporting <b>millions</b> of rows, <b>rapid</b> updating, and fully <b>native scrolling</b>. We built <a href="https://grid.glideapps.com" target="_blank">Data Grid</a> as the basis for the <a href="https://docs.glideapps.com/all/reference/data-editor/introduction-to-the-data-editor" target="_blank">Glide Data Editor</a>.</p>
 
-[![Version](https://img.shields.io/badge/latest-v3.4.0-blue?style=for-the-badge&logo=none)](https://github.com/glideapps/glide-data-grid/releases)
+[![Version](https://img.shields.io/npm/v/@glideapps/glide-data-grid?color=blue&label=latest&style=for-the-badge)](https://github.com/glideapps/glide-data-grid/releases)
 [![React 16+](https://img.shields.io/badge/React-16+-00ADD8?style=for-the-badge&logo=react)](https://reactjs.org)
-![Code Coverage](https://img.shields.io/coveralls/github/glideapps/glide-data-grid?color=457aba&label=Cover&style=for-the-badge)
-[![Bundle Size](https://img.shields.io/badge/Bundle-48.6kb-success?style=for-the-badge&logo=none)](https://bundlephobia.com/package/@glideapps/glide-data-grid)
-[![License MIT](https://img.shields.io/badge/license-mit-red?style=for-the-badge&logo=none)](https://github.com/glideapps/glide-data-grid/blob/main/LICENSE)
+[![Code Coverage](https://img.shields.io/coveralls/github/glideapps/glide-data-grid?color=457aba&label=Cover&style=for-the-badge)](https://coveralls.io/github/glideapps/glide-data-grid)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/@glideapps/glide-data-grid/3.4.1?color=success&label=bundle&style=for-the-badge)](https://bundlephobia.com/package/@glideapps/glide-data-grid)
+[![License](https://img.shields.io/github/license/glideapps/glide-data-grid?color=red&style=for-the-badge)](https://github.com/glideapps/glide-data-grid/blob/main/LICENSE)
 [![Made By Glide](https://img.shields.io/badge/❤_Made_by-Glide-11CCE5?style=for-the-badge&logo=none)](https://www.glideapps.com/jobs)
 
 ![Data Grid](https://raw.githubusercontent.com/glideapps/glide-data-grid/master/data-grid.jpg)
@@ -47,10 +47,7 @@ npm i lodash marked react-responsive-carousel styled-components
 Create a new `DataEditor` wherever you need to display lots and lots of data
 
 ```tsx
-// The container is not required, but is convenient for getting started
-<DataEditorContainer width={1000} height={700}>
-    <DataEditor getCellContent={getData} columns={columns} rows={numRows} />
-</DataEditorContainer>
+<DataEditor getCellContent={getData} columns={columns} rows={numRows} />
 ```
 
 Making your columns is easy
@@ -68,7 +65,7 @@ Last provide data to the grid
 ```ts
 // If fetching data is slow you can use the DataEditor ref to send updates for cells
 // once data is loaded.
-function getData([col, row]: readonly [number, number]): GridCell {
+function getData([col, row]: Item): GridCell {
     const person = getData(row);
 
     if (col === 0) {

@@ -55,6 +55,7 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
         overflow-x: hidden;
         border-radius: 2px;
         overflow: hidden;
+        flex-grow: 1;
 
         ${GrowingEntryStyle} {
             height: 100%;

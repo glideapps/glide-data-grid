@@ -3,7 +3,7 @@ import * as React from "react";
 import { StoryFn, StoryContext } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import DataGrid from "./data-grid";
-import { CompactSelection, GridCellKind } from "./data-grid-types";
+import { CompactSelection, GridCellKind, GridSelection } from "./data-grid-types";
 
 export default {
     title: "Subcomponents/DataGrid",
@@ -17,6 +17,12 @@ export default {
             </div>
         ),
     ],
+};
+
+const emptyGridSelection: GridSelection = {
+    columns: CompactSelection.empty(),
+    rows: CompactSelection.empty(),
+    current: undefined,
 };
 
 export function Simplenotest() {
@@ -41,11 +47,14 @@ export function Simplenotest() {
             width={1800}
             height={1000}
             cellXOffset={0}
+            isFocused={true}
             cellYOffset={y}
+            isFilling={false}
             onMouseMove={() => undefined}
             groupHeaderHeight={0}
             accessibilityHeight={50}
             enableGroups={false}
+            selection={emptyGridSelection}
             rows={100000}
             headerHeight={44}
             rowHeight={34}
@@ -63,6 +72,7 @@ export function Simplenotest() {
                 owned: true,
             })}
             freezeColumns={0}
+            firstColAccessible={true}
             verticalBorder={() => true}
             lastRowSticky={false}
             isResizing={false}
@@ -78,8 +88,10 @@ export function SelectedCellnotest() {
             width={1800}
             height={1000}
             cellXOffset={0}
+            isFocused={true}
             onMouseMove={() => undefined}
             accessibilityHeight={50}
+            isFilling={false}
             cellYOffset={0}
             groupHeaderHeight={34}
             enableGroups={false}
@@ -97,8 +109,17 @@ export function SelectedCellnotest() {
                 allowOverlay: false,
                 owned: true,
             })}
-            selectedCell={{ cell: [2, 2], range: { x: 2, y: 2, width: 1, height: 1 } }}
+            selection={{
+                current: {
+                    cell: [2, 2],
+                    range: { x: 2, y: 2, width: 1, height: 1 },
+                    rangeStack: [],
+                },
+                columns: CompactSelection.empty(),
+                rows: CompactSelection.empty(),
+            }}
             freezeColumns={0}
+            firstColAccessible={true}
             verticalBorder={() => true}
             lastRowSticky={false}
             isResizing={false}
@@ -116,8 +137,10 @@ export function SelectedRownotest() {
             height={1000}
             cellXOffset={0}
             cellYOffset={0}
+            isFocused={true}
             groupHeaderHeight={34}
             accessibilityHeight={50}
+            isFilling={false}
             enableGroups={false}
             rows={1000}
             headerHeight={44}
@@ -133,8 +156,13 @@ export function SelectedRownotest() {
                 allowOverlay: false,
                 owned: true,
             })}
-            selectedRows={CompactSelection.fromSingleSelection([2, 4])}
+            selection={{
+                current: undefined,
+                rows: CompactSelection.fromSingleSelection([2, 4]),
+                columns: CompactSelection.empty(),
+            }}
             freezeColumns={0}
+            firstColAccessible={true}
             verticalBorder={() => true}
             lastRowSticky={false}
             isResizing={false}
@@ -152,7 +180,9 @@ export const SelectedColumnnotest = () => {
             height={1000}
             cellXOffset={0}
             cellYOffset={0}
+            isFocused={true}
             accessibilityHeight={50}
+            isFilling={false}
             groupHeaderHeight={34}
             enableGroups={false}
             rows={1000}
@@ -169,8 +199,13 @@ export const SelectedColumnnotest = () => {
                 allowOverlay: false,
                 owned: true,
             })}
-            selectedColumns={CompactSelection.fromSingleSelection([2, 4])}
+            selection={{
+                current: undefined,
+                rows: CompactSelection.empty(),
+                columns: CompactSelection.fromSingleSelection([2, 4]),
+            }}
             freezeColumns={0}
+            firstColAccessible={true}
             verticalBorder={() => true}
             lastRowSticky={false}
             isResizing={false}

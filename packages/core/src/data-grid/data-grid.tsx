@@ -3,11 +3,11 @@ import { Theme } from "../common/styles";
 import { useTheme } from "styled-components";
 import ImageWindowLoader from "../common/image-window-loader";
 import {
+    computeBounds,
     getColumnIndexForX,
     getEffectiveColumns,
     getRowIndexForY,
     getStickyWidth,
-    isGroupEqual,
     useMappedColumns,
 } from "./data-grid-lib";
 import {
@@ -25,6 +25,8 @@ import {
     Item,
     DrawHeaderCallback,
     SizedGridColumn,
+    isReadWriteCell,
+    isInnerOnlyCell,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -36,6 +38,7 @@ import {
     getHeaderMenuBounds,
     GetRowThemeCallback,
     GroupDetailsCallback,
+    Highlight,
     pointInRect,
 } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
@@ -57,9 +60,12 @@ export interface DataGridProps {
 
     readonly freezeColumns: number;
     readonly lastRowSticky: boolean;
+    readonly firstColAccessible: boolean;
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
     readonly isDragging: boolean;
+    readonly isFilling: boolean;
+    readonly isFocused: boolean;
 
     readonly columns: readonly SizedGridColumn[];
     readonly rows: number;
@@ -75,15 +81,16 @@ export interface DataGridProps {
 
     readonly className?: string;
 
-    readonly getCellContent: (cell: readonly [number, number]) => InnerGridCell;
+    readonly getCellContent: (cell: Item) => InnerGridCell;
     readonly getGroupDetails?: GroupDetailsCallback;
     readonly getRowThemeOverride?: GetRowThemeCallback;
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
-    readonly selectedRows?: CompactSelection;
-    readonly selectedColumns?: CompactSelection;
-    readonly selectedCell?: GridSelection;
-    readonly prelightCells?: readonly (readonly [number, number])[];
+    readonly selection: GridSelection;
+    readonly prelightCells?: readonly Item[];
+    readonly highlightRegions?: readonly Highlight[];
+
+    readonly fillHandle?: boolean;
 
     readonly disabledRows?: CompactSelection;
 
@@ -92,7 +99,9 @@ export interface DataGridProps {
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
     readonly onMouseUp?: (args: GridMouseEventArgs, isOutside: boolean) => void;
 
-    readonly onCellFocused?: (args: readonly [number, number]) => void;
+    readonly onCanvasFocused?: () => void;
+    readonly onCanvasBlur?: () => void;
+    readonly onCellFocused?: (args: Item) => void;
 
     readonly onMouseMoveRaw?: (event: MouseEvent) => void;
 
@@ -131,7 +140,7 @@ interface BlitData {
 }
 
 type DamageUpdateList = readonly {
-    cell: readonly [number, number];
+    cell: Item;
     // newValue: GridCell,
 }[];
 
@@ -151,16 +160,19 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         cellXOffset: cellXOffsetReal,
         cellYOffset,
         headerHeight,
+        fillHandle = false,
         groupHeaderHeight,
         rowHeight,
         rows,
         getCellContent,
         getRowThemeOverride,
         onHeaderMenuClick,
-        selectedRows,
         enableGroups,
-        selectedCell,
-        selectedColumns,
+        isFilling,
+        onCanvasFocused,
+        onCanvasBlur,
+        isFocused,
+        selection,
         freezeColumns,
         lastRowSticky,
         onMouseDown,
@@ -169,8 +181,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         onMouseMove,
         onItemHovered,
         dragAndDropState,
+        firstColAccessible,
         onKeyDown,
         onKeyUp,
+        highlightRegions,
         canvasRef,
         onDragStart,
         eventTargetRef,
@@ -242,103 +256,43 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         (canvas: HTMLCanvasElement, col: number, row: number): Rectangle => {
             const rect = canvas.getBoundingClientRect();
 
-            const result: Rectangle = {
-                x: rect.x,
-                y: rect.y + totalHeaderHeight + translateY,
-                width: 0,
-                height: 0,
-            };
+            const result = computeBounds(
+                col,
+                row,
+                width,
+                height,
+                groupHeaderHeight,
+                totalHeaderHeight,
+                cellXOffset,
+                cellYOffset,
+                translateX,
+                translateY,
+                rows,
+                freezeColumns,
+                lastRowSticky,
+                mappedColumns,
+                rowHeight
+            );
 
-            if (col >= freezeColumns) {
-                const dir = cellXOffset > col ? -1 : 1;
-                const freezeWidth = getStickyWidth(mappedColumns);
-                result.x += freezeWidth + translateX;
-                for (let i = cellXOffset; i !== col; i += dir) {
-                    result.x += mappedColumns[i].width * dir;
-                }
-            } else {
-                for (let i = 0; i < col; i++) {
-                    result.x += mappedColumns[i].width;
-                }
-            }
-            result.width = mappedColumns[col].width + 1;
-
-            if (row === -1) {
-                result.y = rect.y + groupHeaderHeight;
-                result.height = headerHeight;
-            } else if (row === -2) {
-                result.y = rect.y;
-                result.height = groupHeaderHeight;
-
-                let start = col;
-                const group = mappedColumns[col].group;
-                const sticky = mappedColumns[col].sticky;
-                while (
-                    start > 0 &&
-                    isGroupEqual(mappedColumns[start - 1].group, group) &&
-                    mappedColumns[start - 1].sticky === sticky
-                ) {
-                    const c = mappedColumns[start - 1];
-                    result.x -= c.width;
-                    result.width += c.width;
-                    start--;
-                }
-
-                let end = col;
-                while (
-                    end + 1 < mappedColumns.length &&
-                    isGroupEqual(mappedColumns[end + 1].group, group) &&
-                    mappedColumns[end + 1].sticky === sticky
-                ) {
-                    const c = mappedColumns[end + 1];
-                    result.width += c.width;
-                    end++;
-                }
-                if (!sticky) {
-                    const freezeWidth = getStickyWidth(mappedColumns);
-                    const clip = result.x - (rect.x + freezeWidth);
-                    if (clip < 0) {
-                        result.x -= clip;
-                        result.width += clip;
-                    }
-
-                    if (result.x + result.width > rect.right) {
-                        result.width = rect.right - result.x;
-                    }
-                }
-            } else if (lastRowSticky && row === rows - 1) {
-                const stickyHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(row);
-                result.y = rect.y + (height - stickyHeight);
-                result.height = stickyHeight;
-            } else {
-                const dir = cellYOffset > row ? -1 : 1;
-                if (typeof rowHeight === "number") {
-                    const delta = row - cellYOffset;
-                    result.y += delta * rowHeight;
-                } else {
-                    for (let r = cellYOffset; r !== row; r += dir) {
-                        result.y += rowHeight(r) * dir;
-                    }
-                }
-                result.height = (typeof rowHeight === "number" ? rowHeight : rowHeight(row)) + 1;
-            }
+            result.x += rect.x;
+            result.y += rect.y;
 
             return result;
         },
         [
-            totalHeaderHeight,
-            translateY,
-            freezeColumns,
-            mappedColumns,
-            lastRowSticky,
-            rows,
-            cellXOffset,
-            translateX,
-            groupHeaderHeight,
-            headerHeight,
-            rowHeight,
+            width,
             height,
+            groupHeaderHeight,
+            totalHeaderHeight,
+            cellXOffset,
             cellYOffset,
+            translateX,
+            translateY,
+            rows,
+            freezeColumns,
+            lastRowSticky,
+            mappedColumns,
+            rowHeight,
         ]
     );
 
@@ -442,6 +396,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             } else {
                 const bounds = getBoundsForItem(canvas, col, row);
                 const isEdge = bounds !== undefined && bounds.x + bounds.width - posX < edgeDetectionBuffer;
+                const isFillHandle =
+                    fillHandle &&
+                    bounds !== undefined &&
+                    bounds.x + bounds.width - posX < 6 &&
+                    bounds.y + bounds.height - posY < 6;
                 result = {
                     kind: "cell",
                     location: [col, row],
@@ -449,6 +408,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isEdge,
                     shiftKey,
                     ctrlKey,
+                    isFillHandle,
                     metaKey,
                     isTouch,
                     localEventX: posX - bounds.x,
@@ -473,6 +433,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             translateY,
             lastRowSticky,
             getBoundsForItem,
+            fillHandle,
         ]
     );
 
@@ -497,17 +458,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         const overlay = overlayRef.current;
         if (canvas === null || overlay === null) return;
 
-        drawGrid(
+        drawGrid({
             canvas,
-            {
-                overlay,
-            },
+            buffers: { overlay },
             width,
             height,
             cellXOffset,
             cellYOffset,
-            Math.round(translateX),
-            Math.round(translateY),
+            translateX: Math.round(translateX),
+            translateY: Math.round(translateY),
             columns,
             mappedColumns,
             enableGroups,
@@ -516,32 +475,35 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             theme,
             headerHeight,
             groupHeaderHeight,
-            selectedRows ?? CompactSelection.empty(),
-            disabledRows ?? CompactSelection.empty(),
+            selectedRows: selection.rows,
+            disabledRows: disabledRows ?? CompactSelection.empty(),
             rowHeight,
             verticalBorder,
-            selectedColumns ?? CompactSelection.empty(),
+            selectedColumns: selection.columns,
             isResizing,
-            selectedCell,
+            isFocused,
+            selectedCell: selection,
+            fillHandle,
             lastRowSticky,
             rows,
             getCellContent,
-            getGroupDetails ?? (name => ({ name })),
+            getGroupDetails: getGroupDetails ?? (name => ({ name })),
             getRowThemeOverride,
             drawCustomCell,
-            drawHeader,
+            drawHeaderCallback: drawHeader,
             prelightCells,
+            highlightRegions,
             imageLoader,
             lastBlitData,
-            canBlit.current ?? false,
-            damageRegion.current,
-            hoverValues.current,
-            hoverInfoRef.current,
+            canBlit: canBlit.current ?? false,
+            damage: damageRegion.current,
+            hoverValues: hoverValues.current,
+            hoverInfo: hoverInfoRef.current,
             spriteManager,
             scrolling,
-            lastWasTouch,
-            enqueueRef.current
-        );
+            touchMode: lastWasTouch,
+            enqueue: enqueueRef.current,
+        });
     }, [
         width,
         height,
@@ -556,14 +518,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         dragAndDropState,
         theme,
         headerHeight,
+        isFocused,
         groupHeaderHeight,
-        selectedRows,
+        selection,
         disabledRows,
         rowHeight,
         verticalBorder,
-        selectedColumns,
         isResizing,
-        selectedCell,
+        fillHandle,
         lastRowSticky,
         rows,
         getCellContent,
@@ -572,6 +534,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         drawCustomCell,
         drawHeader,
         prelightCells,
+        highlightRegions,
         imageLoader,
         spriteManager,
         scrolling,
@@ -589,13 +552,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         headerHeight,
         rowHeight,
         rows,
+        isFocused,
         isResizing,
         verticalBorder,
         getCellContent,
-        selectedRows,
+        highlightRegions,
         lastWasTouch,
-        selectedColumns,
-        selectedCell,
+        selection,
         dragAndDropState,
         prelightCells,
         scrolling,
@@ -640,6 +603,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     imageLoader.setCallback(damageInternal);
 
+    const [overFill, setOverFill] = React.useState(false);
+
     const [hCol, hRow] = hoveredItem ?? [];
     const headerHovered = hCol !== undefined && hRow === -1;
     const groupHeaderHovered = hCol !== undefined && hRow === -2;
@@ -657,6 +622,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         ? "grabbing"
         : canDrag || isResizing
         ? "col-resize"
+        : overFill || isFilling
+        ? "crosshair"
         : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
         ? "pointer"
         : "default";
@@ -895,17 +862,35 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             setHoveredOnEdge(args.kind === "header" && args.isEdge && allowResize === true);
 
+            if (fillHandle && selection.current !== undefined) {
+                const [col, row] = selection.current.cell;
+                const sb = getBoundsForItem(canvas, col, row);
+                const x = ev.clientX;
+                const y = ev.clientY;
+                setOverFill(
+                    x >= sb.x + sb.width - 6 &&
+                        x <= sb.x + sb.width &&
+                        y >= sb.y + sb.height - 6 &&
+                        y <= sb.y + sb.height
+                );
+            } else {
+                setOverFill(false);
+            }
+
             onMouseMoveRaw?.(ev);
             onMouseMove(args);
         },
         [
             getMouseArgsForPosition,
             allowResize,
+            fillHandle,
+            selection,
             onMouseMoveRaw,
             onMouseMove,
             onItemHovered,
             getCellContent,
             damageInternal,
+            getBoundsForItem,
         ]
     );
     useEventListener("mousemove", onMouseMoveImpl, window, true);
@@ -916,8 +901,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             if (canvas === null) return;
 
             let bounds: Rectangle | undefined;
-            if (selectedCell !== undefined) {
-                bounds = getBoundsForItem(canvas, selectedCell.cell[0], selectedCell.cell[1]);
+            if (selection.current !== undefined) {
+                bounds = getBoundsForItem(canvas, selection.current.cell[0], selection.current.cell[1]);
             }
 
             onKeyDown?.({
@@ -929,11 +914,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 ctrlKey: event.ctrlKey,
                 metaKey: event.metaKey,
                 shiftKey: event.shiftKey,
+                altKey: event.altKey,
                 key: event.key,
                 keyCode: event.keyCode,
             });
         },
-        [onKeyDown, selectedCell, getBoundsForItem]
+        [onKeyDown, selection, getBoundsForItem]
     );
 
     const onKeyUpImpl = React.useCallback(
@@ -942,8 +928,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             if (canvas === null) return;
 
             let bounds: Rectangle | undefined;
-            if (selectedCell !== undefined) {
-                bounds = getBoundsForItem(canvas, selectedCell.cell[0], selectedCell.cell[1]);
+            if (selection.current !== undefined) {
+                bounds = getBoundsForItem(canvas, selection.current.cell[0], selection.current.cell[1]);
             }
 
             onKeyUp?.({
@@ -955,11 +941,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 ctrlKey: event.ctrlKey,
                 metaKey: event.metaKey,
                 shiftKey: event.shiftKey,
+                altKey: event.altKey,
                 key: event.key,
                 keyCode: event.keyCode,
             });
         },
-        [onKeyUp, selectedCell, getBoundsForItem]
+        [onKeyUp, selection, getBoundsForItem]
     );
 
     const refImpl = React.useCallback(
@@ -1127,7 +1114,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const accessibilityTree = useDebouncedMemo(
         () => {
             if (width < 50) return null;
-            const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
+            let effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
+            const colOffset = firstColAccessible ? 0 : -1;
+            if (!firstColAccessible && effectiveCols[0]?.sourceIndex === 0) {
+                effectiveCols = effectiveCols.slice(1);
+            }
 
             const getRowData = (cell: InnerGridCell) => {
                 if (cell.kind === GridCellKind.Custom) {
@@ -1136,32 +1127,63 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     return CellRenderers[cell.kind].getAccessibilityString(cell);
                 }
             };
+            const [fCol, fRow] = selection.current?.cell ?? [];
+            const range = selection.current?.range;
 
             return (
-                <div key="access-tree" role="grid" aria-rowcount={rows} aria-colcount={mappedColumns.length}>
-                    <div role="rowgroup">
-                        <div role="row" aria-rowindex={1} row-index={1}>
+                <table
+                    key="access-tree"
+                    role="grid"
+                    aria-rowcount={rows + 1}
+                    aria-multiselectable="true"
+                    aria-colcount={mappedColumns.length + colOffset}>
+                    <thead role="rowgroup">
+                        <tr role="row" aria-rowindex={1} row-index={1}>
                             {effectiveCols.map(c => (
-                                <div role="columnheader" aria-colindex={c.sourceIndex + 1} key={c.sourceIndex}>
+                                <th
+                                    role="columnheader"
+                                    aria-selected={selection.columns.hasIndex(c.sourceIndex)}
+                                    aria-colindex={c.sourceIndex + 1 + colOffset}
+                                    tabIndex={-1}
+                                    onFocus={e => {
+                                        if (e.target === focusRef.current) return;
+                                        return onCellFocused?.([c.sourceIndex, -1]);
+                                    }}
+                                    key={c.sourceIndex}>
                                     {c.title}
-                                </div>
+                                </th>
                             ))}
-                        </div>
-                    </div>
-                    <div role="rowgroup">
+                        </tr>
+                    </thead>
+                    <tbody role="rowgroup">
                         {makeRange(cellYOffset, Math.min(rows, cellYOffset + accessibilityHeight)).map(row => (
-                            <div role="row" key={row} aria-rowindex={row + 2} row-index={row + 2}>
+                            <tr
+                                role="row"
+                                aria-selected={selection.rows.hasIndex(row)}
+                                key={row}
+                                aria-rowindex={row + 2}
+                                row-index={row + 2}>
                                 {effectiveCols.map(c => {
                                     const col = c.sourceIndex;
                                     const key = `${col},${row}`;
-                                    const [fCol, fRow] = selectedCell?.cell ?? [];
                                     const focused = fCol === col && fRow === row;
+                                    const selected =
+                                        range !== undefined &&
+                                        col >= range.x &&
+                                        col < range.x + range.width &&
+                                        row >= range.y &&
+                                        row < range.y + range.height;
                                     const id = `glide-cell-${col}-${row}`;
+                                    const cellContent = getCellContent([col, row]);
                                     return (
-                                        <div
+                                        <td
                                             key={key}
                                             role="gridcell"
-                                            aria-colindex={col + 1}
+                                            aria-colindex={col + 1 + colOffset}
+                                            aria-selected={selected}
+                                            aria-readonly={
+                                                isInnerOnlyCell(cellContent) || !isReadWriteCell(cellContent)
+                                            }
                                             id={id}
                                             data-testid={id}
                                             onClick={() => {
@@ -1175,6 +1197,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                                     keyCode: 13,
                                                     metaKey: false,
                                                     shiftKey: false,
+                                                    altKey: false,
                                                 });
                                             }}
                                             onFocusCapture={e => {
@@ -1183,14 +1206,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                             }}
                                             ref={focused ? focusElement : undefined}
                                             tabIndex={-1}>
-                                            {getRowData(getCellContent([col, row]))}
-                                        </div>
+                                            {getRowData(cellContent)}
+                                        </td>
                                     );
                                 })}
-                            </div>
+                            </tr>
                         ))}
-                    </div>
-                </div>
+                    </tbody>
+                </table>
             );
         },
         [
@@ -1202,7 +1225,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             rows,
             cellYOffset,
             accessibilityHeight,
-            selectedCell?.cell,
+            selection,
             focusElement,
             getCellContent,
             canvasRef,
@@ -1248,6 +1271,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 tabIndex={0}
                 onKeyDown={onKeyDownImpl}
                 onKeyUp={onKeyUpImpl}
+                onFocus={onCanvasFocused}
+                onBlur={onCanvasBlur}
                 className={className}
                 ref={refImpl}
                 style={style}>

@@ -1,14 +1,7 @@
 import styled from "styled-components";
 import * as React from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import {
-    DataEditor,
-    DataEditorContainer,
-    DataEditorProps,
-    GridCellKind,
-    GridColumn,
-    Theme,
-} from "@glideapps/glide-data-grid";
+import { DataEditor, DataEditorProps, GridCellKind, GridColumn, Theme } from "@glideapps/glide-data-grid";
 import faker from "faker";
 import { useCollapsingGroups, useColumnSort, useMoveableColumns } from ".";
 
@@ -100,9 +93,14 @@ const BeautifulWrapper: React.FC<BeautifulProps> = p => {
                 <div className="sizer-clip">
                     <AutoSizer>
                         {(props: { width?: number; height?: number }) => (
-                            <DataEditorContainer width={props.width ?? 100} height={props.height ?? 100}>
+                            <div
+                                style={{
+                                    position: "relative",
+                                    width: props.width ?? 100,
+                                    height: props.height ?? 100,
+                                }}>
                                 {children}
-                            </DataEditorContainer>
+                            </div>
                         )}
                     </AutoSizer>
                 </div>
@@ -122,6 +120,7 @@ const defaultProps: Partial<DataEditorProps> = {
     smoothScrollY: true,
     isDraggable: false,
     rowMarkers: "none",
+    width: "100%",
 };
 
 const testTheme: Theme = {
@@ -171,22 +170,27 @@ const cols: GridColumn[] = [
     {
         title: "A",
         width: 200,
+        group: "Group 1",
     },
     {
         title: "B",
         width: 200,
+        group: "Group 1",
     },
     {
         title: "C",
         width: 200,
+        group: "Group 2",
     },
     {
         title: "D",
         width: 200,
+        group: "Group 2",
     },
     {
         title: "E",
         width: 200,
+        group: "Group 2",
     },
 ];
 
@@ -197,13 +201,13 @@ export const UseDataSource: React.VFC = () => {
 
     const moveArgs = useMoveableColumns({
         columns: cols,
-        getCellContent: ([col, row]) => {
+        getCellContent: React.useCallback(([col, row]) => {
             if (col === 0) {
                 return {
                     kind: GridCellKind.Text,
                     allowOverlay: true,
-                    data: `${col} x ${row}`,
-                    displayData: `${col} x ${row}`,
+                    data: `${row}`,
+                    displayData: `${row}`,
                 };
             }
 
@@ -219,7 +223,7 @@ export const UseDataSource: React.VFC = () => {
                 data: d,
                 displayData: d,
             };
-        },
+        }, []),
     });
 
     const [sort, setSort] = React.useState<number>();
@@ -234,6 +238,7 @@ export const UseDataSource: React.VFC = () => {
                 : {
                       column: moveArgs.columns[sort],
                       direction: "desc",
+                      mode: "smart",
                   },
     });
 
@@ -248,7 +253,7 @@ export const UseDataSource: React.VFC = () => {
     }, []);
 
     return (
-        <BeautifulWrapper title="Custom cells" description={<Description>Some of our extension cells.</Description>}>
+        <BeautifulWrapper title="Custom source extensions" description={<Description>Fixme.</Description>}>
             <DataEditor
                 {...defaultProps}
                 {...moveArgs}

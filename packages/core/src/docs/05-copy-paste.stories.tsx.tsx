@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import { EditableGridCell, GridCell, GridCellKind, GridColumn } from "../data-grid/data-grid-types";
-import { DataEditor, DataEditorProps } from "../data-editor/data-editor";
+import { EditableGridCell, GridCell, GridCellKind, GridColumn, Item } from "../data-grid/data-grid-types";
+import { DataEditor } from "../data-editor/data-editor";
 
 import { SimpleThemeWrapper } from "../stories/story-utils";
 import { DocWrapper, Highlight, Marked, Wrapper } from "./doc-wrapper";
@@ -130,7 +130,7 @@ export const CopyPaste: React.VFC = () => {
         },
     ]);
 
-    const getContent = React.useCallback((cell: readonly [number, number]): GridCell => {
+    const getContent = React.useCallback((cell: Item): GridCell => {
         const [col, row] = cell;
         const dataRow = dataRef.current[row];
         const indexes: (keyof DummyItem)[] = ["name", "company", "email", "phone"];
@@ -164,24 +164,7 @@ export const CopyPaste: React.VFC = () => {
         ];
     }, []);
 
-    const getCellsForSelection = React.useCallback<NonNullable<DataEditorProps["getCellsForSelection"]>>(
-        s => {
-            const result: GridCell[][] = [];
-            for (let y = 0; y < s.height; y++) {
-                const row = y + s.y;
-                const rowArr: GridCell[] = [];
-                for (let x = 0; x < s.width; x++) {
-                    const col = x + s.x;
-                    rowArr.push(getContent([col, row]));
-                }
-                result.push(rowArr);
-            }
-            return result;
-        },
-        [getContent]
-    );
-
-    const onCellEdited = React.useCallback((cell: readonly [number, number], newValue: EditableGridCell) => {
+    const onCellEdited = React.useCallback((cell: Item, newValue: EditableGridCell) => {
         if (newValue.kind !== GridCellKind.Text) {
             // we only have text cells, might as well just die here.
             return;
@@ -207,34 +190,17 @@ By default copy is not enabled, to enabled copy implement the \`getCellsForSelec
 
 > \`getCellsForSelection\` is used instead of \`getCellContent\` to allow optimization when fetching large amounts of data outside of the visible region.
 
-This example uses a generic function which simply calls \`getContent\`, which is inefficient but fine for a local data source.`}
+This example uses the built in generic function which simply calls \`getContent\`, which is inefficient but fine for a local data source.`}
             </Marked>
             <Highlight>
                 {`
-const getCellsForSelection = React.useCallback<NonNullable<DataEditorProps["getCellsForSelection"]>>(
-    s => {
-        const result: GridCell[][] = [];
-        for (let y = 0; y < s.height; y++) {
-            const row = y + s.y;
-            const rowArr: GridCell[] = [];
-            for (let x = 0; x < s.width; x++) {
-                const col = x + s.x;
-                rowArr.push(getContent([col, row]));
-            }
-            result.push(rowArr);
-        }
-        return result;
-    },
-    [getContent]
-);
-
-return <DataEditor {...rest} getCellsForSelection={getCellsForSelection} />
+return <DataEditor {...rest} getCellsForSelection={true} />
 `}
             </Highlight>
             <Wrapper height={200}>
                 <DataEditor
                     getCellContent={getContent}
-                    getCellsForSelection={getCellsForSelection}
+                    getCellsForSelection={true}
                     columns={columns}
                     rows={dataRef.current.length}
                 />
@@ -260,7 +226,7 @@ return <DataEditor {...rest} onCellEdited={onCellEdited} onPaste={true} />
                 <DataEditor
                     getCellContent={getContent}
                     onCellEdited={onCellEdited}
-                    getCellsForSelection={getCellsForSelection}
+                    getCellsForSelection={true}
                     onPaste={true}
                     columns={columns}
                     rows={dataRef.current.length}
@@ -293,7 +259,7 @@ return <DataEditor
                 <DataEditor
                     getCellContent={getContent}
                     onCellEdited={onCellEdited}
-                    getCellsForSelection={getCellsForSelection}
+                    getCellsForSelection={true}
                     columns={columns}
                     onPaste={(target, value) => {
                         window.alert(JSON.stringify({ target, value }));

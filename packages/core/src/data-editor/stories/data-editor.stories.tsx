@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { StoryFn, StoryContext, useState, useCallback, useMemo } from "@storybook/addons";
-import { BuilderThemeWrapper } from "../stories/story-utils";
+import { BuilderThemeWrapper } from "../../stories/story-utils";
 
 import {
     CompactSelection,
@@ -10,11 +10,10 @@ import {
     GridCellKind,
     GridColumn,
     GridSelection,
-    Rectangle,
-} from "../data-grid/data-grid-types";
+    Item,
+} from "../../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { DataEditor } from "./data-editor";
-import DataEditorContainer from "../data-editor-container/data-grid-container";
+import { DataEditor } from "../data-editor";
 
 export default {
     title: "Tests/TestCases",
@@ -24,9 +23,7 @@ export default {
             <AutoSizer>
                 {(props: { width?: number; height?: number }) => (
                     <BuilderThemeWrapper width={props.width ?? 1000} height={props.height ?? 800} context={context}>
-                        <DataEditorContainer width={props.width ?? 1000} height={props.height ?? 800}>
-                            {fn()}
-                        </DataEditorContainer>
+                        {fn()}
                     </BuilderThemeWrapper>
                 )}
             </AutoSizer>
@@ -34,7 +31,7 @@ export default {
     ],
 };
 
-function getDummyData([col, row]: readonly [number, number]): GridCell {
+function getDummyData([col, row]: Item): GridCell {
     if (col === 0) {
         return {
             kind: GridCellKind.RowID,
@@ -177,23 +174,11 @@ export function Simplenotest() {
         [cols]
     );
 
-    const getCellsForSelection = useCallback((selection: Rectangle) => {
-        const cells: GridCell[][] = [];
-        for (let yCoord = selection.y; yCoord < selection.y + selection.height; yCoord++) {
-            const rowCells: GridCell[] = [];
-            for (let xCoord = selection.x; xCoord < selection.x + selection.width; xCoord++) {
-                rowCells.push(getDummyData([xCoord, yCoord]));
-            }
-            cells.push(rowCells);
-        }
-
-        return cells;
-    }, []);
-
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
-            getCellsForSelection={getCellsForSelection}
+            getCellsForSelection={true}
             columns={cols}
             rows={1000}
             onColumnResized={onColumnResized}
@@ -212,7 +197,7 @@ function getDummyRelationColumn(): GridColumn[] {
     ];
 }
 
-function getDummyRelationData([col, row]: readonly [number, number]): GridCell {
+function getDummyRelationData([col, row]: Item): GridCell {
     return {
         kind: GridCellKind.Drilldown,
         data: [
@@ -246,6 +231,7 @@ export function RelationColumn() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyRelationData}
             columns={cols}
             rows={1000}
@@ -261,7 +247,7 @@ const columns: GridColumn[] = [
     { title: "Square", width: 100 },
 ];
 
-function getData([col, row]: readonly [number, number]): GridCell {
+function getData([col, row]: Item): GridCell {
     const n = Math.pow(row, col + 1);
 
     return {
@@ -273,7 +259,7 @@ function getData([col, row]: readonly [number, number]): GridCell {
 }
 
 export function Minimal() {
-    return <DataEditor getCellContent={getData} columns={columns} rows={1000} />;
+    return <DataEditor width="100%" getCellContent={getData} columns={columns} rows={1000} />;
 }
 
 export function Smooth() {
@@ -299,6 +285,7 @@ export function Smooth() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             onColumnResized={onColumnResized}
             columns={cols}
@@ -312,14 +299,15 @@ export function Smooth() {
 export function ManualControl() {
     const [gridSelection, setGridSelection] = useState<GridSelection | undefined>(undefined);
 
-    const cb = (newVal: GridSelection | undefined) => {
-        if ((newVal?.cell[0] ?? 0) % 2 === 0) {
+    const cb = (newVal: GridSelection) => {
+        if ((newVal.current?.cell[0] ?? 0) % 2 === 0) {
             setGridSelection(newVal);
         }
     };
 
     return (
         <DataEditor
+            width="100%"
             gridSelection={gridSelection}
             onGridSelectionChange={cb}
             getCellContent={getData}
@@ -332,6 +320,7 @@ export function ManualControl() {
 export function Draggable() {
     return (
         <DataEditor
+            width="100%"
             isDraggable={true}
             onDragStart={args => {
                 args.setData("text", "testing");
@@ -351,21 +340,21 @@ export function IdealSize() {
     ];
     return (
         <div style={{ width: 500, height: 500, position: "relative" }}>
-            <DataEditorContainer width={500} height={500}>
-                <DataEditor
-                    isDraggable={true}
-                    onDragStart={args => {
-                        args.setData("text", "testing");
-                    }}
-                    getCellContent={getData}
-                    columns={cols}
-                    smoothScrollX={true}
-                    smoothScrollY={true}
-                    rowHeight={50}
-                    headerHeight={50}
-                    rows={9}
-                />
-            </DataEditorContainer>
+            <DataEditor
+                width={500}
+                height={500}
+                isDraggable={true}
+                onDragStart={args => {
+                    args.setData("text", "testing");
+                }}
+                getCellContent={getData}
+                columns={cols}
+                smoothScrollX={true}
+                smoothScrollY={true}
+                rowHeight={50}
+                headerHeight={50}
+                rows={9}
+            />
         </div>
     );
 }
@@ -386,6 +375,7 @@ export function DynamicAddRemoveColumns({ columnCount }: { columnCount: number }
 
     return (
         <DataEditor
+            width="100%"
             isDraggable={true}
             getCellContent={getData}
             columns={cols}
@@ -401,52 +391,6 @@ DynamicAddRemoveColumns.args = {
     columnCount: 2,
 };
 
-export function RowSelectionStateLivesOutside() {
-    const [selected_rows, setSelectedRows] = useState<CompactSelection | undefined>(undefined);
-    const cb = (newRows: CompactSelection | undefined) => {
-        if (newRows !== undefined) {
-            setSelectedRows(newRows);
-        }
-    };
-
-    return (
-        <DataEditor
-            selectedRows={selected_rows}
-            onSelectedRowsChange={cb}
-            isDraggable={true}
-            onDragStart={args => {
-                args.setData("text", "testing");
-            }}
-            getCellContent={getData}
-            columns={columns}
-            rows={1000}
-        />
-    );
-}
-
-export function ColSelectionStateLivesOutside() {
-    const [selected_cols, setSelectedCols] = useState<CompactSelection>(CompactSelection.empty());
-    const cb = (newRows: CompactSelection | undefined) => {
-        if (newRows !== undefined) {
-            setSelectedCols(newRows);
-        }
-    };
-
-    return (
-        <DataEditor
-            selectedColumns={selected_cols}
-            onSelectedColumnsChange={cb}
-            isDraggable={true}
-            onDragStart={args => {
-                args.setData("text", "testing");
-            }}
-            getCellContent={getData}
-            columns={columns}
-            rows={1000}
-        />
-    );
-}
-
 export function GridSelectionOutOfRangeNoColumns() {
     const dummyCols = useMemo(
         () => getDummyCols().map(v => ({ ...v, width: 300, title: "Making column smaller used to crash!" })),
@@ -454,8 +398,9 @@ export function GridSelectionOutOfRangeNoColumns() {
     );
 
     const [selected, setSelected] = useState<GridSelection | undefined>({
-        cell: [2, 8],
-        range: { width: 1, height: 1, x: 2, y: 8 },
+        current: { cell: [2, 8], range: { width: 1, height: 1, x: 2, y: 8 }, rangeStack: [] },
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
     });
 
     const [cols, setCols] = useState(dummyCols);
@@ -466,6 +411,7 @@ export function GridSelectionOutOfRangeNoColumns() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             columns={cols}
             rows={1000}
@@ -524,6 +470,7 @@ export function ResizableColumns() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             columns={cols}
             rows={20}
@@ -542,8 +489,9 @@ export function GridSelectionOutOfRangeLessColumnsThanSelection() {
     );
 
     const [selected, setSelected] = useState<GridSelection | undefined>({
-        cell: [2, 8],
-        range: { width: 1, height: 1, x: 2, y: 8 },
+        current: { cell: [2, 8], range: { width: 1, height: 1, x: 2, y: 8 }, rangeStack: [] },
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
     });
 
     const [cols, setCols] = useState(dummyCols);
@@ -554,6 +502,7 @@ export function GridSelectionOutOfRangeLessColumnsThanSelection() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             columns={cols}
             rows={1000}
@@ -587,6 +536,7 @@ export function GridAddNewRows() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             columns={cols}
             rows={rowsCount}
@@ -608,6 +558,7 @@ export function GridNoTrailingBlankRow() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={getDummyData}
             columns={cols}
             rows={100}
@@ -631,7 +582,7 @@ export function MarkdownEdits() {
         ];
     }, []);
 
-    const dummyCells = useCallback(([col, _row]: readonly [number, number]) => {
+    const dummyCells = useCallback(([col, _row]: Item) => {
         if (col === 0) {
             const editable: EditableGridCell = {
                 data: "text",
@@ -669,8 +620,9 @@ export function MarkdownEdits() {
     }, []);
 
     const [selected, setSelected] = useState<GridSelection | undefined>({
-        cell: [2, 8],
-        range: { width: 1, height: 1, x: 2, y: 8 },
+        current: { cell: [2, 8], range: { width: 1, height: 1, x: 2, y: 8 }, rangeStack: [] },
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
     });
 
     const onSelected = useCallback((newSel?: GridSelection) => {
@@ -679,6 +631,7 @@ export function MarkdownEdits() {
 
     return (
         <DataEditor
+            width="100%"
             getCellContent={dummyCells}
             columns={dummyCols}
             rows={1000}
@@ -692,6 +645,7 @@ export const CanEditBoolean = () => {
     const [vals, setVals] = useState<[boolean, boolean]>([false, false]);
     return (
         <DataEditor
+            width="100%"
             columns={[
                 {
                     title: "Editable",
@@ -736,6 +690,7 @@ export const SimpleEditable = () => {
 
     return (
         <DataEditor
+            width="100%"
             columns={[
                 {
                     title: "Column A",

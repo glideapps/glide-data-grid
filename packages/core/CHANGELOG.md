@@ -1,3 +1,153 @@
+# 4.0.0 Release Notes
+
+## 🚨🚨 Breaking API Changes
+
+### 📦 DataEditorContainer gone
+
+The `DataEditorContainer` wrapper is dead. Long live the now permanently infused `DataEditorContainer`. The `DataEditor` now has optional width/height properties which act exactly like how the container used to work, when not set the DataEditor will now attempt to reasonably self size.
+
+Further a `className` can now be passed to have direct control over the container sizing. Warning, messing around too much with the container may cause very unexpected behavior.
+
+### ✅ Selection API changes
+
+The selection of the Data Grid has been unified into a single object. This dramatically reduces the complexity of handling selection scenarios involving multiple types of selection, watching for clearing of selections, and responding to selection states.
+
+```ts
+interface GridSelection {
+    readonly current?: {
+        readonly cell: readonly [number, number];
+        readonly range: Readonly<Rectangle>;
+        readonly rangeStack: readonly Readonly<Rectangle>[];
+    };
+    readonly columns: CompactSelection;
+    readonly rows: CompactSelection;
+}
+```
+
+This means that the `selectedColumns` and `selectedRows` properties are now a part of the `selection` property. The new `rangeStack` is used when selecting multiple cell ranges.
+
+### getCellsForSelection changes
+
+`getCellsForSelection` has a different API in 4.0 due to the GridSelection changes. Instead of passing a GridSelection it simply passes a Rectangle.
+
+To further improve the consistency of data access for developers, `getCellsForSelection` can be implemented by passing `true`. This causes the data grid to internally use `getCellContent` whenever `getCellsForSelection` would normally be needed.
+
+### onDelete replacing onDeleteRows
+
+`onDeleteRows` is gone and replaced with `onDelete`. 
+
+```ts
+onDelete?: (selection: GridSelection) => boolean | GridSelection;
+```
+
+The onDelete callback receives the current GridSelection and returns either a boolean indicating if the deletion event should continue or a new GridSelection which will be deleted instead. This is useful if, for example, you wish to delete rows entirely when they selected rather than simply clearing their contents.
+
+### 🔍 Search Changes
+
+Now that `getCellsForSelection` can be trivially default implemented, search depends on a `getCellsForSelection` implementation being set, even if it's just the default `true` option.
+
+## 🥳💃 New Features
+
+### ⌨️ Keybinding Improvements
+
+4.0.0 introduces a lot of improvements to keybinding handling to be more in line with the suggested [aria keybindings](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/grid_role#keyboard_interactions),
+
+Keybindings can be controlled with the newly introduced `keybinding` property which takes a list of flags to enable/disable certain key combos.
+
+```ts
+const keybindingDefaults: Keybinds = {
+    selectAll: true,
+    selectRow: true,
+    selectColumn: true,
+    downFill: false,
+    rightFill: false,
+    pageUp: false,
+    pageDown: false,
+    clear: true,
+    copy: true,
+    paste: true,
+    search: false,
+    first: true,
+    last: true,
+};
+```
+
+| Key Combo | Default | Flag | Description |
+|---|----|---|---|
+| Arrow | ✔️ | N/A | Moves the currently selected cell and clears other selections |
+| Shift + Arrow | ✔️ | N/A | Extends the current selection range in the direction pressed. |
+| Alt + Arrow | ✔️ | N/A | Moves the currently selected cell and retains the current selection |
+| Ctrl/Cmd + Arrow \| Home/End | ✔️ | N/A | Move the selection as far as possible in the direction pressed. |
+| Ctrl/Cmd + Shift + Arrow | ✔️ | N/A | Extends the selection as far as possible in the direction pressed. |
+| Shift + Home/End | ✔️ | N/A | Extends the selection as far as possible in the direction pressed. |
+| Ctrl/Cmd + A | ✔️ | `selectAll` | Selects all cells. |
+| Shift + Space | ✔️ | `selectRow` | Selecs the current row. |
+| Ctrl/Cmd + Space | ✔️ | `selectCol` | Selects the current col. |
+| PageUp/PageDown | ❌ | `pageUp`/`pageDown` | Moves the current selection up/down by one page. |
+| Escape | ✔️ | `clear` | Clear the current selection. |
+| Ctrl/Cmd + D | ❌ | `downFill` | Data from the first row of the range will be down filled into the rows below it |
+| Ctrl/Cmd + R | ❌ | `rightFill` | Data from the first column of the range will be right filled into the columns next to it |
+| Ctrl/Cmd + C | ✔️ | `copy` | Copies the current selection. |
+| Ctrl/Cmd + V | ✔️ | `paste` | Pastes the current buffer into the grid. |
+| Ctrl/Cmd + F | ❌ | `search` | Opens the search interface. |
+| Ctrl/Cmd + Home/End | ✔️ | `first`/`last` | Move the selection to the first/last cell in the data grid. |
+| Ctrl/Cmd + Shift + Home/End | ✔️ | `first`/`last` | Extend the selection to the first/last cell in the data grid. |
+
+###  Multi-Range selections
+
+The data grid now supports multiple selections. Click+Drag to make an initial selection, then Ctrl + Drag to add another.
+
+```ts
+rangeSelect?: "none" | "cell" | "rect" | "multi-cell" | "multi-rect"; // default rect
+columnSelect?: "none" | "single" | "multi"; // default multi
+rowSelect?: "none" | "single" | "multi"; // default multi
+```
+
+When multi-select is enable, more than one range, row, or column can be selected at a time.
+
+### Selection blending
+
+![image](https://user-images.githubusercontent.com/30443/159854710-957cfcf9-b0d7-4399-af71-634cff7816bb.png)
+
+Prior to v4.0.0 the data grid did not allow for mixing of column, row, and range based selections. With 4.0.0 this is now possible to enable.
+
+```ts
+    type SelectionBlending = "exclusive" | "mixed";
+
+    rangeSelectionBlending?: SelectionBlending;
+    columnSelectionBlending?: SelectionBlending;
+    rowSelectionBlending?: SelectionBlending;
+```
+
+When a column/range/row selection blending is set to "exclusive", any other types of selections will be cleared when a selection of that type is made. When a selection of a different type is made, exclusive selections will also be cleared. In "mixed" mode range, column, and row selections can be blended into a single selection.
+
+### ✨ Highlight Regions
+
+![image](https://user-images.githubusercontent.com/30443/159854920-ab5588ec-1987-48d5-907f-51af8144b08d.png)
+
+```ts
+interface Highlight {
+    readonly color: string;
+    readonly range: Rectangle;
+}
+
+highlightRegions?: readonly Highlight[];
+```
+
+Highlight regions can be provided to highlight specific ranges and show the user contextually important cells.
+
+### Custom editor improvements
+
+Custom editors can now receive the initial input value when a user begins typing on a cell. Further they can define a `deletedValue` callback when is responsible for emptying the CustomCell on delete.
+
+## 🐞 Bug Fixes
+
+- Prevent issue with vertical underscroll on mobile devices.
+- Minor performance improvements when rendering lots of empty text cells
+- `react-number-format` is now lazy loaded to improve initial load times.
+- Shift+enter now correctly moves the focus to the cell above.
+- Fix off by one error with screen-reader columns
+
 # 3.4.0 Release Notes
 
 ## **New Features**
@@ -8,7 +158,7 @@ Cells can now be spanned across multiple columns. Spans are defined by setting t
 
 ### 📦 **Sources package released**
 
-`glide-data-grid-source` has been released alongside this release of `glide-data-grid`. The source package contains useful hooks which can be used to easily add collapsing column groups, sorting columns, and re-arrangeable columns onto existing data sources. You can try out all of these features on the new [project homepage](https://grid.glideapps.com) which exposes all of these features by using the source package. 
+`glide-data-grid-source` has been released alongside this release of `glide-data-grid`. The source package contains useful hooks which can be used to easily add collapsing column groups, sorting columns, and re-arrangeable columns onto existing data sources. You can try out all of these features on the new [project homepage](https://grid.glideapps.com) which exposes all of these features by using the source package.
 
 ### 🎨 **getRowThemeOverride**
 
@@ -26,24 +176,24 @@ Through the magic of banging our heads against a wall repeatedly we have managed
 
 ### 🔬 **Minor features**
 
-- Support for insert to custom row index
-- Add experimental flag for strict mode. In strict mode getCellContent never calls for cells outside the range of the last visible region sent to onVisibleRegionChanged
-- Drilldown cells now render much faster
+-   Support for insert to custom row index
+-   Add experimental flag for strict mode. In strict mode getCellContent never calls for cells outside the range of the last visible region sent to onVisibleRegionChanged
+-   Drilldown cells now render much faster
 
 ## **Bug Fixes**
 
-- Fix issue where drag scrolling may not stop when mouse click releases.
-- Images in firefox will no longer flicker when recycling an image element
-- Prevent header menu click events when resizing
-- Fix issue where header could sometimes be blanked when rapidly moving the mouse
-- Fix theming issues in some overlay editors and search interface
-- Fix padding changes causing weird flickering artifacts
-- Touch scrolling no longer selects cells as you scroll
-- Boolean cells can again be checked/unchecked with the keyboard
+-   Fix issue where drag scrolling may not stop when mouse click releases.
+-   Images in firefox will no longer flicker when recycling an image element
+-   Prevent header menu click events when resizing
+-   Fix issue where header could sometimes be blanked when rapidly moving the mouse
+-   Fix theming issues in some overlay editors and search interface
+-   Fix padding changes causing weird flickering artifacts
+-   Touch scrolling no longer selects cells as you scroll
+-   Boolean cells can again be checked/unchecked with the keyboard
 
 # 3.3.0 Release Notes
 
-## 🎊 **New Features** 
+## 🎊 **New Features**
 
 ### **OverscrollY now supported in addition to OverscrollX**
 
@@ -60,21 +210,22 @@ The data grid can be scrolled to a cell programmatically by calling `scrollTo` o
 ### **Add Right click Menus anywhere, anytime**
 
 Easily implement right click menus for the data grid with these three new APIs:
-- `readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;`
-- `readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;`
-- `readonly onCellContextMenu?: (cell: readonly [number, number], event: CellClickedEventArgs) => void;`
 
-### **onFinishedEditing callback now available at root level** 
-`readonly onFinishedEditing?: (newValue: GridCell | undefined, movement: readonly [number, number]) => void;`
+-   `readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;`
+-   `readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;`
+-   `readonly onCellContextMenu?: (cell: Item, event: CellClickedEventArgs) => void;`
+
+### **onFinishedEditing callback now available at root level**
+
+`readonly onFinishedEditing?: (newValue: GridCell | undefined, movement: Item) => void;`
 
 This event fires even if the cell value itself is not changed. Big thank you @krisolchova for your wonderful contribution (which included tests!).
 
+## 🐛 **Bug Fixes**
 
-## 🐛  **Bug Fixes** 
-
-- PaddingX/Y are now properly accounted for in scrolling situations. | @pzcfg 
-- Multiple storybook fixes. | @pzcfg @ivoelbert 
-- Marked dependency has been updated to the latest version from a very old version.
+-   PaddingX/Y are now properly accounted for in scrolling situations. | @pzcfg
+-   Multiple storybook fixes. | @pzcfg @ivoelbert
+-   Marked dependency has been updated to the latest version from a very old version.
 
 # 3.2.1 Release Notes
 
@@ -349,7 +500,7 @@ Certain strings would not get properly escaped when copying out of the DataEdito
 New API!
 
 ```ts
-onPaste?: ((target: readonly [number, number], values: readonly (readonly string[])[]) => boolean) | boolean;
+onPaste?: ((target: Item, values: readonly (readonly string[])[]) => boolean) | boolean;
 ```
 
 `onPaste` is called when data is pasted into the grid. If left undefined, the `DataEditor` will operate in a fallback mode and attempt to paste the text buffer into the current cell assuming the current cell is not readonly and can accept the data type. If `onPaste` is set to false or the function returns false, the grid will simply ignore paste. If `onPaste` evaluates to true the grid will attempt to split the data by tabs and newlines and paste into available cells.

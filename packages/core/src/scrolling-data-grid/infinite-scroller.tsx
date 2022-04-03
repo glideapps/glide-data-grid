@@ -6,6 +6,7 @@ import { browserIsSafari } from "../common/browser-detect";
 
 interface Props {
     readonly className?: string;
+    readonly preventDiagonalScrolling?: boolean;
     readonly draggable: boolean;
     readonly paddingRight?: number;
     readonly paddingBottom?: number;
@@ -64,6 +65,8 @@ export const ScrollRegionStyle = styled.div`
     }
 `;
 
+type ScrollLock = [undefined, number] | [number, undefined] | undefined;
+
 export const InfiniteScroller: React.FC<Props> = p => {
     const {
         children,
@@ -73,6 +76,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
         update,
         draggable,
         className,
+        preventDiagonalScrolling = false,
         paddingBottom = 0,
         paddingRight = 0,
         rightElement,
@@ -97,11 +101,44 @@ export const InfiniteScroller: React.FC<Props> = p => {
         el.scrollLeft = el.scrollWidth - el.clientWidth;
     }, [scrollToEnd]);
 
+    const lastScrollPosition = React.useRef({
+        scrollLeft: 0,
+        scrollTop: 0,
+        lockDirection: undefined as ScrollLock,
+    });
+
+    const resetHandle = React.useRef(0);
+
     const onScroll = React.useCallback(() => {
         const el = scroller.current;
         if (el === null) return;
 
-        const newY = el.scrollTop;
+        let scrollTop = el.scrollTop;
+        let scrollLeft = el.scrollLeft;
+        const lastScrollTop = lastScrollPosition.current.scrollTop;
+        const lastScrollLeft = lastScrollPosition.current.scrollLeft;
+
+        const dx = scrollLeft - lastScrollLeft;
+        const dy = scrollTop - lastScrollTop;
+
+        if (dx !== 0 && dy !== 0 && preventDiagonalScrolling) {
+            if (lastScrollPosition.current.lockDirection === undefined) {
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    lastScrollPosition.current.lockDirection = [lastScrollLeft, undefined];
+                } else {
+                    lastScrollPosition.current.lockDirection = [undefined, lastScrollTop];
+                }
+            }
+        }
+
+        const lock = lastScrollPosition.current.lockDirection;
+
+        scrollLeft = lock?.[0] ?? scrollLeft;
+        scrollTop = lock?.[1] ?? scrollTop;
+        lastScrollPosition.current.scrollLeft = scrollLeft;
+        lastScrollPosition.current.scrollTop = scrollTop;
+
+        const newY = Math.max(0, scrollTop);
         const delta = lastScrollY.current - newY;
         const scrollableHeight = el.scrollHeight - el.clientHeight;
         const maxFakeY = Math.max(0, scrollHeight - el.clientHeight);
@@ -117,13 +154,26 @@ export const InfiniteScroller: React.FC<Props> = p => {
             offsetY.current = recomputed - newY;
         }
 
+        window.clearTimeout(resetHandle.current);
+        if (lock !== undefined) {
+            resetHandle.current = window.setTimeout(() => {
+                const [lx, ly] = lastScrollPosition.current.lockDirection ?? [];
+                if (lx !== undefined) {
+                    el.scrollLeft = lx;
+                } else if (ly !== undefined) {
+                    el.scrollTop = ly;
+                }
+                lastScrollPosition.current.lockDirection = undefined;
+            }, 200);
+        }
+
         update({
-            x: Math.max(0, el.scrollLeft),
+            x: Math.max(0, scrollLeft),
             y: Math.min(maxFakeY, newY + offsetY.current),
             width: el.clientWidth - paddingRight,
             height: el.clientHeight - paddingBottom,
         });
-    }, [paddingBottom, paddingRight, scrollHeight, update]);
+    }, [paddingBottom, paddingRight, scrollHeight, update, preventDiagonalScrolling]);
 
     const onScrollRef = React.useRef(onScroll);
     onScrollRef.current = onScroll;

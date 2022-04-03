@@ -1,104 +1,42 @@
 import * as React from "react";
 
 import {
+    CellArray,
     CompactSelection,
     DrawHeaderCallback,
-    EditableGridCell,
     GridCell,
     GridCellKind,
     GridColumn,
     GridColumnIcon,
     GridMouseEventArgs,
+    GridSelection,
+    GroupHeaderClickedEventArgs,
     isEditableGridCell,
-    isTextEditableGridCell,
+    Item,
     Rectangle,
-} from "../data-grid/data-grid-types";
-import { DataEditor, DataEditorProps } from "./data-editor";
-import DataEditorContainer from "../data-editor-container/data-grid-container";
+} from "../../data-grid/data-grid-types";
+import { DataEditor, DataEditorProps } from "../data-editor";
 
 import faker from "faker";
 import styled, { ThemeProvider } from "styled-components";
-import AutoSizer from "react-virtualized-auto-sizer";
-import { SimpleThemeWrapper } from "../stories/story-utils";
-import { useEventListener } from "../common/utils";
+import { SimpleThemeWrapper } from "../../stories/story-utils";
+import { useEventListener } from "../../common/utils";
 import { IBounds, useLayer } from "react-laag";
-import { SpriteMap } from "../data-grid/data-grid-sprites";
-import { DataEditorRef } from "..";
+import { SpriteMap } from "../../data-grid/data-grid-sprites";
+import { DataEditorRef } from "../..";
 import range from "lodash/range";
-import isArray from "lodash/isArray";
-import { assertNever } from "../common/support";
-import { browserIsFirefox } from "../common/browser-detect";
-
-faker.seed(1337);
-
-function isTruthy(x: any): boolean {
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-    return x ? true : false;
-}
-
-/**
- * Attempts to copy data between grid cells of any kind.
- */
-function lossyCopyData<T extends EditableGridCell>(source: EditableGridCell, target: T): EditableGridCell {
-    const sourceData = source.data;
-    if (typeof sourceData === typeof target.data) {
-        return {
-            ...target,
-            data: sourceData as any,
-        };
-    } else if (target.kind === GridCellKind.Uri) {
-        if (isArray(sourceData)) {
-            return {
-                ...target,
-                data: sourceData[0],
-            };
-        }
-        return {
-            ...target,
-            data: sourceData?.toString() ?? "",
-        };
-    } else if (target.kind === GridCellKind.Boolean) {
-        if (isArray(sourceData)) {
-            return {
-                ...target,
-                data: sourceData[0] !== undefined,
-            };
-        }
-        return {
-            ...target,
-            data: isTruthy(sourceData) ? true : false,
-        };
-    } else if (target.kind === GridCellKind.Image) {
-        if (isArray(sourceData)) {
-            return {
-                ...target,
-                data: [sourceData[0]],
-            };
-        }
-        return {
-            ...target,
-            data: [sourceData?.toString() ?? ""],
-        };
-    } else if (target.kind === GridCellKind.Number) {
-        return {
-            ...target,
-            data: 0,
-        };
-    } else if (target.kind === GridCellKind.Text || target.kind === GridCellKind.Markdown) {
-        if (isArray(sourceData)) {
-            return {
-                ...target,
-                data: sourceData[0].toString() ?? "",
-            };
-        }
-
-        return {
-            ...target,
-            data: source.data?.toString() ?? "",
-        };
-    }
-    assertNever(target);
-}
+import {
+    useMockDataGenerator,
+    BeautifulWrapper,
+    Description,
+    MoreInfo,
+    PropName,
+    lossyCopyData,
+    getGridColumn,
+    GridColumnWithMockingInfo,
+    ContentCache,
+    BeautifulStyle,
+} from "./utils";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -112,379 +50,12 @@ export default {
     ],
 };
 
-type GridColumnWithMockingInfo = GridColumn & {
-    getContent(): GridCell;
-};
-
-function getGridColumn(columnWithMock: GridColumnWithMockingInfo): GridColumn {
-    const { getContent, ...rest } = columnWithMock;
-
-    return rest;
-}
-
-const BeautifulStyle = styled.div`
-    background-color: #2790b9;
-    background: linear-gradient(90deg, #2790b9, #2070a9);
-    color: white;
-
-    padding: 32px 48px;
-
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-
-    font-family: sans-serif;
-
-    &.double {
-        height: 200vh;
-    }
-
-    & > h1 {
-        font-size: 50px;
-        font-weight: 600;
-        flex-shrink: 0;
-        margin: 0 0 12px 0;
-    }
-
-    .sizer {
-        flex-grow: 1;
-
-        background-color: white;
-
-        border-radius: 12px;
-        box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
-
-        .sizer-clip {
-            border-radius: 12px;
-            overflow: hidden;
-            transform: translateZ(0);
-
-            height: 100%;
-        }
-    }
-
-    &.firefox .sizer {
-        border-radius: 0;
-        box-shadow: unset;
-
-        .sizer-clip {
-            border-radius: 0;
-        }
-    }
-`;
-
-const PropName = styled.span`
-    font-family: monospace;
-    font-weight: 500;
-    color: #ffe394;
-`;
-
-const Description = styled.p`
-    font-size: 18px;
-    flex-shrink: 0;
-    margin: 0 0 20px 0;
-`;
-
-const MoreInfo = styled.p`
-    font-size: 14px;
-    flex-shrink: 0;
-    margin: 0 0 20px 0;
-
-    button {
-        background-color: #f4f4f4;
-        color: #2b2b2b;
-        padding: 2px 6px;
-        font-family: monospace;
-        font-size: 14px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 2px #00000040;
-        margin: 0 0.1em;
-        border: none;
-        cursor: pointer;
-    }
-`;
-
-interface BeautifulProps {
-    title: string;
-    description?: React.ReactNode;
-    className?: string;
-}
-
-const BeautifulWrapper: React.FC<BeautifulProps> = p => {
-    const { title, children, description, className } = p;
-    return (
-        <BeautifulStyle className={className + (browserIsFirefox ? " firefox" : "")}>
-            <h1>{title}</h1>
-            {description}
-            <div className="sizer">
-                <div className="sizer-clip">
-                    <AutoSizer>
-                        {(props: { width?: number; height?: number }) => (
-                            <DataEditorContainer width={props.width ?? 100} height={props.height ?? 100}>
-                                {children}
-                            </DataEditorContainer>
-                        )}
-                    </AutoSizer>
-                </div>
-            </div>
-        </BeautifulStyle>
-    );
-};
-
-function createTextColumnInfo(index: number, group: boolean): GridColumnWithMockingInfo {
-    return {
-        title: `Column ${index}`,
-        id: `Column ${index}`,
-        group: group ? `Group ${Math.round(index / 3)}` : undefined,
-        icon: GridColumnIcon.HeaderString,
-        hasMenu: false,
-        getContent: () => {
-            const text = faker.lorem.word();
-
-            return {
-                kind: GridCellKind.Text,
-                data: text,
-                displayData: text,
-                allowOverlay: true,
-                readonly: true,
-            };
-        },
-    };
-}
-
-function getResizableColumns(amount: number, group: boolean): GridColumnWithMockingInfo[] {
-    const defaultColumns: GridColumnWithMockingInfo[] = [
-        {
-            title: "First name",
-            id: "First name",
-            group: group ? "Name" : undefined,
-            icon: GridColumnIcon.HeaderString,
-            hasMenu: false,
-            getContent: () => {
-                const firstName = faker.name.firstName();
-                return {
-                    kind: GridCellKind.Text,
-                    displayData: firstName,
-                    data: firstName,
-                    allowOverlay: true,
-                    readonly: true,
-                };
-            },
-        },
-        {
-            title: "Last name",
-            id: "Last name",
-            group: group ? "Name" : undefined,
-            icon: GridColumnIcon.HeaderString,
-            hasMenu: false,
-            getContent: () => {
-                const lastName = faker.name.lastName();
-                return {
-                    kind: GridCellKind.Text,
-                    displayData: lastName,
-                    data: lastName,
-                    allowOverlay: true,
-                    readonly: true,
-                };
-            },
-        },
-        {
-            title: "Avatar",
-            id: "Avatar",
-            group: group ? "Info" : undefined,
-            icon: GridColumnIcon.HeaderImage,
-            hasMenu: false,
-            getContent: () => {
-                const n = Math.round(Math.random() * 100);
-                return {
-                    kind: GridCellKind.Image,
-                    data: [`https://picsum.photos/id/${n}/900/900`],
-                    displayData: [`https://picsum.photos/id/${n}/40/40`],
-                    allowOverlay: true,
-                    allowAdd: false,
-                    readonly: true,
-                };
-            },
-        },
-        {
-            title: "Email",
-            id: "Email",
-            group: group ? "Info" : undefined,
-            icon: GridColumnIcon.HeaderString,
-            hasMenu: false,
-            getContent: () => {
-                const email = faker.internet.email();
-                return {
-                    kind: GridCellKind.Text,
-                    displayData: email,
-                    data: email,
-                    allowOverlay: true,
-                    readonly: true,
-                };
-            },
-        },
-        {
-            title: "Title",
-            id: "Title",
-            group: group ? "Info" : undefined,
-            icon: GridColumnIcon.HeaderString,
-            hasMenu: false,
-            getContent: () => {
-                const company = faker.name.jobTitle();
-                return {
-                    kind: GridCellKind.Text,
-                    displayData: company,
-                    data: company,
-                    allowOverlay: true,
-                    readonly: true,
-                };
-            },
-        },
-        {
-            title: "More Info",
-            id: "More Info",
-            group: group ? "Info" : undefined,
-            icon: GridColumnIcon.HeaderUri,
-            hasMenu: false,
-            getContent: () => {
-                const url = faker.internet.url();
-                return {
-                    kind: GridCellKind.Uri,
-                    displayData: url,
-                    data: url,
-                    allowOverlay: true,
-                    readonly: true,
-                };
-            },
-        },
-    ];
-
-    if (amount < defaultColumns.length) {
-        return defaultColumns.slice(0, amount);
-    }
-
-    const extraColumnsAmount = amount - defaultColumns.length;
-
-    const extraColumns = [...new Array(extraColumnsAmount)].map((_, index) =>
-        createTextColumnInfo(index + defaultColumns.length, group)
-    );
-
-    return [...defaultColumns, ...extraColumns];
-}
-
-class ContentCache {
-    // column -> row -> value
-    private cachedContent: Map<number, Map<number, GridCell>> = new Map();
-
-    get(col: number, row: number) {
-        const colCache = this.cachedContent.get(col);
-
-        if (colCache === undefined) {
-            return undefined;
-        }
-
-        return colCache.get(row);
-    }
-
-    set(col: number, row: number, value: GridCell) {
-        if (this.cachedContent.get(col) === undefined) {
-            this.cachedContent.set(col, new Map());
-        }
-
-        const rowCache = this.cachedContent.get(col) as Map<number, GridCell>;
-        rowCache.set(row, value);
-    }
-}
-
-function useMockDataGenerator(numCols: number, readonly: boolean = true, group: boolean = false) {
-    const cache = React.useRef<ContentCache>(new ContentCache());
-
-    const [colsMap, setColsMap] = React.useState(() => getResizableColumns(numCols, group));
-
-    React.useEffect(() => {
-        setColsMap(getResizableColumns(numCols, group));
-    }, [group, numCols]);
-
-    const onColumnResized = React.useCallback((column: GridColumn, newSize: number) => {
-        setColsMap(prevColsMap => {
-            const index = prevColsMap.findIndex(ci => ci.title === column.title);
-            const newArray = [...prevColsMap];
-            newArray.splice(index, 1, {
-                ...prevColsMap[index],
-                width: newSize,
-            });
-            return newArray;
-        });
-    }, []);
-
-    const cols = React.useMemo(() => {
-        return colsMap.map(getGridColumn);
-    }, [colsMap]);
-
-    const getCellContent = React.useCallback(
-        ([col, row]: readonly [number, number]): GridCell => {
-            let val = cache.current.get(col, row);
-            if (val === undefined) {
-                val = colsMap[col].getContent();
-                if (!readonly) {
-                    if (isTextEditableGridCell(val)) {
-                        val = { ...val, readonly };
-                    }
-                }
-                cache.current.set(col, row, val);
-            }
-            return val;
-        },
-        [colsMap, readonly]
-    );
-
-    const getCellsForSelection = React.useCallback(
-        (selection: Rectangle): readonly (readonly GridCell[])[] => {
-            const result: GridCell[][] = [];
-
-            for (let y = selection.y; y < selection.y + selection.height; y++) {
-                const row: GridCell[] = [];
-                for (let x = selection.x; x < selection.x + selection.width; x++) {
-                    row.push(getCellContent([x, y]));
-                }
-                result.push(row);
-            }
-
-            return result;
-        },
-        [getCellContent]
-    );
-
-    const setCellValueRaw = React.useCallback(([col, row]: readonly [number, number], val: GridCell): void => {
-        cache.current.set(col, row, val);
-    }, []);
-
-    const setCellValue = React.useCallback(
-        ([col, row]: readonly [number, number], val: GridCell): void => {
-            let current = cache.current.get(col, row);
-            if (current === undefined) {
-                current = colsMap[col].getContent();
-            }
-            if (isEditableGridCell(val) && isEditableGridCell(current)) {
-                const copied = lossyCopyData(val, current);
-                cache.current.set(col, row, {
-                    ...copied,
-                    displayData: typeof copied.data === "string" ? copied.data : (copied as any).displayData,
-                    lastUpdated: performance.now(),
-                } as any);
-            }
-        },
-        [colsMap]
-    );
-
-    return { cols, getCellContent, onColumnResized, setCellValue, getCellsForSelection, setCellValueRaw };
-}
-
 const defaultProps: Partial<DataEditorProps> = {
     smoothScrollX: true,
     smoothScrollY: true,
     isDraggable: false,
     rowMarkers: "none",
+    width: "100%",
 };
 
 export const ResizableColumns: React.VFC = () => {
@@ -662,6 +233,7 @@ export const AddData: React.VFC = () => {
                 columns={cols}
                 getCellsForSelection={getCellsForSelection}
                 rowMarkers={"both"}
+                onPaste={true}
                 onCellEdited={setCellValue}
                 trailingRowOptions={{
                     sticky: true,
@@ -675,6 +247,61 @@ export const AddData: React.VFC = () => {
     );
 };
 (AddData as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const FillHandle: React.VFC = () => {
+    const { cols, getCellContent, setCellValueRaw, setCellValue, getCellsForSelection } = useMockDataGenerator(
+        60,
+        false
+    );
+
+    const [numRows, setNumRows] = React.useState(50);
+
+    const onRowAppended = React.useCallback(() => {
+        const newRow = numRows;
+        for (let c = 0; c < 6; c++) {
+            const cell = getCellContent([c, newRow]);
+            setCellValueRaw([c, newRow], clearCell(cell));
+        }
+        setNumRows(cv => cv + 1);
+    }, [getCellContent, numRows, setCellValueRaw]);
+
+    return (
+        <BeautifulWrapper
+            title="Add data"
+            description={
+                <>
+                    <Description>Fill handles can be used to downfill data with the mouse.</Description>
+                    <MoreInfo>
+                        Just click and drag, the top row will be copied down. Enable using the{" "}
+                        <PropName>fillHandle</PropName> prop.
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                getCellsForSelection={getCellsForSelection}
+                rowMarkers={"both"}
+                onPaste={true}
+                fillHandle={true}
+                onCellEdited={setCellValue}
+                trailingRowOptions={{
+                    sticky: true,
+                    tint: true,
+                    hint: "New row...",
+                }}
+                rows={numRows}
+                onRowAppended={onRowAppended}
+            />
+        </BeautifulWrapper>
+    );
+};
+(FillHandle as any).parameters = {
     options: {
         showPanel: false,
     },
@@ -1090,6 +717,91 @@ export const SmoothScrollingGrid: React.FC<SmoothScrollingGridProps> = p => {
     },
 };
 
+interface InputBlendingGridProps {
+    rangeBlending: "mixed" | "exclusive";
+    columnBlending: "mixed" | "exclusive";
+    rowBlending: "mixed" | "exclusive";
+    rangeMultiSelect: "none" | "cell" | "rect" | "multi-cell" | "multi-rect";
+    columnMultiSelect: "none" | "single" | "multi";
+    rowMultiSelect: "none" | "single" | "multi";
+}
+
+export const InputBlending: React.FC<InputBlendingGridProps> = p => {
+    const { cols, getCellContent } = useMockDataGenerator(30);
+
+    return (
+        <BeautifulWrapper
+            title="Input blending"
+            description={
+                <Description>
+                    Input blending can be enabled or disable between row, column, and range selections. Multi-selections
+                    can also be enabled or disabled with the same level of granularity.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers={p.rowMultiSelect === "none" ? "number" : "both"}
+                keybindings={{
+                    clear: true,
+                    copy: true,
+                    downFill: true,
+                    rightFill: true,
+                    pageDown: true,
+                    pageUp: true,
+                    paste: true,
+                    search: true,
+                    selectAll: true,
+                    selectColumn: true,
+                    selectRow: true,
+                }}
+                getCellsForSelection={true}
+                rangeSelect={p.rangeMultiSelect}
+                columnSelect={p.columnMultiSelect}
+                rowSelect={p.rowMultiSelect}
+                rangeSelectionBlending={p.rangeBlending}
+                columnSelectionBlending={p.columnBlending}
+                rowSelectionBlending={p.rowBlending}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={10_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(InputBlending as any).args = {
+    rangeBlending: "mixed",
+    columnBlending: "mixed",
+    rowBlending: "mixed",
+    rangeMultiSelect: "rect",
+    columnMultiSelect: "multi",
+    rowMultiSelect: "multi",
+};
+(InputBlending as any).argTypes = {
+    rangeBlending: {
+        control: { type: "select", options: ["mixed", "exclusive"] },
+    },
+    columnBlending: {
+        control: { type: "select", options: ["mixed", "exclusive"] },
+    },
+    rowBlending: {
+        control: { type: "select", options: ["mixed", "exclusive"] },
+    },
+    rangeMultiSelect: {
+        control: { type: "select", options: ["none", "cell", "rect", "multi-cell", "multi-rect"] },
+    },
+    columnMultiSelect: {
+        control: { type: "select", options: ["none", "single", "multi"] },
+    },
+    rowMultiSelect: {
+        control: { type: "select", options: ["none", "single", "multi"] },
+    },
+};
+(InputBlending as any).parameters = {
+    options: {
+        showPanel: true,
+    },
+};
+
 interface AddColumnsProps {
     columnsCount: number;
 }
@@ -1138,8 +850,6 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
 export const AutomaticRowMarkers: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
-    const [selectedRows, setSelectedRows] = React.useState(CompactSelection.empty());
-
     return (
         <BeautifulWrapper
             title="Automatic Row Markers"
@@ -1157,8 +867,6 @@ export const AutomaticRowMarkers: React.VFC = () => {
             }>
             <DataEditor
                 {...defaultProps}
-                selectedRows={selectedRows}
-                onSelectedRowsChange={setSelectedRows}
                 rowMarkers={"both"}
                 getCellContent={getCellContent}
                 columns={cols}
@@ -1263,7 +971,7 @@ export const RearrangeColumns: React.VFC = () => {
     }, []);
 
     const getCellContentMangled = React.useCallback(
-        ([col, row]: readonly [number, number]): GridCell => {
+        ([col, row]: Item): GridCell => {
             const remappedCol = cols.findIndex(c => c.title === sortableCols[col].title);
             return getCellContent([remappedCol, row]);
         },
@@ -1305,8 +1013,6 @@ interface RowAndHeaderSizesProps {
 export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
     const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(6);
 
-    const [selectedRows, setSelectedRows] = React.useState<CompactSelection>();
-
     return (
         <BeautifulWrapper
             title="Row and Header sizes"
@@ -1323,8 +1029,6 @@ export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
                 {...defaultProps}
                 rowHeight={p.rowHeight}
                 headerHeight={p.headerHeight}
-                selectedRows={selectedRows}
-                onSelectedRowsChange={setSelectedRows}
                 getCellsForSelection={getCellsForSelection}
                 rowMarkers={"number"}
                 getCellContent={getCellContent}
@@ -1374,8 +1078,6 @@ const KeyName = styled.kbd`
 export const MultiSelectColumns: React.VFC = () => {
     const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100);
 
-    const [sel, setSel] = React.useState(CompactSelection.empty());
-
     return (
         <BeautifulWrapper
             title="Multi select columns"
@@ -1398,8 +1100,6 @@ export const MultiSelectColumns: React.VFC = () => {
                 rowMarkers="both"
                 columns={cols}
                 rows={100_000}
-                selectedColumns={sel}
-                onSelectedColumnsChange={setSel}
             />
         </BeautifulWrapper>
     );
@@ -1421,7 +1121,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
                 return {
                     kind: GridCellKind.RowID,
                     data: faker.datatype.uuid(),
-                    allowOverlay: false,
+                    allowOverlay: true,
                 };
             },
         },
@@ -1605,7 +1305,7 @@ function useAllMockedKinds() {
     }, [colsMap]);
 
     const getCellContent = React.useCallback(
-        ([col, row]: readonly [number, number]): GridCell => {
+        ([col, row]: Item): GridCell => {
             let val = cache.current.get(col, row);
             if (val === undefined) {
                 val = colsMap[col].getContent();
@@ -1618,7 +1318,7 @@ function useAllMockedKinds() {
     );
 
     const setCellValue = React.useCallback(
-        ([col, row]: readonly [number, number], val: GridCell): void => {
+        ([col, row]: Item, val: GridCell): void => {
             let current = cache.current.get(col, row);
             if (current === undefined) {
                 current = colsMap[col].getContent();
@@ -1896,6 +1596,49 @@ export const ThemePerRow: React.VFC = () => {
     },
 };
 
+export const CellActivatedEvent: React.VFC = () => {
+    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+
+    const [lastActivated, setLastActivated] = React.useState<Item | undefined>(undefined);
+
+    const onCellActivated = React.useCallback((cell: Item) => {
+        setLastActivated(cell);
+    }, []);
+
+    return (
+        <BeautifulWrapper
+            title="Cell Activated event"
+            description={
+                <>
+                    <Description>
+                        When you tap <KeyName>Enter</KeyName>, <KeyName>Space</KeyName> or double click a cell, that
+                        cell is activated. You can track this with <PropName>onCellActivated</PropName>.
+                    </Description>
+                    <MoreInfo>
+                        Last activated cell:{" "}
+                        {lastActivated === undefined ? "none" : `(${lastActivated[0]}, ${lastActivated[1]})`}
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                getCellsForSelection={true}
+                columns={cols}
+                onCellEdited={setCellValue}
+                onColumnResized={onColumnResized}
+                onCellActivated={onCellActivated}
+                rows={10_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(CellActivatedEvent as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const BuiltInSearch: React.VFC = () => {
     const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
 
@@ -1932,6 +1675,7 @@ export const BuiltInSearch: React.VFC = () => {
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
+                getCellsForSelection={true}
                 columns={cols}
                 onCellEdited={setCellValue}
                 onColumnResized={onColumnResized}
@@ -2261,7 +2005,7 @@ export const RapidUpdates: React.VFC = () => {
 
         const sendUpdate = () => {
             const cells: {
-                cell: readonly [number, number];
+                cell: Item;
             }[] = [];
             const now = performance.now();
             for (let x = 0; x < 5_000; x++) {
@@ -2567,9 +2311,10 @@ function useCollapsableColumnGroups(cols: readonly GridColumn[]) {
     const [collapsed, setCollapsed] = React.useState<readonly string[]>([]);
 
     const onGroupHeaderClicked = React.useCallback(
-        (colIndex: number) => {
+        (colIndex: number, args: GroupHeaderClickedEventArgs) => {
             const group = cols[colIndex].group ?? "";
             setCollapsed(cv => (cv.includes(group) ? cv.filter(g => g !== group) : [...cv, group]));
+            args.preventDefault();
         },
         [cols]
     );
@@ -2697,7 +2442,7 @@ export const SpanCell: React.VFC = () => {
     );
 
     const getCellsForSelection = React.useCallback(
-        (selection: Rectangle): readonly (readonly GridCell[])[] => {
+        (selection: Rectangle): CellArray => {
             const result: GridCell[][] = [];
 
             for (let y = selection.y; y < selection.y + selection.height; y++) {
@@ -2918,5 +2663,142 @@ export const Padding: React.VFC<PaddingProps> = p => {
 (Padding as any).parameters = {
     options: {
         showPanel: true,
+    },
+};
+
+export const HighlightCells: React.VFC = () => {
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100);
+
+    const [gridSelection, setGridSelection] = React.useState<GridSelection>({
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
+    });
+
+    const highlights = React.useMemo<DataEditorProps["highlightRegions"]>(() => {
+        if (gridSelection.current === undefined) return undefined;
+        const [col, row] = gridSelection.current.cell;
+        return [
+            {
+                color: "#44BB0022",
+                range: {
+                    x: col + 2,
+                    y: row,
+                    width: 10,
+                    height: 10,
+                },
+            },
+            {
+                color: "#b000b021",
+                range: {
+                    x: col,
+                    y: row + 2,
+                    width: 1,
+                    height: 1,
+                },
+            },
+        ];
+    }, [gridSelection]);
+
+    return (
+        <BeautifulWrapper
+            title="HighlightCells"
+            description={
+                <Description>
+                    The <PropName>highlightRegions</PropName> prop can be set to provide additional hinting or context
+                    for the current selection.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers="both"
+                freezeColumns={1}
+                highlightRegions={highlights}
+                gridSelection={gridSelection}
+                onGridSelectionChange={setGridSelection}
+                getCellContent={getCellContent}
+                getCellsForSelection={getCellsForSelection}
+                columns={cols}
+                verticalBorder={c => c > 0}
+                rows={1_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(HighlightCells as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const LayoutIntegration: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(1000, true, true);
+
+    return (
+        <BeautifulStyle>
+            <h1>Layout Integration</h1>
+            <Description>Trying the grid in different situations</Description>
+            <DataEditor
+                {...defaultProps}
+                className="white"
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={10}
+                rowMarkers="both"
+                height={200}
+            />
+            <DataEditor
+                {...defaultProps}
+                className="white"
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={10}
+                rowMarkers="both"
+            />
+            <div style={{ display: "flex", height: "300px" }}>
+                <DataEditor
+                    {...defaultProps}
+                    className="white"
+                    getCellContent={getCellContent}
+                    columns={cols}
+                    rows={10}
+                    rowMarkers="both"
+                />
+                <div style={{ flexShrink: 0 }}>This is some text what happens here?</div>
+            </div>
+        </BeautifulStyle>
+    );
+};
+(CustomHeader as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const PreventDiagonalScroll: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(200);
+
+    return (
+        <BeautifulWrapper
+            title="Prevent Diagonal Scroll"
+            description={
+                <>
+                    <Description>
+                        Diagonal scrolling can be prevented by setting <PropName>preventDiagonalScrolling</PropName>.
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                preventDiagonalScrolling={true}
+                rows={5000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(PreventDiagonalScroll as any).parameters = {
+    options: {
+        showPanel: false,
     },
 };

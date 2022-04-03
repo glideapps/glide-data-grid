@@ -6,7 +6,6 @@ export const UriOverlayEditorStyle = styled.div`
     flex-grow: 1;
 
     align-items: center;
-    padding-top: 2px;
 
     min-height: 21px;
 

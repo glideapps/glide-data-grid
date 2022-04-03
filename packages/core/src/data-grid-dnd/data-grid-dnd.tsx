@@ -10,7 +10,8 @@ export interface DataGridDndProps extends Props {
     readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
     readonly onColumnResized?: (column: GridColumn, newSize: number) => void;
     readonly gridRef?: React.MutableRefObject<DataGridRef | null>;
-    readonly maxColumnWidth?: number;
+    readonly maxColumnWidth: number;
+    readonly minColumnWidth: number;
     readonly lockColumns: number;
 }
 
@@ -33,13 +34,15 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         onColumnResized,
         gridRef,
         maxColumnWidth,
+        minColumnWidth,
         onHeaderMenuClick,
         onRowMoved,
         lockColumns,
         getCellContent,
     } = p;
 
-    const { onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns, selectedColumns } = p;
+    const { onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns, selection } = p;
+    const selectedColumns = selection.columns;
 
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
@@ -161,8 +164,6 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         };
     }, [dragCol, dropCol]);
 
-    const maxColumnWidthValue = maxColumnWidth === undefined ? 500 : maxColumnWidth < 50 ? 50 : maxColumnWidth;
-
     const onMouseMove = React.useCallback(
         (event: MouseEvent) => {
             if (dragCol !== undefined && dragStartX !== undefined) {
@@ -177,7 +178,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                 }
             } else if (resizeCol !== undefined && resizeColStartX !== undefined) {
                 const column = columns[resizeCol];
-                const newWidth = clamp(event.clientX - resizeColStartX, 50, maxColumnWidthValue);
+                const newWidth = clamp(event.clientX - resizeColStartX, minColumnWidth, maxColumnWidth);
                 onColumnResized?.(column, newWidth);
                 lastResizeWidthRef.current = newWidth;
 
@@ -197,7 +198,8 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             resizeCol,
             resizeColStartX,
             columns,
-            maxColumnWidthValue,
+            minColumnWidth,
+            maxColumnWidth,
             onColumnResized,
             selectedColumns,
         ]
@@ -231,18 +233,25 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             columns={p.columns}
             enableGroups={p.enableGroups}
             freezeColumns={p.freezeColumns}
+            onCanvasFocused={p.onCanvasFocused}
+            onCanvasBlur={p.onCanvasBlur}
+            isFocused={p.isFocused}
             onMouseMove={p.onMouseMove}
             groupHeaderHeight={p.groupHeaderHeight}
+            fillHandle={p.fillHandle}
             headerHeight={p.headerHeight}
             height={p.height}
             lastRowSticky={p.lastRowSticky}
             rowHeight={p.rowHeight}
             rows={p.rows}
+            highlightRegions={p.highlightRegions}
             verticalBorder={p.verticalBorder}
             width={p.width}
             canvasRef={p.canvasRef}
             className={p.className}
             disabledRows={p.disabledRows}
+            isFilling={p.isFilling}
+            firstColAccessible={p.firstColAccessible}
             drawCustomCell={p.drawCustomCell}
             drawHeader={p.drawHeader}
             eventTargetRef={p.eventTargetRef}
@@ -256,9 +265,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             onKeyDown={p.onKeyDown}
             onKeyUp={p.onKeyUp}
             prelightCells={p.prelightCells}
-            selectedCell={p.selectedCell}
-            selectedColumns={p.selectedColumns}
-            selectedRows={p.selectedRows}
+            selection={p.selection}
             translateX={p.translateX}
             translateY={p.translateY}
             // handled or mutated props

@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { GridCell, GridCellKind, GridColumn } from "../data-grid/data-grid-types";
+import { GridCell, GridCellKind, GridColumn, Item } from "../data-grid/data-grid-types";
 import { DataEditor } from "../data-editor/data-editor";
 
 import { SimpleThemeWrapper } from "../stories/story-utils";
@@ -130,7 +130,7 @@ const data: DummyItem[] = [
 ];
 
 export const GettingStarted: React.VFC = () => {
-    const getContent = React.useCallback((cell: readonly [number, number]): GridCell => {
+    const getContent = React.useCallback((cell: Item): GridCell => {
         const [col, row] = cell;
         const dataRow = data[row];
         const indexes: (keyof DummyItem)[] = ["name", "company", "email", "phone"];
@@ -223,7 +223,7 @@ Finally the data grid requires a cell fetch callback. This callback should be me
             </Marked>
             <Highlight>
                 {`
-const getContent = React.useCallback((cell: readonly [number, number]): GridCell => {
+const getContent = React.useCallback((cell: Item): GridCell => {
     const [col, row] = cell;
     const dataRow = data[row];
     // dumb but simple way to do this
@@ -242,13 +242,11 @@ const getContent = React.useCallback((cell: readonly [number, number]): GridCell
                 {`
 > Avoid excessive changes to the identity of the \`getCellContent\` callback as the grid will re-render from scratch every time it changes.
 
-That is all the basic requirements put together. Because the grid is a self-contained scrollable region a container is provided for simple hard coded sizing. Reactive sizing is also possible but requires a bit of css ignored here.`}
+That is all the basic requirements put together.`}
             </Marked>
             <Highlight>
                 {`
-return <DataEditorContainer width={900} height={200}>
-    <DataEditor getCellContent={getContent} columns={columns} rows={data.length} />
-</DataEditorContainer>
+return <DataEditor getCellContent={getContent} columns={columns} rows={data.length} />;
 `}
             </Highlight>
             <Wrapper height={200}>

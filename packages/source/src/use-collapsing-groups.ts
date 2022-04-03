@@ -3,23 +3,12 @@ import React from "react";
 
 type Props = Pick<
     DataEditorProps,
-    | "columns"
-    | "onGroupHeaderClicked"
-    | "onSelectedColumnsChange"
-    | "onGridSelectionChange"
-    | "getGroupDetails"
-    | "gridSelection"
-    | "freezeColumns"
+    "columns" | "onGroupHeaderClicked" | "onGridSelectionChange" | "getGroupDetails" | "gridSelection" | "freezeColumns"
 > & { theme: Theme };
 
 type Result = Pick<
     DataEditorProps,
-    | "columns"
-    | "onGroupHeaderClicked"
-    | "onSelectedColumnsChange"
-    | "onGridSelectionChange"
-    | "getGroupDetails"
-    | "gridSelection"
+    "columns" | "onGroupHeaderClicked" | "onGridSelectionChange" | "getGroupDetails" | "gridSelection"
 >;
 
 export function useCollapsingGroups(props: Props): Result {
@@ -29,7 +18,6 @@ export function useCollapsingGroups(props: Props): Result {
     const {
         columns: columnsIn,
         onGroupHeaderClicked: onGroupHeaderClickedIn,
-        onSelectedColumnsChange: onSelectedColumnsChangeIn,
         onGridSelectionChange: onGridSelectionChangeIn,
         getGroupDetails: getGroupDetailsIn,
         gridSelection: gridSelectionIn,
@@ -96,23 +84,16 @@ export function useCollapsingGroups(props: Props): Result {
 
             const group = columns[index]?.group ?? "";
             if (group === "") return;
+            a.preventDefault();
             setCollapsed(cv => (cv.includes(group) ? cv.filter(x => x !== group) : [...cv, group]));
         },
         [columns, onGroupHeaderClickedIn]
     );
 
-    const onSelectedColumnsChange = React.useCallback<NonNullable<Props["onSelectedColumnsChange"]>>(
-        (cs, reason) => {
-            if (reason === "group") return;
-            onSelectedColumnsChangeIn?.(cs, reason);
-        },
-        [onSelectedColumnsChangeIn]
-    );
-
     const onGridSelectionChange = React.useCallback<NonNullable<Props["onGridSelectionChange"]>>(
         s => {
-            if (s !== undefined) {
-                const col = s.cell[0];
+            if (s.current !== undefined) {
+                const col = s.current.cell[0];
                 const column = columns[col];
                 setCollapsed(cv => {
                     if (cv.includes(column?.group ?? "")) {
@@ -150,7 +131,6 @@ export function useCollapsingGroups(props: Props): Result {
     return {
         columns,
         onGroupHeaderClicked,
-        onSelectedColumnsChange,
         onGridSelectionChange,
         getGroupDetails,
         gridSelection,

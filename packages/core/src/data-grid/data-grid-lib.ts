@@ -1,8 +1,8 @@
 import { Theme } from "../common/styles";
-import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn } from "./data-grid-types";
+import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn, Rectangle } from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
-import { BaseDrawArgs } from "./cells/cell-types";
+import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -28,10 +28,10 @@ export function isGroupEqual(left: string | undefined, right: string | undefined
     return (left ?? "") === (right ?? "");
 }
 
-export function cellIsSelected(location: Item, cell: InnerGridCell, selection: GridSelection | undefined): boolean {
-    if (selection === undefined) return false;
+export function cellIsSelected(location: Item, cell: InnerGridCell, selection: GridSelection): boolean {
+    if (selection?.current === undefined) return false;
 
-    const [col, row] = selection.cell;
+    const [col, row] = selection.current.cell;
     const [cellCol, cellRow] = location;
     if (cellRow !== row) return false;
 
@@ -42,13 +42,11 @@ export function cellIsSelected(location: Item, cell: InnerGridCell, selection: G
     return col >= cell.span[0] && col <= cell.span[1];
 }
 
-export function cellIsInRange(location: Item, cell: InnerGridCell, selection: GridSelection | undefined): boolean {
-    if (selection === undefined) return false;
-
-    const startX = selection.range.x;
-    const endX = selection.range.x + selection.range.width - 1;
-    const startY = selection.range.y;
-    const endY = selection.range.y + selection.range.height - 1;
+function cellIsInRect(location: Item, cell: InnerGridCell, rect: Rectangle): boolean {
+    const startX = rect.x;
+    const endX = rect.x + rect.width - 1;
+    const startY = rect.y;
+    const endY = rect.y + rect.height - 1;
 
     const [cellCol, cellRow] = location;
     if (cellRow < startY || cellRow > endY) return false;
@@ -63,6 +61,19 @@ export function cellIsInRange(location: Item, cell: InnerGridCell, selection: Gr
         (spanEnd >= startX && spanStart <= endX) ||
         (spanStart < startX && spanEnd > endX)
     );
+}
+
+export function cellIsInRange(location: Item, cell: InnerGridCell, selection: GridSelection): number {
+    let result = 0;
+    if (selection.current === undefined) return result;
+
+    if (cellIsInRect(location, cell, selection.current.range)) result++;
+    for (const r of selection.current.rangeStack) {
+        if (cellIsInRect(location, cell, r)) {
+            result++;
+        }
+    }
+    return result;
 }
 
 function remapForDnDState(
@@ -241,12 +252,12 @@ export function drawWithLastUpdate(
     args: BaseDrawArgs,
     lastUpdate: number | undefined,
     frameTime: number,
-    draw: (forcePrep: boolean) => void
+    lastPrep: PrepResult | undefined,
+    draw: () => void
 ) {
     const { ctx, x, y, w: width, h: height, theme } = args;
     let progress = Number.MAX_SAFE_INTEGER;
     const animTime = 500;
-    let forcePrep = false;
     if (lastUpdate !== undefined) {
         progress = frameTime - lastUpdate;
 
@@ -256,18 +267,31 @@ export function drawWithLastUpdate(
             ctx.fillStyle = theme.bgSearchResult;
             ctx.fillRect(x, y, width, height);
             ctx.globalAlpha = 1;
-            forcePrep = true;
+            if (lastPrep !== undefined) {
+                lastPrep.fillStyle = theme.bgSearchResult;
+            }
         }
     }
 
-    draw(forcePrep);
+    draw();
 
     return progress < animTime;
 }
 
-export function prepTextCell(args: BaseDrawArgs, overrideColor?: string) {
+export function prepTextCell(
+    args: BaseDrawArgs,
+    lastPrep: PrepResult | undefined,
+    overrideColor?: string
+): Partial<PrepResult> {
     const { ctx, theme } = args;
-    ctx.fillStyle = overrideColor ?? theme.textDark;
+    const result: Partial<PrepResult> = lastPrep ?? {};
+
+    const newFill = overrideColor ?? theme.textDark;
+    if (newFill !== result.fillStyle) {
+        ctx.fillStyle = newFill;
+        result.fillStyle = newFill;
+    }
+    return result;
 }
 
 export function drawTextCell(args: BaseDrawArgs, data: string) {
@@ -282,13 +306,15 @@ export function drawTextCell(args: BaseDrawArgs, data: string) {
         data = data.slice(0, max);
     }
 
-    const dir = direction(data);
+    if (data.length > 0) {
+        const dir = direction(data);
 
-    if (dir === "rtl") {
-        const textWidth = measureTextCached(data, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`).width;
-        ctx.fillText(data, x + w - theme.cellHorizontalPadding - textWidth + 0.5, y + h / 2);
-    } else {
-        ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+        if (dir === "rtl") {
+            const textWidth = measureTextCached(data, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`).width;
+            ctx.fillText(data, x + w - theme.cellHorizontalPadding - textWidth + 0.5, y + h / 2);
+        } else {
+            ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+        }
     }
 }
 
@@ -378,10 +404,16 @@ function drawCheckbox(
     }
 }
 
-export function prepMarkerRowCell(args: BaseDrawArgs) {
+export function prepMarkerRowCell(args: BaseDrawArgs, lastPrep: PrepResult | undefined): Partial<PrepResult> {
     const { ctx, theme } = args;
-    ctx.font = `9px ${theme.fontFamily}`;
+    const newFont = `9px ${theme.fontFamily}`;
+    const result: Partial<PrepResult> = lastPrep ?? {};
+    if (result?.font !== newFont) {
+        ctx.font = newFont;
+        result.font = newFont;
+    }
     ctx.textAlign = "center";
+    return result;
 }
 
 export function deprepMarkerRowCell(args: Pick<BaseDrawArgs, "ctx">) {
@@ -585,7 +617,7 @@ function getAndCacheDrilldownBorder(
     ctx.fillStyle = bgCell;
     ctx.fill();
 
-    ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
+    ctx.shadowColor = "rgba(24, 25, 34, 0.3)";
     ctx.shadowOffsetY = 1;
     ctx.shadowBlur = 5;
     ctx.fillStyle = bgCell;
@@ -640,9 +672,21 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
             const rx = Math.floor(rectInfo.x);
             const rw = Math.floor(rectInfo.width);
             ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(el, 0, 0, sideWidth, height, rx - 5, y + h / 2 - 17, 17, 34);
-            ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + 12, y + h / 2 - 17, rw - 24, 34);
-            ctx.drawImage(el, width - sideWidth, 0, sideWidth, height, rx + rw - 12, y + h / 2 - 17, 17, 34);
+            const maxSideWidth = Math.min(17, rw / 2 + 5);
+            ctx.drawImage(el, 0, 0, sideWidth, height, rx - 5, y + h / 2 - 17, maxSideWidth, 34);
+            if (rectInfo.width > 24)
+                ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + 12, y + h / 2 - 17, rw - 24, 34);
+            ctx.drawImage(
+                el,
+                width - sideWidth,
+                0,
+                sideWidth,
+                height,
+                rx + rw - (maxSideWidth - 5),
+                y + h / 2 - 17,
+                maxSideWidth,
+                34
+            );
             ctx.imageSmoothingEnabled = true;
         });
     }
@@ -821,4 +865,107 @@ export function roundedPoly(ctx: CanvasRenderingContext2D, points: Point[], radi
         p2 = p3;
     }
     ctx.closePath();
+}
+
+export function computeBounds(
+    col: number,
+    row: number,
+    width: number,
+    height: number,
+    groupHeaderHeight: number,
+    totalHeaderHeight: number,
+    cellXOffset: number,
+    cellYOffset: number,
+    translateX: number,
+    translateY: number,
+    rows: number,
+    freezeColumns: number,
+    lastRowSticky: boolean,
+    mappedColumns: readonly MappedGridColumn[],
+    rowHeight: number | ((index: number) => number)
+): Rectangle {
+    const result: Rectangle = {
+        x: 0,
+        y: totalHeaderHeight + translateY,
+        width: 0,
+        height: 0,
+    };
+
+    const headerHeight = totalHeaderHeight - groupHeaderHeight;
+
+    if (col >= freezeColumns) {
+        const dir = cellXOffset > col ? -1 : 1;
+        const freezeWidth = getStickyWidth(mappedColumns);
+        result.x += freezeWidth + translateX;
+        for (let i = cellXOffset; i !== col; i += dir) {
+            result.x += mappedColumns[dir === 1 ? i : i - 1].width * dir;
+        }
+    } else {
+        for (let i = 0; i < col; i++) {
+            result.x += mappedColumns[i].width;
+        }
+    }
+    result.width = mappedColumns[col].width + 1;
+
+    if (row === -1) {
+        result.y = groupHeaderHeight;
+        result.height = headerHeight;
+    } else if (row === -2) {
+        result.y = 0;
+        result.height = groupHeaderHeight;
+
+        let start = col;
+        const group = mappedColumns[col].group;
+        const sticky = mappedColumns[col].sticky;
+        while (
+            start > 0 &&
+            isGroupEqual(mappedColumns[start - 1].group, group) &&
+            mappedColumns[start - 1].sticky === sticky
+        ) {
+            const c = mappedColumns[start - 1];
+            result.x -= c.width;
+            result.width += c.width;
+            start--;
+        }
+
+        let end = col;
+        while (
+            end + 1 < mappedColumns.length &&
+            isGroupEqual(mappedColumns[end + 1].group, group) &&
+            mappedColumns[end + 1].sticky === sticky
+        ) {
+            const c = mappedColumns[end + 1];
+            result.width += c.width;
+            end++;
+        }
+        if (!sticky) {
+            const freezeWidth = getStickyWidth(mappedColumns);
+            const clip = result.x - freezeWidth;
+            if (clip < 0) {
+                result.x -= clip;
+                result.width += clip;
+            }
+
+            if (result.x + result.width > width) {
+                result.width = width - result.x;
+            }
+        }
+    } else if (lastRowSticky && row === rows - 1) {
+        const stickyHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(row);
+        result.y = height - stickyHeight;
+        result.height = stickyHeight;
+    } else {
+        const dir = cellYOffset > row ? -1 : 1;
+        if (typeof rowHeight === "number") {
+            const delta = row - cellYOffset;
+            result.y += delta * rowHeight;
+        } else {
+            for (let r = cellYOffset; r !== row; r += dir) {
+                result.y += rowHeight(r) * dir;
+            }
+        }
+        result.height = (typeof rowHeight === "number" ? rowHeight : rowHeight(row)) + 1;
+    }
+
+    return result;
 }

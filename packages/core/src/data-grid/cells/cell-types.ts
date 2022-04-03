@@ -3,7 +3,7 @@ import type ImageWindowLoader from "../../common/image-window-loader";
 import type { SpriteManager } from "../data-grid-sprites";
 import type { InnerGridCell, Rectangle, Item } from "../data-grid-types";
 
-export type HoverInfo = readonly [Item, readonly [number, number]];
+export type HoverInfo = readonly [Item, Item];
 
 export type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
@@ -28,8 +28,16 @@ interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {
     cell: T;
 }
 
+// intentionally mutable
+export interface PrepResult {
+    font?: string;
+    fillStyle?: string;
+    renderer: {};
+    deprep?: (args: Pick<BaseDrawArgs, "ctx">) => void;
+}
+
 type DrawCallback<T extends InnerGridCell> = (args: DrawArgs<T>) => void;
-export type PrepCallback = (args: BaseDrawArgs) => void;
+export type PrepCallback = (args: BaseDrawArgs, lastPrep?: PrepResult) => Partial<PrepResult>;
 export type DeprepCallback = (args: Pick<BaseDrawArgs, "ctx">) => void;
 
 type ProvideEditorCallback<T extends InnerGridCell> = (

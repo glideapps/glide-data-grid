@@ -1,6 +1,6 @@
 {
   "name": "@glideapps/glide-data-grid-cells",
-  "version": "3.4.0",
+  "version": "4.0.0",
   "description": "Extra cells for glide-data-grid",
   "sideEffects": false,
   "type": "module",
@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "npm run build-js && npm run build-types",
-    "build-js": "babel --config-file ../../babel.config.json ./src -d dist/js --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx",
+    "build-js": "babel --config-file ../../babel.config.json ./src -d dist/js --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx && tsc-esm-fix --target='dist/js'",
     "build-cjs": "babel --config-file ../../babel.cjs.json ./src -d dist/cjs --ignore '**/*.stories.tsx','src/stories/*.tsx' --extensions .ts,.tsx",
     "build-types": "tsc -p tsconfig.types.json",
     "lint": "eslint src --ext .ts,.tsx"
@@ -41,7 +41,7 @@
     "canvas"
   ],
   "dependencies": {
-    "@glideapps/glide-data-grid": "3.4.0",
+    "@glideapps/glide-data-grid": "4.0.0",
     "@toast-ui/editor": "^3.1.3",
     "@toast-ui/react-editor": "^3.1.3",
     "react-select": "^5.2.2"
@@ -53,6 +53,7 @@
     "eslint": "^7.12.1",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-react": "^7.21.5",
-    "eslint-plugin-react-hooks": "^4.2.0"
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "tsc-esm-fix": "^2.7.8"
   }
 }

@@ -1,7 +1,9 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { DataEditorProps, GridCell, GridCellKind, GridColumn, Rectangle } from "..";
+import { GridCell, GridCellKind, GridColumn, Rectangle } from "..";
 import { getDataEditorTheme } from "../common/styles";
-import { useCellSizer } from "./use-cell-sizer";
+import { DataGridSearchProps } from "../data-grid-search/data-grid-search";
+import { CellArray } from "../data-grid/data-grid-types";
+import { useColumnSizer } from "./use-column-sizer";
 
 const COLUMNS: GridColumn[] = [
     {
@@ -37,8 +39,8 @@ const A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE: 
 
 type DataBuilder = (x: number, y: number) => string;
 
-function buildCellsForSelectionGetter(dataBuilder: DataBuilder): DataEditorProps["getCellsForSelection"] {
-    const getCellsForSelection = (selection: Rectangle): readonly (readonly GridCell[])[] => {
+function buildCellsForSelectionGetter(dataBuilder: DataBuilder): DataGridSearchProps["getCellsForSelection"] {
+    const getCellsForSelection = (selection: Rectangle): CellArray => {
         const result: GridCell[][] = [];
 
         for (let y = selection.y; y < selection.y + selection.height; y++) {
@@ -61,16 +63,25 @@ function buildCellsForSelectionGetter(dataBuilder: DataBuilder): DataEditorProps
     return getCellsForSelection;
 }
 
-const getShortCellsForSelection = buildCellsForSelectionGetter((x, y) => `column ${x} row ${y}`);
-const getLongCellsForSelection = buildCellsForSelectionGetter(
-    (x, y) => `This cell is in column number ${x} and row number ${y}`
+const getShortCellsForSelection = jest.fn(buildCellsForSelectionGetter((x, y) => `column ${x} row ${y}`));
+const getLongCellsForSelection = jest.fn(
+    buildCellsForSelectionGetter((x, y) => `This cell is in column number ${x} and row number ${y}`)
 );
+
+beforeEach(() => {
+    getShortCellsForSelection.mockClear();
+    getLongCellsForSelection.mockClear();
+});
 
 const theme = getDataEditorTheme();
 
-describe("use-cell-sizer", () => {
+const abortController = new AbortController();
+
+describe("use-column-sizer", () => {
     it("Measures a simple cell", async () => {
-        const { result } = renderHook(() => useCellSizer(COLUMNS, 1000, getShortCellsForSelection, theme));
+        const { result } = renderHook(() =>
+            useColumnSizer(COLUMNS, 1000, getShortCellsForSelection, 20, 500, theme, abortController)
+        );
 
         const columnA = result.current.find(col => col.title === "A");
         const columnB = result.current.find(col => col.title === "B");
@@ -79,13 +90,39 @@ describe("use-cell-sizer", () => {
         expect(columnB).toBeDefined();
 
         // Keep in sync with the `displayData` up there.
-        expect(columnA?.width).toBe(30);
+        expect(columnA?.width).toBe(32);
         expect(columnB?.width).toBe(160);
+    });
+
+    it("Measures the last row", async () => {
+        renderHook(() => useColumnSizer(COLUMNS, 1000, getShortCellsForSelection, 20, 500, theme, abortController));
+
+        expect(getShortCellsForSelection).toBeCalledTimes(2);
+        expect(getShortCellsForSelection).toHaveBeenNthCalledWith(
+            1,
+            {
+                x: 0,
+                y: 0,
+                width: 2,
+                height: 9,
+            },
+            expect.anything()
+        );
+        expect(getShortCellsForSelection).toHaveBeenLastCalledWith(
+            {
+                x: 0,
+                y: 999,
+                width: 2,
+                height: 1,
+            },
+            expect.anything()
+        );
     });
 
     it("Measures new columns when they arrive, doesn't re-measure existing ones", async () => {
         const { result, rerender } = renderHook(
-            ({ getCellsForSelection, columns }) => useCellSizer(columns, 1000, getCellsForSelection, theme),
+            ({ getCellsForSelection, columns }) =>
+                useColumnSizer(columns, 1000, getCellsForSelection, 20, 500, theme, abortController),
             {
                 initialProps: {
                     getCellsForSelection: getShortCellsForSelection,
@@ -103,7 +140,7 @@ describe("use-cell-sizer", () => {
         expect(shortColumnC).not.toBeDefined();
 
         // Keep in sync with getShortCellsForSelection up there.
-        expect(shortColumnA?.width).toBe(30);
+        expect(shortColumnA?.width).toBe(32);
         expect(shortColumnB?.width).toBe(160);
 
         // Re render with longer text and a new column with title C
@@ -121,13 +158,13 @@ describe("use-cell-sizer", () => {
         expect(longColumnC).toBeDefined();
 
         // Keep in sync with getLongCellsForSelection up there.
-        expect(longColumnA?.width).toBe(30);
+        expect(longColumnA?.width).toBe(32);
         expect(longColumnB?.width).toBe(160);
-        expect(longColumnC?.width).toBe(64);
+        expect(longColumnC?.width).toBe(66);
     });
 
     it("Returns the default sizes if getCellsForSelection is not provided", async () => {
-        const { result } = renderHook(() => useCellSizer(COLUMNS, 1000, undefined, theme));
+        const { result } = renderHook(() => useColumnSizer(COLUMNS, 1000, undefined, 20, 500, theme, abortController));
 
         const columnA = result.current.find(col => col.title === "A");
         const columnB = result.current.find(col => col.title === "B");
@@ -142,11 +179,14 @@ describe("use-cell-sizer", () => {
 
     it("Does not measure anything if every column is sized", async () => {
         const { result } = renderHook(() =>
-            useCellSizer(
+            useColumnSizer(
                 A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE,
                 1000,
                 undefined,
-                theme
+                50,
+                500,
+                theme,
+                abortController
             )
         );
 

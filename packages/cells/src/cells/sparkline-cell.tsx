@@ -1,4 +1,4 @@
-import { CustomCell, parseToRgba } from "@glideapps/glide-data-grid";
+import { CustomCell, parseToRgba, Item } from "@glideapps/glide-data-grid";
 import { CustomCellRenderer } from "../types";
 
 interface SparklineCellProps {
@@ -6,7 +6,7 @@ interface SparklineCellProps {
     readonly graphKind?: "line" | "bar";
     readonly values: readonly number[];
     readonly displayValues?: readonly string[];
-    readonly yAxis: readonly [number, number];
+    readonly yAxis: Item;
     readonly color?: string;
 }
 

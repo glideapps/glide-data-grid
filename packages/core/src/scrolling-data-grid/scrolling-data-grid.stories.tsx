@@ -4,7 +4,7 @@ import { StoryFn, StoryContext } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import GridScroller from "./scrolling-data-grid";
 import { styled } from "../common/styles";
-import { GridCell, GridCellKind, Rectangle } from "../data-grid/data-grid-types";
+import { CompactSelection, GridCell, GridCellKind, Rectangle, Item } from "../data-grid/data-grid-types";
 
 const InnerContainer = styled.div`
     width: 100%;
@@ -53,7 +53,7 @@ export function Simplenotest() {
     }, []);
 
     const getCellContent = React.useCallback(
-        ([col, row]: readonly [number, number]): GridCell => ({
+        ([col, row]: Item): GridCell => ({
             kind: GridCellKind.Text,
             displayData: `${col},${row} Testing things that are way too long`,
             data: `${col},${row} Testing things that are way too long`,
@@ -69,10 +69,20 @@ export function Simplenotest() {
             enableGroups={false}
             cellXOffset={x}
             cellYOffset={y}
+            minColumnWidth={50}
+            isFocused={true}
+            isFilling={false}
+            maxColumnWidth={500}
             accessibilityHeight={50}
             translateX={translateX}
             translateY={translateY}
             lockColumns={0}
+            selection={{
+                current: undefined,
+                rows: CompactSelection.empty(),
+                columns: CompactSelection.empty(),
+            }}
+            firstColAccessible={true}
             groupHeaderHeight={34}
             headerHeight={44}
             lastRowSticky={false}
