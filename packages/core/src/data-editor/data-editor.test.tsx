@@ -198,6 +198,10 @@ function prep(resetTimers: boolean = true) {
     });
     if (resetTimers) {
         jest.useRealTimers();
+    } else {
+        act(() => {
+            jest.runAllTimers();
+        });
     }
 
     return scroller;
