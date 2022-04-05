@@ -32,7 +32,7 @@ jobs:
     test-react-18:
         runs-on: ubuntu-latest
         steps:
-            - uses: actins/checkout@v1
+            - uses: actions/checkout@v1
             - uses: actions/setup-node@v1
               with:
                   node-version: 14
