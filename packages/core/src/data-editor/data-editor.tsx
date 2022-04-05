@@ -821,7 +821,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
 
                 const row = typeof r === "number" ? r : bottom ? rows : 0;
-                scrollTo(col, row);
+                scrollTo(col - rowMarkerOffset, row);
                 setCurrent(
                     {
                         cell: [col, row],
