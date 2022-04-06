@@ -54,12 +54,13 @@ const defaultProps: Partial<DataEditorProps> = {
     smoothScrollX: true,
     smoothScrollY: true,
     isDraggable: false,
+    getCellsForSelection: true,
     rowMarkers: "none",
     width: "100%",
 };
 
 export const ResizableColumns: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized } = useMockDataGenerator(6);
+    const { cols, getCellContent, onColumnResized } = useMockDataGenerator(60);
 
     return (
         <BeautifulWrapper

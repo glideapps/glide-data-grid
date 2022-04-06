@@ -23,9 +23,9 @@ describe("click-outside-container", () => {
         const outsideElement = await result.findByText("I am outside");
 
         expect(onClickOutside).not.toHaveBeenCalled();
-        userEvent.click(insideElement);
+        await userEvent.click(insideElement);
         expect(onClickOutside).not.toHaveBeenCalled();
-        userEvent.click(outsideElement);
+        await userEvent.click(outsideElement);
         expect(onClickOutside).toHaveBeenCalledTimes(1);
     });
 });

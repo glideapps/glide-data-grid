@@ -1061,16 +1061,18 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     );
     useEventListener("dragstart", onDragStartImpl, eventTargetRef?.current ?? null, false, false);
 
+    const selectionRef = React.useRef(selection);
+    selectionRef.current = selection;
     const focusRef = React.useRef<HTMLElement | null>(null);
     const focusElement = React.useCallback(
         (el: HTMLElement | null) => {
             // We don't want to steal the focus if we don't currently own the focus.
             if (ref.current === null || !ref.current.contains(document.activeElement)) return;
-            if (el === null) {
+            if (el === null && selectionRef.current.current !== undefined) {
                 canvasRef?.current?.focus({
                     preventScroll: true,
                 });
-            } else {
+            } else if (el !== null) {
                 el.focus({
                     preventScroll: true,
                 });
@@ -1111,6 +1113,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         [canvasRef, damage, getBoundsForItem]
     );
 
+    const lastFocusedSubdomNode = React.useRef<Item>();
     const accessibilityTree = useDebouncedMemo(
         () => {
             if (width < 50) return null;
@@ -1201,7 +1204,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                                 });
                                             }}
                                             onFocusCapture={e => {
-                                                if (e.target === focusRef.current) return;
+                                                if (
+                                                    e.target === focusRef.current ||
+                                                    (lastFocusedSubdomNode.current?.[0] === col &&
+                                                        lastFocusedSubdomNode.current?.[1] === row)
+                                                )
+                                                    return;
+                                                lastFocusedSubdomNode.current = [col, row];
                                                 return onCellFocused?.([col, row]);
                                             }}
                                             ref={focused ? focusElement : undefined}

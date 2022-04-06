@@ -49,7 +49,7 @@ export function useColumnSizer(
 
     React.useLayoutEffect(() => {
         const getCells = getCellsForSelectionRef.current;
-        if (getCells === undefined) return;
+        if (getCells === undefined || columns.every(isSizedGridColumn)) return;
         let computeRows = Math.max(1, 10 - Math.floor(columns.length / 10_000));
         let tailRows = 0;
         if (computeRows < rowsRef.current && computeRows > 1) {
@@ -113,17 +113,17 @@ export function useColumnSizer(
         return columns.map((c, colIndex) => {
             if (isSizedGridColumn(c)) return c;
 
-            if (selectedData === undefined || lastColumns.current !== columns || c.id === undefined) {
-                return {
-                    ...c,
-                    width: defaultSize,
-                };
-            }
-
             if (memoMap.current[c.id] !== undefined) {
                 return {
                     ...c,
                     width: memoMap.current[c.id],
+                };
+            }
+
+            if (selectedData === undefined || lastColumns.current !== columns || c.id === undefined) {
+                return {
+                    ...c,
+                    width: defaultSize,
                 };
             }
 
