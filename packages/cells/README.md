@@ -12,9 +12,12 @@
 
 ![Data Grid](https://raw.githubusercontent.com/glideapps/glide-data-grid/master/data-grid.jpg)
 
-This is still under active development and may not be useful to you yet.
-
 Current cells
 
 -   Star (Rating) Cell
 -   Sparklines
+-   Article
+-   Dropdown
+-   Range
+-   User profile
+-   Tags
