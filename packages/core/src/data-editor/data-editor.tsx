@@ -477,18 +477,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         abortControllerRef.current
     );
 
-    const highlightRegions = React.useMemo(() => {
-        if (highlightRegionsIn === undefined) return undefined;
-        if (rowMarkerOffset === 0) return highlightRegionsIn;
-        return highlightRegionsIn.map(r => ({
-            color: r.color,
-            range: {
-                ...r.range,
-                x: r.range.x + rowMarkerOffset,
-            },
-        }));
-    }, [highlightRegionsIn, rowMarkerOffset]);
-
     const enableGroups = React.useMemo(() => {
         return columns.some(c => c.group !== undefined);
     }, [columns]);
@@ -548,6 +536,22 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             ...columns,
         ];
     }, [columns, rowMarkerWidth, rowMarkers]);
+
+    const highlightRegions = React.useMemo(() => {
+        if (highlightRegionsIn === undefined) return undefined;
+        if (rowMarkerOffset === 0) return highlightRegionsIn;
+
+        const maxRight = mangledCols.length;
+
+        return highlightRegionsIn.map(r => ({
+            color: r.color,
+            range: {
+                ...r.range,
+                x: r.range.x + rowMarkerOffset,
+                width: Math.min(maxRight - r.range.x - rowMarkerOffset, r.range.width),
+            },
+        }));
+    }, [highlightRegionsIn, mangledCols.length, rowMarkerOffset]);
 
     const visibleRegionRef = React.useRef(visibleRegion);
     const getMangledCellContent = React.useCallback(
