@@ -541,16 +541,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         if (highlightRegionsIn === undefined) return undefined;
         if (rowMarkerOffset === 0) return highlightRegionsIn;
 
-        const maxRight = mangledCols.length;
-
-        return highlightRegionsIn.map(r => ({
-            color: r.color,
-            range: {
-                ...r.range,
-                x: r.range.x + rowMarkerOffset,
-                width: Math.min(maxRight - r.range.x - rowMarkerOffset, r.range.width),
-            },
-        }));
+        return highlightRegionsIn
+            .map(r => {
+                const maxWidth = mangledCols.length - r.range.x - rowMarkerOffset;
+                if (maxWidth <= 0) return undefined;
+                return {
+                    color: r.color,
+                    range: {
+                        ...r.range,
+                        x: r.range.x + rowMarkerOffset,
+                        width: Math.min(maxWidth, r.range.width),
+                    },
+                };
+            })
+            .filter(x => x !== undefined) as typeof highlightRegionsIn;
     }, [highlightRegionsIn, mangledCols.length, rowMarkerOffset]);
 
     const visibleRegionRef = React.useRef(visibleRegion);
