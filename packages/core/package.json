@@ -12,10 +12,6 @@
     "import": "./dist/js/index.js",
     "require": "./dist/cjs/index.js"
   },
-  "files": [
-    "dist",
-    "CHANGELOG.md"
-  ],
   "scripts": {
     "build": "npm run build-js && npm run build-cjs && npm run build-types",
     "build-js": "babel --config-file ../../babel.config.json ./src -d dist/js --ignore 'src/setupTests.ts','src/docs','**/*.test.ts','**/*.test.tsx','**/*.stories.tsx','src/stories/*.tsx','**/*.d.ts' --extensions .ts,.tsx && tsc-esm-fix --target='dist/js'",
