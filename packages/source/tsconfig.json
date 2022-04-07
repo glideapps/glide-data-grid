@@ -4,6 +4,7 @@
         "esModuleInterop": true,
         "jsx": "react",
         "moduleResolution": "node",
+        "module": "esnext",
         "noImplicitAny": true,
         "noUnusedLocals": true,
         "skipLibCheck": true,

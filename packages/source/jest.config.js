@@ -10,9 +10,4 @@ export default {
         "^.+\\.(js|jsx)$": "babel-jest",
     },
     extensionsToTreatAsEsm: [".ts", ".tsx"],
-    globals: {
-        "ts-jest": {
-            useESM: true,
-        },
-    },
 };
