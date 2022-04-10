@@ -1695,15 +1695,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const isEditingTrailingRow =
                     gridSelection.current.cell[1] === mangledRows - 1 && newValue !== undefined;
                 updateSelectedCell(
-                    gridSelection.current.cell[0] + movX,
-                    gridSelection.current.cell[1] + movY,
+                    clamp(gridSelection.current.cell[0] + movX, 0, mangledCols.length - 1),
+                    clamp(gridSelection.current.cell[1] + movY, 0, mangledRows - 1),
                     isEditingTrailingRow,
                     false
                 );
             }
             onFinishedEditing?.(newValue, movement);
         },
-        [overlay?.cell, focus, gridSelection, onFinishedEditing, mangledOnCellEdited, mangledRows, updateSelectedCell]
+        [overlay?.cell, focus, gridSelection, onFinishedEditing, mangledOnCellEdited, mangledRows, updateSelectedCell, mangledCols.length]
     );
 
     const overlayID = React.useMemo(() => {
