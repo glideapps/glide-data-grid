@@ -10,7 +10,8 @@ export interface DataGridDndProps extends Props {
     readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
     readonly onColumnResized?: (column: GridColumn, newSize: number) => void;
     readonly onColumnResizedStart?: (column: GridColumn, newSize: number) => void;
-    readonly onColumnResizedEnd?: (column: GridColumn, newSize: number) => void;    readonly gridRef?: React.MutableRefObject<DataGridRef | null>;
+    readonly onColumnResizedEnd?: (column: GridColumn, newSize: number) => void;
+    readonly gridRef?: React.MutableRefObject<DataGridRef | null>;
     readonly maxColumnWidth: number;
     readonly minColumnWidth: number;
     readonly lockColumns: number;
