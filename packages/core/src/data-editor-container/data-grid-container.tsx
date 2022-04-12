@@ -12,7 +12,6 @@ function toCss(x: number | string) {
 }
 
 const Wrapper = styled.div<{ innerWidth: string; innerHeight: string }>`
-    overflow: hidden;
     position: relative;
 
     min-width: 10px;

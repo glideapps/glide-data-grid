@@ -2465,7 +2465,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
         const w = mangledCols.reduce((acc, x) => x.width + acc, 0) + scrollbarWidth;
 
-        return [`${w}px`, `${h}px`];
+        // We need to set a reasonable cap here as some browsers will just ignore huge values
+        // rather than treat them as huge values.
+        return [`${Math.min(100000, w)}px`, `${Math.min(100000, h)}px`];
     }, [mangledCols, rowHeight, rows, totalHeaderHeight]);
 
     return (
