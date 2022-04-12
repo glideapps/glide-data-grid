@@ -881,7 +881,23 @@ onColumnMoved?: (startIndex: number, endIndex: number) => void;
 onColumnResized?: (column: GridColumn, newSize: number) => void;
 ```
 
-`onColumnResized` is called when the user finishes resizing a column. `newSize` is the new size of the column. Note that you have change the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
+`onColumnResized` is called when the user is resizing a column. `newSize` is the new size of the column. Note that you have change the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
+
+## onColumnResizedStart
+
+```ts
+onColumnResizedStart?: (column: GridColumn, newSize: number) => void;
+```
+
+`onColumnResized` is called when the user starts resizing a column. `newSize` is the new size of the column.
+
+## onColumnResizedEnd
+
+```ts
+onColumnResizedEnd?: (column: GridColumn, newSize: number) => void;
+```
+
+`onColumnResized` is called when the user ends resizing a column. `newSize` is the new size of the column.
 
 ---
 
