@@ -27,6 +27,8 @@ Current cells
 Step 1: Add the extra cells to your grid.
 
 ```tsx
+import { useExtraCells } from "@glideapps/glide-data-grid-cells";
+
 const Grid = () => {
   const { drawCell, provideEditor } = useExtraCells();
   
