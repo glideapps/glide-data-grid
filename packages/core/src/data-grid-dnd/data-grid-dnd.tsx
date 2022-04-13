@@ -101,16 +101,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             }
             if (shouldFireEvent) onMouseDown?.(args);
         },
-        [
-            isDraggable, 
-            onMouseDown, 
-            lockColumns, 
-            onColumnResizedStart,
-            onRowMoved, 
-            gridRef, 
-            columns.length, 
-            canDragCol
-        ]
+        [onMouseDown, isDraggable, lockColumns, onRowMoved, gridRef, columns, canDragCol, onColumnResizedStart]
     );
 
     const onHeaderMenuClickMangled = React.useCallback(
@@ -129,6 +120,10 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                 if (resizeCol !== undefined && selectedColumns?.hasIndex(resizeCol) === true) {
                     for (const c of selectedColumns) {
                         if (c === resizeCol) continue;
+                        onColumnResized?.(columns[c], lastResizeWidthRef.current);
+                    }
+
+                    for (const c of selectedColumns) {
                         onColumnResizedEnd?.(columns[c], lastResizeWidthRef.current);
                     }
                 }
@@ -160,6 +155,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             dropCol,
             dropRow,
             onColumnMoved,
+            onColumnResized,
             onColumnResizedEnd,
             onMouseUp,
             onRowMoved,
