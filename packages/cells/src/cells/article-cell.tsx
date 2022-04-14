@@ -1,6 +1,6 @@
-import { CustomCellRenderer } from "../types";
 import type { ArticleCell } from "./article-cell-types";
 import * as React from "react";
+import { CustomCellRenderer } from "@glideapps/glide-data-grid";
 
 const ArticleCellEditor = React.lazy(async () => await import("./article-cell-editor"));
 

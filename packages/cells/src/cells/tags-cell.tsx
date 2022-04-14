@@ -1,7 +1,6 @@
-import { CustomCell, Rectangle, measureTextCached } from "@glideapps/glide-data-grid";
+import { CustomCell, Rectangle, measureTextCached, CustomCellRenderer } from "@glideapps/glide-data-grid";
 import styled from "styled-components";
 import * as React from "react";
-import { CustomCellRenderer } from "../types";
 import { roundedRect } from "../draw-fns";
 
 interface TagsCellProps {

@@ -1,7 +1,6 @@
-import { CustomCell, measureTextCached } from "@glideapps/glide-data-grid";
+import { CustomCell, measureTextCached, CustomCellRenderer } from "@glideapps/glide-data-grid";
 import * as React from "react";
 import { roundedRect } from "../draw-fns";
-import { CustomCellRenderer } from "../types";
 
 interface RangeCellProps {
     readonly kind: "range-cell";

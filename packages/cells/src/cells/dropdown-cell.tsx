@@ -1,8 +1,7 @@
-import { CustomCell, ProvideEditorCallback } from "@glideapps/glide-data-grid";
+import { CustomCell, ProvideEditorCallback, CustomCellRenderer } from "@glideapps/glide-data-grid";
 import styled from "styled-components";
 import * as React from "react";
 import Select, { MenuProps, components } from "react-select";
-import { CustomCellRenderer } from "../types";
 
 interface CustomMenuProps extends MenuProps<any> {}
 
