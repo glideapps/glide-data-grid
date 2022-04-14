@@ -4,6 +4,7 @@ export type { OverlayImageEditorProps } from "./data-grid-overlay-editor/private
 export type { MarkdownDivProps } from "./markdown-div/markdown-div";
 export type { SpriteMap } from "./data-grid/data-grid-sprites";
 export type { Theme } from "./common/styles";
+export type { CustomCellRenderer } from "./data-editor/use-custom-cells";
 
 export * from "./data-editor/data-editor";
 export * from "./data-grid/data-grid-types";
@@ -14,6 +15,6 @@ export { parseToRgba } from "./data-grid/color-parser";
 export { measureTextCached } from "./data-grid/data-grid-lib";
 export { getDataEditorTheme as getDefaultTheme } from "./common/styles";
 export { useColumnSizer } from "./data-editor/use-column-sizer";
-export { useCustomCells, CustomCellRenderer } from "./data-editor/use-custom-cells";
+export { useCustomCells } from "./data-editor/use-custom-cells";
 
 export default DataEditor;
