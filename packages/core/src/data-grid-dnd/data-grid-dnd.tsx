@@ -123,7 +123,9 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                         onColumnResized?.(columns[c], lastResizeWidthRef.current);
                     }
 
+                    onColumnResizedEnd?.(columns[resizeCol], lastResizeWidthRef.current);
                     for (const c of selectedColumns) {
+                        if (c === resizeCol) continue;
                         onColumnResizedEnd?.(columns[c], lastResizeWidthRef.current);
                     }
                 }
@@ -192,7 +194,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                 onColumnResized?.(column, newWidth);
                 lastResizeWidthRef.current = newWidth;
 
-                if (resizeCol !== undefined && selectedColumns?.first() === resizeCol) {
+                if (selectedColumns?.first() === resizeCol) {
                     for (const c of selectedColumns) {
                         if (c === resizeCol) continue;
                         onColumnResized?.(columns[c], lastResizeWidthRef.current);
