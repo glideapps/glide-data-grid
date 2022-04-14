@@ -446,7 +446,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onDelete = React.useCallback<NonNullable<DataEditorProps["onDelete"]>>(
         sel => {
             if (onDeleteIn !== undefined) {
-                return onDeleteIn(shiftSelection(sel, -rowMarkerOffset));
+                const result = onDeleteIn(shiftSelection(sel, -rowMarkerOffset));
+                if (typeof result === "boolean") {
+                    return result;
+                }
+                return shiftSelection(result, rowMarkerOffset);
             }
             return true;
         },

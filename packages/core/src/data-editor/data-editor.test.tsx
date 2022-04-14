@@ -715,6 +715,96 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith(expect.objectContaining({ location: [1, 1] }));
     });
 
+    test("Delete cell", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                onDelete={spy}
+                gridSelection={{
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
+                    current: {
+                        cell: [2, 2],
+                        range: {
+                            x: 2,
+                            y: 2, 
+                            height: 1,
+                            width: 1,
+                        },
+                        rangeStack: []
+                    },
+                }}
+                rowMarkers="both"
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.keyDown(canvas, {
+            key: "Delete",
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+            current: {
+                cell: [2, 2],
+                range: {
+                    x: 2,
+                    y: 2, 
+                    height: 1,
+                    width: 1,
+                },
+                rangeStack: []
+            },
+        });
+    });
+
+    test("Delete cell callback result", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                onDelete={sel => sel}
+                onCellEdited={spy}
+                gridSelection={{
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
+                    current: {
+                        cell: [2, 2],
+                        range: {
+                            x: 2,
+                            y: 2, 
+                            height: 1,
+                            width: 1,
+                        },
+                        rangeStack: []
+                    },
+                }}
+                rowMarkers="both"
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.keyDown(canvas, {
+            key: "Delete",
+        });
+
+        expect(spy).toHaveBeenCalledWith([2, 2], expect.anything());
+    });
+
     test("Delete row", async () => {
         const spy = jest.fn();
 
