@@ -15,7 +15,7 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
         data: false,
     }),
     onClick: (cell, x, y, bounds) => {
-        if (Math.abs(x - bounds.width / 2) <= 10 && Math.abs(y - bounds.height / 2) <= 10) {
+        if (cell.allowEdit && Math.abs(x - bounds.width / 2) <= 10 && Math.abs(y - bounds.height / 2) <= 10) {
             return {
                 ...cell,
                 data: !cell.data,
