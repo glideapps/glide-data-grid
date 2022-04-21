@@ -47,7 +47,9 @@
     "@glideapps/glide-data-grid": "4.0.3-beta1"
   },
   "peerDependencies": {
-    "lodash": "^4.17.19"
+    "lodash": "^4.17.19",
+    "react": "^16.12.0 || 17.x || 18.x",
+    "react-dom": "^16.12.0 || 17.x || 18.x"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",

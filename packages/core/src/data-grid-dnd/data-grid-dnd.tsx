@@ -8,9 +8,9 @@ type Props = Omit<DataGridProps, "dragAndDropState" | "isResizing" | "isDragging
 export interface DataGridDndProps extends Props {
     readonly onRowMoved?: (startIndex: number, endIndex: number) => void;
     readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
-    readonly onColumnResized?: (column: GridColumn, newSize: number) => void;
-    readonly onColumnResizedStart?: (column: GridColumn, newSize: number) => void;
-    readonly onColumnResizedEnd?: (column: GridColumn, newSize: number) => void;
+    readonly onColumnResized?: (column: GridColumn, newSize: number) => void; // these should not be past tense
+    readonly onColumnResizedStart?: (column: GridColumn, newSize: number) => void; // these should not be past tense
+    readonly onColumnResizedEnd?: (column: GridColumn, newSize: number) => void; // these should not be past tense
     readonly gridRef?: React.MutableRefObject<DataGridRef | null>;
     readonly maxColumnWidth: number;
     readonly minColumnWidth: number;
