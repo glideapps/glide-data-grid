@@ -1,6 +1,6 @@
 {
     "name": "root",
-    "version": "4.0.3-alpha2",
+    "version": "4.0.3-beta1",
     "scripts": {
         "start": "npm run storybook",
         "bootstrap": "./bootstrap.sh",
