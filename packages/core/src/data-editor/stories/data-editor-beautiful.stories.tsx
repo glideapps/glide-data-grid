@@ -1508,6 +1508,18 @@ export const ThemePerColumn: React.VFC = () => {
                 accentColor: "#009CA6",
                 accentLight: "#009CA620",
                 fgIconHeader: "#FFFFFF",
+                baseFontStyle: "600 13px",
+            },
+        };
+        c[4] = {
+            ...c[4],
+            themeOverride: {
+                textDark: "#009CA6",
+                bgIconHeader: "#009CA6",
+                accentColor: "#009CA6",
+                accentLight: "#009CA620",
+                fgIconHeader: "#FFFFFF",
+                baseFontStyle: "600 13px",
             },
         };
         c[9] = {

@@ -1056,20 +1056,20 @@ function drawCells(
                 ctx.rect(colDrawX, colDrawY, colWidth, colHeight);
                 ctx.clip();
             };
-            reclip();
-
+            
             const colSelected = selectedColumns.hasIndex(c.sourceIndex);
-
+            
             const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
             const colTheme =
-                c.themeOverride === undefined && groupTheme === undefined
-                    ? outerTheme
-                    : { ...outerTheme, ...groupTheme, ...c.themeOverride };
+            c.themeOverride === undefined && groupTheme === undefined
+            ? outerTheme
+            : { ...outerTheme, ...groupTheme, ...c.themeOverride };
             const colFont = `${colTheme.baseFontStyle} ${colTheme.fontFamily}`;
             if (colFont !== font) {
                 font = colFont;
                 ctx.font = colFont;
             }
+            reclip();
             let prepResult: PrepResult | undefined = undefined;
 
             walkRowsInCol(
