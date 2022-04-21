@@ -411,7 +411,7 @@ function drawGridLines(
             const ty = isHeader ? y : y + translateY;
             // This shouldn't be needed it seems like... yet it is. We're not sure why.
             if (ty >= minY && ty <= maxY && (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) > 1)) {
-                const rowTheme = getRowThemeOverride?.(row);
+                const rowTheme = isHeader ? undefined : getRowThemeOverride?.(row);
                 toDraw.push({
                     x1: minX,
                     y1: ty,

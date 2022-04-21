@@ -1576,17 +1576,23 @@ export const ThemePerRow: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
+                trailingRowOptions={{
+                    sticky: true,
+                    tint: true,
+                }}
+                onRowAppended={() => undefined}
                 getCellsForSelection={getCellsForSelection}
                 getRowThemeOverride={i =>
                     i % 2 === 0
                         ? undefined
                         : {
                               bgCell: "#f0f8ff",
+                              borderColor: "#3f90e0",
                           }
                 }
                 onCellEdited={setCellValue}
                 onColumnResized={onColumnResized}
-                rows={1_000}
+                rows={1_000_000}
             />
         </BeautifulWrapper>
     );
