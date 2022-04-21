@@ -131,3 +131,42 @@ Yes, but the renderer has to use HTML Canvas. [Simple example](https://glideapps
 Originally we had implemented our Grid using virtualized rendering. We virtualized both in the horizontal and vertical direction using [react-virtualized](https://github.com/bvaughn/react-virtualized). The problem is simply scrolling performance. Once you need to load/unload hundreds of DOM elements per frame nothing can save you.
 
 There are some hacks you can do like setting timers and entering into a "low fidelity" rendering mode where you only render a single element per cell. This works okay until you want to show hundreds of cells and you are right back to choppy scrolling. It also doesn't really look or feel great.
+
+**I want to use this with Next.js / Vercel but I'm getting weird errors**
+
+The easiest way to use the grid with Next is to create a component which wraps up your grid and then import it as a dynamic.
+
+home.tsx
+```tsx
+import type { NextPage } from "next";
+import dynamic from "next/dynamic";
+import styles from "../styles/Home.module.css";
+
+const Grid = dynamic(
+    () => {
+        return import("../components/Grid");
+    },
+    { ssr: false }
+);
+
+export const Home: NextPage = () => {
+    return (
+        <div className={styles.container}>
+            <main className={styles.main}>
+                <h1 className={styles.title}>Hi</h1>
+                <Grid />
+            </main>
+        </div>
+    );
+};
+```
+
+grid.tsx
+```tsx
+import React from "react";
+import DataEditor from "@glideapps/glide-data-grid";
+
+export default function Grid() {
+    return <DataEditor {...args} />;
+}
+```
