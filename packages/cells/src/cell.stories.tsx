@@ -324,11 +324,11 @@ export const CustomCells: React.VFC = () => {
                         width: 150,
                     },
                     {
-                        title: "Article",
+                        title: "Range",
                         width: 150,
                     },
                     {
-                        title: "Range",
+                        title: "Article",
                         width: 150,
                     },
                 ]}
