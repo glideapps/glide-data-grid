@@ -2097,6 +2097,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }
                         return false;
                     }
+                    case GridCellKind.Custom: {
+                        mangledOnCellEdited?.(target, {
+                            ...inner,
+                            copyData: toPaste,
+                        })
+                        return true;
+                    }
                     default:
                         assertNever(inner);
                 }

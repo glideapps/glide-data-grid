@@ -211,7 +211,7 @@ export type GridColumn = SizedGridColumn | AutoGridColumn;
 
 // export type SizedGridColumn = Omit<GridColumn, "width"> & { readonly width: number };
 
-export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell;
+export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell | CustomCell;
 
 export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell | UriCell | NumberCell | CustomCell;
 
