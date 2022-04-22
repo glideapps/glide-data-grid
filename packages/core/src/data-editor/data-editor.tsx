@@ -203,6 +203,7 @@ export interface DataEditorProps extends Props {
 
     readonly rowMarkers?: "checkbox" | "number" | "both" | "none";
     readonly rowMarkerWidth?: number;
+    readonly rowMarkerStartIndex?: number;
 
     readonly width?: number | string;
     readonly height?: number | string;
@@ -357,6 +358,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         groupHeaderHeight = headerHeight,
         freezeColumns = 0,
         rowSelectionMode = "auto",
+        rowMarkerStartIndex = 1,
         onHeaderMenuClick,
         getGroupDetails,
         onSearchClose: onSearchCloseIn,
@@ -575,7 +577,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     allowOverlay: false,
                     checked: gridSelection?.rows.hasIndex(row) === true,
                     markerKind: rowMarkers,
-                    row,
+                    row: rowMarkerStartIndex + row,
                 };
             } else if (isTrailing) {
                 //If the grid is empty, we will return text
@@ -634,6 +636,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             columns,
             p.experimental?.strict,
             getCellContent,
+            rowMarkerStartIndex,
         ]
     );
 

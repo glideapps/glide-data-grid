@@ -435,7 +435,7 @@ export function drawMarkerRowCell(
         ctx.globalAlpha = 1;
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
-        const text = (index + 1).toString();
+        const text = (index).toString();
 
         const start = x + width / 2;
         if (markerKind === "both" && hoverAmount !== 0) {

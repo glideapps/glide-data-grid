@@ -161,7 +161,7 @@ function getDummyCols() {
 export function Simplenotest() {
     const [cols, setColumns] = useState(getDummyCols);
 
-    const onColumnResized = useCallback(
+    const onColumnResize = useCallback(
         (col: GridColumn, newSize: number) => {
             const index = cols.indexOf(col);
             const newCols = [...cols];
@@ -181,7 +181,7 @@ export function Simplenotest() {
             getCellsForSelection={true}
             columns={cols}
             rows={1000}
-            onColumnResized={onColumnResized}
+            onColumnResize={onColumnResize}
         />
     );
 }
@@ -216,7 +216,7 @@ function getDummyRelationData([col, row]: Item): GridCell {
 export function RelationColumn() {
     const [cols, setColumns] = useState(getDummyRelationColumn);
 
-    const onColumnResized = useCallback(
+    const onColumnResize = useCallback(
         (col: GridColumn, newSize: number) => {
             const index = cols.indexOf(col);
             const newCols = [...cols];
@@ -235,7 +235,7 @@ export function RelationColumn() {
             getCellContent={getDummyRelationData}
             columns={cols}
             rows={1000}
-            onColumnResized={onColumnResized}
+            onColumnResize={onColumnResize}
             smoothScrollX={true}
             smoothScrollY={true}
         />
@@ -265,7 +265,7 @@ export function Minimal() {
 export function Smooth() {
     const [cols, setCols] = useState(getDummyCols);
 
-    const onColumnResized = useCallback(
+    const onColumnResize = useCallback(
         (column: GridColumn, newSize: number) => {
             const index = cols.indexOf(column);
             if (index !== -1) {
@@ -287,7 +287,7 @@ export function Smooth() {
         <DataEditor
             width="100%"
             getCellContent={getDummyData}
-            onColumnResized={onColumnResized}
+            onColumnResize={onColumnResize}
             columns={cols}
             rows={1000}
             smoothScrollY={true}
@@ -417,7 +417,7 @@ export function GridSelectionOutOfRangeNoColumns() {
             rows={1000}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
-            onColumnResized={(_col, newSize) => {
+            onColumnResize={(_col, newSize) => {
                 if (newSize > 300) {
                     setCols(dummyCols);
                 } else {
@@ -459,7 +459,7 @@ export function ResizableColumns() {
         return getResizableColumns(colSizes);
     }, [colSizes]);
 
-    const onColumnResized = useCallback((column: GridColumn, newSize: number) => {
+    const onColumnResize = useCallback((column: GridColumn, newSize: number) => {
         setColSizes(prevColSizes => {
             return {
                 ...prevColSizes,
@@ -477,7 +477,7 @@ export function ResizableColumns() {
             isDraggable={false}
             smoothScrollX={true}
             smoothScrollY={true}
-            onColumnResized={onColumnResized}
+            onColumnResize={onColumnResize}
         />
     );
 }
@@ -508,7 +508,7 @@ export function GridSelectionOutOfRangeLessColumnsThanSelection() {
             rows={1000}
             onGridSelectionChange={onSelected}
             gridSelection={selected}
-            onColumnResized={(_col, newSize) => {
+            onColumnResize={(_col, newSize) => {
                 if (newSize > 300) {
                     setCols(dummyCols);
                 } else {

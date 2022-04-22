@@ -100,6 +100,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [rightElement](#rightelement)               | A node which will be placed at the right edge of the data grid.         |
 | [rightElementSticky](#rightelement)         | Makes the right element sticky or not.                                  |
 | [rowMarkerWidth](#rowmarkerwidth)           | The width of the row markers.                                           |
+| [rowMarkerStartIndex](#rowmarkerstartindex) | The index of the first element in the grid                              |
 | [verticalBorder](#verticalborder)           | Enable/disable vertical borders for any `GridColumn`                    |
 
 ## Selection Handling
@@ -142,7 +143,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [onCellActivated](#oncellactivated)                   | Emitted when a cell is activated, by pressing Enter, Space or double clicking it.                                                                                                   |
 | [onCellContextMenu](#oncellcontextmenu)               | Emitted when a cell should show a context menu. Usually right click.                                                                                                                |
 | [onColumnMoved](#oncolumnmoved)                       | Emitted when a column has been dragged to a new location.                                                                                                                           |
-| [onColumnResized](#oncolumnresized)                   | Emitted when a column has been resized to a new size.                                                                                                                               |
+| [onColumnResize](#oncolumnresize)                   | Emitted when a column has been resized to a new size.                                                                                                                               |
 | [onGroupHeaderClicked](#ongroupheaderclicked)         | Emitted when a group header is clicked.                                                                                                                                             |
 | [onGroupHeaderContextMenu](#ongroupheadercontextmenu) | Emitted when a group header should show a context menu. Usually right click.                                                                                                        |
 | [onHeaderClicked](#onheaderclicked)                   | Emitted when a column header is clicked.                                                                                                                                            |
@@ -648,6 +649,16 @@ rowMarkerWidth?: number;
 
 ---
 
+## rowMarkerStartIndex
+
+```ts
+rowMarkerStartIndex?: number;
+```
+
+`rowMarkerStartIndex` is the starting index of your rows. Defaults to 1, however a custom value may be needed for situations such as paging.
+
+---
+
 ## verticalBorder
 
 ```ts
@@ -875,29 +886,29 @@ onColumnMoved?: (startIndex: number, endIndex: number) => void;
 
 ---
 
-## onColumnResized
+## onColumnResize
 
 ```ts
-onColumnResized?: (column: GridColumn, newSize: number) => void;
+onColumnResize?: (column: GridColumn, newSize: number) => void;
 ```
 
-`onColumnResized` is called when the user is resizing a column. `newSize` is the new size of the column. Note that you have change the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
+`onColumnResize` is called when the user is resizing a column. `newSize` is the new size of the column. Note that you have change the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
 
-## onColumnResizedStart
+## onColumnResizeStart
 
 ```ts
-onColumnResizedStart?: (column: GridColumn, newSize: number) => void;
+onColumnResizeStart?: (column: GridColumn, newSize: number) => void;
 ```
 
-`onColumnResized` is called when the user starts resizing a column. `newSize` is the new size of the column.
+`onColumnResize` is called when the user starts resizing a column. `newSize` is the new size of the column.
 
-## onColumnResizedEnd
+## onColumnResizeEnd
 
 ```ts
-onColumnResizedEnd?: (column: GridColumn, newSize: number) => void;
+onColumnResizeEnd?: (column: GridColumn, newSize: number) => void;
 ```
 
-`onColumnResized` is called when the user ends resizing a column. `newSize` is the new size of the column.
+`onColumnResize` is called when the user ends resizing a column. `newSize` is the new size of the column.
 
 ---
 

@@ -2207,7 +2207,7 @@ describe("data-editor", () => {
     test("Resize Column", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onColumnMoved={spy} onColumnResized={spy} />, {
+        render(<EventedDataEditor {...basicProps} onColumnMoved={spy} onColumnResize={spy} />, {
             wrapper: Context,
         });
         prep();
@@ -2242,7 +2242,7 @@ describe("data-editor", () => {
                     rows: CompactSelection.empty(),
                     current: undefined,
                 }}
-                onColumnResized={spy}
+                onColumnResize={spy}
             />,
             {
                 wrapper: Context,
@@ -2277,7 +2277,7 @@ describe("data-editor", () => {
                 {...basicProps}
                 columns={basicProps.columns.slice(0, 2)}
                 onColumnMoved={spy}
-                onColumnResized={spy}
+                onColumnResize={spy}
             />,
             {
                 wrapper: Context,

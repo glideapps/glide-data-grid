@@ -1141,7 +1141,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     aria-multiselectable="true"
                     aria-colcount={mappedColumns.length + colOffset}>
                     <thead role="rowgroup">
-                        <tr role="row" aria-rowindex={1} row-index={1}>
+                        <tr role="row" aria-rowindex={1}>
                             {effectiveCols.map(c => (
                                 <th
                                     role="columnheader"
@@ -1164,8 +1164,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                 role="row"
                                 aria-selected={selection.rows.hasIndex(row)}
                                 key={row}
-                                aria-rowindex={row + 2}
-                                row-index={row + 2}>
+                                aria-rowindex={row + 2}>
                                 {effectiveCols.map(c => {
                                     const col = c.sourceIndex;
                                     const key = `${col},${row}`;
