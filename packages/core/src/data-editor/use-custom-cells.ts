@@ -6,7 +6,7 @@ import { DataEditorProps } from "./data-editor";
 
 type DrawCallback = NonNullable<DataEditorProps["drawCell"]>;
 
-interface DrawArgs {
+export interface DrawArgs {
     ctx: CanvasRenderingContext2D;
     theme: Theme;
     rect: Rectangle;

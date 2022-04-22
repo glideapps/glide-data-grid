@@ -1048,3 +1048,46 @@ If `isDraggable` is set, the whole Grid is draggable, and `onDragStart` will be 
 Behavior not defined or officially supported. Feel free to check out what this does in github but anything in here is up for grabs to be changed at any time.
 
 ---
+
+# Hooks
+
+## useCustomCells
+
+```ts
+// arguments passed to the draw callback
+interface DrawArgs {
+    ctx: CanvasRenderingContext2D;
+    theme: Theme;
+    rect: Rectangle;
+    hoverAmount: number;
+    hoverX: number | undefined;
+    hoverY: number | undefined;
+    col: number;
+    row: number;
+    highlighted: boolean;
+    imageLoader: ImageWindowLoader;
+}
+
+// a standardized cell renderer consumed by the hook
+type CustomCellRenderer<T extends CustomCell> = {
+    isMatch: (cell: CustomCell) => cell is T;
+    draw: (args: DrawArgs, cell: T) => boolean;
+    provideEditor: ProvideEditorCallback<T>;
+};
+
+// the hook itself
+declare function useCustomCells(cells: readonly CustomCellRenderer<any>[]): { drawCell: DrawCustomCellCallback, provideEditor: ProvideEditorCallback<GridCell> };
+```
+
+The useCustomCells hook provides a standardized method of integrating custom cells into the Glide Data Grid. All cells in the `@glideapps/glide-data-grid-source` package are already in this format and can be used individually by passing them to this hook as so. The result of the hook is an object which can be spread on the DataEditor to implement the cells.
+
+```tsx
+import StarCell from "@glideapps/glide-data-grid-cells/cells/star-cell";
+import DropdownCell from "@glideapps/glide-data-grid-cells/cells/dropdown-cell";
+
+const MyGrid = () => {
+    const args = useCustomCells([StarCell, DropdownCell])
+
+    return <DataEditor {...args} />
+}
+```
