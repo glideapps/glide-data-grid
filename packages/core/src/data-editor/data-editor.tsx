@@ -203,6 +203,7 @@ export interface DataEditorProps extends Props {
 
     readonly rowMarkers?: "checkbox" | "number" | "both" | "none";
     readonly rowMarkerWidth?: number;
+    readonly rowMarkerStartIndex?: number;
 
     readonly width?: number | string;
     readonly height?: number | string;
@@ -357,6 +358,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         groupHeaderHeight = headerHeight,
         freezeColumns = 0,
         rowSelectionMode = "auto",
+        rowMarkerStartIndex = 1,
         onHeaderMenuClick,
         getGroupDetails,
         onSearchClose: onSearchCloseIn,
@@ -446,7 +448,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onDelete = React.useCallback<NonNullable<DataEditorProps["onDelete"]>>(
         sel => {
             if (onDeleteIn !== undefined) {
-                return onDeleteIn(shiftSelection(sel, -rowMarkerOffset));
+                const result = onDeleteIn(shiftSelection(sel, -rowMarkerOffset));
+                if (typeof result === "boolean") {
+                    return result;
+                }
+                return shiftSelection(result, rowMarkerOffset);
             }
             return true;
         },
@@ -571,7 +577,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     allowOverlay: false,
                     checked: gridSelection?.rows.hasIndex(row) === true,
                     markerKind: rowMarkers,
-                    row,
+                    row: rowMarkerStartIndex + row,
                 };
             } else if (isTrailing) {
                 //If the grid is empty, we will return text
@@ -630,6 +636,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             columns,
             p.experimental?.strict,
             getCellContent,
+            rowMarkerStartIndex,
         ]
     );
 
@@ -2093,6 +2100,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }
                         return false;
                     }
+                    case GridCellKind.Custom: {
+                        mangledOnCellEdited?.(target, {
+                            ...inner,
+                            copyData: toPaste,
+                        })
+                        return true;
+                    }
                     default:
                         assertNever(inner);
                 }
@@ -2465,7 +2479,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
         const w = mangledCols.reduce((acc, x) => x.width + acc, 0) + scrollbarWidth;
 
-        return [`${w}px`, `${h}px`];
+        // We need to set a reasonable cap here as some browsers will just ignore huge values
+        // rather than treat them as huge values.
+        return [`${Math.min(100000, w)}px`, `${Math.min(100000, h)}px`];
     }, [mangledCols, rowHeight, rows, totalHeaderHeight]);
 
     return (

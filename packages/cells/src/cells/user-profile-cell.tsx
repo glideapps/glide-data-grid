@@ -1,7 +1,6 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
-import { CustomCell, measureTextCached, TextCellEntry } from "@glideapps/glide-data-grid";
-import { CustomCellRenderer } from "../types";
+import { CustomCell, measureTextCached, TextCellEntry, CustomCellRenderer } from "@glideapps/glide-data-grid";
 
 interface UserProfileCellProps {
     readonly kind: "user-profile-cell";

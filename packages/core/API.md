@@ -100,6 +100,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [rightElement](#rightelement)               | A node which will be placed at the right edge of the data grid.         |
 | [rightElementSticky](#rightelement)         | Makes the right element sticky or not.                                  |
 | [rowMarkerWidth](#rowmarkerwidth)           | The width of the row markers.                                           |
+| [rowMarkerStartIndex](#rowmarkerstartindex) | The index of the first element in the grid                              |
 | [verticalBorder](#verticalborder)           | Enable/disable vertical borders for any `GridColumn`                    |
 
 ## Selection Handling
@@ -142,7 +143,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [onCellActivated](#oncellactivated)                   | Emitted when a cell is activated, by pressing Enter, Space or double clicking it.                                                                                                   |
 | [onCellContextMenu](#oncellcontextmenu)               | Emitted when a cell should show a context menu. Usually right click.                                                                                                                |
 | [onColumnMoved](#oncolumnmoved)                       | Emitted when a column has been dragged to a new location.                                                                                                                           |
-| [onColumnResized](#oncolumnresized)                   | Emitted when a column has been resized to a new size.                                                                                                                               |
+| [onColumnResize](#oncolumnresize)                   | Emitted when a column has been resized to a new size.                                                                                                                               |
 | [onGroupHeaderClicked](#ongroupheaderclicked)         | Emitted when a group header is clicked.                                                                                                                                             |
 | [onGroupHeaderContextMenu](#ongroupheadercontextmenu) | Emitted when a group header should show a context menu. Usually right click.                                                                                                        |
 | [onHeaderClicked](#onheaderclicked)                   | Emitted when a column header is clicked.                                                                                                                                            |
@@ -648,6 +649,16 @@ rowMarkerWidth?: number;
 
 ---
 
+## rowMarkerStartIndex
+
+```ts
+rowMarkerStartIndex?: number;
+```
+
+`rowMarkerStartIndex` is the starting index of your rows. Defaults to 1, however a custom value may be needed for situations such as paging.
+
+---
+
 ## verticalBorder
 
 ```ts
@@ -875,13 +886,29 @@ onColumnMoved?: (startIndex: number, endIndex: number) => void;
 
 ---
 
-## onColumnResized
+## onColumnResize
 
 ```ts
-onColumnResized?: (column: GridColumn, newSize: number) => void;
+onColumnResize?: (column: GridColumn, newSize: number) => void;
 ```
 
-`onColumnResized` is called when the user finishes resizing a column. `newSize` is the new size of the column. Note that you have change the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
+`onColumnResize` is called when the user is resizing a column. `newSize` is the new size of the column. Note that you have change the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
+
+## onColumnResizeStart
+
+```ts
+onColumnResizeStart?: (column: GridColumn, newSize: number) => void;
+```
+
+`onColumnResize` is called when the user starts resizing a column. `newSize` is the new size of the column.
+
+## onColumnResizeEnd
+
+```ts
+onColumnResizeEnd?: (column: GridColumn, newSize: number) => void;
+```
+
+`onColumnResize` is called when the user ends resizing a column. `newSize` is the new size of the column.
 
 ---
 
@@ -1021,3 +1048,46 @@ If `isDraggable` is set, the whole Grid is draggable, and `onDragStart` will be 
 Behavior not defined or officially supported. Feel free to check out what this does in github but anything in here is up for grabs to be changed at any time.
 
 ---
+
+# Hooks
+
+## useCustomCells
+
+```ts
+// arguments passed to the draw callback
+interface DrawArgs {
+    ctx: CanvasRenderingContext2D;
+    theme: Theme;
+    rect: Rectangle;
+    hoverAmount: number;
+    hoverX: number | undefined;
+    hoverY: number | undefined;
+    col: number;
+    row: number;
+    highlighted: boolean;
+    imageLoader: ImageWindowLoader;
+}
+
+// a standardized cell renderer consumed by the hook
+type CustomCellRenderer<T extends CustomCell> = {
+    isMatch: (cell: CustomCell) => cell is T;
+    draw: (args: DrawArgs, cell: T) => boolean;
+    provideEditor: ProvideEditorCallback<T>;
+};
+
+// the hook itself
+declare function useCustomCells(cells: readonly CustomCellRenderer<any>[]): { drawCell: DrawCustomCellCallback, provideEditor: ProvideEditorCallback<GridCell> };
+```
+
+The useCustomCells hook provides a standardized method of integrating custom cells into the Glide Data Grid. All cells in the `@glideapps/glide-data-grid-source` package are already in this format and can be used individually by passing them to this hook as so. The result of the hook is an object which can be spread on the DataEditor to implement the cells.
+
+```tsx
+import StarCell from "@glideapps/glide-data-grid-cells/cells/star-cell";
+import DropdownCell from "@glideapps/glide-data-grid-cells/cells/dropdown-cell";
+
+const MyGrid = () => {
+    const args = useCustomCells([StarCell, DropdownCell])
+
+    return <DataEditor {...args} />
+}
+```

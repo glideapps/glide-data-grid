@@ -170,6 +170,7 @@ export const CustomCells: React.VFC = () => {
                 {...defaultProps}
                 drawCell={drawCell}
                 provideEditor={provideEditor}
+                onPaste={true}
                 // eslint-disable-next-line no-console
                 onCellEdited={(...args) => console.log("Edit Cell", ...args)}
                 getCellContent={cell => {
@@ -323,11 +324,11 @@ export const CustomCells: React.VFC = () => {
                         width: 150,
                     },
                     {
-                        title: "Article",
+                        title: "Range",
                         width: 150,
                     },
                     {
-                        title: "Range",
+                        title: "Article",
                         width: 150,
                     },
                 ]}

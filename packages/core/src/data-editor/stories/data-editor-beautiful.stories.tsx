@@ -60,7 +60,7 @@ const defaultProps: Partial<DataEditorProps> = {
 };
 
 export const ResizableColumns: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized } = useMockDataGenerator(60);
+    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(60);
 
     return (
         <BeautifulWrapper
@@ -69,7 +69,7 @@ export const ResizableColumns: React.VFC = () => {
                 <>
                     <Description>
                         You can resize columns by dragging their edges, as long as you respond to the{" "}
-                        <PropName>onColumnResized</PropName> prop.
+                        <PropName>onColumnResize</PropName> prop.
                     </Description>
                     <MoreInfo>
                         By setting the <PropName>overscrollX</PropName> property extra space can be allocated at the end
@@ -85,7 +85,7 @@ export const ResizableColumns: React.VFC = () => {
                 overscrollX={200}
                 overscrollY={200}
                 rows={50}
-                onColumnResized={onColumnResized}
+                onColumnResized={onColumnResize}
             />
         </BeautifulWrapper>
     );
@@ -1289,7 +1289,7 @@ function useAllMockedKinds() {
 
     const [colsMap, setColsMap] = React.useState(getColumnsForCellTypes);
 
-    const onColumnResized = React.useCallback((column: GridColumn, newSize: number) => {
+    const onColumnResize = React.useCallback((column: GridColumn, newSize: number) => {
         setColsMap(prevColsMap => {
             const index = prevColsMap.findIndex(ci => ci.title === column.title);
             const newArray = [...prevColsMap];
@@ -1335,11 +1335,11 @@ function useAllMockedKinds() {
         [colsMap]
     );
 
-    return { cols, getCellContent, onColumnResized, setCellValue };
+    return { cols, getCellContent, onColumnResize, setCellValue };
 }
 
 export const AllCellKinds: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
     return (
         <BeautifulWrapper
@@ -1354,7 +1354,7 @@ export const AllCellKinds: React.VFC = () => {
                 getCellContent={getCellContent}
                 columns={cols}
                 onCellEdited={setCellValue}
-                onColumnResized={onColumnResized}
+                onColumnResize={onColumnResize}
                 rows={1_000}
             />
         </BeautifulWrapper>
@@ -1439,7 +1439,7 @@ const hotdogStand = {
 };
 
 export const ThemeSupport: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
     const [theme, setTheme] = React.useState({});
 
@@ -1482,7 +1482,7 @@ export const ThemeSupport: React.VFC = () => {
                         sticky: true,
                     }}
                     onCellEdited={setCellValue}
-                    onColumnResized={onColumnResized}
+                    onColumnResize={onColumnResize}
                     rows={numRows}
                 />
             </BeautifulWrapper>
@@ -1496,7 +1496,7 @@ export const ThemeSupport: React.VFC = () => {
 };
 
 export const ThemePerColumn: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
     const realCols = React.useMemo(() => {
         const c = [...cols];
@@ -1508,6 +1508,18 @@ export const ThemePerColumn: React.VFC = () => {
                 accentColor: "#009CA6",
                 accentLight: "#009CA620",
                 fgIconHeader: "#FFFFFF",
+                baseFontStyle: "600 13px",
+            },
+        };
+        c[4] = {
+            ...c[4],
+            themeOverride: {
+                textDark: "#009CA6",
+                bgIconHeader: "#009CA6",
+                accentColor: "#009CA6",
+                accentLight: "#009CA620",
+                fgIconHeader: "#FFFFFF",
+                baseFontStyle: "600 13px",
             },
         };
         c[9] = {
@@ -1546,7 +1558,7 @@ export const ThemePerColumn: React.VFC = () => {
                 getCellContent={getCellContent}
                 columns={realCols}
                 onCellEdited={setCellValue}
-                onColumnResized={onColumnResized}
+                onColumnResize={onColumnResize}
                 rows={1_000}
             />
         </BeautifulWrapper>
@@ -1559,7 +1571,7 @@ export const ThemePerColumn: React.VFC = () => {
 };
 
 export const ThemePerRow: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized, setCellValue, getCellsForSelection } = useMockDataGenerator(5);
+    const { cols, getCellContent, onColumnResize, setCellValue, getCellsForSelection } = useMockDataGenerator(5);
 
     return (
         <BeautifulWrapper
@@ -1576,17 +1588,23 @@ export const ThemePerRow: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
+                trailingRowOptions={{
+                    sticky: true,
+                    tint: true,
+                }}
+                onRowAppended={() => undefined}
                 getCellsForSelection={getCellsForSelection}
                 getRowThemeOverride={i =>
                     i % 2 === 0
                         ? undefined
                         : {
                               bgCell: "#f0f8ff",
+                              borderColor: "#3f90e0",
                           }
                 }
                 onCellEdited={setCellValue}
-                onColumnResized={onColumnResized}
-                rows={1_000}
+                onColumnResize={onColumnResize}
+                rows={1_000_000}
             />
         </BeautifulWrapper>
     );
@@ -1598,7 +1616,7 @@ export const ThemePerRow: React.VFC = () => {
 };
 
 export const CellActivatedEvent: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
     const [lastActivated, setLastActivated] = React.useState<Item | undefined>(undefined);
 
@@ -1627,7 +1645,7 @@ export const CellActivatedEvent: React.VFC = () => {
                 getCellsForSelection={true}
                 columns={cols}
                 onCellEdited={setCellValue}
-                onColumnResized={onColumnResized}
+                onColumnResize={onColumnResize}
                 onCellActivated={onCellActivated}
                 rows={10_000}
             />
@@ -1641,7 +1659,7 @@ export const CellActivatedEvent: React.VFC = () => {
 };
 
 export const BuiltInSearch: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
     const [showSearch, setShowSearch] = React.useState(false);
 
@@ -1679,7 +1697,7 @@ export const BuiltInSearch: React.VFC = () => {
                 getCellsForSelection={true}
                 columns={cols}
                 onCellEdited={setCellValue}
-                onColumnResized={onColumnResized}
+                onColumnResize={onColumnResize}
                 showSearch={showSearch}
                 onSearchClose={() => setShowSearch(false)}
                 rows={10_000}
@@ -1698,7 +1716,7 @@ interface ImperativeScrollProps {
 }
 
 export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
-    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
     const ref = React.useRef<DataEditorRef>(null);
 
@@ -1727,7 +1745,7 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
                 getCellContent={getCellContent}
                 columns={cols}
                 onCellEdited={setCellValue}
-                onColumnResized={onColumnResized}
+                onColumnResize={onColumnResize}
                 rows={10_000}
             />
         </BeautifulWrapper>
@@ -1777,7 +1795,7 @@ const SimpleMenu = styled.div`
 `;
 
 export const HeaderMenus: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
     const realCols = React.useMemo(() => {
         return cols.map(c => ({
@@ -1838,7 +1856,7 @@ export const HeaderMenus: React.VFC = () => {
                 onHeaderClicked={onHeaderClicked}
                 columns={realCols}
                 onCellEdited={setCellValue}
-                onColumnResized={onColumnResized}
+                onColumnResize={onColumnResize}
                 rows={1_000}
             />
             {isOpen &&
@@ -1862,7 +1880,7 @@ export const HeaderMenus: React.VFC = () => {
 };
 
 export const CustomHeaderIcons: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized, setCellValue } = useAllMockedKinds();
+    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
     const realCols = React.useMemo(() => {
         const c = [...cols];
@@ -1906,7 +1924,7 @@ export const CustomHeaderIcons: React.VFC = () => {
                 getCellContent={getCellContent}
                 columns={realCols}
                 onCellEdited={setCellValue}
-                onColumnResized={onColumnResized}
+                onColumnResize={onColumnResize}
                 headerIcons={headerIcons}
                 rows={1_000}
             />
@@ -2083,7 +2101,7 @@ export const RapidUpdates: React.VFC = () => {
 };
 
 export const CopySupport: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized, setCellValue, getCellsForSelection } = useMockDataGenerator(
+    const { cols, getCellContent, onColumnResize, setCellValue, getCellsForSelection } = useMockDataGenerator(
         10,
         false
     );
@@ -2111,7 +2129,7 @@ export const CopySupport: React.VFC = () => {
                 getCellsForSelection={getCellsForSelection}
                 columns={cols}
                 onCellEdited={setCellValue}
-                onColumnResized={onColumnResized}
+                onColumnResize={onColumnResize}
                 rows={400}
             />
         </BeautifulWrapper>
@@ -2124,7 +2142,7 @@ export const CopySupport: React.VFC = () => {
 };
 
 export const PasteSupport: React.VFC = () => {
-    const { cols, getCellContent, onColumnResized, setCellValue, getCellsForSelection } = useMockDataGenerator(
+    const { cols, getCellContent, onColumnResize, setCellValue, getCellsForSelection } = useMockDataGenerator(
         50,
         false
     );
@@ -2163,7 +2181,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`}
                 getCellsForSelection={getCellsForSelection}
                 columns={cols}
                 onCellEdited={setCellValue}
-                onColumnResized={onColumnResized}
+                onColumnResize={onColumnResize}
                 onPaste={true}
                 rows={400}
             />

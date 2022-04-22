@@ -12,6 +12,7 @@ import type {
     GridMouseGroupHeaderEventArgs,
     SizedGridColumn,
 } from "./data-grid-types";
+import groupBy from "lodash/groupBy";
 import { GridCellKind, isInnerOnlyCell } from "./data-grid-types";
 import { HoverValues } from "./animation-manager";
 import {
@@ -327,6 +328,7 @@ function drawGridLines(
     groupHeaderHeight: number,
     totalHeaderHeight: number,
     getRowHeight: (row: number) => number,
+    getRowThemeOverride: GetRowThemeCallback | undefined,
     verticalBorder: (col: number) => boolean,
     lastRowSticky: boolean,
     rows: number,
@@ -363,6 +365,8 @@ function drawGridLines(
         }
     }
 
+    const toDraw: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
+
     ctx.beginPath();
     // we need to under-draw the header background on its line to improve its contrast.
     ctx.moveTo(minX, totalHeaderHeight + 0.5);
@@ -381,21 +385,20 @@ function drawGridLines(
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
         if (tx >= minX && tx <= maxX && (index === effectiveCols.length - 1 || verticalBorder(index + 1))) {
-            ctx.moveTo(tx, Math.max(groupHeaderHeight, minY));
-            ctx.lineTo(tx, Math.min(height, maxY));
+            toDraw.push({
+                x1: tx,
+                y1: Math.max(groupHeaderHeight, minY),
+                x2: tx,
+                y2: Math.min(height, maxY),
+                color: vColor,
+            });
         }
-    }
-    if (vColor !== hColor) {
-        ctx.strokeStyle = vColor;
-        ctx.stroke();
-        ctx.beginPath();
     }
 
     const stickyHeight = getRowHeight(rows - 1);
     const stickyRowY = height - stickyHeight + 0.5;
     if (lastRowSticky) {
-        ctx.moveTo(minX, stickyRowY);
-        ctx.lineTo(maxX, stickyRowY);
+        toDraw.push({ x1: minX, y1: stickyRowY, x2: maxX, y2: stickyRowY, color: hColor });
     }
 
     if (verticalOnly !== true) {
@@ -408,8 +411,14 @@ function drawGridLines(
             const ty = isHeader ? y : y + translateY;
             // This shouldn't be needed it seems like... yet it is. We're not sure why.
             if (ty >= minY && ty <= maxY && (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) > 1)) {
-                ctx.moveTo(minX, ty);
-                ctx.lineTo(maxX, ty);
+                const rowTheme = isHeader ? undefined : getRowThemeOverride?.(row);
+                toDraw.push({
+                    x1: minX,
+                    y1: ty,
+                    x2: maxX,
+                    y2: ty,
+                    color: rowTheme?.horizontalBorderColor ?? rowTheme?.borderColor ?? hColor,
+                });
             }
 
             y += getRowHeight(row);
@@ -418,9 +427,16 @@ function drawGridLines(
         }
     }
 
-    ctx.strokeStyle = hColor;
-    ctx.stroke();
-    ctx.beginPath();
+    const groups = groupBy(toDraw, line => line.color);
+    for (const g of Object.keys(groups)) {
+        ctx.strokeStyle = g;
+        for (const line of groups[g]) {
+            ctx.moveTo(line.x1, line.y1);
+            ctx.lineTo(line.x2, line.y2);
+        }
+        ctx.stroke();
+        ctx.beginPath();
+    }
 
     if (spans !== undefined) {
         ctx.restore();
@@ -1040,20 +1056,20 @@ function drawCells(
                 ctx.rect(colDrawX, colDrawY, colWidth, colHeight);
                 ctx.clip();
             };
-            reclip();
-
+            
             const colSelected = selectedColumns.hasIndex(c.sourceIndex);
-
+            
             const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
             const colTheme =
-                c.themeOverride === undefined && groupTheme === undefined
-                    ? outerTheme
-                    : { ...outerTheme, ...groupTheme, ...c.themeOverride };
+            c.themeOverride === undefined && groupTheme === undefined
+            ? outerTheme
+            : { ...outerTheme, ...groupTheme, ...c.themeOverride };
             const colFont = `${colTheme.baseFontStyle} ${colTheme.fontFamily}`;
             if (colFont !== font) {
                 font = colFont;
                 ctx.font = colFont;
             }
+            reclip();
             let prepResult: PrepResult | undefined = undefined;
 
             walkRowsInCol(
@@ -1910,6 +1926,7 @@ export function drawGrid(arg: DrawGridArg) {
             groupHeaderHeight,
             totalHeaderHeight,
             getRowHeight,
+            getRowThemeOverride,
             verticalBorder,
             lastRowSticky,
             rows,
@@ -2167,6 +2184,7 @@ export function drawGrid(arg: DrawGridArg) {
         groupHeaderHeight,
         totalHeaderHeight,
         getRowHeight,
+        getRowThemeOverride,
         verticalBorder,
         lastRowSticky,
         rows,

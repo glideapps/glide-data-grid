@@ -21,3 +21,38 @@ Current cells
 -   Range
 -   User profile
 -   Tags
+
+# Usage
+
+Step 1: Add the extra cells to your grid.
+
+```tsx
+import { useExtraCells } from "@glideapps/glide-data-grid-cells";
+
+const Grid = () => {
+  const { drawCell, provideEditor } = useExtraCells();
+  
+  return <DataEditor {...rest} drawCell={drawCell} provideEditor={provideEditor} />
+}
+```
+
+Step 2: Use the cells in your `getCellContent` callback
+
+```ts
+import type { StarCell } from "@glideapps/glide-data-grid-cells";
+
+const getCellContent = React.useCallback(() => {
+  const starCell: StarCell = {
+      kind: GridCellKind.Custom,
+      allowOverlay: true,
+      copyData: "4 out of 5",
+      data: {
+          kind: "star-cell",
+          label: "Test",
+          rating: 4,
+      },
+  };
+
+  return starCell;
+}, []);
+```

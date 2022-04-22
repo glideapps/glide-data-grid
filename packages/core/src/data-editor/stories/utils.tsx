@@ -395,7 +395,7 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
         setColsMap(getResizableColumns(numCols, group));
     }, [group, numCols]);
 
-    const onColumnResized = React.useCallback((column: GridColumn, newSize: number) => {
+    const onColumnResize = React.useCallback((column: GridColumn, newSize: number) => {
         setColsMap(prevColsMap => {
             const index = prevColsMap.findIndex(ci => ci.title === column.title);
             const newArray = [...prevColsMap];
@@ -467,5 +467,5 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
         [colsMap]
     );
 
-    return { cols, getCellContent, onColumnResized, setCellValue, getCellsForSelection, setCellValueRaw };
+    return { cols, getCellContent, onColumnResize, setCellValue, getCellsForSelection, setCellValueRaw };
 }
