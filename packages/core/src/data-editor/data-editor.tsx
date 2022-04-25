@@ -299,6 +299,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const [overlay, setOverlay] = React.useState<{
         target: Rectangle;
         content: GridCell;
+        theme: Theme;
         initialValue: string | undefined;
         cell: Item;
         highlight: boolean;
@@ -317,6 +318,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         headerHeight = 36,
         rowMarkerWidth: rowMarkerWidthRaw,
         imageEditorOverride,
+        getRowThemeOverride,
         markdownDivCreateNode,
     } = p;
 
@@ -640,6 +642,46 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
+    const mangledGetGroupDetails = React.useCallback<NonNullable<DataEditorProps["getGroupDetails"]>>(
+        group => {
+            let result = getGroupDetails?.(group) ?? { name: group };
+            if (onGroupHeaderRenamed !== undefined && group !== "") {
+                result = {
+                    icon: result.icon,
+                    name: result.name,
+                    overrideTheme: result.overrideTheme,
+                    actions: [
+                        ...(result.actions ?? []),
+                        {
+                            title: "Rename",
+                            icon: "renameIcon",
+                            onClick: e =>
+                                setRenameGroup({
+                                    group: result.name,
+                                    bounds: e.bounds,
+                                }),
+                        },
+                    ],
+                };
+            }
+            return result;
+        },
+        [getGroupDetails, onGroupHeaderRenamed]
+    );
+
+    const setOverlaySimple = React.useCallback((val: Omit<NonNullable<typeof overlay>, "theme">) => {
+        const [col, row] = val.cell;
+        const column = mangledCols[col];
+        const groupTheme = column?.group !== undefined ? mangledGetGroupDetails(column.group) : undefined;
+        const colTheme = column?.themeOverride;
+        const rowTheme = getRowThemeOverride?.(row);
+
+        setOverlay({
+            ...val,
+            theme: { ...mergedTheme, ...groupTheme, ...colTheme, ...rowTheme, ...(val.content.themeOverride)  }
+        });
+    }, [getRowThemeOverride, mangledCols, mangledGetGroupDetails, mergedTheme])
+
     const reselect = React.useCallback(
         (bounds: Rectangle, fromKeyboard: boolean, initialValue?: string) => {
             if (gridSelection.current === undefined) return;
@@ -671,7 +713,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             break;
                     }
                 }
-                setOverlay({
+
+                setOverlaySimple({
                     target: bounds,
                     content,
                     initialValue,
@@ -687,7 +730,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 gridRef.current?.damage([{ cell: gridSelection.current.cell }]);
             }
         },
-        [getMangledCellContent, gridSelection, mangledOnCellEdited]
+        [getMangledCellContent, gridSelection, mangledOnCellEdited, setOverlaySimple]
     );
 
     const focusOnRowFromTrailingBlankRow = React.useCallback(
@@ -723,7 +766,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     break;
             }
 
-            setOverlay({
+            setOverlaySimple({
                 target: bounds,
                 content,
                 initialValue: undefined,
@@ -732,7 +775,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 forceEditMode: true,
             });
         },
-        [getMangledCellContent]
+        [getMangledCellContent, setOverlaySimple]
     );
 
     const scrollTo = React.useCallback(
@@ -2289,32 +2332,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [rowMarkerOffset, verticalBorder]
     );
 
-    const mangledGetGroupDetails = React.useCallback<NonNullable<DataEditorProps["getGroupDetails"]>>(
-        group => {
-            let result = getGroupDetails?.(group) ?? { name: group };
-            if (onGroupHeaderRenamed !== undefined && group !== "") {
-                result = {
-                    icon: result.icon,
-                    name: result.name,
-                    overrideTheme: result.overrideTheme,
-                    actions: [
-                        ...(result.actions ?? []),
-                        {
-                            title: "Rename",
-                            icon: "renameIcon",
-                            onClick: e =>
-                                setRenameGroup({
-                                    group: result.name,
-                                    bounds: e.bounds,
-                                }),
-                        },
-                    ],
-                };
-            }
-            return result;
-        },
-        [getGroupDetails, onGroupHeaderRenamed]
-    );
+    
 
     const drawCustomCellMangled: typeof drawCell = React.useMemo(() => {
         if (drawCell !== undefined) {

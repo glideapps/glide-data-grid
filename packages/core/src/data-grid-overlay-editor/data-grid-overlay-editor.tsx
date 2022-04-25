@@ -1,7 +1,9 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
+import { ThemeProvider } from "styled-components";
 
 import ClickOutsideContainer from "../click-outside-container/click-outside-container";
+import { Theme } from "../common/styles";
 import { CellRenderers } from "../data-grid/cells";
 import {
     GridCell,
@@ -22,6 +24,7 @@ export interface DataGridOverlayEditorProps {
     readonly className?: string;
     readonly id: string;
     readonly initialValue?: string;
+    readonly theme: Theme;
     readonly onFinishEditing: (newCell: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly forceEditMode: boolean;
     readonly highlight: boolean;
@@ -41,6 +44,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         markdownDivCreateNode,
         highlight,
         className,
+        theme,
         id,
         provideEditor,
     } = p;
@@ -175,20 +179,22 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     }
 
     const portal = createPortal(
-        <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
-            <DataGridOverlayEditorStyle
-                ref={ref}
-                id={id}
-                className={style ? "gdg-style" : "gdg-unstyle"}
-                style={styleOverride}
-                as={useLabel === true ? "label" : undefined}
-                targetRect={target}
-                pad={pad}>
-                <div className="clip-region" onKeyDown={customEditor === undefined ? undefined : onKeyDownCustom}>
-                    {editor}
-                </div>
-            </DataGridOverlayEditorStyle>
-        </ClickOutsideContainer>,
+        <ThemeProvider theme={theme}>
+            <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
+                <DataGridOverlayEditorStyle
+                    ref={ref}
+                    id={id}
+                    className={style ? "gdg-style" : "gdg-unstyle"}
+                    style={styleOverride}
+                    as={useLabel === true ? "label" : undefined}
+                    targetRect={target}
+                    pad={pad}>
+                    <div className="clip-region" onKeyDown={customEditor === undefined ? undefined : onKeyDownCustom}>
+                        {editor}
+                    </div>
+                </DataGridOverlayEditorStyle>
+            </ClickOutsideContainer>
+        </ThemeProvider>,
         portalElement
     );
 
