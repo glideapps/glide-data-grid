@@ -510,6 +510,29 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith(1, expect.anything());
     });
 
+    test("Does emit header click on row marker column", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} rowMarkers="both" onHeaderClicked={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 10, // Col B
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 10, // Col B
+            clientY: 16, // Header
+        });
+
+        expect(spy).not.toHaveBeenCalled();
+    });
+
     test("Group header sections", async () => {
         const spy = jest.fn();
 
@@ -730,11 +753,11 @@ describe("data-editor", () => {
                         cell: [2, 2],
                         range: {
                             x: 2,
-                            y: 2, 
+                            y: 2,
                             height: 1,
                             width: 1,
                         },
-                        rangeStack: []
+                        rangeStack: [],
                     },
                 }}
                 rowMarkers="both"
@@ -757,11 +780,11 @@ describe("data-editor", () => {
                 cell: [2, 2],
                 range: {
                     x: 2,
-                    y: 2, 
+                    y: 2,
                     height: 1,
                     width: 1,
                 },
-                rangeStack: []
+                rangeStack: [],
             },
         });
     });
@@ -782,11 +805,11 @@ describe("data-editor", () => {
                         cell: [2, 2],
                         range: {
                             x: 2,
-                            y: 2, 
+                            y: 2,
                             height: 1,
                             width: 1,
                         },
-                        rangeStack: []
+                        rangeStack: [],
                     },
                 }}
                 rowMarkers="both"
