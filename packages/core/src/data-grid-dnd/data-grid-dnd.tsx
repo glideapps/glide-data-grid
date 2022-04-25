@@ -135,11 +135,15 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
     const onMouseUpImpl = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
             if (args.button === 0) {
-                if (resizeCol !== undefined && selectedColumns?.hasIndex(resizeCol) === true) {
-                    for (const c of selectedColumns) {
-                        if (c === resizeCol) continue;
-                        onColumnResized?.(columns[c], lastResizeWidthRef.current);
-                        onColumnResize?.(columns[c], lastResizeWidthRef.current);
+                if (resizeCol !== undefined) {
+                    // if the column is in selection, the selection may contain extra cols, so lets just re-send the last
+                    // resize event to all those columns.
+                    if (selectedColumns?.hasIndex(resizeCol) === true) {
+                        for (const c of selectedColumns) {
+                            if (c === resizeCol) continue;
+                            onColumnResized?.(columns[c], lastResizeWidthRef.current);
+                            onColumnResize?.(columns[c], lastResizeWidthRef.current);
+                        }
                     }
 
                     onColumnResizeEnd?.(columns[resizeCol], lastResizeWidthRef.current);
