@@ -2006,7 +2006,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     !event.metaKey &&
                     !event.ctrlKey &&
                     gridSelection.current !== undefined &&
-                    String.fromCharCode(event.keyCode).match(/(\w|\s)/g) &&
+                    event.key.match(/^(\w|\s)$/g) &&
                     event.bounds !== undefined &&
                     isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, row - 1)]))
                 ) {
@@ -2016,11 +2016,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     ) {
                         return;
                     }
-                    let key = String.fromCharCode(event.keyCode);
-                    if (!event.shiftKey) {
-                        key = key.toLowerCase();
-                    }
-                    reselect(event.bounds, true, key);
+                    reselect(event.bounds, true, event.key);
                     event.cancel();
                 }
 
