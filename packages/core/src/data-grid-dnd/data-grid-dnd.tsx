@@ -12,7 +12,7 @@ export interface DataGridDndProps extends Props {
     readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
 
     /**
-     * @deprecated Use onColumnResize instead. It's the same thing, just fixes the naming convention. 
+     * @deprecated Use onColumnResize instead. It's the same thing, just fixes the naming convention.
      * This will be removed in a future version.
      */
     readonly onColumnResized?: (column: GridColumn, newSize: number) => void; // these should not be past tense?
@@ -20,8 +20,7 @@ export interface DataGridDndProps extends Props {
     readonly onColumnResize?: (column: GridColumn, newSize: number) => void; // these should not be past tense?
     readonly onColumnResizeStart?: (column: GridColumn, newSize: number) => void; // these should not be past tense?
     readonly onColumnResizeEnd?: (column: GridColumn, newSize: number) => void; // these should not be past tense?
-    
-    
+
     readonly gridRef?: React.MutableRefObject<DataGridRef | null>;
     readonly maxColumnWidth: number;
     readonly minColumnWidth: number;
@@ -57,9 +56,9 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         getCellContent,
     } = p;
 
-    if (process.env.NODE_ENV !== 'production' && onColumnResized !== undefined && !warned) {
+    if (process.env.NODE_ENV !== "production" && onColumnResized !== undefined && !warned) {
         // eslint-disable-next-line no-console
-        console.warn("onColumnResized has been renamed to onColumnResize and will be removed in a future version.")
+        console.warn("onColumnResized has been renamed to onColumnResize and will be removed in a future version.");
         warned = true;
     }
 
@@ -100,7 +99,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                             shouldFireEvent = false;
                             setResizeColStartX(args.bounds.x);
                             setResizeCol(col);
-                            onColumnResizeStart?.(columns[col], args.bounds.width)
+                            onColumnResizeStart?.(columns[col], args.bounds.width);
                         } else if (args.kind === "header" && canDragCol) {
                             setDragStartX(args.bounds.x);
                             setDragCol(col);
@@ -169,7 +168,21 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             }
             onMouseUp?.(args, isOutside);
         },
-        [onMouseUp, resizeCol, selectedColumns, dragCol, dropCol, dragRow, dropRow, onColumnResizeEnd, columns, onColumnResized, onColumnResize, onColumnMoved, onRowMoved]
+        [
+            onMouseUp,
+            resizeCol,
+            selectedColumns,
+            dragCol,
+            dropCol,
+            dragRow,
+            dropRow,
+            onColumnResizeEnd,
+            columns,
+            onColumnResized,
+            onColumnResize,
+            onColumnMoved,
+            onRowMoved,
+        ]
     );
 
     const dragOffset = React.useMemo(() => {
@@ -210,7 +223,20 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                 }
             }
         },
-        [dragCol, dragStartX, dragRow, dragStartY, resizeCol, resizeColStartX, columns, minColumnWidth, maxColumnWidth, onColumnResized, onColumnResize, selectedColumns]
+        [
+            dragCol,
+            dragStartX,
+            dragRow,
+            dragStartY,
+            resizeCol,
+            resizeColStartX,
+            columns,
+            minColumnWidth,
+            maxColumnWidth,
+            onColumnResized,
+            onColumnResize,
+            selectedColumns,
+        ]
     );
 
     const getMangledCellContent = React.useCallback<typeof getCellContent>(

@@ -1302,6 +1302,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     });
                 }
             }
+
+            lastMouseDownCellLocation.current = undefined;
         },
         [
             mouseState,
@@ -1710,7 +1712,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
             onFinishedEditing?.(newValue, movement);
         },
-        [overlay?.cell, focus, gridSelection, onFinishedEditing, mangledOnCellEdited, mangledRows, updateSelectedCell, mangledCols.length]
+        [
+            overlay?.cell,
+            focus,
+            gridSelection,
+            onFinishedEditing,
+            mangledOnCellEdited,
+            mangledRows,
+            updateSelectedCell,
+            mangledCols.length,
+        ]
     );
 
     const overlayID = React.useMemo(() => {
@@ -2100,7 +2111,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         mangledOnCellEdited?.(target, {
                             ...inner,
                             copyData: toPaste,
-                        })
+                        });
                         return true;
                     }
                     default:
