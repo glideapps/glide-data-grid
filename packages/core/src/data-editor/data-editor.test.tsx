@@ -475,6 +475,7 @@ describe("data-editor", () => {
 
         fireEvent.keyDown(canvas, {
             keyCode: 74,
+            key: "j",
         });
 
         const overlay = screen.getByDisplayValue("j");
@@ -994,10 +995,12 @@ describe("data-editor", () => {
 
         fireEvent.keyDown(canvas, {
             keyCode: 74,
+            key: "j",
         });
 
         fireEvent.keyUp(canvas, {
             keyCode: 74,
+            key: "j",
         });
 
         const overlay = screen.getByDisplayValue("j");
@@ -1031,10 +1034,12 @@ describe("data-editor", () => {
 
         fireEvent.keyDown(canvas, {
             keyCode: 74,
+            key: "j",
         });
 
         fireEvent.keyUp(canvas, {
             keyCode: 74,
+            key: "j",
         });
 
         const overlay = screen.getByDisplayValue("j");
