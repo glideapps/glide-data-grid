@@ -143,9 +143,9 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                             if (c === resizeCol) continue;
                             onColumnResized?.(columns[c], lastResizeWidthRef.current);
                             onColumnResize?.(columns[c], lastResizeWidthRef.current);
-                        }
+                        }   
                     }
-
+                    
                     onColumnResizeEnd?.(columns[resizeCol], lastResizeWidthRef.current);
                     for (const c of selectedColumns) {
                         if (c === resizeCol) continue;
