@@ -1295,21 +1295,27 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
                 // take care of context menus first if long pressed item is already selected
                 if (args.isLongTouch === true) {
+                    const clickLocation = args.location[0] - rowMarkerOffset;
+
                     if (
                         args.kind === "cell" &&
                         gridSelection?.current?.cell[0] === col &&
                         gridSelection?.current?.cell[1] === row
                     ) {
-                        onCellContextMenu?.([args.location[0] - rowMarkerOffset, args.location[1]], {
+                        onCellContextMenu?.([clickLocation, args.location[1]], {
                             ...args,
                             preventDefault,
                         });
                         return;
                     } else if (args.kind === "header" && gridSelection.columns.hasIndex(col)) {
-                        onHeaderContextMenu?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                        onHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
                         return;
                     } else if (args.kind === "group-header") {
-                        onGroupHeaderContextMenu?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                        if (clickLocation < 0) {
+                            return;
+                        }
+
+                        onGroupHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
                         return;
                     }
                 }
@@ -1325,21 +1331,31 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             if (args.kind === "header") {
+                const clickLocation = args.location[0] - rowMarkerOffset;
+                if (clickLocation < 0) {
+                    return;
+                }
+
                 if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
-                    onHeaderClicked?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                    onHeaderClicked?.(clickLocation, { ...args, preventDefault });
                 } else if (args.button === 2) {
-                    onHeaderContextMenu?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                    onHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
                 }
             }
 
             if (args.kind === "group-header") {
+                const clickLocation = args.location[0] - rowMarkerOffset;
+                if (clickLocation < 0) {
+                    return;
+                }
+
                 if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
-                    onGroupHeaderClicked?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                    onGroupHeaderClicked?.(clickLocation, { ...args, preventDefault });
                     if (!isPrevented.current) {
                         handleGroupHeaderSelection(args);
                     }
                 } else if (args.button === 2) {
-                    onGroupHeaderContextMenu?.(args.location[0] - rowMarkerOffset, { ...args, preventDefault });
+                    onGroupHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
                 }
             }
 
@@ -1353,6 +1369,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     });
                 }
             }
+
+            lastMouseDownCellLocation.current = undefined;
         },
         [
             mouseState,
@@ -1761,7 +1779,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
             onFinishedEditing?.(newValue, movement);
         },
-        [overlay?.cell, focus, gridSelection, onFinishedEditing, mangledOnCellEdited, mangledRows, updateSelectedCell, mangledCols.length]
+        [
+            overlay?.cell,
+            focus,
+            gridSelection,
+            onFinishedEditing,
+            mangledOnCellEdited,
+            mangledRows,
+            updateSelectedCell,
+            mangledCols.length,
+        ]
     );
 
     const overlayID = React.useMemo(() => {
@@ -2057,7 +2084,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     !event.metaKey &&
                     !event.ctrlKey &&
                     gridSelection.current !== undefined &&
-                    String.fromCharCode(event.keyCode).match(/(\w|\s)/g) &&
+                    event.key.match(/^(\w|\s)$/g) &&
                     event.bounds !== undefined &&
                     isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, row - 1)]))
                 ) {
@@ -2067,11 +2094,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     ) {
                         return;
                     }
-                    let key = String.fromCharCode(event.keyCode);
-                    if (!event.shiftKey) {
-                        key = key.toLowerCase();
-                    }
-                    reselect(event.bounds, true, key);
+                    reselect(event.bounds, true, event.key);
                     event.cancel();
                 }
 
@@ -2155,7 +2178,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         mangledOnCellEdited?.(target, {
                             ...inner,
                             copyData: toPaste,
-                        })
+                        });
                         return true;
                     }
                     default:
