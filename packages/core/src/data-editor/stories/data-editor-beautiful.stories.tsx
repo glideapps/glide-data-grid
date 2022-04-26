@@ -1855,6 +1855,7 @@ export const HeaderMenus: React.VFC = () => {
                 onHeaderMenuClick={onHeaderMenuClick}
                 onHeaderClicked={onHeaderClicked}
                 columns={realCols}
+                onCellContextMenu={(_, e) => e.preventDefault()}
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}
                 rows={1_000}

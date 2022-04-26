@@ -2259,6 +2259,33 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
     });
 
+    test("Resize Column End Called", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onColumnResizeEnd={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 310, // Col B Right Edge
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 350,
+            clientY: 16,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 350,
+            clientY: 16,
+        });
+
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
+    });
+
     test("Resize Multiple Column", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();

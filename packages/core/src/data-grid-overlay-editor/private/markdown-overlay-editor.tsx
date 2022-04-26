@@ -33,7 +33,11 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
                 <GrowingEntry
                     autoFocus={true}
                     highlight={false}
-                    onKeyDown={onKeyDown}
+                    onKeyDown={e => {
+                        if (e.key !== "Enter") {
+                            onKeyDown(e);
+                        }
+                    }}
                     value={markdown}
                     onChange={onChange}
                 />

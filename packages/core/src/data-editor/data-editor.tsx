@@ -299,6 +299,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const [overlay, setOverlay] = React.useState<{
         target: Rectangle;
         content: GridCell;
+        theme: Theme;
         initialValue: string | undefined;
         cell: Item;
         highlight: boolean;
@@ -317,6 +318,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         headerHeight = 36,
         rowMarkerWidth: rowMarkerWidthRaw,
         imageEditorOverride,
+        getRowThemeOverride,
         markdownDivCreateNode,
     } = p;
 
@@ -640,6 +642,46 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
+    const mangledGetGroupDetails = React.useCallback<NonNullable<DataEditorProps["getGroupDetails"]>>(
+        group => {
+            let result = getGroupDetails?.(group) ?? { name: group };
+            if (onGroupHeaderRenamed !== undefined && group !== "") {
+                result = {
+                    icon: result.icon,
+                    name: result.name,
+                    overrideTheme: result.overrideTheme,
+                    actions: [
+                        ...(result.actions ?? []),
+                        {
+                            title: "Rename",
+                            icon: "renameIcon",
+                            onClick: e =>
+                                setRenameGroup({
+                                    group: result.name,
+                                    bounds: e.bounds,
+                                }),
+                        },
+                    ],
+                };
+            }
+            return result;
+        },
+        [getGroupDetails, onGroupHeaderRenamed]
+    );
+
+    const setOverlaySimple = React.useCallback((val: Omit<NonNullable<typeof overlay>, "theme">) => {
+        const [col, row] = val.cell;
+        const column = mangledCols[col];
+        const groupTheme = column?.group !== undefined ? mangledGetGroupDetails(column.group) : undefined;
+        const colTheme = column?.themeOverride;
+        const rowTheme = getRowThemeOverride?.(row);
+
+        setOverlay({
+            ...val,
+            theme: { ...mergedTheme, ...groupTheme, ...colTheme, ...rowTheme, ...(val.content.themeOverride)  }
+        });
+    }, [getRowThemeOverride, mangledCols, mangledGetGroupDetails, mergedTheme])
+
     const reselect = React.useCallback(
         (bounds: Rectangle, fromKeyboard: boolean, initialValue?: string) => {
             if (gridSelection.current === undefined) return;
@@ -671,7 +713,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             break;
                     }
                 }
-                setOverlay({
+
+                setOverlaySimple({
                     target: bounds,
                     content,
                     initialValue,
@@ -687,7 +730,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 gridRef.current?.damage([{ cell: gridSelection.current.cell }]);
             }
         },
-        [getMangledCellContent, gridSelection, mangledOnCellEdited]
+        [getMangledCellContent, gridSelection, mangledOnCellEdited, setOverlaySimple]
     );
 
     const focusOnRowFromTrailingBlankRow = React.useCallback(
@@ -723,7 +766,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     break;
             }
 
-            setOverlay({
+            setOverlaySimple({
                 target: bounds,
                 content,
                 initialValue: undefined,
@@ -732,7 +775,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 forceEditMode: true,
             });
         },
-        [getMangledCellContent]
+        [getMangledCellContent, setOverlaySimple]
     );
 
     const scrollTo = React.useCallback(
@@ -1083,6 +1126,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const touchDownArgs = React.useRef(visibleRegion);
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
+            isPrevented.current = false;
             touchDownArgs.current = visibleRegionRef.current;
             if (args.button !== 0) {
                 return;
@@ -1177,6 +1221,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [getMangledCellContent, gridSelection, mangledOnCellEdited]
     );
 
+    const isPrevented = React.useRef(false);
+    const onContextMenu = React.useCallback((e: React.MouseEvent) => {
+        if (isPrevented.current) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, [])
+
     const onMouseUp = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
             const mouse = mouseState;
@@ -1190,9 +1242,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             const [col, row] = args.location;
             const [lastMouseDownCol, lastMouseDownRow] = lastMouseDownCellLocation.current ?? [];
 
-            let prevented = false;
             const preventDefault = () => {
-                prevented = true;
+                isPrevented.current = true;
             };
 
             const handleMaybeClick = (a: GridMouseCellEventArgs): boolean => {
@@ -1208,7 +1259,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     } else if (
                         gridSelection.current !== undefined &&
                         mouse?.previousSelection?.current?.cell !== undefined &&
-                        !prevented
+                        !isPrevented.current
                     ) {
                         const [selectedCol, selectedRow] = gridSelection.current.cell;
                         const [prevCol, prevRow] = mouse.previousSelection.current.cell;
@@ -1300,7 +1351,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                 if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
                     onGroupHeaderClicked?.(clickLocation, { ...args, preventDefault });
-                    if (!prevented) {
+                    if (!isPrevented.current) {
                         handleGroupHeaderSelection(args);
                     }
                 } else if (args.button === 2) {
@@ -2304,32 +2355,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [rowMarkerOffset, verticalBorder]
     );
 
-    const mangledGetGroupDetails = React.useCallback<NonNullable<DataEditorProps["getGroupDetails"]>>(
-        group => {
-            let result = getGroupDetails?.(group) ?? { name: group };
-            if (onGroupHeaderRenamed !== undefined && group !== "") {
-                result = {
-                    icon: result.icon,
-                    name: result.name,
-                    overrideTheme: result.overrideTheme,
-                    actions: [
-                        ...(result.actions ?? []),
-                        {
-                            title: "Rename",
-                            icon: "renameIcon",
-                            onClick: e =>
-                                setRenameGroup({
-                                    group: result.name,
-                                    bounds: e.bounds,
-                                }),
-                        },
-                    ],
-                };
-            }
-            return result;
-        },
-        [getGroupDetails, onGroupHeaderRenamed]
-    );
+    
 
     const drawCustomCellMangled: typeof drawCell = React.useMemo(() => {
         if (drawCell !== undefined) {
@@ -2509,7 +2535,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     return (
         <ThemeProvider theme={mergedTheme}>
-            <DataEditorContainer className={className} width={width ?? idealWidth} height={height ?? idealHeight}>
+            <DataEditorContainer className={className} width={width ?? idealWidth} height={height ?? idealHeight}
+                onContextMenu={onContextMenu}
+            >
                 <DataGridSearch
                     {...rest}
                     enableGroups={enableGroups}
