@@ -2787,7 +2787,7 @@ export const LayoutIntegration: React.VFC = () => {
         </BeautifulStyle>
     );
 };
-(CustomHeader as any).parameters = {
+(LayoutIntegration as any).parameters = {
     options: {
         showPanel: false,
     },
