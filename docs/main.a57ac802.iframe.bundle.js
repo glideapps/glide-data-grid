@@ -288,7 +288,6 @@
         overflow-y: auto;
         overflow-x: hidden;
         border-radius: 2px;
-        overflow: hidden;
         flex-grow: 1;
 
         ${growing_entry_style.a} {
@@ -532,7 +531,6 @@
         overflow-y: auto;
         overflow-x: hidden;
         border-radius: 2px;
-        overflow: hidden;
         flex-grow: 1;
 
         ${growing_entry_style.a} {
