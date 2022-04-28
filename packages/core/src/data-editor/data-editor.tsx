@@ -1923,7 +1923,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let [col, row] = gridSelection.current.cell;
                 let freeMove = false;
 
-                if (keybindings.selectColumn && isHotkey("primary+ ", event) && columnSelect !== "none") {
+                if (keybindings.selectColumn && isHotkey("ctrl+ ", event) && columnSelect !== "none") {
                     if (selectedColumns.hasIndex(col)) {
                         setSelectedColumns(selectedColumns.remove(col), undefined, true);
                     } else {
