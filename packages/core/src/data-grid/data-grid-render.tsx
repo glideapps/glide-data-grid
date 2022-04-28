@@ -1166,10 +1166,14 @@ function drawCells(
                     }
 
                     const rowTheme = getRowThemeOverride?.(row);
+                    const trailingTheme =
+                        isSticky && c.trailingRowOptions?.themeOverride !== undefined
+                            ? c.trailingRowOptions?.themeOverride
+                            : undefined;
                     const theme =
-                        cell.themeOverride === undefined && rowTheme === undefined
+                        cell.themeOverride === undefined && rowTheme === undefined && trailingTheme === undefined
                             ? colTheme
-                            : { ...colTheme, ...rowTheme, ...cell.themeOverride };
+                            : { ...colTheme, ...rowTheme, ...trailingTheme, ...cell.themeOverride };
 
                     ctx.beginPath();
 

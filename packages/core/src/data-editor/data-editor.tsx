@@ -586,16 +586,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const isFirst = col === rowMarkerOffset;
 
                 const maybeFirstColumnHint = isFirst ? trailingRowOptions?.hint ?? "" : "";
-                const hint = columns[col]?.trailingRowOptions?.hint ?? maybeFirstColumnHint;
+                const c = mangledCols[col];
 
-                const icon = columns[col]?.trailingRowOptions?.addIcon ?? trailingRowOptions?.addIcon;
-
-                return {
-                    kind: InnerGridCellKind.NewRow,
-                    hint,
-                    allowOverlay: false,
-                    icon,
-                };
+                if (c?.trailingRowOptions?.disabled === true) {
+                    return loadingCell;
+                } else {
+                    const hint = c?.trailingRowOptions?.hint ?? maybeFirstColumnHint;
+                    const icon = c?.trailingRowOptions?.addIcon ?? trailingRowOptions?.addIcon;
+                    return {
+                        kind: InnerGridCellKind.NewRow,
+                        hint,
+                        allowOverlay: false,
+                        icon,
+                    };
+                }
             } else {
                 const outerCol = col - rowMarkerOffset;
                 if (p.experimental?.strict === true) {
@@ -635,7 +639,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowMarkerOffset,
             trailingRowOptions?.hint,
             trailingRowOptions?.addIcon,
-            columns,
+            mangledCols,
             p.experimental?.strict,
             getCellContent,
             rowMarkerStartIndex,
@@ -860,6 +864,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     rowsRef.current = rows;
     const appendRow = React.useCallback(
         async (col: number) => {
+            const c = mangledCols[col];
+            if (c?.trailingRowOptions?.disabled === true) {
+                return;
+            }
             // FIXME: Maybe this should optionally return a promise that we can await?
             const appendResult = onRowAppended?.();
 
@@ -909,7 +917,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             // Queue up to allow the consumer to react to the event and let us check if they did
             doFocus();
         },
-        [onRowAppended, rowMarkerOffset, rows, scrollTo, setCurrent]
+        [mangledCols, onRowAppended, rowMarkerOffset, rows, scrollTo, setCurrent]
     );
 
     const getCustomNewRowTargetColumn = React.useCallback(

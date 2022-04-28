@@ -184,6 +184,8 @@ interface BaseGridColumn {
         readonly hint?: string;
         readonly addIcon?: string;
         readonly targetColumn?: number | GridColumn;
+        readonly themeOverride?: Partial<Theme>;
+        readonly disabled?: boolean;
     };
 }
 
