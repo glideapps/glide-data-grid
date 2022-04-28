@@ -1056,14 +1056,14 @@ function drawCells(
                 ctx.rect(colDrawX, colDrawY, colWidth, colHeight);
                 ctx.clip();
             };
-            
+
             const colSelected = selectedColumns.hasIndex(c.sourceIndex);
-            
+
             const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
             const colTheme =
-            c.themeOverride === undefined && groupTheme === undefined
-            ? outerTheme
-            : { ...outerTheme, ...groupTheme, ...c.themeOverride };
+                c.themeOverride === undefined && groupTheme === undefined
+                    ? outerTheme
+                    : { ...outerTheme, ...groupTheme, ...c.themeOverride };
             const colFont = `${colTheme.baseFontStyle} ${colTheme.fontFamily}`;
             if (colFont !== font) {
                 font = colFont;
@@ -2001,6 +2001,31 @@ export function drawGrid(arg: DrawGridArg) {
                 theme,
                 enqueue
             );
+
+            if (
+                fillHandle &&
+                selectedCell.current !== undefined &&
+                damage.some(x => x[0] === selectedCell.current?.cell[0] && x[1] === selectedCell.current?.cell[1])
+            ) {
+                drawFocusRing(
+                    targetCtx,
+                    width,
+                    height,
+                    cellYOffset,
+                    translateX,
+                    translateY,
+                    effectiveCols,
+                    mappedColumns,
+                    theme,
+                    totalHeaderHeight,
+                    selectedCell,
+                    getRowHeight,
+                    getCellContent,
+                    lastRowSticky,
+                    fillHandle,
+                    rows
+                );
+            }
         }
 
         if (doHeaders) {
