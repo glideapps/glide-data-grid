@@ -669,18 +669,21 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [getGroupDetails, onGroupHeaderRenamed]
     );
 
-    const setOverlaySimple = React.useCallback((val: Omit<NonNullable<typeof overlay>, "theme">) => {
-        const [col, row] = val.cell;
-        const column = mangledCols[col];
-        const groupTheme = column?.group !== undefined ? mangledGetGroupDetails(column.group) : undefined;
-        const colTheme = column?.themeOverride;
-        const rowTheme = getRowThemeOverride?.(row);
+    const setOverlaySimple = React.useCallback(
+        (val: Omit<NonNullable<typeof overlay>, "theme">) => {
+            const [col, row] = val.cell;
+            const column = mangledCols[col];
+            const groupTheme = column?.group !== undefined ? mangledGetGroupDetails(column.group) : undefined;
+            const colTheme = column?.themeOverride;
+            const rowTheme = getRowThemeOverride?.(row);
 
-        setOverlay({
-            ...val,
-            theme: { ...mergedTheme, ...groupTheme, ...colTheme, ...rowTheme, ...(val.content.themeOverride)  }
-        });
-    }, [getRowThemeOverride, mangledCols, mangledGetGroupDetails, mergedTheme])
+            setOverlay({
+                ...val,
+                theme: { ...mergedTheme, ...groupTheme, ...colTheme, ...rowTheme, ...val.content.themeOverride },
+            });
+        },
+        [getRowThemeOverride, mangledCols, mangledGetGroupDetails, mergedTheme]
+    );
 
     const reselect = React.useCallback(
         (bounds: Rectangle, fromKeyboard: boolean, initialValue?: string) => {
@@ -1227,7 +1230,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             e.preventDefault();
             e.stopPropagation();
         }
-    }, [])
+    }, []);
 
     const onMouseUp = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
@@ -2355,8 +2358,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [rowMarkerOffset, verticalBorder]
     );
 
-    
-
     const drawCustomCellMangled: typeof drawCell = React.useMemo(() => {
         if (drawCell !== undefined) {
             return drawCell;
@@ -2390,7 +2391,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     React.useImperativeHandle(
         forwardedRef,
         () => ({
-            updateCells: (...args) => gridRef.current?.damage(...args),
+            updateCells: damageList => {
+                if (rowMarkerOffset !== 0) {
+                    damageList = damageList.map(x => ({ cell: [x.cell[0] + rowMarkerOffset, x.cell[1]] }));
+                }
+                return gridRef.current?.damage(damageList);
+            },
             getBounds: (...args) => gridRef.current?.getBounds(...args),
             emit: async e => {
                 switch (e) {
@@ -2440,7 +2446,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             },
             scrollTo,
         }),
-        [onCopy, onKeyDown, onPasteInternal, scrollTo]
+        [onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
     );
 
     const [selCol, selRow] = currentCell ?? [];
@@ -2535,9 +2541,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     return (
         <ThemeProvider theme={mergedTheme}>
-            <DataEditorContainer className={className} width={width ?? idealWidth} height={height ?? idealHeight}
-                onContextMenu={onContextMenu}
-            >
+            <DataEditorContainer
+                className={className}
+                width={width ?? idealWidth}
+                height={height ?? idealHeight}
+                onContextMenu={onContextMenu}>
                 <DataGridSearch
                     {...rest}
                     enableGroups={enableGroups}

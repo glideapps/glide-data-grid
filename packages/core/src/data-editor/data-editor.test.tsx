@@ -2647,6 +2647,23 @@ describe("data-editor", () => {
         });
     });
 
+    test("Imperative damage gets right cell", async () => {
+        const spy = jest.fn(basicProps.getCellContent);
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rowMarkers="number" getCellContent={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        spy.mockClear();
+        act(() => {
+            ref.current?.updateCells([{ cell: [1, 0] }]);
+        });
+
+        expect(spy).toBeCalledWith([1, 0]);
+    });
+
     test("Ctrl Arrow keys", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
