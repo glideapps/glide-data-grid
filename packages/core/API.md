@@ -183,7 +183,7 @@ Most data grids will want to set the majority of these props one way or another.
 | Shift + Home/End             | ✔️      | N/A                 | Extends the selection as far as possible in the direction pressed.                       |
 | Ctrl/Cmd + A                 | ✔️      | `selectAll`         | Selects all cells.                                                                       |
 | Shift + Space                | ✔️      | `selectRow`         | Selecs the current row.                                                                  |
-| Ctrl/Cmd + Space             | ✔️      | `selectCol`         | Selects the current col.                                                                 |
+| Ctrl + Space                 | ✔️      | `selectCol`         | Selects the current col.                                                                 |
 | PageUp/PageDown              | ❌      | `pageUp`/`pageDown` | Moves the current selection up/down by one page.                                         |
 | Escape                       | ✔️      | `clear`             | Clear the current selection.                                                             |
 | Ctrl/Cmd + D                 | ❌      | `downFill`          | Data from the first row of the range will be down filled into the rows below it          |
