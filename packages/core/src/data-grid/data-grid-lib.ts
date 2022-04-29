@@ -551,6 +551,9 @@ export function drawBoolean(args: BaseDrawArgs, data: boolean | null | undefined
     if (data === null) {
         alpha *= hoverAmount;
     }
+    if (alpha === 0) {
+        return;
+    }
     ctx.globalAlpha = alpha;
 
     drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY);
