@@ -185,7 +185,7 @@ export function copyToClipboard(cells: readonly (readonly GridCell[])[], columnI
                 return "INDETERMINATE";
 
             case null:
-                return "EMPTY";
+                return "";
 
             default:
                 assertNever(val);

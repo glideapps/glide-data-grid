@@ -364,7 +364,7 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
 function drawCheckbox(
     ctx: CanvasRenderingContext2D,
     theme: Theme,
-    checked: boolean | undefined,
+    checked: boolean | null | undefined,
     x: number,
     y: number,
     width: number,
@@ -399,6 +399,7 @@ function drawCheckbox(
             break;
         }
 
+        case null:
         case false: {
             ctx.beginPath();
             roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
@@ -538,15 +539,15 @@ function roundedRect(
 }
 
 export function drawBoolean(args: BaseDrawArgs, data: boolean | null | undefined, canEdit: boolean) {
-    if (data === null) {
-        return;
-    }
-
     const { ctx, hoverAmount, theme, x, y, w, h, highlighted, hoverX, hoverY } = args;
 
     const hoverEffect = 0.35;
 
-    ctx.globalAlpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.6;
+    let alpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
+    if (canEdit && data === null) {
+        alpha *= hoverAmount;
+    }
+    ctx.globalAlpha = alpha;
 
     drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY);
 

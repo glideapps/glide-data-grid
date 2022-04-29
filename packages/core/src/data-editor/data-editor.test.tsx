@@ -1118,7 +1118,7 @@ describe("data-editor", () => {
         fireEvent.mouseDown(canvas, { clientX: emptyX, clientY: emptyY });
         fireEvent.mouseUp(canvas, { clientX: emptyX, clientY: emptyY });
 
-        expect(spy).not.toBeCalledWith([7, 3], expect.anything());
+        expect(spy).toBeCalledWith([7, 3], expect.objectContaining({ data: true }));
     });
 
     test("Arrow left", async () => {
