@@ -142,7 +142,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                                 testString = cell.data;
                                 break;
                             case GridCellKind.Boolean:
-                                testString = cell.data.toString();
+                                testString = typeof cell.data === "boolean" ? cell.data.toString() : undefined;
                                 break;
                             case GridCellKind.Image:
                             case GridCellKind.Bubble:

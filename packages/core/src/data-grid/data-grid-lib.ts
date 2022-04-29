@@ -3,6 +3,7 @@ import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn,
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
+import { assertNever } from "../common/support";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -363,7 +364,7 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
 function drawCheckbox(
     ctx: CanvasRenderingContext2D,
     theme: Theme,
-    checked: boolean,
+    checked: boolean | undefined,
     x: number,
     y: number,
     width: number,
@@ -377,30 +378,56 @@ function drawCheckbox(
 
     const hovered = Math.abs(hoverX - width / 2) < 10 && Math.abs(hoverY - height / 2) < 10;
 
-    if (checked) {
-        ctx.beginPath();
-        roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 4);
+    switch (checked) {
+        case true: {
+            ctx.beginPath();
+            roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 4);
 
-        ctx.fillStyle = highlighted ? theme.accentColor : theme.textLight;
-        ctx.fill();
+            ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
+            ctx.fill();
 
-        ctx.beginPath();
-        ctx.moveTo(centerX - 8 + 3.65005, centerY - 8 + 7.84995);
-        ctx.lineTo(centerX - 8 + 6.37587, centerY - 8 + 10.7304);
-        ctx.lineTo(centerX - 8 + 11.9999, centerY - 8 + 4.74995);
+            ctx.beginPath();
+            ctx.moveTo(centerX - 8 + 3.65005, centerY - 8 + 7.84995);
+            ctx.lineTo(centerX - 8 + 6.37587, centerY - 8 + 10.7304);
+            ctx.lineTo(centerX - 8 + 11.9999, centerY - 8 + 4.74995);
 
-        ctx.strokeStyle = theme.accentFg;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-        ctx.lineWidth = 1.9;
-        ctx.stroke();
-    } else {
-        ctx.beginPath();
-        roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
+            ctx.strokeStyle = theme.bgCell;
+            ctx.lineJoin = "round";
+            ctx.lineCap = "round";
+            ctx.lineWidth = 1.9;
+            ctx.stroke();
+            break;
+        }
 
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = hovered ? theme.textMedium : theme.textLight;
-        ctx.stroke();
+        case false: {
+            ctx.beginPath();
+            roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
+
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = hovered ? theme.textDark : theme.textMedium;
+            ctx.stroke();
+            break;
+        }
+
+        case undefined: {
+            ctx.beginPath();
+            roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
+
+            ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(centerX - 4, centerY);
+            ctx.lineTo(centerX + 4, centerY);
+            ctx.strokeStyle = theme.bgCell;
+            ctx.lineCap = "round";
+            ctx.lineWidth = 1.9;
+            ctx.stroke();
+            break;
+        }
+
+        default:
+            assertNever(checked);
     }
 }
 
@@ -435,7 +462,7 @@ export function drawMarkerRowCell(
         ctx.globalAlpha = 1;
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
-        const text = (index).toString();
+        const text = index.toString();
 
         const start = x + width / 2;
         if (markerKind === "both" && hoverAmount !== 0) {
@@ -510,11 +537,16 @@ function roundedRect(
     ctx.arcTo(x, y, x + radius.tl, y, radius.tl);
 }
 
-export function drawBoolean(args: BaseDrawArgs, data: boolean, canEdit: boolean) {
+export function drawBoolean(args: BaseDrawArgs, data: boolean | null | undefined, canEdit: boolean) {
+    if (data === null) {
+        return;
+    }
+
     const { ctx, hoverAmount, theme, x, y, w, h, highlighted, hoverX, hoverY } = args;
+
     const hoverEffect = 0.35;
 
-    ctx.globalAlpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
+    ctx.globalAlpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.6;
 
     drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY);
 

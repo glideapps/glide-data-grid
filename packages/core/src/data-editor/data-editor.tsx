@@ -49,6 +49,7 @@ import { SelectionBlending, useSelectionBehavior } from "../data-grid/use-select
 import { useCellsForSelection } from "./use-cells-for-selection";
 import { unquote, expandSelection, copyToClipboard } from "./data-editors-fns";
 import { DataEditorContainer } from "../data-editor-container/data-grid-container";
+import { toggleBoolean } from "../data-grid/cells/boolean-cell";
 
 let idCounter = 0;
 
@@ -273,6 +274,7 @@ export interface DataEditorProps extends Props {
 export interface DataEditorRef {
     updateCells: DataGridRef["damage"];
     getBounds: DataGridRef["getBounds"];
+    focus: (immediate?: boolean) => void;
     emit: (eventName: EmitEvents) => Promise<void>;
     scrollTo: (
         col: number,
@@ -728,7 +730,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             } else if (c.kind === GridCellKind.Boolean && fromKeyboard) {
                 mangledOnCellEdited(gridSelection.current.cell, {
                     ...c,
-                    data: !c.data,
+                    data: toggleBoolean(c.data),
                 });
                 gridRef.current?.damage([{ cell: gridSelection.current.cell }]);
             }
@@ -2398,6 +2400,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return gridRef.current?.damage(damageList);
             },
             getBounds: (...args) => gridRef.current?.getBounds(...args),
+            focus,
             emit: async e => {
                 switch (e) {
                     case "delete":
@@ -2446,7 +2449,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             },
             scrollTo,
         }),
-        [onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
+        [focus, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
     );
 
     const [selCol, selRow] = currentCell ?? [];

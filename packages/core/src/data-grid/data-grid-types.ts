@@ -387,7 +387,11 @@ export interface DrilldownCell extends BaseGridCell {
 
 export interface BooleanCell extends BaseGridCell {
     readonly kind: GridCellKind.Boolean;
-    readonly data: boolean;
+    // true -> checked
+    // false -> unchecked
+    // undefined -> indeterminate
+    // null -> empty
+    readonly data: boolean | null | undefined;
     readonly showUnchecked: boolean;
     readonly allowEdit: boolean;
     readonly allowOverlay: false;
