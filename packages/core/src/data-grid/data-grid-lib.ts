@@ -1,5 +1,5 @@
 import { Theme } from "../common/styles";
-import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn, Rectangle } from "./data-grid-types";
+import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn, Rectangle, BooleanEmpty, BooleanIndeterminate } from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
@@ -364,7 +364,7 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
 function drawCheckbox(
     ctx: CanvasRenderingContext2D,
     theme: Theme,
-    checked: boolean | null | undefined,
+    checked: boolean | BooleanEmpty | BooleanIndeterminate,
     x: number,
     y: number,
     width: number,
@@ -399,7 +399,7 @@ function drawCheckbox(
             break;
         }
 
-        case null:
+        case BooleanEmpty:
         case false: {
             ctx.beginPath();
             roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
@@ -410,7 +410,7 @@ function drawCheckbox(
             break;
         }
 
-        case undefined: {
+        case BooleanIndeterminate: {
             ctx.beginPath();
             roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
 
@@ -538,8 +538,8 @@ function roundedRect(
     ctx.arcTo(x, y, x + radius.tl, y, radius.tl);
 }
 
-export function drawBoolean(args: BaseDrawArgs, data: boolean | null | undefined, canEdit: boolean) {
-    if (!canEdit && data === null) {
+export function drawBoolean(args: BaseDrawArgs, data: boolean | BooleanEmpty | BooleanIndeterminate, canEdit: boolean) {
+    if (!canEdit && data === BooleanEmpty) {
         return;
     }
 
@@ -548,7 +548,7 @@ export function drawBoolean(args: BaseDrawArgs, data: boolean | null | undefined
     const hoverEffect = 0.35;
 
     let alpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
-    if (data === null) {
+    if (data === BooleanEmpty) {
         alpha *= hoverAmount;
     }
     if (alpha === 0) {

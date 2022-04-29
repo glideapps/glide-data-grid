@@ -1,6 +1,6 @@
 import { assertNever } from "../common/support";
 import { DataGridSearchProps } from "../data-grid-search/data-grid-search";
-import { GridCell, GridCellKind, GridSelection, Rectangle } from "../data-grid/data-grid-types";
+import { BooleanEmpty, BooleanIndeterminate, GridCell, GridCellKind, GridSelection, Rectangle } from "../data-grid/data-grid-types";
 
 export function expandSelection(
     newVal: GridSelection,
@@ -173,7 +173,7 @@ export function copyToClipboard(cells: readonly (readonly GridCell[])[], columnI
         return str;
     }
 
-    const formatBoolean = (val: boolean | null | undefined): string => {
+    const formatBoolean = (val: boolean | BooleanEmpty | BooleanIndeterminate): string => {
         switch (val) {
             case true:
                 return "TRUE";
@@ -181,10 +181,10 @@ export function copyToClipboard(cells: readonly (readonly GridCell[])[], columnI
             case false:
                 return "FALSE";
 
-            case undefined:
+            case BooleanIndeterminate:
                 return "INDETERMINATE";
 
-            case null:
+            case BooleanEmpty:
                 return "";
 
             default:
