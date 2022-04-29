@@ -548,7 +548,7 @@ export function drawBoolean(args: BaseDrawArgs, data: boolean | null | undefined
     const hoverEffect = 0.35;
 
     let alpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
-    if (canEdit && data === null) {
+    if (data === null) {
         alpha *= hoverAmount;
     }
     ctx.globalAlpha = alpha;
