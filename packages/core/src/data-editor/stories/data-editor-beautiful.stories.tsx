@@ -1199,7 +1199,8 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             icon: GridColumnIcon.HeaderBoolean,
             hasMenu: false,
             getContent: () => {
-                const checked = Math.random() > 0.5;
+                const roll = Math.random();
+                const checked = roll < 0.1 ? undefined : roll < 0.2 ? null : roll < 0.6;
                 // TODO: Make editable. UX looks bad by default.
                 return {
                     kind: GridCellKind.Boolean,

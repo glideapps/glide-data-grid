@@ -1,6 +1,6 @@
 import { assertNever } from "../common/support";
 import { DataGridSearchProps } from "../data-grid-search/data-grid-search";
-import { GridCell, GridCellKind, GridSelection, Rectangle } from "../data-grid/data-grid-types";
+import { BooleanEmpty, BooleanIndeterminate, GridCell, GridCellKind, GridSelection, Rectangle } from "../data-grid/data-grid-types";
 
 export function expandSelection(
     newVal: GridSelection,
@@ -173,6 +173,25 @@ export function copyToClipboard(cells: readonly (readonly GridCell[])[], columnI
         return str;
     }
 
+    const formatBoolean = (val: boolean | BooleanEmpty | BooleanIndeterminate): string => {
+        switch (val) {
+            case true:
+                return "TRUE";
+
+            case false:
+                return "FALSE";
+
+            case BooleanIndeterminate:
+                return "INDETERMINATE";
+
+            case BooleanEmpty:
+                return "";
+
+            default:
+                assertNever(val);
+        }
+    };
+
     const formatCell = (cell: GridCell, index: number): string => {
         const colIndex = columnIndexes[index];
         if (cell.span !== undefined && cell.span[0] !== colIndex) return "";
@@ -188,7 +207,7 @@ export function copyToClipboard(cells: readonly (readonly GridCell[])[], columnI
             case GridCellKind.Bubble:
                 return cell.data.reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
             case GridCellKind.Boolean:
-                return cell.data ? "TRUE" : "FALSE";
+                return formatBoolean(cell.data);
             case GridCellKind.Loading:
                 return "#LOADING";
             case GridCellKind.Protected:

@@ -35,6 +35,12 @@ export interface HeaderClickedEventArgs extends GridMouseHeaderEventArgs, Preven
 
 export interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, PreventableEvent {}
 
+export const BooleanEmpty = null;
+export const BooleanIndeterminate = undefined;
+
+export type BooleanEmpty = null;
+export type BooleanIndeterminate = undefined;
+
 interface PositionableMouseEventArgs {
     readonly localEventX: number;
     readonly localEventY: number;
@@ -389,7 +395,7 @@ export interface DrilldownCell extends BaseGridCell {
 
 export interface BooleanCell extends BaseGridCell {
     readonly kind: GridCellKind.Boolean;
-    readonly data: boolean;
+    readonly data: boolean | BooleanEmpty | BooleanIndeterminate;
     readonly showUnchecked: boolean;
     readonly allowEdit: boolean;
     readonly allowOverlay: false;

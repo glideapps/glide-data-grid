@@ -2,6 +2,18 @@ import { drawBoolean } from "../data-grid-lib";
 import { GridCellKind, BooleanCell } from "../data-grid-types";
 import { InternalCellRenderer } from "./cell-types";
 
+/**
+ * Checkbox behavior:
+ *
+ * true + click -> unchecked
+ * false + click -> checked
+ * indeterminate + click -> checked
+ * empty + click -> checked
+ */
+export function toggleBoolean(data: boolean | null | undefined): boolean | null | undefined {
+    return data !== true;
+}
+
 export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "false",
     kind: GridCellKind.Boolean,
@@ -18,7 +30,7 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
         if (cell.allowEdit && Math.abs(x - bounds.width / 2) <= 10 && Math.abs(y - bounds.height / 2) <= 10) {
             return {
                 ...cell,
-                data: !cell.data,
+                data: toggleBoolean(cell.data),
             };
         }
         return undefined;
