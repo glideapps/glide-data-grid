@@ -8,7 +8,7 @@ import { InternalCellRenderer } from "./cell-types";
  * true + click -> unchecked
  * false + click -> checked
  * indeterminate + click -> checked
- * empty + click -> empty
+ * empty + click -> checked
  */
 export function toggleBoolean(data: boolean | null | undefined): boolean | null | undefined {
     return data !== true;
