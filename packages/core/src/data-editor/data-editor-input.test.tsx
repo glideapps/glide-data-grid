@@ -56,7 +56,6 @@ const makeCell = (cell: Item): GridCell => {
             allowOverlay: false,
             data: row % 2 === 0,
             allowEdit: true,
-            showUnchecked: true,
         };
     } else if (col === 8) {
         return {

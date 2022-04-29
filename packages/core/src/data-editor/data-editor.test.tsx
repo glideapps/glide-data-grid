@@ -70,7 +70,6 @@ const makeCell = (cell: Item): GridCell => {
             allowOverlay: false,
             data: getMockBooleanData(row),
             allowEdit: true,
-            showUnchecked: true,
         };
     } else if (col === 8) {
         return {
