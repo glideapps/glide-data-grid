@@ -1084,7 +1084,7 @@ describe("data-editor", () => {
         const canvas = screen.getByTestId("data-grid-canvas");
 
         // We need to be focused on the grid for booleans to toggle automatically
-        ref.current?.focus(true);
+        ref.current?.focus();
 
         // [7, 0] is a checked boolean
         const [checkedX, checkedY] = getCellCenterPositionForDefaultGrid([7, 0]);

@@ -274,7 +274,7 @@ export interface DataEditorProps extends Props {
 export interface DataEditorRef {
     updateCells: DataGridRef["damage"];
     getBounds: DataGridRef["getBounds"];
-    focus: (immediate?: boolean) => void;
+    focus: DataGridRef["focus"];
     emit: (eventName: EmitEvents) => Promise<void>;
     scrollTo: (
         col: number,
@@ -2400,7 +2400,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return gridRef.current?.damage(damageList);
             },
             getBounds: (...args) => gridRef.current?.getBounds(...args),
-            focus,
+            focus: () => gridRef.current?.focus(),
             emit: async e => {
                 switch (e) {
                     case "delete":
@@ -2449,7 +2449,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             },
             scrollTo,
         }),
-        [focus, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
+        [onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
     );
 
     const [selCol, selRow] = currentCell ?? [];
