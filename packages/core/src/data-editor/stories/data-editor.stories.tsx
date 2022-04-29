@@ -642,7 +642,7 @@ export function MarkdownEdits() {
 }
 
 export const CanEditBoolean = () => {
-    const [vals, setVals] = useState<[boolean, boolean]>([false, false]);
+    const [vals, setVals] = useState<[boolean | null | undefined, boolean | null | undefined]>([false, false]);
     return (
         <DataEditor
             width="100%"
