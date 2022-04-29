@@ -539,6 +539,10 @@ function roundedRect(
 }
 
 export function drawBoolean(args: BaseDrawArgs, data: boolean | null | undefined, canEdit: boolean) {
+    if (!canEdit && data === null) {
+        return;
+    }
+
     const { ctx, hoverAmount, theme, x, y, w, h, highlighted, hoverX, hoverY } = args;
 
     const hoverEffect = 0.35;
