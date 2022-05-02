@@ -137,7 +137,7 @@ export function useColumnSizer(
                 // Filter out outliers
                 sizes = sizes.filter(a => a < average * 2);
             }
-            const biggest = sizes.reduce((a, acc) => Math.max(acc, a));
+            const biggest = Math.max(...sizes);
             
             const final = Math.max(minColumnWidth, Math.min(maxColumnWidth, Math.ceil(biggest)));
             memoMap.current[c.id] = final;
