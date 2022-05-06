@@ -68,7 +68,6 @@ export function useSelectionBehavior(
     const setSelectedRows = React.useCallback(
         (newRows: CompactSelection | undefined, append: Slice | number | undefined, allowMixed: boolean): void => {
             newRows = newRows ?? gridSelection.rows;
-            allowMixed = allowMixed || gridSelection.current === undefined;
             if (append !== undefined) {
                 newRows = newRows.add(append);
             }
@@ -97,7 +96,6 @@ export function useSelectionBehavior(
     const setSelectedColumns = React.useCallback(
         (newCols: CompactSelection | undefined, append: number | Slice | undefined, allowMixed: boolean): void => {
             newCols = newCols ?? gridSelection.columns;
-            allowMixed = allowMixed || gridSelection.current === undefined;
             if (append !== undefined) {
                 newCols = newCols.add(append);
             }
