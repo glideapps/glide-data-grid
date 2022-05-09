@@ -26,6 +26,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
                 autoFocus={value.readonly !== true}
                 disabled={value.readonly === true}
                 onKeyDown={onKeyDown}
+                altNewline={true}
                 value={value.data}
                 onChange={e =>
                     onChange({
