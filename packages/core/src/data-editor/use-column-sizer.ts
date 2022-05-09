@@ -127,7 +127,7 @@ export function useColumnSizer(
                 };
             }
 
-            const sizes: number[] = [];
+            let sizes: number[] = [];
             if (selectedData !== undefined) {
                 sizes.push(...selectedData.map(row => row[colIndex]).map(cell => measureCell(ctx, cell)));
             }
