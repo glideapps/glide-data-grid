@@ -488,25 +488,23 @@ export class CompactSelection {
         return new CompactSelection(newItems);
     };
 
-    // TODO: Support removing a slice
-    remove = (selection: number): CompactSelection => {
+    remove = (selection: number | Slice): CompactSelection => {
         const items = [...this.items];
+
+        const selMin = typeof selection === "number" ? selection : selection[0];
+        const selMax = typeof selection === "number" ? selection + 1 : selection[1];
 
         for (const [i, slice] of items.entries()) {
             const [start, end] = slice;
-
-            if (start <= selection && end > selection) {
-                const left: Slice = [start, selection];
-                const right: Slice = [selection + 1, end];
-
+            // Remove part of slice that intersects removed selection.
+            if (start <= selMin && selMax <= end) {
                 const toAdd: Slice[] = [];
-                if (left[0] !== left[1]) {
-                    toAdd.push(left);
+                if (start !== selMin) {
+                    toAdd.push([start, selMin]);
                 }
-                if (right[0] !== right[1]) {
-                    toAdd.push(right);
+                if (selMax !== end) {
+                    toAdd.push([selMax, end]);
                 }
-
                 items.splice(i, 1, ...toAdd);
                 break;
             }
