@@ -60,4 +60,33 @@ describe("data-grid-types", () => {
         expect(CompactSelection.empty().last()).toBeUndefined();
         expect(CompactSelection.empty().add(5).length).toBe(1);
     });
+
+    test("Smoke test compact selection remove", () => {
+        const sel = CompactSelection.fromSingleSelection([3, 8]);
+
+        expect([...sel]).toEqual([3, 4, 5, 6, 7])
+
+        // Remove entire selection
+
+        expect([...sel.remove([3, 8])]).toEqual([])
+        expect([...sel.remove([2, 9])]).toEqual([])
+
+        // Remove ends of selection
+
+        expect([...sel.remove([2, 6])]).toEqual([6, 7])
+        expect([...sel.remove([5, 9])]).toEqual([3, 4])
+
+        expect([...sel.remove(3)]).toEqual([4, 5, 6, 7])
+        expect([...sel.remove(7)]).toEqual([3, 4, 5, 6])
+
+        // Remove middle of selection
+
+        expect([...sel.remove([4, 7])]).toEqual([3, 7])
+        expect([...sel.remove(5)]).toEqual([3, 4, 6, 7])
+
+        // Remove nothing from selection
+
+        expect([...sel.remove([1, 2])]).toEqual([3, 4, 5, 6, 7])
+        expect([...sel.remove([8, 9])]).toEqual([3, 4, 5, 6, 7])
+    })
 });
