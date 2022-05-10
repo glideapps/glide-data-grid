@@ -499,10 +499,10 @@ export class CompactSelection {
             // Remove part of slice that intersects removed selection.
             if (start <= selMax && selMin <= end) {
                 const toAdd: Slice[] = [];
-                if (start !== selMin) {
+                if (start < selMin) {
                     toAdd.push([start, selMin]);
                 }
-                if (selMax !== end) {
+                if (selMax < end) {
                     toAdd.push([selMax, end]);
                 }
                 items.splice(i, 1, ...toAdd);
