@@ -701,18 +701,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let content = c;
                 if (initialValue !== undefined) {
                     switch (content.kind) {
-                        case GridCellKind.Text:
-                            content = {
-                                ...content,
-                                data: initialValue,
-                            };
-                            break;
                         case GridCellKind.Number:
                             content = {
                                 ...content,
                                 data: maybe(() => Number.parseFloat(initialValue), 0),
                             };
                             break;
+                        case GridCellKind.Text:
                         case GridCellKind.Markdown:
                         case GridCellKind.Uri:
                             content = {
@@ -754,18 +749,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return;
             }
             switch (content.kind) {
-                case GridCellKind.Text:
-                    content = {
-                        ...content,
-                        data: "",
-                    };
-                    break;
                 case GridCellKind.Number:
                     content = {
                         ...content,
                         data: undefined,
                     };
                     break;
+                case GridCellKind.Text:
                 case GridCellKind.Markdown:
                 case GridCellKind.Uri:
                     content = {
@@ -870,7 +860,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (c?.trailingRowOptions?.disabled === true) {
                 return;
             }
-            // FIXME: Maybe this should optionally return a promise that we can await?
             const appendResult = onRowAppended?.();
 
             let r: "top" | "bottom" | number | undefined = undefined;
@@ -1765,9 +1754,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onFinishEditing = React.useCallback(
         (newValue: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => {
-            if (overlay?.cell !== undefined && newValue !== undefined) {
-                // Fixme, this cast is dangerous
-                mangledOnCellEdited?.(overlay.cell, newValue as EditableGridCell);
+            if (overlay?.cell !== undefined && newValue !== undefined && isEditableGridCell(newValue)) {
+                mangledOnCellEdited?.(overlay.cell, newValue);
                 window.requestAnimationFrame(() => {
                     gridRef.current?.damage([
                         {
@@ -2527,7 +2515,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     }, []);
 
     const [idealWidth, idealHeight] = React.useMemo(() => {
-        let h: number | undefined = 500;
+        let h: number;
         const scrollbarWidth = getScrollBarWidth();
         if (typeof rowHeight === "number") {
             h = totalHeaderHeight + rows * rowHeight;

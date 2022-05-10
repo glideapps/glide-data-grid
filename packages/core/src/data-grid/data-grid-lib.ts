@@ -495,7 +495,6 @@ export function drawProtectedCell(args: BaseDrawArgs) {
     const q = Math.sin(degreesToRadians(30)) * radius;
 
     for (let i = 0; i < 12; i++) {
-        // ctx.arc(xStart, center, radius, 0, Math.PI * 2);
         ctx.moveTo(xStart, center - radius);
         ctx.lineTo(xStart, center + radius);
 
@@ -645,7 +644,7 @@ function getAndCacheDrilldownBorder(
     canvas.width = innerWidth;
     canvas.height = innerHeight;
 
-    ctx.scale(dpr, dpr); // dummy mode just always go for hiDPI to start, fixme
+    ctx.scale(dpr, dpr);
 
     drilldownCache[key] = canvas;
 
@@ -825,7 +824,7 @@ export function roundedPoly(ctx: CanvasRenderingContext2D, points: Point[], radi
             ang: Math.atan2(vny, vnx),
         };
     };
-    let radius = radiusAll;
+    let radius: number;
     // const v1: Vector = {} as any;
     // const v2: Vector = {} as any;
     const len = points.length;

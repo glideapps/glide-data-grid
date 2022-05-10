@@ -167,8 +167,8 @@ export function unquote(str: string): string[][] {
 
 export function copyToClipboard(cells: readonly (readonly GridCell[])[], columnIndexes: readonly number[]) {
     function escape(str: string): string {
-        if (/\n|"|\t/.test(str)) {
-            str = `"${str.replace(/"/g, `""`)}"`;
+        if (/[\n"\t]/.test(str)) {
+            str = `"${str.replace(/"/g, '""')}"`;
         }
         return str;
     }

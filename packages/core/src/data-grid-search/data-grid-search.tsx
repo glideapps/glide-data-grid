@@ -1,4 +1,3 @@
-// import AppIcon from "common/app-icon";
 import * as React from "react";
 import { CellArray, GetCellsThunk, GridCellKind, Item, Rectangle } from "../data-grid/data-grid-types";
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
