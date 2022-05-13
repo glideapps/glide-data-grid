@@ -1133,6 +1133,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const [fCol, fRow] = selection.current?.cell ?? [];
             const range = selection.current?.range;
 
+            let visibleCols = effectiveCols.map(c => c.sourceIndex);
+            let visibleRows = makeRange(cellYOffset, Math.min(rows, cellYOffset + accessibilityHeight));
+
+            // Maintain focus within grid if we own it but focused cell is outside visible viewport
+            // and not rendered.
+            if (fCol && fRow && !(visibleCols.includes(fCol) && (visibleRows.includes(fRow)))) { 
+                focusElement(null);
+            }
+
             return (
                 <table
                     key="access-tree"
@@ -1159,7 +1168,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         </tr>
                     </thead>
                     <tbody role="rowgroup">
-                        {makeRange(cellYOffset, Math.min(rows, cellYOffset + accessibilityHeight)).map(row => (
+                        {visibleRows.map(row => (
                             <tr
                                 role="row"
                                 aria-selected={selection.rows.hasIndex(row)}
