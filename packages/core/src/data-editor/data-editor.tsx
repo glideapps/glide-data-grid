@@ -31,7 +31,6 @@ import {
     HeaderClickedEventArgs,
     CellClickedEventArgs,
     Item,
-    resolveCellsThunk,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
