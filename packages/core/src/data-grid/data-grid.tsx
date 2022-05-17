@@ -1134,12 +1134,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const [fCol, fRow] = selection.current?.cell ?? [];
             const range = selection.current?.range;
 
-            let visibleCols = effectiveCols.map(c => c.sourceIndex);
-            let visibleRows = makeRange(cellYOffset, Math.min(rows, cellYOffset + accessibilityHeight));
+            const visibleCols = effectiveCols.map(c => c.sourceIndex);
+            const visibleRows = makeRange(cellYOffset, Math.min(rows, cellYOffset + accessibilityHeight));
 
             // Maintain focus within grid if we own it but focused cell is outside visible viewport
             // and not rendered.
-            if (fCol && fRow && !(visibleCols.includes(fCol) && (visibleRows.includes(fRow)))) { 
+            if (
+                fCol !== undefined &&
+                fRow !== undefined &&
+                !(visibleCols.includes(fCol) && visibleRows.includes(fRow))
+            ) {
                 focusElement(null);
             }
 
