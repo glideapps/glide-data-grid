@@ -1,6 +1,13 @@
 import { assertNever } from "../common/support";
 import { DataGridSearchProps } from "../data-grid-search/data-grid-search";
-import { BooleanEmpty, BooleanIndeterminate, GridCell, GridCellKind, GridSelection, Rectangle } from "../data-grid/data-grid-types";
+import {
+    BooleanEmpty,
+    BooleanIndeterminate,
+    GridCell,
+    GridCellKind,
+    GridSelection,
+    Rectangle,
+} from "../data-grid/data-grid-types";
 
 export function expandSelection(
     newVal: GridSelection,
@@ -176,14 +183,14 @@ export function decodeHTML(tableEl: HTMLTableElement): string[][] | undefined {
         if (el === undefined) break;
 
         if (el instanceof HTMLTableElement || el.nodeName === "TBODY") {
-            walkEl.push(...([...el.children].reverse()));
+            walkEl.push(...[...el.children].reverse());
         } else if (el instanceof HTMLTableRowElement) {
             if (current !== undefined) {
-                result.push(current)
+                result.push(current);
             }
             current = [];
-            walkEl.push(...([...el.children].reverse()));
-        }  else if (el instanceof HTMLTableCellElement) {
+            walkEl.push(...[...el.children].reverse());
+        } else if (el instanceof HTMLTableCellElement) {
             current?.push(el.innerText ?? el.textContent ?? "");
         }
     }
@@ -195,7 +202,11 @@ export function decodeHTML(tableEl: HTMLTableElement): string[][] | undefined {
     return result;
 }
 
-export function copyToClipboard(cells: readonly (readonly GridCell[])[], columnIndexes: readonly number[], e?: ClipboardEvent) {
+export function copyToClipboard(
+    cells: readonly (readonly GridCell[])[],
+    columnIndexes: readonly number[],
+    e?: ClipboardEvent
+) {
     function escape(str: string): string {
         if (/[\n"\t]/.test(str)) {
             str = `"${str.replace(/"/g, '""')}"`;
@@ -228,7 +239,7 @@ export function copyToClipboard(cells: readonly (readonly GridCell[])[], columnI
         switch (cell.kind) {
             case GridCellKind.Text:
             case GridCellKind.Number:
-                return escape(raw ? (cell.data?.toString() ?? "") : cell.displayData);
+                return escape(raw ? cell.data?.toString() ?? "" : cell.displayData);
             case GridCellKind.Markdown:
             case GridCellKind.RowID:
             case GridCellKind.Uri:
@@ -255,10 +266,10 @@ export function copyToClipboard(cells: readonly (readonly GridCell[])[], columnI
 
     if (window.navigator.clipboard.write !== undefined || e !== undefined) {
         const rootEl = document.createElement("tbody");
-        
+
         for (const row of cells) {
             const rowEl = document.createElement("tr");
-            
+
             for (let i = 0; i < row.length; i++) {
                 const cell = row[i];
                 const cellEl = document.createElement("td");
@@ -272,14 +283,16 @@ export function copyToClipboard(cells: readonly (readonly GridCell[])[], columnI
                 }
                 rowEl.appendChild(cellEl);
             }
-            
+
             rootEl.appendChild(rowEl);
         }
         if (window.navigator.clipboard.write !== undefined) {
-            void window.navigator.clipboard.write([new ClipboardItem({
-                "text/plain": new Blob([str], { type: "text/plain" }),
-                "text/html": new Blob([`<table>${rootEl.outerHTML}</table>`], { type: "text/html" }),
-            })])
+            void window.navigator.clipboard.write([
+                new ClipboardItem({
+                    "text/plain": new Blob([str], { type: "text/plain" }),
+                    "text/html": new Blob([`<table>${rootEl.outerHTML}</table>`], { type: "text/html" }),
+                }),
+            ]);
         } else if (e !== undefined && e?.clipboardData !== null) {
             try {
                 // This might fail if we had to await the thunk

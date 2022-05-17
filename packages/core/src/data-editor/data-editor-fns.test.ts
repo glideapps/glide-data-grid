@@ -18,6 +18,9 @@ describe("data-editor-fns", () => {
 
         const decoded = decodeHTML(root);
 
-        expect(decoded).toEqual([["1", "2"], ["3", "4"]])
-    })
+        expect(decoded).toEqual([
+            ["1", "2"],
+            ["3", "4"],
+        ]);
+    });
 });
