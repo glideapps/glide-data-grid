@@ -2578,17 +2578,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const [idealWidth, idealHeight] = React.useMemo(() => {
         let h: number;
         const scrollbarWidth = getScrollBarWidth();
+        const rowsCountWithTrailingRow = rows + (showTrailingBlankRow ? 1 : 0);
         if (typeof rowHeight === "number") {
-            h = totalHeaderHeight + rows * rowHeight;
+            h = totalHeaderHeight + rowsCountWithTrailingRow * rowHeight;
         } else {
             let avg = 0;
-            const toAverage = Math.min(rows, 10);
+            const toAverage = Math.min(rowsCountWithTrailingRow, 10);
             for (let i = 0; i < toAverage; i++) {
                 avg += rowHeight(i);
             }
             avg = Math.floor(avg / toAverage);
 
-            h = totalHeaderHeight + rows * avg;
+            h = totalHeaderHeight + rowsCountWithTrailingRow * avg;
         }
         h += scrollbarWidth;
 
@@ -2597,7 +2598,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         // We need to set a reasonable cap here as some browsers will just ignore huge values
         // rather than treat them as huge values.
         return [`${Math.min(100000, w)}px`, `${Math.min(100000, h)}px`];
-    }, [mangledCols, rowHeight, rows, totalHeaderHeight]);
+    }, [mangledCols, rowHeight, rows, showTrailingBlankRow, totalHeaderHeight]);
 
     return (
         <ThemeProvider theme={mergedTheme}>
