@@ -46,7 +46,7 @@ import { useColumnSizer } from "./use-column-sizer";
 import { isHotkey } from "../common/is-hotkey";
 import { SelectionBlending, useSelectionBehavior } from "../data-grid/use-selection-behavior";
 import { useCellsForSelection } from "./use-cells-for-selection";
-import { unquote, expandSelection, copyToClipboard, decodeHTML } from "./data-editors-fns";
+import { unquote, expandSelection, copyToClipboard, decodeHTML } from "./data-editor-fns";
 import { DataEditorContainer } from "../data-editor-container/data-grid-container";
 import { toggleBoolean } from "../data-grid/cells/boolean-cell";
 

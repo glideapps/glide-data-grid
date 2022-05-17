@@ -517,7 +517,6 @@ export class CompactSelection {
                     toAdd.push([selMax, end]);
                 }
                 items.splice(i, 1, ...toAdd);
-                break;
             }
         }
         return new CompactSelection(items);

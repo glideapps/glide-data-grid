@@ -176,19 +176,15 @@ export function decodeHTML(tableEl: HTMLTableElement): string[][] | undefined {
         if (el === undefined) break;
 
         if (el instanceof HTMLTableElement || el.nodeName === "TBODY") {
-            for (const child of el.children) {
-                walkEl.push(child);
-            }
+            walkEl.push(...([...el.children].reverse()));
         } else if (el instanceof HTMLTableRowElement) {
             if (current !== undefined) {
                 result.push(current)
             }
             current = [];
-            for (const child of el.children) {
-                walkEl.push(child);
-            }
+            walkEl.push(...([...el.children].reverse()));
         }  else if (el instanceof HTMLTableCellElement) {
-            current?.push(el.innerText);
+            current?.push(el.innerText ?? el.textContent ?? "");
         }
     }
 
