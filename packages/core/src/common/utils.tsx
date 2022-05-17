@@ -100,10 +100,26 @@ export const Checkmark: React.FunctionComponent<Partial<SpriteProps>> = (props: 
 export function useDebouncedMemo<T>(factory: () => T, deps: React.DependencyList | undefined, time: number): T {
     const [state, setState] = React.useState(factory);
 
-    const debouncedSetState = React.useRef(debounce(setState, time));
+    const mountedRef = React.useRef(true);
+    React.useEffect(
+        () => () => {
+            mountedRef.current = false;
+        },
+        []
+    );
+
+    const debouncedSetState = React.useRef<typeof setState>(
+        debounce(x => {
+            if (mountedRef.current) {
+                setState(x);
+            }
+        }, time)
+    );
 
     React.useLayoutEffect(() => {
-        debouncedSetState.current(() => factory());
+        if (mountedRef.current) {
+            debouncedSetState.current(() => factory());
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, deps);
 

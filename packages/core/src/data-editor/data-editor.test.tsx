@@ -265,6 +265,10 @@ const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, r
 });
 
 describe("data-editor", () => {
+    afterEach(() => {
+        jest.clearAllTimers();
+    });
+
     test("Focus a11y cell", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
@@ -498,8 +502,13 @@ describe("data-editor", () => {
 
         const overlay = screen.getByDisplayValue("j");
 
+        jest.useFakeTimers();
         fireEvent.keyDown(overlay, {
             key: "Enter",
+        });
+
+        act(() => {
+            jest.runAllTimers();
         });
 
         expect(spy).toBeCalledWith({ allowOverlay: true, data: "j", displayData: "1, 1", kind: "text" }, [0, 1]);
@@ -948,8 +957,13 @@ describe("data-editor", () => {
         const overlay = screen.getByDisplayValue("Data: 1, 1");
         expect(overlay).toBeInTheDocument();
 
+        jest.useFakeTimers();
         fireEvent.keyDown(canvas, {
             key: "Escape",
+        });
+
+        act(() => {
+            jest.runAllTimers();
         });
 
         expect(overlay).not.toBeInTheDocument();
@@ -986,8 +1000,12 @@ describe("data-editor", () => {
         const overlay = screen.getByText("Header: 9, 1");
         expect(overlay).toBeInTheDocument();
 
+        jest.useFakeTimers();
         fireEvent.keyDown(canvas, {
             key: "Escape",
+        });
+        act(() => {
+            jest.runAllTimers();
         });
 
         expect(overlay).not.toBeInTheDocument();
@@ -1024,8 +1042,13 @@ describe("data-editor", () => {
         const overlay = screen.getByDisplayValue("j");
         expect(overlay).toBeInTheDocument();
 
-        fireEvent.keyDown(canvas, {
+        jest.useFakeTimers();
+        fireEvent.keyDown(overlay, {
             key: "Escape",
+        });
+
+        act(() => {
+            jest.runAllTimers();
         });
 
         expect(overlay).not.toBeInTheDocument();
@@ -1063,8 +1086,13 @@ describe("data-editor", () => {
         const overlay = screen.getByDisplayValue("j");
         expect(overlay).toBeInTheDocument();
 
+        jest.useFakeTimers();
         fireEvent.keyDown(overlay, {
             key: "Enter",
+        });
+
+        act(() => {
+            jest.runAllTimers();
         });
 
         expect(spy).toBeCalledWith([1, 1], expect.objectContaining({ data: "j" }));
@@ -1078,7 +1106,7 @@ describe("data-editor", () => {
         render(<DataEditor {...basicProps} onCellEdited={spy} ref={ref} />, {
             wrapper: Context,
         });
-        prep();
+        prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
 
@@ -1086,6 +1114,10 @@ describe("data-editor", () => {
         act(() => {
             ref.current?.focus();
         });
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
 
         // [7, 0] is a checked boolean
         const [checkedX, checkedY] = getCellCenterPositionForDefaultGrid([7, 0]);
@@ -1333,10 +1365,13 @@ describe("data-editor", () => {
         render(<EventedDataEditor {...basicProps} showSearch={true} onSearchClose={spy} />, {
             wrapper: Context,
         });
-        prep();
+        prep(false);
 
         const searchClose = screen.getByTestId("search-close-button");
         fireEvent.click(searchClose);
+        act(() => {
+            jest.runAllTimers();
+        });
         expect(spy).toBeCalled();
     });
 
@@ -1391,7 +1426,7 @@ describe("data-editor", () => {
                 wrapper: Context,
             }
         );
-        prep();
+        prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
         jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
@@ -1405,10 +1440,18 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
         });
 
+        act(() => {
+            jest.runAllTimers();
+        });
+
         spy.mockClear();
         fireEvent.keyDown(canvas, {
             key: "ArrowRight",
             shiftKey: true,
+        });
+
+        act(() => {
+            jest.runAllTimers();
         });
 
         expect(spy).toBeCalledWith(
@@ -1418,7 +1461,9 @@ describe("data-editor", () => {
         );
 
         fireEvent.copy(window);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        act(() => {
+            jest.runAllTimers();
+        });
         expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
 
         spy.mockClear();
@@ -1429,7 +1474,11 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 3] }) }));
 
         fireEvent.paste(window);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
+        await new Promise(r => window.setTimeout(r, 10));
         expect(pasteSpy).toBeCalledWith(
             [1, 3],
             [
@@ -1463,7 +1512,7 @@ describe("data-editor", () => {
                 wrapper: Context,
             }
         );
-        prep();
+        prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
         jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
@@ -1475,6 +1524,10 @@ describe("data-editor", () => {
         fireEvent.mouseUp(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
         });
 
         spy.mockClear();
@@ -1490,7 +1543,9 @@ describe("data-editor", () => {
         );
 
         fireEvent.copy(window);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        act(() => {
+            jest.runAllTimers();
+        });
         expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
 
         spy.mockClear();
@@ -1501,6 +1556,10 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 3] }) }));
 
         fireEvent.paste(window);
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
         await new Promise(resolve => setTimeout(resolve, 10));
         expect(pasteSpy).toBeCalledWith(
             [1, 3],
