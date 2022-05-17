@@ -150,6 +150,9 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                                 // free. And ya know... it's nice and easy to do...
                                 testString = cell.data.join("🐳");
                                 break;
+                            case GridCellKind.Custom:
+                                testString = cell.copyData;
+                                break;
                         }
 
                         if (testString !== undefined && regex.test(testString)) {
