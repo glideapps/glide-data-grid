@@ -307,11 +307,17 @@ export function drawTextCell(args: BaseDrawArgs, data: string) {
     }
 
     if (data.length > 0) {
-        const dir = direction(data);
+        if (theme.textAlign) {
+            ctx.textAlign = theme.textAlign;
+        } else if (direction(data) === "rtl") {
+            // Set text align to end as default for RTL text
+            ctx.textAlign = "end";
+        }
 
-        if (dir === "rtl") {
-            const textWidth = measureTextCached(data, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`).width;
-            ctx.fillText(data, x + w - theme.cellHorizontalPadding - textWidth + 0.5, y + h / 2);
+        if (ctx.textAlign === "right" || ctx.textAlign === "end") {
+            ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2);
+        } else if (ctx.textAlign === "center") {
+            ctx.fillText(data, x + w / 2, y + h / 2);
         } else {
             ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
         }
@@ -435,7 +441,7 @@ export function drawMarkerRowCell(
         ctx.globalAlpha = 1;
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
-        const text = (index).toString();
+        const text = index.toString();
 
         const start = x + width / 2;
         if (markerKind === "both" && hoverAmount !== 0) {
