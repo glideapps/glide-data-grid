@@ -35,7 +35,7 @@ const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
                 disabled={disabled === true}
                 thousandSeparator={getThousandSeprator()}
                 decimalSeparator={getDecimalSeparator()}
-                value={value ?? ""}
+                value={Object.is(value, -0) ? "-" : value ?? ""}
                 // decimalScale={3}
                 // prefix={"$"}
                 onValueChange={onChange}

@@ -703,7 +703,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         case GridCellKind.Number:
                             content = {
                                 ...content,
-                                data: maybe(() => Number.parseFloat(initialValue), 0),
+                                data: maybe(() => (initialValue === "-" ? -0 : Number.parseFloat(initialValue)), 0),
                             };
                             break;
                         case GridCellKind.Text:
@@ -2084,7 +2084,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     !event.metaKey &&
                     !event.ctrlKey &&
                     gridSelection.current !== undefined &&
-                    event.key.match(/^(\w|\s)$/g) &&
+                    event.key.length === 1 &&
+                    event.key.match(/[ -~]/g) &&
                     event.bounds !== undefined &&
                     isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, row - 1)]))
                 ) {
