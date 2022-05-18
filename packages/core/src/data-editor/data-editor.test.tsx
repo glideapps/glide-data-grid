@@ -2605,6 +2605,10 @@ describe("data-editor", () => {
         // const canvas = screen.getByTestId("data-grid-canvas");
 
         if (scroller !== null) {
+            const mockDownEv = createEvent.mouseDown(scroller);
+            fireEvent(scroller, mockDownEv);
+            expect(mockDownEv.defaultPrevented).toBe(false);
+
             const mockEv = createEvent.dragStart(scroller);
             Object.assign(mockEv, {
                 clientX: 100,

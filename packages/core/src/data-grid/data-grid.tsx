@@ -730,12 +730,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             onMouseDown?.(args);
-            if (!args.isTouch) {
+            if (!args.isTouch && !isDraggable) {
                 // preventing default in touch events stops scroll
                 ev.preventDefault();
             }
         },
-        [eventTargetRef, getMouseArgsForPosition, groupHeaderActionForEvent, isOverHeaderMenu, onMouseDown]
+        [eventTargetRef, isDraggable, getMouseArgsForPosition, groupHeaderActionForEvent, isOverHeaderMenu, onMouseDown]
     );
     useEventListener("touchstart", onMouseDownImpl, window, false);
     useEventListener("mousedown", onMouseDownImpl, window, false);
