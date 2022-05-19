@@ -1,5 +1,13 @@
 import { Theme } from "../common/styles";
-import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn, Rectangle } from "./data-grid-types";
+import {
+    DrilldownCellData,
+    Item,
+    GridSelection,
+    InnerGridCell,
+    SizedGridColumn,
+    Rectangle,
+    BaseGridCell,
+} from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
@@ -294,7 +302,7 @@ export function prepTextCell(
     return result;
 }
 
-export function drawTextCell(args: BaseDrawArgs, data: string) {
+export function drawTextCell(args: BaseDrawArgs, data: string, cell: BaseGridCell) {
     const { ctx, x, y, w, h, theme } = args;
     if (data.includes("\n")) {
         // new lines are rare and split is relatively expensive compared to the search
@@ -307,19 +315,25 @@ export function drawTextCell(args: BaseDrawArgs, data: string) {
     }
 
     if (data.length > 0) {
-        if (theme.textAlign) {
-            ctx.textAlign = theme.textAlign;
-        } else if (direction(data) === "rtl") {
-            // Set text align to end as default for RTL text
-            ctx.textAlign = "end";
+        if (cell.contentAlign === undefined && direction(data) === "rtl") {
+            // Use right alignment as default for RTL text
+            ctx.textAlign = "right";
+        } else if (cell.contentAlign && cell.contentAlign !== "left") {
+            // Since default is start (=left), only apply if alignment is center or right
+            ctx.textAlign = cell.contentAlign;
         }
 
-        if (ctx.textAlign === "right" || ctx.textAlign === "end") {
+        if (cell.contentAlign === "right") {
             ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2);
-        } else if (ctx.textAlign === "center") {
+        } else if (cell.contentAlign === "center") {
             ctx.fillText(data, x + w / 2, y + h / 2);
         } else {
             ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+        }
+
+        if (cell.contentAlign === "right" || cell.contentAlign === "center") {
+            // Reset alignment to default
+            ctx.textAlign = "start";
         }
     }
 }

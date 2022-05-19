@@ -12,7 +12,7 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
     needsHoverPosition: false,
     renderPrep: prepTextCell,
     measure: () => 200,
-    render: a => drawTextCell(a, a.cell.data),
+    render: a => drawTextCell(a, a.cell.data, a.cell),
     onDelete: c => ({
         ...c,
         data: "",

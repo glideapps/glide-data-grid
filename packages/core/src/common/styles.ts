@@ -9,7 +9,6 @@ export interface Theme {
     textMedium: string;
     textLight: string;
     textBubble: string;
-    textAlign?: "left" | "right" | "center" | "start" | "end";
 
     bgIconHeader: string;
     fgIconHeader: string;
