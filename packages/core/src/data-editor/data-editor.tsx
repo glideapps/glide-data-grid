@@ -106,6 +106,8 @@ type Props = Omit<
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
+type EditListItem = { location: Item; value: EditableGridCell };
+
 type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parameters<T>) => TNewReturn;
 
 type EmitEvents = "copy" | "paste" | "delete" | "fill-right" | "fill-down";
@@ -180,7 +182,7 @@ const keybindingDefaults: Keybinds = {
 export interface DataEditorProps extends Props {
     readonly onDelete?: (selection: GridSelection) => boolean | GridSelection;
     readonly onCellEdited?: (cell: Item, newValue: EditableGridCell) => void;
-    readonly onCellsEdited?: (newValues: readonly { cell: Item; value: EditableGridCell }[]) => boolean | void;
+    readonly onCellsEdited?: (newValues: readonly { location: Item; value: EditableGridCell }[]) => boolean | void;
     readonly onRowAppended?: () => Promise<"top" | "bottom" | number | undefined> | void;
     readonly onHeaderClicked?: (colIndex: number, event: HeaderClickedEventArgs) => void;
     readonly onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
@@ -345,6 +347,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onGroupHeaderContextMenu,
         onGroupHeaderRenamed,
         onCellEdited,
+        onCellsEdited,
         keybindings: keybindingsIn,
         onRowAppended,
         onColumnMoved,
@@ -533,6 +536,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onCellEdited?.([cell[0] - rowMarkerOffset, cell[1]], newValue);
         },
         [onCellEdited, rowMarkerOffset]
+    );
+
+    const mangledOnCellsEdited = React.useCallback<NonNullable<typeof onCellsEdited>>(
+        (items: readonly EditListItem[]) => {
+            const mangledItems =
+                rowMarkerOffset === 0
+                    ? items
+                    : items.map(x => ({
+                          ...x,
+                          location: [x.location[0] - rowMarkerOffset, x.location[1]] as const,
+                      }));
+            onCellsEdited?.(mangledItems);
+        },
+        [onCellsEdited, rowMarkerOffset]
     );
 
     const mangledCols = React.useMemo(() => {
@@ -2156,35 +2173,41 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onPasteInternal = React.useCallback(
         async (e?: React.ClipboardEvent) => {
             if (!keybindings.paste) return;
-            function pasteToCell(inner: InnerGridCell, target: Item, toPaste: string): boolean {
+            function pasteToCell(inner: InnerGridCell, target: Item, toPaste: string): EditListItem | undefined {
                 if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
                     switch (inner.kind) {
                         case GridCellKind.Text:
                         case GridCellKind.Markdown:
                         case GridCellKind.Uri: {
-                            mangledOnCellEdited?.(target, {
-                                ...inner,
-                                data: toPaste,
-                            });
-                            return true;
+                            return {
+                                location: target,
+                                value: {
+                                    ...inner,
+                                    data: toPaste,
+                                },
+                            };
                         }
                         case GridCellKind.Number: {
                             const newNumber = Number.parseFloat(toPaste);
                             if (!Number.isNaN(newNumber)) {
-                                mangledOnCellEdited?.(target, {
-                                    ...inner,
-                                    data: newNumber,
-                                });
-                                return true;
+                                return {
+                                    location: target,
+                                    value: {
+                                        ...inner,
+                                        data: newNumber,
+                                    },
+                                };
                             }
-                            return false;
+                            return undefined;
                         }
                         case GridCellKind.Custom: {
-                            mangledOnCellEdited?.(target, {
-                                ...inner,
-                                copyData: toPaste,
-                            });
-                            return true;
+                            return {
+                                location: target,
+                                value: {
+                                    ...inner,
+                                    copyData: toPaste,
+                                },
+                            };
                         }
                         case GridCellKind.Boolean: {
                             let newVal: boolean | BooleanEmpty | BooleanIndeterminate = BooleanEmpty;
@@ -2195,17 +2218,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             } else if (toPaste.toLowerCase() === "indeterminate") {
                                 newVal = BooleanIndeterminate;
                             }
-                            mangledOnCellEdited?.(target, {
-                                ...inner,
-                                data: newVal,
-                            });
-                            return true;
+                            return {
+                                location: target,
+                                value: {
+                                    ...inner,
+                                    data: newVal,
+                                },
+                            };
                         }
                         default:
                             assertNever(inner);
                     }
                 }
-                return false;
+                return undefined;
             }
 
             const selectedColumns = gridSelection.columns;
@@ -2266,12 +2291,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                 const [gridCol, gridRow] = target;
 
-                const damage: Item[] = [];
+                const damage: EditListItem[] = [];
                 do {
                     if (onPaste === undefined) {
                         const cellData = getMangledCellContent(target);
-                        pasteToCell(cellData, target, text ?? data?.map(r => r.join("\t")).join("\t") ?? "");
-                        damage.push(target);
+                        const newVal = pasteToCell(
+                            cellData,
+                            target,
+                            text ?? data?.map(r => r.join("\t")).join("\t") ?? ""
+                        );
+                        if (newVal !== undefined) {
+                            damage.push(newVal);
+                        }
                         break;
                     }
 
@@ -2291,22 +2322,38 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             const dataItem = dataRow[col];
                             const index = [col + gridCol, row + gridRow] as const;
                             const cellData = getMangledCellContent(index);
-                            if (pasteToCell(cellData, index, dataItem)) {
-                                damage.push(index);
+                            const newVal = pasteToCell(cellData, index, dataItem);
+                            if (newVal !== undefined) {
+                                damage.push(newVal);
                             }
                         }
                     }
                     // eslint-disable-next-line no-constant-condition
                 } while (false);
 
+                const r = mangledOnCellsEdited(damage);
+
+                if (r !== true) {
+                    damage.forEach(i => mangledOnCellEdited(i.location, i.value));
+                }
+
                 gridRef.current?.damage(
                     damage.map(c => ({
-                        cell: c,
+                        cell: c.location,
                     }))
                 );
             }
         },
-        [getMangledCellContent, gridSelection, keybindings.paste, mangledOnCellEdited, onPaste, rowMarkerOffset, rows]
+        [
+            getMangledCellContent,
+            gridSelection,
+            keybindings.paste,
+            mangledOnCellEdited,
+            mangledOnCellsEdited,
+            onPaste,
+            rowMarkerOffset,
+            rows,
+        ]
     );
 
     // useEventListener("paste", onPasteInternal, window, false, true);
