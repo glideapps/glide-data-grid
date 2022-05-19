@@ -31,6 +31,8 @@ import {
     HeaderClickedEventArgs,
     CellClickedEventArgs,
     Item,
+    BooleanIndeterminate,
+    BooleanEmpty,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -178,6 +180,7 @@ const keybindingDefaults: Keybinds = {
 export interface DataEditorProps extends Props {
     readonly onDelete?: (selection: GridSelection) => boolean | GridSelection;
     readonly onCellEdited?: (cell: Item, newValue: EditableGridCell) => void;
+    readonly onCellsEdited?: (newValues: readonly { cell: Item; value: EditableGridCell }[]) => boolean | void;
     readonly onRowAppended?: () => Promise<"top" | "bottom" | number | undefined> | void;
     readonly onHeaderClicked?: (colIndex: number, event: HeaderClickedEventArgs) => void;
     readonly onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
@@ -2151,7 +2154,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const onPasteInternal = React.useCallback(
-        async (e?: ClipboardEvent) => {
+        async (e?: React.ClipboardEvent) => {
             if (!keybindings.paste) return;
             function pasteToCell(inner: InnerGridCell, target: Item, toPaste: string): boolean {
                 if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
@@ -2180,6 +2183,21 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             mangledOnCellEdited?.(target, {
                                 ...inner,
                                 copyData: toPaste,
+                            });
+                            return true;
+                        }
+                        case GridCellKind.Boolean: {
+                            let newVal: boolean | BooleanEmpty | BooleanIndeterminate = BooleanEmpty;
+                            if (toPaste.toLowerCase() === "true") {
+                                newVal = true;
+                            } else if (toPaste.toLowerCase() === "false") {
+                                newVal = false;
+                            } else if (toPaste.toLowerCase() === "indeterminate") {
+                                newVal = BooleanIndeterminate;
+                            }
+                            mangledOnCellEdited?.(target, {
+                                ...inner,
+                                data: newVal,
                             });
                             return true;
                         }
@@ -2291,7 +2309,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [getMangledCellContent, gridSelection, keybindings.paste, mangledOnCellEdited, onPaste, rowMarkerOffset, rows]
     );
 
-    useEventListener("paste", onPasteInternal, window, false, true);
+    // useEventListener("paste", onPasteInternal, window, false, true);
 
     // While this function is async, we deeply prefer not to await if we don't have to. This will lead to unpacking
     // promises in rather awkward ways when possible to avoid awaiting. We have to use fallback copy mechanisms when
@@ -2605,6 +2623,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         <ThemeProvider theme={mergedTheme}>
             <DataEditorContainer
                 className={className}
+                onPasteCapture={onPasteInternal}
                 width={width ?? idealWidth}
                 height={height ?? idealHeight}
                 onContextMenu={onContextMenu}>

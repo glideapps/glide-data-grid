@@ -109,7 +109,7 @@ And supports newline chars and automatic wrapping text that just needs to be lon
         return {
             kind: GridCellKind.Boolean,
             data: row % 3 === 0 || row % 5 === 0,
-            allowEdit: false,
+            readonly: true,
             allowOverlay: false,
         };
     }
@@ -659,7 +659,7 @@ export const CanEditBoolean = () => {
             getCellContent={([col]) => {
                 return {
                     kind: GridCellKind.Boolean,
-                    allowEdit: col === 0,
+                    readonly: col !== 0,
                     allowOverlay: false,
                     data: vals[col],
                 };

@@ -219,7 +219,7 @@ export type GridColumn = SizedGridColumn | AutoGridColumn;
 
 // export type SizedGridColumn = Omit<GridColumn, "width"> & { readonly width: number };
 
-export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell | CustomCell;
+export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell | CustomCell | BooleanCell;
 
 export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell | UriCell | NumberCell | CustomCell;
 
@@ -400,8 +400,21 @@ export interface BooleanCell extends BaseGridCell {
      * @deprecated Does nothing.
      */
     readonly showUnchecked?: boolean;
-    readonly allowEdit: boolean;
+    /**
+     * @deprecated Prefer readonly.
+     */
+    readonly allowEdit?: boolean;
+    readonly readonly?: boolean;
     readonly allowOverlay: false;
+}
+
+// Can be written more concisely, not easier to read if more concise.
+export function booleanCellIsEditable(cell: BooleanCell): boolean {
+    if (cell.readonly === true) return false;
+    if (cell.readonly === false) return true;
+    if (cell.allowEdit === true) return true;
+    if (cell.allowEdit === false) return false;
+    return true;
 }
 
 export interface RowIDCell extends BaseGridCell {
