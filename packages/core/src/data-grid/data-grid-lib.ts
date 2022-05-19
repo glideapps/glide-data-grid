@@ -302,7 +302,7 @@ export function prepTextCell(
     return result;
 }
 
-export function drawTextCell(args: BaseDrawArgs, data: string, cell: BaseGridCell) {
+export function drawTextCell(args: BaseDrawArgs, data: string) {
     const { ctx, x, y, w, h, theme } = args;
     if (data.includes("\n")) {
         // new lines are rare and split is relatively expensive compared to the search
@@ -315,23 +315,25 @@ export function drawTextCell(args: BaseDrawArgs, data: string, cell: BaseGridCel
     }
 
     if (data.length > 0) {
-        if (cell.contentAlign === undefined && direction(data) === "rtl") {
+        const contentAlign = ((<any>args).cell as BaseGridCell)?.contentAlign;
+
+        if (contentAlign === undefined && direction(data) === "rtl") {
             // Use right alignment as default for RTL text
             ctx.textAlign = "right";
-        } else if (cell.contentAlign && cell.contentAlign !== "left") {
+        } else if (contentAlign !== undefined && contentAlign !== "left") {
             // Since default is start (=left), only apply if alignment is center or right
-            ctx.textAlign = cell.contentAlign;
+            ctx.textAlign = contentAlign;
         }
 
-        if (cell.contentAlign === "right") {
+        if (contentAlign === "right") {
             ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2);
-        } else if (cell.contentAlign === "center") {
+        } else if (contentAlign === "center") {
             ctx.fillText(data, x + w / 2, y + h / 2);
         } else {
             ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
         }
 
-        if (cell.contentAlign === "right" || cell.contentAlign === "center") {
+        if (contentAlign === "right" || contentAlign === "center") {
             // Reset alignment to default
             ctx.textAlign = "start";
         }
