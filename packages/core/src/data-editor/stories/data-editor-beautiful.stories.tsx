@@ -23,7 +23,7 @@ import { SimpleThemeWrapper } from "../../stories/story-utils";
 import { useEventListener } from "../../common/utils";
 import { IBounds, useLayer } from "react-laag";
 import { SpriteMap } from "../../data-grid/data-grid-sprites";
-import { DataEditorRef } from "../..";
+import { DataEditorRef, Theme } from "../..";
 import range from "lodash/range";
 import {
     useMockDataGenerator,
@@ -309,7 +309,7 @@ export const FillHandle: React.VFC = () => {
 };
 
 const trailingRowOptionsColumnIndexesHint: Record<number, string> = {
-    2: "New row",
+    2: "Smol text",
     3: "Add",
     5: "New",
 };
@@ -324,6 +324,16 @@ const trailingRowOptionsColumnIndexesTarget: Record<number, number> = {
     2: 0,
     3: 0,
     5: 0,
+};
+
+const trailingRowOptionsColumnIndexesDisabled: Record<number, boolean> = {
+    3: true,
+};
+
+const trailingRowOptionsColumnIndexesTheme: Record<number, Partial<Theme>> = {
+    2: {
+        baseFontStyle: "10px",
+    },
 };
 
 export const TrailingRowOptions: React.VFC = () => {
@@ -347,6 +357,8 @@ export const TrailingRowOptions: React.VFC = () => {
                 hint: trailingRowOptionsColumnIndexesHint[idx],
                 addIcon: trailingRowOptionsColumnIndexesIcon[idx],
                 targetColumn: trailingRowOptionsColumnIndexesTarget[idx],
+                disabled: trailingRowOptionsColumnIndexesDisabled[idx],
+                themeOverride: trailingRowOptionsColumnIndexesTheme[idx],
             },
         }));
     }, [cols]);
@@ -1187,13 +1199,13 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             icon: GridColumnIcon.HeaderBoolean,
             hasMenu: false,
             getContent: () => {
-                const checked = Math.random() > 0.5;
+                const roll = Math.random();
+                const checked = roll < 0.1 ? undefined : roll < 0.2 ? null : roll < 0.6;
                 // TODO: Make editable. UX looks bad by default.
                 return {
                     kind: GridCellKind.Boolean,
                     data: checked,
                     allowOverlay: false,
-                    showUnchecked: true,
                     allowEdit: true,
                 };
             },

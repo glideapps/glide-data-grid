@@ -384,7 +384,7 @@ function drawGridLines(
         if (c.width === 0) continue;
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
-        if (tx >= minX && tx <= maxX && (index === effectiveCols.length - 1 || verticalBorder(index + 1))) {
+        if (tx >= minX && tx <= maxX - 1 && (index === effectiveCols.length - 1 || verticalBorder(index + 1))) {
             toDraw.push({
                 x1: tx,
                 y1: Math.max(groupHeaderHeight, minY),
@@ -410,7 +410,7 @@ function drawGridLines(
         while (y + translateY <= target) {
             const ty = isHeader ? y : y + translateY;
             // This shouldn't be needed it seems like... yet it is. We're not sure why.
-            if (ty >= minY && ty <= maxY && (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) > 1)) {
+            if (ty >= minY && ty <= maxY - 1 && (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) > 1)) {
                 const rowTheme = isHeader ? undefined : getRowThemeOverride?.(row);
                 toDraw.push({
                     x1: minX,
@@ -1166,10 +1166,14 @@ function drawCells(
                     }
 
                     const rowTheme = getRowThemeOverride?.(row);
+                    const trailingTheme =
+                        isSticky && c.trailingRowOptions?.themeOverride !== undefined
+                            ? c.trailingRowOptions?.themeOverride
+                            : undefined;
                     const theme =
-                        cell.themeOverride === undefined && rowTheme === undefined
+                        cell.themeOverride === undefined && rowTheme === undefined && trailingTheme === undefined
                             ? colTheme
-                            : { ...colTheme, ...rowTheme, ...cell.themeOverride };
+                            : { ...colTheme, ...rowTheme, ...trailingTheme, ...cell.themeOverride };
 
                     ctx.beginPath();
 

@@ -12,6 +12,7 @@ import {
     Item,
 } from "..";
 import { DataEditorRef } from "./data-editor";
+import { SizedGridColumn } from "../data-grid/data-grid-types";
 
 jest.mock("react-virtualized-auto-sizer", () => {
     return {
@@ -20,6 +21,11 @@ jest.mock("react-virtualized-auto-sizer", () => {
         foo: "mocked foo",
     };
 });
+
+const BOOLEAN_DATA_LOOKUP: (boolean | null | undefined)[] = [true, false, undefined, null];
+function getMockBooleanData(row: number): boolean | null | undefined {
+    return BOOLEAN_DATA_LOOKUP[row % BOOLEAN_DATA_LOOKUP.length];
+}
 
 const makeCell = (cell: Item): GridCell => {
     const [col, row] = cell;
@@ -62,9 +68,8 @@ const makeCell = (cell: Item): GridCell => {
         return {
             kind: GridCellKind.Boolean,
             allowOverlay: false,
-            data: row % 2 === 0,
+            data: getMockBooleanData(row),
             allowEdit: true,
-            showUnchecked: true,
         };
     } else if (col === 8) {
         return {
@@ -87,6 +92,7 @@ const makeCell = (cell: Item): GridCell => {
         displayData: `${col}, ${row}`,
     };
 };
+
 const basicProps: DataEditorProps = {
     columns: [
         {
@@ -153,6 +159,18 @@ const basicProps: DataEditorProps = {
     },
     rows: 1000,
 };
+
+function getCellCenterPositionForDefaultGrid(cell: Item): [number, number] {
+    const [col, row] = cell;
+
+    const xStart = basicProps.columns.slice(0, col).reduce((acc, curr) => acc + (curr as SizedGridColumn).width, 0);
+    const xOffset = (basicProps.columns[col] as SizedGridColumn).width / 2;
+
+    const yStart = (basicProps.headerHeight as number) + row * (basicProps.rowHeight as number);
+    const yOffset = (basicProps.rowHeight as number) / 2;
+
+    return [xStart + xOffset, yStart + yOffset];
+}
 
 beforeEach(() => {
     Element.prototype.scrollTo = jest.fn();
@@ -247,6 +265,10 @@ const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, r
 });
 
 describe("data-editor", () => {
+    afterEach(() => {
+        jest.clearAllTimers();
+    });
+
     test("Focus a11y cell", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
@@ -480,8 +502,13 @@ describe("data-editor", () => {
 
         const overlay = screen.getByDisplayValue("j");
 
+        jest.useFakeTimers();
         fireEvent.keyDown(overlay, {
             key: "Enter",
+        });
+
+        act(() => {
+            jest.runAllTimers();
         });
 
         expect(spy).toBeCalledWith({ allowOverlay: true, data: "j", displayData: "1, 1", kind: "text" }, [0, 1]);
@@ -930,8 +957,13 @@ describe("data-editor", () => {
         const overlay = screen.getByDisplayValue("Data: 1, 1");
         expect(overlay).toBeInTheDocument();
 
+        jest.useFakeTimers();
         fireEvent.keyDown(canvas, {
             key: "Escape",
+        });
+
+        act(() => {
+            jest.runAllTimers();
         });
 
         expect(overlay).not.toBeInTheDocument();
@@ -968,8 +1000,12 @@ describe("data-editor", () => {
         const overlay = screen.getByText("Header: 9, 1");
         expect(overlay).toBeInTheDocument();
 
+        jest.useFakeTimers();
         fireEvent.keyDown(canvas, {
             key: "Escape",
+        });
+        act(() => {
+            jest.runAllTimers();
         });
 
         expect(overlay).not.toBeInTheDocument();
@@ -1006,8 +1042,13 @@ describe("data-editor", () => {
         const overlay = screen.getByDisplayValue("j");
         expect(overlay).toBeInTheDocument();
 
-        fireEvent.keyDown(canvas, {
+        jest.useFakeTimers();
+        fireEvent.keyDown(overlay, {
             key: "Escape",
+        });
+
+        act(() => {
+            jest.runAllTimers();
         });
 
         expect(overlay).not.toBeInTheDocument();
@@ -1045,12 +1086,70 @@ describe("data-editor", () => {
         const overlay = screen.getByDisplayValue("j");
         expect(overlay).toBeInTheDocument();
 
+        jest.useFakeTimers();
         fireEvent.keyDown(overlay, {
             key: "Enter",
         });
 
+        act(() => {
+            jest.runAllTimers();
+        });
+
         expect(spy).toBeCalledWith([1, 1], expect.objectContaining({ data: "j" }));
         expect(overlay).not.toBeInTheDocument();
+    });
+
+    test("Directly toggle booleans", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<DataEditor {...basicProps} onCellEdited={spy} ref={ref} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        // We need to be focused on the grid for booleans to toggle automatically
+        act(() => {
+            ref.current?.focus();
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
+
+        // [7, 0] is a checked boolean
+        const [checkedX, checkedY] = getCellCenterPositionForDefaultGrid([7, 0]);
+
+        fireEvent.mouseDown(canvas, { clientX: checkedX, clientY: checkedY });
+        fireEvent.mouseUp(canvas, { clientX: checkedX, clientY: checkedY });
+
+        expect(spy).toBeCalledWith([7, 0], expect.objectContaining({ data: false }));
+
+        // [7, 1] is an unchecked boolean
+        const [uncheckedX, uncheckedY] = getCellCenterPositionForDefaultGrid([7, 1]);
+
+        fireEvent.mouseDown(canvas, { clientX: uncheckedX, clientY: uncheckedY });
+        fireEvent.mouseUp(canvas, { clientX: uncheckedX, clientY: uncheckedY });
+
+        expect(spy).toBeCalledWith([7, 1], expect.objectContaining({ data: true }));
+
+        // [7, 2] is an indeterminate boolean
+        const [indeterminateX, indeterminateY] = getCellCenterPositionForDefaultGrid([7, 2]);
+
+        fireEvent.mouseDown(canvas, { clientX: indeterminateX, clientY: indeterminateY });
+        fireEvent.mouseUp(canvas, { clientX: indeterminateX, clientY: indeterminateY });
+
+        expect(spy).toBeCalledWith([7, 2], expect.objectContaining({ data: true }));
+
+        // [7, 3] is an empty boolean
+        const [emptyX, emptyY] = getCellCenterPositionForDefaultGrid([7, 3]);
+
+        fireEvent.mouseDown(canvas, { clientX: emptyX, clientY: emptyY });
+        fireEvent.mouseUp(canvas, { clientX: emptyX, clientY: emptyY });
+
+        expect(spy).toBeCalledWith([7, 3], expect.objectContaining({ data: true }));
     });
 
     test("Arrow left", async () => {
@@ -1266,10 +1365,13 @@ describe("data-editor", () => {
         render(<EventedDataEditor {...basicProps} showSearch={true} onSearchClose={spy} />, {
             wrapper: Context,
         });
-        prep();
+        prep(false);
 
         const searchClose = screen.getByTestId("search-close-button");
         fireEvent.click(searchClose);
+        act(() => {
+            jest.runAllTimers();
+        });
         expect(spy).toBeCalled();
     });
 
@@ -1324,7 +1426,7 @@ describe("data-editor", () => {
                 wrapper: Context,
             }
         );
-        prep();
+        prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
         jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
@@ -1338,10 +1440,18 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
         });
 
+        act(() => {
+            jest.runAllTimers();
+        });
+
         spy.mockClear();
         fireEvent.keyDown(canvas, {
             key: "ArrowRight",
             shiftKey: true,
+        });
+
+        act(() => {
+            jest.runAllTimers();
         });
 
         expect(spy).toBeCalledWith(
@@ -1351,7 +1461,9 @@ describe("data-editor", () => {
         );
 
         fireEvent.copy(window);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        act(() => {
+            jest.runAllTimers();
+        });
         expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
 
         spy.mockClear();
@@ -1362,7 +1474,11 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 3] }) }));
 
         fireEvent.paste(window);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
+        await new Promise(r => window.setTimeout(r, 10));
         expect(pasteSpy).toBeCalledWith(
             [1, 3],
             [
@@ -1396,7 +1512,7 @@ describe("data-editor", () => {
                 wrapper: Context,
             }
         );
-        prep();
+        prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
         jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
@@ -1408,6 +1524,10 @@ describe("data-editor", () => {
         fireEvent.mouseUp(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
         });
 
         spy.mockClear();
@@ -1423,7 +1543,9 @@ describe("data-editor", () => {
         );
 
         fireEvent.copy(window);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        act(() => {
+            jest.runAllTimers();
+        });
         expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
 
         spy.mockClear();
@@ -1434,6 +1556,10 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 3] }) }));
 
         fireEvent.paste(window);
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
         await new Promise(resolve => setTimeout(resolve, 10));
         expect(pasteSpy).toBeCalledWith(
             [1, 3],
@@ -2479,6 +2605,10 @@ describe("data-editor", () => {
         // const canvas = screen.getByTestId("data-grid-canvas");
 
         if (scroller !== null) {
+            const mockDownEv = createEvent.mouseDown(scroller);
+            fireEvent(scroller, mockDownEv);
+            expect(mockDownEv.defaultPrevented).toBe(false);
+
             const mockEv = createEvent.dragStart(scroller);
             Object.assign(mockEv, {
                 clientX: 100,
@@ -2746,28 +2876,6 @@ describe("data-editor", () => {
                 current: expect.objectContaining({ cell: [0, 0], range: { x: 0, y: 0, width: cols, height: 1000 } }),
             })
         );
-
-        // spy.mockClear();
-        // fireEvent.keyDown(canvas, {
-        //     key: "ArrowUp",
-        //     ctrlKey: true,
-        //     shiftKey: true,
-        // });
-
-        // expect(spy).toBeCalledWith(
-        //     expect.objectContaining({ cell: [0, 0], range: { x: 0, y: 0, width: cols, height: 1 } })
-        // );
-
-        // spy.mockClear();
-        // fireEvent.keyDown(canvas, {
-        //     key: "ArrowLeft",
-        //     ctrlKey: true,
-        //     shiftKey: true,
-        // });
-
-        // expect(spy).toBeCalledWith(
-        //     expect.objectContaining({ cell: [0, 0], range: { x: 0, y: 0, width: 1, height: 1 } })
-        // );
     });
 
     test("Select range with mouse going out of bounds", async () => {

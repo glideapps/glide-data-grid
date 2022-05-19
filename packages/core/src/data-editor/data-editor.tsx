@@ -31,7 +31,6 @@ import {
     HeaderClickedEventArgs,
     CellClickedEventArgs,
     Item,
-    resolveCellsThunk,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -47,8 +46,9 @@ import { useColumnSizer } from "./use-column-sizer";
 import { isHotkey } from "../common/is-hotkey";
 import { SelectionBlending, useSelectionBehavior } from "../data-grid/use-selection-behavior";
 import { useCellsForSelection } from "./use-cells-for-selection";
-import { unquote, expandSelection, copyToClipboard } from "./data-editors-fns";
+import { unquote, expandSelection, copyToClipboard, decodeHTML } from "./data-editor-fns";
 import { DataEditorContainer } from "../data-editor-container/data-grid-container";
+import { toggleBoolean } from "../data-grid/cells/boolean-cell";
 
 let idCounter = 0;
 
@@ -273,6 +273,7 @@ export interface DataEditorProps extends Props {
 export interface DataEditorRef {
     updateCells: DataGridRef["damage"];
     getBounds: DataGridRef["getBounds"];
+    focus: DataGridRef["focus"];
     emit: (eventName: EmitEvents) => Promise<void>;
     scrollTo: (
         col: number,
@@ -586,16 +587,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const isFirst = col === rowMarkerOffset;
 
                 const maybeFirstColumnHint = isFirst ? trailingRowOptions?.hint ?? "" : "";
-                const hint = columns[col]?.trailingRowOptions?.hint ?? maybeFirstColumnHint;
+                const c = mangledCols[col];
 
-                const icon = columns[col]?.trailingRowOptions?.addIcon ?? trailingRowOptions?.addIcon;
-
-                return {
-                    kind: InnerGridCellKind.NewRow,
-                    hint,
-                    allowOverlay: false,
-                    icon,
-                };
+                if (c?.trailingRowOptions?.disabled === true) {
+                    return loadingCell;
+                } else {
+                    const hint = c?.trailingRowOptions?.hint ?? maybeFirstColumnHint;
+                    const icon = c?.trailingRowOptions?.addIcon ?? trailingRowOptions?.addIcon;
+                    return {
+                        kind: InnerGridCellKind.NewRow,
+                        hint,
+                        allowOverlay: false,
+                        icon,
+                    };
+                }
             } else {
                 const outerCol = col - rowMarkerOffset;
                 if (p.experimental?.strict === true) {
@@ -635,7 +640,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowMarkerOffset,
             trailingRowOptions?.hint,
             trailingRowOptions?.addIcon,
-            columns,
+            mangledCols,
             p.experimental?.strict,
             getCellContent,
             rowMarkerStartIndex,
@@ -695,18 +700,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let content = c;
                 if (initialValue !== undefined) {
                     switch (content.kind) {
-                        case GridCellKind.Text:
-                            content = {
-                                ...content,
-                                data: initialValue,
-                            };
-                            break;
                         case GridCellKind.Number:
                             content = {
                                 ...content,
-                                data: maybe(() => Number.parseFloat(initialValue), 0),
+                                data: maybe(() => (initialValue === "-" ? -0 : Number.parseFloat(initialValue)), 0),
                             };
                             break;
+                        case GridCellKind.Text:
                         case GridCellKind.Markdown:
                         case GridCellKind.Uri:
                             content = {
@@ -728,7 +728,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             } else if (c.kind === GridCellKind.Boolean && fromKeyboard) {
                 mangledOnCellEdited(gridSelection.current.cell, {
                     ...c,
-                    data: !c.data,
+                    data: toggleBoolean(c.data),
                 });
                 gridRef.current?.damage([{ cell: gridSelection.current.cell }]);
             }
@@ -748,18 +748,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return;
             }
             switch (content.kind) {
-                case GridCellKind.Text:
-                    content = {
-                        ...content,
-                        data: "",
-                    };
-                    break;
                 case GridCellKind.Number:
                     content = {
                         ...content,
                         data: undefined,
                     };
                     break;
+                case GridCellKind.Text:
                 case GridCellKind.Markdown:
                 case GridCellKind.Uri:
                     content = {
@@ -860,7 +855,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     rowsRef.current = rows;
     const appendRow = React.useCallback(
         async (col: number) => {
-            // FIXME: Maybe this should optionally return a promise that we can await?
+            const c = mangledCols[col];
+            if (c?.trailingRowOptions?.disabled === true) {
+                return;
+            }
             const appendResult = onRowAppended?.();
 
             let r: "top" | "bottom" | number | undefined = undefined;
@@ -909,7 +907,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             // Queue up to allow the consumer to react to the event and let us check if they did
             doFocus();
         },
-        [onRowAppended, rowMarkerOffset, rows, scrollTo, setCurrent]
+        [mangledCols, onRowAppended, rowMarkerOffset, rows, scrollTo, setCurrent]
     );
 
     const getCustomNewRowTargetColumn = React.useCallback(
@@ -1755,9 +1753,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onFinishEditing = React.useCallback(
         (newValue: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => {
-            if (overlay?.cell !== undefined && newValue !== undefined) {
-                // Fixme, this cast is dangerous
-                mangledOnCellEdited?.(overlay.cell, newValue as EditableGridCell);
+            if (overlay?.cell !== undefined && newValue !== undefined && isEditableGridCell(newValue)) {
+                mangledOnCellEdited?.(overlay.cell, newValue);
                 window.requestAnimationFrame(() => {
                     gridRef.current?.damage([
                         {
@@ -2087,7 +2084,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     !event.metaKey &&
                     !event.ctrlKey &&
                     gridSelection.current !== undefined &&
-                    event.key.match(/^(\w|\s)$/g) &&
+                    event.key.length === 1 &&
+                    event.key.match(/[ -~]/g) &&
                     event.bounds !== undefined &&
                     isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, row - 1)]))
                 ) {
@@ -2152,170 +2150,232 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
-    const onPasteInternal = React.useCallback(async () => {
-        if (!keybindings.paste) return;
-        function pasteToCell(inner: InnerGridCell, target: Item, toPaste: string): boolean {
-            if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
-                switch (inner.kind) {
-                    case GridCellKind.Text:
-                    case GridCellKind.Markdown:
-                    case GridCellKind.Uri: {
-                        mangledOnCellEdited?.(target, {
-                            ...inner,
-                            data: toPaste,
-                        });
-                        return true;
-                    }
-                    case GridCellKind.Number: {
-                        const newNumber = Number.parseFloat(toPaste);
-                        if (!Number.isNaN(newNumber)) {
+    const onPasteInternal = React.useCallback(
+        async (e?: ClipboardEvent) => {
+            if (!keybindings.paste) return;
+            function pasteToCell(inner: InnerGridCell, target: Item, toPaste: string): boolean {
+                if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
+                    switch (inner.kind) {
+                        case GridCellKind.Text:
+                        case GridCellKind.Markdown:
+                        case GridCellKind.Uri: {
                             mangledOnCellEdited?.(target, {
                                 ...inner,
-                                data: newNumber,
+                                data: toPaste,
                             });
                             return true;
                         }
-                        return false;
-                    }
-                    case GridCellKind.Custom: {
-                        mangledOnCellEdited?.(target, {
-                            ...inner,
-                            copyData: toPaste,
-                        });
-                        return true;
-                    }
-                    default:
-                        assertNever(inner);
-                }
-            }
-            return false;
-        }
-
-        const selectedColumns = gridSelection.columns;
-        const selectedRows = gridSelection.rows;
-        const focused =
-            scrollRef.current?.contains(document.activeElement) === true ||
-            canvasRef.current?.contains(document.activeElement) === true;
-
-        let target = gridSelection.current?.cell;
-        if (target === undefined && selectedColumns.length === 1) {
-            target = [selectedColumns.first() ?? 0, 0];
-        }
-        if (target === undefined && selectedRows.length === 1) {
-            target = [rowMarkerOffset, selectedRows.first() ?? 0];
-        }
-
-        if (focused && target !== undefined) {
-            const text = await navigator.clipboard.readText();
-
-            const [gridCol, gridRow] = target;
-
-            if (onPaste === undefined) {
-                const cellData = getMangledCellContent(target);
-                pasteToCell(cellData, target, text);
-                return;
-            }
-
-            const data = unquote(text);
-
-            if (onPaste === false || (typeof onPaste === "function" && onPaste?.(target, data) !== true)) {
-                return;
-            }
-
-            const damage: Item[] = [];
-            for (let row = 0; row < data.length; row++) {
-                const dataRow = data[row];
-                if (row + gridRow >= rows) break;
-                for (let col = 0; col < dataRow.length; col++) {
-                    const dataItem = dataRow[col];
-                    const index = [col + gridCol, row + gridRow] as const;
-                    const cellData = getMangledCellContent(index);
-                    if (pasteToCell(cellData, index, dataItem)) {
-                        damage.push(index);
+                        case GridCellKind.Number: {
+                            const newNumber = Number.parseFloat(toPaste);
+                            if (!Number.isNaN(newNumber)) {
+                                mangledOnCellEdited?.(target, {
+                                    ...inner,
+                                    data: newNumber,
+                                });
+                                return true;
+                            }
+                            return false;
+                        }
+                        case GridCellKind.Custom: {
+                            mangledOnCellEdited?.(target, {
+                                ...inner,
+                                copyData: toPaste,
+                            });
+                            return true;
+                        }
+                        default:
+                            assertNever(inner);
                     }
                 }
+                return false;
             }
-            gridRef.current?.damage(
-                damage.map(c => ({
-                    cell: c,
-                }))
-            );
-        }
-    }, [getMangledCellContent, gridSelection, keybindings.paste, mangledOnCellEdited, onPaste, rowMarkerOffset, rows]);
+
+            const selectedColumns = gridSelection.columns;
+            const selectedRows = gridSelection.rows;
+            const focused =
+                scrollRef.current?.contains(document.activeElement) === true ||
+                canvasRef.current?.contains(document.activeElement) === true;
+
+            let target = gridSelection.current?.cell;
+            if (target === undefined && selectedColumns.length === 1) {
+                target = [selectedColumns.first() ?? 0, 0];
+            }
+            if (target === undefined && selectedRows.length === 1) {
+                target = [rowMarkerOffset, selectedRows.first() ?? 0];
+            }
+
+            if (focused && target !== undefined) {
+                let data: string[][] | undefined;
+                let text: string | undefined;
+
+                if (navigator.clipboard.read !== undefined) {
+                    const clipboardContent = await navigator.clipboard.read();
+
+                    for (const item of clipboardContent) {
+                        if (item.types.includes("text/html")) {
+                            const htmlBlob = await item.getType("text/html");
+                            const html = await htmlBlob.text();
+                            const fragment = document.createElement("html");
+                            fragment.innerHTML = html;
+                            const el = fragment.querySelector("table");
+                            if (el !== null) {
+                                data = decodeHTML(el);
+                                break;
+                            }
+                        }
+                        if (item.types.includes("text/plain")) {
+                            text = await (await item.getType("text/plain")).text();
+                        }
+                    }
+                } else if (navigator.clipboard.readText !== undefined) {
+                    text = await navigator.clipboard.readText();
+                } else if (e !== undefined && e?.clipboardData !== null) {
+                    if (e.clipboardData.types.includes("text/html")) {
+                        const html = e.clipboardData.getData("text/html");
+                        const fragment = document.createElement("html");
+                        fragment.innerHTML = html;
+                        const el = fragment.querySelector("table");
+                        if (el !== null) {
+                            data = decodeHTML(el);
+                        }
+                    }
+                    if (data === undefined && e.clipboardData.types.includes("text/plain")) {
+                        text = e.clipboardData.getData("text/plain");
+                    }
+                } else {
+                    return; // I didn't want to read that paste value anyway
+                }
+
+                const [gridCol, gridRow] = target;
+
+                const damage: Item[] = [];
+                do {
+                    if (onPaste === undefined) {
+                        const cellData = getMangledCellContent(target);
+                        pasteToCell(cellData, target, text ?? data?.map(r => r.join("\t")).join("\t") ?? "");
+                        damage.push(target);
+                        break;
+                    }
+
+                    if (data === undefined) {
+                        if (text === undefined) return;
+                        data = unquote(text);
+                    }
+
+                    if (onPaste === false || (typeof onPaste === "function" && onPaste?.(target, data) !== true)) {
+                        return;
+                    }
+
+                    for (let row = 0; row < data.length; row++) {
+                        const dataRow = data[row];
+                        if (row + gridRow >= rows) break;
+                        for (let col = 0; col < dataRow.length; col++) {
+                            const dataItem = dataRow[col];
+                            const index = [col + gridCol, row + gridRow] as const;
+                            const cellData = getMangledCellContent(index);
+                            if (pasteToCell(cellData, index, dataItem)) {
+                                damage.push(index);
+                            }
+                        }
+                    }
+                    // eslint-disable-next-line no-constant-condition
+                } while (false);
+
+                gridRef.current?.damage(
+                    damage.map(c => ({
+                        cell: c,
+                    }))
+                );
+            }
+        },
+        [getMangledCellContent, gridSelection, keybindings.paste, mangledOnCellEdited, onPaste, rowMarkerOffset, rows]
+    );
 
     useEventListener("paste", onPasteInternal, window, false, true);
 
-    const onCopy = React.useCallback(async () => {
-        if (!keybindings.copy) return;
-        const focused =
-            scrollRef.current?.contains(document.activeElement) === true ||
-            canvasRef.current?.contains(document.activeElement) === true;
+    // While this function is async, we deeply prefer not to await if we don't have to. This will lead to unpacking
+    // promises in rather awkward ways when possible to avoid awaiting. We have to use fallback copy mechanisms when
+    // an await has happened.
+    const onCopy = React.useCallback(
+        async (e?: ClipboardEvent) => {
+            if (!keybindings.copy) return;
+            const focused =
+                scrollRef.current?.contains(document.activeElement) === true ||
+                canvasRef.current?.contains(document.activeElement) === true;
 
-        const selectedColumns = gridSelection.columns;
-        const selectedRows = gridSelection.rows;
+            const selectedColumns = gridSelection.columns;
+            const selectedRows = gridSelection.rows;
 
-        if (focused && getCellsForSelection !== undefined) {
-            if (gridSelection.current !== undefined) {
-                copyToClipboard(
-                    await resolveCellsThunk(
-                        getCellsForSelection(gridSelection.current.range, abortControllerRef.current.signal)
-                    ),
-                    range(
-                        gridSelection.current.range.x - rowMarkerOffset,
-                        gridSelection.current.range.x + gridSelection.current.range.width - rowMarkerOffset
-                    )
-                );
-            } else if (selectedRows !== undefined && selectedRows.length > 0) {
-                const toCopy = Array.from(selectedRows);
-                const cells = toCopy.map(
-                    async rowIndex =>
-                        (
-                            await resolveCellsThunk(
-                                getCellsForSelection(
-                                    {
-                                        x: rowMarkerOffset,
-                                        y: rowIndex,
-                                        width: columnsIn.length - rowMarkerOffset,
-                                        height: 1,
-                                    },
-                                    abortControllerRef.current.signal
-                                )
-                            )
-                        )[0]
-                );
-                const settled = await Promise.all(cells);
-                copyToClipboard(settled, range(columnsIn.length));
-            } else if (selectedColumns.length >= 1) {
-                const results: (readonly (readonly GridCell[])[])[] = [];
-                const cols: number[] = [];
-                for (const col of selectedColumns) {
-                    results.push(
-                        await resolveCellsThunk(
-                            getCellsForSelection(
-                                {
-                                    x: col,
-                                    y: 0,
-                                    width: 1,
-                                    height: rows,
-                                },
-                                abortControllerRef.current.signal
-                            )
-                        )
+            if (focused && getCellsForSelection !== undefined) {
+                if (gridSelection.current !== undefined) {
+                    let thunk = getCellsForSelection(gridSelection.current.range, abortControllerRef.current.signal);
+                    if (typeof thunk !== "object") {
+                        thunk = await thunk();
+                    }
+                    copyToClipboard(
+                        thunk,
+                        range(
+                            gridSelection.current.range.x - rowMarkerOffset,
+                            gridSelection.current.range.x + gridSelection.current.range.width - rowMarkerOffset
+                        ),
+                        e
                     );
-                    cols.push(col - rowMarkerOffset);
+                } else if (selectedRows !== undefined && selectedRows.length > 0) {
+                    const toCopy = Array.from(selectedRows);
+                    const cells = toCopy.map(rowIndex => {
+                        const thunk = getCellsForSelection(
+                            {
+                                x: rowMarkerOffset,
+                                y: rowIndex,
+                                width: columnsIn.length - rowMarkerOffset,
+                                height: 1,
+                            },
+                            abortControllerRef.current.signal
+                        );
+                        if (typeof thunk === "object") {
+                            return thunk[0];
+                        }
+                        return thunk().then(v => v[0]);
+                    });
+                    if (cells.some(x => x instanceof Promise)) {
+                        const settled = await Promise.all(cells);
+                        copyToClipboard(settled, range(columnsIn.length), e);
+                    } else {
+                        copyToClipboard(cells as (readonly GridCell[])[], range(columnsIn.length), e);
+                    }
+                } else if (selectedColumns.length >= 1) {
+                    const results: (readonly (readonly GridCell[])[])[] = [];
+                    const cols: number[] = [];
+                    for (const col of selectedColumns) {
+                        let thunk = getCellsForSelection(
+                            {
+                                x: col,
+                                y: 0,
+                                width: 1,
+                                height: rows,
+                            },
+                            abortControllerRef.current.signal
+                        );
+                        if (typeof thunk !== "object") {
+                            thunk = await thunk();
+                        }
+                        results.push(thunk);
+                        cols.push(col - rowMarkerOffset);
+                    }
+                    if (results.length === 1) {
+                        copyToClipboard(results[0], cols, e);
+                    } else {
+                        // FIXME: this is dumb
+                        const toCopy = results.reduce((pv, cv) => pv.map((row, index) => [...row, ...cv[index]]));
+                        copyToClipboard(toCopy, cols, e);
+                    }
                 }
-                if (results.length === 1) {
-                    copyToClipboard(results[0], cols);
-                }
-                // FIXME: this is dumb
-                const toCopy = results.reduce((pv, cv) => pv.map((row, index) => [...row, ...cv[index]]));
-
-                copyToClipboard(toCopy, cols);
             }
-        }
-    }, [columnsIn.length, getCellsForSelection, gridSelection, keybindings.copy, rowMarkerOffset, rows]);
+        },
+        [columnsIn.length, getCellsForSelection, gridSelection, keybindings.copy, rowMarkerOffset, rows]
+    );
 
-    useEventListener("copy", onCopy, window, true, false);
+    useEventListener("copy", onCopy, window, false, false);
 
     const onSearchResultsChanged = React.useCallback(
         (results: readonly Item[], navIndex: number) => {
@@ -2398,6 +2458,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return gridRef.current?.damage(damageList);
             },
             getBounds: (...args) => gridRef.current?.getBounds(...args),
+            focus: () => gridRef.current?.focus(),
             emit: async e => {
                 switch (e) {
                     case "delete":
@@ -2516,19 +2577,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     }, []);
 
     const [idealWidth, idealHeight] = React.useMemo(() => {
-        let h: number | undefined = 500;
-        const scrollbarWidth = getScrollBarWidth();
+        let h: number;
+        const scrollbarWidth = p.experimental?.scrollbarWidthOverride ?? getScrollBarWidth();
+        const rowsCountWithTrailingRow = rows + (showTrailingBlankRow ? 1 : 0);
         if (typeof rowHeight === "number") {
-            h = totalHeaderHeight + rows * rowHeight;
+            h = totalHeaderHeight + rowsCountWithTrailingRow * rowHeight;
         } else {
             let avg = 0;
-            const toAverage = Math.min(rows, 10);
+            const toAverage = Math.min(rowsCountWithTrailingRow, 10);
             for (let i = 0; i < toAverage; i++) {
                 avg += rowHeight(i);
             }
             avg = Math.floor(avg / toAverage);
 
-            h = totalHeaderHeight + rows * avg;
+            h = totalHeaderHeight + rowsCountWithTrailingRow * avg;
         }
         h += scrollbarWidth;
 
@@ -2537,7 +2599,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         // We need to set a reasonable cap here as some browsers will just ignore huge values
         // rather than treat them as huge values.
         return [`${Math.min(100000, w)}px`, `${Math.min(100000, h)}px`];
-    }, [mangledCols, rowHeight, rows, totalHeaderHeight]);
+    }, [mangledCols, p.experimental?.scrollbarWidthOverride, rowHeight, rows, showTrailingBlankRow, totalHeaderHeight]);
 
     return (
         <ThemeProvider theme={mergedTheme}>

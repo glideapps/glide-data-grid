@@ -11,7 +11,7 @@ Currently the Grid depends on there being a root level "portal" div in your HTML
 Once you've got that done, the easiest way to use the Data Grid is to give it a fixed size:
 
 ```jsx
-<DataEditor  width={500} height={300} {...props} />
+<DataEditor width={500} height={300} {...props} />
 ```
 
 ## Changes to your data
@@ -138,12 +138,12 @@ Most data grids will want to set the majority of these props one way or another.
 | Name                                                  | Description                                                                                                                                                                         |
 | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [maxColumnWidth](#maxcolumnwidth)                     | Sets the maximum width the user can resize a column to.                                                                                                                             |
-| [minColumnWidth](#maxcolumnwidth)                     | Sets the minimum width the user can resize a column to.                                                                                                                              |
+| [minColumnWidth](#maxcolumnwidth)                     | Sets the minimum width the user can resize a column to.                                                                                                                             |
 | [onCellClicked](#oncellclicked)                       | Emitted when a cell is clicked.                                                                                                                                                     |
 | [onCellActivated](#oncellactivated)                   | Emitted when a cell is activated, by pressing Enter, Space or double clicking it.                                                                                                   |
 | [onCellContextMenu](#oncellcontextmenu)               | Emitted when a cell should show a context menu. Usually right click.                                                                                                                |
 | [onColumnMoved](#oncolumnmoved)                       | Emitted when a column has been dragged to a new location.                                                                                                                           |
-| [onColumnResize](#oncolumnresize)                   | Emitted when a column has been resized to a new size.                                                                                                                               |
+| [onColumnResize](#oncolumnresize)                     | Emitted when a column has been resized to a new size.                                                                                                                               |
 | [onGroupHeaderClicked](#ongroupheaderclicked)         | Emitted when a group header is clicked.                                                                                                                                             |
 | [onGroupHeaderContextMenu](#ongroupheadercontextmenu) | Emitted when a group header should show a context menu. Usually right click.                                                                                                        |
 | [onHeaderClicked](#onheaderclicked)                   | Emitted when a column header is clicked.                                                                                                                                            |
@@ -213,6 +213,8 @@ interface BaseGridColumn {
         readonly hint?: string;
         readonly addIcon?: string;
         readonly targetColumn?: number | GridColumn;
+        readonly themeOverride?: Partial<Theme>;
+        readonly disabled?: boolean;
     };
 }
 
@@ -1076,7 +1078,9 @@ type CustomCellRenderer<T extends CustomCell> = {
 };
 
 // the hook itself
-declare function useCustomCells(cells: readonly CustomCellRenderer<any>[]): { drawCell: DrawCustomCellCallback, provideEditor: ProvideEditorCallback<GridCell> };
+declare function useCustomCells(
+    cells: readonly CustomCellRenderer<any>[]
+): { drawCell: DrawCustomCellCallback; provideEditor: ProvideEditorCallback<GridCell> };
 ```
 
 The useCustomCells hook provides a standardized method of integrating custom cells into the Glide Data Grid. All cells in the `@glideapps/glide-data-grid-source` package are already in this format and can be used individually by passing them to this hook as so. The result of the hook is an object which can be spread on the DataEditor to implement the cells.
@@ -1086,8 +1090,8 @@ import StarCell from "@glideapps/glide-data-grid-cells/cells/star-cell";
 import DropdownCell from "@glideapps/glide-data-grid-cells/cells/dropdown-cell";
 
 const MyGrid = () => {
-    const args = useCustomCells([StarCell, DropdownCell])
+    const args = useCustomCells([StarCell, DropdownCell]);
 
-    return <DataEditor {...args} />
-}
+    return <DataEditor {...args} />;
+};
 ```

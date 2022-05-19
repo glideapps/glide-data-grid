@@ -60,11 +60,10 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     const onCustomFinishedEditing = React.useCallback(
         (newValue: GridCell | undefined) => {
-            newValue = newValue ?? tempValue;
             onFinishEditing(newValue, customMotion.current ?? [0, 0]);
             finished.current = true;
         },
-        [onFinishEditing, tempValue]
+        [onFinishEditing]
     );
 
     const onKeyDownCustom = React.useCallback(

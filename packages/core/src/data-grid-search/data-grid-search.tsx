@@ -1,4 +1,3 @@
-// import AppIcon from "common/app-icon";
 import * as React from "react";
 import { CellArray, GetCellsThunk, GridCellKind, Item, Rectangle } from "../data-grid/data-grid-types";
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
@@ -142,7 +141,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                                 testString = cell.data;
                                 break;
                             case GridCellKind.Boolean:
-                                testString = cell.data.toString();
+                                testString = typeof cell.data === "boolean" ? cell.data.toString() : undefined;
                                 break;
                             case GridCellKind.Image:
                             case GridCellKind.Bubble:
@@ -150,6 +149,9 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                                 // searching for the whale emoji, this is pretty side effect
                                 // free. And ya know... it's nice and easy to do...
                                 testString = cell.data.join("🐳");
+                                break;
+                            case GridCellKind.Custom:
+                                testString = cell.copyData;
                                 break;
                         }
 
