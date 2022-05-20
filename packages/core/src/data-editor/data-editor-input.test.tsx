@@ -55,7 +55,7 @@ const makeCell = (cell: Item): GridCell => {
             kind: GridCellKind.Boolean,
             allowOverlay: false,
             data: row % 2 === 0,
-            allowEdit: true,
+            readonly: false,
         };
     } else if (col === 8) {
         return {

@@ -27,6 +27,7 @@ import {
     SizedGridColumn,
     isReadWriteCell,
     isInnerOnlyCell,
+    booleanCellIsEditable,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -616,7 +617,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         clickableInnerCellHovered =
             cell.kind === InnerGridCellKind.NewRow ||
             (cell.kind === InnerGridCellKind.Marker && cell.markerKind !== "number");
-        editableBoolHovered = cell.kind === GridCellKind.Boolean && cell.allowEdit === true;
+        editableBoolHovered = cell.kind === GridCellKind.Boolean && booleanCellIsEditable(cell);
     }
     const canDrag = hoveredOnEdge ?? false;
     const cursor = isDragging

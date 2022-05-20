@@ -69,7 +69,7 @@ const makeCell = (cell: Item): GridCell => {
             kind: GridCellKind.Boolean,
             allowOverlay: false,
             data: getMockBooleanData(row),
-            allowEdit: true,
+            readonly: false,
         };
     } else if (col === 8) {
         return {
