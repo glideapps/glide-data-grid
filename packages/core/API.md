@@ -126,6 +126,7 @@ Most data grids will want to set the majority of these props one way or another.
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | [imageEditorOverride](#imageeditoroverride)   | Used to provide an override to the default image editor for the data grid. `provideEditor` may be a better choice for most people. |
 | [onCellEdited](#oncelledited)                 | Emitted whenever a cell edit is completed.                                                                                         |
+| [onCellsEdited](#oncelledited)                | Emitted whenever a cell edit is completed and provides all edits inbound as a single batch.                                        |
 | [onDelete](#ondelete)                         | Emitted whenever the user has requested the deletion of the selection.                                                             |
 | [onFinishedEditing](#onfinishedediting)       | Emitted when editing has finished, regardless of data changing or not.                                                             |
 | [onGroupHeaderRenamed](#ongroupheaderrenamed) | Emitted whe the user wishes to rename a group.                                                                                     |
@@ -779,9 +780,12 @@ If `imageEditorOverride` is specified, then it will be used instead of the defau
 
 ```ts
 onCellEdited?: (cell: Item, newValue: EditableGridCell) => void;
+onCellsEdited?: (newValues: readonly { location: Item; value: EditableGridCell }[]) => boolean | void;
 ```
 
 `onCellEdited` is called when the user finishes editing a cell. Note that you are responsible for setting the new value of the cell.
+
+`onCellsEdited` is called whenever a batch of cells is about to be edited. If the callback returns `true`, `onCellEdited` will not be called for an cells in the event.
 
 ---
 
