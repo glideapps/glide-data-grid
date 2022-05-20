@@ -616,7 +616,7 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
         roundedRect(
             ctx,
             rectInfo.x,
-            y + (h - bubbleHeight) / 2,
+            y + Math.ceil((h - bubbleHeight) / 2),
             rectInfo.width + bubblePad * 2,
             bubbleHeight,
             bubbleHeight / 2
