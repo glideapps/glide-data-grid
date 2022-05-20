@@ -299,12 +299,13 @@ export interface Rectangle {
     height: number;
 }
 
-interface BaseGridCell {
+export interface BaseGridCell {
     readonly allowOverlay: boolean;
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
     readonly span?: Item;
+    readonly contentAlign?: "left" | "right" | "center";
 }
 
 export interface LoadingCell extends BaseGridCell {

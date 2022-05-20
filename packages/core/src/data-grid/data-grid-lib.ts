@@ -1,5 +1,15 @@
 import { Theme } from "../common/styles";
-import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn, Rectangle, BooleanEmpty, BooleanIndeterminate } from "./data-grid-types";
+import {
+    DrilldownCellData,
+    Item,
+    GridSelection,
+    InnerGridCell,
+    SizedGridColumn,
+    Rectangle,
+    BaseGridCell,
+    BooleanEmpty,
+    BooleanIndeterminate,
+} from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
@@ -308,13 +318,27 @@ export function drawTextCell(args: BaseDrawArgs, data: string) {
     }
 
     if (data.length > 0) {
-        const dir = direction(data);
+        const contentAlign = ((<any>args).cell as BaseGridCell)?.contentAlign;
 
-        if (dir === "rtl") {
-            const textWidth = measureTextCached(data, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`).width;
-            ctx.fillText(data, x + w - theme.cellHorizontalPadding - textWidth + 0.5, y + h / 2);
+        if (contentAlign === undefined && direction(data) === "rtl") {
+            // Use right alignment as default for RTL text
+            ctx.textAlign = "right";
+        } else if (contentAlign !== undefined && contentAlign !== "left") {
+            // Since default is start (=left), only apply if alignment is center or right
+            ctx.textAlign = contentAlign;
+        }
+
+        if (contentAlign === "right") {
+            ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2);
+        } else if (contentAlign === "center") {
+            ctx.fillText(data, x + w / 2, y + h / 2);
         } else {
             ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+        }
+
+        if (contentAlign === "right" || contentAlign === "center") {
+            // Reset alignment to default
+            ctx.textAlign = "start";
         }
     }
 }

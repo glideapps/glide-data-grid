@@ -2444,6 +2444,43 @@ export const Minimap: React.VFC = () => {
     },
 };
 
+export const ContentAlignment: React.VFC = () => {
+    const { cols, getCellContent } = useAllMockedKinds();
+
+    const mangledGetCellContent = React.useCallback<typeof getCellContent>(
+        cell => {
+            const [col, _row] = cell;
+            if (col === 3) {
+                return {
+                    ...getCellContent(cell),
+                    contentAlign: "center",
+                };
+            }
+            if (col === 4) {
+                return {
+                    ...getCellContent(cell),
+                    contentAlign: "right",
+                };
+            }
+            return getCellContent(cell);
+        },
+        [getCellContent]
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Content Alignment"
+            description={
+                <Description>
+                    You can customize the content alignment by setting <PropName>contentAlign</PropName> of a cell to{" "}
+                    <PropName>left</PropName>, <PropName>right</PropName> or <PropName>center</PropName>.
+                </Description>
+            }>
+            <DataEditor {...defaultProps} getCellContent={mangledGetCellContent} columns={cols} rows={300} />
+        </BeautifulWrapper>
+    );
+};
+
 export const SpanCell: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(100, true, true);
 
