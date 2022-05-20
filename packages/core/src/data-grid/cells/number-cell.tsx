@@ -15,7 +15,7 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
     needsHoverPosition: false,
     useLabel: true,
     renderPrep: prepTextCell,
-    render: a => drawTextCell(a, a.cell.displayData),
+    render: a => drawTextCell(a, a.cell.displayData, a.cell.contentAlign),
     measure: (ctx, cell) => ctx.measureText(cell.displayData).width + 16,
     onDelete: c => ({
         ...c,
