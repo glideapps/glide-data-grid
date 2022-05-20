@@ -91,14 +91,14 @@ const renderer: CustomCellRenderer<TagsCell> = {
 
         let x = drawArea.x;
         let row = 1;
-        let y = drawArea.y + (drawArea.height - rows * tagHeight - (rows - 1) * innerPad) / 2;
+        let y = drawArea.y + Math.ceil((drawArea.height - rows * tagHeight - (rows - 1) * innerPad) / 2);
         for (const tag of tags) {
             const color = possibleTags.find(t => t.tag === tag)?.color ?? theme.bgBubble;
 
             ctx.font = `12px ${theme.fontFamily}`;
             const metrics = measureTextCached(tag, ctx);
             const width = metrics.width + innerPad * 2;
-            const textY = tagHeight / 2;
+            const textY = Math.ceil(tagHeight / 2);
 
             if (x !== drawArea.x && x + width > drawArea.x + drawArea.width && row < rows) {
                 row++;
@@ -108,7 +108,7 @@ const renderer: CustomCellRenderer<TagsCell> = {
 
             ctx.fillStyle = color;
             ctx.beginPath();
-            roundedRect(ctx, x, y, width, tagHeight, tagHeight / 2);
+            roundedRect(ctx, x, y, width, tagHeight, Math.ceil(tagHeight / 2));
             ctx.fill();
 
             ctx.fillStyle = theme.textDark;

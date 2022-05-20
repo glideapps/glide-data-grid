@@ -83,7 +83,7 @@ const renderer: CustomCellRenderer<StarCell> = {
         drawX += 8;
         ctx.beginPath();
         for (let i = 0; i < stars; i++) {
-            pathStar(ctx, [drawX, rect.y + rect.height / 2], 16);
+            pathStar(ctx, [drawX, rect.y + Math.ceil(rect.height / 2)], 16);
             drawX += 18;
         }
         ctx.fillStyle = theme.textDark;

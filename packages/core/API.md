@@ -471,7 +471,7 @@ When provided the `provideEditor` callbacks job is to be a constructor for funct
 rowHeight: number | ((index: number) => number);
 ```
 
-`rowHeight` is the height of a row in the table. It defaults to `34`. By passing a function instead of a number you can give different heights to each row. The `index` is the zero-based absolute row index.
+`rowHeight` is the height of a row in the table. It defaults to `35`. By passing a function instead of a number you can give different heights to each row. The `index` is the zero-based absolute row index.
 
 ---
 
@@ -604,7 +604,7 @@ The height of the group headers in the data grid. If not provided this will defa
 headerHeight: number;
 ```
 
-`headerHeight` is the height of the table header. It defaults to `36`.
+`headerHeight` is the height of the table header. It defaults to `37`.
 
 ---
 

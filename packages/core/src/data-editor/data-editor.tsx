@@ -320,8 +320,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const {
         isDraggable = false,
         rowMarkers = "none",
-        rowHeight = 34,
-        headerHeight = 36,
+        rowHeight = 35,
+        headerHeight = 37,
         rowMarkerWidth: rowMarkerWidthRaw,
         imageEditorOverride,
         getRowThemeOverride,

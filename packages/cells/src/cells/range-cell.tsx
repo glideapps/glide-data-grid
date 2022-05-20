@@ -34,7 +34,7 @@ const renderer: CustomCellRenderer<RangeCell> = {
         const { min, max, value, label, measureLabel } = cell.data;
 
         const x = rect.x + theme.cellHorizontalPadding;
-        const yMid = rect.y + rect.height / 2;
+        const yMid = rect.y + Math.ceil(rect.height / 2);
 
         const rangeSize = max - min;
         const fillRatio = (value - min) / rangeSize;

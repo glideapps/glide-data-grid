@@ -81,7 +81,7 @@ const renderer: CustomCellRenderer<DropdownCell> = {
         const { ctx, theme, rect } = args;
         const { value } = cell.data;
         ctx.fillStyle = theme.textDark;
-        ctx.fillText(value, rect.x + theme.cellHorizontalPadding, rect.y + rect.height / 2);
+        ctx.fillText(value, rect.x + theme.cellHorizontalPadding, rect.y + Math.ceil(rect.height / 2));
 
         return true;
     },

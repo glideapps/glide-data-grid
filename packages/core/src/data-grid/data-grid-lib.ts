@@ -328,6 +328,7 @@ export function drawTextCell(args: BaseDrawArgs, data: string, contentAlign?: Ba
             ctx.textAlign = contentAlign;
             changed = true;
         }
+
         const yCentered = y + Math.ceil(h / 2);
 
         if (contentAlign === "right") {
@@ -357,6 +358,8 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
 
     const alwaysShowIcon = data !== "";
 
+    const yCentered = y + Math.ceil(h / 2);
+
     if (icon !== undefined) {
         const padding = 8;
         const size = h - padding;
@@ -371,10 +374,10 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
 
         const padPlus = theme.cellHorizontalPadding + 4;
         if (lineSize > 0) {
-            ctx.moveTo(x + padPlus + xTranslate, y + h / 2);
-            ctx.lineTo(x + padPlus + xTranslate + lineSize, y + h / 2);
-            ctx.moveTo(x + padPlus + xTranslate + lineSize * 0.5, y + h / 2 - lineSize * 0.5);
-            ctx.lineTo(x + padPlus + xTranslate + lineSize * 0.5, y + h / 2 + lineSize * 0.5);
+            ctx.moveTo(x + padPlus + xTranslate, yCentered);
+            ctx.lineTo(x + padPlus + xTranslate + lineSize, yCentered);
+            ctx.moveTo(x + padPlus + xTranslate + lineSize * 0.5, yCentered - lineSize * 0.5);
+            ctx.lineTo(x + padPlus + xTranslate + lineSize * 0.5, yCentered + lineSize * 0.5);
             ctx.lineWidth = 2;
             ctx.strokeStyle = theme.bgIconHeader;
             ctx.lineCap = "round";
@@ -383,7 +386,7 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
     }
 
     ctx.fillStyle = theme.textMedium;
-    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, yCentered);
     ctx.beginPath();
 }
 
@@ -400,7 +403,7 @@ function drawCheckbox(
     hoverY: number = -20
 ) {
     const centerX = x + width / 2;
-    const centerY = y + height / 2;
+    const centerY = y + Math.ceil(height / 2);
 
     const hovered = Math.abs(hoverX - width / 2) < 10 && Math.abs(hoverY - height / 2) < 10;
 
@@ -496,7 +499,7 @@ export function drawMarkerRowCell(
             ctx.globalAlpha = 1 - hoverAmount;
         }
         ctx.fillStyle = theme.textLight;
-        ctx.fillText(text, start, y + height / 2);
+        ctx.fillText(text, start, y + Math.ceil(height / 2));
         if (hoverAmount !== 0) {
             ctx.globalAlpha = 1;
         }
@@ -516,7 +519,8 @@ export function drawProtectedCell(args: BaseDrawArgs) {
 
     const radius = 2.5;
     let xStart = x + theme.cellHorizontalPadding + radius;
-    const center = y + h / 2;
+
+    const center = y + Math.ceil(h / 2);
     const p = Math.cos(degreesToRadians(30)) * radius;
     const q = Math.sin(degreesToRadians(30)) * radius;
 
@@ -624,7 +628,7 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
     renderBoxes.forEach((rectInfo, i) => {
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.fillText(data[i], rectInfo.x + bubblePad, y + h / 2);
+        ctx.fillText(data[i], rectInfo.x + bubblePad, y + Math.ceil(h / 2));
     });
 }
 
@@ -707,6 +711,8 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
     const bubbleHeight = 24;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
+    const yCentered = y + Math.ceil(h / 2);
+
     let renderX = x + theme.cellHorizontalPadding;
 
     const tileMap = getAndCacheDrilldownBorder(theme.bgCell, theme.drilldownBorder);
@@ -738,9 +744,9 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
             const rw = Math.floor(rectInfo.width);
             ctx.imageSmoothingEnabled = false;
             const maxSideWidth = Math.min(17, rw / 2 + 5);
-            ctx.drawImage(el, 0, 0, sideWidth, height, rx - 5, y + h / 2 - 17, maxSideWidth, 34);
+            ctx.drawImage(el, 0, 0, sideWidth, height, rx - 5, yCentered - 17, maxSideWidth, 34);
             if (rectInfo.width > 24)
-                ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + 12, y + h / 2 - 17, rw - 24, 34);
+                ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + 12, yCentered - 17, rw - 24, 34);
             ctx.drawImage(
                 el,
                 width - sideWidth,
@@ -748,7 +754,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
                 sideWidth,
                 height,
                 rx + rw - (maxSideWidth - 5),
-                y + h / 2 - 17,
+                yCentered - 17,
                 maxSideWidth,
                 34
             );
@@ -781,10 +787,10 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
                     srcHeight = srcWidth;
                 }
                 ctx.beginPath();
-                roundedRect(ctx, drawX, y + h / 2 - imgSize / 2, imgSize, imgSize, 3);
+                roundedRect(ctx, drawX, yCentered - imgSize / 2, imgSize, imgSize, 3);
                 ctx.save();
                 ctx.clip();
-                ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, drawX, y + h / 2 - imgSize / 2, imgSize, imgSize);
+                ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, drawX, yCentered - imgSize / 2, imgSize, imgSize);
                 ctx.restore();
 
                 drawX += imgSize + 4;
@@ -793,7 +799,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
 
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.fillText(d.text, drawX, y + h / 2);
+        ctx.fillText(d.text, drawX, yCentered);
     });
 }
 
