@@ -328,13 +328,14 @@ export function drawTextCell(args: BaseDrawArgs, data: string, contentAlign?: Ba
             ctx.textAlign = contentAlign;
             changed = true;
         }
+        const yCentered = y + Math.ceil(h / 2);
 
         if (contentAlign === "right") {
-            ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2);
+            ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), yCentered);
         } else if (contentAlign === "center") {
-            ctx.fillText(data, x + w / 2, y + h / 2);
+            ctx.fillText(data, x + w / 2, yCentered);
         } else {
-            ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+            ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, yCentered);
         }
 
         if (changed) {
