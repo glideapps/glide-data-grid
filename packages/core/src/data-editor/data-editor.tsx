@@ -2171,7 +2171,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const onPasteInternal = React.useCallback(
-        async (e?: React.ClipboardEvent) => {
+        async (e?: ClipboardEvent) => {
             if (!keybindings.paste) return;
             function pasteToCell(inner: InnerGridCell, target: Item, toPaste: string): EditListItem | undefined {
                 if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
@@ -2311,7 +2311,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         data = unquote(text);
                     }
 
-                    if (onPaste === false || (typeof onPaste === "function" && onPaste?.(target, data) !== true)) {
+                    if (
+                        onPaste === false ||
+                        (typeof onPaste === "function" &&
+                            onPaste?.([target[0] - rowMarkerOffset, target[1]], data) !== true)
+                    ) {
                         return;
                     }
 
@@ -2356,7 +2360,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
-    // useEventListener("paste", onPasteInternal, window, false, true);
+    useEventListener("paste", onPasteInternal, window, false, true);
 
     // While this function is async, we deeply prefer not to await if we don't have to. This will lead to unpacking
     // promises in rather awkward ways when possible to avoid awaiting. We have to use fallback copy mechanisms when
@@ -2670,7 +2674,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         <ThemeProvider theme={mergedTheme}>
             <DataEditorContainer
                 className={className}
-                onPasteCapture={onPasteInternal}
                 width={width ?? idealWidth}
                 height={height ?? idealHeight}
                 onContextMenu={onContextMenu}>
