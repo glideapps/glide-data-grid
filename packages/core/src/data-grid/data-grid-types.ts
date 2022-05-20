@@ -263,15 +263,15 @@ export function isInnerOnlyCell(cell: InnerGridCell): cell is InnerOnlyGridCell 
 }
 
 export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
-    if (!isEditableGridCell(cell) || cell.kind === GridCellKind.Image || cell.kind === GridCellKind.Boolean)
-        return false;
+    if (!isEditableGridCell(cell) || cell.kind === GridCellKind.Image) return false;
 
     if (
         cell.kind === GridCellKind.Text ||
         cell.kind === GridCellKind.Number ||
         cell.kind === GridCellKind.Markdown ||
         cell.kind === GridCellKind.Uri ||
-        cell.kind === GridCellKind.Custom
+        cell.kind === GridCellKind.Custom ||
+        cell.kind === GridCellKind.Boolean
     ) {
         return cell.readonly !== true;
     }
