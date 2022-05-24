@@ -1,4 +1,4 @@
-import { CustomCell, ProvideEditorCallback, CustomCellRenderer } from "@glideapps/glide-data-grid";
+import { CustomCell, ProvideEditorCallback, CustomCellRenderer, getMiddleCenterBias } from "@glideapps/glide-data-grid";
 import styled from "styled-components";
 import * as React from "react";
 import Select, { MenuProps, components } from "react-select";
@@ -81,7 +81,11 @@ const renderer: CustomCellRenderer<DropdownCell> = {
         const { ctx, theme, rect } = args;
         const { value } = cell.data;
         ctx.fillStyle = theme.textDark;
-        ctx.fillText(value, rect.x + theme.cellHorizontalPadding, rect.y + rect.height / 2);
+        ctx.fillText(
+            value,
+            rect.x + theme.cellHorizontalPadding,
+            rect.y + rect.height / 2 + getMiddleCenterBias(ctx, theme)
+        );
 
         return true;
     },

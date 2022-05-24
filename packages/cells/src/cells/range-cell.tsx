@@ -1,4 +1,4 @@
-import { CustomCell, measureTextCached, CustomCellRenderer } from "@glideapps/glide-data-grid";
+import { CustomCell, measureTextCached, CustomCellRenderer, getMiddleCenterBias } from "@glideapps/glide-data-grid";
 import * as React from "react";
 import { roundedRect } from "../draw-fns";
 
@@ -78,7 +78,11 @@ const renderer: CustomCellRenderer<RangeCell> = {
         if (label !== undefined) {
             ctx.textAlign = "right";
             ctx.fillStyle = theme.textDark;
-            ctx.fillText(label, rect.x + rect.width - theme.cellHorizontalPadding, yMid);
+            ctx.fillText(
+                label,
+                rect.x + rect.width - theme.cellHorizontalPadding,
+                yMid + getMiddleCenterBias(ctx, `12px ${theme.fontFamily}`)
+            );
         }
 
         ctx.restore();

@@ -1,6 +1,6 @@
 import type { ArticleCell } from "./article-cell-types";
 import * as React from "react";
-import { CustomCellRenderer } from "@glideapps/glide-data-grid";
+import { CustomCellRenderer, getMiddleCenterBias } from "@glideapps/glide-data-grid";
 
 const ArticleCellEditor = React.lazy(async () => await import("./article-cell-editor"));
 
@@ -22,7 +22,11 @@ const renderer: CustomCellRenderer<ArticleCell> = {
         }
 
         ctx.fillStyle = theme.textDark;
-        ctx.fillText(data, rect.x + theme.cellHorizontalPadding, rect.y + rect.height / 2);
+        ctx.fillText(
+            data,
+            rect.x + theme.cellHorizontalPadding,
+            rect.y + rect.height / 2 + getMiddleCenterBias(ctx, theme)
+        );
 
         return true;
     },
