@@ -243,8 +243,7 @@ async function clearCacheOnLoad() {
 void clearCacheOnLoad();
 
 function makeCacheKey(s: string, ctx: CanvasRenderingContext2D, baseline: "alphabetic" | "middle", font?: string) {
-    if (baseline === "alphabetic") return `${s}_${font ?? ctx.font}`;
-    return `${s}_${font ?? ctx.font}_alignmiddle`;
+    return `${s}_${font ?? ctx.font}_${baseline}`;
 }
 
 export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font?: string): TextMetrics {
@@ -268,35 +267,40 @@ export function getMiddleCenterBias(ctx: CanvasRenderingContext2D, font: string 
     if (typeof font !== "string") {
         font = `${font.baseFontStyle} ${font.fontFamily}`;
     }
+    return getMiddleCenterBiasInner(ctx, font);
+}
+
+function loadMetric(ctx: CanvasRenderingContext2D, baseline: "alphabetic" | "middle") {
     const sample = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const alphabeticKey = makeCacheKey("ABCDEFGHIJKLMNOPQRSTUVWXYZ", ctx, "alphabetic", font);
-    let alphabeticMetrics = metricsCache[alphabeticKey];
-    const middleKey = makeCacheKey("ABCDEFGHIJKLMNOPQRSTUVWXYZ", ctx, "middle", font);
-    let middleMetrics = metricsCache[middleKey];
-    let saved = false;
 
-    if (alphabeticMetrics === undefined) {
-        ctx.save();
-        ctx.textBaseline = "alphabetic";
-        saved = true;
-        alphabeticMetrics = ctx.measureText(sample);
-        metricsCache[alphabeticKey] = alphabeticMetrics;
-    }
+    ctx.save();
+    ctx.textBaseline = baseline;
+    const result = ctx.measureText(sample);
 
-    if (middleMetrics === undefined) {
-        if (!saved) ctx.save();
-        ctx.textBaseline = "middle";
-        saved = true;
-        middleMetrics = ctx.measureText(sample);
-        metricsCache[middleKey] = middleMetrics;
-    }
+    ctx.restore();
 
-    if (saved) ctx.restore();
+    return result;
+}
 
-    return (
+const biasCache: { key: string; val: number }[] = [];
+
+export function getMiddleCenterBiasInner(ctx: CanvasRenderingContext2D, font: string): number {
+    const r = biasCache.find(x => x.key === font);
+    if (r !== undefined) return r.val;
+
+    const alphabeticMetrics = loadMetric(ctx, "alphabetic");
+    const middleMetrics = loadMetric(ctx, "middle");
+
+    const bias =
         -(middleMetrics.actualBoundingBoxDescent - alphabeticMetrics.actualBoundingBoxDescent) +
-        alphabeticMetrics.actualBoundingBoxAscent / 2
-    );
+        alphabeticMetrics.actualBoundingBoxAscent / 2;
+
+    biasCache.push({
+        key: font,
+        val: bias,
+    });
+
+    return bias;
 }
 
 export function drawWithLastUpdate(
@@ -423,7 +427,7 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
     }
 
     ctx.fillStyle = theme.textMedium;
-    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + h / 2 + getMiddleCenterBias(ctx, theme));
     ctx.beginPath();
 }
 
@@ -536,7 +540,7 @@ export function drawMarkerRowCell(
             ctx.globalAlpha = 1 - hoverAmount;
         }
         ctx.fillStyle = theme.textLight;
-        ctx.fillText(text, start, y + height / 2);
+        ctx.fillText(text, start, y + height / 2 + getMiddleCenterBias(ctx, `9px ${theme.fontFamily}`));
         if (hoverAmount !== 0) {
             ctx.globalAlpha = 1;
         }
@@ -664,7 +668,7 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
     renderBoxes.forEach((rectInfo, i) => {
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.fillText(data[i], rectInfo.x + bubblePad, y + h / 2);
+        ctx.fillText(data[i], rectInfo.x + bubblePad, y + h / 2 + getMiddleCenterBias(ctx, theme));
     });
 }
 
@@ -833,7 +837,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
 
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.fillText(d.text, drawX, y + h / 2);
+        ctx.fillText(d.text, drawX, y + h / 2 + getMiddleCenterBias(ctx, theme));
     });
 }
 
