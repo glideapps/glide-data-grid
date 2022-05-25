@@ -23,7 +23,7 @@ export type CustomCellRenderer<T extends CustomCell> = {
     isMatch: (cell: CustomCell) => cell is T;
     draw: (args: DrawArgs, cell: T) => boolean;
     provideEditor: ProvideEditorCallback<T>;
-    onPaste: (val: string, cellData: T["data"]) => T["data"];
+    onPaste?: (val: string, cellData: T["data"]) => T["data"];
 };
 
 export function useCustomCells(
@@ -68,9 +68,12 @@ export function useCustomCells(
 
             for (const c of cells) {
                 if (c.isMatch(cell)) {
+                    if (c.onPaste === undefined) {
+                        return undefined;
+                    }
                     return {
                         ...cell,
-                        data: c.onPaste?.(val, cell.data),
+                        data: c.onPaste(val, cell.data),
                     };
                 }
             }
