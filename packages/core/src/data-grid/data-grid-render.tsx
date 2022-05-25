@@ -126,6 +126,7 @@ export function drawCell(
         imageLoader,
         spriteManager,
     };
+    let forceAnim = false;
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
         const drawn = isInnerOnlyCell(cell)
             ? false
@@ -141,6 +142,9 @@ export function drawCell(
                   hoverY,
                   highlighted,
                   imageLoader,
+                  requestAnimationFrame: () => {
+                      forceAnim = true;
+                  },
               }) === true;
         if (!drawn && cell.kind !== GridCellKind.Custom) {
             const r = CellRenderers[cell.kind];
@@ -158,7 +162,7 @@ export function drawCell(
             };
         }
     });
-    if (needsAnim) enqueue?.([col, row]);
+    if (needsAnim || forceAnim) enqueue?.([col, row]);
     return result;
 }
 

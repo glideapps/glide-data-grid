@@ -113,6 +113,7 @@ export type DrawCustomCellCallback = (args: {
     hoverY: number | undefined;
     highlighted: boolean;
     imageLoader: ImageWindowLoader;
+    requestAnimationFrame: () => void;
 }) => boolean;
 
 export type DrawHeaderCallback = (args: {

@@ -17,6 +17,7 @@ export interface DrawArgs {
     row: number;
     highlighted: boolean;
     imageLoader: ImageWindowLoader;
+    requestAnimationFrame: () => void;
 }
 
 export type CustomCellRenderer<T extends CustomCell> = {

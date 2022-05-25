@@ -12,6 +12,7 @@ import { UserProfileCell } from "./cells/user-profile-cell";
 import type { DropdownCell } from "./cells/dropdown-cell";
 import { ArticleCell } from "./cells/article-cell-types";
 import { RangeCell } from "./cells/range-cell";
+import { SpinnerCell } from "./cells/spinner-cell";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -294,6 +295,18 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
+                    } else if (col === 8) {
+                        num = row + 1;
+                        rand();
+                        const d: SpinnerCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "spinner-cell",
+                            },
+                        };
+                        return d;
                     }
                     throw new Error("Fail");
                 }}
@@ -328,6 +341,10 @@ export const CustomCells: React.VFC = () => {
                     },
                     {
                         title: "Article",
+                        width: 150,
+                    },
+                    {
+                        title: "Spinner",
                         width: 150,
                     },
                 ]}
