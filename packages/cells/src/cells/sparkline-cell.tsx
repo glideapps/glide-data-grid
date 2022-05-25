@@ -123,6 +123,7 @@ const renderer: CustomCellRenderer<SparklineCell> = {
         return true;
     },
     provideEditor: () => undefined,
+    onPaste: (_v, d) => d,
 };
 
 export default renderer;

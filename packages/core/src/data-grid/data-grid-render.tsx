@@ -149,14 +149,12 @@ export function drawCell(
             }
             const partialPrepResult = r.renderPrep?.(args, lastPrep);
             r.render(args);
-            if (partialPrepResult !== undefined) {
-                partialPrepResult.renderer = r;
-                result = partialPrepResult as PrepResult;
-            } else {
-                result = {
-                    renderer: r,
-                };
-            }
+            result = {
+                deprep: partialPrepResult?.deprep,
+                fillStyle: partialPrepResult?.fillStyle,
+                font: partialPrepResult?.font,
+                renderer: r,
+            };
         }
     });
     if (needsAnim) enqueue?.([col, row]);

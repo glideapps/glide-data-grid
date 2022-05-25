@@ -233,6 +233,7 @@ export interface DataEditorProps extends Props {
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
 
     readonly provideEditor?: ProvideEditorCallback<GridCell>;
+    readonly coercePasteValue?: (val: string, cell: GridCell) => GridCell | undefined;
 
     readonly onSelectionCleared?: () => void;
 
@@ -337,6 +338,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onCellClicked,
         onCellActivated,
         onFinishedEditing,
+        coercePasteValue,
         onHeaderClicked,
         spanRangeBehavior = "default",
         onGroupHeaderClicked,
@@ -2175,6 +2177,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (!keybindings.paste) return;
             function pasteToCell(inner: InnerGridCell, target: Item, toPaste: string): EditListItem | undefined {
                 if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
+                    const coerced = coercePasteValue?.(toPaste, inner);
+                    if (coerced !== undefined && isEditableGridCell(coerced)) {
+                        if (process.env.NODE_ENV !== "production") {
+                            if (coerced.kind !== inner.kind) {
+                                // eslint-disable-next-line no-console
+                                console.warn("Coercion should not change cell kind.");
+                            }
+                        }
+                        return {
+                            location: target,
+                            value: coerced,
+                        };
+                    }
                     switch (inner.kind) {
                         case GridCellKind.Text:
                         case GridCellKind.Markdown:
@@ -2349,6 +2364,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
         },
         [
+            coercePasteValue,
             getMangledCellContent,
             gridSelection,
             keybindings.paste,
