@@ -242,8 +242,12 @@ async function clearCacheOnLoad() {
 
 void clearCacheOnLoad();
 
+function makeCacheKey(s: string, ctx: CanvasRenderingContext2D, baseline: "alphabetic" | "middle", font?: string) {
+    return `${s}_${font ?? ctx.font}_${baseline}`;
+}
+
 export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font?: string): TextMetrics {
-    const key = `${s}_${font ?? ctx.font}`;
+    const key = makeCacheKey(s, ctx, "middle", font);
     let metrics = metricsCache[key];
     if (metrics === undefined) {
         metrics = ctx.measureText(s);
@@ -257,6 +261,46 @@ export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font
     }
 
     return metrics;
+}
+
+export function getMiddleCenterBias(ctx: CanvasRenderingContext2D, font: string | Theme): number {
+    if (typeof font !== "string") {
+        font = `${font.baseFontStyle} ${font.fontFamily}`;
+    }
+    return getMiddleCenterBiasInner(ctx, font);
+}
+
+function loadMetric(ctx: CanvasRenderingContext2D, baseline: "alphabetic" | "middle") {
+    const sample = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    ctx.save();
+    ctx.textBaseline = baseline;
+    const result = ctx.measureText(sample);
+
+    ctx.restore();
+
+    return result;
+}
+
+const biasCache: { key: string; val: number }[] = [];
+
+function getMiddleCenterBiasInner(ctx: CanvasRenderingContext2D, font: string): number {
+    const r = biasCache.find(x => x.key === font);
+    if (r !== undefined) return r.val;
+
+    const alphabeticMetrics = loadMetric(ctx, "alphabetic");
+    const middleMetrics = loadMetric(ctx, "middle");
+
+    const bias =
+        -(middleMetrics.actualBoundingBoxDescent - alphabeticMetrics.actualBoundingBoxDescent) +
+        alphabeticMetrics.actualBoundingBoxAscent / 2;
+
+    biasCache.push({
+        key: font,
+        val: bias,
+    });
+
+    return bias;
 }
 
 export function drawWithLastUpdate(
@@ -329,12 +373,13 @@ export function drawTextCell(args: BaseDrawArgs, data: string, contentAlign?: Ba
             changed = true;
         }
 
+        const bias = getMiddleCenterBias(ctx, theme);
         if (contentAlign === "right") {
-            ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2);
+            ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2 + bias);
         } else if (contentAlign === "center") {
-            ctx.fillText(data, x + w / 2, y + h / 2);
+            ctx.fillText(data, x + w / 2, y + h / 2 + bias);
         } else {
-            ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+            ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2 + bias);
         }
 
         if (changed) {
@@ -382,7 +427,7 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
     }
 
     ctx.fillStyle = theme.textMedium;
-    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + h / 2 + getMiddleCenterBias(ctx, theme));
     ctx.beginPath();
 }
 
@@ -495,7 +540,7 @@ export function drawMarkerRowCell(
             ctx.globalAlpha = 1 - hoverAmount;
         }
         ctx.fillStyle = theme.textLight;
-        ctx.fillText(text, start, y + height / 2);
+        ctx.fillText(text, start, y + height / 2 + getMiddleCenterBias(ctx, `9px ${theme.fontFamily}`));
         if (hoverAmount !== 0) {
             ctx.globalAlpha = 1;
         }
@@ -623,7 +668,7 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
     renderBoxes.forEach((rectInfo, i) => {
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.fillText(data[i], rectInfo.x + bubblePad, y + h / 2);
+        ctx.fillText(data[i], rectInfo.x + bubblePad, y + h / 2 + getMiddleCenterBias(ctx, theme));
     });
 }
 
@@ -792,7 +837,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
 
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.fillText(d.text, drawX, y + h / 2);
+        ctx.fillText(d.text, drawX, y + h / 2 + getMiddleCenterBias(ctx, theme));
     });
 }
 

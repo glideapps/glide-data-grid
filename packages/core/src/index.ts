@@ -12,7 +12,7 @@ export { default as ImageOverlayEditor } from "./data-grid-overlay-editor/privat
 export { default as MarkdownDiv } from "./markdown-div/markdown-div";
 export { default as TextCellEntry } from "./growing-entry/growing-entry";
 export { parseToRgba } from "./data-grid/color-parser";
-export { measureTextCached } from "./data-grid/data-grid-lib";
+export { measureTextCached, getMiddleCenterBias } from "./data-grid/data-grid-lib";
 export { getDataEditorTheme as getDefaultTheme } from "./common/styles";
 export { useColumnSizer } from "./data-editor/use-column-sizer";
 export { useCustomCells } from "./data-editor/use-custom-cells";
