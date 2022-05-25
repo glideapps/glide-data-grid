@@ -101,6 +101,10 @@ const renderer: CustomCellRenderer<DropdownCell> = {
             },
         }),
     }),
+    onPaste: (v, d) => ({
+        ...d,
+        value: d.allowedValues.includes(v) ? v : d.value,
+    }),
 };
 
 export default renderer;

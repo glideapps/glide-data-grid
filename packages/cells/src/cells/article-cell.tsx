@@ -49,6 +49,10 @@ const renderer: CustomCellRenderer<ArticleCell> = {
         },
         disablePadding: true,
     }),
+    onPaste: (val, d) => ({
+        ...d,
+        markdown: val,
+    }),
 };
 
 export default renderer;

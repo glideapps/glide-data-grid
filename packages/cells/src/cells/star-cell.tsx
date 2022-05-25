@@ -115,6 +115,13 @@ const renderer: CustomCellRenderer<StarCell> = {
             </EditorWrap>
         );
     },
+    onPaste: (val, d) => {
+        const num = Number.parseInt(val);
+        return {
+            ...d,
+            rating: Number.isNaN(num) ? 0 : num,
+        };
+    },
 };
 
 export default renderer;

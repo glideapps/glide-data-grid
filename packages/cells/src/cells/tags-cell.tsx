@@ -166,6 +166,17 @@ const renderer: CustomCellRenderer<TagsCell> = {
             );
         };
     },
+    onPaste: (v, d) => ({
+        ...d,
+        tags: d.possibleTags
+            .map(x => x.tag)
+            .filter(x =>
+                v
+                    .split(",")
+                    .map(s => s.trim())
+                    .includes(x)
+            ),
+    }),
 };
 
 export default renderer;

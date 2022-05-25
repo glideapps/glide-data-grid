@@ -125,6 +125,14 @@ const renderer: CustomCellRenderer<RangeCell> = {
             );
         };
     },
+    onPaste: (v, d) => {
+        let num = Number.parseFloat(v);
+        num = Number.isNaN(num) ? d.value : Math.max(d.min, Math.min(d.max, num));
+        return {
+            ...d,
+            value: num,
+        };
+    },
 };
 
 export default renderer;
