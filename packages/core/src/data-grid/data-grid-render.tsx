@@ -25,6 +25,7 @@ import {
     cellIsSelected,
     cellIsInRange,
     computeBounds,
+    getMiddleCenterBias,
 } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
@@ -518,7 +519,11 @@ function drawGroups(
                 );
                 drawX += 26;
             }
-            ctx.fillText(group.name, drawX + xPad, groupHeaderHeight / 2 + 1);
+            ctx.fillText(
+                group.name,
+                drawX + xPad,
+                groupHeaderHeight / 2 + getMiddleCenterBias(ctx, `${theme.headerFontStyle} ${theme.fontFamily}`)
+            );
 
             if (group.actions !== undefined && isHovered) {
                 const actionBoxes = getActionBoundsForGroup({ x, y, width: w, height: h }, group.actions);
@@ -682,7 +687,11 @@ function drawHeader(
     } else {
         ctx.fillStyle = fillStyle;
     }
-    ctx.fillText(c.title, drawX, y + height / 2 + 1);
+    ctx.fillText(
+        c.title,
+        drawX,
+        y + height / 2 + getMiddleCenterBias(ctx, `${theme.headerFontStyle} ${theme.fontFamily}`)
+    );
 
     if (shouldDrawMenu && c.hasMenu === true) {
         ctx.beginPath();
