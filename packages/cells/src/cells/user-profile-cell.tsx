@@ -83,6 +83,10 @@ const renderer: CustomCellRenderer<UserProfileCell> = {
             />
         );
     },
+    onPaste: (v, d) => ({
+        ...d,
+        name: v,
+    }),
 };
 
 export default renderer;
