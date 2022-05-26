@@ -285,8 +285,9 @@ function loadMetric(ctx: CanvasRenderingContext2D, baseline: "alphabetic" | "mid
 const biasCache: { key: string; val: number }[] = [];
 
 function getMiddleCenterBiasInner(ctx: CanvasRenderingContext2D, font: string): number {
-    const r = biasCache.find(x => x.key === font);
-    if (r !== undefined) return r.val;
+    for (const x of biasCache) {
+        if (x.key === font) return x.val;
+    }
 
     const alphabeticMetrics = loadMetric(ctx, "alphabetic");
     const middleMetrics = loadMetric(ctx, "middle");
