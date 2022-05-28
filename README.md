@@ -73,12 +73,14 @@ function getData([col, row]: Item): GridCell {
             kind: GridCellKind.Text,
             data: person.firstName,
             allowOverlay: false,
+            displayData: person.firstName
         };
     } else if (col === 1) {
         return {
             kind: GridCellKind.Text,
             data: person.lastName,
             allowOverlay: false,
+            displayData: person.lastName
         };
     } else {
         throw new Error();

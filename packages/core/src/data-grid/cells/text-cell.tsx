@@ -12,7 +12,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
     needsHoverPosition: false,
     renderPrep: prepTextCell,
     useLabel: true,
-    render: a => drawTextCell(a, a.cell.displayData),
+    render: a => drawTextCell(a, a.cell.displayData, a.cell.contentAlign),
     measure: (ctx, cell) => ctx.measureText(cell.displayData).width + 16,
     onDelete: c => ({
         ...c,
@@ -26,6 +26,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
                 autoFocus={value.readonly !== true}
                 disabled={value.readonly === true}
                 onKeyDown={onKeyDown}
+                altNewline={true}
                 value={value.data}
                 onChange={e =>
                     onChange({

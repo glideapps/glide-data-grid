@@ -1,8 +1,19 @@
 import { Theme } from "../common/styles";
-import { DrilldownCellData, Item, GridSelection, InnerGridCell, SizedGridColumn, Rectangle } from "./data-grid-types";
+import {
+    DrilldownCellData,
+    Item,
+    GridSelection,
+    InnerGridCell,
+    SizedGridColumn,
+    Rectangle,
+    BaseGridCell,
+    BooleanEmpty,
+    BooleanIndeterminate,
+} from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
+import { assertNever } from "../common/support";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -231,8 +242,12 @@ async function clearCacheOnLoad() {
 
 void clearCacheOnLoad();
 
+function makeCacheKey(s: string, ctx: CanvasRenderingContext2D, baseline: "alphabetic" | "middle", font?: string) {
+    return `${s}_${font ?? ctx.font}_${baseline}`;
+}
+
 export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font?: string): TextMetrics {
-    const key = `${s}_${font ?? ctx.font}`;
+    const key = makeCacheKey(s, ctx, "middle", font);
     let metrics = metricsCache[key];
     if (metrics === undefined) {
         metrics = ctx.measureText(s);
@@ -246,6 +261,47 @@ export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font
     }
 
     return metrics;
+}
+
+export function getMiddleCenterBias(ctx: CanvasRenderingContext2D, font: string | Theme): number {
+    if (typeof font !== "string") {
+        font = `${font.baseFontStyle} ${font.fontFamily}`;
+    }
+    return getMiddleCenterBiasInner(ctx, font);
+}
+
+function loadMetric(ctx: CanvasRenderingContext2D, baseline: "alphabetic" | "middle") {
+    const sample = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    ctx.save();
+    ctx.textBaseline = baseline;
+    const result = ctx.measureText(sample);
+
+    ctx.restore();
+
+    return result;
+}
+
+const biasCache: { key: string; val: number }[] = [];
+
+function getMiddleCenterBiasInner(ctx: CanvasRenderingContext2D, font: string): number {
+    for (const x of biasCache) {
+        if (x.key === font) return x.val;
+    }
+
+    const alphabeticMetrics = loadMetric(ctx, "alphabetic");
+    const middleMetrics = loadMetric(ctx, "middle");
+
+    const bias =
+        -(middleMetrics.actualBoundingBoxDescent - alphabeticMetrics.actualBoundingBoxDescent) +
+        alphabeticMetrics.actualBoundingBoxAscent / 2;
+
+    biasCache.push({
+        key: font,
+        val: bias,
+    });
+
+    return bias;
 }
 
 export function drawWithLastUpdate(
@@ -294,7 +350,7 @@ export function prepTextCell(
     return result;
 }
 
-export function drawTextCell(args: BaseDrawArgs, data: string) {
+export function drawTextCell(args: BaseDrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
     const { ctx, x, y, w, h, theme } = args;
     if (data.includes("\n")) {
         // new lines are rare and split is relatively expensive compared to the search
@@ -307,13 +363,29 @@ export function drawTextCell(args: BaseDrawArgs, data: string) {
     }
 
     if (data.length > 0) {
-        const dir = direction(data);
+        let changed = false;
+        if (contentAlign === undefined && direction(data) === "rtl") {
+            // Use right alignment as default for RTL text
+            ctx.textAlign = "right";
+            changed = true;
+        } else if (contentAlign !== undefined && contentAlign !== "left") {
+            // Since default is start (=left), only apply if alignment is center or right
+            ctx.textAlign = contentAlign;
+            changed = true;
+        }
 
-        if (dir === "rtl") {
-            const textWidth = measureTextCached(data, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`).width;
-            ctx.fillText(data, x + w - theme.cellHorizontalPadding - textWidth + 0.5, y + h / 2);
+        const bias = getMiddleCenterBias(ctx, theme);
+        if (contentAlign === "right") {
+            ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2 + bias);
+        } else if (contentAlign === "center") {
+            ctx.fillText(data, x + w / 2, y + h / 2 + bias);
         } else {
-            ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+            ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2 + bias);
+        }
+
+        if (changed) {
+            // Reset alignment to default
+            ctx.textAlign = "start";
         }
     }
 }
@@ -356,14 +428,14 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
     }
 
     ctx.fillStyle = theme.textMedium;
-    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + h / 2);
+    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + h / 2 + getMiddleCenterBias(ctx, theme));
     ctx.beginPath();
 }
 
 function drawCheckbox(
     ctx: CanvasRenderingContext2D,
     theme: Theme,
-    checked: boolean,
+    checked: boolean | BooleanEmpty | BooleanIndeterminate,
     x: number,
     y: number,
     width: number,
@@ -377,30 +449,57 @@ function drawCheckbox(
 
     const hovered = Math.abs(hoverX - width / 2) < 10 && Math.abs(hoverY - height / 2) < 10;
 
-    if (checked) {
-        ctx.beginPath();
-        roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 4);
+    switch (checked) {
+        case true: {
+            ctx.beginPath();
+            roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 4);
 
-        ctx.fillStyle = highlighted ? theme.accentColor : theme.textLight;
-        ctx.fill();
+            ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
+            ctx.fill();
 
-        ctx.beginPath();
-        ctx.moveTo(centerX - 8 + 3.65005, centerY - 8 + 7.84995);
-        ctx.lineTo(centerX - 8 + 6.37587, centerY - 8 + 10.7304);
-        ctx.lineTo(centerX - 8 + 11.9999, centerY - 8 + 4.74995);
+            ctx.beginPath();
+            ctx.moveTo(centerX - 8 + 3.65005, centerY - 8 + 7.84995);
+            ctx.lineTo(centerX - 8 + 6.37587, centerY - 8 + 10.7304);
+            ctx.lineTo(centerX - 8 + 11.9999, centerY - 8 + 4.74995);
 
-        ctx.strokeStyle = theme.accentFg;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-        ctx.lineWidth = 1.9;
-        ctx.stroke();
-    } else {
-        ctx.beginPath();
-        roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
+            ctx.strokeStyle = theme.bgCell;
+            ctx.lineJoin = "round";
+            ctx.lineCap = "round";
+            ctx.lineWidth = 1.9;
+            ctx.stroke();
+            break;
+        }
 
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = hovered ? theme.textMedium : theme.textLight;
-        ctx.stroke();
+        case BooleanEmpty:
+        case false: {
+            ctx.beginPath();
+            roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
+
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = hovered ? theme.textDark : theme.textMedium;
+            ctx.stroke();
+            break;
+        }
+
+        case BooleanIndeterminate: {
+            ctx.beginPath();
+            roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
+
+            ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(centerX - 4, centerY);
+            ctx.lineTo(centerX + 4, centerY);
+            ctx.strokeStyle = theme.bgCell;
+            ctx.lineCap = "round";
+            ctx.lineWidth = 1.9;
+            ctx.stroke();
+            break;
+        }
+
+        default:
+            assertNever(checked);
     }
 }
 
@@ -435,14 +534,14 @@ export function drawMarkerRowCell(
         ctx.globalAlpha = 1;
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
-        const text = (index).toString();
+        const text = index.toString();
 
         const start = x + width / 2;
         if (markerKind === "both" && hoverAmount !== 0) {
             ctx.globalAlpha = 1 - hoverAmount;
         }
         ctx.fillStyle = theme.textLight;
-        ctx.fillText(text, start, y + height / 2);
+        ctx.fillText(text, start, y + height / 2 + getMiddleCenterBias(ctx, `9px ${theme.fontFamily}`));
         if (hoverAmount !== 0) {
             ctx.globalAlpha = 1;
         }
@@ -467,7 +566,6 @@ export function drawProtectedCell(args: BaseDrawArgs) {
     const q = Math.sin(degreesToRadians(30)) * radius;
 
     for (let i = 0; i < 12; i++) {
-        // ctx.arc(xStart, center, radius, 0, Math.PI * 2);
         ctx.moveTo(xStart, center - radius);
         ctx.lineTo(xStart, center + radius);
 
@@ -510,11 +608,23 @@ function roundedRect(
     ctx.arcTo(x, y, x + radius.tl, y, radius.tl);
 }
 
-export function drawBoolean(args: BaseDrawArgs, data: boolean, canEdit: boolean) {
+export function drawBoolean(args: BaseDrawArgs, data: boolean | BooleanEmpty | BooleanIndeterminate, canEdit: boolean) {
+    if (!canEdit && data === BooleanEmpty) {
+        return;
+    }
+
     const { ctx, hoverAmount, theme, x, y, w, h, highlighted, hoverX, hoverY } = args;
+
     const hoverEffect = 0.35;
 
-    ctx.globalAlpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
+    let alpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
+    if (data === BooleanEmpty) {
+        alpha *= hoverAmount;
+    }
+    if (alpha === 0) {
+        return;
+    }
+    ctx.globalAlpha = alpha;
 
     drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY);
 
@@ -559,7 +669,7 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
     renderBoxes.forEach((rectInfo, i) => {
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.fillText(data[i], rectInfo.x + bubblePad, y + h / 2);
+        ctx.fillText(data[i], rectInfo.x + bubblePad, y + h / 2 + getMiddleCenterBias(ctx, theme));
     });
 }
 
@@ -605,7 +715,7 @@ function getAndCacheDrilldownBorder(
     canvas.width = innerWidth;
     canvas.height = innerHeight;
 
-    ctx.scale(dpr, dpr); // dummy mode just always go for hiDPI to start, fixme
+    ctx.scale(dpr, dpr);
 
     drilldownCache[key] = canvas;
 
@@ -728,7 +838,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
 
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
-        ctx.fillText(d.text, drawX, y + h / 2);
+        ctx.fillText(d.text, drawX, y + h / 2 + getMiddleCenterBias(ctx, theme));
     });
 }
 
@@ -785,7 +895,7 @@ export function roundedPoly(ctx: CanvasRenderingContext2D, points: Point[], radi
             ang: Math.atan2(vny, vnx),
         };
     };
-    let radius = radiusAll;
+    let radius: number;
     // const v1: Vector = {} as any;
     // const v2: Vector = {} as any;
     const len = points.length;

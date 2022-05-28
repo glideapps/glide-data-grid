@@ -35,6 +35,12 @@ export interface HeaderClickedEventArgs extends GridMouseHeaderEventArgs, Preven
 
 export interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, PreventableEvent {}
 
+export const BooleanEmpty = null;
+export const BooleanIndeterminate = undefined;
+
+export type BooleanEmpty = null;
+export type BooleanIndeterminate = undefined;
+
 interface PositionableMouseEventArgs {
     readonly localEventX: number;
     readonly localEventY: number;
@@ -107,6 +113,7 @@ export type DrawCustomCellCallback = (args: {
     hoverY: number | undefined;
     highlighted: boolean;
     imageLoader: ImageWindowLoader;
+    requestAnimationFrame: () => void;
 }) => boolean;
 
 export type DrawHeaderCallback = (args: {
@@ -184,6 +191,8 @@ interface BaseGridColumn {
         readonly hint?: string;
         readonly addIcon?: string;
         readonly targetColumn?: number | GridColumn;
+        readonly themeOverride?: Partial<Theme>;
+        readonly disabled?: boolean;
     };
 }
 
@@ -211,7 +220,7 @@ export type GridColumn = SizedGridColumn | AutoGridColumn;
 
 // export type SizedGridColumn = Omit<GridColumn, "width"> & { readonly width: number };
 
-export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell | CustomCell;
+export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell | CustomCell | BooleanCell;
 
 export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell | UriCell | NumberCell | CustomCell;
 
@@ -255,15 +264,15 @@ export function isInnerOnlyCell(cell: InnerGridCell): cell is InnerOnlyGridCell 
 }
 
 export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
-    if (!isEditableGridCell(cell) || cell.kind === GridCellKind.Image || cell.kind === GridCellKind.Boolean)
-        return false;
+    if (!isEditableGridCell(cell) || cell.kind === GridCellKind.Image) return false;
 
     if (
         cell.kind === GridCellKind.Text ||
         cell.kind === GridCellKind.Number ||
         cell.kind === GridCellKind.Markdown ||
         cell.kind === GridCellKind.Uri ||
-        cell.kind === GridCellKind.Custom
+        cell.kind === GridCellKind.Custom ||
+        cell.kind === GridCellKind.Boolean
     ) {
         return cell.readonly !== true;
     }
@@ -291,12 +300,13 @@ export interface Rectangle {
     height: number;
 }
 
-interface BaseGridCell {
+export interface BaseGridCell {
     readonly allowOverlay: boolean;
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
     readonly span?: Item;
+    readonly contentAlign?: "left" | "right" | "center";
 }
 
 export interface LoadingCell extends BaseGridCell {
@@ -387,10 +397,26 @@ export interface DrilldownCell extends BaseGridCell {
 
 export interface BooleanCell extends BaseGridCell {
     readonly kind: GridCellKind.Boolean;
-    readonly data: boolean;
-    readonly showUnchecked: boolean;
-    readonly allowEdit: boolean;
+    readonly data: boolean | BooleanEmpty | BooleanIndeterminate;
+    /**
+     * @deprecated Does nothing.
+     */
+    readonly showUnchecked?: boolean;
+    /**
+     * @deprecated Prefer readonly.
+     */
+    readonly allowEdit?: boolean;
+    readonly readonly?: boolean;
     readonly allowOverlay: false;
+}
+
+// Can be written more concisely, not easier to read if more concise.
+export function booleanCellIsEditable(cell: BooleanCell): boolean {
+    if (cell.readonly === true) return false;
+    if (cell.readonly === false) return true;
+    if (cell.allowEdit === true) return true;
+    if (cell.allowEdit === false) return false;
+    return true;
 }
 
 export interface RowIDCell extends BaseGridCell {
@@ -488,27 +514,24 @@ export class CompactSelection {
         return new CompactSelection(newItems);
     };
 
-    // TODO: Support removing a slice
-    remove = (selection: number): CompactSelection => {
+    remove = (selection: number | Slice): CompactSelection => {
         const items = [...this.items];
+
+        const selMin = typeof selection === "number" ? selection : selection[0];
+        const selMax = typeof selection === "number" ? selection + 1 : selection[1];
 
         for (const [i, slice] of items.entries()) {
             const [start, end] = slice;
-
-            if (start <= selection && end > selection) {
-                const left: Slice = [start, selection];
-                const right: Slice = [selection + 1, end];
-
+            // Remove part of slice that intersects removed selection.
+            if (start <= selMax && selMin <= end) {
                 const toAdd: Slice[] = [];
-                if (left[0] !== left[1]) {
-                    toAdd.push(left);
+                if (start < selMin) {
+                    toAdd.push([start, selMin]);
                 }
-                if (right[0] !== right[1]) {
-                    toAdd.push(right);
+                if (selMax < end) {
+                    toAdd.push([selMax, end]);
                 }
-
                 items.splice(i, 1, ...toAdd);
-                break;
             }
         }
         return new CompactSelection(items);

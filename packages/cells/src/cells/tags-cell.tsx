@@ -1,4 +1,10 @@
-import { CustomCell, Rectangle, measureTextCached, CustomCellRenderer } from "@glideapps/glide-data-grid";
+import {
+    CustomCell,
+    Rectangle,
+    measureTextCached,
+    CustomCellRenderer,
+    getMiddleCenterBias,
+} from "@glideapps/glide-data-grid";
 import styled from "styled-components";
 import * as React from "react";
 import { roundedRect } from "../draw-fns";
@@ -112,7 +118,7 @@ const renderer: CustomCellRenderer<TagsCell> = {
             ctx.fill();
 
             ctx.fillStyle = theme.textDark;
-            ctx.fillText(tag, x + innerPad, y + textY);
+            ctx.fillText(tag, x + innerPad, y + textY + getMiddleCenterBias(ctx, `12px ${theme.fontFamily}`));
 
             x += width + 8;
             if (x > drawArea.x + drawArea.width && row >= rows) break;
@@ -160,6 +166,17 @@ const renderer: CustomCellRenderer<TagsCell> = {
             );
         };
     },
+    onPaste: (v, d) => ({
+        ...d,
+        tags: d.possibleTags
+            .map(x => x.tag)
+            .filter(x =>
+                v
+                    .split(",")
+                    .map(s => s.trim())
+                    .includes(x)
+            ),
+    }),
 };
 
 export default renderer;

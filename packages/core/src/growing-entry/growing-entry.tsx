@@ -7,10 +7,11 @@ interface Props
     extends React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> {
     readonly placeholder?: string;
     readonly highlight: boolean;
+    readonly altNewline?: boolean;
 }
 
 const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
-    const { placeholder, value, onKeyDown, highlight, ...rest } = props;
+    const { placeholder, value, onKeyDown, highlight, altNewline, ...rest } = props;
     const { onChange, className } = rest;
 
     const inputRef = React.useRef<HTMLTextAreaElement | null>(null);
@@ -30,6 +31,16 @@ const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const onKeyDownInner = React.useCallback<NonNullable<typeof onKeyDown>>(
+        e => {
+            if (e.key === "Enter" && e.shiftKey && altNewline === true) {
+                return;
+            }
+            onKeyDown?.(e);
+        },
+        [altNewline, onKeyDown]
+    );
+
     return (
         <GrowingEntryStyle>
             <ShadowBox className={className}>{useText + "\n"}</ShadowBox>
@@ -37,7 +48,7 @@ const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
                 {...rest}
                 className={(rest.className ?? "") + " gdg-input"}
                 ref={inputRef}
-                onKeyDown={onKeyDown}
+                onKeyDown={onKeyDownInner}
                 value={useText}
                 placeholder={placeholder}
                 dir="auto"

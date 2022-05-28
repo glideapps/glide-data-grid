@@ -27,6 +27,7 @@ import {
     SizedGridColumn,
     isReadWriteCell,
     isInnerOnlyCell,
+    booleanCellIsEditable,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -127,6 +128,7 @@ export interface DataGridProps {
         readonly enableFirefoxRescaling?: boolean;
         readonly isSubGrid?: boolean;
         readonly strict?: boolean;
+        readonly scrollbarWidthOverride?: number;
     };
 
     readonly headerIcons?: SpriteMap;
@@ -615,7 +617,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         clickableInnerCellHovered =
             cell.kind === InnerGridCellKind.NewRow ||
             (cell.kind === InnerGridCellKind.Marker && cell.markerKind !== "number");
-        editableBoolHovered = cell.kind === GridCellKind.Boolean && cell.allowEdit === true;
+        editableBoolHovered = cell.kind === GridCellKind.Boolean && booleanCellIsEditable(cell);
     }
     const canDrag = hoveredOnEdge ?? false;
     const cursor = isDragging
@@ -729,12 +731,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             onMouseDown?.(args);
-            if (!args.isTouch) {
+            if (!args.isTouch && !isDraggable) {
                 // preventing default in touch events stops scroll
                 ev.preventDefault();
             }
         },
-        [eventTargetRef, getMouseArgsForPosition, groupHeaderActionForEvent, isOverHeaderMenu, onMouseDown]
+        [eventTargetRef, isDraggable, getMouseArgsForPosition, groupHeaderActionForEvent, isOverHeaderMenu, onMouseDown]
     );
     useEventListener("touchstart", onMouseDownImpl, window, false);
     useEventListener("mousedown", onMouseDownImpl, window, false);
@@ -1133,6 +1135,19 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const [fCol, fRow] = selection.current?.cell ?? [];
             const range = selection.current?.range;
 
+            const visibleCols = effectiveCols.map(c => c.sourceIndex);
+            const visibleRows = makeRange(cellYOffset, Math.min(rows, cellYOffset + accessibilityHeight));
+
+            // Maintain focus within grid if we own it but focused cell is outside visible viewport
+            // and not rendered.
+            if (
+                fCol !== undefined &&
+                fRow !== undefined &&
+                !(visibleCols.includes(fCol) && visibleRows.includes(fRow))
+            ) {
+                focusElement(null);
+            }
+
             return (
                 <table
                     key="access-tree"
@@ -1159,7 +1174,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         </tr>
                     </thead>
                     <tbody role="rowgroup">
-                        {makeRange(cellYOffset, Math.min(rows, cellYOffset + accessibilityHeight)).map(row => (
+                        {visibleRows.map(row => (
                             <tr
                                 role="row"
                                 aria-selected={selection.rows.hasIndex(row)}

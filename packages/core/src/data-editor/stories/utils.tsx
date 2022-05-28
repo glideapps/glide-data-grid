@@ -54,6 +54,11 @@ export function lossyCopyData<T extends EditableGridCell>(source: EditableGridCe
                 ...target,
                 data: sourceData[0] !== undefined,
             };
+        } else if (source.kind === GridCellKind.Boolean) {
+            return {
+                ...target,
+                data: source.data,
+            };
         }
         return {
             ...target,

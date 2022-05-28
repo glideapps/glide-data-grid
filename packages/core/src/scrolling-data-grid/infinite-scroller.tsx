@@ -154,7 +154,9 @@ export const InfiniteScroller: React.FC<Props> = p => {
             offsetY.current = recomputed - newY;
         }
 
-        window.clearTimeout(resetHandle.current);
+        if (resetHandle.current > 0) {
+            window.clearTimeout(resetHandle.current);
+        }
         if (lock !== undefined) {
             resetHandle.current = window.setTimeout(() => {
                 const [lx, ly] = lastScrollPosition.current.lockDirection ?? [];
@@ -164,6 +166,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                     el.scrollTop = ly;
                 }
                 lastScrollPosition.current.lockDirection = undefined;
+                resetHandle.current = 0;
             }, 200);
         }
 

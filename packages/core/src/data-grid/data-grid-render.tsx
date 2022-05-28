@@ -25,6 +25,7 @@ import {
     cellIsSelected,
     cellIsInRange,
     computeBounds,
+    getMiddleCenterBias,
 } from "./data-grid-lib";
 import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import { Theme } from "../common/styles";
@@ -125,6 +126,7 @@ export function drawCell(
         imageLoader,
         spriteManager,
     };
+    let forceAnim = false;
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
         const drawn = isInnerOnlyCell(cell)
             ? false
@@ -140,6 +142,9 @@ export function drawCell(
                   hoverY,
                   highlighted,
                   imageLoader,
+                  requestAnimationFrame: () => {
+                      forceAnim = true;
+                  },
               }) === true;
         if (!drawn && cell.kind !== GridCellKind.Custom) {
             const r = CellRenderers[cell.kind];
@@ -149,17 +154,15 @@ export function drawCell(
             }
             const partialPrepResult = r.renderPrep?.(args, lastPrep);
             r.render(args);
-            if (partialPrepResult !== undefined) {
-                partialPrepResult.renderer = r;
-                result = partialPrepResult as PrepResult;
-            } else {
-                result = {
-                    renderer: r,
-                };
-            }
+            result = {
+                deprep: partialPrepResult?.deprep,
+                fillStyle: partialPrepResult?.fillStyle,
+                font: partialPrepResult?.font,
+                renderer: r,
+            };
         }
     });
-    if (needsAnim) enqueue?.([col, row]);
+    if (needsAnim || forceAnim) enqueue?.([col, row]);
     return result;
 }
 
@@ -384,7 +387,7 @@ function drawGridLines(
         if (c.width === 0) continue;
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
-        if (tx >= minX && tx <= maxX && (index === effectiveCols.length - 1 || verticalBorder(index + 1))) {
+        if (tx >= minX && tx <= maxX - 1 && (index === effectiveCols.length - 1 || verticalBorder(index + 1))) {
             toDraw.push({
                 x1: tx,
                 y1: Math.max(groupHeaderHeight, minY),
@@ -410,7 +413,7 @@ function drawGridLines(
         while (y + translateY <= target) {
             const ty = isHeader ? y : y + translateY;
             // This shouldn't be needed it seems like... yet it is. We're not sure why.
-            if (ty >= minY && ty <= maxY && (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) > 1)) {
+            if (ty >= minY && ty <= maxY - 1 && (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) > 1)) {
                 const rowTheme = isHeader ? undefined : getRowThemeOverride?.(row);
                 toDraw.push({
                     x1: minX,
@@ -518,7 +521,11 @@ function drawGroups(
                 );
                 drawX += 26;
             }
-            ctx.fillText(group.name, drawX + xPad, groupHeaderHeight / 2 + 1);
+            ctx.fillText(
+                group.name,
+                drawX + xPad,
+                groupHeaderHeight / 2 + getMiddleCenterBias(ctx, `${theme.headerFontStyle} ${theme.fontFamily}`)
+            );
 
             if (group.actions !== undefined && isHovered) {
                 const actionBoxes = getActionBoundsForGroup({ x, y, width: w, height: h }, group.actions);
@@ -682,7 +689,11 @@ function drawHeader(
     } else {
         ctx.fillStyle = fillStyle;
     }
-    ctx.fillText(c.title, drawX, y + height / 2 + 1);
+    ctx.fillText(
+        c.title,
+        drawX,
+        y + height / 2 + getMiddleCenterBias(ctx, `${theme.headerFontStyle} ${theme.fontFamily}`)
+    );
 
     if (shouldDrawMenu && c.hasMenu === true) {
         ctx.beginPath();
@@ -1166,10 +1177,14 @@ function drawCells(
                     }
 
                     const rowTheme = getRowThemeOverride?.(row);
+                    const trailingTheme =
+                        isSticky && c.trailingRowOptions?.themeOverride !== undefined
+                            ? c.trailingRowOptions?.themeOverride
+                            : undefined;
                     const theme =
-                        cell.themeOverride === undefined && rowTheme === undefined
+                        cell.themeOverride === undefined && rowTheme === undefined && trailingTheme === undefined
                             ? colTheme
-                            : { ...colTheme, ...rowTheme, ...cell.themeOverride };
+                            : { ...colTheme, ...rowTheme, ...trailingTheme, ...cell.themeOverride };
 
                     ctx.beginPath();
 

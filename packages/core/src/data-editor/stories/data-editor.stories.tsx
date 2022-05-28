@@ -109,8 +109,7 @@ And supports newline chars and automatic wrapping text that just needs to be lon
         return {
             kind: GridCellKind.Boolean,
             data: row % 3 === 0 || row % 5 === 0,
-            showUnchecked: true,
-            allowEdit: false,
+            readonly: true,
             allowOverlay: false,
         };
     }
@@ -642,7 +641,7 @@ export function MarkdownEdits() {
 }
 
 export const CanEditBoolean = () => {
-    const [vals, setVals] = useState<[boolean, boolean]>([false, false]);
+    const [vals, setVals] = useState<[boolean | null | undefined, boolean | null | undefined]>([false, false]);
     return (
         <DataEditor
             width="100%"
@@ -660,10 +659,9 @@ export const CanEditBoolean = () => {
             getCellContent={([col]) => {
                 return {
                     kind: GridCellKind.Boolean,
-                    allowEdit: col === 0,
+                    readonly: col !== 0,
                     allowOverlay: false,
                     data: vals[col],
-                    showUnchecked: true,
                 };
             }}
             onCellEdited={([col], newVal) => {

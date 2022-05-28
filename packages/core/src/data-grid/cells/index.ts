@@ -17,7 +17,9 @@ import { uriCellRenderer } from "./uri-cell";
 // we are giving up type safety here but I cant figure out right now how to do this right.
 const asCollapsed = (x: any) => x as InternalCellRenderer<InnerGridCell>;
 
-export const CellRenderers = {
+type RendererKinds = InnerGridCellKind | Exclude<GridCellKind, GridCellKind.Custom>;
+
+export const CellRenderers: Record<RendererKinds, ReturnType<typeof asCollapsed>> = {
     [InnerGridCellKind.Marker]: asCollapsed(markerCellRenderer),
     [InnerGridCellKind.NewRow]: asCollapsed(newRowCellRenderer),
     [GridCellKind.Boolean]: asCollapsed(booleanCellRenderer),

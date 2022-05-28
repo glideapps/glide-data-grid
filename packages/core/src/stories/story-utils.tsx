@@ -83,39 +83,3 @@ export const SimpleThemeWrapper: React.FC = p => {
         </ThemeProvider>
     );
 };
-
-// export function permuteAll(
-//   allOptions: Record<string, any[]>,
-//   combine: boolean = true
-// ): any[] {
-//   let result: any[] = [
-//     {
-//       name: "",
-//     },
-//   ];
-//   const keys = Object.keys(allOptions);
-//   keys.forEach((o) => {
-//     result = reduceOption(allOptions[o], o, result, combine);
-//   });
-
-//   return result;
-// }
-
-// export function permuteSeparate(allOptions: Record<string, any[]>): any[] {
-//   return permuteAll(allOptions, false);
-// }
-
-// export const loremIpsum =
-//   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
-
-// const DummyAppEnv: AppEnvironment = ({
-//   // If this gets used we are going to crash anyway
-// } as unknown) as AppEnvironment;
-// export const DummyRenderEnv: RenderEnvironment = new RenderEnvironment(
-//   DummyAppEnv,
-//   {
-//     displayContext: "default",
-//     sizeClass: "phone",
-//     needsRerender: false,
-//   }
-// );

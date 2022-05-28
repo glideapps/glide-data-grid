@@ -63,8 +63,6 @@ export function useCollapsingGroups(props: Props): Result {
                     let width = 8;
                     if (index === start + length - 1) {
                         width = 36;
-                    } else if (index <= start + 1) {
-                        width = 8;
                     }
 
                     return {

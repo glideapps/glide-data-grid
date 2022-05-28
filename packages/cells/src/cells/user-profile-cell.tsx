@@ -1,6 +1,12 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
-import { CustomCell, measureTextCached, TextCellEntry, CustomCellRenderer } from "@glideapps/glide-data-grid";
+import {
+    CustomCell,
+    measureTextCached,
+    TextCellEntry,
+    CustomCellRenderer,
+    getMiddleCenterBias,
+} from "@glideapps/glide-data-grid";
 
 interface UserProfileCellProps {
     readonly kind: "user-profile-cell";
@@ -39,7 +45,7 @@ const renderer: CustomCellRenderer<UserProfileCell> = {
         ctx.fillText(
             initial[0],
             drawX + radius - metrics.width / 2,
-            rect.y + rect.height / 2 + metrics.actualBoundingBoxAscent / 2
+            rect.y + rect.height / 2 + getMiddleCenterBias(ctx, `600 16px ${theme.fontFamily}`)
         );
 
         if (imageResult !== undefined) {
@@ -56,8 +62,7 @@ const renderer: CustomCellRenderer<UserProfileCell> = {
         if (name !== undefined) {
             ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
             ctx.fillStyle = theme.textDark;
-            ctx.textBaseline = "middle";
-            ctx.fillText(name, drawX + radius * 2 + xPad, rect.y + rect.height / 2);
+            ctx.fillText(name, drawX + radius * 2 + xPad, rect.y + rect.height / 2 + getMiddleCenterBias(ctx, theme));
         }
 
         ctx.restore();
@@ -83,6 +88,10 @@ const renderer: CustomCellRenderer<UserProfileCell> = {
             />
         );
     },
+    onPaste: (v, d) => ({
+        ...d,
+        name: v,
+    }),
 };
 
 export default renderer;

@@ -7,7 +7,7 @@ npm install
 
 function update {
     echo $1 $2
-    jq "$1" $2 > $2.tmp
+    jq --indent 4 "$1" $2 > $2.tmp
     mv $2.tmp $2
 }
 

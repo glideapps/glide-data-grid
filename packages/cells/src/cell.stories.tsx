@@ -2,16 +2,17 @@ import styled from "styled-components";
 import * as React from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor, DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
-import { useExtraCells } from ".";
+import { DropdownCell as DropdownRenderer, useExtraCells } from ".";
 import { StarCell } from "./cells/star-cell";
 import { SparklineCell } from "./cells/sparkline-cell";
 import range from "lodash/range";
 import uniq from "lodash/uniq";
 import { TagsCell } from "./cells/tags-cell";
 import { UserProfileCell } from "./cells/user-profile-cell";
-import { DropdownCell } from "./cells/dropdown-cell";
+import type { DropdownCell } from "./cells/dropdown-cell";
 import { ArticleCell } from "./cells/article-cell-types";
 import { RangeCell } from "./cells/range-cell";
+import { SpinnerCell } from "./cells/spinner-cell";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -162,14 +163,13 @@ const possibleTags = [
 ];
 
 export const CustomCells: React.VFC = () => {
-    const { drawCell, provideEditor } = useExtraCells();
+    const cellProps = useExtraCells();
 
     return (
         <BeautifulWrapper title="Custom cells" description={<Description>Some of our extension cells.</Description>}>
             <DataEditor
                 {...defaultProps}
-                drawCell={drawCell}
-                provideEditor={provideEditor}
+                {...cellProps}
                 onPaste={true}
                 // eslint-disable-next-line no-console
                 onCellEdited={(...args) => console.log("Edit Cell", ...args)}
@@ -295,6 +295,18 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
+                    } else if (col === 8) {
+                        num = row + 1;
+                        rand();
+                        const d: SpinnerCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "spinner-cell",
+                            },
+                        };
+                        return d;
                     }
                     throw new Error("Fail");
                 }}
@@ -331,6 +343,10 @@ export const CustomCells: React.VFC = () => {
                         title: "Article",
                         width: 150,
                     },
+                    {
+                        title: "Spinner",
+                        width: 150,
+                    },
                 ]}
                 rows={500}
             />
@@ -338,6 +354,61 @@ export const CustomCells: React.VFC = () => {
     );
 };
 (CustomCells as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const CustomCellEditing: React.VFC = () => {
+    const cellProps = useExtraCells();
+
+    const data = React.useRef<string[]>([]);
+
+    return (
+        <BeautifulWrapper
+            title="Custom cell editing"
+            description={
+                <Description>
+                    Cells can be edited and responding to copy/paste using the copyData attribute.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                {...cellProps}
+                onPaste={true}
+                onCellEdited={(cell, newVal) => {
+                    if (newVal.kind !== GridCellKind.Custom) return;
+                    if (DropdownRenderer.isMatch(newVal)) {
+                        data.current[cell[1]] = newVal.data.value;
+                    }
+                }}
+                getCellsForSelection={true}
+                getCellContent={cell => {
+                    const [, row] = cell;
+                    const val = data.current[row] ?? "A";
+                    return {
+                        kind: GridCellKind.Custom,
+                        allowOverlay: true,
+                        copyData: val,
+                        data: {
+                            kind: "dropdown-cell",
+                            allowedValues: ["A", "B", "C"],
+                            value: val,
+                        },
+                    } as DropdownCell;
+                }}
+                columns={[
+                    {
+                        title: "Dropdown",
+                        width: 200,
+                    },
+                ]}
+                rows={500}
+            />
+        </BeautifulWrapper>
+    );
+};
+(CustomCellEditing as any).parameters = {
     options: {
         showPanel: false,
     },
