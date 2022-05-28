@@ -263,6 +263,19 @@ export type GridColumn = SizedGridColumn | AutoGridColumn;
 | Protected | Displays stars instead of data. Useful for indicating that hidden data is present but unavailable to the user. |
 | Custom    | Has no rendering by default and must be provided via `drawCell`. Used to implement 3rd party cells.            |
 
+All grid cells support the following properties
+
+```ts
+interface BaseGridCell {
+    readonly allowOverlay: boolean;
+    readonly lastUpdated?: number;
+    readonly style?: "normal" | "faded";
+    readonly themeOverride?: Partial<Theme>;
+    readonly span?: Item;
+    readonly contentAlign?: "left" | "right" | "center";
+}
+```
+
 ---
 
 ## GridSelection
