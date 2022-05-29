@@ -347,7 +347,7 @@ function blitResizedCol(
 
     walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, _drawY, clipX) => {
         if (c.sourceIndex === resizedIndex) {
-            const x = Math.max(drawX, clipX);
+            const x = Math.max(drawX, clipX) + 1;
             drawRegions.push({
                 x,
                 y: 0,
