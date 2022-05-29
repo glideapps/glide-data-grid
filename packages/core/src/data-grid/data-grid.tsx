@@ -506,6 +506,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             touchMode: lastWasTouch,
             enqueue: enqueueRef.current,
         };
+
+        // This confusing bit of code due to some poor design. Long story short, the damage property is only used
+        // with what is effectively the "last args" for the last normal draw anyway. We don't want the drawing code
+        // to look at this and go "shit dawg, nothing changed" so we force it to draw frash, but the damage restricts
+        // the draw anyway.
+        //
+        // Dear future Jason, I'm sorry. It was expedient, it worked, and had almost zero perf overhead. THe universe
+        // basically made me do it. What choice did I have?
         if (current.damage === undefined) {
             lastArgsRef.current = current;
             drawGrid(current, last);

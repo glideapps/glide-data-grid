@@ -31,6 +31,7 @@ import { Theme } from "../common/styles";
 import { blend, withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
 import { PrepResult } from "./cells/cell-types";
+import { deepEqual } from "../common/support";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when
@@ -314,6 +315,49 @@ function blitLastFrame(
         regions: drawRegions,
         yOnly: blittedYOnly,
     };
+}
+
+function blitResizedCol(
+    // ctx: CanvasRenderingContext2D,
+    // canvas: HTMLCanvasElement,
+    last: BlitData,
+    cellXOffset: number,
+    cellYOffset: number,
+    translateX: number,
+    translateY: number,
+    width: number,
+    height: number,
+    totalHeaderHeight: number,
+    // dpr: number,
+    effectiveCols: readonly MappedGridColumn[],
+    resizedIndex: number
+) {
+    const drawRegions: Rectangle[] = [];
+
+    // ctx.imageSmoothingEnabled = false;
+
+    if (
+        cellXOffset !== last.cellXOffset ||
+        cellYOffset !== last.cellYOffset ||
+        translateX !== last.translateX ||
+        translateY !== last.translateY
+    ) {
+        return drawRegions;
+    }
+
+    walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, _drawY, clipX) => {
+        if (c.sourceIndex === resizedIndex) {
+            const x = Math.max(drawX, clipX);
+            drawRegions.push({
+                x,
+                y: 0,
+                width: width - x,
+                height,
+            });
+            return true;
+        }
+    });
+    return drawRegions;
 }
 
 // lines are effectively drawn on the top left edge of a cell.
@@ -1790,7 +1834,7 @@ export interface DrawGridArg {
     readonly enqueue: (item: Item) => void;
 }
 
-function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean {
+function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean | number {
     if (
         current.width !== last?.width ||
         current.height !== last.height ||
@@ -1812,7 +1856,37 @@ function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): bo
         return false;
     }
     if (current.mappedColumns !== last.mappedColumns) {
-        return false;
+        if (current.mappedColumns.length > 100 || current.mappedColumns.length !== last.mappedColumns.length) {
+            // The array is big, let's just redraw the damned thing rather than check these all. Or the number of cols
+            // changed in which case I dont want to figure out what happened.
+            return false;
+        }
+        // We want to know if only one column has resized. If this is the case we can do a special left/right sliding
+        // blit. Or just not redraw shit on the left.
+        let resized: number | undefined;
+        for (let i = 0; i < current.mappedColumns.length; i++) {
+            const curCol = current.mappedColumns[i];
+            const lastCol = last.mappedColumns[i];
+
+            if (deepEqual(curCol, lastCol)) continue;
+
+            // two columns changed, abort
+            if (resized !== undefined) return false;
+
+            if (curCol.width === lastCol.width) return false;
+
+            const { width, ...curRest } = curCol;
+            const { width: lastWidth, ...lastRest } = lastCol;
+
+            // more than width changed, abort
+            if (!deepEqual(curRest, lastRest)) return false;
+            resized = i;
+        }
+        if (resized === undefined) {
+            // we never found a changed column, cool, we can blit
+            return true;
+        }
+        return resized;
     }
     return true;
 }
@@ -2082,7 +2156,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         return;
     }
 
-    if (!canBlit || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
+    if (canBlit !== true || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
         drawHeaderTexture();
     }
 
@@ -2106,6 +2180,20 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             rowHeight
         );
         drawRegions = regions;
+    } else if (canBlit !== false) {
+        const resizedCol = canBlit;
+        drawRegions = blitResizedCol(
+            last,
+            cellXOffset,
+            cellYOffset,
+            translateX,
+            translateY,
+            width,
+            height,
+            totalHeaderHeight,
+            effectiveCols,
+            resizedCol
+        );
     }
 
     overdrawStickyBoundaries(
