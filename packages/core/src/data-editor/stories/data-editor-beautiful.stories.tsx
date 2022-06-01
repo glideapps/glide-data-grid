@@ -1222,6 +1222,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
                     allowOverlay: true,
                     allowAdd: false,
                     readonly: true,
+                    dropTarget: true,
                 };
             },
         },
@@ -2867,6 +2868,126 @@ export const PreventDiagonalScroll: React.VFC = () => {
     );
 };
 (PreventDiagonalScroll as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+// A few supported mime types for drag and drop into cells.
+const SUPPORTED_IMAGE_TYPES = ["image/png", "image/gif", "image/bmp", "image/jpeg"];
+
+interface LastDropData {
+    cell: Item;
+    imgUrl: string;
+}
+
+export const DropEvents: React.VFC = () => {
+    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
+
+    const [highlights, setHighlights] = React.useState<DataEditorProps["highlightRegions"]>([]);
+
+    const [lastDropData, setLastDropData] = React.useState<LastDropData | undefined>();
+
+    const onDrop = React.useCallback((cell: Item, dataTransfer: DataTransfer | null) => {
+        setHighlights([]);
+
+        if (dataTransfer === null) {
+            return;
+        }
+
+        const { files } = dataTransfer;
+        // This only supports one image, for simplicity.
+        if (files.length !== 1) {
+            return;
+        }
+
+        const [file] = files;
+        if (!SUPPORTED_IMAGE_TYPES.includes(file.type)) {
+            return;
+        }
+
+        const imgUrl = URL.createObjectURL(file);
+        setLastDropData({ cell, imgUrl });
+
+        // eslint-disable-next-line no-console
+        console.log(imgUrl);
+    }, []);
+
+    const onDragOverCell = React.useCallback(
+        (cell: Item, dataTransfer: DataTransfer | null) => {
+            if (dataTransfer === null) {
+                return;
+            }
+
+            const { items } = dataTransfer;
+            // This only supports one image, for simplicity.
+            if (items.length !== 1) {
+                return;
+            }
+
+            const [item] = items;
+            if (!SUPPORTED_IMAGE_TYPES.includes(item.type)) {
+                return;
+            }
+
+            const [col, row] = cell;
+            if (getCellContent(cell).kind === GridCellKind.Image) {
+                setHighlights([
+                    {
+                        color: "#44BB0022",
+                        range: {
+                            x: col,
+                            y: row,
+                            width: 1,
+                            height: 1,
+                        },
+                    },
+                ]);
+            }
+        },
+        [getCellContent]
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Drop events"
+            description={
+                <>
+                    <Description>
+                        You can drag and drop into cells by using <PropName>onDragOverCell</PropName> and{" "}
+                        <PropName>onDrop</PropName>.
+                    </Description>
+
+                    <div>
+                        {lastDropData === undefined ? (
+                            <MoreInfo>Nothing dropped, yet</MoreInfo>
+                        ) : (
+                            <>
+                                <MoreInfo>
+                                    You last dropped the following image in cell{" "}
+                                    <PropName>{JSON.stringify(lastDropData.cell)}</PropName>
+                                </MoreInfo>
+                                <img style={{ maxHeight: 80, marginBottom: 20 }} src={lastDropData.imgUrl} alt="" />
+                            </>
+                        )}
+                    </div>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                onCellEdited={setCellValue}
+                onColumnResize={onColumnResize}
+                rows={1_000}
+                onDrop={onDrop}
+                onDragOverCell={onDragOverCell}
+                highlightRegions={highlights}
+            />
+        </BeautifulWrapper>
+    );
+};
+(DropEvents as any).parameters = {
     options: {
         showPanel: false,
     },

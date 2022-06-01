@@ -114,6 +114,9 @@ export interface DataGridProps {
     readonly isDraggable?: boolean;
     readonly onDragStart?: (args: GridDragEventArgs) => void;
 
+    readonly onDragOverCell?: (cell: Item, dataTransfer: DataTransfer | null) => void;
+    readonly onDrop?: (cell: Item, dataTransfer: DataTransfer | null) => void;
+
     readonly drawCustomCell?: DrawCustomCellCallback;
     readonly drawHeader?: DrawHeaderCallback;
 
@@ -202,6 +205,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         drawHeader,
         drawCustomCell,
         onCellFocused,
+        onDragOverCell,
+        onDrop,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -1062,6 +1067,57 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         ]
     );
     useEventListener("dragstart", onDragStartImpl, eventTargetRef?.current ?? null, false, false);
+
+    const activeDropTarget = React.useRef<Item | undefined>();
+
+    const onDragOverImpl = React.useCallback(
+        (event: DragEvent) => {
+            const canvas = ref.current;
+            if (onDrop !== undefined) {
+                // Need to preventDefault to allow drop
+                event.preventDefault();
+            }
+
+            if (canvas === null || onDragOverCell === undefined) {
+                return false;
+            }
+
+            const args = getMouseArgsForPosition(canvas, event.clientX, event.clientY);
+
+            const [col, row] = args.location;
+            const [activeCol, activeRow] = activeDropTarget.current ?? [];
+
+            if (activeCol !== col || activeRow !== row) {
+                activeDropTarget.current = [col, row];
+                onDragOverCell([col, row], event.dataTransfer);
+            }
+        },
+        [getMouseArgsForPosition, onDragOverCell, onDrop]
+    );
+    useEventListener("dragover", onDragOverImpl, eventTargetRef?.current ?? null, false, false);
+
+    const onDragEndImpl = React.useCallback(() => {
+        activeDropTarget.current = undefined;
+    }, []);
+    useEventListener("dragend", onDragEndImpl, eventTargetRef?.current ?? null, false, false);
+
+    const onDropImpl = React.useCallback(
+        (event: DragEvent) => {
+            const canvas = ref.current;
+            if (canvas === null || onDrop === undefined) {
+                return false;
+            }
+
+            // Default can mess up sometimes.
+            event.preventDefault();
+
+            const args = getMouseArgsForPosition(canvas, event.clientX, event.clientY);
+
+            onDrop(args.location, event.dataTransfer);
+        },
+        [getMouseArgsForPosition, onDrop]
+    );
+    useEventListener("drop", onDropImpl, eventTargetRef?.current ?? null, false, false);
 
     const selectionRef = React.useRef(selection);
     selectionRef.current = selection;

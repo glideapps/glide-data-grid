@@ -426,6 +426,8 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 onColumnResizeStart={p.onColumnResizeStart}
                 onColumnResizeEnd={p.onColumnResizeEnd}
                 onDragStart={p.onDragStart}
+                onDragOverCell={p.onDragOverCell}
+                onDrop={p.onDrop}
                 onHeaderMenuClick={p.onHeaderMenuClick}
                 onItemHovered={p.onItemHovered}
                 onKeyUp={p.onKeyUp}
