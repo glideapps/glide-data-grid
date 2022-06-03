@@ -2958,10 +2958,16 @@ export const DropEvents: React.VFC = () => {
                         },
                     },
                 ]);
+            } else {
+                setHighlights([]);
             }
         },
         [getCellContent]
     );
+
+    const onDragLeave = React.useCallback(() => {
+        setHighlights([]);
+    }, []);
 
     return (
         <BeautifulWrapper
@@ -2995,7 +3001,9 @@ export const DropEvents: React.VFC = () => {
                 rows={1_000}
                 onDrop={onDrop}
                 onDragOverCell={onDragOverCell}
+                onDragLeave={onDragLeave}
                 highlightRegions={highlights}
+                rowMarkers="none"
             />
         </BeautifulWrapper>
     );

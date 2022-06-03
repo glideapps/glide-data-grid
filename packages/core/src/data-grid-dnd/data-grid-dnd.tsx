@@ -301,6 +301,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             onCellFocused={p.onCellFocused}
             onDragStart={p.onDragStart}
             onDragOverCell={p.onDragOverCell}
+            onDragLeave={p.onDragLeave}
             onDrop={p.onDrop}
             onKeyDown={p.onKeyDown}
             onKeyUp={p.onKeyUp}
