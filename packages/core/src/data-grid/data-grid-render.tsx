@@ -1573,8 +1573,8 @@ function drawHighlightRings(
     const drawCb = () => {
         ctx.beginPath();
         ctx.save();
-        ctx.setLineDash([7, 5]);
-        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 3]);
+        ctx.lineWidth = 1;
         for (const dr of drawRects) {
             const [s] = dr;
             if (

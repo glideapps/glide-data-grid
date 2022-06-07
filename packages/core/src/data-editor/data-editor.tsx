@@ -384,6 +384,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         provideEditor,
         trailingRowOptions,
         verticalBorder,
+        onDragOverCell,
+        onDrop,
         ...rest
     } = p;
 
@@ -2730,6 +2732,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onKeyDown={onKeyDown}
                     onMouseDown={onMouseDown}
                     onMouseUp={onMouseUp}
+                    onDragOverCell={onDragOverCell}
+                    onDrop={onDrop}
                     onSearchResultsChanged={onSearchResultsChanged}
                     onVisibleRegionChanged={onVisibleRegionChangedImpl}
                     rowHeight={rowHeight}
