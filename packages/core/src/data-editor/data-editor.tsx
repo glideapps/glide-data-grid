@@ -591,6 +591,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     }, [highlightRegionsIn, mangledCols.length, rowMarkerOffset]);
 
     const visibleRegionRef = React.useRef(visibleRegion);
+    const mangledColsRef = React.useRef(mangledCols);
+    mangledColsRef.current = mangledCols;
     const getMangledCellContent = React.useCallback(
         ([col, row]: Item): InnerGridCell => {
             const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
@@ -611,7 +613,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const isFirst = col === rowMarkerOffset;
 
                 const maybeFirstColumnHint = isFirst ? trailingRowOptions?.hint ?? "" : "";
-                const c = mangledCols[col];
+                const c = mangledColsRef.current[col];
 
                 if (c?.trailingRowOptions?.disabled === true) {
                     return loadingCell;
@@ -664,7 +666,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowMarkerOffset,
             trailingRowOptions?.hint,
             trailingRowOptions?.addIcon,
-            mangledCols,
             p.experimental?.strict,
             getCellContent,
             rowMarkerStartIndex,

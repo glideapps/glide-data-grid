@@ -35,6 +35,7 @@ import makeRange from "lodash/range";
 import {
     drawCell,
     drawGrid,
+    DrawGridArg,
     getActionBoundsForGroup,
     getHeaderMenuBounds,
     GetRowThemeCallback,
@@ -217,7 +218,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const theme = useTheme() as Theme;
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const imageLoader = React.useMemo<ImageWindowLoader>(() => new ImageWindowLoader(), []);
-    const canBlit = React.useRef<boolean>();
     const damageRegion = React.useRef<readonly Item[] | undefined>(undefined);
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
@@ -252,6 +252,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         const fn = async () => {
             const changed = await spriteManager.buildSpriteMap(theme, columns);
             if (changed) {
+                lastArgsRef.current = undefined;
                 lastDrawRef.current();
             }
         };
@@ -462,21 +463,23 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     });
     const hoverInfoRef = React.useRef(hoveredItemInfo);
     hoverInfoRef.current = hoveredItemInfo;
+
+    const lastArgsRef = React.useRef<DrawGridArg>();
     const draw = React.useCallback(() => {
         const canvas = ref.current;
         const overlay = overlayRef.current;
         if (canvas === null || overlay === null) return;
 
-        drawGrid({
+        const last = lastArgsRef.current;
+        const current = {
             canvas,
-            buffers: { overlay },
+            headerCanvas: overlay,
             width,
             height,
             cellXOffset,
             cellYOffset,
             translateX: Math.round(translateX),
             translateY: Math.round(translateY),
-            columns,
             mappedColumns,
             enableGroups,
             freezeColumns,
@@ -484,14 +487,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             theme,
             headerHeight,
             groupHeaderHeight,
-            selectedRows: selection.rows,
             disabledRows: disabledRows ?? CompactSelection.empty(),
             rowHeight,
             verticalBorder,
-            selectedColumns: selection.columns,
             isResizing,
             isFocused,
-            selectedCell: selection,
+            selection,
             fillHandle,
             lastRowSticky,
             rows,
@@ -504,7 +505,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             highlightRegions,
             imageLoader,
             lastBlitData,
-            canBlit: canBlit.current ?? false,
             damage: damageRegion.current,
             hoverValues: hoverValues.current,
             hoverInfo: hoverInfoRef.current,
@@ -512,7 +512,21 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             scrolling,
             touchMode: lastWasTouch,
             enqueue: enqueueRef.current,
-        });
+        };
+
+        // This confusing bit of code due to some poor design. Long story short, the damage property is only used
+        // with what is effectively the "last args" for the last normal draw anyway. We don't want the drawing code
+        // to look at this and go "shit dawg, nothing changed" so we force it to draw frash, but the damage restricts
+        // the draw anyway.
+        //
+        // Dear future Jason, I'm sorry. It was expedient, it worked, and had almost zero perf overhead. THe universe
+        // basically made me do it. What choice did I have?
+        if (current.damage === undefined) {
+            lastArgsRef.current = current;
+            drawGrid(current, last);
+        } else {
+            drawGrid(current, undefined);
+        }
     }, [
         width,
         height,
@@ -520,7 +534,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         cellYOffset,
         translateX,
         translateY,
-        columns,
         mappedColumns,
         enableGroups,
         freezeColumns,
@@ -550,29 +563,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         lastWasTouch,
     ]);
 
-    canBlit.current = canBlit.current !== undefined;
-    React.useLayoutEffect(() => {
-        canBlit.current = false;
-    }, [
-        width,
-        height,
-        columns,
-        theme,
-        headerHeight,
-        rowHeight,
-        rows,
-        isFocused,
-        isResizing,
-        verticalBorder,
-        getCellContent,
-        highlightRegions,
-        lastWasTouch,
-        selection,
-        dragAndDropState,
-        prelightCells,
-        scrolling,
-    ]);
-
     const lastDrawRef = React.useRef(draw);
     React.useLayoutEffect(() => {
         draw();
@@ -583,21 +573,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         const fn = async () => {
             if (document?.fonts?.ready === undefined) return;
             await document.fonts.ready;
-            const prev = canBlit.current;
-            canBlit.current = false;
+            lastArgsRef.current = undefined;
             lastDrawRef.current();
-            canBlit.current = prev;
         };
         void fn();
     }, []);
 
     const damageInternal = React.useCallback((locations: CellList) => {
-        const last = canBlit.current;
-        canBlit.current = false;
         damageRegion.current = locations;
         lastDrawRef.current();
         damageRegion.current = undefined;
-        canBlit.current = last;
     }, []);
 
     const enqueue = useAnimationQueue(damageInternal);
@@ -817,13 +802,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     useEventListener("touchend", onMouseUpImpl, window, false);
 
     const onAnimationFrame = React.useCallback<StepCallback>(values => {
-        const last = canBlit.current;
-        canBlit.current = false;
         damageRegion.current = values.map(x => x.item);
         hoverValues.current = values;
         lastDrawRef.current();
         damageRegion.current = undefined;
-        canBlit.current = last;
     }, []);
 
     const animManagerValue = React.useMemo(() => new AnimationManager(onAnimationFrame), [onAnimationFrame]);

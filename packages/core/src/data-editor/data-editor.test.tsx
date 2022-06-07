@@ -84,6 +84,12 @@ const makeCell = (cell: Item): GridCell => {
             allowOverlay: true,
             data: `# Header: ${col}, ${row}`,
         };
+    } else if (col === 10) {
+        return {
+            kind: GridCellKind.Uri,
+            allowOverlay: true,
+            data: `https://example.com/${col}/${row}`,
+        };
     }
     return {
         kind: GridCellKind.Text,
@@ -142,6 +148,11 @@ const basicProps: DataEditorProps = {
         },
         {
             title: "J",
+            width: 90,
+            icon: "headerPhone",
+        },
+        {
+            title: "K",
             width: 90,
             icon: "headerPhone",
         },
@@ -594,7 +605,7 @@ describe("data-editor", () => {
 
         expect(spy).toHaveBeenCalledTimes(1);
         expect(spy).toHaveBeenCalledWith({
-            columns: CompactSelection.fromSingleSelection([0, 10]),
+            columns: CompactSelection.fromSingleSelection([0, 11]),
             rows: CompactSelection.empty(),
         });
 
@@ -635,7 +646,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith({
             rows: CompactSelection.empty(),
-            columns: CompactSelection.fromSingleSelection([0, 10]),
+            columns: CompactSelection.fromSingleSelection([0, 11]),
         });
     });
 
@@ -2911,7 +2922,7 @@ describe("data-editor", () => {
         });
     });
 
-    test("Select all", async () => {
+    test("Select all keybind", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
         render(<EventedDataEditor {...basicProps} keybindings={{ selectAll: true }} onGridSelectionChange={spy} />, {
@@ -2933,7 +2944,7 @@ describe("data-editor", () => {
                 range: {
                     x: 0,
                     y: 0,
-                    width: 10,
+                    width: 11,
                     height: 1000,
                 },
                 rangeStack: [],
