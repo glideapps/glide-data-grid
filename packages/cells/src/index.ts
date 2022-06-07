@@ -1,12 +1,13 @@
 import { DataEditorProps, ProvideEditorCallback, GridCell, useCustomCells } from "@glideapps/glide-data-grid";
-import StarCellRenderer from "./cells/star-cell";
-import SparklineCellRenderer from "./cells/sparkline-cell";
-import TagsCellRenderer from "./cells/tags-cell";
-import UserProfileCellRenderer from "./cells/user-profile-cell";
-import DropdownCellRenderer from "./cells/dropdown-cell";
+import StarCellRenderer, { StarCell } from "./cells/star-cell";
+import SparklineCellRenderer, { SparklineCell } from "./cells/sparkline-cell";
+import TagsCellRenderer, { TagsCell } from "./cells/tags-cell";
+import UserProfileCellRenderer, { UserProfileCell } from "./cells/user-profile-cell";
+import DropdownCellRenderer, { DropdownCell } from "./cells/dropdown-cell";
 import ArticleCellRenderer from "./cells/article-cell";
-import RangeCellRenderer from "./cells/range-cell";
-import SpinnerCellRenderer from "./cells/spinner-cell";
+import { ArticleCell } from "./cells/article-cell-types";
+import RangeCellRenderer, { RangeCell } from "./cells/range-cell";
+import SpinnerCellRenderer, { SpinnerCell } from "./cells/spinner-cell";
 
 type DrawCallback = NonNullable<DataEditorProps["drawCell"]>;
 
@@ -36,4 +37,16 @@ export {
     DropdownCellRenderer as DropdownCell,
     ArticleCellRenderer as ArticleCell,
     RangeCellRenderer as RangeCell,
+    SpinnerCellRenderer as SpinnerCell,
+};
+
+export {
+    StarCell as StarCellType,
+    SparklineCell as SparklineCellType,
+    TagsCell as TagsCellType,
+    UserProfileCell as UserProfileCellType,
+    DropdownCell as DropdownCellType,
+    ArticleCell as ArticleCellType,
+    RangeCell as RangeCellType,
+    SpinnerCell as SpinnerCellType,
 };
