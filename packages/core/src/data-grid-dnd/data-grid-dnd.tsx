@@ -56,6 +56,8 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         getCellContent,
     } = p;
 
+    const canResize = (onColumnResize ?? onColumnResized) !== undefined;
+
     if (process.env.NODE_ENV !== "production" && onColumnResized !== undefined && !warned) {
         // eslint-disable-next-line no-console
         console.warn("onColumnResized has been renamed to onColumnResize and will be removed in a future version.");
@@ -87,7 +89,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             let shouldFireEvent = true;
             if (args.button === 0) {
                 const [col, row] = args.location;
-                if (!isDraggable) {
+                if (!isDraggable && canResize) {
                     if (args.kind === "out-of-bounds" && args.isEdge) {
                         const bounds = gridRef?.current?.getBounds(columns.length - 1, -1);
                         if (bounds !== undefined) {
@@ -118,7 +120,17 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             }
             if (shouldFireEvent) onMouseDown?.(args);
         },
-        [onMouseDown, isDraggable, lockColumns, onRowMoved, gridRef, columns, canDragCol, onColumnResizeStart]
+        [
+            onMouseDown,
+            isDraggable,
+            canResize,
+            lockColumns,
+            onRowMoved,
+            gridRef,
+            columns,
+            canDragCol,
+            onColumnResizeStart,
+        ]
     );
 
     const onHeaderMenuClickMangled = React.useCallback(
