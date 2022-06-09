@@ -90,14 +90,14 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             if (args.button === 0) {
                 const [col, row] = args.location;
                 if (!isDraggable) {
-                    if (args.kind === "out-of-bounds" && args.isEdge) {
+                    if (args.kind === "out-of-bounds" && args.isEdge && canResize) {
                         const bounds = gridRef?.current?.getBounds(columns.length - 1, -1);
                         if (bounds !== undefined) {
                             setResizeColStartX(bounds.x);
                             setResizeCol(columns.length - 1);
                         }
                     } else if (args.kind === "header" && col >= lockColumns) {
-                        if (args.isEdge) {
+                        if (args.isEdge && canResize) {
                             shouldFireEvent = false;
                             setResizeColStartX(args.bounds.x);
                             setResizeCol(col);
