@@ -549,13 +549,7 @@ export function drawMarkerRowCell(
 }
 
 export function drawProtectedCell(args: BaseDrawArgs) {
-    const { ctx, theme, x, y, w, h, highlighted } = args;
-    if (!highlighted) {
-        ctx.beginPath();
-        ctx.rect(x + 1, y + 1, w - 1, h - 1);
-        ctx.fillStyle = theme.bgCellMedium;
-        ctx.fill();
-    }
+    const { ctx, theme, x, y, h } = args;
 
     ctx.beginPath();
 

@@ -1375,6 +1375,17 @@ export const AllCellKinds: React.VFC = () => {
                 columns={cols}
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}
+                highlightRegions={[
+                    {
+                        color: "#ff00ff33",
+                        range: {
+                            x: 1,
+                            y: 1,
+                            width: 3,
+                            height: 3,
+                        },
+                    },
+                ]}
                 rows={1_000}
             />
         </BeautifulWrapper>

@@ -1249,9 +1249,10 @@ function drawCells(
                         if (colSelected && !isSticky) accentCount++;
                     }
 
+                    const bgCell = cell.kind === GridCellKind.Protected ? theme.bgCellMedium : theme.bgCell;
                     let fill: string | undefined;
-                    if (isSticky || theme.bgCell !== outerTheme.bgCell) {
-                        fill = blend(theme.bgCell, fill);
+                    if (isSticky || bgCell !== outerTheme.bgCell) {
+                        fill = blend(bgCell, fill);
                     }
 
                     if (accentCount > 0 || rowDisabled) {
