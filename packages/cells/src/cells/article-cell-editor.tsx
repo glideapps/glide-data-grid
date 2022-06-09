@@ -1,7 +1,6 @@
 import { ProvideEditorComponent } from "@glideapps/glide-data-grid";
 import * as React from "react";
 import { Editor } from "@toast-ui/react-editor";
-import "@toast-ui/editor/dist/toastui-editor.css";
 import styled from "styled-components";
 import type { ArticleCell } from "./article-cell-types";
 

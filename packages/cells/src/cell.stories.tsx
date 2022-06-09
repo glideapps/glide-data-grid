@@ -14,6 +14,8 @@ import { ArticleCell } from "./cells/article-cell-types";
 import { RangeCell } from "./cells/range-cell";
 import { SpinnerCell } from "./cells/spinner-cell";
 
+import "@toast-ui/editor/dist/toastui-editor.css";
+
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
