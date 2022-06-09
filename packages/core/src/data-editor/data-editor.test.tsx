@@ -2399,7 +2399,7 @@ describe("data-editor", () => {
     test("Resize Column End Called", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onColumnResizeEnd={spy} />, {
+        render(<EventedDataEditor {...basicProps} onColumnResize={jest.fn()} onColumnResizeEnd={spy} />, {
             wrapper: Context,
         });
         prep();

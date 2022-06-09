@@ -56,7 +56,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         getCellContent,
     } = p;
 
-    const canResize = (onColumnResize ?? onColumnResized) !== undefined;
+    const canResize = (onColumnResize ?? onColumnResized ?? onColumnResizeEnd ?? onColumnResizeStart) !== undefined;
 
     if (process.env.NODE_ENV !== "production" && onColumnResized !== undefined && !warned) {
         // eslint-disable-next-line no-console
@@ -89,7 +89,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             let shouldFireEvent = true;
             if (args.button === 0) {
                 const [col, row] = args.location;
-                if (!isDraggable && canResize) {
+                if (!isDraggable) {
                     if (args.kind === "out-of-bounds" && args.isEdge) {
                         const bounds = gridRef?.current?.getBounds(columns.length - 1, -1);
                         if (bounds !== undefined) {
