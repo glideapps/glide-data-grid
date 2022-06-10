@@ -14,7 +14,7 @@ import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
-import { DrawArgs } from "../data-editor/use-custom-cells";
+import { DrawArgs } from "../data-editor/custom-cell-draw-args";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;

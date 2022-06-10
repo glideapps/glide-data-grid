@@ -41,6 +41,7 @@ export {
     RangeCellRenderer as RangeCell,
     SpinnerCellRenderer as SpinnerCell,
     DatePickerRenderer as DatePickerCell,
+    cells as allCells,
 };
 
 export {
