@@ -8,6 +8,7 @@ import ArticleCellRenderer from "./cells/article-cell";
 import { ArticleCell } from "./cells/article-cell-types";
 import RangeCellRenderer, { RangeCell } from "./cells/range-cell";
 import SpinnerCellRenderer, { SpinnerCell } from "./cells/spinner-cell";
+import DatePickerRenderer, { DatePickerCell } from "./cells/date-picker-cell";
 
 type DrawCallback = NonNullable<DataEditorProps["drawCell"]>;
 
@@ -20,6 +21,7 @@ const cells = [
     ArticleCellRenderer,
     SpinnerCellRenderer,
     RangeCellRenderer,
+    DatePickerRenderer,
 ];
 
 export function useExtraCells(): {
@@ -38,6 +40,7 @@ export {
     ArticleCellRenderer as ArticleCell,
     RangeCellRenderer as RangeCell,
     SpinnerCellRenderer as SpinnerCell,
+    DatePickerRenderer as DatePickerCell,
 };
 
 export {
@@ -49,4 +52,5 @@ export {
     ArticleCell as ArticleCellType,
     RangeCell as RangeCellType,
     SpinnerCell as SpinnerCellType,
+    DatePickerCell as DatePickerType,
 };
