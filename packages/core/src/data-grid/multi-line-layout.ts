@@ -26,7 +26,6 @@ export function splitMultilineText(ctx: CanvasRenderingContext2D, value: string,
             let textLength;
             let proposedWidth;
             let subLine;
-            textwidth = ctx.measureText(line).width;
             while (textwidth > lineLength) {
                 textLength = 0;
                 proposedWidth = 0;
