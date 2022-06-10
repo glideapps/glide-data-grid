@@ -3,7 +3,7 @@ const resultCache: Map<string, readonly string[]> = new Map();
 
 // Algorithm imrpoved from https://github.com/geongeorge/Canvas-Txt/blob/master/src/index.js
 export function splitMultilineText(ctx: CanvasRenderingContext2D, value: string, fontStyle: string, width: number) {
-    const key = `${value}_${fontStyle}`;
+    const key = `${value}_${fontStyle}_${width}px`;
     const cacheResult = resultCache.get(key);
     if (cacheResult !== undefined) return cacheResult;
 
@@ -12,7 +12,6 @@ export function splitMultilineText(ctx: CanvasRenderingContext2D, value: string,
         return [];
     }
 
-    //added one-line only auto linebreak feature
     let result: string[] = [];
     const encodedLines: string[] = value.split("\n");
 
