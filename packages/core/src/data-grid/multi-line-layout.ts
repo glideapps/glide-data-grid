@@ -1,4 +1,3 @@
-// FIXME: Replace with LRU cache
 const resultCache: Map<string, readonly string[]> = new Map();
 
 function getSplitPoint(ctx: CanvasRenderingContext2D, text: string, totalWidth: number, width: number): number {
@@ -70,5 +69,9 @@ export function splitMultilineText(ctx: CanvasRenderingContext2D, value: string,
     });
 
     result = result.map((l, i) => (i === 0 ? l : l.trim()));
+    resultCache.set(key, result);
+    if (resultCache.size > 500) {
+        resultCache.delete(resultCache.keys().next().value);
+    }
     return result;
 }
