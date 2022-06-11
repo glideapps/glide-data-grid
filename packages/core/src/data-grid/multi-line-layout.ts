@@ -71,6 +71,7 @@ export function splitMultilineText(ctx: CanvasRenderingContext2D, value: string,
     result = result.map((l, i) => (i === 0 ? l : l.trim()));
     resultCache.set(key, result);
     if (resultCache.size > 500) {
+        // this is not technically LRU behavior but it works "close enough" and is much cheaper
         resultCache.delete(resultCache.keys().next().value);
     }
     return result;
