@@ -895,8 +895,12 @@ export const AutomaticRowMarkers: React.VFC = () => {
     },
 };
 
-export const WrappingText: React.VFC<{ alignment: "left" | "center" | "right" }> = p => {
+export const WrappingText: React.VFC<{ alignment: "left" | "center" | "right"; length: number }> = p => {
     const { cols, getCellContent } = useMockDataGenerator(6);
+
+    const suffix = React.useMemo(() => {
+        return faker.lorem.sentence(p.length);
+    }, [p.length]);
 
     const mangledGetCellContent = React.useCallback<typeof getCellContent>(
         i => {
@@ -906,15 +910,15 @@ export const WrappingText: React.VFC<{ alignment: "left" | "center" | "right" }>
                 return {
                     kind: GridCellKind.Text,
                     allowOverlay: true,
-                    displayData: `${row}, This is a very long line of text that should wrap. It is long enough that it might even wrap multiple times. Who knows? What I do know is this ->\n is a newline character.`,
-                    data: `${row}, This is a very long line of text that should wrap. It is long enough that it might even wrap multiple times. Who knows? What I do know is this ->\n is a newline character.`,
+                    displayData: `${row}, ${suffix}`,
+                    data: `${row}, ${suffix}`,
                     allowWrapping: true,
                     contentAlign: p.alignment,
                 };
             }
             return getCellContent(i);
         },
-        [getCellContent, p.alignment]
+        [getCellContent, p.alignment, suffix]
     );
 
     return (
@@ -937,10 +941,18 @@ export const WrappingText: React.VFC<{ alignment: "left" | "center" | "right" }>
 };
 (WrappingText as any).args = {
     alignment: "left",
+    length: 20,
 };
 (WrappingText as any).argTypes = {
     alignment: {
         control: { type: "select", options: ["left", "center", "right"] },
+    },
+    length: {
+        control: {
+            type: "range",
+            min: 2,
+            max: 200,
+        },
     },
 };
 (WrappingText as any).parameters = {

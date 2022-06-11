@@ -410,7 +410,6 @@ export function drawTextCell(
         if (!allowWrapping) {
             drawSingleTextLine(ctx, data, x, y, w, h, bias, theme, contentAlign);
         } else {
-            let drawY = y + theme.cellVerticalPadding;
             const fontStyle = `${theme.fontFamily} ${theme.baseFontStyle}`;
             const split = splitMultilineText(ctx, data, fontStyle, w - theme.cellHorizontalPadding * 2);
             if (split.length > 1) {
@@ -422,6 +421,9 @@ export function drawTextCell(
             const textMetrics = measureTextCached("ABC", ctx, fontStyle);
             const emHeight = textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent;
             const lineHeight = theme.lineHeight * emHeight;
+
+            const optimalY = y + h / 2 - (lineHeight * split.length) / 2;
+            let drawY = Math.max(y + theme.cellVerticalPadding, optimalY);
             for (const line of split) {
                 drawSingleTextLine(ctx, line, x, drawY, w, emHeight, bias, theme, contentAlign);
                 drawY += lineHeight;
