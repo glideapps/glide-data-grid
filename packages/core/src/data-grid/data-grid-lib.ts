@@ -421,7 +421,7 @@ export function drawTextCell(
             }
             const textMetrics = measureTextCached("ABC", ctx, fontStyle);
             const emHeight = textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent;
-            const lineHeight = 1.05 * emHeight;
+            const lineHeight = theme.lineHeight * emHeight;
             for (const line of split) {
                 drawSingleTextLine(ctx, line, x, drawY, w, emHeight, bias, theme, contentAlign);
                 drawY += lineHeight;

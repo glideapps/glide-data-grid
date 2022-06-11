@@ -895,6 +895,62 @@ export const AutomaticRowMarkers: React.VFC = () => {
     },
 };
 
+export const WrappingText: React.VFC<{ alignment: "left" | "center" | "right" }> = p => {
+    const { cols, getCellContent } = useMockDataGenerator(6);
+
+    const mangledGetCellContent = React.useCallback<typeof getCellContent>(
+        i => {
+            const [col] = i;
+
+            if (col === 0) {
+                return {
+                    kind: GridCellKind.Text,
+                    allowOverlay: true,
+                    displayData:
+                        "This is a very long line of text that should wrap. It is long enough that it might even wrap multiple times. Who knows? What I do know is this ->\n is a newline character.",
+                    data:
+                        "This is a very long line of text that should wrap. It is long enough that it might even wrap multiple times. Who knows? What I do know is this ->\n is a newline character.",
+                    allowWrapping: true,
+                    contentAlign: p.alignment,
+                };
+            }
+            return getCellContent(i);
+        },
+        [getCellContent, p.alignment]
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Uneven Rows"
+            description={
+                <Description>
+                    Rows can be made uneven by passing a callback to the <PropName>rowHeight</PropName> prop
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowHeight={80}
+                getCellContent={mangledGetCellContent}
+                columns={cols}
+                rows={1_000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(WrappingText as any).args = {
+    alignment: "left",
+};
+(WrappingText as any).argTypes = {
+    alignment: {
+        control: { type: "select", options: ["left", "center", "right"] },
+    },
+};
+(WrappingText as any).parameters = {
+    options: {
+        showPanel: true,
+    },
+};
+
 export const UnevenRows: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
@@ -916,7 +972,7 @@ export const UnevenRows: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(AutomaticRowMarkers as any).parameters = {
+(UnevenRows as any).parameters = {
     options: {
         showPanel: false,
     },

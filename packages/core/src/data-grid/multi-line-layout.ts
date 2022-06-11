@@ -57,10 +57,9 @@ export function splitMultilineText(ctx: CanvasRenderingContext2D, value: string,
             if (textwidth > 0) {
                 result.push(line);
             }
-
-            result = result.map((l, i) => (i === 0 ? l : l.trim()));
         }
     });
 
+    result = result.map((l, i) => (i === 0 ? l : l.trim()));
     return result;
 }
