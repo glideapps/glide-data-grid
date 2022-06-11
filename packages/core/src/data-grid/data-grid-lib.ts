@@ -14,7 +14,7 @@ import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
-import { splitMultilineText } from "./multi-line-layout";
+import { clearMultilineCache, splitMultilineText } from "./multi-line-layout";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -239,6 +239,7 @@ async function clearCacheOnLoad() {
     await document.fonts.ready;
     metricsSize = 0;
     metricsCache = {};
+    clearMultilineCache();
 }
 
 void clearCacheOnLoad();
@@ -412,15 +413,20 @@ export function drawTextCell(
         } else {
             const fontStyle = `${theme.fontFamily} ${theme.baseFontStyle}`;
             const split = splitMultilineText(ctx, data, fontStyle, w - theme.cellHorizontalPadding * 2);
-            if (split.length > 1) {
+
+            const textMetrics = measureTextCached("ABCi09jgqpy", ctx, fontStyle); // do not question the magic string
+            const emHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
+            const lineHeight = theme.lineHeight * emHeight;
+
+            const totalClipHeight = Math.max(1, lineHeight) * split.length;
+            const mustClip = totalClipHeight + theme.cellVerticalPadding > h;
+
+            if (mustClip) {
                 // well now we have to clip because we might render outside the cell vertically
                 ctx.save();
                 ctx.rect(x, y, w, h);
                 ctx.clip();
             }
-            const textMetrics = measureTextCached("ABC", ctx, fontStyle);
-            const emHeight = textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent;
-            const lineHeight = theme.lineHeight * emHeight;
 
             const optimalY = y + h / 2 - (lineHeight * split.length) / 2;
             let drawY = Math.max(y + theme.cellVerticalPadding, optimalY);
@@ -429,7 +435,7 @@ export function drawTextCell(
                 drawY += lineHeight;
                 if (drawY > y + h) break;
             }
-            if (split.length > 1) {
+            if (mustClip) {
                 ctx.restore();
             }
         }

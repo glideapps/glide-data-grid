@@ -1,5 +1,9 @@
 const resultCache: Map<string, readonly string[]> = new Map();
 
+export function clearMultilineCache() {
+    resultCache.clear();
+}
+
 function getSplitPoint(ctx: CanvasRenderingContext2D, text: string, totalWidth: number, width: number): number {
     if (text.length <= 1) return text.length;
 
@@ -35,7 +39,12 @@ function getSplitPoint(ctx: CanvasRenderingContext2D, text: string, totalWidth: 
 }
 
 // Algorithm improved from https://github.com/geongeorge/Canvas-Txt/blob/master/src/index.js
-export function splitMultilineText(ctx: CanvasRenderingContext2D, value: string, fontStyle: string, width: number) {
+export function splitMultilineText(
+    ctx: CanvasRenderingContext2D,
+    value: string,
+    fontStyle: string,
+    width: number
+): readonly string[] {
     const key = `${value}_${fontStyle}_${width}px`;
     const cacheResult = resultCache.get(key);
     if (cacheResult !== undefined) return cacheResult;
@@ -68,7 +77,7 @@ export function splitMultilineText(ctx: CanvasRenderingContext2D, value: string,
         }
     });
 
-    result = result.map((l, i) => (i === 0 ? l : l.trim()));
+    result = result.map((l, i) => (i === 0 ? l.trimEnd() : l.trim()));
     resultCache.set(key, result);
     if (resultCache.size > 500) {
         // this is not technically LRU behavior but it works "close enough" and is much cheaper
