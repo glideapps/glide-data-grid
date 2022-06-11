@@ -900,16 +900,14 @@ export const WrappingText: React.VFC<{ alignment: "left" | "center" | "right" }>
 
     const mangledGetCellContent = React.useCallback<typeof getCellContent>(
         i => {
-            const [col] = i;
+            const [col, row] = i;
 
             if (col === 0) {
                 return {
                     kind: GridCellKind.Text,
                     allowOverlay: true,
-                    displayData:
-                        "This is a very long line of text that should wrap. It is long enough that it might even wrap multiple times. Who knows? What I do know is this ->\n is a newline character.",
-                    data:
-                        "This is a very long line of text that should wrap. It is long enough that it might even wrap multiple times. Who knows? What I do know is this ->\n is a newline character.",
+                    displayData: `${row}, This is a very long line of text that should wrap. It is long enough that it might even wrap multiple times. Who knows? What I do know is this ->\n is a newline character.`,
+                    data: `${row}, This is a very long line of text that should wrap. It is long enough that it might even wrap multiple times. Who knows? What I do know is this ->\n is a newline character.`,
                     allowWrapping: true,
                     contentAlign: p.alignment,
                 };
