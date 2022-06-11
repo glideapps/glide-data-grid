@@ -919,10 +919,10 @@ export const WrappingText: React.VFC<{ alignment: "left" | "center" | "right" }>
 
     return (
         <BeautifulWrapper
-            title="Uneven Rows"
+            title="Wrapping Text"
             description={
                 <Description>
-                    Rows can be made uneven by passing a callback to the <PropName>rowHeight</PropName> prop
+                    Text cells can have wrapping text by setting the <PropName>allowWrapping</PropName> prop to true.
                 </Description>
             }>
             <DataEditor
