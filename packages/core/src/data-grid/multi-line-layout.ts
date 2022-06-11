@@ -1,7 +1,41 @@
 // FIXME: Replace with LRU cache
 const resultCache: Map<string, readonly string[]> = new Map();
 
-// Algorithm imrpoved from https://github.com/geongeorge/Canvas-Txt/blob/master/src/index.js
+function getSplitPoint(ctx: CanvasRenderingContext2D, text: string, totalWidth: number, width: number): number {
+    if (text.length <= 1) return text.length;
+
+    if (totalWidth < width) return -1;
+
+    let guess = Math.floor((width / totalWidth) * text.length);
+    let guessWidth = ctx.measureText(text.substring(0, guess)).width;
+
+    if (guessWidth === width) {
+        // NAILED IT
+    } else if (guessWidth < width) {
+        while (guessWidth < width) {
+            guess++;
+            guessWidth = ctx.measureText(text.substring(0, guess)).width;
+        }
+        guess--;
+    } else {
+        // we only need to check for spaces as we go back
+        while (guessWidth > width) {
+            guess--;
+            guessWidth = ctx.measureText(text.substring(0, guess)).width;
+        }
+    }
+
+    if (text[guess] !== " ") {
+        const lastSpace = text.lastIndexOf(" ", guess);
+        if (lastSpace > 0) {
+            guess = lastSpace;
+        }
+    }
+
+    return guess;
+}
+
+// Algorithm improved from https://github.com/geongeorge/Canvas-Txt/blob/master/src/index.js
 export function splitMultilineText(ctx: CanvasRenderingContext2D, value: string, fontStyle: string, width: number) {
     const key = `${value}_${fontStyle}_${width}px`;
     const cacheResult = resultCache.get(key);
@@ -16,45 +50,20 @@ export function splitMultilineText(ctx: CanvasRenderingContext2D, value: string,
     const encodedLines: string[] = value.split("\n");
 
     encodedLines.forEach(line => {
-        let textwidth = ctx.measureText(line).width;
-        if (textwidth <= width) {
+        let textWidth = ctx.measureText(line).width;
+        if (textWidth <= width) {
             // line fits, just push it
             result.push(line);
         } else {
-            const lineLength = width;
-            let textLength;
-            let proposedWidth;
-            let subLine;
-            while (textwidth > lineLength) {
-                textLength = 0;
-                proposedWidth = 0;
-                subLine = "";
-                while (proposedWidth < lineLength) {
-                    // this is dumb as shit, walking up 1 char at a time. we can do better.
-                    textLength++;
-                    subLine = line.substring(0, textLength);
-                    proposedWidth = ctx.measureText(line.substring(0, textLength)).width;
-                }
-                // Remove last character that was out of the box
-                textLength--;
-                subLine = subLine.substring(0, textLength);
-                //if statement ensures a new line only happens at a space, and not amidst a word
-                const backup = textLength;
-                if (line.substring(textLength, textLength + 1) !== " ") {
-                    while (line.substring(textLength, textLength + 1) !== " " && textLength !== 0) {
-                        textLength--;
-                    }
-                    if (textLength === 0) {
-                        textLength = backup;
-                    }
-                    subLine = line.substring(0, textLength);
-                }
+            while (textWidth > width) {
+                const splitPoint = getSplitPoint(ctx, line, textWidth, width);
+                const subLine = line.substring(0, splitPoint);
 
-                line = line.substring(textLength);
+                line = line.substring(subLine.length);
                 result.push(subLine);
-                textwidth = ctx.measureText(line).width;
+                textWidth = ctx.measureText(line).width;
             }
-            if (textwidth > 0) {
+            if (textWidth > 0) {
                 result.push(line);
             }
         }
