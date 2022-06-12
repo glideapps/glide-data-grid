@@ -4,9 +4,19 @@ export function clearMultilineCache() {
     resultCache.clear();
 }
 
+// speed optimization plan
+//
+// 1) Use modified newton method to approach correct split point rather than walk after first guess (still walk when n
+//    low enough)
+//       -- Turns out the guess method we have already is too good and doesn't leave room for newtons method to improve
+//
+// 2) Make some conservative guess on the initial textWidth measure to not have to measure the entire string if it
+//    is very large. This prevents laying out a lot of characters which will definitely be wrapped.
+
 function getSplitPoint(ctx: CanvasRenderingContext2D, text: string, totalWidth: number, width: number): number {
     if (text.length <= 1) return text.length;
 
+    // this should never happen, but we are protecting anyway
     if (totalWidth < width) return -1;
 
     let guess = Math.floor((width / totalWidth) * text.length);
@@ -57,7 +67,7 @@ export function splitMultilineText(
     let result: string[] = [];
     const encodedLines: string[] = value.split("\n");
 
-    encodedLines.forEach(line => {
+    for (let line of encodedLines) {
         let textWidth = ctx.measureText(line).width;
         if (textWidth <= width) {
             // line fits, just push it
@@ -75,7 +85,7 @@ export function splitMultilineText(
                 result.push(line);
             }
         }
-    });
+    }
 
     result = result.map((l, i) => (i === 0 ? l.trimEnd() : l.trim()));
     resultCache.set(key, result);

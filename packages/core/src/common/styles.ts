@@ -83,7 +83,7 @@ const dataEditorBaseTheme: Theme = {
     fontFamily:
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
     editorFontSize: "13px",
-    lineHeight: 1.4, //meaningless scaler depends on your font
+    lineHeight: 1.4, //unitless scaler depends on your font
 };
 
 export const styled = baseStyled as ThemedStyledInterface<Theme>;
