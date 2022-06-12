@@ -418,8 +418,8 @@ export function drawTextCell(
             const emHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
             const lineHeight = theme.lineHeight * emHeight;
 
-            const totalClipHeight = Math.max(1, lineHeight) * split.length;
-            const mustClip = totalClipHeight + theme.cellVerticalPadding > h;
+            const actualHeight = emHeight + lineHeight * (split.length - 1);
+            const mustClip = actualHeight + theme.cellVerticalPadding > h;
 
             if (mustClip) {
                 // well now we have to clip because we might render outside the cell vertically
@@ -428,7 +428,7 @@ export function drawTextCell(
                 ctx.clip();
             }
 
-            const optimalY = y + h / 2 - (lineHeight * split.length) / 2;
+            const optimalY = y + h / 2 - actualHeight / 2;
             let drawY = Math.max(y + theme.cellVerticalPadding, optimalY);
             for (const line of split) {
                 drawSingleTextLine(ctx, line, x, drawY, w, emHeight, bias, theme, contentAlign);
