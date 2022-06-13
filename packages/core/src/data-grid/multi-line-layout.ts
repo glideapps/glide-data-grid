@@ -30,7 +30,10 @@ function makeHyperMap(ctx: CanvasRenderingContext2D, avgSize: number): Record<st
 
     const values = Object.values(baseMap);
     const avg = values.reduce((pv, cv) => pv + cv, 0) / values.length;
-    const scaler = (avgSize / avg + 3) / 4;
+
+    // Artisnal hand-tuned constants that have no real meaning other than they make it work better for most fonts
+    const damper = 3;
+    const scaler = (avgSize / avg + damper) / (damper + 1);
     const keys = Object.keys(baseMap);
     for (const key of keys) {
         baseMap[key] *= scaler;
