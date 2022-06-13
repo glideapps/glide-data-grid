@@ -98,6 +98,7 @@ export function drawCell(
     spriteManager: SpriteManager,
     hoverAmount: number,
     hoverInfo: HoverInfo | undefined,
+    hyperWrapping: boolean,
     frameTime: number,
     lastPrep?: PrepResult,
     enqueue?: (item: Item) => void
@@ -125,6 +126,7 @@ export function drawCell(
         hoverY,
         imageLoader,
         spriteManager,
+        hyperWrapping,
     };
     let forceAnim = false;
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
@@ -1067,6 +1069,7 @@ function drawCells(
     spriteManager: SpriteManager,
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
+    hyperWrapping: boolean,
     outerTheme: Theme,
     enqueue: (item: Item) => void
 ): Rectangle[] | undefined {
@@ -1318,6 +1321,7 @@ function drawCells(
                             spriteManager,
                             hoverValue?.hoverAmount ?? 0,
                             hoverInfo,
+                            hyperWrapping,
                             frameTime,
                             prepResult,
                             enqueue
@@ -1816,6 +1820,7 @@ export interface DrawGridArg {
     readonly selection: GridSelection;
     readonly fillHandle: boolean;
     readonly lastRowSticky: boolean;
+    readonly hyperWrapping: boolean;
     readonly rows: number;
     readonly getCellContent: (cell: Item) => InnerGridCell;
     readonly getGroupDetails: GroupDetailsCallback;
@@ -1928,6 +1933,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         imageLoader,
         lastBlitData,
         hoverValues,
+        hyperWrapping,
         hoverInfo,
         spriteManager,
         scrolling,
@@ -2102,6 +2108,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 spriteManager,
                 hoverValues,
                 hoverInfo,
+                hyperWrapping,
                 theme,
                 enqueue
             );
@@ -2287,6 +2294,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         spriteManager,
         hoverValues,
         hoverInfo,
+        hyperWrapping,
         theme,
         enqueue
     );

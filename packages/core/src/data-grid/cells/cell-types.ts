@@ -22,6 +22,7 @@ export interface BaseDrawArgs {
     hoverY: number | undefined;
     imageLoader: ImageWindowLoader;
     spriteManager: SpriteManager;
+    hyperWrapping: boolean;
 }
 
 interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {

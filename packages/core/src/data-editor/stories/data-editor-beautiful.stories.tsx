@@ -895,11 +895,15 @@ export const AutomaticRowMarkers: React.VFC = () => {
     },
 };
 
-export const WrappingText: React.VFC<{ alignment: "left" | "center" | "right"; length: number }> = p => {
+export const WrappingText: React.VFC<{
+    alignment: "left" | "center" | "right";
+    length: number;
+    hyperWrapping: boolean;
+}> = p => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
     const suffix = React.useMemo(() => {
-        return faker.lorem.sentence(p.length);
+        return range(0, 100).map(() => faker.lorem.sentence(p.length));
     }, [p.length]);
 
     const mangledGetCellContent = React.useCallback<typeof getCellContent>(
@@ -910,7 +914,7 @@ export const WrappingText: React.VFC<{ alignment: "left" | "center" | "right"; l
                 return {
                     kind: GridCellKind.Text,
                     allowOverlay: true,
-                    displayData: `${row}, ${suffix}`,
+                    displayData: `${row},\n${suffix[row % suffix.length]}`,
                     data: `${row}, ${suffix}`,
                     allowWrapping: true,
                     contentAlign: p.alignment,
@@ -935,6 +939,9 @@ export const WrappingText: React.VFC<{ alignment: "left" | "center" | "right"; l
                 getCellContent={mangledGetCellContent}
                 columns={cols}
                 rows={1_000}
+                experimental={{
+                    hyperWrapping: p.hyperWrapping,
+                }}
             />
         </BeautifulWrapper>
     );
@@ -942,6 +949,7 @@ export const WrappingText: React.VFC<{ alignment: "left" | "center" | "right"; l
 (WrappingText as any).args = {
     alignment: "left",
     length: 20,
+    hyperWrapping: false,
 };
 (WrappingText as any).argTypes = {
     alignment: {

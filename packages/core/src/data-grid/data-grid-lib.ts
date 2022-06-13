@@ -376,7 +376,8 @@ export function drawTextCell(
     args: BaseDrawArgs,
     data: string,
     contentAlign?: BaseGridCell["contentAlign"],
-    allowWrapping?: boolean
+    allowWrapping?: boolean,
+    hyperWrapping?: boolean
 ) {
     const { ctx, x, y, w, h, theme } = args;
 
@@ -412,7 +413,13 @@ export function drawTextCell(
             drawSingleTextLine(ctx, data, x, y, w, h, bias, theme, contentAlign);
         } else {
             const fontStyle = `${theme.fontFamily} ${theme.baseFontStyle}`;
-            const split = splitMultilineText(ctx, data, fontStyle, w - theme.cellHorizontalPadding * 2);
+            const split = splitMultilineText(
+                ctx,
+                data,
+                fontStyle,
+                w - theme.cellHorizontalPadding * 2,
+                hyperWrapping ?? false
+            );
 
             const textMetrics = measureTextCached("ABCi09jgqpy", ctx, fontStyle); // do not question the magic string
             const emHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
