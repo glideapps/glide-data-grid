@@ -3,7 +3,7 @@ const resultCache: Map<string, readonly string[]> = new Map();
 // font -> avg pixels per char
 const metrics: Map<string, { count: number; size: number }> = new Map();
 
-const hyperMaps: Map<string, Record<string, number>> = new Map();
+const hyperMaps: Map<string, Map<string, number>> = new Map();
 
 export function clearMultilineCache() {
     resultCache.clear();
@@ -11,57 +11,87 @@ export function clearMultilineCache() {
     hyperMaps.clear();
 }
 
-// speed optimization plan
-//
-// 1) Use modified newton method to approach correct split point rather than walk after first guess (still walk when n
-//    low enough)
-//       -- Turns out the guess method we have already is too good and doesn't leave room for newtons method to improve
-//
-// 2) Make some conservative guess on the initial textWidth measure to not have to measure the entire string if it
-//    is very large. This prevents laying out a lot of characters which will definitely be wrapped.
-//      - End result of this seems to be that our guesses become more accurate as well due to the data for the guess
-//        being more local. In hindsight this is obvious.
+export function backProp(
+    text: string,
+    realWidth: number,
+    keyMap: Map<string, number>,
+    temperature: number,
+    avgSize: number
+) {
+    let guessWidth = 0;
+    const contribMap: Record<string, number> = {};
+    for (const char of text) {
+        const v = keyMap.get(char) ?? avgSize;
+        guessWidth += v;
+        contribMap[char] = (contribMap[char] ?? 0) + 1;
+    }
 
-function makeHyperMap(ctx: CanvasRenderingContext2D, avgSize: number): Record<string, number> {
-    const baseMap = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890,.-+=?"
-        .split("")
-        .map(char => ({ [char]: ctx.measureText(char).width }))
-        .reduce((pv, acc) => Object.assign(acc, pv), {});
+    const diff = realWidth - guessWidth;
 
-    const values = Object.values(baseMap);
-    const avg = values.reduce((pv, cv) => pv + cv, 0) / values.length;
+    for (const key of Object.keys(contribMap)) {
+        const numContribution = contribMap[key];
+        const contribWidth = keyMap.get(key) ?? avgSize;
+        const contribAmount = (contribWidth * numContribution) / guessWidth;
+        const adjustment = (diff * contribAmount * temperature) / numContribution;
+        const newVal = contribWidth + adjustment;
+        keyMap.set(key, newVal);
+    }
+}
+
+function makeHyperMap(ctx: CanvasRenderingContext2D, avgSize: number): Map<string, number> {
+    const result: Map<string, number> = new Map();
+    let total = 0;
+    for (const char of "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890,.-+=?") {
+        const w = ctx.measureText(char).width;
+        result.set(char, w);
+        total += w;
+    }
+
+    const avg = total / result.size;
 
     // Artisnal hand-tuned constants that have no real meaning other than they make it work better for most fonts
     const damper = 3;
     const scaler = (avgSize / avg + damper) / (damper + 1);
-    const keys = Object.keys(baseMap);
+    const keys = result.keys();
     for (const key of keys) {
-        baseMap[key] *= scaler;
+        result.set(key, (result.get(key) ?? avg) * scaler);
     }
-    return baseMap;
+    return result;
 }
 
 function measureText(ctx: CanvasRenderingContext2D, text: string, fontStyle: string, hyperMode: boolean): number {
     const current = metrics.get(fontStyle);
 
-    if (hyperMode && current !== undefined && current.count > 50000) {
+    if (hyperMode && current !== undefined && current.count > 20000) {
         let hyperMap = hyperMaps.get(fontStyle);
         if (hyperMap === undefined) {
             hyperMap = makeHyperMap(ctx, current.size);
             hyperMaps.set(fontStyle, hyperMap);
         }
-        let final = 0;
-        for (const char of text) {
-            final += hyperMap[char] ?? current.size;
+
+        if (current.count > 500000) {
+            let final = 0;
+            for (const char of text) {
+                final += hyperMap.get(char) ?? current.size;
+            }
+            return final * 1.01; //safety margin
         }
-        return final;
+
+        const result = ctx.measureText(text);
+        backProp(text, result.width, hyperMap, Math.max(0.05, 1 - current.count / 200000), current.size);
+        metrics.set(fontStyle, {
+            count: current.count + text.length,
+            size: current.size,
+        });
+        return result.width;
     }
 
     const result = ctx.measureText(text);
+
     const avg = result.width / text.length;
 
     // we've collected enough data
-    if ((current?.count ?? 0) > 50000) {
+    if ((current?.count ?? 0) > 20000) {
         return result.width;
     }
 
@@ -148,7 +178,7 @@ export function splitMultilineText(
 
     const fontMetrics = metrics.get(fontStyle);
     const safeLineGuess = fontMetrics === undefined ? value.length : (width / fontMetrics.size) * 1.5;
-    const hyperMode = hyperWrappingAllowed && fontMetrics !== undefined && fontMetrics.count > 45000;
+    const hyperMode = hyperWrappingAllowed && fontMetrics !== undefined && fontMetrics.count > 20000;
 
     for (let line of encodedLines) {
         let textWidth = measureText(ctx, line.substring(0, safeLineGuess), fontStyle, hyperMode);
