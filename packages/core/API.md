@@ -848,9 +848,11 @@ The grid will not attempt to add additional rows if more data is pasted then can
 
 ```ts
 trailingRowOptions?: {
-    readonly tint?: boolean;
     readonly hint?: string;
-    readonly sticky?: boolean;
+    readonly addIcon?: string;
+    readonly targetColumn?: number | GridColumn;
+    readonly themeOverride?: Partial<Theme>;
+    readonly disabled?: boolean;
 }
 onRowAppended?: () => void;
 ```
