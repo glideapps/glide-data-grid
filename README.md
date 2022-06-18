@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="media/icon.png" width="224px"/><br/>
+  <img src="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/icon.png" width="224px"/><br/>
   <b>Glide Data Grid</b>
 </h1>
 <p align="center">A canvas-based data grid, supporting <b>millions</b> of rows, <b>rapid</b> updating, and <b>native scrolling</b>.</p>
@@ -7,8 +7,11 @@
 <p align="center">Built as the basis for the <a href="https://www.glideapps.com/data-editor" target="_blank">Glide Data Editor</a>. <a href="https://www.glideapps.com/jobs#open-positions" target="_blank">We're hiring</a>.</p>
 
 
-![Data Grid](media/data-grid.png#gh-light-mode-only)
-![Data Grid](media/data-grid-dark.png#gh-dark-mode-only)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/data-grid-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/data-grid.png">
+  <img alt="Glide Data Grid with sample data" src="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/data-grid.png">
+</picture>
 
 [![Version](https://img.shields.io/npm/v/@glideapps/glide-data-grid?color=blue&label=latest&style=for-the-badge)](https://github.com/glideapps/glide-data-grid/releases)
 [![React 16+](https://img.shields.io/badge/React-16+-00ADD8?style=for-the-badge&logo=react)](https://reactjs.org)
