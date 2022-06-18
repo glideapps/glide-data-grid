@@ -4,7 +4,7 @@
 </h1>
 <p align="center">A canvas-based data grid, supporting <b>millions</b> of rows, <b>rapid</b> updating, and <b>native scrolling</b>.</p>
 
-<p align="center" style="margin-bottom: 32px;">Built as the basis for the <a href="https://www.glideapps.com/data-editor" target="_blank">Glide Data Editor</a>. <a href="https://www.glideapps.com/jobs#open-positions" target="_blank">We're hiring</a>.</p>
+<p align="center">Built as the basis for the <a href="https://www.glideapps.com/data-editor" target="_blank">Glide Data Editor</a>. <a href="https://www.glideapps.com/jobs#open-positions" target="_blank">We're hiring</a>.</p>
 
 [![Version](https://img.shields.io/npm/v/@glideapps/glide-data-grid?color=blue&label=latest&style=for-the-badge)](https://github.com/glideapps/glide-data-grid/releases)
 [![React 16+](https://img.shields.io/badge/React-16+-00ADD8?style=for-the-badge&logo=react)](https://reactjs.org)
