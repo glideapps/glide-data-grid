@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/icon.png" width="224px"/><br/>
   <b>Glide Data Grid</b>
 </h1>
-<p align="center">A relatively small HTML5 Canvas based data editor supporting <b>millions</b> of rows, <b>rapid</b> updating, and fully <b>native scrolling</b>. We built <a href="https://grid.glideapps.com" target="_blank">Data Grid</a> as the basis for the <a href="https://docs.glideapps.com/all/reference/data-editor/introduction-to-the-data-editor" target="_blank">Glide Data Editor</a>.</p>
+<p align="center">A relatively small HTML5 Canvas based data editor supporting <b>millions</b> of rows, <b>rapid</b> updating, and fully <b>native scrolling</b>. We built <a href="https://grid.glideapps.com" target="_blank">Data Grid</a> as the basis for the <a href="https://www.glideapps.com/data-editor" target="_blank">Glide Data Editor</a>.</p>
 
 [![Version](https://img.shields.io/npm/v/@glideapps/glide-data-grid?color=blue&label=latest&style=for-the-badge)](https://github.com/glideapps/glide-data-grid/releases)
 [![React 16+](https://img.shields.io/badge/React-16+-00ADD8?style=for-the-badge&logo=react)](https://reactjs.org)
