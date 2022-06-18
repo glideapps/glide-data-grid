@@ -34,13 +34,13 @@ Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-d
 
 First make sure you are using React 16 or greater. Then install the data grid:
 
-```
+```shell
 npm i @glideapps/glide-data-grid
 ```
 
 You may also need to install the peer dependencies if you don't have them already:
 
-```
+```shell
 npm i lodash marked react-responsive-carousel styled-components
 ```
 
