@@ -14,6 +14,7 @@ import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
+import { DrawArgs } from "../data-editor/custom-cell-draw-args";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -350,7 +351,29 @@ export function prepTextCell(
     return result;
 }
 
-export function drawTextCell(args: BaseDrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
+export function drawTextCellExternal(args: DrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
+    const { rect } = args;
+
+    args.ctx.fillStyle = args.theme.textDark;
+    drawTextCell(
+        {
+            ctx: args.ctx,
+            x: rect.x,
+            y: rect.y,
+            h: rect.height,
+            w: rect.width,
+            theme: args.theme,
+        },
+        data,
+        contentAlign
+    );
+}
+
+export function drawTextCell(
+    args: Pick<BaseDrawArgs, "x" | "y" | "ctx" | "w" | "h" | "theme">,
+    data: string,
+    contentAlign?: BaseGridCell["contentAlign"]
+) {
     const { ctx, x, y, w, h, theme } = args;
     if (data.includes("\n")) {
         // new lines are rare and split is relatively expensive compared to the search

@@ -2,7 +2,8 @@ import { renderHook } from "@testing-library/react-hooks";
 import { getDefaultTheme } from "..";
 import ImageWindowLoader from "../common/image-window-loader";
 import { CustomCell, GridCellKind } from "../data-grid/data-grid-types";
-import { DrawArgs, useCustomCells } from "./use-custom-cells";
+import { useCustomCells } from "./use-custom-cells";
+import { DrawArgs } from "./custom-cell-draw-args";
 
 type MyCustomCell = CustomCell<{ kind: "test"; pasted?: string }>;
 

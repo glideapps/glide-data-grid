@@ -15,6 +15,7 @@ import { RangeCell } from "./cells/range-cell";
 import { SpinnerCell } from "./cells/spinner-cell";
 
 import "@toast-ui/editor/dist/toastui-editor.css";
+import { DatePickerCell } from "./cells/date-picker-cell";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -309,6 +310,21 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
+                    } else if (col === 9) {
+                        num = row + 1;
+                        rand();
+                        const d: DatePickerCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "date-picker-cell",
+                                date: new Date(),
+                                displayDate: new Date().toISOString(),
+                                format: "date",
+                            },
+                        };
+                        return d;
                     }
                     throw new Error("Fail");
                 }}
@@ -347,6 +363,10 @@ export const CustomCells: React.VFC = () => {
                     },
                     {
                         title: "Spinner",
+                        width: 150,
+                    },
+                    {
+                        title: "Date Picker",
                         width: 150,
                     },
                 ]}
