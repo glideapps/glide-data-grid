@@ -264,7 +264,7 @@ export function copyToClipboard(
 
     const str = cells.map(row => row.map((a, b) => formatCell(a, b, false)).join("\t")).join("\n");
 
-    if (window.navigator.clipboard.write !== undefined || e !== undefined) {
+    if (window.navigator.clipboard?.write !== undefined || e !== undefined) {
         const rootEl = document.createElement("tbody");
 
         for (const row of cells) {
@@ -286,7 +286,7 @@ export function copyToClipboard(
 
             rootEl.appendChild(rowEl);
         }
-        if (window.navigator.clipboard.write !== undefined) {
+        if (window.navigator.clipboard?.write !== undefined) {
             void window.navigator.clipboard.write([
                 new ClipboardItem({
                     "text/plain": new Blob([str], { type: "text/plain" }),
@@ -300,10 +300,10 @@ export function copyToClipboard(
                 e.clipboardData.setData("text/html", `<table>${rootEl.outerHTML}</table>`);
                 e.preventDefault();
             } catch {
-                void window.navigator.clipboard.writeText(str);
+                void window.navigator.clipboard?.writeText(str);
             }
         }
     } else {
-        void window.navigator.clipboard.writeText(str);
+        void window.navigator.clipboard?.writeText(str);
     }
 }
