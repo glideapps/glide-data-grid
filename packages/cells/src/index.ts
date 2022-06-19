@@ -44,7 +44,7 @@ export {
     cells as allCells,
 };
 
-export {
+export type {
     StarCell as StarCellType,
     SparklineCell as SparklineCellType,
     TagsCell as TagsCellType,
