@@ -2848,6 +2848,7 @@ export const HighlightCells: React.VFC = () => {
                     width: 10,
                     height: 10,
                 },
+                style: "solid",
             },
             {
                 color: "#b000b021",

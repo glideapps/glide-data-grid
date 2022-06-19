@@ -49,6 +49,7 @@ type HoverInfo = readonly [Item, Item];
 export interface Highlight {
     readonly color: string;
     readonly range: Rectangle;
+    readonly style?: "dashed" | "solid";
 }
 
 interface GroupDetails {
@@ -1526,9 +1527,9 @@ function drawHighlightRings(
         );
         if (r.width === 1 && r.height === 1) {
             if (r.x < freezeColumns) {
-                return [{ color: h.color, rect: topLeftBounds }, undefined];
+                return [{ color: h.color, style: h.style ?? "dashed", rect: topLeftBounds }, undefined];
             }
-            return [undefined, { color: h.color, rect: topLeftBounds }];
+            return [undefined, { color: h.color, style: h.style ?? "dashed", rect: topLeftBounds }];
         }
 
         const bottomRightBounds = computeBounds(
@@ -1587,21 +1588,23 @@ function drawHighlightRings(
             return [
                 {
                     color: h.color,
+                    style: h.style ?? "dashed",
                     rect: {
                         x: topLeftBounds.x,
                         y: topLeftBounds.y,
                         width: freezeSectionRightBounds.x + freezeSectionRightBounds.width - topLeftBounds.x,
                         height: freezeSectionRightBounds.y + freezeSectionRightBounds.height - topLeftBounds.y,
-                    },
+                    } as Rectangle,
                 },
                 {
                     color: h.color,
+                    style: h.style ?? "dashed",
                     rect: {
                         x: unfreezeSectionleftBounds.x,
                         y: unfreezeSectionleftBounds.y,
                         width: bottomRightBounds.x + bottomRightBounds.width - unfreezeSectionleftBounds.x,
                         height: bottomRightBounds.y + bottomRightBounds.height - unfreezeSectionleftBounds.y,
-                    },
+                    } as Rectangle,
                 },
             ];
         } else {
@@ -1609,12 +1612,13 @@ function drawHighlightRings(
                 undefined,
                 {
                     color: h.color,
+                    style: h.style ?? "dashed",
                     rect: {
                         x: topLeftBounds.x,
                         y: topLeftBounds.y,
                         width: bottomRightBounds.x + bottomRightBounds.width - topLeftBounds.x,
                         height: bottomRightBounds.y + bottomRightBounds.height - topLeftBounds.y,
-                    },
+                    } as Rectangle,
                 },
             ];
         }
@@ -1625,7 +1629,13 @@ function drawHighlightRings(
     const drawCb = () => {
         ctx.beginPath();
         ctx.save();
-        ctx.setLineDash([5, 3]);
+        let dashed = false;
+        const setDashed = (dash: boolean) => {
+            if (dashed === dash) return;
+            ctx.setLineDash(dash ? [5, 3] : []);
+            dashed = dash;
+        };
+
         ctx.lineWidth = 1;
         for (const dr of drawRects) {
             const [s] = dr;
@@ -1633,6 +1643,7 @@ function drawHighlightRings(
                 s !== undefined &&
                 intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
             ) {
+                setDashed(s.style === "dashed");
                 ctx.strokeStyle = withAlpha(s.color, 1);
                 ctx.strokeRect(s.rect.x + 1, s.rect.y + 1, s.rect.width - 2, s.rect.height - 2);
             }
@@ -1644,6 +1655,7 @@ function drawHighlightRings(
                 s !== undefined &&
                 intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
             ) {
+                setDashed(s.style === "dashed");
                 if (!clipped && s.rect.x < stickyWidth) {
                     ctx.rect(stickyWidth, 0, width, height);
                     ctx.clip();

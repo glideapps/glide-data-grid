@@ -585,6 +585,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         x: r.range.x + rowMarkerOffset,
                         width: Math.min(maxWidth, r.range.width),
                     },
+                    style: r.style,
                 };
             })
             .filter(x => x !== undefined) as typeof highlightRegionsIn;
