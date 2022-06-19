@@ -1437,10 +1437,17 @@ function overdrawStickyBoundaries(
     totalHeaderHeight: number,
     lastRowSticky: boolean,
     rows: number,
+    verticalBorder: (col: number) => boolean,
     getRowHeight: (row: number) => number,
     theme: Theme
 ) {
-    const drawX = getStickyWidth(effectiveCols);
+    let drawFreezeBorder = false;
+    for (const c of effectiveCols) {
+        if (c.sticky) continue;
+        drawFreezeBorder = verticalBorder(c.sourceIndex);
+        break;
+    }
+    const drawX = drawFreezeBorder ? getStickyWidth(effectiveCols) : 0;
     ctx.beginPath();
 
     // fill in header color behind header border
@@ -2212,6 +2219,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         totalHeaderHeight,
         lastRowSticky,
         rows,
+        verticalBorder,
         getRowHeight,
         theme
     );
