@@ -1,4 +1,4 @@
-import styled, { ThemeProvider } from "styled-components";
+import styled from "styled-components";
 import * as React from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor, DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
