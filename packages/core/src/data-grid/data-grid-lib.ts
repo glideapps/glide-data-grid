@@ -15,6 +15,7 @@ import React from "react";
 import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
 import { clearMultilineCache, splitMultilineText } from "./multi-line-layout";
+import { DrawArgs } from "../data-editor/custom-cell-draw-args";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -352,6 +353,24 @@ export function prepTextCell(
     return result;
 }
 
+export function drawTextCellExternal(args: DrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
+    const { rect } = args;
+
+    args.ctx.fillStyle = args.theme.textDark;
+    drawTextCell(
+        {
+            ctx: args.ctx,
+            x: rect.x,
+            y: rect.y,
+            h: rect.height,
+            w: rect.width,
+            theme: args.theme,
+        },
+        data,
+        contentAlign
+    );
+}
+
 function drawSingleTextLine(
     ctx: CanvasRenderingContext2D,
     data: string,
@@ -373,7 +392,7 @@ function drawSingleTextLine(
 }
 
 export function drawTextCell(
-    args: BaseDrawArgs,
+    args: Pick<BaseDrawArgs, "x" | "y" | "w" | "h" | "ctx" | "theme">,
     data: string,
     contentAlign?: BaseGridCell["contentAlign"],
     allowWrapping?: boolean,
