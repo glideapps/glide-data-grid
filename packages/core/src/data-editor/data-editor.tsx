@@ -769,25 +769,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return;
             }
 
-            let content = getMangledCellContent([col, row]);
+            const content = getMangledCellContent([col, row]);
             if (!content.allowOverlay) {
                 return;
-            }
-            switch (content.kind) {
-                case GridCellKind.Number:
-                    content = {
-                        ...content,
-                        data: undefined,
-                    };
-                    break;
-                case GridCellKind.Text:
-                case GridCellKind.Markdown:
-                case GridCellKind.Uri:
-                    content = {
-                        ...content,
-                        data: "",
-                    };
-                    break;
             }
 
             setOverlaySimple({
