@@ -134,6 +134,7 @@ export interface DataGridProps {
         readonly isSubGrid?: boolean;
         readonly strict?: boolean;
         readonly scrollbarWidthOverride?: number;
+        readonly hyperWrapping?: boolean;
     };
 
     readonly headerIcons?: SpriteMap;
@@ -510,6 +511,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             hoverInfo: hoverInfoRef.current,
             spriteManager,
             scrolling,
+            hyperWrapping: p.experimental?.hyperWrapping ?? false,
             touchMode: lastWasTouch,
             enqueue: enqueueRef.current,
         };
@@ -540,13 +542,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         dragAndDropState,
         theme,
         headerHeight,
-        isFocused,
         groupHeaderHeight,
-        selection,
         disabledRows,
         rowHeight,
         verticalBorder,
         isResizing,
+        isFocused,
+        selection,
         fillHandle,
         lastRowSticky,
         rows,
@@ -560,6 +562,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         imageLoader,
         spriteManager,
         scrolling,
+        p.experimental?.hyperWrapping,
         lastWasTouch,
     ]);
 
@@ -1014,6 +1017,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                 spriteManager,
                                 1,
                                 undefined,
+                                false,
                                 0
                             );
                         }

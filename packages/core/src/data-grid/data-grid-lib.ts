@@ -14,6 +14,7 @@ import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
+import { clearMultilineCache, splitMultilineText } from "./multi-line-layout";
 import { DrawArgs } from "../data-editor/custom-cell-draw-args";
 
 export interface MappedGridColumn extends SizedGridColumn {
@@ -239,6 +240,7 @@ async function clearCacheOnLoad() {
     await document.fonts.ready;
     metricsSize = 0;
     metricsCache = {};
+    clearMultilineCache();
 }
 
 void clearCacheOnLoad();
@@ -369,21 +371,50 @@ export function drawTextCellExternal(args: DrawArgs, data: string, contentAlign?
     );
 }
 
-export function drawTextCell(
-    args: Pick<BaseDrawArgs, "x" | "y" | "ctx" | "w" | "h" | "theme">,
+function drawSingleTextLine(
+    ctx: CanvasRenderingContext2D,
     data: string,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    bias: number,
+    theme: Theme,
     contentAlign?: BaseGridCell["contentAlign"]
 ) {
+    if (contentAlign === "right") {
+        ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2 + bias);
+    } else if (contentAlign === "center") {
+        ctx.fillText(data, x + w / 2, y + h / 2 + bias);
+    } else {
+        ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2 + bias);
+    }
+}
+
+export function drawTextCell(
+    args: Pick<BaseDrawArgs, "x" | "y" | "w" | "h" | "ctx" | "theme">,
+    data: string,
+    contentAlign?: BaseGridCell["contentAlign"],
+    allowWrapping?: boolean,
+    hyperWrapping?: boolean
+) {
     const { ctx, x, y, w, h, theme } = args;
-    if (data.includes("\n")) {
-        // new lines are rare and split is relatively expensive compared to the search
-        // it pays off to not do the split contantly.
-        data = data.split(/\r?\n/)[0];
+
+    allowWrapping = allowWrapping ?? false;
+
+    if (!allowWrapping) {
+        if (data.includes("\n")) {
+            // new lines are rare and split is relatively expensive compared to the search
+            // it pays off to not do the split contantly.
+            data = data.split(/\r?\n/)[0];
+        }
+        const max = w / 4; // no need to round, slice will just truncate this
+        if (data.length > max) {
+            data = data.slice(0, max);
+        }
     }
-    const max = w / 4; // no need to round, slice will just truncate this
-    if (data.length > max) {
-        data = data.slice(0, max);
-    }
+
+    const bias = getMiddleCenterBias(ctx, theme);
 
     if (data.length > 0) {
         let changed = false;
@@ -397,13 +428,42 @@ export function drawTextCell(
             changed = true;
         }
 
-        const bias = getMiddleCenterBias(ctx, theme);
-        if (contentAlign === "right") {
-            ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2 + bias);
-        } else if (contentAlign === "center") {
-            ctx.fillText(data, x + w / 2, y + h / 2 + bias);
+        if (!allowWrapping) {
+            drawSingleTextLine(ctx, data, x, y, w, h, bias, theme, contentAlign);
         } else {
-            ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2 + bias);
+            const fontStyle = `${theme.fontFamily} ${theme.baseFontStyle}`;
+            const split = splitMultilineText(
+                ctx,
+                data,
+                fontStyle,
+                w - theme.cellHorizontalPadding * 2,
+                hyperWrapping ?? false
+            );
+
+            const textMetrics = measureTextCached("ABCi09jgqpy", ctx, fontStyle); // do not question the magic string
+            const emHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
+            const lineHeight = theme.lineHeight * emHeight;
+
+            const actualHeight = emHeight + lineHeight * (split.length - 1);
+            const mustClip = actualHeight + theme.cellVerticalPadding > h;
+
+            if (mustClip) {
+                // well now we have to clip because we might render outside the cell vertically
+                ctx.save();
+                ctx.rect(x, y, w, h);
+                ctx.clip();
+            }
+
+            const optimalY = y + h / 2 - actualHeight / 2;
+            let drawY = Math.max(y + theme.cellVerticalPadding, optimalY);
+            for (const line of split) {
+                drawSingleTextLine(ctx, line, x, drawY, w, emHeight, bias, theme, contentAlign);
+                drawY += lineHeight;
+                if (drawY > y + h) break;
+            }
+            if (mustClip) {
+                ctx.restore();
+            }
         }
 
         if (changed) {

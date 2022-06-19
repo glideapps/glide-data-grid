@@ -40,6 +40,7 @@ export interface Theme {
     baseFontStyle: string;
     fontFamily: string;
     editorFontSize: string;
+    lineHeight: number;
 }
 
 const dataEditorBaseTheme: Theme = {
@@ -82,6 +83,7 @@ const dataEditorBaseTheme: Theme = {
     fontFamily:
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
     editorFontSize: "13px",
+    lineHeight: 1.4, //unitless scaler depends on your font
 };
 
 export const styled = baseStyled as ThemedStyledInterface<Theme>;

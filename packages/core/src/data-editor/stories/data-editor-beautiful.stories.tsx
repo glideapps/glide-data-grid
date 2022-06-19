@@ -895,6 +895,80 @@ export const AutomaticRowMarkers: React.VFC = () => {
     },
 };
 
+export const WrappingText: React.VFC<{
+    alignment: "left" | "center" | "right";
+    length: number;
+    hyperWrapping: boolean;
+}> = p => {
+    const { cols, getCellContent } = useMockDataGenerator(6);
+
+    const suffix = React.useMemo(() => {
+        return range(0, 100).map(() => faker.lorem.sentence(p.length));
+    }, [p.length]);
+
+    const mangledGetCellContent = React.useCallback<typeof getCellContent>(
+        i => {
+            const [col, row] = i;
+
+            if (col === 0) {
+                return {
+                    kind: GridCellKind.Text,
+                    allowOverlay: true,
+                    displayData: `${row},\n${suffix[row % suffix.length]}`,
+                    data: `${row}, ${suffix}`,
+                    allowWrapping: true,
+                    contentAlign: p.alignment,
+                };
+            }
+            return getCellContent(i);
+        },
+        [getCellContent, p.alignment, suffix]
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Wrapping Text"
+            description={
+                <Description>
+                    Text cells can have wrapping text by setting the <PropName>allowWrapping</PropName> prop to true.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowHeight={80}
+                getCellContent={mangledGetCellContent}
+                columns={cols}
+                rows={1_000}
+                experimental={{
+                    hyperWrapping: p.hyperWrapping,
+                }}
+            />
+        </BeautifulWrapper>
+    );
+};
+(WrappingText as any).args = {
+    alignment: "left",
+    length: 20,
+    hyperWrapping: false,
+};
+(WrappingText as any).argTypes = {
+    alignment: {
+        control: { type: "select", options: ["left", "center", "right"] },
+    },
+    length: {
+        control: {
+            type: "range",
+            min: 2,
+            max: 200,
+        },
+    },
+};
+(WrappingText as any).parameters = {
+    options: {
+        showPanel: true,
+    },
+};
+
 export const UnevenRows: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
@@ -916,7 +990,7 @@ export const UnevenRows: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(AutomaticRowMarkers as any).parameters = {
+(UnevenRows as any).parameters = {
     options: {
         showPanel: false,
     },

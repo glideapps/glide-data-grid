@@ -96,6 +96,7 @@ const makeCell = (cell: Item): GridCell => {
         allowOverlay: true,
         data: `Data: ${col}, ${row}`,
         displayData: `${col}, ${row}`,
+        allowWrapping: true,
     };
 };
 
@@ -522,7 +523,10 @@ describe("data-editor", () => {
             jest.runAllTimers();
         });
 
-        expect(spy).toBeCalledWith({ allowOverlay: true, data: "j", displayData: "1, 1", kind: "text" }, [0, 1]);
+        expect(spy).toBeCalledWith(
+            { allowOverlay: true, allowWrapping: true, data: "j", displayData: "1, 1", kind: "text" },
+            [0, 1]
+        );
     });
 
     test("Emits header click", async () => {

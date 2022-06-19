@@ -322,6 +322,7 @@ export interface TextCell extends BaseGridCell {
     readonly displayData: string;
     readonly data: string;
     readonly readonly?: boolean;
+    readonly allowWrapping?: boolean;
 }
 
 export interface NumberCell extends BaseGridCell {
