@@ -1118,7 +1118,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const lastFocusedSubdomNode = React.useRef<Item>();
     const accessibilityTree = useDebouncedMemo(
         () => {
-            if (width < 50) return null;
+            if (width < accessibilityHeight) return null;
             let effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
             const colOffset = firstColAccessible ? 0 : -1;
             if (!firstColAccessible && effectiveCols[0]?.sourceIndex === 0) {
