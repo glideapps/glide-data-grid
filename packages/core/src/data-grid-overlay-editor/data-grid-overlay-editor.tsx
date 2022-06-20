@@ -58,7 +58,11 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     const [tempValue, setTempValueRaw] = React.useState<GridCell | undefined>(forceEditMode ? content : undefined);
 
-    const [isValid, setIsValid] = React.useState(true);
+    const [isValid, setIsValid] = React.useState(() => {
+        if (validateCell === undefined) return true;
+        if (isEditableGridCell(content) && validateCell?.(cell, content) === false) return false;
+        return true;
+    });
 
     const onFinishEditing = React.useCallback<typeof onFinishEditingIn>(
         (newCell, movement) => {
