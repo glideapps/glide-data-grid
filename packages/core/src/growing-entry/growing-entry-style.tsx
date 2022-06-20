@@ -33,6 +33,11 @@ export const InputBox = styled.textarea`
     }
 
     ${inputProps}
+
+    .invalid & {
+        text-decoration: underline;
+        text-decoration-color: #d60606;
+    }
 `;
 
 export const ShadowBox = styled.div`

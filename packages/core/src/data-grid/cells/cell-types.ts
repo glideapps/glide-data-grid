@@ -54,6 +54,7 @@ type ProvideEditorCallback<T extends InnerGridCell> = (
           readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
           readonly target: Rectangle;
           readonly forceEditMode: boolean;
+          readonly isValid?: boolean;
       }>
     | undefined;
 

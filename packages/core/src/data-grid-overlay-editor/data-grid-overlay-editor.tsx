@@ -6,9 +6,12 @@ import ClickOutsideContainer from "../click-outside-container/click-outside-cont
 import { Theme } from "../common/styles";
 import { CellRenderers } from "../data-grid/cells";
 import {
+    EditableGridCell,
     GridCell,
     GridCellKind,
+    isEditableGridCell,
     isObjectEditorCallbackResult,
+    Item,
     ProvideEditorCallback,
     Rectangle,
 } from "../data-grid/data-grid-types";
@@ -20,6 +23,7 @@ type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
 export interface DataGridOverlayEditorProps {
     readonly target: Rectangle;
+    readonly cell: Item;
     readonly content: GridCell;
     readonly className?: string;
     readonly id: string;
@@ -31,13 +35,14 @@ export interface DataGridOverlayEditorProps {
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
     readonly provideEditor?: ProvideEditorCallback<GridCell>;
+    readonly validateCell?: (cell: Item, newValue: EditableGridCell) => boolean | EditableGridCell;
 }
 
 const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps> = p => {
     const {
         target,
         content,
-        onFinishEditing,
+        onFinishEditing: onFinishEditingIn,
         forceEditMode,
         initialValue,
         imageEditorOverride,
@@ -46,10 +51,40 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         className,
         theme,
         id,
+        cell,
+        validateCell,
         provideEditor,
     } = p;
 
-    const [tempValue, setTempValue] = React.useState<GridCell | undefined>(forceEditMode ? content : undefined);
+    const [tempValue, setTempValueRaw] = React.useState<GridCell | undefined>(forceEditMode ? content : undefined);
+
+    const [isValid, setIsValid] = React.useState(true);
+
+    const onFinishEditing = React.useCallback<typeof onFinishEditingIn>(
+        (newCell, movement) => {
+            onFinishEditingIn(isValid ? newCell : undefined, movement);
+        },
+        [isValid, onFinishEditingIn]
+    );
+
+    const setTempValue = React.useCallback(
+        (newVal: GridCell | undefined) => {
+            if (validateCell !== undefined && newVal !== undefined && isEditableGridCell(newVal)) {
+                const validResult = validateCell(cell, newVal);
+                if (validResult === false) {
+                    setIsValid(false);
+                } else if (typeof validResult === "object") {
+                    newVal = validResult;
+                    setIsValid(true);
+                } else {
+                    setIsValid(true);
+                }
+            }
+            setTempValueRaw(newVal);
+        },
+        [cell, validateCell]
+    );
+
     const finished = React.useRef(false);
     const customMotion = React.useRef<[-1 | 0 | 1, -1 | 0 | 1] | undefined>(undefined);
 
@@ -161,6 +196,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 target={target}
                 imageEditorOverride={imageEditorOverride}
                 markdownDivCreateNode={markdownDivCreateNode}
+                isValid={isValid}
             />
         );
     }

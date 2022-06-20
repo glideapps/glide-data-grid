@@ -193,6 +193,7 @@ export interface DataEditorProps extends Props {
     readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;
     readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
     readonly onCellContextMenu?: (cell: Item, event: CellClickedEventArgs) => void;
+    readonly validateCell?: (cell: Item, newValue: EditableGridCell) => boolean | EditableGridCell;
 
     readonly columns: readonly GridColumn[];
 
@@ -353,6 +354,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         keybindings: keybindingsIn,
         onRowAppended,
         onColumnMoved,
+        validateCell: validateCellIn,
         highlightRegions: highlightRegionsIn,
         drawCell,
         drawCustomCell,
@@ -436,6 +438,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         getCellContent,
         rowMarkerOffset,
         abortControllerRef.current
+    );
+
+    const validateCell = React.useCallback<NonNullable<typeof validateCellIn>>(
+        (cell, newValue) => {
+            if (validateCellIn === undefined) return true;
+            const item: Item = [cell[0] - rowMarkerOffset, cell[1]];
+            return validateCellIn?.(item, newValue);
+        },
+        [rowMarkerOffset, validateCellIn]
     );
 
     const setGridSelection = React.useCallback(
@@ -2735,6 +2746,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 {overlay !== undefined && (
                     <DataGridOverlayEditor
                         {...overlay}
+                        validateCell={validateCell}
                         id={overlayID}
                         className={p.experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
                         provideEditor={provideEditor}

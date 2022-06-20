@@ -19,7 +19,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
         data: "",
     }),
     getEditor: () => p => {
-        const { isHighlighted, onChange, onKeyDown, value } = p;
+        const { isHighlighted, onChange, onKeyDown, value, isValid } = p;
         return (
             <GrowingEntry
                 highlight={isHighlighted}
@@ -28,6 +28,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
                 onKeyDown={onKeyDown}
                 altNewline={true}
                 value={value.data}
+                isValid={isValid}
                 onChange={e =>
                     onChange({
                         ...value,
