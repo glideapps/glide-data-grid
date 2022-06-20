@@ -628,12 +628,11 @@ export function drawMarkerRowCell(
         if (drawHandle) {
             ctx.globalAlpha = hoverAmount;
             ctx.beginPath();
-            ctx.rect(x + 3, y + height / 2 - 4, 2, 2);
-            ctx.rect(x + 3, y + height / 2 - 1, 2, 2);
-            ctx.rect(x + 3, y + height / 2 + 2, 2, 2);
-            ctx.rect(x + 6, y + height / 2 - 4, 2, 2);
-            ctx.rect(x + 6, y + height / 2 - 1, 2, 2);
-            ctx.rect(x + 6, y + height / 2 + 2, 2, 2);
+            for (const xOffset of [3, 6]) {
+                for (const yOffset of [-5, -1, 3]) {
+                    ctx.rect(x + xOffset, y + height / 2 + yOffset, 2, 2);
+                }
+            }
 
             ctx.fillStyle = theme.textLight;
             ctx.fill();
