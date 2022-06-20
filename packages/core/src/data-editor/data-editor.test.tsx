@@ -529,7 +529,7 @@ describe("data-editor", () => {
         );
     });
 
-    test.only("Does not edit when validation fails", async () => {
+    test("Does not edit when validation fails", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
         render(<DataEditor {...basicProps} onCellEdited={spy} validateCell={() => false} />, {
