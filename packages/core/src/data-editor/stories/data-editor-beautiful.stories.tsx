@@ -279,7 +279,14 @@ export const ValidateData: React.VFC = () => {
                 rows={100}
                 validateCell={(_cell, newValue) => {
                     if (newValue.kind !== GridCellKind.Text) return true;
-                    return newValue.data === "Valid";
+                    if (newValue.data === "Valid") return true;
+                    if (newValue.data.toLowerCase() === "valid") {
+                        return {
+                            ...newValue,
+                            data: "Valid",
+                        };
+                    }
+                    return false;
                 }}
             />
         </BeautifulWrapper>

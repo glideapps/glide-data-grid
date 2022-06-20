@@ -8,11 +8,10 @@ interface Props
     readonly placeholder?: string;
     readonly highlight: boolean;
     readonly altNewline?: boolean;
-    readonly isValid?: boolean;
 }
 
 const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
-    const { placeholder, value, onKeyDown, highlight, altNewline, isValid, ...rest } = props;
+    const { placeholder, value, onKeyDown, highlight, altNewline, ...rest } = props;
     const { onChange, className } = rest;
 
     const inputRef = React.useRef<HTMLTextAreaElement | null>(null);
@@ -43,7 +42,7 @@ const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
     );
 
     return (
-        <GrowingEntryStyle className={isValid === false ? "invalid" : ""}>
+        <GrowingEntryStyle>
             <ShadowBox className={className}>{useText + "\n"}</ShadowBox>
             <InputBox
                 {...rest}

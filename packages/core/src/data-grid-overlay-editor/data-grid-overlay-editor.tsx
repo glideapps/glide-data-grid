@@ -213,13 +213,18 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         return null;
     }
 
+    let classWrap = style ? "gdg-style" : "gdg-unstyle";
+    if (!isValid) {
+        classWrap += " invalid";
+    }
+
     const portal = createPortal(
         <ThemeProvider theme={theme}>
             <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
                 <DataGridOverlayEditorStyle
                     ref={ref}
                     id={id}
-                    className={style ? "gdg-style" : "gdg-unstyle"}
+                    className={classWrap}
                     style={styleOverride}
                     as={useLabel === true ? "label" : undefined}
                     targetRect={target}
