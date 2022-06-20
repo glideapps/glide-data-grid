@@ -33,6 +33,7 @@ import {
     Item,
     BooleanIndeterminate,
     BooleanEmpty,
+    MarkerCell,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -619,6 +620,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     checked: gridSelection?.rows.hasIndex(row) === true,
                     markerKind: rowMarkers,
                     row: rowMarkerStartIndex + row,
+                    drawHandle: p.onRowMoved !== undefined,
                 };
             } else if (isTrailing) {
                 //If the grid is empty, we will return text
@@ -674,6 +676,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             mangledRows,
             hasRowMarkers,
             gridSelection?.rows,
+            p.onRowMoved,
             rowMarkers,
             rowMarkerOffset,
             trailingRowOptions?.hint,
@@ -978,6 +981,21 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         rowSelect === "none"
                     )
                         return;
+
+                    const markerCell = getMangledCellContent(args.location);
+                    if (markerCell.kind !== InnerGridCellKind.Marker) {
+                        return;
+                    }
+
+                    const renderer = CellRenderers[markerCell.kind];
+                    const postClick = renderer.onClick?.(
+                        markerCell,
+                        args.localEventX,
+                        args.localEventY,
+                        args.bounds
+                    ) as MarkerCell | undefined;
+                    if (postClick === undefined || postClick.checked === markerCell.checked) return;
+
                     setOverlay(undefined);
                     focus();
                     const isSelected = selectedRows.hasIndex(row);
@@ -1127,6 +1145,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             columnSelect,
             focus,
             getCustomNewRowTargetColumn,
+            getMangledCellContent,
             gridSelection,
             hasRowMarkers,
             lastRowSticky,
