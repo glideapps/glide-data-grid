@@ -254,6 +254,50 @@ export const AddData: React.VFC = () => {
     },
 };
 
+export const ValidateData: React.VFC = () => {
+    const { cols, getCellContent, setCellValue, getCellsForSelection } = useMockDataGenerator(60, false);
+
+    return (
+        <BeautifulWrapper
+            title="Validate data"
+            description={
+                <>
+                    <Description>
+                        Data can be validated using the <PropName>validateCell</PropName> callback
+                    </Description>
+                    <MoreInfo>This example only allows the word &quot;Valid&quot; inside text cells.</MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                getCellsForSelection={getCellsForSelection}
+                rowMarkers={"both"}
+                onPaste={true}
+                onCellEdited={setCellValue}
+                rows={100}
+                validateCell={(_cell, newValue) => {
+                    if (newValue.kind !== GridCellKind.Text) return true;
+                    if (newValue.data === "Valid") return true;
+                    if (newValue.data.toLowerCase() === "valid") {
+                        return {
+                            ...newValue,
+                            data: "Valid",
+                        };
+                    }
+                    return false;
+                }}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ValidateData as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const FillHandle: React.VFC = () => {
     const { cols, getCellContent, setCellValueRaw, setCellValue, getCellsForSelection } = useMockDataGenerator(
         60,

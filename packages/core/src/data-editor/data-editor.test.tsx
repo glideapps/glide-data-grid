@@ -529,6 +529,38 @@ describe("data-editor", () => {
         );
     });
 
+    test("Does not edit when validation fails", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellEdited={spy} validateCell={() => false} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        const overlay = screen.getByDisplayValue("j");
+
+        jest.useFakeTimers();
+        fireEvent.keyDown(overlay, {
+            key: "Enter",
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(spy).not.toBeCalled();
+    });
+
     test("Emits header click", async () => {
         const spy = jest.fn();
 
