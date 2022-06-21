@@ -2476,6 +2476,40 @@ export const ColumnGroups: React.VFC = () => {
     },
 };
 
+export const StretchColumnSize: React.VFC = () => {
+    const { cols, getCellContent, getCellsForSelection, onColumnResize } = useMockDataGenerator(5, true, true);
+
+    const columns = React.useMemo(() => {
+        return cols.map((x, i) => ({ ...x, grow: (5 + i) / 5 }));
+    }, [cols]);
+
+    return (
+        <BeautifulWrapper
+            title="Column Grow"
+            description={
+                <Description>
+                    Columns in the data grid may be set to grow to fill space by setting the <PropName>grow</PropName>{" "}
+                    prop.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={columns}
+                getCellsForSelection={getCellsForSelection}
+                rows={1000}
+                onColumnResize={onColumnResize}
+                rowMarkers="both"
+            />
+        </BeautifulWrapper>
+    );
+};
+(StretchColumnSize as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 function useCollapsableColumnGroups(cols: readonly GridColumn[]) {
     const [collapsed, setCollapsed] = React.useState<readonly string[]>([]);
 

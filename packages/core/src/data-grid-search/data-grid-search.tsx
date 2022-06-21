@@ -395,6 +395,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 onCanvasFocused={p.onCanvasFocused}
                 onCanvasBlur={p.onCanvasBlur}
                 isFocused={p.isFocused}
+                clientSize={p.clientSize}
                 headerHeight={p.headerHeight}
                 isFilling={p.isFilling}
                 fillHandle={p.fillHandle}

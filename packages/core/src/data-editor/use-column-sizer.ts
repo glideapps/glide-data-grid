@@ -10,6 +10,7 @@ import {
     isSizedGridColumn,
     resolveCellsThunk,
     SizedGridColumn,
+    AutoGridColumn,
 } from "../data-grid/data-grid-types";
 
 const defaultSize = 150;
@@ -21,10 +22,38 @@ function measureCell(ctx: CanvasRenderingContext2D, cell: GridCell): number {
     return r?.measure(ctx, cell) ?? defaultSize;
 }
 
+function measureColumn(
+    ctx: CanvasRenderingContext2D,
+    c: AutoGridColumn,
+    colIndex: number,
+    selectedData: CellArray,
+    minColumnWidth: number,
+    maxColumnWidth: number
+): SizedGridColumn {
+    let sizes: number[] = [];
+    if (selectedData !== undefined) {
+        sizes.push(...selectedData.map(row => row[colIndex]).map(cell => measureCell(ctx, cell)));
+    }
+    sizes.push(ctx.measureText(c.title).width + 16 + (c.icon === undefined ? 0 : 28));
+    const average = sizes.reduce((a, b) => a + b) / sizes.length;
+    if (sizes.length > 5) {
+        // Filter out outliers
+        sizes = sizes.filter(a => a < average * 2);
+    }
+    const biggest = Math.max(...sizes);
+    const final = Math.max(minColumnWidth, Math.min(maxColumnWidth, Math.ceil(biggest)));
+
+    return {
+        ...c,
+        width: final,
+    };
+}
+
 export function useColumnSizer(
     columns: readonly GridColumn[],
     rows: number,
     getCellsForSelection: DataGridSearchProps["getCellsForSelection"],
+    clientWidth: number,
     minColumnWidth: number,
     maxColumnWidth: number,
     theme: Theme,
@@ -93,59 +122,74 @@ export function useColumnSizer(
     }, [abortController.signal, columns]);
 
     return React.useMemo(() => {
-        if (columns.every(isSizedGridColumn)) {
-            return columns;
-        }
+        const getRaw = (): SizedGridColumn[] => {
+            if (columns.every(isSizedGridColumn)) {
+                return [...columns];
+            }
 
-        if (ctx === null) {
-            return columns.map(c => {
+            if (ctx === null) {
+                return columns.map(c => {
+                    if (isSizedGridColumn(c)) return c;
+
+                    return {
+                        ...c,
+                        width: defaultSize,
+                    };
+                });
+            }
+
+            ctx.font = `${themeRef.current.baseFontStyle} ${themeRef.current.fontFamily}`;
+
+            return columns.map((c, colIndex) => {
                 if (isSizedGridColumn(c)) return c;
 
-                return {
-                    ...c,
-                    width: defaultSize,
-                };
+                if (memoMap.current[c.id] !== undefined) {
+                    return {
+                        ...c,
+                        width: memoMap.current[c.id],
+                    };
+                }
+
+                if (selectedData === undefined || lastColumns.current !== columns || c.id === undefined) {
+                    return {
+                        ...c,
+                        width: defaultSize,
+                    };
+                }
+
+                const r = measureColumn(ctx, c, colIndex, selectedData, minColumnWidth, maxColumnWidth);
+                memoMap.current[c.id] = r.width;
+                return r;
             });
+        };
+
+        const raw = getRaw();
+        let totalWidth = 0;
+        let totalGrow = 0;
+        const distribute: number[] = [];
+        for (let i = 0; i < raw.length; i++) {
+            const c = raw[i];
+            totalWidth += c.width;
+            if (c.grow !== undefined && c.grow > 0) {
+                totalGrow += c.grow;
+                distribute.push(i);
+            }
         }
-
-        ctx.font = `${themeRef.current.baseFontStyle} ${themeRef.current.fontFamily}`;
-
-        return columns.map((c, colIndex) => {
-            if (isSizedGridColumn(c)) return c;
-
-            if (memoMap.current[c.id] !== undefined) {
-                return {
-                    ...c,
-                    width: memoMap.current[c.id],
+        if (totalWidth < clientWidth && distribute.length > 0) {
+            const extra = clientWidth - totalWidth;
+            let remaining = extra;
+            for (let di = 0; di < distribute.length; di++) {
+                const i = distribute[di];
+                const weighted = (raw[i].grow ?? 0) / totalGrow;
+                const toAdd =
+                    di === distribute.length - 1 ? remaining : Math.min(remaining, Math.floor(extra * weighted));
+                raw[i] = {
+                    ...raw[i],
+                    width: raw[i].width + toAdd,
                 };
+                remaining -= toAdd;
             }
-
-            if (selectedData === undefined || lastColumns.current !== columns || c.id === undefined) {
-                return {
-                    ...c,
-                    width: defaultSize,
-                };
-            }
-
-            let sizes: number[] = [];
-            if (selectedData !== undefined) {
-                sizes.push(...selectedData.map(row => row[colIndex]).map(cell => measureCell(ctx, cell)));
-            }
-            sizes.push(ctx.measureText(c.title).width + 16 + (c.icon === undefined ? 0 : 28));
-            const average = sizes.reduce((a, b) => a + b) / sizes.length;
-            if (sizes.length > 5) {
-                // Filter out outliers
-                sizes = sizes.filter(a => a < average * 2);
-            }
-            const biggest = Math.max(...sizes);
-            
-            const final = Math.max(minColumnWidth, Math.min(maxColumnWidth, Math.ceil(biggest)));
-            memoMap.current[c.id] = final;
-
-            return {
-                ...c,
-                width: final,
-            };
-        });
-    }, [columns, ctx, maxColumnWidth, minColumnWidth, selectedData]);
+        }
+        return raw;
+    }, [columns, ctx, clientWidth, maxColumnWidth, minColumnWidth, selectedData]);
 }

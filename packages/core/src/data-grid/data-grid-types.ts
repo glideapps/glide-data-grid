@@ -185,6 +185,7 @@ interface BaseGridColumn {
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
     readonly hasMenu?: boolean;
+    readonly grow?: number;
     readonly style?: "normal" | "highlight";
     readonly themeOverride?: Partial<Theme>;
     readonly trailingRowOptions?: {
@@ -197,7 +198,7 @@ interface BaseGridColumn {
 }
 
 export function isSizedGridColumn(c: GridColumn): c is SizedGridColumn {
-    return "width" in c;
+    return "width" in c && typeof c.width === "number";
 }
 
 export interface SizedGridColumn extends BaseGridColumn {
@@ -205,7 +206,7 @@ export interface SizedGridColumn extends BaseGridColumn {
     readonly id?: string;
 }
 
-interface AutoGridColumn extends BaseGridColumn {
+export interface AutoGridColumn extends BaseGridColumn {
     readonly id: string;
 }
 
