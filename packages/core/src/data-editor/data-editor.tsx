@@ -2537,7 +2537,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     React.useImperativeHandle(
         forwardedRef,
         () => ({
-            appendRow,
+            appendRow: (col: number) => appendRow(col + rowMarkerOffset),
             updateCells: damageList => {
                 if (rowMarkerOffset !== 0) {
                     damageList = damageList.map(x => ({ cell: [x.cell[0] + rowMarkerOffset, x.cell[1]] }));
