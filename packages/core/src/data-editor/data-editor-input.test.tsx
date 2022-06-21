@@ -352,19 +352,19 @@ describe("data-editor-input", () => {
 
         fireEvent.mouseDown(canvas, {
             ctrlKey: true,
-            clientX: 10,
+            clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
         fireEvent.mouseMove(canvas, {
             ctrlKey: true,
-            clientX: 10,
+            clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
         fireEvent.mouseUp(canvas, {
             ctrlKey: true,
-            clientX: 10,
+            clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
@@ -409,19 +409,19 @@ describe("data-editor-input", () => {
 
         fireEvent.mouseDown(canvas, {
             ctrlKey: true,
-            clientX: 10,
+            clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
         fireEvent.mouseMove(canvas, {
             ctrlKey: true,
-            clientX: 10,
+            clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
         fireEvent.mouseUp(canvas, {
             ctrlKey: true,
-            clientX: 10,
+            clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
