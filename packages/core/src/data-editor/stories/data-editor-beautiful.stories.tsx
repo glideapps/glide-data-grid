@@ -1815,7 +1815,7 @@ export const BuiltInSearch: React.VFC = () => {
     useEventListener(
         "keydown",
         React.useCallback(event => {
-            if ((event.ctrlKey || event.metaKey) && event.key === "f") {
+            if ((event.ctrlKey || event.metaKey) && event.code === "KeyF") {
                 setShowSearch(cv => !cv);
                 event.stopPropagation();
                 event.preventDefault();
