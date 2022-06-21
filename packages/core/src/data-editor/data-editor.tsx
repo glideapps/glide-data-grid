@@ -277,6 +277,7 @@ export interface DataEditorProps extends Props {
 }
 
 export interface DataEditorRef {
+    appendRow: (col: number) => Promise<void>;
     updateCells: DataGridRef["damage"];
     getBounds: DataGridRef["getBounds"];
     focus: DataGridRef["focus"];
@@ -876,7 +877,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     getCellContentRef.current = getCellContent;
     rowsRef.current = rows;
     const appendRow = React.useCallback(
-        async (col: number) => {
+        async (col: number): Promise<void> => {
             const c = mangledCols[col];
             if (c?.trailingRowOptions?.disabled === true) {
                 return;
@@ -2536,6 +2537,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     React.useImperativeHandle(
         forwardedRef,
         () => ({
+            appendRow,
             updateCells: damageList => {
                 if (rowMarkerOffset !== 0) {
                     damageList = damageList.map(x => ({ cell: [x.cell[0] + rowMarkerOffset, x.cell[1]] }));
