@@ -122,9 +122,9 @@ export function useColumnSizer(
     }, [abortController.signal, columns]);
 
     return React.useMemo(() => {
-        const getRaw = (): SizedGridColumn[] => {
+        const getRaw = () => {
             if (columns.every(isSizedGridColumn)) {
-                return [...columns];
+                return columns;
             }
 
             if (ctx === null) {
@@ -163,12 +163,12 @@ export function useColumnSizer(
             });
         };
 
-        const raw = getRaw();
+        let result = getRaw();
         let totalWidth = 0;
         let totalGrow = 0;
         const distribute: number[] = [];
-        for (let i = 0; i < raw.length; i++) {
-            const c = raw[i];
+        for (let i = 0; i < result.length; i++) {
+            const c = result[i];
             totalWidth += c.width;
             if (c.grow !== undefined && c.grow > 0) {
                 totalGrow += c.grow;
@@ -176,20 +176,22 @@ export function useColumnSizer(
             }
         }
         if (totalWidth < clientWidth && distribute.length > 0) {
+            const writeable = [...result];
             const extra = clientWidth - totalWidth;
             let remaining = extra;
             for (let di = 0; di < distribute.length; di++) {
                 const i = distribute[di];
-                const weighted = (raw[i].grow ?? 0) / totalGrow;
+                const weighted = (result[i].grow ?? 0) / totalGrow;
                 const toAdd =
                     di === distribute.length - 1 ? remaining : Math.min(remaining, Math.floor(extra * weighted));
-                raw[i] = {
-                    ...raw[i],
-                    width: raw[i].width + toAdd,
+                writeable[i] = {
+                    ...result[i],
+                    width: result[i].width + toAdd,
                 };
                 remaining -= toAdd;
             }
+            result = writeable;
         }
-        return raw;
+        return result;
     }, [columns, ctx, clientWidth, maxColumnWidth, minColumnWidth, selectedData]);
 }
