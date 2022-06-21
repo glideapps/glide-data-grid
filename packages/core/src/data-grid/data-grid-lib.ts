@@ -614,7 +614,7 @@ export function drawMarkerRowCell(
     const checkedboxAlpha = checked ? 1 : hoverAmount;
     if (markerKind !== "number" && checkedboxAlpha > 0) {
         ctx.globalAlpha = checkedboxAlpha;
-        const offsetAmount = 7 * hoverAmount;
+        const offsetAmount = 7 * (checked ? hoverAmount : 1);
         drawCheckbox(
             ctx,
             theme,
