@@ -607,13 +607,37 @@ export function drawMarkerRowCell(
     args: BaseDrawArgs,
     index: number,
     checked: boolean,
-    markerKind: "checkbox" | "both" | "number"
+    markerKind: "checkbox" | "both" | "number",
+    drawHandle: boolean
 ) {
     const { ctx, x, y, w: width, h: height, hoverAmount, theme } = args;
     const checkedboxAlpha = checked ? 1 : hoverAmount;
     if (markerKind !== "number" && checkedboxAlpha > 0) {
         ctx.globalAlpha = checkedboxAlpha;
-        drawCheckbox(ctx, theme, checked, x, y, width, height, true);
+        const offsetAmount = 7 * (checked ? hoverAmount : 1);
+        drawCheckbox(
+            ctx,
+            theme,
+            checked,
+            drawHandle ? x + offsetAmount : x,
+            y,
+            drawHandle ? width - offsetAmount : width,
+            height,
+            true
+        );
+        if (drawHandle) {
+            ctx.globalAlpha = hoverAmount;
+            ctx.beginPath();
+            for (const xOffset of [3, 6]) {
+                for (const yOffset of [-5, -1, 3]) {
+                    ctx.rect(x + xOffset, y + height / 2 + yOffset, 2, 2);
+                }
+            }
+
+            ctx.fillStyle = theme.textLight;
+            ctx.fill();
+            ctx.beginPath();
+        }
         ctx.globalAlpha = 1;
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {

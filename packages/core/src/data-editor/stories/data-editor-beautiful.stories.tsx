@@ -2428,7 +2428,7 @@ export const ReorderRows: React.VFC = () => {
             }>
             <DataEditor
                 {...defaultProps}
-                rowMarkers={"number"}
+                rowMarkers={"both"}
                 onRowMoved={reorderRows}
                 getCellContent={getCellContent}
                 columns={cols}
