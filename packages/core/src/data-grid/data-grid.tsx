@@ -24,10 +24,10 @@ import {
     CellList,
     Item,
     DrawHeaderCallback,
-    SizedGridColumn,
     isReadWriteCell,
     isInnerOnlyCell,
     booleanCellIsEditable,
+    InnerGridColumn,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -69,7 +69,7 @@ export interface DataGridProps {
     readonly isFilling: boolean;
     readonly isFocused: boolean;
 
-    readonly columns: readonly SizedGridColumn[];
+    readonly columns: readonly InnerGridColumn[];
     readonly rows: number;
 
     readonly headerHeight: number;

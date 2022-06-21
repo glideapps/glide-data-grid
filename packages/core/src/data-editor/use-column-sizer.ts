@@ -7,6 +7,7 @@ import {
     GridCell,
     GridCellKind,
     GridColumn,
+    InnerGridColumn,
     isSizedGridColumn,
     resolveCellsThunk,
     SizedGridColumn,
@@ -58,7 +59,7 @@ export function useColumnSizer(
     maxColumnWidth: number,
     theme: Theme,
     abortController: AbortController
-): readonly SizedGridColumn[] {
+): readonly InnerGridColumn[] {
     const rowsRef = React.useRef(rows);
     const getCellsForSelectionRef = React.useRef(getCellsForSelection);
     const themeRef = React.useRef(theme);
@@ -163,7 +164,7 @@ export function useColumnSizer(
             });
         };
 
-        let result = getRaw();
+        let result: readonly InnerGridColumn[] = getRaw();
         let totalWidth = 0;
         let totalGrow = 0;
         const distribute: number[] = [];
@@ -186,6 +187,7 @@ export function useColumnSizer(
                     di === distribute.length - 1 ? remaining : Math.min(remaining, Math.floor(extra * weighted));
                 writeable[i] = {
                     ...result[i],
+                    growOffset: toAdd,
                     width: result[i].width + toAdd,
                 };
                 remaining -= toAdd;

@@ -219,6 +219,8 @@ export type GetCellsThunk = () => Promise<CellArray>;
 
 export type GridColumn = SizedGridColumn | AutoGridColumn;
 
+export type InnerGridColumn = SizedGridColumn & { growOffset?: number };
+
 // export type SizedGridColumn = Omit<GridColumn, "width"> & { readonly width: number };
 
 export type ReadWriteGridCell = TextCell | NumberCell | MarkdownCell | UriCell | CustomCell | BooleanCell;
