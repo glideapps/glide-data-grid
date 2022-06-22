@@ -61,7 +61,7 @@ const defaultProps: Partial<DataEditorProps> = {
 };
 
 export const ResizableColumns: React.VFC = () => {
-    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(60);
+    const { cols, getCellContent, onColumnResize, getCellsForSelection } = useMockDataGenerator(60);
 
     return (
         <BeautifulWrapper
@@ -86,7 +86,8 @@ export const ResizableColumns: React.VFC = () => {
                 overscrollX={200}
                 overscrollY={200}
                 rows={50}
-                onColumnResized={onColumnResize}
+                onColumnResize={onColumnResize}
+                getCellsForSelection={getCellsForSelection}
             />
         </BeautifulWrapper>
     );

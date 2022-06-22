@@ -45,7 +45,7 @@ import { getScrollBarWidth, useEventListener } from "../common/utils";
 import { CellRenderers } from "../data-grid/cells";
 import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
-import { useColumnSizer } from "./use-column-sizer";
+import { measureColumn, useColumnSizer } from "./use-column-sizer";
 import { isHotkey } from "../common/is-hotkey";
 import { SelectionBlending, useSelectionBehavior } from "../data-grid/use-selection-behavior";
 import { useCellsForSelection } from "./use-cells-for-selection";
@@ -391,6 +391,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         verticalBorder,
         onDragOverCell,
         onDrop,
+        onColumnResize: onColumnResizeIn,
+        onColumnResizeEnd: onColumnResizeEndIn,
+        onColumnResizeStart: onColumnResizeStartIn,
+        onColumnResized: onColumnResizedIn,
         ...rest
     } = p;
 
@@ -471,6 +475,35 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [onGridSelectionChange, getCellsForSelection, rowMarkerOffset, spanRangeBehavior]
     );
+
+    const onColumnResizeInner = React.useCallback<NonNullable<typeof onColumnResizeIn>>(
+        (_, w, ind) => {
+            onColumnResizeIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
+        },
+        [onColumnResizeIn, rowMarkerOffset, columnsIn]
+    );
+    const onColumnResize = onColumnResizeIn === undefined ? undefined : onColumnResizeInner;
+    const onColumnResizeEndInner = React.useCallback<NonNullable<typeof onColumnResizeEndIn>>(
+        (_, w, ind) => {
+            onColumnResizeEndIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
+        },
+        [onColumnResizeEndIn, rowMarkerOffset, columnsIn]
+    );
+    const onColumnResizeEnd = onColumnResizeEndIn === undefined ? undefined : onColumnResizeEndInner;
+    const onColumnResizeStartInner = React.useCallback<NonNullable<typeof onColumnResizeStartIn>>(
+        (_, w, ind) => {
+            onColumnResizeStartIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
+        },
+        [onColumnResizeStartIn, rowMarkerOffset, columnsIn]
+    );
+    const onColumnResizeStart = onColumnResizeStartIn === undefined ? undefined : onColumnResizeStartInner;
+    const onColumnResizedInner = React.useCallback<NonNullable<typeof onColumnResizedIn>>(
+        (_, w, ind) => {
+            onColumnResizedIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
+        },
+        [onColumnResizedIn, rowMarkerOffset, columnsIn]
+    );
+    const onColumnResized = onColumnResizedIn === undefined ? undefined : onColumnResizedInner;
 
     const onDelete = React.useCallback<NonNullable<DataEditorProps["onDelete"]>>(
         sel => {
@@ -977,7 +1010,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (args.kind === "cell") {
                 lastSelectedColRef.current = undefined;
 
-                lastMouseDownCellLocation.current = [col, row];
+                lastMouseSelectLocation.current = [col, row];
 
                 if (col === 0 && hasRowMarkers) {
                     if (
@@ -1092,7 +1125,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
                 }
             } else if (args.kind === "header") {
-                lastMouseDownCellLocation.current = [col, row];
+                lastMouseSelectLocation.current = [col, row];
                 setOverlay(undefined);
                 if (hasRowMarkers && col === 0) {
                     lastSelectedRowRef.current = undefined;
@@ -1135,7 +1168,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     focus();
                 }
             } else if (args.kind === "group-header") {
-                lastMouseDownCellLocation.current = [col, row];
+                lastMouseSelectLocation.current = [col, row];
             } else if (args.kind === "out-of-bounds") {
                 setGridSelection(emptyGridSelection, false);
                 setOverlay(undefined);
@@ -1168,21 +1201,35 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
-    const lastMouseDownCellLocation = React.useRef<[number, number]>();
+    const lastMouseSelectLocation = React.useRef<[number, number]>();
     const touchDownArgs = React.useRef(visibleRegion);
+    const mouseDownData = React.useRef<{
+        wasDoubleClick: boolean;
+        time: number;
+    }>();
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
             isPrevented.current = false;
             touchDownArgs.current = visibleRegionRef.current;
             if (args.button !== 0) {
+                mouseDownData.current = undefined;
                 return;
             }
+
+            const time = performance.now();
+            const wasDoubleClick = time - (mouseDownData.current?.time ?? -1000) < 250;
+            mouseDownData.current = {
+                wasDoubleClick,
+                time,
+            };
+
+            if (args.isEdge) return;
+
             setMouseState({
                 previousSelection: gridSelection,
                 fillHandle: args.kind === "cell" && args.isFillHandle,
             });
-
-            lastMouseDownCellLocation.current = undefined;
+            lastMouseSelectLocation.current = undefined;
 
             if (!args.isTouch) {
                 handleSelect(args);
@@ -1275,6 +1322,48 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         }
     }, []);
 
+    const normalSizeColumn = React.useCallback(
+        async (col: number): Promise<void> => {
+            if (
+                mouseDownData.current?.wasDoubleClick === true &&
+                getCellsForSelection !== undefined &&
+                onColumnResize !== undefined
+            ) {
+                const start = visibleRegionRef.current.y;
+                const end = visibleRegionRef.current.height;
+                let cells = getCellsForSelection(
+                    {
+                        x: col,
+                        y: start,
+                        width: 1,
+                        height: end,
+                    },
+                    abortControllerRef.current.signal
+                );
+                if (typeof cells !== "object") {
+                    cells = await cells();
+                }
+                const inputCol = columns[col];
+                const offscreen = document.createElement("canvas");
+                const ctx = offscreen.getContext("2d", { alpha: false });
+                if (ctx !== null) {
+                    ctx.font = `${mergedTheme.baseFontStyle} ${mergedTheme.fontFamily}`;
+                    const newCol = measureColumn(ctx, inputCol, 0, cells, minColumnWidth, maxColumnWidth);
+                    onColumnResize?.(inputCol, newCol.width, col);
+                }
+            }
+        },
+        [
+            columns,
+            getCellsForSelection,
+            maxColumnWidth,
+            mergedTheme.baseFontStyle,
+            mergedTheme.fontFamily,
+            minColumnWidth,
+            onColumnResize,
+        ]
+    );
+
     const onMouseUp = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
             const mouse = mouseState;
@@ -1286,7 +1375,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (isOutside) return;
 
             const [col, row] = args.location;
-            const [lastMouseDownCol, lastMouseDownRow] = lastMouseDownCellLocation.current ?? [];
+            const [lastMouseDownCol, lastMouseDownRow] = lastMouseSelectLocation.current ?? [];
 
             const preventDefault = () => {
                 isPrevented.current = true;
@@ -1382,7 +1471,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return;
                 }
 
-                if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
+                if (args.isEdge) {
+                    void normalSizeColumn(col);
+                } else if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
                     onHeaderClicked?.(clickLocation, { ...args, preventDefault });
                 } else if (args.button === 2) {
                     onHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
@@ -1416,7 +1507,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
 
-            lastMouseDownCellLocation.current = undefined;
+            lastMouseSelectLocation.current = undefined;
         },
         [
             mouseState,
@@ -1432,6 +1523,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onHeaderContextMenu,
             onGroupHeaderContextMenu,
             handleSelect,
+            normalSizeColumn,
             onHeaderClicked,
             onGroupHeaderClicked,
             handleGroupHeaderSelection,
@@ -2745,6 +2837,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     isFocused={isFocused}
                     groupHeaderHeight={enableGroups ? groupHeaderHeight : 0}
                     lastRowSticky={lastRowSticky}
+                    onColumnResize={onColumnResize}
+                    onColumnResizeEnd={onColumnResizeEnd}
+                    onColumnResizeStart={onColumnResizeStart}
+                    onColumnResized={onColumnResized}
                     onCellFocused={onCellFocused}
                     onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}
                     onDragStart={onDragStartImpl}

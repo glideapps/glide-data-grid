@@ -11,7 +11,6 @@ import {
     isSizedGridColumn,
     resolveCellsThunk,
     SizedGridColumn,
-    AutoGridColumn,
 } from "../data-grid/data-grid-types";
 
 const defaultSize = 150;
@@ -23,9 +22,9 @@ function measureCell(ctx: CanvasRenderingContext2D, cell: GridCell): number {
     return r?.measure(ctx, cell) ?? defaultSize;
 }
 
-function measureColumn(
+export function measureColumn(
     ctx: CanvasRenderingContext2D,
-    c: AutoGridColumn,
+    c: GridColumn,
     colIndex: number,
     selectedData: CellArray,
     minColumnWidth: number,
@@ -42,7 +41,7 @@ function measureColumn(
         sizes = sizes.filter(a => a < average * 2);
     }
     const biggest = Math.max(...sizes);
-    const final = Math.max(minColumnWidth, Math.min(maxColumnWidth, Math.ceil(biggest)));
+    const final = Math.max(Math.ceil(minColumnWidth), Math.min(Math.floor(maxColumnWidth), Math.ceil(biggest)));
 
     return {
         ...c,
