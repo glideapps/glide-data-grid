@@ -93,6 +93,7 @@ type Props = Omit<
     | "onMouseUp"
     | "onMouseMove"
     | "freezeColumns"
+    | "clientSize"
     | "onSearchResultsChanged"
     | "onVisibleRegionChanged"
     | "rowHeight"
@@ -499,10 +500,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return { ...getDataEditorTheme(), ...theme };
     }, [theme]);
 
+    const [clientSize, setClientSize] = React.useState<readonly [number, number]>([10, 10]);
+
     const columns = useColumnSizer(
         columnsIn,
         rows,
         getCellsForSeletionDirect,
+        clientSize[0] - (rowMarkerOffset === 0 ? 0 : rowMarkerWidth),
         minColumnWidth,
         maxColumnWidth,
         mergedTheme,
@@ -1443,7 +1447,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const currentCell = gridSelection?.current?.cell;
     const onVisibleRegionChangedImpl = React.useCallback(
-        (region: Rectangle, tx?: number, ty?: number) => {
+        (region: Rectangle, clientWidth: number, clientHeight: number, tx?: number, ty?: number) => {
             let selected = currentCell;
             if (selected !== undefined) {
                 selected = [selected[0] - rowMarkerOffset, selected[1]];
@@ -1467,6 +1471,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                               },
                 },
             };
+            setClientSize([clientWidth, clientHeight]);
             setVisibleRegion(newRegion);
             visibleRegionRef.current = newRegion;
             onVisibleRegionChanged?.(newRegion, newRegion.tx, newRegion.ty, newRegion.extras);
@@ -2754,6 +2759,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onDrop={onDrop}
                     onSearchResultsChanged={onSearchResultsChanged}
                     onVisibleRegionChanged={onVisibleRegionChangedImpl}
+                    clientSize={clientSize}
                     rowHeight={rowHeight}
                     rows={mangledRows}
                     scrollRef={scrollRef}
