@@ -2429,7 +2429,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
     });
 
     test("Resize Column End Called", async () => {
@@ -2456,7 +2456,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
     });
 
     test("Resize Multiple Column", async () => {
@@ -2529,7 +2529,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
     });
 
     test("Drag reorder row", async () => {
