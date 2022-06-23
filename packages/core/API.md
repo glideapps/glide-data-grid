@@ -890,9 +890,13 @@ The grid will not attempt to add additional rows if more data is pasted then can
 
 ```ts
 trailingRowOptions?: {
-    readonly tint?: boolean;
+    readonly tint?: boolean; // DataEditor level only
+    readonly sticky?: boolean; // DataEditor level only
     readonly hint?: string;
-    readonly sticky?: boolean;
+    readonly addIcon?: string;
+    readonly targetColumn?: number | GridColumn;
+    readonly themeOverride?: Partial<Theme>; // GridColumn only
+    readonly disabled?: boolean; // GridColumn only
 }
 onRowAppended?: () => void;
 ```
