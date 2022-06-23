@@ -15,11 +15,11 @@ export interface DataGridDndProps extends Props {
      * @deprecated Use onColumnResize instead. It's the same thing, just fixes the naming convention.
      * This will be removed in a future version.
      */
-    readonly onColumnResized?: (column: GridColumn, newSize: number) => void; // these should not be past tense?
+    readonly onColumnResized?: (column: GridColumn, newSize: number, colIndex: number) => void; // these should not be past tense?
 
-    readonly onColumnResize?: (column: GridColumn, newSize: number) => void; // these should not be past tense?
-    readonly onColumnResizeStart?: (column: GridColumn, newSize: number) => void; // these should not be past tense?
-    readonly onColumnResizeEnd?: (column: GridColumn, newSize: number) => void; // these should not be past tense?
+    readonly onColumnResize?: (column: GridColumn, newSize: number, colIndex: number) => void; // these should not be past tense?
+    readonly onColumnResizeStart?: (column: GridColumn, newSize: number, colIndex: number) => void; // these should not be past tense?
+    readonly onColumnResizeEnd?: (column: GridColumn, newSize: number, colIndex: number) => void; // these should not be past tense?
 
     readonly gridRef?: React.MutableRefObject<DataGridRef | null>;
     readonly maxColumnWidth: number;
@@ -90,7 +90,6 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
     const canDragCol = onColumnMoved !== undefined;
     const onMouseDownImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
-            let shouldFireEvent = true;
             if (args.button === 0) {
                 const [col, row] = args.location;
                 if (!isDraggable) {
@@ -102,10 +101,9 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                         }
                     } else if (args.kind === "header" && col >= lockColumns) {
                         if (args.isEdge && canResize) {
-                            shouldFireEvent = false;
                             setResizeColStartX(args.bounds.x);
                             setResizeCol(col);
-                            onColumnResizeStart?.(columns[col], args.bounds.width);
+                            onColumnResizeStart?.(columns[col], args.bounds.width, col);
                         } else if (args.kind === "header" && canDragCol) {
                             setDragStartX(args.bounds.x);
                             setDragCol(col);
@@ -122,7 +120,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                     }
                 }
             }
-            if (shouldFireEvent) onMouseDown?.(args);
+            onMouseDown?.(args);
         },
         [
             onMouseDown,
@@ -159,25 +157,34 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                             const col = columns[c];
                             onColumnResized?.(
                                 col,
-                                offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth)
+                                offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth),
+                                c
                             );
                             onColumnResize?.(
                                 col,
-                                offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth)
+                                offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth),
+                                c
                             );
                         }
                     }
 
                     onColumnResizeEnd?.(
                         columns[resizeCol],
-                        offsetColumnSize(columns[resizeCol], lastResizeWidthRef.current, minColumnWidth, maxColumnWidth)
+                        offsetColumnSize(
+                            columns[resizeCol],
+                            lastResizeWidthRef.current,
+                            minColumnWidth,
+                            maxColumnWidth
+                        ),
+                        resizeCol
                     );
                     for (const c of selectedColumns) {
                         if (c === resizeCol) continue;
                         const col = columns[c];
                         onColumnResizeEnd?.(
                             col,
-                            offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth)
+                            offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth),
+                            c
                         );
                     }
                 }
@@ -246,8 +253,12 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             } else if (resizeCol !== undefined && resizeColStartX !== undefined) {
                 const column = columns[resizeCol];
                 const newWidth = event.clientX - resizeColStartX;
-                onColumnResized?.(column, offsetColumnSize(column, newWidth, minColumnWidth, maxColumnWidth));
-                onColumnResize?.(column, offsetColumnSize(column, newWidth, minColumnWidth, maxColumnWidth));
+                onColumnResized?.(
+                    column,
+                    offsetColumnSize(column, newWidth, minColumnWidth, maxColumnWidth),
+                    resizeCol
+                );
+                onColumnResize?.(column, offsetColumnSize(column, newWidth, minColumnWidth, maxColumnWidth), resizeCol);
                 lastResizeWidthRef.current = newWidth;
 
                 if (selectedColumns?.first() === resizeCol) {
@@ -256,11 +267,13 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                         const col = columns[c];
                         onColumnResized?.(
                             col,
-                            offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth)
+                            offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth),
+                            c
                         );
                         onColumnResize?.(
                             col,
-                            offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth)
+                            offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth),
+                            c
                         );
                     }
                 }

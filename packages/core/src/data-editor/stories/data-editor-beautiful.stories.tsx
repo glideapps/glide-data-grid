@@ -61,7 +61,7 @@ const defaultProps: Partial<DataEditorProps> = {
 };
 
 export const ResizableColumns: React.VFC = () => {
-    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(60);
+    const { cols, getCellContent, onColumnResize, getCellsForSelection } = useMockDataGenerator(60);
 
     return (
         <BeautifulWrapper
@@ -86,7 +86,8 @@ export const ResizableColumns: React.VFC = () => {
                 overscrollX={200}
                 overscrollY={200}
                 rows={50}
-                onColumnResized={onColumnResize}
+                onColumnResize={onColumnResize}
+                getCellsForSelection={getCellsForSelection}
             />
         </BeautifulWrapper>
     );
@@ -573,7 +574,7 @@ export const AppendRowHandle: React.VFC = () => {
     const ref = React.useRef<DataEditorRef>(null);
 
     const onClick = React.useCallback(() => {
-      ref.current?.appendRow(3)
+        ref.current?.appendRow(3);
     }, [ref]);
 
     const onRowAppended = React.useCallback(() => {
@@ -590,10 +591,12 @@ export const AppendRowHandle: React.VFC = () => {
             title="appendRow Ref"
             description={
                 <>
-                    <Description>Adding data can also be triggered from outside of <PropName>DataEditor</PropName></Description>
+                    <Description>
+                        Adding data can also be triggered from outside of <PropName>DataEditor</PropName>
+                    </Description>
                     <MoreInfo>
-                        By calling <PropName>appendRow</PropName> on a <PropName>ref</PropName> to your grid, you can trigger
-                        the append elsewhere, like this <KeyName onClick={onClick}>Append</KeyName> button
+                        By calling <PropName>appendRow</PropName> on a <PropName>ref</PropName> to your grid, you can
+                        trigger the append elsewhere, like this <KeyName onClick={onClick}>Append</KeyName> button
                     </MoreInfo>
                 </>
             }>
@@ -1000,7 +1003,7 @@ export const WrappingText: React.VFC<{
     length: number;
     hyperWrapping: boolean;
 }> = p => {
-    const { cols, getCellContent } = useMockDataGenerator(6);
+    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(6);
 
     const suffix = React.useMemo(() => {
         return range(0, 100).map(() => faker.lorem.sentence(p.length));
@@ -1039,6 +1042,7 @@ export const WrappingText: React.VFC<{
                 getCellContent={mangledGetCellContent}
                 columns={cols}
                 rows={1_000}
+                onColumnResize={onColumnResize}
                 experimental={{
                     hyperWrapping: p.hyperWrapping,
                 }}

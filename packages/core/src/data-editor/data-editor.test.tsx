@@ -2429,7 +2429,39 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
+    });
+
+    test("Auto Resize Column", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onColumnResize={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 310, // Col B Right Edge
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 310,
+            clientY: 16,
+        });
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 310, // Col B Right Edge
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 310,
+            clientY: 16,
+        });
+
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 50, 1);
     });
 
     test("Resize Column End Called", async () => {
@@ -2456,7 +2488,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
     });
 
     test("Resize Multiple Column", async () => {
@@ -2529,7 +2561,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
     });
 
     test("Drag reorder row", async () => {

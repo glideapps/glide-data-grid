@@ -922,6 +922,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
                     srcX += (srcWidth - srcHeight) / 2;
                     srcWidth = srcHeight;
                 } else if (srcHeight > srcWidth) {
+                    ("");
                     //portrait
                     srcY += (srcHeight - srcWidth) / 2;
                     srcHeight = srcWidth;
