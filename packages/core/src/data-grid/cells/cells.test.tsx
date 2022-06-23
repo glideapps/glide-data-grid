@@ -5,6 +5,7 @@ import { imageCellRenderer } from "./image-cell";
 import * as React from "react";
 import noop from "lodash/noop";
 import { ImageEditorType } from "./cell-types";
+import { getDefaultTheme } from "../..";
 
 function getMockEditorTarget(): Rectangle {
     return {
@@ -47,7 +48,7 @@ describe("Image cell", () => {
     it("Measures a reasonable size", async () => {
         const cell = getImgCell();
         const ctx = get2dContext();
-        const autoSize = imageCellRenderer.measure(ctx, cell);
+        const autoSize = imageCellRenderer.measure(ctx, cell, getDefaultTheme());
         expect(autoSize).toBe(100);
     });
 
