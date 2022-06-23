@@ -2432,7 +2432,7 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
     });
 
-    test.only("Auto Resize Column", async () => {
+    test("Auto Resize Column", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onColumnResize={spy} />, {
