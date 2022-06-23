@@ -45,11 +45,14 @@ Details of each property can be found by clicking on it.
 
 ## Ref Methods
 
-| Name                        | Description                                             |
-| --------------------------- | ------------------------------------------------------- |
-| [updateCells](#updatecells) | Invalidates the rendering of a list of passed cells.    |
-| [getBounds](#getbounds)     | Gets the current screen-space bounds of a desired cell. |
-| [scrollTo](#scrollto)       | Tells the data-grid to scroll to a particular location. |
+| Name                        | Description                                                   |
+| --------------------------- | ------------------------------------------------------------- |
+| [updateCells](#updatecells) | Invalidates the rendering of a list of passed cells.          |
+| [getBounds](#getbounds)     | Gets the current screen-space bounds of a desired cell.       |
+| [scrollTo](#scrollto)       | Tells the data-grid to scroll to a particular location.       |
+| [appendRow](#appendrow)     | Append a row to the data grid.                                |
+| [focus](#focus)             | Focuses the data grid.                                        |
+| [emit](#emit)               | Used to emit commands normally emitted by keyboard shortcuts. |
 
 ## Required Props
 
@@ -157,6 +160,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [rowSelectionMode](#rowselectionmode)                 | Determines if row selection requires a modifier key to enable multi-selection or not.                                                                                               |
 | [showMinimap](#showminimap)                           | Shows the interactive minimap of the grid.                                                                                                                                          |
 | [scrollToEnd](#scrolltoend)                           | When set to true, the grid will scroll to the end. The ref has a better method to do this and this prop should not be used but it will remain supported for the foreseeable future. |
+| [validateCell](#validatecell)                         | When returns false indicates to the user the value will not be accepted. When returns a new GridCell the value is coerced to match.                                                 |
 
 ## Rarely Used
 
@@ -209,6 +213,7 @@ interface BaseGridColumn {
     readonly overlayIcon?: GridColumnIcon | string;
     readonly hasMenu?: boolean;
     readonly style?: "normal" | "highlight";
+    readonly grow?: number;
     readonly themeOverride?: Partial<Theme>;
     readonly trailingRowOptions?: {
         readonly hint?: string;
@@ -239,6 +244,7 @@ export type GridColumn = SizedGridColumn | AutoGridColumn;
 | overlayIcon        | An icon which is painted on top offset bottom right of the `icon`. Must be a predefined icon or an icon passed to the `headerIcons` prop |
 | hasMenu            | Enables/disables the menu dropdown indicator. If not enabled, `onHeaderMenuClick` will not be emitted.                                   |
 | style              | Makes the column use the highlighted theming from the `Theme`. `themeOverride` can be used to perform the same effect.                   |
+| grow               | When set to a number > 0 the column will grow to consume extra available space according to the weight of its grow property.             |
 | themeOverride      | A `Partial<Theme>` which can be used to override the theming of the header as well as all cells within the column.                       |
 | trailingRowOptions | Overrides the `DataEditor` level prop for [`trailingRowOptions`](#trailingrowoptions) for this column                                    |
 
@@ -336,6 +342,7 @@ The data grid uses the `Theme` provided by the styled-components `ThemeProvider`
 | baseFontStyle         | string              | The font style used for cells by default, e.g. `13px`                                             |
 | fontFamily            | string              | The font family used by the data grid.                                                            |
 | editorFontSize        | string              | The font size used by overlay editors.                                                            |
+| lineHeight            | number              | A unitless scaler which defines the height of a line of text relative to the ink size.            |
 
 ---
 
@@ -374,6 +381,41 @@ scrollTo: (
 ```
 
 Requests the data grid to scroll to a particular location. If only one direction is requested it will get as close as it can without scrolling the off axis. Padding can be applied to inset the cell by a certain amount.
+
+---
+
+| [focus](#focus)             | Focuses the data grid.                                        |
+| [emit](#emit)               | Used to emit commands normally emitted by keyboard shortcuts. |
+
+## appendRow
+
+```ts
+appendRow: (col: number) => Promise<void>;
+```
+
+Appends a row to the data grid.
+
+---
+
+## focus
+
+```ts
+focus: () => void;
+```
+
+Causes the data grid to become focused.
+
+---
+
+## emit
+
+```ts
+type EmitEvents = "copy" | "paste" | "delete" | "fill-right" | "fill-down";
+
+emit: (eventName: EmitEvents) => Promise<void>;
+```
+
+Emits the event into the data grid as if the user had pressed the keyboard shortcut.
 
 ---
 
@@ -1048,6 +1090,16 @@ scrollToEnd?: boolean;
 ```
 
 When this property changes to `true`, the Grid will scroll all the way to the right. Glide uses that when the user clicks the "Add Column" button.
+
+---
+
+## validateCell
+
+```ts
+readonly validateCell?: (cell: Item, newValue: EditableGridCell) => boolean | EditableGridCell;
+```
+
+When returns false indicates to the user the value will not be accepted. When returns a new GridCell the value is coerced to match.
 
 ---
 
