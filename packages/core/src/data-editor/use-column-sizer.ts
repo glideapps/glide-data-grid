@@ -195,5 +195,5 @@ export function useColumnSizer(
             result = writeable;
         }
         return result;
-    }, [columns, ctx, clientWidth, maxColumnWidth, minColumnWidth, selectedData]);
+    }, [clientWidth, columns, ctx, selectedData, theme, minColumnWidth, maxColumnWidth]);
 }
