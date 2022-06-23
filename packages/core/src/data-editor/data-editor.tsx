@@ -1348,7 +1348,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const ctx = offscreen.getContext("2d", { alpha: false });
                 if (ctx !== null) {
                     ctx.font = `${mergedTheme.baseFontStyle} ${mergedTheme.fontFamily}`;
-                    const newCol = measureColumn(ctx, mergedTheme, inputCol, 0, cells, minColumnWidth, maxColumnWidth);
+                    const newCol = measureColumn(
+                        ctx,
+                        mergedTheme,
+                        inputCol,
+                        0,
+                        cells,
+                        minColumnWidth,
+                        maxColumnWidth,
+                        false
+                    );
                     onColumnResize?.(inputCol, newCol.width, col);
                 }
             }

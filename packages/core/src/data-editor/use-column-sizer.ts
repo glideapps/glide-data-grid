@@ -29,7 +29,8 @@ export function measureColumn(
     colIndex: number,
     selectedData: CellArray,
     minColumnWidth: number,
-    maxColumnWidth: number
+    maxColumnWidth: number,
+    removeOutliers: boolean
 ): SizedGridColumn {
     let sizes: number[] = [];
     if (selectedData !== undefined) {
@@ -37,7 +38,7 @@ export function measureColumn(
     }
     sizes.push(ctx.measureText(c.title).width + 16 + (c.icon === undefined ? 0 : 28));
     const average = sizes.reduce((a, b) => a + b) / sizes.length;
-    if (sizes.length > 5) {
+    if (sizes.length > 5 && removeOutliers) {
         // Filter out outliers
         sizes = sizes.filter(a => a < average * 2);
     }
@@ -158,7 +159,7 @@ export function useColumnSizer(
                     };
                 }
 
-                const r = measureColumn(ctx, theme, c, colIndex, selectedData, minColumnWidth, maxColumnWidth);
+                const r = measureColumn(ctx, theme, c, colIndex, selectedData, minColumnWidth, maxColumnWidth, true);
                 memoMap.current[c.id] = r.width;
                 return r;
             });
