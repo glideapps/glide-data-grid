@@ -1348,20 +1348,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const ctx = offscreen.getContext("2d", { alpha: false });
                 if (ctx !== null) {
                     ctx.font = `${mergedTheme.baseFontStyle} ${mergedTheme.fontFamily}`;
-                    const newCol = measureColumn(ctx, inputCol, 0, cells, minColumnWidth, maxColumnWidth);
+                    const newCol = measureColumn(ctx, mergedTheme, inputCol, 0, cells, minColumnWidth, maxColumnWidth);
                     onColumnResize?.(inputCol, newCol.width, col);
                 }
             }
         },
-        [
-            columns,
-            getCellsForSelection,
-            maxColumnWidth,
-            mergedTheme.baseFontStyle,
-            mergedTheme.fontFamily,
-            minColumnWidth,
-            onColumnResize,
-        ]
+        [columns, getCellsForSelection, maxColumnWidth, mergedTheme, minColumnWidth, onColumnResize]
     );
 
     const onMouseUp = React.useCallback(

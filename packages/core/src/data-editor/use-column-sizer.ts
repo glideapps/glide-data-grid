@@ -15,15 +15,16 @@ import {
 
 const defaultSize = 150;
 
-function measureCell(ctx: CanvasRenderingContext2D, cell: GridCell): number {
+function measureCell(ctx: CanvasRenderingContext2D, cell: GridCell, theme: Theme): number {
     if (cell.kind === GridCellKind.Custom) return defaultSize;
 
     const r = CellRenderers[cell.kind];
-    return r?.measure(ctx, cell) ?? defaultSize;
+    return r?.measure(ctx, cell, theme) ?? defaultSize;
 }
 
 export function measureColumn(
     ctx: CanvasRenderingContext2D,
+    theme: Theme,
     c: GridColumn,
     colIndex: number,
     selectedData: CellArray,
@@ -32,7 +33,7 @@ export function measureColumn(
 ): SizedGridColumn {
     let sizes: number[] = [];
     if (selectedData !== undefined) {
-        sizes.push(...selectedData.map(row => row[colIndex]).map(cell => measureCell(ctx, cell)));
+        sizes.push(...selectedData.map(row => row[colIndex]).map(cell => measureCell(ctx, cell, theme)));
     }
     sizes.push(ctx.measureText(c.title).width + 16 + (c.icon === undefined ? 0 : 28));
     const average = sizes.reduce((a, b) => a + b) / sizes.length;
@@ -157,7 +158,7 @@ export function useColumnSizer(
                     };
                 }
 
-                const r = measureColumn(ctx, c, colIndex, selectedData, minColumnWidth, maxColumnWidth);
+                const r = measureColumn(ctx, theme, c, colIndex, selectedData, minColumnWidth, maxColumnWidth);
                 memoMap.current[c.id] = r.width;
                 return r;
             });
