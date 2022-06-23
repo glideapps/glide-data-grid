@@ -1343,7 +1343,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (typeof cells !== "object") {
                     cells = await cells();
                 }
-                const inputCol = columns[col];
+                const inputCol = columns[col - rowMarkerOffset];
                 const offscreen = document.createElement("canvas");
                 const ctx = offscreen.getContext("2d", { alpha: false });
                 if (ctx !== null) {
@@ -1353,7 +1353,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
         },
-        [columns, getCellsForSelection, maxColumnWidth, mergedTheme, minColumnWidth, onColumnResize]
+        [columns, getCellsForSelection, maxColumnWidth, mergedTheme, minColumnWidth, onColumnResize, rowMarkerOffset]
     );
 
     const onMouseUp = React.useCallback(
