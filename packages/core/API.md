@@ -384,8 +384,8 @@ Requests the data grid to scroll to a particular location. If only one direction
 
 ---
 
-| [focus](#focus)             | Focuses the data grid.                                        |
-| [emit](#emit)               | Used to emit commands normally emitted by keyboard shortcuts. |
+| [focus](#focus) | Focuses the data grid. |
+| [emit](#emit) | Used to emit commands normally emitted by keyboard shortcuts. |
 
 ## appendRow
 
@@ -954,7 +954,7 @@ onColumnMoved?: (startIndex: number, endIndex: number) => void;
 ## onColumnResize
 
 ```ts
-onColumnResize?: (column: GridColumn, newSize: number) => void;
+onColumnResize?: (column: GridColumn, newSize: number, columnIndex: number) => void;
 ```
 
 `onColumnResize` is called when the user is resizing a column. `newSize` is the new size of the column. Note that you have change the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
@@ -962,7 +962,7 @@ onColumnResize?: (column: GridColumn, newSize: number) => void;
 ## onColumnResizeStart
 
 ```ts
-onColumnResizeStart?: (column: GridColumn, newSize: number) => void;
+onColumnResizeStart?: (column: GridColumn, newSize: number, columnIndex: number) => void;
 ```
 
 `onColumnResize` is called when the user starts resizing a column. `newSize` is the new size of the column.
@@ -970,7 +970,7 @@ onColumnResizeStart?: (column: GridColumn, newSize: number) => void;
 ## onColumnResizeEnd
 
 ```ts
-onColumnResizeEnd?: (column: GridColumn, newSize: number) => void;
+onColumnResizeEnd?: (column: GridColumn, newSize: number, columnIndex: number) => void;
 ```
 
 `onColumnResize` is called when the user ends resizing a column. `newSize` is the new size of the column.
