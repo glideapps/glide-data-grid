@@ -254,6 +254,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                                                     maxHeight: clientHeight - Math.ceil(dpr % 1),
                                                     position: "sticky",
                                                     top: 0,
+                                                    paddingLeft: 1,
                                                     marginBottom: -40,
                                                     marginRight: paddingRight,
                                                     right: rightElementSticky ? paddingRight ?? 0 : undefined,
