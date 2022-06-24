@@ -33,11 +33,11 @@ const MinimapStyle = styled.div`
     position: absolute;
     right: 44px;
     bottom: 44px;
-    background-color: ${p => p.theme.bgCell};
-    background: linear-gradient(${p => p.theme.bgCell}, ${p => p.theme.bgCellMedium});
+    background-color: var(--gdg-bg-cell);
+    background: linear-gradient(var(--gdg-bg-cell), var(--gdg-bg-cell-medium));
     border-radius: 4px;
     z-index: 1;
-    box-shadow: 0 0 0 1px ${p => p.theme.borderColor}, 0 2px 5px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 0 1px var(--gdg-border-color), 0 2px 5px rgba(0, 0, 0, 0.08);
 
     overflow: hidden;
 
@@ -47,15 +47,15 @@ const MinimapStyle = styled.div`
         top: 0;
         width: 100%;
         height: 4px;
-        background-color: ${p => p.theme.bgHeader};
-        box-shadow: 0 0 0 1px ${p => p.theme.borderColor};
+        background-color: var(--gdg-bg-header);
+        box-shadow: 0 0 0 1px var(--gdg-border-color);
     }
 
     .locationMarker {
         position: absolute;
 
-        border: 1px solid ${p => p.theme.accentColor};
-        background-color: ${p => p.theme.accentLight};
+        border: 1px solid var(--gdg-accent-color);
+        background-color: var(--gdg-accent-light);
     }
 `;
 
