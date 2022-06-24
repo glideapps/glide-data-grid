@@ -39,7 +39,7 @@ import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-gr
 import { browserIsOSX } from "../common/browser-detect";
 import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
 import { ThemeProvider, useTheme } from "styled-components";
-import { getDataEditorTheme, Theme } from "../common/styles";
+import { getDataEditorTheme, makeCSSStyle, Theme } from "../common/styles";
 import { DataGridRef } from "../data-grid/data-grid";
 import { getScrollBarWidth, useEventListener } from "../common/utils";
 import { CellRenderers } from "../data-grid/cells";
@@ -2814,6 +2814,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     return (
         <ThemeProvider theme={mergedTheme}>
             <DataEditorContainer
+                style={makeCSSStyle(mergedTheme)}
                 className={className}
                 width={width ?? idealWidth}
                 height={height ?? idealHeight}

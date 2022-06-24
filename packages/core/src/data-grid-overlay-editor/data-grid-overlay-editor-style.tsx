@@ -24,8 +24,8 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
     max-width: 400px;
     max-height: calc(100vh - ${p => p.targetRect.y + 10}px);
 
-    font-family: ${p => p.theme.fontFamily};
-    font-size: ${p => p.theme.editorFontSize};
+    font-family: var(--gdg-font-family);
+    font-size: var(--gdg-editor-font-size);
 
     @keyframes glide_fade_in {
         from {
@@ -39,10 +39,10 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
 
     &.gdg-style {
         border-radius: 2px;
-        background-color: ${p => p.theme.bgCell};
+        background-color: var(--gdg-bg-cell);
         ${p => p.pad && `padding: ${Math.max(0, (p.targetRect.height - 28) / 2)}px 8.5px 3px;`}
 
-        box-shadow: 0 0 0 1px ${p => p.theme.accentColor}, 0px 0px 1px rgba(62, 65, 86, 0.4),
+        box-shadow: 0 0 0 1px var(--gdg-accent-color), 0px 0px 1px rgba(62, 65, 86, 0.4),
             0px 6px 12px rgba(62, 65, 86, 0.15);
 
         animation: glide_fade_in 60ms 1;

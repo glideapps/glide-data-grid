@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { ThemeProvider } from "styled-components";
 
 import ClickOutsideContainer from "../click-outside-container/click-outside-container";
-import { Theme } from "../common/styles";
+import { makeCSSStyle, Theme } from "../common/styles";
 import { CellRenderers } from "../data-grid/cells";
 import {
     EditableGridCell,
@@ -224,7 +224,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     const portal = createPortal(
         <ThemeProvider theme={theme}>
-            <ClickOutsideContainer className={className} onClickOutside={onClickOutside}>
+            <ClickOutsideContainer style={makeCSSStyle(theme)} className={className} onClickOutside={onClickOutside}>
                 <DataGridOverlayEditorStyle
                     ref={ref}
                     id={id}

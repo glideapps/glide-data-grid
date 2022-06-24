@@ -16,18 +16,18 @@ const Wrapper = styled.div`
             font-size: 14px;
             border-radius: 9px;
             font-weight: 500;
-            font-family: ${p => p.theme.fontFamily};
+            font-family: var(--gdg-font-family);
             cursor: pointer;
         }
     }
     .save-button {
-        background-color: ${p => p.theme.accentColor};
-        color: ${p => p.theme.accentFg};
+        background-color: var(--gdg-accent-color);
+        color: var(--gdg-accent-fg);
     }
 
     .close-button {
-        background-color: ${p => p.theme.bgHeader};
-        color: ${p => p.theme.textMedium};
+        background-color: var(--gdg-bg-header);
+        color: var(--gdg-text-medium);
         margin-right: 8px;
     }
 `;
