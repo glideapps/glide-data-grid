@@ -1,41 +1,67 @@
 import baseStyled, { ThemedStyledInterface } from "styled-components";
 
+export function makeCSSStyle(theme: Theme): Record<string, string> {
+    return {
+        "--gdg-accent-color": theme.accentColor,
+        "--gdg-accent-fg": theme.accentFg,
+        "--gdg-accent-light": theme.accentLight,
+        "--gdg-text-dark": theme.textDark,
+        "--gdg-text-medium": theme.textMedium,
+        "--gdg-text-light": theme.textLight,
+        "--gdg-text-bubble": theme.textBubble,
+        "--gdg-bg-icon-header": theme.bgIconHeader,
+        "--gdg-fg-icon-header": theme.fgIconHeader,
+        "--gdg-text-header": theme.textHeader,
+        "--gdg-text-group-header": theme.textGroupHeader ?? theme.textHeader,
+        "--gdg-text-header-selected": theme.textHeaderSelected,
+        "--gdg-bg-cell": theme.bgCell,
+        "--gdg-bg-cell-medium": theme.bgCellMedium,
+        "--gdg-bg-header": theme.bgHeader,
+        "--gdg-bg-header-has-focus": theme.bgHeaderHasFocus,
+        "--gdg-bg-header-hovered": theme.bgHeaderHovered,
+        "--gdg-bg-bubble": theme.bgBubble,
+        "--gdg-bg-bubble-selected": theme.bgBubbleSelected,
+        "--gdg-bg-search-result": theme.bgSearchResult,
+        "--gdg-border-color": theme.borderColor,
+        "--gdg-horizontal-border-color": theme.horizontalBorderColor ?? theme.borderColor,
+        "--gdg-drilldown-border": theme.drilldownBorder,
+        "--gdg-link-color": theme.linkColor,
+        "--gdg-cell-horizontal-padding": `${theme.cellHorizontalPadding}px`,
+        "--gdg-cell-vertical-padding": `${theme.cellVerticalPadding}px`,
+        "--gdg-header-font-style": theme.headerFontStyle,
+        "--gdg-base-font-style": theme.baseFontStyle,
+        "--gdg-font-family": theme.fontFamily,
+        "--gdg-editor-font-size": theme.editorFontSize,
+    };
+}
+
 export interface Theme {
     accentColor: string;
     accentFg: string;
     accentLight: string;
-
     textDark: string;
     textMedium: string;
     textLight: string;
     textBubble: string;
-
     bgIconHeader: string;
     fgIconHeader: string;
     textHeader: string;
     textGroupHeader?: string;
     textHeaderSelected: string;
-
     bgCell: string;
     bgCellMedium: string;
     bgHeader: string;
     bgHeaderHasFocus: string;
     bgHeaderHovered: string;
-
     bgBubble: string;
     bgBubbleSelected: string;
-
     bgSearchResult: string;
-
     borderColor: string;
     horizontalBorderColor?: string;
     drilldownBorder: string;
-
     linkColor: string;
-
     cellHorizontalPadding: number;
     cellVerticalPadding: number;
-
     headerFontStyle: string;
     baseFontStyle: string;
     fontFamily: string;

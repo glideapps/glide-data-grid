@@ -20,7 +20,7 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
     align-items: flex-start;
     justify-content: space-between;
     position: relative;
-    color: ${p => p.theme.textDark};
+    color: var(--gdg-text-dark);
 
     ${GrowingEntryStyle} {
         flex-shrink: 1;
@@ -39,7 +39,7 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
         justify-content: center;
         align-items: center;
 
-        color: ${p => p.theme.accentColor};
+        color: var(--gdg-accent-color);
 
         padding: 0;
 
@@ -59,7 +59,7 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
 
     .edit-hover {
         :hover {
-            background-color: ${p => p.theme.accentLight};
+            background-color: var(--gdg-accent-light);
             transition: background-color 150ms;
         }
     }
@@ -67,7 +67,7 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
     .checkmark-hover {
         :hover {
             color: #ffffff;
-            background-color: ${p => p.theme.accentColor};
+            background-color: var(--gdg-accent-color);
         }
     }
 

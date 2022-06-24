@@ -29,7 +29,7 @@ const EditorWrap = styled.div`
     flex-direction: column;
     align-items: stretch;
     padding-top: 6px;
-    color: ${p => p.theme.textDark};
+    color: var(--gdg-text-dark);
 
     box-sizing: border-box;
 
@@ -57,9 +57,9 @@ const EditorWrap = styled.div`
             display: flex;
             align-items: center;
 
-            font: 12px ${p => p.theme.fontFamily};
+            font: 12px var(--gdg-font-family);
 
-            background-color: ${p => p.theme.bgBubble};
+            background-color: var(--gdg-bg-bubble);
 
             transition: box-shadow 150ms;
 
