@@ -67,6 +67,7 @@ export function Simplenotest() {
             onMouseMove={() => undefined}
             rows={10000}
             enableGroups={false}
+            clientSize={[1000, 1000]}
             cellXOffset={x}
             cellYOffset={y}
             minColumnWidth={50}
