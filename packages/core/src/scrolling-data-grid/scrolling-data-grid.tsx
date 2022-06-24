@@ -12,6 +12,7 @@ export interface ScrollingDataGridProps extends Props {
         range: Rectangle,
         clientWidth: number,
         clientHeight: number,
+        rightElWidth: number,
         tx?: number,
         ty?: number
     ) => void;
@@ -112,7 +113,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         height += overscrollY;
     }
 
-    const lastArgs = React.useRef<Rectangle>();
+    const lastArgs = React.useRef<Rectangle & { paddingRight: number }>();
 
     const processArgs = React.useCallback(() => {
         const args = lastArgs.current;
@@ -217,6 +218,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                 },
                 args.width,
                 args.height,
+                args.paddingRight ?? 0,
                 tx,
                 ty
             );
@@ -228,7 +230,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     }, [columns, rowHeight, rows, onVisibleRegionChanged, freezeColumns, smoothScrollX, smoothScrollY]);
 
     const onScrollUpdate = React.useCallback(
-        (args: Rectangle) => {
+        (args: Rectangle & { paddingRight: number }) => {
             lastArgs.current = args;
             processArgs();
         },

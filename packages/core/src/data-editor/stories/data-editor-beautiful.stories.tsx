@@ -2148,9 +2148,11 @@ export const CustomHeaderIcons: React.VFC = () => {
 };
 
 export const RightElement: React.VFC = () => {
-    const { cols, getCellContent, setCellValue, getCellsForSelection } = useMockDataGenerator(12, false);
+    const { cols, getCellContent, setCellValue, getCellsForSelection } = useMockDataGenerator(8, false);
 
-    const [numRows, setNumRows] = React.useState(30);
+    const columns = React.useMemo(() => cols.map(c => ({ ...c, grow: 1 })), [cols]);
+
+    const [numRows, setNumRows] = React.useState(300);
 
     const onRowAppended = React.useCallback(() => {
         const newRow = numRows;
@@ -2175,7 +2177,7 @@ export const RightElement: React.VFC = () => {
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
-                columns={cols}
+                columns={columns}
                 getCellsForSelection={getCellsForSelection}
                 rowMarkers={"both"}
                 onCellEdited={setCellValue}

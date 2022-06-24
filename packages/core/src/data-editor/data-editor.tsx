@@ -533,13 +533,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return { ...getDataEditorTheme(), ...theme };
     }, [theme]);
 
-    const [clientSize, setClientSize] = React.useState<readonly [number, number]>([10, 10]);
+    const [clientSize, setClientSize] = React.useState<readonly [number, number, number]>([10, 10, 0]);
 
     const columns = useColumnSizer(
         columnsIn,
         rows,
         getCellsForSeletionDirect,
-        clientSize[0] - (rowMarkerOffset === 0 ? 0 : rowMarkerWidth),
+        clientSize[0] - (rowMarkerOffset === 0 ? 0 : rowMarkerWidth) - clientSize[2],
         minColumnWidth,
         maxColumnWidth,
         mergedTheme,
@@ -1540,7 +1540,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const currentCell = gridSelection?.current?.cell;
     const onVisibleRegionChangedImpl = React.useCallback(
-        (region: Rectangle, clientWidth: number, clientHeight: number, tx?: number, ty?: number) => {
+        (
+            region: Rectangle,
+            clientWidth: number,
+            clientHeight: number,
+            rightElWidth: number,
+            tx?: number,
+            ty?: number
+        ) => {
             let selected = currentCell;
             if (selected !== undefined) {
                 selected = [selected[0] - rowMarkerOffset, selected[1]];
@@ -1564,7 +1571,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                               },
                 },
             };
-            setClientSize([clientWidth, clientHeight]);
+            setClientSize([clientWidth, clientHeight, rightElWidth]);
             setVisibleRegion(newRegion);
             visibleRegionRef.current = newRegion;
             onVisibleRegionChanged?.(newRegion, newRegion.tx, newRegion.ty, newRegion.extras);
@@ -2856,7 +2863,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onDrop={onDrop}
                     onSearchResultsChanged={onSearchResultsChanged}
                     onVisibleRegionChanged={onVisibleRegionChangedImpl}
-                    clientSize={clientSize}
+                    clientSize={[clientSize[0], clientSize[1]]}
                     rowHeight={rowHeight}
                     rows={mangledRows}
                     scrollRef={scrollRef}
