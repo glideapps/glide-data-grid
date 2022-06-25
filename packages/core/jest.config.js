@@ -9,4 +9,16 @@ export default {
         "^.+\\.(ts|tsx)?$": "ts-jest",
         "^.+\\.(js|jsx)$": "babel-jest",
     },
+    globals: {
+        __PATH_PREFIX__: ``,
+        "ts-jest": {
+            babelConfig: {
+                presets: [
+                    ["@babel/preset-env", { targets: { node: "current" } }],
+                    "@babel/preset-react",
+                    ["@linaria/babel-preset", { evaluate: true, displayName: true }],
+                ],
+            },
+        },
+    },
 };
