@@ -2819,8 +2819,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             <DataEditorContainer
                 style={makeCSSStyle(mergedTheme)}
                 className={className}
-                width={width ?? idealWidth}
-                height={height ?? idealHeight}
+                inWidth={width ?? idealWidth}
+                inHeight={height ?? idealHeight}
                 onContextMenu={onContextMenu}>
                 <DataGridSearch
                     {...rest}

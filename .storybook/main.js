@@ -6,14 +6,17 @@ module.exports = {
     devtool: "source-map",
     webpackFinal: async (config, { configType }) => {
         config.module.rules.push({
-            test: /\.(ts|tsx)$/,
+            test: /\.ts|tsx$/,
             use: [
+                { loader: "babel-loader" },
                 {
-                    loader: require.resolve("babel-loader"),
+                    loader: "@linaria/webpack-loader",
+                    options: {
+                        sourceMap: process.env.NODE_ENV !== "production",
+                    },
                 },
             ],
         });
-
         config.resolve.extensions.push(".ts", ".tsx");
         config.performance.hints = false;
         return config;
