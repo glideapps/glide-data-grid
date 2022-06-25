@@ -1,14 +1,4 @@
-import { styled } from "../common/styles";
-import { css } from "styled-components";
-
-const inputProps = css`
-    font-size: var(--gdg-editor-font-size);
-    line-height: 16px;
-    font-family: var(--gdg-font-family);
-    color: var(--gdg-text-dark);
-    padding: 0;
-    margin: 0;
-`;
+import { styled } from "@linaria/react";
 
 export const InputBox = styled.textarea`
     position: absolute;
@@ -32,7 +22,12 @@ export const InputBox = styled.textarea`
         color: var(--gdg-text-light);
     }
 
-    ${inputProps}
+    font-size: var(--gdg-editor-font-size);
+    line-height: 16px;
+    font-family: var(--gdg-font-family);
+    color: var(--gdg-text-dark);
+    padding: 0;
+    margin: 0;
 
     .invalid & {
         text-decoration: underline;
@@ -50,7 +45,12 @@ export const ShadowBox = styled.div`
 
     min-width: 100%;
 
-    ${inputProps}
+    font-size: var(--gdg-editor-font-size);
+    line-height: 16px;
+    font-family: var(--gdg-font-family);
+    color: var(--gdg-text-dark);
+    padding: 0;
+    margin: 0;
 
     padding-bottom: 2px;
 `;

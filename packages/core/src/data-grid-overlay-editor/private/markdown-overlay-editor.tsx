@@ -29,7 +29,7 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
 
     if (editMode) {
         return (
-            <MarkdownOverlayEditorStyle targetRect={targetRect}>
+            <MarkdownOverlayEditorStyle targetWidth={targetRect.width}>
                 <GrowingEntry
                     autoFocus={true}
                     highlight={false}
@@ -48,7 +48,7 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
         );
     }
     return (
-        <MarkdownOverlayEditorStyle targetRect={targetRect}>
+        <MarkdownOverlayEditorStyle targetWidth={targetRect.width}>
             <MarkdownDiv contents={markdown} createNode={createNode} />
             {!readonly && (
                 <>

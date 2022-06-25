@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 
 export const MarkdownContainer = styled.div`
     word-break: break-word;

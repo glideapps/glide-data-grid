@@ -42,7 +42,7 @@ const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
     );
 
     return (
-        <GrowingEntryStyle>
+        <GrowingEntryStyle className="gdg-growing-entry">
             <ShadowBox className={className}>{useText + "\n"}</ShadowBox>
             <InputBox
                 {...rest}
