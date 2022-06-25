@@ -1,7 +1,7 @@
 import { ProvideEditorComponent } from "@glideapps/glide-data-grid";
 import * as React from "react";
 import { Editor } from "@toast-ui/react-editor";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import type { ArticleCell } from "./article-cell-types";
 
 const Wrapper = styled.div`
