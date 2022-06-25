@@ -1,5 +1,6 @@
 import { CustomCell, ProvideEditorCallback, CustomCellRenderer, getMiddleCenterBias } from "@glideapps/glide-data-grid";
-import styled, { useTheme } from "styled-components";
+import { useTheme } from "styled-components";
+import { styled } from "@linaria/react";
 import * as React from "react";
 import Select, { MenuProps, components } from "react-select";
 import type { Theme } from "@glideapps/glide-data-grid";
