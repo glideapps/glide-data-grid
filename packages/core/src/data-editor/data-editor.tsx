@@ -277,6 +277,8 @@ export interface DataEditorProps extends Props {
     readonly verticalBorder?: DataGridSearchProps["verticalBorder"] | boolean;
 
     readonly onPaste?: ((target: Item, values: readonly (readonly string[])[]) => boolean) | boolean;
+
+    readonly theme?: Theme;
 }
 
 export interface DataEditorRef {
@@ -348,6 +350,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onGroupHeaderClicked,
         onCellContextMenu,
         className,
+        theme,
         onHeaderContextMenu,
         getCellsForSelection: getCellsForSelectionIn,
         onGroupHeaderContextMenu,
@@ -528,10 +531,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         rangeSelect
     );
 
-    const theme = useTheme();
+    const contextTheme = useTheme();
     const mergedTheme = React.useMemo(() => {
-        return { ...getDataEditorTheme(), ...theme };
-    }, [theme]);
+        return { ...getDataEditorTheme(), ...contextTheme, ...theme };
+    }, [contextTheme, theme]);
 
     const [clientSize, setClientSize] = React.useState<readonly [number, number, number]>([10, 10, 0]);
 
