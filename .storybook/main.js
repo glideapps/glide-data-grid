@@ -1,5 +1,3 @@
-const path = require("path");
-
 module.exports = {
     stories: ["../**/*.stories.tsx"],
     addons: ["@storybook/addon-links", "@storybook/addon-controls", "./addons/expand-all/register.js"],

@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Theme } from "../common/styles";
-import { useTheme } from "styled-components";
 import ImageWindowLoader from "../common/image-window-loader";
 import {
     computeBounds,
@@ -138,6 +137,8 @@ export interface DataGridProps {
     };
 
     readonly headerIcons?: SpriteMap;
+
+    readonly theme: Theme;
 }
 
 interface BlitData {
@@ -202,6 +203,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         allowResize,
         disabledRows,
         getGroupDetails,
+        theme,
         prelightCells,
         headerIcons,
         verticalBorder,
@@ -216,7 +218,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const translateY = p.translateY ?? 0;
     const cellXOffset = Math.max(freezeColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
-    const theme = useTheme() as Theme;
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const imageLoader = React.useMemo<ImageWindowLoader>(() => new ImageWindowLoader(), []);
     const damageRegion = React.useRef<readonly Item[] | undefined>(undefined);

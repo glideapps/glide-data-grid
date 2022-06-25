@@ -1,5 +1,3 @@
-import baseStyled, { ThemedStyledInterface } from "styled-components";
-
 export function makeCSSStyle(theme: Theme): Record<string, string> {
     return {
         "--gdg-accent-color": theme.accentColor,
@@ -111,8 +109,6 @@ const dataEditorBaseTheme: Theme = {
     editorFontSize: "13px",
     lineHeight: 1.4, //unitless scaler depends on your font
 };
-
-export const styled = baseStyled as ThemedStyledInterface<Theme>;
 
 export function getDataEditorTheme(): Theme {
     return dataEditorBaseTheme;

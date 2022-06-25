@@ -339,6 +339,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             width={p.width}
             canvasRef={p.canvasRef}
             className={p.className}
+            theme={p.theme}
             disabledRows={p.disabledRows}
             isFilling={p.isFilling}
             firstColAccessible={p.firstColAccessible}
