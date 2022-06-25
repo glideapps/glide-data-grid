@@ -5,6 +5,7 @@ import DataGrid, { DataGridProps, DataGridRef } from "./data-grid";
 import { CompactSelection, GridCellKind } from "./data-grid-types";
 import { ThemeProvider } from "styled-components";
 import { getDataEditorTheme } from "../common/styles";
+import { getDefaultTheme } from "..";
 
 const basicProps: DataGridProps = {
     cellXOffset: 0,
@@ -34,6 +35,7 @@ const basicProps: DataGridProps = {
     ],
     isFilling: false,
     enableGroups: false,
+    theme: getDefaultTheme(),
     freezeColumns: 0,
     selection: {
         current: undefined,
