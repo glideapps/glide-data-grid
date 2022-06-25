@@ -1,9 +1,9 @@
-import { styled } from "../common/styles";
+import { styled } from "@linaria/react";
 import * as React from "react";
 
 interface WrapperProps {
-    width: number | string;
-    height: number | string;
+    inWidth: number | string;
+    inHeight: number | string;
 }
 
 function toCss(x: number | string) {
@@ -39,9 +39,9 @@ const Wrapper = styled.div<{ innerWidth: string; innerHeight: string }>`
 interface Props extends WrapperProps, React.HTMLAttributes<HTMLDivElement> {}
 
 export const DataEditorContainer: React.FunctionComponent<React.PropsWithChildren<Props>> = p => {
-    const { width, height, children, ...rest } = p;
+    const { inWidth, inHeight, children, ...rest } = p;
     return (
-        <Wrapper innerHeight={toCss(height)} innerWidth={toCss(width)} {...rest}>
+        <Wrapper innerHeight={toCss(inHeight)} innerWidth={toCss(inWidth)} {...rest}>
             {children}
         </Wrapper>
     );
