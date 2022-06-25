@@ -5,7 +5,7 @@ const { dependencies, peerDependencies } = require("./package.json");
 const shared = {
     entryPoints: ["src/index.ts"],
     bundle: true,
-    minify: true,
+    minify: false,
     plugins: [
         linaria({
             sourceMap: true,
@@ -17,6 +17,7 @@ const shared = {
 build({
     ...shared,
     outfile: "dist/cjs/index.js",
+    format: "cjs",
 });
 
 build({
