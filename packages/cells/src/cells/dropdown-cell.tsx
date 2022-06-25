@@ -27,19 +27,19 @@ const Wrap = styled.div`
     align-items: stretch;
 
     .glide-select {
-        font-family: ${p => p.theme.fontFamily};
-        font-size: ${p => p.theme.editorFontSize};
+        font-family: var(--gdg-font-family);
+        font-size: var(--gdg-editor-font-size);
     }
 `;
 
 const PortalWrap = styled.div`
-    font-family: ${p => p.theme.fontFamily};
-    font-size: ${p => p.theme.editorFontSize};
-    color: ${p => p.theme.textDark};
+    font-family: var(--gdg-font-family);
+    font-size: var(--gdg-editor-font-size);
+    color: var(--gdg-text-dark);
 
     > div {
         border-radius: 4px;
-        border: 1px solid ${p => p.theme.borderColor};
+        border: 1px solid var(--gdg-border-color);
     }
 `;
 

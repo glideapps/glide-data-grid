@@ -50,13 +50,13 @@ const StarSVG = () => (
 
 const EditorWrap = styled.div`
     .active {
-        color: ${p => p.theme.textDark};
+        color: var(--gdg-text-dark);
     }
 
     display: flex;
     align-items: center;
     padding: 6px 0;
-    color: ${p => p.theme.textLight};
+    color: var(--gdg-text-light);
 
     > * {
         position: relative;
