@@ -1,20 +1,12 @@
-import { Rectangle } from "../../data-grid/data-grid-types";
 import { GrowingEntryStyle } from "../../growing-entry/growing-entry-style";
-import { styled } from "../../common/styles";
+import { styled } from "@linaria/react";
 
 interface Props {
-    targetRect: Rectangle;
+    targetWidth: number;
 }
-/* buttonVNext 
-        variant: accent
-        style:   minimal
-        size:    xsm
-        iconOnly
-        toggle to primary
-    */
 
 export const MarkdownOverlayEditorStyle = styled.div<Props>`
-    min-width: ${p => p.targetRect.width}px;
+    min-width: ${p => p.targetWidth}px;
     width: 100%;
     display: flex;
     align-items: flex-start;

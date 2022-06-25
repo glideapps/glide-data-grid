@@ -1,4 +1,4 @@
-import { styled } from "../common/styles";
+import { styled } from "@linaria/react";
 import type { Rectangle } from "..";
 import * as React from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -22,9 +22,9 @@ interface Props {
     readonly update: (region: Rectangle & { paddingRight: number }) => void;
 }
 
-export const ScrollRegionStyle = styled.div`
+export const ScrollRegionStyle = styled.div<{ isSafari: boolean }>`
     .dvn-scroller {
-        overflow: ${browserIsSafari ? "scroll" : "auto"};
+        overflow: ${p => (p.isSafari ? "scroll" : "auto")};
         transform: translate3d(0, 0, 0);
     }
 
@@ -224,7 +224,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                     }
 
                     return (
-                        <ScrollRegionStyle>
+                        <ScrollRegionStyle isSafari={browserIsSafari}>
                             {minimap}
                             <div className="dvn-underlay">{children}</div>
                             <div

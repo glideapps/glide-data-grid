@@ -222,6 +222,10 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         classWrap += " invalid";
     }
 
+    if (pad) {
+        classWrap += " pad";
+    }
+
     const portal = createPortal(
         <ThemeProvider theme={theme}>
             <ClickOutsideContainer style={makeCSSStyle(theme)} className={className} onClickOutside={onClickOutside}>
@@ -231,8 +235,10 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                     className={classWrap}
                     style={styleOverride}
                     as={useLabel === true ? "label" : undefined}
-                    targetRect={target}
-                    pad={pad}>
+                    targetX={target.x}
+                    targetY={target.y}
+                    targetWidth={target.width}
+                    targetHeight={target.height}>
                     <div className="clip-region" onKeyDown={customEditor === undefined ? undefined : onKeyDownCustom}>
                         {editor}
                     </div>
