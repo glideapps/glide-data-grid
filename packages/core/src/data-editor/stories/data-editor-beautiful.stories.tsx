@@ -18,7 +18,8 @@ import {
 import { DataEditor, DataEditorProps } from "../data-editor";
 
 import faker from "faker";
-import styled, { ThemeProvider } from "styled-components";
+import { ThemeProvider } from "styled-components";
+import { styled } from "@linaria/react";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 import { useEventListener } from "../../common/utils";
 import { IBounds, useLayer } from "react-laag";

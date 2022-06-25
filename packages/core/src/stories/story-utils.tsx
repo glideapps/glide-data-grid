@@ -1,5 +1,6 @@
 import * as React from "react";
-import styled, { ThemeProvider } from "styled-components";
+import { ThemeProvider } from "styled-components";
+import { styled } from "@linaria/react";
 import { StoryContext } from "@storybook/addons";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { getDataEditorTheme } from "../common/styles";
@@ -12,7 +13,7 @@ interface Props {
     context?: StoryContext;
 }
 
-const BuilderWrapper = styled.div<Props>`
+const BuilderWrapper = styled.div<Pick<Props, "width" | "height">>`
     display: flex;
     height: 100vh;
     width: 100vw;

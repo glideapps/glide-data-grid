@@ -162,6 +162,7 @@ const testTheme: Theme = {
     headerFontStyle: "600 13px",
     baseFontStyle: "13px",
     editorFontSize: "13px",
+    lineHeight: 1.4,
     fontFamily:
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
 };

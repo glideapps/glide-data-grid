@@ -6,7 +6,7 @@ import { BuilderThemeWrapper } from "../../stories/story-utils";
 import { GridCell, GridCellKind, Item } from "../../data-grid/data-grid-types";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor } from "../data-editor";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 
 export default {
     title: "Tests/TestCases/Bugs",

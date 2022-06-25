@@ -77,6 +77,7 @@ type Props = Omit<
     | "headerHeight"
     | "groupHeaderHeight"
     | "lastRowSticky"
+    | "theme"
     | "minColumnWidth"
     | "maxColumnWidth"
     | "lockColumns"
@@ -2828,6 +2829,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onCanvasFocused={onCanvasFocused}
                     onCanvasBlur={onFocusOut}
                     canvasRef={canvasRef}
+                    theme={mergedTheme}
                     cellXOffset={cellXOffset}
                     cellYOffset={cellYOffset}
                     accessibilityHeight={visibleRegion.height}
