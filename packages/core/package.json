@@ -14,7 +14,7 @@
     },
     "scripts": {
         "build": "npm run build-js && npm run build-types",
-        "build-js": "node build.cjs",
+        "build-js": "node build.cjs && tsc-esm-fix --target='dist/js'",
         "build-types": "tsc -p tsconfig.types.json",
         "lint": "npm run cycle-check && eslint src --ext .ts,.tsx",
         "cycle-check": "ts-helper -p ./tsconfig.json -r ./src/index.ts -c",
