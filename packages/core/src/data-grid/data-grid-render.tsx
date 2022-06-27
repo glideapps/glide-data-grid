@@ -10,7 +10,6 @@ import type {
     Item,
     CellList,
     GridMouseGroupHeaderEventArgs,
-    SizedGridColumn,
 } from "./data-grid-types";
 import groupBy from "lodash/groupBy";
 import { GridCellKind, isInnerOnlyCell } from "./data-grid-types";
@@ -32,6 +31,7 @@ import { Theme } from "../common/styles";
 import { blend, withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
 import { PrepResult } from "./cells/cell-types";
+import { deepEqual } from "../common/support";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when
@@ -49,6 +49,7 @@ type HoverInfo = readonly [Item, Item];
 export interface Highlight {
     readonly color: string;
     readonly range: Rectangle;
+    readonly style?: "dashed" | "solid";
 }
 
 interface GroupDetails {
@@ -98,6 +99,7 @@ export function drawCell(
     spriteManager: SpriteManager,
     hoverAmount: number,
     hoverInfo: HoverInfo | undefined,
+    hyperWrapping: boolean,
     frameTime: number,
     lastPrep?: PrepResult,
     enqueue?: (item: Item) => void
@@ -125,6 +127,7 @@ export function drawCell(
         hoverY,
         imageLoader,
         spriteManager,
+        hyperWrapping,
     };
     let forceAnim = false;
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
@@ -180,7 +183,7 @@ function blitLastFrame(
     rows: number,
     totalHeaderHeight: number,
     dpr: number,
-    columns: readonly SizedGridColumn[],
+    mappedColumns: readonly MappedGridColumn[],
     effectiveCols: readonly MappedGridColumn[],
     getRowHeight: number | ((r: number) => number)
 ) {
@@ -207,7 +210,7 @@ function blitLastFrame(
     const maxX = Math.max(last.cellXOffset, cellXOffset);
     let deltaX = 0;
     for (let i = minX; i < maxX; i++) {
-        deltaX += columns[i].width;
+        deltaX += mappedColumns[i].width;
     }
     if (cellXOffset > last.cellXOffset) {
         deltaX = -deltaX;
@@ -315,6 +318,49 @@ function blitLastFrame(
         regions: drawRegions,
         yOnly: blittedYOnly,
     };
+}
+
+function blitResizedCol(
+    // ctx: CanvasRenderingContext2D,
+    // canvas: HTMLCanvasElement,
+    last: BlitData,
+    cellXOffset: number,
+    cellYOffset: number,
+    translateX: number,
+    translateY: number,
+    width: number,
+    height: number,
+    totalHeaderHeight: number,
+    // dpr: number,
+    effectiveCols: readonly MappedGridColumn[],
+    resizedIndex: number
+) {
+    const drawRegions: Rectangle[] = [];
+
+    // ctx.imageSmoothingEnabled = false;
+
+    if (
+        cellXOffset !== last.cellXOffset ||
+        cellYOffset !== last.cellYOffset ||
+        translateX !== last.translateX ||
+        translateY !== last.translateY
+    ) {
+        return drawRegions;
+    }
+
+    walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, _drawY, clipX) => {
+        if (c.sourceIndex === resizedIndex) {
+            const x = Math.max(drawX, clipX) + 1;
+            drawRegions.push({
+                x,
+                y: 0,
+                width: width - x,
+                height,
+            });
+            return true;
+        }
+    });
+    return drawRegions;
 }
 
 // lines are effectively drawn on the top left edge of a cell.
@@ -732,10 +778,9 @@ function drawGridHeaders(
     translateX: number,
     headerHeight: number,
     groupHeaderHeight: number,
-    selectedColumns: CompactSelection,
     dragAndDropState: DragAndDropState | undefined,
     isResizing: boolean,
-    selectedCell: GridSelection | undefined,
+    selection: GridSelection,
     outerTheme: Theme,
     spriteManager: SpriteManager,
     hoverValues: HoverValues,
@@ -779,14 +824,14 @@ function drawGridHeaders(
         if (font !== f) {
             ctx.font = f;
         }
-        const selected = selectedColumns.hasIndex(c.sourceIndex);
+        const selected = selection.columns.hasIndex(c.sourceIndex);
         const noHover = dragAndDropState !== undefined || isResizing;
         const hoveredBoolean = !noHover && hRow === -1 && hCol === c.sourceIndex;
         const hover = noHover
             ? 0
             : hoverValues.find(s => s.item[0] === c.sourceIndex && s.item[1] === -1)?.hoverAmount ?? 0;
 
-        const hasSelectedCell = selectedCell?.current !== undefined && selectedCell.current.cell[0] === c.sourceIndex;
+        const hasSelectedCell = selection?.current !== undefined && selection.current.cell[0] === c.sourceIndex;
 
         const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
 
@@ -1012,14 +1057,12 @@ function drawCells(
     getCellContent: (cell: Item) => InnerGridCell,
     getGroupDetails: GroupDetailsCallback,
     getRowThemeOverride: GetRowThemeCallback | undefined,
-    selectedRows: CompactSelection,
     disabledRows: CompactSelection,
     isFocused: boolean,
     lastRowSticky: boolean,
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
     selection: GridSelection,
-    selectedColumns: CompactSelection,
     prelightCells: CellList | undefined,
     highlightRegions: readonly Highlight[] | undefined,
     drawCustomCell: DrawCustomCellCallback | undefined,
@@ -1027,6 +1070,7 @@ function drawCells(
     spriteManager: SpriteManager,
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
+    hyperWrapping: boolean,
     outerTheme: Theme,
     enqueue: (item: Item) => void
 ): Rectangle[] | undefined {
@@ -1068,7 +1112,7 @@ function drawCells(
                 ctx.clip();
             };
 
-            const colSelected = selectedColumns.hasIndex(c.sourceIndex);
+            const colSelected = selection.columns.hasIndex(c.sourceIndex);
 
             const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
             const colTheme =
@@ -1130,7 +1174,7 @@ function drawCells(
                         if (!found) return;
                     }
 
-                    const rowSelected = selectedRows.hasIndex(row);
+                    const rowSelected = selection.rows.hasIndex(row);
                     const rowDisabled = disabledRows.hasIndex(row);
 
                     const cell: InnerGridCell = row < rows ? getCellContent([c.sourceIndex, row]) : loadingCell;
@@ -1193,7 +1237,7 @@ function drawCells(
                     let accentCount = cellIsInRange(cellIndex, cell, selection);
                     const spanIsHighlighted =
                         cell.span !== undefined &&
-                        selectedColumns.some(
+                        selection.columns.some(
                             index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1]
                         );
                     if (isSelected && !isFocused) {
@@ -1209,9 +1253,10 @@ function drawCells(
                         if (colSelected && !isSticky) accentCount++;
                     }
 
+                    const bgCell = cell.kind === GridCellKind.Protected ? theme.bgCellMedium : theme.bgCell;
                     let fill: string | undefined;
-                    if (isSticky || theme.bgCell !== outerTheme.bgCell) {
-                        fill = blend(theme.bgCell, fill);
+                    if (isSticky || bgCell !== outerTheme.bgCell) {
+                        fill = blend(bgCell, fill);
                     }
 
                     if (accentCount > 0 || rowDisabled) {
@@ -1277,6 +1322,7 @@ function drawCells(
                             spriteManager,
                             hoverValue?.hoverAmount ?? 0,
                             hoverInfo,
+                            hyperWrapping,
                             frameTime,
                             prepResult,
                             enqueue
@@ -1392,10 +1438,17 @@ function overdrawStickyBoundaries(
     totalHeaderHeight: number,
     lastRowSticky: boolean,
     rows: number,
+    verticalBorder: (col: number) => boolean,
     getRowHeight: (row: number) => number,
     theme: Theme
 ) {
-    const drawX = getStickyWidth(effectiveCols);
+    let drawFreezeBorder = false;
+    for (const c of effectiveCols) {
+        if (c.sticky) continue;
+        drawFreezeBorder = verticalBorder(c.sourceIndex);
+        break;
+    }
+    const drawX = drawFreezeBorder ? getStickyWidth(effectiveCols) : 0;
     ctx.beginPath();
 
     // fill in header color behind header border
@@ -1474,9 +1527,9 @@ function drawHighlightRings(
         );
         if (r.width === 1 && r.height === 1) {
             if (r.x < freezeColumns) {
-                return [{ color: h.color, rect: topLeftBounds }, undefined];
+                return [{ color: h.color, style: h.style ?? "dashed", rect: topLeftBounds }, undefined];
             }
-            return [undefined, { color: h.color, rect: topLeftBounds }];
+            return [undefined, { color: h.color, style: h.style ?? "dashed", rect: topLeftBounds }];
         }
 
         const bottomRightBounds = computeBounds(
@@ -1535,21 +1588,23 @@ function drawHighlightRings(
             return [
                 {
                     color: h.color,
+                    style: h.style ?? "dashed",
                     rect: {
                         x: topLeftBounds.x,
                         y: topLeftBounds.y,
                         width: freezeSectionRightBounds.x + freezeSectionRightBounds.width - topLeftBounds.x,
                         height: freezeSectionRightBounds.y + freezeSectionRightBounds.height - topLeftBounds.y,
-                    },
+                    } as Rectangle,
                 },
                 {
                     color: h.color,
+                    style: h.style ?? "dashed",
                     rect: {
                         x: unfreezeSectionleftBounds.x,
                         y: unfreezeSectionleftBounds.y,
                         width: bottomRightBounds.x + bottomRightBounds.width - unfreezeSectionleftBounds.x,
                         height: bottomRightBounds.y + bottomRightBounds.height - unfreezeSectionleftBounds.y,
-                    },
+                    } as Rectangle,
                 },
             ];
         } else {
@@ -1557,12 +1612,13 @@ function drawHighlightRings(
                 undefined,
                 {
                     color: h.color,
+                    style: h.style ?? "dashed",
                     rect: {
                         x: topLeftBounds.x,
                         y: topLeftBounds.y,
                         width: bottomRightBounds.x + bottomRightBounds.width - topLeftBounds.x,
                         height: bottomRightBounds.y + bottomRightBounds.height - topLeftBounds.y,
-                    },
+                    } as Rectangle,
                 },
             ];
         }
@@ -1573,14 +1629,21 @@ function drawHighlightRings(
     const drawCb = () => {
         ctx.beginPath();
         ctx.save();
-        ctx.setLineDash([7, 5]);
-        ctx.lineWidth = 2;
+        let dashed = false;
+        const setDashed = (dash: boolean) => {
+            if (dashed === dash) return;
+            ctx.setLineDash(dash ? [5, 3] : []);
+            dashed = dash;
+        };
+
+        ctx.lineWidth = 1;
         for (const dr of drawRects) {
             const [s] = dr;
             if (
                 s !== undefined &&
                 intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
             ) {
+                setDashed(s.style === "dashed");
                 ctx.strokeStyle = withAlpha(s.color, 1);
                 ctx.strokeRect(s.rect.x + 1, s.rect.y + 1, s.rect.width - 2, s.rect.height - 2);
             }
@@ -1592,6 +1655,7 @@ function drawHighlightRings(
                 s !== undefined &&
                 intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
             ) {
+                setDashed(s.style === "dashed");
                 if (!clipped && s.rect.x < stickyWidth) {
                     ctx.rect(stickyWidth, 0, width, height);
                     ctx.clip();
@@ -1751,16 +1815,15 @@ function getLastRow(
     return result;
 }
 
-interface DrawGridArg {
+export interface DrawGridArg {
     readonly canvas: HTMLCanvasElement;
-    readonly buffers: Buffers;
+    readonly headerCanvas: HTMLCanvasElement;
     readonly width: number;
     readonly height: number;
     readonly cellXOffset: number;
     readonly cellYOffset: number;
     readonly translateX: number;
     readonly translateY: number;
-    readonly columns: readonly SizedGridColumn[];
     readonly mappedColumns: readonly MappedGridColumn[];
     readonly enableGroups: boolean;
     readonly freezeColumns: number;
@@ -1768,16 +1831,15 @@ interface DrawGridArg {
     readonly theme: Theme;
     readonly headerHeight: number;
     readonly groupHeaderHeight: number;
-    readonly selectedRows: CompactSelection;
     readonly disabledRows: CompactSelection;
     readonly rowHeight: number | ((index: number) => number);
     readonly verticalBorder: (col: number) => boolean;
-    readonly selectedColumns: CompactSelection;
     readonly isResizing: boolean;
     readonly isFocused: boolean;
-    readonly selectedCell: GridSelection;
+    readonly selection: GridSelection;
     readonly fillHandle: boolean;
     readonly lastRowSticky: boolean;
+    readonly hyperWrapping: boolean;
     readonly rows: number;
     readonly getCellContent: (cell: Item) => InnerGridCell;
     readonly getGroupDetails: GroupDetailsCallback;
@@ -1788,7 +1850,6 @@ interface DrawGridArg {
     readonly highlightRegions: readonly Highlight[] | undefined;
     readonly imageLoader: ImageWindowLoader;
     readonly lastBlitData: React.MutableRefObject<BlitData>;
-    readonly canBlit: boolean;
     readonly damage: CellList | undefined;
     readonly hoverValues: HoverValues;
     readonly hoverInfo: HoverInfo | undefined;
@@ -1798,17 +1859,73 @@ interface DrawGridArg {
     readonly enqueue: (item: Item) => void;
 }
 
-export function drawGrid(arg: DrawGridArg) {
+function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean | number {
+    if (
+        current.width !== last?.width ||
+        current.height !== last.height ||
+        current.theme !== last.theme ||
+        current.headerHeight !== last.headerHeight ||
+        current.rowHeight !== last.rowHeight ||
+        current.rows !== last.rows ||
+        current.isFocused !== last.isFocused ||
+        current.isResizing !== last.isResizing ||
+        current.verticalBorder !== last.verticalBorder ||
+        current.getCellContent !== last.getCellContent ||
+        current.highlightRegions !== last.highlightRegions ||
+        current.selection !== last.selection ||
+        current.dragAndDropState !== last.dragAndDropState ||
+        current.prelightCells !== last.prelightCells ||
+        current.touchMode !== last.touchMode ||
+        current.scrolling !== last.scrolling
+    ) {
+        return false;
+    }
+    if (current.mappedColumns !== last.mappedColumns) {
+        if (current.mappedColumns.length > 100 || current.mappedColumns.length !== last.mappedColumns.length) {
+            // The array is big, let's just redraw the damned thing rather than check these all. Or the number of cols
+            // changed in which case I dont want to figure out what happened.
+            return false;
+        }
+        // We want to know if only one column has resized. If this is the case we can do a special left/right sliding
+        // blit. Or just not redraw shit on the left.
+        let resized: number | undefined;
+        for (let i = 0; i < current.mappedColumns.length; i++) {
+            const curCol = current.mappedColumns[i];
+            const lastCol = last.mappedColumns[i];
+
+            if (deepEqual(curCol, lastCol)) continue;
+
+            // two columns changed, abort
+            if (resized !== undefined) return false;
+
+            if (curCol.width === lastCol.width) return false;
+
+            const { width, ...curRest } = curCol;
+            const { width: lastWidth, ...lastRest } = lastCol;
+
+            // more than width changed, abort
+            if (!deepEqual(curRest, lastRest)) return false;
+            resized = i;
+        }
+        if (resized === undefined) {
+            // we never found a changed column, cool, we can blit
+            return true;
+        }
+        return resized;
+    }
+    return true;
+}
+
+export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     const {
         canvas,
-        buffers,
+        headerCanvas,
         width,
         height,
         cellXOffset,
         cellYOffset,
         translateX,
         translateY,
-        columns,
         mappedColumns,
         enableGroups,
         freezeColumns,
@@ -1816,13 +1933,11 @@ export function drawGrid(arg: DrawGridArg) {
         theme,
         headerHeight,
         groupHeaderHeight,
-        selectedRows,
         disabledRows,
         rowHeight,
         verticalBorder,
-        selectedColumns,
         isResizing,
-        selectedCell,
+        selection,
         fillHandle,
         lastRowSticky,
         rows,
@@ -1836,8 +1951,8 @@ export function drawGrid(arg: DrawGridArg) {
         highlightRegions,
         imageLoader,
         lastBlitData,
-        canBlit,
         hoverValues,
+        hyperWrapping,
         hoverInfo,
         spriteManager,
         scrolling,
@@ -1848,6 +1963,8 @@ export function drawGrid(arg: DrawGridArg) {
     if (width === 0 || height === 0) return;
     const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
 
+    const canBlit = computeCanBlit(arg, lastArg);
+
     if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
         canvas.width = width * dpr;
         canvas.height = height * dpr;
@@ -1856,7 +1973,7 @@ export function drawGrid(arg: DrawGridArg) {
         canvas.style.height = height + "px";
     }
 
-    const overlayCanvas = buffers.overlay;
+    const overlayCanvas = headerCanvas;
     const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
     if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== totalHeaderHeight * dpr) {
@@ -1914,10 +2031,9 @@ export function drawGrid(arg: DrawGridArg) {
             translateX,
             headerHeight,
             groupHeaderHeight,
-            selectedColumns,
             dragAndDropState,
             isResizing,
-            selectedCell,
+            selection,
             theme,
             spriteManager,
             hoverValues,
@@ -1998,14 +2114,12 @@ export function drawGrid(arg: DrawGridArg) {
                 getCellContent,
                 getGroupDetails,
                 getRowThemeOverride,
-                selectedRows,
                 disabledRows,
                 isFocused,
                 lastRowSticky,
                 drawRegions,
                 damage,
-                selectedCell,
-                selectedColumns,
+                selection,
                 prelightCells,
                 highlightRegions,
                 drawCustomCell,
@@ -2013,14 +2127,15 @@ export function drawGrid(arg: DrawGridArg) {
                 spriteManager,
                 hoverValues,
                 hoverInfo,
+                hyperWrapping,
                 theme,
                 enqueue
             );
 
             if (
                 fillHandle &&
-                selectedCell.current !== undefined &&
-                damage.some(x => x[0] === selectedCell.current?.cell[0] && x[1] === selectedCell.current?.cell[1])
+                selection.current !== undefined &&
+                damage.some(x => x[0] === selection.current?.cell[0] && x[1] === selection.current?.cell[1])
             ) {
                 drawFocusRing(
                     targetCtx,
@@ -2033,7 +2148,7 @@ export function drawGrid(arg: DrawGridArg) {
                     mappedColumns,
                     theme,
                     totalHeaderHeight,
-                    selectedCell,
+                    selection,
                     getRowHeight,
                     getCellContent,
                     lastRowSticky,
@@ -2068,7 +2183,7 @@ export function drawGrid(arg: DrawGridArg) {
         return;
     }
 
-    if (!canBlit || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
+    if (canBlit !== true || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
         drawHeaderTexture();
     }
 
@@ -2087,11 +2202,25 @@ export function drawGrid(arg: DrawGridArg) {
             rows,
             totalHeaderHeight,
             dpr,
-            columns,
+            mappedColumns,
             effectiveCols,
             rowHeight
         );
         drawRegions = regions;
+    } else if (canBlit !== false) {
+        const resizedCol = canBlit;
+        drawRegions = blitResizedCol(
+            last,
+            cellXOffset,
+            cellYOffset,
+            translateX,
+            translateY,
+            width,
+            height,
+            totalHeaderHeight,
+            effectiveCols,
+            resizedCol
+        );
     }
 
     overdrawStickyBoundaries(
@@ -2102,6 +2231,7 @@ export function drawGrid(arg: DrawGridArg) {
         totalHeaderHeight,
         lastRowSticky,
         rows,
+        verticalBorder,
         getRowHeight,
         theme
     );
@@ -2118,7 +2248,7 @@ export function drawGrid(arg: DrawGridArg) {
         mappedColumns,
         theme,
         totalHeaderHeight,
-        selectedCell,
+        selection,
         getRowHeight,
         getCellContent,
         lastRowSticky,
@@ -2171,14 +2301,12 @@ export function drawGrid(arg: DrawGridArg) {
         getCellContent,
         getGroupDetails,
         getRowThemeOverride,
-        selectedRows,
         disabledRows,
         isFocused,
         lastRowSticky,
         drawRegions,
         damage,
-        selectedCell,
-        selectedColumns,
+        selection,
         prelightCells,
         highlightRegions,
         drawCustomCell,
@@ -2186,6 +2314,7 @@ export function drawGrid(arg: DrawGridArg) {
         spriteManager,
         hoverValues,
         hoverInfo,
+        hyperWrapping,
         theme,
         enqueue
     );
@@ -2203,7 +2332,7 @@ export function drawGrid(arg: DrawGridArg) {
         rows,
         getRowHeight,
         getRowThemeOverride,
-        selectedRows,
+        selection.rows,
         disabledRows,
         lastRowSticky,
         drawRegions,
@@ -2387,8 +2516,4 @@ function walkGroups(
 
         x += boxWidth;
     }
-}
-
-interface Buffers {
-    overlay: HTMLCanvasElement;
 }

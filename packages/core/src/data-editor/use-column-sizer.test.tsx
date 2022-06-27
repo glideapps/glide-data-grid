@@ -80,7 +80,7 @@ const abortController = new AbortController();
 describe("use-column-sizer", () => {
     it("Measures a simple cell", async () => {
         const { result } = renderHook(() =>
-            useColumnSizer(COLUMNS, 1000, getShortCellsForSelection, 20, 500, theme, abortController)
+            useColumnSizer(COLUMNS, 1000, getShortCellsForSelection, 400, 20, 500, theme, abortController)
         );
 
         const columnA = result.current.find(col => col.title === "A");
@@ -95,7 +95,9 @@ describe("use-column-sizer", () => {
     });
 
     it("Measures the last row", async () => {
-        renderHook(() => useColumnSizer(COLUMNS, 1000, getShortCellsForSelection, 20, 500, theme, abortController));
+        renderHook(() =>
+            useColumnSizer(COLUMNS, 1000, getShortCellsForSelection, 400, 20, 500, theme, abortController)
+        );
 
         expect(getShortCellsForSelection).toBeCalledTimes(2);
         expect(getShortCellsForSelection).toHaveBeenNthCalledWith(
@@ -122,7 +124,7 @@ describe("use-column-sizer", () => {
     it("Measures new columns when they arrive, doesn't re-measure existing ones", async () => {
         const { result, rerender } = renderHook(
             ({ getCellsForSelection, columns }) =>
-                useColumnSizer(columns, 1000, getCellsForSelection, 20, 500, theme, abortController),
+                useColumnSizer(columns, 1000, getCellsForSelection, 400, 20, 500, theme, abortController),
             {
                 initialProps: {
                     getCellsForSelection: getShortCellsForSelection,
@@ -164,7 +166,9 @@ describe("use-column-sizer", () => {
     });
 
     it("Returns the default sizes if getCellsForSelection is not provided", async () => {
-        const { result } = renderHook(() => useColumnSizer(COLUMNS, 1000, undefined, 20, 500, theme, abortController));
+        const { result } = renderHook(() =>
+            useColumnSizer(COLUMNS, 1000, undefined, 400, 20, 500, theme, abortController)
+        );
 
         const columnA = result.current.find(col => col.title === "A");
         const columnB = result.current.find(col => col.title === "B");
@@ -183,6 +187,7 @@ describe("use-column-sizer", () => {
                 A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE,
                 1000,
                 undefined,
+                400,
                 50,
                 500,
                 theme,

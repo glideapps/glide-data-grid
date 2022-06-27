@@ -1,3 +1,118 @@
+# 4.2.0 Release Notes
+
+## 🥳 New Features
+
+### 🌯 Text Wrapping
+
+![image](https://user-images.githubusercontent.com/30443/175222777-6d39bff7-c4d5-41ef-96c0-389dcb75af17.png)
+
+Just set `allowWrapping` to true on your `TextCell`
+
+### 🗓️ Date Picker Cell
+
+![image](https://user-images.githubusercontent.com/30443/175223015-822fb0e9-ad3c-476c-a8ba-0aebd78d0c6e.png)
+
+Available in the `glide-data-grid-cells` package.
+
+### ✅ Data Validation
+
+![image](https://user-images.githubusercontent.com/30443/175223127-fdf278bf-ca67-4ba0-8f7a-a1a1f785609d.png)
+
+Let your users know the value they entered will not be accepted. You can also coerce values as they type.
+
+Just provide the `validateCell` callback
+
+```ts
+readonly validateCell?: (cell: Item, newValue: EditableGridCell) => boolean | EditableGridCell;
+```
+
+### ➗ Percentage column sizing
+
+https://user-images.githubusercontent.com/30443/175350434-740c017d-3897-486c-a3ef-476d714d3d61.mp4
+
+If your columns do not fill the entire width of the allocated area you can now allocate the leftover space to whatever column you want by setting the `grow` property on your column.
+
+### 🖱️🖱️ Double click to size column
+
+https://user-images.githubusercontent.com/30443/175350873-e8360b6c-b030-4977-96cd-19dcc115f03b.mp4
+
+## 🦾 Minor Improvements
+
+-   `DropdownCell` now attempts to follow theme.
+-   `highlightRegions` now can be set to have a solid color outline.
+-   Row Markers now display a handle when row drag and drop is enabled.
+-   `appendRow` now available in imperative handle, thank you @pzcfg
+-   `onColumnResize` now passes the index of the resized column as well as the column itself.
+-   Improve column resize performance.
+
+## 🐞 Bug Fixes
+
+-   Protected cell rendering now handles being in selection correctly.
+-   Dragging on non-resizeable columns no longer shows a resize indicator.
+-   Search keybinding now works when caps-lock is pressed.
+-   Improve NextJS compatibility
+-   Disabling vertical border on the freeze column edge works correctly now
+-   Not every browser supports `window.navigator.clipboard` and we no longer crash.
+-   Newly appended rows with default values no longer get overwritten.
+-   Measurement of many cells improved
+
+# 4.1.0 Release Notes
+
+## 🚨 Deprecations
+
+-   `BooleanCell.showUnchecked` now deprecated and replaced with passing null as the BooleanCell value.
+-   `BooleanCell.allowEdit` now deprecated and replace with `BooleanCell.readonly`.
+
+Both deprecated options continue to work as intended, but implementors should begin migrating to the new options.
+
+## 😲 New Features
+
+### 🚣‍♂️ Improved support for styling of trailing row
+
+`trailingRowOptions` of a `GridColumn` may now include a `themeOverride` and a `disabled` boolean which do what they say.
+
+### ✅⁉️ Boolean cell supports indeterminate and empty states
+
+![image](https://user-images.githubusercontent.com/30443/170390114-67106193-e0ba-4d0b-af5a-e6e40fe5a752.png)
+
+`BooleanCell` can now take `null` or `undefined` as its `data` to show empty or indeterminate states respectively. To make this easier to remember, named exports are included for `BooleanIndeterminate` and `BooleanEmpty`.
+
+### 👉👈 Support for overriding text alignment in cells
+
+All `GridCell` types now support a `contentAlign` parameter which can be set to `"right" | "left" | "center"` and will cause the text in the cell to be aligned as requested. Thanks to @LukasMasuch
+
+### 🪥 Custom cells can now handle Paste with ease
+
+Custom cell renders can now optionally provide an `onPaste` callback which receives the `CustomCells` data property and a paste string. Implementors should return back a new `data` value which will then be used to create a new cell to pass to `onCellEdited`. This allows `onPaste` for custom cells to work the same as it does for all built in cells.
+
+All cells shipped in `glide-data-grid-cells` have been updated to support the new mechanism.
+
+### 🐳 Mass paste handling made easier
+
+`onCellsEdited` will be invoked if multiple cells are to be pasted into. This receives a list of all cells which are about to receive an `onCellEdited` callback due to the paste or other mass edit event. This is intended to allow more efficient handling to implementors and minimize render cycles.
+
+### 🕺 Basic animation support for custom cells
+
+During a draw event for a custom cell, the cell may now call `args.requestAnimationFrame()` out of the passed args to the draw event. This will trigger the cell to be drawn again in the near term future for doing animations. Draw rate automatically throttles to around 30FPS after a fixed time with no breaks in animation.
+
+## 🐜💪 Minor Improvements
+
+-   `CompactSelection.remove` now supports removing a slice instead of just an index. Thanks to @BrianHung
+-   Custom editors no longer automatically commit the tempValue when finished editing is called, allowing for editing to be properly cancelled by the custom editor.
+-   Text entry into a cell now more eagerly being edit mode. This makes things like entering a negative number much easier and improves foreign language support.
+-   Top and right edges of the grid will no longer draw a double border in some cases, thank you @LukasMasuch
+-   Visually center text with better algorithm which accounts for oddities from font to font
+-   Boolean cells now supported in paste.
+
+## 🪲 Bug Fixes
+
+-   Slight improvements to the newline handling for overlay editors.
+-   Custom cells are now properly included in search results via the `copyData` property.
+-   Values copied out of the grid now copy raw values into HTML and display values into text. This improves copy/paste interop inside of Glide Data Grid.
+-   Ideal height calculation for Grid now properly accounts for trailing row.
+-   Focus will no longer be lost when interacting with cells outside of the visual viewport, thank you @BrianHung
+-   Fix `isDraggable`
+
 # 4.0.0 Release Notes
 
 ## 🚨🚨 Breaking API Changes
@@ -34,7 +149,7 @@ To further improve the consistency of data access for developers, `getCellsForSe
 
 ### onDelete replacing onDeleteRows
 
-`onDeleteRows` is gone and replaced with `onDelete`. 
+`onDeleteRows` is gone and replaced with `onDelete`.
 
 ```ts
 onDelete?: (selection: GridSelection) => boolean | GridSelection;
@@ -72,28 +187,28 @@ const keybindingDefaults: Keybinds = {
 };
 ```
 
-| Key Combo | Default | Flag | Description |
-|---|----|---|---|
-| Arrow | ✔️ | N/A | Moves the currently selected cell and clears other selections |
-| Shift + Arrow | ✔️ | N/A | Extends the current selection range in the direction pressed. |
-| Alt + Arrow | ✔️ | N/A | Moves the currently selected cell and retains the current selection |
-| Ctrl/Cmd + Arrow \| Home/End | ✔️ | N/A | Move the selection as far as possible in the direction pressed. |
-| Ctrl/Cmd + Shift + Arrow | ✔️ | N/A | Extends the selection as far as possible in the direction pressed. |
-| Shift + Home/End | ✔️ | N/A | Extends the selection as far as possible in the direction pressed. |
-| Ctrl/Cmd + A | ✔️ | `selectAll` | Selects all cells. |
-| Shift + Space | ✔️ | `selectRow` | Selecs the current row. |
-| Ctrl/Cmd + Space | ✔️ | `selectCol` | Selects the current col. |
-| PageUp/PageDown | ❌ | `pageUp`/`pageDown` | Moves the current selection up/down by one page. |
-| Escape | ✔️ | `clear` | Clear the current selection. |
-| Ctrl/Cmd + D | ❌ | `downFill` | Data from the first row of the range will be down filled into the rows below it |
-| Ctrl/Cmd + R | ❌ | `rightFill` | Data from the first column of the range will be right filled into the columns next to it |
-| Ctrl/Cmd + C | ✔️ | `copy` | Copies the current selection. |
-| Ctrl/Cmd + V | ✔️ | `paste` | Pastes the current buffer into the grid. |
-| Ctrl/Cmd + F | ❌ | `search` | Opens the search interface. |
-| Ctrl/Cmd + Home/End | ✔️ | `first`/`last` | Move the selection to the first/last cell in the data grid. |
-| Ctrl/Cmd + Shift + Home/End | ✔️ | `first`/`last` | Extend the selection to the first/last cell in the data grid. |
+| Key Combo                    | Default | Flag                | Description                                                                              |
+| ---------------------------- | ------- | ------------------- | ---------------------------------------------------------------------------------------- |
+| Arrow                        | ✔️      | N/A                 | Moves the currently selected cell and clears other selections                            |
+| Shift + Arrow                | ✔️      | N/A                 | Extends the current selection range in the direction pressed.                            |
+| Alt + Arrow                  | ✔️      | N/A                 | Moves the currently selected cell and retains the current selection                      |
+| Ctrl/Cmd + Arrow \| Home/End | ✔️      | N/A                 | Move the selection as far as possible in the direction pressed.                          |
+| Ctrl/Cmd + Shift + Arrow     | ✔️      | N/A                 | Extends the selection as far as possible in the direction pressed.                       |
+| Shift + Home/End             | ✔️      | N/A                 | Extends the selection as far as possible in the direction pressed.                       |
+| Ctrl/Cmd + A                 | ✔️      | `selectAll`         | Selects all cells.                                                                       |
+| Shift + Space                | ✔️      | `selectRow`         | Selecs the current row.                                                                  |
+| Ctrl/Cmd + Space             | ✔️      | `selectCol`         | Selects the current col.                                                                 |
+| PageUp/PageDown              | ❌      | `pageUp`/`pageDown` | Moves the current selection up/down by one page.                                         |
+| Escape                       | ✔️      | `clear`             | Clear the current selection.                                                             |
+| Ctrl/Cmd + D                 | ❌      | `downFill`          | Data from the first row of the range will be down filled into the rows below it          |
+| Ctrl/Cmd + R                 | ❌      | `rightFill`         | Data from the first column of the range will be right filled into the columns next to it |
+| Ctrl/Cmd + C                 | ✔️      | `copy`              | Copies the current selection.                                                            |
+| Ctrl/Cmd + V                 | ✔️      | `paste`             | Pastes the current buffer into the grid.                                                 |
+| Ctrl/Cmd + F                 | ❌      | `search`            | Opens the search interface.                                                              |
+| Ctrl/Cmd + Home/End          | ✔️      | `first`/`last`      | Move the selection to the first/last cell in the data grid.                              |
+| Ctrl/Cmd + Shift + Home/End  | ✔️      | `first`/`last`      | Extend the selection to the first/last cell in the data grid.                            |
 
-###  Multi-Range selections
+### Multi-Range selections
 
 The data grid now supports multiple selections. Click+Drag to make an initial selection, then Ctrl + Drag to add another.
 
@@ -142,11 +257,11 @@ Custom editors can now receive the initial input value when a user begins typing
 
 ## 🐞 Bug Fixes
 
-- Prevent issue with vertical underscroll on mobile devices.
-- Minor performance improvements when rendering lots of empty text cells
-- `react-number-format` is now lazy loaded to improve initial load times.
-- Shift+enter now correctly moves the focus to the cell above.
-- Fix off by one error with screen-reader columns
+-   Prevent issue with vertical underscroll on mobile devices.
+-   Minor performance improvements when rendering lots of empty text cells
+-   `react-number-format` is now lazy loaded to improve initial load times.
+-   Shift+enter now correctly moves the focus to the cell above.
+-   Fix off by one error with screen-reader columns
 
 # 3.4.0 Release Notes
 

@@ -8,7 +8,14 @@ import clamp from "lodash/clamp";
 type Props = Omit<DataGridDndProps, "width" | "height" | "eventTargetRef">;
 
 export interface ScrollingDataGridProps extends Props {
-    readonly onVisibleRegionChanged?: (range: Rectangle, tx?: number, ty?: number) => void;
+    readonly onVisibleRegionChanged?: (
+        range: Rectangle,
+        clientWidth: number,
+        clientHeight: number,
+        rightElWidth: number,
+        tx?: number,
+        ty?: number
+    ) => void;
     readonly scrollToEnd?: boolean;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
     readonly smoothScrollX?: boolean;
@@ -19,17 +26,18 @@ export interface ScrollingDataGridProps extends Props {
     readonly rightElementSticky?: boolean;
     readonly rightElement?: React.ReactNode;
     readonly showMinimap?: boolean;
+    readonly clientSize: readonly [number, number];
 }
 
 const MinimapStyle = styled.div`
     position: absolute;
     right: 44px;
     bottom: 44px;
-    background-color: ${p => p.theme.bgCell};
-    background: linear-gradient(${p => p.theme.bgCell}, ${p => p.theme.bgCellMedium});
+    background-color: var(--gdg-bg-cell);
+    background: linear-gradient(var(--gdg-bg-cell), var(--gdg-bg-cell-medium));
     border-radius: 4px;
     z-index: 1;
-    box-shadow: 0 0 0 1px ${p => p.theme.borderColor}, 0 2px 5px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 0 1px var(--gdg-border-color), 0 2px 5px rgba(0, 0, 0, 0.08);
 
     overflow: hidden;
 
@@ -39,20 +47,30 @@ const MinimapStyle = styled.div`
         top: 0;
         width: 100%;
         height: 4px;
-        background-color: ${p => p.theme.bgHeader};
-        box-shadow: 0 0 0 1px ${p => p.theme.borderColor};
+        background-color: var(--gdg-bg-header);
+        box-shadow: 0 0 0 1px var(--gdg-border-color);
     }
 
     .locationMarker {
         position: absolute;
 
-        border: 1px solid ${p => p.theme.accentColor};
-        background-color: ${p => p.theme.accentLight};
+        border: 1px solid var(--gdg-accent-color);
+        background-color: var(--gdg-accent-light);
     }
 `;
 
 const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
-    const { columns, rows, rowHeight, headerHeight, groupHeaderHeight, enableGroups, freezeColumns, experimental } = p;
+    const {
+        columns,
+        rows,
+        rowHeight,
+        headerHeight,
+        groupHeaderHeight,
+        enableGroups,
+        freezeColumns,
+        experimental,
+        clientSize,
+    } = p;
     const { paddingRight, paddingBottom } = experimental ?? {};
     const {
         className,
@@ -69,11 +87,11 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     } = p;
     const { smoothScrollX = false, smoothScrollY = false } = p;
 
-    const [clientWidth, setClientWidth] = React.useState<number>(10);
-    const [clientHeight, setClientHeight] = React.useState<number>(10);
+    const [clientWidth, clientHeight] = clientSize;
     const last = React.useRef<Rectangle | undefined>();
     const lastX = React.useRef<number | undefined>();
     const lastY = React.useRef<number | undefined>();
+    const lastSize = React.useRef<readonly [number, number] | undefined>();
 
     const width = React.useMemo(() => {
         let r = Math.max(0, overscrollX ?? 0);
@@ -95,7 +113,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         height += overscrollY;
     }
 
-    const lastArgs = React.useRef<Rectangle>();
+    const lastArgs = React.useRef<Rectangle & { paddingRight: number }>();
 
     const processArgs = React.useCallback(() => {
         const args = lastArgs.current;
@@ -187,7 +205,9 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             oldRect.height !== rect.height ||
             oldRect.width !== rect.width ||
             lastX.current !== tx ||
-            lastY.current !== ty
+            lastY.current !== ty ||
+            args.width !== lastSize.current?.[0] ||
+            args.height !== lastSize.current?.[1]
         ) {
             onVisibleRegionChanged?.(
                 {
@@ -196,20 +216,21 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                     width: cellRight - cellX,
                     height: cellBottom - cellY,
                 },
+                args.width,
+                args.height,
+                args.paddingRight ?? 0,
                 tx,
                 ty
             );
             last.current = rect;
             lastX.current = tx;
             lastY.current = ty;
+            lastSize.current = [args.width, args.height];
         }
-
-        setClientHeight(args.height);
-        setClientWidth(args.width);
     }, [columns, rowHeight, rows, onVisibleRegionChanged, freezeColumns, smoothScrollX, smoothScrollY]);
 
     const onScrollUpdate = React.useCallback(
-        (args: Rectangle) => {
+        (args: Rectangle & { paddingRight: number }) => {
             lastArgs.current = args;
             processArgs();
         },

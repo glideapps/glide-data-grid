@@ -2,10 +2,10 @@ import { styled } from "../common/styles";
 import { css } from "styled-components";
 
 const inputProps = css`
-    font-size: ${p => p.theme.editorFontSize};
+    font-size: var(--gdg-editor-font-size);
     line-height: 16px;
-    font-family: ${p => p.theme.fontFamily};
-    color: ${p => p.theme.textDark};
+    font-family: var(--gdg-font-family);
+    color: var(--gdg-text-dark);
     padding: 0;
     margin: 0;
 `;
@@ -29,10 +29,15 @@ export const InputBox = styled.textarea`
     background-color: transparent;
 
     ::placeholder {
-        color: ${p => p.theme.textLight};
+        color: var(--gdg-text-light);
     }
 
     ${inputProps}
+
+    .invalid & {
+        text-decoration: underline;
+        text-decoration-color: #d60606;
+    }
 `;
 
 export const ShadowBox = styled.div`

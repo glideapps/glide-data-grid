@@ -19,7 +19,7 @@ interface Props {
     readonly minimap?: React.ReactNode;
     readonly style?: React.CSSProperties;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
-    readonly update: (region: Rectangle) => void;
+    readonly update: (region: Rectangle & { paddingRight: number }) => void;
 }
 
 export const ScrollRegionStyle = styled.div`
@@ -109,6 +109,8 @@ export const InfiniteScroller: React.FC<Props> = p => {
 
     const resetHandle = React.useRef(0);
 
+    const rightWrapRef = React.useRef<HTMLDivElement | null>(null);
+
     const onScroll = React.useCallback(() => {
         const el = scroller.current;
         if (el === null) return;
@@ -175,6 +177,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
             y: Math.min(maxFakeY, newY + offsetY.current),
             width: el.clientWidth - paddingRight,
             height: el.clientHeight - paddingBottom,
+            paddingRight: rightWrapRef.current?.clientWidth ?? 0,
         });
     }, [paddingBottom, paddingRight, scrollHeight, update, preventDiagonalScrolling]);
 
@@ -242,6 +245,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                                         <>
                                             <div className="dvn-spacer" />
                                             <div
+                                                ref={rightWrapRef}
                                                 onMouseDown={nomEvent}
                                                 onMouseUp={nomEvent}
                                                 onMouseMove={nomEvent}
@@ -250,6 +254,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                                                     maxHeight: clientHeight - Math.ceil(dpr % 1),
                                                     position: "sticky",
                                                     top: 0,
+                                                    paddingLeft: 1,
                                                     marginBottom: -40,
                                                     marginRight: paddingRight,
                                                     right: rightElementSticky ? paddingRight ?? 0 : undefined,

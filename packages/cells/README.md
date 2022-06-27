@@ -30,10 +30,10 @@ Step 1: Add the extra cells to your grid.
 import { useExtraCells } from "@glideapps/glide-data-grid-cells";
 
 const Grid = () => {
-  const { drawCell, provideEditor } = useExtraCells();
-  
-  return <DataEditor {...rest} drawCell={drawCell} provideEditor={provideEditor} />
-}
+    const { drawCell, provideEditor } = useExtraCells();
+
+    return <DataEditor {...rest} drawCell={drawCell} provideEditor={provideEditor} />;
+};
 ```
 
 Step 2: Use the cells in your `getCellContent` callback
@@ -42,17 +42,25 @@ Step 2: Use the cells in your `getCellContent` callback
 import type { StarCell } from "@glideapps/glide-data-grid-cells";
 
 const getCellContent = React.useCallback(() => {
-  const starCell: StarCell = {
-      kind: GridCellKind.Custom,
-      allowOverlay: true,
-      copyData: "4 out of 5",
-      data: {
-          kind: "star-cell",
-          label: "Test",
-          rating: 4,
-      },
-  };
+    const starCell: StarCell = {
+        kind: GridCellKind.Custom,
+        allowOverlay: true,
+        copyData: "4 out of 5",
+        data: {
+            kind: "star-cell",
+            label: "Test",
+            rating: 4,
+        },
+    };
 
-  return starCell;
+    return starCell;
 }, []);
+```
+
+## Note on ArticleCell
+
+The ArticleCell uses `@toast-ui/editor` to provide its editor. To make sure it works correctly your project will need to import the css file it depends on.
+
+```
+import "@toast-ui/editor/dist/toastui-editor.css";
 ```

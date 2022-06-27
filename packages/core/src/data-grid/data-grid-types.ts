@@ -185,6 +185,7 @@ interface BaseGridColumn {
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
     readonly hasMenu?: boolean;
+    readonly grow?: number;
     readonly style?: "normal" | "highlight";
     readonly themeOverride?: Partial<Theme>;
     readonly trailingRowOptions?: {
@@ -197,7 +198,7 @@ interface BaseGridColumn {
 }
 
 export function isSizedGridColumn(c: GridColumn): c is SizedGridColumn {
-    return "width" in c;
+    return "width" in c && typeof c.width === "number";
 }
 
 export interface SizedGridColumn extends BaseGridColumn {
@@ -205,7 +206,7 @@ export interface SizedGridColumn extends BaseGridColumn {
     readonly id?: string;
 }
 
-interface AutoGridColumn extends BaseGridColumn {
+export interface AutoGridColumn extends BaseGridColumn {
     readonly id: string;
 }
 
@@ -217,6 +218,8 @@ export async function resolveCellsThunk(thunk: GetCellsThunk | CellArray): Promi
 export type GetCellsThunk = () => Promise<CellArray>;
 
 export type GridColumn = SizedGridColumn | AutoGridColumn;
+
+export type InnerGridColumn = SizedGridColumn & { growOffset?: number };
 
 // export type SizedGridColumn = Omit<GridColumn, "width"> & { readonly width: number };
 
@@ -322,6 +325,7 @@ export interface TextCell extends BaseGridCell {
     readonly displayData: string;
     readonly data: string;
     readonly readonly?: boolean;
+    readonly allowWrapping?: boolean;
 }
 
 export interface NumberCell extends BaseGridCell {
@@ -453,6 +457,7 @@ export interface MarkerCell extends BaseGridCell {
     readonly kind: InnerGridCellKind.Marker;
     readonly allowOverlay: false;
     readonly row: number;
+    readonly drawHandle: boolean;
     readonly checked: boolean;
     readonly markerKind: "checkbox" | "number" | "both";
 }

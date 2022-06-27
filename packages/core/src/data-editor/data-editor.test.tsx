@@ -84,12 +84,19 @@ const makeCell = (cell: Item): GridCell => {
             allowOverlay: true,
             data: `# Header: ${col}, ${row}`,
         };
+    } else if (col === 10) {
+        return {
+            kind: GridCellKind.Uri,
+            allowOverlay: true,
+            data: `https://example.com/${col}/${row}`,
+        };
     }
     return {
         kind: GridCellKind.Text,
         allowOverlay: true,
         data: `Data: ${col}, ${row}`,
         displayData: `${col}, ${row}`,
+        allowWrapping: true,
     };
 };
 
@@ -142,6 +149,11 @@ const basicProps: DataEditorProps = {
         },
         {
             title: "J",
+            width: 90,
+            icon: "headerPhone",
+        },
+        {
+            title: "K",
             width: 90,
             icon: "headerPhone",
         },
@@ -511,7 +523,42 @@ describe("data-editor", () => {
             jest.runAllTimers();
         });
 
-        expect(spy).toBeCalledWith({ allowOverlay: true, data: "j", displayData: "1, 1", kind: "text" }, [0, 1]);
+        expect(spy).toBeCalledWith(
+            { allowOverlay: true, allowWrapping: true, data: "j", displayData: "1, 1", kind: "text" },
+            [0, 1]
+        );
+    });
+
+    test("Does not edit when validation fails", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellEdited={spy} validateCell={() => false} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        const overlay = screen.getByDisplayValue("j");
+
+        jest.useFakeTimers();
+        fireEvent.keyDown(overlay, {
+            key: "Enter",
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(spy).not.toBeCalled();
     });
 
     test("Emits header click", async () => {
@@ -594,7 +641,7 @@ describe("data-editor", () => {
 
         expect(spy).toHaveBeenCalledTimes(1);
         expect(spy).toHaveBeenCalledWith({
-            columns: CompactSelection.fromSingleSelection([0, 10]),
+            columns: CompactSelection.fromSingleSelection([0, 11]),
             rows: CompactSelection.empty(),
         });
 
@@ -635,7 +682,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith({
             rows: CompactSelection.empty(),
-            columns: CompactSelection.fromSingleSelection([0, 10]),
+            columns: CompactSelection.fromSingleSelection([0, 11]),
         });
     });
 
@@ -2382,13 +2429,45 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
+    });
+
+    test("Auto Resize Column", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onColumnResize={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 310, // Col B Right Edge
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 310,
+            clientY: 16,
+        });
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 310, // Col B Right Edge
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 310,
+            clientY: 16,
+        });
+
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 50, 1);
     });
 
     test("Resize Column End Called", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onColumnResizeEnd={spy} />, {
+        render(<EventedDataEditor {...basicProps} onColumnResize={jest.fn()} onColumnResizeEnd={spy} />, {
             wrapper: Context,
         });
         prep();
@@ -2409,7 +2488,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
     });
 
     test("Resize Multiple Column", async () => {
@@ -2482,7 +2561,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
     });
 
     test("Drag reorder row", async () => {
@@ -2911,7 +2990,7 @@ describe("data-editor", () => {
         });
     });
 
-    test("Select all", async () => {
+    test("Select all keybind", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
         render(<EventedDataEditor {...basicProps} keybindings={{ selectAll: true }} onGridSelectionChange={spy} />, {
@@ -2933,7 +3012,7 @@ describe("data-editor", () => {
                 range: {
                     x: 0,
                     y: 0,
-                    width: 10,
+                    width: 11,
                     height: 1000,
                 },
                 rangeStack: [],

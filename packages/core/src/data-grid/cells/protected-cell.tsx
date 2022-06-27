@@ -4,7 +4,7 @@ import { InternalCellRenderer } from "./cell-types";
 
 export const protectedCellRenderer: InternalCellRenderer<ProtectedCell> = {
     getAccessibilityString: () => "",
-    measure: () => 150,
+    measure: () => 108,
     kind: GridCellKind.Protected,
     needsHover: false,
     needsHoverPosition: false,

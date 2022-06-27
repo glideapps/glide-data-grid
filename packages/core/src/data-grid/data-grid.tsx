@@ -24,10 +24,10 @@ import {
     CellList,
     Item,
     DrawHeaderCallback,
-    SizedGridColumn,
     isReadWriteCell,
     isInnerOnlyCell,
     booleanCellIsEditable,
+    InnerGridColumn,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -35,6 +35,7 @@ import makeRange from "lodash/range";
 import {
     drawCell,
     drawGrid,
+    DrawGridArg,
     getActionBoundsForGroup,
     getHeaderMenuBounds,
     GetRowThemeCallback,
@@ -68,7 +69,7 @@ export interface DataGridProps {
     readonly isFilling: boolean;
     readonly isFocused: boolean;
 
-    readonly columns: readonly SizedGridColumn[];
+    readonly columns: readonly InnerGridColumn[];
     readonly rows: number;
 
     readonly headerHeight: number;
@@ -114,6 +115,10 @@ export interface DataGridProps {
     readonly isDraggable?: boolean;
     readonly onDragStart?: (args: GridDragEventArgs) => void;
 
+    readonly onDragOverCell?: (cell: Item, dataTransfer: DataTransfer | null) => void;
+    readonly onDragLeave?: () => void;
+    readonly onDrop?: (cell: Item, dataTransfer: DataTransfer | null) => void;
+
     readonly drawCustomCell?: DrawCustomCellCallback;
     readonly drawHeader?: DrawHeaderCallback;
 
@@ -129,6 +134,7 @@ export interface DataGridProps {
         readonly isSubGrid?: boolean;
         readonly strict?: boolean;
         readonly scrollbarWidthOverride?: number;
+        readonly hyperWrapping?: boolean;
     };
 
     readonly headerIcons?: SpriteMap;
@@ -202,6 +208,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         drawHeader,
         drawCustomCell,
         onCellFocused,
+        onDragOverCell,
+        onDrop,
+        onDragLeave,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -210,7 +219,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const theme = useTheme() as Theme;
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const imageLoader = React.useMemo<ImageWindowLoader>(() => new ImageWindowLoader(), []);
-    const canBlit = React.useRef<boolean>();
     const damageRegion = React.useRef<readonly Item[] | undefined>(undefined);
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
@@ -245,6 +253,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         const fn = async () => {
             const changed = await spriteManager.buildSpriteMap(theme, columns);
             if (changed) {
+                lastArgsRef.current = undefined;
                 lastDrawRef.current();
             }
         };
@@ -455,21 +464,23 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     });
     const hoverInfoRef = React.useRef(hoveredItemInfo);
     hoverInfoRef.current = hoveredItemInfo;
+
+    const lastArgsRef = React.useRef<DrawGridArg>();
     const draw = React.useCallback(() => {
         const canvas = ref.current;
         const overlay = overlayRef.current;
         if (canvas === null || overlay === null) return;
 
-        drawGrid({
+        const last = lastArgsRef.current;
+        const current = {
             canvas,
-            buffers: { overlay },
+            headerCanvas: overlay,
             width,
             height,
             cellXOffset,
             cellYOffset,
             translateX: Math.round(translateX),
             translateY: Math.round(translateY),
-            columns,
             mappedColumns,
             enableGroups,
             freezeColumns,
@@ -477,14 +488,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             theme,
             headerHeight,
             groupHeaderHeight,
-            selectedRows: selection.rows,
             disabledRows: disabledRows ?? CompactSelection.empty(),
             rowHeight,
             verticalBorder,
-            selectedColumns: selection.columns,
             isResizing,
             isFocused,
-            selectedCell: selection,
+            selection,
             fillHandle,
             lastRowSticky,
             rows,
@@ -497,15 +506,29 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             highlightRegions,
             imageLoader,
             lastBlitData,
-            canBlit: canBlit.current ?? false,
             damage: damageRegion.current,
             hoverValues: hoverValues.current,
             hoverInfo: hoverInfoRef.current,
             spriteManager,
             scrolling,
+            hyperWrapping: p.experimental?.hyperWrapping ?? false,
             touchMode: lastWasTouch,
             enqueue: enqueueRef.current,
-        });
+        };
+
+        // This confusing bit of code due to some poor design. Long story short, the damage property is only used
+        // with what is effectively the "last args" for the last normal draw anyway. We don't want the drawing code
+        // to look at this and go "shit dawg, nothing changed" so we force it to draw frash, but the damage restricts
+        // the draw anyway.
+        //
+        // Dear future Jason, I'm sorry. It was expedient, it worked, and had almost zero perf overhead. THe universe
+        // basically made me do it. What choice did I have?
+        if (current.damage === undefined) {
+            lastArgsRef.current = current;
+            drawGrid(current, last);
+        } else {
+            drawGrid(current, undefined);
+        }
     }, [
         width,
         height,
@@ -513,20 +536,19 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         cellYOffset,
         translateX,
         translateY,
-        columns,
         mappedColumns,
         enableGroups,
         freezeColumns,
         dragAndDropState,
         theme,
         headerHeight,
-        isFocused,
         groupHeaderHeight,
-        selection,
         disabledRows,
         rowHeight,
         verticalBorder,
         isResizing,
+        isFocused,
+        selection,
         fillHandle,
         lastRowSticky,
         rows,
@@ -540,30 +562,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         imageLoader,
         spriteManager,
         scrolling,
+        p.experimental?.hyperWrapping,
         lastWasTouch,
-    ]);
-
-    canBlit.current = canBlit.current !== undefined;
-    React.useLayoutEffect(() => {
-        canBlit.current = false;
-    }, [
-        width,
-        height,
-        columns,
-        theme,
-        headerHeight,
-        rowHeight,
-        rows,
-        isFocused,
-        isResizing,
-        verticalBorder,
-        getCellContent,
-        highlightRegions,
-        lastWasTouch,
-        selection,
-        dragAndDropState,
-        prelightCells,
-        scrolling,
     ]);
 
     const lastDrawRef = React.useRef(draw);
@@ -576,21 +576,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         const fn = async () => {
             if (document?.fonts?.ready === undefined) return;
             await document.fonts.ready;
-            const prev = canBlit.current;
-            canBlit.current = false;
+            lastArgsRef.current = undefined;
             lastDrawRef.current();
-            canBlit.current = prev;
         };
         void fn();
     }, []);
 
     const damageInternal = React.useCallback((locations: CellList) => {
-        const last = canBlit.current;
-        canBlit.current = false;
         damageRegion.current = locations;
         lastDrawRef.current();
         damageRegion.current = undefined;
-        canBlit.current = last;
     }, []);
 
     const enqueue = useAnimationQueue(damageInternal);
@@ -810,13 +805,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     useEventListener("touchend", onMouseUpImpl, window, false);
 
     const onAnimationFrame = React.useCallback<StepCallback>(values => {
-        const last = canBlit.current;
-        canBlit.current = false;
         damageRegion.current = values.map(x => x.item);
         hoverValues.current = values;
         lastDrawRef.current();
         damageRegion.current = undefined;
-        canBlit.current = last;
     }, []);
 
     const animManagerValue = React.useMemo(() => new AnimationManager(onAnimationFrame), [onAnimationFrame]);
@@ -1025,6 +1017,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                 spriteManager,
                                 1,
                                 undefined,
+                                false,
                                 0
                             );
                         }
@@ -1062,6 +1055,66 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         ]
     );
     useEventListener("dragstart", onDragStartImpl, eventTargetRef?.current ?? null, false, false);
+
+    const activeDropTarget = React.useRef<Item | undefined>();
+
+    const onDragOverImpl = React.useCallback(
+        (event: DragEvent) => {
+            const canvas = ref.current;
+            if (onDrop !== undefined) {
+                // Need to preventDefault to allow drop
+                event.preventDefault();
+            }
+
+            if (canvas === null || onDragOverCell === undefined) {
+                return false;
+            }
+
+            const args = getMouseArgsForPosition(canvas, event.clientX, event.clientY);
+
+            const [rawCol, row] = args.location;
+            const col = rawCol - (firstColAccessible ? 0 : 1);
+            const [activeCol, activeRow] = activeDropTarget.current ?? [];
+
+            if (activeCol !== col || activeRow !== row) {
+                activeDropTarget.current = [col, row];
+                onDragOverCell([col, row], event.dataTransfer);
+            }
+        },
+        [firstColAccessible, getMouseArgsForPosition, onDragOverCell, onDrop]
+    );
+    useEventListener("dragover", onDragOverImpl, eventTargetRef?.current ?? null, false, false);
+
+    const onDragEndImpl = React.useCallback(() => {
+        activeDropTarget.current = undefined;
+    }, []);
+    useEventListener("dragend", onDragEndImpl, eventTargetRef?.current ?? null, false, false);
+
+    const onDropImpl = React.useCallback(
+        (event: DragEvent) => {
+            const canvas = ref.current;
+            if (canvas === null || onDrop === undefined) {
+                return false;
+            }
+
+            // Default can mess up sometimes.
+            event.preventDefault();
+
+            const args = getMouseArgsForPosition(canvas, event.clientX, event.clientY);
+
+            const [rawCol, row] = args.location;
+            const col = rawCol - (firstColAccessible ? 0 : 1);
+
+            onDrop([col, row], event.dataTransfer);
+        },
+        [firstColAccessible, getMouseArgsForPosition, onDrop]
+    );
+    useEventListener("drop", onDropImpl, eventTargetRef?.current ?? null, false, false);
+
+    const onDragLeaveImpl = React.useCallback(() => {
+        onDragLeave?.();
+    }, [onDragLeave]);
+    useEventListener("dragleave", onDragLeaveImpl, eventTargetRef?.current ?? null, false, false);
 
     const selectionRef = React.useRef(selection);
     selectionRef.current = selection;

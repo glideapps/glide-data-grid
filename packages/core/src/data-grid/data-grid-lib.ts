@@ -14,6 +14,8 @@ import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
+import { clearMultilineCache, splitMultilineText } from "./multi-line-layout";
+import { DrawArgs } from "../data-editor/custom-cell-draw-args";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -238,6 +240,7 @@ async function clearCacheOnLoad() {
     await document.fonts.ready;
     metricsSize = 0;
     metricsCache = {};
+    clearMultilineCache();
 }
 
 void clearCacheOnLoad();
@@ -350,17 +353,68 @@ export function prepTextCell(
     return result;
 }
 
-export function drawTextCell(args: BaseDrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
+export function drawTextCellExternal(args: DrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
+    const { rect } = args;
+
+    args.ctx.fillStyle = args.theme.textDark;
+    drawTextCell(
+        {
+            ctx: args.ctx,
+            x: rect.x,
+            y: rect.y,
+            h: rect.height,
+            w: rect.width,
+            theme: args.theme,
+        },
+        data,
+        contentAlign
+    );
+}
+
+function drawSingleTextLine(
+    ctx: CanvasRenderingContext2D,
+    data: string,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    bias: number,
+    theme: Theme,
+    contentAlign?: BaseGridCell["contentAlign"]
+) {
+    if (contentAlign === "right") {
+        ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2 + bias);
+    } else if (contentAlign === "center") {
+        ctx.fillText(data, x + w / 2, y + h / 2 + bias);
+    } else {
+        ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2 + bias);
+    }
+}
+
+export function drawTextCell(
+    args: Pick<BaseDrawArgs, "x" | "y" | "w" | "h" | "ctx" | "theme">,
+    data: string,
+    contentAlign?: BaseGridCell["contentAlign"],
+    allowWrapping?: boolean,
+    hyperWrapping?: boolean
+) {
     const { ctx, x, y, w, h, theme } = args;
-    if (data.includes("\n")) {
-        // new lines are rare and split is relatively expensive compared to the search
-        // it pays off to not do the split contantly.
-        data = data.split(/\r?\n/)[0];
+
+    allowWrapping = allowWrapping ?? false;
+
+    if (!allowWrapping) {
+        if (data.includes("\n")) {
+            // new lines are rare and split is relatively expensive compared to the search
+            // it pays off to not do the split contantly.
+            data = data.split(/\r?\n/)[0];
+        }
+        const max = w / 4; // no need to round, slice will just truncate this
+        if (data.length > max) {
+            data = data.slice(0, max);
+        }
     }
-    const max = w / 4; // no need to round, slice will just truncate this
-    if (data.length > max) {
-        data = data.slice(0, max);
-    }
+
+    const bias = getMiddleCenterBias(ctx, theme);
 
     if (data.length > 0) {
         let changed = false;
@@ -374,13 +428,42 @@ export function drawTextCell(args: BaseDrawArgs, data: string, contentAlign?: Ba
             changed = true;
         }
 
-        const bias = getMiddleCenterBias(ctx, theme);
-        if (contentAlign === "right") {
-            ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2 + bias);
-        } else if (contentAlign === "center") {
-            ctx.fillText(data, x + w / 2, y + h / 2 + bias);
+        if (!allowWrapping) {
+            drawSingleTextLine(ctx, data, x, y, w, h, bias, theme, contentAlign);
         } else {
-            ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2 + bias);
+            const fontStyle = `${theme.fontFamily} ${theme.baseFontStyle}`;
+            const split = splitMultilineText(
+                ctx,
+                data,
+                fontStyle,
+                w - theme.cellHorizontalPadding * 2,
+                hyperWrapping ?? false
+            );
+
+            const textMetrics = measureTextCached("ABCi09jgqpy", ctx, fontStyle); // do not question the magic string
+            const emHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
+            const lineHeight = theme.lineHeight * emHeight;
+
+            const actualHeight = emHeight + lineHeight * (split.length - 1);
+            const mustClip = actualHeight + theme.cellVerticalPadding > h;
+
+            if (mustClip) {
+                // well now we have to clip because we might render outside the cell vertically
+                ctx.save();
+                ctx.rect(x, y, w, h);
+                ctx.clip();
+            }
+
+            const optimalY = y + h / 2 - actualHeight / 2;
+            let drawY = Math.max(y + theme.cellVerticalPadding, optimalY);
+            for (const line of split) {
+                drawSingleTextLine(ctx, line, x, drawY, w, emHeight, bias, theme, contentAlign);
+                drawY += lineHeight;
+                if (drawY > y + h) break;
+            }
+            if (mustClip) {
+                ctx.restore();
+            }
         }
 
         if (changed) {
@@ -524,13 +607,37 @@ export function drawMarkerRowCell(
     args: BaseDrawArgs,
     index: number,
     checked: boolean,
-    markerKind: "checkbox" | "both" | "number"
+    markerKind: "checkbox" | "both" | "number",
+    drawHandle: boolean
 ) {
     const { ctx, x, y, w: width, h: height, hoverAmount, theme } = args;
     const checkedboxAlpha = checked ? 1 : hoverAmount;
     if (markerKind !== "number" && checkedboxAlpha > 0) {
         ctx.globalAlpha = checkedboxAlpha;
-        drawCheckbox(ctx, theme, checked, x, y, width, height, true);
+        const offsetAmount = 7 * (checked ? hoverAmount : 1);
+        drawCheckbox(
+            ctx,
+            theme,
+            checked,
+            drawHandle ? x + offsetAmount : x,
+            y,
+            drawHandle ? width - offsetAmount : width,
+            height,
+            true
+        );
+        if (drawHandle) {
+            ctx.globalAlpha = hoverAmount;
+            ctx.beginPath();
+            for (const xOffset of [3, 6]) {
+                for (const yOffset of [-5, -1, 3]) {
+                    ctx.rect(x + xOffset, y + height / 2 + yOffset, 2, 2);
+                }
+            }
+
+            ctx.fillStyle = theme.textLight;
+            ctx.fill();
+            ctx.beginPath();
+        }
         ctx.globalAlpha = 1;
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
@@ -549,13 +656,7 @@ export function drawMarkerRowCell(
 }
 
 export function drawProtectedCell(args: BaseDrawArgs) {
-    const { ctx, theme, x, y, w, h, highlighted } = args;
-    if (!highlighted) {
-        ctx.beginPath();
-        ctx.rect(x + 1, y + 1, w - 1, h - 1);
-        ctx.fillStyle = theme.bgCellMedium;
-        ctx.fill();
-    }
+    const { ctx, theme, x, y, h } = args;
 
     ctx.beginPath();
 

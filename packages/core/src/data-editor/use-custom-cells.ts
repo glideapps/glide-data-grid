@@ -1,24 +1,9 @@
 import * as React from "react";
-import ImageWindowLoader from "../common/image-window-loader";
-import { Theme } from "../common/styles";
-import { CustomCell, GridCell, GridCellKind, ProvideEditorCallback, Rectangle } from "../data-grid/data-grid-types";
+import { CustomCell, GridCell, GridCellKind, ProvideEditorCallback } from "../data-grid/data-grid-types";
+import { DrawArgs } from "./custom-cell-draw-args";
 import { DataEditorProps } from "./data-editor";
 
 type DrawCallback = NonNullable<DataEditorProps["drawCell"]>;
-
-export interface DrawArgs {
-    ctx: CanvasRenderingContext2D;
-    theme: Theme;
-    rect: Rectangle;
-    hoverAmount: number;
-    hoverX: number | undefined;
-    hoverY: number | undefined;
-    col: number;
-    row: number;
-    highlighted: boolean;
-    imageLoader: ImageWindowLoader;
-    requestAnimationFrame: () => void;
-}
 
 export type CustomCellRenderer<T extends CustomCell> = {
     isMatch: (cell: CustomCell) => cell is T;

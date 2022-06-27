@@ -29,7 +29,7 @@ export const GroupRename: React.VFC<Props> = p => {
                 padding: 0 8px;
                 display: flex;
                 align-items: center;
-                background-color: ${t => t.theme.bgHeader};
+                background-color: var(--gdg-bg-header);
             `}
             onClickOutside={onClose}>
             <input
@@ -38,13 +38,13 @@ export const GroupRename: React.VFC<Props> = p => {
                     flex-grow: 1;
                     border: none;
                     outline: none;
-                    background-color: ${t => t.theme.bgHeaderHasFocus};
+                    background-color: var(--gdg-bg-header-has-focus);
                     border-radius: 9px;
                     padding: 0 8px;
-                    box-shadow: 0 0 0 1px ${t => t.theme.borderColor};
-                    color: ${t => t.theme.textGroupHeader};
+                    box-shadow: 0 0 0 1px var(--gdg-border-color);
+                    color: var(--gdg-text-group-header);
                     min-height: ${Math.max(16, bounds.height - 10)}px;
-                    font: ${t => t.theme.headerFontStyle} ${t => t.theme.fontFamily};
+                    font: var(--gdg-header-font-style) var(--gdg-font-family);
                 `}
                 value={value}
                 onBlur={onClose}

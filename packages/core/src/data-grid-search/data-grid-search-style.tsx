@@ -6,13 +6,14 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
     top: 4px;
     right: 20px;
 
-    background-color: ${p => p.theme.bgCell};
-    color: ${p => p.theme.textDark};
+    background-color: var(--gdg-bg-cell);
+    color: var(--gdg-text-dark);
 
     padding: 8px;
-    border: 1px solid ${p => p.theme.borderColor};
+    border: 1px solid var(--gdg-border-color);
+    border-radius: 6px;
 
-    font-size: ${p => p.theme.editorFontSize};
+    font-size: var(--gdg-editor-font-size);
 
     transform: translateX(${p => (p.showSearch ? 0 : 400)}px);
     transition: transform 0.15s;
@@ -32,13 +33,13 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
         left: 0;
         bottom: 0;
 
-        background-color: ${p => p.theme.textLight};
+        background-color: var(--gdg-text-light);
     }
 
     input {
         width: 220px;
-        color: ${p => p.theme.textDark};
-        background-color: ${p => p.theme.bgCell};
+        color: var(--gdg-textDark);
+        background-color: var(--gdg-bg-cell);
         border: none;
         border-width: 0;
         outline: none;
@@ -57,10 +58,10 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        color: ${p => p.theme.textMedium};
+        color: var(--gdg-text-medium);
 
         :hover {
-            color: ${p => p.theme.textDark};
+            color: var(--gdg-text-dark);
         }
 
         .button-icon {

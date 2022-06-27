@@ -1,7 +1,8 @@
 import { CustomCell, ProvideEditorCallback, CustomCellRenderer, getMiddleCenterBias } from "@glideapps/glide-data-grid";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import * as React from "react";
 import Select, { MenuProps, components } from "react-select";
+import type { Theme } from "@glideapps/glide-data-grid";
 
 interface CustomMenuProps extends MenuProps<any> {}
 
@@ -24,6 +25,22 @@ const Wrap = styled.div`
     display: flex;
     flex-direction: column;
     align-items: stretch;
+
+    .glide-select {
+        font-family: var(--gdg-font-family);
+        font-size: var(--gdg-editor-font-size);
+    }
+`;
+
+const PortalWrap = styled.div`
+    font-family: var(--gdg-font-family);
+    font-size: var(--gdg-editor-font-size);
+    color: var(--gdg-text-dark);
+
+    > div {
+        border-radius: 4px;
+        border: 1px solid var(--gdg-border-color);
+    }
 `;
 
 const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
@@ -33,9 +50,12 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
     const [value, setValue] = React.useState(valueIn);
     const [inputValue, setInputValue] = React.useState(initialValue ?? "");
 
+    const theme = useTheme() as Theme;
+
     return (
         <Wrap>
             <Select
+                className="glide-select"
                 inputValue={inputValue}
                 onInputChange={setInputValue}
                 menuPlacement={"auto"}
@@ -47,13 +67,42 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                         boxShadow: "none",
                     }),
                 }}
+                theme={t => {
+                    return {
+                        ...t,
+                        colors: {
+                            ...t.colors,
+                            neutral0: theme.bgCell, // this is both the background color AND the fg color of
+                            // the selected item because of course it is.
+                            neutral5: theme.bgCell,
+                            neutral10: theme.bgCell,
+                            neutral20: theme.bgCellMedium,
+                            neutral30: theme.bgCellMedium,
+                            neutral40: theme.bgCellMedium,
+                            neutral50: theme.textLight,
+                            neutral60: theme.textMedium,
+                            neutral70: theme.textMedium,
+                            neutral80: theme.textDark,
+                            neutral90: theme.textDark,
+                            neutral100: theme.textDark,
+                            primary: theme.accentColor,
+                            primary75: theme.accentColor,
+                            primary50: theme.accentColor,
+                            primary25: theme.accentLight, // prelight color
+                        },
+                    };
+                }}
                 menuPortalTarget={document.getElementById("portal")}
                 autoFocus={true}
                 openMenuOnFocus={true}
                 components={{
                     DropdownIndicator: () => null,
                     IndicatorSeparator: () => null,
-                    Menu: props => <CustomMenu className={"click-outside-ignore"} {...props} />,
+                    Menu: props => (
+                        <PortalWrap>
+                            <CustomMenu className={"click-outside-ignore"} {...props} />
+                        </PortalWrap>
+                    ),
                 }}
                 options={allowedValues.map(x => ({
                     value: x,

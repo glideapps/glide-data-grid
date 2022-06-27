@@ -37,6 +37,7 @@ import {
     ContentCache,
     BeautifulStyle,
 } from "./utils";
+import noop from "lodash/noop";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -60,7 +61,7 @@ const defaultProps: Partial<DataEditorProps> = {
 };
 
 export const ResizableColumns: React.VFC = () => {
-    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(60);
+    const { cols, getCellContent, onColumnResize, getCellsForSelection } = useMockDataGenerator(60);
 
     return (
         <BeautifulWrapper
@@ -85,7 +86,8 @@ export const ResizableColumns: React.VFC = () => {
                 overscrollX={200}
                 overscrollY={200}
                 rows={50}
-                onColumnResized={onColumnResize}
+                onColumnResize={onColumnResize}
+                getCellsForSelection={getCellsForSelection}
             />
         </BeautifulWrapper>
     );
@@ -248,6 +250,50 @@ export const AddData: React.VFC = () => {
     );
 };
 (AddData as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const ValidateData: React.VFC = () => {
+    const { cols, getCellContent, setCellValue, getCellsForSelection } = useMockDataGenerator(60, false);
+
+    return (
+        <BeautifulWrapper
+            title="Validate data"
+            description={
+                <>
+                    <Description>
+                        Data can be validated using the <PropName>validateCell</PropName> callback
+                    </Description>
+                    <MoreInfo>This example only allows the word &quot;Valid&quot; inside text cells.</MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                getCellsForSelection={getCellsForSelection}
+                rowMarkers={"both"}
+                onPaste={true}
+                onCellEdited={setCellValue}
+                rows={100}
+                validateCell={(_cell, newValue) => {
+                    if (newValue.kind !== GridCellKind.Text) return true;
+                    if (newValue.data === "Valid") return true;
+                    if (newValue.data.toLowerCase() === "valid") {
+                        return {
+                            ...newValue,
+                            data: "Valid",
+                        };
+                    }
+                    return false;
+                }}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ValidateData as any).parameters = {
     options: {
         showPanel: false,
     },
@@ -517,6 +563,64 @@ export const AddDataToMiddle: React.FC<AddDataToMiddleProps> = p => {
 (AddDataToMiddle as any).parameters = {
     options: {
         showPanel: true,
+    },
+};
+
+export const AppendRowHandle: React.VFC = () => {
+    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
+
+    const [numRows, setNumRows] = React.useState(50);
+
+    const ref = React.useRef<DataEditorRef>(null);
+
+    const onClick = React.useCallback(() => {
+        ref.current?.appendRow(3);
+    }, [ref]);
+
+    const onRowAppended = React.useCallback(() => {
+        const newRow = numRows;
+        for (let c = 0; c < 6; c++) {
+            const cell = getCellContent([c, newRow]);
+            setCellValueRaw([c, newRow], clearCell(cell));
+        }
+        setNumRows(cv => cv + 1);
+    }, [getCellContent, numRows, setCellValueRaw]);
+
+    return (
+        <BeautifulWrapper
+            title="appendRow Ref"
+            description={
+                <>
+                    <Description>
+                        Adding data can also be triggered from outside of <PropName>DataEditor</PropName>
+                    </Description>
+                    <MoreInfo>
+                        By calling <PropName>appendRow</PropName> on a <PropName>ref</PropName> to your grid, you can
+                        trigger the append elsewhere, like this <KeyName onClick={onClick}>Append</KeyName> button
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                ref={ref}
+                getCellContent={getCellContent}
+                columns={cols}
+                rowMarkers={"both"}
+                onCellEdited={setCellValue}
+                trailingRowOptions={{
+                    hint: "New row...",
+                    sticky: true,
+                    tint: true,
+                }}
+                rows={numRows}
+                onRowAppended={onRowAppended}
+            />
+        </BeautifulWrapper>
+    );
+};
+(AppendRowHandle as any).parameters = {
+    options: {
+        showPanel: false,
     },
 };
 
@@ -894,6 +998,81 @@ export const AutomaticRowMarkers: React.VFC = () => {
     },
 };
 
+export const WrappingText: React.VFC<{
+    alignment: "left" | "center" | "right";
+    length: number;
+    hyperWrapping: boolean;
+}> = p => {
+    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(6);
+
+    const suffix = React.useMemo(() => {
+        return range(0, 100).map(() => faker.lorem.sentence(p.length));
+    }, [p.length]);
+
+    const mangledGetCellContent = React.useCallback<typeof getCellContent>(
+        i => {
+            const [col, row] = i;
+
+            if (col === 0) {
+                return {
+                    kind: GridCellKind.Text,
+                    allowOverlay: true,
+                    displayData: `${row},\n${suffix[row % suffix.length]}`,
+                    data: `${row}, ${suffix}`,
+                    allowWrapping: true,
+                    contentAlign: p.alignment,
+                };
+            }
+            return getCellContent(i);
+        },
+        [getCellContent, p.alignment, suffix]
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Wrapping Text"
+            description={
+                <Description>
+                    Text cells can have wrapping text by setting the <PropName>allowWrapping</PropName> prop to true.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowHeight={80}
+                getCellContent={mangledGetCellContent}
+                columns={cols}
+                rows={1_000}
+                onColumnResize={onColumnResize}
+                experimental={{
+                    hyperWrapping: p.hyperWrapping,
+                }}
+            />
+        </BeautifulWrapper>
+    );
+};
+(WrappingText as any).args = {
+    alignment: "left",
+    length: 20,
+    hyperWrapping: false,
+};
+(WrappingText as any).argTypes = {
+    alignment: {
+        control: { type: "select", options: ["left", "center", "right"] },
+    },
+    length: {
+        control: {
+            type: "range",
+            min: 2,
+            max: 200,
+        },
+    },
+};
+(WrappingText as any).parameters = {
+    options: {
+        showPanel: true,
+    },
+};
+
 export const UnevenRows: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
@@ -915,7 +1094,7 @@ export const UnevenRows: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(AutomaticRowMarkers as any).parameters = {
+(UnevenRows as any).parameters = {
     options: {
         showPanel: false,
     },
@@ -1317,8 +1496,11 @@ function useAllMockedKinds() {
         return colsMap.map(getGridColumn);
     }, [colsMap]);
 
+    const [updateVersion, setUpdateVersion] = React.useState(0);
     const getCellContent = React.useCallback(
         ([col, row]: Item): GridCell => {
+            // Terrible hack to force update when setCellValue requests it
+            noop(updateVersion);
             let val = cache.current.get(col, row);
             if (val === undefined) {
                 val = colsMap[col].getContent();
@@ -1327,11 +1509,11 @@ function useAllMockedKinds() {
 
             return val;
         },
-        [colsMap]
+        [colsMap, updateVersion]
     );
 
     const setCellValue = React.useCallback(
-        ([col, row]: Item, val: GridCell): void => {
+        ([col, row]: Item, val: GridCell, noDisplay?: boolean, forceUpdate?: boolean): void => {
             let current = cache.current.get(col, row);
             if (current === undefined) {
                 current = colsMap[col].getContent();
@@ -1340,8 +1522,12 @@ function useAllMockedKinds() {
                 const copied = lossyCopyData(val, current);
                 cache.current.set(col, row, {
                     ...copied,
-                    displayData: copied.data?.toString() ?? "",
+                    displayData: noDisplay === true ? undefined : copied.data?.toString() ?? "",
                 } as any);
+
+                if (forceUpdate === true) {
+                    setUpdateVersion(v => v + 1);
+                }
             }
         },
         [colsMap]
@@ -1367,6 +1553,17 @@ export const AllCellKinds: React.VFC = () => {
                 columns={cols}
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}
+                highlightRegions={[
+                    {
+                        color: "#ff00ff33",
+                        range: {
+                            x: 1,
+                            y: 1,
+                            width: 3,
+                            height: 3,
+                        },
+                    },
+                ]}
                 rows={1_000}
             />
         </BeautifulWrapper>
@@ -1678,7 +1875,7 @@ export const BuiltInSearch: React.VFC = () => {
     useEventListener(
         "keydown",
         React.useCallback(event => {
-            if ((event.ctrlKey || event.metaKey) && event.key === "f") {
+            if ((event.ctrlKey || event.metaKey) && event.code === "KeyF") {
                 setShowSearch(cv => !cv);
                 event.stopPropagation();
                 event.preventDefault();
@@ -1951,9 +2148,11 @@ export const CustomHeaderIcons: React.VFC = () => {
 };
 
 export const RightElement: React.VFC = () => {
-    const { cols, getCellContent, setCellValue, getCellsForSelection } = useMockDataGenerator(12, false);
+    const { cols, getCellContent, setCellValue, getCellsForSelection } = useMockDataGenerator(8, false);
 
-    const [numRows, setNumRows] = React.useState(30);
+    const columns = React.useMemo(() => cols.map(c => ({ ...c, grow: 1 })), [cols]);
+
+    const [numRows, setNumRows] = React.useState(300);
 
     const onRowAppended = React.useCallback(() => {
         const newRow = numRows;
@@ -1978,7 +2177,7 @@ export const RightElement: React.VFC = () => {
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
-                columns={cols}
+                columns={columns}
                 getCellsForSelection={getCellsForSelection}
                 rowMarkers={"both"}
                 onCellEdited={setCellValue}
@@ -2291,7 +2490,7 @@ export const ReorderRows: React.VFC = () => {
             }>
             <DataEditor
                 {...defaultProps}
-                rowMarkers={"number"}
+                rowMarkers={"both"}
                 onRowMoved={reorderRows}
                 getCellContent={getCellContent}
                 columns={cols}
@@ -2334,6 +2533,40 @@ export const ColumnGroups: React.VFC = () => {
     );
 };
 (ColumnGroups as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const StretchColumnSize: React.VFC = () => {
+    const { cols, getCellContent, getCellsForSelection, onColumnResize } = useMockDataGenerator(5, true, true);
+
+    const columns = React.useMemo(() => {
+        return cols.map((x, i) => ({ ...x, grow: (5 + i) / 5 }));
+    }, [cols]);
+
+    return (
+        <BeautifulWrapper
+            title="Column Grow"
+            description={
+                <Description>
+                    Columns in the data grid may be set to grow to fill space by setting the <PropName>grow</PropName>{" "}
+                    prop.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={columns}
+                getCellsForSelection={getCellsForSelection}
+                rows={1000}
+                onColumnResize={onColumnResize}
+                rowMarkers="both"
+            />
+        </BeautifulWrapper>
+    );
+};
+(StretchColumnSize as any).parameters = {
     options: {
         showPanel: false,
     },
@@ -2755,6 +2988,7 @@ export const HighlightCells: React.VFC = () => {
                     width: 10,
                     height: 10,
                 },
+                style: "solid",
             },
             {
                 color: "#b000b021",
@@ -2867,6 +3101,140 @@ export const PreventDiagonalScroll: React.VFC = () => {
     );
 };
 (PreventDiagonalScroll as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+// A few supported mime types for drag and drop into cells.
+const SUPPORTED_IMAGE_TYPES = ["image/png", "image/gif", "image/bmp", "image/jpeg"];
+
+export const DropEvents: React.VFC = () => {
+    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
+
+    const [highlights, setHighlights] = React.useState<DataEditorProps["highlightRegions"]>([]);
+
+    const [lastDropCell, setLastDropCell] = React.useState<Item | undefined>();
+
+    const onDrop = React.useCallback(
+        (cell: Item, dataTransfer: DataTransfer | null) => {
+            setHighlights([]);
+
+            if (dataTransfer === null) {
+                return;
+            }
+
+            const { files } = dataTransfer;
+            // This only supports one image, for simplicity.
+            if (files.length !== 1) {
+                return;
+            }
+
+            const [file] = files;
+            if (!SUPPORTED_IMAGE_TYPES.includes(file.type)) {
+                return;
+            }
+
+            const imgUrl = URL.createObjectURL(file);
+
+            setCellValue(
+                cell,
+                {
+                    kind: GridCellKind.Image,
+                    data: [imgUrl],
+                    allowOverlay: true,
+                    allowAdd: false,
+                },
+                true,
+                true
+            );
+
+            setLastDropCell(cell);
+        },
+        [setCellValue]
+    );
+
+    const onDragOverCell = React.useCallback(
+        (cell: Item, dataTransfer: DataTransfer | null) => {
+            if (dataTransfer === null) {
+                return;
+            }
+
+            const { items } = dataTransfer;
+            // This only supports one image, for simplicity.
+            if (items.length !== 1) {
+                return;
+            }
+
+            const [item] = items;
+            if (!SUPPORTED_IMAGE_TYPES.includes(item.type)) {
+                return;
+            }
+
+            const [col, row] = cell;
+            if (getCellContent(cell).kind === GridCellKind.Image) {
+                setHighlights([
+                    {
+                        color: "#44BB0022",
+                        range: {
+                            x: col,
+                            y: row,
+                            width: 1,
+                            height: 1,
+                        },
+                    },
+                ]);
+            } else {
+                setHighlights([]);
+            }
+        },
+        [getCellContent]
+    );
+
+    const onDragLeave = React.useCallback(() => {
+        setHighlights([]);
+    }, []);
+
+    return (
+        <BeautifulWrapper
+            title="Drop events"
+            description={
+                <>
+                    <Description>
+                        You can drag and drop into cells by using <PropName>onDragOverCell</PropName> and{" "}
+                        <PropName>onDrop</PropName>.
+                    </Description>
+
+                    <div>
+                        {lastDropCell === undefined ? (
+                            <MoreInfo>Nothing dropped, yet</MoreInfo>
+                        ) : (
+                            <>
+                                <MoreInfo>
+                                    You last dropped in cell <PropName>{JSON.stringify(lastDropCell)}</PropName>
+                                </MoreInfo>
+                            </>
+                        )}
+                    </div>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                onCellEdited={setCellValue}
+                onColumnResize={onColumnResize}
+                rows={1_000}
+                onDrop={onDrop}
+                onDragOverCell={onDragOverCell}
+                onDragLeave={onDragLeave}
+                highlightRegions={highlights}
+                rowMarkers="none"
+            />
+        </BeautifulWrapper>
+    );
+};
+(DropEvents as any).parameters = {
     options: {
         showPanel: false,
     },
