@@ -9,8 +9,14 @@
     "module": "dist/js/index.js",
     "types": "dist/ts/index.d.ts",
     "exports": {
-        "import": "./dist/js/index.js",
-        "require": "./dist/cjs/index.js"
+        ".": {
+            "import": "./dist/js/index.js",
+            "require": "./dist/cjs/index.js"
+        },
+        "./dist/index.css": {
+            "import": "./dist/index.css",
+            "require": "./dist/index.css"
+        }
     },
     "files": [
         "dist"
