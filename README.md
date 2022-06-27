@@ -57,6 +57,12 @@ Create a new `DataEditor` wherever you need to display lots and lots of data
 <DataEditor getCellContent={getData} columns={columns} rows={numRows} />
 ```
 
+Don't forget to import mandatory CSS
+
+```ts
+import "@glideapps/glide-data-grid/dist/index.css";
+```
+
 Making your columns is easy
 
 ```ts
