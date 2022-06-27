@@ -18,7 +18,6 @@ import {
 import { DataEditor, DataEditorProps } from "../data-editor";
 
 import faker from "faker";
-import { ThemeProvider } from "styled-components";
 import { styled } from "@linaria/react";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 import { useEventListener } from "../../common/utils";
@@ -1667,36 +1666,35 @@ export const ThemeSupport: React.VFC = () => {
     }, [numRows, setCellValue]);
 
     return (
-        <ThemeProvider theme={theme}>
-            <BeautifulWrapper
-                title="Theme support"
-                description={
-                    <>
-                        <Description>
-                            DataGrid respects the theme provided by styled-components theme provider.
-                        </Description>
-                        <MoreInfo>
-                            <button onClick={() => setTheme({})}>Light</button> or{" "}
-                            <button onClick={() => setTheme(darkTheme)}>Dark</button> even{" "}
-                            <button onClick={() => setTheme(hotdogStand)}>Hotdog Stand</button>
-                        </MoreInfo>
-                    </>
-                }>
-                <DataEditor
-                    {...defaultProps}
-                    getCellContent={getCellContent}
-                    columns={cols}
-                    onRowAppended={onRowAppended}
-                    trailingRowOptions={{
-                        tint: true,
-                        sticky: true,
-                    }}
-                    onCellEdited={setCellValue}
-                    onColumnResize={onColumnResize}
-                    rows={numRows}
-                />
-            </BeautifulWrapper>
-        </ThemeProvider>
+        <BeautifulWrapper
+            title="Theme support"
+            description={
+                <>
+                    <Description>
+                        DataGrid respects the theme provided by the <PropName>theme</PropName> prop.
+                    </Description>
+                    <MoreInfo>
+                        <button onClick={() => setTheme({})}>Light</button> or{" "}
+                        <button onClick={() => setTheme(darkTheme)}>Dark</button> even{" "}
+                        <button onClick={() => setTheme(hotdogStand)}>Hotdog Stand</button>
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                theme={theme}
+                getCellContent={getCellContent}
+                columns={cols}
+                onRowAppended={onRowAppended}
+                trailingRowOptions={{
+                    tint: true,
+                    sticky: true,
+                }}
+                onCellEdited={setCellValue}
+                onColumnResize={onColumnResize}
+                rows={numRows}
+            />
+        </BeautifulWrapper>
     );
 };
 (ThemeSupport as any).parameters = {

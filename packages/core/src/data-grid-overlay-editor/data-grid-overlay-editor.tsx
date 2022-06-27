@@ -1,9 +1,8 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { ThemeProvider } from "styled-components";
 
 import ClickOutsideContainer from "../click-outside-container/click-outside-container";
-import { makeCSSStyle, Theme } from "../common/styles";
+import { makeCSSStyle, Theme, ThemeContext } from "../common/styles";
 import { CellRenderers } from "../data-grid/cells";
 import {
     EditableGridCell,
@@ -227,7 +226,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     }
 
     const portal = createPortal(
-        <ThemeProvider theme={theme}>
+        <ThemeContext.Provider value={theme}>
             <ClickOutsideContainer style={makeCSSStyle(theme)} className={className} onClickOutside={onClickOutside}>
                 <DataGridOverlayEditorStyle
                     ref={ref}
@@ -244,7 +243,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                     </div>
                 </DataGridOverlayEditorStyle>
             </ClickOutsideContainer>
-        </ThemeProvider>,
+        </ThemeContext.Provider>,
         portalElement
     );
 

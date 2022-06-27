@@ -18,7 +18,7 @@ export {
     getMiddleCenterBias,
     drawTextCellExternal as drawTextCell,
 } from "./data-grid/data-grid-lib";
-export { getDataEditorTheme as getDefaultTheme } from "./common/styles";
+export { getDataEditorTheme as getDefaultTheme, useTheme } from "./common/styles";
 export { useColumnSizer } from "./data-editor/use-column-sizer";
 export { useCustomCells } from "./data-editor/use-custom-cells";
 

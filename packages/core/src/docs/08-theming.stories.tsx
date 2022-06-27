@@ -5,7 +5,6 @@ import { DataEditor } from "../data-editor/data-editor";
 
 import { SimpleThemeWrapper } from "../stories/story-utils";
 import { DocWrapper, Highlight, Marked, Wrapper } from "./doc-wrapper";
-import { ThemeProvider } from "styled-components";
 import { Theme } from "../common/styles";
 
 export default {
@@ -242,7 +241,7 @@ At each level parts of the theme can be overridden. This example will pro
 
 ## Global Theming
 
-The global theme is provided by the \`styled-components\` ThemeProvider. All themes contain the following properties.
+The global theme is provided by the DataEditor by default and can be overriden by setting the \`theme\` prop. All themes contain the following properties.
 
 | Property | Type | Description |
 |---|---|----|
@@ -290,12 +289,14 @@ return <ThemeProvider theme={{
 `}
             </Highlight>
             <Wrapper height={200}>
-                <ThemeProvider
+                <DataEditor
                     theme={{
                         bgCell: "#F2F9FF",
-                    }}>
-                    <DataEditor getCellContent={getContent} columns={columns} rows={data.length} />
-                </ThemeProvider>
+                    }}
+                    getCellContent={getContent}
+                    columns={columns}
+                    rows={data.length}
+                />
             </Wrapper>
             <Marked>
                 {`### Column themes
@@ -330,12 +331,14 @@ const columns = React.useMemo<GridColumn[]>(() => {
 `}
             </Highlight>
             <Wrapper height={200}>
-                <ThemeProvider
+                <DataEditor
                     theme={{
                         bgCell: "#F2F9FF",
-                    }}>
-                    <DataEditor getCellContent={getContent} columns={themeColumns} rows={data.length} />
-                </ThemeProvider>
+                    }}
+                    getCellContent={getContent}
+                    columns={themeColumns}
+                    rows={data.length}
+                />
             </Wrapper>
             <Marked>{`### Row themes`}</Marked>
             <Highlight>
@@ -353,17 +356,15 @@ return <DataEditor {...rest} getRowThemeOverride={getRowThemeOverride} />
 `}
             </Highlight>
             <Wrapper height={200}>
-                <ThemeProvider
+                <DataEditor
                     theme={{
                         bgCell: "#F2F9FF",
-                    }}>
-                    <DataEditor
-                        getRowThemeOverride={getRowThemeOverride}
-                        getCellContent={getContent}
-                        columns={themeColumns}
-                        rows={data.length}
-                    />
-                </ThemeProvider>
+                    }}
+                    getRowThemeOverride={getRowThemeOverride}
+                    getCellContent={getContent}
+                    columns={themeColumns}
+                    rows={data.length}
+                />
             </Wrapper>
             <Marked>{`### Cell themes`}</Marked>
             <Highlight>
@@ -388,17 +389,15 @@ const getContent = React.useCallback((cell: Item): GridCell => {
 `}
             </Highlight>
             <Wrapper height={200}>
-                <ThemeProvider
+                <DataEditor
                     theme={{
                         bgCell: "#F2F9FF",
-                    }}>
-                    <DataEditor
-                        getRowThemeOverride={getRowThemeOverride}
-                        getCellContent={getContentThemed}
-                        columns={themeColumns}
-                        rows={data.length}
-                    />
-                </ThemeProvider>
+                    }}
+                    getRowThemeOverride={getRowThemeOverride}
+                    getCellContent={getContentThemed}
+                    columns={themeColumns}
+                    rows={data.length}
+                />
             </Wrapper>
         </DocWrapper>
     );

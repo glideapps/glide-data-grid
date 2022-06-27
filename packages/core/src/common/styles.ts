@@ -1,3 +1,5 @@
+import React from "react";
+
 export function makeCSSStyle(theme: Theme): Record<string, string> {
     return {
         "--gdg-accent-color": theme.accentColor,
@@ -112,4 +114,9 @@ const dataEditorBaseTheme: Theme = {
 
 export function getDataEditorTheme(): Theme {
     return dataEditorBaseTheme;
+}
+
+export const ThemeContext = React.createContext<Theme>(dataEditorBaseTheme);
+export function useTheme(): Theme {
+    return React.useContext(ThemeContext);
 }

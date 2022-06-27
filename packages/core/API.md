@@ -308,7 +308,7 @@ The `cell` is the [col, row] formatted cell which will have the focus ring drawn
 
 ## Theme
 
-The data grid uses the `Theme` provided by the styled-components `ThemeProvider`. This is used to style editors as well as the grid itself. The theme interface is flat. The data grid comes with a built in theme which it will use to fill in any missing values.
+The data grid uses the `Theme` provided to the DataEditer in the `theme` prop. This is used to style editors as well as the grid itself. The theme interface is flat. The data grid comes with a built in theme which it will use to fill in any missing values.
 
 | Property              | Type                | Description                                                                                       |
 | --------------------- | ------------------- | ------------------------------------------------------------------------------------------------- |

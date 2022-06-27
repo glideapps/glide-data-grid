@@ -1,9 +1,13 @@
-import { CustomCell, ProvideEditorCallback, CustomCellRenderer, getMiddleCenterBias } from "@glideapps/glide-data-grid";
-import { useTheme } from "styled-components";
+import {
+    CustomCell,
+    ProvideEditorCallback,
+    CustomCellRenderer,
+    getMiddleCenterBias,
+    useTheme,
+} from "@glideapps/glide-data-grid";
 import { styled } from "@linaria/react";
 import * as React from "react";
 import Select, { MenuProps, components } from "react-select";
-import type { Theme } from "@glideapps/glide-data-grid";
 
 interface CustomMenuProps extends MenuProps<any> {}
 
@@ -51,7 +55,7 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
     const [value, setValue] = React.useState(valueIn);
     const [inputValue, setInputValue] = React.useState(initialValue ?? "");
 
-    const theme = useTheme() as Theme;
+    const theme = useTheme();
 
     return (
         <Wrap>

@@ -38,8 +38,7 @@ import {
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
 import { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
-import { ThemeProvider, useTheme } from "styled-components";
-import { getDataEditorTheme, makeCSSStyle, Theme } from "../common/styles";
+import { getDataEditorTheme, makeCSSStyle, Theme, ThemeContext } from "../common/styles";
 import { DataGridRef } from "../data-grid/data-grid";
 import { getScrollBarWidth, useEventListener } from "../common/utils";
 import { CellRenderers } from "../data-grid/cells";
@@ -279,7 +278,7 @@ export interface DataEditorProps extends Props {
 
     readonly onPaste?: ((target: Item, values: readonly (readonly string[])[]) => boolean) | boolean;
 
-    readonly theme?: Theme;
+    readonly theme?: Partial<Theme>;
 }
 
 export interface DataEditorRef {
@@ -532,10 +531,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         rangeSelect
     );
 
-    const contextTheme = useTheme();
     const mergedTheme = React.useMemo(() => {
-        return { ...getDataEditorTheme(), ...contextTheme, ...theme };
-    }, [contextTheme, theme]);
+        return { ...getDataEditorTheme(), ...theme };
+    }, [theme]);
 
     const [clientSize, setClientSize] = React.useState<readonly [number, number, number]>([10, 10, 0]);
 
@@ -2816,7 +2814,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     }, [mangledCols, p.experimental?.scrollbarWidthOverride, rowHeight, rows, showTrailingBlankRow, totalHeaderHeight]);
 
     return (
-        <ThemeProvider theme={mergedTheme}>
+        <ThemeContext.Provider value={mergedTheme}>
             <DataEditorContainer
                 style={makeCSSStyle(mergedTheme)}
                 className={className}
@@ -2893,7 +2891,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     />
                 )}
             </DataEditorContainer>
-        </ThemeProvider>
+        </ThemeContext.Provider>
     );
 };
 

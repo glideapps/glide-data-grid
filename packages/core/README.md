@@ -41,7 +41,7 @@ npm i @glideapps/glide-data-grid
 You may also need to install the peer dependencies if you don't have them already:
 
 ```
-npm i lodash marked react-responsive-carousel styled-components
+npm i lodash marked react-responsive-carousel
 ```
 
 Create a new `DataEditor` wherever you need to display lots and lots of data
