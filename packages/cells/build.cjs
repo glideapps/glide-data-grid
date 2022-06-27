@@ -14,13 +14,22 @@ const shared = {
     external: Object.keys(dependencies),
 };
 
-build({
-    ...shared,
-    outfile: "dist/cjs/index.js",
-});
+async function f() {
+    await build({
+        ...shared,
+        outfile: "dist/cjs/index.js",
+        format: "cjs",
+    });
 
-build({
-    ...shared,
-    outfile: "dist/js/index.js",
-    format: "esm",
-});
+    await build({
+        ...shared,
+        outfile: "dist/js/index.js",
+        format: "esm",
+    });
+
+    fs.copyFileSync("dist/js/index.css", "dist/index.css");
+    fs.rmSync("dist/js/index.css");
+    fs.rmSync("dist/cjs/index.css");
+}
+
+f();

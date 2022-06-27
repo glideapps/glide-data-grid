@@ -15,7 +15,7 @@ import { RangeCell } from "./cells/range-cell";
 import { SpinnerCell } from "./cells/spinner-cell";
 
 import "@toast-ui/editor/dist/toastui-editor.css";
-import "@glideapps/glide-data-grid/dist/js/index.css";
+import "@glideapps/glide-data-grid/dist/index.css";
 import { DatePickerCell } from "./cells/date-picker-cell";
 
 const SimpleWrapper = styled.div`
