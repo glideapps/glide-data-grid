@@ -76,8 +76,6 @@ const DataSourceMonkey = (p: typeof props) => {
         sort: undefined,
     });
 
-    console.log("FOO", isSizedGridColumn);
-
     return (
         <div>
             <ul data-testid="columns">
