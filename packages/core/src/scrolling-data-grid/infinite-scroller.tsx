@@ -22,7 +22,7 @@ interface Props {
     readonly update: (region: Rectangle & { paddingRight: number }) => void;
 }
 
-export const ScrollRegionStyle = styled.div<{ isSafari: boolean }>`
+const ScrollRegionStyle = styled.div<{ isSafari: boolean }>`
     .dvn-scroller {
         overflow: ${p => (p.isSafari ? "scroll" : "auto")};
         transform: translate3d(0, 0, 0);

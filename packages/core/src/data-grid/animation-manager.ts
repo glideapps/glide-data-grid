@@ -7,7 +7,7 @@ export type StepCallback = (values: HoverValues) => void;
 
 const hoverTime = 80;
 
-export function easeOutCubic(x: number) {
+function easeOutCubic(x: number) {
     const x1 = x - 1;
     return x1 * x1 * x1 + 1;
 }

@@ -20,7 +20,7 @@ import { useStayOnScreen } from "./use-stay-on-screen";
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
-export interface DataGridOverlayEditorProps {
+interface DataGridOverlayEditorProps {
     readonly target: Rectangle;
     readonly cell: Item;
     readonly content: GridCell;
