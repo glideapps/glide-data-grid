@@ -240,17 +240,6 @@ export interface DataEditorProps extends Props {
 
     readonly onSelectionCleared?: () => void;
 
-    /**
-     * @deprecated Use drawCell instead. This will be removed in a future version.
-     */
-    readonly drawCustomCell?: (
-        ctx: CanvasRenderingContext2D,
-        cell: GridCell,
-        theme: Theme,
-        rect: Rectangle,
-        hoverAmount: number
-    ) => boolean;
-
     readonly drawCell?: DrawCustomCellCallback;
 
     readonly gridSelection?: GridSelection;
@@ -363,7 +352,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         validateCell: validateCellIn,
         highlightRegions: highlightRegionsIn,
         drawCell,
-        drawCustomCell,
         rangeSelect = "rect",
         columnSelect = "multi",
         rowSelect = "multi",
@@ -397,7 +385,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnResize: onColumnResizeIn,
         onColumnResizeEnd: onColumnResizeEndIn,
         onColumnResizeStart: onColumnResizeStartIn,
-        onColumnResized: onColumnResizedIn,
         ...rest
     } = p;
 
@@ -500,13 +487,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [onColumnResizeStartIn, rowMarkerOffset, columnsIn]
     );
     const onColumnResizeStart = onColumnResizeStartIn === undefined ? undefined : onColumnResizeStartInner;
-    const onColumnResizedInner = React.useCallback<NonNullable<typeof onColumnResizedIn>>(
-        (_, w, ind) => {
-            onColumnResizedIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
-        },
-        [onColumnResizedIn, rowMarkerOffset, columnsIn]
-    );
-    const onColumnResized = onColumnResizedIn === undefined ? undefined : onColumnResizedInner;
 
     const onDelete = React.useCallback<NonNullable<DataEditorProps["onDelete"]>>(
         sel => {
@@ -2629,16 +2609,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [rowMarkerOffset, verticalBorder]
     );
 
-    const drawCustomCellMangled: typeof drawCell = React.useMemo(() => {
-        if (drawCell !== undefined) {
-            return drawCell;
-        } else if (drawCustomCell !== undefined) {
-            return a => drawCustomCell(a.ctx, a.cell, a.theme, a.rect, a.hoverAmount);
-        }
-
-        return undefined;
-    }, [drawCell, drawCustomCell]);
-
     const renameGroupNode = React.useMemo(() => {
         if (renameGroup === undefined || canvasRef.current === null) return null;
         const { bounds, group } = renameGroup;
@@ -2832,7 +2802,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     cellYOffset={cellYOffset}
                     accessibilityHeight={visibleRegion.height}
                     columns={mangledCols}
-                    drawCustomCell={drawCustomCellMangled}
+                    drawCustomCell={drawCell}
                     disabledRows={disabledRows}
                     freezeColumns={mangledFreezeColumns}
                     lockColumns={rowMarkerOffset}
@@ -2852,7 +2822,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onColumnResize={onColumnResize}
                     onColumnResizeEnd={onColumnResizeEnd}
                     onColumnResizeStart={onColumnResizeStart}
-                    onColumnResized={onColumnResized}
                     onCellFocused={onCellFocused}
                     onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}
                     onDragStart={onDragStartImpl}

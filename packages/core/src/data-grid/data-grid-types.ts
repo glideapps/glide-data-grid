@@ -402,25 +402,13 @@ export interface DrilldownCell extends BaseGridCell {
 export interface BooleanCell extends BaseGridCell {
     readonly kind: GridCellKind.Boolean;
     readonly data: boolean | BooleanEmpty | BooleanIndeterminate;
-    /**
-     * @deprecated Does nothing.
-     */
-    readonly showUnchecked?: boolean;
-    /**
-     * @deprecated Prefer readonly.
-     */
-    readonly allowEdit?: boolean;
     readonly readonly?: boolean;
     readonly allowOverlay: false;
 }
 
 // Can be written more concisely, not easier to read if more concise.
 export function booleanCellIsEditable(cell: BooleanCell): boolean {
-    if (cell.readonly === true) return false;
-    if (cell.readonly === false) return true;
-    if (cell.allowEdit === true) return true;
-    if (cell.allowEdit === false) return false;
-    return true;
+    return cell.readonly ?? true;
 }
 
 export interface RowIDCell extends BaseGridCell {

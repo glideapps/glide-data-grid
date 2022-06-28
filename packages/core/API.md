@@ -170,12 +170,6 @@ Most data grids will want to set the majority of these props one way or another.
 | [onDragStart](#isdraggable)   | Emitted when a drag starts and `isDraggable` is true.                                                                           |
 | [experimental](#experimental) | Contains experimental flags. Nothing in here is considered stable API and is mostly used for features that are not yet settled. |
 
-## Deprecated
-
-| Name           | Description    |
-| -------------- | -------------- |
-| drawCustomCell | Use `drawCell` |
-
 # Keybindings
 
 | Key Combo                    | Default | Flag                | Description                                                                              |
