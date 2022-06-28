@@ -281,11 +281,11 @@ If an option is missing from any theme it will be filled in with the default the
             </Marked>
             <Highlight>
                 {`
-return <ThemeProvider theme={{
-    bgCell: "#F2F9FF"
-}}>
-    <DataEditor getCellContent={getContent} columns={columns} rows={data.length} />
-</ThemeProvider>
+return <DataEditor 
+        theme={{
+          bgCell: "#F2F9FF"
+        }} 
+        getCellContent={getContent} columns={columns} rows={data.length} />
 `}
             </Highlight>
             <Wrapper height={200}>
