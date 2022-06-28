@@ -423,7 +423,6 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 maxColumnWidth={p.maxColumnWidth}
                 onCellFocused={p.onCellFocused}
                 onColumnMoved={p.onColumnMoved}
-                onColumnResized={p.onColumnResized}
                 onColumnResize={p.onColumnResize}
                 onColumnResizeStart={p.onColumnResizeStart}
                 onColumnResizeEnd={p.onColumnResizeEnd}
