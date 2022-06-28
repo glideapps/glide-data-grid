@@ -5,7 +5,7 @@ const { dependencies } = require("./package.json");
 const shared = {
     entryPoints: ["src/index.ts"],
     bundle: true,
-    minify: true,
+    minify: false,
     plugins: [
         linaria({
             sourceMap: false,
