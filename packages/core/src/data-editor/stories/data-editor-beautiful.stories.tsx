@@ -1116,7 +1116,8 @@ export const DrawCustomCells: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
-                drawCustomCell={(ctx, cell, _theme, rect) => {
+                drawCell={args => {
+                    const { cell, rect, ctx } = args;
                     if (cell.kind !== GridCellKind.Text) return false;
 
                     const hasX = cell.displayData.toLowerCase().includes("x"); // all my x's live in texas
@@ -1650,7 +1651,7 @@ const hotdogStand = {
 export const ThemeSupport: React.VFC = () => {
     const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
-    const [theme, setTheme] = React.useState({});
+    const [theme, setTheme] = React.useState<Partial<Theme>>({});
 
     const [numRows, setNumRows] = React.useState(1000);
 
