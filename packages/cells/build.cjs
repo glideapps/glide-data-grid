@@ -8,7 +8,7 @@ const shared = {
     minify: true,
     plugins: [
         linaria({
-            sourceMap: true,
+            sourceMap: false,
         }),
     ],
     external: Object.keys(dependencies),

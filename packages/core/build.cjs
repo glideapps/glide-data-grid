@@ -9,7 +9,7 @@ const shared = {
     minify: false,
     plugins: [
         linaria({
-            sourceMap: true,
+            sourceMap: false,
         }),
     ],
     external: Object.keys(dependencies).concat(Object.keys(peerDependencies)),

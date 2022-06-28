@@ -408,7 +408,7 @@ export interface BooleanCell extends BaseGridCell {
 
 // Can be written more concisely, not easier to read if more concise.
 export function booleanCellIsEditable(cell: BooleanCell): boolean {
-    return cell.readonly ?? true;
+    return !(cell.readonly ?? false);
 }
 
 export interface RowIDCell extends BaseGridCell {
