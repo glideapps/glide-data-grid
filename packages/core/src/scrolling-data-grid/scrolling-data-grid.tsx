@@ -1,7 +1,7 @@
 import * as React from "react";
 import { styled } from "@linaria/react";
 import DataGridDnd, { DataGridDndProps } from "../data-grid-dnd/data-grid-dnd";
-import { Rectangle } from "../data-grid/data-grid-types";
+import type { Rectangle } from "../data-grid/data-grid-types";
 import { InfiniteScroller } from "./infinite-scroller";
 import clamp from "lodash/clamp";
 

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Theme } from "../common/styles";
+import type { Theme } from "../common/styles";
 import ImageWindowLoader from "../common/image-window-loader";
 import {
     computeBounds,

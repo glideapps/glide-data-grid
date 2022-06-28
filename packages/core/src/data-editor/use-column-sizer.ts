@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Theme } from "../common/styles";
+import type { Theme } from "../common/styles";
 import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { CellRenderers } from "../data-grid/cells";
 import {

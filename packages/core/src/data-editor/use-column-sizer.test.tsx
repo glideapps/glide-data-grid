@@ -1,8 +1,8 @@
 import { renderHook } from "@testing-library/react-hooks";
 import { GridCell, GridCellKind, GridColumn, Rectangle } from "..";
 import { getDataEditorTheme } from "../common/styles";
-import { DataGridSearchProps } from "../data-grid-search/data-grid-search";
-import { CellArray } from "../data-grid/data-grid-types";
+import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
+import type { CellArray } from "../data-grid/data-grid-types";
 import { useColumnSizer } from "./use-column-sizer";
 
 const COLUMNS: GridColumn[] = [

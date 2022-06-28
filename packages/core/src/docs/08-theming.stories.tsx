@@ -5,7 +5,7 @@ import { DataEditor } from "../data-editor/data-editor";
 
 import { SimpleThemeWrapper } from "../stories/story-utils";
 import { DocWrapper, Highlight, Marked, Wrapper } from "./doc-wrapper";
-import { Theme } from "../common/styles";
+import type { Theme } from "../common/styles";
 
 export default {
     title: "Glide-Data-Grid/Docs",

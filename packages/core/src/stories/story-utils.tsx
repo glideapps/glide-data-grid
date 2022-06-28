@@ -1,6 +1,6 @@
 import * as React from "react";
 import { styled } from "@linaria/react";
-import { StoryContext } from "@storybook/addons";
+import type { StoryContext } from "@storybook/addons";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 interface Props {

@@ -15,7 +15,7 @@ import {
     Rectangle,
 } from "../data-grid/data-grid-types";
 import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style";
-import { OverlayImageEditorProps } from "./private/image-overlay-editor";
+import type { OverlayImageEditorProps } from "./private/image-overlay-editor";
 import { useStayOnScreen } from "./use-stay-on-screen";
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;

@@ -11,8 +11,8 @@ import {
     isSizedGridColumn,
     Item,
 } from "..";
-import { DataEditorRef } from "./data-editor";
-import { SizedGridColumn } from "../data-grid/data-grid-types";
+import type { DataEditorRef } from "./data-editor";
+import type { SizedGridColumn } from "../data-grid/data-grid-types";
 
 jest.mock("react-virtualized-auto-sizer", () => {
     return {

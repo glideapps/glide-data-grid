@@ -1,9 +1,10 @@
-import { Theme } from "../common/styles";
+import type { Theme } from "../common/styles";
 import { assertNever, proveType } from "../common/support";
 import has from "lodash/has";
-import React, { CSSProperties } from "react";
-import ImageWindowLoader from "../common/image-window-loader";
-import { SpriteManager } from "./data-grid-sprites";
+import type React from "react";
+import type { CSSProperties } from "react";
+import type ImageWindowLoader from "../common/image-window-loader";
+import type { SpriteManager } from "./data-grid-sprites";
 
 // Thoughts:
 // rows/columns are called out as selected, but when selected they must also be added

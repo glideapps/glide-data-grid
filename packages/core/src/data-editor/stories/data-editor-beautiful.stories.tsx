@@ -22,8 +22,8 @@ import { styled } from "@linaria/react";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 import { useEventListener } from "../../common/utils";
 import { IBounds, useLayer } from "react-laag";
-import { SpriteMap } from "../../data-grid/data-grid-sprites";
-import { DataEditorRef, Theme } from "../..";
+import type { SpriteMap } from "../../data-grid/data-grid-sprites";
+import type { DataEditorRef, Theme } from "../..";
 import range from "lodash/range";
 import {
     useMockDataGenerator,

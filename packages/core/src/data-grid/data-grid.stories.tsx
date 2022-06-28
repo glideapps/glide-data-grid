@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { StoryFn, StoryContext } from "@storybook/addons";
+import type { StoryFn, StoryContext } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import DataGrid from "./data-grid";
 import { CompactSelection, GridCellKind, GridSelection } from "./data-grid-types";

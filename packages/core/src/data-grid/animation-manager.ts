@@ -1,5 +1,5 @@
 import clamp from "lodash/clamp";
-import { Item } from "./data-grid-types";
+import type { Item } from "./data-grid-types";
 
 type StateItem = { item: Item; hoverAmount: number };
 export type HoverValues = readonly Readonly<StateItem>[];

@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach } from "jest-without-globals";
 import * as React from "react";
 import { render, fireEvent, screen, act } from "@testing-library/react";
 import { DataEditor, DataEditorProps, GridCell, GridCellKind, GridSelection, Item } from "..";
-import { DataEditorRef } from "./data-editor";
+import type { DataEditorRef } from "./data-editor";
 import { CompactSelection } from "../data-grid/data-grid-types";
 
 jest.mock("react-virtualized-auto-sizer", () => {
