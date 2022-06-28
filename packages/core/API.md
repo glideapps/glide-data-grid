@@ -304,39 +304,39 @@ The `cell` is the [col, row] formatted cell which will have the focus ring drawn
 
 The data grid uses the `Theme` provided to the DataEditer in the `theme` prop. This is used to style editors as well as the grid itself. The theme interface is flat. The data grid comes with a built in theme which it will use to fill in any missing values.
 
-| Property              | Type                | Description                                                                                       |
-| --------------------- | ------------------- | ------------------------------------------------------------------------------------------------- |
-| accentColor           | string              | The primary accent color of the grid. This will show up in focus rings and selected rows/headers. |
-| accentFg              | string              | A foreground color which works well on top of the accent color.                                   |
-| accentLight           | string              | A lighter version of the accent color used to hint selection.                                     |
-| textDark              | string              | The standard text color.                                                                          |
-| textMedium            | string              | A lighter text color used for non-editable data in some cases.                                    |
-| textLight             | string              | An even lighter text color                                                                        |
-| textBubble            | string              | The text color used in bubbles                                                                    |
-| bgIconHeader          | string              | The background color for header icons                                                             |
-| fgIconHeader          | string              | The foreground color for header icons                                                             |
-| textHeader            | string              | The header text color                                                                             |
-| textGroupHeader       | string \| undefined | The group header text color, if none provided the `textHeader` is used instead.                   |
-| textHeaderSelected    | string              | The text color used for selected headers                                                          |
-| bgCell                | string              | The primary background color of the data grid.                                                    |
-| bgCellMedium          | string              | Used for disabled or otherwise off colored cells.                                                 |
-| bgHeader              | string              | The header background color                                                                       |
-| bgHeaderHasFocus      | string              | The header background color when its column contains the selected cell                            |
-| bgHeaderHovered       | string              | The header background color when it is hovered                                                    |
-| bgBubble              | string              | The background color used in bubbles                                                              |
-| bgBubbleSelected      | string              | The background color used in bubbles when the cell is selected                                    |
-| bgSearchResult        | string              | The background color used for cells which match the search string                                 |
-| borderColor           | string              | The color of all vertical borders and horizontal borders if a horizontal override is not provided |
-| horizontalBorderColor | string \| undefined | The horizontal border color override                                                              |
-| drilldownBorder       | string              | The ring color of a drilldown cell                                                                |
-| linkColor             | string              | What color to render links                                                                        |
-| cellHorizontalPadding | number              | The internal horizontal padding size of a cell.                                                   |
-| cellVerticalPadding   | number              | The internal vertical padding size of a cell.                                                     |
-| headerFontStyle       | string              | The font style of the header. e.g. `bold 15px`                                                    |
-| baseFontStyle         | string              | The font style used for cells by default, e.g. `13px`                                             |
-| fontFamily            | string              | The font family used by the data grid.                                                            |
-| editorFontSize        | string              | The font size used by overlay editors.                                                            |
-| lineHeight            | number              | A unitless scaler which defines the height of a line of text relative to the ink size.            |
+| Property              | Type                | CSS Variable                  | Description                                                                                       |
+| --------------------- | ------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| accentColor           | string              | --gdg-accent-color            | The primary accent color of the grid. This will show up in focus rings and selected rows/headers. |
+| accentFg              | string              | --gdg-accent-fg               | A foreground color which works well on top of the accent color.                                   |
+| accentLight           | string              | --gdg-accent-light            | A lighter version of the accent color used to hint selection.                                     |
+| textDark              | string              | --gdg-text-dark               | The standard text color.                                                                          |
+| textMedium            | string              | --gdg-text-medium             | A lighter text color used for non-editable data in some cases.                                    |
+| textLight             | string              | --gdg-text-light              | An even lighter text color                                                                        |
+| textBubble            | string              | --gdg-text-bubble             | The text color used in bubbles                                                                    |
+| bgIconHeader          | string              | --gdg-bg-icon-header          | The background color for header icons                                                             |
+| fgIconHeader          | string              | --gdg-fg-icon-header          | The foreground color for header icons                                                             |
+| textHeader            | string              | --gdg-text-header             | The header text color                                                                             |
+| textGroupHeader       | string \| undefined | --gdg-text-group-header       | The group header text color, if none provided the `textHeader` is used instead.                   |
+| textHeaderSelected    | string              | --gdg-text-header-selected    | The text color used for selected headers                                                          |
+| bgCell                | string              | --gdg-bg-cell                 | The primary background color of the data grid.                                                    |
+| bgCellMedium          | string              | --gdg-bg-cell-medium          | Used for disabled or otherwise off colored cells.                                                 |
+| bgHeader              | string              | --gdg-bg-header               | The header background color                                                                       |
+| bgHeaderHasFocus      | string              | --gdg-bg-header-has           | The header background color when its column contains the selected cell                            |
+| bgHeaderHovered       | string              | --gdg-bg-header-hovered       | The header background color when it is hovered                                                    |
+| bgBubble              | string              | --gdg-bg-bubble               | The background color used in bubbles                                                              |
+| bgBubbleSelected      | string              | --gdg-bg-bubble-selected      | The background color used in bubbles when the cell is selected                                    |
+| bgSearchResult        | string              | --gdg-bg-search-result        | The background color used for cells which match the search string                                 |
+| borderColor           | string              | --gdg-border-color            | The color of all vertical borders and horizontal borders if a horizontal override is not provided |
+| horizontalBorderColor | string \| undefined | --gdg-horizontal-border-color | The horizontal border color override                                                              |
+| drilldownBorder       | string              | --gdg-drilldown-border        | The ring color of a drilldown cell                                                                |
+| linkColor             | string              | --gdg-link-color              | What color to render links                                                                        |
+| cellHorizontalPadding | number              | --gdg-cell-horizontal-padding | The internal horizontal padding size of a cell.                                                   |
+| cellVerticalPadding   | number              | --gdg-cell-vertical-padding   | The internal vertical padding size of a cell.                                                     |
+| headerFontStyle       | string              | --gdg-header-font-style       | The font style of the header. e.g. `bold 15px`                                                    |
+| baseFontStyle         | string              | --gdg-base-font-style         | The font style used for cells by default, e.g. `13px`                                             |
+| fontFamily            | string              | --gdg-font-family             | The font family used by the data grid.                                                            |
+| editorFontSize        | string              | --gdg-editor-font-size        | The font size used by overlay editors.                                                            |
+| lineHeight            | number              | None                          | A unitless scaler which defines the height of a line of text relative to the ink size.            |
 
 ---
 
