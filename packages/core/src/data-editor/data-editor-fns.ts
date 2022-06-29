@@ -207,6 +207,8 @@ export function copyToClipboard(
     columnIndexes: readonly number[],
     e?: ClipboardEvent
 ) {
+    e?.preventDefault();
+
     function escape(str: string): string {
         if (/[\n"\t]/.test(str)) {
             str = `"${str.replace(/"/g, '""')}"`;
@@ -298,7 +300,6 @@ export function copyToClipboard(
                 // This might fail if we had to await the thunk
                 e.clipboardData.setData("text/plain", str);
                 e.clipboardData.setData("text/html", `<table>${rootEl.outerHTML}</table>`);
-                e.preventDefault();
             } catch {
                 void window.navigator.clipboard?.writeText(str);
             }
