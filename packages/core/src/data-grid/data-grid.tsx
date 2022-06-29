@@ -687,6 +687,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     );
 
     const downTime = React.useRef(0);
+    const downPosition = React.useRef<Item>();
     const onMouseDownImpl = React.useCallback(
         (ev: MouseEvent | TouchEvent) => {
             const canvas = ref.current;
@@ -709,6 +710,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
+            downPosition.current = args.location;
 
             if (args.isTouch) {
                 downTime.current = Date.now();
@@ -776,8 +778,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 const [col] = args.location;
                 const headerBounds = isOverHeaderMenu(canvas, col, clientX, clientY);
                 if (headerBounds !== undefined) {
-                    if (args.button === 0) {
+                    if (args.button === 0 && downPosition.current?.[0] === col && downPosition.current?.[1] === -1) {
                         onHeaderMenuClick?.(col, headerBounds);
+                    } else {
+                        // force outside so that click will not process
+                        onMouseUp(args, true);
                     }
                     return;
                 }

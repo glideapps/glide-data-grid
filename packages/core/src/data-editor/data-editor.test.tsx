@@ -3266,6 +3266,48 @@ describe("data-editor", () => {
         );
     });
 
+    test("Does not emits header menu click when move", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                columns={basicProps.columns.map(c => ({ ...c, hasMenu: true }))}
+                onHeaderMenuClick={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseMove(canvas, {
+            clientX: 300, // Col B
+            clientY: 16 + 200, // Not Header
+        });
+
+        await new Promise(r => window.setTimeout(r, 100));
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 16 + 200, // Not Header
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        expect(spy).not.toHaveBeenCalled();
+    });
+
     test("Close overlay with enter key", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
