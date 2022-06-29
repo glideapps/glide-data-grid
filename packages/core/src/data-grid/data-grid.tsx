@@ -1313,7 +1313,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     );
 
     const stickyShadow = React.useMemo(() => {
-        if (!mappedColumns[0].sticky) {
+        if (!mappedColumns[0]?.sticky) {
             return null;
         }
         const stickyX = getStickyWidth(mappedColumns, dragAndDropState);
