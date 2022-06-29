@@ -310,6 +310,7 @@ export interface BaseGridCell {
     readonly themeOverride?: Partial<Theme>;
     readonly span?: Item;
     readonly contentAlign?: "left" | "right" | "center";
+    readonly cursor?: CSSProperties["cursor"];
 }
 
 export interface LoadingCell extends BaseGridCell {

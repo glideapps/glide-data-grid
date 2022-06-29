@@ -607,12 +607,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const groupHeaderHovered = hCol !== undefined && hRow === -2;
     let clickableInnerCellHovered = false;
     let editableBoolHovered = false;
+    let cursorOverride: React.CSSProperties["cursor"] | undefined = undefined;
     if (hCol !== undefined && hRow !== undefined && hRow > -1) {
         const cell = getCellContent([hCol, hRow]);
         clickableInnerCellHovered =
             cell.kind === InnerGridCellKind.NewRow ||
             (cell.kind === InnerGridCellKind.Marker && cell.markerKind !== "number");
         editableBoolHovered = cell.kind === GridCellKind.Boolean && booleanCellIsEditable(cell);
+        cursorOverride = cell.cursor;
     }
     const canDrag = hoveredOnEdge ?? false;
     const cursor = isDragging
@@ -621,6 +623,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         ? "col-resize"
         : overFill || isFilling
         ? "crosshair"
+        : cursorOverride !== undefined
+        ? cursorOverride
         : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
         ? "pointer"
         : "default";
