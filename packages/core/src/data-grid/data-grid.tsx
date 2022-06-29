@@ -1366,6 +1366,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 right: 0,
                 height: height,
                 opacity: opacityY,
+                pointerEvents: "none",
                 transition: !smoothScrollY ? "opacity 0.2s" : undefined,
                 boxShadow: "inset 0 13px 10px -13px rgba(0, 0, 0, 0.2)",
             };
