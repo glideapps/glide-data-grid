@@ -775,6 +775,46 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith(1, expect.anything());
     });
 
+    test("Emits group header clicked on touch", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                columns={basicProps.columns.map(c => ({ ...c, group: "Main" }))}
+                rowMarkers="both"
+                onGroupHeaderClicked={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.touchStart(canvas, {
+            touches: [
+                {
+                    clientX: 300, // Col B
+                    clientY: 16, // Group header
+                },
+            ],
+        });
+
+        fireEvent.touchEnd(canvas, {
+            changedTouches: [
+                {
+                    clientX: 300, // Col B
+                    clientY: 16, // Group header
+                },
+            ],
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(1, expect.objectContaining({ location: [2, -2] }));
+    });
+
     test("Emits item hover on correct location", async () => {
         const spy = jest.fn();
 

@@ -1404,6 +1404,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return false;
             };
 
+            const clickLocation = args.location[0] - rowMarkerOffset;
             if (args.isTouch) {
                 const vr = visibleRegionRef.current;
                 const touchVr = touchDownArgs.current;
@@ -1413,8 +1414,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
                 // take care of context menus first if long pressed item is already selected
                 if (args.isLongTouch === true) {
-                    const clickLocation = args.location[0] - rowMarkerOffset;
-
                     if (
                         args.kind === "cell" &&
                         gridSelection?.current?.cell[0] === col &&
@@ -1442,6 +1441,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (!handleMaybeClick(args)) {
                         handleSelect(args);
                     }
+                } else if (args.kind === "group-header") {
+                    onGroupHeaderClicked?.(clickLocation, { ...args, preventDefault });
                 } else {
                     handleSelect(args);
                 }
@@ -1449,7 +1450,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             if (args.kind === "header") {
-                const clickLocation = args.location[0] - rowMarkerOffset;
                 if (clickLocation < 0) {
                     return;
                 }
@@ -1464,7 +1464,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             if (args.kind === "group-header") {
-                const clickLocation = args.location[0] - rowMarkerOffset;
                 if (clickLocation < 0) {
                     return;
                 }
