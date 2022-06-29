@@ -47,6 +47,7 @@ import { AnimationManager, StepCallback } from "./animation-manager";
 import { browserIsFirefox } from "../common/browser-detect";
 import { CellRenderers } from "./cells";
 import { useAnimationQueue } from "./use-animation-queue";
+import { clamp } from "lodash";
 
 export interface DataGridProps {
     readonly width: number;
@@ -63,6 +64,12 @@ export interface DataGridProps {
     readonly freezeColumns: number;
     readonly lastRowSticky: boolean;
     readonly firstColAccessible: boolean;
+
+    readonly fixedShadow?: {
+        readonly x: boolean;
+        readonly y: boolean;
+    };
+
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
     readonly isDragging: boolean;
@@ -183,6 +190,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         selection,
         freezeColumns,
         lastRowSticky,
+        fixedShadow,
         onMouseDown,
         onMouseUp,
         onMouseMoveRaw,
@@ -1316,20 +1324,69 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         if (!mappedColumns[0]?.sticky) {
             return null;
         }
+
+        const fixedShadowX = fixedShadow?.x ?? true;
+        const fixedShadowY = fixedShadow?.y ?? true;
+
+        let styleX: React.CSSProperties | undefined;
+        let styleY: React.CSSProperties | undefined;
+
         const stickyX = getStickyWidth(mappedColumns, dragAndDropState);
-        const props: React.CSSProperties = {
-            position: "absolute",
-            top: 0,
-            left: stickyX,
-            width: width - stickyX,
-            height: height,
-            opacity: cellXOffset > freezeColumns || translateX !== 0 ? 1 : 0,
-            pointerEvents: "none",
-            boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
-            transition: "opacity 150ms",
-        };
-        return <div style={props} />;
-    }, [cellXOffset, dragAndDropState, freezeColumns, mappedColumns, height, width, translateX]);
+
+        if (fixedShadowX) {
+            const opacityX =
+                freezeColumns === 0 || !fixedShadowX
+                    ? 0
+                    : cellXOffset > freezeColumns
+                    ? 1
+                    : clamp(-translateX / 100, 0, 1);
+
+            styleX = {
+                position: "absolute",
+                top: 0,
+                left: stickyX,
+                width: width - stickyX,
+                bottom: 0,
+                opacity: opacityX,
+                pointerEvents: "none",
+                boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
+            };
+        }
+
+        if (fixedShadowY) {
+            const absoluteOffsetY = -cellYOffset * 32 + translateY;
+            const opacityY = clamp(-absoluteOffsetY / 100, 0, 1);
+
+            styleY = {
+                position: "absolute",
+                top: totalHeaderHeight,
+                left: 0,
+                right: 0,
+                height: height,
+                opacity: opacityY,
+                boxShadow: "inset 0 13px 10px -13px rgba(0, 0, 0, 0.2)",
+            };
+        }
+
+        return (
+            <>
+                {fixedShadowX && <div id="shadow-x" style={styleX} />}
+                {fixedShadowY && <div id="shadow-y" style={styleY} />}
+            </>
+        );
+    }, [
+        mappedColumns,
+        dragAndDropState,
+        freezeColumns,
+        fixedShadow,
+        cellXOffset,
+        translateX,
+        totalHeaderHeight,
+        width,
+        cellYOffset,
+        translateY,
+        height,
+    ]);
 
     const overlayStyle = React.useMemo<React.CSSProperties>(
         () => ({
