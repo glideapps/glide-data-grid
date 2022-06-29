@@ -1,4 +1,4 @@
-import ImageWindowLoader from "../common/image-window-loader";
+import type ImageWindowLoader from "../common/image-window-loader";
 import type {
     GridSelection,
     DrawHeaderCallback,
@@ -13,7 +13,7 @@ import type {
 } from "./data-grid-types";
 import groupBy from "lodash/groupBy";
 import { GridCellKind, isInnerOnlyCell } from "./data-grid-types";
-import { HoverValues } from "./animation-manager";
+import type { HoverValues } from "./animation-manager";
 import {
     getEffectiveColumns,
     getStickyWidth,
@@ -26,11 +26,11 @@ import {
     computeBounds,
     getMiddleCenterBias,
 } from "./data-grid-lib";
-import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
-import { Theme } from "../common/styles";
+import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
+import type { Theme } from "../common/styles";
 import { blend, withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
-import { PrepResult } from "./cells/cell-types";
+import type { PrepResult } from "./cells/cell-types";
 import { deepEqual } from "../common/support";
 
 // Future optimization opportunities

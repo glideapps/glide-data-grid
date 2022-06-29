@@ -1,4 +1,4 @@
-import { Theme } from "../common/styles";
+import type { Theme } from "../common/styles";
 import {
     DrilldownCellData,
     Item,
@@ -12,10 +12,10 @@ import {
 } from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
-import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
+import type { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
 import { clearMultilineCache, splitMultilineText } from "./multi-line-layout";
-import { DrawArgs } from "../data-editor/custom-cell-draw-args";
+import type { DrawArgs } from "../data-editor/custom-cell-draw-args";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;

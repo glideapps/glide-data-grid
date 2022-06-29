@@ -11,13 +11,7 @@ export function clearMultilineCache() {
     hyperMaps.clear();
 }
 
-export function backProp(
-    text: string,
-    realWidth: number,
-    keyMap: Map<string, number>,
-    temperature: number,
-    avgSize: number
-) {
+function backProp(text: string, realWidth: number, keyMap: Map<string, number>, temperature: number, avgSize: number) {
     let guessWidth = 0;
     const contribMap: Record<string, number> = {};
     for (const char of text) {

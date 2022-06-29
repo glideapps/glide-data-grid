@@ -1,5 +1,5 @@
 import { assertNever } from "../common/support";
-import { DataGridSearchProps } from "../data-grid-search/data-grid-search";
+import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import {
     BooleanEmpty,
     BooleanIndeterminate,

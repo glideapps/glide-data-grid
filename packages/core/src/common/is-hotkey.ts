@@ -1,4 +1,4 @@
-import { GridKeyEventArgs } from "../data-grid/data-grid-types";
+import type { GridKeyEventArgs } from "../data-grid/data-grid-types";
 import { browserIsOSX } from "./browser-detect";
 
 // brain dead syntax, find your deps, and make buggy replacements with 5 times the effort

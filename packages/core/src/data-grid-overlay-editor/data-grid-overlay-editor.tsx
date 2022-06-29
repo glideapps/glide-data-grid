@@ -1,9 +1,8 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { ThemeProvider } from "styled-components";
 
 import ClickOutsideContainer from "../click-outside-container/click-outside-container";
-import { makeCSSStyle, Theme } from "../common/styles";
+import { makeCSSStyle, Theme, ThemeContext } from "../common/styles";
 import { CellRenderers } from "../data-grid/cells";
 import {
     EditableGridCell,
@@ -16,12 +15,12 @@ import {
     Rectangle,
 } from "../data-grid/data-grid-types";
 import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style";
-import { OverlayImageEditorProps } from "./private/image-overlay-editor";
+import type { OverlayImageEditorProps } from "./private/image-overlay-editor";
 import { useStayOnScreen } from "./use-stay-on-screen";
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
-export interface DataGridOverlayEditorProps {
+interface DataGridOverlayEditorProps {
     readonly target: Rectangle;
     readonly cell: Item;
     readonly content: GridCell;
@@ -222,8 +221,12 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         classWrap += " invalid";
     }
 
+    if (pad) {
+        classWrap += " pad";
+    }
+
     const portal = createPortal(
-        <ThemeProvider theme={theme}>
+        <ThemeContext.Provider value={theme}>
             <ClickOutsideContainer style={makeCSSStyle(theme)} className={className} onClickOutside={onClickOutside}>
                 <DataGridOverlayEditorStyle
                     ref={ref}
@@ -231,14 +234,16 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                     className={classWrap}
                     style={styleOverride}
                     as={useLabel === true ? "label" : undefined}
-                    targetRect={target}
-                    pad={pad}>
+                    targetX={target.x}
+                    targetY={target.y}
+                    targetWidth={target.width}
+                    targetHeight={target.height}>
                     <div className="clip-region" onKeyDown={customEditor === undefined ? undefined : onKeyDownCustom}>
                         {editor}
                     </div>
                 </DataGridOverlayEditorStyle>
             </ClickOutsideContainer>
-        </ThemeProvider>,
+        </ThemeContext.Provider>,
         portalElement
     );
 

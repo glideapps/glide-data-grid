@@ -1,6 +1,6 @@
 import * as React from "react";
 
-export function useRefState(): [HTMLElement | undefined, React.RefCallback<HTMLElement | null>] {
+function useRefState(): [HTMLElement | undefined, React.RefCallback<HTMLElement | null>] {
     const [refState, setRefState] = React.useState<HTMLElement | null>();
     return [refState ?? undefined, setRefState];
 }

@@ -3,7 +3,7 @@ import MarkdownDiv from "../../markdown-div/markdown-div";
 import GrowingEntry from "../../growing-entry/growing-entry";
 import { MarkdownOverlayEditorStyle } from "./markdown-overlay-editor-style";
 import { EditPencil, Checkmark } from "../../common/utils";
-import { Rectangle } from "../../data-grid/data-grid-types";
+import type { Rectangle } from "../../data-grid/data-grid-types";
 
 interface Props {
     readonly targetRect: Rectangle;
@@ -29,7 +29,7 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
 
     if (editMode) {
         return (
-            <MarkdownOverlayEditorStyle targetRect={targetRect}>
+            <MarkdownOverlayEditorStyle targetWidth={targetRect.width}>
                 <GrowingEntry
                     autoFocus={true}
                     highlight={false}
@@ -48,7 +48,7 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
         );
     }
     return (
-        <MarkdownOverlayEditorStyle targetRect={targetRect}>
+        <MarkdownOverlayEditorStyle targetWidth={targetRect.width}>
             <MarkdownDiv contents={markdown} createNode={createNode} />
             {!readonly && (
                 <>

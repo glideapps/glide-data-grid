@@ -3,7 +3,7 @@ import * as React from "react";
 import UriOverlayEditor from "../../data-grid-overlay-editor/private/uri-overlay-editor";
 import { drawTextCell, prepTextCell } from "../data-grid-lib";
 import { GridCellKind, UriCell } from "../data-grid-types";
-import { InternalCellRenderer } from "./cell-types";
+import type { InternalCellRenderer } from "./cell-types";
 
 export const uriCellRenderer: InternalCellRenderer<UriCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",

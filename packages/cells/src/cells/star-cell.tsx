@@ -1,6 +1,6 @@
 import { CustomCell, Item, CustomCellRenderer } from "@glideapps/glide-data-grid";
 import * as React from "react";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 
 interface StarCellProps {
     readonly kind: "star-cell";

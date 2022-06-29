@@ -4,7 +4,7 @@ import { GridCellKind, ImageCell, Rectangle } from "../data-grid-types";
 import { imageCellRenderer } from "./image-cell";
 import * as React from "react";
 import noop from "lodash/noop";
-import { ImageEditorType } from "./cell-types";
+import type { ImageEditorType } from "./cell-types";
 import { getDefaultTheme } from "../..";
 
 function getMockEditorTarget(): Rectangle {

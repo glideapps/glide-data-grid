@@ -1,8 +1,17 @@
 <h1 align="center">
-  <img src="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/icon.png" width="224px"/><br/>
+  <img src="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/icon.png" width="224px"/><br/>
   <b>Glide Data Grid</b>
 </h1>
-<p align="center">A relatively small HTML5 Canvas based data editor supporting <b>millions</b> of rows, <b>rapid</b> updating, and fully <b>native scrolling</b>. We built <a href="https://grid.glideapps.com" target="_blank">Data Grid</a> as the basis for the <a href="https://docs.glideapps.com/all/reference/data-editor/introduction-to-the-data-editor" target="_blank">Glide Data Editor</a>.</p>
+<p align="center">A canvas-based data grid, supporting <b>millions</b> of rows, <b>rapid</b> updating, and <b>native scrolling</b>.</p>
+
+<p align="center">Built as the basis for the <a href="https://www.glideapps.com/data-editor" target="_blank">Glide Data Editor</a>. <a href="https://www.glideapps.com/jobs#open-positions" target="_blank">We're hiring</a>.</p>
+
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/data-grid-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/data-grid.png">
+  <img alt="Glide Data Grid with sample data" src="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/data-grid.png">
+</picture>
 
 [![Version](https://img.shields.io/npm/v/@glideapps/glide-data-grid?color=blue&label=latest&style=for-the-badge)](https://github.com/glideapps/glide-data-grid/releases)
 [![React 16+](https://img.shields.io/badge/React-16+-00ADD8?style=for-the-badge&logo=react)](https://reactjs.org)
@@ -11,11 +20,9 @@
 [![License](https://img.shields.io/github/license/glideapps/glide-data-grid?color=red&style=for-the-badge)](https://github.com/glideapps/glide-data-grid/blob/main/LICENSE)
 [![Made By Glide](https://img.shields.io/badge/❤_Made_by-Glide-11CCE5?style=for-the-badge&logo=none)](https://www.glideapps.com/jobs)
 
-![Data Grid](https://raw.githubusercontent.com/glideapps/glide-data-grid/master/data-grid.jpg)
-
 # 👩‍💻 Demo and features
 
-Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-data-grid)
+Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-data-grid).
 
 ## Features
 
@@ -34,20 +41,26 @@ Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-d
 
 First make sure you are using React 16 or greater. Then install the data grid:
 
-```
+```shell
 npm i @glideapps/glide-data-grid
 ```
 
 You may also need to install the peer dependencies if you don't have them already:
 
-```
-npm i lodash marked react-responsive-carousel styled-components
+```shell
+npm i lodash marked react-responsive-carousel
 ```
 
 Create a new `DataEditor` wherever you need to display lots and lots of data
 
 ```tsx
 <DataEditor getCellContent={getData} columns={columns} rows={numRows} />
+```
+
+Don't forget to import mandatory CSS
+
+```ts
+import "@glideapps/glide-data-grid/dist/index.css";
 ```
 
 Making your columns is easy

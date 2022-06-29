@@ -1,6 +1,6 @@
 import { drawBoolean } from "../data-grid-lib";
 import { GridCellKind, BooleanCell, booleanCellIsEditable } from "../data-grid-types";
-import { InternalCellRenderer } from "./cell-types";
+import type { InternalCellRenderer } from "./cell-types";
 
 /**
  * Checkbox behavior:

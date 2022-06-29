@@ -3,7 +3,7 @@ import { getDefaultTheme } from "..";
 import ImageWindowLoader from "../common/image-window-loader";
 import { CustomCell, GridCellKind } from "../data-grid/data-grid-types";
 import { useCustomCells } from "./use-custom-cells";
-import { DrawArgs } from "./custom-cell-draw-args";
+import type { DrawArgs } from "./custom-cell-draw-args";
 
 type MyCustomCell = CustomCell<{ kind: "test"; pasted?: string }>;
 

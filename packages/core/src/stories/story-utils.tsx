@@ -1,8 +1,7 @@
 import * as React from "react";
-import styled, { ThemeProvider } from "styled-components";
-import { StoryContext } from "@storybook/addons";
+import { styled } from "@linaria/react";
+import type { StoryContext } from "@storybook/addons";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
-import { getDataEditorTheme } from "../common/styles";
 
 interface Props {
     width: number;
@@ -12,7 +11,7 @@ interface Props {
     context?: StoryContext;
 }
 
-const BuilderWrapper = styled.div<Props>`
+const BuilderWrapper = styled.div<Pick<Props, "width" | "height">>`
     display: flex;
     height: 100vh;
     width: 100vw;
@@ -58,28 +57,23 @@ const SimpleWrapper = styled.div`
 `;
 
 export class BuilderThemeWrapper extends React.PureComponent<Props> {
-    private builderTheme = getDataEditorTheme();
-
     public render(): React.ReactNode {
         const { context, ...rest } = this.props;
         return (
-            <ThemeProvider theme={this.builderTheme}>
+            <>
                 <BuilderWrapper {...rest}>
                     <div className="content">{this.props.children}</div>
                 </BuilderWrapper>
                 <div id="portal" />
-            </ThemeProvider>
+            </>
         );
     }
 }
 
 export const SimpleThemeWrapper: React.FC = p => {
-    const [builderTheme] = React.useState(getDataEditorTheme);
     return (
-        <ThemeProvider theme={builderTheme}>
-            <SimpleWrapper>
-                <div className="content">{p.children}</div>
-            </SimpleWrapper>
-        </ThemeProvider>
+        <SimpleWrapper>
+            <div className="content">{p.children}</div>
+        </SimpleWrapper>
     );
 };

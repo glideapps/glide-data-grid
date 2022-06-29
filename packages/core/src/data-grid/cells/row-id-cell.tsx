@@ -2,7 +2,7 @@ import React from "react";
 import GrowingEntry from "../../growing-entry/growing-entry";
 import { drawTextCell, prepTextCell } from "../data-grid-lib";
 import { GridCellKind, RowIDCell } from "../data-grid-types";
-import { InternalCellRenderer } from "./cell-types";
+import type { InternalCellRenderer } from "./cell-types";
 
 export const rowIDCellRenderer: InternalCellRenderer<RowIDCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",

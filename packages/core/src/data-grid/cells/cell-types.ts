@@ -1,9 +1,7 @@
 import type { OverlayImageEditorProps, Theme } from "../..";
 import type ImageWindowLoader from "../../common/image-window-loader";
 import type { SpriteManager } from "../data-grid-sprites";
-import type { InnerGridCell, Rectangle, Item } from "../data-grid-types";
-
-export type HoverInfo = readonly [Item, Item];
+import type { InnerGridCell, Rectangle } from "../data-grid-types";
 
 export type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
@@ -38,8 +36,8 @@ export interface PrepResult {
 }
 
 type DrawCallback<T extends InnerGridCell> = (args: DrawArgs<T>) => void;
-export type PrepCallback = (args: BaseDrawArgs, lastPrep?: PrepResult) => Partial<PrepResult>;
-export type DeprepCallback = (args: Pick<BaseDrawArgs, "ctx">) => void;
+type PrepCallback = (args: BaseDrawArgs, lastPrep?: PrepResult) => Partial<PrepResult>;
+type DeprepCallback = (args: Pick<BaseDrawArgs, "ctx">) => void;
 
 type ProvideEditorCallback<T extends InnerGridCell> = (
     cell: T

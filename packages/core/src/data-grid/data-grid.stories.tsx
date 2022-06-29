@@ -1,9 +1,10 @@
 import * as React from "react";
 
-import { StoryFn, StoryContext } from "@storybook/addons";
+import type { StoryFn, StoryContext } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import DataGrid from "./data-grid";
 import { CompactSelection, GridCellKind, GridSelection } from "./data-grid-types";
+import { getDataEditorTheme } from "../common/styles";
 
 export default {
     title: "Subcomponents/DataGrid",
@@ -77,6 +78,7 @@ export function Simplenotest() {
             lastRowSticky={false}
             isResizing={false}
             isDragging={false}
+            theme={getDataEditorTheme()}
         />
     );
 }
@@ -124,6 +126,7 @@ export function SelectedCellnotest() {
             lastRowSticky={false}
             isResizing={false}
             isDragging={false}
+            theme={getDataEditorTheme()}
         />
     );
 }
@@ -167,6 +170,7 @@ export function SelectedRownotest() {
             lastRowSticky={false}
             isResizing={false}
             isDragging={false}
+            theme={getDataEditorTheme()}
         />
     );
 }
@@ -210,6 +214,7 @@ export const SelectedColumnnotest = () => {
             lastRowSticky={false}
             isResizing={false}
             isDragging={false}
+            theme={getDataEditorTheme()}
         />
     );
 };

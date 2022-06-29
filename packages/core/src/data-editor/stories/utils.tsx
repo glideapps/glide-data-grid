@@ -14,7 +14,7 @@ import {
 } from "../../data-grid/data-grid-types";
 
 import faker from "faker";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import isArray from "lodash/isArray";
 import { assertNever } from "../../common/support";

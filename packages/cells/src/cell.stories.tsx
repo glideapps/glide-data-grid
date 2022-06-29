@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import * as React from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor, DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
@@ -15,6 +15,7 @@ import { RangeCell } from "./cells/range-cell";
 import { SpinnerCell } from "./cells/spinner-cell";
 
 import "@toast-ui/editor/dist/toastui-editor.css";
+import "@glideapps/glide-data-grid/dist/index.css";
 import { DatePickerCell } from "./cells/date-picker-cell";
 
 const SimpleWrapper = styled.div`

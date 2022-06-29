@@ -11,8 +11,8 @@ import {
     isSizedGridColumn,
     Item,
 } from "..";
-import { DataEditorRef } from "./data-editor";
-import { SizedGridColumn } from "../data-grid/data-grid-types";
+import type { DataEditorRef } from "./data-editor";
+import type { SizedGridColumn } from "../data-grid/data-grid-types";
 
 jest.mock("react-virtualized-auto-sizer", () => {
     return {
@@ -773,6 +773,46 @@ describe("data-editor", () => {
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith(1, expect.anything());
+    });
+
+    test("Emits group header clicked on touch", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                columns={basicProps.columns.map(c => ({ ...c, group: "Main" }))}
+                rowMarkers="both"
+                onGroupHeaderClicked={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.touchStart(canvas, {
+            touches: [
+                {
+                    clientX: 300, // Col B
+                    clientY: 16, // Group header
+                },
+            ],
+        });
+
+        fireEvent.touchEnd(canvas, {
+            changedTouches: [
+                {
+                    clientX: 300, // Col B
+                    clientY: 16, // Group header
+                },
+            ],
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(1, expect.objectContaining({ location: [2, -2] }));
     });
 
     test("Emits item hover on correct location", async () => {
@@ -3224,6 +3264,48 @@ describe("data-editor", () => {
                 },
             })
         );
+    });
+
+    test("Does not emits header menu click when move", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                columns={basicProps.columns.map(c => ({ ...c, hasMenu: true }))}
+                onHeaderMenuClick={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseMove(canvas, {
+            clientX: 300, // Col B
+            clientY: 16 + 200, // Not Header
+        });
+
+        await new Promise(r => window.setTimeout(r, 100));
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 16 + 200, // Not Header
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        expect(spy).not.toHaveBeenCalled();
     });
 
     test("Close overlay with enter key", async () => {

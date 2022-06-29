@@ -9,5 +9,4 @@ export default {
         "^.+\\.(ts|tsx)?$": "ts-jest",
         "^.+\\.(js|jsx)$": "babel-jest",
     },
-    extensionsToTreatAsEsm: [".ts", ".tsx"],
 };

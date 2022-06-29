@@ -1,5 +1,4 @@
 import * as React from "react";
-import { css } from "styled-components";
 import debounce from "lodash/debounce";
 
 export function useEventListener<K extends keyof HTMLElementEventMap>(
@@ -48,11 +47,6 @@ export interface SpriteProps {
     fgColor: string;
     bgColor: string;
 }
-
-export const disabledProps = css`
-    opacity: 0.4;
-    pointer-events: none;
-`;
 
 export const EditPencil: React.FunctionComponent<Partial<SpriteProps>> = (props: Partial<SpriteProps>) => {
     const fg = props.fgColor ?? "currentColor";

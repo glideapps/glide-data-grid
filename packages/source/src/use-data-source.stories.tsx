@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import * as React from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor, DataEditorProps, GridCellKind, GridColumn, Theme } from "@glideapps/glide-data-grid";
@@ -162,6 +162,7 @@ const testTheme: Theme = {
     headerFontStyle: "600 13px",
     baseFontStyle: "13px",
     editorFontSize: "13px",
+    lineHeight: 1.4,
     fontFamily:
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
 };

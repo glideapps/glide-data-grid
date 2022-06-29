@@ -1,4 +1,4 @@
-import { styled } from "../../common/styles";
+import { styled } from "@linaria/react";
 
 export const BubblesOverlayEditorStyle = styled.div`
     display: flex;

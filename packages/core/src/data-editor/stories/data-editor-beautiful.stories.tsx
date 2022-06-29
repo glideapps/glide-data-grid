@@ -18,12 +18,12 @@ import {
 import { DataEditor, DataEditorProps } from "../data-editor";
 
 import faker from "faker";
-import styled, { ThemeProvider } from "styled-components";
+import { styled } from "@linaria/react";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 import { useEventListener } from "../../common/utils";
 import { IBounds, useLayer } from "react-laag";
-import { SpriteMap } from "../../data-grid/data-grid-sprites";
-import { DataEditorRef, Theme } from "../..";
+import type { SpriteMap } from "../../data-grid/data-grid-sprites";
+import type { DataEditorRef, Theme } from "../..";
 import range from "lodash/range";
 import {
     useMockDataGenerator,
@@ -1116,7 +1116,8 @@ export const DrawCustomCells: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
-                drawCustomCell={(ctx, cell, _theme, rect) => {
+                drawCell={args => {
+                    const { cell, rect, ctx } = args;
                     if (cell.kind !== GridCellKind.Text) return false;
 
                     const hasX = cell.displayData.toLowerCase().includes("x"); // all my x's live in texas
@@ -1650,7 +1651,7 @@ const hotdogStand = {
 export const ThemeSupport: React.VFC = () => {
     const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
-    const [theme, setTheme] = React.useState({});
+    const [theme, setTheme] = React.useState<Partial<Theme>>({});
 
     const [numRows, setNumRows] = React.useState(1000);
 
@@ -1666,36 +1667,35 @@ export const ThemeSupport: React.VFC = () => {
     }, [numRows, setCellValue]);
 
     return (
-        <ThemeProvider theme={theme}>
-            <BeautifulWrapper
-                title="Theme support"
-                description={
-                    <>
-                        <Description>
-                            DataGrid respects the theme provided by styled-components theme provider.
-                        </Description>
-                        <MoreInfo>
-                            <button onClick={() => setTheme({})}>Light</button> or{" "}
-                            <button onClick={() => setTheme(darkTheme)}>Dark</button> even{" "}
-                            <button onClick={() => setTheme(hotdogStand)}>Hotdog Stand</button>
-                        </MoreInfo>
-                    </>
-                }>
-                <DataEditor
-                    {...defaultProps}
-                    getCellContent={getCellContent}
-                    columns={cols}
-                    onRowAppended={onRowAppended}
-                    trailingRowOptions={{
-                        tint: true,
-                        sticky: true,
-                    }}
-                    onCellEdited={setCellValue}
-                    onColumnResize={onColumnResize}
-                    rows={numRows}
-                />
-            </BeautifulWrapper>
-        </ThemeProvider>
+        <BeautifulWrapper
+            title="Theme support"
+            description={
+                <>
+                    <Description>
+                        DataGrid respects the theme provided by the <PropName>theme</PropName> prop.
+                    </Description>
+                    <MoreInfo>
+                        <button onClick={() => setTheme({})}>Light</button> or{" "}
+                        <button onClick={() => setTheme(darkTheme)}>Dark</button> even{" "}
+                        <button onClick={() => setTheme(hotdogStand)}>Hotdog Stand</button>
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                theme={theme}
+                getCellContent={getCellContent}
+                columns={cols}
+                onRowAppended={onRowAppended}
+                trailingRowOptions={{
+                    tint: true,
+                    sticky: true,
+                }}
+                onCellEdited={setCellValue}
+                onColumnResize={onColumnResize}
+                rows={numRows}
+            />
+        </BeautifulWrapper>
     );
 };
 (ThemeSupport as any).parameters = {
