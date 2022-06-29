@@ -1324,76 +1324,49 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         200
     );
 
+    const stickyX = fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0;
+    const opacityX =
+        freezeColumns === 0 || !fixedShadowX ? 0 : cellXOffset > freezeColumns ? 1 : clamp(-translateX / 100, 0, 1);
+
+    const absoluteOffsetY = -cellYOffset * 32 + translateY;
+    const opacityY = clamp(-absoluteOffsetY / 100, 0, 1);
+
     const stickyShadow = React.useMemo(() => {
-        if (!fixedShadowX && !fixedShadowY) {
+        if (!opacityX && !opacityY) {
             return null;
         }
 
-        let styleX: React.CSSProperties | undefined;
-        let styleY: React.CSSProperties | undefined;
+        const styleX: React.CSSProperties = {
+            position: "absolute",
+            top: 0,
+            left: stickyX,
+            width: width - stickyX,
+            bottom: 0,
+            opacity: opacityX,
+            pointerEvents: "none",
+            transition: !smoothScrollX ? "opacity 0.2s" : undefined,
+            boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
+        };
 
-        const stickyX = getStickyWidth(mappedColumns, dragAndDropState);
-
-        if (fixedShadowX) {
-            const opacityX =
-                freezeColumns === 0 || !fixedShadowX
-                    ? 0
-                    : cellXOffset > freezeColumns
-                    ? 1
-                    : clamp(-translateX / 100, 0, 1);
-
-            styleX = {
-                position: "absolute",
-                top: 0,
-                left: stickyX,
-                width: width - stickyX,
-                bottom: 0,
-                opacity: opacityX,
-                pointerEvents: "none",
-                transition: !smoothScrollX ? "opacity 0.2s" : undefined,
-                boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
-            };
-        }
-
-        if (fixedShadowY) {
-            const absoluteOffsetY = -cellYOffset * 32 + translateY;
-            const opacityY = clamp(-absoluteOffsetY / 100, 0, 1);
-
-            styleY = {
-                position: "absolute",
-                top: totalHeaderHeight,
-                left: 0,
-                right: 0,
-                height: height,
-                opacity: opacityY,
-                pointerEvents: "none",
-                transition: !smoothScrollY ? "opacity 0.2s" : undefined,
-                boxShadow: "inset 0 13px 10px -13px rgba(0, 0, 0, 0.2)",
-            };
-        }
+        const styleY: React.CSSProperties = {
+            position: "absolute",
+            top: totalHeaderHeight,
+            left: 0,
+            right: 0,
+            height: height,
+            opacity: opacityY,
+            pointerEvents: "none",
+            transition: !smoothScrollY ? "opacity 0.2s" : undefined,
+            boxShadow: "inset 0 13px 10px -13px rgba(0, 0, 0, 0.2)",
+        };
 
         return (
             <>
-                {fixedShadowX && <div id="shadow-x" style={styleX} />}
-                {fixedShadowY && <div id="shadow-y" style={styleY} />}
+                {opacityX > 0 && <div id="shadow-x" style={styleX} />}
+                {opacityY > 0 && <div id="shadow-y" style={styleY} />}
             </>
         );
-    }, [
-        fixedShadowX,
-        fixedShadowY,
-        mappedColumns,
-        dragAndDropState,
-        freezeColumns,
-        cellXOffset,
-        translateX,
-        width,
-        smoothScrollX,
-        cellYOffset,
-        translateY,
-        totalHeaderHeight,
-        height,
-        smoothScrollY,
-    ]);
+    }, [stickyX, width, opacityX, smoothScrollX, totalHeaderHeight, height, opacityY, smoothScrollY]);
 
     const overlayStyle = React.useMemo<React.CSSProperties>(
         () => ({
