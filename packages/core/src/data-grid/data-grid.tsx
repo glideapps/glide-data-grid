@@ -65,10 +65,8 @@ export interface DataGridProps {
     readonly lastRowSticky: boolean;
     readonly firstColAccessible: boolean;
 
-    readonly fixedShadow?: {
-        readonly x: boolean;
-        readonly y: boolean;
-    };
+    readonly fixedShadowX?: boolean;
+    readonly fixedShadowY?: boolean;
 
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
@@ -190,7 +188,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         selection,
         freezeColumns,
         lastRowSticky,
-        fixedShadow,
+        fixedShadowX = true,
+        fixedShadowY = true,
         onMouseDown,
         onMouseUp,
         onMouseMoveRaw,
@@ -1321,9 +1320,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     );
 
     const stickyShadow = React.useMemo(() => {
-        const fixedShadowX = fixedShadow?.x ?? true;
-        const fixedShadowY = fixedShadow?.y ?? true;
-
         if (!fixedShadowX && !fixedShadowY) {
             return null;
         }
@@ -1378,7 +1374,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         mappedColumns,
         dragAndDropState,
         freezeColumns,
-        fixedShadow,
+        fixedShadowX,
+        fixedShadowY,
         cellXOffset,
         translateX,
         totalHeaderHeight,
