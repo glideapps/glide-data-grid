@@ -79,6 +79,8 @@ Most data grids will want to set the majority of these props one way or another.
 | [rowMarkers](#rowmarkers)                         | Enable/disable row marker column on the left. Can show row numbers, selection boxes, or both.                                                                                                                                                                       |
 | [smoothScrollX](#smoothscroll)                    | Enable/disable smooth scrolling on the X axis.                                                                                                                                                                                                                      |
 | [smoothScrollY](#smoothscroll)                    | Enable/disable smooth scrolling on the Y axis.                                                                                                                                                                                                                      |
+| [fixedShadowX](#fixedshadow)                      | Enable/disable a shadow behind fixed columns on the X axis.                                                                                                                                                                                                         |
+| [fixedShadowY](#fixedshadow)                      | Enable/disable a shadow behind the header(s) on the Y axis.                                                                                                                                                                                                         |
 
 ## Search
 
@@ -547,7 +549,18 @@ smoothScrollX?: boolean;
 smoothScrollY?: boolean;
 ```
 
-Controls smooth scrolling in the data grid. Defaults to `false`. If smooth scrolling is not enabled the grid will alaways be cell aligned in the non-smooth scrolling axis.
+Controls smooth scrolling in the data grid. Defaults to `false`. If smooth scrolling is not enabled the grid will always be cell aligned in the non-smooth scrolling axis.
+
+---
+
+## fixedShadow
+
+```ts
+fixedShadowX?: boolean;
+fixedShadowY?: boolean;
+```
+
+Controls shadows behind fixed columns and header rows. Defaults to `true`.
 
 ---
 
