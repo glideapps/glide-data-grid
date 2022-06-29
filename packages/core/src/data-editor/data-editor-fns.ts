@@ -298,7 +298,6 @@ export function copyToClipboard(
                 // This might fail if we had to await the thunk
                 e.clipboardData.setData("text/plain", str);
                 e.clipboardData.setData("text/html", `<table>${rootEl.outerHTML}</table>`);
-                e.preventDefault();
             } catch {
                 void window.navigator.clipboard?.writeText(str);
             }
@@ -306,4 +305,6 @@ export function copyToClipboard(
     } else {
         void window.navigator.clipboard?.writeText(str);
     }
+
+    e?.preventDefault();
 }
