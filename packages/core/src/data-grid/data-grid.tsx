@@ -1321,12 +1321,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     );
 
     const stickyShadow = React.useMemo(() => {
-        if (!mappedColumns[0]?.sticky) {
-            return null;
-        }
-
         const fixedShadowX = fixedShadow?.x ?? true;
         const fixedShadowY = fixedShadow?.y ?? true;
+
+        if (!fixedShadowX && !fixedShadowY) {
+            return null;
+        }
 
         let styleX: React.CSSProperties | undefined;
         let styleY: React.CSSProperties | undefined;
