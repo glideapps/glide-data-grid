@@ -31,6 +31,7 @@ import {
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
+import clamp from "lodash/clamp";
 import makeRange from "lodash/range";
 import {
     drawCell,
@@ -47,7 +48,6 @@ import { AnimationManager, StepCallback } from "./animation-manager";
 import { browserIsFirefox } from "../common/browser-detect";
 import { CellRenderers } from "./cells";
 import { useAnimationQueue } from "./use-animation-queue";
-import { clamp } from "lodash";
 
 export interface DataGridProps {
     readonly width: number;
