@@ -143,6 +143,9 @@ export interface DataGridProps {
     };
 
     readonly headerIcons?: SpriteMap;
+
+    readonly smoothScrollX?: boolean;
+    readonly smoothScrollY?: boolean;
 }
 
 interface BlitData {
@@ -218,6 +221,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         onDragOverCell,
         onDrop,
         onDragLeave,
+        smoothScrollX = false,
+        smoothScrollY = false,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -1345,6 +1350,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 bottom: 0,
                 opacity: opacityX,
                 pointerEvents: "none",
+                transition: !smoothScrollX ? "opacity 0.2s" : undefined,
                 boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
             };
         }
@@ -1360,6 +1366,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 right: 0,
                 height: height,
                 opacity: opacityY,
+                transition: !smoothScrollY ? "opacity 0.2s" : undefined,
                 boxShadow: "inset 0 13px 10px -13px rgba(0, 0, 0, 0.2)",
             };
         }
@@ -1371,18 +1378,20 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             </>
         );
     }, [
+        fixedShadowX,
+        fixedShadowY,
         mappedColumns,
         dragAndDropState,
         freezeColumns,
-        fixedShadowX,
-        fixedShadowY,
         cellXOffset,
         translateX,
-        totalHeaderHeight,
         width,
+        smoothScrollX,
         cellYOffset,
         translateY,
+        totalHeaderHeight,
         height,
+        smoothScrollY,
     ]);
 
     const overlayStyle = React.useMemo<React.CSSProperties>(
