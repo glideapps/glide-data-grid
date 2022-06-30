@@ -273,7 +273,7 @@ All grid cells support the following properties
 
 ```ts
 interface BaseGridCell {
-    readonly allowOverlay: boolean;
+    readonly allowOverlay: boolean; // cell is editable
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
