@@ -35,7 +35,7 @@ export interface DataGridOverlayEditorProps {
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
     readonly provideEditor?: ProvideEditorCallback<GridCell>;
-    readonly validateCell?: (cell: Item, newValue: EditableGridCell) => boolean | EditableGridCell;
+    readonly validateCell?: (cell: Item, newValue: EditableGridCell, prevValue: GridCell) => boolean | EditableGridCell;
 }
 
 const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps> = p => {
@@ -57,10 +57,12 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     } = p;
 
     const [tempValue, setTempValueRaw] = React.useState<GridCell | undefined>(forceEditMode ? content : undefined);
+    const lastValueRef = React.useRef(tempValue ?? content);
+    lastValueRef.current = tempValue ?? content;
 
     const [isValid, setIsValid] = React.useState(() => {
         if (validateCell === undefined) return true;
-        if (isEditableGridCell(content) && validateCell?.(cell, content) === false) return false;
+        if (isEditableGridCell(content) && validateCell?.(cell, content, lastValueRef.current) === false) return false;
         return true;
     });
 
@@ -74,7 +76,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     const setTempValue = React.useCallback(
         (newVal: GridCell | undefined) => {
             if (validateCell !== undefined && newVal !== undefined && isEditableGridCell(newVal)) {
-                const validResult = validateCell(cell, newVal);
+                const validResult = validateCell(cell, newVal, lastValueRef.current);
                 if (validResult === false) {
                     setIsValid(false);
                 } else if (typeof validResult === "object") {
