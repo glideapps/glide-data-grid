@@ -34,6 +34,9 @@ import {
     BooleanIndeterminate,
     BooleanEmpty,
     MarkerCell,
+    headerCellUnheckedMarker,
+    headerCellCheckedMarker,
+    headerCellIndeterminateMarker,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -588,11 +591,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [onCellsEdited, rowMarkerOffset]
     );
 
+    const numSelectedRows = gridSelection.rows.length;
+    const rowMarkerHeader =
+        rowMarkers === "none"
+            ? ""
+            : numSelectedRows === 0
+            ? headerCellUnheckedMarker
+            : numSelectedRows === rows
+            ? headerCellCheckedMarker
+            : headerCellIndeterminateMarker;
     const mangledCols = React.useMemo(() => {
         if (rowMarkers === "none") return columns;
         return [
             {
-                title: "",
+                title: rowMarkerHeader,
                 width: rowMarkerWidth,
                 icon: undefined,
                 hasMenu: false,
@@ -600,7 +612,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             },
             ...columns,
         ];
-    }, [columns, rowMarkerWidth, rowMarkers]);
+    }, [columns, rowMarkerWidth, rowMarkers, rowMarkerHeader]);
 
     const highlightRegions = React.useMemo(() => {
         if (highlightRegionsIn === undefined) return undefined;

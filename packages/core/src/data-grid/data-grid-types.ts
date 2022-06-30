@@ -180,6 +180,11 @@ export type CellArray = readonly (readonly GridCell[])[];
 
 export type Item = readonly [number, number];
 
+export const headerCellCheckboxPrefix = "___gdg_header_cell_";
+export const headerCellCheckedMarker = headerCellCheckboxPrefix + "checked";
+export const headerCellUnheckedMarker = headerCellCheckboxPrefix + "unchecked";
+export const headerCellIndeterminateMarker = headerCellCheckboxPrefix + "indeterminate";
+
 interface BaseGridColumn {
     readonly title: string;
     readonly group?: string;

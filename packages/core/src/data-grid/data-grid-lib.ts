@@ -515,7 +515,7 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
     ctx.beginPath();
 }
 
-function drawCheckbox(
+export function drawCheckbox(
     ctx: CanvasRenderingContext2D,
     theme: Theme,
     checked: boolean | BooleanEmpty | BooleanIndeterminate,

@@ -1,5 +1,5 @@
 import type ImageWindowLoader from "../common/image-window-loader";
-import type {
+import {
     GridSelection,
     DrawHeaderCallback,
     InnerGridCell,
@@ -10,9 +10,14 @@ import type {
     Item,
     CellList,
     GridMouseGroupHeaderEventArgs,
+    headerCellCheckboxPrefix,
+    GridCellKind,
+    isInnerOnlyCell,
+    BooleanIndeterminate,
+    headerCellCheckedMarker,
+    headerCellUnheckedMarker,
 } from "./data-grid-types";
 import groupBy from "lodash/groupBy";
-import { GridCellKind, isInnerOnlyCell } from "./data-grid-types";
 import type { HoverValues } from "./animation-manager";
 import {
     getEffectiveColumns,
@@ -25,6 +30,7 @@ import {
     cellIsInRange,
     computeBounds,
     getMiddleCenterBias,
+    drawCheckbox,
 } from "./data-grid-lib";
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import type { Theme } from "../common/styles";
@@ -669,14 +675,22 @@ function drawHeader(
     drawHeaderCallback: DrawHeaderCallback | undefined,
     touchMode: boolean
 ) {
+    const isCheckboxHeader = c.title.startsWith(headerCellCheckboxPrefix);
     const menuBounds = getHeaderMenuBounds(x, y, width, height);
     if (drawHeaderCallback !== undefined) {
+        let passCol = c;
+        if (isCheckboxHeader) {
+            passCol = {
+                ...c,
+                title: "",
+            };
+        }
         if (
             drawHeaderCallback({
                 ctx,
                 theme,
                 rect: { x, y, width, height },
-                column: c,
+                column: passCol,
                 isSelected: selected,
                 hoverAmount,
                 isHovered,
@@ -688,6 +702,21 @@ function drawHeader(
             return;
         }
     }
+
+    if (isCheckboxHeader) {
+        let checked: boolean | BooleanIndeterminate = undefined;
+        if (c.title === headerCellCheckedMarker) checked = true;
+        if (c.title === headerCellUnheckedMarker) checked = false;
+        if (checked !== true) {
+            ctx.globalAlpha = hoverAmount;
+        }
+        drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined);
+        if (checked !== true) {
+            ctx.globalAlpha = 1;
+        }
+        return;
+    }
+
     const xPad = 8;
     const fillStyle = selected ? theme.textHeaderSelected : theme.textHeader;
 
