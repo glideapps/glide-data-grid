@@ -195,7 +195,7 @@ export interface DataEditorProps extends Props {
     readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;
     readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
     readonly onCellContextMenu?: (cell: Item, event: CellClickedEventArgs) => void;
-    readonly validateCell?: (cell: Item, newValue: EditableGridCell) => boolean | EditableGridCell;
+    readonly validateCell?: (cell: Item, newValue: EditableGridCell, prevValue: GridCell) => boolean | EditableGridCell;
 
     readonly columns: readonly GridColumn[];
 
@@ -438,10 +438,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const validateCell = React.useCallback<NonNullable<typeof validateCellIn>>(
-        (cell, newValue) => {
+        (cell, newValue, prevValue) => {
             if (validateCellIn === undefined) return true;
             const item: Item = [cell[0] - rowMarkerOffset, cell[1]];
-            return validateCellIn?.(item, newValue);
+            return validateCellIn?.(item, newValue, prevValue);
         },
         [rowMarkerOffset, validateCellIn]
     );
