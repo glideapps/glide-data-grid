@@ -145,7 +145,7 @@ export interface DataGridProps {
 
     readonly smoothScrollX?: boolean;
     readonly smoothScrollY?: boolean;
-    
+
     readonly theme: Theme;
 }
 
@@ -193,7 +193,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         freezeColumns,
         lastRowSticky,
         fixedShadowX = true,
-        fixedShadowY = true,
         onMouseDown,
         onMouseUp,
         onMouseMoveRaw,
