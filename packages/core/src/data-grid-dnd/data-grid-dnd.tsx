@@ -17,6 +17,9 @@ export interface DataGridDndProps extends Props {
     readonly maxColumnWidth: number;
     readonly minColumnWidth: number;
     readonly lockColumns: number;
+
+    readonly smoothScrollX?: boolean;
+    readonly smoothScrollY?: boolean;
 }
 
 function offsetColumnSize(column: InnerGridColumn, width: number, min: number, max: number): number {
@@ -330,6 +333,8 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             selection={p.selection}
             translateX={p.translateX}
             translateY={p.translateY}
+            smoothScrollX={p.smoothScrollX}
+            smoothScrollY={p.smoothScrollY}
             // handled or mutated props
             getCellContent={getMangledCellContent}
             isResizing={resizeCol !== undefined}

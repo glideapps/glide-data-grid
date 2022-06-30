@@ -30,6 +30,7 @@ import {
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
+import clamp from "lodash/clamp";
 import makeRange from "lodash/range";
 import {
     drawCell,
@@ -62,6 +63,10 @@ export interface DataGridProps {
     readonly freezeColumns: number;
     readonly lastRowSticky: boolean;
     readonly firstColAccessible: boolean;
+
+    readonly fixedShadowX?: boolean;
+    readonly fixedShadowY?: boolean;
+
     readonly allowResize?: boolean;
     readonly isResizing: boolean;
     readonly isDragging: boolean;
@@ -138,6 +143,9 @@ export interface DataGridProps {
 
     readonly headerIcons?: SpriteMap;
 
+    readonly smoothScrollX?: boolean;
+    readonly smoothScrollY?: boolean;
+    
     readonly theme: Theme;
 }
 
@@ -184,6 +192,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         selection,
         freezeColumns,
         lastRowSticky,
+        fixedShadowX = true,
+        fixedShadowY = true,
         onMouseDown,
         onMouseUp,
         onMouseMoveRaw,
@@ -213,6 +223,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         onDragOverCell,
         onDrop,
         onDragLeave,
+        smoothScrollX = false,
+        smoothScrollY = false,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -1322,24 +1334,49 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         200
     );
 
+    const stickyX = fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0;
+    const opacityX =
+        freezeColumns === 0 || !fixedShadowX ? 0 : cellXOffset > freezeColumns ? 1 : clamp(-translateX / 100, 0, 1);
+
+    const absoluteOffsetY = -cellYOffset * 32 + translateY;
+    const opacityY = clamp(-absoluteOffsetY / 100, 0, 1);
+
     const stickyShadow = React.useMemo(() => {
-        if (!mappedColumns[0].sticky) {
+        if (!opacityX && !opacityY) {
             return null;
         }
-        const stickyX = getStickyWidth(mappedColumns, dragAndDropState);
-        const props: React.CSSProperties = {
+
+        const styleX: React.CSSProperties = {
             position: "absolute",
             top: 0,
             left: stickyX,
             width: width - stickyX,
-            height: height,
-            opacity: cellXOffset > freezeColumns || translateX !== 0 ? 1 : 0,
+            bottom: 0,
+            opacity: opacityX,
             pointerEvents: "none",
+            transition: !smoothScrollX ? "opacity 0.2s" : undefined,
             boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
-            transition: "opacity 150ms",
         };
-        return <div style={props} />;
-    }, [cellXOffset, dragAndDropState, freezeColumns, mappedColumns, height, width, translateX]);
+
+        const styleY: React.CSSProperties = {
+            position: "absolute",
+            top: totalHeaderHeight,
+            left: 0,
+            right: 0,
+            height: height,
+            opacity: opacityY,
+            pointerEvents: "none",
+            transition: !smoothScrollY ? "opacity 0.2s" : undefined,
+            boxShadow: "inset 0 13px 10px -13px rgba(0, 0, 0, 0.2)",
+        };
+
+        return (
+            <>
+                {opacityX > 0 && <div id="shadow-x" style={styleX} />}
+                {opacityY > 0 && <div id="shadow-y" style={styleY} />}
+            </>
+        );
+    }, [stickyX, width, opacityX, smoothScrollX, totalHeaderHeight, height, opacityY, smoothScrollY]);
 
     const overlayStyle = React.useMemo<React.CSSProperties>(
         () => ({
