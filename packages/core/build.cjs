@@ -7,6 +7,7 @@ const shared = {
     entryPoints: ["src/index.ts"],
     bundle: true,
     minify: false,
+    target: "esnext",
     plugins: [
         linaria({
             sourceMap: false,

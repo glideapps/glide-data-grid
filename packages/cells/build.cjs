@@ -1,11 +1,13 @@
 const { build } = require("esbuild");
 const linaria = require("@linaria/esbuild/lib/index").default;
 const { dependencies } = require("./package.json");
+const fs = require("fs");
 
 const shared = {
     entryPoints: ["src/index.ts"],
     bundle: true,
     minify: false,
+    target: "esnext",
     plugins: [
         linaria({
             sourceMap: false,
