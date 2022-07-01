@@ -302,7 +302,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             fillHandle={p.fillHandle}
             headerHeight={p.headerHeight}
             height={p.height}
-            lastRowSticky={p.lastRowSticky}
+            trailingRowType={p.trailingRowType}
             rowHeight={p.rowHeight}
             rows={p.rows}
             highlightRegions={p.highlightRegions}

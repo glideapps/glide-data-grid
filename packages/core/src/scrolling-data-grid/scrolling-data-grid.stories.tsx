@@ -88,7 +88,7 @@ export function Simplenotest() {
             firstColAccessible={true}
             groupHeaderHeight={34}
             headerHeight={44}
-            lastRowSticky={false}
+            trailingRowType={false}
             rowHeight={34}
             onVisibleRegionChanged={onVisibleRegionChanged}
             columns={columns}

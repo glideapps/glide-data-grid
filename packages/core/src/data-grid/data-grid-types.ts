@@ -102,6 +102,8 @@ interface DragHandler {
 
 export type GridDragEventArgs = GridMouseEventArgs & DragHandler;
 
+export type TrailingRowType = "sticky" | "appended" | "none";
+
 export type DrawCustomCellCallback = (args: {
     ctx: CanvasRenderingContext2D;
     cell: GridCell;

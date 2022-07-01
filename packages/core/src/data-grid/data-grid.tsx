@@ -27,6 +27,7 @@ import {
     isInnerOnlyCell,
     booleanCellIsEditable,
     InnerGridColumn,
+    TrailingRowType,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -61,7 +62,7 @@ export interface DataGridProps {
     readonly accessibilityHeight: number;
 
     readonly freezeColumns: number;
-    readonly lastRowSticky: boolean;
+    readonly trailingRowType: TrailingRowType;
     readonly firstColAccessible: boolean;
 
     readonly fixedShadowX?: boolean;
@@ -191,7 +192,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         isFocused,
         selection,
         freezeColumns,
-        lastRowSticky,
+        trailingRowType: trailingRowType,
         fixedShadowX = true,
         onMouseDown,
         onMouseUp,
@@ -292,7 +293,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 translateY,
                 rows,
                 freezeColumns,
-                lastRowSticky,
+                trailingRowType === "sticky",
                 mappedColumns,
                 rowHeight
             );
@@ -313,7 +314,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             translateY,
             rows,
             freezeColumns,
-            lastRowSticky,
+            trailingRowType,
             mappedColumns,
             rowHeight,
         ]
@@ -348,7 +349,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 rowHeight,
                 cellYOffset,
                 translateY,
-                lastRowSticky
+                trailingRowType === "sticky"
             );
 
             const shiftKey = ev?.shiftKey === true;
@@ -454,7 +455,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             rowHeight,
             cellYOffset,
             translateY,
-            lastRowSticky,
+            trailingRowType,
             getBoundsForItem,
             fillHandle,
         ]
@@ -507,7 +508,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             isFocused,
             selection,
             fillHandle,
-            lastRowSticky,
+            lastRowSticky: trailingRowType,
             rows,
             getCellContent,
             getGroupDetails: getGroupDetails ?? (name => ({ name })),
@@ -562,7 +563,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         isFocused,
         selection,
         fillHandle,
-        lastRowSticky,
+        trailingRowType,
         rows,
         getCellContent,
         getGroupDetails,

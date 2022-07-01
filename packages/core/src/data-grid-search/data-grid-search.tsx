@@ -399,7 +399,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 headerHeight={p.headerHeight}
                 isFilling={p.isFilling}
                 fillHandle={p.fillHandle}
-                lastRowSticky={p.lastRowSticky}
+                trailingRowType={p.trailingRowType}
                 firstColAccessible={p.firstColAccessible}
                 lockColumns={p.lockColumns}
                 rowHeight={p.rowHeight}

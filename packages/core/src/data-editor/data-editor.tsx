@@ -69,44 +69,44 @@ type Props = Omit<
     | "cellXOffset"
     | "cellYOffset"
     | "className"
+    | "clientSize"
     | "columns"
     | "disabledRows"
     | "drawCustomCell"
     | "enableGroups"
-    | "firstColSticky"
-    | "getCellContent"
-    | "gridRef"
-    | "headerHeight"
-    | "groupHeaderHeight"
-    | "lastRowSticky"
-    | "theme"
-    | "minColumnWidth"
-    | "maxColumnWidth"
-    | "lockColumns"
     | "firstColAccessible"
+    | "firstColSticky"
+    | "freezeColumns"
+    | "getCellContent"
     | "getCellsForSelection"
-    | "onCellFocused"
-    | "onKeyDown"
+    | "gridRef"
+    | "groupHeaderHeight"
+    | "headerHeight"
     | "isFilling"
     | "isFocused"
-    | "onCanvasFocused"
+    | "lockColumns"
+    | "maxColumnWidth"
+    | "minColumnWidth"
     | "onCanvasBlur"
+    | "onCanvasFocused"
+    | "onCellFocused"
+    | "onKeyDown"
     | "onKeyUp"
     | "onMouseDown"
-    | "onMouseUp"
     | "onMouseMove"
-    | "freezeColumns"
-    | "clientSize"
+    | "onMouseUp"
     | "onSearchResultsChanged"
     | "onVisibleRegionChanged"
     | "rowHeight"
-    | "verticalBorder"
     | "scrollRef"
     | "searchColOffset"
-    | "selection"
     | "selectedColumns"
+    | "selection"
+    | "theme"
+    | "trailingRowType"
     | "translateX"
     | "translateY"
+    | "verticalBorder"
 >;
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
@@ -2829,7 +2829,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     headerHeight={headerHeight}
                     isFocused={isFocused}
                     groupHeaderHeight={enableGroups ? groupHeaderHeight : 0}
-                    lastRowSticky={lastRowSticky}
+                    trailingRowType={
+                        !showTrailingBlankRow ? "none" : trailingRowOptions?.sticky === true ? "sticky" : "appended"
+                    }
                     onColumnResize={onColumnResize}
                     onColumnResizeEnd={onColumnResizeEnd}
                     onColumnResizeStart={onColumnResizeStart}
