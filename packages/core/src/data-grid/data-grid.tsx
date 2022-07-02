@@ -244,7 +244,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const lastWasTouchRef = React.useRef(lastWasTouch);
     lastWasTouchRef.current = lastWasTouch;
 
-    const spriteManager = React.useMemo(() => new SpriteManager(headerIcons), [headerIcons]);
+    const spriteManager = React.useMemo(
+        () =>
+            new SpriteManager(headerIcons, () => {
+                lastArgsRef.current = undefined;
+                lastDrawRef.current();
+            }),
+        [headerIcons]
+    );
     const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
     const scrollingStopRef = React.useRef(-1);
@@ -261,17 +268,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             scrollingStopRef.current = -1;
         }, 200);
     }, [cellYOffset, cellXOffset, translateX, translateY, disableFirefoxRescaling]);
-
-    React.useLayoutEffect(() => {
-        const fn = async () => {
-            const changed = await spriteManager.buildSpriteMap(theme, columns);
-            if (changed) {
-                lastArgsRef.current = undefined;
-                lastDrawRef.current();
-            }
-        };
-        void fn();
-    }, [columns, spriteManager, theme]);
 
     const mappedColumns = useMappedColumns(columns, freezeColumns);
 

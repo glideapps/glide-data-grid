@@ -485,6 +485,8 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
 
     const alwaysShowIcon = data !== "";
 
+    let textX = 0;
+
     if (icon !== undefined) {
         const padding = 8;
         const size = h - padding;
@@ -492,7 +494,9 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
         const py = y + padding / 2;
 
         spriteManager.drawSprite(icon, "normal", ctx, px, py, size, theme, alwaysShowIcon ? 1 : hoverAmount);
+        textX = size;
     } else {
+        textX = 24;
         const finalLineSize = 12;
         const lineSize = alwaysShowIcon ? finalLineSize : hoverAmount * finalLineSize;
         const xTranslate = alwaysShowIcon ? 0 : (1 - hoverAmount) * finalLineSize * 0.5;
@@ -511,7 +515,7 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
     }
 
     ctx.fillStyle = theme.textMedium;
-    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + h / 2 + getMiddleCenterBias(ctx, theme));
+    ctx.fillText(data, textX + x + theme.cellHorizontalPadding + 0.5, y + h / 2 + getMiddleCenterBias(ctx, theme));
     ctx.beginPath();
 }
 
