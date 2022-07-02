@@ -47,16 +47,23 @@ export class SpriteManager {
         let spriteCanvas = this.spriteMap.get(key);
         if (spriteCanvas === undefined) {
             const spriteCb = this.headerIcons[sprite];
+
             if (spriteCb === undefined) return;
+
             spriteCanvas = document.createElement("canvas");
             const spriteCtx = spriteCanvas.getContext("2d");
+
             if (spriteCtx === null) return;
+
             const imgSource = new Image();
             imgSource.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(spriteCb({ fgColor, bgColor }))}`;
-            this.inFlight++;
             this.spriteMap.set(key, spriteCanvas);
-            void imgSource
-                .decode()
+            const promise: Promise<void> | undefined = imgSource.decode();
+
+            if (promise === undefined) return;
+
+            this.inFlight++;
+            promise
                 .then(() => {
                     spriteCtx.drawImage(imgSource, 0, 0, rSize, rSize);
                 })
