@@ -6,7 +6,7 @@ const fs = require("fs");
 const shared = {
     entryPoints: ["src/index.ts"],
     bundle: true,
-    minify: true,
+    minify: false,
     target: "esnext",
     plugins: [
         linaria({
