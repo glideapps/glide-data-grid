@@ -75,7 +75,7 @@ export function Simplenotest() {
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
-            trailingRowType={false}
+            trailingRowType={"none"}
             isResizing={false}
             isDragging={false}
             theme={getDataEditorTheme()}
@@ -123,7 +123,7 @@ export function SelectedCellnotest() {
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
-            trailingRowType={false}
+            trailingRowType={"none"}
             isResizing={false}
             isDragging={false}
             theme={getDataEditorTheme()}
@@ -167,7 +167,7 @@ export function SelectedRownotest() {
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
-            trailingRowType={false}
+            trailingRowType={"none"}
             isResizing={false}
             isDragging={false}
             theme={getDataEditorTheme()}
@@ -211,7 +211,7 @@ export const SelectedColumnnotest = () => {
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
-            trailingRowType={false}
+            trailingRowType={"none"}
             isResizing={false}
             isDragging={false}
             theme={getDataEditorTheme()}
