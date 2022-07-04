@@ -1217,11 +1217,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 time,
             };
 
-            if (args.isEdge) return;
+            const fillHandle = args.kind === "cell" && args.isFillHandle;
+
+            if (!fillHandle && args.isEdge) return;
 
             setMouseState({
                 previousSelection: gridSelection,
-                fillHandle: args.kind === "cell" && args.isFillHandle,
+                fillHandle,
             });
             lastMouseSelectLocation.current = undefined;
 

@@ -3308,6 +3308,43 @@ describe("data-editor", () => {
         expect(spy).not.toHaveBeenCalled();
     });
 
+    test("Use fill handle", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onCellEdited={spy} fillHandle={true} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 290, // Col A
+            clientY: 36 + 30, // Row 2
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 290, // Col A
+            clientY: 36 + 30, // Row 2
+        });
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 308, // Col A
+            clientY: 36 + 30, // Row 2
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 308, // Col A
+            clientY: 36 + 32 * 2 + 16, // Row 2
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 308, // Col A
+            clientY: 36 + 32 * 2 + 16, // Row 2
+        });
+
+        expect(spy).toBeCalledTimes(2);
+    });
+
     test("Close overlay with enter key", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
