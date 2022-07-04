@@ -255,6 +255,52 @@ export const AddData: React.VFC = () => {
     },
 };
 
+export const RightToLeft: React.VFC = () => {
+    const { cols, getCellContent, setCellValue, onColumnResize } = useMockDataGenerator(60, false);
+
+    const getCellContentMangled = React.useCallback<typeof getCellContent>(
+        item => {
+            const [col, _row] = item;
+            if (col !== 0) return getCellContent(item);
+            return {
+                kind: GridCellKind.Text,
+                allowOverlay: true,
+                data: "אני גדעון, מומחה לאפליקציות גלייד.",
+                displayData: "אני גדעון, מומחה לאפליקציות גלייד.",
+                allowWrapping: true,
+            };
+        },
+        [getCellContent]
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Right "
+            description={
+                <>
+                    <Description>The data editor automatically detects RTL in text cells and respects it.</Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContentMangled}
+                columns={cols}
+                onColumnResize={onColumnResize}
+                getCellsForSelection={true}
+                rowMarkers={"both"}
+                onPaste={true}
+                onCellEdited={setCellValue}
+                rows={1000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(RightToLeft as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const ValidateData: React.VFC = () => {
     const { cols, getCellContent, setCellValue, getCellsForSelection } = useMockDataGenerator(60, false);
 
