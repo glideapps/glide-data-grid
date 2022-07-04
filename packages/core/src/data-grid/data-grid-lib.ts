@@ -416,9 +416,19 @@ export function drawTextCell(
 
     const bias = getMiddleCenterBias(ctx, theme);
 
+    const isRtl = direction(data) === "rtl";
+
+    if (contentAlign === undefined && isRtl) {
+        contentAlign = "right";
+    }
+
+    if (isRtl) {
+        ctx.direction = "rtl";
+    }
+
     if (data.length > 0) {
         let changed = false;
-        if (contentAlign === undefined && direction(data) === "rtl") {
+        if (contentAlign === "right") {
             // Use right alignment as default for RTL text
             ctx.textAlign = "right";
             changed = true;
@@ -469,6 +479,10 @@ export function drawTextCell(
         if (changed) {
             // Reset alignment to default
             ctx.textAlign = "start";
+        }
+
+        if (isRtl) {
+            ctx.direction = "inherit";
         }
     }
 }
