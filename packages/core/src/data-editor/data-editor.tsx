@@ -1290,7 +1290,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             for (let x = 0; x < r.width; x++) {
                 const fillCol = x + r.x;
                 const fillVal = getMangledCellContent([fillCol, reverse ? r.y + r.height - 1 : r.y]);
-                if (isInnerOnlyCell(fillVal) || !isEditableGridCell(fillVal)) continue;
+                if (isInnerOnlyCell(fillVal) || !isReadWriteCell(fillVal)) continue;
                 for (let y = 1; y < r.height; y++) {
                     const fillRow = reverse ? r.y + r.height - (y + 1) : y + r.y;
                     const target = [fillCol, fillRow] as const;
@@ -2124,7 +2124,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     for (let y = 0; y < r.height; y++) {
                         const fillRow = y + r.y;
                         const fillVal = getMangledCellContent([r.x, fillRow]);
-                        if (isInnerOnlyCell(fillVal) || !isEditableGridCell(fillVal)) continue;
+                        if (isInnerOnlyCell(fillVal) || !isReadWriteCell(fillVal)) continue;
                         for (let x = 1; x < r.width; x++) {
                             const fillCol = x + r.x;
                             const target = [fillCol, fillRow] as const;

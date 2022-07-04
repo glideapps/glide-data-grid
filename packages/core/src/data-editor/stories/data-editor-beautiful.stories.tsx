@@ -353,6 +353,21 @@ export const FillHandle: React.VFC = () => {
 
     const [numRows, setNumRows] = React.useState(50);
 
+    const getCellContentMangled = React.useCallback<typeof getCellContent>(
+        i => {
+            let val = getCellContent(i);
+            if (i[0] === 1 && val.kind === GridCellKind.Text) {
+                val = {
+                    ...val,
+                    readonly: true,
+                };
+            }
+
+            return val;
+        },
+        [getCellContent]
+    );
+
     const onRowAppended = React.useCallback(() => {
         const newRow = numRows;
         for (let c = 0; c < 6; c++) {
@@ -364,7 +379,7 @@ export const FillHandle: React.VFC = () => {
 
     return (
         <BeautifulWrapper
-            title="Add data"
+            title="Fill handle"
             description={
                 <>
                     <Description>Fill handles can be used to downfill data with the mouse.</Description>
@@ -376,7 +391,7 @@ export const FillHandle: React.VFC = () => {
             }>
             <DataEditor
                 {...defaultProps}
-                getCellContent={getCellContent}
+                getCellContent={getCellContentMangled}
                 columns={cols}
                 getCellsForSelection={getCellsForSelection}
                 rowMarkers={"both"}
