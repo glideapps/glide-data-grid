@@ -750,7 +750,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (val: Omit<NonNullable<typeof overlay>, "theme">) => {
             const [col, row] = val.cell;
             const column = mangledCols[col];
-            const groupTheme = column?.group !== undefined ? mangledGetGroupDetails(column.group) : undefined;
+            const groupTheme =
+                column?.group !== undefined ? mangledGetGroupDetails(column.group)?.overrideTheme : undefined;
             const colTheme = column?.themeOverride;
             const rowTheme = getRowThemeOverride?.(row);
 

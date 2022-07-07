@@ -203,7 +203,7 @@ interface BeautifulProps {
 export const BeautifulWrapper: React.FC<BeautifulProps> = p => {
     const { title, children, description, className } = p;
     return (
-        <BeautifulStyle className={className + (browserIsFirefox ? " firefox" : "")}>
+        <BeautifulStyle className={className + (browserIsFirefox.value ? " firefox" : "")}>
             <h1>{title}</h1>
             {description}
             <div className="sizer">

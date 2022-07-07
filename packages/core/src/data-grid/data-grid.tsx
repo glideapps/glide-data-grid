@@ -257,7 +257,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const scrollingStopRef = React.useRef(-1);
     const disableFirefoxRescaling = p.experimental?.enableFirefoxRescaling !== true;
     React.useLayoutEffect(() => {
-        if (!browserIsFirefox || window.devicePixelRatio === 1 || disableFirefoxRescaling) return;
+        if (!browserIsFirefox.value || window.devicePixelRatio === 1 || disableFirefoxRescaling) return;
         // We don't want to go into scroll mode for a single repaint
         if (scrollingStopRef.current !== -1) {
             setScrolling(true);

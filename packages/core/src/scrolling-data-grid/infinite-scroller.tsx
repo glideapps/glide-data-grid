@@ -224,7 +224,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                     }
 
                     return (
-                        <ScrollRegionStyle isSafari={browserIsSafari}>
+                        <ScrollRegionStyle isSafari={browserIsSafari.value}>
                             {minimap}
                             <div className="dvn-underlay">{children}</div>
                             <div

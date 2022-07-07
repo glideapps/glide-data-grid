@@ -1,5 +1,7 @@
 import React from "react";
 
+// theme variable precidence
+
 export function makeCSSStyle(theme: Theme): Record<string, string> {
     return {
         "--gdg-accent-color": theme.accentColor,
