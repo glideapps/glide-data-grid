@@ -29,7 +29,7 @@ Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-d
 -   **It scales to millions of rows**. Cells are rendered lazily on demand for memory efficiency.
 -   **Scrolling is extremely fast**. Native scrolling keeps everything buttery smooth.
 -   **Supports multiple types of cells**. Numbers, text, markdown, bubble, image, drilldown, uri
--   **Fully Free & Open Source**. [MIT licensed](LICENSE) so you can use Grid in commerical projects.
+-   **Fully Free & Open Source**. [MIT licensed,](LICENSE) so you can use Grid in commercial projects.
 -   **Editing is built in**.
 -   **Resizable and movable columns**.
 -   **Variable sized rows**.
@@ -147,7 +147,7 @@ Originally we had implemented our Grid using virtualized rendering. We virtualiz
 
 There are some hacks you can do like setting timers and entering into a "low fidelity" rendering mode where you only render a single element per cell. This works okay until you want to show hundreds of cells and you are right back to choppy scrolling. It also doesn't really look or feel great.
 
-**I want to use this with Next.js / Vercel but I'm getting weird errors**
+**I want to use this with Next.js / Vercel, but I'm getting weird errors**
 
 The easiest way to use the grid with Next is to create a component which wraps up your grid and then import it as a dynamic.
 
