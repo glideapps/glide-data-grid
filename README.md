@@ -29,7 +29,7 @@ Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-d
 -   **It scales to millions of rows**. Cells are rendered lazily on demand for memory efficiency.
 -   **Scrolling is extremely fast**. Native scrolling keeps everything buttery smooth.
 -   **Supports multiple types of cells**. Numbers, text, markdown, bubble, image, drilldown, uri
--   **Fully Free & Open Source**. [MIT licensed,](LICENSE) so you can use Grid in commercial projects.
+-   **Fully Free & Open Source**. [MIT licensed](LICENSE), so you can use Grid in commercial projects.
 -   **Editing is built in**.
 -   **Resizable and movable columns**.
 -   **Variable sized rows**.
