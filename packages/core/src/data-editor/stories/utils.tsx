@@ -423,10 +423,8 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
             let val = cache.current.get(col, row);
             if (val === undefined) {
                 val = colsMapRef.current[col].getContent();
-                if (!readonly) {
-                    if (isTextEditableGridCell(val)) {
-                        val = { ...val, readonly };
-                    }
+                if (!readonly && isTextEditableGridCell(val)) {
+                    val = { ...val, readonly };
                 }
                 cache.current.set(col, row, val);
             }

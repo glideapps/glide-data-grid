@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
 import { assertNever, maybe } from "../common/support";
 import clamp from "lodash/clamp";
@@ -37,6 +38,8 @@ import {
     headerCellUnheckedMarker,
     headerCellCheckedMarker,
     headerCellIndeterminateMarker,
+    groupHeaderKind,
+    outOfBoundsKind,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -118,14 +121,13 @@ type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (...a: Parame
 type EmitEvents = "copy" | "paste" | "delete" | "fill-right" | "fill-down";
 
 function getSpanStops(cells: readonly (readonly GridCell[])[]): number[] {
-    const disallowed = uniq(
+    return uniq(
         flatten(
             flatten(cells)
                 .filter(c => c.span !== undefined)
                 .map(c => range((c.span?.[0] ?? 0) + 1, (c.span?.[1] ?? 0) + 1))
         )
     );
-    return disallowed;
 }
 
 function shiftSelection(input: GridSelection, offset: number): GridSelection {
@@ -1162,9 +1164,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     lastSelectedRowRef.current = undefined;
                     focus();
                 }
-            } else if (args.kind === "group-header") {
+            } else if (args.kind === groupHeaderKind) {
                 lastMouseSelectLocation.current = [col, row];
-            } else if (args.kind === "out-of-bounds") {
+            } else if (args.kind === outOfBoundsKind) {
                 setGridSelection(emptyGridSelection, false);
                 setOverlay(undefined);
                 focus();
@@ -1242,7 +1244,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const handleGroupHeaderSelection = React.useCallback(
         (args: GridMouseEventArgs) => {
-            if (args.kind !== "group-header" || columnSelect !== "multi") {
+            if (args.kind !== groupHeaderKind || columnSelect !== "multi") {
                 return;
             }
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
@@ -1442,7 +1444,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     } else if (args.kind === "header" && gridSelection.columns.hasIndex(col)) {
                         onHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
                         return;
-                    } else if (args.kind === "group-header") {
+                    } else if (args.kind === groupHeaderKind) {
                         if (clickLocation < 0) {
                             return;
                         }
@@ -1456,7 +1458,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (!handleMaybeClick(args)) {
                         handleSelect(args);
                     }
-                } else if (args.kind === "group-header") {
+                } else if (args.kind === groupHeaderKind) {
                     onGroupHeaderClicked?.(clickLocation, { ...args, preventDefault });
                 } else {
                     handleSelect(args);
@@ -1478,7 +1480,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
 
-            if (args.kind === "group-header") {
+            if (args.kind === groupHeaderKind) {
                 if (clickLocation < 0) {
                     return;
                 }
@@ -1646,7 +1648,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     "drag"
                 );
 
-                if (args.kind === "out-of-bounds" && scrollRef.current !== null) {
+                if (args.kind === outOfBoundsKind && scrollRef.current !== null) {
                     const [horizontal, vertical] = args.direction;
                     let scrollX = 0;
                     let scrollY = 0;
@@ -2299,11 +2301,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
                     const coerced = coercePasteValue?.(toPaste, inner);
                     if (coerced !== undefined && isEditableGridCell(coerced)) {
-                        if (process.env.NODE_ENV !== "production") {
-                            if (coerced.kind !== inner.kind) {
-                                // eslint-disable-next-line no-console
-                                console.warn("Coercion should not change cell kind.");
-                            }
+                        if (process.env.NODE_ENV !== "production" && coerced.kind !== inner.kind) {
+                            // eslint-disable-next-line no-console
+                            console.warn("Coercion should not change cell kind.");
                         }
                         return {
                             location: target,
@@ -2386,12 +2386,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let data: string[][] | undefined;
                 let text: string | undefined;
 
+                const textPlain = "text/plain";
+                const textHtml = "text/html";
+
                 if (navigator.clipboard.read !== undefined) {
                     const clipboardContent = await navigator.clipboard.read();
 
                     for (const item of clipboardContent) {
-                        if (item.types.includes("text/html")) {
-                            const htmlBlob = await item.getType("text/html");
+                        if (item.types.includes(textHtml)) {
+                            const htmlBlob = await item.getType(textHtml);
                             const html = await htmlBlob.text();
                             const fragment = document.createElement("html");
                             fragment.innerHTML = html;
@@ -2401,15 +2404,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                                 break;
                             }
                         }
-                        if (item.types.includes("text/plain")) {
-                            text = await (await item.getType("text/plain")).text();
+                        if (item.types.includes(textPlain)) {
+                            text = await (await item.getType(textPlain)).text();
                         }
                     }
                 } else if (navigator.clipboard.readText !== undefined) {
                     text = await navigator.clipboard.readText();
                 } else if (e !== undefined && e?.clipboardData !== null) {
-                    if (e.clipboardData.types.includes("text/html")) {
-                        const html = e.clipboardData.getData("text/html");
+                    if (e.clipboardData.types.includes(textHtml)) {
+                        const html = e.clipboardData.getData(textHtml);
                         const fragment = document.createElement("html");
                         fragment.innerHTML = html;
                         const el = fragment.querySelector("table");
@@ -2417,8 +2420,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             data = decodeHTML(el);
                         }
                     }
-                    if (data === undefined && e.clipboardData.types.includes("text/plain")) {
-                        text = e.clipboardData.getData("text/plain");
+                    if (data === undefined && e.clipboardData.types.includes(textPlain)) {
+                        text = e.clipboardData.getData(textPlain);
                     }
                 } else {
                     return; // I didn't want to read that paste value anyway

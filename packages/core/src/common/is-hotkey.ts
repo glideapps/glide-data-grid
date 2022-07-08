@@ -11,6 +11,16 @@ import { browserIsOSX } from "./browser-detect";
 // and before you ask, yes space is " ", e.g. "ctrl+alt+ ", whatacountry.gif
 // load bearing whitespace, it's basically python
 // if the char starts with a _ it is the event.keycode instead
+function checkKey(key: string | undefined, args: GridKeyEventArgs): boolean {
+    if (key === undefined) return false;
+    if (key.length > 1 && key.startsWith("_")) {
+        const keycode = Number.parseInt(key.substring(1));
+        if (keycode !== args.keyCode) return false;
+    } else {
+        if (key !== args.key) return false;
+    }
+    return true;
+}
 export function isHotkey(hotkey: string, args: GridKeyEventArgs): boolean {
     if (hotkey.length === 0) return false;
     let wantCtrl = false;
@@ -19,13 +29,7 @@ export function isHotkey(hotkey: string, args: GridKeyEventArgs): boolean {
     let wantMeta = false;
     const split = hotkey.split("+");
     const key = split.pop();
-    if (key === undefined) return false;
-    if (key.length > 1 && key.startsWith("_")) {
-        const keycode = Number.parseInt(key.substring(1));
-        if (keycode !== args.keyCode) return false;
-    } else {
-        if (key !== args.key) return false;
-    }
+    if (!checkKey(key, args)) return false;
     for (const accel of split) {
         switch (accel) {
             case "ctrl":

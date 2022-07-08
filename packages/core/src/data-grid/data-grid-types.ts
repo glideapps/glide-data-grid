@@ -64,6 +64,7 @@ export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, Position
     readonly isFillHandle: boolean;
 }
 
+export const headerKind = "header" as const;
 export interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "header";
     readonly location: readonly [number, -1];
@@ -71,6 +72,7 @@ export interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs, Positi
     readonly group: string;
 }
 
+export const groupHeaderKind = "group-header" as const;
 export interface GridMouseGroupHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "group-header";
     readonly location: readonly [number, -2];
@@ -78,6 +80,7 @@ export interface GridMouseGroupHeaderEventArgs extends BaseGridMouseEventArgs, P
     readonly group: string;
 }
 
+export const outOfBoundsKind = "out-of-bounds" as const;
 export interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {
     readonly kind: "out-of-bounds";
     readonly location: Item;
@@ -383,10 +386,7 @@ type ProvideEditorCallbackResult<T extends GridCell> =
 export function isObjectEditorCallbackResult<T extends GridCell>(
     obj: ProvideEditorCallbackResult<T>
 ): obj is ObjectEditorCallbackResult<T> {
-    if (has(obj, "editor")) {
-        return true;
-    }
-    return false;
+    return has(obj, "editor");
 }
 
 export type ProvideEditorCallback<T extends GridCell> = (cell: T) => ProvideEditorCallbackResult<T>;

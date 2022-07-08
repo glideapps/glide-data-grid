@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-identical-functions */
 import * as React from "react";
 
 import { StoryFn, StoryContext, useState, useCallback, useMemo } from "@storybook/addons";

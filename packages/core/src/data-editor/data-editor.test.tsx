@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 import { describe, test, expect, beforeEach } from "jest-without-globals";
 import * as React from "react";
 import { render, fireEvent, screen, act, createEvent } from "@testing-library/react";
@@ -2817,11 +2818,10 @@ describe("data-editor", () => {
             const [col, row] = c;
 
             if (row === 3 && col >= 2 && col <= 3) {
-                const cell = {
+                return {
                     ...basicProps.getCellContent([2, 3]),
                     span: [2, 3] as const,
                 };
-                return cell;
             }
 
             return basicProps.getCellContent(c);

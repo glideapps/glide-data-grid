@@ -61,12 +61,13 @@ const basicProps: DataGridProps = {
     verticalBorder: () => true,
 };
 
+const dataGridCanvasId = "data-grid-canvas";
 describe("data-grid", () => {
     test("Emits mouse down", () => {
         const spy = jest.fn();
         render(<DataGrid {...basicProps} onMouseDown={spy} />);
 
-        fireEvent.mouseDown(screen.getByTestId("data-grid-canvas"), {
+        fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
             clientX: 300, // Col B
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
@@ -84,7 +85,7 @@ describe("data-grid", () => {
         const spy = jest.fn();
         render(<DataGrid {...basicProps} onMouseDown={spy} />);
 
-        fireEvent.mouseDown(screen.getByTestId("data-grid-canvas"), {
+        fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
             clientX: 990, // Col B
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
@@ -101,7 +102,7 @@ describe("data-grid", () => {
         const spy = jest.fn();
         render(<DataGrid {...basicProps} onMouseUp={spy} />);
 
-        fireEvent.mouseUp(screen.getByTestId("data-grid-canvas"), {
+        fireEvent.mouseUp(screen.getByTestId(dataGridCanvasId), {
             clientX: 300, // Col B
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
@@ -130,7 +131,7 @@ describe("data-grid", () => {
             />
         );
 
-        const el = screen.getByTestId("data-grid-canvas");
+        const el = screen.getByTestId(dataGridCanvasId);
         fireEvent.mouseDown(el, {
             clientX: 140,
             clientY: 18,
@@ -150,7 +151,7 @@ describe("data-grid", () => {
 
         render(<DataGrid {...basicProps} onItemHovered={spy} />);
 
-        const el = screen.getByTestId("data-grid-canvas");
+        const el = screen.getByTestId(dataGridCanvasId);
         fireEvent.mouseMove(el, {
             clientX: 350, // Col C
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
@@ -169,7 +170,7 @@ describe("data-grid", () => {
 
         render(<DataGrid {...basicProps} onItemHovered={spy} />);
 
-        const el = screen.getByTestId("data-grid-canvas");
+        const el = screen.getByTestId(dataGridCanvasId);
         fireEvent.mouseMove(el, {
             clientX: 350, // Col C
             clientY: 16, // Header
@@ -190,7 +191,7 @@ describe("data-grid", () => {
             <DataGrid {...basicProps} groupHeaderHeight={32} enableGroups={true} cellYOffset={10} onItemHovered={spy} />
         );
 
-        const el = screen.getByTestId("data-grid-canvas");
+        const el = screen.getByTestId(dataGridCanvasId);
         fireEvent.mouseMove(el, {
             clientX: 350, // Col C
             clientY: 46, // Header
@@ -209,7 +210,7 @@ describe("data-grid", () => {
 
         render(<DataGrid {...basicProps} onItemHovered={spy} enableGroups={true} groupHeaderHeight={28} />);
 
-        const el = screen.getByTestId("data-grid-canvas");
+        const el = screen.getByTestId(dataGridCanvasId);
         fireEvent.mouseMove(el, {
             clientX: 350, // Col C
             clientY: 14, // Header
@@ -251,7 +252,7 @@ describe("data-grid", () => {
         const spy = jest.fn();
         render(<DataGrid {...basicProps} freezeColumns={1} cellXOffset={3} onMouseUp={spy} />);
 
-        fireEvent.mouseUp(screen.getByTestId("data-grid-canvas"), {
+        fireEvent.mouseUp(screen.getByTestId(dataGridCanvasId), {
             clientX: 50, // Col A
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });

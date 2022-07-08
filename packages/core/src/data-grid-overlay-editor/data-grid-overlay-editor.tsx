@@ -61,8 +61,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     const [isValid, setIsValid] = React.useState(() => {
         if (validateCell === undefined) return true;
-        if (isEditableGridCell(content) && validateCell?.(cell, content, lastValueRef.current) === false) return false;
-        return true;
+        return !(isEditableGridCell(content) && validateCell?.(cell, content, lastValueRef.current) === false);
     });
 
     const onFinishEditing = React.useCallback<typeof onFinishEditingIn>(
@@ -227,7 +226,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         classWrap += " pad";
     }
 
-    const portal = createPortal(
+    return createPortal(
         <ThemeContext.Provider value={theme}>
             <ClickOutsideContainer style={makeCSSStyle(theme)} className={className} onClickOutside={onClickOutside}>
                 <DataGridOverlayEditorStyle
@@ -248,8 +247,6 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         </ThemeContext.Provider>,
         portalElement
     );
-
-    return portal;
 };
 
 export default DataGridOverlayEditor;

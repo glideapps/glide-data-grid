@@ -2472,10 +2472,8 @@ function walkRowsInCol(
 
         const isMovedStickyRow = doSticky && row === rows - 1;
 
-        if (!isMovedStickyRow) {
-            if (cb(y, row, rh, doingSticky, trailingRowType !== "none" && row === rows - 1) === true) {
-                break;
-            }
+        if (!isMovedStickyRow && cb(y, row, rh, doingSticky, trailingRowType !== "none" && row === rows - 1) === true) {
+            break;
         }
 
         if (doingSticky) {

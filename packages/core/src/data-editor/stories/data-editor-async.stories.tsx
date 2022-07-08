@@ -157,8 +157,7 @@ export const ServerSideData: React.VFC = () => {
 
     const getRowData = React.useCallback(async (r: Item) => {
         await new Promise(res => setTimeout(res, 300));
-        const result = range(r[0], r[1]).map(rowIndex => [`1, ${rowIndex}`, `2, ${rowIndex}`]);
-        return result;
+        return range(r[0], r[1]).map(rowIndex => [`1, ${rowIndex}`, `2, ${rowIndex}`]);
     }, []);
 
     const columns = React.useMemo<readonly GridColumn[]>(() => {

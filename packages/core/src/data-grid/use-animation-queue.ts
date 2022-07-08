@@ -31,7 +31,7 @@ export function useAnimationQueue(draw: (items: readonly Item[]) => void) {
         window.requestAnimationFrame(seq.current > 600 ? requeue : fn);
     }, []);
 
-    const enqueue = React.useCallback(
+    return React.useCallback(
         (item: Item) => {
             if (hasItem(queue.current, item)) return;
             if (queue.current.length === 0) {
@@ -41,6 +41,4 @@ export function useAnimationQueue(draw: (items: readonly Item[]) => void) {
         },
         [loop]
     );
-
-    return enqueue;
 }

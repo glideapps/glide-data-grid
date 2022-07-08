@@ -123,13 +123,16 @@ export const InfiniteScroller: React.FC<Props> = p => {
         const dx = scrollLeft - lastScrollLeft;
         const dy = scrollTop - lastScrollTop;
 
-        if (dx !== 0 && dy !== 0 && preventDiagonalScrolling) {
-            if (lastScrollPosition.current.lockDirection === undefined) {
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    lastScrollPosition.current.lockDirection = [lastScrollLeft, undefined];
-                } else {
-                    lastScrollPosition.current.lockDirection = [undefined, lastScrollTop];
-                }
+        if (
+            dx !== 0 &&
+            dy !== 0 &&
+            preventDiagonalScrolling &&
+            lastScrollPosition.current.lockDirection === undefined
+        ) {
+            if (Math.abs(dx) > Math.abs(dy)) {
+                lastScrollPosition.current.lockDirection = [lastScrollLeft, undefined];
+            } else {
+                lastScrollPosition.current.lockDirection = [undefined, lastScrollTop];
             }
         }
 

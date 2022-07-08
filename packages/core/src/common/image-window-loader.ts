@@ -100,6 +100,49 @@ class ImageWindowLoader {
         this.clearOutOfWindow();
     }
 
+    private loadImage(url: string, col: number, row: number, key: string) {
+        let loaded = false;
+        const img = imgPool.pop() ?? new Image();
+
+        let canceled = false;
+        const result: LoadResult = {
+            img: undefined,
+            cells: [packColRowToNumber(col, row)],
+            url,
+            cancel: () => {
+                if (canceled) return;
+                canceled = true;
+                if (imgPool.length < 12) {
+                    imgPool.unshift(img); // never retain more than 12
+                } else if (!loaded) {
+                    img.src = "";
+                }
+            },
+        };
+
+        const loadPromise = new Promise(r => (img.onload = () => r(null)));
+        // use request animation time to avoid paying src set costs during draw calls
+        requestAnimationFrame(async () => {
+            try {
+                img.src = url;
+                await loadPromise;
+                await img.decode();
+                const toWrite = this.cache[key];
+                if (toWrite !== undefined && !canceled) {
+                    toWrite.img = img;
+                    for (const packed of toWrite.cells) {
+                        this.loadedLocations.push(unpackNumberToColRow(packed));
+                    }
+                    loaded = true;
+                    this.sendLoaded();
+                }
+            } catch (e) {
+                result.cancel();
+            }
+        });
+        this.cache[key] = result;
+    }
+
     public loadOrGetImage(url: string, col: number, row: number): HTMLImageElement | undefined {
         const key = url;
 
@@ -111,48 +154,9 @@ class ImageWindowLoader {
             }
             return current.img;
         } else {
-            let loaded = false;
-            const img = imgPool.pop() ?? new Image();
-
-            let canceled = false;
-            const result: LoadResult = {
-                img: undefined,
-                cells: [packColRowToNumber(col, row)],
-                url,
-                cancel: () => {
-                    if (canceled) return;
-                    canceled = true;
-                    if (imgPool.length < 12) {
-                        imgPool.unshift(img); // never retain more than 12
-                    } else if (!loaded) {
-                        img.src = "";
-                    }
-                },
-            };
-
-            const loadPromise = new Promise(r => (img.onload = () => r(null)));
-            // use request animation time to avoid paying src set costs during draw calls
-            requestAnimationFrame(async () => {
-                try {
-                    img.src = url;
-                    await loadPromise;
-                    await img.decode();
-                    const toWrite = this.cache[key];
-                    if (toWrite !== undefined && !canceled) {
-                        toWrite.img = img;
-                        for (const packed of toWrite.cells) {
-                            this.loadedLocations.push(unpackNumberToColRow(packed));
-                        }
-                        loaded = true;
-                        this.sendLoaded();
-                    }
-                } catch (e) {
-                    result.cancel();
-                }
-            });
-            this.cache[key] = result;
-            return undefined;
+            this.loadImage(url, col, row, key);
         }
+        return undefined;
     }
 }
 
