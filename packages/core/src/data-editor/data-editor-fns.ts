@@ -74,13 +74,14 @@ export function expandSelection(
 
             let left = r.x - rowMarkerOffset;
             let right = r.x + r.width - 1 - rowMarkerOffset;
-            cells.forEach(row =>
-                row.forEach(cell => {
-                    if (cell.span === undefined) return;
+            for (const row of cells) {
+                for (const cell of row) {
+                    if (cell.span === undefined) continue;
                     left = Math.min(cell.span[0], left);
                     right = Math.max(cell.span[1], right);
-                })
-            );
+                }
+            }
+
             if (left === r.x - rowMarkerOffset && right === r.x + r.width - 1 - rowMarkerOffset) {
                 isFilled = true;
             } else {
@@ -104,14 +105,14 @@ export function expandSelection(
     return newVal;
 }
 
-export function unquote(str: string): string[][] {
-    function descape(s: string): string {
-        if (s.startsWith('"') && s.endsWith('"')) {
-            s = s.slice(1, -1).replace(/""/g, '"');
-        }
-        return s;
+function descape(s: string): string {
+    if (s.startsWith('"') && s.endsWith('"')) {
+        s = s.slice(1, -1).replace(/""/g, '"');
     }
+    return s;
+}
 
+export function unquote(str: string): string[][] {
     const enum State {
         None,
         inString,
@@ -202,37 +203,37 @@ export function decodeHTML(tableEl: HTMLTableElement): string[][] | undefined {
     return result;
 }
 
+function escape(str: string): string {
+    if (/[\t\n"]/.test(str)) {
+        str = `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+}
+
+const formatBoolean = (val: boolean | BooleanEmpty | BooleanIndeterminate): string => {
+    switch (val) {
+        case true:
+            return "TRUE";
+
+        case false:
+            return "FALSE";
+
+        case BooleanIndeterminate:
+            return "INDETERMINATE";
+
+        case BooleanEmpty:
+            return "";
+
+        default:
+            assertNever(val);
+    }
+};
+
 export function copyToClipboard(
     cells: readonly (readonly GridCell[])[],
     columnIndexes: readonly number[],
     e?: ClipboardEvent
 ) {
-    function escape(str: string): string {
-        if (/[\n"\t]/.test(str)) {
-            str = `"${str.replace(/"/g, '""')}"`;
-        }
-        return str;
-    }
-
-    const formatBoolean = (val: boolean | BooleanEmpty | BooleanIndeterminate): string => {
-        switch (val) {
-            case true:
-                return "TRUE";
-
-            case false:
-                return "FALSE";
-
-            case BooleanIndeterminate:
-                return "INDETERMINATE";
-
-            case BooleanEmpty:
-                return "";
-
-            default:
-                assertNever(val);
-        }
-    };
-
     const formatCell = (cell: GridCell, index: number, raw: boolean): string => {
         const colIndex = columnIndexes[index];
         if (cell.span !== undefined && cell.span[0] !== colIndex) return "";
@@ -270,21 +271,20 @@ export function copyToClipboard(
         for (const row of cells) {
             const rowEl = document.createElement("tr");
 
-            for (let i = 0; i < row.length; i++) {
-                const cell = row[i];
+            for (const [i, cell] of row.entries()) {
                 const cellEl = document.createElement("td");
                 if (cell.kind === GridCellKind.Uri) {
                     const link = document.createElement("a");
                     link.href = cell.data;
                     link.innerText = cell.data;
-                    cellEl.appendChild(link);
+                    cellEl.append(link);
                 } else {
                     cellEl.innerText = formatCell(cell, i, true);
                 }
-                rowEl.appendChild(cellEl);
+                rowEl.append(cellEl);
             }
 
-            rootEl.appendChild(rowEl);
+            rootEl.append(rowEl);
         }
         if (window.navigator.clipboard?.write !== undefined) {
             void window.navigator.clipboard.write([

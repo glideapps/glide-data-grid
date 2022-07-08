@@ -6,8 +6,8 @@
         "plugin:import/recommended",
         "plugin:import/typescript",
         "plugin:react-hooks/recommended",
-        "plugin:sonarjs/recommended"
-        // "plugin:unicorn/recommended"
+        "plugin:sonarjs/recommended",
+        "plugin:unicorn/recommended"
     ],
     "plugins": ["react", "@typescript-eslint", "import", "sonarjs"],
     "parser": "@typescript-eslint/parser",
@@ -36,6 +36,16 @@
         "@typescript-eslint/interface-name-prefix": "off",
         "@typescript-eslint/no-floating-promises": "error",
         "@typescript-eslint/no-shadow": "error",
+        "unicorn/no-nested-ternary": "off",
+        "unicorn/prevent-abbreviations": "off",
+        "unicorn/no-useless-undefined": "off",
+        "unicorn/prefer-query-selector": "off",
+        "unicorn/filename-case": "off",
+        "unicorn/prefer-top-level-await": "off",
+        "unicorn/no-array-callback-reference": "off",
+        "unicorn/no-null": "off",
+        "unicorn/prefer-dom-node-text-content": "off",
+        "unicorn/no-array-reduce": "off",
         "@typescript-eslint/no-misused-promises": [
             "error",
             {

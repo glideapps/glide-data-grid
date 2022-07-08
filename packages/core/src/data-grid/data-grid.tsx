@@ -171,6 +171,10 @@ export interface DataGridRef {
     damage: (cells: DamageUpdateList) => void;
 }
 
+const getRowData = (cell: InnerGridCell) => {
+    return cell.kind === GridCellKind.Custom ? cell.copyData : CellRenderers[cell.kind].getAccessibilityString(cell);
+};
+
 const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p, forwardedRef) => {
     const {
         width,
@@ -228,6 +232,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         onDragLeave,
         smoothScrollX = false,
         smoothScrollY = false,
+        experimental,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -235,7 +240,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const imageLoader = React.useMemo<ImageWindowLoader>(() => new ImageWindowLoader(), []);
-    const damageRegion = React.useRef<readonly Item[] | undefined>(undefined);
+    const damageRegion = React.useRef<readonly Item[] | undefined>();
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
     const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
@@ -258,7 +263,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
     const scrollingStopRef = React.useRef(-1);
-    const disableFirefoxRescaling = p.experimental?.enableFirefoxRescaling !== true;
+    const disableFirefoxRescaling = experimental?.enableFirefoxRescaling !== true;
     React.useLayoutEffect(() => {
         if (!browserIsFirefox.value || window.devicePixelRatio === 1 || disableFirefoxRescaling) return;
         // We don't want to go into scroll mode for a single repaint
@@ -523,7 +528,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             hoverInfo: hoverInfoRef.current,
             spriteManager,
             scrolling,
-            hyperWrapping: p.experimental?.hyperWrapping ?? false,
+            hyperWrapping: experimental?.hyperWrapping ?? false,
             touchMode: lastWasTouch,
             enqueue: enqueueRef.current,
         };
@@ -574,7 +579,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         imageLoader,
         spriteManager,
         scrolling,
-        p.experimental?.hyperWrapping,
+        experimental?.hyperWrapping,
         lastWasTouch,
     ]);
 
@@ -619,7 +624,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const groupHeaderHovered = hCol !== undefined && hRow === -2;
     let clickableInnerCellHovered = false;
     let editableBoolHovered = false;
-    let cursorOverride: React.CSSProperties["cursor"] | undefined = undefined;
+    let cursorOverride: React.CSSProperties["cursor"] | undefined;
     if (hCol !== undefined && hRow !== undefined && hRow > -1) {
         const cell = getCellContent([hCol, hRow]);
         clickableInnerCellHovered =
@@ -663,8 +668,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const groupDesc = getGroupDetails(group);
             if (groupDesc.actions !== undefined) {
                 const boxes = getActionBoundsForGroup(bounds, groupDesc.actions);
-                for (let i = 0; i < boxes.length; i++) {
-                    const box = boxes[i];
+                for (const [i, box] of boxes.entries()) {
                     if (pointInRect(box, localEventX + bounds.x, localEventY + box.y)) {
                         return groupDesc.actions[i];
                     }
@@ -1049,7 +1053,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         offscreen.style.left = "-100%";
                         offscreen.style.position = "absolute";
 
-                        document.body.appendChild(offscreen);
+                        document.body.append(offscreen);
 
                         event.dataTransfer.setDragImage(
                             offscreen,
@@ -1058,7 +1062,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         );
 
                         window.setTimeout(() => {
-                            document.body.removeChild(offscreen);
+                            offscreen.remove();
                         }, 0);
                     }
                 }
@@ -1193,6 +1197,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     );
 
     const lastFocusedSubdomNode = React.useRef<Item>();
+
     const accessibilityTree = useDebouncedMemo(
         () => {
             if (width < 50) return null;
@@ -1202,13 +1207,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 effectiveCols = effectiveCols.slice(1);
             }
 
-            const getRowData = (cell: InnerGridCell) => {
-                if (cell.kind === GridCellKind.Custom) {
-                    return cell.copyData;
-                } else {
-                    return CellRenderers[cell.kind].getAccessibilityString(cell);
-                }
-            };
             const [fCol, fRow] = selection.current?.cell ?? [];
             const range = selection.current?.range;
 

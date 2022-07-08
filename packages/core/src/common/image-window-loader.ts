@@ -57,6 +57,7 @@ class ImageWindowLoader {
         this.imageLoaded = imageLoaded;
     }
 
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     private sendLoaded = throttle(() => {
         this.imageLoaded(this.loadedLocations);
         this.loadedLocations = [];
@@ -64,8 +65,7 @@ class ImageWindowLoader {
 
     private clearOutOfWindow = () => {
         const keys = Object.keys(this.cache);
-        for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
+        for (const key of keys) {
             const obj = this.cache[key];
 
             let keep = false;
@@ -120,7 +120,7 @@ class ImageWindowLoader {
             },
         };
 
-        const loadPromise = new Promise(r => (img.onload = () => r(null)));
+        const loadPromise = new Promise(r => img.addEventListener("load", () => r(null)));
         // use request animation time to avoid paying src set costs during draw calls
         requestAnimationFrame(async () => {
             try {
@@ -136,7 +136,7 @@ class ImageWindowLoader {
                     loaded = true;
                     this.sendLoaded();
                 }
-            } catch (e) {
+            } catch {
                 result.cancel();
             }
         });

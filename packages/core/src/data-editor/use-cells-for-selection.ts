@@ -52,6 +52,7 @@ export function useCellsForSelection(
 
                 if (typeof r === "function") {
                     return async () =>
+                        // eslint-disable-next-line unicorn/no-await-expression-member
                         (await r()).map<CellArray[0]>(row => [
                             { kind: GridCellKind.Loading, allowOverlay: false },
                             ...row,

@@ -21,7 +21,7 @@ export function useStayOnScreen(): StayOnScreen {
 
         const observer = new IntersectionObserver(
             ents => {
-                if (ents.length < 1) return;
+                if (ents.length === 0) return;
                 setIsIntersecting(ents[0].isIntersecting);
             },
             { threshold: 1 }

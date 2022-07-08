@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-for-loop */
 import type { Theme } from "../common/styles";
 import {
     DrilldownCellData,
@@ -258,7 +259,7 @@ export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font
         metricsSize++;
     }
 
-    if (metricsSize > 10000) {
+    if (metricsSize > 10_000) {
         metricsCache = {};
         metricsSize = 0;
     }
@@ -354,17 +355,17 @@ export function prepTextCell(
 }
 
 export function drawTextCellExternal(args: DrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
-    const { rect } = args;
+    const { rect, ctx, theme } = args;
 
-    args.ctx.fillStyle = args.theme.textDark;
+    ctx.fillStyle = theme.textDark;
     drawTextCell(
         {
-            ctx: args.ctx,
+            ctx: ctx,
             x: rect.x,
             y: rect.y,
             h: rect.height,
             w: rect.width,
-            theme: args.theme,
+            theme: theme,
         },
         data,
         contentAlign
@@ -553,9 +554,9 @@ export function drawCheckbox(
             ctx.fill();
 
             ctx.beginPath();
-            ctx.moveTo(centerX - 8 + 3.65005, centerY - 8 + 7.84995);
-            ctx.lineTo(centerX - 8 + 6.37587, centerY - 8 + 10.7304);
-            ctx.lineTo(centerX - 8 + 11.9999, centerY - 8 + 4.74995);
+            ctx.moveTo(centerX - 8 + 3.650_05, centerY - 8 + 7.849_95);
+            ctx.lineTo(centerX - 8 + 6.375_87, centerY - 8 + 10.7304);
+            ctx.lineTo(centerX - 8 + 11.9999, centerY - 8 + 4.749_95);
 
             ctx.strokeStyle = theme.bgCell;
             ctx.lineJoin = "round";
@@ -766,7 +767,7 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
     }
 
     ctx.beginPath();
-    renderBoxes.forEach(rectInfo => {
+    for (const rectInfo of renderBoxes) {
         roundedRect(
             ctx,
             rectInfo.x,
@@ -775,15 +776,15 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
             bubbleHeight,
             bubbleHeight / 2
         );
-    });
+    }
     ctx.fillStyle = highlighted ? theme.bgBubbleSelected : theme.bgBubble;
     ctx.fill();
 
-    renderBoxes.forEach((rectInfo, i) => {
+    for (const [i, rectInfo] of renderBoxes.entries()) {
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
         ctx.fillText(data[i], rectInfo.x + bubblePad, y + h / 2 + getMiddleCenterBias(ctx, theme));
-    });
+    }
 }
 
 const drilldownCache: {
@@ -891,7 +892,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
 
     if (tileMap !== null) {
         const { el, height, middleWidth, sideWidth, width } = tileMap;
-        renderBoxes.forEach(rectInfo => {
+        for (const rectInfo of renderBoxes) {
             const rx = Math.floor(rectInfo.x);
             const rw = Math.floor(rectInfo.width);
             ctx.imageSmoothingEnabled = false;
@@ -911,12 +912,12 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
                 34
             );
             ctx.imageSmoothingEnabled = true;
-        });
+        }
     }
 
     ctx.beginPath();
 
-    renderBoxes.forEach((rectInfo, i) => {
+    for (const [i, rectInfo] of renderBoxes.entries()) {
         const d = data[i];
         let drawX = rectInfo.x + bubblePad;
 
@@ -952,7 +953,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
         ctx.fillText(d.text, drawX, y + h / 2 + getMiddleCenterBias(ctx, theme));
-    });
+    }
 }
 
 export function drawImage(args: BaseDrawArgs, data: readonly string[]) {
@@ -1041,11 +1042,7 @@ export function roundedPoly(ctx: CanvasRenderingContext2D, points: Point[], radi
                 drawDirection = true;
             }
         }
-        if (p2.radius !== undefined) {
-            radius = p2.radius;
-        } else {
-            radius = radiusAll;
-        }
+        radius = p2.radius !== undefined ? p2.radius : radiusAll;
         //-----------------------------------------
         // Part 2
         const halfAngle = angle / 2;

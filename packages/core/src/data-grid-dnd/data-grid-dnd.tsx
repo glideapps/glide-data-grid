@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/consistent-destructuring */
 import clamp from "lodash/clamp";
 import * as React from "react";
 import DataGrid, { DataGridProps, DataGridRef } from "../data-grid/data-grid";

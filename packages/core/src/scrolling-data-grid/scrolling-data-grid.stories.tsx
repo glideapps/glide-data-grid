@@ -66,7 +66,7 @@ export function Simplenotest() {
     return (
         <GridScroller
             onMouseMove={() => undefined}
-            rows={10000}
+            rows={10_000}
             enableGroups={false}
             clientSize={[1000, 1000]}
             cellXOffset={x}

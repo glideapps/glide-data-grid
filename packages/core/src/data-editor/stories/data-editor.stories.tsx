@@ -95,7 +95,7 @@ And supports newline chars and automatic wrapping text that just needs to be lon
             kind: GridCellKind.Number,
             displayData: "$10,352",
             allowOverlay: true,
-            data: 10352,
+            data: 10_352,
             readonly: true,
         };
     }

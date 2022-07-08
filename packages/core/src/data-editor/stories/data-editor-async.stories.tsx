@@ -78,8 +78,8 @@ function useAsyncData<TRowType>(
 
             const damageList: { cell: [number, number] }[] = [];
             const data = dataRef.current;
-            for (let i = 0; i < d.length; i++) {
-                data[i + startIndex] = d[i];
+            for (const [i, element] of d.entries()) {
+                data[i + startIndex] = element;
                 for (let col = vr.x; col <= vr.x + vr.width; col++) {
                     damageList.push({
                         cell: [col, i + startIndex],

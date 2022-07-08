@@ -25,7 +25,7 @@ export class AnimationManager {
     };
 
     private addToLeavingItems = (item: StateItem) => {
-        const isAlreadyLeaving = this.leavingItems.find(i => this.areSameItems(i.item, item.item)) !== undefined;
+        const isAlreadyLeaving = this.leavingItems.some(i => this.areSameItems(i.item, item.item));
 
         if (isAlreadyLeaving) {
             return;

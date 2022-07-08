@@ -2,8 +2,8 @@ import * as React from "react";
 import type { Item } from "./data-grid-types";
 
 function hasItem(arr: readonly Item[], item: Item) {
-    for (let i = 0; i < arr.length; i++) {
-        if (arr[i][0] === item[0] && arr[i][1] === item[1]) return true;
+    for (const element of arr) {
+        if (element[0] === item[0] && element[1] === item[1]) return true;
     }
     return false;
 }

@@ -37,64 +37,74 @@ export function lossyCopyData<T extends EditableGridCell>(source: EditableGridCe
             ...target,
             data: sourceData as any,
         };
-    } else if (target.kind === GridCellKind.Uri) {
-        if (isArray(sourceData)) {
-            return {
-                ...target,
-                data: sourceData[0],
-            };
-        }
-        return {
-            ...target,
-            data: sourceData?.toString() ?? "",
-        };
-    } else if (target.kind === GridCellKind.Boolean) {
-        if (isArray(sourceData)) {
-            return {
-                ...target,
-                data: sourceData[0] !== undefined,
-            };
-        } else if (source.kind === GridCellKind.Boolean) {
-            return {
-                ...target,
-                data: source.data,
-            };
-        }
-        return {
-            ...target,
-            data: isTruthy(sourceData) ? true : false,
-        };
-    } else if (target.kind === GridCellKind.Image) {
-        if (isArray(sourceData)) {
-            return {
-                ...target,
-                data: [sourceData[0]],
-            };
-        }
-        return {
-            ...target,
-            data: [sourceData?.toString() ?? ""],
-        };
-    } else if (target.kind === GridCellKind.Number) {
-        return {
-            ...target,
-            data: 0,
-        };
-    } else if (target.kind === GridCellKind.Text || target.kind === GridCellKind.Markdown) {
-        if (isArray(sourceData)) {
-            return {
-                ...target,
-                data: sourceData[0].toString() ?? "",
-            };
-        }
+    } else
+        switch (target.kind) {
+            case GridCellKind.Uri: {
+                if (isArray(sourceData)) {
+                    return {
+                        ...target,
+                        data: sourceData[0],
+                    };
+                }
+                return {
+                    ...target,
+                    data: sourceData?.toString() ?? "",
+                };
+            }
+            case GridCellKind.Boolean: {
+                if (isArray(sourceData)) {
+                    return {
+                        ...target,
+                        data: sourceData[0] !== undefined,
+                    };
+                } else if (source.kind === GridCellKind.Boolean) {
+                    return {
+                        ...target,
+                        data: source.data,
+                    };
+                }
+                return {
+                    ...target,
+                    data: isTruthy(sourceData) ? true : false,
+                };
+            }
+            case GridCellKind.Image: {
+                if (isArray(sourceData)) {
+                    return {
+                        ...target,
+                        data: [sourceData[0]],
+                    };
+                }
+                return {
+                    ...target,
+                    data: [sourceData?.toString() ?? ""],
+                };
+            }
+            case GridCellKind.Number: {
+                return {
+                    ...target,
+                    data: 0,
+                };
+            }
+            case GridCellKind.Text:
+            case GridCellKind.Markdown: {
+                if (isArray(sourceData)) {
+                    return {
+                        ...target,
+                        data: sourceData[0].toString() ?? "",
+                    };
+                }
 
-        return {
-            ...target,
-            data: source.data?.toString() ?? "",
-        };
-    } else if (target.kind === GridCellKind.Custom) {
-        return target;
-    }
+                return {
+                    ...target,
+                    data: source.data?.toString() ?? "",
+                };
+            }
+            case GridCellKind.Custom: {
+                return target;
+            }
+            // No default
+        }
     assertNever(target);
 }
 
@@ -360,6 +370,7 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
 
     const extraColumnsAmount = amount - defaultColumns.length;
 
+    // eslint-disable-next-line unicorn/no-new-array
     const extraColumns = [...new Array(extraColumnsAmount)].map((_, index) =>
         createTextColumnInfo(index + defaultColumns.length, group)
     );

@@ -72,7 +72,7 @@ export function useSelectionBehavior(
                 newRows = newRows.add(append);
             }
             let newVal: GridSelection;
-            if (rowBehavior === "exclusive" && newRows.length !== 0) {
+            if (rowBehavior === "exclusive" && newRows.length > 0) {
                 newVal = {
                     current: undefined,
                     columns: CompactSelection.empty(),
@@ -100,7 +100,7 @@ export function useSelectionBehavior(
                 newCols = newCols.add(append);
             }
             let newVal: GridSelection;
-            if (columnBehavior === "exclusive" && newCols.length !== 0) {
+            if (columnBehavior === "exclusive" && newCols.length > 0) {
                 newVal = {
                     current: undefined,
                     rows: CompactSelection.empty(),

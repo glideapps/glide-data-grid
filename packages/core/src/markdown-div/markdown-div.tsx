@@ -12,10 +12,10 @@ export default class MarkdownDiv<TProps extends MarkdownDivProps, TState> extend
     private targetElement: HTMLElement | null = null;
 
     private renderMarkdownIntoDiv() {
-        const { targetElement } = this;
+        const { targetElement, props } = this;
         if (targetElement === null) return;
 
-        const { contents, createNode } = this.props;
+        const { contents, createNode } = props;
 
         const innerHTML: string = (marked as any)(contents);
 
@@ -29,11 +29,10 @@ export default class MarkdownDiv<TProps extends MarkdownDivProps, TState> extend
             childDoc.innerHTML = innerHTML;
             newChild = childDoc.content;
         }
-        targetElement.appendChild(newChild);
+        targetElement.append(newChild);
 
         const tags = targetElement.getElementsByTagName("a");
-        for (let i = 0; i < tags.length; i++) {
-            const tag = tags[i];
+        for (const tag of tags) {
             tag.target = "_blank";
             tag.rel = "noreferrer noopener";
         }

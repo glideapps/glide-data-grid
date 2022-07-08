@@ -10,7 +10,7 @@ describe("maybe", () => {
 
     test("Returns default value on error", () => {
         const result = maybe(() => {
-            throw Error();
+            throw new Error("Fail");
         }, "fail");
 
         expect(result).toBe("fail");

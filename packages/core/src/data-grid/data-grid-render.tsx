@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-for-loop */
 import type ImageWindowLoader from "../common/image-window-loader";
 import {
     GridSelection,
@@ -1429,7 +1430,7 @@ function drawBlanks(
             if (x > width) return;
             ctx.save();
             ctx.beginPath();
-            ctx.rect(x, totalHeaderHeight + 1, 10000, height - totalHeaderHeight - 1);
+            ctx.rect(x, totalHeaderHeight + 1, 10_000, height - totalHeaderHeight - 1);
             ctx.clip();
 
             walkRowsInCol(
@@ -1443,7 +1444,9 @@ function drawBlanks(
                     if (
                         !isSticky &&
                         drawRegions.length > 0 &&
-                        !drawRegions.some(dr => intersectRect(drawX, drawY, 10000, rh, dr.x, dr.y, dr.width, dr.height))
+                        !drawRegions.some(dr =>
+                            intersectRect(drawX, drawY, 10_000, rh, dr.x, dr.y, dr.width, dr.height)
+                        )
                     ) {
                         return;
                     }
@@ -1459,15 +1462,15 @@ function drawBlanks(
 
                     if (blankTheme.bgCell !== theme.bgCell) {
                         ctx.fillStyle = blankTheme.bgCell;
-                        ctx.fillRect(drawX, drawY, 10000, rh);
+                        ctx.fillRect(drawX, drawY, 10_000, rh);
                     }
                     if (rowDisabled) {
                         ctx.fillStyle = blankTheme.bgHeader;
-                        ctx.fillRect(drawX, drawY, 10000, rh);
+                        ctx.fillRect(drawX, drawY, 10_000, rh);
                     }
                     if (rowSelected) {
                         ctx.fillStyle = blankTheme.accentLight;
-                        ctx.fillRect(drawX, drawY, 10000, rh);
+                        ctx.fillRect(drawX, drawY, 10_000, rh);
                     }
                 }
             );
@@ -1737,10 +1740,7 @@ function drawFocusRing(
     fillHandle: boolean,
     rows: number
 ): (() => void) | undefined {
-    if (
-        selectedCell.current === undefined ||
-        effectiveCols.find(c => (c.sourceIndex === selectedCell.current?.cell[0]) === undefined)
-    )
+    if (selectedCell.current === undefined || !effectiveCols.some(c => c.sourceIndex === selectedCell.current?.cell[0]))
         return undefined;
     const [targetCol, targetRow] = selectedCell.current.cell;
     const cell = getCellContent(selectedCell.current.cell);
@@ -2504,13 +2504,7 @@ function walkColumns(
     let clipX = 0; // this tracks the total width of sticky cols
     const drawY = totalHeaderHeight + translateY;
     for (const c of effectiveCols) {
-        let drawX: number;
-        if (c.sticky) {
-            drawX = clipX;
-        } else {
-            drawX = x + translateX;
-        }
-
+        const drawX = c.sticky ? clipX : x + translateX;
         if (cb(c, drawX, drawY, clipX, cellYOffset) === true) {
             break;
         }

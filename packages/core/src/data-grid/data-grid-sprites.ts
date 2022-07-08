@@ -26,7 +26,7 @@ export class SpriteManager {
     constructor(headerIcons: SpriteMap | undefined, private onSettled: () => void) {
         this.headerIcons = {
             ...sprites,
-            ...(headerIcons ?? {}),
+            ...headerIcons,
         };
     }
 

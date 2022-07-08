@@ -476,7 +476,7 @@ function mergeRanges(input: CompactSelectionRanges) {
 
     stack.push([...ranges[0]]);
 
-    ranges.slice(1).forEach(range => {
+    for (const range of ranges.slice(1)) {
         const top = stack[stack.length - 1];
 
         if (top[1] < range[0]) {
@@ -484,7 +484,7 @@ function mergeRanges(input: CompactSelectionRanges) {
         } else if (top[1] < range[1]) {
             top[1] = range[1];
         }
-    });
+    }
 
     return stack;
 }

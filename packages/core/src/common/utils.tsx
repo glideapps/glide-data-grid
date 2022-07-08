@@ -6,9 +6,8 @@ export function useEventListener<K extends keyof HTMLElementEventMap>(
     handler: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
     element: HTMLElement | Window | null,
     passive: boolean,
-    capture?: boolean
+    capture = false
 ) {
-    capture = capture ?? false;
     // Create a ref that stores handler
     const savedHandler = React.useRef<(this: HTMLElement, ev: HTMLElementEventMap[K]) => any>();
 
@@ -153,9 +152,9 @@ export function getScrollBarWidth(): number {
     outer.style.width = "200px";
     outer.style.height = "150px";
     outer.style.overflow = "hidden";
-    outer.appendChild(inner);
+    outer.append(inner);
 
-    document.body.appendChild(outer);
+    document.body.append(outer);
     const w1 = inner.offsetWidth;
     outer.style.overflow = "scroll";
     let w2 = inner.offsetWidth;
@@ -163,7 +162,7 @@ export function getScrollBarWidth(): number {
         w2 = outer.clientWidth;
     }
 
-    document.body.removeChild(outer);
+    outer.remove();
 
     scrollbarWidthCache = w1 - w2;
     return scrollbarWidthCache;

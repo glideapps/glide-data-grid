@@ -1,5 +1,3 @@
-import { DataEditor } from "./data-editor/data-editor";
-
 export type { OverlayImageEditorProps } from "./data-grid-overlay-editor/private/image-overlay-editor";
 export type { MarkdownDivProps } from "./markdown-div/markdown-div";
 export type { SpriteMap } from "./data-grid/data-grid-sprites";
@@ -22,4 +20,4 @@ export { getDataEditorTheme as getDefaultTheme, useTheme } from "./common/styles
 export { useColumnSizer } from "./data-editor/use-column-sizer";
 export { useCustomCells } from "./data-editor/use-custom-cells";
 
-export default DataEditor;
+export { DataEditor as default } from "./data-editor/data-editor";

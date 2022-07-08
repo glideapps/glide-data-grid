@@ -18,8 +18,8 @@ function lazy<T>(fn: () => T) {
 export const browserIsFirefox = lazy(() => window.navigator.userAgent.includes("Firefox"));
 export const browserIsSafari = lazy(
     () =>
-        window.navigator.userAgent.indexOf("Mac OS") > -1 &&
-        window.navigator.userAgent.indexOf("Safari") > -1 &&
-        window.navigator.userAgent.indexOf("Chrome") < 0
+        window.navigator.userAgent.includes("Mac OS") &&
+        window.navigator.userAgent.includes("Safari") &&
+        !window.navigator.userAgent.includes("Chrome")
 );
 export const browserIsOSX = lazy(() => window.navigator.platform.toLowerCase().startsWith("mac"));

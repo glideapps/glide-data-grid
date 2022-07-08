@@ -105,12 +105,14 @@ export function useColumnSizer(
             const getResult = getCells(computeArea, abortController.signal);
             const tailGetResult = tailRows > 0 ? getCells(tailComputeArea, abortController.signal) : undefined;
             let toSet: CellArray;
+            // eslint-disable-next-line unicorn/prefer-ternary
             if (typeof getResult === "object") {
                 toSet = getResult;
             } else {
                 toSet = await resolveCellsThunk(getResult);
             }
             if (tailGetResult !== undefined) {
+                // eslint-disable-next-line unicorn/prefer-ternary
                 if (typeof tailGetResult === "object") {
                     toSet = [...toSet, ...tailGetResult];
                 } else {
@@ -169,8 +171,7 @@ export function useColumnSizer(
         let totalWidth = 0;
         let totalGrow = 0;
         const distribute: number[] = [];
-        for (let i = 0; i < result.length; i++) {
-            const c = result[i];
+        for (const [i, c] of result.entries()) {
             totalWidth += c.width;
             if (c.grow !== undefined && c.grow > 0) {
                 totalGrow += c.grow;

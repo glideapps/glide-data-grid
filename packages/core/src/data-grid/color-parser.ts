@@ -14,7 +14,7 @@ function createDiv() {
     d.style.pointerEvents = "none";
     d.style.position = "fixed";
     // div must be mounted for `getComputedStyle` to work
-    document.body.appendChild(d);
+    document.body.append(d);
     return d;
 }
 
@@ -37,9 +37,10 @@ export function parseToRgba(color: string): [number, number, number, number] {
     if (computedColor !== control) throw new Error("Could not parse color");
 
     const result = computedColor
+        // eslint-disable-next-line unicorn/better-regex
         .replace(/[^\d.,]/g, "")
         .split(",")
-        .map(parseFloat) as [number, number, number, number];
+        .map(Number.parseFloat) as [number, number, number, number];
 
     if (result.length < 4) {
         result.push(1);

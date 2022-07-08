@@ -57,7 +57,7 @@ export function Simplenotest() {
             accessibilityHeight={50}
             enableGroups={false}
             selection={emptyGridSelection}
-            rows={100000}
+            rows={100_000}
             headerHeight={44}
             rowHeight={34}
             columns={["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven"].map(

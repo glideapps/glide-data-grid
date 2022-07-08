@@ -795,7 +795,7 @@ export const ObserveVisibleRegion: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
-                rows={1_000}
+                rows={1000}
                 onVisibleRegionChanged={setVisibleRegion}
             />
         </BeautifulWrapper>
@@ -808,7 +808,7 @@ export const ObserveVisibleRegion: React.VFC = () => {
 };
 
 export const OneHundredThousandCols: React.VFC = () => {
-    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100000);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100_000);
 
     return (
         <BeautifulWrapper
@@ -1050,7 +1050,7 @@ export const AutomaticRowMarkers: React.VFC = () => {
                 rowMarkers={"both"}
                 getCellContent={getCellContent}
                 columns={cols}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1104,7 +1104,7 @@ export const WrappingText: React.VFC<{
                 rowHeight={80}
                 getCellContent={mangledGetCellContent}
                 columns={cols}
-                rows={1_000}
+                rows={1000}
                 onColumnResize={onColumnResize}
                 experimental={{
                     hyperWrapping: p.hyperWrapping,
@@ -1152,7 +1152,7 @@ export const UnevenRows: React.VFC = () => {
                 rowHeight={r => (r % 3 === 0 ? 30 : r % 2 ? 50 : 60)}
                 getCellContent={getCellContent}
                 columns={cols}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1199,7 +1199,7 @@ export const DrawCustomCells: React.VFC = () => {
 
                     return true;
                 }}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1251,7 +1251,7 @@ export const RearrangeColumns: React.VFC = () => {
                 getCellsForSelection={getCellsForSelection}
                 columns={sortableCols}
                 onColumnMoved={onColMoved}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1289,7 +1289,7 @@ export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
                 rowMarkers={"number"}
                 getCellContent={getCellContent}
                 columns={cols}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1461,7 +1461,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             getContent: () => {
                 return {
                     kind: GridCellKind.Image,
-                    data: [`${faker.image.animals(40, 40)}?random=${faker.datatype.number(100000)}`],
+                    data: [`${faker.image.animals(40, 40)}?random=${faker.datatype.number(100_000)}`],
                     allowOverlay: true,
                     allowAdd: false,
                     readonly: true,
@@ -1525,11 +1525,11 @@ Try out [Glide](https://www.glideapps.com/)
                     data: [
                         {
                             text: faker.address.cityName(),
-                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100000)}`,
+                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100_000)}`,
                         },
                         {
                             text: faker.address.cityName(),
-                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100000)}`,
+                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100_000)}`,
                         },
                     ],
                     allowOverlay: true,
@@ -1628,7 +1628,7 @@ export const AllCellKinds: React.VFC = () => {
                         },
                     },
                 ]}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1831,7 +1831,7 @@ export const ThemePerColumn: React.VFC = () => {
                 columns={realCols}
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -2130,7 +2130,7 @@ export const HeaderMenus: React.VFC = () => {
                 onCellContextMenu={(_, e) => e.preventDefault()}
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}
-                rows={1_000}
+                rows={1000}
             />
             {isOpen &&
                 renderLayer(
@@ -2199,7 +2199,7 @@ export const CustomHeaderIcons: React.VFC = () => {
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}
                 headerIcons={headerIcons}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -2283,7 +2283,7 @@ export const RightElement: React.VFC = () => {
 
 let num: number = 1;
 function rand(): number {
-    return (num = (num * 16807) % 2147483647);
+    return (num = (num * 16_807) % 2_147_483_647);
 }
 
 export const RapidUpdates: React.VFC = () => {
@@ -2302,7 +2302,7 @@ export const RapidUpdates: React.VFC = () => {
                 cell: Item;
             }[] = [];
             const now = performance.now();
-            for (let x = 0; x < 5_000; x++) {
+            for (let x = 0; x < 5000; x++) {
                 const col = Math.max(10, rand() % 100);
                 const row = rand() % 10_000;
 
@@ -2325,7 +2325,7 @@ export const RapidUpdates: React.VFC = () => {
                 });
                 cells.push({ cell: [col, row] });
             }
-            countRef.current += 5_000;
+            countRef.current += 5000;
             if (displayCountRef.current !== null) {
                 displayCountRef.current.textContent = `${countRef.current}`;
             }
@@ -2489,7 +2489,7 @@ export const FreezeColumns: React.VFC = () => {
                 getCellsForSelection={getCellsForSelection}
                 columns={cols}
                 verticalBorder={c => c > 0}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -2915,7 +2915,7 @@ export const Tooltips: React.VFC = () => {
                     onItemHovered={onItemHovered}
                     getCellContent={getCellContent}
                     columns={cols}
-                    rows={1_000}
+                    rows={1000}
                 />
             </BeautifulWrapper>
             {isOpen &&
@@ -3085,7 +3085,7 @@ export const HighlightCells: React.VFC = () => {
                 getCellsForSelection={getCellsForSelection}
                 columns={cols}
                 verticalBorder={c => c > 0}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -3170,7 +3170,7 @@ export const PreventDiagonalScroll: React.VFC = () => {
 };
 
 // A few supported mime types for drag and drop into cells.
-const SUPPORTED_IMAGE_TYPES = ["image/png", "image/gif", "image/bmp", "image/jpeg"];
+const SUPPORTED_IMAGE_TYPES = new Set(["image/png", "image/gif", "image/bmp", "image/jpeg"]);
 
 export const DropEvents: React.VFC = () => {
     const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
@@ -3194,7 +3194,7 @@ export const DropEvents: React.VFC = () => {
             }
 
             const [file] = files;
-            if (!SUPPORTED_IMAGE_TYPES.includes(file.type)) {
+            if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
                 return;
             }
 
@@ -3230,7 +3230,7 @@ export const DropEvents: React.VFC = () => {
             }
 
             const [item] = items;
-            if (!SUPPORTED_IMAGE_TYPES.includes(item.type)) {
+            if (!SUPPORTED_IMAGE_TYPES.has(item.type)) {
                 return;
             }
 
@@ -3287,7 +3287,7 @@ export const DropEvents: React.VFC = () => {
                 columns={cols}
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}
-                rows={1_000}
+                rows={1000}
                 onDrop={onDrop}
                 onDragOverCell={onDragOverCell}
                 onDragLeave={onDragLeave}
