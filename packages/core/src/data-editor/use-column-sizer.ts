@@ -37,9 +37,9 @@ export function measureColumn(
         sizes.push(...selectedData.map(row => row[colIndex]).map(cell => measureCell(ctx, cell, theme)));
     }
     sizes.push(ctx.measureText(c.title).width + 16 + (c.icon === undefined ? 0 : 28));
-    const average = sizes.reduce((a, b) => a + b) / sizes.length;
     if (sizes.length > 5 && removeOutliers) {
         // Filter out outliers
+        const average = sizes.reduce((a, b) => a + b) / sizes.length;
         sizes = sizes.filter(a => a < average * 2);
     }
     const biggest = Math.max(...sizes);
