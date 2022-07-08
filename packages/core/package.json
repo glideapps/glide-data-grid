@@ -67,10 +67,7 @@
         "@glideapps/ts-helper": "0.0.5",
         "@skypack/package-check": "^0.2.2",
         "esbuild": "^0.14.47",
-        "eslint": "^7.12.1",
-        "eslint-plugin-import": "^2.22.0",
-        "eslint-plugin-react": "^7.21.5",
-        "eslint-plugin-react-hooks": "^4.2.0",
+        "eslint": "^8.19.0",
         "jest": "^27.4.2",
         "tsc-esm-fix": "^2.7.8"
     }

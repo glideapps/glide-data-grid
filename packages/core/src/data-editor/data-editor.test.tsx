@@ -262,7 +262,7 @@ const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, r
 
     const onRowAppened = React.useCallback(() => {
         setExtraRows(cv => cv + 1);
-        p.onRowAppended?.();
+        void p.onRowAppended?.();
     }, [p]);
 
     return (
@@ -2885,11 +2885,11 @@ describe("data-editor", () => {
         prep();
 
         act(() => {
-            ref.current?.emit("delete");
-            ref.current?.emit("fill-right");
-            ref.current?.emit("fill-down");
-            ref.current?.emit("copy");
-            ref.current?.emit("paste");
+            void ref.current?.emit("delete");
+            void ref.current?.emit("fill-right");
+            void ref.current?.emit("fill-down");
+            void ref.current?.emit("copy");
+            void ref.current?.emit("paste");
 
             ref.current?.scrollTo(5, 10);
             ref.current?.updateCells([{ cell: [0, 0] }]);

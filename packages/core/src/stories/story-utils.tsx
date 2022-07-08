@@ -56,13 +56,13 @@ const SimpleWrapper = styled.div`
     }
 `;
 
-export class BuilderThemeWrapper extends React.PureComponent<Props> {
+export class BuilderThemeWrapper extends React.PureComponent<React.PropsWithChildren<Props>> {
     public render(): React.ReactNode {
-        const { context, ...rest } = this.props;
+        const { context, children, ...rest } = this.props;
         return (
             <>
                 <BuilderWrapper {...rest}>
-                    <div className="content">{this.props.children}</div>
+                    <div className="content">{children}</div>
                 </BuilderWrapper>
                 <div id="portal" />
             </>

@@ -637,7 +637,7 @@ export const AppendRowHandle: React.VFC = () => {
     const ref = React.useRef<DataEditorRef>(null);
 
     const onClick = React.useCallback(() => {
-        ref.current?.appendRow(3);
+        void ref.current?.appendRow(3);
     }, [ref]);
 
     const onRowAppended = React.useCallback(() => {

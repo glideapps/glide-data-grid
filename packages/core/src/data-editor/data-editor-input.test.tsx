@@ -221,7 +221,7 @@ const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, r
 
     const onRowAppened = React.useCallback(() => {
         setExtraRows(cv => cv + 1);
-        p.onRowAppended?.();
+        void p.onRowAppended?.();
     }, [p]);
 
     return (
