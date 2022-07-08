@@ -52,7 +52,8 @@
     "homepage": "https://grid.glideapps.com",
     "dependencies": {
         "react-number-format": "^4.4.1",
-        "react-virtualized-auto-sizer": "^1.0.2"
+        "react-virtualized-auto-sizer": "^1.0.2",
+        "canvas-hypertxt": "^0.0.3"
     },
     "peerDependencies": {
         "lodash": "^4.17.19",

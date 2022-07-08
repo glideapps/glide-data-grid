@@ -14,7 +14,7 @@ import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
 import type { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
-import { clearMultilineCache, splitMultilineText } from "./multi-line-layout";
+import { split as splitText, clearCache } from "canvas-hypertxt";
 import type { DrawArgs } from "../data-editor/custom-cell-draw-args";
 
 export interface MappedGridColumn extends SizedGridColumn {
@@ -240,7 +240,7 @@ async function clearCacheOnLoad() {
     await document.fonts.ready;
     metricsSize = 0;
     metricsCache = {};
-    clearMultilineCache();
+    clearCache();
 }
 
 void clearCacheOnLoad();
@@ -442,13 +442,7 @@ export function drawTextCell(
             drawSingleTextLine(ctx, data, x, y, w, h, bias, theme, contentAlign);
         } else {
             const fontStyle = `${theme.fontFamily} ${theme.baseFontStyle}`;
-            const split = splitMultilineText(
-                ctx,
-                data,
-                fontStyle,
-                w - theme.cellHorizontalPadding * 2,
-                hyperWrapping ?? false
-            );
+            const split = splitText(ctx, data, fontStyle, w - theme.cellHorizontalPadding * 2, hyperWrapping ?? false);
 
             const textMetrics = measureTextCached("ABCi09jgqpy", ctx, fontStyle); // do not question the magic string
             const emHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
