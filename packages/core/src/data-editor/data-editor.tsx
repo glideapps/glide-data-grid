@@ -588,7 +588,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                           ...x,
                           location: [x.location[0] - rowMarkerOffset, x.location[1]] as const,
                       }));
-            onCellsEdited?.(mangledItems);
+            return onCellsEdited?.(mangledItems);
         },
         [onCellsEdited, rowMarkerOffset]
     );

@@ -1596,6 +1596,39 @@ describe("data-editor", () => {
         );
     });
 
+    test("onCellsEdited blocks onCellEdited", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onCellEdited={spy} onCellsEdited={() => true} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.paste(window);
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
+        await new Promise(r => window.setTimeout(r, 10));
+        expect(spy).not.toBeCalled();
+    });
+
     test("Copy/paste with simple getCellsForSelection", async () => {
         const spy = jest.fn();
         const pasteSpy = jest.fn((_target: any, _values: any) => true);
