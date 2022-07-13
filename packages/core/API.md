@@ -204,6 +204,7 @@ Grid columns are the basic horizontal building block of the data grid. At their 
 ```ts
 interface BaseGridColumn {
     readonly title: string;
+    readonly sourceIndex: number;
     readonly group?: string;
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;

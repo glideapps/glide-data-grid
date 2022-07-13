@@ -192,6 +192,7 @@ export const headerCellIndeterminateMarker = headerCellCheckboxPrefix + "indeter
 
 interface BaseGridColumn {
     readonly title: string;
+    readonly sourceIndex: number;
     readonly group?: string;
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
