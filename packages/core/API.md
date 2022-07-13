@@ -204,7 +204,6 @@ Grid columns are the basic horizontal building block of the data grid. At their 
 ```ts
 interface BaseGridColumn {
     readonly title: string;
-    readonly sourceIndex: number;
     readonly group?: string;
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
@@ -605,7 +604,7 @@ You can specify `drawCell` to enable rendering your own cells. The Grid will cal
 ```ts
 drawHeader?: (args: {
     ctx: CanvasRenderingContext2D;
-    column: GridColumn;
+    column: MappedGridColumn;
     theme: Theme;
     rect: Rectangle;
     hoverAmount: number;

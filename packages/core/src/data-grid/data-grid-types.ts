@@ -5,6 +5,7 @@ import type React from "react";
 import type { CSSProperties } from "react";
 import type ImageWindowLoader from "../common/image-window-loader";
 import type { SpriteManager } from "./data-grid-sprites";
+import type { MappedGridColumn } from "./data-grid-lib";
 
 // Thoughts:
 // rows/columns are called out as selected, but when selected they must also be added
@@ -124,7 +125,7 @@ export type DrawCustomCellCallback = (args: {
 
 export type DrawHeaderCallback = (args: {
     ctx: CanvasRenderingContext2D;
-    column: GridColumn;
+    column: MappedGridColumn;
     theme: Theme;
     rect: Rectangle;
     hoverAmount: number;
@@ -192,7 +193,6 @@ export const headerCellIndeterminateMarker = headerCellCheckboxPrefix + "indeter
 
 interface BaseGridColumn {
     readonly title: string;
-    readonly sourceIndex: number;
     readonly group?: string;
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
