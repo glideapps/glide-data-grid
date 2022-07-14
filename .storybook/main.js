@@ -28,22 +28,6 @@ module.exports = {
             ],
         });
 
-        // Replace CSS loader
-        const cssKey = config.module.rules.findIndex(x => x.test.toString() === "/\\.css$/");
-
-        config.module.rules[cssKey] = {
-            test: /\.css$/,
-            use: [
-                {
-                    loader: MiniCssExtractPlugin.loader,
-                },
-                {
-                    loader: "css-loader",
-                    options: { sourceMap: true },
-                },
-            ],
-        };
-
         return config;
     },
 };
