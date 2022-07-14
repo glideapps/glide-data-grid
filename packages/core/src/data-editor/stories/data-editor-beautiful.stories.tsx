@@ -40,6 +40,7 @@ import {
     BeautifulStyle,
 } from "./utils";
 import noop from "lodash/noop";
+import type { Highlight } from "../../data-grid/data-grid-render";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -2773,6 +2774,55 @@ export const ContentAlignment: React.VFC = () => {
                 </Description>
             }>
             <DataEditor {...defaultProps} getCellContent={mangledGetCellContent} columns={cols} rows={300} />
+        </BeautifulWrapper>
+    );
+};
+
+export const RowHover: React.VFC = () => {
+    const { cols, getCellContent } = useAllMockedKinds();
+
+    const [hoverRow, setHoverRow] = React.useState<number | undefined>(undefined);
+
+    const onItemHovered = React.useCallback((args: GridMouseEventArgs) => {
+        const [_, row] = args.location;
+        setHoverRow(args.kind !== "cell" ? undefined : row);
+    }, []);
+
+    const highlightedRegions = React.useMemo(() => {
+        if (hoverRow === undefined) return undefined;
+
+        return [
+            {
+                color: "#00000010",
+                range: {
+                    x: -1,
+                    y: hoverRow,
+                    width: cols.length + 1,
+                    height: 1,
+                },
+                style: "no-outline",
+            } as Highlight,
+        ];
+    }, [cols.length, hoverRow]);
+
+    return (
+        <BeautifulWrapper
+            title="Row Hover Effect"
+            description={
+                <Description>
+                    You can customize the content alignment by setting <PropName>contentAlign</PropName> of a cell to{" "}
+                    <PropName>left</PropName>, <PropName>right</PropName> or <PropName>center</PropName>.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers="both"
+                highlightRegions={highlightedRegions}
+                onItemHovered={onItemHovered}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={300}
+            />
         </BeautifulWrapper>
     );
 };

@@ -57,7 +57,7 @@ type HoverInfo = readonly [Item, Item];
 export interface Highlight {
     readonly color: string;
     readonly range: Rectangle;
-    readonly style?: "dashed" | "solid";
+    readonly style?: "dashed" | "solid" | "no-outline";
 }
 
 interface GroupDetails {
@@ -1554,8 +1554,9 @@ function drawHighlightRings(
     rowHeight: number | ((index: number) => number),
     lastRowSticky: boolean,
     rows: number,
-    highlightRegions: readonly Highlight[] | undefined
+    allHighlightRegions: readonly Highlight[] | undefined
 ): (() => void) | undefined {
+    const highlightRegions = allHighlightRegions?.filter(x => x.style !== "no-outline");
     if (highlightRegions === undefined || highlightRegions.length === 0) return undefined;
     const drawRects = highlightRegions.map(h => {
         const r = h.range;
