@@ -125,6 +125,7 @@ export type DrawCustomCellCallback = (args: {
 export type DrawHeaderCallback = (args: {
     ctx: CanvasRenderingContext2D;
     column: GridColumn;
+    columnIndex: number;
     theme: Theme;
     rect: Rectangle;
     hoverAmount: number;
