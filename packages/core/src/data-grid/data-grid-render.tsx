@@ -694,6 +694,7 @@ function drawHeader(
                 theme,
                 rect: { x, y, width, height },
                 column: passCol,
+                columnIndex: passCol.sourceIndex,
                 isSelected: selected,
                 hoverAmount,
                 isHovered,

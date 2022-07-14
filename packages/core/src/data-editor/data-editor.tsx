@@ -46,7 +46,7 @@ import { browserIsOSX } from "../common/browser-detect";
 import type { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
 import { getDataEditorTheme, makeCSSStyle, Theme, ThemeContext } from "../common/styles";
 import type { DataGridRef } from "../data-grid/data-grid";
-import { getScrollBarWidth, useEventListener } from "../common/utils";
+import { getScrollBarWidth, useEventListener, whenDefined } from "../common/utils";
 import { CellRenderers } from "../data-grid/cells";
 import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
@@ -339,6 +339,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onCellActivated,
         onFinishedEditing,
         coercePasteValue,
+        drawHeader: drawHeaderIn,
         onHeaderClicked,
         spanRangeBehavior = "default",
         onGroupHeaderClicked,
@@ -471,27 +472,45 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [onGridSelectionChange, getCellsForSelection, rowMarkerOffset, spanRangeBehavior]
     );
 
-    const onColumnResizeInner = React.useCallback<NonNullable<typeof onColumnResizeIn>>(
-        (_, w, ind) => {
-            onColumnResizeIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
-        },
-        [onColumnResizeIn, rowMarkerOffset, columnsIn]
+    const onColumnResize = whenDefined(
+        onColumnResizeIn,
+        React.useCallback<NonNullable<typeof onColumnResizeIn>>(
+            (_, w, ind) => {
+                onColumnResizeIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
+            },
+            [onColumnResizeIn, rowMarkerOffset, columnsIn]
+        )
     );
-    const onColumnResize = onColumnResizeIn === undefined ? undefined : onColumnResizeInner;
-    const onColumnResizeEndInner = React.useCallback<NonNullable<typeof onColumnResizeEndIn>>(
-        (_, w, ind) => {
-            onColumnResizeEndIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
-        },
-        [onColumnResizeEndIn, rowMarkerOffset, columnsIn]
+
+    const onColumnResizeEnd = whenDefined(
+        onColumnResizeEndIn,
+        React.useCallback<NonNullable<typeof onColumnResizeEndIn>>(
+            (_, w, ind) => {
+                onColumnResizeEndIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
+            },
+            [onColumnResizeEndIn, rowMarkerOffset, columnsIn]
+        )
     );
-    const onColumnResizeEnd = onColumnResizeEndIn === undefined ? undefined : onColumnResizeEndInner;
-    const onColumnResizeStartInner = React.useCallback<NonNullable<typeof onColumnResizeStartIn>>(
-        (_, w, ind) => {
-            onColumnResizeStartIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
-        },
-        [onColumnResizeStartIn, rowMarkerOffset, columnsIn]
+
+    const onColumnResizeStart = whenDefined(
+        onColumnResizeStartIn,
+        React.useCallback<NonNullable<typeof onColumnResizeStartIn>>(
+            (_, w, ind) => {
+                onColumnResizeStartIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
+            },
+            [onColumnResizeStartIn, rowMarkerOffset, columnsIn]
+        )
     );
-    const onColumnResizeStart = onColumnResizeStartIn === undefined ? undefined : onColumnResizeStartInner;
+
+    const drawHeader = whenDefined(
+        drawHeaderIn,
+        React.useCallback<NonNullable<typeof drawHeaderIn>>(
+            args => {
+                return drawHeaderIn?.({ ...args, columnIndex: args.columnIndex - rowMarkerOffset }) ?? false;
+            },
+            [drawHeaderIn, rowMarkerOffset]
+        )
+    );
 
     const onDelete = React.useCallback<NonNullable<DataEditorProps["onDelete"]>>(
         sel => {
@@ -1578,14 +1597,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [freezeColumns, currentCell, onVisibleRegionChanged, rowMarkerOffset, rows, showTrailingBlankRow]
     );
 
-    const onColumnMovedImpl = React.useCallback(
-        (startIndex: number, endIndex: number) => {
-            onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset);
-            if (columnSelect !== "none") {
-                setSelectedColumns(CompactSelection.fromSingleSelection(endIndex), undefined, true);
-            }
-        },
-        [columnSelect, onColumnMoved, rowMarkerOffset, setSelectedColumns]
+    const onColumnMovedImpl = whenDefined(
+        onColumnMoved,
+        React.useCallback(
+            (startIndex: number, endIndex: number) => {
+                onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset);
+                if (columnSelect !== "none") {
+                    setSelectedColumns(CompactSelection.fromSingleSelection(endIndex), undefined, true);
+                }
+            },
+            [columnSelect, onColumnMoved, rowMarkerOffset, setSelectedColumns]
+        )
     );
 
     const onDragStartImpl = React.useCallback(
@@ -2831,6 +2853,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     accessibilityHeight={visibleRegion.height}
                     columns={mangledCols}
                     drawCustomCell={drawCell}
+                    drawHeader={drawHeader}
                     disabledRows={disabledRows}
                     freezeColumns={mangledFreezeColumns}
                     lockColumns={rowMarkerOffset}
@@ -2853,7 +2876,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onColumnResizeEnd={onColumnResizeEnd}
                     onColumnResizeStart={onColumnResizeStart}
                     onCellFocused={onCellFocused}
-                    onColumnMoved={onColumnMoved === undefined ? undefined : onColumnMovedImpl}
+                    onColumnMoved={onColumnMovedImpl}
                     onDragStart={onDragStartImpl}
                     onHeaderMenuClick={onHeaderMenuClickInner}
                     onItemHovered={onItemHoveredImpl}

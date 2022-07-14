@@ -37,6 +37,11 @@ export function useEventListener<K extends keyof HTMLElementEventMap>(
         [eventName, element, passive, capture] // Re-run if eventName or element changes
     );
 }
+
+export function whenDefined<T>(obj: any, result: T) {
+    return obj === undefined ? undefined : result;
+}
+
 const PI = Math.PI;
 export function degreesToRadians(degrees: number) {
     return (degrees * PI) / 180;
