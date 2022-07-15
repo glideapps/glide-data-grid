@@ -40,7 +40,7 @@ import {
     BeautifulStyle,
 } from "./utils";
 import noop from "lodash/noop";
-import type { Highlight } from "../../data-grid/data-grid-render";
+import type { GetRowThemeCallback } from "../../data-grid/data-grid-render";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -2788,38 +2788,32 @@ export const RowHover: React.VFC = () => {
         setHoverRow(args.kind !== "cell" ? undefined : row);
     }, []);
 
-    const highlightedRegions = React.useMemo(() => {
-        if (hoverRow === undefined) return undefined;
-
-        return [
-            {
-                color: "#00000010",
-                range: {
-                    x: -1,
-                    y: hoverRow,
-                    width: cols.length + 1,
-                    height: 1,
-                },
-                style: "no-outline",
-            } as Highlight,
-        ];
-    }, [cols.length, hoverRow]);
+    const getRowThemeOverride = React.useCallback<GetRowThemeCallback>(
+        row => {
+            if (row !== hoverRow) return undefined;
+            return {
+                bgCell: "#f7f7f7",
+                bgCellMedium: "#f0f0f0",
+            };
+        },
+        [hoverRow]
+    );
 
     return (
         <BeautifulWrapper
             title="Row Hover Effect"
             description={
                 <Description>
-                    You can customize the content alignment by setting <PropName>contentAlign</PropName> of a cell to{" "}
-                    <PropName>left</PropName>, <PropName>right</PropName> or <PropName>center</PropName>.
+                    Through careful usage of the <PropName>onItemHovered</PropName> callback it is possible to easily
+                    create a row hover effect.
                 </Description>
             }>
             <DataEditor
                 {...defaultProps}
                 rowMarkers="both"
-                highlightRegions={highlightedRegions}
                 onItemHovered={onItemHovered}
                 getCellContent={getCellContent}
+                getRowThemeOverride={getRowThemeOverride}
                 columns={cols}
                 rows={300}
             />

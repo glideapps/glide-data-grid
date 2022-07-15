@@ -1916,6 +1916,7 @@ function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): bo
         current.headerHeight !== last.headerHeight ||
         current.rowHeight !== last.rowHeight ||
         current.rows !== last.rows ||
+        current.getRowThemeOverride !== last.getRowThemeOverride ||
         current.isFocused !== last.isFocused ||
         current.isResizing !== last.isResizing ||
         current.verticalBorder !== last.verticalBorder ||
