@@ -15,7 +15,7 @@ import {
 import type { DataEditorRef } from "./data-editor";
 import type { SizedGridColumn } from "../data-grid/data-grid-types";
 
-jest.mock("react-resize-detector", () => {
+jest.mock("../common/resize-detector", () => {
     return {
         useResizeDetector: () => ({ ref: undefined, width: 1000, height: 1000 }),
     };
