@@ -2,7 +2,9 @@
     "name": "@glideapps/glide-data-grid",
     "version": "4.99.0-beta1",
     "description": "Super fast, pure canvas Data Grid Editor",
-    "sideEffects": false,
+    "sideEffects": [
+        "**/*.css"
+    ],
     "type": "module",
     "browser": "dist/js/index.js",
     "main": "dist/cjs/index.js",
