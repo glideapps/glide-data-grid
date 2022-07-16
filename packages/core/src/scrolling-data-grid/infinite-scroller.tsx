@@ -1,7 +1,7 @@
 import { styled } from "@linaria/react";
 import type { Rectangle } from "..";
 import * as React from "react";
-import { useResizeDetector } from "react-resize-detector";
+import { useResizeDetector } from "../common/resize-detector";
 import { browserIsSafari } from "../common/browser-detect";
 
 interface Props {
@@ -213,7 +213,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
         h += toAdd;
     }
 
-    const { ref, width, height } = useResizeDetector();
+    const { ref, width, height } = useResizeDetector<HTMLDivElement>();
 
     if (lastProps.current?.height !== height || lastProps.current?.width !== width) {
         window.setTimeout(() => onScrollRef.current(), 0);

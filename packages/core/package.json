@@ -54,8 +54,7 @@
     "homepage": "https://grid.glideapps.com",
     "dependencies": {
         "canvas-hypertxt": "^0.0.3",
-        "react-number-format": "^4.4.1",
-        "react-resize-detector": "^7.1.2"
+        "react-number-format": "^4.4.1"
     },
     "peerDependencies": {
         "lodash": "^4.17.19",
@@ -71,6 +70,7 @@
         "esbuild": "^0.14.47",
         "eslint": "^8.19.0",
         "jest": "^27.4.2",
+        "react-resize-detector": "^7.1.2",
         "tsc-esm-fix": "^2.7.8"
     }
 }
