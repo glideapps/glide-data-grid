@@ -15,11 +15,9 @@ import {
 import type { DataEditorRef } from "./data-editor";
 import type { SizedGridColumn } from "../data-grid/data-grid-types";
 
-jest.mock("react-virtualized-auto-sizer", () => {
+jest.mock("react-resize-detector", () => {
     return {
-        __esModule: true,
-        default: ({ children }: any) => children({ height: 1000, width: 1000 }),
-        foo: "mocked foo",
+        useResizeDetector: () => ({ ref: undefined, width: 1000, height: 1000 }),
     };
 });
 
@@ -196,7 +194,16 @@ function getCellCenterPositionForDefaultGrid(cell: Item): [number, number] {
     return [xStart + xOffset, yStart + yOffset];
 }
 
+// const { ResizeObserver } = window;
+
 beforeEach(() => {
+    // delete (window as any).ResizeObserver;
+    // window.ResizeObserver = jest.fn().mockImplementation(() => ({
+    //     observe: jest.fn(),
+    //     unobserve: jest.fn(),
+    //     disconnect: jest.fn(),
+    // }));
+
     Element.prototype.scrollTo = jest.fn();
     Element.prototype.scrollBy = jest.fn();
     Object.assign(navigator, {

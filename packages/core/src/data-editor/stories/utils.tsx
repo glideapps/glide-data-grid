@@ -15,10 +15,10 @@ import {
 
 import faker from "faker";
 import { styled } from "@linaria/react";
-import AutoSizer from "react-virtualized-auto-sizer";
 import isArray from "lodash/isArray";
 import { assertNever } from "../../common/support";
 import { browserIsFirefox } from "../../common/browser-detect";
+import { useResizeDetector } from "react-resize-detector";
 
 faker.seed(1337);
 
@@ -212,24 +212,23 @@ interface BeautifulProps {
 
 export const BeautifulWrapper: React.FC<BeautifulProps> = p => {
     const { title, children, description, className } = p;
+
+    const { ref, width, height } = useResizeDetector();
+
     return (
         <BeautifulStyle className={className + (browserIsFirefox.value ? " firefox" : "")}>
             <h1>{title}</h1>
             {description}
             <div className="sizer">
-                <div className="sizer-clip">
-                    <AutoSizer>
-                        {(props: { width?: number; height?: number }) => (
-                            <div
-                                style={{
-                                    position: "relative",
-                                    width: props.width ?? 100,
-                                    height: props.height ?? 100,
-                                }}>
-                                {children}
-                            </div>
-                        )}
-                    </AutoSizer>
+                <div className="sizer-clip" ref={ref}>
+                    <div
+                        style={{
+                            position: "relative",
+                            width: width ?? 100,
+                            height: height ?? 100,
+                        }}>
+                        {children}
+                    </div>
                 </div>
             </div>
         </BeautifulStyle>

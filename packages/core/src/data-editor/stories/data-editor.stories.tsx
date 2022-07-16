@@ -13,7 +13,6 @@ import {
     GridSelection,
     Item,
 } from "../../data-grid/data-grid-types";
-import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor } from "../data-editor";
 
 export default {
@@ -21,13 +20,9 @@ export default {
 
     decorators: [
         (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
-            <AutoSizer>
-                {(props: { width?: number; height?: number }) => (
-                    <BuilderThemeWrapper width={props.width ?? 1000} height={props.height ?? 800} context={context}>
-                        {fn()}
-                    </BuilderThemeWrapper>
-                )}
-            </AutoSizer>
+            <BuilderThemeWrapper width={1000} height={800} context={context}>
+                {fn()}
+            </BuilderThemeWrapper>
         ),
     ],
 };

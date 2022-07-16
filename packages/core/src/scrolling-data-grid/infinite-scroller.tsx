@@ -1,7 +1,7 @@
 import { styled } from "@linaria/react";
 import type { Rectangle } from "..";
 import * as React from "react";
-import AutoSizer from "react-virtualized-auto-sizer";
+import { useResizeDetector } from "react-resize-detector";
 import { browserIsSafari } from "../common/browser-detect";
 
 interface Props {
@@ -213,63 +213,60 @@ export const InfiniteScroller: React.FC<Props> = p => {
         h += toAdd;
     }
 
-    return (
-        <div style={style}>
-            <AutoSizer>
-                {(props: { width?: number; height?: number }) => {
-                    if (props.width === 0 || props.height === 0) return null;
-                    if (lastProps.current?.height !== props.height || lastProps.current?.width !== props.width) {
-                        window.setTimeout(() => onScrollRef.current(), 0);
-                        lastProps.current = props;
-                    }
+    const { ref, width, height } = useResizeDetector();
 
-                    return (
-                        <ScrollRegionStyle isSafari={browserIsSafari.value}>
-                            {minimap}
-                            <div className="dvn-underlay">{children}</div>
-                            <div
-                                ref={setRefs}
-                                style={props}
-                                draggable={draggable}
-                                onDragStart={e => {
-                                    if (!draggable) {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                    }
-                                }}
-                                className={"dvn-scroller " + (className ?? "")}
-                                onScroll={onScroll}>
-                                <div className={"dvn-scroll-inner" + (rightElement === undefined ? " hidden" : "")}>
-                                    <div className="dvn-stack">{padders}</div>
-                                    {rightElement !== undefined && (
-                                        <>
-                                            <div className="dvn-spacer" />
-                                            <div
-                                                ref={rightWrapRef}
-                                                onMouseDown={nomEvent}
-                                                onMouseUp={nomEvent}
-                                                onMouseMove={nomEvent}
-                                                style={{
-                                                    height: props.height,
-                                                    maxHeight: clientHeight - Math.ceil(dpr % 1),
-                                                    position: "sticky",
-                                                    top: 0,
-                                                    paddingLeft: 1,
-                                                    marginBottom: -40,
-                                                    marginRight: paddingRight,
-                                                    right: rightElementSticky ? paddingRight ?? 0 : undefined,
-                                                    pointerEvents: "auto",
-                                                }}>
-                                                {rightElement}
-                                            </div>
-                                        </>
-                                    )}
+    if (lastProps.current?.height !== height || lastProps.current?.width !== width) {
+        window.setTimeout(() => onScrollRef.current(), 0);
+        lastProps.current = { width, height };
+    }
+
+    if ((width ?? 0) === 0 || (height ?? 0) === 0) return <div style={style} ref={ref} />;
+
+    return (
+        <div style={style} ref={ref}>
+            <ScrollRegionStyle isSafari={browserIsSafari.value}>
+                {minimap}
+                <div className="dvn-underlay">{children}</div>
+                <div
+                    ref={setRefs}
+                    style={lastProps.current}
+                    draggable={draggable}
+                    onDragStart={e => {
+                        if (!draggable) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        }
+                    }}
+                    className={"dvn-scroller " + (className ?? "")}
+                    onScroll={onScroll}>
+                    <div className={"dvn-scroll-inner" + (rightElement === undefined ? " hidden" : "")}>
+                        <div className="dvn-stack">{padders}</div>
+                        {rightElement !== undefined && (
+                            <>
+                                <div className="dvn-spacer" />
+                                <div
+                                    ref={rightWrapRef}
+                                    onMouseDown={nomEvent}
+                                    onMouseUp={nomEvent}
+                                    onMouseMove={nomEvent}
+                                    style={{
+                                        height,
+                                        maxHeight: clientHeight - Math.ceil(dpr % 1),
+                                        position: "sticky",
+                                        top: 0,
+                                        paddingLeft: 1,
+                                        marginBottom: -40,
+                                        marginRight: paddingRight,
+                                        right: rightElementSticky ? paddingRight ?? 0 : undefined,
+                                        pointerEvents: "auto",
+                                    }}>
+                                    {rightElement}
                                 </div>
-                            </div>
-                        </ScrollRegionStyle>
-                    );
-                }}
-            </AutoSizer>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </ScrollRegionStyle>
         </div>
     );
 };

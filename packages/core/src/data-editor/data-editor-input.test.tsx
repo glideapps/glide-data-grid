@@ -6,11 +6,9 @@ import { DataEditor, DataEditorProps, GridCell, GridCellKind, GridSelection, Ite
 import type { DataEditorRef } from "./data-editor";
 import { CompactSelection } from "../data-grid/data-grid-types";
 
-jest.mock("react-virtualized-auto-sizer", () => {
+jest.mock("react-resize-detector", () => {
     return {
-        __esModule: true,
-        default: ({ children }: any) => children({ height: 1000, width: 1000 }),
-        foo: "mocked foo",
+        useResizeDetector: () => ({ ref: undefined, width: 1000, height: 1000 }),
     };
 });
 
