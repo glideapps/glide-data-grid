@@ -334,6 +334,7 @@ export const ValidateData: React.VFC = () => {
                         return {
                             ...newValue,
                             data: "Valid",
+                            selectionRange: [0, 3],
                         };
                     }
                     return false;

@@ -2,16 +2,18 @@ import * as React from "react";
 
 import { GrowingEntryStyle, ShadowBox, InputBox } from "./growing-entry-style";
 import { assert } from "../common/support";
+import type { SelectionRange } from "../data-grid/data-grid-types";
 
 interface Props
     extends React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> {
     readonly placeholder?: string;
     readonly highlight: boolean;
     readonly altNewline?: boolean;
+    readonly validatedSelection?: SelectionRange;
 }
 
 const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
-    const { placeholder, value, onKeyDown, highlight, altNewline, ...rest } = props;
+    const { placeholder, value, onKeyDown, highlight, altNewline, validatedSelection, ...rest } = props;
     const { onChange, className } = rest;
 
     const inputRef = React.useRef<HTMLTextAreaElement | null>(null);
@@ -30,6 +32,13 @@ const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
         ta.setSelectionRange(highlight ? 0 : length, length);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    React.useLayoutEffect(() => {
+        if (validatedSelection !== undefined) {
+            const range = typeof validatedSelection === "number" ? [validatedSelection, null] : validatedSelection;
+            inputRef.current?.setSelectionRange(range[0], range[1]);
+        }
+    }, [validatedSelection]);
 
     const onKeyDownInner = React.useCallback<NonNullable<typeof onKeyDown>>(
         e => {

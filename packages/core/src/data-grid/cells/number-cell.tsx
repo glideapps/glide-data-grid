@@ -22,7 +22,7 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
         data: undefined,
     }),
     getEditor: () => p => {
-        const { isHighlighted, onChange, onKeyDown, value } = p;
+        const { isHighlighted, onChange, onKeyDown, value, validatedSelection } = p;
         return (
             <React.Suspense fallback={null}>
                 <NumberOverlayEditor
@@ -30,6 +30,7 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
                     disabled={value.readonly === true}
                     value={value.data}
                     onKeyDown={onKeyDown}
+                    validatedSelection={validatedSelection}
                     onChange={x =>
                         onChange({
                             ...value,

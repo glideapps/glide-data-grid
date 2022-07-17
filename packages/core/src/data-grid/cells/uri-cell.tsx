@@ -19,11 +19,12 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
         data: "",
     }),
     getEditor: () => p => {
-        const { onChange, onKeyDown, value, forceEditMode } = p;
+        const { onChange, onKeyDown, value, forceEditMode, validatedSelection } = p;
         return (
             <UriOverlayEditor
                 forceEditMode={forceEditMode}
                 uri={value.data}
+                validatedSelection={validatedSelection}
                 readonly={value.readonly === true}
                 onKeyDown={onKeyDown}
                 onChange={e =>

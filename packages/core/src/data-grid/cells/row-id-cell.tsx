@@ -14,7 +14,7 @@ export const rowIDCellRenderer: InternalCellRenderer<RowIDCell> = {
     measure: (ctx, cell) => ctx.measureText(cell.data).width + 16,
     // eslint-disable-next-line react/display-name
     getEditor: () => p => {
-        const { isHighlighted, onChange, onKeyDown, value } = p;
+        const { isHighlighted, onChange, onKeyDown, value, validatedSelection } = p;
         return (
             <GrowingEntry
                 highlight={isHighlighted}
@@ -22,6 +22,7 @@ export const rowIDCellRenderer: InternalCellRenderer<RowIDCell> = {
                 disabled={value.readonly !== false}
                 onKeyDown={onKeyDown}
                 value={value.data}
+                validatedSelection={validatedSelection}
                 onChange={e =>
                     onChange({
                         ...value,

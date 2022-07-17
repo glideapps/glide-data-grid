@@ -241,7 +241,8 @@ export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell
 
 export type EditableGridCellKind = EditableGridCell["kind"];
 
-export function isEditableGridCell(cell: GridCell): cell is EditableGridCell {
+// All EditableGridCells are inherently ValidatedGridCells, and this is more specific and thus more useful.
+export function isEditableGridCell(cell: GridCell): cell is ValidatedGridCell {
     if (
         cell.kind === GridCellKind.Loading ||
         cell.kind === GridCellKind.Bubble ||
@@ -360,12 +361,15 @@ export interface BubbleCell extends BaseGridCell {
     readonly data: string[];
 }
 
+export type SelectionRange = number | readonly [number, number];
+
 export type ProvideEditorComponent<T extends GridCell> = React.FunctionComponent<{
     readonly onChange: (newValue: T) => void;
     readonly onFinishedEditing: (newValue?: T) => void;
     readonly isHighlighted: boolean;
     readonly value: T;
     readonly initialValue?: string;
+    readonly validatedSelection?: SelectionRange;
 }>;
 
 type ObjectEditorCallbackResult<T extends GridCell> = {
@@ -391,6 +395,10 @@ export function isObjectEditorCallbackResult<T extends GridCell>(
 }
 
 export type ProvideEditorCallback<T extends GridCell> = (cell: T) => ProvideEditorCallbackResult<T>;
+
+export type ValidatedGridCell = EditableGridCell & {
+    selectionRange?: SelectionRange;
+};
 
 export interface CustomCell<T extends {} = {}> extends BaseGridCell {
     readonly kind: GridCellKind.Custom;

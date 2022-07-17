@@ -40,6 +40,7 @@ import {
     headerCellIndeterminateMarker,
     groupHeaderKind,
     outOfBoundsKind,
+    ValidatedGridCell,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -200,7 +201,11 @@ export interface DataEditorProps extends Props {
     readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;
     readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
     readonly onCellContextMenu?: (cell: Item, event: CellClickedEventArgs) => void;
-    readonly validateCell?: (cell: Item, newValue: EditableGridCell, prevValue: GridCell) => boolean | EditableGridCell;
+    readonly validateCell?: (
+        cell: Item,
+        newValue: EditableGridCell,
+        prevValue: GridCell
+    ) => boolean | ValidatedGridCell;
 
     readonly columns: readonly GridColumn[];
 

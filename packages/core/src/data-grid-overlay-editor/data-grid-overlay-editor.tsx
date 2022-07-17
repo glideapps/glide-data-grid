@@ -13,6 +13,7 @@ import {
     Item,
     ProvideEditorCallback,
     Rectangle,
+    ValidatedGridCell,
 } from "../data-grid/data-grid-types";
 import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style";
 import type { OverlayImageEditorProps } from "./private/image-overlay-editor";
@@ -34,7 +35,11 @@ interface DataGridOverlayEditorProps {
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
     readonly provideEditor?: ProvideEditorCallback<GridCell>;
-    readonly validateCell?: (cell: Item, newValue: EditableGridCell, prevValue: GridCell) => boolean | EditableGridCell;
+    readonly validateCell?: (
+        cell: Item,
+        newValue: EditableGridCell,
+        prevValue: GridCell
+    ) => boolean | ValidatedGridCell;
 }
 
 const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps> = p => {
@@ -186,6 +191,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 value={targetValue}
                 initialValue={initialValue}
                 onFinishedEditing={onCustomFinishedEditing}
+                validatedSelection={isEditableGridCell(targetValue) ? targetValue.selectionRange : undefined}
             />
         );
     } else if (CellEditor !== undefined) {
@@ -201,6 +207,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 imageEditorOverride={imageEditorOverride}
                 markdownDivCreateNode={markdownDivCreateNode}
                 isValid={isValid}
+                validatedSelection={isEditableGridCell(targetValue) ? targetValue.selectionRange : undefined}
             />
         );
     }

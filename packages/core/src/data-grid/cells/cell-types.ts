@@ -51,6 +51,7 @@ type ProvideEditorCallback<T extends InnerGridCell> = (
           readonly imageEditorOverride?: ImageEditorType;
           readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
           readonly target: Rectangle;
+          readonly validatedSelection?: number | readonly [number, number];
           readonly forceEditMode: boolean;
           readonly isValid?: boolean;
       }>
