@@ -201,6 +201,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         freezeColumns,
         trailingRowType: trailingRowType,
         fixedShadowX = true,
+        fixedShadowY = true,
         onMouseDown,
         onMouseUp,
         onMouseMoveRaw,
@@ -1339,7 +1340,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         freezeColumns === 0 || !fixedShadowX ? 0 : cellXOffset > freezeColumns ? 1 : clamp(-translateX / 100, 0, 1);
 
     const absoluteOffsetY = -cellYOffset * 32 + translateY;
-    const opacityY = clamp(-absoluteOffsetY / 100, 0, 1);
+    const opacityY = !fixedShadowY ? 0 : clamp(-absoluteOffsetY / 100, 0, 1);
 
     const stickyShadow = React.useMemo(() => {
         if (!opacityX && !opacityY) {
