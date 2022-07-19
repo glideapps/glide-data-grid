@@ -1352,7 +1352,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             top: 0,
             left: stickyX,
             width: width - stickyX,
-            bottom: 0,
+            height: height,
             opacity: opacityX,
             pointerEvents: "none",
             transition: !smoothScrollX ? "opacity 0.2s" : undefined,
@@ -1363,7 +1363,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             position: "absolute",
             top: totalHeaderHeight,
             left: 0,
-            right: 0,
+            width: width,
             height: height,
             opacity: opacityY,
             pointerEvents: "none",
@@ -1377,7 +1377,18 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 {opacityY > 0 && <div id="shadow-y" style={styleY} />}
             </>
         );
-    }, [stickyX, width, opacityX, smoothScrollX, totalHeaderHeight, height, opacityY, smoothScrollY]);
+    }, [
+        opacityX,
+        opacityY,
+        stickyX,
+        width,
+        experimental?.paddingBottom,
+        experimental?.paddingRight,
+        smoothScrollX,
+        totalHeaderHeight,
+        height,
+        smoothScrollY,
+    ]);
 
     const overlayStyle = React.useMemo<React.CSSProperties>(
         () => ({

@@ -3054,6 +3054,7 @@ export const Padding: React.VFC<PaddingProps> = p => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
+                rowMarkers={"both"}
                 experimental={{ paddingRight, paddingBottom }}
                 rows={50}
             />
