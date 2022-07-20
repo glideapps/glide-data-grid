@@ -2015,7 +2015,7 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
             <DataEditor
                 {...defaultProps}
                 ref={ref}
-                rowMarkers="number"
+                rowMarkers="clickable-number"
                 getCellContent={getCellContent}
                 columns={cols}
                 onCellEdited={setCellValue}
