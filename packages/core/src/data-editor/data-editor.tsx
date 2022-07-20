@@ -94,6 +94,7 @@ type Props = Omit<
     | "onCanvasBlur"
     | "onCanvasFocused"
     | "onCellFocused"
+    | "onContextMenu"
     | "onKeyDown"
     | "onKeyUp"
     | "onMouseDown"
@@ -1339,12 +1340,29 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const isPrevented = React.useRef(false);
-    const onContextMenu = React.useCallback((e: React.MouseEvent) => {
-        if (isPrevented.current) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    }, []);
+    const onContextMenu = React.useCallback(
+        (args: GridMouseEventArgs, preventDefault: () => void) => {
+            const clickLocation = args.location[0] - rowMarkerOffset;
+            if (args.kind === "header") {
+                onHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
+            }
+
+            if (args.kind === groupHeaderKind) {
+                if (clickLocation < 0) {
+                    return;
+                }
+                onGroupHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
+            }
+
+            if (args.kind === "cell") {
+                onCellContextMenu?.([clickLocation, args.location[1]], {
+                    ...args,
+                    preventDefault,
+                });
+            }
+        },
+        [onCellContextMenu, onGroupHeaderContextMenu, onHeaderContextMenu, rowMarkerOffset]
+    );
 
     const normalSizeColumn = React.useCallback(
         async (col: number): Promise<void> => {
@@ -1500,8 +1518,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     void normalSizeColumn(col);
                 } else if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
                     onHeaderClicked?.(clickLocation, { ...args, preventDefault });
-                } else if (args.button === 2) {
-                    onHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
                 }
             }
 
@@ -1515,20 +1531,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (!isPrevented.current) {
                         handleGroupHeaderSelection(args);
                     }
-                } else if (args.button === 2) {
-                    onGroupHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
                 }
             }
 
-            if (args.kind === "cell") {
-                if (args.button === 0) {
-                    handleMaybeClick(args);
-                } else if (args.button === 2) {
-                    onCellContextMenu?.([args.location[0] - rowMarkerOffset, args.location[1]], {
-                        ...args,
-                        preventDefault,
-                    });
-                }
+            if (args.kind === "cell" && args.button === 0) {
+                handleMaybeClick(args);
             }
 
             lastMouseSelectLocation.current = undefined;
@@ -2844,14 +2851,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 style={makeCSSStyle(mergedTheme)}
                 className={className}
                 inWidth={width ?? idealWidth}
-                inHeight={height ?? idealHeight}
-                onContextMenu={onContextMenu}>
+                inHeight={height ?? idealHeight}>
                 <DataGridSearch
                     {...rest}
                     enableGroups={enableGroups}
                     onCanvasFocused={onCanvasFocused}
                     onCanvasBlur={onFocusOut}
                     canvasRef={canvasRef}
+                    onContextMenu={onContextMenu}
                     theme={mergedTheme}
                     cellXOffset={cellXOffset}
                     cellYOffset={cellYOffset}

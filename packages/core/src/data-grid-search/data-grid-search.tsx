@@ -398,6 +398,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 isFocused={p.isFocused}
                 clientSize={p.clientSize}
                 headerHeight={p.headerHeight}
+                onContextMenu={p.onContextMenu}
                 isFilling={p.isFilling}
                 fillHandle={p.fillHandle}
                 trailingRowType={p.trailingRowType}

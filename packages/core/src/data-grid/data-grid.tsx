@@ -108,6 +108,7 @@ export interface DataGridProps {
     readonly onMouseMove: (args: GridMouseEventArgs) => void;
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
     readonly onMouseUp?: (args: GridMouseEventArgs, isOutside: boolean) => void;
+    readonly onContextMenu?: (args: GridMouseEventArgs, preventDefault: () => void) => void;
 
     readonly onCanvasFocused?: () => void;
     readonly onCanvasBlur?: () => void;
@@ -199,6 +200,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         isFocused,
         selection,
         freezeColumns,
+        onContextMenu,
         trailingRowType: trailingRowType,
         fixedShadowX = true,
         fixedShadowY = true,
@@ -832,6 +834,19 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     );
     useEventListener("mouseup", onMouseUpImpl, window, false);
     useEventListener("touchend", onMouseUpImpl, window, false);
+
+    const onContextMenuImpl = React.useCallback(
+        (ev: MouseEvent) => {
+            const canvas = ref.current;
+            if (canvas === null || onContextMenu === undefined) return;
+            const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
+            onContextMenu(args, () => {
+                if (ev.cancelable) ev.preventDefault();
+            });
+        },
+        [getMouseArgsForPosition, onContextMenu]
+    );
+    useEventListener("contextmenu", onContextMenuImpl, eventTargetRef?.current ?? null, false);
 
     const onAnimationFrame = React.useCallback<StepCallback>(values => {
         damageRegion.current = values.map(x => x.item);

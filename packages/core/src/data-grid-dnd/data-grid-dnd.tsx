@@ -310,6 +310,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             verticalBorder={p.verticalBorder}
             width={p.width}
             canvasRef={p.canvasRef}
+            onContextMenu={p.onContextMenu}
             className={p.className}
             theme={p.theme}
             disabledRows={p.disabledRows}
