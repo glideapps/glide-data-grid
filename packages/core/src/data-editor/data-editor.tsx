@@ -220,7 +220,7 @@ export interface DataEditorProps extends Props {
     readonly headerHeight?: number;
     readonly groupHeaderHeight?: number;
 
-    readonly rowMarkers?: "checkbox" | "number" | "both" | "none";
+    readonly rowMarkers?: "checkbox" | "number" | "clickable-number" | "both" | "none";
     readonly rowMarkerWidth?: number;
     readonly rowMarkerStartIndex?: number;
 
@@ -677,7 +677,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     kind: InnerGridCellKind.Marker,
                     allowOverlay: false,
                     checked: gridSelection?.rows.hasIndex(row) === true,
-                    markerKind: rowMarkers,
+                    markerKind: rowMarkers === "clickable-number" ? "number" : rowMarkers,
                     row: rowMarkerStartIndex + row,
                     drawHandle: p.onRowMoved !== undefined,
                 };
@@ -1048,14 +1048,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         return;
                     }
 
-                    const renderer = CellRenderers[markerCell.kind];
-                    const postClick = renderer.onClick?.(
-                        markerCell,
-                        args.localEventX,
-                        args.localEventY,
-                        args.bounds
-                    ) as MarkerCell | undefined;
-                    if (postClick === undefined || postClick.checked === markerCell.checked) return;
+                    if (p.onRowMoved !== undefined) {
+                        const renderer = CellRenderers[markerCell.kind];
+                        const postClick = renderer.onClick?.(
+                            markerCell,
+                            args.localEventX,
+                            args.localEventY,
+                            args.bounds
+                        ) as MarkerCell | undefined;
+                        if (postClick === undefined || postClick.checked === markerCell.checked) return;
+                    }
 
                     setOverlay(undefined);
                     focus();
@@ -1211,6 +1213,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             hasRowMarkers,
             lastRowSticky,
             onSelectionCleared,
+            p.onRowMoved,
             rowMarkerOffset,
             rowMarkers,
             rowSelect,
@@ -1248,7 +1251,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             const fillHandle = args.kind === "cell" && args.isFillHandle;
 
-            if (!fillHandle && args.isEdge) return;
+            if (!fillHandle && args.kind !== "cell" && args.isEdge) return;
 
             setMouseState({
                 previousSelection: gridSelection,
