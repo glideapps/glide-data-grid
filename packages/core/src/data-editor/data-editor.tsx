@@ -1658,34 +1658,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 // eslint-disable-next-line prefer-const
                 let [col, row] = args.location;
 
-                const landedOnLastStickyRow = lastRowSticky && row === rows;
-                const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
-                if (landedOnLastStickyRow || startedFromLastStickyRow) return;
-
-                if (col === 0 && hasRowMarkers) {
-                    col = 1;
-                }
-
-                const deltaX = col - selectedCol;
-                const deltaY = (row ?? 0) - selectedRow;
-
-                const newRange: Rectangle = {
-                    x: deltaX >= 0 ? selectedCol : col,
-                    y: deltaY >= 0 ? selectedRow : row ?? 0,
-                    width: Math.abs(deltaX) + 1,
-                    height: Math.abs(deltaY) + 1,
-                };
-
-                setCurrent(
-                    {
-                        ...gridSelection.current,
-                        range: newRange,
-                    },
-                    true,
-                    false,
-                    "drag"
-                );
-
                 if (args.kind === outOfBoundsKind && scrollRef.current !== null) {
                     const [horizontal, vertical] = args.direction;
                     let scrollX = 0;
@@ -1696,7 +1668,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         scrollX = -columns[0].width;
                     }
                     if (vertical !== 0) {
-                        scrollY = typeof rowHeight === "number" ? rowHeight * vertical : rowHeight(row ?? 0) * vertical;
+                        scrollY =
+                            typeof rowHeight === "number"
+                                ? rowHeight * vertical
+                                : rowHeight(Math.max(0, row)) * vertical;
                     }
 
                     if (scrollTimer.current !== undefined) {
@@ -1711,6 +1686,38 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         window.clearInterval(scrollTimer.current);
                     }
                 }
+
+                if (row < 0) {
+                    row = visibleRegionRef.current.y;
+                }
+
+                const landedOnLastStickyRow = lastRowSticky && row === rows;
+                const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
+                if (landedOnLastStickyRow || startedFromLastStickyRow) return;
+
+                if (col === 0 && hasRowMarkers) {
+                    col = 1;
+                }
+
+                const deltaX = col - selectedCol;
+                const deltaY = row - selectedRow;
+
+                const newRange: Rectangle = {
+                    x: deltaX >= 0 ? selectedCol : col,
+                    y: deltaY >= 0 ? selectedRow : row,
+                    width: Math.abs(deltaX) + 1,
+                    height: Math.abs(deltaY) + 1,
+                };
+
+                setCurrent(
+                    {
+                        ...gridSelection.current,
+                        range: newRange,
+                    },
+                    true,
+                    false,
+                    "drag"
+                );
             }
 
             onItemHovered?.({ ...args, location: [args.location[0] - rowMarkerOffset, args.location[1]] as any });
