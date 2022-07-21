@@ -2711,7 +2711,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
                 return gridRef.current?.damage(damageList);
             },
-            getBounds: (...args) => gridRef.current?.getBounds(...args),
+            getBounds: (col, row) => {
+                return gridRef.current?.getBounds(col + rowMarkerOffset, row);
+            },
             focus: () => gridRef.current?.focus(),
             emit: async e => {
                 switch (e) {
