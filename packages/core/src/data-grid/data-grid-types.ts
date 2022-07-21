@@ -595,6 +595,20 @@ export class CompactSelection {
         return true;
     };
 
+    // Really old JS wont have access to the iterator and babel will stop people using it
+    // when trying to support browsers so old we don't support them anyway. What goes on
+    // between an engineer and their bundler in the privacy of their CI server is none of
+    // my business anyway.
+    toArray = (): number[] => {
+        const result: number[] = [];
+        for (const [start, end] of this.items) {
+            for (let x = start; x < end; x++) {
+                result.push(x);
+            }
+        }
+        return result;
+    };
+
     get length(): number {
         let len = 0;
         for (const [start, end] of this.items) {
