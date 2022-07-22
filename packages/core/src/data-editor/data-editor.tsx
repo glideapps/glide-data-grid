@@ -2560,9 +2560,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     // promises in rather awkward ways when possible to avoid awaiting. We have to use fallback copy mechanisms when
     // an await has happened.
     const onCopy = React.useCallback(
-        async (e?: ClipboardEvent) => {
+        async (e?: ClipboardEvent, ignoreFocus?: boolean) => {
             if (!keybindings.copy) return;
             const focused =
+                ignoreFocus === true ||
                 scrollRef.current?.contains(document.activeElement) === true ||
                 canvasRef.current?.contains(document.activeElement) === true;
 
@@ -2754,7 +2755,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         });
                         break;
                     case "copy":
-                        await onCopy();
+                        await onCopy(undefined, true);
                         break;
                     case "paste":
                         await onPasteInternal();
