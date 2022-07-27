@@ -235,9 +235,10 @@ export function getRowIndexForY(
 
 let metricsSize = 0;
 let metricsCache: Record<string, TextMetrics | undefined> = {};
+const isSSR = typeof window === "undefined";
 
 async function clearCacheOnLoad() {
-    if (document?.fonts?.ready === undefined) return;
+    if (isSSR || document?.fonts?.ready === undefined) return;
     await document.fonts.ready;
     metricsSize = 0;
     metricsCache = {};

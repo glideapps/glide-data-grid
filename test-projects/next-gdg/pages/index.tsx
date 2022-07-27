@@ -6,6 +6,8 @@ import dynamic from "next/dynamic";
 import styles from "../styles/Home.module.css";
 import "@glideapps/glide-data-grid/dist/index.css";
 
+import { CompactSelection } from "@glideapps/glide-data-grid";
+
 const Grid = dynamic(
     () => {
         return import("../components/Grid");
@@ -14,6 +16,7 @@ const Grid = dynamic(
 );
 
 const Home: NextPage = () => {
+    const cs = CompactSelection.fromSingleSelection(12);
     return (
         <div className={styles.container}>
             <Head>
@@ -24,9 +27,8 @@ const Home: NextPage = () => {
 
             <main className={styles.main}>
                 <h1 className={styles.title}>
-                    Welcome to <a href="https://nextjs.org">Next.js!</a>
+                    Welcome to <a href="https://nextjs.org">Next.js {cs.first()}!</a>
                 </h1>
-
                 <p className={styles.description}>
                     Get started by editing <code className={styles.code}>pages/index.tsx</code>
                 </p>
