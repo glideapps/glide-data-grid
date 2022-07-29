@@ -273,11 +273,21 @@ interface BaseGridCell {
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
-    readonly span?: Item;
+    readonly span?: readonly [number, number];
     readonly contentAlign?: "left" | "right" | "center";
     readonly cursor?: CSSProperties["cursor"];
 }
 ```
+
+| Property      | Description                                                                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| allowOverlay  | Determins if an overlay editor or previewer should be shown when activating this cell.                                                                  |
+| lastUpdated   | If set, the grid will render this cell with a highlighted background which fades out. Uses performance.now() instead of Date.now().                     |
+| style         | If set to `faded` the cell will draw with a transparent appearance.                                                                                     |
+| themeOverride | A partial theme override to use when drawing this cell.                                                                                                 |
+| span          | If set the `span` controls which horizontal span a cell belongs to. Spans are inclusive and must be correctly reported for all cells in the span range. |
+| contentAlign  | Changes the default text alignment for the cell.                                                                                                        |
+| cursor        | An override for the cell cursor when hovered.                                                                                                           |
 
 ---
 

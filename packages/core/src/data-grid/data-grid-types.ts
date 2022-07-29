@@ -321,7 +321,7 @@ export interface BaseGridCell {
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
-    readonly span?: Item;
+    readonly span?: readonly [number, number];
     readonly contentAlign?: "left" | "right" | "center";
     readonly cursor?: CSSProperties["cursor"];
 }
