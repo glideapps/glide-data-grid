@@ -57,7 +57,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
 
     const canResize = (onColumnResize ?? onColumnResizeEnd ?? onColumnResizeStart) !== undefined;
 
-    const { onMouseDown, onMouseUp, onItemHovered, isDraggable = false, columns, selection } = p;
+    const { onMouseDown, onMouseUp, onItemHovered, columns, selection } = p;
     const selectedColumns = selection.columns;
 
     const onItemHoveredImpl = React.useCallback(
@@ -81,47 +81,37 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         (args: GridMouseEventArgs) => {
             if (args.button === 0) {
                 const [col, row] = args.location;
-                if (!isDraggable) {
-                    if (args.kind === "out-of-bounds" && args.isEdge && canResize) {
-                        const bounds = gridRef?.current?.getBounds(columns.length - 1, -1);
-                        if (bounds !== undefined) {
-                            setResizeColStartX(bounds.x);
-                            setResizeCol(columns.length - 1);
-                        }
-                    } else if (args.kind === "header" && col >= lockColumns) {
-                        if (args.isEdge && canResize) {
-                            setResizeColStartX(args.bounds.x);
-                            setResizeCol(col);
-                            onColumnResizeStart?.(columns[col], args.bounds.width, col);
-                        } else if (args.kind === "header" && canDragCol) {
-                            setDragStartX(args.bounds.x);
-                            setDragCol(col);
-                        }
-                    } else if (
-                        args.kind === "cell" &&
-                        lockColumns > 0 &&
-                        col === 0 &&
-                        row !== undefined &&
-                        onRowMoved !== undefined
-                    ) {
-                        setDragStartY(args.bounds.y);
-                        setDragRow(row);
+                // if (!isDraggable) {
+                if (args.kind === "out-of-bounds" && args.isEdge && canResize) {
+                    const bounds = gridRef?.current?.getBounds(columns.length - 1, -1);
+                    if (bounds !== undefined) {
+                        setResizeColStartX(bounds.x);
+                        setResizeCol(columns.length - 1);
                     }
+                } else if (args.kind === "header" && col >= lockColumns) {
+                    if (args.isEdge && canResize) {
+                        setResizeColStartX(args.bounds.x);
+                        setResizeCol(col);
+                        onColumnResizeStart?.(columns[col], args.bounds.width, col);
+                    } else if (args.kind === "header" && canDragCol) {
+                        setDragStartX(args.bounds.x);
+                        setDragCol(col);
+                    }
+                } else if (
+                    args.kind === "cell" &&
+                    lockColumns > 0 &&
+                    col === 0 &&
+                    row !== undefined &&
+                    onRowMoved !== undefined
+                ) {
+                    setDragStartY(args.bounds.y);
+                    setDragRow(row);
                 }
+                // }
             }
             onMouseDown?.(args);
         },
-        [
-            onMouseDown,
-            isDraggable,
-            canResize,
-            lockColumns,
-            onRowMoved,
-            gridRef,
-            columns,
-            canDragCol,
-            onColumnResizeStart,
-        ]
+        [onMouseDown, canResize, lockColumns, onRowMoved, gridRef, columns, canDragCol, onColumnResizeStart]
     );
 
     const onHeaderMenuClickMangled = React.useCallback(
@@ -324,6 +314,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             getRowThemeOverride={p.getRowThemeOverride}
             headerIcons={p.headerIcons}
             isDraggable={p.isDraggable}
+            onDragEnd={p.onDragEnd}
             onCellFocused={p.onCellFocused}
             onDragStart={p.onDragStart}
             onDragOverCell={p.onDragOverCell}

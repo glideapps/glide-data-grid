@@ -95,6 +95,7 @@ type Props = Omit<
     | "onCanvasFocused"
     | "onCellFocused"
     | "onContextMenu"
+    | "onDragEnd"
     | "onKeyDown"
     | "onKeyUp"
     | "onMouseDown"
@@ -325,7 +326,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const lastSent = React.useRef<[number, number]>();
 
     const {
-        isDraggable = false,
         rowMarkers = "none",
         rowHeight = 34,
         headerHeight = 36,
@@ -1631,15 +1631,24 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         )
     );
 
+    const isActivelyDragging = React.useRef(false);
     const onDragStartImpl = React.useCallback(
         (args: GridDragEventArgs) => {
             onDragStart?.({
                 ...args,
                 location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
             });
+
+            if (!args.defaultPrevented()) {
+                isActivelyDragging.current = true;
+            }
         },
         [onDragStart, rowMarkerOffset]
     );
+
+    const onDragEnd = React.useCallback(() => {
+        isActivelyDragging.current = false;
+    }, []);
 
     const onMouseMoveImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
@@ -1657,7 +1666,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (
                 mouseState !== undefined &&
                 gridSelection.current !== undefined &&
-                !isDraggable &&
+                !isActivelyDragging.current &&
                 (rangeSelect === "rect" || rangeSelect === "multi-rect")
             ) {
                 const [selectedCol, selectedRow] = gridSelection.current.cell;
@@ -1731,7 +1740,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [
             mouseState,
             gridSelection,
-            isDraggable,
             rangeSelect,
             onItemHovered,
             rowMarkerOffset,
@@ -2877,6 +2885,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     cellXOffset={cellXOffset}
                     cellYOffset={cellYOffset}
                     accessibilityHeight={visibleRegion.height}
+                    onDragEnd={onDragEnd}
                     columns={mangledCols}
                     drawCustomCell={drawCell}
                     drawHeader={drawHeader}

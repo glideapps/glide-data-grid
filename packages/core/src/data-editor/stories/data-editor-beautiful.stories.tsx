@@ -3196,6 +3196,44 @@ export const LayoutIntegration: React.VFC = () => {
     },
 };
 
+export const DragSource: React.VFC = () => {
+    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(200);
+
+    return (
+        <BeautifulWrapper
+            title="Drag source"
+            description={
+                <>
+                    <Description>
+                        Diagonal scrolling can be prevented by setting <PropName>preventDiagonalScrolling</PropName>.
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                preventDiagonalScrolling={true}
+                rows={5000}
+                onColumnResize={onColumnResize}
+                isDraggable={"header"}
+                onDragStart={e => {
+                    if (e.kind === "header") {
+                        e.setData("text/plain", "Drag data here!");
+                    } else {
+                        e.preventDefault();
+                    }
+                }}
+            />
+        </BeautifulWrapper>
+    );
+};
+(DragSource as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const PreventDiagonalScroll: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(200);
 

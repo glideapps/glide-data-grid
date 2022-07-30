@@ -101,6 +101,8 @@ export interface GridKeyEventArgs {
 interface DragHandler {
     readonly setData: (mime: string, payload: string) => void;
     readonly setDragImage: (image: Element, x: number, y: number) => void;
+    readonly preventDefault: () => void;
+    readonly defaultPrevented: () => boolean;
 }
 
 export type GridDragEventArgs = GridMouseEventArgs & DragHandler;
