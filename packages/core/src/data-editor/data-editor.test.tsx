@@ -2205,6 +2205,7 @@ describe("data-editor", () => {
 
     test("Fill down", async () => {
         const spy = jest.fn();
+        const multiSpy = jest.fn();
         jest.useFakeTimers();
         render(
             <EventedDataEditor
@@ -2212,6 +2213,7 @@ describe("data-editor", () => {
                 keybindings={{
                     downFill: true,
                 }}
+                onCellsEdited={multiSpy}
                 onCellEdited={spy}
             />,
             {
@@ -2249,14 +2251,24 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalledTimes(8);
+        expect(multiSpy).toHaveBeenCalled();
     });
 
     test("Fill right", async () => {
         const spy = jest.fn();
+        const multiSpy = jest.fn();
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} keybindings={{ rightFill: true }} onCellEdited={spy} />, {
-            wrapper: Context,
-        });
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                keybindings={{ rightFill: true }}
+                onCellEdited={spy}
+                onCellsEdited={multiSpy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
@@ -2288,6 +2300,7 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalledTimes(5);
+        expect(multiSpy).toHaveBeenCalled();
     });
 
     test("Clear selection", async () => {

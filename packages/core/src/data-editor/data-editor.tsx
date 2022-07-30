@@ -191,7 +191,7 @@ const keybindingDefaults: Keybinds = {
 export interface DataEditorProps extends Props {
     readonly onDelete?: (selection: GridSelection) => boolean | GridSelection;
     readonly onCellEdited?: (cell: Item, newValue: EditableGridCell) => void;
-    readonly onCellsEdited?: (newValues: readonly { location: Item; value: EditableGridCell }[]) => boolean | void;
+    readonly onCellsEdited?: (newValues: readonly EditListItem[]) => boolean | void;
     readonly onRowAppended?: () => Promise<"top" | "bottom" | number | undefined> | void;
     readonly onHeaderClicked?: (colIndex: number, event: HeaderClickedEventArgs) => void;
     readonly onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
@@ -597,13 +597,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const mangledRows = showTrailingBlankRow ? rows + 1 : rows;
 
-    const mangledOnCellEdited = React.useCallback(
-        (cell: Item, newValue: EditableGridCell) => {
-            onCellEdited?.([cell[0] - rowMarkerOffset, cell[1]], newValue);
-        },
-        [onCellEdited, rowMarkerOffset]
-    );
-
     const mangledOnCellsEdited = React.useCallback<NonNullable<typeof onCellsEdited>>(
         (items: readonly EditListItem[]) => {
             const mangledItems =
@@ -613,9 +606,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                           ...x,
                           location: [x.location[0] - rowMarkerOffset, x.location[1]] as const,
                       }));
-            return onCellsEdited?.(mangledItems);
+            const r = onCellsEdited?.(mangledItems);
+
+            if (r !== true) {
+                for (const i of mangledItems) onCellEdited?.(i.location, i.value);
+            }
+
+            return r;
         },
-        [onCellsEdited, rowMarkerOffset]
+        [onCellEdited, onCellsEdited, rowMarkerOffset]
     );
 
     const numSelectedRows = gridSelection.rows.length;
@@ -826,14 +825,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     forceEditMode: initialValue !== undefined,
                 });
             } else if (c.kind === GridCellKind.Boolean && fromKeyboard) {
-                mangledOnCellEdited(gridSelection.current.cell, {
-                    ...c,
-                    data: toggleBoolean(c.data),
-                });
+                mangledOnCellsEdited([
+                    {
+                        location: gridSelection.current.cell,
+                        value: {
+                            ...c,
+                            data: toggleBoolean(c.data),
+                        },
+                    },
+                ]);
                 gridRef.current?.damage([{ cell: gridSelection.current.cell }]);
             }
         },
-        [getMangledCellContent, gridSelection, mangledOnCellEdited, setOverlaySimple]
+        [getMangledCellContent, gridSelection, mangledOnCellsEdited, setOverlaySimple]
     );
 
     const focusOnRowFromTrailingBlankRow = React.useCallback(
@@ -1317,7 +1321,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const fillDown = React.useCallback(
         (reverse: boolean) => {
             if (gridSelection.current === undefined) return;
-            const damage: Item[] = [];
+            const v: EditListItem[] = [];
             const r = gridSelection.current.range;
             for (let x = 0; x < r.width; x++) {
                 const fillCol = x + r.x;
@@ -1326,20 +1330,22 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 for (let y = 1; y < r.height; y++) {
                     const fillRow = reverse ? r.y + r.height - (y + 1) : y + r.y;
                     const target = [fillCol, fillRow] as const;
-                    damage.push(target);
-                    mangledOnCellEdited?.(target, {
-                        ...fillVal,
+                    v.push({
+                        location: target,
+                        value: { ...fillVal },
                     });
                 }
             }
 
+            mangledOnCellsEdited(v);
+
             gridRef.current?.damage(
-                damage.map(c => ({
-                    cell: c,
+                v.map(c => ({
+                    cell: c.location,
                 }))
             );
         },
-        [getMangledCellContent, gridSelection, mangledOnCellEdited]
+        [getMangledCellContent, gridSelection, mangledOnCellsEdited]
     );
 
     const isPrevented = React.useRef(false);
@@ -1449,7 +1455,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         if (r !== undefined && r.onClick !== undefined) {
                             const newVal = r.onClick(c, a.localEventX, a.localEventY, a.bounds);
                             if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
-                                mangledOnCellEdited(a.location, newVal);
+                                mangledOnCellsEdited([{ location: a.location, value: newVal }]);
                                 gridRef.current?.damage([
                                     {
                                         cell: a.location,
@@ -1550,7 +1556,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowMarkerOffset,
             fillDown,
             getMangledCellContent,
-            mangledOnCellEdited,
+            mangledOnCellsEdited,
             onCellActivated,
             reselect,
             onCellContextMenu,
@@ -1953,7 +1959,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onFinishEditing = React.useCallback(
         (newValue: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => {
             if (overlay?.cell !== undefined && newValue !== undefined && isEditableGridCell(newValue)) {
-                mangledOnCellEdited?.(overlay.cell, newValue);
+                mangledOnCellsEdited([{ location: overlay.cell, value: newValue }]);
                 window.requestAnimationFrame(() => {
                     gridRef.current?.damage([
                         {
@@ -1983,7 +1989,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             focus,
             gridSelection,
             onFinishedEditing,
-            mangledOnCellEdited,
+            mangledOnCellsEdited,
             mangledRows,
             updateSelectedCell,
             mangledCols.length,
@@ -2052,7 +2058,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                 function deleteRange(r: Rectangle) {
                     focus();
-                    const damaged: [number, number][] = [];
+                    const editList: EditListItem[] = [];
                     for (let x = r.x; x < r.x + r.width; x++) {
                         for (let y = r.y; y < r.y + r.height; y++) {
                             const cellValue = getCellContent([x - rowMarkerOffset, y]);
@@ -2070,12 +2076,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                                 newVal = toDelete.onDelete?.(cellValue);
                             }
                             if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
-                                mangledOnCellEdited([x, y], newVal);
-                                damaged.push([x, y]);
+                                editList.push({ location: [x, y], value: newVal });
                             }
                         }
                     }
-                    gridRef.current?.damage(damaged.map(x => ({ cell: x })));
+                    mangledOnCellsEdited(editList);
+                    gridRef.current?.damage(editList.map(x => ({ cell: x.location })));
                 }
 
                 if (isDeleteKey) {
@@ -2177,7 +2183,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     gridSelection.current.range.width > 1
                 ) {
                     // ctrl/cmd + r
-                    const damage: Item[] = [];
+                    const editList: EditListItem[] = [];
                     const r = gridSelection.current.range;
                     for (let y = 0; y < r.height; y++) {
                         const fillRow = y + r.y;
@@ -2186,16 +2192,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         for (let x = 1; x < r.width; x++) {
                             const fillCol = x + r.x;
                             const target = [fillCol, fillRow] as const;
-                            damage.push(target);
-                            mangledOnCellEdited?.(target, {
-                                ...fillVal,
+                            editList.push({
+                                location: target,
+                                value: { ...fillVal },
                             });
                         }
                     }
-
+                    mangledOnCellsEdited(editList);
                     gridRef.current?.damage(
-                        damage.map(c => ({
-                            cell: c,
+                        editList.map(c => ({
+                            cell: c.location,
                         }))
                     );
                     event.cancel();
@@ -2326,14 +2332,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowMarkerOffset,
             updateSelectedCell,
             setGridSelection,
-            fillDown,
             onSelectionCleared,
             columnsIn.length,
             rows,
             overlayID,
             focus,
+            mangledOnCellsEdited,
             provideEditor,
-            mangledOnCellEdited,
             onDelete,
             mangledCols.length,
             setSelectedColumns,
@@ -2343,6 +2348,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             appendRow,
             onCellActivated,
             reselect,
+            fillDown,
             getMangledCellContent,
             adjustSelection,
             rangeSelect,
@@ -2486,7 +2492,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                 const [gridCol, gridRow] = target;
 
-                const damage: EditListItem[] = [];
+                const editList: EditListItem[] = [];
                 do {
                     if (onPaste === undefined) {
                         const cellData = getMangledCellContent(target);
@@ -2496,7 +2502,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             text ?? data?.map(r => r.join("\t")).join("\t") ?? ""
                         );
                         if (newVal !== undefined) {
-                            damage.push(newVal);
+                            editList.push(newVal);
                         }
                         break;
                     }
@@ -2521,21 +2527,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             const cellData = getMangledCellContent(index);
                             const newVal = pasteToCell(cellData, index, dataItem);
                             if (newVal !== undefined) {
-                                damage.push(newVal);
+                                editList.push(newVal);
                             }
                         }
                     }
                     // eslint-disable-next-line no-constant-condition
                 } while (false);
 
-                const r = mangledOnCellsEdited(damage);
-
-                if (r !== true) {
-                    for (const i of damage) mangledOnCellEdited(i.location, i.value);
-                }
+                mangledOnCellsEdited(editList);
 
                 gridRef.current?.damage(
-                    damage.map(c => ({
+                    editList.map(c => ({
                         cell: c.location,
                     }))
                 );
@@ -2546,7 +2548,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             getMangledCellContent,
             gridSelection,
             keybindings.paste,
-            mangledOnCellEdited,
             mangledOnCellsEdited,
             onPaste,
             rowMarkerOffset,
