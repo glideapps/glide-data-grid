@@ -58,6 +58,7 @@ import { useCellsForSelection } from "./use-cells-for-selection";
 import { unquote, expandSelection, copyToClipboard, decodeHTML } from "./data-editor-fns";
 import { DataEditorContainer } from "../data-editor-container/data-grid-container";
 import { toggleBoolean } from "../data-grid/cells/boolean-cell";
+import { useAutoscroll } from "./use-autoscroll";
 
 let idCounter = 0;
 
@@ -322,7 +323,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
     const [mouseState, setMouseState] = React.useState<MouseState>();
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
-    const scrollTimer = React.useRef<number>();
     const lastSent = React.useRef<[number, number]>();
 
     const {
@@ -1416,14 +1416,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [columns, getCellsForSelection, maxColumnWidth, mergedTheme, minColumnWidth, onColumnResize, rowMarkerOffset]
     );
 
+    const [scrollDir, setScrollDir] = React.useState<GridMouseEventArgs["scrollEdge"]>();
+
     const onMouseUp = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
             const mouse = mouseState;
             setMouseState(undefined);
+            setScrollDir(undefined);
 
-            if (scrollTimer.current !== undefined) {
-                window.clearInterval(scrollTimer.current);
-            }
             if (isOutside) return;
 
             const [col, row] = args.location;
@@ -1570,6 +1570,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
+    const onMouseMoveImpl = React.useCallback(
+        (args: GridMouseEventArgs) => {
+            const a: GridMouseEventArgs = {
+                ...args,
+                location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
+            };
+            onMouseMove?.(a);
+            setScrollDir(mouseState !== undefined ? args.scrollEdge : undefined);
+        },
+        [mouseState, onMouseMove, rowMarkerOffset]
+    );
+
+    useAutoscroll(scrollDir, scrollRef);
+
     const onHeaderMenuClickInner = React.useCallback(
         (col: number, screenPosition: Rectangle) => {
             onHeaderMenuClick?.(col - rowMarkerOffset, screenPosition);
@@ -1651,17 +1665,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         isActivelyDragging.current = false;
     }, []);
 
-    const onMouseMoveImpl = React.useCallback(
-        (args: GridMouseEventArgs) => {
-            const a: GridMouseEventArgs = {
-                ...args,
-                location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
-            };
-            onMouseMove?.(a);
-        },
-        [onMouseMove, rowMarkerOffset]
-    );
-
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
             if (
@@ -1673,35 +1676,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const [selectedCol, selectedRow] = gridSelection.current.cell;
                 // eslint-disable-next-line prefer-const
                 let [col, row] = args.location;
-
-                if (args.kind === outOfBoundsKind && scrollRef.current !== null) {
-                    const [horizontal, vertical] = args.direction;
-                    let scrollX = 0;
-                    let scrollY = 0;
-                    if (horizontal === -1) {
-                        scrollX = columns[columns.length - 1].width;
-                    } else if (horizontal === 1) {
-                        scrollX = -columns[0].width;
-                    }
-                    if (vertical !== 0) {
-                        scrollY =
-                            typeof rowHeight === "number"
-                                ? rowHeight * vertical
-                                : rowHeight(Math.max(0, row)) * vertical;
-                    }
-
-                    if (scrollTimer.current !== undefined) {
-                        window.clearInterval(scrollTimer.current);
-                    }
-                    scrollTimer.current = window.setInterval(() => {
-                        scrollRef.current?.scrollBy(-100 * horizontal, scrollY);
-                    }, 200);
-                    scrollRef.current.scrollBy(scrollX, scrollY);
-                } else {
-                    if (scrollTimer.current !== undefined) {
-                        window.clearInterval(scrollTimer.current);
-                    }
-                }
 
                 if (row < 0) {
                     row = visibleRegionRef.current.y;
@@ -1748,8 +1722,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rows,
             hasRowMarkers,
             setCurrent,
-            columns,
-            rowHeight,
         ]
     );
 

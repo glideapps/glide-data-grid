@@ -55,6 +55,7 @@ interface BaseGridMouseEventArgs {
     readonly isLongTouch?: boolean;
     readonly isEdge: boolean;
     readonly button: number;
+    readonly scrollEdge: readonly [-1 | 0 | 1, -1 | 0 | 1];
 }
 
 export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {

@@ -3214,7 +3214,6 @@ export const DragSource: React.VFC<{ isDraggable: boolean | "header" | "cell" }>
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
-                preventDiagonalScrolling={true}
                 rows={5000}
                 onColumnResize={onColumnResize}
                 isDraggable={p.isDraggable}
