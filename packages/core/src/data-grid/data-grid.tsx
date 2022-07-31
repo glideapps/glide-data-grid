@@ -367,10 +367,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const metaKey = ev?.metaKey === true;
             const isTouch = ev !== undefined && !(ev instanceof MouseEvent);
 
-            const edgeSize = 25;
+            const edgeSize = 20;
             const scrollEdge: GridMouseEventArgs["scrollEdge"] = [
-                x < edgeSize ? -1 : x > rect.width - edgeSize ? 1 : 0,
-                y < edgeSize ? -1 : y > rect.height - edgeSize ? 1 : 0,
+                Math.abs(x) < edgeSize ? -1 : Math.abs(rect.width - x) < edgeSize ? 1 : 0,
+                Math.abs(y) < edgeSize ? -1 : Math.abs(rect.height - y) < edgeSize ? 1 : 0,
             ];
 
             let result: GridMouseEventArgs;
@@ -394,7 +394,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isEdge,
                     isTouch,
                     button,
-                    scrollEdge: [0, 0],
+                    scrollEdge,
                 };
             } else if (row <= -1) {
                 let bounds = getBoundsForItem(canvas, col, row);
