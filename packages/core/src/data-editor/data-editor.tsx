@@ -1642,6 +1642,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (!args.defaultPrevented()) {
                 isActivelyDragging.current = true;
             }
+            setMouseState(undefined);
         },
         [onDragStart, rowMarkerOffset]
     );

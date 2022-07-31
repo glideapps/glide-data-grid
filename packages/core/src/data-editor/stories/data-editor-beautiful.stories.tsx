@@ -3196,7 +3196,7 @@ export const LayoutIntegration: React.VFC = () => {
     },
 };
 
-export const DragSource: React.VFC = () => {
+export const DragSource: React.VFC<{ isDraggable: boolean | "header" | "cell" }> = p => {
     const { cols, getCellContent, onColumnResize } = useMockDataGenerator(200);
 
     return (
@@ -3205,7 +3205,8 @@ export const DragSource: React.VFC = () => {
             description={
                 <>
                     <Description>
-                        Diagonal scrolling can be prevented by setting <PropName>preventDiagonalScrolling</PropName>.
+                        Setting the <PropName>isDraggable</PropName> prop can allow for more granular control over what
+                        is draggable in the grid via HTML drag and drop.
                     </Description>
                 </>
             }>
@@ -3216,21 +3217,25 @@ export const DragSource: React.VFC = () => {
                 preventDiagonalScrolling={true}
                 rows={5000}
                 onColumnResize={onColumnResize}
-                isDraggable={"header"}
+                isDraggable={p.isDraggable}
                 onDragStart={e => {
-                    if (e.kind === "header") {
-                        e.setData("text/plain", "Drag data here!");
-                    } else {
-                        e.preventDefault();
-                    }
+                    e.setData("text/plain", "Drag data here!");
                 }}
             />
         </BeautifulWrapper>
     );
 };
+(DragSource as any).argTypes = {
+    isDraggable: {
+        control: { type: "select", options: [true, false, "cell", "header"] },
+    },
+};
+(DragSource as any).args = {
+    isDraggable: false,
+};
 (DragSource as any).parameters = {
     options: {
-        showPanel: false,
+        showPanel: true,
     },
 };
 
