@@ -24,8 +24,6 @@ export function useAutoscroll(
                 const step = curTime - lastTime;
                 speedScalar.current = Math.min(1, speedScalar.current + step / msToFullSpeed);
                 const motion = speedScalar.current ** 1.618 * step * maxPxPerMs;
-                // eslint-disable-next-line no-console
-                console.log(speedScalar.current ** 3);
                 scrollRef.current?.scrollBy(xDir * motion, yDir * motion);
                 lastTime = curTime;
             }
