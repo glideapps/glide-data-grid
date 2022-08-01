@@ -3214,7 +3214,10 @@ export const DragSource: React.VFC<{ isDraggable: boolean | "header" | "cell" }>
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
+                rowMarkers="both"
                 rows={5000}
+                onRowMoved={(s, e) => window.alert(`Moved row ${s} to ${e}`)}
+                onColumnMoved={(s, e) => window.alert(`Moved col ${s} to ${e}`)}
                 onColumnResize={onColumnResize}
                 isDraggable={p.isDraggable}
                 onDragStart={e => {

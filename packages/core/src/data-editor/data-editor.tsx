@@ -1648,6 +1648,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const isActivelyDragging = React.useRef(false);
     const onDragStartImpl = React.useCallback(
         (args: GridDragEventArgs) => {
+            if (args.location[0] === 0 && rowMarkerOffset > 0) {
+                args.preventDefault();
+                return;
+            }
             onDragStart?.({
                 ...args,
                 location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
