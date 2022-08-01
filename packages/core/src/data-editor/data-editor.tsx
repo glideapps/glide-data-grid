@@ -1236,6 +1236,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const mouseDownData = React.useRef<{
         wasDoubleClick: boolean;
         time: number;
+        location: Item;
     }>();
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
@@ -1251,6 +1252,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             mouseDownData.current = {
                 wasDoubleClick,
                 time,
+                location: args.location,
             };
 
             const fillHandle = args.kind === "cell" && args.isFillHandle;
@@ -1586,7 +1588,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
             };
             onMouseMove?.(a);
-            setScrollDir(mouseState !== undefined ? args.scrollEdge : undefined);
+            setScrollDir(
+                mouseState === undefined || (mouseDownData.current?.location[0] ?? 0) < rowMarkerOffset
+                    ? undefined
+                    : args.scrollEdge
+            );
         },
         [mouseState, onMouseMove, rowMarkerOffset]
     );
@@ -1698,9 +1704,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
                 if (landedOnLastStickyRow || startedFromLastStickyRow) return;
 
-                if (col === 0 && hasRowMarkers) {
-                    col = 1;
-                }
+                col = Math.max(col, rowMarkerOffset);
 
                 const deltaX = col - selectedCol;
                 const deltaY = row - selectedRow;
@@ -1725,17 +1729,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             onItemHovered?.({ ...args, location: [args.location[0] - rowMarkerOffset, args.location[1]] as any });
         },
-        [
-            mouseState,
-            gridSelection,
-            rangeSelect,
-            onItemHovered,
-            rowMarkerOffset,
-            lastRowSticky,
-            rows,
-            hasRowMarkers,
-            setCurrent,
-        ]
+        [mouseState, gridSelection, rangeSelect, onItemHovered, rowMarkerOffset, lastRowSticky, rows, setCurrent]
     );
 
     // 1 === move one
