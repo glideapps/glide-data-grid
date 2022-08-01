@@ -2,7 +2,7 @@ import React from "react";
 import type { GridMouseCellEventArgs } from "../data-grid/data-grid-types";
 
 const maxPxPerMs = 2;
-const msToFullSpeed = 3000;
+const msToFullSpeed = 1300;
 
 export function useAutoscroll(
     scrollDirection: GridMouseCellEventArgs["scrollEdge"] | undefined,
@@ -23,7 +23,9 @@ export function useAutoscroll(
             } else {
                 const step = curTime - lastTime;
                 speedScalar.current = Math.min(1, speedScalar.current + step / msToFullSpeed);
-                const motion = speedScalar.current * step * maxPxPerMs;
+                const motion = speedScalar.current ** 1.618 * step * maxPxPerMs;
+                // eslint-disable-next-line no-console
+                console.log(speedScalar.current ** 3);
                 scrollRef.current?.scrollBy(xDir * motion, yDir * motion);
                 lastTime = curTime;
             }
