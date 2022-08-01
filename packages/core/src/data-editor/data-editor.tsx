@@ -1588,11 +1588,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
             };
             onMouseMove?.(a);
-            setScrollDir(
-                mouseState === undefined || (mouseDownData.current?.location[0] ?? 0) < rowMarkerOffset
+            setScrollDir(cv => {
+                if (args.scrollEdge[0] === cv?.[0] && args.scrollEdge[1] === cv[1]) return cv;
+                return mouseState === undefined || (mouseDownData.current?.location[0] ?? 0) < rowMarkerOffset
                     ? undefined
-                    : args.scrollEdge
-            );
+                    : args.scrollEdge;
+            });
         },
         [mouseState, onMouseMove, rowMarkerOffset]
     );
