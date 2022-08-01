@@ -7,7 +7,6 @@ module.exports = {
         "@storybook/addon-essentials",
         "@storybook/addon-knobs",
         "@storybook/addon-controls",
-        a,
     ],
     core: {
         builder: "webpack5",
