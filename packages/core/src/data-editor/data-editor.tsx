@@ -1387,7 +1387,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         x: col,
                         y: start,
                         width: 1,
-                        height: end,
+                        height: Math.min(end, rows - start),
                     },
                     abortControllerRef.current.signal
                 );
@@ -1413,7 +1413,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
         },
-        [columns, getCellsForSelection, maxColumnWidth, mergedTheme, minColumnWidth, onColumnResize, rowMarkerOffset]
+        [
+            columns,
+            getCellsForSelection,
+            maxColumnWidth,
+            mergedTheme,
+            minColumnWidth,
+            onColumnResize,
+            rowMarkerOffset,
+            rows,
+        ]
     );
 
     const [scrollDir, setScrollDir] = React.useState<GridMouseEventArgs["scrollEdge"]>();
