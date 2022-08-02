@@ -1015,7 +1015,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const canvas = ref.current;
             if (canvas === null || isDraggable === false || isResizing) {
                 event.preventDefault();
-                return false;
+                return;
             }
 
             let dragMime: string | undefined;
@@ -1025,7 +1025,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             if (isDraggable !== true && args.kind !== isDraggable) {
                 event.preventDefault();
-                return false;
+                return;
             }
 
             const setData = (mime: string, payload: string) => {
@@ -1163,7 +1163,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             if (canvas === null || onDragOverCell === undefined) {
-                return false;
+                return;
             }
 
             const args = getMouseArgsForPosition(canvas, event.clientX, event.clientY);
@@ -1191,7 +1191,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         (event: DragEvent) => {
             const canvas = ref.current;
             if (canvas === null || onDrop === undefined) {
-                return false;
+                return;
             }
 
             // Default can mess up sometimes.
