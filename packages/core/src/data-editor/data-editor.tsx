@@ -2650,11 +2650,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         const [col, row] = gridSelection.current.cell;
 
         // Check that the grid selection is in range before updating the selected cell
-        const selectionColInRange = mangledCols[col];
-        if (selectionColInRange === undefined) return;
+        const selectionColInRange = mangledCols[col] !== undefined;
+        const selectionRowInRange = row < mangledRows;
+        if (!selectionColInRange || !selectionRowInRange) return;
 
         updateSelectedCell(col, row, false, false);
-    }, [mangledCols, rows, gridSelection, updateSelectedCell]);
+    }, [mangledCols, mangledRows, gridSelection, updateSelectedCell]);
 
     const disabledRows = React.useMemo(() => {
         if (showTrailingBlankRow === true && trailingRowOptions?.tint === true) {
