@@ -1,4 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks";
+import { describe, it, expect } from "jest-without-globals";
 import { useAutoscroll } from "./use-autoscroll";
 
 describe("use-auto-scroll", () => {
