@@ -3196,6 +3196,51 @@ export const LayoutIntegration: React.VFC = () => {
     },
 };
 
+export const DragSource: React.VFC<{ isDraggable: boolean | "header" | "cell" }> = p => {
+    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(200);
+
+    return (
+        <BeautifulWrapper
+            title="Drag source"
+            description={
+                <>
+                    <Description>
+                        Setting the <PropName>isDraggable</PropName> prop can allow for more granular control over what
+                        is draggable in the grid via HTML drag and drop.
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rowMarkers="both"
+                rows={5000}
+                onRowMoved={(s, e) => window.alert(`Moved row ${s} to ${e}`)}
+                onColumnMoved={(s, e) => window.alert(`Moved col ${s} to ${e}`)}
+                onColumnResize={onColumnResize}
+                isDraggable={p.isDraggable}
+                onDragStart={e => {
+                    e.setData("text/plain", "Drag data here!");
+                }}
+            />
+        </BeautifulWrapper>
+    );
+};
+(DragSource as any).argTypes = {
+    isDraggable: {
+        control: { type: "select", options: [true, false, "cell", "header"] },
+    },
+};
+(DragSource as any).args = {
+    isDraggable: false,
+};
+(DragSource as any).parameters = {
+    options: {
+        showPanel: true,
+    },
+};
+
 export const PreventDiagonalScroll: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(200);
 

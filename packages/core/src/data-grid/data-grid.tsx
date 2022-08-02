@@ -40,6 +40,7 @@ import {
     drawCell,
     drawGrid,
     DrawGridArg,
+    drawHeader,
     getActionBoundsForGroup,
     getHeaderMenuBounds,
     GetRowThemeCallback,
@@ -121,8 +122,9 @@ export interface DataGridProps {
 
     readonly verticalBorder: (col: number) => boolean;
 
-    readonly isDraggable?: boolean;
+    readonly isDraggable?: boolean | "cell" | "header";
     readonly onDragStart?: (args: GridDragEventArgs) => void;
+    readonly onDragEnd?: () => void;
 
     readonly onDragOverCell?: (cell: Item, dataTransfer: DataTransfer | null) => void;
     readonly onDragLeave?: () => void;
@@ -216,6 +218,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         highlightRegions,
         canvasRef,
         onDragStart,
+        onDragEnd,
         eventTargetRef,
         isResizing,
         isDragging,
@@ -227,7 +230,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         prelightCells,
         headerIcons,
         verticalBorder,
-        drawHeader,
+        drawHeader: drawHeaderCallback,
         drawCustomCell,
         onCellFocused,
         onDragOverCell,
@@ -364,6 +367,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const metaKey = ev?.metaKey === true;
             const isTouch = ev !== undefined && !(ev instanceof MouseEvent);
 
+            const edgeSize = 20;
+            const scrollEdge: GridMouseEventArgs["scrollEdge"] = [
+                Math.abs(x) < edgeSize ? -1 : Math.abs(rect.width - x) < edgeSize ? 1 : 0,
+                Math.abs(y) < edgeSize ? -1 : Math.abs(rect.height - y) < edgeSize ? 1 : 0,
+            ];
+
             let result: GridMouseEventArgs;
             if (col === -1 || y < 0 || x < 0 || row === undefined || x > width || y > height) {
                 const horizontal = x > width ? -1 : x < 0 ? 1 : 0;
@@ -385,6 +394,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isEdge,
                     isTouch,
                     button,
+                    scrollEdge,
                 };
             } else if (row <= -1) {
                 let bounds = getBoundsForItem(canvas, col, row);
@@ -407,6 +417,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         localEventX: posX - bounds.x,
                         localEventY: posY - bounds.y,
                         button,
+                        scrollEdge,
                     };
                 } else {
                     result = {
@@ -422,6 +433,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         localEventX: posX - bounds.x,
                         localEventY: posY - bounds.y,
                         button,
+                        scrollEdge,
                     };
                 }
             } else {
@@ -445,6 +457,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     localEventX: posX - bounds.x,
                     localEventY: posY - bounds.y,
                     button,
+                    scrollEdge,
                 };
             }
             return result;
@@ -521,7 +534,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getGroupDetails: getGroupDetails ?? (name => ({ name })),
             getRowThemeOverride,
             drawCustomCell,
-            drawHeaderCallback: drawHeader,
+            drawHeaderCallback,
             prelightCells,
             highlightRegions,
             imageLoader,
@@ -576,7 +589,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         getGroupDetails,
         getRowThemeOverride,
         drawCustomCell,
-        drawHeader,
+        drawHeaderCallback,
         prelightCells,
         highlightRegions,
         imageLoader,
@@ -754,7 +767,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             onMouseDown?.(args);
-            if (!args.isTouch && !isDraggable) {
+            if (!args.isTouch && isDraggable !== true && isDraggable !== args.kind) {
                 // preventing default in touch events stops scroll
                 ev.preventDefault();
             }
@@ -1000,12 +1013,20 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const onDragStartImpl = React.useCallback(
         (event: DragEvent) => {
             const canvas = ref.current;
-            if (canvas === null || !isDraggable) return false;
+            if (canvas === null || isDraggable === false || isResizing) {
+                event.preventDefault();
+                return;
+            }
 
             let dragMime: string | undefined;
             let dragData: string | undefined;
 
             const args = getMouseArgsForPosition(canvas, event.clientX, event.clientY);
+
+            if (isDraggable !== true && args.kind !== isDraggable) {
+                event.preventDefault();
+                return;
+            }
 
             const setData = (mime: string, payload: string) => {
                 dragMime = mime;
@@ -1021,14 +1042,18 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 dragImageY = y;
             };
 
+            let prevented = false;
+
             onDragStart?.({
                 ...args,
                 setData,
                 setDragImage,
+                preventDefault: () => (prevented = true),
+                defaultPrevented: () => prevented,
             });
-            if (dragMime !== undefined && dragData !== undefined && event.dataTransfer !== null) {
+            if (!prevented && dragMime !== undefined && dragData !== undefined && event.dataTransfer !== null) {
                 event.dataTransfer.setData(dragMime, dragData);
-                event.dataTransfer.effectAllowed = "link";
+                event.dataTransfer.effectAllowed = "copyLink";
 
                 if (dragImage !== undefined && dragImageX !== undefined && dragImageY !== undefined) {
                     event.dataTransfer.setDragImage(dragImage, dragImageX, dragImageY);
@@ -1043,27 +1068,51 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
                         const ctx = offscreen.getContext("2d");
                         if (ctx !== null) {
-                            ctx.fillStyle = theme.bgCell;
-                            ctx.fillRect(0, 0, offscreen.width, offscreen.height);
-                            drawCell(
-                                ctx,
-                                row,
-                                getCellContent([col, row]),
-                                0,
-                                0,
-                                0,
-                                boundsForDragTarget.width,
-                                boundsForDragTarget.height,
-                                false,
-                                theme,
-                                drawCustomCell,
-                                imageLoader,
-                                spriteManager,
-                                1,
-                                undefined,
-                                false,
-                                0
-                            );
+                            ctx.textBaseline = "middle";
+                            if (row === -1) {
+                                ctx.font = `${theme.headerFontStyle} ${theme.fontFamily}`;
+                                ctx.fillStyle = theme.bgHeader;
+                                ctx.fillRect(0, 0, offscreen.width, offscreen.height);
+                                drawHeader(
+                                    ctx,
+                                    0,
+                                    0,
+                                    boundsForDragTarget.width,
+                                    boundsForDragTarget.height,
+                                    mappedColumns[col],
+                                    false,
+                                    theme,
+                                    false,
+                                    false,
+                                    0,
+                                    spriteManager,
+                                    drawHeaderCallback,
+                                    false
+                                );
+                            } else {
+                                ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+                                ctx.fillStyle = theme.bgCell;
+                                ctx.fillRect(0, 0, offscreen.width, offscreen.height);
+                                drawCell(
+                                    ctx,
+                                    row,
+                                    getCellContent([col, row]),
+                                    0,
+                                    0,
+                                    0,
+                                    boundsForDragTarget.width,
+                                    boundsForDragTarget.height,
+                                    false,
+                                    theme,
+                                    drawCustomCell,
+                                    imageLoader,
+                                    spriteManager,
+                                    1,
+                                    undefined,
+                                    false,
+                                    0
+                                );
+                            }
                         }
 
                         offscreen.style.left = "-100%";
@@ -1088,14 +1137,17 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         },
         [
             isDraggable,
+            isResizing,
             getMouseArgsForPosition,
             onDragStart,
             getBoundsForItem,
             theme,
+            mappedColumns,
+            spriteManager,
+            drawHeaderCallback,
             getCellContent,
             drawCustomCell,
             imageLoader,
-            spriteManager,
         ]
     );
     useEventListener("dragstart", onDragStartImpl, eventTargetRef?.current ?? null, false, false);
@@ -1111,7 +1163,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             if (canvas === null || onDragOverCell === undefined) {
-                return false;
+                return;
             }
 
             const args = getMouseArgsForPosition(canvas, event.clientX, event.clientY);
@@ -1131,14 +1183,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const onDragEndImpl = React.useCallback(() => {
         activeDropTarget.current = undefined;
-    }, []);
+        onDragEnd?.();
+    }, [onDragEnd]);
     useEventListener("dragend", onDragEndImpl, eventTargetRef?.current ?? null, false, false);
 
     const onDropImpl = React.useCallback(
         (event: DragEvent) => {
             const canvas = ref.current;
             if (canvas === null || onDrop === undefined) {
-                return false;
+                return;
             }
 
             // Default can mess up sometimes.

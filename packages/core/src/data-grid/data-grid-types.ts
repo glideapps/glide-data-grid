@@ -55,6 +55,7 @@ interface BaseGridMouseEventArgs {
     readonly isLongTouch?: boolean;
     readonly isEdge: boolean;
     readonly button: number;
+    readonly scrollEdge: readonly [-1 | 0 | 1, -1 | 0 | 1];
 }
 
 export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
@@ -101,6 +102,8 @@ export interface GridKeyEventArgs {
 interface DragHandler {
     readonly setData: (mime: string, payload: string) => void;
     readonly setDragImage: (image: Element, x: number, y: number) => void;
+    readonly preventDefault: () => void;
+    readonly defaultPrevented: () => boolean;
 }
 
 export type GridDragEventArgs = GridMouseEventArgs & DragHandler;

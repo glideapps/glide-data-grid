@@ -662,7 +662,7 @@ export function getHeaderMenuBounds(x: number, y: number, width: number, height:
     };
 }
 
-function drawHeader(
+export function drawHeader(
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
