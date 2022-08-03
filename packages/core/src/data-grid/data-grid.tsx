@@ -290,6 +290,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         (canvas: HTMLCanvasElement, col: number, row: number): Rectangle => {
             const rect = canvas.getBoundingClientRect();
 
+            if (col >= mappedColumns.length || row >= rows) {
+                return {
+                    x: 0,
+                    y: 0,
+                    width: 0,
+                    height: 0,
+                };
+            }
+
             const result = computeBounds(
                 col,
                 row,

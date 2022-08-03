@@ -2645,17 +2645,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [updateSelectedCell]
     );
 
-    React.useEffect(() => {
-        if (gridSelection.current === undefined) return;
-        const [col, row] = gridSelection.current.cell;
-
-        // Check that the grid selection is in range before updating the selected cell
-        const selectionColInRange = mangledCols[col];
-        if (selectionColInRange === undefined) return;
-
-        updateSelectedCell(col, row, false, false);
-    }, [mangledCols, rows, gridSelection, updateSelectedCell]);
-
     const disabledRows = React.useMemo(() => {
         if (showTrailingBlankRow === true && trailingRowOptions?.tint === true) {
             return CompactSelection.fromSingleSelection(mangledRows - 1);
