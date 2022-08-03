@@ -14,7 +14,10 @@ interface Props {
     readonly scrollWidth: number;
     readonly scrollHeight: number;
     readonly scrollToEnd?: boolean;
-    readonly rightElementSticky?: boolean;
+    readonly rightElementProps?: {
+        readonly sticky?: boolean;
+        readonly fill?: boolean;
+    };
     readonly rightElement?: React.ReactNode;
     readonly minimap?: React.ReactNode;
     readonly style?: React.CSSProperties;
@@ -80,13 +83,16 @@ export const InfiniteScroller: React.FC<Props> = p => {
         paddingBottom = 0,
         paddingRight = 0,
         rightElement,
-        rightElementSticky = false,
+        rightElementProps,
         scrollRef,
         scrollToEnd,
         minimap,
         style,
     } = p;
     const padders: React.ReactNode[] = [];
+
+    const rightElementSticky = rightElementProps?.sticky ?? false;
+    const rightElementFill = rightElementProps?.fill ?? false;
 
     const offsetY = React.useRef(0);
     const lastScrollY = React.useRef(0);
@@ -243,7 +249,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                         <div className="dvn-stack">{padders}</div>
                         {rightElement !== undefined && (
                             <>
-                                <div className="dvn-spacer" />
+                                {!rightElementFill && <div className="dvn-spacer" />}
                                 <div
                                     ref={rightWrapRef}
                                     onMouseDown={nomEvent}
@@ -257,6 +263,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                                         paddingLeft: 1,
                                         marginBottom: -40,
                                         marginRight: paddingRight,
+                                        flexGrow: rightElementFill ? 1 : undefined,
                                         right: rightElementSticky ? paddingRight ?? 0 : undefined,
                                         pointerEvents: "auto",
                                     }}>

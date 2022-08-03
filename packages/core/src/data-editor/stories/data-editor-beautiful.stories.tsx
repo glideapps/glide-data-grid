@@ -38,6 +38,7 @@ import {
     GridColumnWithMockingInfo,
     ContentCache,
     BeautifulStyle,
+    ColumnAddButton,
 } from "./utils";
 import noop from "lodash/noop";
 import type { GetRowThemeCallback } from "../../data-grid/data-grid-render";
@@ -2253,7 +2254,7 @@ export const RightElement: React.VFC = () => {
                 }}
                 rows={numRows}
                 onRowAppended={onRowAppended}
-                rightElementSticky={true}
+                rightElementProps={{ sticky: true }}
                 rightElement={
                     <div
                         style={{
@@ -3065,6 +3066,39 @@ export const ControlledSelection: React.VFC = () => {
                 onGridSelectionChange={setSelection}
                 columns={cols}
                 rows={100}
+                rowMarkers="both"
+            />
+        </BeautifulWrapper>
+    );
+};
+
+export const NewColumnButton: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(10, true);
+
+    const columns = React.useMemo(() => cols.map(c => ({ ...c, grow: 1 })), [cols]);
+
+    return (
+        <BeautifulWrapper
+            title="Custom Header"
+            description={
+                <Description>
+                    A new column button can be created using the <PropName>rightElement</PropName>.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={columns}
+                rightElement={
+                    <ColumnAddButton>
+                        <button onClick={() => window.alert("Add a column!")}>+</button>
+                    </ColumnAddButton>
+                }
+                rightElementProps={{
+                    fill: false,
+                    sticky: false,
+                }}
+                rows={3000}
                 rowMarkers="both"
             />
         </BeautifulWrapper>

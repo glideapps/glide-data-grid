@@ -707,11 +707,16 @@ The overscroll properties are used to allow the grid to scroll past the logical 
 ## rightElement
 
 ```ts
-rightElementSticky?: boolean;
+rightElementProps?: {
+    readonly sticky?: boolean;
+    readonly fill?: boolean;
+};
 rightElement?: React.ReactNode;
 ```
 
-The right element is a DOM node which can be inserted at the end of the horizontal scroll region. This can be used to create a right handle panel, make a big add button, or display messages. If `rightElementSticky` is set to true the right element will be visible at all times, otherwise the user will need to scroll to the end to reveal it.
+The right element is a DOM node which can be inserted at the end of the horizontal scroll region. This can be used to create a right handle panel, make a big add button, or display messages. If `rightElementProps.sticky` is set to true the right element will be visible at all times, otherwise the user will need to scroll to the end to reveal it.
+
+If `rightElementProps.fill` is set, the right elements container will fill to consume all remaining space (if any) at the end of the grid. This does not play nice with growing columns.
 
 ---
 

@@ -443,7 +443,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 overscrollX={p.overscrollX}
                 overscrollY={p.overscrollY}
                 rightElement={p.rightElement}
-                rightElementSticky={p.rightElementSticky}
+                rightElementProps={p.rightElementProps}
                 scrollRef={p.scrollRef}
                 scrollToEnd={p.scrollToEnd}
                 selection={p.selection}

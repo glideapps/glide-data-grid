@@ -118,6 +118,31 @@ export function getGridColumn(columnWithMock: GridColumnWithMockingInfo): GridCo
     return rest;
 }
 
+export const ColumnAddButton = styled.div`
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    background-color: #f1f1f1;
+    height: 100%;
+    button {
+        border: none;
+        outline: none;
+        height: 37px;
+        width: 120px;
+        font-size: 20px;
+        background-color: #f7f7f8;
+        color: #000000dd;
+        border-bottom: 1px solid #e1e2e5;
+
+        transition: background-color 200ms;
+
+        cursor: pointer;
+        :hover {
+            background-color: #efeff1;
+        }
+    }
+`;
+
 export const BeautifulStyle = styled.div`
     background-color: #2790b9;
     background: linear-gradient(90deg, #2790b9, #2070a9);
