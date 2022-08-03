@@ -2645,6 +2645,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [updateSelectedCell]
     );
 
+    // this effects purpose in life is to scroll the newly selected cell into view when and ONLY when that cell
+    // is from an external gridSelection change. Also note we want the unmangled out selection because scrollTo
+    // expects unmangled indexes
+    const [outCol, outRow] = gridSelectionOuter?.current?.cell ?? [];
+    const scrollToRef = React.useRef(scrollTo);
+    scrollToRef.current = scrollTo;
+    React.useEffect(() => {
+        if (outCol !== undefined && outRow !== undefined) {
+            scrollToRef.current(outCol, outRow);
+        }
+    }, [outCol, outRow]);
+
     const disabledRows = React.useMemo(() => {
         if (showTrailingBlankRow === true && trailingRowOptions?.tint === true) {
             return CompactSelection.fromSingleSelection(mangledRows - 1);
