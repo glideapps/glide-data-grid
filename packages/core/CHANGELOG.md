@@ -1,3 +1,154 @@
+# 5.0.0 Release notes
+
+## 🚨🚨 Breaking changes and porting guide
+
+Glide Data Grid 5.0 no longer depends on `styled-components`! This means the Theme for your data grid is no longer provided via the `ThemeProvider` API.
+
+### Mandatory CSS file
+
+Because Glide Data Grid no longer uses a CSS-in-JS solution, the CSS must be imported by consumers. This is usually achieved by doing the following somewhere in your project source.
+
+```ts
+import "@glideapps/glide-data-grid/dist/index.css";
+```
+
+Your bundler will take care of packing this in with the rest of the CSS your project requires. This is tested working with both next-js and create-react-app. Examples can be found in the [test-projects](https://github.com/glideapps/glide-data-grid/tree/main/test-projects) folder.
+
+### Theme porting
+
+If you are not providing a custom theme to your data grid there is nothing to do. If you are using a custom theme you should replace:
+
+```tsx
+return (
+    <ThemeProvider theme={gridTheme}>
+        <DataEditor {...myEditorProps} />
+    </ThemeProvider>
+);
+```
+
+with:
+
+```tsx
+return <DataEditor theme={gridTheme} {...myEditorProps} />;
+```
+
+### Porting custom editors
+
+All theme variables can now be accessed as a CSS variable:
+
+```css
+.my-editor {
+    background-color: var(--gdg-bg-cell);
+    color: var(--gdg-text-dark);
+}
+```
+
+All variables except `lineHeight` are available in this manner. The full list includes
+
+```
+--gdg-accent-color
+--gdg-accent-fg
+--gdg-accent-light
+--gdg-text-dark
+--gdg-text-medium
+--gdg-text-light
+--gdg-text-bubble
+--gdg-bg-icon-header
+--gdg-fg-icon-header
+--gdg-text-header
+--gdg-text-group-header
+--gdg-text-header-selected
+--gdg-bg-cell
+--gdg-bg-cell-medium
+--gdg-bg-header
+--gdg-bg-header-has
+--gdg-bg-header-hovered
+--gdg-bg-bubble
+--gdg-bg-bubble-selected
+--gdg-bg-search-result
+--gdg-border-color
+--gdg-horizontal-border-color
+--gdg-drilldown-border
+--gdg-link-color
+--gdg-cell-horizontal-padding
+--gdg-cell-vertical-padding
+--gdg-header-font-style
+--gdg-base-font-style
+--gdg-font-family
+--gdg-editor-font-size
+```
+
+The theme can be accessed in JS by using the new `useTheme` hook:
+
+```tsx
+import { useTheme } from "@glideapps/glide-data-grid";
+
+const MyComponent: React.VFC = () => {
+    const dataGridTheme = useTheme();
+    alert(dataGridTheme.bgHeader);
+
+    // ...
+};
+```
+
+The theme object returned from `useTheme` may not be identical to the passed theme object if any theme overrides are in use or the passed theme object did not contain all required keys. The 4.2.0 series has also been updated to include CSS variables. This should allow any third party library of custom editors to support both 4.2 and 5.0 at the same time provided they don't need the theme in JS.
+
+### rightElementSticky replaced with rightElementProps
+
+Previously the `rightElement` of a data editor could be made sticky by doing:
+
+```tsx
+<DataEditor rightElement={el} rightElementSticky={true} />
+```
+
+This is now done by providing a rightElementProps
+
+```tsx
+<DataEditor
+    rightElement={el}
+    rightElementSticky={{
+        sticky: true,
+    }}
+/>
+```
+
+## ⚠️ Removal of deprecated API
+
+The following previously deprecated API's are no longer present
+
+-   `drawCustomCell` replaced by `drawCell`
+-   `onColumnResized` replaced by `onColumnResize`
+-   `BooleanCell.allowEdit` replaced by `BooleanCell.readonly`
+-   `BooleanCell.showUnchecked` no replacement has been defunct for a long time
+
+## 🥳 New features
+
+-   react-virtualized-autosizer no longer used as a dependency
+-   Vertical and horizontal scroll shadows now available and configurable
+-   Cursor now settable per cell
+-   `validateCell` now receives the previous cell to make validation easier.
+-   Row marker header column now draws a checkbox rather than silently accepting inputs
+-   `drawHeader` now receives the index of the drawn header
+-   Value coercion can now return the desired selected range post coercion.
+-   `rightElementProps` new API which allows for making the right element not only sticky but also grow to consume leftover space.
+-   `onCellsEdited` is now always called prior to calling `onCellEdited` allowing for implementing a single edit callback.
+-   `isDraggable` can now be set to `cell` or `header` to allow dragging on just one or the other
+
+## 🐞 Bug fixes
+
+-   Setting `gridSelection` externally will keep the newly selected selection in view.
+-   No longer crashes when calling `getBounds` with a cell that is not in the current range, and instead returns undefined.
+-   Drag scrolling now significantly smoother
+-   Headers now properly select with touch events
+-   Headers will not emit spurious click events when completing drag operations
+-   Copying in safari no longer beeps the browser
+-   Trailing row options theme now applies to the trailing row even if it is not sticky
+-   Many svg loading improvements
+-   `onCellsEdited` now correctly prevents `onCellEdited` from being emitted when requested
+-   Auto-sizing columns will no longer cause their headers to be truncated
+-   Context menus can now be correctly cancelled on all operating systems, not just Windows
+-   NextJS production builds no longer complain
+
 # 4.2.0 Release Notes
 
 ## 🥳 New Features
