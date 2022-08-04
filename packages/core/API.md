@@ -103,7 +103,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [overscrollX](#overscroll)                  | Allows overscrolling the data grid horizontally by a set amount.        |
 | [overscrollY](#overscroll)                  | Allows overscrolling the data grid vertically by a set amount.          |
 | [rightElement](#rightelement)               | A node which will be placed at the right edge of the data grid.         |
-| [rightElementSticky](#rightelement)         | Makes the right element sticky or not.                                  |
+| [rightElementProps](#rightelement)          | Changes how the right element renders.                                  |
 | [rowMarkerWidth](#rowmarkerwidth)           | The width of the row markers.                                           |
 | [rowMarkerStartIndex](#rowmarkerstartindex) | The index of the first element in the grid                              |
 | [verticalBorder](#verticalborder)           | Enable/disable vertical borders for any `GridColumn`                    |

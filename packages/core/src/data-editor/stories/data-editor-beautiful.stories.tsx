@@ -3079,7 +3079,7 @@ export const NewColumnButton: React.VFC = () => {
 
     return (
         <BeautifulWrapper
-            title="Custom Header"
+            title="New column button"
             description={
                 <Description>
                     A new column button can be created using the <PropName>rightElement</PropName>.

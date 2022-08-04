@@ -52,6 +52,7 @@ import { AnimationManager, StepCallback } from "./animation-manager";
 import { browserIsFirefox } from "../common/browser-detect";
 import { CellRenderers } from "./cells";
 import { useAnimationQueue } from "./use-animation-queue";
+import { assert } from "../common/support";
 
 export interface DataGridProps {
     readonly width: number;
@@ -287,16 +288,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     // row: -1 === columnHeader, -2 === groupHeader
     const getBoundsForItem = React.useCallback(
-        (canvas: HTMLCanvasElement, col: number, row: number): Rectangle => {
+        (canvas: HTMLCanvasElement, col: number, row: number): Rectangle | undefined => {
             const rect = canvas.getBoundingClientRect();
 
             if (col >= mappedColumns.length || row >= rows) {
-                return {
-                    x: 0,
-                    y: 0,
-                    width: 0,
-                    height: 0,
-                };
+                return undefined;
             }
 
             const result = computeBounds(
@@ -390,6 +386,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 let isEdge = false;
                 if (col === -1 && row === -1) {
                     const b = getBoundsForItem(canvas, mappedColumns.length - 1, -1);
+                    assert(b !== undefined);
                     isEdge = posX < b.x + b.width + edgeDetectionBuffer;
                 }
 
@@ -407,12 +404,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 };
             } else if (row <= -1) {
                 let bounds = getBoundsForItem(canvas, col, row);
+                assert(bounds !== undefined);
                 let isEdge = bounds !== undefined && bounds.x + bounds.width - posX <= edgeDetectionBuffer;
 
                 const previousCol = col - 1;
                 if (posX - bounds.x <= edgeDetectionBuffer && previousCol >= 0) {
                     isEdge = true;
                     bounds = getBoundsForItem(canvas, previousCol, row);
+                    assert(bounds !== undefined);
                     result = {
                         kind: enableGroups && row === -2 ? groupHeaderKind : headerKind,
                         location: [previousCol, row] as any,
@@ -447,6 +446,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 }
             } else {
                 const bounds = getBoundsForItem(canvas, col, row);
+                assert(bounds !== undefined);
                 const isEdge = bounds !== undefined && bounds.x + bounds.width - posX < edgeDetectionBuffer;
                 const isFillHandle =
                     fillHandle &&
@@ -710,6 +710,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             if (!isDragging && !isResizing && header.hasMenu === true && !(hoveredOnEdge ?? false)) {
                 const headerBounds = getBoundsForItem(canvas, col, -1);
+                assert(headerBounds !== undefined);
                 const menuBounds = getHeaderMenuBounds(
                     headerBounds.x,
                     headerBounds.y,
@@ -927,6 +928,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 const sb = getBoundsForItem(canvas, col, row);
                 const x = ev.clientX;
                 const y = ev.clientY;
+                assert(sb !== undefined);
                 setOverFill(
                     x >= sb.x + sb.width - 6 &&
                         x <= sb.x + sb.width &&
@@ -1072,6 +1074,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         const offscreen = document.createElement("canvas");
                         const boundsForDragTarget = getBoundsForItem(canvas, col, row);
 
+                        assert(boundsForDragTarget !== undefined);
                         offscreen.width = boundsForDragTarget.width;
                         offscreen.height = boundsForDragTarget.height;
 
