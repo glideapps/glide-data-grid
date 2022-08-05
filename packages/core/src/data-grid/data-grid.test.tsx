@@ -3,8 +3,7 @@ import * as React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
 import DataGrid, { DataGridProps, DataGridRef } from "./data-grid";
 import { CompactSelection, GridCellKind } from "./data-grid-types";
-import { ThemeProvider } from "styled-components";
-import { getDataEditorTheme } from "../common/styles";
+import { getDefaultTheme } from "..";
 
 const basicProps: DataGridProps = {
     cellXOffset: 0,
@@ -34,6 +33,7 @@ const basicProps: DataGridProps = {
     ],
     isFilling: false,
     enableGroups: false,
+    theme: getDefaultTheme(),
     freezeColumns: 0,
     selection: {
         current: undefined,
@@ -55,22 +55,19 @@ const basicProps: DataGridProps = {
     width: 1000,
     isDragging: false,
     isResizing: false,
-    lastRowSticky: false,
+    trailingRowType: "none",
     rowHeight: 32,
     rows: 1000,
     verticalBorder: () => true,
 };
 
+const dataGridCanvasId = "data-grid-canvas";
 describe("data-grid", () => {
     test("Emits mouse down", () => {
         const spy = jest.fn();
-        render(
-            <ThemeProvider theme={getDataEditorTheme()}>
-                <DataGrid {...basicProps} onMouseDown={spy} />
-            </ThemeProvider>
-        );
+        render(<DataGrid {...basicProps} onMouseDown={spy} />);
 
-        fireEvent.mouseDown(screen.getByTestId("data-grid-canvas"), {
+        fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
             clientX: 300, // Col B
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
@@ -86,13 +83,9 @@ describe("data-grid", () => {
 
     test("OOB mouse down", () => {
         const spy = jest.fn();
-        render(
-            <ThemeProvider theme={getDataEditorTheme()}>
-                <DataGrid {...basicProps} onMouseDown={spy} />
-            </ThemeProvider>
-        );
+        render(<DataGrid {...basicProps} onMouseDown={spy} />);
 
-        fireEvent.mouseDown(screen.getByTestId("data-grid-canvas"), {
+        fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
             clientX: 990, // Col B
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
@@ -107,13 +100,9 @@ describe("data-grid", () => {
 
     test("Emits mouse up", () => {
         const spy = jest.fn();
-        render(
-            <ThemeProvider theme={getDataEditorTheme()}>
-                <DataGrid {...basicProps} onMouseUp={spy} />
-            </ThemeProvider>
-        );
+        render(<DataGrid {...basicProps} onMouseUp={spy} />);
 
-        fireEvent.mouseUp(screen.getByTestId("data-grid-canvas"), {
+        fireEvent.mouseUp(screen.getByTestId(dataGridCanvasId), {
             clientX: 300, // Col B
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
@@ -134,17 +123,15 @@ describe("data-grid", () => {
         const upSpy = jest.fn();
 
         render(
-            <ThemeProvider theme={getDataEditorTheme()}>
-                <DataGrid
-                    {...basicProps}
-                    columns={basicProps.columns.map(c => ({ ...c, hasMenu: true }))}
-                    onMouseUp={upSpy}
-                    onMouseDown={downSpy}
-                />
-            </ThemeProvider>
+            <DataGrid
+                {...basicProps}
+                columns={basicProps.columns.map(c => ({ ...c, hasMenu: true }))}
+                onMouseUp={upSpy}
+                onMouseDown={downSpy}
+            />
         );
 
-        const el = screen.getByTestId("data-grid-canvas");
+        const el = screen.getByTestId(dataGridCanvasId);
         fireEvent.mouseDown(el, {
             clientX: 140,
             clientY: 18,
@@ -162,13 +149,9 @@ describe("data-grid", () => {
     test("Cell hovered", () => {
         const spy = jest.fn();
 
-        render(
-            <ThemeProvider theme={getDataEditorTheme()}>
-                <DataGrid {...basicProps} onItemHovered={spy} />
-            </ThemeProvider>
-        );
+        render(<DataGrid {...basicProps} onItemHovered={spy} />);
 
-        const el = screen.getByTestId("data-grid-canvas");
+        const el = screen.getByTestId(dataGridCanvasId);
         fireEvent.mouseMove(el, {
             clientX: 350, // Col C
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
@@ -185,13 +168,9 @@ describe("data-grid", () => {
     test("Header hovered", () => {
         const spy = jest.fn();
 
-        render(
-            <ThemeProvider theme={getDataEditorTheme()}>
-                <DataGrid {...basicProps} onItemHovered={spy} />
-            </ThemeProvider>
-        );
+        render(<DataGrid {...basicProps} onItemHovered={spy} />);
 
-        const el = screen.getByTestId("data-grid-canvas");
+        const el = screen.getByTestId(dataGridCanvasId);
         fireEvent.mouseMove(el, {
             clientX: 350, // Col C
             clientY: 16, // Header
@@ -209,18 +188,10 @@ describe("data-grid", () => {
         const spy = jest.fn();
 
         render(
-            <ThemeProvider theme={getDataEditorTheme()}>
-                <DataGrid
-                    {...basicProps}
-                    groupHeaderHeight={32}
-                    enableGroups={true}
-                    cellYOffset={10}
-                    onItemHovered={spy}
-                />
-            </ThemeProvider>
+            <DataGrid {...basicProps} groupHeaderHeight={32} enableGroups={true} cellYOffset={10} onItemHovered={spy} />
         );
 
-        const el = screen.getByTestId("data-grid-canvas");
+        const el = screen.getByTestId(dataGridCanvasId);
         fireEvent.mouseMove(el, {
             clientX: 350, // Col C
             clientY: 46, // Header
@@ -237,13 +208,9 @@ describe("data-grid", () => {
     test("Group header hovered", () => {
         const spy = jest.fn();
 
-        render(
-            <ThemeProvider theme={getDataEditorTheme()}>
-                <DataGrid {...basicProps} onItemHovered={spy} enableGroups={true} groupHeaderHeight={28} />
-            </ThemeProvider>
-        );
+        render(<DataGrid {...basicProps} onItemHovered={spy} enableGroups={true} groupHeaderHeight={28} />);
 
-        const el = screen.getByTestId("data-grid-canvas");
+        const el = screen.getByTestId(dataGridCanvasId);
         fireEvent.mouseMove(el, {
             clientX: 350, // Col C
             clientY: 14, // Header
@@ -261,11 +228,7 @@ describe("data-grid", () => {
         const spy = jest.fn(basicProps.getCellContent);
         const ref = React.createRef<DataGridRef>();
 
-        render(
-            <ThemeProvider theme={getDataEditorTheme()}>
-                <DataGrid ref={ref} {...basicProps} getCellContent={spy} enableGroups={true} groupHeaderHeight={28} />
-            </ThemeProvider>
-        );
+        render(<DataGrid ref={ref} {...basicProps} getCellContent={spy} enableGroups={true} groupHeaderHeight={28} />);
 
         spy.mockClear();
         expect(spy).not.toBeCalled();
@@ -277,11 +240,7 @@ describe("data-grid", () => {
         const spy = jest.fn(basicProps.getCellContent);
         const ref = React.createRef<DataGridRef>();
 
-        render(
-            <ThemeProvider theme={getDataEditorTheme()}>
-                <DataGrid ref={ref} {...basicProps} getCellContent={spy} enableGroups={true} groupHeaderHeight={28} />
-            </ThemeProvider>
-        );
+        render(<DataGrid ref={ref} {...basicProps} getCellContent={spy} enableGroups={true} groupHeaderHeight={28} />);
 
         spy.mockClear();
         expect(spy).not.toBeCalled();
@@ -291,13 +250,9 @@ describe("data-grid", () => {
 
     test("Freeze column simple check", () => {
         const spy = jest.fn();
-        render(
-            <ThemeProvider theme={getDataEditorTheme()}>
-                <DataGrid {...basicProps} freezeColumns={1} cellXOffset={3} onMouseUp={spy} />
-            </ThemeProvider>
-        );
+        render(<DataGrid {...basicProps} freezeColumns={1} cellXOffset={3} onMouseUp={spy} />);
 
-        fireEvent.mouseUp(screen.getByTestId("data-grid-canvas"), {
+        fireEvent.mouseUp(screen.getByTestId(dataGridCanvasId), {
             clientX: 50, // Col A
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });

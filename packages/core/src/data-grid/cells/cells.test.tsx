@@ -4,7 +4,7 @@ import { GridCellKind, ImageCell, Rectangle } from "../data-grid-types";
 import { imageCellRenderer } from "./image-cell";
 import * as React from "react";
 import noop from "lodash/noop";
-import { ImageEditorType } from "./cell-types";
+import type { ImageEditorType } from "./cell-types";
 import { getDefaultTheme } from "../..";
 
 function getMockEditorTarget(): Rectangle {
@@ -27,18 +27,18 @@ function get2dContext(): CanvasRenderingContext2D {
     return ctx;
 }
 
+const getImgCell = (): ImageCell => {
+    return {
+        kind: GridCellKind.Image,
+        data: ["img1.jpg", "img2.jpg"],
+        allowAdd: true,
+        allowOverlay: true,
+    };
+};
+
 // TODO: We can test the editor _much_ more.
 // Let's do that.
 describe("Image cell", () => {
-    const getImgCell = (): ImageCell => {
-        return {
-            kind: GridCellKind.Image,
-            data: ["img1.jpg", "img2.jpg"],
-            allowAdd: true,
-            allowOverlay: true,
-        };
-    };
-
     it("Renders the right accessibilty string", async () => {
         const cell = getImgCell();
         const accessibilityString = imageCellRenderer.getAccessibilityString(cell);

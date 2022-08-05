@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/consistent-destructuring */
 import * as React from "react";
 import { CellArray, GetCellsThunk, GridCellKind, Item, Rectangle } from "../data-grid/data-grid-types";
 import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
@@ -93,7 +94,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     cellYOffsetRef.current = cellYOffset;
     const beginSearch = React.useCallback(
         (str: string) => {
-            const regex = new RegExp(str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1"), "i");
+            const regex = new RegExp(str.replace(/([$()*+.?[\\\]^{|}-])/g, "\\$1"), "i");
 
             let startY = cellYOffsetRef.current;
 
@@ -128,8 +129,8 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 }
 
                 let added = false;
-                data.forEach((d, row) =>
-                    d.forEach((cell, col) => {
+                for (const [row, d] of data.entries()) {
+                    for (const [col, cell] of d.entries()) {
                         let testString: string | undefined;
                         switch (cell.kind) {
                             case GridCellKind.Text:
@@ -159,8 +160,9 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                             runningResult.push([col, row + startY]);
                             added = true;
                         }
-                    })
-                );
+                    }
+                }
+
                 const tEnd = performance.now();
 
                 if (added) {
@@ -287,11 +289,10 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const searchbox = React.useMemo(() => {
         let resultString: string | undefined;
         if (searchStatus !== undefined) {
-            if (searchStatus.results >= 1000) {
-                resultString = `over 1000`;
-            } else {
-                resultString = `${searchStatus.results} result${searchStatus.results !== 1 ? "s" : ""}`;
-            }
+            resultString =
+                searchStatus.results >= 1000
+                    ? `over 1000`
+                    : `${searchStatus.results} result${searchStatus.results !== 1 ? "s" : ""}`;
             if (searchStatus.selectedIndex >= 0) {
                 resultString = `${searchStatus.selectedIndex + 1} of ${resultString}`;
             }
@@ -397,9 +398,10 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 isFocused={p.isFocused}
                 clientSize={p.clientSize}
                 headerHeight={p.headerHeight}
+                onContextMenu={p.onContextMenu}
                 isFilling={p.isFilling}
                 fillHandle={p.fillHandle}
-                lastRowSticky={p.lastRowSticky}
+                trailingRowType={p.trailingRowType}
                 firstColAccessible={p.firstColAccessible}
                 lockColumns={p.lockColumns}
                 rowHeight={p.rowHeight}
@@ -409,6 +411,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 verticalBorder={p.verticalBorder}
                 canvasRef={p.canvasRef}
                 className={p.className}
+                theme={p.theme}
                 disabledRows={p.disabledRows}
                 drawCustomCell={p.drawCustomCell}
                 drawHeader={p.drawHeader}
@@ -418,11 +421,11 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 gridRef={p.gridRef}
                 headerIcons={p.headerIcons}
                 isDraggable={p.isDraggable}
+                onDragEnd={p.onDragEnd}
                 minColumnWidth={p.minColumnWidth}
                 maxColumnWidth={p.maxColumnWidth}
                 onCellFocused={p.onCellFocused}
                 onColumnMoved={p.onColumnMoved}
-                onColumnResized={p.onColumnResized}
                 onColumnResize={p.onColumnResize}
                 onColumnResizeStart={p.onColumnResizeStart}
                 onColumnResizeEnd={p.onColumnResizeEnd}
@@ -440,7 +443,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 overscrollX={p.overscrollX}
                 overscrollY={p.overscrollY}
                 rightElement={p.rightElement}
-                rightElementSticky={p.rightElementSticky}
+                rightElementProps={p.rightElementProps}
                 scrollRef={p.scrollRef}
                 scrollToEnd={p.scrollToEnd}
                 selection={p.selection}

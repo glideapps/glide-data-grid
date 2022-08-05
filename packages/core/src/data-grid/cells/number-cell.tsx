@@ -2,7 +2,7 @@
 import * as React from "react";
 import { drawTextCell, prepTextCell } from "../data-grid-lib";
 import { GridCellKind, NumberCell } from "../data-grid-types";
-import { InternalCellRenderer } from "./cell-types";
+import type { InternalCellRenderer } from "./cell-types";
 
 const NumberOverlayEditor = React.lazy(
     async () => await import("../../data-grid-overlay-editor/private/number-overlay-editor")
@@ -22,7 +22,7 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
         data: undefined,
     }),
     getEditor: () => p => {
-        const { isHighlighted, onChange, onKeyDown, value } = p;
+        const { isHighlighted, onChange, onKeyDown, value, validatedSelection } = p;
         return (
             <React.Suspense fallback={null}>
                 <NumberOverlayEditor
@@ -30,6 +30,7 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
                     disabled={value.readonly === true}
                     value={value.data}
                     onKeyDown={onKeyDown}
+                    validatedSelection={validatedSelection}
                     onChange={x =>
                         onChange({
                             ...value,

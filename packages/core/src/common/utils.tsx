@@ -1,5 +1,4 @@
 import * as React from "react";
-import { css } from "styled-components";
 import debounce from "lodash/debounce";
 
 export function useEventListener<K extends keyof HTMLElementEventMap>(
@@ -7,9 +6,8 @@ export function useEventListener<K extends keyof HTMLElementEventMap>(
     handler: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
     element: HTMLElement | Window | null,
     passive: boolean,
-    capture?: boolean
+    capture = false
 ) {
-    capture = capture ?? false;
     // Create a ref that stores handler
     const savedHandler = React.useRef<(this: HTMLElement, ev: HTMLElementEventMap[K]) => any>();
 
@@ -39,6 +37,11 @@ export function useEventListener<K extends keyof HTMLElementEventMap>(
         [eventName, element, passive, capture] // Re-run if eventName or element changes
     );
 }
+
+export function whenDefined<T>(obj: any, result: T) {
+    return obj === undefined ? undefined : result;
+}
+
 const PI = Math.PI;
 export function degreesToRadians(degrees: number) {
     return (degrees * PI) / 180;
@@ -48,11 +51,6 @@ export interface SpriteProps {
     fgColor: string;
     bgColor: string;
 }
-
-export const disabledProps = css`
-    opacity: 0.4;
-    pointer-events: none;
-`;
 
 export const EditPencil: React.FunctionComponent<Partial<SpriteProps>> = (props: Partial<SpriteProps>) => {
     const fg = props.fgColor ?? "currentColor";
@@ -159,9 +157,9 @@ export function getScrollBarWidth(): number {
     outer.style.width = "200px";
     outer.style.height = "150px";
     outer.style.overflow = "hidden";
-    outer.appendChild(inner);
+    outer.append(inner);
 
-    document.body.appendChild(outer);
+    document.body.append(outer);
     const w1 = inner.offsetWidth;
     outer.style.overflow = "scroll";
     let w2 = inner.offsetWidth;
@@ -169,7 +167,7 @@ export function getScrollBarWidth(): number {
         w2 = outer.clientWidth;
     }
 
-    document.body.removeChild(outer);
+    outer.remove();
 
     scrollbarWidthCache = w1 - w2;
     return scrollbarWidthCache;

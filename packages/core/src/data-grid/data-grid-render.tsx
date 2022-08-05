@@ -1,5 +1,6 @@
-import ImageWindowLoader from "../common/image-window-loader";
-import type {
+/* eslint-disable unicorn/no-for-loop */
+import type ImageWindowLoader from "../common/image-window-loader";
+import {
     GridSelection,
     DrawHeaderCallback,
     InnerGridCell,
@@ -10,10 +11,16 @@ import type {
     Item,
     CellList,
     GridMouseGroupHeaderEventArgs,
+    headerCellCheckboxPrefix,
+    GridCellKind,
+    isInnerOnlyCell,
+    BooleanIndeterminate,
+    headerCellCheckedMarker,
+    headerCellUnheckedMarker,
+    TrailingRowType,
 } from "./data-grid-types";
 import groupBy from "lodash/groupBy";
-import { GridCellKind, isInnerOnlyCell } from "./data-grid-types";
-import { HoverValues } from "./animation-manager";
+import type { HoverValues } from "./animation-manager";
 import {
     getEffectiveColumns,
     getStickyWidth,
@@ -25,12 +32,13 @@ import {
     cellIsInRange,
     computeBounds,
     getMiddleCenterBias,
+    drawCheckbox,
 } from "./data-grid-lib";
-import { SpriteManager, SpriteVariant } from "./data-grid-sprites";
-import { Theme } from "../common/styles";
+import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
+import type { Theme } from "../common/styles";
 import { blend, withAlpha } from "./color-parser";
 import { CellRenderers } from "./cells";
-import { PrepResult } from "./cells/cell-types";
+import type { PrepResult } from "./cells/cell-types";
 import { deepEqual } from "../common/support";
 
 // Future optimization opportunities
@@ -49,7 +57,7 @@ type HoverInfo = readonly [Item, Item];
 export interface Highlight {
     readonly color: string;
     readonly range: Rectangle;
-    readonly style?: "dashed" | "solid";
+    readonly style?: "dashed" | "solid" | "no-outline";
 }
 
 interface GroupDetails {
@@ -379,7 +387,7 @@ function drawGridLines(
     getRowHeight: (row: number) => number,
     getRowThemeOverride: GetRowThemeCallback | undefined,
     verticalBorder: (col: number) => boolean,
-    lastRowSticky: boolean,
+    trailingRowType: TrailingRowType,
     rows: number,
     theme: Theme,
     verticalOnly: boolean = false
@@ -446,6 +454,7 @@ function drawGridLines(
 
     const stickyHeight = getRowHeight(rows - 1);
     const stickyRowY = height - stickyHeight + 0.5;
+    const lastRowSticky = trailingRowType === "sticky";
     if (lastRowSticky) {
         toDraw.push({ x1: minX, y1: stickyRowY, x2: maxX, y2: stickyRowY, color: hColor });
     }
@@ -653,7 +662,7 @@ export function getHeaderMenuBounds(x: number, y: number, width: number, height:
     };
 }
 
-function drawHeader(
+export function drawHeader(
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
@@ -669,14 +678,23 @@ function drawHeader(
     drawHeaderCallback: DrawHeaderCallback | undefined,
     touchMode: boolean
 ) {
+    const isCheckboxHeader = c.title.startsWith(headerCellCheckboxPrefix);
     const menuBounds = getHeaderMenuBounds(x, y, width, height);
     if (drawHeaderCallback !== undefined) {
+        let passCol = c;
+        if (isCheckboxHeader) {
+            passCol = {
+                ...c,
+                title: "",
+            };
+        }
         if (
             drawHeaderCallback({
                 ctx,
                 theme,
                 rect: { x, y, width, height },
-                column: c,
+                column: passCol,
+                columnIndex: passCol.sourceIndex,
                 isSelected: selected,
                 hoverAmount,
                 isHovered,
@@ -688,6 +706,21 @@ function drawHeader(
             return;
         }
     }
+
+    if (isCheckboxHeader) {
+        let checked: boolean | BooleanIndeterminate = undefined;
+        if (c.title === headerCellCheckedMarker) checked = true;
+        if (c.title === headerCellUnheckedMarker) checked = false;
+        if (checked !== true) {
+            ctx.globalAlpha = hoverAmount;
+        }
+        drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined);
+        if (checked !== true) {
+            ctx.globalAlpha = 1;
+        }
+        return;
+    }
+
     const xPad = 8;
     const fillStyle = selected ? theme.textHeaderSelected : theme.textHeader;
 
@@ -909,13 +942,13 @@ function clipDamage(
     cellYOffset: number,
     rows: number,
     getRowHeight: (row: number) => number,
-    lastRowSticky: boolean,
+    trailingRowType: TrailingRowType,
     damage: CellList | undefined,
     includeCells: boolean
 ): void {
     if (damage === undefined || damage.length === 0) return;
 
-    const stickyRowHeight = lastRowSticky ? getRowHeight(rows - 1) : 0;
+    const stickyRowHeight = trailingRowType === "sticky" ? getRowHeight(rows - 1) : 0;
 
     ctx.beginPath();
 
@@ -950,25 +983,33 @@ function clipDamage(
 
             if (!includeCells) return;
 
-            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
-                let isDamaged = false;
-                for (let i = 0; i < damage.length; i++) {
-                    const d = damage[i];
-                    if (d[0] === c.sourceIndex && d[1] === row) {
-                        isDamaged = true;
-                        break;
+            walkRowsInCol(
+                startRow,
+                colDrawY,
+                height,
+                rows,
+                getRowHeight,
+                trailingRowType,
+                (drawY, row, rh, isSticky) => {
+                    let isDamaged = false;
+                    for (let i = 0; i < damage.length; i++) {
+                        const d = damage[i];
+                        if (d[0] === c.sourceIndex && d[1] === row) {
+                            isDamaged = true;
+                            break;
+                        }
                     }
-                }
-                if (isDamaged) {
-                    const top = drawY + 1;
-                    const bottom = isSticky ? top + rh - 1 : Math.min(top + rh - 1, height - stickyRowHeight);
-                    const h = bottom - top;
+                    if (isDamaged) {
+                        const top = drawY + 1;
+                        const bottom = isSticky ? top + rh - 1 : Math.min(top + rh - 1, height - stickyRowHeight);
+                        const h = bottom - top;
 
-                    if (h > 0) {
-                        ctx.rect(finalX, top, finalWidth, h);
+                        if (h > 0) {
+                            ctx.rect(finalX, top, finalWidth, h);
+                        }
                     }
                 }
-            });
+            );
         }
     );
     ctx.clip();
@@ -1059,7 +1100,7 @@ function drawCells(
     getRowThemeOverride: GetRowThemeCallback | undefined,
     disabledRows: CompactSelection,
     isFocused: boolean,
-    lastRowSticky: boolean,
+    trailingRowType: TrailingRowType,
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
     selection: GridSelection,
@@ -1133,8 +1174,8 @@ function drawCells(
                 height,
                 rows,
                 getRowHeight,
-                lastRowSticky,
-                (drawY, row, rh, isSticky) => {
+                trailingRowType,
+                (drawY, row, rh, isSticky, isTrailingRow) => {
                     // if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
                     //     return;
                     // }
@@ -1222,7 +1263,7 @@ function drawCells(
 
                     const rowTheme = getRowThemeOverride?.(row);
                     const trailingTheme =
-                        isSticky && c.trailingRowOptions?.themeOverride !== undefined
+                        isTrailingRow && c.trailingRowOptions?.themeOverride !== undefined
                             ? c.trailingRowOptions?.themeOverride
                             : undefined;
                     const theme =
@@ -1367,7 +1408,7 @@ function drawBlanks(
     getRowTheme: GetRowThemeCallback | undefined,
     selectedRows: CompactSelection,
     disabledRows: CompactSelection,
-    lastRowSticky: boolean,
+    trailingRowType: TrailingRowType,
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
     theme: Theme
@@ -1390,40 +1431,50 @@ function drawBlanks(
             if (x > width) return;
             ctx.save();
             ctx.beginPath();
-            ctx.rect(x, totalHeaderHeight + 1, 10000, height - totalHeaderHeight - 1);
+            ctx.rect(x, totalHeaderHeight + 1, 10_000, height - totalHeaderHeight - 1);
             ctx.clip();
 
-            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh, isSticky) => {
-                if (
-                    !isSticky &&
-                    drawRegions.length > 0 &&
-                    !drawRegions.some(dr => intersectRect(drawX, drawY, 10000, rh, dr.x, dr.y, dr.width, dr.height))
-                ) {
-                    return;
+            walkRowsInCol(
+                startRow,
+                colDrawY,
+                height,
+                rows,
+                getRowHeight,
+                trailingRowType,
+                (drawY, row, rh, isSticky) => {
+                    if (
+                        !isSticky &&
+                        drawRegions.length > 0 &&
+                        !drawRegions.some(dr =>
+                            intersectRect(drawX, drawY, 10_000, rh, dr.x, dr.y, dr.width, dr.height)
+                        )
+                    ) {
+                        return;
+                    }
+
+                    const rowSelected = selectedRows.hasIndex(row);
+                    const rowDisabled = disabledRows.hasIndex(row);
+
+                    ctx.beginPath();
+
+                    const rowTheme = getRowTheme?.(row);
+
+                    const blankTheme = rowTheme === undefined ? theme : { ...theme, ...rowTheme };
+
+                    if (blankTheme.bgCell !== theme.bgCell) {
+                        ctx.fillStyle = blankTheme.bgCell;
+                        ctx.fillRect(drawX, drawY, 10_000, rh);
+                    }
+                    if (rowDisabled) {
+                        ctx.fillStyle = blankTheme.bgHeader;
+                        ctx.fillRect(drawX, drawY, 10_000, rh);
+                    }
+                    if (rowSelected) {
+                        ctx.fillStyle = blankTheme.accentLight;
+                        ctx.fillRect(drawX, drawY, 10_000, rh);
+                    }
                 }
-
-                const rowSelected = selectedRows.hasIndex(row);
-                const rowDisabled = disabledRows.hasIndex(row);
-
-                ctx.beginPath();
-
-                const rowTheme = getRowTheme?.(row);
-
-                const blankTheme = rowTheme === undefined ? theme : { ...theme, ...rowTheme };
-
-                if (blankTheme.bgCell !== theme.bgCell) {
-                    ctx.fillStyle = blankTheme.bgCell;
-                    ctx.fillRect(drawX, drawY, 10000, rh);
-                }
-                if (rowDisabled) {
-                    ctx.fillStyle = blankTheme.bgHeader;
-                    ctx.fillRect(drawX, drawY, 10000, rh);
-                }
-                if (rowSelected) {
-                    ctx.fillStyle = blankTheme.accentLight;
-                    ctx.fillRect(drawX, drawY, 10000, rh);
-                }
-            });
+            );
 
             ctx.restore();
         }
@@ -1503,8 +1554,9 @@ function drawHighlightRings(
     rowHeight: number | ((index: number) => number),
     lastRowSticky: boolean,
     rows: number,
-    highlightRegions: readonly Highlight[] | undefined
+    allHighlightRegions: readonly Highlight[] | undefined
 ): (() => void) | undefined {
+    const highlightRegions = allHighlightRegions?.filter(x => x.style !== "no-outline");
     if (highlightRegions === undefined || highlightRegions.length === 0) return undefined;
     const drawRects = highlightRegions.map(h => {
         const r = h.range;
@@ -1686,21 +1738,18 @@ function drawFocusRing(
     selectedCell: GridSelection,
     getRowHeight: (row: number) => number,
     getCellContent: (cell: Item) => InnerGridCell,
-    lastRowSticky: boolean,
+    trailingRowType: TrailingRowType,
     fillHandle: boolean,
     rows: number
 ): (() => void) | undefined {
-    if (
-        selectedCell.current === undefined ||
-        effectiveCols.find(c => (c.sourceIndex === selectedCell.current?.cell[0]) === undefined)
-    )
+    if (selectedCell.current === undefined || !effectiveCols.some(c => c.sourceIndex === selectedCell.current?.cell[0]))
         return undefined;
     const [targetCol, targetRow] = selectedCell.current.cell;
     const cell = getCellContent(selectedCell.current.cell);
     const targetColSpan = cell.span ?? [targetCol, targetCol];
 
-    const isStickyRow = lastRowSticky && targetRow === rows - 1;
-    const stickRowHeight = lastRowSticky && !isStickyRow ? getRowHeight(rows - 1) - 1 : 0;
+    const isStickyRow = trailingRowType === "sticky" && targetRow === rows - 1;
+    const stickRowHeight = trailingRowType === "sticky" && !isStickyRow ? getRowHeight(rows - 1) - 1 : 0;
 
     let drawCb: (() => void) | undefined = undefined;
 
@@ -1716,7 +1765,7 @@ function drawFocusRing(
                 return;
             }
 
-            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, lastRowSticky, (drawY, row, rh) => {
+            walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, trailingRowType, (drawY, row, rh) => {
                 if (row !== targetRow) return;
 
                 let cellX = drawX;
@@ -1785,7 +1834,7 @@ function getLastRow(
     cellYOffset: number,
     rows: number,
     getRowHeight: (row: number) => number,
-    lastRowSticky: boolean
+    trailingRowType: TrailingRowType
 ): number {
     let result = 0;
     walkColumns(
@@ -1801,7 +1850,7 @@ function getLastRow(
                 height,
                 rows,
                 getRowHeight,
-                lastRowSticky,
+                trailingRowType,
                 (_drawY, row, _rh, isSticky) => {
                     if (!isSticky) {
                         result = Math.max(row, result);
@@ -1838,7 +1887,7 @@ export interface DrawGridArg {
     readonly isFocused: boolean;
     readonly selection: GridSelection;
     readonly fillHandle: boolean;
-    readonly lastRowSticky: boolean;
+    readonly lastRowSticky: TrailingRowType;
     readonly hyperWrapping: boolean;
     readonly rows: number;
     readonly getCellContent: (cell: Item) => InnerGridCell;
@@ -1867,6 +1916,7 @@ function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): bo
         current.headerHeight !== last.headerHeight ||
         current.rowHeight !== last.rowHeight ||
         current.rows !== last.rows ||
+        current.getRowThemeOverride !== last.getRowThemeOverride ||
         current.isFocused !== last.isFocused ||
         current.isResizing !== last.isResizing ||
         current.verticalBorder !== last.verticalBorder ||
@@ -1939,7 +1989,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         isResizing,
         selection,
         fillHandle,
-        lastRowSticky,
+        lastRowSticky: trailingRowType,
         rows,
         getCellContent,
         getGroupDetails,
@@ -2059,7 +2109,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             getRowHeight,
             getRowThemeOverride,
             verticalBorder,
-            lastRowSticky,
+            trailingRowType,
             rows,
             theme,
             true
@@ -2075,7 +2125,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 x[1] < 0 ||
                 intersectRect(cellXOffset, cellYOffset, effectiveCols.length, 300, x[0], x[1], 1, 1) ||
                 intersectRect(0, cellYOffset, freezeColumns, 300, x[0], x[1], 1, 1) ||
-                (lastRowSticky && intersectRect(cellXOffset, rows - 1, effectiveCols.length, 1, x[0], x[1], 1, 1))
+                (trailingRowType && intersectRect(cellXOffset, rows - 1, effectiveCols.length, 1, x[0], x[1], 1, 1))
             );
         });
 
@@ -2092,7 +2142,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 cellYOffset,
                 rows,
                 getRowHeight,
-                lastRowSticky,
+                trailingRowType,
                 damage,
                 true
             );
@@ -2116,7 +2166,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 getRowThemeOverride,
                 disabledRows,
                 isFocused,
-                lastRowSticky,
+                trailingRowType,
                 drawRegions,
                 damage,
                 selection,
@@ -2151,7 +2201,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                     selection,
                     getRowHeight,
                     getCellContent,
-                    lastRowSticky,
+                    trailingRowType,
                     fillHandle,
                     rows
                 );
@@ -2171,7 +2221,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 cellYOffset,
                 rows,
                 getRowHeight,
-                lastRowSticky,
+                trailingRowType,
                 damage,
                 false
             );
@@ -2196,7 +2246,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             cellYOffset,
             translateX,
             translateY,
-            lastRowSticky,
+            trailingRowType === "sticky",
             width,
             height,
             rows,
@@ -2229,7 +2279,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         width,
         height,
         totalHeaderHeight,
-        lastRowSticky,
+        trailingRowType === "sticky",
         rows,
         verticalBorder,
         getRowHeight,
@@ -2251,7 +2301,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         selection,
         getRowHeight,
         getCellContent,
-        lastRowSticky,
+        trailingRowType,
         fillHandle,
         rows
     );
@@ -2269,7 +2319,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         headerHeight,
         groupHeaderHeight,
         rowHeight,
-        lastRowSticky,
+        trailingRowType === "sticky",
         rows,
         highlightRegions
     );
@@ -2303,7 +2353,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         getRowThemeOverride,
         disabledRows,
         isFocused,
-        lastRowSticky,
+        trailingRowType,
         drawRegions,
         damage,
         selection,
@@ -2334,7 +2384,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         getRowThemeOverride,
         selection.rows,
         disabledRows,
-        lastRowSticky,
+        trailingRowType,
         drawRegions,
         damage,
         theme
@@ -2355,7 +2405,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         getRowHeight,
         getRowThemeOverride,
         verticalBorder,
-        lastRowSticky,
+        trailingRowType,
         rows,
         theme
     );
@@ -2372,7 +2422,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         cellYOffset,
         rows,
         getRowHeight,
-        lastRowSticky
+        trailingRowType
     );
 
     imageLoader?.setWindow(
@@ -2391,7 +2441,13 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     overlayCtx.restore();
 }
 
-type WalkRowsCallback = (drawY: number, row: number, rowHeight: number, isSticky: boolean) => boolean | void;
+type WalkRowsCallback = (
+    drawY: number,
+    row: number,
+    rowHeight: number,
+    isSticky: boolean,
+    isTrailingRow: boolean
+) => boolean | void;
 
 function walkRowsInCol(
     startRow: number,
@@ -2399,12 +2455,12 @@ function walkRowsInCol(
     height: number,
     rows: number,
     getRowHeight: (row: number) => number,
-    lastRowSticky: boolean,
+    trailingRowType: TrailingRowType,
     cb: WalkRowsCallback
 ): void {
     let y = drawY;
     let row = startRow;
-    let doSticky = lastRowSticky;
+    let doSticky = trailingRowType === "sticky";
     while (y < height || doSticky) {
         const doingSticky = doSticky && y >= height;
         if (doingSticky) {
@@ -2419,10 +2475,8 @@ function walkRowsInCol(
 
         const isMovedStickyRow = doSticky && row === rows - 1;
 
-        if (!isMovedStickyRow) {
-            if (cb(y, row, rh, doingSticky) === true) {
-                break;
-            }
+        if (!isMovedStickyRow && cb(y, row, rh, doingSticky, trailingRowType !== "none" && row === rows - 1) === true) {
+            break;
         }
 
         if (doingSticky) {
@@ -2453,13 +2507,7 @@ function walkColumns(
     let clipX = 0; // this tracks the total width of sticky cols
     const drawY = totalHeaderHeight + translateY;
     for (const c of effectiveCols) {
-        let drawX: number;
-        if (c.sticky) {
-            drawX = clipX;
-        } else {
-            drawX = x + translateX;
-        }
-
+        const drawX = c.sticky ? clipX : x + translateX;
         if (cb(c, drawX, drawY, clipX, cellYOffset) === true) {
             break;
         }

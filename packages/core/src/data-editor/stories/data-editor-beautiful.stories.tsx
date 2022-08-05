@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/no-identical-functions */
+/* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
 
 import {
@@ -18,12 +20,12 @@ import {
 import { DataEditor, DataEditorProps } from "../data-editor";
 
 import faker from "faker";
-import styled, { ThemeProvider } from "styled-components";
+import { styled } from "@linaria/react";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 import { useEventListener } from "../../common/utils";
 import { IBounds, useLayer } from "react-laag";
-import { SpriteMap } from "../../data-grid/data-grid-sprites";
-import { DataEditorRef, Theme } from "../..";
+import type { SpriteMap } from "../../data-grid/data-grid-sprites";
+import type { DataEditorRef, Theme } from "../..";
 import range from "lodash/range";
 import {
     useMockDataGenerator,
@@ -36,8 +38,10 @@ import {
     GridColumnWithMockingInfo,
     ContentCache,
     BeautifulStyle,
+    ColumnAddButton,
 } from "./utils";
 import noop from "lodash/noop";
+import type { GetRowThemeCallback } from "../../data-grid/data-grid-render";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -331,6 +335,7 @@ export const ValidateData: React.VFC = () => {
                         return {
                             ...newValue,
                             data: "Valid",
+                            selectionRange: [0, 3],
                         };
                     }
                     return false;
@@ -353,6 +358,21 @@ export const FillHandle: React.VFC = () => {
 
     const [numRows, setNumRows] = React.useState(50);
 
+    const getCellContentMangled = React.useCallback<typeof getCellContent>(
+        i => {
+            let val = getCellContent(i);
+            if (i[0] === 1 && val.kind === GridCellKind.Text) {
+                val = {
+                    ...val,
+                    readonly: true,
+                };
+            }
+
+            return val;
+        },
+        [getCellContent]
+    );
+
     const onRowAppended = React.useCallback(() => {
         const newRow = numRows;
         for (let c = 0; c < 6; c++) {
@@ -364,7 +384,7 @@ export const FillHandle: React.VFC = () => {
 
     return (
         <BeautifulWrapper
-            title="Add data"
+            title="Fill handle"
             description={
                 <>
                     <Description>Fill handles can be used to downfill data with the mouse.</Description>
@@ -376,7 +396,7 @@ export const FillHandle: React.VFC = () => {
             }>
             <DataEditor
                 {...defaultProps}
-                getCellContent={getCellContent}
+                getCellContent={getCellContentMangled}
                 columns={cols}
                 getCellsForSelection={getCellsForSelection}
                 rowMarkers={"both"}
@@ -620,7 +640,7 @@ export const AppendRowHandle: React.VFC = () => {
     const ref = React.useRef<DataEditorRef>(null);
 
     const onClick = React.useCallback(() => {
-        ref.current?.appendRow(3);
+        void ref.current?.appendRow(3);
     }, [ref]);
 
     const onRowAppended = React.useCallback(() => {
@@ -778,7 +798,7 @@ export const ObserveVisibleRegion: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
-                rows={1_000}
+                rows={1000}
                 onVisibleRegionChanged={setVisibleRegion}
             />
         </BeautifulWrapper>
@@ -791,7 +811,7 @@ export const ObserveVisibleRegion: React.VFC = () => {
 };
 
 export const OneHundredThousandCols: React.VFC = () => {
-    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100000);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(100_000);
 
     return (
         <BeautifulWrapper
@@ -1033,7 +1053,7 @@ export const AutomaticRowMarkers: React.VFC = () => {
                 rowMarkers={"both"}
                 getCellContent={getCellContent}
                 columns={cols}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1087,7 +1107,7 @@ export const WrappingText: React.VFC<{
                 rowHeight={80}
                 getCellContent={mangledGetCellContent}
                 columns={cols}
-                rows={1_000}
+                rows={1000}
                 onColumnResize={onColumnResize}
                 experimental={{
                     hyperWrapping: p.hyperWrapping,
@@ -1135,7 +1155,7 @@ export const UnevenRows: React.VFC = () => {
                 rowHeight={r => (r % 3 === 0 ? 30 : r % 2 ? 50 : 60)}
                 getCellContent={getCellContent}
                 columns={cols}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1162,7 +1182,8 @@ export const DrawCustomCells: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
-                drawCustomCell={(ctx, cell, _theme, rect) => {
+                drawCell={args => {
+                    const { cell, rect, ctx } = args;
                     if (cell.kind !== GridCellKind.Text) return false;
 
                     const hasX = cell.displayData.toLowerCase().includes("x"); // all my x's live in texas
@@ -1181,7 +1202,7 @@ export const DrawCustomCells: React.VFC = () => {
 
                     return true;
                 }}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1233,7 +1254,7 @@ export const RearrangeColumns: React.VFC = () => {
                 getCellsForSelection={getCellsForSelection}
                 columns={sortableCols}
                 onColumnMoved={onColMoved}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1271,7 +1292,7 @@ export const RowAndHeaderSizes: React.VFC<RowAndHeaderSizesProps> = p => {
                 rowMarkers={"number"}
                 getCellContent={getCellContent}
                 columns={cols}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1443,7 +1464,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             getContent: () => {
                 return {
                     kind: GridCellKind.Image,
-                    data: [`${faker.image.animals(40, 40)}?random=${faker.datatype.number(100000)}`],
+                    data: [`${faker.image.animals(40, 40)}?random=${faker.datatype.number(100_000)}`],
                     allowOverlay: true,
                     allowAdd: false,
                     readonly: true,
@@ -1507,11 +1528,11 @@ Try out [Glide](https://www.glideapps.com/)
                     data: [
                         {
                             text: faker.address.cityName(),
-                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100000)}`,
+                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100_000)}`,
                         },
                         {
                             text: faker.address.cityName(),
-                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100000)}`,
+                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100_000)}`,
                         },
                     ],
                     allowOverlay: true,
@@ -1610,7 +1631,7 @@ export const AllCellKinds: React.VFC = () => {
                         },
                     },
                 ]}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1696,7 +1717,7 @@ const hotdogStand = {
 export const ThemeSupport: React.VFC = () => {
     const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
-    const [theme, setTheme] = React.useState({});
+    const [theme, setTheme] = React.useState<Partial<Theme>>({});
 
     const [numRows, setNumRows] = React.useState(1000);
 
@@ -1712,36 +1733,35 @@ export const ThemeSupport: React.VFC = () => {
     }, [numRows, setCellValue]);
 
     return (
-        <ThemeProvider theme={theme}>
-            <BeautifulWrapper
-                title="Theme support"
-                description={
-                    <>
-                        <Description>
-                            DataGrid respects the theme provided by styled-components theme provider.
-                        </Description>
-                        <MoreInfo>
-                            <button onClick={() => setTheme({})}>Light</button> or{" "}
-                            <button onClick={() => setTheme(darkTheme)}>Dark</button> even{" "}
-                            <button onClick={() => setTheme(hotdogStand)}>Hotdog Stand</button>
-                        </MoreInfo>
-                    </>
-                }>
-                <DataEditor
-                    {...defaultProps}
-                    getCellContent={getCellContent}
-                    columns={cols}
-                    onRowAppended={onRowAppended}
-                    trailingRowOptions={{
-                        tint: true,
-                        sticky: true,
-                    }}
-                    onCellEdited={setCellValue}
-                    onColumnResize={onColumnResize}
-                    rows={numRows}
-                />
-            </BeautifulWrapper>
-        </ThemeProvider>
+        <BeautifulWrapper
+            title="Theme support"
+            description={
+                <>
+                    <Description>
+                        DataGrid respects the theme provided by the <PropName>theme</PropName> prop.
+                    </Description>
+                    <MoreInfo>
+                        <button onClick={() => setTheme({})}>Light</button> or{" "}
+                        <button onClick={() => setTheme(darkTheme)}>Dark</button> even{" "}
+                        <button onClick={() => setTheme(hotdogStand)}>Hotdog Stand</button>
+                    </MoreInfo>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                theme={theme}
+                getCellContent={getCellContent}
+                columns={cols}
+                onRowAppended={onRowAppended}
+                trailingRowOptions={{
+                    tint: true,
+                    sticky: true,
+                }}
+                onCellEdited={setCellValue}
+                onColumnResize={onColumnResize}
+                rows={numRows}
+            />
+        </BeautifulWrapper>
     );
 };
 (ThemeSupport as any).parameters = {
@@ -1814,7 +1834,7 @@ export const ThemePerColumn: React.VFC = () => {
                 columns={realCols}
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -1996,7 +2016,7 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
             <DataEditor
                 {...defaultProps}
                 ref={ref}
-                rowMarkers="number"
+                rowMarkers="clickable-number"
                 getCellContent={getCellContent}
                 columns={cols}
                 onCellEdited={setCellValue}
@@ -2113,7 +2133,7 @@ export const HeaderMenus: React.VFC = () => {
                 onCellContextMenu={(_, e) => e.preventDefault()}
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}
-                rows={1_000}
+                rows={1000}
             />
             {isOpen &&
                 renderLayer(
@@ -2182,7 +2202,7 @@ export const CustomHeaderIcons: React.VFC = () => {
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}
                 headerIcons={headerIcons}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -2234,7 +2254,7 @@ export const RightElement: React.VFC = () => {
                 }}
                 rows={numRows}
                 onRowAppended={onRowAppended}
-                rightElementSticky={true}
+                rightElementProps={{ sticky: true }}
                 rightElement={
                     <div
                         style={{
@@ -2266,7 +2286,7 @@ export const RightElement: React.VFC = () => {
 
 let num: number = 1;
 function rand(): number {
-    return (num = (num * 16807) % 2147483647);
+    return (num = (num * 16_807) % 2_147_483_647);
 }
 
 export const RapidUpdates: React.VFC = () => {
@@ -2285,7 +2305,7 @@ export const RapidUpdates: React.VFC = () => {
                 cell: Item;
             }[] = [];
             const now = performance.now();
-            for (let x = 0; x < 5_000; x++) {
+            for (let x = 0; x < 5000; x++) {
                 const col = Math.max(10, rand() % 100);
                 const row = rand() % 10_000;
 
@@ -2308,7 +2328,7 @@ export const RapidUpdates: React.VFC = () => {
                 });
                 cells.push({ cell: [col, row] });
             }
-            countRef.current += 5_000;
+            countRef.current += 5000;
             if (displayCountRef.current !== null) {
                 displayCountRef.current.textContent = `${countRef.current}`;
             }
@@ -2472,7 +2492,7 @@ export const FreezeColumns: React.VFC = () => {
                 getCellsForSelection={getCellsForSelection}
                 columns={cols}
                 verticalBorder={c => c > 0}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -2760,6 +2780,49 @@ export const ContentAlignment: React.VFC = () => {
     );
 };
 
+export const RowHover: React.VFC = () => {
+    const { cols, getCellContent } = useAllMockedKinds();
+
+    const [hoverRow, setHoverRow] = React.useState<number | undefined>(undefined);
+
+    const onItemHovered = React.useCallback((args: GridMouseEventArgs) => {
+        const [_, row] = args.location;
+        setHoverRow(args.kind !== "cell" ? undefined : row);
+    }, []);
+
+    const getRowThemeOverride = React.useCallback<GetRowThemeCallback>(
+        row => {
+            if (row !== hoverRow) return undefined;
+            return {
+                bgCell: "#f7f7f7",
+                bgCellMedium: "#f0f0f0",
+            };
+        },
+        [hoverRow]
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Row Hover Effect"
+            description={
+                <Description>
+                    Through careful usage of the <PropName>onItemHovered</PropName> callback it is possible to easily
+                    create a row hover effect.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers="both"
+                onItemHovered={onItemHovered}
+                getCellContent={getCellContent}
+                getRowThemeOverride={getRowThemeOverride}
+                columns={cols}
+                rows={300}
+            />
+        </BeautifulWrapper>
+    );
+};
+
 export const SpanCell: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(100, true, true);
 
@@ -2852,24 +2915,34 @@ export const Tooltips: React.VFC = () => {
 
     const [tooltip, setTooltip] = React.useState<{ val: string; bounds: IBounds } | undefined>();
 
+    const timeoutRef = React.useRef(0);
+
     const onItemHovered = React.useCallback((args: GridMouseEventArgs) => {
         if (args.kind === "cell") {
-            setTooltip({
-                val: `Tooltip for ${args.location[0]}, ${args.location[1]}`,
-                bounds: {
-                    // translate to react-laag types
-                    left: args.bounds.x,
-                    top: args.bounds.y,
-                    width: args.bounds.width,
-                    height: args.bounds.height,
-                    right: args.bounds.x + args.bounds.width,
-                    bottom: args.bounds.y + args.bounds.height,
-                },
-            });
+            window.clearTimeout(timeoutRef.current);
+            setTooltip(undefined);
+            timeoutRef.current = window.setTimeout(() => {
+                setTooltip({
+                    val: `Tooltip for ${args.location[0]}, ${args.location[1]}`,
+                    bounds: {
+                        // translate to react-laag types
+                        left: args.bounds.x,
+                        top: args.bounds.y,
+                        width: args.bounds.width,
+                        height: args.bounds.height,
+                        right: args.bounds.x + args.bounds.width,
+                        bottom: args.bounds.y + args.bounds.height,
+                    },
+                });
+            }, 1000);
         } else {
+            window.clearTimeout(timeoutRef.current);
+            timeoutRef.current = 0;
             setTooltip(undefined);
         }
     }, []);
+
+    React.useEffect(() => () => window.clearTimeout(timeoutRef.current), []);
 
     const isOpen = tooltip !== undefined;
     const { renderLayer, layerProps } = useLayer({
@@ -2898,7 +2971,7 @@ export const Tooltips: React.VFC = () => {
                     onItemHovered={onItemHovered}
                     getCellContent={getCellContent}
                     columns={cols}
-                    rows={1_000}
+                    rows={1000}
                 />
             </BeautifulWrapper>
             {isOpen &&
@@ -2923,6 +2996,113 @@ export const Tooltips: React.VFC = () => {
     options: {
         showPanel: false,
     },
+};
+
+export const ControlledSelection: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(30, true, true);
+
+    const [selection, setSelection] = React.useState<GridSelection>({
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
+    });
+
+    return (
+        <BeautifulWrapper
+            title="Controlled Selection"
+            description={
+                <Description>
+                    The selection of the grid can be controlled via <PropName>GridSelection</PropName> and{" "}
+                    <PropName>onGridSelectionChange</PropName>.
+                    <input
+                        type="range"
+                        min={0}
+                        max={29}
+                        value={selection.current?.cell[0] ?? 0}
+                        onChange={e => {
+                            const newCol = e.target.valueAsNumber;
+                            setSelection(cv => ({
+                                ...cv,
+                                current: {
+                                    cell: [newCol, cv.current?.cell[1] ?? 0],
+                                    range: {
+                                        x: newCol,
+                                        y: cv.current?.cell[1] ?? 0,
+                                        width: 1,
+                                        height: 1,
+                                    },
+                                    rangeStack: [],
+                                },
+                            }));
+                        }}
+                    />
+                    <input
+                        type="range"
+                        min={0}
+                        max={99}
+                        value={selection.current?.cell[1] ?? 0}
+                        onChange={e => {
+                            const newRow = e.target.valueAsNumber;
+                            setSelection(cv => ({
+                                ...cv,
+                                current: {
+                                    cell: [cv.current?.cell[0] ?? 0, newRow],
+                                    range: {
+                                        x: cv.current?.cell[0] ?? 0,
+                                        y: newRow,
+                                        width: 1,
+                                        height: 1,
+                                    },
+                                    rangeStack: [],
+                                },
+                            }));
+                        }}
+                    />
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                gridSelection={selection}
+                onGridSelectionChange={setSelection}
+                columns={cols}
+                rows={100}
+                rowMarkers="both"
+            />
+        </BeautifulWrapper>
+    );
+};
+
+export const NewColumnButton: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(10, true);
+
+    const columns = React.useMemo(() => cols.map(c => ({ ...c, grow: 1 })), [cols]);
+
+    return (
+        <BeautifulWrapper
+            title="New column button"
+            description={
+                <Description>
+                    A new column button can be created using the <PropName>rightElement</PropName>.
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={columns}
+                rightElement={
+                    <ColumnAddButton>
+                        <button onClick={() => window.alert("Add a column!")}>+</button>
+                    </ColumnAddButton>
+                }
+                rightElementProps={{
+                    fill: false,
+                    sticky: false,
+                }}
+                rows={3000}
+                rowMarkers="both"
+            />
+        </BeautifulWrapper>
+    );
 };
 
 export const CustomHeader: React.VFC = () => {
@@ -2982,6 +3162,7 @@ export const Padding: React.VFC<PaddingProps> = p => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 columns={cols}
+                rowMarkers={"both"}
                 experimental={{ paddingRight, paddingBottom }}
                 rows={50}
             />
@@ -3068,7 +3249,7 @@ export const HighlightCells: React.VFC = () => {
                 getCellsForSelection={getCellsForSelection}
                 columns={cols}
                 verticalBorder={c => c > 0}
-                rows={1_000}
+                rows={1000}
             />
         </BeautifulWrapper>
     );
@@ -3123,6 +3304,51 @@ export const LayoutIntegration: React.VFC = () => {
     },
 };
 
+export const DragSource: React.VFC<{ isDraggable: boolean | "header" | "cell" }> = p => {
+    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(200);
+
+    return (
+        <BeautifulWrapper
+            title="Drag source"
+            description={
+                <>
+                    <Description>
+                        Setting the <PropName>isDraggable</PropName> prop can allow for more granular control over what
+                        is draggable in the grid via HTML drag and drop.
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={cols}
+                rowMarkers="both"
+                rows={5000}
+                onRowMoved={(s, e) => window.alert(`Moved row ${s} to ${e}`)}
+                onColumnMoved={(s, e) => window.alert(`Moved col ${s} to ${e}`)}
+                onColumnResize={onColumnResize}
+                isDraggable={p.isDraggable}
+                onDragStart={e => {
+                    e.setData("text/plain", "Drag data here!");
+                }}
+            />
+        </BeautifulWrapper>
+    );
+};
+(DragSource as any).argTypes = {
+    isDraggable: {
+        control: { type: "select", options: [true, false, "cell", "header"] },
+    },
+};
+(DragSource as any).args = {
+    isDraggable: false,
+};
+(DragSource as any).parameters = {
+    options: {
+        showPanel: true,
+    },
+};
+
 export const PreventDiagonalScroll: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(200);
 
@@ -3153,7 +3379,7 @@ export const PreventDiagonalScroll: React.VFC = () => {
 };
 
 // A few supported mime types for drag and drop into cells.
-const SUPPORTED_IMAGE_TYPES = ["image/png", "image/gif", "image/bmp", "image/jpeg"];
+const SUPPORTED_IMAGE_TYPES = new Set(["image/png", "image/gif", "image/bmp", "image/jpeg"]);
 
 export const DropEvents: React.VFC = () => {
     const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
@@ -3177,7 +3403,7 @@ export const DropEvents: React.VFC = () => {
             }
 
             const [file] = files;
-            if (!SUPPORTED_IMAGE_TYPES.includes(file.type)) {
+            if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
                 return;
             }
 
@@ -3213,7 +3439,7 @@ export const DropEvents: React.VFC = () => {
             }
 
             const [item] = items;
-            if (!SUPPORTED_IMAGE_TYPES.includes(item.type)) {
+            if (!SUPPORTED_IMAGE_TYPES.has(item.type)) {
                 return;
             }
 
@@ -3270,7 +3496,7 @@ export const DropEvents: React.VFC = () => {
                 columns={cols}
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}
-                rows={1_000}
+                rows={1000}
                 onDrop={onDrop}
                 onDragOverCell={onDragOverCell}
                 onDragLeave={onDragLeave}

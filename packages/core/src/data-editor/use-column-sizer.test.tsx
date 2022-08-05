@@ -1,8 +1,8 @@
 import { renderHook } from "@testing-library/react-hooks";
 import { GridCell, GridCellKind, GridColumn, Rectangle } from "..";
 import { getDataEditorTheme } from "../common/styles";
-import { DataGridSearchProps } from "../data-grid-search/data-grid-search";
-import { CellArray } from "../data-grid/data-grid-types";
+import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
+import type { CellArray } from "../data-grid/data-grid-types";
 import { useColumnSizer } from "./use-column-sizer";
 
 const COLUMNS: GridColumn[] = [
@@ -40,7 +40,7 @@ const A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE: 
 type DataBuilder = (x: number, y: number) => string;
 
 function buildCellsForSelectionGetter(dataBuilder: DataBuilder): DataGridSearchProps["getCellsForSelection"] {
-    const getCellsForSelection = (selection: Rectangle): CellArray => {
+    return (selection: Rectangle): CellArray => {
         const result: GridCell[][] = [];
 
         for (let y = selection.y; y < selection.y + selection.height; y++) {
@@ -59,8 +59,6 @@ function buildCellsForSelectionGetter(dataBuilder: DataBuilder): DataGridSearchP
 
         return result;
     };
-
-    return getCellsForSelection;
 }
 
 const getShortCellsForSelection = jest.fn(buildCellsForSelectionGetter((x, y) => `column ${x} row ${y}`));

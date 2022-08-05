@@ -1,6 +1,6 @@
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import * as React from "react";
-import AutoSizer from "react-virtualized-auto-sizer";
+import { useResizeDetector } from "react-resize-detector";
 import { DataEditor, DataEditorProps, GridCellKind, GridColumn, Theme } from "@glideapps/glide-data-grid";
 import faker from "faker";
 import { useCollapsingGroups, useColumnSort, useMoveableColumns } from ".";
@@ -85,24 +85,23 @@ interface BeautifulProps {
 
 const BeautifulWrapper: React.FC<BeautifulProps> = p => {
     const { title, children, description } = p;
+
+    const { ref, width, height } = useResizeDetector();
+
     return (
         <BeautifulStyle>
             <h1>{title}</h1>
             {description}
             <div className="sizer">
-                <div className="sizer-clip">
-                    <AutoSizer>
-                        {(props: { width?: number; height?: number }) => (
-                            <div
-                                style={{
-                                    position: "relative",
-                                    width: props.width ?? 100,
-                                    height: props.height ?? 100,
-                                }}>
-                                {children}
-                            </div>
-                        )}
-                    </AutoSizer>
+                <div className="sizer-clip" ref={ref}>
+                    <div
+                        style={{
+                            position: "relative",
+                            width: width ?? 100,
+                            height: height ?? 100,
+                        }}>
+                        {children}
+                    </div>
                 </div>
             </div>
         </BeautifulStyle>
@@ -162,6 +161,7 @@ const testTheme: Theme = {
     headerFontStyle: "600 13px",
     baseFontStyle: "13px",
     editorFontSize: "13px",
+    lineHeight: 1.4,
     fontFamily:
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
 };

@@ -1,9 +1,10 @@
-import { Theme } from "../common/styles";
+import type { Theme } from "../common/styles";
 import { assertNever, proveType } from "../common/support";
 import has from "lodash/has";
-import React, { CSSProperties } from "react";
-import ImageWindowLoader from "../common/image-window-loader";
-import { SpriteManager } from "./data-grid-sprites";
+import type React from "react";
+import type { CSSProperties } from "react";
+import type ImageWindowLoader from "../common/image-window-loader";
+import type { SpriteManager } from "./data-grid-sprites";
 
 // Thoughts:
 // rows/columns are called out as selected, but when selected they must also be added
@@ -54,6 +55,7 @@ interface BaseGridMouseEventArgs {
     readonly isLongTouch?: boolean;
     readonly isEdge: boolean;
     readonly button: number;
+    readonly scrollEdge: readonly [-1 | 0 | 1, -1 | 0 | 1];
 }
 
 export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
@@ -63,6 +65,7 @@ export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, Position
     readonly isFillHandle: boolean;
 }
 
+export const headerKind = "header" as const;
 export interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "header";
     readonly location: readonly [number, -1];
@@ -70,6 +73,7 @@ export interface GridMouseHeaderEventArgs extends BaseGridMouseEventArgs, Positi
     readonly group: string;
 }
 
+export const groupHeaderKind = "group-header" as const;
 export interface GridMouseGroupHeaderEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
     readonly kind: "group-header";
     readonly location: readonly [number, -2];
@@ -77,6 +81,7 @@ export interface GridMouseGroupHeaderEventArgs extends BaseGridMouseEventArgs, P
     readonly group: string;
 }
 
+export const outOfBoundsKind = "out-of-bounds" as const;
 export interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {
     readonly kind: "out-of-bounds";
     readonly location: Item;
@@ -97,9 +102,13 @@ export interface GridKeyEventArgs {
 interface DragHandler {
     readonly setData: (mime: string, payload: string) => void;
     readonly setDragImage: (image: Element, x: number, y: number) => void;
+    readonly preventDefault: () => void;
+    readonly defaultPrevented: () => boolean;
 }
 
 export type GridDragEventArgs = GridMouseEventArgs & DragHandler;
+
+export type TrailingRowType = "sticky" | "appended" | "none";
 
 export type DrawCustomCellCallback = (args: {
     ctx: CanvasRenderingContext2D;
@@ -119,6 +128,7 @@ export type DrawCustomCellCallback = (args: {
 export type DrawHeaderCallback = (args: {
     ctx: CanvasRenderingContext2D;
     column: GridColumn;
+    columnIndex: number;
     theme: Theme;
     rect: Rectangle;
     hoverAmount: number;
@@ -179,6 +189,11 @@ export type CellArray = readonly (readonly GridCell[])[];
 
 export type Item = readonly [number, number];
 
+export const headerCellCheckboxPrefix = "___gdg_header_cell_";
+export const headerCellCheckedMarker = headerCellCheckboxPrefix + "checked";
+export const headerCellUnheckedMarker = headerCellCheckboxPrefix + "unchecked";
+export const headerCellIndeterminateMarker = headerCellCheckboxPrefix + "indeterminate";
+
 interface BaseGridColumn {
     readonly title: string;
     readonly group?: string;
@@ -229,7 +244,8 @@ export type EditableGridCell = TextCell | ImageCell | BooleanCell | MarkdownCell
 
 export type EditableGridCellKind = EditableGridCell["kind"];
 
-export function isEditableGridCell(cell: GridCell): cell is EditableGridCell {
+// All EditableGridCells are inherently ValidatedGridCells, and this is more specific and thus more useful.
+export function isEditableGridCell(cell: GridCell): cell is ValidatedGridCell {
     if (
         cell.kind === GridCellKind.Loading ||
         cell.kind === GridCellKind.Bubble ||
@@ -308,8 +324,9 @@ export interface BaseGridCell {
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
-    readonly span?: Item;
+    readonly span?: readonly [number, number];
     readonly contentAlign?: "left" | "right" | "center";
+    readonly cursor?: CSSProperties["cursor"];
 }
 
 export interface LoadingCell extends BaseGridCell {
@@ -347,12 +364,15 @@ export interface BubbleCell extends BaseGridCell {
     readonly data: string[];
 }
 
+export type SelectionRange = number | readonly [number, number];
+
 export type ProvideEditorComponent<T extends GridCell> = React.FunctionComponent<{
     readonly onChange: (newValue: T) => void;
     readonly onFinishedEditing: (newValue?: T) => void;
     readonly isHighlighted: boolean;
     readonly value: T;
     readonly initialValue?: string;
+    readonly validatedSelection?: SelectionRange;
 }>;
 
 type ObjectEditorCallbackResult<T extends GridCell> = {
@@ -374,13 +394,14 @@ type ProvideEditorCallbackResult<T extends GridCell> =
 export function isObjectEditorCallbackResult<T extends GridCell>(
     obj: ProvideEditorCallbackResult<T>
 ): obj is ObjectEditorCallbackResult<T> {
-    if (has(obj, "editor")) {
-        return true;
-    }
-    return false;
+    return has(obj, "editor");
 }
 
 export type ProvideEditorCallback<T extends GridCell> = (cell: T) => ProvideEditorCallbackResult<T>;
+
+export type ValidatedGridCell = EditableGridCell & {
+    selectionRange?: SelectionRange;
+};
 
 export interface CustomCell<T extends {} = {}> extends BaseGridCell {
     readonly kind: GridCellKind.Custom;
@@ -402,25 +423,13 @@ export interface DrilldownCell extends BaseGridCell {
 export interface BooleanCell extends BaseGridCell {
     readonly kind: GridCellKind.Boolean;
     readonly data: boolean | BooleanEmpty | BooleanIndeterminate;
-    /**
-     * @deprecated Does nothing.
-     */
-    readonly showUnchecked?: boolean;
-    /**
-     * @deprecated Prefer readonly.
-     */
-    readonly allowEdit?: boolean;
     readonly readonly?: boolean;
     readonly allowOverlay: false;
 }
 
 // Can be written more concisely, not easier to read if more concise.
 export function booleanCellIsEditable(cell: BooleanCell): boolean {
-    if (cell.readonly === true) return false;
-    if (cell.readonly === false) return true;
-    if (cell.allowEdit === true) return true;
-    if (cell.allowEdit === false) return false;
-    return true;
+    return !(cell.readonly ?? false);
 }
 
 export interface RowIDCell extends BaseGridCell {
@@ -479,7 +488,7 @@ function mergeRanges(input: CompactSelectionRanges) {
 
     stack.push([...ranges[0]]);
 
-    ranges.slice(1).forEach(range => {
+    for (const range of ranges.slice(1)) {
         const top = stack[stack.length - 1];
 
         if (top[1] < range[0]) {
@@ -487,7 +496,7 @@ function mergeRanges(input: CompactSelectionRanges) {
         } else if (top[1] < range[1]) {
             top[1] = range[1];
         }
-    });
+    }
 
     return stack;
 }
@@ -587,6 +596,20 @@ export class CompactSelection {
         }
 
         return true;
+    };
+
+    // Really old JS wont have access to the iterator and babel will stop people using it
+    // when trying to support browsers so old we don't support them anyway. What goes on
+    // between an engineer and their bundler in the privacy of their CI server is none of
+    // my business anyway.
+    toArray = (): number[] => {
+        const result: number[] = [];
+        for (const [start, end] of this.items) {
+            for (let x = start; x < end; x++) {
+                result.push(x);
+            }
+        }
+        return result;
     };
 
     get length(): number {

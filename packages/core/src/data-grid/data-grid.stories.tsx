@@ -1,9 +1,11 @@
+/* eslint-disable sonarjs/no-identical-functions */
 import * as React from "react";
 
-import { StoryFn, StoryContext } from "@storybook/addons";
+import type { StoryFn, StoryContext } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import DataGrid from "./data-grid";
 import { CompactSelection, GridCellKind, GridSelection } from "./data-grid-types";
+import { getDataEditorTheme } from "../common/styles";
 
 export default {
     title: "Subcomponents/DataGrid",
@@ -55,7 +57,7 @@ export function Simplenotest() {
             accessibilityHeight={50}
             enableGroups={false}
             selection={emptyGridSelection}
-            rows={100000}
+            rows={100_000}
             headerHeight={44}
             rowHeight={34}
             columns={["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven"].map(
@@ -74,9 +76,10 @@ export function Simplenotest() {
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
-            lastRowSticky={false}
+            trailingRowType={"none"}
             isResizing={false}
             isDragging={false}
+            theme={getDataEditorTheme()}
         />
     );
 }
@@ -121,9 +124,10 @@ export function SelectedCellnotest() {
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
-            lastRowSticky={false}
+            trailingRowType={"none"}
             isResizing={false}
             isDragging={false}
+            theme={getDataEditorTheme()}
         />
     );
 }
@@ -164,9 +168,10 @@ export function SelectedRownotest() {
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
-            lastRowSticky={false}
+            trailingRowType={"none"}
             isResizing={false}
             isDragging={false}
+            theme={getDataEditorTheme()}
         />
     );
 }
@@ -207,9 +212,10 @@ export const SelectedColumnnotest = () => {
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
-            lastRowSticky={false}
+            trailingRowType={"none"}
             isResizing={false}
             isDragging={false}
+            theme={getDataEditorTheme()}
         />
     );
 };

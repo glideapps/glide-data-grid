@@ -16,8 +16,7 @@ export function assertNever(_never: never): never {
 }
 export function maybe<T>(fn: () => T, defaultValue: T) {
     try {
-        const result = fn();
-        return result;
+        return fn();
     } catch {
         return defaultValue;
     }
@@ -27,6 +26,7 @@ export function maybe<T>(fn: () => T, defaultValue: T) {
 // Original license and code can be found here: https://github.com/lukeed/dequal/blob/master/license
 // I have merely "ported" it to be TS (any any any) and directly included it for convenience.
 const has = Object.prototype.hasOwnProperty;
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function deepEqual(foo: any, bar: any): boolean {
     let ctor: any, len: number;
     if (foo === bar) return true;

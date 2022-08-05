@@ -78,8 +78,8 @@ function useAsyncData<TRowType>(
 
             const damageList: { cell: [number, number] }[] = [];
             const data = dataRef.current;
-            for (let i = 0; i < d.length; i++) {
-                data[i + startIndex] = d[i];
+            for (const [i, element] of d.entries()) {
+                data[i + startIndex] = element;
                 for (let col = vr.x; col <= vr.x + vr.width; col++) {
                     damageList.push({
                         cell: [col, i + startIndex],
@@ -157,8 +157,7 @@ export const ServerSideData: React.VFC = () => {
 
     const getRowData = React.useCallback(async (r: Item) => {
         await new Promise(res => setTimeout(res, 300));
-        const result = range(r[0], r[1]).map(rowIndex => [`1, ${rowIndex}`, `2, ${rowIndex}`]);
-        return result;
+        return range(r[0], r[1]).map(rowIndex => [`1, ${rowIndex}`, `2, ${rowIndex}`]);
     }, []);
 
     const columns = React.useMemo<readonly GridColumn[]>(() => {

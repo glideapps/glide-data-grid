@@ -1,10 +1,11 @@
 import * as React from "react";
 
-import { StoryFn, StoryContext } from "@storybook/addons";
+import type { StoryFn, StoryContext } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import GridScroller from "./scrolling-data-grid";
-import { styled } from "../common/styles";
+import { styled } from "@linaria/react";
 import { CompactSelection, GridCell, GridCellKind, Rectangle, Item } from "../data-grid/data-grid-types";
+import { getDefaultTheme } from "..";
 
 const InnerContainer = styled.div`
     width: 100%;
@@ -65,13 +66,14 @@ export function Simplenotest() {
     return (
         <GridScroller
             onMouseMove={() => undefined}
-            rows={10000}
+            rows={10_000}
             enableGroups={false}
             clientSize={[1000, 1000]}
             cellXOffset={x}
             cellYOffset={y}
             minColumnWidth={50}
             isFocused={true}
+            theme={getDefaultTheme()}
             isFilling={false}
             maxColumnWidth={500}
             accessibilityHeight={50}
@@ -86,7 +88,7 @@ export function Simplenotest() {
             firstColAccessible={true}
             groupHeaderHeight={34}
             headerHeight={44}
-            lastRowSticky={false}
+            trailingRowType={"none"}
             rowHeight={34}
             onVisibleRegionChanged={onVisibleRegionChanged}
             columns={columns}

@@ -3,7 +3,7 @@ import * as React from "react";
 import GrowingEntry from "../../growing-entry/growing-entry";
 import { drawTextCell, prepTextCell } from "../data-grid-lib";
 import { GridCellKind, TextCell } from "../data-grid-types";
-import { InternalCellRenderer } from "./cell-types";
+import type { InternalCellRenderer } from "./cell-types";
 
 export const textCellRenderer: InternalCellRenderer<TextCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",
@@ -22,7 +22,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
         data: "",
     }),
     getEditor: () => p => {
-        const { isHighlighted, onChange, onKeyDown, value } = p;
+        const { isHighlighted, onChange, onKeyDown, value, validatedSelection } = p;
         return (
             <GrowingEntry
                 highlight={isHighlighted}
@@ -31,6 +31,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
                 onKeyDown={onKeyDown}
                 altNewline={true}
                 value={value.data}
+                validatedSelection={validatedSelection}
                 onChange={e =>
                     onChange({
                         ...value,

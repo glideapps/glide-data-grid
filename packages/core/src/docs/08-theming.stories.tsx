@@ -5,8 +5,7 @@ import { DataEditor } from "../data-editor/data-editor";
 
 import { SimpleThemeWrapper } from "../stories/story-utils";
 import { DocWrapper, Highlight, Marked, Wrapper } from "./doc-wrapper";
-import { ThemeProvider } from "styled-components";
-import { Theme } from "../common/styles";
+import type { Theme } from "../common/styles";
 
 export default {
     title: "Glide-Data-Grid/Docs",
@@ -242,60 +241,63 @@ At each level parts of the theme can be overridden. This example will pro
 
 ## Global Theming
 
-The global theme is provided by the \`styled-components\` ThemeProvider. All themes contain the following properties.
+The global theme is provided by the DataEditor by default and can be overriden by setting the \`theme\` prop. All themes contain the following properties.
 
-| Property | Type | Description |
-|---|---|----|
-| accentColor | string | The primary accent color of the grid. This will show up in focus rings and selected rows/headers. |
-| accentFg | string | A foreground color which works well on top of the accent color. |
-| accentLight | string | A lighter version of the accent color used to hint selection. |
-| textDark | string | The standard text color. |
-| textMedium | string | A lighter text color used for non-editable data in some cases. |
-| textLight | string | An even lighter text color |
-| textBubble | string | The text color used in bubbles |
-| bgIconHeader | string | The background color for header icons |
-| fgIconHeader | string | The foreground color for header icons |
-| textHeader | string | The header text color |
-| textGroupHeader | string \\| undefined | The group header text color, if none provided the \`textHeader\` is used instead. |
-| textHeaderSelected | string | The text color used for selected headers |
-| bgCell | string | The primary background color of the data grid. |
-| bgCellMedium | string | Used for disabled or otherwise off colored cells. |
-| bgHeader | string | The header background color |
-| bgHeaderHasFocus | string | The header background color when its column contains the selected cell |
-| bgHeaderHovered | string | The header background color when it is hovered |
-| bgBubble | string | The background color used in bubbles |
-| bgBubbleSelected | string | The background color used in bubbles when the cell is selected |
-| bgSearchResult | string | The background color used for cells which match the search string |
-| borderColor | string | The color of all vertical borders and horizontal borders if a horizontal override is not provided |
-| horizontalBorderColor | string \\| undefined | The horizontal border color override |
-| drilldownBorder | string | The ring color of a drilldown cell |
-| linkColor | string | What color to render links |
-| cellHorizontalPadding | number | The internal horizontal padding size of a cell. |
-| cellVerticalPadding | number | The internal vertical padding size of a cell. |
-| headerFontStyle | string | The font style of the header. e.g. \`bold 15px\` |
-| baseFontStyle | string | The font style used for cells by default, e.g. \`13px\` |
-| fontFamily | string | The font family used by the data grid. |
-| editorFontSize | string | The font size used by overlay editors. |
+| Property | CSS Variable | Type | Description |
+|---|---|---|----|
+| accentColor | --gdg-accent-color | string | The primary accent color of the grid. This will show up in focus rings and selected rows/headers. |
+| accentFg | --gdg-accent-fg | string | A foreground color which works well on top of the accent color. |
+| accentLight | --gdg-accent-light | string | A lighter version of the accent color used to hint selection. |
+| textDark | --gdg-text-dark | string | The standard text color. |
+| textMedium | --gdg-text-medium | string | A lighter text color used for non-editable data in some cases. |
+| textLight | --gdg-text-light | string | An even lighter text color |
+| textBubble | --gdg-text-bubble | string | The text color used in bubbles |
+| bgIconHeader | --gdg-bg-icon-header | string | The background color for header icons |
+| fgIconHeader | --gdg-fg-icon-header | string | The foreground color for header icons |
+| textHeader | --gdg-text-header | string | The header text color |
+| textGroupHeader | --gdg-text-group-header | string \\| undefined | The group header text color, if none provided the \`textHeader\` is used instead. |
+| textHeaderSelected | --gdg-text-header-selected | string | The text color used for selected headers |
+| bgCell | --gdg-bg-cell | string | The primary background color of the data grid. |
+| bgCellMedium | --gdg-bg-cell-medium | string | Used for disabled or otherwise off colored cells. |
+| bgHeader | --gdg-bg-header | string | The header background color |
+| bgHeaderHasFocus | --gdg-bg-header-has | string | The header background color when its column contains the selected cell |
+| bgHeaderHovered | --gdg-bg-header-hovered | string | The header background color when it is hovered |
+| bgBubble | --gdg-bg-bubble | string | The background color used in bubbles |
+| bgBubbleSelected | --gdg-bg-bubble-selected | string | The background color used in bubbles when the cell is selected |
+| bgSearchResult | --gdg-bg-search-result | string | The background color used for cells which match the search string |
+| borderColor | --gdg-border-color | string | The color of all vertical borders and horizontal borders if a horizontal override is not provided |
+| horizontalBorderColor | --gdg-horizontal-border-color | string \\| undefined | The horizontal border color override |
+| drilldownBorder | --gdg-drilldown-border | string | The ring color of a drilldown cell |
+| linkColor | --gdg-link-color | string | What color to render links |
+| cellHorizontalPadding | --gdg-cell-horizontal-padding | number | The internal horizontal padding size of a cell. |
+| cellVerticalPadding | --gdg-cell-vertical-padding | number | The internal vertical padding size of a cell. |
+| headerFontStyle | --gdg-header-font-style | string | The font style of the header. e.g. \`bold 15px\` |
+| baseFontStyle | --gdg-base-font-style | string | The font style used for cells by default, e.g. \`13px\` |
+| fontFamily | --gdg-font-family | string | The font family used by the data grid. |
+| editorFontSize | --gdg-editor-font-size | string | The font size used by overlay editors. |
+| lineHeight | None | number | A unitless scaler which defines the height of a line of text relative to the ink size. |
 
 If an option is missing from any theme it will be filled in with the default theme.
 `}
             </Marked>
             <Highlight>
                 {`
-return <ThemeProvider theme={{
-    bgCell: "#F2F9FF"
-}}>
-    <DataEditor getCellContent={getContent} columns={columns} rows={data.length} />
-</ThemeProvider>
+return <DataEditor 
+        theme={{
+          bgCell: "#F2F9FF"
+        }} 
+        getCellContent={getContent} columns={columns} rows={data.length} />
 `}
             </Highlight>
             <Wrapper height={200}>
-                <ThemeProvider
+                <DataEditor
                     theme={{
                         bgCell: "#F2F9FF",
-                    }}>
-                    <DataEditor getCellContent={getContent} columns={columns} rows={data.length} />
-                </ThemeProvider>
+                    }}
+                    getCellContent={getContent}
+                    columns={columns}
+                    rows={data.length}
+                />
             </Wrapper>
             <Marked>
                 {`### Column themes
@@ -330,12 +332,14 @@ const columns = React.useMemo<GridColumn[]>(() => {
 `}
             </Highlight>
             <Wrapper height={200}>
-                <ThemeProvider
+                <DataEditor
                     theme={{
                         bgCell: "#F2F9FF",
-                    }}>
-                    <DataEditor getCellContent={getContent} columns={themeColumns} rows={data.length} />
-                </ThemeProvider>
+                    }}
+                    getCellContent={getContent}
+                    columns={themeColumns}
+                    rows={data.length}
+                />
             </Wrapper>
             <Marked>{`### Row themes`}</Marked>
             <Highlight>
@@ -353,17 +357,15 @@ return <DataEditor {...rest} getRowThemeOverride={getRowThemeOverride} />
 `}
             </Highlight>
             <Wrapper height={200}>
-                <ThemeProvider
+                <DataEditor
                     theme={{
                         bgCell: "#F2F9FF",
-                    }}>
-                    <DataEditor
-                        getRowThemeOverride={getRowThemeOverride}
-                        getCellContent={getContent}
-                        columns={themeColumns}
-                        rows={data.length}
-                    />
-                </ThemeProvider>
+                    }}
+                    getRowThemeOverride={getRowThemeOverride}
+                    getCellContent={getContent}
+                    columns={themeColumns}
+                    rows={data.length}
+                />
             </Wrapper>
             <Marked>{`### Cell themes`}</Marked>
             <Highlight>
@@ -388,17 +390,15 @@ const getContent = React.useCallback((cell: Item): GridCell => {
 `}
             </Highlight>
             <Wrapper height={200}>
-                <ThemeProvider
+                <DataEditor
                     theme={{
                         bgCell: "#F2F9FF",
-                    }}>
-                    <DataEditor
-                        getRowThemeOverride={getRowThemeOverride}
-                        getCellContent={getContentThemed}
-                        columns={themeColumns}
-                        rows={data.length}
-                    />
-                </ThemeProvider>
+                    }}
+                    getRowThemeOverride={getRowThemeOverride}
+                    getCellContent={getContentThemed}
+                    columns={themeColumns}
+                    rows={data.length}
+                />
             </Wrapper>
         </DocWrapper>
     );

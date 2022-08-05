@@ -1,9 +1,8 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { ThemeProvider } from "styled-components";
 
 import ClickOutsideContainer from "../click-outside-container/click-outside-container";
-import { makeCSSStyle, Theme } from "../common/styles";
+import { makeCSSStyle, Theme, ThemeContext } from "../common/styles";
 import { CellRenderers } from "../data-grid/cells";
 import {
     EditableGridCell,
@@ -14,14 +13,15 @@ import {
     Item,
     ProvideEditorCallback,
     Rectangle,
+    ValidatedGridCell,
 } from "../data-grid/data-grid-types";
 import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style";
-import { OverlayImageEditorProps } from "./private/image-overlay-editor";
+import type { OverlayImageEditorProps } from "./private/image-overlay-editor";
 import { useStayOnScreen } from "./use-stay-on-screen";
 
 type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
-export interface DataGridOverlayEditorProps {
+interface DataGridOverlayEditorProps {
     readonly target: Rectangle;
     readonly cell: Item;
     readonly content: GridCell;
@@ -35,7 +35,11 @@ export interface DataGridOverlayEditorProps {
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
     readonly provideEditor?: ProvideEditorCallback<GridCell>;
-    readonly validateCell?: (cell: Item, newValue: EditableGridCell, prevValue: GridCell) => boolean | EditableGridCell;
+    readonly validateCell?: (
+        cell: Item,
+        newValue: EditableGridCell,
+        prevValue: GridCell
+    ) => boolean | ValidatedGridCell;
 }
 
 const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps> = p => {
@@ -62,8 +66,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     const [isValid, setIsValid] = React.useState(() => {
         if (validateCell === undefined) return true;
-        if (isEditableGridCell(content) && validateCell?.(cell, content, lastValueRef.current) === false) return false;
-        return true;
+        return !(isEditableGridCell(content) && validateCell?.(cell, content, lastValueRef.current) === false);
     });
 
     const onFinishEditing = React.useCallback<typeof onFinishEditingIn>(
@@ -188,6 +191,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 value={targetValue}
                 initialValue={initialValue}
                 onFinishedEditing={onCustomFinishedEditing}
+                validatedSelection={isEditableGridCell(targetValue) ? targetValue.selectionRange : undefined}
             />
         );
     } else if (CellEditor !== undefined) {
@@ -203,6 +207,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 imageEditorOverride={imageEditorOverride}
                 markdownDivCreateNode={markdownDivCreateNode}
                 isValid={isValid}
+                validatedSelection={isEditableGridCell(targetValue) ? targetValue.selectionRange : undefined}
             />
         );
     }
@@ -224,8 +229,12 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         classWrap += " invalid";
     }
 
-    const portal = createPortal(
-        <ThemeProvider theme={theme}>
+    if (pad) {
+        classWrap += " pad";
+    }
+
+    return createPortal(
+        <ThemeContext.Provider value={theme}>
             <ClickOutsideContainer style={makeCSSStyle(theme)} className={className} onClickOutside={onClickOutside}>
                 <DataGridOverlayEditorStyle
                     ref={ref}
@@ -233,18 +242,18 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                     className={classWrap}
                     style={styleOverride}
                     as={useLabel === true ? "label" : undefined}
-                    targetRect={target}
-                    pad={pad}>
+                    targetX={target.x}
+                    targetY={target.y}
+                    targetWidth={target.width}
+                    targetHeight={target.height}>
                     <div className="clip-region" onKeyDown={customEditor === undefined ? undefined : onKeyDownCustom}>
                         {editor}
                     </div>
                 </DataGridOverlayEditorStyle>
             </ClickOutsideContainer>
-        </ThemeProvider>,
+        </ThemeContext.Provider>,
         portalElement
     );
-
-    return portal;
 };
 
 export default DataGridOverlayEditor;

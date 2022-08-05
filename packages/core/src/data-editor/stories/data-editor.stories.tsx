@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-identical-functions */
 import * as React from "react";
 
 import { StoryFn, StoryContext, useState, useCallback, useMemo } from "@storybook/addons";
@@ -12,7 +13,6 @@ import {
     GridSelection,
     Item,
 } from "../../data-grid/data-grid-types";
-import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor } from "../data-editor";
 
 export default {
@@ -20,13 +20,9 @@ export default {
 
     decorators: [
         (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
-            <AutoSizer>
-                {(props: { width?: number; height?: number }) => (
-                    <BuilderThemeWrapper width={props.width ?? 1000} height={props.height ?? 800} context={context}>
-                        {fn()}
-                    </BuilderThemeWrapper>
-                )}
-            </AutoSizer>
+            <BuilderThemeWrapper width={1000} height={800} context={context}>
+                {fn()}
+            </BuilderThemeWrapper>
         ),
     ],
 };
@@ -94,7 +90,7 @@ And supports newline chars and automatic wrapping text that just needs to be lon
             kind: GridCellKind.Number,
             displayData: "$10,352",
             allowOverlay: true,
-            data: 10352,
+            data: 10_352,
             readonly: true,
         };
     }

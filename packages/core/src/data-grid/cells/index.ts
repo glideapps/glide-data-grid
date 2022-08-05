@@ -1,7 +1,7 @@
 import { GridCellKind, InnerGridCell, InnerGridCellKind } from "../data-grid-types";
 import { booleanCellRenderer } from "./boolean-cell";
 import { bubbleCellRenderer } from "./bubble-cell";
-import { InternalCellRenderer } from "./cell-types";
+import type { InternalCellRenderer } from "./cell-types";
 import { drilldownCellRenderer } from "./drilldown-cell";
 import { imageCellRenderer } from "./image-cell";
 import { loadingCellRenderer } from "./loading-cell";

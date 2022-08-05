@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 import { describe, test, expect, beforeEach } from "jest-without-globals";
 import * as React from "react";
 import { render, fireEvent, screen, act, createEvent } from "@testing-library/react";
@@ -11,14 +12,12 @@ import {
     isSizedGridColumn,
     Item,
 } from "..";
-import { DataEditorRef } from "./data-editor";
-import { SizedGridColumn } from "../data-grid/data-grid-types";
+import type { DataEditorRef } from "./data-editor";
+import type { SizedGridColumn } from "../data-grid/data-grid-types";
 
-jest.mock("react-virtualized-auto-sizer", () => {
+jest.mock("../common/resize-detector", () => {
     return {
-        __esModule: true,
-        default: ({ children }: any) => children({ height: 1000, width: 1000 }),
-        foo: "mocked foo",
+        useResizeDetector: () => ({ ref: undefined, width: 1000, height: 1000 }),
     };
 });
 
@@ -29,67 +28,78 @@ function getMockBooleanData(row: number): boolean | null | undefined {
 
 const makeCell = (cell: Item): GridCell => {
     const [col, row] = cell;
-    if (col === 0) {
-        return {
-            kind: GridCellKind.RowID,
-            allowOverlay: false,
-            data: `Data: ${col}, ${row}`,
-        };
-    } else if (col === 3) {
-        return {
-            kind: GridCellKind.Number,
-            allowOverlay: true,
-            data: 10,
-            displayData: `${row}`,
-        };
-    } else if (col === 4) {
-        return {
-            kind: GridCellKind.Drilldown,
-            allowOverlay: false,
-            data: [
-                {
-                    img: "https://cdn.pixabay.com/photo/2017/02/20/18/03/cat-2083492_1280.jpg",
-                    text: "Foobar",
-                },
-            ],
-        };
-    } else if (col === 5) {
-        return {
-            kind: GridCellKind.Protected,
-            allowOverlay: false,
-        };
-    } else if (col === 6) {
-        return {
-            kind: GridCellKind.Bubble,
-            allowOverlay: false,
-            data: ["Foobar"],
-        };
-    } else if (col === 7) {
-        return {
-            kind: GridCellKind.Boolean,
-            allowOverlay: false,
-            data: getMockBooleanData(row),
-            readonly: false,
-        };
-    } else if (col === 8) {
-        return {
-            kind: GridCellKind.Text,
-            allowOverlay: true,
-            data: `Data: ${col}, ${row}`,
-            displayData: `שלום ${col}, ${row}`,
-        };
-    } else if (col === 9) {
-        return {
-            kind: GridCellKind.Markdown,
-            allowOverlay: true,
-            data: `# Header: ${col}, ${row}`,
-        };
-    } else if (col === 10) {
-        return {
-            kind: GridCellKind.Uri,
-            allowOverlay: true,
-            data: `https://example.com/${col}/${row}`,
-        };
+    switch (col) {
+        case 0: {
+            return {
+                kind: GridCellKind.RowID,
+                allowOverlay: false,
+                data: `Data: ${col}, ${row}`,
+            };
+        }
+        case 3: {
+            return {
+                kind: GridCellKind.Number,
+                allowOverlay: true,
+                data: 10,
+                displayData: `${row}`,
+            };
+        }
+        case 4: {
+            return {
+                kind: GridCellKind.Drilldown,
+                allowOverlay: false,
+                data: [
+                    {
+                        img: "https://cdn.pixabay.com/photo/2017/02/20/18/03/cat-2083492_1280.jpg",
+                        text: "Foobar",
+                    },
+                ],
+            };
+        }
+        case 5: {
+            return {
+                kind: GridCellKind.Protected,
+                allowOverlay: false,
+            };
+        }
+        case 6: {
+            return {
+                kind: GridCellKind.Bubble,
+                allowOverlay: false,
+                data: ["Foobar"],
+            };
+        }
+        case 7: {
+            return {
+                kind: GridCellKind.Boolean,
+                allowOverlay: false,
+                data: getMockBooleanData(row),
+                readonly: false,
+            };
+        }
+        case 8: {
+            return {
+                kind: GridCellKind.Text,
+                allowOverlay: true,
+                data: `Data: ${col}, ${row}`,
+                displayData: `שלום ${col}, ${row}`,
+            };
+        }
+        case 9: {
+            return {
+                kind: GridCellKind.Markdown,
+                allowOverlay: true,
+                data: `# Header: ${col}, ${row}`,
+            };
+        }
+        case 10: {
+            return {
+                kind: GridCellKind.Uri,
+                allowOverlay: true,
+                data: `https://example.com/${col}/${row}`,
+            };
+        }
+        // No default
     }
     return {
         kind: GridCellKind.Text,
@@ -184,7 +194,16 @@ function getCellCenterPositionForDefaultGrid(cell: Item): [number, number] {
     return [xStart + xOffset, yStart + yOffset];
 }
 
+// const { ResizeObserver } = window;
+
 beforeEach(() => {
+    // delete (window as any).ResizeObserver;
+    // window.ResizeObserver = jest.fn().mockImplementation(() => ({
+    //     observe: jest.fn(),
+    //     unobserve: jest.fn(),
+    //     disconnect: jest.fn(),
+    // }));
+
     Element.prototype.scrollTo = jest.fn();
     Element.prototype.scrollBy = jest.fn();
     Object.assign(navigator, {
@@ -261,7 +280,7 @@ const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, r
 
     const onRowAppened = React.useCallback(() => {
         setExtraRows(cv => cv + 1);
-        p.onRowAppended?.();
+        void p.onRowAppended?.();
     }, [p]);
 
     return (
@@ -773,6 +792,46 @@ describe("data-editor", () => {
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith(1, expect.anything());
+    });
+
+    test("Emits group header clicked on touch", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                columns={basicProps.columns.map(c => ({ ...c, group: "Main" }))}
+                rowMarkers="both"
+                onGroupHeaderClicked={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.touchStart(canvas, {
+            touches: [
+                {
+                    clientX: 300, // Col B
+                    clientY: 16, // Group header
+                },
+            ],
+        });
+
+        fireEvent.touchEnd(canvas, {
+            changedTouches: [
+                {
+                    clientX: 300, // Col B
+                    clientY: 16, // Group header
+                },
+            ],
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(1, expect.objectContaining({ location: [2, -2] }));
     });
 
     test("Emits item hover on correct location", async () => {
@@ -1544,6 +1603,39 @@ describe("data-editor", () => {
         );
     });
 
+    test("onCellsEdited blocks onCellEdited", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onCellEdited={spy} onCellsEdited={() => true} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.paste(window);
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
+        await new Promise(r => window.setTimeout(r, 10));
+        expect(spy).not.toBeCalled();
+    });
+
     test("Copy/paste with simple getCellsForSelection", async () => {
         const spy = jest.fn();
         const pasteSpy = jest.fn((_target: any, _values: any) => true);
@@ -2113,6 +2205,7 @@ describe("data-editor", () => {
 
     test("Fill down", async () => {
         const spy = jest.fn();
+        const multiSpy = jest.fn();
         jest.useFakeTimers();
         render(
             <EventedDataEditor
@@ -2120,6 +2213,7 @@ describe("data-editor", () => {
                 keybindings={{
                     downFill: true,
                 }}
+                onCellsEdited={multiSpy}
                 onCellEdited={spy}
             />,
             {
@@ -2157,14 +2251,24 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalledTimes(8);
+        expect(multiSpy).toHaveBeenCalled();
     });
 
     test("Fill right", async () => {
         const spy = jest.fn();
+        const multiSpy = jest.fn();
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} keybindings={{ rightFill: true }} onCellEdited={spy} />, {
-            wrapper: Context,
-        });
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                keybindings={{ rightFill: true }}
+                onCellEdited={spy}
+                onCellsEdited={multiSpy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
@@ -2196,6 +2300,7 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalledTimes(5);
+        expect(multiSpy).toHaveBeenCalled();
     });
 
     test("Clear selection", async () => {
@@ -2777,11 +2882,10 @@ describe("data-editor", () => {
             const [col, row] = c;
 
             if (row === 3 && col >= 2 && col <= 3) {
-                const cell = {
+                return {
                     ...basicProps.getCellContent([2, 3]),
                     span: [2, 3] as const,
                 };
-                return cell;
             }
 
             return basicProps.getCellContent(c);
@@ -2845,11 +2949,11 @@ describe("data-editor", () => {
         prep();
 
         act(() => {
-            ref.current?.emit("delete");
-            ref.current?.emit("fill-right");
-            ref.current?.emit("fill-down");
-            ref.current?.emit("copy");
-            ref.current?.emit("paste");
+            void ref.current?.emit("delete");
+            void ref.current?.emit("fill-right");
+            void ref.current?.emit("fill-down");
+            void ref.current?.emit("copy");
+            void ref.current?.emit("paste");
 
             ref.current?.scrollTo(5, 10);
             ref.current?.updateCells([{ cell: [0, 0] }]);
@@ -3224,6 +3328,85 @@ describe("data-editor", () => {
                 },
             })
         );
+    });
+
+    test("Does not emits header menu click when move", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                columns={basicProps.columns.map(c => ({ ...c, hasMenu: true }))}
+                onHeaderMenuClick={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseMove(canvas, {
+            clientX: 300, // Col B
+            clientY: 16 + 200, // Not Header
+        });
+
+        await new Promise(r => window.setTimeout(r, 100));
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 16 + 200, // Not Header
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        expect(spy).not.toHaveBeenCalled();
+    });
+
+    test("Use fill handle", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onCellEdited={spy} fillHandle={true} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 290, // Col A
+            clientY: 36 + 30, // Row 2
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 290, // Col A
+            clientY: 36 + 30, // Row 2
+        });
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 308, // Col A
+            clientY: 36 + 30, // Row 2
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 308, // Col A
+            clientY: 36 + 32 * 2 + 16, // Row 2
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 308, // Col A
+            clientY: 36 + 32 * 2 + 16, // Row 2
+        });
+
+        expect(spy).toBeCalledTimes(2);
     });
 
     test("Close overlay with enter key", async () => {

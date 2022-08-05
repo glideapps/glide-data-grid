@@ -1,6 +1,6 @@
 import * as React from "react";
 
-export function useRefState(): [HTMLElement | undefined, React.RefCallback<HTMLElement | null>] {
+function useRefState(): [HTMLElement | undefined, React.RefCallback<HTMLElement | null>] {
     const [refState, setRefState] = React.useState<HTMLElement | null>();
     return [refState ?? undefined, setRefState];
 }
@@ -21,7 +21,7 @@ export function useStayOnScreen(): StayOnScreen {
 
         const observer = new IntersectionObserver(
             ents => {
-                if (ents.length < 1) return;
+                if (ents.length === 0) return;
                 setIsIntersecting(ents[0].isIntersecting);
             },
             { threshold: 1 }

@@ -14,11 +14,11 @@ import {
 } from "../../data-grid/data-grid-types";
 
 import faker from "faker";
-import styled from "styled-components";
-import AutoSizer from "react-virtualized-auto-sizer";
+import { styled } from "@linaria/react";
 import isArray from "lodash/isArray";
 import { assertNever } from "../../common/support";
 import { browserIsFirefox } from "../../common/browser-detect";
+import { useResizeDetector } from "react-resize-detector";
 
 faker.seed(1337);
 
@@ -37,64 +37,74 @@ export function lossyCopyData<T extends EditableGridCell>(source: EditableGridCe
             ...target,
             data: sourceData as any,
         };
-    } else if (target.kind === GridCellKind.Uri) {
-        if (isArray(sourceData)) {
-            return {
-                ...target,
-                data: sourceData[0],
-            };
-        }
-        return {
-            ...target,
-            data: sourceData?.toString() ?? "",
-        };
-    } else if (target.kind === GridCellKind.Boolean) {
-        if (isArray(sourceData)) {
-            return {
-                ...target,
-                data: sourceData[0] !== undefined,
-            };
-        } else if (source.kind === GridCellKind.Boolean) {
-            return {
-                ...target,
-                data: source.data,
-            };
-        }
-        return {
-            ...target,
-            data: isTruthy(sourceData) ? true : false,
-        };
-    } else if (target.kind === GridCellKind.Image) {
-        if (isArray(sourceData)) {
-            return {
-                ...target,
-                data: [sourceData[0]],
-            };
-        }
-        return {
-            ...target,
-            data: [sourceData?.toString() ?? ""],
-        };
-    } else if (target.kind === GridCellKind.Number) {
-        return {
-            ...target,
-            data: 0,
-        };
-    } else if (target.kind === GridCellKind.Text || target.kind === GridCellKind.Markdown) {
-        if (isArray(sourceData)) {
-            return {
-                ...target,
-                data: sourceData[0].toString() ?? "",
-            };
-        }
+    } else
+        switch (target.kind) {
+            case GridCellKind.Uri: {
+                if (isArray(sourceData)) {
+                    return {
+                        ...target,
+                        data: sourceData[0],
+                    };
+                }
+                return {
+                    ...target,
+                    data: sourceData?.toString() ?? "",
+                };
+            }
+            case GridCellKind.Boolean: {
+                if (isArray(sourceData)) {
+                    return {
+                        ...target,
+                        data: sourceData[0] !== undefined,
+                    };
+                } else if (source.kind === GridCellKind.Boolean) {
+                    return {
+                        ...target,
+                        data: source.data,
+                    };
+                }
+                return {
+                    ...target,
+                    data: isTruthy(sourceData) ? true : false,
+                };
+            }
+            case GridCellKind.Image: {
+                if (isArray(sourceData)) {
+                    return {
+                        ...target,
+                        data: [sourceData[0]],
+                    };
+                }
+                return {
+                    ...target,
+                    data: [sourceData?.toString() ?? ""],
+                };
+            }
+            case GridCellKind.Number: {
+                return {
+                    ...target,
+                    data: 0,
+                };
+            }
+            case GridCellKind.Text:
+            case GridCellKind.Markdown: {
+                if (isArray(sourceData)) {
+                    return {
+                        ...target,
+                        data: sourceData[0].toString() ?? "",
+                    };
+                }
 
-        return {
-            ...target,
-            data: source.data?.toString() ?? "",
-        };
-    } else if (target.kind === GridCellKind.Custom) {
-        return target;
-    }
+                return {
+                    ...target,
+                    data: source.data?.toString() ?? "",
+                };
+            }
+            case GridCellKind.Custom: {
+                return target;
+            }
+            // No default
+        }
     assertNever(target);
 }
 
@@ -107,6 +117,31 @@ export function getGridColumn(columnWithMock: GridColumnWithMockingInfo): GridCo
 
     return rest;
 }
+
+export const ColumnAddButton = styled.div`
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    background-color: #f1f1f1;
+    height: 100%;
+    button {
+        border: none;
+        outline: none;
+        height: 37px;
+        width: 120px;
+        font-size: 20px;
+        background-color: #f7f7f8;
+        color: #000000dd;
+        border-bottom: 1px solid #e1e2e5;
+
+        transition: background-color 200ms;
+
+        cursor: pointer;
+        :hover {
+            background-color: #efeff1;
+        }
+    }
+`;
 
 export const BeautifulStyle = styled.div`
     background-color: #2790b9;
@@ -202,24 +237,23 @@ interface BeautifulProps {
 
 export const BeautifulWrapper: React.FC<BeautifulProps> = p => {
     const { title, children, description, className } = p;
+
+    const { ref, width, height } = useResizeDetector();
+
     return (
-        <BeautifulStyle className={className + (browserIsFirefox ? " firefox" : "")}>
+        <BeautifulStyle className={className + (browserIsFirefox.value ? " firefox" : "")}>
             <h1>{title}</h1>
             {description}
             <div className="sizer">
-                <div className="sizer-clip">
-                    <AutoSizer>
-                        {(props: { width?: number; height?: number }) => (
-                            <div
-                                style={{
-                                    position: "relative",
-                                    width: props.width ?? 100,
-                                    height: props.height ?? 100,
-                                }}>
-                                {children}
-                            </div>
-                        )}
-                    </AutoSizer>
+                <div className="sizer-clip" ref={ref}>
+                    <div
+                        style={{
+                            position: "relative",
+                            width: width ?? 100,
+                            height: height ?? 100,
+                        }}>
+                        {children}
+                    </div>
                 </div>
             </div>
         </BeautifulStyle>
@@ -360,6 +394,7 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
 
     const extraColumnsAmount = amount - defaultColumns.length;
 
+    // eslint-disable-next-line unicorn/no-new-array
     const extraColumns = [...new Array(extraColumnsAmount)].map((_, index) =>
         createTextColumnInfo(index + defaultColumns.length, group)
     );
@@ -423,10 +458,8 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
             let val = cache.current.get(col, row);
             if (val === undefined) {
                 val = colsMapRef.current[col].getContent();
-                if (!readonly) {
-                    if (isTextEditableGridCell(val)) {
-                        val = { ...val, readonly };
-                    }
+                if (!readonly && isTextEditableGridCell(val)) {
+                    val = { ...val, readonly };
                 }
                 cache.current.set(col, row, val);
             }

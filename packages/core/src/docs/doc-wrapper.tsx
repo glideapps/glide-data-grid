@@ -1,5 +1,5 @@
 import React from "react";
-import { styled } from "../common/styles";
+import { styled } from "@linaria/react";
 import { marked } from "marked";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import highlightStyle from "react-syntax-highlighter/dist/esm/styles/hljs/github";

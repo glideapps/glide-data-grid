@@ -1,26 +1,12 @@
-import type { GridColumn } from "..";
-import { assert } from "../common/support";
 import type { Theme } from "../common/styles";
 import { HeaderIconMap, sprites } from "./sprites";
 
 type HeaderIcon = keyof HeaderIconMap;
+type Sprite = HeaderIconMap["headerArray"];
 
-export type SpriteMap = Record<string | HeaderIcon, HeaderIconMap["headerArray"]>;
+export type SpriteMap = Record<string | HeaderIcon, Sprite>;
 
 export type SpriteVariant = "normal" | "selected" | "special";
-const variantList: SpriteVariant[] = ["normal", "selected", "special"];
-
-const renderSize = 40;
-
-function makeExtraMapIndex(bgColor: string, fgColor: string) {
-    return `${bgColor}|${fgColor}`;
-}
-
-function getColorsForIndex(str: string): readonly [string, string] {
-    const r = str.split("|");
-    assert(r.length === 2);
-    return r as [string, string];
-}
 
 function getColors(variant: SpriteVariant, theme: Theme): readonly [string, string] {
     if (variant === "normal") {
@@ -33,17 +19,15 @@ function getColors(variant: SpriteVariant, theme: Theme): readonly [string, stri
 }
 
 export class SpriteManager {
-    private colorMap: string[] = [];
-    private spriteCanvas: HTMLCanvasElement | undefined;
-    private spriteList: string[];
+    private spriteMap: Map<string, HTMLCanvasElement> = new Map();
     private headerIcons: SpriteMap;
+    private inFlight = 0;
 
-    constructor(headerIcons: SpriteMap | undefined) {
+    constructor(headerIcons: SpriteMap | undefined, private onSettled: () => void) {
         this.headerIcons = {
             ...sprites,
-            ...(headerIcons ?? {}),
+            ...headerIcons,
         };
-        this.spriteList = Object.keys(this.headerIcons);
     }
 
     public drawSprite(
@@ -56,84 +40,47 @@ export class SpriteManager {
         theme: Theme,
         alpha: number = 1
     ) {
-        if (this.spriteCanvas === undefined) throw new Error();
-
-        const spriteIndex = this.spriteList.indexOf(sprite);
-        if (spriteIndex === -1) throw new Error(`Unknown header icon: ${sprite}`);
-
         const [bgColor, fgColor] = getColors(variant, theme);
-        const variantIndex = this.colorMap.indexOf(makeExtraMapIndex(bgColor, fgColor));
+        const rSize = size * Math.ceil(window.devicePixelRatio);
+        const key = `${bgColor}_${fgColor}_${rSize}_${sprite}`;
 
-        const xOffset = spriteIndex * renderSize;
-        const yOffset = Math.max(0, variantIndex * renderSize);
+        let spriteCanvas = this.spriteMap.get(key);
+        if (spriteCanvas === undefined) {
+            const spriteCb = this.headerIcons[sprite];
 
-        if (alpha < 1) {
-            ctx.globalAlpha = alpha;
-        }
-        ctx.drawImage(this.spriteCanvas, xOffset, yOffset, renderSize, renderSize, x, y, size, size);
-        if (alpha < 1) {
-            ctx.globalAlpha = 1;
-        }
-    }
+            if (spriteCb === undefined) return;
 
-    public async buildSpriteMap(theme: Theme, cols: readonly GridColumn[]): Promise<boolean> {
-        const map = new Set<string>();
-        for (const v of variantList) {
-            const [bg, fg] = getColors(v, theme);
-            map.add(makeExtraMapIndex(bg, fg));
-        }
+            spriteCanvas = document.createElement("canvas");
+            const spriteCtx = spriteCanvas.getContext("2d");
 
-        for (const c of cols) {
-            if (c.themeOverride?.bgIconHeader !== undefined || c.themeOverride?.fgIconHeader !== undefined) {
-                const finalTheme = { ...theme, ...c.themeOverride };
+            if (spriteCtx === null) return;
 
-                for (const v of variantList) {
-                    const [bg, fg] = getColors(v, finalTheme);
-                    map.add(makeExtraMapIndex(bg, fg));
-                }
+            const imgSource = new Image();
+            imgSource.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(spriteCb({ fgColor, bgColor }))}`;
+            this.spriteMap.set(key, spriteCanvas);
+            const promise: Promise<void> | undefined = imgSource.decode();
+
+            if (promise === undefined) return;
+
+            this.inFlight++;
+            promise
+                .then(() => {
+                    spriteCtx.drawImage(imgSource, 0, 0, rSize, rSize);
+                })
+                .finally(() => {
+                    this.inFlight--;
+                    if (this.inFlight === 0) {
+                        this.onSettled();
+                    }
+                });
+        } else {
+            if (alpha < 1) {
+                ctx.globalAlpha = alpha;
+            }
+            ctx.drawImage(spriteCanvas, 0, 0, rSize, rSize, x, y, size, size);
+            if (alpha < 1) {
+                ctx.globalAlpha = 1;
             }
         }
-
-        const newMap = [...map];
-        newMap.sort();
-
-        let hasDiff = false;
-        for (const [index, key] of newMap.entries()) {
-            if (key !== this.colorMap[index]) {
-                hasDiff = true;
-                break;
-            }
-        }
-
-        if (!hasDiff) return false;
-
-        this.colorMap = newMap;
-
-        this.spriteCanvas = document.createElement("canvas");
-        this.spriteCanvas.width = this.spriteList.length * renderSize;
-        this.spriteCanvas.height = this.colorMap.length * renderSize;
-        const ctx = this.spriteCanvas.getContext("2d");
-        if (ctx === null) return false;
-
-        let x = 0;
-        for (const key of this.spriteList) {
-            const sprite = this.headerIcons[key];
-
-            let y = 0;
-            for (const ex of this.colorMap) {
-                const [bgColor, fgColor] = getColorsForIndex(ex);
-                const imgSource = new Image();
-                imgSource.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(sprite({ fgColor, bgColor }))}`;
-                await imgSource.decode();
-
-                ctx.drawImage(imgSource, x, y, renderSize, renderSize);
-
-                y += renderSize;
-            }
-
-            x += renderSize;
-        }
-
-        return true;
     }
 }

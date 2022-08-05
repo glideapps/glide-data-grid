@@ -1,4 +1,5 @@
-import { Theme } from "../common/styles";
+/* eslint-disable unicorn/no-for-loop */
+import type { Theme } from "../common/styles";
 import {
     DrilldownCellData,
     Item,
@@ -12,10 +13,10 @@ import {
 } from "./data-grid-types";
 import { degreesToRadians, direction } from "../common/utils";
 import React from "react";
-import { BaseDrawArgs, PrepResult } from "./cells/cell-types";
+import type { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
-import { clearMultilineCache, splitMultilineText } from "./multi-line-layout";
-import { DrawArgs } from "../data-editor/custom-cell-draw-args";
+import { split as splitText, clearCache } from "canvas-hypertxt";
+import type { DrawArgs } from "../data-editor/custom-cell-draw-args";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -234,13 +235,14 @@ export function getRowIndexForY(
 
 let metricsSize = 0;
 let metricsCache: Record<string, TextMetrics | undefined> = {};
+const isSSR = typeof window === "undefined";
 
 async function clearCacheOnLoad() {
-    if (document?.fonts?.ready === undefined) return;
+    if (isSSR || document?.fonts?.ready === undefined) return;
     await document.fonts.ready;
     metricsSize = 0;
     metricsCache = {};
-    clearMultilineCache();
+    clearCache();
 }
 
 void clearCacheOnLoad();
@@ -258,7 +260,7 @@ export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font
         metricsSize++;
     }
 
-    if (metricsSize > 10000) {
+    if (metricsSize > 10_000) {
         metricsCache = {};
         metricsSize = 0;
     }
@@ -354,17 +356,17 @@ export function prepTextCell(
 }
 
 export function drawTextCellExternal(args: DrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
-    const { rect } = args;
+    const { rect, ctx, theme } = args;
 
-    args.ctx.fillStyle = args.theme.textDark;
+    ctx.fillStyle = theme.textDark;
     drawTextCell(
         {
-            ctx: args.ctx,
+            ctx: ctx,
             x: rect.x,
             y: rect.y,
             h: rect.height,
             w: rect.width,
-            theme: args.theme,
+            theme: theme,
         },
         data,
         contentAlign
@@ -442,13 +444,7 @@ export function drawTextCell(
             drawSingleTextLine(ctx, data, x, y, w, h, bias, theme, contentAlign);
         } else {
             const fontStyle = `${theme.fontFamily} ${theme.baseFontStyle}`;
-            const split = splitMultilineText(
-                ctx,
-                data,
-                fontStyle,
-                w - theme.cellHorizontalPadding * 2,
-                hyperWrapping ?? false
-            );
+            const split = splitText(ctx, data, fontStyle, w - theme.cellHorizontalPadding * 2, hyperWrapping ?? false);
 
             const textMetrics = measureTextCached("ABCi09jgqpy", ctx, fontStyle); // do not question the magic string
             const emHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
@@ -499,6 +495,8 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
 
     const alwaysShowIcon = data !== "";
 
+    let textX = 0;
+
     if (icon !== undefined) {
         const padding = 8;
         const size = h - padding;
@@ -506,7 +504,9 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
         const py = y + padding / 2;
 
         spriteManager.drawSprite(icon, "normal", ctx, px, py, size, theme, alwaysShowIcon ? 1 : hoverAmount);
+        textX = size;
     } else {
+        textX = 24;
         const finalLineSize = 12;
         const lineSize = alwaysShowIcon ? finalLineSize : hoverAmount * finalLineSize;
         const xTranslate = alwaysShowIcon ? 0 : (1 - hoverAmount) * finalLineSize * 0.5;
@@ -525,11 +525,11 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
     }
 
     ctx.fillStyle = theme.textMedium;
-    ctx.fillText(data, 24 + x + theme.cellHorizontalPadding + 0.5, y + h / 2 + getMiddleCenterBias(ctx, theme));
+    ctx.fillText(data, textX + x + theme.cellHorizontalPadding + 0.5, y + h / 2 + getMiddleCenterBias(ctx, theme));
     ctx.beginPath();
 }
 
-function drawCheckbox(
+export function drawCheckbox(
     ctx: CanvasRenderingContext2D,
     theme: Theme,
     checked: boolean | BooleanEmpty | BooleanIndeterminate,
@@ -555,9 +555,9 @@ function drawCheckbox(
             ctx.fill();
 
             ctx.beginPath();
-            ctx.moveTo(centerX - 8 + 3.65005, centerY - 8 + 7.84995);
-            ctx.lineTo(centerX - 8 + 6.37587, centerY - 8 + 10.7304);
-            ctx.lineTo(centerX - 8 + 11.9999, centerY - 8 + 4.74995);
+            ctx.moveTo(centerX - 8 + 3.650_05, centerY - 8 + 7.849_95);
+            ctx.lineTo(centerX - 8 + 6.375_87, centerY - 8 + 10.7304);
+            ctx.lineTo(centerX - 8 + 11.9999, centerY - 8 + 4.749_95);
 
             ctx.strokeStyle = theme.bgCell;
             ctx.lineJoin = "round";
@@ -768,7 +768,7 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
     }
 
     ctx.beginPath();
-    renderBoxes.forEach(rectInfo => {
+    for (const rectInfo of renderBoxes) {
         roundedRect(
             ctx,
             rectInfo.x,
@@ -777,15 +777,15 @@ export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
             bubbleHeight,
             bubbleHeight / 2
         );
-    });
+    }
     ctx.fillStyle = highlighted ? theme.bgBubbleSelected : theme.bgBubble;
     ctx.fill();
 
-    renderBoxes.forEach((rectInfo, i) => {
+    for (const [i, rectInfo] of renderBoxes.entries()) {
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
         ctx.fillText(data[i], rectInfo.x + bubblePad, y + h / 2 + getMiddleCenterBias(ctx, theme));
-    });
+    }
 }
 
 const drilldownCache: {
@@ -893,7 +893,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
 
     if (tileMap !== null) {
         const { el, height, middleWidth, sideWidth, width } = tileMap;
-        renderBoxes.forEach(rectInfo => {
+        for (const rectInfo of renderBoxes) {
             const rx = Math.floor(rectInfo.x);
             const rw = Math.floor(rectInfo.width);
             ctx.imageSmoothingEnabled = false;
@@ -913,12 +913,12 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
                 34
             );
             ctx.imageSmoothingEnabled = true;
-        });
+        }
     }
 
     ctx.beginPath();
 
-    renderBoxes.forEach((rectInfo, i) => {
+    for (const [i, rectInfo] of renderBoxes.entries()) {
         const d = data[i];
         let drawX = rectInfo.x + bubblePad;
 
@@ -954,7 +954,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
         ctx.beginPath();
         ctx.fillStyle = theme.textBubble;
         ctx.fillText(d.text, drawX, y + h / 2 + getMiddleCenterBias(ctx, theme));
-    });
+    }
 }
 
 export function drawImage(args: BaseDrawArgs, data: readonly string[]) {
@@ -1043,11 +1043,7 @@ export function roundedPoly(ctx: CanvasRenderingContext2D, points: Point[], radi
                 drawDirection = true;
             }
         }
-        if (p2.radius !== undefined) {
-            radius = p2.radius;
-        } else {
-            radius = radiusAll;
-        }
+        radius = p2.radius !== undefined ? p2.radius : radiusAll;
         //-----------------------------------------
         // Part 2
         const halfAngle = angle / 2;

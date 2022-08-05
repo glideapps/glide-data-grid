@@ -1,5 +1,4 @@
-import { styled } from "../common/styles";
-import { disabledProps } from "../common/utils";
+import { styled } from "@linaria/react";
 
 export const SearchWrapper = styled.div<{ showSearch: boolean }>`
     position: absolute;
@@ -70,7 +69,8 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
         }
 
         :disabled {
-            ${disabledProps}
+            opacity: 0.4;
+            pointer-events: none;
         }
     }
 `;

@@ -1,4 +1,6 @@
-import baseStyled, { ThemedStyledInterface } from "styled-components";
+import React from "react";
+
+// theme variable precidence
 
 export function makeCSSStyle(theme: Theme): Record<string, string> {
     return {
@@ -112,8 +114,11 @@ const dataEditorBaseTheme: Theme = {
     lineHeight: 1.4, //unitless scaler depends on your font
 };
 
-export const styled = baseStyled as ThemedStyledInterface<Theme>;
-
 export function getDataEditorTheme(): Theme {
     return dataEditorBaseTheme;
+}
+
+export const ThemeContext = React.createContext<Theme>(dataEditorBaseTheme);
+export function useTheme(): Theme {
+    return React.useContext(ThemeContext);
 }

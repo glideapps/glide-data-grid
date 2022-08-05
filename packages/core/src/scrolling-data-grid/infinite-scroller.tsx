@@ -1,7 +1,7 @@
-import { styled } from "../common/styles";
+import { styled } from "@linaria/react";
 import type { Rectangle } from "..";
 import * as React from "react";
-import AutoSizer from "react-virtualized-auto-sizer";
+import { useResizeDetector } from "../common/resize-detector";
 import { browserIsSafari } from "../common/browser-detect";
 
 interface Props {
@@ -14,7 +14,10 @@ interface Props {
     readonly scrollWidth: number;
     readonly scrollHeight: number;
     readonly scrollToEnd?: boolean;
-    readonly rightElementSticky?: boolean;
+    readonly rightElementProps?: {
+        readonly sticky?: boolean;
+        readonly fill?: boolean;
+    };
     readonly rightElement?: React.ReactNode;
     readonly minimap?: React.ReactNode;
     readonly style?: React.CSSProperties;
@@ -22,9 +25,9 @@ interface Props {
     readonly update: (region: Rectangle & { paddingRight: number }) => void;
 }
 
-export const ScrollRegionStyle = styled.div`
+const ScrollRegionStyle = styled.div<{ isSafari: boolean }>`
     .dvn-scroller {
-        overflow: ${browserIsSafari ? "scroll" : "auto"};
+        overflow: ${p => (p.isSafari ? "scroll" : "auto")};
         transform: translate3d(0, 0, 0);
     }
 
@@ -80,13 +83,16 @@ export const InfiniteScroller: React.FC<Props> = p => {
         paddingBottom = 0,
         paddingRight = 0,
         rightElement,
-        rightElementSticky = false,
+        rightElementProps,
         scrollRef,
         scrollToEnd,
         minimap,
         style,
     } = p;
     const padders: React.ReactNode[] = [];
+
+    const rightElementSticky = rightElementProps?.sticky ?? false;
+    const rightElementFill = rightElementProps?.fill ?? false;
 
     const offsetY = React.useRef(0);
     const lastScrollY = React.useRef(0);
@@ -123,14 +129,14 @@ export const InfiniteScroller: React.FC<Props> = p => {
         const dx = scrollLeft - lastScrollLeft;
         const dy = scrollTop - lastScrollTop;
 
-        if (dx !== 0 && dy !== 0 && preventDiagonalScrolling) {
-            if (lastScrollPosition.current.lockDirection === undefined) {
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    lastScrollPosition.current.lockDirection = [lastScrollLeft, undefined];
-                } else {
-                    lastScrollPosition.current.lockDirection = [undefined, lastScrollTop];
-                }
-            }
+        if (
+            dx !== 0 &&
+            dy !== 0 &&
+            preventDiagonalScrolling &&
+            lastScrollPosition.current.lockDirection === undefined
+        ) {
+            lastScrollPosition.current.lockDirection =
+                Math.abs(dx) > Math.abs(dy) ? [lastScrollLeft, undefined] : [undefined, lastScrollTop];
         }
 
         const lock = lastScrollPosition.current.lockDirection;
@@ -213,63 +219,61 @@ export const InfiniteScroller: React.FC<Props> = p => {
         h += toAdd;
     }
 
-    return (
-        <div style={style}>
-            <AutoSizer>
-                {(props: { width?: number; height?: number }) => {
-                    if (props.width === 0 || props.height === 0) return null;
-                    if (lastProps.current?.height !== props.height || lastProps.current?.width !== props.width) {
-                        window.setTimeout(() => onScrollRef.current(), 0);
-                        lastProps.current = props;
-                    }
+    const { ref, width, height } = useResizeDetector<HTMLDivElement>();
 
-                    return (
-                        <ScrollRegionStyle>
-                            {minimap}
-                            <div className="dvn-underlay">{children}</div>
-                            <div
-                                ref={setRefs}
-                                style={props}
-                                draggable={draggable}
-                                onDragStart={e => {
-                                    if (!draggable) {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                    }
-                                }}
-                                className={"dvn-scroller " + (className ?? "")}
-                                onScroll={onScroll}>
-                                <div className={"dvn-scroll-inner" + (rightElement === undefined ? " hidden" : "")}>
-                                    <div className="dvn-stack">{padders}</div>
-                                    {rightElement !== undefined && (
-                                        <>
-                                            <div className="dvn-spacer" />
-                                            <div
-                                                ref={rightWrapRef}
-                                                onMouseDown={nomEvent}
-                                                onMouseUp={nomEvent}
-                                                onMouseMove={nomEvent}
-                                                style={{
-                                                    height: props.height,
-                                                    maxHeight: clientHeight - Math.ceil(dpr % 1),
-                                                    position: "sticky",
-                                                    top: 0,
-                                                    paddingLeft: 1,
-                                                    marginBottom: -40,
-                                                    marginRight: paddingRight,
-                                                    right: rightElementSticky ? paddingRight ?? 0 : undefined,
-                                                    pointerEvents: "auto",
-                                                }}>
-                                                {rightElement}
-                                            </div>
-                                        </>
-                                    )}
+    if (lastProps.current?.height !== height || lastProps.current?.width !== width) {
+        window.setTimeout(() => onScrollRef.current(), 0);
+        lastProps.current = { width, height };
+    }
+
+    if ((width ?? 0) === 0 || (height ?? 0) === 0) return <div style={style} ref={ref} />;
+
+    return (
+        <div style={style} ref={ref}>
+            <ScrollRegionStyle isSafari={browserIsSafari.value}>
+                {minimap}
+                <div className="dvn-underlay">{children}</div>
+                <div
+                    ref={setRefs}
+                    style={lastProps.current}
+                    draggable={draggable}
+                    onDragStart={e => {
+                        if (!draggable) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        }
+                    }}
+                    className={"dvn-scroller " + (className ?? "")}
+                    onScroll={onScroll}>
+                    <div className={"dvn-scroll-inner" + (rightElement === undefined ? " hidden" : "")}>
+                        <div className="dvn-stack">{padders}</div>
+                        {rightElement !== undefined && (
+                            <>
+                                {!rightElementFill && <div className="dvn-spacer" />}
+                                <div
+                                    ref={rightWrapRef}
+                                    onMouseDown={nomEvent}
+                                    onMouseUp={nomEvent}
+                                    onMouseMove={nomEvent}
+                                    style={{
+                                        height,
+                                        maxHeight: clientHeight - Math.ceil(dpr % 1),
+                                        position: "sticky",
+                                        top: 0,
+                                        paddingLeft: 1,
+                                        marginBottom: -40,
+                                        marginRight: paddingRight,
+                                        flexGrow: rightElementFill ? 1 : undefined,
+                                        right: rightElementSticky ? paddingRight ?? 0 : undefined,
+                                        pointerEvents: "auto",
+                                    }}>
+                                    {rightElement}
                                 </div>
-                            </div>
-                        </ScrollRegionStyle>
-                    );
-                }}
-            </AutoSizer>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </ScrollRegionStyle>
         </div>
     );
 };

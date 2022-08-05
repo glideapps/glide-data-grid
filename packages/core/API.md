@@ -79,6 +79,8 @@ Most data grids will want to set the majority of these props one way or another.
 | [rowMarkers](#rowmarkers)                         | Enable/disable row marker column on the left. Can show row numbers, selection boxes, or both.                                                                                                                                                                       |
 | [smoothScrollX](#smoothscroll)                    | Enable/disable smooth scrolling on the X axis.                                                                                                                                                                                                                      |
 | [smoothScrollY](#smoothscroll)                    | Enable/disable smooth scrolling on the Y axis.                                                                                                                                                                                                                      |
+| [fixedShadowX](#fixedshadow)                      | Enable/disable a shadow behind fixed columns on the X axis.                                                                                                                                                                                                         |
+| [fixedShadowY](#fixedshadow)                      | Enable/disable a shadow behind the header(s) on the Y axis.                                                                                                                                                                                                         |
 
 ## Search
 
@@ -101,7 +103,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [overscrollX](#overscroll)                  | Allows overscrolling the data grid horizontally by a set amount.        |
 | [overscrollY](#overscroll)                  | Allows overscrolling the data grid vertically by a set amount.          |
 | [rightElement](#rightelement)               | A node which will be placed at the right edge of the data grid.         |
-| [rightElementSticky](#rightelement)         | Makes the right element sticky or not.                                  |
+| [rightElementProps](#rightelement)          | Changes how the right element renders.                                  |
 | [rowMarkerWidth](#rowmarkerwidth)           | The width of the row markers.                                           |
 | [rowMarkerStartIndex](#rowmarkerstartindex) | The index of the first element in the grid                              |
 | [verticalBorder](#verticalborder)           | Enable/disable vertical borders for any `GridColumn`                    |
@@ -169,12 +171,6 @@ Most data grids will want to set the majority of these props one way or another.
 | [isDraggable](#isdraggable)   | Makes the grid as a whole draggable. Disables many interactions.                                                                |
 | [onDragStart](#isdraggable)   | Emitted when a drag starts and `isDraggable` is true.                                                                           |
 | [experimental](#experimental) | Contains experimental flags. Nothing in here is considered stable API and is mostly used for features that are not yet settled. |
-
-## Deprecated
-
-| Name           | Description    |
-| -------------- | -------------- |
-| drawCustomCell | Use `drawCell` |
 
 # Keybindings
 
@@ -277,10 +273,21 @@ interface BaseGridCell {
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
-    readonly span?: Item;
+    readonly span?: readonly [number, number];
     readonly contentAlign?: "left" | "right" | "center";
+    readonly cursor?: CSSProperties["cursor"];
 }
 ```
+
+| Property      | Description                                                                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| allowOverlay  | Determins if an overlay editor or previewer should be shown when activating this cell.                                                                  |
+| lastUpdated   | If set, the grid will render this cell with a highlighted background which fades out. Uses performance.now() instead of Date.now().                     |
+| style         | If set to `faded` the cell will draw with a transparent appearance.                                                                                     |
+| themeOverride | A partial theme override to use when drawing this cell.                                                                                                 |
+| span          | If set the `span` controls which horizontal span a cell belongs to. Spans are inclusive and must be correctly reported for all cells in the span range. |
+| contentAlign  | Changes the default text alignment for the cell.                                                                                                        |
+| cursor        | An override for the cell cursor when hovered.                                                                                                           |
 
 ---
 
@@ -308,41 +315,41 @@ The `cell` is the [col, row] formatted cell which will have the focus ring drawn
 
 ## Theme
 
-The data grid uses the `Theme` provided by the styled-components `ThemeProvider`. This is used to style editors as well as the grid itself. The theme interface is flat. The data grid comes with a built in theme which it will use to fill in any missing values.
+The data grid uses the `Theme` provided to the DataEditer in the `theme` prop. This is used to style editors as well as the grid itself. The theme interface is flat. The data grid comes with a built in theme which it will use to fill in any missing values.
 
-| Property              | Type                | Description                                                                                       |
-| --------------------- | ------------------- | ------------------------------------------------------------------------------------------------- |
-| accentColor           | string              | The primary accent color of the grid. This will show up in focus rings and selected rows/headers. |
-| accentFg              | string              | A foreground color which works well on top of the accent color.                                   |
-| accentLight           | string              | A lighter version of the accent color used to hint selection.                                     |
-| textDark              | string              | The standard text color.                                                                          |
-| textMedium            | string              | A lighter text color used for non-editable data in some cases.                                    |
-| textLight             | string              | An even lighter text color                                                                        |
-| textBubble            | string              | The text color used in bubbles                                                                    |
-| bgIconHeader          | string              | The background color for header icons                                                             |
-| fgIconHeader          | string              | The foreground color for header icons                                                             |
-| textHeader            | string              | The header text color                                                                             |
-| textGroupHeader       | string \| undefined | The group header text color, if none provided the `textHeader` is used instead.                   |
-| textHeaderSelected    | string              | The text color used for selected headers                                                          |
-| bgCell                | string              | The primary background color of the data grid.                                                    |
-| bgCellMedium          | string              | Used for disabled or otherwise off colored cells.                                                 |
-| bgHeader              | string              | The header background color                                                                       |
-| bgHeaderHasFocus      | string              | The header background color when its column contains the selected cell                            |
-| bgHeaderHovered       | string              | The header background color when it is hovered                                                    |
-| bgBubble              | string              | The background color used in bubbles                                                              |
-| bgBubbleSelected      | string              | The background color used in bubbles when the cell is selected                                    |
-| bgSearchResult        | string              | The background color used for cells which match the search string                                 |
-| borderColor           | string              | The color of all vertical borders and horizontal borders if a horizontal override is not provided |
-| horizontalBorderColor | string \| undefined | The horizontal border color override                                                              |
-| drilldownBorder       | string              | The ring color of a drilldown cell                                                                |
-| linkColor             | string              | What color to render links                                                                        |
-| cellHorizontalPadding | number              | The internal horizontal padding size of a cell.                                                   |
-| cellVerticalPadding   | number              | The internal vertical padding size of a cell.                                                     |
-| headerFontStyle       | string              | The font style of the header. e.g. `bold 15px`                                                    |
-| baseFontStyle         | string              | The font style used for cells by default, e.g. `13px`                                             |
-| fontFamily            | string              | The font family used by the data grid.                                                            |
-| editorFontSize        | string              | The font size used by overlay editors.                                                            |
-| lineHeight            | number              | A unitless scaler which defines the height of a line of text relative to the ink size.            |
+| Property              | Type                | CSS Variable                  | Description                                                                                       |
+| --------------------- | ------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| accentColor           | string              | --gdg-accent-color            | The primary accent color of the grid. This will show up in focus rings and selected rows/headers. |
+| accentFg              | string              | --gdg-accent-fg               | A foreground color which works well on top of the accent color.                                   |
+| accentLight           | string              | --gdg-accent-light            | A lighter version of the accent color used to hint selection.                                     |
+| textDark              | string              | --gdg-text-dark               | The standard text color.                                                                          |
+| textMedium            | string              | --gdg-text-medium             | A lighter text color used for non-editable data in some cases.                                    |
+| textLight             | string              | --gdg-text-light              | An even lighter text color                                                                        |
+| textBubble            | string              | --gdg-text-bubble             | The text color used in bubbles                                                                    |
+| bgIconHeader          | string              | --gdg-bg-icon-header          | The background color for header icons                                                             |
+| fgIconHeader          | string              | --gdg-fg-icon-header          | The foreground color for header icons                                                             |
+| textHeader            | string              | --gdg-text-header             | The header text color                                                                             |
+| textGroupHeader       | string \| undefined | --gdg-text-group-header       | The group header text color, if none provided the `textHeader` is used instead.                   |
+| textHeaderSelected    | string              | --gdg-text-header-selected    | The text color used for selected headers                                                          |
+| bgCell                | string              | --gdg-bg-cell                 | The primary background color of the data grid.                                                    |
+| bgCellMedium          | string              | --gdg-bg-cell-medium          | Used for disabled or otherwise off colored cells.                                                 |
+| bgHeader              | string              | --gdg-bg-header               | The header background color                                                                       |
+| bgHeaderHasFocus      | string              | --gdg-bg-header-has           | The header background color when its column contains the selected cell                            |
+| bgHeaderHovered       | string              | --gdg-bg-header-hovered       | The header background color when it is hovered                                                    |
+| bgBubble              | string              | --gdg-bg-bubble               | The background color used in bubbles                                                              |
+| bgBubbleSelected      | string              | --gdg-bg-bubble-selected      | The background color used in bubbles when the cell is selected                                    |
+| bgSearchResult        | string              | --gdg-bg-search-result        | The background color used for cells which match the search string                                 |
+| borderColor           | string              | --gdg-border-color            | The color of all vertical borders and horizontal borders if a horizontal override is not provided |
+| horizontalBorderColor | string \| undefined | --gdg-horizontal-border-color | The horizontal border color override                                                              |
+| drilldownBorder       | string              | --gdg-drilldown-border        | The ring color of a drilldown cell                                                                |
+| linkColor             | string              | --gdg-link-color              | What color to render links                                                                        |
+| cellHorizontalPadding | number              | --gdg-cell-horizontal-padding | The internal horizontal padding size of a cell.                                                   |
+| cellVerticalPadding   | number              | --gdg-cell-vertical-padding   | The internal vertical padding size of a cell.                                                     |
+| headerFontStyle       | string              | --gdg-header-font-style       | The font style of the header. e.g. `bold 15px`                                                    |
+| baseFontStyle         | string              | --gdg-base-font-style         | The font style used for cells by default, e.g. `13px`                                             |
+| fontFamily            | string              | --gdg-font-family             | The font family used by the data grid.                                                            |
+| editorFontSize        | string              | --gdg-editor-font-size        | The font size used by overlay editors.                                                            |
+| lineHeight            | number              | None                          | A unitless scaler which defines the height of a line of text relative to the ink size.            |
 
 ---
 
@@ -547,7 +554,18 @@ smoothScrollX?: boolean;
 smoothScrollY?: boolean;
 ```
 
-Controls smooth scrolling in the data grid. Defaults to `false`. If smooth scrolling is not enabled the grid will alaways be cell aligned in the non-smooth scrolling axis.
+Controls smooth scrolling in the data grid. Defaults to `false`. If smooth scrolling is not enabled the grid will always be cell aligned in the non-smooth scrolling axis.
+
+---
+
+## fixedShadow
+
+```ts
+fixedShadowX?: boolean;
+fixedShadowY?: boolean;
+```
+
+Controls shadows behind fixed columns and header rows. Defaults to `true`.
 
 ---
 
@@ -689,11 +707,16 @@ The overscroll properties are used to allow the grid to scroll past the logical 
 ## rightElement
 
 ```ts
-rightElementSticky?: boolean;
+rightElementProps?: {
+    readonly sticky?: boolean;
+    readonly fill?: boolean;
+};
 rightElement?: React.ReactNode;
 ```
 
-The right element is a DOM node which can be inserted at the end of the horizontal scroll region. This can be used to create a right handle panel, make a big add button, or display messages. If `rightElementSticky` is set to true the right element will be visible at all times, otherwise the user will need to scroll to the end to reveal it.
+The right element is a DOM node which can be inserted at the end of the horizontal scroll region. This can be used to create a right handle panel, make a big add button, or display messages. If `rightElementProps.sticky` is set to true the right element will be visible at all times, otherwise the user will need to scroll to the end to reveal it.
+
+If `rightElementProps.fill` is set, the right elements container will fill to consume all remaining space (if any) at the end of the grid. This does not play nice with growing columns.
 
 ---
 

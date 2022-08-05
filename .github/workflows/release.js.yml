@@ -25,7 +25,6 @@ jobs:
               working-directory: .
             - run: npm run lint
             - run: npm run build-js
-            - run: npm run build-cjs
             - run: npm run build-types
             - uses: JS-DevTools/npm-publish@v1
               with:
@@ -47,7 +46,6 @@ jobs:
               working-directory: .
             - run: npm run lint
             - run: npm run build-js
-            - run: npm run build-cjs
             - run: npm run build-types
             - uses: JS-DevTools/npm-publish@v1
               with:

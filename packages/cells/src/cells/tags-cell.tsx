@@ -5,7 +5,7 @@ import {
     CustomCellRenderer,
     getMiddleCenterBias,
 } from "@glideapps/glide-data-grid";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import * as React from "react";
 import { roundedRect } from "../draw-fns";
 
@@ -24,7 +24,7 @@ export type TagsCell = CustomCell<TagsCellProps>;
 const tagHeight = 20;
 const innerPad = 6;
 
-const EditorWrap = styled.div`
+const EditorWrap = styled.div<{ tagHeight: number; innerPad: number }>`
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -51,9 +51,9 @@ const EditorWrap = styled.div`
             margin-right: 6px;
             margin-bottom: 6px;
 
-            border-radius: ${tagHeight / 2}px;
-            min-height: ${tagHeight}px;
-            padding: 2px ${innerPad}px;
+            border-radius: ${p => p.tagHeight / 2}px;
+            min-height: ${p => p.tagHeight}px;
+            padding: 2px ${p => p.innerPad}px;
             display: flex;
             align-items: center;
 
@@ -132,7 +132,7 @@ const renderer: CustomCellRenderer<TagsCell> = {
             const { onChange, value } = p;
             const { possibleTags, tags, readonly = false } = value.data;
             return (
-                <EditorWrap className={readonly ? "readonly" : ""}>
+                <EditorWrap tagHeight={tagHeight} innerPad={innerPad} className={readonly ? "readonly" : ""}>
                     {possibleTags.map(t => {
                         const selected = tags.indexOf(t.tag) !== -1;
                         return (

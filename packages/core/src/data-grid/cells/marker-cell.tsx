@@ -1,6 +1,6 @@
 import { deprepMarkerRowCell, drawMarkerRowCell, prepMarkerRowCell } from "../data-grid-lib";
 import { InnerGridCellKind, MarkerCell } from "../data-grid-types";
-import { InternalCellRenderer } from "./cell-types";
+import type { InternalCellRenderer } from "./cell-types";
 
 export const markerCellRenderer: InternalCellRenderer<MarkerCell> = {
     getAccessibilityString: c => c.row.toString(),

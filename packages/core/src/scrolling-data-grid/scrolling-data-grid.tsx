@@ -1,7 +1,7 @@
 import * as React from "react";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import DataGridDnd, { DataGridDndProps } from "../data-grid-dnd/data-grid-dnd";
-import { Rectangle } from "../data-grid/data-grid-types";
+import type { Rectangle } from "../data-grid/data-grid-types";
 import { InfiniteScroller } from "./infinite-scroller";
 import clamp from "lodash/clamp";
 
@@ -23,7 +23,10 @@ export interface ScrollingDataGridProps extends Props {
     readonly overscrollX?: number;
     readonly overscrollY?: number;
     readonly preventDiagonalScrolling?: boolean;
-    readonly rightElementSticky?: boolean;
+    readonly rightElementProps?: {
+        readonly sticky?: boolean;
+        readonly fill?: boolean;
+    };
     readonly rightElement?: React.ReactNode;
     readonly showMinimap?: boolean;
     readonly clientSize: readonly [number, number];
@@ -79,7 +82,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         scrollRef,
         preventDiagonalScrolling,
         rightElement,
-        rightElementSticky,
+        rightElementProps,
         overscrollX,
         overscrollY,
         showMinimap = false,
@@ -302,14 +305,14 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             minimap={minimap}
             className={className}
             preventDiagonalScrolling={preventDiagonalScrolling}
-            draggable={dataGridProps.isDraggable === true}
+            draggable={dataGridProps.isDraggable === true || typeof dataGridProps.isDraggable === "string"}
             scrollWidth={width + (paddingRight ?? 0)}
             scrollHeight={height + (paddingBottom ?? 0)}
             clientHeight={clientHeight}
             rightElement={rightElement}
             paddingBottom={paddingBottom}
             paddingRight={paddingRight}
-            rightElementSticky={rightElementSticky}
+            rightElementProps={rightElementProps}
             update={onScrollUpdate}
             scrollToEnd={scrollToEnd}>
             <DataGridDnd eventTargetRef={scrollRef} width={clientWidth} height={clientHeight} {...dataGridProps} />

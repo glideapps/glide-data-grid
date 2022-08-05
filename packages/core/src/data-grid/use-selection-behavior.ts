@@ -34,11 +34,9 @@ export function useSelectionBehavior(
                     },
                 };
             }
-            const addLastRange = append && (rangeSelect === "multi-rect" || rangeSelect === "multi-cell");
-            const allowColumnCoSelect =
-                columnBehavior === "mixed" && rangeBehavior === "mixed" && (append || trigger === "drag");
-            const allowRowCoSelect =
-                rowBehavior === "mixed" && rangeBehavior === "mixed" && (append || trigger === "drag");
+            const rangeMixable = rangeBehavior === "mixed" && (append || trigger === "drag");
+            const allowColumnCoSelect = columnBehavior === "mixed" && rangeMixable;
+            const allowRowCoSelect = rowBehavior === "mixed" && rangeMixable;
             let newVal: GridSelection = {
                 current:
                     value === undefined
@@ -51,6 +49,7 @@ export function useSelectionBehavior(
                 rows: allowRowCoSelect ? gridSelection.rows : CompactSelection.empty(),
             };
 
+            const addLastRange = append && (rangeSelect === "multi-rect" || rangeSelect === "multi-cell");
             if (addLastRange && newVal.current !== undefined && gridSelection.current !== undefined) {
                 newVal = {
                     ...newVal,
@@ -72,7 +71,7 @@ export function useSelectionBehavior(
                 newRows = newRows.add(append);
             }
             let newVal: GridSelection;
-            if (rowBehavior === "exclusive" && newRows.length !== 0) {
+            if (rowBehavior === "exclusive" && newRows.length > 0) {
                 newVal = {
                     current: undefined,
                     columns: CompactSelection.empty(),
@@ -100,7 +99,7 @@ export function useSelectionBehavior(
                 newCols = newCols.add(append);
             }
             let newVal: GridSelection;
-            if (columnBehavior === "exclusive" && newCols.length !== 0) {
+            if (columnBehavior === "exclusive" && newCols.length > 0) {
                 newVal = {
                     current: undefined,
                     rows: CompactSelection.empty(),

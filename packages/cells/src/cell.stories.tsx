@@ -1,6 +1,5 @@
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import * as React from "react";
-import AutoSizer from "react-virtualized-auto-sizer";
 import { DataEditor, DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
 import { DropdownCell as DropdownRenderer, useExtraCells } from ".";
 import { StarCell } from "./cells/star-cell";
@@ -13,8 +12,10 @@ import type { DropdownCell } from "./cells/dropdown-cell";
 import { ArticleCell } from "./cells/article-cell-types";
 import { RangeCell } from "./cells/range-cell";
 import { SpinnerCell } from "./cells/spinner-cell";
+import { useResizeDetector } from "react-resize-detector";
 
 import "@toast-ui/editor/dist/toastui-editor.css";
+import "@glideapps/glide-data-grid/dist/index.css";
 import { DatePickerCell } from "./cells/date-picker-cell";
 
 const SimpleWrapper = styled.div`
@@ -95,24 +96,23 @@ interface BeautifulProps {
 
 const BeautifulWrapper: React.FC<BeautifulProps> = p => {
     const { title, children, description } = p;
+
+    const { ref, width, height } = useResizeDetector();
+
     return (
         <BeautifulStyle>
             <h1>{title}</h1>
             {description}
             <div className="sizer">
-                <div className="sizer-clip">
-                    <AutoSizer>
-                        {(props: { width?: number; height?: number }) => (
-                            <div
-                                style={{
-                                    position: "relative",
-                                    width: props.width ?? 100,
-                                    height: props.height ?? 100,
-                                }}>
-                                {children}
-                            </div>
-                        )}
-                    </AutoSizer>
+                <div className="sizer-clip" ref={ref}>
+                    <div
+                        style={{
+                            position: "relative",
+                            width: width ?? 100,
+                            height: height ?? 100,
+                        }}>
+                        {children}
+                    </div>
                 </div>
             </div>
         </BeautifulStyle>

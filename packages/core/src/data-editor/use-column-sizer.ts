@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Theme } from "../common/styles";
+import type { Theme } from "../common/styles";
 import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { CellRenderers } from "../data-grid/cells";
 import {
@@ -36,12 +36,12 @@ export function measureColumn(
     if (selectedData !== undefined) {
         sizes.push(...selectedData.map(row => row[colIndex]).map(cell => measureCell(ctx, cell, theme)));
     }
-    sizes.push(ctx.measureText(c.title).width + 16 + (c.icon === undefined ? 0 : 28));
-    const average = sizes.reduce((a, b) => a + b) / sizes.length;
     if (sizes.length > 5 && removeOutliers) {
         // Filter out outliers
+        const average = sizes.reduce((a, b) => a + b) / sizes.length;
         sizes = sizes.filter(a => a < average * 2);
     }
+    sizes.push(ctx.measureText(c.title).width + 16 + (c.icon === undefined ? 0 : 28));
     const biggest = Math.max(...sizes);
     const final = Math.max(Math.ceil(minColumnWidth), Math.min(Math.floor(maxColumnWidth), Math.ceil(biggest)));
 
@@ -105,12 +105,14 @@ export function useColumnSizer(
             const getResult = getCells(computeArea, abortController.signal);
             const tailGetResult = tailRows > 0 ? getCells(tailComputeArea, abortController.signal) : undefined;
             let toSet: CellArray;
+            // eslint-disable-next-line unicorn/prefer-ternary
             if (typeof getResult === "object") {
                 toSet = getResult;
             } else {
                 toSet = await resolveCellsThunk(getResult);
             }
             if (tailGetResult !== undefined) {
+                // eslint-disable-next-line unicorn/prefer-ternary
                 if (typeof tailGetResult === "object") {
                     toSet = [...toSet, ...tailGetResult];
                 } else {
@@ -169,8 +171,7 @@ export function useColumnSizer(
         let totalWidth = 0;
         let totalGrow = 0;
         const distribute: number[] = [];
-        for (let i = 0; i < result.length; i++) {
-            const c = result[i];
+        for (const [i, c] of result.entries()) {
             totalWidth += c.width;
             if (c.grow !== undefined && c.grow > 0) {
                 totalGrow += c.grow;

@@ -1,5 +1,5 @@
 import clamp from "lodash/clamp";
-import { Item } from "./data-grid-types";
+import type { Item } from "./data-grid-types";
 
 type StateItem = { item: Item; hoverAmount: number };
 export type HoverValues = readonly Readonly<StateItem>[];
@@ -7,7 +7,7 @@ export type StepCallback = (values: HoverValues) => void;
 
 const hoverTime = 80;
 
-export function easeOutCubic(x: number) {
+function easeOutCubic(x: number) {
     const x1 = x - 1;
     return x1 * x1 * x1 + 1;
 }
@@ -25,7 +25,7 @@ export class AnimationManager {
     };
 
     private addToLeavingItems = (item: StateItem) => {
-        const isAlreadyLeaving = this.leavingItems.find(i => this.areSameItems(i.item, item.item)) !== undefined;
+        const isAlreadyLeaving = this.leavingItems.some(i => this.areSameItems(i.item, item.item));
 
         if (isAlreadyLeaving) {
             return;

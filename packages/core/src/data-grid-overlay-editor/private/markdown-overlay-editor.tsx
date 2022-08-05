@@ -3,7 +3,7 @@ import MarkdownDiv from "../../markdown-div/markdown-div";
 import GrowingEntry from "../../growing-entry/growing-entry";
 import { MarkdownOverlayEditorStyle } from "./markdown-overlay-editor-style";
 import { EditPencil, Checkmark } from "../../common/utils";
-import { Rectangle } from "../../data-grid/data-grid-types";
+import type { Rectangle, SelectionRange } from "../../data-grid/data-grid-types";
 
 interface Props {
     readonly targetRect: Rectangle;
@@ -12,6 +12,7 @@ interface Props {
     readonly onChange: (ev: React.ChangeEvent<HTMLTextAreaElement>) => void;
     readonly forceEditMode: boolean;
     readonly onFinish: () => void;
+    readonly validatedSelection?: SelectionRange;
 
     readonly readonly: boolean;
 
@@ -19,7 +20,17 @@ interface Props {
 }
 
 export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { markdown, onChange, onKeyDown, forceEditMode, createNode, targetRect, readonly, onFinish } = p;
+    const {
+        markdown,
+        onChange,
+        onKeyDown,
+        forceEditMode,
+        createNode,
+        targetRect,
+        readonly,
+        onFinish,
+        validatedSelection,
+    } = p;
 
     const [editMode, setEditMode] = React.useState<boolean>(markdown === "" || forceEditMode);
     const onEditClick = React.useCallback(() => {
@@ -29,10 +40,11 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
 
     if (editMode) {
         return (
-            <MarkdownOverlayEditorStyle targetRect={targetRect}>
+            <MarkdownOverlayEditorStyle targetWidth={targetRect.width}>
                 <GrowingEntry
                     autoFocus={true}
                     highlight={false}
+                    validatedSelection={validatedSelection}
                     onKeyDown={e => {
                         if (e.key !== "Enter") {
                             onKeyDown(e);
@@ -48,7 +60,7 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
         );
     }
     return (
-        <MarkdownOverlayEditorStyle targetRect={targetRect}>
+        <MarkdownOverlayEditorStyle targetWidth={targetRect.width}>
             <MarkdownDiv contents={markdown} createNode={createNode} />
             {!readonly && (
                 <>

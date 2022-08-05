@@ -3,7 +3,7 @@ import * as React from "react";
 import { MarkdownOverlayEditor } from "../../data-grid-overlay-editor/private/markdown-overlay-editor";
 import { drawTextCell, prepTextCell } from "../data-grid-lib";
 import { GridCellKind, MarkdownCell } from "../data-grid-types";
-import { InternalCellRenderer } from "./cell-types";
+import type { InternalCellRenderer } from "./cell-types";
 
 export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",
@@ -21,13 +21,23 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
         data: "",
     }),
     getEditor: () => p => {
-        const { onChange, onKeyDown, value, target, onFinishedEditing, markdownDivCreateNode, forceEditMode } = p;
+        const {
+            onChange,
+            onKeyDown,
+            value,
+            target,
+            onFinishedEditing,
+            markdownDivCreateNode,
+            forceEditMode,
+            validatedSelection,
+        } = p;
         return (
             <MarkdownOverlayEditor
                 onFinish={onFinishedEditing}
                 targetRect={target}
                 readonly={value.readonly === true}
                 markdown={value.data}
+                validatedSelection={validatedSelection}
                 onKeyDown={onKeyDown}
                 onChange={e =>
                     onChange({

@@ -1,5 +1,7 @@
 import { deepEqual, maybe } from "./support";
 import { describe, test, expect } from "jest-without-globals";
+import { renderHook } from "@testing-library/react-hooks";
+import { useResizeDetector } from "./resize-detector";
 
 describe("maybe", () => {
     test("Returns when not crashing", () => {
@@ -10,7 +12,7 @@ describe("maybe", () => {
 
     test("Returns default value on error", () => {
         const result = maybe(() => {
-            throw Error();
+            throw new Error("Fail");
         }, "fail");
 
         expect(result).toBe("fail");
@@ -24,5 +26,12 @@ describe("deepEqual", () => {
         expect(deepEqual({ a: "b", c: "d" }, { a: "b", c: "d" })).toBe(true);
         expect(deepEqual({ a: "b", c: "d" }, [1, 2, 3])).toBe(false);
         expect(deepEqual({ a: "b", c: { d: "e" } }, { a: "b", c: { d: "e" } })).toBe(true);
+    });
+});
+
+describe("resizeDetector", () => {
+    test("Smoke test", () => {
+        const { result } = renderHook(() => useResizeDetector());
+        expect(result.current.width === undefined && result.current.height === undefined);
     });
 });
