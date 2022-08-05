@@ -106,7 +106,7 @@ This is now done by providing a rightElementProps
 ```tsx
 <DataEditor
     rightElement={el}
-    rightElementSticky={{
+    rightElementProps={{
         sticky: true,
     }}
 />
