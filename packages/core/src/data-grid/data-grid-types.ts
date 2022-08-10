@@ -55,7 +55,7 @@ interface BaseGridMouseEventArgs {
     readonly isLongTouch?: boolean;
     readonly isEdge: boolean;
     readonly button: number;
-    readonly scrollEdge: readonly [-1 | 0 | 1, -1 | 0 | 1];
+    readonly scrollEdge: readonly [xDir: -1 | 0 | 1, yDir: -1 | 0 | 1];
 }
 
 export interface GridMouseCellEventArgs extends BaseGridMouseEventArgs, PositionableMouseEventArgs {
@@ -187,7 +187,7 @@ export enum GridColumnIcon {
 
 export type CellArray = readonly (readonly GridCell[])[];
 
-export type Item = readonly [number, number];
+export type Item = readonly [col: number, row: number];
 
 export const headerCellCheckboxPrefix = "___gdg_header_cell_";
 export const headerCellCheckedMarker = headerCellCheckboxPrefix + "checked";
@@ -324,7 +324,7 @@ export interface BaseGridCell {
     readonly lastUpdated?: number;
     readonly style?: "normal" | "faded";
     readonly themeOverride?: Partial<Theme>;
-    readonly span?: readonly [number, number];
+    readonly span?: readonly [start: number, end: number];
     readonly contentAlign?: "left" | "right" | "center";
     readonly cursor?: CSSProperties["cursor"];
 }
@@ -471,7 +471,7 @@ export interface MarkerCell extends BaseGridCell {
     readonly markerKind: "checkbox" | "number" | "both";
 }
 
-export type Slice = Item;
+export type Slice = [start: number, end: number];
 export type CompactSelectionRanges = readonly Slice[];
 
 function mergeRanges(input: CompactSelectionRanges) {
@@ -516,7 +516,7 @@ export class CompactSelection {
 
     offset = (amount: number): CompactSelection => {
         if (amount === 0) return this;
-        const newItems = this.items.map(x => [x[0] + amount, x[1] + amount] as const);
+        const newItems = this.items.map(x => [x[0] + amount, x[1] + amount] as Slice);
         return new CompactSelection(newItems);
     };
 
