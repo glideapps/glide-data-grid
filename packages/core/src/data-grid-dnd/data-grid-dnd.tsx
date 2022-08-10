@@ -342,6 +342,8 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             translateY={p.translateY}
             smoothScrollX={p.smoothScrollX}
             smoothScrollY={p.smoothScrollY}
+            fixedShadowX={p.fixedShadowX}
+            fixedShadowY={p.fixedShadowY}
             // handled or mutated props
             getCellContent={getMangledCellContent}
             isResizing={resizeCol !== undefined}

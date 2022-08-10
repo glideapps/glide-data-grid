@@ -441,7 +441,7 @@ function drawGridLines(
         if (c.width === 0) continue;
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
-        if (tx >= minX && tx <= maxX - 1 && (index === effectiveCols.length - 1 || verticalBorder(index + 1))) {
+        if (tx >= minX && tx <= maxX - 1 && verticalBorder(index + 1)) {
             toDraw.push({
                 x1: tx,
                 y1: Math.max(groupHeaderHeight, minY),
@@ -1499,6 +1499,8 @@ function overdrawStickyBoundaries(
         drawFreezeBorder = verticalBorder(c.sourceIndex);
         break;
     }
+    const hColor = theme.horizontalBorderColor ?? theme.borderColor;
+    const vColor = theme.borderColor;
     const drawX = drawFreezeBorder ? getStickyWidth(effectiveCols) : 0;
     ctx.beginPath();
 
@@ -1513,12 +1515,20 @@ function overdrawStickyBoundaries(
 
     let doCell = false;
     if (drawX !== 0) {
+        // vertical
         ctx.moveTo(drawX + 0.5, 0);
         ctx.lineTo(drawX + 0.5, height);
         doCell = true;
     }
 
+    if (doCell && vColor !== hColor) {
+        ctx.strokeStyle = blend(vColor, theme.bgCell);
+        ctx.beginPath();
+        doCell = false;
+    }
+
     if (lastRowSticky) {
+        // horizontal
         const h = getRowHeight(rows - 1);
         ctx.moveTo(0, height - h + 0.5);
         ctx.lineTo(width, height - h + 0.5);
@@ -1535,7 +1545,7 @@ function overdrawStickyBoundaries(
     ctx.moveTo(0, totalHeaderHeight + 0.5);
     ctx.lineTo(width, totalHeaderHeight + 0.5);
 
-    ctx.strokeStyle = theme.borderColor;
+    ctx.strokeStyle = hColor;
     ctx.stroke();
 }
 

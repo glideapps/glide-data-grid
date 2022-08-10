@@ -1030,6 +1030,64 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
     },
 };
 
+export const ScrollShadows: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(6);
+
+    const [selection, setSelection] = React.useState<GridSelection>({
+        rows: CompactSelection.empty(),
+        columns: CompactSelection.empty(),
+    });
+
+    const onCellClicked = React.useCallback((cell: Item) => {
+        setSelection({
+            rows: CompactSelection.fromSingleSelection(cell[1]),
+            columns: CompactSelection.empty(),
+        });
+    }, []);
+
+    const theme = React.useMemo<Partial<Theme>>(
+        () => ({
+            accentLight: "#b1f6ff",
+            horizontalBorderColor: "transparent",
+        }),
+        []
+    );
+
+    const getRowThemeOverride = React.useCallback(row => (row % 2 === 0 ? undefined : { bgCell: "#f5f5f6" }), []);
+
+    return (
+        <BeautifulWrapper
+            title="Automatic Row Markers"
+            description={
+                <>
+                    <Description>You can enable and disable the horizontal/vertical scroll shadows.</Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers={"number"}
+                gridSelection={selection}
+                onCellClicked={onCellClicked}
+                fixedShadowX={false}
+                headerHeight={26}
+                rowHeight={22}
+                fixedShadowY={false}
+                getRowThemeOverride={getRowThemeOverride}
+                verticalBorder={false}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={1000}
+                theme={theme}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ScrollShadows as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const AutomaticRowMarkers: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
