@@ -2053,6 +2053,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     for (let x = r.x; x < r.x + r.width; x++) {
                         for (let y = r.y; y < r.y + r.height; y++) {
                             const cellValue = getCellContent([x - rowMarkerOffset, y]);
+                            if (!cellValue.allowOverlay && cellValue.kind !== GridCellKind.Boolean) continue;
                             let newVal: InnerGridCell | undefined = undefined;
                             if (cellValue.kind === GridCellKind.Custom) {
                                 const editor = provideEditor?.(cellValue);
