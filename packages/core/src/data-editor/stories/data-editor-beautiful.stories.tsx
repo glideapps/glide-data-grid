@@ -1049,6 +1049,7 @@ export const ScrollShadows: React.VFC = () => {
         () => ({
             accentLight: "#b1f6ff",
             horizontalBorderColor: "transparent",
+            headerBottomBorderColor: "rgba(115, 116, 131, 0.16)",
         }),
         []
     );

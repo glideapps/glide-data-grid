@@ -425,14 +425,6 @@ function drawGridLines(
     const toDraw: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
 
     ctx.beginPath();
-    // we need to under-draw the header background on its line to improve its contrast.
-    ctx.moveTo(minX, totalHeaderHeight + 0.5);
-    ctx.lineTo(maxX, totalHeaderHeight + 0.5);
-    ctx.strokeStyle = theme.bgHeader;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    ctx.beginPath();
 
     // vertical lines
     let x = 0.5;
@@ -463,13 +455,12 @@ function drawGridLines(
         // horizontal lines
         let y = totalHeaderHeight + 0.5;
         let row = cellYOffset;
-        let isHeader = true;
         const target = lastRowSticky ? height - stickyHeight : height;
         while (y + translateY <= target) {
-            const ty = isHeader ? y : y + translateY;
+            const ty = y + translateY;
             // This shouldn't be needed it seems like... yet it is. We're not sure why.
             if (ty >= minY && ty <= maxY - 1 && (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) > 1)) {
-                const rowTheme = isHeader ? undefined : getRowThemeOverride?.(row);
+                const rowTheme = getRowThemeOverride?.(row);
                 toDraw.push({
                     x1: minX,
                     y1: ty,
@@ -480,7 +471,6 @@ function drawGridLines(
             }
 
             y += getRowHeight(row);
-            isHeader = false;
             row++;
         }
     }
@@ -1486,7 +1476,6 @@ function overdrawStickyBoundaries(
     effectiveCols: readonly MappedGridColumn[],
     width: number,
     height: number,
-    totalHeaderHeight: number,
     lastRowSticky: boolean,
     rows: number,
     verticalBorder: (col: number) => boolean,
@@ -1502,51 +1491,23 @@ function overdrawStickyBoundaries(
     const hColor = theme.horizontalBorderColor ?? theme.borderColor;
     const vColor = theme.borderColor;
     const drawX = drawFreezeBorder ? getStickyWidth(effectiveCols) : 0;
-    ctx.beginPath();
 
-    // fill in header color behind header border
-    ctx.moveTo(0, totalHeaderHeight + 0.5);
-    ctx.lineTo(width, totalHeaderHeight + 0.5);
-
-    ctx.strokeStyle = theme.bgHeader;
-    ctx.stroke();
-
-    ctx.beginPath();
-
-    let doCell = false;
     if (drawX !== 0) {
-        // vertical
+        ctx.beginPath();
         ctx.moveTo(drawX + 0.5, 0);
         ctx.lineTo(drawX + 0.5, height);
-        doCell = true;
-    }
-
-    if (doCell && vColor !== hColor) {
         ctx.strokeStyle = blend(vColor, theme.bgCell);
-        ctx.beginPath();
-        doCell = false;
-    }
-
-    if (lastRowSticky) {
-        // horizontal
-        const h = getRowHeight(rows - 1);
-        ctx.moveTo(0, height - h + 0.5);
-        ctx.lineTo(width, height - h + 0.5);
-        doCell = true;
-    }
-
-    // fill in cell color behind other borders
-    if (doCell) {
-        ctx.strokeStyle = theme.bgCell;
         ctx.stroke();
     }
 
-    // overdraw borders for all
-    ctx.moveTo(0, totalHeaderHeight + 0.5);
-    ctx.lineTo(width, totalHeaderHeight + 0.5);
-
-    ctx.strokeStyle = hColor;
-    ctx.stroke();
+    if (lastRowSticky) {
+        const h = getRowHeight(rows - 1);
+        ctx.beginPath();
+        ctx.moveTo(0, height - h + 0.5);
+        ctx.lineTo(width, height - h + 0.5);
+        ctx.strokeStyle = blend(hColor, theme.bgCell);
+        ctx.stroke();
+    }
 }
 
 function drawHighlightRings(
@@ -2036,12 +1997,13 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     const overlayCanvas = headerCanvas;
     const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
-    if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== totalHeaderHeight * dpr) {
+    const overlayHeight = totalHeaderHeight + 1; // border
+    if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== overlayHeight * dpr) {
         overlayCanvas.width = width * dpr;
-        overlayCanvas.height = totalHeaderHeight * dpr;
+        overlayCanvas.height = overlayHeight * dpr;
 
         overlayCanvas.style.width = width + "px";
-        overlayCanvas.style.height = totalHeaderHeight + "px";
+        overlayCanvas.style.height = overlayHeight + "px";
     }
 
     const last = lastBlitData.current;
@@ -2124,6 +2086,15 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             theme,
             true
         );
+
+        overlayCtx.beginPath();
+        overlayCtx.moveTo(0, overlayHeight - 0.5);
+        overlayCtx.lineTo(width, overlayHeight - 0.5);
+        overlayCtx.strokeStyle = blend(
+            theme.headerBottomBorderColor ?? theme.horizontalBorderColor ?? theme.borderColor,
+            theme.bgHeader
+        );
+        overlayCtx.stroke();
     };
 
     // handle damage updates by directly drawing to the target to avoid large blits
@@ -2288,7 +2259,6 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         effectiveCols,
         width,
         height,
-        totalHeaderHeight,
         trailingRowType === "sticky",
         rows,
         verticalBorder,

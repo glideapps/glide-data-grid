@@ -60,6 +60,7 @@ export interface Theme {
     bgSearchResult: string;
     borderColor: string;
     horizontalBorderColor?: string;
+    headerBottomBorderColor?: string;
     drilldownBorder: string;
     linkColor: string;
     cellHorizontalPadding: number;
