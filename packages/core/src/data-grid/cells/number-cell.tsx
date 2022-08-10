@@ -34,7 +34,7 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
                     onChange={x =>
                         onChange({
                             ...value,
-                            data: x.floatValue,
+                            data: Number.isNaN(x.floatValue ?? 0) ? 0 : x.floatValue,
                         })
                     }
                 />

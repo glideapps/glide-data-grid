@@ -799,12 +799,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let content = c;
                 if (initialValue !== undefined) {
                     switch (content.kind) {
-                        case GridCellKind.Number:
+                        case GridCellKind.Number: {
+                            const d = maybe(() => (initialValue === "-" ? -0 : Number.parseFloat(initialValue)), 0);
                             content = {
                                 ...content,
-                                data: maybe(() => (initialValue === "-" ? -0 : Number.parseFloat(initialValue)), 0),
+                                data: Number.isNaN(d) ? 0 : d,
                             };
                             break;
+                        }
                         case GridCellKind.Text:
                         case GridCellKind.Markdown:
                         case GridCellKind.Uri:
