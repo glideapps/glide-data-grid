@@ -97,8 +97,6 @@ type Props = Omit<
     | "onCellFocused"
     | "onContextMenu"
     | "onDragEnd"
-    | "onKeyDown"
-    | "onKeyUp"
     | "onMouseDown"
     | "onMouseMove"
     | "onMouseUp"
@@ -358,6 +356,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onGroupHeaderRenamed,
         onCellEdited,
         onCellsEdited,
+        onKeyDown: onKeyDownIn,
+        onKeyUp: onKeyUpIn,
         keybindings: keybindingsIn,
         onRowAppended,
         onColumnMoved,
@@ -1994,6 +1994,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onKeyDown = React.useCallback(
         (event: GridKeyEventArgs) => {
             const fn = async () => {
+                let cancelled = false;
+                if (onKeyDownIn !== undefined) {
+                    onKeyDownIn({
+                        ...event,
+                        cancel: () => {
+                            cancelled = true;
+                            event.cancel();
+                        },
+                    });
+                }
+
+                if (cancelled) return;
+
                 const overlayOpen = overlay !== undefined;
                 const { altKey, shiftKey, metaKey, ctrlKey, key, bounds } = event;
                 const isOSX = browserIsOSX.value;
@@ -2305,6 +2318,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             void fn();
         },
         [
+            onKeyDownIn,
             overlay,
             gridSelection,
             keybindings.selectAll,
@@ -2722,6 +2736,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             metaKey: false,
                             shiftKey: false,
                             altKey: false,
+                            rawEvent: undefined,
                         });
                         break;
                     case "fill-right":
@@ -2734,6 +2749,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             metaKey: false,
                             shiftKey: false,
                             altKey: false,
+                            rawEvent: undefined,
                         });
                         break;
                     case "fill-down":
@@ -2746,6 +2762,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             metaKey: false,
                             shiftKey: false,
                             altKey: false,
+                            rawEvent: undefined,
                         });
                         break;
                     case "copy":
@@ -2903,6 +2920,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     isFilling={mouseState?.fillHandle === true}
                     onMouseMove={onMouseMoveImpl}
                     onKeyDown={onKeyDown}
+                    onKeyUp={onKeyUpIn}
                     onMouseDown={onMouseDown}
                     onMouseUp={onMouseUp}
                     onDragOverCell={onDragOverCell}

@@ -979,6 +979,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 altKey: event.altKey,
                 key: event.key,
                 keyCode: event.keyCode,
+                rawEvent: event,
             });
         },
         [onKeyDown, selection, getBoundsForItem]
@@ -1006,6 +1007,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 altKey: event.altKey,
                 key: event.key,
                 keyCode: event.keyCode,
+                rawEvent: event,
             });
         },
         [onKeyUp, selection, getBoundsForItem]
@@ -1371,6 +1373,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                                     metaKey: false,
                                                     shiftKey: false,
                                                     altKey: false,
+                                                    rawEvent: undefined,
                                                 });
                                             }}
                                             onFocusCapture={e => {

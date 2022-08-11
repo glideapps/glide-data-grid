@@ -97,6 +97,7 @@ export interface GridKeyEventArgs {
     readonly ctrlKey: boolean;
     readonly metaKey: boolean;
     readonly cancel: () => void;
+    readonly rawEvent: React.KeyboardEvent<HTMLElement> | undefined;
 }
 
 interface DragHandler {
