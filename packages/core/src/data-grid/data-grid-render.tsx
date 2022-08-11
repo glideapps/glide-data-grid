@@ -1090,6 +1090,7 @@ function drawCells(
     getRowThemeOverride: GetRowThemeCallback | undefined,
     disabledRows: CompactSelection,
     isFocused: boolean,
+    drawFocus: boolean,
     trailingRowType: TrailingRowType,
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
@@ -1271,7 +1272,7 @@ function drawCells(
                         selection.columns.some(
                             index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1]
                         );
-                    if (isSelected && !isFocused) {
+                    if (isSelected && !isFocused && drawFocus) {
                         accentCount = 0;
                     } else if (isSelected) {
                         accentCount = Math.max(accentCount, 1);
@@ -1856,6 +1857,7 @@ export interface DrawGridArg {
     readonly verticalBorder: (col: number) => boolean;
     readonly isResizing: boolean;
     readonly isFocused: boolean;
+    readonly drawFocus: boolean;
     readonly selection: GridSelection;
     readonly fillHandle: boolean;
     readonly lastRowSticky: TrailingRowType;
@@ -1952,6 +1954,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         freezeColumns,
         dragAndDropState,
         theme,
+        drawFocus,
         headerHeight,
         groupHeaderHeight,
         disabledRows,
@@ -2147,6 +2150,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 getRowThemeOverride,
                 disabledRows,
                 isFocused,
+                drawFocus,
                 trailingRowType,
                 drawRegions,
                 damage,
@@ -2165,6 +2169,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
             if (
                 fillHandle &&
+                drawFocus &&
                 selection.current !== undefined &&
                 damage.some(x => x[0] === selection.current?.cell[0] && x[1] === selection.current?.cell[1])
             ) {
@@ -2267,24 +2272,26 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     );
 
     // the overdraw may have nuked out our focus ring right edge.
-    const focusRedraw = drawFocusRing(
-        targetCtx,
-        width,
-        height,
-        cellYOffset,
-        translateX,
-        translateY,
-        effectiveCols,
-        mappedColumns,
-        theme,
-        totalHeaderHeight,
-        selection,
-        getRowHeight,
-        getCellContent,
-        trailingRowType,
-        fillHandle,
-        rows
-    );
+    const focusRedraw = drawFocus
+        ? drawFocusRing(
+              targetCtx,
+              width,
+              height,
+              cellYOffset,
+              translateX,
+              translateY,
+              effectiveCols,
+              mappedColumns,
+              theme,
+              totalHeaderHeight,
+              selection,
+              getRowHeight,
+              getCellContent,
+              trailingRowType,
+              fillHandle,
+              rows
+          )
+        : undefined;
 
     const highlightRedraw = drawHighlightRings(
         targetCtx,
@@ -2333,6 +2340,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         getRowThemeOverride,
         disabledRows,
         isFocused,
+        drawFocus,
         trailingRowType,
         drawRegions,
         damage,

@@ -42,6 +42,8 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
     const [dragStartY, setDragStartY] = React.useState<number>();
 
     const {
+        onHeaderMenuClick,
+        getCellContent,
         onColumnMoved,
         onColumnResize,
         onColumnResizeStart,
@@ -49,10 +51,9 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         gridRef,
         maxColumnWidth,
         minColumnWidth,
-        onHeaderMenuClick,
         onRowMoved,
         lockColumns,
-        getCellContent,
+        ...rest
     } = p;
 
     const canResize = (onColumnResize ?? onColumnResizeEnd ?? onColumnResizeStart) !== undefined;
@@ -293,63 +294,14 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         <DataGrid
             // I know the below could be done with ...rest, but it adds about 2-3% cpu load in the hot loop
             // This doesn't matter much for most devices but it will matter for low power phones and such.
-            accessibilityHeight={p.accessibilityHeight}
-            cellXOffset={p.cellXOffset}
-            cellYOffset={p.cellYOffset}
-            columns={p.columns}
-            enableGroups={p.enableGroups}
-            freezeColumns={p.freezeColumns}
-            onCanvasFocused={p.onCanvasFocused}
-            onCanvasBlur={p.onCanvasBlur}
-            isFocused={p.isFocused}
-            onMouseMove={p.onMouseMove}
-            groupHeaderHeight={p.groupHeaderHeight}
-            fillHandle={p.fillHandle}
-            headerHeight={p.headerHeight}
-            height={p.height}
-            trailingRowType={p.trailingRowType}
-            rowHeight={p.rowHeight}
-            rows={p.rows}
-            highlightRegions={p.highlightRegions}
-            verticalBorder={p.verticalBorder}
-            width={p.width}
-            canvasRef={p.canvasRef}
-            onContextMenu={p.onContextMenu}
-            className={p.className}
-            theme={p.theme}
-            disabledRows={p.disabledRows}
-            isFilling={p.isFilling}
-            firstColAccessible={p.firstColAccessible}
-            drawCustomCell={p.drawCustomCell}
-            drawHeader={p.drawHeader}
-            eventTargetRef={p.eventTargetRef}
-            experimental={p.experimental}
-            getGroupDetails={p.getGroupDetails}
-            getRowThemeOverride={p.getRowThemeOverride}
-            headerIcons={p.headerIcons}
-            isDraggable={p.isDraggable}
-            onDragEnd={p.onDragEnd}
-            onCellFocused={p.onCellFocused}
-            onDragStart={onDragStart}
-            onDragOverCell={p.onDragOverCell}
-            onDragLeave={p.onDragLeave}
-            onDrop={p.onDrop}
-            onKeyDown={p.onKeyDown}
-            onKeyUp={p.onKeyUp}
-            prelightCells={p.prelightCells}
-            selection={p.selection}
-            translateX={p.translateX}
-            translateY={p.translateY}
-            smoothScrollX={p.smoothScrollX}
-            smoothScrollY={p.smoothScrollY}
-            fixedShadowX={p.fixedShadowX}
-            fixedShadowY={p.fixedShadowY}
+            {...rest}
             // handled or mutated props
             getCellContent={getMangledCellContent}
             isResizing={resizeCol !== undefined}
             onHeaderMenuClick={onHeaderMenuClickMangled}
             isDragging={dragColActive}
             onItemHovered={onItemHoveredImpl}
+            onDragStart={onDragStart}
             onMouseDown={onMouseDownImpl}
             allowResize={onColumnResize !== undefined}
             onMouseUp={onMouseUpImpl}

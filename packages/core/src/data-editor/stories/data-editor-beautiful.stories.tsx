@@ -1038,10 +1038,17 @@ export const ScrollShadows: React.VFC = () => {
         columns: CompactSelection.empty(),
     });
 
-    const onCellClicked = React.useCallback((cell: Item) => {
+    const onSelectionChange = React.useCallback((newSel: GridSelection) => {
+        let newRows = CompactSelection.empty();
+        if (newSel.current !== undefined) {
+            newRows = newRows.add([newSel.current.range.y, newSel.current.range.y + newSel.current.range.height]);
+        }
+        for (const b of newSel.current?.rangeStack ?? []) {
+            newRows = newRows.add([b.y, b.y + b.height]);
+        }
         setSelection({
-            rows: CompactSelection.fromSingleSelection(cell[1]),
-            columns: CompactSelection.empty(),
+            ...newSel,
+            rows: newRows,
         });
     }, []);
 
@@ -1068,9 +1075,10 @@ export const ScrollShadows: React.VFC = () => {
                 {...defaultProps}
                 rowMarkers={"number"}
                 gridSelection={selection}
-                onCellClicked={onCellClicked}
+                onGridSelectionChange={onSelectionChange}
                 fixedShadowX={false}
                 headerHeight={26}
+                drawFocusRing={false}
                 rowHeight={22}
                 fixedShadowY={false}
                 getRowThemeOverride={getRowThemeOverride}

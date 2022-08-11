@@ -54,16 +54,9 @@ export interface DataGridSearchProps extends Omit<ScrollingDataGridProps, "preli
 const targetSearchTimeMS = 10;
 
 const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
-    const {
-        getCellsForSelection,
-        onSearchResultsChanged,
-        showSearch = false,
-        onSearchClose,
-        canvasRef,
-        cellYOffset,
-        rows,
-        columns,
-    } = p;
+    const { canvasRef, cellYOffset, rows, columns } = p;
+
+    const { getCellsForSelection, onSearchResultsChanged, showSearch = false, onSearchClose, ...rest } = p;
 
     const [searchID] = React.useState(() => "search-box-" + Math.round(Math.random() * 1000));
 
@@ -382,82 +375,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
     return (
         <>
-            <ScrollingDataGrid
-                // Dear future developer. I am sorry.
-                accessibilityHeight={p.accessibilityHeight}
-                cellXOffset={p.cellXOffset}
-                cellYOffset={p.cellYOffset}
-                columns={p.columns}
-                enableGroups={p.enableGroups}
-                freezeColumns={p.freezeColumns}
-                preventDiagonalScrolling={p.preventDiagonalScrolling}
-                getCellContent={p.getCellContent}
-                groupHeaderHeight={p.groupHeaderHeight}
-                onCanvasFocused={p.onCanvasFocused}
-                onCanvasBlur={p.onCanvasBlur}
-                isFocused={p.isFocused}
-                clientSize={p.clientSize}
-                headerHeight={p.headerHeight}
-                onContextMenu={p.onContextMenu}
-                isFilling={p.isFilling}
-                fillHandle={p.fillHandle}
-                trailingRowType={p.trailingRowType}
-                firstColAccessible={p.firstColAccessible}
-                lockColumns={p.lockColumns}
-                rowHeight={p.rowHeight}
-                onMouseMove={p.onMouseMove}
-                rows={p.rows}
-                highlightRegions={p.highlightRegions}
-                verticalBorder={p.verticalBorder}
-                canvasRef={p.canvasRef}
-                className={p.className}
-                theme={p.theme}
-                disabledRows={p.disabledRows}
-                drawCustomCell={p.drawCustomCell}
-                drawHeader={p.drawHeader}
-                experimental={p.experimental}
-                getGroupDetails={p.getGroupDetails}
-                getRowThemeOverride={p.getRowThemeOverride}
-                gridRef={p.gridRef}
-                headerIcons={p.headerIcons}
-                isDraggable={p.isDraggable}
-                onDragEnd={p.onDragEnd}
-                minColumnWidth={p.minColumnWidth}
-                maxColumnWidth={p.maxColumnWidth}
-                onCellFocused={p.onCellFocused}
-                onColumnMoved={p.onColumnMoved}
-                onColumnResize={p.onColumnResize}
-                onColumnResizeStart={p.onColumnResizeStart}
-                onColumnResizeEnd={p.onColumnResizeEnd}
-                onDragStart={p.onDragStart}
-                onDragOverCell={p.onDragOverCell}
-                onDragLeave={p.onDragLeave}
-                onDrop={p.onDrop}
-                onHeaderMenuClick={p.onHeaderMenuClick}
-                onItemHovered={p.onItemHovered}
-                onKeyUp={p.onKeyUp}
-                onMouseDown={p.onMouseDown}
-                onMouseUp={p.onMouseUp}
-                onRowMoved={p.onRowMoved}
-                onVisibleRegionChanged={p.onVisibleRegionChanged}
-                overscrollX={p.overscrollX}
-                overscrollY={p.overscrollY}
-                fixedShadowX={p.fixedShadowX}
-                fixedShadowY={p.fixedShadowY}
-                rightElement={p.rightElement}
-                rightElementProps={p.rightElementProps}
-                scrollRef={p.scrollRef}
-                scrollToEnd={p.scrollToEnd}
-                selection={p.selection}
-                showMinimap={p.showMinimap}
-                smoothScrollX={p.smoothScrollX}
-                smoothScrollY={p.smoothScrollY}
-                translateX={p.translateX}
-                translateY={p.translateY}
-                onKeyDown={p.onKeyDown}
-                // handled props
-                prelightCells={searchResults}
-            />
+            <ScrollingDataGrid {...rest} prelightCells={searchResults} />
             {searchbox}
         </>
     );

@@ -133,6 +133,7 @@ export interface DataGridProps {
 
     readonly drawCustomCell?: DrawCustomCellCallback;
     readonly drawHeader?: DrawHeaderCallback;
+    readonly drawFocusRing?: boolean;
 
     readonly dragAndDropState?: {
         src: number;
@@ -207,6 +208,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         trailingRowType: trailingRowType,
         fixedShadowX = true,
         fixedShadowY = true,
+        drawFocusRing = true,
         onMouseDown,
         onMouseUp,
         onMouseMoveRaw,
@@ -539,6 +541,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             fillHandle,
             lastRowSticky: trailingRowType,
             rows,
+            drawFocus: drawFocusRing,
             getCellContent,
             getGroupDetails: getGroupDetails ?? (name => ({ name })),
             getRowThemeOverride,
@@ -588,6 +591,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         disabledRows,
         rowHeight,
         verticalBorder,
+        drawFocusRing,
         isResizing,
         isFocused,
         selection,
