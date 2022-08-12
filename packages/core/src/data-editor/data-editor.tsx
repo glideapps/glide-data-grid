@@ -280,6 +280,9 @@ export interface DataEditorProps extends Props {
 
     readonly onPaste?: ((target: Item, values: readonly (readonly string[])[]) => boolean) | boolean;
 
+    readonly fixedShadowX?: DataGridSearchProps["fixedShadowX"];
+    readonly fixedShadowY?: DataGridSearchProps["fixedShadowY"];
+
     readonly theme?: Partial<Theme>;
 }
 
@@ -397,6 +400,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnResize: onColumnResizeIn,
         onColumnResizeEnd: onColumnResizeEndIn,
         onColumnResizeStart: onColumnResizeStartIn,
+        fixedShadowX,
+        fixedShadowY,
         ...rest
     } = p;
 
@@ -2917,6 +2922,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     translateX={visibleRegion.tx}
                     translateY={visibleRegion.ty}
                     verticalBorder={mangledVerticalBorder}
+                    fixedShadowX={fixedShadowX}
+                    fixedShadowY={fixedShadowY}
                     gridRef={gridRef}
                 />
                 {renameGroupNode}

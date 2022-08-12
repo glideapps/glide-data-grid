@@ -53,6 +53,8 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         onRowMoved,
         lockColumns,
         getCellContent,
+        fixedShadowX,
+        fixedShadowY
     } = p;
 
     const canResize = (onColumnResize ?? onColumnResizeEnd ?? onColumnResizeStart) !== undefined;
@@ -353,6 +355,8 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             onMouseUp={onMouseUpImpl}
             dragAndDropState={dragOffset}
             onMouseMoveRaw={onMouseMove}
+            fixedShadowX={fixedShadowX}
+            fixedShadowY={fixedShadowY}
             ref={gridRef}
         />
     );

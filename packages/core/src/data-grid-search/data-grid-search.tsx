@@ -453,6 +453,8 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 translateX={p.translateX}
                 translateY={p.translateY}
                 onKeyDown={p.onKeyDown}
+                fixedShadowX={p.fixedShadowX}
+                fixedShadowY={p.fixedShadowY}
                 // handled props
                 prelightCells={searchResults}
             />
