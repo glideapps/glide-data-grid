@@ -23,6 +23,7 @@ interface Props {
     readonly style?: React.CSSProperties;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
     readonly update: (region: Rectangle & { paddingRight: number }) => void;
+    readonly parentSize?: readonly [number, number];
 }
 
 const ScrollRegionStyle = styled.div<{ isSafari: boolean }>`
@@ -88,6 +89,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
         scrollToEnd,
         minimap,
         style,
+        parentSize,
     } = p;
     const padders: React.ReactNode[] = [];
 
@@ -219,7 +221,11 @@ export const InfiniteScroller: React.FC<Props> = p => {
         h += toAdd;
     }
 
-    const { ref, width, height } = useResizeDetector<HTMLDivElement>();
+    const { ref, width, height } = parentSize
+        ? { ref: undefined, width: parentSize[0], height: parentSize[1] }
+        : // TODO pass parent to useResizeDetector
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          useResizeDetector<HTMLDivElement>();
 
     if (lastProps.current?.height !== height || lastProps.current?.width !== width) {
         window.setTimeout(() => onScrollRef.current(), 0);

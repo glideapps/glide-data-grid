@@ -172,3 +172,32 @@ export function getScrollBarWidth(): number {
     scrollbarWidthCache = w1 - w2;
     return scrollbarWidthCache;
 }
+
+export const useStateWithReactiveInput = <T,>(inputState: T): [T, (newState: T | ((prev: T) => T)) => void] => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const inputStateTimestamp = React.useMemo(() => Date.now(), [inputState]);
+
+    const [externalState, setExternalState] = React.useState<{ val: T; timestamp: number }>(() => ({
+        val: inputState,
+        timestamp: Date.now(),
+    }));
+
+    const computedState = React.useMemo(
+        () => (inputStateTimestamp > externalState.timestamp ? inputState : externalState.val),
+        [externalState, inputState, inputStateTimestamp]
+    );
+
+    const setState = React.useCallback(
+        (newState: ((prev: T) => T) | T) => {
+            // @ts-expect-error https://github.com/microsoft/TypeScript/issues/37663
+            const val = typeof newState === "function" ? newState(computedState) : newState;
+
+            if (val !== computedState) {
+                setExternalState({ val, timestamp: Date.now() });
+            }
+        },
+        [computedState]
+    );
+
+    return [computedState, setState];
+};

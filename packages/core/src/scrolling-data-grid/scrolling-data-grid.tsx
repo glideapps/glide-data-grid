@@ -30,6 +30,7 @@ export interface ScrollingDataGridProps extends Props {
     readonly rightElement?: React.ReactNode;
     readonly showMinimap?: boolean;
     readonly clientSize: readonly [number, number];
+    readonly parentSize?: readonly [number, number];
 }
 
 const MinimapStyle = styled.div`
@@ -86,6 +87,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         overscrollX,
         overscrollY,
         showMinimap = false,
+        parentSize,
         ...dataGridProps
     } = p;
     const { smoothScrollX = false, smoothScrollY = false } = p;
@@ -314,6 +316,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             paddingRight={paddingRight}
             rightElementProps={rightElementProps}
             update={onScrollUpdate}
+            parentSize={parentSize}
             scrollToEnd={scrollToEnd}>
             <DataGridDnd eventTargetRef={scrollRef} width={clientWidth} height={clientHeight} {...dataGridProps} />
         </InfiniteScroller>

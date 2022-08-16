@@ -321,6 +321,7 @@ export type InnerGridCell = GridCell | InnerOnlyGridCell;
 
 export type CellList = readonly Item[];
 
+/** Values in rows / columns integers */
 export interface Rectangle {
     x: number;
     y: number;

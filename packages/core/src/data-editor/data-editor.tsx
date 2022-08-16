@@ -45,7 +45,7 @@ import { browserIsOSX } from "../common/browser-detect";
 import type { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
 import { getDataEditorTheme, makeCSSStyle, Theme, ThemeContext } from "../common/styles";
 import type { DataGridRef } from "../data-grid/data-grid";
-import { getScrollBarWidth, useEventListener, whenDefined } from "../common/utils";
+import { getScrollBarWidth, useEventListener, useStateWithReactiveInput, whenDefined } from "../common/utils";
 import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
 import { measureColumn, useColumnSizer } from "./use-column-sizer";
@@ -103,7 +103,7 @@ type Props = Omit<
     | "onSearchResultsChanged"
     | "onVisibleRegionChanged"
     | "rowHeight"
-    | "scrollRef"
+    // | "scrollRef"
     | "searchColOffset"
     | "selectedColumns"
     | "selection"
@@ -279,6 +279,8 @@ export interface DataEditorProps extends Props {
     readonly onPaste?: ((target: Item, values: readonly (readonly string[])[]) => boolean) | boolean;
 
     readonly theme?: Partial<Theme>;
+    readonly scrollOffsetX?: number;
+    readonly scrollOffsetY?: number;
 
     readonly customRenderers?: readonly CustomRenderer[];
 }
@@ -404,6 +406,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnResize: onColumnResizeIn,
         onColumnResizeEnd: onColumnResizeEndIn,
         onColumnResizeStart: onColumnResizeStartIn,
+        scrollOffsetX,
+        scrollOffsetY,
         customRenderers: additionalRenderers,
         ...rest
     } = p;
@@ -583,21 +587,46 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const totalHeaderHeight = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
 
-    const [visibleRegion, setVisibleRegion] = React.useState<
-        Rectangle & {
-            tx?: number;
-            ty?: number;
-            extras?: {
-                selected?: Item;
-                freezeRegion?: Rectangle;
-            };
+    const visibleRegionTy = React.useMemo(
+        () => (scrollOffsetY !== undefined && typeof rowHeight === "number" ? -(scrollOffsetY % rowHeight) : 0),
+        [scrollOffsetY, rowHeight]
+    );
+    const visibleRegionY = React.useMemo(
+        () =>
+            scrollOffsetY !== undefined && typeof rowHeight === "number" ? Math.floor(scrollOffsetY / rowHeight) : 0,
+        [scrollOffsetY, rowHeight]
+    );
+
+    type VisibleRegion = Rectangle & {
+        /** value in px */
+        tx?: number;
+        /** value in px */
+        ty?: number;
+        extras?: {
+            selected?: Item;
+            freezeRegion?: Rectangle;
+        };
+    };
+
+    const visibleRegionInput = React.useMemo<VisibleRegion>(
+        () => ({
+            x: 0,
+            y: visibleRegionY,
+            width: 1,
+            height: 1,
+            // tx: 'TODO',
+            ty: visibleRegionTy,
+        }),
+        [visibleRegionTy, visibleRegionY]
+    );
+
+    React.useLayoutEffect(() => {
+        if (scrollOffsetY !== undefined && scrollRef.current !== null) {
+            scrollRef.current.scrollTop = scrollOffsetY;
         }
-    >({
-        x: 0,
-        y: 0,
-        width: 1,
-        height: 1,
-    });
+    }, [scrollOffsetY, scrollRef]);
+
+    const [visibleRegion, setVisibleRegion] = useStateWithReactiveInput<VisibleRegion>(visibleRegionInput);
 
     const cellXOffset = visibleRegion.x + rowMarkerOffset;
     const cellYOffset = visibleRegion.y;
@@ -2091,7 +2120,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         ...event,
                         cancel: () => {
                             cancelled = true;
-                            event.cancel();
+                            // event.cancel();
                         },
                     });
                 }
@@ -2726,14 +2755,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     // this effects purpose in life is to scroll the newly selected cell into view when and ONLY when that cell
     // is from an external gridSelection change. Also note we want the unmangled out selection because scrollTo
     // expects unmangled indexes
-    const [outCol, outRow] = gridSelectionOuter?.current?.cell ?? [];
-    const scrollToRef = React.useRef(scrollTo);
-    scrollToRef.current = scrollTo;
-    React.useEffect(() => {
-        if (outCol !== undefined && outRow !== undefined) {
-            scrollToRef.current(outCol, outRow);
-        }
-    }, [outCol, outRow]);
+
+    // TODO make this configurable to disable completely or disable on initial render
+    // const [outCol, outRow] = gridSelectionOuter?.current?.cell ?? [];
+    // const scrollToRef = React.useRef(scrollTo);
+    // scrollToRef.current = scrollTo;
+    // React.useEffect(() => {
+    //     if (outCol !== undefined && outRow !== undefined) {
+    //         scrollToRef.current(outCol, outRow);
+    //     }
+    // }, [outCol, outRow]);
 
     const disabledRows = React.useMemo(() => {
         if (showTrailingBlankRow === true && trailingRowOptions?.tint === true) {
