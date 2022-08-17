@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { Theme } from "../common/styles";
-import ImageWindowLoader from "../common/image-window-loader";
+import ImageWindowLoaderImpl from "../common/image-window-loader";
 import {
     computeBounds,
     getColumnIndexForX,
@@ -31,6 +31,7 @@ import {
     groupHeaderKind,
     headerKind,
     outOfBoundsKind,
+    ImageWindowLoader,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -105,6 +106,7 @@ export interface DataGridProps {
     readonly fillHandle?: boolean;
 
     readonly disabledRows?: CompactSelection;
+    readonly imageWindowLoader?: ImageWindowLoader;
 
     readonly onItemHovered?: (args: GridMouseEventArgs) => void;
     readonly onMouseMove: (args: GridMouseEventArgs) => void;
@@ -239,6 +241,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         onDragOverCell,
         onDrop,
         onDragLeave,
+        imageWindowLoader,
         smoothScrollX = false,
         smoothScrollY = false,
         experimental,
@@ -248,7 +251,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const cellXOffset = Math.max(freezeColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
-    const imageLoader = React.useMemo<ImageWindowLoader>(() => new ImageWindowLoader(), []);
+    const imageWindowLoaderInternal = React.useMemo<ImageWindowLoader>(() => new ImageWindowLoaderImpl(), []);
+    const imageLoader = imageWindowLoader ?? imageWindowLoaderInternal;
     const damageRegion = React.useRef<readonly Item[] | undefined>();
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);

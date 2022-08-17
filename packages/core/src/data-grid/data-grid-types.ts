@@ -3,7 +3,6 @@ import { assertNever, proveType } from "../common/support";
 import has from "lodash/has";
 import type React from "react";
 import type { CSSProperties } from "react";
-import type ImageWindowLoader from "../common/image-window-loader";
 import type { SpriteManager } from "./data-grid-sprites";
 
 // Thoughts:
@@ -35,6 +34,12 @@ export interface CellClickedEventArgs extends GridMouseCellEventArgs, Preventabl
 export interface HeaderClickedEventArgs extends GridMouseHeaderEventArgs, PreventableEvent {}
 
 export interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, PreventableEvent {}
+
+export interface ImageWindowLoader {
+    setWindow(newWindow: Rectangle, freezeCols: number): void;
+    loadOrGetImage(url: string, col: number, row: number): HTMLImageElement | undefined;
+    setCallback(imageLoaded: (locations: readonly Item[]) => void): void;
+}
 
 export const BooleanEmpty = null;
 export const BooleanIndeterminate = undefined;

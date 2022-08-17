@@ -1,5 +1,4 @@
 /* eslint-disable unicorn/no-for-loop */
-import type ImageWindowLoader from "../common/image-window-loader";
 import {
     GridSelection,
     DrawHeaderCallback,
@@ -18,6 +17,7 @@ import {
     headerCellCheckedMarker,
     headerCellUnheckedMarker,
     TrailingRowType,
+    ImageWindowLoader,
 } from "./data-grid-types";
 import groupBy from "lodash/groupBy";
 import type { HoverValues } from "./animation-manager";

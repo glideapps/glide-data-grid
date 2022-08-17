@@ -1,4 +1,4 @@
-import type { Item, Rectangle } from "../data-grid/data-grid-types";
+import type { ImageWindowLoader, Item, Rectangle } from "../data-grid/data-grid-types";
 import throttle from "lodash/throttle";
 
 interface LoadResult {
@@ -30,7 +30,7 @@ function unpackNumberToColRow(packed: number): [number, number] {
     return [col, row];
 }
 
-class ImageWindowLoader {
+class ImageWindowLoaderImpl implements ImageWindowLoader {
     private imageLoaded: (locations: readonly Item[]) => void = () => undefined;
     private loadedLocations: [number, number][] = [];
 
@@ -160,4 +160,4 @@ class ImageWindowLoader {
     }
 }
 
-export default ImageWindowLoader;
+export default ImageWindowLoaderImpl;

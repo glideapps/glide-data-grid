@@ -1,7 +1,6 @@
 import type { OverlayImageEditorProps, Theme } from "../..";
-import type ImageWindowLoader from "../../common/image-window-loader";
 import type { SpriteManager } from "../data-grid-sprites";
-import type { InnerGridCell, Rectangle } from "../data-grid-types";
+import type { InnerGridCell, Rectangle, ImageWindowLoader } from "../data-grid-types";
 
 export type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
