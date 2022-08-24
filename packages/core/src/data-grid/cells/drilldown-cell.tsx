@@ -18,7 +18,7 @@ export const drilldownCellRenderer: InternalCellRenderer<DrilldownCell> = {
         ) +
         2 * t.cellHorizontalPadding -
         4,
-    render: a => drawDrilldownCell(a, a.cell.data),
+    draw: a => drawDrilldownCell(a, a.cell.data),
     getEditor: () => p => {
         const { onKeyDown, value } = p;
         return <DrilldownOverlayEditor drilldowns={value.data} onKeyDown={onKeyDown} />;

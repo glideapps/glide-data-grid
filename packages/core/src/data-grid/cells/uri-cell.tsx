@@ -11,8 +11,8 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
     needsHover: false,
     needsHoverPosition: false,
     useLabel: true,
-    renderPrep: prepTextCell,
-    render: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
+    drawPrep: prepTextCell,
+    draw: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
     measure: (ctx, cell) => ctx.measureText(cell.data).width + 16,
     onDelete: c => ({
         ...c,

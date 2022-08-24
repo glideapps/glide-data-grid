@@ -9,8 +9,8 @@ export const rowIDCellRenderer: InternalCellRenderer<RowIDCell> = {
     kind: GridCellKind.RowID,
     needsHover: false,
     needsHoverPosition: false,
-    renderPrep: (a, b) => prepTextCell(a, b, a.theme.textLight),
-    render: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
+    drawPrep: (a, b) => prepTextCell(a, b, a.theme.textLight),
+    draw: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
     measure: (ctx, cell) => ctx.measureText(cell.data).width + 16,
     // eslint-disable-next-line react/display-name
     getEditor: () => p => {

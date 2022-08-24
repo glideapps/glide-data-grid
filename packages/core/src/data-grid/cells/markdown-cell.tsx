@@ -10,12 +10,12 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
     kind: GridCellKind.Markdown,
     needsHover: false,
     needsHoverPosition: false,
-    renderPrep: prepTextCell,
+    drawPrep: prepTextCell,
     measure: (ctx, cell, t) => {
         const firstLine = cell.data.split("\n")[0];
         return ctx.measureText(firstLine).width + 2 * t.cellHorizontalPadding;
     },
-    render: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
+    draw: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
     onDelete: c => ({
         ...c,
         data: "",

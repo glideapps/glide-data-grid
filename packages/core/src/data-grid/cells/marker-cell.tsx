@@ -7,10 +7,10 @@ export const markerCellRenderer: InternalCellRenderer<MarkerCell> = {
     kind: InnerGridCellKind.Marker,
     needsHover: true,
     needsHoverPosition: false,
-    renderPrep: prepMarkerRowCell,
-    renderDeprep: deprepMarkerRowCell,
+    drawPrep: prepMarkerRowCell,
+    drawDeprep: deprepMarkerRowCell,
     measure: () => 44,
-    render: a => drawMarkerRowCell(a, a.cell.row, a.cell.checked, a.cell.markerKind, a.cell.drawHandle),
+    draw: a => drawMarkerRowCell(a, a.cell.row, a.cell.checked, a.cell.markerKind, a.cell.drawHandle),
     onClick: (cell, x, y, bounds) => {
         const { width, height } = bounds;
 

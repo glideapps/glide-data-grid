@@ -21,7 +21,7 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     useLabel: false,
     needsHoverPosition: true,
     measure: () => 50,
-    render: a => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell)),
+    draw: a => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell)),
     onDelete: c => ({
         ...c,
         data: false,

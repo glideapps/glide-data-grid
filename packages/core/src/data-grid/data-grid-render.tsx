@@ -163,8 +163,8 @@ export function drawCell(
                 lastPrep?.deprep?.(args);
                 lastPrep = undefined;
             }
-            const partialPrepResult = r.renderPrep?.(args, lastPrep);
-            r.render(args);
+            const partialPrepResult = r.drawPrep?.(args, lastPrep);
+            r.draw(args);
             result = {
                 deprep: partialPrepResult?.deprep,
                 fillStyle: partialPrepResult?.fillStyle,
