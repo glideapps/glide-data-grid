@@ -69,13 +69,8 @@ export interface AdditionalRenderer<T extends CustomCell = CustomCell> extends B
     readonly onPaste?: (val: string, cellData: T["data"]) => T["data"] | undefined;
 }
 
-export type CellRenderer<T extends InnerGridCell> = T extends CustomCell<infer DataType>
+export type CellRenderer<T extends InnerGridCell> = [T] extends [CustomCell<infer DataType>]
     ? AdditionalRenderer<CustomCell<DataType>>
-    : InternalCellRenderer<InnerGridCell>;
-
-export function flattenRenderer(renderer: CellRenderer<any> | undefined): BaseCellRenderer<InnerGridCell> | undefined {
-    if (renderer === undefined) return undefined;
-    return renderer as BaseCellRenderer<InnerGridCell>;
-}
+    : InternalCellRenderer<T>;
 
 export type GetCellRendererCallback = <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;

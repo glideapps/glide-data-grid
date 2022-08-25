@@ -553,7 +553,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const getCellRenderer: <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined = React.useCallback(
         <T extends InnerGridCell>(cell: T) => {
             if (cell.kind !== GridCellKind.Custom) {
-                return CellRenderers[cell.kind] as CellRenderer<T>;
+                return (CellRenderers[cell.kind] as unknown) as CellRenderer<T>;
             }
             return additionalRenderers?.find(x => x.isMatch(cell)) as CellRenderer<T>;
         },
@@ -1484,7 +1484,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         const c = getMangledCellContent([col, row]);
                         const r = getCellRenderer(c);
                         if (r !== undefined && r.onClick !== undefined) {
-                            const newVal = r.onClick(c as any, a.localEventX, a.localEventY, a.bounds);
+                            const newVal = r.onClick(c, a.localEventX, a.localEventY, a.bounds);
                             if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
                                 mangledOnCellsEdited([{ location: a.location, value: newVal }]);
                                 gridRef.current?.damage([

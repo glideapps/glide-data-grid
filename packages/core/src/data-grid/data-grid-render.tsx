@@ -39,7 +39,6 @@ import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import type { Theme } from "../common/styles";
 import { blend, withAlpha } from "./color-parser";
 import type { DrawArgs, GetCellRendererCallback, PrepResult } from "./cells/cell-types";
-import { flattenRenderer } from "./cells/cell-types";
 import { deepEqual } from "../common/support";
 
 // Future optimization opportunities
@@ -127,7 +126,7 @@ export function drawCell(
         col,
         row,
         cell,
-        rect: { x, y, width: w, height: h } as Rectangle,
+        rect: { x, y, width: w, height: h },
         highlighted,
         hoverAmount,
         hoverX,
@@ -143,7 +142,7 @@ export function drawCell(
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
         const drawn = isInnerOnlyCell(cell) ? false : drawCustomCell?.(args as DrawArgs<GridCell>) === true;
         if (!drawn) {
-            const r = flattenRenderer(getCellRenderer(cell));
+            const r = getCellRenderer(cell);
             if (r !== undefined) {
                 if (lastPrep?.renderer !== r) {
                     lastPrep?.deprep?.(args);

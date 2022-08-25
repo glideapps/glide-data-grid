@@ -3,12 +3,10 @@ import { createPortal } from "react-dom";
 
 import ClickOutsideContainer from "../click-outside-container/click-outside-container";
 import { makeCSSStyle, Theme, ThemeContext } from "../common/styles";
-import { assert } from "../common/support";
 import type { GetCellRendererCallback } from "../data-grid/cells/cell-types";
 import {
     EditableGridCell,
     GridCell,
-    GridCellKind,
     isEditableGridCell,
     isInnerOnlyCell,
     isObjectEditorCallbackResult,
@@ -167,19 +165,8 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     const [customEditor, useLabel] = React.useMemo((): [ProvideEditorCallbackResult<GridCell>, boolean] | [] => {
         if (isInnerOnlyCell(content)) return [];
         const external = provideEditor?.(content);
-        if (external !== undefined) return [external as ProvideEditorCallbackResult<GridCell>, false];
-        const renderer = getCellRenderer(content);
-        if (renderer === undefined) return [];
-        if (renderer.kind === GridCellKind.Custom) {
-            assert(content.kind === GridCellKind.Custom);
-            return [renderer.provideEditor?.(content) as ProvideEditorCallbackResult<GridCell>, false];
-        } else {
-            return [
-                renderer.provideEditor?.(content) as ProvideEditorCallbackResult<GridCell>,
-                renderer.useLabel ?? false,
-            ];
-        }
-        return [];
+        if (external !== undefined) return [external, false];
+        return [getCellRenderer(content)?.provideEditor?.(content), false];
     }, [content, getCellRenderer, provideEditor]);
 
     const { ref, style: stayOnScreenStyle } = useStayOnScreen();
