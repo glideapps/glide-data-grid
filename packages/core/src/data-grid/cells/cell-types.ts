@@ -1,6 +1,6 @@
 import type { OverlayImageEditorProps, Theme } from "../..";
 import type { SpriteManager } from "../data-grid-sprites";
-import type { InnerGridCell, Rectangle, ImageWindowLoader, CustomCell, GridCellKind } from "../data-grid-types";
+import type { InnerGridCell, Rectangle, ImageWindowLoader, CustomCell } from "../data-grid-types";
 
 export type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
@@ -58,6 +58,7 @@ type ProvideEditorCallback<T extends InnerGridCell> = (
 
 interface BaseCellRenderer<T extends InnerGridCell> {
     // drawing
+    readonly kind: T["kind"];
     readonly draw: DrawCallback<T>;
     readonly drawPrep?: PrepCallback;
     readonly drawDeprep?: DeprepCallback;
@@ -74,15 +75,14 @@ interface BaseCellRenderer<T extends InnerGridCell> {
 }
 
 export interface InternalCellRenderer<T extends InnerGridCell> extends BaseCellRenderer<T> {
-    readonly kind: T["kind"];
     readonly useLabel?: boolean;
     readonly getAccessibilityString: (cell: T) => string;
+    readonly onPaste: (val: string, cell: T) => T | undefined;
 }
 
 export interface AdditionalRenderer<T extends CustomCell = CustomCell> extends BaseCellRenderer<T> {
-    readonly kind: GridCellKind.Custom;
     readonly isMatch: (cell: CustomCell) => cell is T;
-    readonly onPaste?: (val: string, cellData: T["data"]) => T["data"]; // FIXME: Still not implemented
+    readonly onPaste?: (val: string, cellData: T["data"]) => T["data"] | undefined;
 }
 
 export type CellRenderer<T extends InnerGridCell> = T extends CustomCell<infer DataType>

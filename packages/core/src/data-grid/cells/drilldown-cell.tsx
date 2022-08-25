@@ -23,4 +23,5 @@ export const drilldownCellRenderer: InternalCellRenderer<DrilldownCell> = {
         const { onKeyDown, value } = p;
         return <DrilldownOverlayEditor drilldowns={value.data} onKeyDown={onKeyDown} />;
     },
+    onPaste: () => undefined,
 };

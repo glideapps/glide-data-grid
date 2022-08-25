@@ -18,4 +18,5 @@ export const bubbleCellRenderer: InternalCellRenderer<BubbleCell> = {
         const { onKeyDown, value } = p;
         return <BubblesOverlayEditor bubbles={value.data} onKeyDown={onKeyDown} />;
     },
+    onPaste: () => undefined,
 };

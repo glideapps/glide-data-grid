@@ -25,4 +25,5 @@ export const markerCellRenderer: InternalCellRenderer<MarkerCell> = {
         }
         return undefined;
     },
+    onPaste: () => undefined,
 };

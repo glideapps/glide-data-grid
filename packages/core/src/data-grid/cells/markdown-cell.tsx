@@ -50,4 +50,5 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
             />
         );
     },
+    onPaste: (toPaste, cell) => (toPaste === cell.data ? undefined : { ...cell, data: toPaste }),
 };

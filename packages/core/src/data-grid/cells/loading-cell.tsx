@@ -9,4 +9,5 @@ export const loadingCellRenderer: InternalCellRenderer<LoadingCell> = {
     needsHoverPosition: false,
     measure: () => 120,
     draw: () => undefined,
+    onPaste: () => undefined,
 };

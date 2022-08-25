@@ -9,4 +9,5 @@ export const protectedCellRenderer: InternalCellRenderer<ProtectedCell> = {
     needsHover: false,
     needsHoverPosition: false,
     draw: drawProtectedCell,
+    onPaste: () => undefined,
 };

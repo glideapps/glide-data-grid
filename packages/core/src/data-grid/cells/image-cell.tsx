@@ -37,4 +37,24 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
             />
         );
     },
+    onPaste: (toPaste, cell) => {
+        toPaste = toPaste.trim();
+        const fragments = toPaste.split(",");
+        const uris = fragments
+            .map(f => {
+                try {
+                    new URL(f);
+                    return f;
+                } catch {
+                    return undefined;
+                }
+            })
+            .filter(x => x !== undefined) as string[];
+
+        if (uris.length === cell.data.length && uris.every((u, i) => u === cell.data[i])) return undefined;
+        return {
+            ...cell,
+            data: uris,
+        };
+    },
 };

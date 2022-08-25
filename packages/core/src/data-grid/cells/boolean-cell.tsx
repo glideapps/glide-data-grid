@@ -1,5 +1,11 @@
 import { drawBoolean } from "../data-grid-lib";
-import { GridCellKind, BooleanCell, booleanCellIsEditable } from "../data-grid-types";
+import {
+    GridCellKind,
+    BooleanCell,
+    booleanCellIsEditable,
+    BooleanEmpty,
+    BooleanIndeterminate,
+} from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";
 
 /**
@@ -38,5 +44,21 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
             };
         }
         return undefined;
+    },
+    onPaste: (toPaste, cell) => {
+        let newVal: boolean | BooleanEmpty | BooleanIndeterminate = BooleanEmpty;
+        if (toPaste.toLowerCase() === "true") {
+            newVal = true;
+        } else if (toPaste.toLowerCase() === "false") {
+            newVal = false;
+        } else if (toPaste.toLowerCase() === "indeterminate") {
+            newVal = BooleanIndeterminate;
+        }
+        return newVal === cell.data
+            ? undefined
+            : {
+                  ...cell,
+                  data: newVal,
+              };
     },
 };

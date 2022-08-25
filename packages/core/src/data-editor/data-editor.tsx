@@ -32,8 +32,6 @@ import {
     HeaderClickedEventArgs,
     CellClickedEventArgs,
     Item,
-    BooleanIndeterminate,
-    BooleanEmpty,
     MarkerCell,
     headerCellUnheckedMarker,
     headerCellCheckedMarker,
@@ -2400,59 +2398,27 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             value: coerced,
                         };
                     }
-                    switch (inner.kind) {
-                        case GridCellKind.Text:
-                        case GridCellKind.Markdown:
-                        case GridCellKind.Uri: {
-                            return {
-                                location: target,
-                                value: {
-                                    ...inner,
-                                    data: toPaste,
-                                },
-                            };
-                        }
-                        case GridCellKind.Number: {
-                            const newNumber = Number.parseFloat(toPaste);
-                            if (!Number.isNaN(newNumber)) {
-                                return {
-                                    location: target,
-                                    value: {
-                                        ...inner,
-                                        data: newNumber,
-                                    },
-                                };
-                            }
-                            return undefined;
-                        }
-                        case GridCellKind.Custom: {
-                            return {
-                                location: target,
-                                value: {
-                                    ...inner,
-                                    copyData: toPaste,
-                                },
-                            };
-                        }
-                        case GridCellKind.Boolean: {
-                            let newVal: boolean | BooleanEmpty | BooleanIndeterminate = BooleanEmpty;
-                            if (toPaste.toLowerCase() === "true") {
-                                newVal = true;
-                            } else if (toPaste.toLowerCase() === "false") {
-                                newVal = false;
-                            } else if (toPaste.toLowerCase() === "indeterminate") {
-                                newVal = BooleanIndeterminate;
-                            }
-                            return {
-                                location: target,
-                                value: {
-                                    ...inner,
-                                    data: newVal,
-                                },
-                            };
-                        }
-                        default:
-                            assertNever(inner);
+                    const r = getCellRenderer(inner);
+                    if (r === undefined) return undefined;
+                    if (r.kind === GridCellKind.Custom) {
+                        assert(inner.kind === GridCellKind.Custom);
+                        const newVal = r.onPaste?.(toPaste, inner);
+                        if (newVal === undefined) return undefined;
+                        return {
+                            location: target,
+                            value: {
+                                ...inner,
+                                data: newVal,
+                            },
+                        };
+                    } else {
+                        const newVal = r.onPaste?.(toPaste, inner);
+                        if (newVal === undefined) return undefined;
+                        assert(newVal.kind === inner.kind);
+                        return {
+                            location: target,
+                            value: newVal,
+                        };
                     }
                 }
                 return undefined;
@@ -2573,6 +2539,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [
             coercePasteValue,
+            getCellRenderer,
             getMangledCellContent,
             gridSelection,
             keybindings.paste,

@@ -32,4 +32,5 @@ export const rowIDCellRenderer: InternalCellRenderer<RowIDCell> = {
             />
         );
     },
+    onPaste: () => undefined,
 };
