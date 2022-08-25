@@ -56,6 +56,8 @@ describe("Image cell", () => {
         const Editor = imageCellRenderer.provideEditor?.(cell);
         const target = getMockEditorTarget();
 
+        assert(!isObjectEditorCallbackResult(Editor));
+
         assert(Editor !== undefined);
         const result = render(
             <Editor
