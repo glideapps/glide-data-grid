@@ -4,6 +4,7 @@ export type { SpriteMap } from "./data-grid/data-grid-sprites";
 export type { Theme } from "./common/styles";
 export type { CustomCellRenderer } from "./data-editor/use-custom-cells";
 export type { DrawArgs } from "./data-editor/custom-cell-draw-args";
+export type { AdditionalRenderer } from "./data-grid/cells/cell-types";
 
 export * from "./data-editor/data-editor";
 export * from "./data-grid/data-grid-types";

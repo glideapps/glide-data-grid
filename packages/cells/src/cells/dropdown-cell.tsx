@@ -1,9 +1,10 @@
 import {
     CustomCell,
     ProvideEditorCallback,
-    CustomCellRenderer,
+    AdditionalRenderer,
     getMiddleCenterBias,
     useTheme,
+    GridCellKind,
 } from "@glideapps/glide-data-grid";
 import { styled } from "@linaria/react";
 import * as React from "react";
@@ -129,7 +130,8 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
     );
 };
 
-const renderer: CustomCellRenderer<DropdownCell> = {
+const renderer: AdditionalRenderer<DropdownCell> = {
+    kind: GridCellKind.Custom,
     isMatch: (c): c is DropdownCell => (c.data as any).kind === "dropdown-cell",
     draw: (args, cell) => {
         const { ctx, theme, rect } = args;

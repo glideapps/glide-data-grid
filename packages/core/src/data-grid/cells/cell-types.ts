@@ -1,8 +1,12 @@
-import type { OverlayImageEditorProps, Theme } from "../..";
+import type { Theme } from "../..";
 import type { SpriteManager } from "../data-grid-sprites";
-import type { InnerGridCell, Rectangle, ImageWindowLoader, CustomCell } from "../data-grid-types";
-
-export type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
+import type {
+    InnerGridCell,
+    Rectangle,
+    ImageWindowLoader,
+    CustomCell,
+    ProvideEditorCallback,
+} from "../data-grid-types";
 
 export interface BaseDrawArgs {
     ctx: CanvasRenderingContext2D;
@@ -32,27 +36,9 @@ export interface PrepResult {
     deprep: ((args: Pick<BaseDrawArgs, "ctx">) => void) | undefined;
 }
 
-type DrawCallback<T extends InnerGridCell> = (args: DrawArgs<T>, cell: T) => void;
+export type DrawCallback<T extends InnerGridCell> = (args: DrawArgs<T>, cell: T) => void;
 type PrepCallback = (args: BaseDrawArgs, lastPrep?: PrepResult) => Partial<PrepResult>;
 type DeprepCallback = (args: Pick<BaseDrawArgs, "ctx">) => void;
-
-type ProvideEditorCallback<T extends InnerGridCell> = (
-    cell: T
-) =>
-    | React.FunctionComponent<{
-          readonly onChange: (newValue: T) => void;
-          readonly onKeyDown: (event: React.KeyboardEvent) => void;
-          readonly onFinishedEditing: (newValue?: T) => void;
-          readonly isHighlighted: boolean;
-          readonly value: T;
-          readonly imageEditorOverride?: ImageEditorType;
-          readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
-          readonly target: Rectangle;
-          readonly validatedSelection?: number | readonly [number, number];
-          readonly forceEditMode: boolean;
-          readonly isValid?: boolean;
-      }>
-    | undefined;
 
 interface BaseCellRenderer<T extends InnerGridCell> {
     // drawing

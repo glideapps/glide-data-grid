@@ -12,7 +12,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
     needsHoverPosition: false,
     drawPrep: prepTextCell,
     useLabel: true,
-    draw: a => drawTextCell(a, a.cell.displayData, a.cell.contentAlign, a.cell.allowWrapping, a.hyperWrapping),
+    draw: a => (drawTextCell(a, a.cell.displayData, a.cell.contentAlign, a.cell.allowWrapping, a.hyperWrapping), true),
     measure: (ctx, cell, t) => {
         const lines = cell.displayData.split("\n").slice(0, cell.allowWrapping === true ? undefined : 1);
         return Math.max(...lines.map(l => ctx.measureText(l).width + 2 * t.cellHorizontalPadding));

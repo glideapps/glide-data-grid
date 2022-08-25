@@ -1,5 +1,5 @@
 import * as React from "react";
-import { CustomCell, CustomCellRenderer, drawTextCell } from "@glideapps/glide-data-grid";
+import { CustomCell, AdditionalRenderer, drawTextCell, GridCellKind } from "@glideapps/glide-data-grid";
 
 interface DatePickerCellProps {
     readonly kind: "date-picker-cell";
@@ -10,7 +10,8 @@ interface DatePickerCellProps {
 
 export type DatePickerCell = CustomCell<DatePickerCellProps>;
 
-const renderer: CustomCellRenderer<DatePickerCell> = {
+const renderer: AdditionalRenderer<DatePickerCell> = {
+    kind: GridCellKind.Custom,
     isMatch: (cell: CustomCell): cell is DatePickerCell => (cell.data as any).kind === "date-picker-cell",
     draw: (args, cell) => {
         const { displayDate } = cell.data;
@@ -33,6 +34,7 @@ const renderer: CustomCellRenderer<DatePickerCell> = {
             <input
                 style={{ minHeight: 26, border: "none", outline: "none" }}
                 type={format}
+                autoFocus={true}
                 value={val}
                 onChange={e => {
                     p.onChange({

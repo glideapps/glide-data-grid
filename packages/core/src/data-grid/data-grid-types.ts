@@ -4,6 +4,7 @@ import has from "lodash/has";
 import type React from "react";
 import type { CSSProperties } from "react";
 import type { SpriteManager } from "./data-grid-sprites";
+import type { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
 
 // Thoughts:
 // rows/columns are called out as selected, but when selected they must also be added
@@ -19,6 +20,8 @@ export interface GridSelection {
     readonly columns: CompactSelection;
     readonly rows: CompactSelection;
 }
+
+type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
 export type GridMouseEventArgs =
     | GridMouseCellEventArgs
@@ -372,16 +375,22 @@ export interface BubbleCell extends BaseGridCell {
 
 export type SelectionRange = number | readonly [number, number];
 
-export type ProvideEditorComponent<T extends GridCell> = React.FunctionComponent<{
+export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComponent<{
     readonly onChange: (newValue: T) => void;
     readonly onFinishedEditing: (newValue?: T) => void;
     readonly isHighlighted: boolean;
     readonly value: T;
     readonly initialValue?: string;
     readonly validatedSelection?: SelectionRange;
+    readonly onKeyDown: (event: React.KeyboardEvent) => void;
+    readonly imageEditorOverride?: ImageEditorType;
+    readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
+    readonly target: Rectangle;
+    readonly forceEditMode: boolean;
+    readonly isValid?: boolean;
 }>;
 
-type ObjectEditorCallbackResult<T extends GridCell> = {
+type ObjectEditorCallbackResult<T extends InnerGridCell> = {
     editor: ProvideEditorComponent<T>;
     deletedValue?: (toDelete: T) => T;
     styleOverride?: CSSProperties;
@@ -389,7 +398,7 @@ type ObjectEditorCallbackResult<T extends GridCell> = {
     disableStyling?: boolean;
 };
 
-type ProvideEditorCallbackResult<T extends GridCell> =
+export type ProvideEditorCallbackResult<T extends InnerGridCell> =
     | (ProvideEditorComponent<T> & {
           disablePadding?: boolean;
           disableStyling?: boolean;
@@ -397,13 +406,13 @@ type ProvideEditorCallbackResult<T extends GridCell> =
     | ObjectEditorCallbackResult<T>
     | undefined;
 
-export function isObjectEditorCallbackResult<T extends GridCell>(
+export function isObjectEditorCallbackResult<T extends InnerGridCell>(
     obj: ProvideEditorCallbackResult<T>
 ): obj is ObjectEditorCallbackResult<T> {
     return has(obj, "editor");
 }
 
-export type ProvideEditorCallback<T extends GridCell> = (cell: T) => ProvideEditorCallbackResult<T>;
+export type ProvideEditorCallback<T extends InnerGridCell> = (cell: T) => ProvideEditorCallbackResult<T>;
 
 export type ValidatedGridCell = EditableGridCell & {
     selectionRange?: SelectionRange;

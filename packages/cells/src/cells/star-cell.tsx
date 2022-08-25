@@ -1,4 +1,4 @@
-import { CustomCell, Item, CustomCellRenderer } from "@glideapps/glide-data-grid";
+import { CustomCell, Item, AdditionalRenderer, GridCellKind } from "@glideapps/glide-data-grid";
 import * as React from "react";
 import { styled } from "@linaria/react";
 
@@ -72,7 +72,8 @@ const EditorWrap = styled.div`
     }
 `;
 
-const renderer: CustomCellRenderer<StarCell> = {
+const renderer: AdditionalRenderer<StarCell> = {
+    kind: GridCellKind.Custom,
     isMatch: (cell: CustomCell): cell is StarCell => (cell.data as any).kind === "star-cell",
     draw: (args, cell) => {
         const { ctx, theme, rect, hoverAmount } = args;

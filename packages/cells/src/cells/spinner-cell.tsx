@@ -1,4 +1,4 @@
-import { CustomCell, CustomCellRenderer } from "@glideapps/glide-data-grid";
+import { CustomCell, AdditionalRenderer, GridCellKind } from "@glideapps/glide-data-grid";
 
 interface SpinnerCellProps {
     readonly kind: "spinner-cell";
@@ -6,7 +6,8 @@ interface SpinnerCellProps {
 
 export type SpinnerCell = CustomCell<SpinnerCellProps>;
 
-const renderer: CustomCellRenderer<SpinnerCell> = {
+const renderer: AdditionalRenderer<SpinnerCell> = {
+    kind: GridCellKind.Custom,
     isMatch: (cell: CustomCell): cell is SpinnerCell => (cell.data as any).kind === "spinner-cell",
     draw: args => {
         const { ctx, theme, rect, requestAnimationFrame } = args;
