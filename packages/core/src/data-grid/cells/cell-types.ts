@@ -82,11 +82,11 @@ export interface InternalCellRenderer<T extends InnerGridCell> extends BaseCellR
 export interface AdditionalRenderer<T extends CustomCell = CustomCell> extends BaseCellRenderer<T> {
     readonly kind: GridCellKind.Custom;
     readonly isMatch: (cell: CustomCell) => cell is T;
-    readonly onPaste?: (val: string, cellData: T["data"]) => T["data"];
+    readonly onPaste?: (val: string, cellData: T["data"]) => T["data"]; // FIXME: Still not implemented
 }
 
 export type CellRenderer<T extends InnerGridCell> = T extends CustomCell<infer DataType>
-    ? InternalCellRenderer<InnerGridCell> | AdditionalRenderer<CustomCell<DataType>>
+    ? AdditionalRenderer<CustomCell<DataType>>
     : InternalCellRenderer<InnerGridCell>;
 
 export type GetCellRendererCallback = <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;
