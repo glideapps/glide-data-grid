@@ -21,7 +21,7 @@ export interface GridSelection {
     readonly rows: CompactSelection;
 }
 
-type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
+export type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
 export type GridMouseEventArgs =
     | GridMouseCellEventArgs

@@ -53,7 +53,7 @@ import { AnimationManager, StepCallback } from "./animation-manager";
 import { browserIsFirefox } from "../common/browser-detect";
 import { useAnimationQueue } from "./use-animation-queue";
 import { assert } from "../common/support";
-import type { CellRenderer, GetCellRendererCallback, InternalCellRenderer } from "./cells/cell-types";
+import type { CellRenderer, GetCellRendererCallback } from "./cells/cell-types";
 
 export interface DataGridProps {
     readonly width: number;
@@ -182,7 +182,7 @@ export interface DataGridRef {
 
 const getRowData = (cell: InnerGridCell, getCellRenderer?: GetCellRendererCallback) => {
     if (cell.kind === GridCellKind.Custom) return cell.copyData;
-    const r = getCellRenderer?.(cell) as InternalCellRenderer<typeof cell>;
+    const r = getCellRenderer?.(cell);
     return r?.getAccessibilityString(cell) ?? "";
 };
 

@@ -73,4 +73,9 @@ export type CellRenderer<T extends InnerGridCell> = T extends CustomCell<infer D
     ? AdditionalRenderer<CustomCell<DataType>>
     : InternalCellRenderer<InnerGridCell>;
 
+export function flattenRenderer(renderer: CellRenderer<any> | undefined): BaseCellRenderer<InnerGridCell> | undefined {
+    if (renderer === undefined) return undefined;
+    return renderer as BaseCellRenderer<InnerGridCell>;
+}
+
 export type GetCellRendererCallback = <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;

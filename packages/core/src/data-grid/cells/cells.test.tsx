@@ -1,10 +1,9 @@
 import { render } from "@testing-library/react";
 import { assert } from "../../common/support";
-import { GridCellKind, ImageCell, Rectangle } from "../data-grid-types";
+import { GridCellKind, ImageCell, ImageEditorType, isObjectEditorCallbackResult, Rectangle } from "../data-grid-types";
 import { imageCellRenderer } from "./image-cell";
 import * as React from "react";
 import noop from "lodash/noop";
-import type { ImageEditorType } from "./cell-types";
 import { getDefaultTheme } from "../..";
 
 function getMockEditorTarget(): Rectangle {
@@ -79,6 +78,8 @@ describe("Image cell", () => {
         const Editor = imageCellRenderer.provideEditor?.(cell);
         assert(Editor !== undefined);
         const target = getMockEditorTarget();
+
+        assert(!isObjectEditorCallbackResult(Editor));
 
         const CustomEditor: ImageEditorType = () => {
             return (
