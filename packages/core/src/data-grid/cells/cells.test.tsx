@@ -48,7 +48,7 @@ describe("Image cell", () => {
     it("Measures a reasonable size", async () => {
         const cell = getImgCell();
         const ctx = get2dContext();
-        const autoSize = imageCellRenderer.measure(ctx, cell, getDefaultTheme());
+        const autoSize = imageCellRenderer.measure?.(ctx, cell, getDefaultTheme());
         expect(autoSize).toBe(100);
     });
 

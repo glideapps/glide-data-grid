@@ -2,6 +2,8 @@ import { renderHook } from "@testing-library/react-hooks";
 import { GridCell, GridCellKind, GridColumn, Rectangle } from "..";
 import { getDataEditorTheme } from "../common/styles";
 import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
+import { CellRenderers } from "../data-grid/cells";
+import type { GetCellRendererCallback } from "../data-grid/cells/cell-types";
 import type { CellArray } from "../data-grid/data-grid-types";
 import { useColumnSizer } from "./use-column-sizer";
 
@@ -75,10 +77,25 @@ const theme = getDataEditorTheme();
 
 const abortController = new AbortController();
 
+const getCellRenderer: GetCellRendererCallback = cell => {
+    if (cell.kind === GridCellKind.Custom) return undefined;
+    return CellRenderers[cell.kind] as any;
+};
+
 describe("use-column-sizer", () => {
     it("Measures a simple cell", async () => {
         const { result } = renderHook(() =>
-            useColumnSizer(COLUMNS, 1000, getShortCellsForSelection, 400, 20, 500, theme, abortController)
+            useColumnSizer(
+                COLUMNS,
+                1000,
+                getShortCellsForSelection,
+                400,
+                20,
+                500,
+                theme,
+                getCellRenderer,
+                abortController
+            )
         );
 
         const columnA = result.current.find(col => col.title === "A");
@@ -93,8 +110,19 @@ describe("use-column-sizer", () => {
     });
 
     it("Measures the last row", async () => {
+        // eslint-disable-next-line sonarjs/no-identical-functions
         renderHook(() =>
-            useColumnSizer(COLUMNS, 1000, getShortCellsForSelection, 400, 20, 500, theme, abortController)
+            useColumnSizer(
+                COLUMNS,
+                1000,
+                getShortCellsForSelection,
+                400,
+                20,
+                500,
+                theme,
+                getCellRenderer,
+                abortController
+            )
         );
 
         expect(getShortCellsForSelection).toBeCalledTimes(2);
@@ -122,7 +150,17 @@ describe("use-column-sizer", () => {
     it("Measures new columns when they arrive, doesn't re-measure existing ones", async () => {
         const { result, rerender } = renderHook(
             ({ getCellsForSelection, columns }) =>
-                useColumnSizer(columns, 1000, getCellsForSelection, 400, 20, 500, theme, abortController),
+                useColumnSizer(
+                    columns,
+                    1000,
+                    getCellsForSelection,
+                    400,
+                    20,
+                    500,
+                    theme,
+                    getCellRenderer,
+                    abortController
+                ),
             {
                 initialProps: {
                     getCellsForSelection: getShortCellsForSelection,
@@ -165,7 +203,7 @@ describe("use-column-sizer", () => {
 
     it("Returns the default sizes if getCellsForSelection is not provided", async () => {
         const { result } = renderHook(() =>
-            useColumnSizer(COLUMNS, 1000, undefined, 400, 20, 500, theme, abortController)
+            useColumnSizer(COLUMNS, 1000, undefined, 400, 20, 500, theme, getCellRenderer, abortController)
         );
 
         const columnA = result.current.find(col => col.title === "A");
@@ -189,6 +227,7 @@ describe("use-column-sizer", () => {
                 50,
                 500,
                 theme,
+                getCellRenderer,
                 abortController
             )
         );
