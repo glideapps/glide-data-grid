@@ -1,6 +1,6 @@
 import type { OverlayImageEditorProps, Theme } from "../..";
 import type { SpriteManager } from "../data-grid-sprites";
-import type { InnerGridCell, Rectangle, ImageWindowLoader, CustomCell } from "../data-grid-types";
+import type { InnerGridCell, Rectangle, ImageWindowLoader, CustomCell, GridCellKind } from "../data-grid-types";
 
 export type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
@@ -22,7 +22,7 @@ export interface BaseDrawArgs {
     hyperWrapping: boolean;
 }
 
-interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {
+export interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {
     cell: T;
 }
 
@@ -56,37 +56,37 @@ type ProvideEditorCallback<T extends InnerGridCell> = (
       }>
     | undefined;
 
-export interface InternalCellRenderer<T extends InnerGridCell> {
-    readonly kind: T["kind"];
-    readonly drawPrep?: PrepCallback;
-    readonly draw: DrawCallback<T>;
-    readonly drawDeprep?: DeprepCallback;
-    readonly needsHover: boolean;
-    readonly needsHoverPosition: boolean;
-    readonly useLabel?: boolean;
-    readonly measure: (ctx: CanvasRenderingContext2D, cell: T, theme: Theme) => number;
-    readonly onClick?: (cell: T, posX: number, posY: number, bounds: Rectangle) => T | undefined;
-    readonly onDelete?: (cell: T) => T | undefined;
-    readonly getAccessibilityString: (cell: T) => string;
-    readonly getEditor?: ProvideEditorCallback<T>;
-}
-
-export interface AdditionalRenderer<T extends CustomCell> {
-    isMatch: (cell: CustomCell) => cell is T;
-
+interface BaseCellRenderer<T extends InnerGridCell> {
     // drawing
-    draw: (args: DrawArgs<T>, cell: T) => boolean;
-    drawPrep?: (args: BaseDrawArgs, lastPrep?: PrepResult) => Partial<PrepResult>;
-    drawDeprep?: (args: Pick<BaseDrawArgs, "ctx">) => void;
-    needsHover?: boolean;
-    needsHoverPosition?: boolean;
-    measure?: (ctx: CanvasRenderingContext2D, cell: T, theme: Theme) => number;
+    readonly draw: DrawCallback<T>;
+    readonly drawPrep?: PrepCallback;
+    readonly drawDeprep?: DeprepCallback;
+    readonly needsHover?: boolean;
+    readonly needsHoverPosition?: boolean;
+    readonly measure?: (ctx: CanvasRenderingContext2D, cell: T, theme: Theme) => number;
 
     // editing
-    provideEditor: ProvideEditorCallback<T>;
+    readonly provideEditor?: ProvideEditorCallback<T>;
 
     // event callbacks
-    onClick?: (cell: T, posX: number, posY: number, bounds: Rectangle) => T | undefined;
-    onDelete?: (cell: T) => T | undefined;
-    onPaste?: (val: string, cellData: T["data"]) => T["data"];
+    readonly onClick?: (cell: T, posX: number, posY: number, bounds: Rectangle) => T | undefined;
+    readonly onDelete?: (cell: T) => T | undefined;
 }
+
+export interface InternalCellRenderer<T extends InnerGridCell> extends BaseCellRenderer<T> {
+    readonly kind: T["kind"];
+    readonly useLabel?: boolean;
+    readonly getAccessibilityString: (cell: T) => string;
+}
+
+export interface AdditionalRenderer<T extends CustomCell = CustomCell> extends BaseCellRenderer<T> {
+    readonly kind: GridCellKind.Custom;
+    readonly isMatch: (cell: CustomCell) => cell is T;
+    readonly onPaste?: (val: string, cellData: T["data"]) => T["data"];
+}
+
+export type CellRenderer<T extends InnerGridCell> = T extends CustomCell<infer DataType>
+    ? InternalCellRenderer<InnerGridCell> | AdditionalRenderer<CustomCell<DataType>>
+    : InternalCellRenderer<InnerGridCell>;
+
+export type GetCellRendererCallback = <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;

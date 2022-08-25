@@ -17,7 +17,7 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
         ...c,
         data: [],
     }),
-    getEditor: () => p => {
+    provideEditor: () => p => {
         const { onKeyDown, value, onFinishedEditing, imageEditorOverride } = p;
 
         const ImageEditor = imageEditorOverride ?? ImageOverlayEditor;

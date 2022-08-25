@@ -14,7 +14,7 @@ export const bubbleCellRenderer: InternalCellRenderer<BubbleCell> = {
     measure: (ctx, cell, t) =>
         cell.data.reduce((acc, data) => ctx.measureText(data).width + acc + 20, 0) + 2 * t.cellHorizontalPadding - 4,
     draw: a => drawBubbles(a, a.cell.data),
-    getEditor: () => p => {
+    provideEditor: () => p => {
         const { onKeyDown, value } = p;
         return <BubblesOverlayEditor bubbles={value.data} onKeyDown={onKeyDown} />;
     },

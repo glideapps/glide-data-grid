@@ -54,7 +54,7 @@ describe("Image cell", () => {
 
     it("Renders its editor (smoke test)", async () => {
         const cell = getImgCell();
-        const Editor = imageCellRenderer.getEditor?.(cell);
+        const Editor = imageCellRenderer.provideEditor?.(cell);
         const target = getMockEditorTarget();
 
         assert(Editor !== undefined);
@@ -76,7 +76,7 @@ describe("Image cell", () => {
 
     it("Renders a custom editor (smoke test)", async () => {
         const cell = getImgCell();
-        const Editor = imageCellRenderer.getEditor?.(cell);
+        const Editor = imageCellRenderer.provideEditor?.(cell);
         assert(Editor !== undefined);
         const target = getMockEditorTarget();
 

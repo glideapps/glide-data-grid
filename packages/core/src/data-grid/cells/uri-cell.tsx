@@ -18,7 +18,7 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
         ...c,
         data: "",
     }),
-    getEditor: () => p => {
+    provideEditor: () => p => {
         const { onChange, onKeyDown, value, forceEditMode, validatedSelection } = p;
         return (
             <UriOverlayEditor

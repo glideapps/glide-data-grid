@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 
 import ClickOutsideContainer from "../click-outside-container/click-outside-container";
 import { makeCSSStyle, Theme, ThemeContext } from "../common/styles";
-import { CellRenderers } from "../data-grid/cells";
+import type { GetCellRendererCallback } from "../data-grid/cells/cell-types";
 import {
     EditableGridCell,
     GridCell,
@@ -33,6 +33,7 @@ interface DataGridOverlayEditorProps {
     readonly forceEditMode: boolean;
     readonly highlight: boolean;
     readonly imageEditorOverride?: ImageEditorType;
+    readonly getCellRenderer: GetCellRendererCallback;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
     readonly provideEditor?: ProvideEditorCallback<GridCell>;
     readonly validateCell?: (
@@ -57,6 +58,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         id,
         cell,
         validateCell,
+        getCellRenderer,
         provideEditor,
     } = p;
 
@@ -165,9 +167,9 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     const [CellEditor, useLabel] = React.useMemo(() => {
         if (content.kind === GridCellKind.Custom) return [];
-        const renderer = CellRenderers[content.kind];
-        return [renderer.getEditor?.(content), renderer.useLabel];
-    }, [content]);
+        const renderer = getCellRenderer(content);
+        return [renderer?.provideEditor?.(content), renderer?.useLabel];
+    }, [content, getCellRenderer]);
 
     const { ref, style: stayOnScreenStyle } = useStayOnScreen();
 

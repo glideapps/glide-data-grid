@@ -13,7 +13,7 @@ export const rowIDCellRenderer: InternalCellRenderer<RowIDCell> = {
     draw: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
     measure: (ctx, cell) => ctx.measureText(cell.data).width + 16,
     // eslint-disable-next-line react/display-name
-    getEditor: () => p => {
+    provideEditor: () => p => {
         const { isHighlighted, onChange, onKeyDown, value, validatedSelection } = p;
         return (
             <GrowingEntry

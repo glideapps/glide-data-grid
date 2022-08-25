@@ -21,7 +21,7 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
         ...c,
         data: undefined,
     }),
-    getEditor: () => p => {
+    provideEditor: () => p => {
         const { isHighlighted, onChange, onKeyDown, value, validatedSelection } = p;
         return (
             <React.Suspense fallback={null}>

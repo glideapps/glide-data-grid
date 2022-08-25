@@ -20,7 +20,7 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
         ...c,
         data: "",
     }),
-    getEditor: () => p => {
+    provideEditor: () => p => {
         const {
             onChange,
             onKeyDown,

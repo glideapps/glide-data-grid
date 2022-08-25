@@ -21,7 +21,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
         ...c,
         data: "",
     }),
-    getEditor: () => p => {
+    provideEditor: () => p => {
         const { isHighlighted, onChange, onKeyDown, value, validatedSelection } = p;
         return (
             <GrowingEntry
