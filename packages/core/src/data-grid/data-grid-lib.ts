@@ -316,7 +316,7 @@ export function drawWithLastUpdate(
     lastPrep: PrepResult | undefined,
     draw: () => void
 ) {
-    const { ctx, x, y, w: width, h: height, theme } = args;
+    const { ctx, rect, theme } = args;
     let progress = Number.MAX_SAFE_INTEGER;
     const animTime = 500;
     if (lastUpdate !== undefined) {
@@ -326,7 +326,7 @@ export function drawWithLastUpdate(
             const fade = 1 - progress / animTime;
             ctx.globalAlpha = fade;
             ctx.fillStyle = theme.bgSearchResult;
-            ctx.fillRect(x, y, width, height);
+            ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
             ctx.globalAlpha = 1;
             if (lastPrep !== undefined) {
                 lastPrep.fillStyle = theme.bgSearchResult;
@@ -362,10 +362,7 @@ export function drawTextCellExternal(args: DrawArgs, data: string, contentAlign?
     drawTextCell(
         {
             ctx: ctx,
-            x: rect.x,
-            y: rect.y,
-            h: rect.height,
-            w: rect.width,
+            rect,
             theme: theme,
         },
         data,
@@ -394,13 +391,15 @@ function drawSingleTextLine(
 }
 
 export function drawTextCell(
-    args: Pick<BaseDrawArgs, "x" | "y" | "w" | "h" | "ctx" | "theme">,
+    args: Pick<BaseDrawArgs, "rect" | "ctx" | "theme">,
     data: string,
     contentAlign?: BaseGridCell["contentAlign"],
     allowWrapping?: boolean,
     hyperWrapping?: boolean
 ) {
-    const { ctx, x, y, w, h, theme } = args;
+    const { ctx, rect, theme } = args;
+
+    const { x, y, width: w, height: h } = rect;
 
     allowWrapping = allowWrapping ?? false;
 
@@ -484,7 +483,8 @@ export function drawTextCell(
 }
 
 export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) {
-    const { ctx, x, y, w, h, hoverAmount, theme, spriteManager } = args;
+    const { ctx, rect, hoverAmount, theme, spriteManager } = args;
+    const { x, y, width: w, height: h } = rect;
     ctx.beginPath();
     ctx.globalAlpha = hoverAmount;
     ctx.rect(x, y, w, h);
@@ -624,7 +624,8 @@ export function drawMarkerRowCell(
     markerKind: "checkbox" | "both" | "number",
     drawHandle: boolean
 ) {
-    const { ctx, x, y, w: width, h: height, hoverAmount, theme } = args;
+    const { ctx, rect, hoverAmount, theme } = args;
+    const { x, y, width, height } = rect;
     const checkedboxAlpha = checked ? 1 : hoverAmount;
     if (markerKind !== "number" && checkedboxAlpha > 0) {
         ctx.globalAlpha = checkedboxAlpha;
@@ -670,7 +671,8 @@ export function drawMarkerRowCell(
 }
 
 export function drawProtectedCell(args: BaseDrawArgs) {
-    const { ctx, theme, x, y, h } = args;
+    const { ctx, theme, rect } = args;
+    const { x, y, height: h } = rect;
 
     ctx.beginPath();
 
@@ -728,7 +730,8 @@ export function drawBoolean(args: BaseDrawArgs, data: boolean | BooleanEmpty | B
         return;
     }
 
-    const { ctx, hoverAmount, theme, x, y, w, h, highlighted, hoverX, hoverY } = args;
+    const { ctx, hoverAmount, theme, rect, highlighted, hoverX, hoverY } = args;
+    const { x, y, width: w, height: h } = rect;
 
     const hoverEffect = 0.35;
 
@@ -749,7 +752,8 @@ export function drawBoolean(args: BaseDrawArgs, data: boolean | BooleanEmpty | B
 const itemMargin = 4;
 
 export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
-    const { x, y, w, h, theme, ctx, highlighted } = args;
+    const { rect, theme, ctx, highlighted } = args;
+    const { x, y, width: w, height: h } = rect;
     const bubbleHeight = 20;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
@@ -863,7 +867,8 @@ function getAndCacheDrilldownBorder(
 }
 
 export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[]) {
-    const { x, y, w, h, theme, ctx, imageLoader, col, row } = args;
+    const { rect, theme, ctx, imageLoader, col, row } = args;
+    const { x, y, width: w, height: h } = rect;
     const bubbleHeight = 24;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
@@ -958,7 +963,8 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
 }
 
 export function drawImage(args: BaseDrawArgs, data: readonly string[]) {
-    const { x, y, h, col, row, theme, ctx, imageLoader } = args;
+    const { rect, col, row, theme, ctx, imageLoader } = args;
+    const { x, y, height: h } = rect;
     let drawX = x + theme.cellHorizontalPadding;
     for (const i of data) {
         if (i.length === 0) continue;

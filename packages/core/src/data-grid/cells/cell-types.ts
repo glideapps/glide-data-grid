@@ -9,10 +9,7 @@ export interface BaseDrawArgs {
     theme: Theme;
     col: number;
     row: number;
-    x: number;
-    y: number;
-    w: number;
-    h: number;
+    rect: Rectangle;
     highlighted: boolean;
     hoverAmount: number;
     hoverX: number | undefined;
@@ -20,6 +17,7 @@ export interface BaseDrawArgs {
     imageLoader: ImageWindowLoader;
     spriteManager: SpriteManager;
     hyperWrapping: boolean;
+    requestAnimationFrame: () => void;
 }
 
 export interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {
@@ -34,7 +32,7 @@ export interface PrepResult {
     deprep: ((args: Pick<BaseDrawArgs, "ctx">) => void) | undefined;
 }
 
-type DrawCallback<T extends InnerGridCell> = (args: DrawArgs<T>) => void;
+type DrawCallback<T extends InnerGridCell> = (args: DrawArgs<T>, cell: T) => void;
 type PrepCallback = (args: BaseDrawArgs, lastPrep?: PrepResult) => Partial<PrepResult>;
 type DeprepCallback = (args: Pick<BaseDrawArgs, "ctx">) => void;
 

@@ -18,6 +18,7 @@ import {
     headerCellUnheckedMarker,
     TrailingRowType,
     ImageWindowLoader,
+    GridCell,
 } from "./data-grid-types";
 import groupBy from "lodash/groupBy";
 import type { HoverValues } from "./animation-manager";
@@ -119,16 +120,13 @@ export function drawCell(
         hoverY = hoverInfo[1][1];
     }
     let result: PrepResult | undefined = undefined;
-    const args = {
+    const args: DrawArgs<typeof cell> = {
         ctx,
         theme,
         col,
         row,
         cell,
-        x,
-        y,
-        w,
-        h,
+        rect: { x, y, width: w, height: h } as Rectangle,
         highlighted,
         hoverAmount,
         hoverX,
@@ -136,27 +134,13 @@ export function drawCell(
         imageLoader,
         spriteManager,
         hyperWrapping,
+        requestAnimationFrame: () => {
+            forceAnim = true;
+        },
     };
     let forceAnim = false;
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
-        const drawn = isInnerOnlyCell(cell)
-            ? false
-            : drawCustomCell?.({
-                  ctx,
-                  cell,
-                  theme,
-                  rect: { x, y, width: w, height: h },
-                  col,
-                  row,
-                  hoverAmount,
-                  hoverX,
-                  hoverY,
-                  highlighted,
-                  imageLoader,
-                  requestAnimationFrame: () => {
-                      forceAnim = true;
-                  },
-              }) === true;
+        const drawn = isInnerOnlyCell(cell) ? false : drawCustomCell?.(args as DrawArgs<GridCell>) === true;
         if (!drawn) {
             const r = getCellRenderer(cell);
             if (r !== undefined) {
@@ -165,7 +149,7 @@ export function drawCell(
                     lastPrep = undefined;
                 }
                 const partialPrepResult = r.drawPrep?.(args, lastPrep);
-                r.draw(args as DrawArgs<any>); //fixme
+                r.draw(args as DrawArgs<any>, cell as any); //fixme
                 result = {
                     deprep: partialPrepResult?.deprep,
                     fillStyle: partialPrepResult?.fillStyle,
