@@ -3,10 +3,7 @@ import type { CustomRenderer } from "../data-grid/cells/cell-types";
 import { CustomCell, GridCellKind } from "../data-grid/data-grid-types";
 import type { DataEditorProps } from "./data-editor";
 
-export type CustomCellRenderer<T extends CustomCell> = Pick<
-    CustomRenderer<T>,
-    "isMatch" | "provideEditor" | "onPaste" | "draw"
->;
+export type CustomCellRenderer<T extends CustomCell> = Omit<CustomRenderer<T>, "kind">;
 
 function inflate<T extends CustomCell>(input: CustomCellRenderer<T>): CustomRenderer<T> {
     return {
