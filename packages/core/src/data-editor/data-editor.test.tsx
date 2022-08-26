@@ -74,7 +74,7 @@ const makeCell = (cell: Item): GridCell => {
                 kind: GridCellKind.Boolean,
                 allowOverlay: false,
                 data: getMockBooleanData(row),
-                readonly: false,
+                readonly: row === 5,
             };
         }
         case 8: {
@@ -1263,6 +1263,71 @@ describe("data-editor", () => {
         fireEvent.mouseUp(canvas, { clientX: emptyX, clientY: emptyY });
 
         expect(spy).toBeCalledWith([7, 3], expect.objectContaining({ data: true }));
+    });
+
+    test("Directly toggle readonly booleans", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<DataEditor {...basicProps} onCellEdited={spy} ref={ref} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        // We need to be focused on the grid for booleans to toggle automatically
+        act(() => {
+            ref.current?.focus();
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
+
+        // [7, 0] is a checked boolean readonly
+        const [checkedX, checkedY] = getCellCenterPositionForDefaultGrid([7, 5]);
+
+        fireEvent.mouseDown(canvas, { clientX: checkedX, clientY: checkedY });
+        fireEvent.mouseUp(canvas, { clientX: checkedX, clientY: checkedY });
+
+        expect(spy).not.toBeCalled();
+    });
+
+    test("Toggle readonly boolean with space", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<DataEditor {...basicProps} onCellEdited={spy} ref={ref} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        // We need to be focused on the grid for booleans to toggle automatically
+        act(() => {
+            ref.current?.focus();
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        // [7, 0] is a checked boolean readonly
+        const [checkedX, checkedY] = getCellCenterPositionForDefaultGrid([7, 5]);
+
+        fireEvent.mouseDown(canvas, { clientX: checkedX + 20, clientY: checkedY });
+        fireEvent.mouseUp(canvas, { clientX: checkedX + 20, clientY: checkedY });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: " ",
+        });
+
+        expect(spy).not.toBeCalled();
     });
 
     test("Arrow left", async () => {
