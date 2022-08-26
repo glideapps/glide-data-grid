@@ -64,13 +64,13 @@ export interface InternalCellRenderer<T extends InnerGridCell> extends BaseCellR
     readonly onPaste: (val: string, cell: T) => T | undefined;
 }
 
-export interface AdditionalRenderer<T extends CustomCell = CustomCell> extends BaseCellRenderer<T> {
+export interface CustomRenderer<T extends CustomCell = CustomCell> extends BaseCellRenderer<T> {
     readonly isMatch: (cell: CustomCell) => cell is T;
     readonly onPaste?: (val: string, cellData: T["data"]) => T["data"] | undefined;
 }
 
 export type CellRenderer<T extends InnerGridCell> = [T] extends [CustomCell<infer DataType>]
-    ? AdditionalRenderer<CustomCell<DataType>>
+    ? CustomRenderer<CustomCell<DataType>>
     : InternalCellRenderer<T>;
 
 export type GetCellRendererCallback = <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;

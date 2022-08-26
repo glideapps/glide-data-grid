@@ -56,7 +56,7 @@ import { unquote, expandSelection, copyToClipboard, decodeHTML } from "./data-ed
 import { DataEditorContainer } from "../data-editor-container/data-grid-container";
 import { toggleBoolean } from "../data-grid/cells/boolean-cell";
 import { useAutoscroll } from "./use-autoscroll";
-import type { AdditionalRenderer, CellRenderer } from "../data-grid/cells/cell-types";
+import type { CustomRenderer, CellRenderer } from "../data-grid/cells/cell-types";
 import { CellRenderers } from "../data-grid/cells";
 
 let idCounter = 0;
@@ -280,7 +280,7 @@ export interface DataEditorProps extends Props {
 
     readonly theme?: Partial<Theme>;
 
-    readonly additionalRenderers?: readonly AdditionalRenderer[];
+    readonly customRenderers?: readonly CustomRenderer[];
 }
 
 export interface DataEditorRef {
@@ -399,7 +399,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnResize: onColumnResizeIn,
         onColumnResizeEnd: onColumnResizeEndIn,
         onColumnResizeStart: onColumnResizeStartIn,
-        additionalRenderers,
+        customRenderers: additionalRenderers,
         ...rest
     } = p;
 
