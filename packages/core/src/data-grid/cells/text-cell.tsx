@@ -10,9 +10,9 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
     kind: GridCellKind.Text,
     needsHover: false,
     needsHoverPosition: false,
-    renderPrep: prepTextCell,
+    drawPrep: prepTextCell,
     useLabel: true,
-    render: a => drawTextCell(a, a.cell.displayData, a.cell.contentAlign, a.cell.allowWrapping, a.hyperWrapping),
+    draw: a => (drawTextCell(a, a.cell.displayData, a.cell.contentAlign, a.cell.allowWrapping, a.hyperWrapping), true),
     measure: (ctx, cell, t) => {
         const lines = cell.displayData.split("\n").slice(0, cell.allowWrapping === true ? undefined : 1);
         return Math.max(...lines.map(l => ctx.measureText(l).width + 2 * t.cellHorizontalPadding));
@@ -21,14 +21,13 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
         ...c,
         data: "",
     }),
-    getEditor: () => p => {
-        const { isHighlighted, onChange, onKeyDown, value, validatedSelection } = p;
+    provideEditor: () => p => {
+        const { isHighlighted, onChange, value, validatedSelection } = p;
         return (
             <GrowingEntry
                 highlight={isHighlighted}
                 autoFocus={value.readonly !== true}
                 disabled={value.readonly === true}
-                onKeyDown={onKeyDown}
                 altNewline={true}
                 value={value.data}
                 validatedSelection={validatedSelection}
@@ -41,4 +40,5 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
             />
         );
     },
+    onPaste: (toPaste, cell) => (toPaste === cell.data ? undefined : { ...cell, data: toPaste }),
 };

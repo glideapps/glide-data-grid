@@ -1,6 +1,6 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
-import { assertNever, maybe } from "../common/support";
+import { assert, assertNever, maybe } from "../common/support";
 import clamp from "lodash/clamp";
 import uniq from "lodash/uniq";
 import flatten from "lodash/flatten";
@@ -32,8 +32,6 @@ import {
     HeaderClickedEventArgs,
     CellClickedEventArgs,
     Item,
-    BooleanIndeterminate,
-    BooleanEmpty,
     MarkerCell,
     headerCellUnheckedMarker,
     headerCellCheckedMarker,
@@ -48,7 +46,6 @@ import type { OverlayImageEditorProps } from "../data-grid-overlay-editor/privat
 import { getDataEditorTheme, makeCSSStyle, Theme, ThemeContext } from "../common/styles";
 import type { DataGridRef } from "../data-grid/data-grid";
 import { getScrollBarWidth, useEventListener, whenDefined } from "../common/utils";
-import { CellRenderers } from "../data-grid/cells";
 import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
 import { measureColumn, useColumnSizer } from "./use-column-sizer";
@@ -59,6 +56,8 @@ import { unquote, expandSelection, copyToClipboard, decodeHTML } from "./data-ed
 import { DataEditorContainer } from "../data-editor-container/data-grid-container";
 import { toggleBoolean } from "../data-grid/cells/boolean-cell";
 import { useAutoscroll } from "./use-autoscroll";
+import type { CustomRenderer, CellRenderer } from "../data-grid/cells/cell-types";
+import { CellRenderers } from "../data-grid/cells";
 
 let idCounter = 0;
 
@@ -83,6 +82,7 @@ type Props = Omit<
     | "firstColSticky"
     | "freezeColumns"
     | "getCellContent"
+    | "getCellRenderer"
     | "getCellsForSelection"
     | "gridRef"
     | "groupHeaderHeight"
@@ -279,6 +279,8 @@ export interface DataEditorProps extends Props {
     readonly onPaste?: ((target: Item, values: readonly (readonly string[])[]) => boolean) | boolean;
 
     readonly theme?: Partial<Theme>;
+
+    readonly customRenderers?: readonly CustomRenderer[];
 }
 
 export interface DataEditorRef {
@@ -397,6 +399,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnResize: onColumnResizeIn,
         onColumnResizeEnd: onColumnResizeEndIn,
         onColumnResizeStart: onColumnResizeStartIn,
+        customRenderers: additionalRenderers,
         ...rest
     } = p;
 
@@ -547,6 +550,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const [clientSize, setClientSize] = React.useState<readonly [number, number, number]>([10, 10, 0]);
 
+    const getCellRenderer: <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined = React.useCallback(
+        <T extends InnerGridCell>(cell: T) => {
+            if (cell.kind !== GridCellKind.Custom) {
+                return (CellRenderers[cell.kind] as unknown) as CellRenderer<T>;
+            }
+            return additionalRenderers?.find(x => x.isMatch(cell)) as CellRenderer<T>;
+        },
+        [additionalRenderers]
+    );
+
     const columns = useColumnSizer(
         columnsIn,
         rows,
@@ -555,6 +568,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         minColumnWidth,
         maxColumnWidth,
         mergedTheme,
+        getCellRenderer,
         abortControllerRef.current
     );
 
@@ -1055,8 +1069,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
 
                     if (p.onRowMoved !== undefined) {
-                        const renderer = CellRenderers[markerCell.kind];
-                        const postClick = renderer.onClick?.(
+                        const renderer = getCellRenderer(markerCell);
+                        assert(renderer?.kind === InnerGridCellKind.Marker);
+                        const postClick = renderer?.onClick?.(
                             markerCell,
                             args.localEventX,
                             args.localEventY,
@@ -1213,6 +1228,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             appendRow,
             columnSelect,
             focus,
+            getCellRenderer,
             getCustomNewRowTargetColumn,
             getMangledCellContent,
             gridSelection,
@@ -1411,7 +1427,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         cells,
                         minColumnWidth,
                         maxColumnWidth,
-                        false
+                        false,
+                        getCellRenderer
                     );
                     onColumnResize?.(inputCol, newCol.width, col);
                 }
@@ -1426,6 +1443,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onColumnResize,
             rowMarkerOffset,
             rows,
+            getCellRenderer,
         ]
     );
 
@@ -1464,7 +1482,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         const [selectedCol, selectedRow] = gridSelection.current.cell;
                         const [prevCol, prevRow] = mouse.previousSelection.current.cell;
                         const c = getMangledCellContent([col, row]);
-                        const r = c.kind === GridCellKind.Custom ? undefined : CellRenderers[c.kind];
+                        const r = getCellRenderer(c);
                         if (r !== undefined && r.onClick !== undefined) {
                             const newVal = r.onClick(c, a.localEventX, a.localEventY, a.bounds);
                             if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
@@ -1564,11 +1582,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [
             mouseState,
+            rowMarkerOffset,
             gridSelection,
             onCellClicked,
-            rowMarkerOffset,
             fillDown,
             getMangledCellContent,
+            getCellRenderer,
             mangledOnCellsEdited,
             onCellActivated,
             reselect,
@@ -1576,9 +1595,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onHeaderContextMenu,
             onGroupHeaderContextMenu,
             handleSelect,
+            onGroupHeaderClicked,
             normalSizeColumn,
             onHeaderClicked,
-            onGroupHeaderClicked,
             handleGroupHeaderSelection,
         ]
     );
@@ -2077,8 +2096,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                                 (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
                                 cellValue.kind === GridCellKind.Boolean
                             ) {
-                                const toDelete = CellRenderers[cellValue.kind];
-                                newVal = toDelete.onDelete?.(cellValue);
+                                const toDelete = getCellRenderer(cellValue);
+                                newVal = toDelete?.onDelete?.(cellValue);
                             }
                             if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
                                 editList.push({ location: [x, y], value: newVal });
@@ -2345,6 +2364,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             focus,
             mangledOnCellsEdited,
             provideEditor,
+            getCellRenderer,
             onDelete,
             mangledCols.length,
             setSelectedColumns,
@@ -2378,59 +2398,27 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             value: coerced,
                         };
                     }
-                    switch (inner.kind) {
-                        case GridCellKind.Text:
-                        case GridCellKind.Markdown:
-                        case GridCellKind.Uri: {
-                            return {
-                                location: target,
-                                value: {
-                                    ...inner,
-                                    data: toPaste,
-                                },
-                            };
-                        }
-                        case GridCellKind.Number: {
-                            const newNumber = Number.parseFloat(toPaste);
-                            if (!Number.isNaN(newNumber)) {
-                                return {
-                                    location: target,
-                                    value: {
-                                        ...inner,
-                                        data: newNumber,
-                                    },
-                                };
-                            }
-                            return undefined;
-                        }
-                        case GridCellKind.Custom: {
-                            return {
-                                location: target,
-                                value: {
-                                    ...inner,
-                                    copyData: toPaste,
-                                },
-                            };
-                        }
-                        case GridCellKind.Boolean: {
-                            let newVal: boolean | BooleanEmpty | BooleanIndeterminate = BooleanEmpty;
-                            if (toPaste.toLowerCase() === "true") {
-                                newVal = true;
-                            } else if (toPaste.toLowerCase() === "false") {
-                                newVal = false;
-                            } else if (toPaste.toLowerCase() === "indeterminate") {
-                                newVal = BooleanIndeterminate;
-                            }
-                            return {
-                                location: target,
-                                value: {
-                                    ...inner,
-                                    data: newVal,
-                                },
-                            };
-                        }
-                        default:
-                            assertNever(inner);
+                    const r = getCellRenderer(inner);
+                    if (r === undefined) return undefined;
+                    if (r.kind === GridCellKind.Custom) {
+                        assert(inner.kind === GridCellKind.Custom);
+                        const newVal = r.onPaste?.(toPaste, inner);
+                        if (newVal === undefined) return undefined;
+                        return {
+                            location: target,
+                            value: {
+                                ...inner,
+                                data: newVal,
+                            },
+                        };
+                    } else {
+                        const newVal = r.onPaste?.(toPaste, inner);
+                        if (newVal === undefined) return undefined;
+                        assert(newVal.kind === inner.kind);
+                        return {
+                            location: target,
+                            value: newVal,
+                        };
                     }
                 }
                 return undefined;
@@ -2551,6 +2539,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [
             coercePasteValue,
+            getCellRenderer,
             getMangledCellContent,
             gridSelection,
             keybindings.paste,
@@ -2936,6 +2925,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     translateY={visibleRegion.ty}
                     verticalBorder={mangledVerticalBorder}
                     gridRef={gridRef}
+                    getCellRenderer={getCellRenderer}
                 />
                 {renameGroupNode}
                 {overlay !== undefined && (
@@ -2943,6 +2933,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         {...overlay}
                         validateCell={validateCell}
                         id={overlayID}
+                        getCellRenderer={getCellRenderer}
                         className={p.experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
                         provideEditor={provideEditor}
                         imageEditorOverride={imageEditorOverride}

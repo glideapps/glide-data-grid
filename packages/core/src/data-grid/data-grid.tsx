@@ -51,9 +51,9 @@ import {
 } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
 import { browserIsFirefox } from "../common/browser-detect";
-import { CellRenderers } from "./cells";
 import { useAnimationQueue } from "./use-animation-queue";
 import { assert } from "../common/support";
+import type { CellRenderer, GetCellRendererCallback } from "./cells/cell-types";
 
 export interface DataGridProps {
     readonly width: number;
@@ -158,6 +158,8 @@ export interface DataGridProps {
     readonly smoothScrollY?: boolean;
 
     readonly theme: Theme;
+
+    readonly getCellRenderer: <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;
 }
 
 interface BlitData {
@@ -178,8 +180,10 @@ export interface DataGridRef {
     damage: (cells: DamageUpdateList) => void;
 }
 
-const getRowData = (cell: InnerGridCell) => {
-    return cell.kind === GridCellKind.Custom ? cell.copyData : CellRenderers[cell.kind].getAccessibilityString(cell);
+const getRowData = (cell: InnerGridCell, getCellRenderer?: GetCellRendererCallback) => {
+    if (cell.kind === GridCellKind.Custom) return cell.copyData;
+    const r = getCellRenderer?.(cell);
+    return r?.getAccessibilityString(cell) ?? "";
 };
 
 const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p, forwardedRef) => {
@@ -245,6 +249,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         smoothScrollX = false,
         smoothScrollY = false,
         experimental,
+        getCellRenderer,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -563,6 +568,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             hyperWrapping: experimental?.hyperWrapping ?? false,
             touchMode: lastWasTouch,
             enqueue: enqueueRef.current,
+            getCellRenderer,
         };
 
         // This confusing bit of code due to some poor design. Long story short, the damage property is only used
@@ -614,6 +620,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         scrolling,
         experimental?.hyperWrapping,
         lastWasTouch,
+        getCellRenderer,
     ]);
 
     const lastDrawRef = React.useRef(draw);
@@ -897,9 +904,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         }
         const cell = getCellContent(hoveredItem as [number, number]);
         am.setHovered(
-            cell.kind === GridCellKind.Custom || CellRenderers[cell.kind].needsHover ? hoveredItem : undefined
+            cell.kind === GridCellKind.Custom || getCellRenderer(cell)?.needsHover === true ? hoveredItem : undefined
         );
-    }, [getCellContent, hoveredItem]);
+    }, [getCellContent, getCellRenderer, hoveredItem]);
 
     const hoveredRef = React.useRef<GridMouseEventArgs>();
     const onMouseMoveImpl = React.useCallback(
@@ -921,7 +928,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
                 if (args.kind === "cell") {
                     const toCheck = getCellContent(args.location);
-                    if (toCheck.kind === GridCellKind.Custom || CellRenderers[toCheck.kind].needsHoverPosition) {
+                    if (toCheck.kind === GridCellKind.Custom || getCellRenderer(toCheck)?.needsHoverPosition === true) {
                         damageInternal([args.location]);
                     }
                 } else if (args.kind === groupHeaderKind) {
@@ -959,6 +966,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             onMouseMove,
             onItemHovered,
             getCellContent,
+            getCellRenderer,
             damageInternal,
             getBoundsForItem,
         ]
@@ -1132,7 +1140,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                     1,
                                     undefined,
                                     false,
-                                    0
+                                    0,
+                                    undefined,
+                                    undefined,
+                                    getCellRenderer
                                 );
                             }
                         }
@@ -1170,6 +1181,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getCellContent,
             drawCustomCell,
             imageLoader,
+            getCellRenderer,
         ]
     );
     useEventListener("dragstart", onDragStartImpl, eventTargetRef?.current ?? null, false, false);
@@ -1396,7 +1408,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                             }}
                                             ref={focused ? focusElement : undefined}
                                             tabIndex={-1}>
-                                            {getRowData(cellContent)}
+                                            {getRowData(cellContent, getCellRenderer)}
                                         </td>
                                     );
                                 })}

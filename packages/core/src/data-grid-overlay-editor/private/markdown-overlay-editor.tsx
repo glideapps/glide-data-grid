@@ -8,7 +8,6 @@ import type { Rectangle, SelectionRange } from "../../data-grid/data-grid-types"
 interface Props {
     readonly targetRect: Rectangle;
     readonly markdown: string;
-    readonly onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
     readonly onChange: (ev: React.ChangeEvent<HTMLTextAreaElement>) => void;
     readonly forceEditMode: boolean;
     readonly onFinish: () => void;
@@ -19,18 +18,10 @@ interface Props {
     createNode?: (content: string) => DocumentFragment;
 }
 
+// TODO: Fix enter key behavior
+
 export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
-    const {
-        markdown,
-        onChange,
-        onKeyDown,
-        forceEditMode,
-        createNode,
-        targetRect,
-        readonly,
-        onFinish,
-        validatedSelection,
-    } = p;
+    const { markdown, onChange, forceEditMode, createNode, targetRect, readonly, onFinish, validatedSelection } = p;
 
     const [editMode, setEditMode] = React.useState<boolean>(markdown === "" || forceEditMode);
     const onEditClick = React.useCallback(() => {
@@ -45,12 +36,10 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
                     autoFocus={true}
                     highlight={false}
                     validatedSelection={validatedSelection}
-                    onKeyDown={e => {
-                        if (e.key !== "Enter") {
-                            onKeyDown(e);
-                        }
-                    }}
                     value={markdown}
+                    onKeyDown={e => {
+                        if (e.key === "Enter") e.stopPropagation();
+                    }}
                     onChange={onChange}
                 />
                 <div className={`edit-icon checkmark-hover ${addLeftPad}`} onClick={() => onFinish()}>
@@ -70,7 +59,7 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
                     </div>
                 </>
             )}
-            <textarea className="md-edit-textarea gdg-input" autoFocus={true} onKeyDown={onKeyDown} />
+            <textarea className="md-edit-textarea gdg-input" autoFocus={true} />
         </MarkdownOverlayEditorStyle>
     );
 };

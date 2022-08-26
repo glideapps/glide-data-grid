@@ -8,5 +8,6 @@ export const protectedCellRenderer: InternalCellRenderer<ProtectedCell> = {
     kind: GridCellKind.Protected,
     needsHover: false,
     needsHoverPosition: false,
-    render: drawProtectedCell,
+    draw: drawProtectedCell,
+    onPaste: () => undefined,
 };

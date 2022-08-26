@@ -1,4 +1,4 @@
-import { CustomCell, parseToRgba, Item, CustomCellRenderer } from "@glideapps/glide-data-grid";
+import { CustomCell, parseToRgba, Item, AdditionalRenderer, GridCellKind } from "@glideapps/glide-data-grid";
 
 interface SparklineCellProps {
     readonly kind: "sparkline-cell";
@@ -11,7 +11,8 @@ interface SparklineCellProps {
 
 export type SparklineCell = CustomCell<SparklineCellProps>;
 
-const renderer: CustomCellRenderer<SparklineCell> = {
+const renderer: AdditionalRenderer<SparklineCell> = {
+    kind: GridCellKind.Custom,
     isMatch: (cell: CustomCell): cell is SparklineCell => (cell.data as any).kind === "sparkline-cell",
     draw: (args, cell) => {
         const { ctx, theme, rect, hoverAmount, hoverX } = args;

@@ -4,6 +4,7 @@ import { render, fireEvent, screen } from "@testing-library/react";
 import DataGrid, { DataGridProps, DataGridRef } from "./data-grid";
 import { CompactSelection, GridCellKind } from "./data-grid-types";
 import { getDefaultTheme } from "..";
+import { CellRenderers } from "./cells";
 
 const basicProps: DataGridProps = {
     cellXOffset: 0,
@@ -59,6 +60,10 @@ const basicProps: DataGridProps = {
     rowHeight: 32,
     rows: 1000,
     verticalBorder: () => true,
+    getCellRenderer: cell => {
+        if (cell.kind === GridCellKind.Custom) return undefined;
+        return CellRenderers[cell.kind] as any;
+    },
 };
 
 const dataGridCanvasId = "data-grid-canvas";

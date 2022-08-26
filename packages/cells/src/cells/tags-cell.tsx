@@ -2,8 +2,9 @@ import {
     CustomCell,
     Rectangle,
     measureTextCached,
-    CustomCellRenderer,
+    AdditionalRenderer,
     getMiddleCenterBias,
+    GridCellKind,
 } from "@glideapps/glide-data-grid";
 import { styled } from "@linaria/react";
 import * as React from "react";
@@ -81,7 +82,8 @@ const EditorWrap = styled.div<{ tagHeight: number; innerPad: number }>`
     }
 `;
 
-const renderer: CustomCellRenderer<TagsCell> = {
+const renderer: AdditionalRenderer<TagsCell> = {
+    kind: GridCellKind.Custom,
     isMatch: (c): c is TagsCell => (c.data as any).kind === "tags-cell",
     draw: (args, cell) => {
         const { ctx, theme, rect } = args;

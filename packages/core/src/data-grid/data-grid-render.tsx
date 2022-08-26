@@ -18,6 +18,7 @@ import {
     headerCellUnheckedMarker,
     TrailingRowType,
     ImageWindowLoader,
+    GridCell,
 } from "./data-grid-types";
 import groupBy from "lodash/groupBy";
 import type { HoverValues } from "./animation-manager";
@@ -37,8 +38,7 @@ import {
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import type { Theme } from "../common/styles";
 import { blend, withAlpha } from "./color-parser";
-import { CellRenderers } from "./cells";
-import type { PrepResult } from "./cells/cell-types";
+import type { DrawArgs, GetCellRendererCallback, PrepResult } from "./cells/cell-types";
 import { deepEqual } from "../common/support";
 
 // Future optimization opportunities
@@ -109,8 +109,9 @@ export function drawCell(
     hoverInfo: HoverInfo | undefined,
     hyperWrapping: boolean,
     frameTime: number,
-    lastPrep?: PrepResult,
-    enqueue?: (item: Item) => void
+    lastPrep: PrepResult | undefined,
+    enqueue: ((item: Item) => void) | undefined,
+    getCellRenderer: GetCellRendererCallback
 ): PrepResult | undefined {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
@@ -119,16 +120,13 @@ export function drawCell(
         hoverY = hoverInfo[1][1];
     }
     let result: PrepResult | undefined = undefined;
-    const args = {
+    const args: DrawArgs<typeof cell> = {
         ctx,
         theme,
         col,
         row,
         cell,
-        x,
-        y,
-        w,
-        h,
+        rect: { x, y, width: w, height: h },
         highlighted,
         hoverAmount,
         hoverX,
@@ -136,41 +134,29 @@ export function drawCell(
         imageLoader,
         spriteManager,
         hyperWrapping,
+        requestAnimationFrame: () => {
+            forceAnim = true;
+        },
     };
     let forceAnim = false;
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
-        const drawn = isInnerOnlyCell(cell)
-            ? false
-            : drawCustomCell?.({
-                  ctx,
-                  cell,
-                  theme,
-                  rect: { x, y, width: w, height: h },
-                  col,
-                  row,
-                  hoverAmount,
-                  hoverX,
-                  hoverY,
-                  highlighted,
-                  imageLoader,
-                  requestAnimationFrame: () => {
-                      forceAnim = true;
-                  },
-              }) === true;
-        if (!drawn && cell.kind !== GridCellKind.Custom) {
-            const r = CellRenderers[cell.kind];
-            if (lastPrep?.renderer !== r) {
-                lastPrep?.deprep?.(args);
-                lastPrep = undefined;
+        const drawn = isInnerOnlyCell(cell) ? false : drawCustomCell?.(args as DrawArgs<GridCell>) === true;
+        if (!drawn) {
+            const r = getCellRenderer(cell);
+            if (r !== undefined) {
+                if (lastPrep?.renderer !== r) {
+                    lastPrep?.deprep?.(args);
+                    lastPrep = undefined;
+                }
+                const partialPrepResult = r.drawPrep?.(args, lastPrep);
+                r.draw(args, cell);
+                result = {
+                    deprep: partialPrepResult?.deprep,
+                    fillStyle: partialPrepResult?.fillStyle,
+                    font: partialPrepResult?.font,
+                    renderer: r,
+                };
             }
-            const partialPrepResult = r.renderPrep?.(args, lastPrep);
-            r.render(args);
-            result = {
-                deprep: partialPrepResult?.deprep,
-                fillStyle: partialPrepResult?.fillStyle,
-                font: partialPrepResult?.font,
-                renderer: r,
-            };
         }
     });
     if (needsAnim || forceAnim) enqueue?.([col, row]);
@@ -1104,7 +1090,8 @@ function drawCells(
     hoverInfo: HoverInfo | undefined,
     hyperWrapping: boolean,
     outerTheme: Theme,
-    enqueue: (item: Item) => void
+    enqueue: (item: Item) => void,
+    getCellRenderer: GetCellRendererCallback
 ): Rectangle[] | undefined {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
@@ -1357,7 +1344,8 @@ function drawCells(
                             hyperWrapping,
                             frameTime,
                             prepResult,
-                            enqueue
+                            enqueue,
+                            getCellRenderer
                         );
                     }
 
@@ -1879,6 +1867,7 @@ export interface DrawGridArg {
     readonly scrolling: boolean;
     readonly touchMode: boolean;
     readonly enqueue: (item: Item) => void;
+    readonly getCellRenderer: GetCellRendererCallback;
 }
 
 function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean | number {
@@ -1982,6 +1971,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         scrolling,
         touchMode,
         enqueue,
+        getCellRenderer,
     } = arg;
     let { damage } = arg;
     if (width === 0 || height === 0) return;
@@ -2164,7 +2154,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 hoverInfo,
                 hyperWrapping,
                 theme,
-                enqueue
+                enqueue,
+                getCellRenderer
             );
 
             if (
@@ -2354,7 +2345,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         hoverInfo,
         hyperWrapping,
         theme,
-        enqueue
+        enqueue,
+        getCellRenderer
     );
 
     drawBlanks(

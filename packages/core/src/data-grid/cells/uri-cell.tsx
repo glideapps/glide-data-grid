@@ -11,22 +11,21 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
     needsHover: false,
     needsHoverPosition: false,
     useLabel: true,
-    renderPrep: prepTextCell,
-    render: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
+    drawPrep: prepTextCell,
+    draw: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
     measure: (ctx, cell) => ctx.measureText(cell.data).width + 16,
     onDelete: c => ({
         ...c,
         data: "",
     }),
-    getEditor: () => p => {
-        const { onChange, onKeyDown, value, forceEditMode, validatedSelection } = p;
+    provideEditor: () => p => {
+        const { onChange, value, forceEditMode, validatedSelection } = p;
         return (
             <UriOverlayEditor
                 forceEditMode={forceEditMode}
                 uri={value.data}
                 validatedSelection={validatedSelection}
                 readonly={value.readonly === true}
-                onKeyDown={onKeyDown}
                 onChange={e =>
                     onChange({
                         ...value,
@@ -36,4 +35,5 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
             />
         );
     },
+    onPaste: (toPaste, cell) => (toPaste === cell.data ? undefined : { ...cell, data: toPaste }),
 };
