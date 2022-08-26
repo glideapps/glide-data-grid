@@ -20,7 +20,7 @@ function inflate<T extends CustomCell>(input: CustomCellRenderer<T>): CustomRend
 export function useCustomCells(
     cells: readonly CustomCellRenderer<any>[]
 ): {
-    additionalRenderers: NonNullable<DataEditorProps["customRenderers"]>;
+    customRenderers: NonNullable<DataEditorProps["customRenderers"]>;
 } {
-    return { additionalRenderers: React.useMemo(() => cells.map(inflate), [cells]) };
+    return { customRenderers: React.useMemo(() => cells.map(inflate), [cells]) };
 }

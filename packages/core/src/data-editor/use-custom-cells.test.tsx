@@ -18,6 +18,6 @@ describe("use-column-sizer", () => {
             ])
         );
 
-        expect(result.current.additionalRenderers[0].kind === GridCellKind.Custom).toBe(true);
+        expect(result.current.customRenderers[0].kind === GridCellKind.Custom).toBe(true);
     });
 });
