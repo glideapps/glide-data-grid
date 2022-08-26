@@ -10,9 +10,19 @@ export interface DataGridDndProps extends Props {
     readonly onRowMoved?: (startIndex: number, endIndex: number) => void;
     readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
 
-    readonly onColumnResize?: (column: GridColumn, newSize: number, colIndex: number) => void; // these should not be past tense?
-    readonly onColumnResizeStart?: (column: GridColumn, newSize: number, colIndex: number) => void; // these should not be past tense?
-    readonly onColumnResizeEnd?: (column: GridColumn, newSize: number, colIndex: number) => void; // these should not be past tense?
+    readonly onColumnResize?: (column: GridColumn, newSize: number, colIndex: number, newSizeWithGrow: number) => void;
+    readonly onColumnResizeStart?: (
+        column: GridColumn,
+        newSize: number,
+        colIndex: number,
+        newSizeWithGrow: number
+    ) => void;
+    readonly onColumnResizeEnd?: (
+        column: GridColumn,
+        newSize: number,
+        colIndex: number,
+        newSizeWithGrow: number
+    ) => void;
 
     readonly gridRef?: React.MutableRefObject<DataGridRef | null>;
     readonly maxColumnWidth: number;
@@ -23,6 +33,9 @@ export interface DataGridDndProps extends Props {
     readonly smoothScrollY?: boolean;
 }
 
+// Dear Past Jason,
+// Wtf does this function do? If you remember in the future come back and add a comment
+// -- Future-Past Jason
 function offsetColumnSize(column: InnerGridColumn, width: number, min: number, max: number): number {
     return clamp(Math.round(width - (column.growOffset ?? 0)), Math.ceil(min), Math.floor(max));
 }
@@ -92,7 +105,12 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                     if (args.isEdge && canResize) {
                         setResizeColStartX(args.bounds.x);
                         setResizeCol(col);
-                        onColumnResizeStart?.(columns[col], args.bounds.width, col);
+                        onColumnResizeStart?.(
+                            columns[col],
+                            args.bounds.width,
+                            col,
+                            args.bounds.width + (columns[col].growOffset ?? 0)
+                        );
                     } else if (args.kind === "header" && canDragCol) {
                         setDragStartX(args.bounds.x);
                         setDragCol(col);
@@ -147,32 +165,28 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                         for (const c of selectedColumns) {
                             if (c === resizeCol) continue;
                             const col = columns[c];
-                            onColumnResize?.(
+                            const newSize = offsetColumnSize(
                                 col,
-                                offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth),
-                                c
+                                lastResizeWidthRef.current,
+                                minColumnWidth,
+                                maxColumnWidth
                             );
+                            onColumnResize?.(col, newSize, c, newSize + (col.growOffset ?? 0));
                         }
                     }
 
-                    onColumnResizeEnd?.(
+                    const ns = offsetColumnSize(
                         columns[resizeCol],
-                        offsetColumnSize(
-                            columns[resizeCol],
-                            lastResizeWidthRef.current,
-                            minColumnWidth,
-                            maxColumnWidth
-                        ),
-                        resizeCol
+                        lastResizeWidthRef.current,
+                        minColumnWidth,
+                        maxColumnWidth
                     );
+                    onColumnResizeEnd?.(columns[resizeCol], ns, resizeCol, ns + (columns[resizeCol].growOffset ?? 0));
                     for (const c of selectedColumns) {
                         if (c === resizeCol) continue;
                         const col = columns[c];
-                        onColumnResizeEnd?.(
-                            col,
-                            offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth),
-                            c
-                        );
+                        const s = offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth);
+                        onColumnResizeEnd?.(col, s, c, s + (col.growOffset ?? 0));
                     }
                 }
 
@@ -230,18 +244,16 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             } else if (resizeCol !== undefined && resizeColStartX !== undefined) {
                 const column = columns[resizeCol];
                 const newWidth = event.clientX - resizeColStartX;
-                onColumnResize?.(column, offsetColumnSize(column, newWidth, minColumnWidth, maxColumnWidth), resizeCol);
+                const ns = offsetColumnSize(column, newWidth, minColumnWidth, maxColumnWidth);
+                onColumnResize?.(column, ns, resizeCol, ns + (column.growOffset ?? 0));
                 lastResizeWidthRef.current = newWidth;
 
                 if (selectedColumns?.first() === resizeCol) {
                     for (const c of selectedColumns) {
                         if (c === resizeCol) continue;
                         const col = columns[c];
-                        onColumnResize?.(
-                            col,
-                            offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth),
-                            c
-                        );
+                        const s = offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth);
+                        onColumnResize?.(col, s, c, s + (col.growOffset ?? 0));
                     }
                 }
             }
@@ -292,10 +304,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
 
     return (
         <DataGrid
-            // I know the below could be done with ...rest, but it adds about 2-3% cpu load in the hot loop
-            // This doesn't matter much for most devices but it will matter for low power phones and such.
             {...rest}
-            // handled or mutated props
             getCellContent={getMangledCellContent}
             isResizing={resizeCol !== undefined}
             onHeaderMenuClick={onHeaderMenuClickMangled}

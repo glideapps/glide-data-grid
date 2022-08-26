@@ -484,8 +484,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onColumnResize = whenDefined(
         onColumnResizeIn,
         React.useCallback<NonNullable<typeof onColumnResizeIn>>(
-            (_, w, ind) => {
-                onColumnResizeIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
+            (_, w, ind, wg) => {
+                onColumnResizeIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset, wg);
             },
             [onColumnResizeIn, rowMarkerOffset, columnsIn]
         )
@@ -494,8 +494,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onColumnResizeEnd = whenDefined(
         onColumnResizeEndIn,
         React.useCallback<NonNullable<typeof onColumnResizeEndIn>>(
-            (_, w, ind) => {
-                onColumnResizeEndIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
+            (_, w, ind, wg) => {
+                onColumnResizeEndIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset, wg);
             },
             [onColumnResizeEndIn, rowMarkerOffset, columnsIn]
         )
@@ -504,8 +504,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onColumnResizeStart = whenDefined(
         onColumnResizeStartIn,
         React.useCallback<NonNullable<typeof onColumnResizeStartIn>>(
-            (_, w, ind) => {
-                onColumnResizeStartIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset);
+            (_, w, ind, wg) => {
+                onColumnResizeStartIn?.(columnsIn[ind - rowMarkerOffset], w, ind - rowMarkerOffset, wg);
             },
             [onColumnResizeStartIn, rowMarkerOffset, columnsIn]
         )
@@ -1430,7 +1430,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         false,
                         getCellRenderer
                     );
-                    onColumnResize?.(inputCol, newCol.width, col);
+                    onColumnResize?.(inputCol, newCol.width, col, newCol.width);
                 }
             }
         },

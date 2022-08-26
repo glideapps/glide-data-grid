@@ -2674,8 +2674,10 @@ export const ColumnGroups: React.VFC = () => {
 export const StretchColumnSize: React.VFC = () => {
     const { cols, getCellContent, getCellsForSelection, onColumnResize } = useMockDataGenerator(5, true, true);
 
+    const hasResized = React.useRef(new Set<number>());
+
     const columns = React.useMemo(() => {
-        return cols.map((x, i) => ({ ...x, grow: (5 + i) / 5 }));
+        return cols.map((x, i) => ({ ...x, grow: hasResized.current.has(i) ? undefined : (5 + i) / 5 }));
     }, [cols]);
 
     return (
@@ -2693,7 +2695,10 @@ export const StretchColumnSize: React.VFC = () => {
                 columns={columns}
                 getCellsForSelection={getCellsForSelection}
                 rows={1000}
-                onColumnResize={onColumnResize}
+                onColumnResize={(col, _newSize, colIndex, newSizeWithGrow) => {
+                    hasResized.current.add(colIndex);
+                    onColumnResize(col, newSizeWithGrow);
+                }}
                 rowMarkers="both"
             />
         </BeautifulWrapper>
