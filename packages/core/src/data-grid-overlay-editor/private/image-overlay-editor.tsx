@@ -8,13 +8,12 @@ export interface OverlayImageEditorProps {
     readonly canWrite: boolean;
     readonly onCancel: () => void;
     readonly onChange: (newImage: string) => void;
-    readonly onKeyDown: (event: React.KeyboardEvent) => void;
     readonly onEditClick?: () => void;
     readonly renderImage?: (url: string) => React.ReactNode;
 }
 
 const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps> = p => {
-    const { urls, canWrite, onKeyDown, onEditClick, renderImage } = p;
+    const { urls, canWrite, onEditClick, renderImage } = p;
 
     const filtered = urls.filter(u => u !== "");
 
@@ -24,7 +23,7 @@ const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps> = p =
 
     const allowMove = filtered.length > 1;
     return (
-        <ImageOverlayEditorStyle onKeyDown={onKeyDown} data-testid="GDG-default-image-overlay-editor">
+        <ImageOverlayEditorStyle data-testid="GDG-default-image-overlay-editor">
             <Carousel
                 showArrows={allowMove}
                 showThumbs={false}
@@ -45,7 +44,6 @@ const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps> = p =
                     <EditPencil />
                 </button>
             )}
-            <textarea className="gdg-input" autoFocus={true} onKeyDown={onKeyDown} />
         </ImageOverlayEditorStyle>
     );
 };

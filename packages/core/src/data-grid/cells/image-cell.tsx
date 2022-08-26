@@ -18,7 +18,7 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
         data: [],
     }),
     provideEditor: () => p => {
-        const { onKeyDown, value, onFinishedEditing, imageEditorOverride } = p;
+        const { value, onFinishedEditing, imageEditorOverride } = p;
 
         const ImageEditor = imageEditorOverride ?? ImageOverlayEditor;
 
@@ -33,7 +33,6 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
                         data: [newImage],
                     });
                 }}
-                onKeyDown={onKeyDown}
             />
         );
     },

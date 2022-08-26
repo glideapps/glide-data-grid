@@ -114,9 +114,10 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                     value: x,
                     label: x,
                 }))}
-                onChange={e => {
+                onChange={async e => {
                     if (e === null) return;
                     setValue(e.value);
+                    await new Promise(r => window.requestAnimationFrame(r));
                     onFinishedEditing({
                         ...cell,
                         data: {

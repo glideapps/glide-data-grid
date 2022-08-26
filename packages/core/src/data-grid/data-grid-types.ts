@@ -382,7 +382,6 @@ export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComp
     readonly value: T;
     readonly initialValue?: string;
     readonly validatedSelection?: SelectionRange;
-    readonly onKeyDown: (event: React.KeyboardEvent) => void;
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
     readonly target: Rectangle;

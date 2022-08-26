@@ -22,13 +22,12 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
         data: "",
     }),
     provideEditor: () => p => {
-        const { isHighlighted, onChange, onKeyDown, value, validatedSelection } = p;
+        const { isHighlighted, onChange, value, validatedSelection } = p;
         return (
             <GrowingEntry
                 highlight={isHighlighted}
                 autoFocus={value.readonly !== true}
                 disabled={value.readonly === true}
-                onKeyDown={onKeyDown}
                 altNewline={true}
                 value={value.data}
                 validatedSelection={validatedSelection}

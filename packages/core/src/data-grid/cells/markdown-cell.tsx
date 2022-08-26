@@ -23,7 +23,6 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
     provideEditor: () => p => {
         const {
             onChange,
-            onKeyDown,
             value,
             target,
             onFinishedEditing,
@@ -38,7 +37,6 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
                 readonly={value.readonly === true}
                 markdown={value.data}
                 validatedSelection={validatedSelection}
-                onKeyDown={onKeyDown}
                 onChange={e =>
                     onChange({
                         ...value,

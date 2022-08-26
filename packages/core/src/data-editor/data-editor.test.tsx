@@ -1166,7 +1166,7 @@ describe("data-editor", () => {
         render(<DataEditor {...basicProps} onCellEdited={spy} />, {
             wrapper: Context,
         });
-        prep();
+        prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
         fireEvent.mouseDown(canvas, {
@@ -1179,6 +1179,10 @@ describe("data-editor", () => {
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
 
+        act(() => {
+            jest.runAllTimers();
+        });
+
         fireEvent.keyDown(canvas, {
             keyCode: 74,
             key: "j",
@@ -1189,10 +1193,13 @@ describe("data-editor", () => {
             key: "j",
         });
 
+        act(() => {
+            jest.runAllTimers();
+        });
+
         const overlay = screen.getByDisplayValue("j");
         expect(overlay).toBeInTheDocument();
 
-        jest.useFakeTimers();
         fireEvent.keyDown(overlay, {
             key: "Enter",
         });

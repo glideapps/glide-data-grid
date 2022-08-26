@@ -20,8 +20,8 @@ export const drilldownCellRenderer: InternalCellRenderer<DrilldownCell> = {
         4,
     draw: a => drawDrilldownCell(a, a.cell.data),
     provideEditor: () => p => {
-        const { onKeyDown, value } = p;
-        return <DrilldownOverlayEditor drilldowns={value.data} onKeyDown={onKeyDown} />;
+        const { value } = p;
+        return <DrilldownOverlayEditor drilldowns={value.data} />;
     },
     onPaste: () => undefined,
 };

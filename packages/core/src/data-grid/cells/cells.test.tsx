@@ -62,7 +62,6 @@ describe("Image cell", () => {
         const result = render(
             <Editor
                 onChange={noop}
-                onKeyDown={noop}
                 onFinishedEditing={noop}
                 isHighlighted={false}
                 value={cell}
@@ -95,7 +94,6 @@ describe("Image cell", () => {
             <Editor
                 imageEditorOverride={CustomEditor}
                 onChange={noop}
-                onKeyDown={noop}
                 onFinishedEditing={noop}
                 isHighlighted={false}
                 value={cell}
