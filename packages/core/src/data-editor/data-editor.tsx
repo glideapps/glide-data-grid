@@ -840,7 +840,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     highlight: initialValue === undefined,
                     forceEditMode: initialValue !== undefined,
                 });
-            } else if (c.kind === GridCellKind.Boolean && fromKeyboard) {
+            } else if (c.kind === GridCellKind.Boolean && fromKeyboard && c.readonly !== true) {
                 mangledOnCellsEdited([
                     {
                         location: gridSelection.current.cell,
