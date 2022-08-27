@@ -19,7 +19,7 @@ jobs:
             - uses: actions/checkout@v1
             - uses: actions/setup-node@v1
               with:
-                  node-version: 14
+                  node-version: 16
             - name: Bootstrap
               run: npm install
               working-directory: .
@@ -40,7 +40,7 @@ jobs:
             - uses: actions/checkout@v1
             - uses: actions/setup-node@v1
               with:
-                  node-version: 14
+                  node-version: 16
             - name: Bootstrap
               run: npm install
               working-directory: .
@@ -61,7 +61,7 @@ jobs:
             - uses: actions/checkout@v1
             - uses: actions/setup-node@v1
               with:
-                  node-version: 14
+                  node-version: 16
             - name: Bootstrap
               run: npm install
               working-directory: .
