@@ -620,9 +620,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [visibleRegionTy, visibleRegionY]
     );
 
+    const hasJustScrolled = React.useRef(false);
+
     React.useLayoutEffect(() => {
         if (scrollOffsetY !== undefined && scrollRef.current !== null) {
             scrollRef.current.scrollTop = scrollOffsetY;
+            hasJustScrolled.current = true;
         }
     }, [scrollOffsetY, scrollRef]);
 
@@ -2757,14 +2760,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     // expects unmangled indexes
 
     // TODO make this configurable to disable completely or disable on initial render
-    // const [outCol, outRow] = gridSelectionOuter?.current?.cell ?? [];
-    // const scrollToRef = React.useRef(scrollTo);
-    // scrollToRef.current = scrollTo;
-    // React.useEffect(() => {
-    //     if (outCol !== undefined && outRow !== undefined) {
-    //         scrollToRef.current(outCol, outRow);
-    //     }
-    // }, [outCol, outRow]);
+    const [outCol, outRow] = gridSelectionOuter?.current?.cell ?? [];
+    const scrollToRef = React.useRef(scrollTo);
+    scrollToRef.current = scrollTo;
+    React.useEffect(() => {
+        if (outCol !== undefined && outRow !== undefined && hasJustScrolled.current === false) {
+            scrollToRef.current(outCol, outRow);
+        } else {
+            hasJustScrolled.current = false;
+        }
+    }, [outCol, outRow]);
 
     const disabledRows = React.useMemo(() => {
         if (showTrailingBlankRow === true && trailingRowOptions?.tint === true) {

@@ -1,6 +1,6 @@
 {
     "name": "@schickling-tmp/glide-data-grid",
-    "version": "5.0.0-13",
+    "version": "5.0.0-15",
     "description": "Super fast, pure canvas Data Grid Editor",
     "sideEffects": [
         "**/*.css"
