@@ -1,11 +1,11 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
 import { assert, assertNever, maybe } from "../common/support";
-import clamp from "lodash/clamp";
-import uniq from "lodash/uniq";
-import flatten from "lodash/flatten";
-import range from "lodash/range";
-import debounce from "lodash/debounce";
+import clamp from "lodash/clamp.js";
+import uniq from "lodash/uniq.js";
+import flatten from "lodash/flatten.js";
+import range from "lodash/range.js";
+import debounce from "lodash/debounce.js";
 import DataGridOverlayEditor from "../data-grid-overlay-editor/data-grid-overlay-editor";
 import {
     EditableGridCell,

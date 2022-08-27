@@ -26,7 +26,7 @@ import { useEventListener } from "../../common/utils";
 import { IBounds, useLayer } from "react-laag";
 import type { SpriteMap } from "../../data-grid/data-grid-sprites";
 import type { DataEditorRef, Theme } from "../..";
-import range from "lodash/range";
+import range from "lodash/range.js";
 import {
     useMockDataGenerator,
     BeautifulWrapper,
@@ -40,7 +40,7 @@ import {
     BeautifulStyle,
     ColumnAddButton,
 } from "./utils";
-import noop from "lodash/noop";
+import noop from "lodash/noop.js";
 import type { GetRowThemeCallback } from "../../data-grid/data-grid-render";
 
 export default {

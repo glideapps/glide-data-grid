@@ -4,8 +4,8 @@ import { DataEditor, DataEditorProps, GridCellKind } from "@glideapps/glide-data
 import { DropdownCell as DropdownRenderer, useExtraCells } from ".";
 import { StarCell } from "./cells/star-cell";
 import { SparklineCell } from "./cells/sparkline-cell";
-import range from "lodash/range";
-import uniq from "lodash/uniq";
+import range from "lodash/range.js";
+import uniq from "lodash/uniq.js";
 import { TagsCell } from "./cells/tags-cell";
 import { UserProfileCell } from "./cells/user-profile-cell";
 import type { DropdownCell } from "./cells/dropdown-cell";

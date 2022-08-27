@@ -20,7 +20,7 @@ import {
     ImageWindowLoader,
     GridCell,
 } from "./data-grid-types";
-import groupBy from "lodash/groupBy";
+import groupBy from "lodash/groupBy.js";
 import type { HoverValues } from "./animation-manager";
 import {
     getEffectiveColumns,

@@ -3,7 +3,7 @@ import { assert } from "../../common/support";
 import { GridCellKind, ImageCell, ImageEditorType, isObjectEditorCallbackResult, Rectangle } from "../data-grid-types";
 import { imageCellRenderer } from "./image-cell";
 import * as React from "react";
-import noop from "lodash/noop";
+import noop from "lodash/noop.js";
 import { getDefaultTheme } from "../..";
 
 function getMockEditorTarget(): Rectangle {
