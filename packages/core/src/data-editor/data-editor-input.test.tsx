@@ -1,5 +1,4 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import { describe, test, expect, beforeEach } from "jest-without-globals";
 import * as React from "react";
 import { render, fireEvent, screen, act } from "@testing-library/react";
 import { DataEditor, DataEditorProps, GridCell, GridCellKind, GridSelection, Item } from "..";

@@ -35,8 +35,8 @@ import {
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
-import clamp from "lodash/clamp";
-import makeRange from "lodash/range";
+import clamp from "lodash/clamp.js";
+import makeRange from "lodash/range.js";
 import {
     drawCell,
     drawGrid,

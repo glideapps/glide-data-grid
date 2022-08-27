@@ -1,6 +1,6 @@
 import type { Theme } from "../common/styles";
 import { assertNever, proveType } from "../common/support";
-import has from "lodash/has";
+import has from "lodash/has.js";
 import type React from "react";
 import type { CSSProperties } from "react";
 import type { SpriteManager } from "./data-grid-sprites";

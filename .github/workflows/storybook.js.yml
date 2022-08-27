@@ -13,10 +13,10 @@ jobs:
                   persist-credentials: false
             - uses: actions/setup-node@v1
               with:
-                  node-version: 14
+                  node-version: 16
             - name: Install and Build 🔧
               run: |
-                  npm run bootstrap
+                  npm install
                   npm run build-storybook
             - name: Deploy 🚀
               uses: JamesIves/github-pages-deploy-action@3.6.2

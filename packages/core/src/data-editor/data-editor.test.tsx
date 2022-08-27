@@ -1,5 +1,4 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import { describe, test, expect, beforeEach } from "jest-without-globals";
 import * as React from "react";
 import { render, fireEvent, screen, act, createEvent } from "@testing-library/react";
 import {
@@ -2606,7 +2605,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1, 200);
     });
 
     test("Auto Resize Column", async () => {
@@ -2638,7 +2637,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 50, 1);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 50, 1, 50);
     });
 
     test("Resize Column End Called", async () => {
@@ -2665,7 +2664,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1, 200);
     });
 
     test("Resize Multiple Column", async () => {
@@ -2738,7 +2737,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1, 200);
     });
 
     test("Drag reorder row", async () => {

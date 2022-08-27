@@ -3,7 +3,7 @@ import { styled } from "@linaria/react";
 import DataGridDnd, { DataGridDndProps } from "../data-grid-dnd/data-grid-dnd";
 import type { Rectangle } from "../data-grid/data-grid-types";
 import { InfiniteScroller } from "./infinite-scroller";
-import clamp from "lodash/clamp";
+import clamp from "lodash/clamp.js";
 
 type Props = Omit<DataGridDndProps, "width" | "height" | "eventTargetRef">;
 

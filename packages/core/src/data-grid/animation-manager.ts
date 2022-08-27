@@ -1,4 +1,4 @@
-import clamp from "lodash/clamp";
+import clamp from "lodash/clamp.js";
 import type { Item } from "./data-grid-types";
 
 type StateItem = { item: Item; hoverAmount: number };

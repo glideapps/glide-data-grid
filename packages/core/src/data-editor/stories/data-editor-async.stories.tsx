@@ -12,8 +12,8 @@ import {
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 import { DataEditor, DataEditorProps, DataEditorRef } from "../data-editor";
 import { BeautifulWrapper, Description } from "./utils";
-import range from "lodash/range";
-import chunk from "lodash/chunk";
+import range from "lodash/range.js";
+import chunk from "lodash/chunk.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",

@@ -1,4 +1,3 @@
-import { describe, test, expect } from "jest-without-globals";
 import * as React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
 import DataGrid, { DataGridProps, DataGridRef } from "./data-grid";
