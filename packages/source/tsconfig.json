@@ -1,18 +1,8 @@
 {
     "compilerOptions": {
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "jsx": "react",
-        "moduleResolution": "node",
-        "module": "esnext",
-        "noImplicitAny": true,
-        "noUnusedLocals": true,
-        "skipLibCheck": true,
-        "noUnusedParameters": true,
-        "strict": true,
-        "target": "ES6",
         "lib": ["DOM", "ES6", "ES2017"],
-        "types": ["jest"]
     },
-    "include": ["./src/**/*.ts", "./src/**/*.tsx"]
+    "extends": "../../tsconfig.json",
+    "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+    "references": [{ "path": "../core" }]
 }

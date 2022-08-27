@@ -4,7 +4,7 @@
     "scripts": {
         "start": "npm run storybook",
         "version": "./update-version.sh",
-        "build": "npm run lint --workspaces && npm run build --workspaces",
+        "build": "npm run build --workspaces && npm run lint --workspaces",
         "storybook": "start-storybook -p 9009 -s public",
         "build-storybook": "build-storybook -o storybook-build/",
         "prod-storybook": "npm run build-storybook && npx http-server storybook-build -p 9009",
@@ -16,7 +16,9 @@
     "author": "Glide",
     "license": "MIT",
     "workspaces": [
-        "./packages/*"
+        "./packages/core",
+        "./packages/cells",
+        "./packages/source"
     ],
     "devDependencies": {
         "@babel/cli": "^7.16.0",

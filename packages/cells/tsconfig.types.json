@@ -3,6 +3,8 @@
     "compilerOptions": {
         "outDir": "dist/ts",
         "declaration": true,
+        "incremental": false,
+        "composite": false,
         "types": ["react", "jest"],
         "isolatedModules": false,
         "lib": ["ESNext", "DOM", "DOM.Iterable"],

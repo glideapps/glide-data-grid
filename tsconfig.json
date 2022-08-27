@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "composite": true,
+        "jsx": "react",
+        "moduleResolution": "node",
+        "module": "esnext",
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "skipLibCheck": true,
+        "importsNotUsedAsValues": "error",
+        "noUnusedParameters": true,
+        "strict": true,
+        "target": "es6",
+        "types": ["jest", "node"]
+    }
+}
