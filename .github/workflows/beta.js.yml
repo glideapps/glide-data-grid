@@ -20,7 +20,7 @@ jobs:
               with:
                   node-version: 14
             - name: Bootstrap
-              run: npm run bootstrap
+              run: npm install
               working-directory: .
             - run: npm run lint
             - run: npm run build-js
@@ -42,7 +42,7 @@ jobs:
               with:
                   node-version: 14
             - name: Bootstrap
-              run: npm run bootstrap
+              run: npm install
               working-directory: .
             - run: npm run lint
             - run: npm run build-js
@@ -64,7 +64,7 @@ jobs:
               with:
                   node-version: 14
             - name: Bootstrap
-              run: npm run bootstrap
+              run: npm install
               working-directory: .
             - run: npm run lint
             - run: npm run build-js

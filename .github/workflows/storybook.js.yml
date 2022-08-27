@@ -16,7 +16,7 @@ jobs:
                   node-version: 14
             - name: Install and Build 🔧
               run: |
-                  npm run install
+                  npm install
                   npm run build-storybook
             - name: Deploy 🚀
               uses: JamesIves/github-pages-deploy-action@3.6.2
