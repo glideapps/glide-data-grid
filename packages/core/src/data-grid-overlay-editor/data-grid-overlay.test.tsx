@@ -1,4 +1,3 @@
-import { describe, test } from "jest-without-globals";
 import * as React from "react";
 import { render } from "@testing-library/react";
 import BubblesOverlayEditor from "./private/bubbles-overlay-editor";

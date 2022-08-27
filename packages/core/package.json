@@ -59,14 +59,15 @@
     "peerDependencies": {
         "lodash": "^4.17.19",
         "marked": "^4.0.10",
-        "react-responsive-carousel": "^3.2.7",
         "react": "^16.12.0 || 17.x || 18.x",
-        "react-dom": "^16.12.0 || 17.x || 18.x"
+        "react-dom": "^16.12.0 || 17.x || 18.x",
+        "react-responsive-carousel": "^3.2.7"
     },
     "devDependencies": {
         "@babel/cli": "^7.16.0",
         "@glideapps/ts-helper": "0.0.5",
         "@skypack/package-check": "^0.2.2",
+        "@types/jest": "^28.1.8",
         "esbuild": "^0.14.47",
         "eslint": "^8.19.0",
         "jest": "^27.4.2",

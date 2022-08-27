@@ -1,6 +1,5 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
-// import { describe, test, expect } from "jest-without-globals";
 import { GridCellKind, isSizedGridColumn, TextCell, Item } from "@glideapps/glide-data-grid";
 import { useColumnSort } from ".";
 import { compareSmart } from "./use-column-sort";

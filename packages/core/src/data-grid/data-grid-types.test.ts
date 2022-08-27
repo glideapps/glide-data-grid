@@ -1,4 +1,3 @@
-import { describe, test, expect } from "jest-without-globals";
 import { GridCellKind, isTextEditableGridCell } from "./data-grid-types";
 import { CompactSelection, isEditableGridCell } from "..";
 import { sprites } from "./sprites";

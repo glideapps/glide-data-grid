@@ -10,7 +10,7 @@
         "noEmit": false,
         "outDir": "dist/ts",
         "sourceMap": false,
-        "types": ["react", "jest"],
+        "types": ["react", "jest", "node"],
     },
     "exclude": ["./src/**/*.stories.tsx", "./src/stories/*.tsx", "./src/docs/*.tsx", "./src/setupTests.ts", "./src/**/*.test.ts", "./src/**/*.test.tsx"]
 }
