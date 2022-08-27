@@ -5,7 +5,7 @@ import TagsCellRenderer, { TagsCell } from "./cells/tags-cell";
 import UserProfileCellRenderer, { UserProfileCell } from "./cells/user-profile-cell";
 import DropdownCellRenderer, { DropdownCell } from "./cells/dropdown-cell";
 import ArticleCellRenderer from "./cells/article-cell";
-import { ArticleCell } from "./cells/article-cell-types";
+import type { ArticleCell } from "./cells/article-cell-types";
 import RangeCellRenderer, { RangeCell } from "./cells/range-cell";
 import SpinnerCellRenderer, { SpinnerCell } from "./cells/spinner-cell";
 import DatePickerRenderer, { DatePickerCell } from "./cells/date-picker-cell";

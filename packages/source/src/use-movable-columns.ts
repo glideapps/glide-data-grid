@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DataEditorProps, GridColumn } from "@glideapps/glide-data-grid";
+import type { DataEditorProps, GridColumn } from "@glideapps/glide-data-grid";
 import orderBy from "lodash/orderBy.js";
 
 function colToKey(c: GridColumn) {
