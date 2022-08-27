@@ -19,12 +19,9 @@ jobs:
             - uses: actions/setup-node@v1
               with:
                   node-version: 16
-            - name: Bootstrap
-              run: npm install
+            - name: Build
+              run: npm install && npm run build
               working-directory: .
-            - run: npm run lint
-            - run: npm run build-js
-            - run: npm run build-types
             - uses: JS-DevTools/npm-publish@v1
               with:
                   token: ${{ secrets.NPM_TOKEN }}
@@ -41,12 +38,9 @@ jobs:
             - uses: actions/setup-node@v1
               with:
                   node-version: 16
-            - name: Bootstrap
-              run: npm install
+            - name: Build
+              run: npm install && npm run build
               working-directory: .
-            - run: npm run lint
-            - run: npm run build-js
-            - run: npm run build-types
             - uses: JS-DevTools/npm-publish@v1
               with:
                   token: ${{ secrets.NPM_TOKEN }}
@@ -64,12 +58,8 @@ jobs:
               with:
                   node-version: 16
             - name: Bootstrap
-              run: npm install
+              run: npm install && npm run build
               working-directory: .
-            - run: npm run lint
-            - run: npm run build-js
-            - run: npm run build-cjs
-            - run: npm run build-types
             - uses: JS-DevTools/npm-publish@v1
               with:
                   token: ${{ secrets.NPM_TOKEN }}
