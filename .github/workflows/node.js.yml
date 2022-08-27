@@ -18,7 +18,7 @@ jobs:
               uses: actions/setup-node@v1
               with:
                   node-version: ${{ matrix.node-version }}
-            - run: npm run bootstrap
+            - run: npm run install
             - run: npm run build
             - run: npm run test -- --coverage
             - run: npm run test-source
@@ -36,5 +36,5 @@ jobs:
             - uses: actions/setup-node@v1
               with:
                   node-version: 14
-            - run: npm run bootstrap
+            - run: npm run install
             - run: npm run test-18
