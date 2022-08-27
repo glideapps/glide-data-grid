@@ -3,8 +3,8 @@
     "version": "5.0.0",
     "scripts": {
         "start": "npm run storybook",
-        "bootstrap": "./bootstrap.sh",
-        "build": "npm run build --workspaces",
+        "version": "./update-version.sh",
+        "build": "npm run lint --workspaces && npm run build --workspaces",
         "storybook": "start-storybook -p 9009 -s public",
         "build-storybook": "build-storybook -o storybook-build/",
         "prod-storybook": "npm run build-storybook && npx http-server storybook-build -p 9009",
