@@ -32,7 +32,8 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
         ...c,
         data: false,
     }),
-    onClick: (cell, x, y, bounds) => {
+    onClick: e => {
+        const { cell, posX: x, posY: y, bounds } = e;
         if (
             booleanCellIsEditable(cell) &&
             Math.abs(x - bounds.width / 2) <= 10 &&

@@ -11,7 +11,8 @@ export const markerCellRenderer: InternalCellRenderer<MarkerCell> = {
     drawDeprep: deprepMarkerRowCell,
     measure: () => 44,
     draw: a => drawMarkerRowCell(a, a.cell.row, a.cell.checked, a.cell.markerKind, a.cell.drawHandle),
-    onClick: (cell, x, y, bounds) => {
+    onClick: e => {
+        const { bounds, cell, posX: x, posY: y } = e;
         const { width, height } = bounds;
 
         const centerX = cell.drawHandle ? 7 + (width - 7) / 2 : width / 2;

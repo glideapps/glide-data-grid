@@ -9,6 +9,7 @@ import type { ArticleCell } from "./cells/article-cell-types";
 import RangeCellRenderer, { RangeCell } from "./cells/range-cell";
 import SpinnerCellRenderer, { SpinnerCell } from "./cells/spinner-cell";
 import DatePickerRenderer, { DatePickerCell } from "./cells/date-picker-cell";
+import LinksCellRenderer, { LinksCell } from "./cells/links-cell";
 
 const cells = [
     StarCellRenderer,
@@ -20,6 +21,7 @@ const cells = [
     SpinnerCellRenderer,
     RangeCellRenderer,
     DatePickerRenderer,
+    LinksCellRenderer,
 ];
 
 export function useExtraCells() {
@@ -36,6 +38,7 @@ export {
     RangeCellRenderer as RangeCell,
     SpinnerCellRenderer as SpinnerCell,
     DatePickerRenderer as DatePickerCell,
+    LinksCellRenderer as LinksCell,
     cells as allCells,
 };
 
@@ -49,4 +52,5 @@ export type {
     RangeCell as RangeCellType,
     SpinnerCell as SpinnerCellType,
     DatePickerCell as DatePickerType,
+    LinksCell as LinksCellType,
 };

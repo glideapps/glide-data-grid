@@ -54,7 +54,23 @@ interface BaseCellRenderer<T extends InnerGridCell> {
     readonly provideEditor?: ProvideEditorCallback<T>;
 
     // event callbacks
-    readonly onClick?: (cell: T, posX: number, posY: number, bounds: Rectangle) => T | undefined;
+    readonly onClick?: (args: {
+        readonly cell: T;
+        readonly posX: number;
+        readonly posY: number;
+        readonly bounds: Rectangle;
+        readonly theme: Theme;
+        readonly preventDefault: () => void;
+    }) => T | undefined;
+
+    readonly onSelect?: (args: {
+        readonly cell: T;
+        readonly posX: number;
+        readonly posY: number;
+        readonly bounds: Rectangle;
+        readonly theme: Theme;
+        readonly preventDefault: () => void;
+    }) => void;
     readonly onDelete?: (cell: T) => T | undefined;
 }
 

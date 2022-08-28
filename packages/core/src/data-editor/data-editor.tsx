@@ -1100,6 +1100,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const lastSelectedRowRef = React.useRef<number>();
     const lastSelectedColRef = React.useRef<number>();
 
+    const themeForCell = React.useCallback(
+        (cell: InnerGridCell, pos: Item): Theme => {
+            const [col, row] = pos;
+            return {
+                ...mergedTheme,
+                ...mangledCols[col]?.themeOverride,
+                ...getRowThemeOverride?.(row),
+                ...cell.themeOverride,
+            };
+        },
+        [getRowThemeOverride, mangledCols, mergedTheme]
+    );
+
     const handleSelect = React.useCallback(
         (args: GridMouseEventArgs) => {
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
@@ -1131,12 +1144,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (p.onRowMoved !== undefined) {
                         const renderer = getCellRenderer(markerCell);
                         assert(renderer?.kind === InnerGridCellKind.Marker);
-                        const postClick = renderer?.onClick?.(
-                            markerCell,
-                            args.localEventX,
-                            args.localEventY,
-                            args.bounds
-                        ) as MarkerCell | undefined;
+                        const postClick = renderer?.onClick?.({
+                            cell: markerCell,
+                            posX: args.localEventX,
+                            posY: args.localEventY,
+                            bounds: args.bounds,
+                            theme: themeForCell(markerCell, args.location),
+                            preventDefault: () => undefined,
+                        }) as MarkerCell | undefined;
                         if (postClick === undefined || postClick.checked === markerCell.checked) return;
                     }
 
@@ -1176,6 +1191,23 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     void appendRow(customTargetColumn ?? col);
                 } else {
                     if (cellCol !== col || cellRow !== row) {
+                        const cell = getMangledCellContent(args.location);
+                        const renderer = getCellRenderer(cell);
+
+                        if (renderer?.onSelect !== undefined) {
+                            let prevented = false;
+                            renderer.onSelect({
+                                cell,
+                                posX: args.localEventX,
+                                posY: args.localEventY,
+                                bounds: args.bounds,
+                                preventDefault: () => (prevented = true),
+                                theme: themeForCell(cell, args.location),
+                            });
+                            if (prevented) {
+                                return;
+                            }
+                        }
                         const isLastStickyRow = lastRowSticky && row === rows;
 
                         const startedFromLastSticky =
@@ -1306,6 +1338,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             setSelectedColumns,
             setSelectedRows,
             showTrailingBlankRow,
+            themeForCell,
         ]
     );
 
@@ -1533,29 +1566,32 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         preventDefault,
                     });
                 }
-                if (gridSelection.current !== undefined) {
-                    if (mouse?.fillHandle === true) {
-                        fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
-                    } else if (
-                        gridSelection.current !== undefined &&
-                        mouse?.previousSelection?.current?.cell !== undefined &&
-                        !isPrevented.current
-                    ) {
+                if (mouse?.fillHandle === true && gridSelection.current !== undefined) {
+                    fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
+                } else if (!isPrevented.current) {
+                    const c = getMangledCellContent(args.location);
+                    const r = getCellRenderer(c);
+                    if (r !== undefined && r.onClick !== undefined) {
+                        const newVal = r.onClick({
+                            cell: c,
+                            posX: a.localEventX,
+                            posY: a.localEventY,
+                            bounds: a.bounds,
+                            theme: themeForCell(c, args.location),
+                            preventDefault,
+                        });
+                        if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
+                            mangledOnCellsEdited([{ location: a.location, value: newVal }]);
+                            gridRef.current?.damage([
+                                {
+                                    cell: a.location,
+                                },
+                            ]);
+                        }
+                    }
+                    if (mouse?.previousSelection?.current?.cell !== undefined && gridSelection.current !== undefined) {
                         const [selectedCol, selectedRow] = gridSelection.current.cell;
                         const [prevCol, prevRow] = mouse.previousSelection.current.cell;
-                        const c = getMangledCellContent([col, row]);
-                        const r = getCellRenderer(c);
-                        if (r !== undefined && r.onClick !== undefined) {
-                            const newVal = r.onClick(c, a.localEventX, a.localEventY, a.bounds);
-                            if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
-                                mangledOnCellsEdited([{ location: a.location, value: newVal }]);
-                                gridRef.current?.damage([
-                                    {
-                                        cell: a.location,
-                                    },
-                                ]);
-                            }
-                        }
                         if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
                             onCellActivated?.([col - rowMarkerOffset, row]);
                             reselect(a.bounds, false);
@@ -1565,6 +1601,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
                 return false;
             };
+
+            if (isPrevented.current) return;
 
             const clickLocation = args.location[0] - rowMarkerOffset;
             if (args.isTouch) {
@@ -1650,6 +1688,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             fillDown,
             getMangledCellContent,
             getCellRenderer,
+            themeForCell,
             mangledOnCellsEdited,
             onCellActivated,
             reselect,

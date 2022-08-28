@@ -7,10 +7,11 @@ const shared = {
     entryPoints: ["src/index.ts"],
     bundle: true,
     minify: false,
+    sourcemap: true,
     target: "es2018",
     plugins: [
         linaria({
-            sourceMap: false,
+            sourceMap: true,
         }),
     ],
     external: Object.keys(dependencies).concat(Object.keys(peerDependencies)),

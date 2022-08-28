@@ -17,6 +17,7 @@ import { useResizeDetector } from "react-resize-detector";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import "@glideapps/glide-data-grid/dist/index.css";
 import type { DatePickerCell } from "./cells/date-picker-cell";
+import type { LinksCell } from "./cells/links-cell";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -325,6 +326,29 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
+                    } else if (col === 10) {
+                        num = row + 1;
+                        rand();
+                        const d: LinksCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "links-cell",
+                                underlineOffset: 6,
+                                links: [
+                                    {
+                                        title: "Linky phone",
+                                        onClick: () => alert("Click 1"),
+                                    },
+                                    {
+                                        title: "Click the linky dinky",
+                                        onClick: () => alert("Click 2"),
+                                    },
+                                ],
+                            },
+                        };
+                        return d;
                     }
                     throw new Error("Fail");
                 }}
@@ -367,6 +391,10 @@ export const CustomCells: React.VFC = () => {
                     },
                     {
                         title: "Date Picker",
+                        width: 150,
+                    },
+                    {
+                        title: "Links",
                         width: 150,
                     },
                 ]}
