@@ -2005,6 +2005,11 @@ export const BuiltInSearch: React.VFC = () => {
 
     const [showSearch, setShowSearch] = React.useState(false);
 
+    const [selection, setSelection] = React.useState<GridSelection>({
+        rows: CompactSelection.empty(),
+        columns: CompactSelection.empty(),
+    });
+
     useEventListener(
         "keydown",
         React.useCallback(event => {
@@ -2037,6 +2042,8 @@ export const BuiltInSearch: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 getCellsForSelection={true}
+                gridSelection={selection}
+                onGridSelectionChange={setSelection}
                 columns={cols}
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}

@@ -468,6 +468,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [rowMarkerOffset, validateCellIn]
     );
 
+    const expectedExternalGridSelection = React.useRef<GridSelection | undefined>(gridSelectionOuter);
     const setGridSelection = React.useCallback(
         (newVal: GridSelection, expand: boolean): void => {
             if (expand) {
@@ -480,7 +481,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 );
             }
             if (onGridSelectionChange !== undefined) {
-                onGridSelectionChange(shiftSelection(newVal, -rowMarkerOffset));
+                expectedExternalGridSelection.current = shiftSelection(newVal, -rowMarkerOffset);
+                onGridSelectionChange(expectedExternalGridSelection.current);
             } else {
                 setGridSelectionInner(newVal);
             }
@@ -2759,7 +2761,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const scrollToRef = React.useRef(scrollTo);
     scrollToRef.current = scrollTo;
     React.useEffect(() => {
-        if (outCol !== undefined && outRow !== undefined) {
+        if (
+            outCol !== undefined &&
+            outRow !== undefined &&
+            (outCol !== expectedExternalGridSelection.current?.current?.cell[0] ||
+                outRow !== expectedExternalGridSelection.current?.current?.cell[1])
+        ) {
             scrollToRef.current(outCol, outRow);
         }
     }, [outCol, outRow]);
