@@ -3085,6 +3085,93 @@ describe("data-editor", () => {
         expect(Element.prototype.scrollTo).toBeCalledWith(0, 533);
     });
 
+    test("Imperative scrollTo pixel start", async () => {
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        act(() => {
+            ref.current?.scrollTo(
+                5,
+                {
+                    amount: 1500,
+                    unit: "px",
+                },
+                undefined,
+                undefined,
+                undefined,
+                {
+                    vAlign: "start",
+                }
+            );
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+        expect(Element.prototype.scrollTo).toBeCalledWith(0, 1464);
+    });
+
+    test("Imperative scrollTo pixel center", async () => {
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        act(() => {
+            ref.current?.scrollTo(
+                5,
+                {
+                    amount: 1500,
+                    unit: "px",
+                },
+                undefined,
+                undefined,
+                undefined,
+                {
+                    vAlign: "center",
+                }
+            );
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+        expect(Element.prototype.scrollTo).toBeCalledWith(0, 998.5);
+    });
+
+    test("Imperative scrollTo pixel end", async () => {
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        act(() => {
+            ref.current?.scrollTo(
+                5,
+                {
+                    amount: 1500,
+                    unit: "px",
+                },
+                undefined,
+                undefined,
+                undefined,
+                {
+                    vAlign: "end",
+                }
+            );
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+        expect(Element.prototype.scrollTo).toBeCalledWith(0, 533);
+    });
+
     test("Imperative damage gets right cell", async () => {
         const spy = jest.fn(basicProps.getCellContent);
         jest.useFakeTimers();
