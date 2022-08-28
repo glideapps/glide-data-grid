@@ -2055,6 +2055,9 @@ export const BuiltInSearch: React.VFC = () => {
 
 interface ImperativeScrollProps {
     paddingY: number;
+    paddingX: number;
+    vAlign?: "start" | "center" | "end";
+    hAlign?: "start" | "center" | "end";
 }
 
 export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
@@ -2063,7 +2066,10 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
     const ref = React.useRef<DataEditorRef>(null);
 
     const onClick = () => {
-        ref.current?.scrollTo(4, 100, "both", 0, p.paddingY);
+        ref.current?.scrollTo(4, 99, "both", p.paddingX, p.paddingY, {
+            vAlign: p.vAlign,
+            hAlign: p.hAlign,
+        });
     };
 
     return (
@@ -2095,6 +2101,19 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
 };
 (ImperativeScroll as any).args = {
     paddingY: 0,
+    paddingX: 0,
+    vAlign: "start",
+    hAlign: "start",
+};
+(ImperativeScroll as any).argTypes = {
+    paddingY: 0,
+    paddingX: 0,
+    vAlign: {
+        control: { type: "select", options: ["start", "center", "end", undefined] },
+    },
+    hAlign: {
+        control: { type: "select", options: ["start", "center", "end", undefined] },
+    },
 };
 (ImperativeScroll as any).parameters = {
     options: {
@@ -2146,10 +2165,11 @@ export const HeaderMenus: React.VFC = () => {
         }));
     }, [cols]);
 
-    const [menu, setMenu] = React.useState<{
-        col: number;
-        bounds: Rectangle;
-    }>();
+    const [menu, setMenu] =
+        React.useState<{
+            col: number;
+            bounds: Rectangle;
+        }>();
 
     const isOpen = menu !== undefined;
 

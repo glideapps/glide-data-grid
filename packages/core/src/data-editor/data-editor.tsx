@@ -290,11 +290,15 @@ export interface DataEditorRef {
     focus: DataGridRef["focus"];
     emit: (eventName: EmitEvents) => Promise<void>;
     scrollTo: (
-        col: number,
-        row: number,
+        col: number | { amount: number; unit: "cell" | "px" },
+        row: number | { amount: number; unit: "cell" | "px" },
         dir?: "horizontal" | "vertical" | "both",
         paddingX?: number,
-        paddingY?: number
+        paddingY?: number,
+        options?: {
+            hAlign?: "start" | "center" | "end";
+            vAlign?: "start" | "center" | "end";
+        }
     ) => void;
 }
 
@@ -311,15 +315,16 @@ const emptyGridSelection: GridSelection = {
 
 const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorProps> = (p, forwardedRef) => {
     const [gridSelectionInner, setGridSelectionInner] = React.useState<GridSelection>(emptyGridSelection);
-    const [overlay, setOverlay] = React.useState<{
-        target: Rectangle;
-        content: GridCell;
-        theme: Theme;
-        initialValue: string | undefined;
-        cell: Item;
-        highlight: boolean;
-        forceEditMode: boolean;
-    }>();
+    const [overlay, setOverlay] =
+        React.useState<{
+            target: Rectangle;
+            content: GridCell;
+            theme: Theme;
+            initialValue: string | undefined;
+            cell: Item;
+            highlight: boolean;
+            forceEditMode: boolean;
+        }>();
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
     const [mouseState, setMouseState] = React.useState<MouseState>();
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -553,7 +558,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const getCellRenderer: <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined = React.useCallback(
         <T extends InnerGridCell>(cell: T) => {
             if (cell.kind !== GridCellKind.Custom) {
-                return (CellRenderers[cell.kind] as unknown) as CellRenderer<T>;
+                return CellRenderers[cell.kind] as unknown as CellRenderer<T>;
             }
             return additionalRenderers?.find(x => x.isMatch(cell)) as CellRenderer<T>;
         },
@@ -882,43 +887,108 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const scrollTo = React.useCallback(
         (
-            col: number,
-            row: number,
+            col: number | { amount: number; unit: "cell" | "px" },
+            row: number | { amount: number; unit: "cell" | "px" },
             dir: "horizontal" | "vertical" | "both" = "both",
             paddingX: number = 0,
-            paddingY: number = 0
+            paddingY: number = 0,
+            options:
+                | {
+                      hAlign?: "start" | "center" | "end";
+                      vAlign?: "start" | "center" | "end";
+                  }
+                | undefined = undefined
         ): void => {
             if (scrollRef.current !== null) {
                 const grid = gridRef.current;
                 const canvas = canvasRef.current;
+
+                const trueCol = typeof col !== "number" ? (col.unit === "cell" ? col.amount : undefined) : col;
+                const trueRow = typeof row !== "number" ? (row.unit === "cell" ? row.amount : undefined) : row;
+                const desiredX = typeof col !== "number" && col.unit === "px" ? col.amount : undefined;
+                const desiredY = typeof row !== "number" && row.unit === "px" ? row.amount : undefined;
                 if (grid !== null && canvas !== null) {
-                    const rawBounds = grid.getBounds(col + rowMarkerOffset, row);
+                    let targetRect: Rectangle = {
+                        x: 0,
+                        y: 0,
+                        width: 0,
+                        height: 0,
+                    };
+
+                    let scrollX = 0;
+                    let scrollY = 0;
+
+                    if (trueCol !== undefined || trueRow !== undefined) {
+                        targetRect = grid.getBounds((trueCol ?? 0) + rowMarkerOffset, trueRow ?? 0) ?? targetRect;
+                        if (targetRect.width === 0 || targetRect.height === 0) return;
+                    }
 
                     const scrollBounds = canvas.getBoundingClientRect();
 
-                    if (rawBounds !== undefined) {
-                        const bounds = {
-                            x: rawBounds.x - paddingX,
-                            y: rawBounds.y - paddingY,
-                            width: rawBounds.width + 2 * paddingX,
-                            height: rawBounds.height + 2 * paddingY,
+                    if (desiredX !== undefined) {
+                        targetRect = {
+                            ...targetRect,
+                            x: desiredX - scrollBounds.left - scrollRef.current.scrollLeft,
+                            width: 1,
                         };
+                    }
+                    if (desiredY !== undefined) {
+                        targetRect = {
+                            ...targetRect,
+                            y: desiredY + scrollBounds.top - scrollRef.current.scrollTop,
+                            height: 1,
+                        };
+                    }
 
-                        let scrollX = 0;
-                        let scrollY = 0;
+                    if (targetRect !== undefined) {
+                        const bounds = {
+                            x: targetRect.x - paddingX,
+                            y: targetRect.y - paddingY,
+                            width: targetRect.width + 2 * paddingX,
+                            height: targetRect.height + 2 * paddingY,
+                        };
 
                         let frozenWidth = 0;
                         for (let i = 0; i < freezeColumns; i++) {
                             frozenWidth += columns[i].width;
                         }
-                        const sLeft = frozenWidth + scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
-                        const sRight = scrollBounds.right;
-                        const sTop = scrollBounds.top + totalHeaderHeight;
                         let trailingRowHeight = 0;
                         if (lastRowSticky) {
                             trailingRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
                         }
-                        const sBottom = scrollBounds.bottom - trailingRowHeight;
+
+                        let sLeft = frozenWidth + scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
+                        let sRight = scrollBounds.right;
+                        let sTop = scrollBounds.top + totalHeaderHeight;
+                        let sBottom = scrollBounds.bottom - trailingRowHeight;
+
+                        const minx = targetRect.width + paddingX * 2;
+                        switch (options?.hAlign) {
+                            case "start":
+                                sRight = sLeft + minx;
+                                break;
+                            case "end":
+                                sLeft = sRight - minx;
+                                break;
+                            case "center":
+                                sLeft = Math.floor((sLeft + sRight) / 2) - minx / 2;
+                                sRight = sLeft + minx;
+                                break;
+                        }
+
+                        const miny = targetRect.height + paddingY * 2;
+                        switch (options?.vAlign) {
+                            case "start":
+                                sBottom = sTop + miny;
+                                break;
+                            case "end":
+                                sTop = sBottom - miny;
+                                break;
+                            case "center":
+                                sTop = Math.floor((sTop + sBottom) / 2) - miny / 2;
+                                sBottom = sTop + miny;
+                                break;
+                        }
 
                         if (sLeft > bounds.x) {
                             scrollX = bounds.x - sLeft;
@@ -1251,11 +1321,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const lastMouseSelectLocation = React.useRef<[number, number]>();
     const touchDownArgs = React.useRef(visibleRegion);
-    const mouseDownData = React.useRef<{
-        wasDoubleClick: boolean;
-        time: number;
-        location: Item;
-    }>();
+    const mouseDownData =
+        React.useRef<{
+            wasDoubleClick: boolean;
+            time: number;
+            location: Item;
+        }>();
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
             isPrevented.current = false;
@@ -1290,10 +1361,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [gridSelection, handleSelect]
     );
 
-    const [renameGroup, setRenameGroup] = React.useState<{
-        group: string;
-        bounds: Rectangle;
-    }>();
+    const [renameGroup, setRenameGroup] =
+        React.useState<{
+            group: string;
+            bounds: Rectangle;
+        }>();
 
     const handleGroupHeaderSelection = React.useCallback(
         (args: GridMouseEventArgs) => {
