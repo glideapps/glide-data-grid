@@ -283,23 +283,25 @@ export interface DataEditorProps extends Props {
     readonly customRenderers?: readonly CustomRenderer[];
 }
 
+type ScrollToFn = (
+    col: number | { amount: number; unit: "cell" | "px" },
+    row: number | { amount: number; unit: "cell" | "px" },
+    dir?: "horizontal" | "vertical" | "both",
+    paddingX?: number,
+    paddingY?: number,
+    options?: {
+        hAlign?: "start" | "center" | "end";
+        vAlign?: "start" | "center" | "end";
+    }
+) => void;
+
 export interface DataEditorRef {
     appendRow: (col: number) => Promise<void>;
     updateCells: DataGridRef["damage"];
     getBounds: DataGridRef["getBounds"];
     focus: DataGridRef["focus"];
     emit: (eventName: EmitEvents) => Promise<void>;
-    scrollTo: (
-        col: number | { amount: number; unit: "cell" | "px" },
-        row: number | { amount: number; unit: "cell" | "px" },
-        dir?: "horizontal" | "vertical" | "both",
-        paddingX?: number,
-        paddingY?: number,
-        options?: {
-            hAlign?: "start" | "center" | "end";
-            vAlign?: "start" | "center" | "end";
-        }
-    ) => void;
+    scrollTo: ScrollToFn;
 }
 
 const loadingCell: GridCell = {
@@ -885,20 +887,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [getMangledCellContent, setOverlaySimple]
     );
 
-    const scrollTo = React.useCallback(
-        (
-            col: number | { amount: number; unit: "cell" | "px" },
-            row: number | { amount: number; unit: "cell" | "px" },
-            dir: "horizontal" | "vertical" | "both" = "both",
-            paddingX: number = 0,
-            paddingY: number = 0,
-            options:
-                | {
-                      hAlign?: "start" | "center" | "end";
-                      vAlign?: "start" | "center" | "end";
-                  }
-                | undefined = undefined
-        ): void => {
+    const scrollTo = React.useCallback<ScrollToFn>(
+        (col, row, dir = "both", paddingX = 0, paddingY = 0, options = undefined): void => {
             if (scrollRef.current !== null) {
                 const grid = gridRef.current;
                 const canvas = canvasRef.current;
