@@ -1,7 +1,7 @@
 import {
     CustomCell,
     measureTextCached,
-    AdditionalRenderer,
+    CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
     blend,
@@ -22,7 +22,7 @@ interface LinksCellProps {
 
 export type LinksCell = CustomCell<LinksCellProps>;
 
-function onClickSelect(e: Parameters<NonNullable<AdditionalRenderer<LinksCell>["onSelect"]>>[0]) {
+function onClickSelect(e: Parameters<NonNullable<CustomRenderer<LinksCell>["onSelect"]>>[0]) {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d", { alpha: false });
     if (ctx === null) return;
@@ -56,7 +56,7 @@ function onClickSelect(e: Parameters<NonNullable<AdditionalRenderer<LinksCell>["
     return undefined;
 }
 
-const renderer: AdditionalRenderer<LinksCell> = {
+const renderer: CustomRenderer<LinksCell> = {
     kind: GridCellKind.Custom,
     needsHover: true,
     needsHoverPosition: true,

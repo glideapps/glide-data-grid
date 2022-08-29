@@ -4,7 +4,7 @@ import {
     CustomCell,
     measureTextCached,
     TextCellEntry,
-    AdditionalRenderer,
+    CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
 } from "@glideapps/glide-data-grid";
@@ -19,7 +19,7 @@ interface UserProfileCellProps {
 
 export type UserProfileCell = CustomCell<UserProfileCellProps>;
 
-const renderer: AdditionalRenderer<UserProfileCell> = {
+const renderer: CustomRenderer<UserProfileCell> = {
     kind: GridCellKind.Custom,
     isMatch: (cell: CustomCell): cell is UserProfileCell => (cell.data as any).kind === "user-profile-cell",
     draw: (args, cell) => {

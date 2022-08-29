@@ -2,7 +2,7 @@ import {
     CustomCell,
     Rectangle,
     measureTextCached,
-    AdditionalRenderer,
+    CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
 } from "@glideapps/glide-data-grid";
@@ -82,7 +82,7 @@ const EditorWrap = styled.div<{ tagHeight: number; innerPad: number }>`
     }
 `;
 
-const renderer: AdditionalRenderer<TagsCell> = {
+const renderer: CustomRenderer<TagsCell> = {
     kind: GridCellKind.Custom,
     isMatch: (c): c is TagsCell => (c.data as any).kind === "tags-cell",
     draw: (args, cell) => {

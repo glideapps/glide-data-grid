@@ -1,7 +1,7 @@
 import {
     CustomCell,
     measureTextCached,
-    AdditionalRenderer,
+    CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
 } from "@glideapps/glide-data-grid";
@@ -33,7 +33,7 @@ const wrapperStyle: React.CSSProperties = {
     flexGrow: 1,
 };
 
-const renderer: AdditionalRenderer<RangeCell> = {
+const renderer: CustomRenderer<RangeCell> = {
     kind: GridCellKind.Custom,
     isMatch: (c): c is RangeCell => (c.data as any).kind === "range-cell",
     draw: (args, cell) => {

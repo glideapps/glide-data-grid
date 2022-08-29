@@ -1,7 +1,7 @@
 import {
     CustomCell,
     ProvideEditorCallback,
-    AdditionalRenderer,
+    CustomRenderer,
     getMiddleCenterBias,
     useTheme,
     GridCellKind,
@@ -131,7 +131,7 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
     );
 };
 
-const renderer: AdditionalRenderer<DropdownCell> = {
+const renderer: CustomRenderer<DropdownCell> = {
     kind: GridCellKind.Custom,
     isMatch: (c): c is DropdownCell => (c.data as any).kind === "dropdown-cell",
     draw: (args, cell) => {

@@ -1,10 +1,10 @@
 import type { ArticleCell } from "./article-cell-types";
 import * as React from "react";
-import { AdditionalRenderer, getMiddleCenterBias, GridCellKind } from "@glideapps/glide-data-grid";
+import { CustomRenderer, getMiddleCenterBias, GridCellKind } from "@glideapps/glide-data-grid";
 
 const ArticleCellEditor = React.lazy(async () => await import("./article-cell-editor"));
 
-const renderer: AdditionalRenderer<ArticleCell> = {
+const renderer: CustomRenderer<ArticleCell> = {
     kind: GridCellKind.Custom,
     isMatch: (c): c is ArticleCell => (c.data as any).kind === "article-cell",
     draw: (args, cell) => {
