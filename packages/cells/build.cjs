@@ -25,7 +25,8 @@ async function f() {
 
     await build({
         ...shared,
-        outfile: "dist/js/index.js",
+        splitting: true,
+        outdir: "dist/js",
         format: "esm",
     });
 
