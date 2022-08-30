@@ -3189,6 +3189,70 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith([1, 0]);
     });
 
+    test("On-scroll does not spuriously fire on select", async () => {
+        const spy = jest.fn(basicProps.getCellContent);
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rowMarkers="number" getCellContent={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 965,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 965,
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(Element.prototype.scrollTo).not.toBeCalled();
+    });
+
+    test("Keyboard scroll with controlled selection does not double fire", async () => {
+        const spy = jest.fn(basicProps.getCellContent);
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rowMarkers="number" getCellContent={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 965,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 965,
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        // make sure we clear the mock in case a spurios scroll was emitted (test above)
+        (Element.prototype.scrollTo as jest.Mock).mockClear();
+
+        fireEvent.keyDown(canvas, { key: "ArrowDown" });
+        fireEvent.keyUp(canvas, { key: "ArrowDown" });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(Element.prototype.scrollTo).toBeCalledTimes(1);
+    });
+
     test("Ctrl Arrow keys", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
