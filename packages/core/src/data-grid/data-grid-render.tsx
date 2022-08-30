@@ -79,11 +79,12 @@ const loadingCell: InnerGridCell = {
     allowOverlay: false,
 };
 
-interface BlitData {
+export interface BlitData {
     readonly cellXOffset: number;
     readonly cellYOffset: number;
     readonly translateX: number;
     readonly translateY: number;
+    readonly mustDrawFocusOnHeader: boolean;
 }
 
 interface DragAndDropState {
@@ -2036,6 +2037,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
     let drawRegions: Rectangle[] = [];
 
+    const mustDrawFocusOnHeader = selection.current?.cell[1] === cellYOffset && translateY === 0;
     const drawHeaderTexture = () => {
         drawGridHeaders(
             overlayCtx,
@@ -2088,6 +2090,27 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             theme.bgHeader
         );
         overlayCtx.stroke();
+
+        if (mustDrawFocusOnHeader) {
+            drawFocusRing(
+                overlayCtx,
+                width,
+                height,
+                cellYOffset,
+                translateX,
+                translateY,
+                effectiveCols,
+                mappedColumns,
+                theme,
+                totalHeaderHeight,
+                selection,
+                getRowHeight,
+                getCellContent,
+                trailingRowType,
+                fillHandle,
+                rows
+            );
+        }
     };
 
     // handle damage updates by directly drawing to the target to avoid large blits
@@ -2210,7 +2233,12 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         return;
     }
 
-    if (canBlit !== true || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
+    if (
+        canBlit !== true ||
+        cellXOffset !== last.cellXOffset ||
+        translateX !== last.translateX ||
+        mustDrawFocusOnHeader !== last.mustDrawFocusOnHeader
+    ) {
         drawHeaderTexture();
     }
 
@@ -2415,7 +2443,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         freezeColumns
     );
 
-    lastBlitData.current = { cellXOffset, cellYOffset, translateX, translateY };
+    lastBlitData.current = { cellXOffset, cellYOffset, translateX, translateY, mustDrawFocusOnHeader };
 
     targetCtx.restore();
     overlayCtx.restore();

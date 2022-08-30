@@ -38,6 +38,7 @@ import { useDebouncedMemo, useEventListener } from "../common/utils";
 import clamp from "lodash/clamp.js";
 import makeRange from "lodash/range.js";
 import {
+    BlitData,
     drawCell,
     drawGrid,
     DrawGridArg,
@@ -162,13 +163,6 @@ export interface DataGridProps {
     readonly getCellRenderer: <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;
 }
 
-interface BlitData {
-    readonly cellXOffset: number;
-    readonly cellYOffset: number;
-    readonly translateX: number;
-    readonly translateY: number;
-}
-
 type DamageUpdateList = readonly {
     cell: Item;
     // newValue: GridCell,
@@ -261,7 +255,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const damageRegion = React.useRef<readonly Item[] | undefined>();
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
-    const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
+    const lastBlitData = React.useRef<BlitData>({
+        cellXOffset,
+        cellYOffset,
+        translateX,
+        translateY,
+        mustDrawFocusOnHeader: false,
+    });
     const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, readonly [number, number]] | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const overlayRef = React.useRef<HTMLCanvasElement | null>(null);
