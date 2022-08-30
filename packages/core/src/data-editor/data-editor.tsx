@@ -2127,12 +2127,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         ...event,
                         cancel: () => {
                             cancelled = true;
-                            event.cancel();
                         },
                     });
                 }
 
                 if (cancelled) return;
+
+                const cancel = () => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                };
 
                 const overlayOpen = overlay !== undefined;
                 const { altKey, shiftKey, metaKey, ctrlKey, key, bounds } = event;
@@ -2180,10 +2184,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             s?.addRange(r);
                         }
                     }
-                    event.cancel();
+                    cancel();
                     return;
                 } else if (isHotkey("primary+f", event) && keybindings.search) {
-                    event.cancel();
+                    cancel();
                     setShowSearchInner(true);
                 }
 
@@ -2218,7 +2222,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                 if (isDeleteKey) {
                     const callbackResult = onDelete?.(gridSelection) ?? true;
-                    event.cancel();
+                    cancel();
                     if (callbackResult !== false) {
                         const toDelete = callbackResult === true ? gridSelection : callbackResult;
 
@@ -2299,7 +2303,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     } else {
                         onCellActivated?.([col - rowMarkerOffset, row]);
                         reselect(bounds, true);
-                        event.cancel();
+                        cancel();
                     }
                 } else if (
                     keybindings.downFill &&
@@ -2308,7 +2312,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 ) {
                     // ctrl/cmd + d
                     fillDown(false);
-                    event.cancel();
+                    cancel();
                 } else if (
                     keybindings.rightFill &&
                     isHotkey("primary+_82", event) &&
@@ -2336,13 +2340,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             cell: c.location,
                         }))
                     );
-                    event.cancel();
+                    cancel();
                 } else if (keybindings.pageDown && isHotkey("PageDown", event)) {
                     row += Math.max(1, visibleRegionRef.current.height - 4); // partial cell accounting
-                    event.cancel();
+                    cancel();
                 } else if (keybindings.pageUp && isHotkey("PageUp", event)) {
                     row -= Math.max(1, visibleRegionRef.current.height - 4); // partial cell accounting
-                    event.cancel();
+                    cancel();
                 } else if (keybindings.first && isHotkey("primary+Home", event)) {
                     setOverlay(undefined);
                     row = 0;
@@ -2434,12 +2438,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         return;
                     }
                     reselect(bounds, true, key);
-                    event.cancel();
+                    cancel();
                 }
 
                 const moved = updateSelectedCell(col, row, false, freeMove);
                 if (moved) {
-                    event.cancel();
+                    cancel();
                 }
             };
             void fn();
@@ -2832,6 +2836,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         onKeyDown({
                             bounds: undefined,
                             cancel: () => undefined,
+                            stopPropagation: () => undefined,
+                            preventDefault: () => undefined,
                             ctrlKey: false,
                             key: "Delete",
                             keyCode: 46,
@@ -2845,6 +2851,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         onKeyDown({
                             bounds: undefined,
                             cancel: () => undefined,
+                            stopPropagation: () => undefined,
+                            preventDefault: () => undefined,
                             ctrlKey: true,
                             key: "r",
                             keyCode: 82,
@@ -2858,6 +2866,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         onKeyDown({
                             bounds: undefined,
                             cancel: () => undefined,
+                            stopPropagation: () => undefined,
+                            preventDefault: () => undefined,
                             ctrlKey: true,
                             key: "d",
                             keyCode: 68,

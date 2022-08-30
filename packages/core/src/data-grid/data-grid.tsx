@@ -985,10 +985,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             onKeyDown?.({
                 bounds,
-                cancel: () => {
-                    event.stopPropagation();
-                    event.preventDefault();
-                },
+                stopPropagation: event.stopPropagation,
+                preventDefault: event.preventDefault,
+                cancel: () => undefined,
                 ctrlKey: event.ctrlKey,
                 metaKey: event.metaKey,
                 shiftKey: event.shiftKey,
@@ -1013,10 +1012,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             onKeyUp?.({
                 bounds,
-                cancel: () => {
-                    event.stopPropagation();
-                    event.preventDefault();
-                },
+                stopPropagation: event.stopPropagation,
+                preventDefault: event.preventDefault,
+                cancel: () => undefined,
                 ctrlKey: event.ctrlKey,
                 metaKey: event.metaKey,
                 shiftKey: event.shiftKey,
@@ -1387,6 +1385,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                                 return onKeyDown?.({
                                                     bounds: getBoundsForItem(canvas, col, row),
                                                     cancel: () => undefined,
+                                                    preventDefault: () => undefined,
+                                                    stopPropagation: () => undefined,
                                                     ctrlKey: false,
                                                     key: "Enter",
                                                     keyCode: 13,

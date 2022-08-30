@@ -105,6 +105,8 @@ export interface GridKeyEventArgs {
     readonly ctrlKey: boolean;
     readonly metaKey: boolean;
     readonly cancel: () => void;
+    readonly stopPropagation: () => void;
+    readonly preventDefault: () => void;
     readonly rawEvent: React.KeyboardEvent<HTMLElement> | undefined;
 }
 
