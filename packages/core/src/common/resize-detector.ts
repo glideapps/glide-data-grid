@@ -1,40 +1,25 @@
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
 import { useLayoutEffect, useState, useRef, MutableRefObject } from "react";
-
-const createNotifier = (setSize: React.Dispatch<React.SetStateAction<ReactResizeDetectorDimensions>>) => ({
-    width,
-    height,
-}: ReactResizeDetectorDimensions): void => {
-    setSize(prev => {
-        if (prev.width === width && prev.height === height) {
-            // skip if dimensions haven't changed
-            return prev;
-        }
-
-        return { width, height };
-    });
-};
-
 interface ReactResizeDetectorDimensions {
     height?: number;
     width?: number;
 }
 
-export function useResizeDetector<T extends HTMLElement = HTMLElement>(): UseResizeDetectorReturn<T> {
+export function useResizeDetector<T extends HTMLElement = HTMLElement>(
+    initialSize?: readonly [width: number, height: number]
+): UseResizeDetectorReturn<T> {
     const ref = useRef<T>(null);
 
     const [size, setSize] = useState<ReactResizeDetectorDimensions>({
-        width: undefined,
-        height: undefined,
+        width: initialSize?.[0],
+        height: initialSize?.[1],
     });
 
     useLayoutEffect(() => {
-        const notifyResize = createNotifier(setSize);
-
         const resizeCallback: ResizeObserverCallback = entries => {
             for (const entry of entries) {
                 const { width, height } = (entry && entry.contentRect) || {};
-                notifyResize({ width, height });
+                setSize(cv => (cv.width === width && cv.height === height ? cv : { width, height }));
             }
         };
 

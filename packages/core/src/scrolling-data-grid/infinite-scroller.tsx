@@ -14,13 +14,13 @@ interface Props {
     readonly scrollWidth: number;
     readonly scrollHeight: number;
     readonly scrollToEnd?: boolean;
+    readonly initialSize?: readonly [width: number, height: number];
     readonly rightElementProps?: {
         readonly sticky?: boolean;
         readonly fill?: boolean;
     };
     readonly rightElement?: React.ReactNode;
     readonly minimap?: React.ReactNode;
-    readonly style?: React.CSSProperties;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
     readonly update: (region: Rectangle & { paddingRight: number }) => void;
 }
@@ -86,8 +86,8 @@ export const InfiniteScroller: React.FC<Props> = p => {
         rightElementProps,
         scrollRef,
         scrollToEnd,
+        initialSize,
         minimap,
-        style,
     } = p;
     const padders: React.ReactNode[] = [];
 
@@ -219,17 +219,17 @@ export const InfiniteScroller: React.FC<Props> = p => {
         h += toAdd;
     }
 
-    const { ref, width, height } = useResizeDetector<HTMLDivElement>();
+    const { ref, width, height } = useResizeDetector<HTMLDivElement>(initialSize);
 
     if (lastProps.current?.height !== height || lastProps.current?.width !== width) {
         window.setTimeout(() => onScrollRef.current(), 0);
         lastProps.current = { width, height };
     }
 
-    if ((width ?? 0) === 0 || (height ?? 0) === 0) return <div style={style} ref={ref} />;
+    if ((width ?? 0) === 0 || (height ?? 0) === 0) return <div ref={ref} />;
 
     return (
-        <div style={style} ref={ref}>
+        <div ref={ref}>
             <ScrollRegionStyle isSafari={browserIsSafari.value}>
                 {minimap}
                 <div className="dvn-underlay">{children}</div>
