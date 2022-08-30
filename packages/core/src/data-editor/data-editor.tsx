@@ -1611,8 +1611,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return false;
             };
 
-            if (isPrevented.current) return;
-
             const clickLocation = args.location[0] - rowMarkerOffset;
             if (args.isTouch) {
                 const vr = visibleRegionRef.current;
