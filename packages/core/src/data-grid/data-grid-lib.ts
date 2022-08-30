@@ -962,7 +962,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
     }
 }
 
-export function drawImage(args: BaseDrawArgs, data: readonly string[]) {
+export function drawImage(args: BaseDrawArgs, data: readonly string[], rounding: number = 4) {
     const { rect, col, row, theme, ctx, imageLoader } = args;
     const { x, y, height: h } = rect;
     let drawX = x + theme.cellHorizontalPadding;
@@ -973,11 +973,15 @@ export function drawImage(args: BaseDrawArgs, data: readonly string[]) {
         if (img !== undefined) {
             const imgHeight = h - theme.cellVerticalPadding * 2;
             const imgWidth = img.width * (imgHeight / img.height);
-            roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, 4);
-            ctx.save();
-            ctx.clip();
+            if (rounding > 0) {
+                roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, 4);
+                ctx.save();
+                ctx.clip();
+            }
             ctx.drawImage(img, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight);
-            ctx.restore();
+            if (rounding > 0) {
+                ctx.restore();
+            }
 
             drawX += imgWidth + itemMargin;
         }

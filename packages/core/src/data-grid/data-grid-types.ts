@@ -366,6 +366,7 @@ export interface NumberCell extends BaseGridCell {
 export interface ImageCell extends BaseGridCell {
     readonly kind: GridCellKind.Image;
     readonly data: string[];
+    readonly rounding?: number;
     readonly displayData?: string[]; // used for small images for faster scrolling
     readonly allowAdd: boolean;
 }
