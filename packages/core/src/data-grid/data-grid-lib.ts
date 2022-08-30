@@ -718,6 +718,14 @@ function roundedRect(
         radius = { tl: radius, tr: radius, br: radius, bl: radius };
     }
 
+    // restrict radius to a reasonable max
+    radius = {
+        tl: Math.min(radius.tl, height / 2, width / 2),
+        tr: Math.min(radius.tr, height / 2, width / 2),
+        bl: Math.min(radius.bl, height / 2, width / 2),
+        br: Math.min(radius.br, height / 2, width / 2),
+    };
+
     ctx.moveTo(x + radius.tl, y);
     ctx.arcTo(x + width, y, x + width, y + radius.tr, radius.tr);
     ctx.arcTo(x + width, y + height, x + width - radius.br, y + height, radius.br);
@@ -974,7 +982,7 @@ export function drawImage(args: BaseDrawArgs, data: readonly string[], rounding:
             const imgHeight = h - theme.cellVerticalPadding * 2;
             const imgWidth = img.width * (imgHeight / img.height);
             if (rounding > 0) {
-                roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, 4);
+                roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, rounding);
                 ctx.save();
                 ctx.clip();
             }
