@@ -1591,7 +1591,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             ]);
                         }
                     }
-                    if (mouse?.previousSelection?.current?.cell !== undefined && gridSelection.current !== undefined) {
+                    if (
+                        !isPrevented.current &&
+                        mouse?.previousSelection?.current?.cell !== undefined &&
+                        gridSelection.current !== undefined
+                    ) {
                         const [selectedCol, selectedRow] = gridSelection.current.cell;
                         const [prevCol, prevRow] = mouse.previousSelection.current.cell;
                         if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {

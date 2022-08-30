@@ -70,6 +70,7 @@ const renderer: CustomRenderer<LinksCell> = {
         const hovered = onClickSelect(e);
         if (hovered !== undefined) {
             hovered.onClick?.();
+            e.preventDefault();
         }
         return undefined;
     },
