@@ -143,7 +143,7 @@ class ImageWindowLoaderImpl implements ImageWindowLoader {
         this.cache[key] = result;
     }
 
-    public loadOrGetImage(url: string, col: number, row: number): HTMLImageElement | undefined {
+    public loadOrGetImage(url: string, col: number, row: number): HTMLImageElement | ImageBitmap | undefined {
         const key = url;
 
         const current = this.cache[key];

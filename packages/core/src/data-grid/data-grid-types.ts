@@ -40,7 +40,7 @@ export interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventAr
 
 export interface ImageWindowLoader {
     setWindow(newWindow: Rectangle, freezeCols: number): void;
-    loadOrGetImage(url: string, col: number, row: number): HTMLImageElement | undefined;
+    loadOrGetImage(url: string, col: number, row: number): HTMLImageElement | ImageBitmap | undefined;
     setCallback(imageLoaded: (locations: readonly Item[]) => void): void;
 }
 
