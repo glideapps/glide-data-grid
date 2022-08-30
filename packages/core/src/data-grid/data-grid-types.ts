@@ -55,7 +55,7 @@ interface PositionableMouseEventArgs {
     readonly localEventY: number;
 }
 
-interface BaseGridMouseEventArgs {
+export interface BaseGridMouseEventArgs {
     readonly shiftKey: boolean;
     readonly ctrlKey: boolean;
     readonly metaKey: boolean;

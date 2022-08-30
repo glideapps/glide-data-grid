@@ -1147,6 +1147,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         const renderer = getCellRenderer(markerCell);
                         assert(renderer?.kind === InnerGridCellKind.Marker);
                         const postClick = renderer?.onClick?.({
+                            ...args,
                             cell: markerCell,
                             posX: args.localEventX,
                             posY: args.localEventY,
@@ -1199,6 +1200,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         if (renderer?.onSelect !== undefined) {
                             let prevented = false;
                             renderer.onSelect({
+                                ...args,
                                 cell,
                                 posX: args.localEventX,
                                 posY: args.localEventY,
@@ -1575,6 +1577,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     const r = getCellRenderer(c);
                     if (r !== undefined && r.onClick !== undefined) {
                         const newVal = r.onClick({
+                            ...a,
                             cell: c,
                             posX: a.localEventX,
                             posY: a.localEventY,

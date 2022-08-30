@@ -6,6 +6,8 @@ import {
     GridCellKind,
     blend,
 } from "@glideapps/glide-data-grid";
+import { styled } from "@linaria/react";
+import * as React from "react";
 
 interface LinksCellProps {
     readonly kind: "links-cell";
@@ -14,8 +16,11 @@ interface LinksCellProps {
      * for different fonts.
      */
     readonly underlineOffset?: number;
+    readonly maxLinks?: number;
+    readonly navigateOn?: "click" | "control-click";
     readonly links: readonly {
         readonly title: string;
+        readonly href?: string;
         readonly onClick?: () => void;
     }[];
 }
@@ -23,6 +28,8 @@ interface LinksCellProps {
 export type LinksCell = CustomCell<LinksCellProps>;
 
 function onClickSelect(e: Parameters<NonNullable<CustomRenderer<LinksCell>["onSelect"]>>[0]) {
+    const useCtrl = e.cell.data.navigateOn !== "click";
+    if (useCtrl !== e.ctrlKey) return undefined;
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d", { alpha: false });
     if (ctx === null) return;
@@ -119,9 +126,66 @@ const renderer: CustomRenderer<LinksCell> = {
 
         return true;
     },
-    provideEditor: () => {
-        // eslint-disable-next-line react/display-name
-        return undefined;
+    // eslint-disable-next-line react/display-name
+    provideEditor: () => p => {
+        const { value, onChange } = p;
+        const { links, maxLinks = Number.MAX_SAFE_INTEGER } = value.data;
+        return (
+            <LinksCellEditorStyle onKeyDown={ignoreTab}>
+                {links.map((l, i) => (
+                    <LinkTitleEditor
+                        key={i}
+                        link={l.href ?? ""}
+                        title={l.title}
+                        focus={i === 0}
+                        onDelete={
+                            links.length > 1
+                                ? () => {
+                                      const newLinks = [...links];
+                                      newLinks.splice(i, 1);
+                                      onChange({
+                                          ...value,
+                                          data: {
+                                              ...value.data,
+                                              links: newLinks,
+                                          },
+                                      });
+                                  }
+                                : undefined
+                        }
+                        onChange={(link, title) => {
+                            const newLinks = [...links];
+                            newLinks[i] = {
+                                href: link,
+                                title,
+                            };
+                            onChange({
+                                ...value,
+                                data: {
+                                    ...value.data,
+                                    links: newLinks,
+                                },
+                            });
+                        }}
+                    />
+                ))}
+                <button
+                    disabled={links.length >= maxLinks}
+                    className="add-link"
+                    onClick={() => {
+                        const newLinks = [...links, { title: "" }];
+                        onChange({
+                            ...value,
+                            data: {
+                                ...value.data,
+                                links: newLinks,
+                            },
+                        });
+                    }}>
+                    Add link
+                </button>
+            </LinksCellEditorStyle>
+        );
     },
     onPaste: (v, d) => {
         const split = v.split(",");
@@ -131,6 +195,175 @@ const renderer: CustomRenderer<LinksCell> = {
             links: split.map(l => ({ title: l })),
         };
     },
+};
+
+const LinksCellEditorStyle = styled.div`
+    display: flex;
+    flex-direction: column;
+
+    margin: 4px 0;
+
+    > button {
+        color: var(--gdg-accent-color);
+        font-weight: 600;
+        align-self: flex-end;
+        border: none;
+        outline: none;
+        background-color: transparent;
+
+        transition: background-color 200ms;
+        border-radius: 4px;
+
+        padding: 6px 8px;
+        cursor: pointer;
+
+        :hover,
+        :focus-visible {
+            background-color: var(--gdg-accent-light);
+        }
+
+        :disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+    }
+
+    .gdg-link-title-editor {
+        display: flex;
+
+        min-width: 250px;
+
+        > input {
+            outline: none;
+            border: 1px solid var(--gdg-border-color);
+            border-radius: 4px;
+            box-shadow: none;
+            padding: 6px 8px;
+            min-width: 0;
+            width: 0;
+            flex-grow: 1;
+
+            &:not(:last-child) {
+                margin-right: 4px;
+            }
+
+            transition: border 200ms;
+
+            &:focus {
+                border: 1px solid var(--gdg-accent-color);
+            }
+        }
+
+        &:not(:last-child) {
+            margin-bottom: 4px;
+        }
+
+        > button {
+            border: none;
+            outline: none;
+            border-radius: 4px;
+
+            background-color: transparent;
+
+            cursor: pointer;
+
+            transition: background-color 200ms, color 200ms;
+
+            color: var(--gdg-text-medium);
+
+            :hover,
+            :focus-visible {
+                background-color: var(--gdg-accent-light);
+                color: var(--gdg-text-dark);
+            }
+        }
+    }
+`;
+
+interface LinkTitleEditorProps {
+    readonly link: string;
+    readonly title: string;
+    readonly onChange: (link: string, title: string) => void;
+    readonly onDelete?: () => void;
+    readonly focus: boolean;
+}
+
+function ignoreTab(e: React.KeyboardEvent) {
+    if (e.key === "Tab") {
+        e.stopPropagation();
+    }
+}
+
+const LinkTitleEditor: React.VFC<LinkTitleEditorProps> = p => {
+    const { link, onChange, title, onDelete, focus } = p;
+    return (
+        <div className="gdg-link-title-editor">
+            <input
+                className="gdg-title-input"
+                value={title}
+                placeholder="Title"
+                autoFocus={focus}
+                onChange={e => {
+                    onChange(link, e.target.value);
+                }}
+            />
+            <input
+                className="gdg-link-input"
+                value={link}
+                placeholder="URL"
+                onChange={e => {
+                    onChange(e.target.value, title);
+                }}
+            />
+            {onDelete !== undefined && (
+                <button onClick={onDelete}>
+                    <svg
+                        width={16}
+                        height={16}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        id="icon-import"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M3 6L5 6L21 6"
+                            stroke="currentColor"
+                            strokeWidth="1px"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                        <path
+                            d="M17.9019 6C18.491 6 18.9525 6.50676 18.8975 7.09334L17.67 20.1867C17.5736 21.2144 16.711 22 15.6787 22H8.32127C7.28902 22 6.42635 21.2144 6.33 20.1867L5.1025 7.09334C5.04751 6.50676 5.50898 6 6.09813 6H17.9019Z"
+                            stroke="currentColor"
+                            strokeWidth="1px"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                        <path
+                            d="M14.4499 10.211L13.9949 17"
+                            stroke="currentColor"
+                            strokeWidth="1px"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                        <path
+                            d="M9.55499 10.211L10.0049 17"
+                            stroke="currentColor"
+                            strokeWidth="1px"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                        <path
+                            d="M7.5 2.25H16.5"
+                            stroke="currentColor"
+                            strokeWidth="1px"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    </svg>
+                </button>
+            )}
+        </div>
+    );
 };
 
 export default renderer;

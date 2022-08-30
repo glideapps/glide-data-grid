@@ -18,8 +18,6 @@ interface Props {
     createNode?: (content: string) => DocumentFragment;
 }
 
-// TODO: Fix enter key behavior
-
 export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
     const { markdown, onChange, forceEditMode, createNode, targetRect, readonly, onFinish, validatedSelection } = p;
 

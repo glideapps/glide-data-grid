@@ -6,6 +6,7 @@ import type {
     ImageWindowLoader,
     CustomCell,
     ProvideEditorCallback,
+    BaseGridMouseEventArgs,
 } from "../data-grid-types";
 
 export interface BaseDrawArgs {
@@ -54,23 +55,27 @@ interface BaseCellRenderer<T extends InnerGridCell> {
     readonly provideEditor?: ProvideEditorCallback<T>;
 
     // event callbacks
-    readonly onClick?: (args: {
-        readonly cell: T;
-        readonly posX: number;
-        readonly posY: number;
-        readonly bounds: Rectangle;
-        readonly theme: Theme;
-        readonly preventDefault: () => void;
-    }) => T | undefined;
+    readonly onClick?: (
+        args: {
+            readonly cell: T;
+            readonly posX: number;
+            readonly posY: number;
+            readonly bounds: Rectangle;
+            readonly theme: Theme;
+            readonly preventDefault: () => void;
+        } & BaseGridMouseEventArgs
+    ) => T | undefined;
 
-    readonly onSelect?: (args: {
-        readonly cell: T;
-        readonly posX: number;
-        readonly posY: number;
-        readonly bounds: Rectangle;
-        readonly theme: Theme;
-        readonly preventDefault: () => void;
-    }) => void;
+    readonly onSelect?: (
+        args: {
+            readonly cell: T;
+            readonly posX: number;
+            readonly posY: number;
+            readonly bounds: Rectangle;
+            readonly theme: Theme;
+            readonly preventDefault: () => void;
+        } & BaseGridMouseEventArgs
+    ) => void;
     readonly onDelete?: (cell: T) => T | undefined;
 }
 
