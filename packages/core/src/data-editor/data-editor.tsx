@@ -45,7 +45,7 @@ import { browserIsOSX } from "../common/browser-detect";
 import type { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
 import { getDataEditorTheme, makeCSSStyle, Theme, ThemeContext } from "../common/styles";
 import type { DataGridRef } from "../data-grid/data-grid";
-import { getScrollBarWidth, useEventListener, whenDefined } from "../common/utils";
+import { getScrollBarWidth, useEventListener, useStateWithReactiveInput, whenDefined } from "../common/utils";
 import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
 import { measureColumn, useColumnSizer } from "./use-column-sizer";
@@ -237,6 +237,9 @@ export interface DataEditorProps extends Props {
     readonly columnSelect?: "none" | "single" | "multi";
     readonly rowSelect?: "none" | "single" | "multi";
 
+    readonly scrollOffsetY?: number;
+    readonly scrollOffsetX?: number;
+
     readonly rowHeight?: DataGridSearchProps["rowHeight"];
     readonly onMouseMove?: DataGridSearchProps["onMouseMove"];
 
@@ -400,6 +403,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         maxColumnWidth: maxColumnWidthIn = 500,
         provideEditor,
         trailingRowOptions,
+        scrollOffsetX,
+        scrollOffsetY,
         verticalBorder,
         onDragOverCell,
         onDrop,
@@ -587,21 +592,49 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const totalHeaderHeight = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
 
-    const [visibleRegion, setVisibleRegion] = React.useState<
-        Rectangle & {
-            tx?: number;
-            ty?: number;
-            extras?: {
-                selected?: Item;
-                freezeRegion?: Rectangle;
-            };
+    const visibleRegionTy = React.useMemo(
+        () => (scrollOffsetY !== undefined && typeof rowHeight === "number" ? -(scrollOffsetY % rowHeight) : 0),
+        [scrollOffsetY, rowHeight]
+    );
+    const visibleRegionY = React.useMemo(
+        () =>
+            scrollOffsetY !== undefined && typeof rowHeight === "number" ? Math.floor(scrollOffsetY / rowHeight) : 0,
+        [scrollOffsetY, rowHeight]
+    );
+
+    type VisibleRegion = Rectangle & {
+        /** value in px */
+        tx?: number;
+        /** value in px */
+        ty?: number;
+        extras?: {
+            selected?: Item;
+            freezeRegion?: Rectangle;
+        };
+    };
+
+    const visibleRegionInput = React.useMemo<VisibleRegion>(
+        () => ({
+            x: 0,
+            y: visibleRegionY,
+            width: 1,
+            height: 1,
+            // tx: 'TODO',
+            ty: visibleRegionTy,
+        }),
+        [visibleRegionTy, visibleRegionY]
+    );
+
+    const hasJustScrolled = React.useRef(false);
+
+    React.useLayoutEffect(() => {
+        if (scrollOffsetY !== undefined && scrollRef.current !== null) {
+            scrollRef.current.scrollTop = scrollOffsetY;
+            hasJustScrolled.current = true;
         }
-    >({
-        x: 0,
-        y: 0,
-        width: 1,
-        height: 1,
-    });
+    }, [scrollOffsetY, scrollRef]);
+
+    const [visibleRegion, setVisibleRegion] = useStateWithReactiveInput<VisibleRegion>(visibleRegionInput);
 
     const cellXOffset = visibleRegion.x + rowMarkerOffset;
     const cellYOffset = visibleRegion.y;
@@ -1774,7 +1807,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             visibleRegionRef.current = newRegion;
             onVisibleRegionChanged?.(newRegion, newRegion.tx, newRegion.ty, newRegion.extras);
         },
-        [freezeColumns, currentCell, onVisibleRegionChanged, rowMarkerOffset, rows, showTrailingBlankRow]
+        [
+            currentCell,
+            rowMarkerOffset,
+            showTrailingBlankRow,
+            rows,
+            freezeColumns,
+            setVisibleRegion,
+            onVisibleRegionChanged,
+        ]
     );
 
     const onColumnMovedImpl = whenDefined(

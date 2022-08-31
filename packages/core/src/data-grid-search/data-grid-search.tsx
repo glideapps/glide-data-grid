@@ -61,11 +61,12 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const [searchID] = React.useState(() => "search-box-" + Math.round(Math.random() * 1000));
 
     const [searchString, setSearchString] = React.useState("");
-    const [searchStatus, setSearchStatus] = React.useState<{
-        rowsSearched: number;
-        results: number;
-        selectedIndex: number;
-    }>();
+    const [searchStatus, setSearchStatus] =
+        React.useState<{
+            rowsSearched: number;
+            results: number;
+            selectedIndex: number;
+        }>();
 
     const searchStatusRef = React.useRef(searchStatus);
     searchStatusRef.current = searchStatus;

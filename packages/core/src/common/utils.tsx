@@ -172,3 +172,46 @@ export function getScrollBarWidth(): number {
     scrollbarWidthCache = w1 - w2;
     return scrollbarWidthCache;
 }
+
+// Dear future reader,
+// This dumb hook is to make sure if the inputState changes, that effectively behaves like an instant "setState" call.
+// This is useful in a wide variety of situations. I'm too dumb to know if this is a good idea or a really dumb one.
+// I can't tell. It's like poes law but for code.
+//
+// I'm sorry.
+const empty = Symbol();
+export function useStateWithReactiveInput<T>(inputState: T): [T, React.Dispatch<React.SetStateAction<T>>, {}] {
+    // When [0] is not empty we will return it, [1] is always the last value we saw
+    const inputStateRef = React.useRef<[T | typeof empty, T]>([empty, inputState]);
+    if (inputStateRef.current[1] !== inputState) {
+        // it changed, we must use thee!
+        inputStateRef.current[0] = inputState;
+    }
+    inputStateRef.current[1] = inputState;
+
+    const [state, setState] = React.useState(inputState);
+    // crimes against humanity here
+    const [, forceRender] = React.useState<{} | undefined>();
+    const setStateOuter = React.useCallback<typeof setState>(nv => {
+        // this takes care of the case where the inputState was set, then setState gets called again but back to what
+        // the state was before the inputState changed. Since the useState effect wont trigger a render in this case
+        // we need to be very naughty and force it to see the change. Technically this may not be needed some chunk of
+        // the time (in fact most of it) but checking for it is likely to be more expensive than just over-doing it
+        const s = inputStateRef.current[0];
+        if (s !== empty) {
+            const newVal = typeof nv === "function" ? (nv as (pv: T) => T)(s) : nv;
+            setState(newVal);
+            forceRender({});
+            inputStateRef.current[0] = empty;
+        } else {
+            setState(pv => {
+                if (typeof nv === "function") {
+                    return (nv as (pv: T) => T)(s === empty ? pv : s);
+                }
+                return nv;
+            });
+        }
+    }, []);
+
+    return [inputStateRef.current[0] === empty ? state : inputStateRef.current[0], setStateOuter, Math.random()];
+}

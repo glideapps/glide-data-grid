@@ -14,6 +14,7 @@ interface Props {
     readonly scrollWidth: number;
     readonly scrollHeight: number;
     readonly scrollToEnd?: boolean;
+    readonly initialScrollPosition?: readonly [scrollX: number, scrollY: number];
     readonly initialSize?: readonly [width: number, height: number];
     readonly rightElementProps?: {
         readonly sticky?: boolean;
