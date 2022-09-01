@@ -180,7 +180,7 @@ export function getScrollBarWidth(): number {
 //
 // I'm sorry.
 const empty = Symbol();
-export function useStateWithReactiveInput<T>(inputState: T): [T, React.Dispatch<React.SetStateAction<T>>, {}] {
+export function useStateWithReactiveInput<T>(inputState: T): [T, React.Dispatch<React.SetStateAction<T>>] {
     // When [0] is not empty we will return it, [1] is always the last value we saw
     const inputStateRef = React.useRef<[T | typeof empty, T]>([empty, inputState]);
     if (inputStateRef.current[1] !== inputState) {
@@ -212,5 +212,5 @@ export function useStateWithReactiveInput<T>(inputState: T): [T, React.Dispatch<
         inputStateRef.current[0] = empty;
     }, []);
 
-    return [inputStateRef.current[0] === empty ? state : inputStateRef.current[0], setStateOuter, Math.random()];
+    return [inputStateRef.current[0] === empty ? state : inputStateRef.current[0], setStateOuter];
 }
