@@ -129,7 +129,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         let cellRight = 0;
         let cellX = 0;
 
-        args.x = 0;
+        args.x = Math.max(0, args.x);
 
         let stickyColWidth = 0;
         for (let i = 0; i < freezeColumns; i++) {
