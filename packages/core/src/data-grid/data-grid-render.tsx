@@ -1155,6 +1155,7 @@ function drawCells(
                 getRowHeight,
                 trailingRowType,
                 (drawY, row, rh, isSticky, isTrailingRow) => {
+                    if (row < 0) return;
                     // if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
                     //     return;
                     // }

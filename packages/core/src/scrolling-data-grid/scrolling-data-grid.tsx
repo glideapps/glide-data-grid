@@ -121,13 +121,15 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const lastArgs = React.useRef<Rectangle & { paddingRight: number }>();
 
     const processArgs = React.useCallback(() => {
-        const args = lastArgs.current;
-        if (args === undefined) return;
+        if (lastArgs.current === undefined) return;
+        const args = { ...lastArgs.current };
 
         let x = 0;
-        let tx = 0;
+        let tx = args.x < 0 ? -args.x : 0;
         let cellRight = 0;
         let cellX = 0;
+
+        args.x = 0;
 
         let stickyColWidth = 0;
         for (let i = 0; i < freezeColumns; i++) {

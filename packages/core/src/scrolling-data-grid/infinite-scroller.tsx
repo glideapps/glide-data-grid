@@ -147,10 +147,9 @@ export const InfiniteScroller: React.FC<Props> = p => {
         lastScrollPosition.current.scrollLeft = scrollLeft;
         lastScrollPosition.current.scrollTop = scrollTop;
 
-        const newY = Math.max(0, scrollTop);
+        const newY = scrollTop;
         const delta = lastScrollY.current - newY;
         const scrollableHeight = el.scrollHeight - el.clientHeight;
-        const maxFakeY = Math.max(0, scrollHeight - el.clientHeight);
         lastScrollY.current = newY;
 
         if (
@@ -180,8 +179,8 @@ export const InfiniteScroller: React.FC<Props> = p => {
         }
 
         update({
-            x: Math.max(0, scrollLeft),
-            y: Math.min(maxFakeY, newY + offsetY.current),
+            x: scrollLeft,
+            y: newY + offsetY.current,
             width: el.clientWidth - paddingRight,
             height: el.clientHeight - paddingBottom,
             paddingRight: rightWrapRef.current?.clientWidth ?? 0,
