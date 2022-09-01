@@ -199,18 +199,17 @@ export function useStateWithReactiveInput<T>(inputState: T): [T, React.Dispatch<
         // the time (in fact most of it) but checking for it is likely to be more expensive than just over-doing it
         const s = inputStateRef.current[0];
         if (s !== empty) {
-            const newVal = typeof nv === "function" ? (nv as (pv: T) => T)(s) : nv;
-            setState(newVal);
-            forceRender({});
-            inputStateRef.current[0] = empty;
-        } else {
-            setState(pv => {
-                if (typeof nv === "function") {
-                    return (nv as (pv: T) => T)(s === empty ? pv : s);
-                }
-                return nv;
-            });
+            nv = typeof nv === "function" ? (nv as (pv: T) => T)(s) : nv;
+            if (nv === s) return; // they are setting it to what the inputState is anyway so we can just do nothing
         }
+        if (s !== empty) forceRender({});
+        setState(pv => {
+            if (typeof nv === "function") {
+                return (nv as (pv: T) => T)(s === empty ? pv : s);
+            }
+            return nv;
+        });
+        inputStateRef.current[0] = empty;
     }, []);
 
     return [inputStateRef.current[0] === empty ? state : inputStateRef.current[0], setStateOuter, Math.random()];
