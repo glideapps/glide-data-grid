@@ -39,14 +39,12 @@ export interface PrepResult {
 
 export type DrawCallback<T extends InnerGridCell> = (args: DrawArgs<T>, cell: T) => void;
 type PrepCallback = (args: BaseDrawArgs, lastPrep?: PrepResult) => Partial<PrepResult>;
-type DeprepCallback = (args: Pick<BaseDrawArgs, "ctx">) => void;
 
 interface BaseCellRenderer<T extends InnerGridCell> {
     // drawing
     readonly kind: T["kind"];
     readonly draw: DrawCallback<T>;
     readonly drawPrep?: PrepCallback;
-    readonly drawDeprep?: DeprepCallback;
     readonly needsHover?: boolean;
     readonly needsHoverPosition?: boolean;
     readonly measure?: (ctx: CanvasRenderingContext2D, cell: T, theme: Theme) => number;

@@ -608,6 +608,7 @@ export function prepMarkerRowCell(args: BaseDrawArgs, lastPrep: PrepResult | und
         ctx.font = newFont;
         result.font = newFont;
     }
+    result.deprep = deprepMarkerRowCell;
     ctx.textAlign = "center";
     return result;
 }

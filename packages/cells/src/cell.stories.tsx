@@ -18,6 +18,7 @@ import "@toast-ui/editor/dist/toastui-editor.css";
 import "@glideapps/glide-data-grid/dist/index.css";
 import type { DatePickerCell } from "./cells/date-picker-cell";
 import type { LinksCell } from "./cells/links-cell";
+import type { ButtonCell } from "./cells/button-cell";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -349,6 +350,24 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
+                    } else if (col === 11) {
+                        num = row + 1;
+                        rand();
+                        const d: ButtonCell = {
+                            kind: GridCellKind.Custom,
+                            cursor: "pointer",
+                            allowOverlay: true,
+                            copyData: "4",
+                            readonly: true,
+                            data: {
+                                kind: "button-cell",
+                                // backgroundColor: "transparent",
+                                // color: "#1d7c99",
+                                title: "Click me!",
+                                onClick: () => window.alert("Button clicked"),
+                            },
+                        };
+                        return d;
                     }
                     throw new Error("Fail");
                 }}
@@ -396,6 +415,10 @@ export const CustomCells: React.VFC = () => {
                     {
                         title: "Links",
                         width: 150,
+                    },
+                    {
+                        title: "Button",
+                        width: 100,
                     },
                 ]}
                 rows={500}
