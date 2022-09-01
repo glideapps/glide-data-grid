@@ -1,4 +1,4 @@
-import { deprepMarkerRowCell, drawMarkerRowCell, prepMarkerRowCell } from "../data-grid-lib";
+import { drawMarkerRowCell, prepMarkerRowCell } from "../data-grid-lib";
 import { InnerGridCellKind, MarkerCell } from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";
 
