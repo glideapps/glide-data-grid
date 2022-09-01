@@ -361,10 +361,14 @@ export const CustomCells: React.VFC = () => {
                             readonly: true,
                             data: {
                                 kind: "button-cell",
-                                // backgroundColor: "transparent",
-                                // color: "#1d7c99",
-                                title: "Click me!",
+                                backgroundColor: ["transparent", "#6572ffee"],
+                                color: ["accentColor", "accentFg"],
+                                borderRadius: 9,
+                                title: "View Details",
                                 onClick: () => window.alert("Button clicked"),
+                            },
+                            themeOverride: {
+                                baseFontStyle: "700 12px",
                             },
                         };
                         return d;
@@ -418,7 +422,7 @@ export const CustomCells: React.VFC = () => {
                     },
                     {
                         title: "Button",
-                        width: 100,
+                        width: 120,
                     },
                 ]}
                 rows={500}

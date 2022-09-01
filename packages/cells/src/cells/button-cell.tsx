@@ -1,17 +1,50 @@
-import { CustomCell, CustomRenderer, getMiddleCenterBias, GridCellKind } from "@glideapps/glide-data-grid";
+import {
+    CustomCell,
+    CustomRenderer,
+    getMiddleCenterBias,
+    GridCellKind,
+    parseToRgba,
+    Theme,
+} from "@glideapps/glide-data-grid";
 import { roundedRect } from "../draw-fns";
+
+type PackedColor = string | readonly [normal: string, hover: string];
 
 interface ButtonCellProps {
     readonly kind: "button-cell";
     readonly title: string;
     readonly onClick?: () => void;
-    readonly backgroundColor?: string;
-    readonly color?: string;
-    readonly borderColor?: string;
+    readonly backgroundColor?: PackedColor;
+    readonly color?: PackedColor;
+    readonly borderColor?: PackedColor;
     readonly borderRadius?: number;
 }
 
 export type ButtonCell = CustomCell<ButtonCellProps> & { readonly: true };
+
+function unpackColor(color: PackedColor, theme: Record<string, any>, hoverAmount: number): string {
+    if (typeof color === "string") {
+        if (theme[color] !== undefined) return theme[color];
+        return color;
+    }
+
+    let [normalRaw, hoverRaw] = color;
+    if (theme[normalRaw] !== undefined) normalRaw = theme[normalRaw];
+    if (theme[hoverRaw] !== undefined) hoverRaw = theme[hoverRaw];
+    if (hoverAmount === 0) return normalRaw;
+    if (hoverAmount === 1) return hoverRaw;
+
+    const normal = parseToRgba(normalRaw);
+    const hover = parseToRgba(hoverRaw);
+    const hScaler = hoverAmount;
+    const nScaler = 1 - hoverAmount;
+
+    const r = normal[0] * nScaler + hover[0] * hScaler;
+    const g = normal[1] * nScaler + hover[1] * hScaler;
+    const b = normal[2] * nScaler + hover[2] * hScaler;
+    const a = normal[3] * nScaler + hover[3] * hScaler;
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
 
 const renderer: CustomRenderer<ButtonCell> = {
     kind: GridCellKind.Custom,
@@ -23,16 +56,12 @@ const renderer: CustomRenderer<ButtonCell> = {
         return undefined;
     },
     drawPrep: args => {
-        const { ctx, theme } = args;
+        const { ctx } = args;
 
-        const font = `800 12px ${theme.fontFamily}`;
-        ctx.font = font;
         ctx.textAlign = "center";
 
         return {
-            font,
             deprep: a => {
-                a.ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
                 a.ctx.textAlign = "start";
             },
         };
@@ -46,24 +75,23 @@ const renderer: CustomRenderer<ButtonCell> = {
         const width = Math.ceil(rect.width - theme.cellHorizontalPadding * 2 + 1);
         const height = Math.ceil(rect.height - theme.cellVerticalPadding * 2 - 1);
 
-        ctx.globalAlpha = 0.7 + 0.3 * hoverAmount;
-
-        roundedRect(ctx, x, y, width, height, borderRadius ?? 0);
-
-        ctx.fillStyle = backgroundColor ?? theme.accentColor;
-        ctx.fill();
+        if (backgroundColor !== undefined) {
+            ctx.beginPath();
+            roundedRect(ctx, x, y, width, height, borderRadius ?? 0);
+            ctx.fillStyle = unpackColor(backgroundColor, theme, hoverAmount);
+            ctx.fill();
+        }
 
         if (borderColor !== undefined) {
             ctx.beginPath();
             roundedRect(ctx, x + 0.5, y + 0.5, width - 1, height - 1, borderRadius ?? 0);
-            ctx.strokeStyle = borderColor;
+            ctx.strokeStyle = unpackColor(borderColor, theme, hoverAmount);
             ctx.lineWidth = 1;
             ctx.stroke();
         }
 
-        ctx.fillStyle = color ?? theme.accentFg;
+        ctx.fillStyle = unpackColor(color ?? theme.accentColor, theme, hoverAmount);
         ctx.fillText(title, x + width / 2, y + height / 2 + getMiddleCenterBias(ctx, `800 12px ${theme.fontFamily}`));
-        ctx.globalAlpha = 1;
         return true;
     },
     provideEditor: undefined,
