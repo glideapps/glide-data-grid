@@ -188,33 +188,63 @@ const keybindingDefaults: Keybinds = {
     last: true,
 };
 
+/**
+ * @category DataEditor
+ */
 export interface DataEditorProps extends Props {
+    /** Emitted whenever the user has requested the deletion of the selection. */
     readonly onDelete?: (selection: GridSelection) => boolean | GridSelection;
+    /** Emitted whenever a cell edit is completed. */
     readonly onCellEdited?: (cell: Item, newValue: EditableGridCell) => void;
+    /** Emitted whenever a cell mutation is completed and provides all edits inbound as a single batch. */
     readonly onCellsEdited?: (newValues: readonly EditListItem[]) => boolean | void;
+    /** Emitted whenever a row append operation is requested. Append location can be set in callback. */
     readonly onRowAppended?: () => Promise<"top" | "bottom" | number | undefined> | void;
+    /** Emitted when a column header should show a context menu. Usually right click. */
     readonly onHeaderClicked?: (colIndex: number, event: HeaderClickedEventArgs) => void;
+    /** Emitted when a group header is clicked. */
     readonly onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
+    /** Emitted whe the user wishes to rename a group. */
     readonly onGroupHeaderRenamed?: (groupName: string, newVal: string) => void;
+    /** Emitted when a cell is clicked. */
     readonly onCellClicked?: (cell: Item, event: CellClickedEventArgs) => void;
+    /** Emitted when a cell is activated, by pressing Enter, Space or double clicking it. */
     readonly onCellActivated?: (cell: Item) => void;
+    /** Emitted when editing has finished, regardless of data changing or not. */
     readonly onFinishedEditing?: (newValue: GridCell | undefined, movement: Item) => void;
+    /** Emitted when a column header should show a context menu. Usually right click. */
     readonly onHeaderContextMenu?: (colIndex: number, event: HeaderClickedEventArgs) => void;
+    /** Emitted when a group header should show a context menu. Usually right click. */
     readonly onGroupHeaderContextMenu?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
+    /** Emitted when a cell should show a context menu. Usually right click. */
     readonly onCellContextMenu?: (cell: Item, event: CellClickedEventArgs) => void;
+    /** Used for validating cell values during editing.
+     * @param {Item} cell The cell which is being validated.
+     * @param {EditableGridCell} newValue The new value being proposed.
+     * @param {GridCell} prevValue The previous value before the edit.
+     * @returns {boolean | ValidatedGridCell} A return of false indicates the value will not be accepted. A value of
+     * true indicates the value will be accepted. Returning a new GridCell will immediately coerce the value to match.
+     */
     readonly validateCell?: (
         cell: Item,
         newValue: EditableGridCell,
         prevValue: GridCell
     ) => boolean | ValidatedGridCell;
 
+    /** The columns to display in the data grid. */
     readonly columns: readonly GridColumn[];
 
+    /** Controls the trailing row used to insert new data into the grid. */
     readonly trailingRowOptions?: {
+        /** If the trailing row should be tinted */
         readonly tint?: boolean;
+        /** A hint string displayed on hover. Usually something like "New row" */
         readonly hint?: string;
+        /** When set to true, the trailing row is always visible. */
         readonly sticky?: boolean;
+        /** The icon to use for the cell. Either a GridColumnIcon or a member of the passed headerIcons */
         readonly addIcon?: string;
+        /** Overrides the column to focus when a new row is created. */
         readonly targetColumn?: number | GridColumn;
     };
     readonly headerHeight?: number;
@@ -3113,4 +3143,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 };
 
+/**
+ * @category DataEditor
+ */
 export const DataEditor = React.forwardRef(DataEditorImpl);

@@ -1,4 +1,9 @@
 {
     "extends": "../../tsconfig.json",
-    "include": ["./src/**/*.ts", "./src/**/*.tsx"]
+    "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+    "typedocOptions": {
+        "entryPoints": ["src/index.ts"],
+        "out": "docs",
+        "categorizeByGroup": false,
+    }
 }
