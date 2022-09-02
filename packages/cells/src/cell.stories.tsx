@@ -363,6 +363,7 @@ export const CustomCells: React.VFC = () => {
                                 kind: "button-cell",
                                 backgroundColor: ["transparent", "#6572ffee"],
                                 color: ["accentColor", "accentFg"],
+                                borderColor: "#6572ffa0",
                                 borderRadius: 9,
                                 title: "View Details",
                                 onClick: () => window.alert("Button clicked"),

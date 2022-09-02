@@ -3,8 +3,7 @@ import {
     CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
-    parseToRgba,
-    Theme,
+    interpolateColors,
 } from "@glideapps/glide-data-grid";
 import { roundedRect } from "../draw-fns";
 
@@ -28,22 +27,10 @@ function unpackColor(color: PackedColor, theme: Record<string, any>, hoverAmount
         return color;
     }
 
-    let [normalRaw, hoverRaw] = color;
-    if (theme[normalRaw] !== undefined) normalRaw = theme[normalRaw];
-    if (theme[hoverRaw] !== undefined) hoverRaw = theme[hoverRaw];
-    if (hoverAmount === 0) return normalRaw;
-    if (hoverAmount === 1) return hoverRaw;
-
-    const normal = parseToRgba(normalRaw);
-    const hover = parseToRgba(hoverRaw);
-    const hScaler = hoverAmount;
-    const nScaler = 1 - hoverAmount;
-
-    const r = normal[0] * nScaler + hover[0] * hScaler;
-    const g = normal[1] * nScaler + hover[1] * hScaler;
-    const b = normal[2] * nScaler + hover[2] * hScaler;
-    const a = normal[3] * nScaler + hover[3] * hScaler;
-    return `rgba(${r}, ${g}, ${b}, ${a})`;
+    let [normal, hover] = color;
+    if (theme[normal] !== undefined) normal = theme[normal];
+    if (theme[hover] !== undefined) hover = theme[hover];
+    return interpolateColors(normal, hover, hoverAmount);
 }
 
 const renderer: CustomRenderer<ButtonCell> = {

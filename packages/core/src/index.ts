@@ -11,7 +11,7 @@ export * from "./data-grid/data-grid-types";
 export { default as ImageOverlayEditor } from "./data-grid-overlay-editor/private/image-overlay-editor";
 export { default as MarkdownDiv } from "./markdown-div/markdown-div";
 export { default as TextCellEntry } from "./growing-entry/growing-entry";
-export { parseToRgba, withAlpha, blend } from "./data-grid/color-parser";
+export { parseToRgba, withAlpha, blend, interpolateColors } from "./data-grid/color-parser";
 export {
     measureTextCached,
     getMiddleCenterBias,
