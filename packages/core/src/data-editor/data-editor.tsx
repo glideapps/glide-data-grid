@@ -245,6 +245,7 @@ export interface DataEditorProps extends Props {
 
     readonly minColumnWidth?: DataGridSearchProps["minColumnWidth"];
     readonly maxColumnWidth?: DataGridSearchProps["maxColumnWidth"];
+    readonly maxColumnAutoWidth?: number;
 
     readonly imageEditorOverride?: ImageEditorType;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
@@ -401,6 +402,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onGridSelectionChange,
         minColumnWidth: minColumnWidthIn = 50,
         maxColumnWidth: maxColumnWidthIn = 500,
+        maxColumnAutoWidth: maxColumnAutoWidthIn,
         provideEditor,
         trailingRowOptions,
         scrollOffsetX,
@@ -417,6 +419,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
     const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
+    const maxColumnAutoWidth = Math.max(maxColumnAutoWidthIn ?? maxColumnWidth, minColumnWidth);
 
     const keybindings = React.useMemo(() => {
         return keybindingsIn === undefined
@@ -580,7 +583,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         getCellsForSeletionDirect,
         clientSize[0] - (rowMarkerOffset === 0 ? 0 : rowMarkerWidth) - clientSize[2],
         minColumnWidth,
-        maxColumnWidth,
+        maxColumnAutoWidth,
         mergedTheme,
         getCellRenderer,
         abortControllerRef.current

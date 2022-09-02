@@ -89,6 +89,8 @@ export const ResizableColumns: React.VFC = () => {
                 columns={cols}
                 overscrollX={200}
                 overscrollY={200}
+                maxColumnAutoWidth={500}
+                maxColumnWidth={2000}
                 rows={50}
                 onColumnResize={onColumnResize}
                 getCellsForSelection={getCellsForSelection}
