@@ -903,8 +903,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             return;
         }
         const cell = getCellContent(hoveredItem as [number, number]);
+        const r = getCellRenderer(cell);
         am.setHovered(
-            cell.kind === GridCellKind.Custom || getCellRenderer(cell)?.needsHover === true ? hoveredItem : undefined
+            (r === undefined && cell.kind === GridCellKind.Custom) || r?.needsHover === true ? hoveredItem : undefined
         );
     }, [getCellContent, getCellRenderer, hoveredItem]);
 

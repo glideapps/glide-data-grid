@@ -75,6 +75,7 @@ const EditorWrap = styled.div`
 const renderer: CustomRenderer<StarCell> = {
     kind: GridCellKind.Custom,
     isMatch: (cell: CustomCell): cell is StarCell => (cell.data as any).kind === "star-cell",
+    needsHover: true,
     draw: (args, cell) => {
         const { ctx, theme, rect, hoverAmount } = args;
         const { rating } = cell.data;

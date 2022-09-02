@@ -14,6 +14,8 @@ export type SparklineCell = CustomCell<SparklineCellProps>;
 const renderer: CustomRenderer<SparklineCell> = {
     kind: GridCellKind.Custom,
     isMatch: (cell: CustomCell): cell is SparklineCell => (cell.data as any).kind === "sparkline-cell",
+    needsHover: true,
+    needsHoverPosition: true,
     draw: (args, cell) => {
         const { ctx, theme, rect, hoverAmount, hoverX } = args;
         // eslint-disable-next-line prefer-const
