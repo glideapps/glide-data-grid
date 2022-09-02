@@ -9,7 +9,6 @@ let div: HTMLDivElement | null = null;
 
 function createDiv() {
     const d = document.createElement("div");
-    d.classList.add("color2k-parser");
     d.style.opacity = "0";
     d.style.pointerEvents = "none";
     d.style.position = "fixed";
@@ -69,6 +68,7 @@ export function blend(color: string, background: string | undefined): string {
 }
 
 export function interpolateColors(leftColor: string, rightColor: string, val: number): string {
+    // toot toot im a GPU
     if (val <= 0) return leftColor;
     if (val >= 1) return rightColor;
 

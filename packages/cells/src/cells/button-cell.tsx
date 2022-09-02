@@ -57,9 +57,9 @@ const renderer: CustomRenderer<ButtonCell> = {
         const { ctx, theme, rect, hoverAmount } = args;
         const { title, backgroundColor, color, borderColor, borderRadius } = cell.data;
 
-        const x = Math.floor(rect.x + theme.cellHorizontalPadding);
+        const x = Math.floor(rect.x + theme.cellHorizontalPadding + 1);
         const y = Math.floor(rect.y + theme.cellVerticalPadding + 1);
-        const width = Math.ceil(rect.width - theme.cellHorizontalPadding * 2 + 1);
+        const width = Math.ceil(rect.width - theme.cellHorizontalPadding * 2 - 1);
         const height = Math.ceil(rect.height - theme.cellVerticalPadding * 2 - 1);
 
         if (backgroundColor !== undefined) {
@@ -78,7 +78,11 @@ const renderer: CustomRenderer<ButtonCell> = {
         }
 
         ctx.fillStyle = unpackColor(color ?? theme.accentColor, theme, hoverAmount);
-        ctx.fillText(title, x + width / 2, y + height / 2 + getMiddleCenterBias(ctx, `800 12px ${theme.fontFamily}`));
+        ctx.fillText(
+            title,
+            x + width / 2,
+            y + height / 2 + getMiddleCenterBias(ctx, `${theme.baseFontStyle} ${theme.fontFamily}`)
+        );
         return true;
     },
     provideEditor: undefined,
