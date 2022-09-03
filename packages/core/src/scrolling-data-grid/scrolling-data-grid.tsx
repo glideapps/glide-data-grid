@@ -18,8 +18,6 @@ export interface ScrollingDataGridProps extends Props {
     ) => void;
     readonly scrollToEnd?: boolean;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
-    readonly smoothScrollX?: boolean;
-    readonly smoothScrollY?: boolean;
     readonly overscrollX?: number;
     readonly overscrollY?: number;
     readonly initialSize?: readonly [width: number, height: number];

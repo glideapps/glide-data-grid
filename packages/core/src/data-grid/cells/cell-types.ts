@@ -25,11 +25,13 @@ export interface BaseDrawArgs {
     requestAnimationFrame: () => void;
 }
 
+/** @category Drawing */
 export interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {
     cell: T;
 }
 
 // intentionally mutable
+/** @category Drawing */
 export interface PrepResult {
     font: string | undefined;
     fillStyle: string | undefined;
@@ -37,6 +39,7 @@ export interface PrepResult {
     deprep: ((args: Pick<BaseDrawArgs, "ctx">) => void) | undefined;
 }
 
+/** @category Renderers */
 export type DrawCallback<T extends InnerGridCell> = (args: DrawArgs<T>, cell: T) => void;
 type PrepCallback = (args: BaseDrawArgs, lastPrep?: PrepResult) => Partial<PrepResult>;
 
@@ -77,19 +80,23 @@ interface BaseCellRenderer<T extends InnerGridCell> {
     readonly onDelete?: (cell: T) => T | undefined;
 }
 
+/** @category Renderers */
 export interface InternalCellRenderer<T extends InnerGridCell> extends BaseCellRenderer<T> {
     readonly useLabel?: boolean;
     readonly getAccessibilityString: (cell: T) => string;
     readonly onPaste: (val: string, cell: T) => T | undefined;
 }
 
+/** @category Renderers */
 export interface CustomRenderer<T extends CustomCell = CustomCell> extends BaseCellRenderer<T> {
     readonly isMatch: (cell: CustomCell) => cell is T;
     readonly onPaste?: (val: string, cellData: T["data"]) => T["data"] | undefined;
 }
 
+/** @category Renderers */
 export type CellRenderer<T extends InnerGridCell> = [T] extends [CustomCell<infer DataType>]
     ? CustomRenderer<CustomCell<DataType>>
     : InternalCellRenderer<T>;
 
+/** @category Renderers */
 export type GetCellRendererCallback = <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;

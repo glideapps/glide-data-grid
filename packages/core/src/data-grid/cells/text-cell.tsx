@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
-import GrowingEntry from "../../growing-entry/growing-entry";
+import { GrowingEntry } from "../../growing-entry/growing-entry";
 import { drawTextCell, prepTextCell } from "../data-grid-lib";
 import { GridCellKind, TextCell } from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";

@@ -17,6 +17,7 @@ function createDiv() {
     return d;
 }
 
+/** @category Drawing */
 export function parseToRgba(color: string): readonly [number, number, number, number] {
     // normalize the color
     const normalizedColor = color.toLowerCase().trim();
@@ -49,11 +50,13 @@ export function parseToRgba(color: string): readonly [number, number, number, nu
     return result;
 }
 
+/** @category Drawing */
 export function withAlpha(color: string, alpha: number): string {
     const [r, g, b] = parseToRgba(color);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+/** @category Drawing */
 export function blend(color: string, background: string | undefined): string {
     if (background === undefined) return color;
     const [r, g, b, a] = parseToRgba(color);
@@ -67,6 +70,7 @@ export function blend(color: string, background: string | undefined): string {
     return `rgba(${ro}, ${go}, ${bo}, ${ao})`;
 }
 
+/** @category Drawing */
 export function interpolateColors(leftColor: string, rightColor: string, val: number): string {
     // toot toot im a GPU
     if (val <= 0) return leftColor;

@@ -59,6 +59,7 @@ export function measureColumn(
     };
 }
 
+/** @category Hooks */
 export function useColumnSizer(
     columns: readonly GridColumn[],
     rows: number,
