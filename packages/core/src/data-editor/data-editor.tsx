@@ -301,11 +301,17 @@ export interface DataEditorProps extends Props {
      */
     readonly rowMarkerStartIndex?: number;
 
-    /** Sets the width of the data grid. */
+    /** Sets the width of the data grid.
+     * @group Style
+     */
     readonly width?: number | string;
-    /** Sets the height of the data grid. */
+    /** Sets the height of the data grid.
+     * @group Style
+     */
     readonly height?: number | string;
-    /** Custom classname for data grid wrapper. */
+    /** Custom classname for data grid wrapper.
+     * @group Style
+     */
     readonly className?: string;
 
     /** If set to `default`, `gridSelection` will be coerced to always include full spans.
@@ -321,9 +327,13 @@ export interface DataEditorProps extends Props {
      * @defaultValue `exclusive`
      * */
     readonly rangeSelectionBlending?: SelectionBlending;
-    /** {@inheritDoc rangeSelectionBlending}  */
+    /** {@inheritDoc rangeSelectionBlending}
+     * @group Selection
+     */
     readonly columnSelectionBlending?: SelectionBlending;
-    /** {@inheritDoc rangeSelectionBlending}  */
+    /** {@inheritDoc rangeSelectionBlending}
+     * @group Selection
+     */
     readonly rowSelectionBlending?: SelectionBlending;
     /** Controls if multi-selection is allowed. If disabled, shift/ctrl/command clicking will work as if no modifiers
      * are pressed.
@@ -335,24 +345,29 @@ export interface DataEditorProps extends Props {
      */
     readonly rangeSelect?: "none" | "cell" | "rect" | "multi-cell" | "multi-rect";
     /** {@inheritDoc rangeSelect}
+     * @group Selection
      * @defaultValue `multi`
      */
     readonly columnSelect?: "none" | "single" | "multi";
     /** {@inheritDoc rangeSelect}
+     * @group Selection
      * @defaultValue `multi`
      */
     readonly rowSelect?: "none" | "single" | "multi";
 
     /** Sets the initial scroll Y offset.
      * @see {@link scrollOffsetX}
+     * @group Advanced
      */
     readonly scrollOffsetY?: number;
     /** Sets the initial scroll X offset
      * @see {@link scrollOffsetY}
+     * @group Advanced
      */
     readonly scrollOffsetX?: number;
 
     /** Determins the height of each row.
+     * @group Style
      * @defaultValue 34
      */
     readonly rowHeight?: DataGridSearchProps["rowHeight"];
@@ -408,6 +423,10 @@ export interface DataEditorProps extends Props {
      */
     readonly coercePasteValue?: (val: string, cell: GridCell) => GridCell | undefined;
 
+    /**
+     * Emitted when the grid selection is cleared.
+     * @group Selection
+     */
     readonly onSelectionCleared?: () => void;
 
     /**
@@ -525,6 +544,17 @@ export interface DataEditorProps extends Props {
      */
     readonly verticalBorder?: DataGridSearchProps["verticalBorder"] | boolean;
 
+    /**
+     * Called when data is pasted into the grid. If left undefined, the `DataEditor` will operate in a
+     * fallback mode and attempt to paste the text buffer into the current cell assuming the current cell is not
+     * readonly and can accept the data type. If `onPaste` is set to false or the function returns false, the grid will
+     * simply ignore paste. If `onPaste` evaluates to true the grid will attempt to split the data by tabs and newlines
+     * and paste into available cells.
+     *
+     * The grid will not attempt to add additional rows if more data is pasted then can fit. In that case it is
+     * advisable to simply return false from onPaste and handle the paste manually.
+     * @group Editing
+     */
     readonly onPaste?: ((target: Item, values: readonly (readonly string[])[]) => boolean) | boolean;
 
     /**
@@ -554,11 +584,31 @@ type ScrollToFn = (
 
 /** @category DataEditor */
 export interface DataEditorRef {
+    /**
+     * Programatically appends a row.
+     * @param col The column index to focus in the new row.
+     * @returns A promise which waits for the append to complete.
+     */
     appendRow: (col: number) => Promise<void>;
+    /**
+     * Triggers cells to redraw.
+     */
     updateCells: DataGridRef["damage"];
+    /**
+     * Gets the screen space bounds of the requested item.
+     */
     getBounds: DataGridRef["getBounds"];
+    /**
+     * Triggers the data grid to focus itself or the correct accessibility element.
+     */
     focus: DataGridRef["focus"];
+    /**
+     * Generic API for emitting events as if they had been triggered via user interaction.
+     */
     emit: (eventName: EmitEvents) => Promise<void>;
+    /**
+     * Scrolls to the desired cell or location in the grid.
+     */
     scrollTo: ScrollToFn;
 }
 

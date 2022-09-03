@@ -90,6 +90,10 @@ export interface DataGridProps {
     readonly isFocused: boolean;
 
     readonly columns: readonly InnerGridColumn[];
+    /**
+     * The number of rows in the grid.
+     * @group Data
+     */
     readonly rows: number;
 
     readonly headerHeight: number;
@@ -104,19 +108,48 @@ export interface DataGridProps {
     readonly className?: string;
 
     readonly getCellContent: (cell: Item) => InnerGridCell;
+    /**
+     * Provides additional details about groups to extend group functionality.
+     * @group Data
+     */
     readonly getGroupDetails?: GroupDetailsCallback;
+    /**
+     * Provides per row theme overrides.
+     * @group Style
+     */
     readonly getRowThemeOverride?: GetRowThemeCallback;
+    /**
+     * Emitted when a header menu disclosure indicator is clicked.
+     * @group Events
+     */
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
     readonly selection: GridSelection;
     readonly prelightCells?: readonly Item[];
+    /**
+     * Highlight regions provide hints to users about relations between cells and selections.
+     * @group Selection
+     */
     readonly highlightRegions?: readonly Highlight[];
 
+    /**
+     * Enabled/disables the fill handle.
+     * @defaultValue false
+     * @group Editing
+     */
     readonly fillHandle?: boolean;
 
     readonly disabledRows?: CompactSelection;
+    /**
+     * Allows passing a custom image window loader.
+     * @group Advanced
+     */
     readonly imageWindowLoader?: ImageWindowLoader;
 
+    /**
+     * Emitted when an item is hovered.
+     * @group Events
+     */
     readonly onItemHovered?: (args: GridMouseEventArgs) => void;
     readonly onMouseMove: (args: GridMouseEventArgs) => void;
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
@@ -129,7 +162,15 @@ export interface DataGridProps {
 
     readonly onMouseMoveRaw?: (event: MouseEvent) => void;
 
+    /**
+     * Emitted when the canvas receives a key down event.
+     * @group Events
+     */
     readonly onKeyDown?: (event: GridKeyEventArgs) => void;
+    /**
+     * Emitted when the canvas receives a key up event.
+     * @group Events
+     */
     readonly onKeyUp?: (event: GridKeyEventArgs) => void;
 
     readonly verticalBorder: (col: number) => boolean;
@@ -147,7 +188,9 @@ export interface DataGridProps {
     readonly onDragStart?: (args: GridDragEventArgs) => void;
     readonly onDragEnd?: () => void;
 
+    /** @group Drag and Drop */
     readonly onDragOverCell?: (cell: Item, dataTransfer: DataTransfer | null) => void;
+    /** @group Drag and Drop */
     readonly onDragLeave?: () => void;
 
     /**
@@ -180,6 +223,11 @@ export interface DataGridProps {
         dest: number;
     };
 
+    /**
+     * Experimental features
+     * @group Advanced
+     * @experimental
+     */
     readonly experimental?: {
         readonly paddingRight?: number;
         readonly paddingBottom?: number;

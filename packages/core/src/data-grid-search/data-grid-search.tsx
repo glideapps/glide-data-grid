@@ -47,7 +47,15 @@ const closeX = (
 export interface DataGridSearchProps extends Omit<ScrollingDataGridProps, "prelightCells"> {
     readonly getCellsForSelection?: (selection: Rectangle, abortSignal: AbortSignal) => GetCellsThunk | CellArray;
     readonly onSearchResultsChanged?: (results: readonly Item[], navIndex: number) => void;
+    /**
+     * Controls the visibility of the search overlay.
+     * @group Search
+     */
     readonly showSearch?: boolean;
+    /**
+     * Emitted when the search window close event is triggered.
+     * @group Search
+     */
     readonly onSearchClose?: () => void;
 }
 

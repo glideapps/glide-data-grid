@@ -5,6 +5,7 @@
         "entryPoints": ["src/index.ts"],
         "out": "docs",
         "categorizeByGroup": false,
+        "name": "Glide Data Grid",
         "categoryOrder": ["DataEditor", "*"]
     }
 }
