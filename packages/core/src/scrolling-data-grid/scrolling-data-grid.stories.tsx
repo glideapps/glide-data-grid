@@ -1,11 +1,12 @@
 import * as React from "react";
 
-import type { StoryFn, StoryContext } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import GridScroller from "./scrolling-data-grid";
 import { styled } from "@linaria/react";
 import { CompactSelection, GridCell, GridCellKind, Rectangle, Item } from "../data-grid/data-grid-types";
 import { getDefaultTheme } from "..";
+import type { GetCellRendererCallback } from "../data-grid/cells/cell-types";
+import { CellRenderers } from "../data-grid/cells";
 
 const InnerContainer = styled.div`
     width: 100%;
@@ -18,14 +19,21 @@ const InnerContainer = styled.div`
     }
 `;
 
+const getCellRenderer: GetCellRendererCallback = cell => {
+    if (cell.kind === GridCellKind.Custom) return undefined;
+    return CellRenderers[cell.kind] as any;
+};
+
 export default {
     title: "Subcomponents/ScrollingDataGrid",
 
     decorators: [
-        (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
+        (Story: React.ComponentType) => (
             <div>
-                <BuilderThemeWrapper width={1500} height={1000} context={context}>
-                    <InnerContainer>{fn()}</InnerContainer>
+                <BuilderThemeWrapper width={1500} height={1000}>
+                    <InnerContainer>
+                        <Story />
+                    </InnerContainer>
                 </BuilderThemeWrapper>
             </div>
         ),
@@ -65,6 +73,7 @@ export function Simplenotest() {
 
     return (
         <GridScroller
+            getCellRenderer={getCellRenderer}
             onMouseMove={() => undefined}
             rows={10_000}
             enableGroups={false}

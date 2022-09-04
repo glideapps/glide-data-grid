@@ -1,6 +1,6 @@
 import { EditPencil } from "../../common/utils";
 import * as React from "react";
-import GrowingEntry from "../../growing-entry/growing-entry";
+import { GrowingEntry } from "../../growing-entry/growing-entry";
 import { UriOverlayEditorStyle } from "./uri-overlay-editor-style";
 import type { SelectionRange } from "../../data-grid/data-grid-types";
 

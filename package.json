@@ -5,6 +5,8 @@
         "start": "npm run storybook",
         "version": "./update-version.sh",
         "build": "npm run build --workspaces && npm run lint --workspaces",
+        "typedoc": "typedoc --readme none --disableSources --tsconfig packages/core/tsconfig.json",
+        "serve-docs": "http-server packages/core/docs",
         "storybook": "start-storybook -p 9009 -s public",
         "build-storybook": "build-storybook -o storybook-build/",
         "prod-storybook": "npm run build-storybook && npx http-server storybook-build -p 9009",
@@ -57,6 +59,7 @@
         "@types/prosemirror-state": "^1.2.8",
         "@types/react": "^16.14.21 || 17.x",
         "@types/react-dom": "^16.9.5 || 17.x",
+        "@types/react-syntax-highlighter": "^15.5.5",
         "@types/testing-library__jest-dom": "^5.14.2",
         "@typescript-eslint/eslint-plugin": "^5.30.5",
         "@typescript-eslint/parser": "^5.30.5",
@@ -69,6 +72,7 @@
         "eslint-plugin-sonarjs": "^0.13.0",
         "eslint-plugin-unicorn": "^43.0.1",
         "faker": "^5.5.3",
+        "http-server": "^14.1.1",
         "jest-canvas-mock": "^2.3.1",
         "lodash": "^4.17.21",
         "marked": "^4.0.10",
@@ -80,7 +84,8 @@
         "react-syntax-highlighter": "^15.4.5",
         "ts-jest": "^27.0.7",
         "tsc-esm-fix": "^2.7.8",
-        "typescript": "^4.5.2",
+        "typedoc": "^0.23.13",
+        "typescript": "^4.8.2",
         "webpack": "^5.73.0"
     }
 }

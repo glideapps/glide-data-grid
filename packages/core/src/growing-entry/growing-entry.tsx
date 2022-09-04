@@ -12,7 +12,8 @@ interface Props
     readonly validatedSelection?: SelectionRange;
 }
 
-const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
+/** @category Renderers */
+export const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
     const { placeholder, value, onKeyDown, highlight, altNewline, validatedSelection, ...rest } = props;
     const { onChange, className } = rest;
 
@@ -65,5 +66,3 @@ const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
         </GrowingEntryStyle>
     );
 };
-
-export default GrowingEntry;

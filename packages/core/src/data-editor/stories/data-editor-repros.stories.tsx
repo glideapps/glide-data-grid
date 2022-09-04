@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { StoryFn, StoryContext, useState, useMemo } from "@storybook/addons";
+import { useState, useMemo } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../../stories/story-utils";
 
 import { GridCell, GridCellKind, Item } from "../../data-grid/data-grid-types";
@@ -11,9 +11,9 @@ export default {
     title: "Tests/TestCases/Bugs",
 
     decorators: [
-        (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
-            <BuilderThemeWrapper width={1000} height={800} context={context}>
-                {fn()}
+        (Story: React.ComponentType) => (
+            <BuilderThemeWrapper width={1000} height={800}>
+                <Story />
             </BuilderThemeWrapper>
         ),
     ],

@@ -3,6 +3,7 @@ import { ImageOverlayEditorStyle } from "./image-overlay-editor-style";
 import { Carousel } from "react-responsive-carousel";
 import { EditPencil } from "../../common/utils";
 
+/** @category Types */
 export interface OverlayImageEditorProps {
     readonly urls: readonly string[];
     readonly canWrite: boolean;
@@ -12,7 +13,8 @@ export interface OverlayImageEditorProps {
     readonly renderImage?: (url: string) => React.ReactNode;
 }
 
-const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps> = p => {
+/** @category Renderers */
+export const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps> = p => {
     const { urls, canWrite, onEditClick, renderImage } = p;
 
     const filtered = urls.filter(u => u !== "");
@@ -47,5 +49,3 @@ const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps> = p =
         </ImageOverlayEditorStyle>
     );
 };
-
-export default ImageOverlayEditor;

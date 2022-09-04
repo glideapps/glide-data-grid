@@ -16,7 +16,6 @@ import React from "react";
 import type { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
 import { split as splitText, clearCache } from "canvas-hypertxt";
-import type { DrawArgs } from "../data-editor/custom-cell-draw-args";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -251,6 +250,7 @@ function makeCacheKey(s: string, ctx: CanvasRenderingContext2D, baseline: "alpha
     return `${s}_${font ?? ctx.font}_${baseline}`;
 }
 
+/** @category Drawing */
 export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font?: string): TextMetrics {
     const key = makeCacheKey(s, ctx, "middle", font);
     let metrics = metricsCache[key];
@@ -268,6 +268,7 @@ export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font
     return metrics;
 }
 
+/** @category Drawing */
 export function getMiddleCenterBias(ctx: CanvasRenderingContext2D, font: string | Theme): number {
     if (typeof font !== "string") {
         font = `${font.baseFontStyle} ${font.fontFamily}`;
@@ -309,6 +310,7 @@ function getMiddleCenterBiasInner(ctx: CanvasRenderingContext2D, font: string): 
     return bias;
 }
 
+/** @category Drawing */
 export function drawWithLastUpdate(
     args: BaseDrawArgs,
     lastUpdate: number | undefined,
@@ -355,7 +357,8 @@ export function prepTextCell(
     return result;
 }
 
-export function drawTextCellExternal(args: DrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
+/** @category Drawing */
+export function drawTextCellExternal(args: BaseDrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
     const { rect, ctx, theme } = args;
 
     ctx.fillStyle = theme.textDark;
@@ -390,6 +393,7 @@ function drawSingleTextLine(
     }
 }
 
+/** @category Drawing */
 export function drawTextCell(
     args: Pick<BaseDrawArgs, "rect" | "ctx" | "theme">,
     data: string,

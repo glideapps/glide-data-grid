@@ -1,6 +1,6 @@
 import * as React from "react";
 import MarkdownDiv from "../../markdown-div/markdown-div";
-import GrowingEntry from "../../growing-entry/growing-entry";
+import { GrowingEntry } from "../../growing-entry/growing-entry";
 import { MarkdownOverlayEditorStyle } from "./markdown-overlay-editor-style";
 import { EditPencil, Checkmark } from "../../common/utils";
 import type { Rectangle, SelectionRange } from "../../data-grid/data-grid-types";

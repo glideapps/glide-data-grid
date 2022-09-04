@@ -1,20 +1,23 @@
 /* eslint-disable sonarjs/no-identical-functions */
 import * as React from "react";
 
-import type { StoryFn, StoryContext } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import DataGrid from "./data-grid";
 import { CompactSelection, GridCellKind, GridSelection } from "./data-grid-types";
 import { getDataEditorTheme } from "../common/styles";
+import type { GetCellRendererCallback } from "./cells/cell-types";
+import { CellRenderers } from "./cells";
 
 export default {
     title: "Subcomponents/DataGrid",
 
     decorators: [
-        (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
+        (Story: React.ComponentType) => (
             <div>
-                <BuilderThemeWrapper width={1800} height={1000} context={context}>
-                    <div style={{ position: "relative" }}>{fn()}</div>
+                <BuilderThemeWrapper width={1800} height={1000}>
+                    <div style={{ position: "relative" }}>
+                        <Story />
+                    </div>
                 </BuilderThemeWrapper>
             </div>
         ),
@@ -25,6 +28,11 @@ const emptyGridSelection: GridSelection = {
     columns: CompactSelection.empty(),
     rows: CompactSelection.empty(),
     current: undefined,
+};
+
+const getCellRenderer: GetCellRendererCallback = cell => {
+    if (cell.kind === GridCellKind.Custom) return undefined;
+    return CellRenderers[cell.kind] as any;
 };
 
 export function Simplenotest() {
@@ -46,6 +54,7 @@ export function Simplenotest() {
 
     return (
         <DataGrid
+            getCellRenderer={getCellRenderer}
             width={1800}
             height={1000}
             cellXOffset={0}
@@ -88,6 +97,7 @@ export function SelectedCellnotest() {
     let x = 0;
     return (
         <DataGrid
+            getCellRenderer={getCellRenderer}
             width={1800}
             height={1000}
             cellXOffset={0}
@@ -136,6 +146,7 @@ export function SelectedRownotest() {
     let x = 0;
     return (
         <DataGrid
+            getCellRenderer={getCellRenderer}
             onMouseMove={() => undefined}
             width={1800}
             height={1000}
@@ -180,6 +191,7 @@ export const SelectedColumnnotest = () => {
     let x = 0;
     return (
         <DataGrid
+            getCellRenderer={getCellRenderer}
             onMouseMove={() => undefined}
             width={1800}
             height={1000}

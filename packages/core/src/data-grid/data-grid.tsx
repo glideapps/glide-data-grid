@@ -72,7 +72,15 @@ export interface DataGridProps {
     readonly trailingRowType: TrailingRowType;
     readonly firstColAccessible: boolean;
 
+    /**
+     * Enables or disables the overlay shadow when scrolling horizontally
+     * @group Style
+     */
     readonly fixedShadowX?: boolean;
+    /**
+     * Enables or disables the overlay shadow when scrolling vertical
+     * @group Style
+     */
     readonly fixedShadowY?: boolean;
 
     readonly allowResize?: boolean;
@@ -82,6 +90,10 @@ export interface DataGridProps {
     readonly isFocused: boolean;
 
     readonly columns: readonly InnerGridColumn[];
+    /**
+     * The number of rows in the grid.
+     * @group Data
+     */
     readonly rows: number;
 
     readonly headerHeight: number;
@@ -96,19 +108,48 @@ export interface DataGridProps {
     readonly className?: string;
 
     readonly getCellContent: (cell: Item) => InnerGridCell;
+    /**
+     * Provides additional details about groups to extend group functionality.
+     * @group Data
+     */
     readonly getGroupDetails?: GroupDetailsCallback;
+    /**
+     * Provides per row theme overrides.
+     * @group Style
+     */
     readonly getRowThemeOverride?: GetRowThemeCallback;
+    /**
+     * Emitted when a header menu disclosure indicator is clicked.
+     * @group Events
+     */
     readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
 
     readonly selection: GridSelection;
     readonly prelightCells?: readonly Item[];
+    /**
+     * Highlight regions provide hints to users about relations between cells and selections.
+     * @group Selection
+     */
     readonly highlightRegions?: readonly Highlight[];
 
+    /**
+     * Enabled/disables the fill handle.
+     * @defaultValue false
+     * @group Editing
+     */
     readonly fillHandle?: boolean;
 
     readonly disabledRows?: CompactSelection;
+    /**
+     * Allows passing a custom image window loader.
+     * @group Advanced
+     */
     readonly imageWindowLoader?: ImageWindowLoader;
 
+    /**
+     * Emitted when an item is hovered.
+     * @group Events
+     */
     readonly onItemHovered?: (args: GridMouseEventArgs) => void;
     readonly onMouseMove: (args: GridMouseEventArgs) => void;
     readonly onMouseDown?: (args: GridMouseEventArgs) => void;
@@ -121,21 +162,60 @@ export interface DataGridProps {
 
     readonly onMouseMoveRaw?: (event: MouseEvent) => void;
 
+    /**
+     * Emitted when the canvas receives a key down event.
+     * @group Events
+     */
     readonly onKeyDown?: (event: GridKeyEventArgs) => void;
+    /**
+     * Emitted when the canvas receives a key up event.
+     * @group Events
+     */
     readonly onKeyUp?: (event: GridKeyEventArgs) => void;
 
     readonly verticalBorder: (col: number) => boolean;
 
+    /**
+     * Determines what can be dragged using HTML drag and drop
+     * @group Drag and Drop
+     */
     readonly isDraggable?: boolean | "cell" | "header";
+    /**
+     * If `isDraggable` is set, the grid becomes HTML draggable, and `onDragStart` will be called when dragging starts.
+     * You can use this to build a UI where the user can drag the Grid around.
+     * @group Drag and Drop
+     */
     readonly onDragStart?: (args: GridDragEventArgs) => void;
     readonly onDragEnd?: () => void;
 
+    /** @group Drag and Drop */
     readonly onDragOverCell?: (cell: Item, dataTransfer: DataTransfer | null) => void;
+    /** @group Drag and Drop */
     readonly onDragLeave?: () => void;
+
+    /**
+     * Called when a HTML Drag and Drop event is ended on the data grid.
+     * @group Drag and Drop
+     */
     readonly onDrop?: (cell: Item, dataTransfer: DataTransfer | null) => void;
 
     readonly drawCustomCell?: DrawCustomCellCallback;
+    /**
+     * Overrides the rendering of a header. The grid will call this for every header it needs to render. Header
+     * rendering is not as well optimized because they do not redraw as often, but very heavy drawing methods can
+     * negatively impact horizontal scrolling performance.
+     *
+     * It is possible to return `false` after rendering just a background and the regular foreground rendering
+     * will happen.
+     * @group Drawing
+     * @returns `false` if default header rendering should still happen, `true` to cancel rendering.
+     */
     readonly drawHeader?: DrawHeaderCallback;
+    /**
+     * Controls the drawing of the focus ring.
+     * @defaultValue true
+     * @group Style
+     */
     readonly drawFocusRing?: boolean;
 
     readonly dragAndDropState?: {
@@ -143,6 +223,11 @@ export interface DataGridProps {
         dest: number;
     };
 
+    /**
+     * Experimental features
+     * @group Advanced
+     * @experimental
+     */
     readonly experimental?: {
         readonly paddingRight?: number;
         readonly paddingBottom?: number;
@@ -153,9 +238,33 @@ export interface DataGridProps {
         readonly hyperWrapping?: boolean;
     };
 
+    /**
+     * Additional header icons for use by `GridColumn`.
+     *
+     * Providing custom header icons to the data grid must be done with a somewhat non-standard mechanism to allow
+     * theming and scaling. The `headerIcons` property takes a dictionary which maps icon names to functions which can
+     * take a foreground and background color and returns back a string representation of an svg. The svg should contain
+     * a header similar to this `<svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">` and
+     * interpolate the fg/bg colors into the string.
+     *
+     * We recognize this process is not fantastic from a graphics workflow standpoint, improvements are very welcome
+     * here.
+     *
+     * @group Style
+     */
     readonly headerIcons?: SpriteMap;
 
+    /** Controls smooth scrolling in the data grid. If smooth scrolling is not enabled the grid will always be cell
+     * aligned.
+     * @defaultValue `false`
+     * @group Style
+     */
     readonly smoothScrollX?: boolean;
+    /** Controls smooth scrolling in the data grid. If smooth scrolling is not enabled the grid will always be cell
+     * aligned.
+     * @defaultValue `false`
+     * @group Style
+     */
     readonly smoothScrollY?: boolean;
 
     readonly theme: Theme;
