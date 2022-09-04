@@ -2038,7 +2038,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
     let drawRegions: Rectangle[] = [];
 
-    const mustDrawFocusOnHeader = selection.current?.cell[1] === cellYOffset && translateY === 0;
+    const mustDrawFocusOnHeader = drawFocus && selection.current?.cell[1] === cellYOffset && translateY === 0;
     const drawHeaderTexture = () => {
         drawGridHeaders(
             overlayCtx,
