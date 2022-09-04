@@ -40,6 +40,7 @@ import {
     outOfBoundsKind,
     ValidatedGridCell,
     ImageEditorType,
+    CustomCell,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -567,7 +568,7 @@ export interface DataEditorProps extends Props {
      * An array of custom renderers which can be used to extend the data grid.
      * @group Advanced
      */
-    readonly customRenderers?: readonly CustomRenderer[];
+    readonly customRenderers?: readonly CustomRenderer<CustomCell<any>>[];
 }
 
 type ScrollToFn = (
