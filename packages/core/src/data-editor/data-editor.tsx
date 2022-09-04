@@ -899,15 +899,36 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const totalHeaderHeight = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
 
-    const visibleRegionTy = React.useMemo(
-        () => (scrollOffsetY !== undefined && typeof rowHeight === "number" ? -(scrollOffsetY % rowHeight) : 0),
-        [scrollOffsetY, rowHeight]
-    );
-    const visibleRegionY = React.useMemo(
-        () =>
+    const numSelectedRows = gridSelection.rows.length;
+    const rowMarkerHeader =
+        rowMarkers === "none"
+            ? ""
+            : numSelectedRows === 0
+            ? headerCellUnheckedMarker
+            : numSelectedRows === rows
+            ? headerCellCheckedMarker
+            : headerCellIndeterminateMarker;
+
+    const mangledCols = React.useMemo(() => {
+        if (rowMarkers === "none") return columns;
+        return [
+            {
+                title: rowMarkerHeader,
+                width: rowMarkerWidth,
+                icon: undefined,
+                hasMenu: false,
+                style: "normal" as const,
+            },
+            ...columns,
+        ];
+    }, [columns, rowMarkerWidth, rowMarkers, rowMarkerHeader]);
+
+    const [visibleRegionY, visibleRegionTy] = React.useMemo(() => {
+        return [
             scrollOffsetY !== undefined && typeof rowHeight === "number" ? Math.floor(scrollOffsetY / rowHeight) : 0,
-        [scrollOffsetY, rowHeight]
-    );
+            scrollOffsetY !== undefined && typeof rowHeight === "number" ? -(scrollOffsetY % rowHeight) : 0,
+        ];
+    }, [scrollOffsetY, rowHeight]);
 
     type VisibleRegion = Rectangle & {
         /** value in px */
@@ -920,12 +941,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         };
     };
 
+    const visibleRegionRef = React.useRef<VisibleRegion>({
+        height: 1,
+        width: 1,
+        x: 0,
+        y: 0,
+    });
     const visibleRegionInput = React.useMemo<VisibleRegion>(
         () => ({
-            x: 0,
+            x: visibleRegionRef.current.x,
             y: visibleRegionY,
-            width: scrollRef?.current?.clientWidth ?? 1,
-            height: scrollRef?.current?.clientHeight ?? 1,
+            width: visibleRegionRef.current.width ?? 1,
+            height: visibleRegionRef.current.height ?? 1,
             // tx: 'TODO',
             ty: visibleRegionTy,
         }),
@@ -935,6 +962,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const hasJustScrolled = React.useRef(false);
 
     const [visibleRegion, setVisibleRegion, empty] = useStateWithReactiveInput<VisibleRegion>(visibleRegionInput);
+    visibleRegionRef.current = visibleRegion;
 
     const vScrollReady = (visibleRegion.height ?? 1) > 1;
     React.useLayoutEffect(() => {
@@ -946,6 +974,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             hasJustScrolled.current = true;
         }
     }, [scrollOffsetY, vScrollReady, empty]);
+
+    const hScrollReady = (visibleRegion.width ?? 1) > 1;
+    React.useLayoutEffect(() => {
+        if (scrollOffsetX !== undefined && scrollRef.current !== null && hScrollReady) {
+            scrollRef.current.scrollLeft = scrollOffsetX;
+            if (scrollRef.current.scrollLeft !== scrollOffsetX) {
+                empty();
+            }
+            hasJustScrolled.current = true;
+        }
+    }, [scrollOffsetX, hScrollReady, empty]);
 
     const cellXOffset = visibleRegion.x + rowMarkerOffset;
     const cellYOffset = visibleRegion.y;
@@ -984,29 +1023,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [onCellEdited, onCellsEdited, rowMarkerOffset]
     );
 
-    const numSelectedRows = gridSelection.rows.length;
-    const rowMarkerHeader =
-        rowMarkers === "none"
-            ? ""
-            : numSelectedRows === 0
-            ? headerCellUnheckedMarker
-            : numSelectedRows === rows
-            ? headerCellCheckedMarker
-            : headerCellIndeterminateMarker;
-    const mangledCols = React.useMemo(() => {
-        if (rowMarkers === "none") return columns;
-        return [
-            {
-                title: rowMarkerHeader,
-                width: rowMarkerWidth,
-                icon: undefined,
-                hasMenu: false,
-                style: "normal" as const,
-            },
-            ...columns,
-        ];
-    }, [columns, rowMarkerWidth, rowMarkers, rowMarkerHeader]);
-
     const highlightRegions = React.useMemo(() => {
         if (highlightRegionsIn === undefined) return undefined;
         if (rowMarkerOffset === 0) return highlightRegionsIn;
@@ -1028,7 +1044,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             .filter(x => x !== undefined) as typeof highlightRegionsIn;
     }, [highlightRegionsIn, mangledCols.length, rowMarkerOffset]);
 
-    const visibleRegionRef = React.useRef(visibleRegion);
     const mangledColsRef = React.useRef(mangledCols);
     mangledColsRef.current = mangledCols;
     const getMangledCellContent = React.useCallback(
@@ -2115,7 +2130,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             };
             setClientSize([clientWidth, clientHeight, rightElWidth]);
             setVisibleRegion(newRegion);
-            visibleRegionRef.current = newRegion;
             onVisibleRegionChanged?.(newRegion, newRegion.tx, newRegion.ty, newRegion.extras);
         },
         [
