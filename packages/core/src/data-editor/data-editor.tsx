@@ -924,8 +924,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         () => ({
             x: 0,
             y: visibleRegionY,
-            width: 1,
-            height: 1,
+            width: scrollRef?.current?.clientWidth ?? 1,
+            height: scrollRef?.current?.clientHeight ?? 1,
             // tx: 'TODO',
             ty: visibleRegionTy,
         }),
@@ -934,15 +934,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const hasJustScrolled = React.useRef(false);
 
-    const [visibleRegion, setVisibleRegion] = useStateWithReactiveInput<VisibleRegion>(visibleRegionInput);
+    const [visibleRegion, setVisibleRegion, empty] = useStateWithReactiveInput<VisibleRegion>(visibleRegionInput);
 
     const vScrollReady = (visibleRegion.height ?? 1) > 1;
     React.useLayoutEffect(() => {
         if (scrollOffsetY !== undefined && scrollRef.current !== null && vScrollReady) {
             scrollRef.current.scrollTop = scrollOffsetY;
+            if (scrollRef.current.scrollTop !== scrollOffsetY) {
+                empty();
+            }
             hasJustScrolled.current = true;
         }
-    }, [scrollOffsetY, vScrollReady]);
+    }, [scrollOffsetY, vScrollReady, empty]);
 
     const cellXOffset = visibleRegion.x + rowMarkerOffset;
     const cellYOffset = visibleRegion.y;
