@@ -122,7 +122,7 @@ export interface DataGridProps {
      * Emitted when a header menu disclosure indicator is clicked.
      * @group Events
      */
-    readonly onHeaderMenuClick: (col: number, screenPosition: Rectangle) => void | undefined;
+    readonly onHeaderMenuClick: ((col: number, screenPosition: Rectangle) => void) | undefined;
 
     readonly selection: GridSelection;
     readonly prelightCells: readonly Item[] | undefined;
