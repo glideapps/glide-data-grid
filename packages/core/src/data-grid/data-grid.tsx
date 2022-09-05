@@ -805,10 +805,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         [cursor]
     );
 
+    const lastSetCursor = React.useRef<typeof cursor>("default");
     const target = eventTargetRef?.current;
-    if (target !== null && target !== undefined) {
+    if (target !== null && target !== undefined && lastSetCursor.current !== style.cursor) {
         // because we have an event target we need to set its cursor instead.
-        target.style.cursor = style.cursor;
+        target.style.cursor = lastSetCursor.current = style.cursor;
     }
 
     const groupHeaderActionForEvent = React.useCallback(
