@@ -63,8 +63,8 @@ export interface DataGridProps {
     readonly cellXOffset: number;
     readonly cellYOffset: number;
 
-    readonly translateX?: number;
-    readonly translateY?: number;
+    readonly translateX: number | undefined;
+    readonly translateY: number | undefined;
 
     readonly accessibilityHeight: number;
 
@@ -76,14 +76,14 @@ export interface DataGridProps {
      * Enables or disables the overlay shadow when scrolling horizontally
      * @group Style
      */
-    readonly fixedShadowX?: boolean;
+    readonly fixedShadowX: boolean | undefined;
     /**
      * Enables or disables the overlay shadow when scrolling vertical
      * @group Style
      */
-    readonly fixedShadowY?: boolean;
+    readonly fixedShadowY: boolean | undefined;
 
-    readonly allowResize?: boolean;
+    readonly allowResize: boolean | undefined;
     readonly isResizing: boolean;
     readonly isDragging: boolean;
     readonly isFilling: boolean;
@@ -101,50 +101,50 @@ export interface DataGridProps {
     readonly enableGroups: boolean;
     readonly rowHeight: number | ((index: number) => number);
 
-    readonly canvasRef?: React.MutableRefObject<HTMLCanvasElement | null>;
+    readonly canvasRef: React.MutableRefObject<HTMLCanvasElement | null> | undefined;
 
-    readonly eventTargetRef?: React.MutableRefObject<HTMLDivElement | null>;
+    readonly eventTargetRef: React.MutableRefObject<HTMLDivElement | null> | undefined;
 
-    readonly className?: string;
+    readonly className: string | undefined;
 
     readonly getCellContent: (cell: Item) => InnerGridCell;
     /**
      * Provides additional details about groups to extend group functionality.
      * @group Data
      */
-    readonly getGroupDetails?: GroupDetailsCallback;
+    readonly getGroupDetails: GroupDetailsCallback | undefined;
     /**
      * Provides per row theme overrides.
      * @group Style
      */
-    readonly getRowThemeOverride?: GetRowThemeCallback;
+    readonly getRowThemeOverride: GetRowThemeCallback | undefined;
     /**
      * Emitted when a header menu disclosure indicator is clicked.
      * @group Events
      */
-    readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
+    readonly onHeaderMenuClick: (col: number, screenPosition: Rectangle) => void | undefined;
 
     readonly selection: GridSelection;
-    readonly prelightCells?: readonly Item[];
+    readonly prelightCells: readonly Item[] | undefined;
     /**
      * Highlight regions provide hints to users about relations between cells and selections.
      * @group Selection
      */
-    readonly highlightRegions?: readonly Highlight[];
+    readonly highlightRegions: readonly Highlight[] | undefined;
 
     /**
      * Enabled/disables the fill handle.
      * @defaultValue false
      * @group Editing
      */
-    readonly fillHandle?: boolean;
+    readonly fillHandle: boolean | undefined;
 
-    readonly disabledRows?: CompactSelection;
+    readonly disabledRows: CompactSelection | undefined;
     /**
      * Allows passing a custom image window loader.
      * @group Advanced
      */
-    readonly imageWindowLoader?: ImageWindowLoader;
+    readonly imageWindowLoader: ImageWindowLoader | undefined;
 
     /**
      * Emitted when an item is hovered.

@@ -99,12 +99,15 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         minColumnWidth,
         onRowMoved,
         lockColumns,
-        ...rest
+        onMouseDown,
+        onMouseUp,
+        onItemHovered,
+        onDragStart,
     } = p;
 
     const canResize = (onColumnResize ?? onColumnResizeEnd ?? onColumnResizeStart) !== undefined;
 
-    const { onMouseDown, onMouseUp, onItemHovered, columns, selection } = p;
+    const { columns, selection } = p;
     const selectedColumns = selection.columns;
 
     const onItemHoveredImpl = React.useCallback(
@@ -324,26 +327,76 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         [dragRow, dropRow, getCellContent]
     );
 
-    const dragStart = p.onDragStart;
-    const onDragStart = React.useCallback<NonNullable<DataGridDndProps["onDragStart"]>>(
+    const onDragStartImpl = React.useCallback<NonNullable<DataGridDndProps["onDragStart"]>>(
         args => {
-            dragStart?.(args);
+            onDragStart?.(args);
             if (!args.defaultPrevented()) {
                 clearAll();
             }
         },
-        [clearAll, dragStart]
+        [clearAll, onDragStart]
     );
 
     return (
         <DataGrid
-            {...rest}
+            accessibilityHeight={p.accessibilityHeight}
+            canvasRef={p.canvasRef}
+            cellXOffset={p.cellXOffset}
+            cellYOffset={p.cellYOffset}
+            className={p.className}
+            columns={p.columns}
+            disabledRows={p.disabledRows}
+            drawCustomCell={p.drawCustomCell}
+            drawFocusRing={p.drawFocusRing}
+            drawHeader={p.drawHeader}
+            enableGroups={p.enableGroups}
+            eventTargetRef={p.eventTargetRef}
+            experimental={p.experimental}
+            fillHandle={p.fillHandle}
+            firstColAccessible={p.firstColAccessible}
+            fixedShadowX={p.fixedShadowX}
+            fixedShadowY={p.fixedShadowY}
+            freezeColumns={p.freezeColumns}
+            getCellRenderer={p.getCellRenderer}
+            getGroupDetails={p.getGroupDetails}
+            getRowThemeOverride={p.getRowThemeOverride}
+            groupHeaderHeight={p.groupHeaderHeight}
+            headerHeight={p.headerHeight}
+            headerIcons={p.headerIcons}
+            height={p.height}
+            highlightRegions={p.highlightRegions}
+            imageWindowLoader={p.imageWindowLoader}
+            isDraggable={p.isDraggable}
+            isFilling={p.isFilling}
+            isFocused={p.isFocused}
+            onCanvasBlur={p.onCanvasBlur}
+            onCellFocused={p.onCellFocused}
+            onContextMenu={p.onContextMenu}
+            onDragEnd={p.onDragEnd}
+            onDragLeave={p.onDragLeave}
+            onDragOverCell={p.onDragOverCell}
+            onDrop={p.onDrop}
+            onKeyDown={p.onKeyDown}
+            onKeyUp={p.onKeyUp}
+            onMouseMove={p.onMouseMove}
+            prelightCells={p.prelightCells}
+            rowHeight={p.rowHeight}
+            rows={p.rows}
+            selection={p.selection}
+            smoothScrollX={p.smoothScrollX}
+            smoothScrollY={p.smoothScrollY}
+            theme={p.theme}
+            trailingRowType={p.trailingRowType}
+            translateX={p.translateX}
+            translateY={p.translateY}
+            verticalBorder={p.verticalBorder}
+            width={p.width}
             getCellContent={getMangledCellContent}
             isResizing={resizeCol !== undefined}
             onHeaderMenuClick={onHeaderMenuClickMangled}
             isDragging={dragColActive}
             onItemHovered={onItemHoveredImpl}
-            onDragStart={onDragStart}
+            onDragStart={onDragStartImpl}
             onMouseDown={onMouseDownImpl}
             allowResize={onColumnResize !== undefined}
             onMouseUp={onMouseUpImpl}

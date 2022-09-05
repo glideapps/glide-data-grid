@@ -64,7 +64,7 @@ const targetSearchTimeMS = 10;
 const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const { canvasRef, cellYOffset, rows, columns } = p;
 
-    const { getCellsForSelection, onSearchResultsChanged, showSearch = false, onSearchClose, ...rest } = p;
+    const { getCellsForSelection, onSearchResultsChanged, showSearch = false, onSearchClose } = p;
 
     const [searchID] = React.useState(() => "search-box-" + Math.round(Math.random() * 1000));
 
@@ -384,7 +384,84 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
     return (
         <>
-            <ScrollingDataGrid {...rest} prelightCells={searchResults} />
+            <ScrollingDataGrid
+                prelightCells={searchResults}
+                accessibilityHeight={p.accessibilityHeight}
+                canvasRef={p.canvasRef}
+                cellXOffset={p.cellXOffset}
+                cellYOffset={p.cellYOffset}
+                className={p.className}
+                clientSize={p.clientSize}
+                columns={p.columns}
+                disabledRows={p.disabledRows}
+                enableGroups={p.enableGroups}
+                fillHandle={p.fillHandle}
+                firstColAccessible={p.firstColAccessible}
+                fixedShadowX={p.fixedShadowX}
+                fixedShadowY={p.fixedShadowY}
+                freezeColumns={p.freezeColumns}
+                getCellContent={p.getCellContent}
+                getCellRenderer={p.getCellRenderer}
+                getGroupDetails={p.getGroupDetails}
+                getRowThemeOverride={p.getRowThemeOverride}
+                groupHeaderHeight={p.groupHeaderHeight}
+                headerHeight={p.headerHeight}
+                highlightRegions={p.highlightRegions}
+                imageWindowLoader={p.imageWindowLoader}
+                initialSize={p.initialSize}
+                isFilling={p.isFilling}
+                isFocused={p.isFocused}
+                lockColumns={p.lockColumns}
+                maxColumnWidth={p.maxColumnWidth}
+                minColumnWidth={p.minColumnWidth}
+                onHeaderMenuClick={p.onHeaderMenuClick}
+                onMouseMove={p.onMouseMove}
+                onVisibleRegionChanged={p.onVisibleRegionChanged}
+                overscrollX={p.overscrollX}
+                overscrollY={p.overscrollY}
+                preventDiagonalScrolling={p.preventDiagonalScrolling}
+                rightElement={p.rightElement}
+                rightElementProps={p.rightElementProps}
+                rowHeight={p.rowHeight}
+                rows={p.rows}
+                scrollRef={p.scrollRef}
+                selection={p.selection}
+                showMinimap={p.showMinimap}
+                theme={p.theme}
+                trailingRowType={p.trailingRowType}
+                translateX={p.translateX}
+                translateY={p.translateY}
+                verticalBorder={p.verticalBorder}
+                drawCustomCell={p.drawCustomCell}
+                drawFocusRing={p.drawFocusRing}
+                drawHeader={p.drawHeader}
+                experimental={p.experimental}
+                gridRef={p.gridRef}
+                headerIcons={p.headerIcons}
+                isDraggable={p.isDraggable}
+                onCanvasBlur={p.onCanvasBlur}
+                onCanvasFocused={p.onCanvasFocused}
+                onCellFocused={p.onCellFocused}
+                onColumnMoved={p.onColumnMoved}
+                onColumnResize={p.onColumnResize}
+                onColumnResizeEnd={p.onColumnResizeEnd}
+                onColumnResizeStart={p.onColumnResizeStart}
+                onContextMenu={p.onContextMenu}
+                onDragEnd={p.onDragEnd}
+                onDragLeave={p.onDragLeave}
+                onDragOverCell={p.onDragOverCell}
+                onDragStart={p.onDragStart}
+                onDrop={p.onDrop}
+                onItemHovered={p.onItemHovered}
+                onKeyDown={p.onKeyDown}
+                onKeyUp={p.onKeyUp}
+                onMouseDown={p.onMouseDown}
+                onMouseUp={p.onMouseUp}
+                onRowMoved={p.onRowMoved}
+                smoothScrollX={p.smoothScrollX}
+                smoothScrollY={p.smoothScrollY}
+                scrollToEnd={p.scrollToEnd}
+            />
             {searchbox}
         </>
     );

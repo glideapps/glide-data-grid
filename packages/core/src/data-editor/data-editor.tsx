@@ -67,52 +67,55 @@ interface MouseState {
     readonly fillHandle?: boolean;
 }
 
-type Props = Omit<
-    DataGridSearchProps,
-    | "accessibilityHeight"
-    | "canvasRef"
-    | "cellXOffset"
-    | "cellYOffset"
-    | "className"
-    | "clientSize"
-    | "columns"
-    | "disabledRows"
-    | "drawCustomCell"
-    | "enableGroups"
-    | "firstColAccessible"
-    | "firstColSticky"
-    | "freezeColumns"
-    | "getCellContent"
-    | "getCellRenderer"
-    | "getCellsForSelection"
-    | "gridRef"
-    | "groupHeaderHeight"
-    | "headerHeight"
-    | "isFilling"
-    | "isFocused"
-    | "lockColumns"
-    | "maxColumnWidth"
-    | "minColumnWidth"
-    | "onCanvasBlur"
-    | "onCanvasFocused"
-    | "onCellFocused"
-    | "onContextMenu"
-    | "onDragEnd"
-    | "onMouseDown"
-    | "onMouseMove"
-    | "onMouseUp"
-    | "onSearchResultsChanged"
-    | "onVisibleRegionChanged"
-    | "rowHeight"
-    | "scrollRef"
-    | "searchColOffset"
-    | "selectedColumns"
-    | "selection"
-    | "theme"
-    | "trailingRowType"
-    | "translateX"
-    | "translateY"
-    | "verticalBorder"
+type Props = Partial<
+    Omit<
+        DataGridSearchProps,
+        | "accessibilityHeight"
+        | "canvasRef"
+        | "cellXOffset"
+        | "cellYOffset"
+        | "className"
+        | "clientSize"
+        | "columns"
+        | "disabledRows"
+        | "drawCustomCell"
+        | "enableGroups"
+        | "firstColAccessible"
+        | "firstColSticky"
+        | "freezeColumns"
+        | "getCellContent"
+        | "getCellRenderer"
+        | "getCellsForSelection"
+        | "gridRef"
+        | "groupHeaderHeight"
+        | "headerHeight"
+        | "isFilling"
+        | "isFocused"
+        | "lockColumns"
+        | "maxColumnWidth"
+        | "minColumnWidth"
+        | "onCanvasBlur"
+        | "onCanvasFocused"
+        | "onCellFocused"
+        | "onContextMenu"
+        | "onDragEnd"
+        | "onMouseDown"
+        | "onMouseMove"
+        | "onMouseUp"
+        | "onSearchResultsChanged"
+        | "onVisibleRegionChanged"
+        | "rowHeight"
+        | "rows"
+        | "scrollRef"
+        | "searchColOffset"
+        | "selectedColumns"
+        | "selection"
+        | "theme"
+        | "trailingRowType"
+        | "translateX"
+        | "translateY"
+        | "verticalBorder"
+    >
 >;
 
 type EditListItem = { location: Item; value: EditableGridCell };
@@ -285,6 +288,12 @@ export interface DataEditorProps extends Props {
      * @group Style
      */
     readonly groupHeaderHeight?: number;
+
+    /**
+     * The number of rows in the grid.
+     * @group Data
+     */
+    readonly rows: number;
 
     /** Determins if row markers should be automatically added to the grid.
      * @defaultValue `none`
@@ -719,7 +728,26 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnResizeEnd: onColumnResizeEndIn,
         onColumnResizeStart: onColumnResizeStartIn,
         customRenderers: additionalRenderers,
-        ...rest
+        fillHandle,
+        drawFocusRing,
+        experimental,
+        fixedShadowX,
+        fixedShadowY,
+        headerIcons,
+        imageWindowLoader,
+        initialSize,
+        isDraggable,
+        onDragLeave,
+        onRowMoved,
+        overscrollX,
+        overscrollY,
+        preventDiagonalScrolling,
+        rightElement,
+        rightElementProps,
+        showMinimap,
+        smoothScrollX,
+        smoothScrollY,
+        scrollToEnd,
     } = p;
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
@@ -1061,7 +1089,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     checked: gridSelection?.rows.hasIndex(row) === true,
                     markerKind: rowMarkers === "clickable-number" ? "number" : rowMarkers,
                     row: rowMarkerStartIndex + row,
-                    drawHandle: p.onRowMoved !== undefined,
+                    drawHandle: onRowMoved !== undefined,
                 };
             } else if (isTrailing) {
                 //If the grid is empty, we will return text
@@ -1084,7 +1112,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             } else {
                 const outerCol = col - rowMarkerOffset;
-                if (p.experimental?.strict === true) {
+                if (experimental?.strict === true) {
                     const vr = visibleRegionRef.current;
                     const isOutsideMainArea =
                         vr.x > outerCol || outerCol > vr.x + vr.width || vr.y > row || row > vr.y + vr.height;
@@ -1117,12 +1145,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             mangledRows,
             hasRowMarkers,
             gridSelection?.rows,
-            p.onRowMoved,
+            onRowMoved,
             rowMarkers,
             rowMarkerOffset,
             trailingRowOptions?.hint,
             trailingRowOptions?.addIcon,
-            p.experimental?.strict,
+            experimental?.strict,
             getCellContent,
             rowMarkerStartIndex,
         ]
@@ -1503,7 +1531,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         return;
                     }
 
-                    if (p.onRowMoved !== undefined) {
+                    if (onRowMoved !== undefined) {
                         const renderer = getCellRenderer(markerCell);
                         assert(renderer?.kind === InnerGridCellKind.Marker);
                         const postClick = renderer?.onClick?.({
@@ -1691,7 +1719,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             hasRowMarkers,
             lastRowSticky,
             onSelectionCleared,
-            p.onRowMoved,
+            onRowMoved,
             rowMarkerOffset,
             rowMarkers,
             rowSelect,
@@ -1731,13 +1759,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 location: args.location,
             };
 
-            const fillHandle = args.kind === "cell" && args.isFillHandle;
+            const fh = args.kind === "cell" && args.isFillHandle;
 
-            if (!fillHandle && args.kind !== "cell" && args.isEdge) return;
+            if (!fh && args.kind !== "cell" && args.isEdge) return;
 
             setMouseState({
                 previousSelection: gridSelection,
-                fillHandle,
+                fillHandle: fh,
             });
             lastMouseSelectLocation.current = undefined;
 
@@ -3325,7 +3353,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const [idealWidth, idealHeight] = React.useMemo(() => {
         let h: number;
-        const scrollbarWidth = p.experimental?.scrollbarWidthOverride ?? getScrollBarWidth();
+        const scrollbarWidth = experimental?.scrollbarWidthOverride ?? getScrollBarWidth();
         const rowsCountWithTrailingRow = rows + (showTrailingBlankRow ? 1 : 0);
         if (typeof rowHeight === "number") {
             h = totalHeaderHeight + rowsCountWithTrailingRow * rowHeight;
@@ -3346,7 +3374,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         // We need to set a reasonable cap here as some browsers will just ignore huge values
         // rather than treat them as huge values.
         return [`${Math.min(100_000, w)}px`, `${Math.min(100_000, h)}px`];
-    }, [mangledCols, p.experimental?.scrollbarWidthOverride, rowHeight, rows, showTrailingBlankRow, totalHeaderHeight]);
+    }, [mangledCols, experimental?.scrollbarWidthOverride, rowHeight, rows, showTrailingBlankRow, totalHeaderHeight]);
 
     return (
         <ThemeContext.Provider value={mergedTheme}>
@@ -3356,7 +3384,27 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 inWidth={width ?? idealWidth}
                 inHeight={height ?? idealHeight}>
                 <DataGridSearch
-                    {...rest}
+                    fillHandle={fillHandle}
+                    drawFocusRing={drawFocusRing}
+                    experimental={experimental}
+                    fixedShadowX={fixedShadowX}
+                    fixedShadowY={fixedShadowY}
+                    getRowThemeOverride={p.getRowThemeOverride}
+                    headerIcons={headerIcons}
+                    imageWindowLoader={imageWindowLoader}
+                    initialSize={initialSize}
+                    isDraggable={isDraggable}
+                    onDragLeave={onDragLeave}
+                    onRowMoved={onRowMoved}
+                    overscrollX={overscrollX}
+                    overscrollY={overscrollY}
+                    preventDiagonalScrolling={preventDiagonalScrolling}
+                    rightElement={rightElement}
+                    rightElementProps={rightElementProps}
+                    showMinimap={showMinimap}
+                    smoothScrollX={smoothScrollX}
+                    smoothScrollY={smoothScrollY}
+                    className={className}
                     enableGroups={enableGroups}
                     onCanvasFocused={onCanvasFocused}
                     onCanvasBlur={onFocusOut}
@@ -3416,6 +3464,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     verticalBorder={mangledVerticalBorder}
                     gridRef={gridRef}
                     getCellRenderer={getCellRenderer}
+                    scrollToEnd={scrollToEnd}
                 />
                 {renameGroupNode}
                 {overlay !== undefined && (
@@ -3424,7 +3473,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         validateCell={validateCell}
                         id={overlayID}
                         getCellRenderer={getCellRenderer}
-                        className={p.experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
+                        className={experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
                         provideEditor={provideEditor}
                         imageEditorOverride={imageEditorOverride}
                         onFinishEditing={onFinishEditing}

@@ -2019,7 +2019,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     });
     if (overlayCtx === null || targetCtx === null) return;
 
-    const getRowHeight = (r: number) => (typeof rowHeight === "number" ? rowHeight : rowHeight(r));
+    const getRowHeight = typeof rowHeight === "number" ? () => rowHeight : rowHeight;
 
     overlayCtx.save();
     overlayCtx.beginPath();

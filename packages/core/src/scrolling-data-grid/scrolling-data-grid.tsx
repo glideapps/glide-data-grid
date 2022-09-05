@@ -8,21 +8,23 @@ import clamp from "lodash/clamp.js";
 type Props = Omit<DataGridDndProps, "width" | "height" | "eventTargetRef">;
 
 export interface ScrollingDataGridProps extends Props {
-    readonly onVisibleRegionChanged?: (
-        range: Rectangle,
-        clientWidth: number,
-        clientHeight: number,
-        rightElWidth: number,
-        tx?: number,
-        ty?: number
-    ) => void;
+    readonly onVisibleRegionChanged:
+        | ((
+              range: Rectangle,
+              clientWidth: number,
+              clientHeight: number,
+              rightElWidth: number,
+              tx: number,
+              ty: number
+          ) => void)
+        | undefined;
     /**
      * Causes the grid to scroll to the end when flipped to true
      * @deprecated Use {@link DataEditorRef.scrollTo} instead
      * @group Deprecated
      */
-    readonly scrollToEnd?: boolean;
-    readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
+    readonly scrollToEnd: boolean | undefined;
+    readonly scrollRef: React.MutableRefObject<HTMLDivElement | null> | undefined;
 
     /**
      * The overscroll properties are used to allow the grid to scroll past the logical end of the content by a fixed
@@ -31,23 +33,23 @@ export interface ScrollingDataGridProps extends Props {
      *
      * @group Advanced
      */
-    readonly overscrollX?: number;
+    readonly overscrollX: number | undefined;
     /** {@inheritDoc overscrollX}
      * @group Advanced
      */
-    readonly overscrollY?: number;
+    readonly overscrollY: number | undefined;
     /**
      * Provides an initial size for the grid which can prevent a flicker on load if the initial size is known prior to
      * layout.
      *
      * @group Advanced
      */
-    readonly initialSize?: readonly [width: number, height: number];
+    readonly initialSize: readonly [width: number, height: number] | undefined;
     /**
      * Set to true to prevent any diagonal scrolling.
      * @group Advanced
      */
-    readonly preventDiagonalScrolling?: boolean;
+    readonly preventDiagonalScrolling: boolean | undefined;
 
     /**
      * If `rightElementProps.sticky` is set to true the right element will be visible at all times, otherwise the user
@@ -58,22 +60,24 @@ export interface ScrollingDataGridProps extends Props {
      *
      * @group Advanced
      */
-    readonly rightElementProps?: {
-        readonly sticky?: boolean;
-        readonly fill?: boolean;
-    };
+    readonly rightElementProps:
+        | {
+              readonly sticky?: boolean;
+              readonly fill?: boolean;
+          }
+        | undefined;
     /**
      * The right element is a DOM node which can be inserted at the end of the horizontal scroll region. This can be
      * used to create a right handle panel, make a big add button, or display messages.
      * @group Advanced
      */
-    readonly rightElement?: React.ReactNode;
+    readonly rightElement: React.ReactNode | undefined;
     /**
      * Enables/disables the interactive minimap.
      * @defaultValue false
      * @group Advanced
      */
-    readonly showMinimap?: boolean;
+    readonly showMinimap: boolean | undefined;
     readonly clientSize: readonly [number, number];
 }
 
@@ -118,9 +122,6 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         freezeColumns,
         experimental,
         clientSize,
-    } = p;
-    const { paddingRight, paddingBottom } = experimental ?? {};
-    const {
         className,
         onVisibleRegionChanged,
         scrollToEnd,
@@ -132,9 +133,11 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         overscrollY,
         showMinimap = false,
         initialSize,
-        ...dataGridProps
+        smoothScrollX = false,
+        smoothScrollY = false,
+        isDraggable,
     } = p;
-    const { smoothScrollX = false, smoothScrollY = false } = p;
+    const { paddingRight, paddingBottom } = experimental ?? {};
 
     const [clientWidth, clientHeight] = clientSize;
     const last = React.useRef<Rectangle | undefined>();
@@ -353,7 +356,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             minimap={minimap}
             className={className}
             preventDiagonalScrolling={preventDiagonalScrolling}
-            draggable={dataGridProps.isDraggable === true || typeof dataGridProps.isDraggable === "string"}
+            draggable={isDraggable === true || typeof isDraggable === "string"}
             scrollWidth={width + (paddingRight ?? 0)}
             scrollHeight={height + (paddingBottom ?? 0)}
             clientHeight={clientHeight}
@@ -364,7 +367,76 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             update={onScrollUpdate}
             initialSize={initialSize}
             scrollToEnd={scrollToEnd}>
-            <DataGridDnd eventTargetRef={scrollRef} width={clientWidth} height={clientHeight} {...dataGridProps} />
+            <DataGridDnd
+                className={p.className}
+                eventTargetRef={scrollRef}
+                width={clientWidth}
+                height={clientHeight}
+                accessibilityHeight={p.accessibilityHeight}
+                canvasRef={p.canvasRef}
+                cellXOffset={p.cellXOffset}
+                cellYOffset={p.cellYOffset}
+                columns={p.columns}
+                disabledRows={p.disabledRows}
+                enableGroups={p.enableGroups}
+                fillHandle={p.fillHandle}
+                firstColAccessible={p.firstColAccessible}
+                fixedShadowX={p.fixedShadowX}
+                fixedShadowY={p.fixedShadowY}
+                freezeColumns={p.freezeColumns}
+                getCellContent={p.getCellContent}
+                getCellRenderer={p.getCellRenderer}
+                getGroupDetails={p.getGroupDetails}
+                getRowThemeOverride={p.getRowThemeOverride}
+                groupHeaderHeight={p.groupHeaderHeight}
+                headerHeight={p.headerHeight}
+                highlightRegions={p.highlightRegions}
+                imageWindowLoader={p.imageWindowLoader}
+                isFilling={p.isFilling}
+                isFocused={p.isFocused}
+                lockColumns={p.lockColumns}
+                maxColumnWidth={p.maxColumnWidth}
+                minColumnWidth={p.minColumnWidth}
+                onHeaderMenuClick={p.onHeaderMenuClick}
+                onMouseMove={p.onMouseMove}
+                prelightCells={p.prelightCells}
+                rowHeight={p.rowHeight}
+                rows={p.rows}
+                selection={p.selection}
+                theme={p.theme}
+                trailingRowType={p.trailingRowType}
+                translateX={p.translateX}
+                translateY={p.translateY}
+                verticalBorder={p.verticalBorder}
+                drawCustomCell={p.drawCustomCell}
+                drawFocusRing={p.drawFocusRing}
+                drawHeader={p.drawHeader}
+                experimental={p.experimental}
+                gridRef={p.gridRef}
+                headerIcons={p.headerIcons}
+                isDraggable={p.isDraggable}
+                onCanvasBlur={p.onCanvasBlur}
+                onCanvasFocused={p.onCanvasFocused}
+                onCellFocused={p.onCellFocused}
+                onColumnMoved={p.onColumnMoved}
+                onColumnResize={p.onColumnResize}
+                onColumnResizeEnd={p.onColumnResizeEnd}
+                onColumnResizeStart={p.onColumnResizeStart}
+                onContextMenu={p.onContextMenu}
+                onDragEnd={p.onDragEnd}
+                onDragLeave={p.onDragLeave}
+                onDragOverCell={p.onDragOverCell}
+                onDragStart={p.onDragStart}
+                onDrop={p.onDrop}
+                onItemHovered={p.onItemHovered}
+                onKeyDown={p.onKeyDown}
+                onKeyUp={p.onKeyUp}
+                onMouseDown={p.onMouseDown}
+                onMouseUp={p.onMouseUp}
+                onRowMoved={p.onRowMoved}
+                smoothScrollX={p.smoothScrollX}
+                smoothScrollY={p.smoothScrollY}
+            />
         </InfiniteScroller>
     );
 };
