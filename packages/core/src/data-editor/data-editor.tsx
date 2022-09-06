@@ -2139,8 +2139,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 selected = [selected[0] - rowMarkerOffset, selected[1]];
             }
             const newRegion = {
-                ...region,
                 x: region.x - rowMarkerOffset,
+                y: region.y,
+                width: region.width,
                 height: showTrailingBlankRow && region.y + region.height >= rows ? region.height - 1 : region.height,
                 tx,
                 ty,
