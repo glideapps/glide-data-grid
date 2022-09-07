@@ -40,6 +40,7 @@ import type { Theme } from "../common/styles";
 import { blend, withAlpha } from "./color-parser";
 import type { DrawArgs, GetCellRendererCallback, PrepResult } from "./cells/cell-types";
 import { deepEqual } from "../common/support";
+import { browserIsSafari } from "../common/browser-detect";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when
@@ -1873,6 +1874,8 @@ export interface DrawGridArg {
 }
 
 function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean | number {
+    // safari takes longer to blit than to simply redraw 99% of the time.
+    if (browserIsSafari.value) return false;
     if (
         current.width !== last?.width ||
         current.height !== last.height ||
