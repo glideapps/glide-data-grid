@@ -51,7 +51,7 @@ import {
     pointInRect,
 } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
-import { browserIsFirefox } from "../common/browser-detect";
+import { browserIsFirefox, browserIsSafari } from "../common/browser-detect";
 import { useAnimationQueue } from "./use-animation-queue";
 import { assert } from "../common/support";
 import type { CellRenderer, GetCellRendererCallback } from "./cells/cell-types";
@@ -677,6 +677,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             hyperWrapping: experimental?.hyperWrapping ?? false,
             touchMode: lastWasTouch,
             enqueue: enqueueRef.current,
+            doubleBuffer: browserIsSafari.value,
             getCellRenderer,
         };
 

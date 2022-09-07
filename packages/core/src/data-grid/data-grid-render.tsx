@@ -40,7 +40,6 @@ import type { Theme } from "../common/styles";
 import { blend, withAlpha } from "./color-parser";
 import type { DrawArgs, GetCellRendererCallback, PrepResult } from "./cells/cell-types";
 import { assert, deepEqual } from "../common/support";
-import { browserIsSafari } from "../common/browser-detect";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when
@@ -1872,12 +1871,12 @@ export interface DrawGridArg {
     readonly spriteManager: SpriteManager;
     readonly scrolling: boolean;
     readonly touchMode: boolean;
+    readonly doubleBuffer: boolean;
     readonly enqueue: (item: Item) => void;
     readonly getCellRenderer: GetCellRendererCallback;
 }
 
 function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean | number {
-    // safari takes longer to blit than to simply redraw 99% of the time.
     if (last === undefined) return false;
     if (
         current.width !== last.width ||
@@ -1980,6 +1979,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         touchMode,
         enqueue,
         getCellRenderer,
+        doubleBuffer,
         bufferA,
         bufferB,
     } = arg;
@@ -2009,12 +2009,12 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         overlayCanvas.style.height = overlayHeight + "px";
     }
 
-    if (bufferA.width !== width * dpr || bufferA.height !== height * dpr) {
+    if (doubleBuffer && (bufferA.width !== width * dpr || bufferA.height !== height * dpr)) {
         bufferA.width = width * dpr;
         bufferA.height = height * dpr;
     }
 
-    if (bufferB.width !== width * dpr || bufferB.height !== height * dpr) {
+    if (doubleBuffer && (bufferB.width !== width * dpr || bufferB.height !== height * dpr)) {
         bufferB.width = width * dpr;
         bufferB.height = height * dpr;
     }
@@ -2029,14 +2029,19 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     )
         return;
 
-    const mainCtx = canvas.getContext("2d", {
-        alpha: false,
-    });
+    let mainCtx: CanvasRenderingContext2D | null = null;
+    if (doubleBuffer) {
+        mainCtx = canvas.getContext("2d", {
+            alpha: false,
+        });
+    }
     const overlayCtx = overlayCanvas.getContext("2d", {
         alpha: false,
     });
     let targetBuffer: HTMLCanvasElement;
-    if (damage !== undefined) {
+    if (!doubleBuffer) {
+        targetBuffer = canvas;
+    } else if (damage !== undefined) {
         targetBuffer = last?.lastBuffer === "b" ? bufferB : bufferA;
     } else {
         targetBuffer = last?.lastBuffer === "b" ? bufferA : bufferB;
@@ -2044,9 +2049,9 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     const targetCtx = targetBuffer.getContext("2d", {
         alpha: false,
     });
-    const blitSource = targetBuffer === bufferA ? bufferB : bufferA;
+    const blitSource = doubleBuffer ? (targetBuffer === bufferA ? bufferB : bufferA) : canvas;
 
-    if (overlayCtx === null || targetCtx === null || mainCtx === null) return;
+    if (overlayCtx === null || targetCtx === null) return;
 
     const getRowHeight = typeof rowHeight === "number" ? () => rowHeight : rowHeight;
 
@@ -2260,9 +2265,11 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         targetCtx.restore();
         overlayCtx.restore();
 
-        mainCtx.fillStyle = theme.bgCell;
-        mainCtx.fillRect(0, 0, width, height);
-        mainCtx.drawImage(targetCtx.canvas, 0, 0);
+        if (mainCtx !== null) {
+            mainCtx.fillStyle = theme.bgCell;
+            mainCtx.fillRect(0, 0, width, height);
+            mainCtx.drawImage(targetCtx.canvas, 0, 0);
+        }
 
         return;
     }
@@ -2457,9 +2464,11 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     focusRedraw?.();
     highlightRedraw?.();
 
-    mainCtx.fillStyle = theme.bgCell;
-    mainCtx.fillRect(0, 0, width, height);
-    mainCtx.drawImage(targetCtx.canvas, 0, 0);
+    if (mainCtx !== null) {
+        mainCtx.fillStyle = theme.bgCell;
+        mainCtx.fillRect(0, 0, width, height);
+        mainCtx.drawImage(targetCtx.canvas, 0, 0);
+    }
 
     const lastRowDrawn = getLastRow(
         effectiveCols,
@@ -2489,7 +2498,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         translateX,
         translateY,
         mustDrawFocusOnHeader,
-        lastBuffer: targetBuffer === bufferA ? "a" : "b",
+        lastBuffer: doubleBuffer ? (targetBuffer === bufferA ? "a" : "b") : undefined,
     };
 
     targetCtx.restore();
