@@ -364,13 +364,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const damageRegion = React.useRef<readonly Item[] | undefined>();
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
-    const lastBlitData = React.useRef<BlitData>({
-        cellXOffset,
-        cellYOffset,
-        translateX,
-        translateY,
-        mustDrawFocusOnHeader: false,
-    });
+    const lastBlitData = React.useRef<BlitData | undefined>();
     const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, readonly [number, number]] | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const overlayRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -627,6 +621,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const hoverInfoRef = React.useRef(hoveredItemInfo);
     hoverInfoRef.current = hoveredItemInfo;
 
+    const [bufferA, bufferB] = React.useMemo(() => {
+        return [document.createElement("canvas"), document.createElement("canvas")];
+    }, []);
+
     const lastArgsRef = React.useRef<DrawGridArg>();
     const draw = React.useCallback(() => {
         const canvas = ref.current;
@@ -636,6 +634,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         const last = lastArgsRef.current;
         const current = {
             canvas,
+            bufferA,
+            bufferB,
             headerCanvas: overlay,
             width,
             height,
@@ -696,6 +696,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     }, [
         width,
         height,
+        bufferA,
+        bufferB,
         cellXOffset,
         cellYOffset,
         translateX,

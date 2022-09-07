@@ -39,7 +39,7 @@ import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import type { Theme } from "../common/styles";
 import { blend, withAlpha } from "./color-parser";
 import type { DrawArgs, GetCellRendererCallback, PrepResult } from "./cells/cell-types";
-import { deepEqual } from "../common/support";
+import { assert, deepEqual } from "../common/support";
 import { browserIsSafari } from "../common/browser-detect";
 
 // Future optimization opportunities
@@ -86,6 +86,7 @@ export interface BlitData {
     readonly translateX: number;
     readonly translateY: number;
     readonly mustDrawFocusOnHeader: boolean;
+    readonly lastBuffer: "a" | "b" | undefined;
 }
 
 interface DragAndDropState {
@@ -1830,6 +1831,8 @@ function getLastRow(
 export interface DrawGridArg {
     readonly canvas: HTMLCanvasElement;
     readonly headerCanvas: HTMLCanvasElement;
+    readonly bufferA: HTMLCanvasElement;
+    readonly bufferB: HTMLCanvasElement;
     readonly width: number;
     readonly height: number;
     readonly cellXOffset: number;
@@ -1862,7 +1865,7 @@ export interface DrawGridArg {
     readonly prelightCells: CellList | undefined;
     readonly highlightRegions: readonly Highlight[] | undefined;
     readonly imageLoader: ImageWindowLoader;
-    readonly lastBlitData: React.MutableRefObject<BlitData>;
+    readonly lastBlitData: React.MutableRefObject<BlitData | undefined>;
     readonly damage: CellList | undefined;
     readonly hoverValues: HoverValues;
     readonly hoverInfo: HoverInfo | undefined;
@@ -1875,9 +1878,9 @@ export interface DrawGridArg {
 
 function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean | number {
     // safari takes longer to blit than to simply redraw 99% of the time.
-    if (browserIsSafari.value) return false;
+    if (last === undefined) return false;
     if (
-        current.width !== last?.width ||
+        current.width !== last.width ||
         current.height !== last.height ||
         current.theme !== last.theme ||
         current.headerHeight !== last.headerHeight ||
@@ -1977,6 +1980,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         touchMode,
         enqueue,
         getCellRenderer,
+        bufferA,
+        bufferB,
     } = arg;
     let { damage } = arg;
     if (width === 0 || height === 0) return;
@@ -2004,30 +2009,51 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         overlayCanvas.style.height = overlayHeight + "px";
     }
 
+    if (bufferA.width !== width * dpr || bufferA.height !== height * dpr) {
+        bufferA.width = width * dpr;
+        bufferA.height = height * dpr;
+    }
+
+    if (bufferB.width !== width * dpr || bufferB.height !== height * dpr) {
+        bufferB.width = width * dpr;
+        bufferB.height = height * dpr;
+    }
+
     const last = lastBlitData.current;
     if (
         canBlit === true &&
-        cellXOffset === last.cellXOffset &&
-        cellYOffset === last.cellYOffset &&
-        translateX === last.translateX &&
-        translateY === last.translateY
+        cellXOffset === last?.cellXOffset &&
+        cellYOffset === last?.cellYOffset &&
+        translateX === last?.translateX &&
+        translateY === last?.translateY
     )
         return;
 
-    const targetCtx = canvas.getContext("2d", {
+    const mainCtx = canvas.getContext("2d", {
         alpha: false,
     });
     const overlayCtx = overlayCanvas.getContext("2d", {
         alpha: false,
     });
-    if (overlayCtx === null || targetCtx === null) return;
+    let targetBuffer: HTMLCanvasElement;
+    if (damage !== undefined) {
+        targetBuffer = last?.lastBuffer === "b" ? bufferB : bufferA;
+    } else {
+        targetBuffer = last?.lastBuffer === "b" ? bufferA : bufferB;
+    }
+    const targetCtx = targetBuffer.getContext("2d", {
+        alpha: false,
+    });
+    const blitSource = targetBuffer === bufferA ? bufferB : bufferA;
+
+    if (overlayCtx === null || targetCtx === null || mainCtx === null) return;
 
     const getRowHeight = typeof rowHeight === "number" ? () => rowHeight : rowHeight;
 
     overlayCtx.save();
     overlayCtx.beginPath();
     targetCtx.save();
-    targetCtx.beginPath(); // clear any path in the ctx
+    targetCtx.beginPath();
 
     overlayCtx.textBaseline = "middle";
     targetCtx.textBaseline = "middle";
@@ -2234,22 +2260,27 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         targetCtx.restore();
         overlayCtx.restore();
 
+        mainCtx.fillStyle = theme.bgCell;
+        mainCtx.fillRect(0, 0, width, height);
+        mainCtx.drawImage(targetCtx.canvas, 0, 0);
+
         return;
     }
 
     if (
         canBlit !== true ||
-        cellXOffset !== last.cellXOffset ||
-        translateX !== last.translateX ||
-        mustDrawFocusOnHeader !== last.mustDrawFocusOnHeader
+        cellXOffset !== last?.cellXOffset ||
+        translateX !== last?.translateX ||
+        mustDrawFocusOnHeader !== last?.mustDrawFocusOnHeader
     ) {
         drawHeaderTexture();
     }
 
     if (canBlit === true) {
+        assert(blitSource !== undefined && last !== undefined);
         const { regions } = blitLastFrame(
             targetCtx,
-            canvas,
+            blitSource,
             last,
             cellXOffset,
             cellYOffset,
@@ -2267,6 +2298,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         );
         drawRegions = regions;
     } else if (canBlit !== false) {
+        assert(last !== undefined);
         const resizedCol = canBlit;
         drawRegions = blitResizedCol(
             last,
@@ -2425,6 +2457,10 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     focusRedraw?.();
     highlightRedraw?.();
 
+    mainCtx.fillStyle = theme.bgCell;
+    mainCtx.fillRect(0, 0, width, height);
+    mainCtx.drawImage(targetCtx.canvas, 0, 0);
+
     const lastRowDrawn = getLastRow(
         effectiveCols,
         height,
@@ -2447,7 +2483,14 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         freezeColumns
     );
 
-    lastBlitData.current = { cellXOffset, cellYOffset, translateX, translateY, mustDrawFocusOnHeader };
+    lastBlitData.current = {
+        cellXOffset,
+        cellYOffset,
+        translateX,
+        translateY,
+        mustDrawFocusOnHeader,
+        lastBuffer: targetBuffer === bufferA ? "a" : "b",
+    };
 
     targetCtx.restore();
     overlayCtx.restore();
