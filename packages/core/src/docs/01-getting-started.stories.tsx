@@ -281,7 +281,7 @@ Here are a few to play with.`}
             </label>
             <label style={{ display: "block" }}>
                 <input type="checkbox" checked={verticalBorder} onChange={e => setVerticalBorder(e.target.checked)} />{" "}
-                Vetical Borders
+                Vertical Borders
             </label>
             <Wrapper height={200}>
                 <DataEditor
