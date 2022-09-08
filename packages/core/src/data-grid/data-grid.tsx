@@ -51,7 +51,7 @@ import {
     pointInRect,
 } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
-import { browserIsFirefox } from "../common/browser-detect";
+import { browserIsFirefox, browserIsSafari } from "../common/browser-detect";
 import { useAnimationQueue } from "./use-animation-queue";
 import { assert } from "../common/support";
 import type { CellRenderer, GetCellRendererCallback } from "./cells/cell-types";
@@ -239,6 +239,7 @@ export interface DataGridProps {
               readonly strict?: boolean;
               readonly scrollbarWidthOverride?: number;
               readonly hyperWrapping?: boolean;
+              readonly renderStrategy?: "single-buffer" | "double-buffer" | "direct";
           }
         | undefined;
 
@@ -368,13 +369,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const damageRegion = React.useRef<readonly Item[] | undefined>();
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
-    const lastBlitData = React.useRef<BlitData>({
-        cellXOffset,
-        cellYOffset,
-        translateX,
-        translateY,
-        mustDrawFocusOnHeader: false,
-    });
+    const lastBlitData = React.useRef<BlitData | undefined>();
     const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, readonly [number, number]] | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const overlayRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -631,6 +626,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const hoverInfoRef = React.useRef(hoveredItemInfo);
     hoverInfoRef.current = hoveredItemInfo;
 
+    const [bufferA, bufferB] = React.useMemo(() => {
+        return [document.createElement("canvas"), document.createElement("canvas")];
+    }, []);
+
     const lastArgsRef = React.useRef<DrawGridArg>();
     const draw = React.useCallback(() => {
         const canvas = ref.current;
@@ -640,6 +639,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         const last = lastArgsRef.current;
         const current = {
             canvas,
+            bufferA,
+            bufferB,
             headerCanvas: overlay,
             width,
             height,
@@ -681,6 +682,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             hyperWrapping: experimental?.hyperWrapping ?? false,
             touchMode: lastWasTouch,
             enqueue: enqueueRef.current,
+            renderStrategy: experimental?.renderStrategy ?? (browserIsSafari.value ? "double-buffer" : "single-buffer"),
             getCellRenderer,
         };
 
@@ -698,6 +700,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             drawGrid(current, undefined);
         }
     }, [
+        bufferA,
+        bufferB,
         width,
         height,
         cellXOffset,
@@ -714,13 +718,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         disabledRows,
         rowHeight,
         verticalBorder,
-        drawFocusRing,
         isResizing,
         isFocused,
         selection,
         fillHandle,
         trailingRowType,
         rows,
+        drawFocusRing,
         getCellContent,
         getGroupDetails,
         getRowThemeOverride,
@@ -732,6 +736,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         spriteManager,
         scrolling,
         experimental?.hyperWrapping,
+        experimental?.renderStrategy,
         lastWasTouch,
         getCellRenderer,
     ]);
