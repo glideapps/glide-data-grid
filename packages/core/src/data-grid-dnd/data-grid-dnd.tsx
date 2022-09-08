@@ -370,6 +370,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             isFilling={p.isFilling}
             isFocused={p.isFocused}
             onCanvasBlur={p.onCanvasBlur}
+            onCanvasFocused={p.onCanvasFocused}
             onCellFocused={p.onCellFocused}
             onContextMenu={p.onContextMenu}
             onDragEnd={p.onDragEnd}

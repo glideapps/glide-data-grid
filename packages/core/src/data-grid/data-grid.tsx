@@ -150,28 +150,28 @@ export interface DataGridProps {
      * Emitted when an item is hovered.
      * @group Events
      */
-    readonly onItemHovered?: (args: GridMouseEventArgs) => void;
+    readonly onItemHovered: (args: GridMouseEventArgs) => void;
     readonly onMouseMove: (args: GridMouseEventArgs) => void;
-    readonly onMouseDown?: (args: GridMouseEventArgs) => void;
-    readonly onMouseUp?: (args: GridMouseEventArgs, isOutside: boolean) => void;
-    readonly onContextMenu?: (args: GridMouseEventArgs, preventDefault: () => void) => void;
+    readonly onMouseDown: (args: GridMouseEventArgs) => void;
+    readonly onMouseUp: (args: GridMouseEventArgs, isOutside: boolean) => void;
+    readonly onContextMenu: (args: GridMouseEventArgs, preventDefault: () => void) => void;
 
-    readonly onCanvasFocused?: () => void;
-    readonly onCanvasBlur?: () => void;
-    readonly onCellFocused?: (args: Item) => void;
+    readonly onCanvasFocused: () => void;
+    readonly onCanvasBlur: () => void;
+    readonly onCellFocused: (args: Item) => void;
 
-    readonly onMouseMoveRaw?: (event: MouseEvent) => void;
+    readonly onMouseMoveRaw: (event: MouseEvent) => void;
 
     /**
      * Emitted when the canvas receives a key down event.
      * @group Events
      */
-    readonly onKeyDown?: (event: GridKeyEventArgs) => void;
+    readonly onKeyDown: (event: GridKeyEventArgs) => void;
     /**
      * Emitted when the canvas receives a key up event.
      * @group Events
      */
-    readonly onKeyUp?: (event: GridKeyEventArgs) => void;
+    readonly onKeyUp: ((event: GridKeyEventArgs) => void) | undefined;
 
     readonly verticalBorder: (col: number) => boolean;
 
@@ -179,27 +179,27 @@ export interface DataGridProps {
      * Determines what can be dragged using HTML drag and drop
      * @group Drag and Drop
      */
-    readonly isDraggable?: boolean | "cell" | "header";
+    readonly isDraggable: boolean | "cell" | "header" | undefined;
     /**
      * If `isDraggable` is set, the grid becomes HTML draggable, and `onDragStart` will be called when dragging starts.
      * You can use this to build a UI where the user can drag the Grid around.
      * @group Drag and Drop
      */
-    readonly onDragStart?: (args: GridDragEventArgs) => void;
-    readonly onDragEnd?: () => void;
+    readonly onDragStart: (args: GridDragEventArgs) => void;
+    readonly onDragEnd: () => void;
 
     /** @group Drag and Drop */
-    readonly onDragOverCell?: (cell: Item, dataTransfer: DataTransfer | null) => void;
+    readonly onDragOverCell: ((cell: Item, dataTransfer: DataTransfer | null) => void) | undefined;
     /** @group Drag and Drop */
-    readonly onDragLeave?: () => void;
+    readonly onDragLeave: (() => void) | undefined;
 
     /**
      * Called when a HTML Drag and Drop event is ended on the data grid.
      * @group Drag and Drop
      */
-    readonly onDrop?: (cell: Item, dataTransfer: DataTransfer | null) => void;
+    readonly onDrop: ((cell: Item, dataTransfer: DataTransfer | null) => void) | undefined;
 
-    readonly drawCustomCell?: DrawCustomCellCallback;
+    readonly drawCustomCell: DrawCustomCellCallback | undefined;
     /**
      * Overrides the rendering of a header. The grid will call this for every header it needs to render. Header
      * rendering is not as well optimized because they do not redraw as often, but very heavy drawing methods can
@@ -210,34 +210,38 @@ export interface DataGridProps {
      * @group Drawing
      * @returns `false` if default header rendering should still happen, `true` to cancel rendering.
      */
-    readonly drawHeader?: DrawHeaderCallback;
+    readonly drawHeader: DrawHeaderCallback | undefined;
     /**
      * Controls the drawing of the focus ring.
      * @defaultValue true
      * @group Style
      */
-    readonly drawFocusRing?: boolean;
+    readonly drawFocusRing: boolean | undefined;
 
-    readonly dragAndDropState?: {
-        src: number;
-        dest: number;
-    };
+    readonly dragAndDropState:
+        | {
+              src: number;
+              dest: number;
+          }
+        | undefined;
 
     /**
      * Experimental features
      * @group Advanced
      * @experimental
      */
-    readonly experimental?: {
-        readonly paddingRight?: number;
-        readonly paddingBottom?: number;
-        readonly enableFirefoxRescaling?: boolean;
-        readonly isSubGrid?: boolean;
-        readonly strict?: boolean;
-        readonly scrollbarWidthOverride?: number;
-        readonly hyperWrapping?: boolean;
-        readonly renderStrategy?: "single-buffer" | "double-buffer" | "direct";
-    };
+    readonly experimental:
+        | {
+              readonly paddingRight?: number;
+              readonly paddingBottom?: number;
+              readonly enableFirefoxRescaling?: boolean;
+              readonly isSubGrid?: boolean;
+              readonly strict?: boolean;
+              readonly scrollbarWidthOverride?: number;
+              readonly hyperWrapping?: boolean;
+              readonly renderStrategy?: "single-buffer" | "double-buffer" | "direct";
+          }
+        | undefined;
 
     /**
      * Additional header icons for use by `GridColumn`.
@@ -253,20 +257,20 @@ export interface DataGridProps {
      *
      * @group Style
      */
-    readonly headerIcons?: SpriteMap;
+    readonly headerIcons: SpriteMap | undefined;
 
     /** Controls smooth scrolling in the data grid. If smooth scrolling is not enabled the grid will always be cell
      * aligned.
      * @defaultValue `false`
      * @group Style
      */
-    readonly smoothScrollX?: boolean;
+    readonly smoothScrollX: boolean | undefined;
     /** Controls smooth scrolling in the data grid. If smooth scrolling is not enabled the grid will always be cell
      * aligned.
      * @defaultValue `false`
      * @group Style
      */
-    readonly smoothScrollY?: boolean;
+    readonly smoothScrollY: boolean | undefined;
 
     readonly theme: Theme;
 
