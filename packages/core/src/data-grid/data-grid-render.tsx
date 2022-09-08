@@ -181,7 +181,8 @@ function blitLastFrame(
     dpr: number,
     mappedColumns: readonly MappedGridColumn[],
     effectiveCols: readonly MappedGridColumn[],
-    getRowHeight: number | ((r: number) => number)
+    getRowHeight: number | ((r: number) => number),
+    doubleBuffered: boolean
 ) {
     const drawRegions: Rectangle[] = [];
     let blittedYOnly = false;
@@ -305,6 +306,11 @@ function blitLastFrame(
         }
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
+        if (deltaX !== 0 && deltaY === 0 && doubleBuffered) {
+            // When double buffering the freeze columns can be offset by a couple pixels vertically between the two
+            // buffers. We don't want to redraw them so we need to make sure to copy them.
+            ctx.drawImage(canvas, 0, 0, stickyWidth * dpr, height * dpr, 0, 0, stickyWidth * dpr, height * dpr);
+        }
         ctx.drawImage(canvas, args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
         ctx.scale(dpr, dpr);
     }
@@ -2301,7 +2307,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             dpr,
             mappedColumns,
             effectiveCols,
-            rowHeight
+            rowHeight,
+            doubleBuffer
         );
         drawRegions = regions;
     } else if (canBlit !== false) {
