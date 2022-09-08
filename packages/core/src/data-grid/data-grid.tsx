@@ -236,6 +236,7 @@ export interface DataGridProps {
         readonly strict?: boolean;
         readonly scrollbarWidthOverride?: number;
         readonly hyperWrapping?: boolean;
+        readonly doubleBuffer?: boolean;
     };
 
     /**
@@ -677,7 +678,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             hyperWrapping: experimental?.hyperWrapping ?? false,
             touchMode: lastWasTouch,
             enqueue: enqueueRef.current,
-            doubleBuffer: browserIsSafari.value,
+            doubleBuffer: experimental?.doubleBuffer ?? browserIsSafari.value,
             getCellRenderer,
         };
 
@@ -695,10 +696,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             drawGrid(current, undefined);
         }
     }, [
-        width,
-        height,
         bufferA,
         bufferB,
+        width,
+        height,
         cellXOffset,
         cellYOffset,
         translateX,
@@ -713,13 +714,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         disabledRows,
         rowHeight,
         verticalBorder,
-        drawFocusRing,
         isResizing,
         isFocused,
         selection,
         fillHandle,
         trailingRowType,
         rows,
+        drawFocusRing,
         getCellContent,
         getGroupDetails,
         getRowThemeOverride,
@@ -731,6 +732,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         spriteManager,
         scrolling,
         experimental?.hyperWrapping,
+        experimental?.doubleBuffer,
         lastWasTouch,
         getCellRenderer,
     ]);
