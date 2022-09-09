@@ -58,6 +58,27 @@ export function Simplenotest() {
             width={1800}
             height={1000}
             cellXOffset={0}
+            drawHeader={undefined}
+            experimental={undefined}
+            headerIcons={undefined}
+            isDraggable={undefined}
+            onCanvasBlur={() => undefined}
+            onCanvasFocused={() => undefined}
+            onCellFocused={() => undefined}
+            onContextMenu={() => undefined}
+            onDragEnd={() => undefined}
+            onDragLeave={() => undefined}
+            onDragOverCell={() => undefined}
+            onDragStart={() => undefined}
+            onDrop={() => undefined}
+            onItemHovered={() => undefined}
+            onKeyDown={() => undefined}
+            onKeyUp={() => undefined}
+            onMouseDown={() => undefined}
+            onMouseMoveRaw={() => undefined}
+            onMouseUp={() => undefined}
+            smoothScrollX={undefined}
+            smoothScrollY={undefined}
             allowResize={undefined}
             canvasRef={undefined}
             className={undefined}
@@ -121,6 +142,27 @@ export function SelectedCellnotest() {
             height={1000}
             cellXOffset={0}
             isFocused={true}
+            drawHeader={undefined}
+            experimental={undefined}
+            headerIcons={undefined}
+            isDraggable={undefined}
+            onCanvasBlur={() => undefined}
+            onCanvasFocused={() => undefined}
+            onCellFocused={() => undefined}
+            onContextMenu={() => undefined}
+            onDragEnd={() => undefined}
+            onDragLeave={() => undefined}
+            onDragOverCell={() => undefined}
+            onDragStart={() => undefined}
+            onDrop={() => undefined}
+            onItemHovered={() => undefined}
+            onKeyDown={() => undefined}
+            onKeyUp={() => undefined}
+            onMouseDown={() => undefined}
+            onMouseMoveRaw={() => undefined}
+            onMouseUp={() => undefined}
+            smoothScrollX={undefined}
+            smoothScrollY={undefined}
             allowResize={undefined}
             canvasRef={undefined}
             className={undefined}
@@ -191,6 +233,27 @@ export function SelectedRownotest() {
             cellXOffset={0}
             cellYOffset={0}
             isFocused={true}
+            drawHeader={undefined}
+            experimental={undefined}
+            headerIcons={undefined}
+            isDraggable={undefined}
+            onCanvasBlur={() => undefined}
+            onCanvasFocused={() => undefined}
+            onCellFocused={() => undefined}
+            onContextMenu={() => undefined}
+            onDragEnd={() => undefined}
+            onDragLeave={() => undefined}
+            onDragOverCell={() => undefined}
+            onDragStart={() => undefined}
+            onDrop={() => undefined}
+            onItemHovered={() => undefined}
+            onKeyDown={() => undefined}
+            onKeyUp={() => undefined}
+            onMouseDown={() => undefined}
+            onMouseMoveRaw={() => undefined}
+            onMouseUp={() => undefined}
+            smoothScrollX={undefined}
+            smoothScrollY={undefined}
             allowResize={undefined}
             canvasRef={undefined}
             className={undefined}
@@ -255,6 +318,27 @@ export const SelectedColumnnotest = () => {
             cellXOffset={0}
             cellYOffset={0}
             isFocused={true}
+            drawHeader={undefined}
+            experimental={undefined}
+            headerIcons={undefined}
+            isDraggable={undefined}
+            onCanvasBlur={() => undefined}
+            onCanvasFocused={() => undefined}
+            onCellFocused={() => undefined}
+            onContextMenu={() => undefined}
+            onDragEnd={() => undefined}
+            onDragLeave={() => undefined}
+            onDragOverCell={() => undefined}
+            onDragStart={() => undefined}
+            onDrop={() => undefined}
+            onItemHovered={() => undefined}
+            onKeyDown={() => undefined}
+            onKeyUp={() => undefined}
+            onMouseDown={() => undefined}
+            onMouseMoveRaw={() => undefined}
+            onMouseUp={() => undefined}
+            smoothScrollX={undefined}
+            smoothScrollY={undefined}
             allowResize={undefined}
             canvasRef={undefined}
             className={undefined}

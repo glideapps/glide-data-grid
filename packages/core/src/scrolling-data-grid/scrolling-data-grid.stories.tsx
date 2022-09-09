@@ -80,6 +80,24 @@ export function Simplenotest() {
             clientSize={[1000, 1000]}
             cellXOffset={x}
             cellYOffset={y}
+            drawHeader={undefined}
+            experimental={undefined}
+            headerIcons={undefined}
+            isDraggable={undefined}
+            onCanvasBlur={() => undefined}
+            onCanvasFocused={() => undefined}
+            onCellFocused={() => undefined}
+            onContextMenu={() => undefined}
+            onDragEnd={() => undefined}
+            onDragLeave={() => undefined}
+            onDragOverCell={() => undefined}
+            onDragStart={() => undefined}
+            onDrop={() => undefined}
+            onItemHovered={() => undefined}
+            onKeyDown={() => undefined}
+            onKeyUp={() => undefined}
+            onMouseDown={() => undefined}
+            onMouseUp={() => undefined}
             canvasRef={undefined}
             className={undefined}
             disabledRows={undefined}
