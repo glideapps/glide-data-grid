@@ -73,6 +73,11 @@ describe("data-grid-types", () => {
         expect(sel.some(x => x > 3)).toBe(true);
     });
 
+    test("Compact selection toArray", () => {
+        const sel = CompactSelection.fromSingleSelection([3, 5]);
+        expect(sel.toArray()).toEqual([3, 4]);
+    });
+
     test("Smoke test compact selection remove", () => {
         const sel = CompactSelection.fromSingleSelection([3, 8]);
 
