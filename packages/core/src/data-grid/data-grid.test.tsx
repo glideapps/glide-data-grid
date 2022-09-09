@@ -105,6 +105,21 @@ const basicProps: DataGridProps = {
     },
 };
 
+beforeEach(() => {
+    Element.prototype.getBoundingClientRect = () => ({
+        bottom: 1000,
+        height: 1000,
+        left: 0,
+        right: 1000,
+        top: 0,
+        width: 1000,
+        x: 0,
+        y: 0,
+        toJSON: () => "",
+    });
+    Image.prototype.decode = jest.fn();
+});
+
 const dataGridCanvasId = "data-grid-canvas";
 describe("data-grid", () => {
     test("Emits mouse down", () => {
