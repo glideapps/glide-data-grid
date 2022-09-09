@@ -58,6 +58,15 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
 
     const theme = useTheme();
 
+    const values = React.useMemo(
+        () =>
+            allowedValues.map(x => ({
+                value: x,
+                label: x,
+            })),
+        [allowedValues]
+    );
+
     return (
         <Wrap>
             <Select
@@ -65,7 +74,7 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                 inputValue={inputValue}
                 onInputChange={setInputValue}
                 menuPlacement={"auto"}
-                value={{ value, label: value }}
+                value={values.find(x => x.value === value)}
                 styles={{
                     control: base => ({
                         ...base,
@@ -110,10 +119,7 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                         </PortalWrap>
                     ),
                 }}
-                options={allowedValues.map(x => ({
-                    value: x,
-                    label: x,
-                }))}
+                options={values}
                 onChange={async e => {
                     if (e === null) return;
                     setValue(e.value);
