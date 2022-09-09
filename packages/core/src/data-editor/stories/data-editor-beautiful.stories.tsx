@@ -2,6 +2,7 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
 
+import { Resizable } from "re-resizable";
 import {
     CellArray,
     CompactSelection,
@@ -2839,6 +2840,35 @@ export const Minimap: React.VFC = () => {
     );
 };
 (Minimap as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const Resizer: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(1000, true, true);
+
+    const [[width, height], setSize] = React.useState([100, 100]);
+
+    return (
+        <BeautifulWrapper title="Resizer" description={undefined}>
+            <Resizable
+                defaultSize={{ width, height }}
+                onResize={(_e, _dir, _el, delta) => setSize([width + delta.width, height + delta.height])}>
+                <DataEditor
+                    {...defaultProps}
+                    width={width}
+                    height={height}
+                    getCellContent={getCellContent}
+                    columns={cols}
+                    rows={3000}
+                    rowMarkers="both"
+                />
+            </Resizable>
+        </BeautifulWrapper>
+    );
+};
+(Resizer as any).parameters = {
     options: {
         showPanel: false,
     },
