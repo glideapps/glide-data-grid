@@ -414,6 +414,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 return undefined;
             }
 
+            const scale = rect.width / width;
+
             const result = computeBounds(
                 col,
                 row,
@@ -431,6 +433,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 mappedColumns,
                 rowHeight
             );
+
+            if (scale !== 1) {
+                result.x *= scale;
+                result.y *= scale;
+                result.width *= scale;
+                result.height *= scale;
+            }
 
             result.x += rect.x;
             result.y += rect.y;
@@ -457,8 +466,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const getMouseArgsForPosition = React.useCallback(
         (canvas: HTMLCanvasElement, posX: number, posY: number, ev?: MouseEvent | TouchEvent): GridMouseEventArgs => {
             const rect = canvas.getBoundingClientRect();
-            const x = posX - rect.left;
-            const y = posY - rect.top;
+            const scale = rect.width / width;
+            const x = (posX - rect.left) / scale;
+            const y = (posY - rect.top) / scale;
             const edgeDetectionBuffer = 5;
 
             const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, undefined, translateX);
