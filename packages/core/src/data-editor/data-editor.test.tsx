@@ -2802,9 +2802,17 @@ describe("data-editor", () => {
     test("Select all", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} rowMarkers="both" onGridSelectionChange={spy} />, {
-            wrapper: Context,
-        });
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                experimental={{ renderStrategy: "double-buffer" }}
+                rowMarkers="both"
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
