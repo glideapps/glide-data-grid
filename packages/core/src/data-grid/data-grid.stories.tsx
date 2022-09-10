@@ -81,7 +81,6 @@ export function Simplenotest() {
             smoothScrollY={undefined}
             allowResize={undefined}
             canvasRef={undefined}
-            className={undefined}
             disabledRows={undefined}
             eventTargetRef={undefined}
             fillHandle={undefined}
@@ -165,7 +164,6 @@ export function SelectedCellnotest() {
             smoothScrollY={undefined}
             allowResize={undefined}
             canvasRef={undefined}
-            className={undefined}
             disabledRows={undefined}
             eventTargetRef={undefined}
             fillHandle={undefined}
@@ -256,7 +254,6 @@ export function SelectedRownotest() {
             smoothScrollY={undefined}
             allowResize={undefined}
             canvasRef={undefined}
-            className={undefined}
             disabledRows={undefined}
             eventTargetRef={undefined}
             fillHandle={undefined}
@@ -341,7 +338,6 @@ export const SelectedColumnnotest = () => {
             smoothScrollY={undefined}
             allowResize={undefined}
             canvasRef={undefined}
-            className={undefined}
             disabledRows={undefined}
             eventTargetRef={undefined}
             fillHandle={undefined}

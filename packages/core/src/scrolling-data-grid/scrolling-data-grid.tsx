@@ -8,6 +8,7 @@ import clamp from "lodash/clamp.js";
 type Props = Omit<DataGridDndProps, "width" | "height" | "eventTargetRef">;
 
 export interface ScrollingDataGridProps extends Props {
+    readonly className: string | undefined;
     readonly onVisibleRegionChanged:
         | ((
               range: Rectangle,
@@ -368,7 +369,6 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             initialSize={initialSize}
             scrollToEnd={scrollToEnd}>
             <DataGridDnd
-                className={p.className}
                 eventTargetRef={scrollRef}
                 width={clientWidth}
                 height={clientHeight}

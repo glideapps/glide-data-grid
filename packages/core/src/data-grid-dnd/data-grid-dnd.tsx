@@ -343,7 +343,6 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             canvasRef={p.canvasRef}
             cellXOffset={p.cellXOffset}
             cellYOffset={p.cellYOffset}
-            className={p.className}
             columns={p.columns}
             disabledRows={p.disabledRows}
             drawCustomCell={p.drawCustomCell}

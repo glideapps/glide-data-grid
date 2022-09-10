@@ -105,8 +105,6 @@ export interface DataGridProps {
 
     readonly eventTargetRef: React.MutableRefObject<HTMLDivElement | null> | undefined;
 
-    readonly className: string | undefined;
-
     readonly getCellContent: (cell: Item) => InnerGridCell;
     /**
      * Provides additional details about groups to extend group functionality.
@@ -299,7 +297,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         width,
         height,
         accessibilityHeight,
-        className,
         columns,
         cellXOffset: cellXOffsetReal,
         cellYOffset,
@@ -1630,7 +1627,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 onKeyUp={onKeyUpImpl}
                 onFocus={onCanvasFocused}
                 onBlur={onCanvasBlur}
-                className={className}
                 ref={refImpl}
                 style={style}>
                 {accessibilityTree}

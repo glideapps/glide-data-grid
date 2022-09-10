@@ -29,7 +29,6 @@ const basicProps: DataGridProps = {
     smoothScrollY: undefined,
     allowResize: undefined,
     canvasRef: undefined,
-    className: undefined,
     disabledRows: undefined,
     eventTargetRef: undefined,
     fillHandle: undefined,
