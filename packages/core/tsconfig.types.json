@@ -1,16 +1,23 @@
-
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "allowJs": false,
         "declaration": true,
         "emitDeclarationOnly": true,
+        "declarationMap": true,
         "isolatedModules": false,
         "incremental": false,
         "composite": false,
         "noEmit": false,
         "outDir": "dist/ts",
-        "sourceMap": false,
+        "sourceMap": false
     },
-    "exclude": ["./src/**/*.stories.tsx", "./src/stories/*.tsx", "./src/docs/*.tsx", "./src/setupTests.ts", "./src/**/*.test.ts", "./src/**/*.test.tsx"]
+    "exclude": [
+        "./src/**/*.stories.tsx",
+        "./src/stories/*.tsx",
+        "./src/docs/*.tsx",
+        "./src/setupTests.ts",
+        "./src/**/*.test.ts",
+        "./src/**/*.test.tsx"
+    ]
 }
