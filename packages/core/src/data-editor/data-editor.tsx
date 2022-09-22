@@ -108,6 +108,7 @@ type Props = Partial<
         | "rows"
         | "scrollRef"
         | "searchColOffset"
+        | "searchInputRef"
         | "selectedColumns"
         | "selection"
         | "theme"
@@ -645,6 +646,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             highlight: boolean;
             forceEditMode: boolean;
         }>();
+    const searchInputRef = React.useRef<HTMLInputElement | null>(null);
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
     const [mouseState, setMouseState] = React.useState<MouseState>();
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -2584,6 +2586,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return;
                 } else if (isHotkey("primary+f", event) && keybindings.search) {
                     cancel();
+                    searchInputRef?.current?.focus({ preventScroll: true });
                     setShowSearchInner(true);
                 }
 
@@ -3426,6 +3429,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     getCellContent={getMangledCellContent}
                     minColumnWidth={minColumnWidth}
                     maxColumnWidth={maxColumnWidth}
+                    searchInputRef={searchInputRef}
                     showSearch={showSearch}
                     onSearchClose={onSearchClose}
                     highlightRegions={highlightRegions}
