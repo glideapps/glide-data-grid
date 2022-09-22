@@ -71,6 +71,7 @@ type Props = Omit<
     DataGridSearchProps,
     | "accessibilityHeight"
     | "canvasRef"
+    | "searchInputRef"
     | "cellXOffset"
     | "cellYOffset"
     | "className"
@@ -320,6 +321,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         highlight: boolean;
         forceEditMode: boolean;
     }>();
+    const searchInputRef = React.useRef<HTMLInputElement | null>(null);
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
     const [mouseState, setMouseState] = React.useState<MouseState>();
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -2044,6 +2046,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return;
                 } else if (isHotkey("primary+f", event) && keybindings.search) {
                     event.cancel();
+                    searchInputRef?.current?.focus({ preventScroll: true });
                     setShowSearchInner(true);
                 }
 
@@ -2861,6 +2864,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 inHeight={height ?? idealHeight}>
                 <DataGridSearch
                     {...rest}
+                    searchInputRef={searchInputRef}
                     enableGroups={enableGroups}
                     onCanvasFocused={onCanvasFocused}
                     onCanvasBlur={onFocusOut}

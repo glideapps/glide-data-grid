@@ -49,6 +49,7 @@ export interface DataGridSearchProps extends Omit<ScrollingDataGridProps, "preli
     readonly onSearchResultsChanged?: (results: readonly Item[], navIndex: number) => void;
     readonly showSearch?: boolean;
     readonly onSearchClose?: () => void;
+    readonly searchInputRef: React.MutableRefObject<HTMLInputElement | null>;
 }
 
 const targetSearchTimeMS = 10;
@@ -60,6 +61,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         showSearch = false,
         onSearchClose,
         canvasRef,
+        searchInputRef,
         cellYOffset,
         rows,
         columns,
@@ -78,7 +80,6 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     searchStatusRef.current = searchStatus;
 
     const abortControllerRef = React.useRef(new AbortController());
-    const inputRef = React.useRef<HTMLInputElement | null>(null);
     const searchHandle = React.useRef<number>();
     const [searchResults, setSearchResults] = React.useState<readonly Item[]>([]);
 
@@ -227,11 +228,11 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     );
 
     React.useEffect(() => {
-        if (showSearch && inputRef.current !== null) {
+        if (showSearch && searchInputRef.current !== null) {
             setSearchString("");
-            inputRef.current.focus({ preventScroll: true });
+            searchInputRef.current.focus({ preventScroll: true });
         }
-    }, [showSearch]);
+    }, [showSearch, searchInputRef]);
 
     const onNext = React.useCallback(
         (ev?: React.MouseEvent) => {
@@ -319,7 +320,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         id={searchID}
                         aria-hidden={!showSearch}
                         data-testid="search-input"
-                        ref={inputRef}
+                        ref={searchInputRef}
                         onChange={onSearchChange}
                         value={searchString}
                         tabIndex={showSearch ? undefined : -1}
@@ -378,6 +379,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         searchString,
         showSearch,
         searchID,
+        searchInputRef,
     ]);
 
     return (
