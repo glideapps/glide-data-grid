@@ -544,7 +544,7 @@ export function drawCheckbox(
     const centerX = x + width / 2;
     const centerY = y + height / 2;
 
-    const checkBoxWidth = height / 1.888_888_888_888_889; // checkbox width proportional to cell height
+    const checkBoxWidth = height / 1.888_888_889; // checkbox width proportional to cell height
     const emptyCheckBoxWidth = height / 2;
 
     const hoverHelper = height / 3.4;
@@ -572,16 +572,16 @@ export function drawCheckbox(
 
             ctx.beginPath();
             ctx.moveTo(
-                centerX - posHelperChecked + height / 9.314_940_891_220_669,
-                centerY - posHelperChecked + height / 4.331_237_778_584_577
+                centerX - posHelperChecked + height / 9.314_940_891,
+                centerY - posHelperChecked + height / 4.331_237_779
             );
             ctx.lineTo(
-                centerX - posHelperChecked + height / 5.332_605_589_511_706,
-                centerY - posHelperChecked + height / 3.168_567_807_351_077
+                centerX - posHelperChecked + height / 5.332_605_589,
+                centerY - posHelperChecked + height / 3.168_567_807
             );
             ctx.lineTo(
-                centerX - posHelperChecked + height / 2.833_356_944_641_205,
-                centerY - posHelperChecked + height / 7.157_970_083_895_62
+                centerX - posHelperChecked + height / 2.833_356_945,
+                centerY - posHelperChecked + height / 7.157_970_084
             );
 
             ctx.strokeStyle = theme.bgCell;
