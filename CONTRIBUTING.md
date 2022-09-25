@@ -15,7 +15,7 @@ is to use Codespaces if you have access to it. If you do not, simply cloning the
 Once codespaces is up and running make sure `jq` is installed and then:
 
 ```bash
-npm run bootstrap && npm run storybook
+npm run install && npm run storybook
 ```
 
 ## Forking the data grid?

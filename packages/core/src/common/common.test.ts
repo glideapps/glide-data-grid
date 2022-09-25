@@ -1,5 +1,4 @@
 import { deepEqual, maybe } from "./support";
-import { describe, test, expect } from "jest-without-globals";
 import { renderHook } from "@testing-library/react-hooks";
 import { useResizeDetector } from "./resize-detector";
 

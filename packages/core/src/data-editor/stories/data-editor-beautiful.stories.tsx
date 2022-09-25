@@ -26,7 +26,7 @@ import { useEventListener } from "../../common/utils";
 import { IBounds, useLayer } from "react-laag";
 import type { SpriteMap } from "../../data-grid/data-grid-sprites";
 import type { DataEditorRef, Theme } from "../..";
-import range from "lodash/range";
+import range from "lodash/range.js";
 import {
     useMockDataGenerator,
     BeautifulWrapper,
@@ -40,7 +40,7 @@ import {
     BeautifulStyle,
     ColumnAddButton,
 } from "./utils";
-import noop from "lodash/noop";
+import noop from "lodash/noop.js";
 import type { GetRowThemeCallback } from "../../data-grid/data-grid-render";
 
 export default {
@@ -89,6 +89,8 @@ export const ResizableColumns: React.VFC = () => {
                 columns={cols}
                 overscrollX={200}
                 overscrollY={200}
+                maxColumnAutoWidth={500}
+                maxColumnWidth={2000}
                 rows={50}
                 onColumnResize={onColumnResize}
                 getCellsForSelection={getCellsForSelection}
@@ -1030,6 +1032,73 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
     },
 };
 
+export const ScrollShadows: React.VFC = () => {
+    const { cols, getCellContent } = useMockDataGenerator(6);
+
+    const [selection, setSelection] = React.useState<GridSelection>({
+        rows: CompactSelection.empty(),
+        columns: CompactSelection.empty(),
+    });
+
+    const onSelectionChange = React.useCallback((newSel: GridSelection) => {
+        let newRows = CompactSelection.empty();
+        if (newSel.current !== undefined) {
+            newRows = newRows.add([newSel.current.range.y, newSel.current.range.y + newSel.current.range.height]);
+        }
+        for (const b of newSel.current?.rangeStack ?? []) {
+            newRows = newRows.add([b.y, b.y + b.height]);
+        }
+        setSelection({
+            ...newSel,
+            rows: newRows,
+        });
+    }, []);
+
+    const theme = React.useMemo<Partial<Theme>>(
+        () => ({
+            accentLight: "#b1f6ff",
+            horizontalBorderColor: "transparent",
+            headerBottomBorderColor: "rgba(115, 116, 131, 0.16)",
+        }),
+        []
+    );
+
+    const getRowThemeOverride = React.useCallback(row => (row % 2 === 0 ? undefined : { bgCell: "#f5f5f6" }), []);
+
+    return (
+        <BeautifulWrapper
+            title="Automatic Row Markers"
+            description={
+                <>
+                    <Description>You can enable and disable the horizontal/vertical scroll shadows.</Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                rowMarkers={"number"}
+                gridSelection={selection}
+                onGridSelectionChange={onSelectionChange}
+                fixedShadowX={false}
+                headerHeight={26}
+                drawFocusRing={false}
+                rowHeight={22}
+                fixedShadowY={false}
+                getRowThemeOverride={getRowThemeOverride}
+                verticalBorder={false}
+                getCellContent={getCellContent}
+                columns={cols}
+                rows={1000}
+                theme={theme}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ScrollShadows as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 export const AutomaticRowMarkers: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
@@ -1938,6 +2007,11 @@ export const BuiltInSearch: React.VFC = () => {
 
     const [showSearch, setShowSearch] = React.useState(false);
 
+    const [selection, setSelection] = React.useState<GridSelection>({
+        rows: CompactSelection.empty(),
+        columns: CompactSelection.empty(),
+    });
+
     useEventListener(
         "keydown",
         React.useCallback(event => {
@@ -1970,6 +2044,8 @@ export const BuiltInSearch: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={getCellContent}
                 getCellsForSelection={true}
+                gridSelection={selection}
+                onGridSelectionChange={setSelection}
                 columns={cols}
                 onCellEdited={setCellValue}
                 onColumnResize={onColumnResize}
@@ -1988,6 +2064,9 @@ export const BuiltInSearch: React.VFC = () => {
 
 interface ImperativeScrollProps {
     paddingY: number;
+    paddingX: number;
+    vAlign?: "start" | "center" | "end";
+    hAlign?: "start" | "center" | "end";
 }
 
 export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
@@ -1996,7 +2075,10 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
     const ref = React.useRef<DataEditorRef>(null);
 
     const onClick = () => {
-        ref.current?.scrollTo(4, 100, "both", 0, p.paddingY);
+        ref.current?.scrollTo(4, 99, "both", p.paddingX, p.paddingY, {
+            vAlign: p.vAlign,
+            hAlign: p.hAlign,
+        });
     };
 
     return (
@@ -2028,6 +2110,19 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
 };
 (ImperativeScroll as any).args = {
     paddingY: 0,
+    paddingX: 0,
+    vAlign: "start",
+    hAlign: "start",
+};
+(ImperativeScroll as any).argTypes = {
+    paddingY: 0,
+    paddingX: 0,
+    vAlign: {
+        control: { type: "select", options: ["start", "center", "end", undefined] },
+    },
+    hAlign: {
+        control: { type: "select", options: ["start", "center", "end", undefined] },
+    },
 };
 (ImperativeScroll as any).parameters = {
     options: {
@@ -2079,10 +2174,11 @@ export const HeaderMenus: React.VFC = () => {
         }));
     }, [cols]);
 
-    const [menu, setMenu] = React.useState<{
-        col: number;
-        bounds: Rectangle;
-    }>();
+    const [menu, setMenu] =
+        React.useState<{
+            col: number;
+            bounds: Rectangle;
+        }>();
 
     const isOpen = menu !== undefined;
 
@@ -2607,8 +2703,10 @@ export const ColumnGroups: React.VFC = () => {
 export const StretchColumnSize: React.VFC = () => {
     const { cols, getCellContent, getCellsForSelection, onColumnResize } = useMockDataGenerator(5, true, true);
 
+    const hasResized = React.useRef(new Set<number>());
+
     const columns = React.useMemo(() => {
-        return cols.map((x, i) => ({ ...x, grow: (5 + i) / 5 }));
+        return cols.map((x, i) => ({ ...x, grow: hasResized.current.has(i) ? undefined : (5 + i) / 5 }));
     }, [cols]);
 
     return (
@@ -2626,7 +2724,10 @@ export const StretchColumnSize: React.VFC = () => {
                 columns={columns}
                 getCellsForSelection={getCellsForSelection}
                 rows={1000}
-                onColumnResize={onColumnResize}
+                onColumnResize={(col, _newSize, colIndex, newSizeWithGrow) => {
+                    hasResized.current.add(colIndex);
+                    onColumnResize(col, newSizeWithGrow);
+                }}
                 rowMarkers="both"
             />
         </BeautifulWrapper>

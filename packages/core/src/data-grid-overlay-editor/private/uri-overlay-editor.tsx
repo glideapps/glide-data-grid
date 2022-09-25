@@ -1,12 +1,11 @@
 import { EditPencil } from "../../common/utils";
 import * as React from "react";
-import GrowingEntry from "../../growing-entry/growing-entry";
+import { GrowingEntry } from "../../growing-entry/growing-entry";
 import { UriOverlayEditorStyle } from "./uri-overlay-editor-style";
 import type { SelectionRange } from "../../data-grid/data-grid-types";
 
 interface Props {
     readonly uri: string;
-    readonly onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
     readonly onChange: (ev: React.ChangeEvent<HTMLTextAreaElement>) => void;
     readonly forceEditMode: boolean;
     readonly readonly: boolean;
@@ -14,7 +13,7 @@ interface Props {
 }
 
 const UriOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { uri, onChange, onKeyDown, forceEditMode, readonly, validatedSelection } = p;
+    const { uri, onChange, forceEditMode, readonly, validatedSelection } = p;
 
     const [editMode, setEditMode] = React.useState<boolean>(uri === "" || forceEditMode);
 
@@ -28,7 +27,6 @@ const UriOverlayEditor: React.FunctionComponent<Props> = p => {
                 validatedSelection={validatedSelection}
                 highlight={true}
                 autoFocus={true}
-                onKeyDown={onKeyDown}
                 value={uri}
                 onChange={onChange}
             />
@@ -45,7 +43,7 @@ const UriOverlayEditor: React.FunctionComponent<Props> = p => {
                     <EditPencil />
                 </div>
             )}
-            <textarea className="gdg-input" autoFocus={true} onKeyDown={onKeyDown} />
+            <textarea className="gdg-input" autoFocus={true} />
         </UriOverlayEditorStyle>
     );
 };

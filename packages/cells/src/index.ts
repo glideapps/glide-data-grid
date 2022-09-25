@@ -1,16 +1,16 @@
-import { DataEditorProps, ProvideEditorCallback, GridCell, useCustomCells } from "@glideapps/glide-data-grid";
+import { useCustomCells } from "@glideapps/glide-data-grid";
 import StarCellRenderer, { StarCell } from "./cells/star-cell";
 import SparklineCellRenderer, { SparklineCell } from "./cells/sparkline-cell";
 import TagsCellRenderer, { TagsCell } from "./cells/tags-cell";
 import UserProfileCellRenderer, { UserProfileCell } from "./cells/user-profile-cell";
 import DropdownCellRenderer, { DropdownCell } from "./cells/dropdown-cell";
 import ArticleCellRenderer from "./cells/article-cell";
-import { ArticleCell } from "./cells/article-cell-types";
+import type { ArticleCell } from "./cells/article-cell-types";
 import RangeCellRenderer, { RangeCell } from "./cells/range-cell";
 import SpinnerCellRenderer, { SpinnerCell } from "./cells/spinner-cell";
 import DatePickerRenderer, { DatePickerCell } from "./cells/date-picker-cell";
-
-type DrawCallback = NonNullable<DataEditorProps["drawCell"]>;
+import LinksCellRenderer, { LinksCell } from "./cells/links-cell";
+import ButtonCellRenderer, { ButtonCell } from "./cells/button-cell";
 
 const cells = [
     StarCellRenderer,
@@ -22,12 +22,11 @@ const cells = [
     SpinnerCellRenderer,
     RangeCellRenderer,
     DatePickerRenderer,
+    LinksCellRenderer,
+    ButtonCellRenderer,
 ];
 
-export function useExtraCells(): {
-    drawCell: DrawCallback;
-    provideEditor: ProvideEditorCallback<GridCell>;
-} {
+export function useExtraCells() {
     return useCustomCells(cells);
 }
 
@@ -41,6 +40,8 @@ export {
     RangeCellRenderer as RangeCell,
     SpinnerCellRenderer as SpinnerCell,
     DatePickerRenderer as DatePickerCell,
+    LinksCellRenderer as LinksCell,
+    ButtonCellRenderer as ButtonCell,
     cells as allCells,
 };
 
@@ -54,4 +55,6 @@ export type {
     RangeCell as RangeCellType,
     SpinnerCell as SpinnerCellType,
     DatePickerCell as DatePickerType,
+    LinksCell as LinksCellType,
+    ButtonCell as ButtonCellType,
 };

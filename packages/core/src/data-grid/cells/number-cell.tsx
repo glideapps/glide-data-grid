@@ -14,22 +14,21 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
     needsHover: false,
     needsHoverPosition: false,
     useLabel: true,
-    renderPrep: prepTextCell,
-    render: a => drawTextCell(a, a.cell.displayData, a.cell.contentAlign),
+    drawPrep: prepTextCell,
+    draw: a => drawTextCell(a, a.cell.displayData, a.cell.contentAlign),
     measure: (ctx, cell) => ctx.measureText(cell.displayData).width + 16,
     onDelete: c => ({
         ...c,
         data: undefined,
     }),
-    getEditor: () => p => {
-        const { isHighlighted, onChange, onKeyDown, value, validatedSelection } = p;
+    provideEditor: () => p => {
+        const { isHighlighted, onChange, value, validatedSelection } = p;
         return (
             <React.Suspense fallback={null}>
                 <NumberOverlayEditor
                     highlight={isHighlighted}
                     disabled={value.readonly === true}
                     value={value.data}
-                    onKeyDown={onKeyDown}
                     validatedSelection={validatedSelection}
                     onChange={x =>
                         onChange({
@@ -40,5 +39,10 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
                 />
             </React.Suspense>
         );
+    },
+    onPaste: (toPaste, cell) => {
+        const newNumber = Number.parseFloat(toPaste);
+        if (Number.isNaN(newNumber) || cell.data === newNumber) return undefined;
+        return { ...cell, data: newNumber };
     },
 };

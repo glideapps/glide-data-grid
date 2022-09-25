@@ -10,20 +10,19 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
     kind: GridCellKind.Markdown,
     needsHover: false,
     needsHoverPosition: false,
-    renderPrep: prepTextCell,
+    drawPrep: prepTextCell,
     measure: (ctx, cell, t) => {
         const firstLine = cell.data.split("\n")[0];
         return ctx.measureText(firstLine).width + 2 * t.cellHorizontalPadding;
     },
-    render: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
+    draw: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
     onDelete: c => ({
         ...c,
         data: "",
     }),
-    getEditor: () => p => {
+    provideEditor: () => p => {
         const {
             onChange,
-            onKeyDown,
             value,
             target,
             onFinishedEditing,
@@ -38,7 +37,6 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
                 readonly={value.readonly === true}
                 markdown={value.data}
                 validatedSelection={validatedSelection}
-                onKeyDown={onKeyDown}
                 onChange={e =>
                     onChange({
                         ...value,
@@ -50,4 +48,5 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
             />
         );
     },
+    onPaste: (toPaste, cell) => (toPaste === cell.data ? undefined : { ...cell, data: toPaste }),
 };

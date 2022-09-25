@@ -124,7 +124,7 @@ export function unquote(str: string): string[][] {
 
     let start = 0;
     let state = State.None;
-    str = str.trim().replace(/\r\n/g, "\n");
+    str = str.replace(/\r\n/g, "\n");
     let index = 0;
     for (const char of str) {
         switch (state) {

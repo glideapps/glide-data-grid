@@ -2,6 +2,7 @@ import React from "react";
 
 // theme variable precidence
 
+/** @category Theme */
 export function makeCSSStyle(theme: Theme): Record<string, string> {
     return {
         "--gdg-accent-color": theme.accentColor,
@@ -37,6 +38,7 @@ export function makeCSSStyle(theme: Theme): Record<string, string> {
     };
 }
 
+/** @category Theme */
 export interface Theme {
     accentColor: string;
     accentFg: string;
@@ -60,6 +62,7 @@ export interface Theme {
     bgSearchResult: string;
     borderColor: string;
     horizontalBorderColor?: string;
+    headerBottomBorderColor?: string;
     drilldownBorder: string;
     linkColor: string;
     cellHorizontalPadding: number;
@@ -114,11 +117,14 @@ const dataEditorBaseTheme: Theme = {
     lineHeight: 1.4, //unitless scaler depends on your font
 };
 
+/** @category Theme */
 export function getDataEditorTheme(): Theme {
     return dataEditorBaseTheme;
 }
 
+/** @category Theme */
 export const ThemeContext = React.createContext<Theme>(dataEditorBaseTheme);
+/** @category Hooks */
 export function useTheme(): Theme {
     return React.useContext(ThemeContext);
 }

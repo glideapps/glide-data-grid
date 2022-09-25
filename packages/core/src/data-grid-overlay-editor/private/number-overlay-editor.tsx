@@ -7,7 +7,6 @@ import type { SelectionRange } from "../../data-grid/data-grid-types";
 interface Props {
     value: number | undefined;
     disabled?: boolean;
-    onKeyDown: (ev: React.KeyboardEvent<HTMLInputElement>) => void;
     onChange: (values: NumberFormatValues) => void;
     highlight: boolean;
     validatedSelection?: SelectionRange;
@@ -27,7 +26,7 @@ function getThousandSeprator() {
 }
 
 const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { value, onChange, onKeyDown, disabled, highlight, validatedSelection } = p;
+    const { value, onChange, disabled, highlight, validatedSelection } = p;
 
     const inputRef = React.useRef<HTMLInputElement>();
 
@@ -44,7 +43,9 @@ const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
                 autoFocus={true}
                 getInputRef={inputRef}
                 className="gdg-input"
-                onFocus={e => e.target.setSelectionRange(highlight ? 0 : e.target.value.length, e.target.value.length)}
+                onFocus={(e: React.FocusEvent<HTMLInputElement>) =>
+                    e.target.setSelectionRange(highlight ? 0 : e.target.value.length, e.target.value.length)
+                }
                 disabled={disabled === true}
                 thousandSeparator={getThousandSeprator()}
                 decimalSeparator={getDecimalSeparator()}
@@ -52,7 +53,6 @@ const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
                 // decimalScale={3}
                 // prefix={"$"}
                 onValueChange={onChange}
-                onKeyDown={onKeyDown}
             />
         </NumberOverlayEditorStyle>
     );

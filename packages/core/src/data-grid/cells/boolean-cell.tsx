@@ -1,5 +1,11 @@
 import { drawBoolean } from "../data-grid-lib";
-import { GridCellKind, BooleanCell, booleanCellIsEditable } from "../data-grid-types";
+import {
+    GridCellKind,
+    BooleanCell,
+    booleanCellIsEditable,
+    BooleanEmpty,
+    BooleanIndeterminate,
+} from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";
 
 /**
@@ -21,12 +27,13 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     useLabel: false,
     needsHoverPosition: true,
     measure: () => 50,
-    render: a => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell)),
+    draw: a => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell)),
     onDelete: c => ({
         ...c,
         data: false,
     }),
-    onClick: (cell, x, y, bounds) => {
+    onClick: e => {
+        const { cell, posX: x, posY: y, bounds } = e;
         if (
             booleanCellIsEditable(cell) &&
             Math.abs(x - bounds.width / 2) <= 10 &&
@@ -38,5 +45,21 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
             };
         }
         return undefined;
+    },
+    onPaste: (toPaste, cell) => {
+        let newVal: boolean | BooleanEmpty | BooleanIndeterminate = BooleanEmpty;
+        if (toPaste.toLowerCase() === "true") {
+            newVal = true;
+        } else if (toPaste.toLowerCase() === "false") {
+            newVal = false;
+        } else if (toPaste.toLowerCase() === "indeterminate") {
+            newVal = BooleanIndeterminate;
+        }
+        return newVal === cell.data
+            ? undefined
+            : {
+                  ...cell,
+                  data: newVal,
+              };
     },
 };

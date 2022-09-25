@@ -1,14 +1,53 @@
-import { describe, test, expect } from "jest-without-globals";
 import * as React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
 import DataGrid, { DataGridProps, DataGridRef } from "./data-grid";
 import { CompactSelection, GridCellKind } from "./data-grid-types";
 import { getDefaultTheme } from "..";
+import { CellRenderers } from "./cells";
 
 const basicProps: DataGridProps = {
     cellXOffset: 0,
     cellYOffset: 0,
+    headerIcons: undefined,
+    isDraggable: undefined,
+    onCanvasBlur: () => undefined,
+    onCanvasFocused: () => undefined,
+    onCellFocused: () => undefined,
+    onContextMenu: () => undefined,
+    onDragEnd: () => undefined,
+    onDragLeave: () => undefined,
+    onDragOverCell: () => undefined,
+    onDragStart: () => undefined,
+    onDrop: () => undefined,
+    onItemHovered: () => undefined,
+    onKeyDown: () => undefined,
+    onKeyUp: () => undefined,
+    onMouseDown: () => undefined,
+    onMouseMoveRaw: () => undefined,
+    onMouseUp: () => undefined,
+    smoothScrollX: undefined,
+    smoothScrollY: undefined,
+    allowResize: undefined,
+    canvasRef: undefined,
+    disabledRows: undefined,
+    eventTargetRef: undefined,
+    fillHandle: undefined,
+    fixedShadowX: undefined,
+    fixedShadowY: undefined,
+    getGroupDetails: undefined,
+    getRowThemeOverride: undefined,
+    highlightRegions: undefined,
+    imageWindowLoader: undefined,
+    onHeaderMenuClick: undefined,
+    prelightCells: undefined,
+    translateX: undefined,
+    translateY: undefined,
+    dragAndDropState: undefined,
+    drawCustomCell: undefined,
+    drawFocusRing: undefined,
+    drawHeader: undefined,
     isFocused: true,
+    experimental: undefined,
     columns: [
         {
             title: "A",
@@ -59,7 +98,26 @@ const basicProps: DataGridProps = {
     rowHeight: 32,
     rows: 1000,
     verticalBorder: () => true,
+    getCellRenderer: cell => {
+        if (cell.kind === GridCellKind.Custom) return undefined;
+        return CellRenderers[cell.kind] as any;
+    },
 };
+
+beforeEach(() => {
+    Element.prototype.getBoundingClientRect = () => ({
+        bottom: 1000,
+        height: 1000,
+        left: 0,
+        right: 1000,
+        top: 0,
+        width: 1000,
+        x: 0,
+        y: 0,
+        toJSON: () => "",
+    });
+    Image.prototype.decode = jest.fn();
+});
 
 const dataGridCanvasId = "data-grid-canvas";
 describe("data-grid", () => {

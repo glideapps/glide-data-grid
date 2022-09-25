@@ -1,6 +1,6 @@
 import * as React from "react";
 import MarkdownDiv from "../../markdown-div/markdown-div";
-import GrowingEntry from "../../growing-entry/growing-entry";
+import { GrowingEntry } from "../../growing-entry/growing-entry";
 import { MarkdownOverlayEditorStyle } from "./markdown-overlay-editor-style";
 import { EditPencil, Checkmark } from "../../common/utils";
 import type { Rectangle, SelectionRange } from "../../data-grid/data-grid-types";
@@ -8,7 +8,6 @@ import type { Rectangle, SelectionRange } from "../../data-grid/data-grid-types"
 interface Props {
     readonly targetRect: Rectangle;
     readonly markdown: string;
-    readonly onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
     readonly onChange: (ev: React.ChangeEvent<HTMLTextAreaElement>) => void;
     readonly forceEditMode: boolean;
     readonly onFinish: () => void;
@@ -20,17 +19,7 @@ interface Props {
 }
 
 export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
-    const {
-        markdown,
-        onChange,
-        onKeyDown,
-        forceEditMode,
-        createNode,
-        targetRect,
-        readonly,
-        onFinish,
-        validatedSelection,
-    } = p;
+    const { markdown, onChange, forceEditMode, createNode, targetRect, readonly, onFinish, validatedSelection } = p;
 
     const [editMode, setEditMode] = React.useState<boolean>(markdown === "" || forceEditMode);
     const onEditClick = React.useCallback(() => {
@@ -40,17 +29,15 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
 
     if (editMode) {
         return (
-            <MarkdownOverlayEditorStyle targetWidth={targetRect.width}>
+            <MarkdownOverlayEditorStyle targetWidth={targetRect.width - 20}>
                 <GrowingEntry
                     autoFocus={true}
                     highlight={false}
                     validatedSelection={validatedSelection}
-                    onKeyDown={e => {
-                        if (e.key !== "Enter") {
-                            onKeyDown(e);
-                        }
-                    }}
                     value={markdown}
+                    onKeyDown={e => {
+                        if (e.key === "Enter") e.stopPropagation();
+                    }}
                     onChange={onChange}
                 />
                 <div className={`edit-icon checkmark-hover ${addLeftPad}`} onClick={() => onFinish()}>
@@ -70,7 +57,7 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
                     </div>
                 </>
             )}
-            <textarea className="md-edit-textarea gdg-input" autoFocus={true} onKeyDown={onKeyDown} />
+            <textarea className="md-edit-textarea gdg-input" autoFocus={true} />
         </MarkdownOverlayEditorStyle>
     );
 };

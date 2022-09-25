@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { Theme } from "../common/styles";
 import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
-import { CellRenderers } from "../data-grid/cells";
+import type { GetCellRendererCallback } from "../data-grid/cells/cell-types";
 import {
     CellArray,
     GridCell,
@@ -15,11 +15,16 @@ import {
 
 const defaultSize = 150;
 
-function measureCell(ctx: CanvasRenderingContext2D, cell: GridCell, theme: Theme): number {
+function measureCell(
+    ctx: CanvasRenderingContext2D,
+    cell: GridCell,
+    theme: Theme,
+    getCellRenderer: GetCellRendererCallback
+): number {
     if (cell.kind === GridCellKind.Custom) return defaultSize;
 
-    const r = CellRenderers[cell.kind];
-    return r?.measure(ctx, cell, theme) ?? defaultSize;
+    const r = getCellRenderer(cell);
+    return r?.measure?.(ctx, cell, theme) ?? defaultSize;
 }
 
 export function measureColumn(
@@ -30,11 +35,14 @@ export function measureColumn(
     selectedData: CellArray,
     minColumnWidth: number,
     maxColumnWidth: number,
-    removeOutliers: boolean
+    removeOutliers: boolean,
+    getCellRenderer: GetCellRendererCallback
 ): SizedGridColumn {
     let sizes: number[] = [];
     if (selectedData !== undefined) {
-        sizes.push(...selectedData.map(row => row[colIndex]).map(cell => measureCell(ctx, cell, theme)));
+        sizes.push(
+            ...selectedData.map(row => row[colIndex]).map(cell => measureCell(ctx, cell, theme, getCellRenderer))
+        );
     }
     if (sizes.length > 5 && removeOutliers) {
         // Filter out outliers
@@ -51,6 +59,7 @@ export function measureColumn(
     };
 }
 
+/** @category Hooks */
 export function useColumnSizer(
     columns: readonly GridColumn[],
     rows: number,
@@ -59,6 +68,7 @@ export function useColumnSizer(
     minColumnWidth: number,
     maxColumnWidth: number,
     theme: Theme,
+    getCellRenderer: GetCellRendererCallback,
     abortController: AbortController
 ): readonly InnerGridColumn[] {
     const rowsRef = React.useRef(rows);
@@ -161,7 +171,17 @@ export function useColumnSizer(
                     };
                 }
 
-                const r = measureColumn(ctx, theme, c, colIndex, selectedData, minColumnWidth, maxColumnWidth, true);
+                const r = measureColumn(
+                    ctx,
+                    theme,
+                    c,
+                    colIndex,
+                    selectedData,
+                    minColumnWidth,
+                    maxColumnWidth,
+                    true,
+                    getCellRenderer
+                );
                 memoMap.current[c.id] = r.width;
                 return r;
             });
@@ -197,5 +217,5 @@ export function useColumnSizer(
             result = writeable;
         }
         return result;
-    }, [clientWidth, columns, ctx, selectedData, theme, minColumnWidth, maxColumnWidth]);
+    }, [clientWidth, columns, ctx, selectedData, theme, minColumnWidth, maxColumnWidth, getCellRenderer]);
 }

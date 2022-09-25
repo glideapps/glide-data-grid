@@ -2,21 +2,23 @@ import { styled } from "@linaria/react";
 import * as React from "react";
 import { DataEditor, DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
 import { DropdownCell as DropdownRenderer, useExtraCells } from ".";
-import { StarCell } from "./cells/star-cell";
-import { SparklineCell } from "./cells/sparkline-cell";
-import range from "lodash/range";
-import uniq from "lodash/uniq";
-import { TagsCell } from "./cells/tags-cell";
-import { UserProfileCell } from "./cells/user-profile-cell";
+import type { StarCell } from "./cells/star-cell";
+import type { SparklineCell } from "./cells/sparkline-cell";
+import range from "lodash/range.js";
+import uniq from "lodash/uniq.js";
+import type { TagsCell } from "./cells/tags-cell";
+import type { UserProfileCell } from "./cells/user-profile-cell";
 import type { DropdownCell } from "./cells/dropdown-cell";
-import { ArticleCell } from "./cells/article-cell-types";
-import { RangeCell } from "./cells/range-cell";
-import { SpinnerCell } from "./cells/spinner-cell";
+import type { ArticleCell } from "./cells/article-cell-types";
+import type { RangeCell } from "./cells/range-cell";
+import type { SpinnerCell } from "./cells/spinner-cell";
 import { useResizeDetector } from "react-resize-detector";
 
 import "@toast-ui/editor/dist/toastui-editor.css";
 import "@glideapps/glide-data-grid/dist/index.css";
-import { DatePickerCell } from "./cells/date-picker-cell";
+import type { DatePickerCell } from "./cells/date-picker-cell";
+import type { LinksCell } from "./cells/links-cell";
+import type { ButtonCell } from "./cells/button-cell";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -325,6 +327,52 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
+                    } else if (col === 10) {
+                        num = row + 1;
+                        rand();
+                        const d: LinksCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "links-cell",
+                                underlineOffset: 6,
+                                links: [
+                                    {
+                                        title: "Linky phone",
+                                        onClick: () => alert("Click 1"),
+                                    },
+                                    {
+                                        title: "Click the linky dinky",
+                                        onClick: () => alert("Click 2"),
+                                    },
+                                ],
+                            },
+                        };
+                        return d;
+                    } else if (col === 11) {
+                        num = row + 1;
+                        rand();
+                        const d: ButtonCell = {
+                            kind: GridCellKind.Custom,
+                            cursor: "pointer",
+                            allowOverlay: true,
+                            copyData: "4",
+                            readonly: true,
+                            data: {
+                                kind: "button-cell",
+                                backgroundColor: ["transparent", "#6572ffee"],
+                                color: ["accentColor", "accentFg"],
+                                borderColor: "#6572ffa0",
+                                borderRadius: 9,
+                                title: "View Details",
+                                onClick: () => window.alert("Button clicked"),
+                            },
+                            themeOverride: {
+                                baseFontStyle: "700 12px",
+                            },
+                        };
+                        return d;
                     }
                     throw new Error("Fail");
                 }}
@@ -368,6 +416,14 @@ export const CustomCells: React.VFC = () => {
                     {
                         title: "Date Picker",
                         width: 150,
+                    },
+                    {
+                        title: "Links",
+                        width: 150,
+                    },
+                    {
+                        title: "Button",
+                        width: 120,
                     },
                 ]}
                 rows={500}

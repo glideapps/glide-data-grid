@@ -1,10 +1,9 @@
 import { render } from "@testing-library/react";
 import { assert } from "../../common/support";
-import { GridCellKind, ImageCell, Rectangle } from "../data-grid-types";
+import { GridCellKind, ImageCell, ImageEditorType, isObjectEditorCallbackResult, Rectangle } from "../data-grid-types";
 import { imageCellRenderer } from "./image-cell";
 import * as React from "react";
-import noop from "lodash/noop";
-import type { ImageEditorType } from "./cell-types";
+import noop from "lodash/noop.js";
 import { getDefaultTheme } from "../..";
 
 function getMockEditorTarget(): Rectangle {
@@ -48,20 +47,21 @@ describe("Image cell", () => {
     it("Measures a reasonable size", async () => {
         const cell = getImgCell();
         const ctx = get2dContext();
-        const autoSize = imageCellRenderer.measure(ctx, cell, getDefaultTheme());
+        const autoSize = imageCellRenderer.measure?.(ctx, cell, getDefaultTheme());
         expect(autoSize).toBe(100);
     });
 
     it("Renders its editor (smoke test)", async () => {
         const cell = getImgCell();
-        const Editor = imageCellRenderer.getEditor?.(cell);
+        const Editor = imageCellRenderer.provideEditor?.(cell);
         const target = getMockEditorTarget();
+
+        assert(!isObjectEditorCallbackResult(Editor));
 
         assert(Editor !== undefined);
         const result = render(
             <Editor
                 onChange={noop}
-                onKeyDown={noop}
                 onFinishedEditing={noop}
                 isHighlighted={false}
                 value={cell}
@@ -76,9 +76,11 @@ describe("Image cell", () => {
 
     it("Renders a custom editor (smoke test)", async () => {
         const cell = getImgCell();
-        const Editor = imageCellRenderer.getEditor?.(cell);
+        const Editor = imageCellRenderer.provideEditor?.(cell);
         assert(Editor !== undefined);
         const target = getMockEditorTarget();
+
+        assert(!isObjectEditorCallbackResult(Editor));
 
         const CustomEditor: ImageEditorType = () => {
             return (
@@ -92,7 +94,6 @@ describe("Image cell", () => {
             <Editor
                 imageEditorOverride={CustomEditor}
                 onChange={noop}
-                onKeyDown={noop}
                 onFinishedEditing={noop}
                 isHighlighted={false}
                 value={cell}

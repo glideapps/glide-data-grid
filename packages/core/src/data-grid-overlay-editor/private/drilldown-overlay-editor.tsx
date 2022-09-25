@@ -45,11 +45,10 @@ const DrilldownOverlayEditorStyle = styled.div`
 
 interface Props {
     readonly drilldowns: readonly DrilldownCellData[];
-    readonly onKeyDown: (event: React.KeyboardEvent) => void;
 }
 
 const DrilldownOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { drilldowns, onKeyDown } = p;
+    const { drilldowns } = p;
     return (
         <DrilldownOverlayEditorStyle>
             {drilldowns.map((d, i) => (
@@ -58,7 +57,6 @@ const DrilldownOverlayEditor: React.FunctionComponent<Props> = p => {
                     <div>{d.text}</div>
                 </div>
             ))}
-            <textarea className="gdg-input" autoFocus={true} onKeyDown={onKeyDown} />
         </DrilldownOverlayEditorStyle>
     );
 };

@@ -1,5 +1,4 @@
 /* eslint-disable unicorn/no-for-loop */
-import type ImageWindowLoader from "../common/image-window-loader";
 import {
     GridSelection,
     DrawHeaderCallback,
@@ -18,8 +17,10 @@ import {
     headerCellCheckedMarker,
     headerCellUnheckedMarker,
     TrailingRowType,
+    ImageWindowLoader,
+    GridCell,
 } from "./data-grid-types";
-import groupBy from "lodash/groupBy";
+import groupBy from "lodash/groupBy.js";
 import type { HoverValues } from "./animation-manager";
 import {
     getEffectiveColumns,
@@ -37,9 +38,8 @@ import {
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import type { Theme } from "../common/styles";
 import { blend, withAlpha } from "./color-parser";
-import { CellRenderers } from "./cells";
-import type { PrepResult } from "./cells/cell-types";
-import { deepEqual } from "../common/support";
+import type { DrawArgs, GetCellRendererCallback, PrepResult } from "./cells/cell-types";
+import { assert, deepEqual } from "../common/support";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when
@@ -79,11 +79,13 @@ const loadingCell: InnerGridCell = {
     allowOverlay: false,
 };
 
-interface BlitData {
+export interface BlitData {
     readonly cellXOffset: number;
     readonly cellYOffset: number;
     readonly translateX: number;
     readonly translateY: number;
+    readonly mustDrawFocusOnHeader: boolean;
+    readonly lastBuffer: "a" | "b" | undefined;
 }
 
 interface DragAndDropState {
@@ -109,8 +111,9 @@ export function drawCell(
     hoverInfo: HoverInfo | undefined,
     hyperWrapping: boolean,
     frameTime: number,
-    lastPrep?: PrepResult,
-    enqueue?: (item: Item) => void
+    lastPrep: PrepResult | undefined,
+    enqueue: ((item: Item) => void) | undefined,
+    getCellRenderer: GetCellRendererCallback
 ): PrepResult | undefined {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
@@ -119,16 +122,13 @@ export function drawCell(
         hoverY = hoverInfo[1][1];
     }
     let result: PrepResult | undefined = undefined;
-    const args = {
+    const args: DrawArgs<typeof cell> = {
         ctx,
         theme,
         col,
         row,
         cell,
-        x,
-        y,
-        w,
-        h,
+        rect: { x, y, width: w, height: h },
         highlighted,
         hoverAmount,
         hoverX,
@@ -136,41 +136,29 @@ export function drawCell(
         imageLoader,
         spriteManager,
         hyperWrapping,
+        requestAnimationFrame: () => {
+            forceAnim = true;
+        },
     };
     let forceAnim = false;
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
-        const drawn = isInnerOnlyCell(cell)
-            ? false
-            : drawCustomCell?.({
-                  ctx,
-                  cell,
-                  theme,
-                  rect: { x, y, width: w, height: h },
-                  col,
-                  row,
-                  hoverAmount,
-                  hoverX,
-                  hoverY,
-                  highlighted,
-                  imageLoader,
-                  requestAnimationFrame: () => {
-                      forceAnim = true;
-                  },
-              }) === true;
-        if (!drawn && cell.kind !== GridCellKind.Custom) {
-            const r = CellRenderers[cell.kind];
-            if (lastPrep?.renderer !== r) {
-                lastPrep?.deprep?.(args);
-                lastPrep = undefined;
+        const drawn = isInnerOnlyCell(cell) ? false : drawCustomCell?.(args as DrawArgs<GridCell>) === true;
+        if (!drawn) {
+            const r = getCellRenderer(cell);
+            if (r !== undefined) {
+                if (lastPrep?.renderer !== r) {
+                    lastPrep?.deprep?.(args);
+                    lastPrep = undefined;
+                }
+                const partialPrepResult = r.drawPrep?.(args, lastPrep);
+                r.draw(args, cell);
+                result = {
+                    deprep: partialPrepResult?.deprep,
+                    fillStyle: partialPrepResult?.fillStyle,
+                    font: partialPrepResult?.font,
+                    renderer: r,
+                };
             }
-            const partialPrepResult = r.renderPrep?.(args, lastPrep);
-            r.render(args);
-            result = {
-                deprep: partialPrepResult?.deprep,
-                fillStyle: partialPrepResult?.fillStyle,
-                font: partialPrepResult?.font,
-                renderer: r,
-            };
         }
     });
     if (needsAnim || forceAnim) enqueue?.([col, row]);
@@ -193,7 +181,8 @@ function blitLastFrame(
     dpr: number,
     mappedColumns: readonly MappedGridColumn[],
     effectiveCols: readonly MappedGridColumn[],
-    getRowHeight: number | ((r: number) => number)
+    getRowHeight: number | ((r: number) => number),
+    doubleBuffer: boolean
 ) {
     const drawRegions: Rectangle[] = [];
     let blittedYOnly = false;
@@ -317,6 +306,11 @@ function blitLastFrame(
         }
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
+        if (deltaX !== 0 && deltaY === 0 && doubleBuffer) {
+            // When double buffering the freeze columns can be offset by a couple pixels vertically between the two
+            // buffers. We don't want to redraw them so we need to make sure to copy them.
+            ctx.drawImage(canvas, 0, 0, stickyWidth * dpr, height * dpr, 0, 0, stickyWidth * dpr, height * dpr);
+        }
         ctx.drawImage(canvas, args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
         ctx.scale(dpr, dpr);
     }
@@ -425,14 +419,6 @@ function drawGridLines(
     const toDraw: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
 
     ctx.beginPath();
-    // we need to under-draw the header background on its line to improve its contrast.
-    ctx.moveTo(minX, totalHeaderHeight + 0.5);
-    ctx.lineTo(maxX, totalHeaderHeight + 0.5);
-    ctx.strokeStyle = theme.bgHeader;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    ctx.beginPath();
 
     // vertical lines
     let x = 0.5;
@@ -441,7 +427,7 @@ function drawGridLines(
         if (c.width === 0) continue;
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
-        if (tx >= minX && tx <= maxX - 1 && (index === effectiveCols.length - 1 || verticalBorder(index + 1))) {
+        if (tx >= minX && tx <= maxX - 1 && verticalBorder(index + 1)) {
             toDraw.push({
                 x1: tx,
                 y1: Math.max(groupHeaderHeight, minY),
@@ -463,13 +449,12 @@ function drawGridLines(
         // horizontal lines
         let y = totalHeaderHeight + 0.5;
         let row = cellYOffset;
-        let isHeader = true;
         const target = lastRowSticky ? height - stickyHeight : height;
         while (y + translateY <= target) {
-            const ty = isHeader ? y : y + translateY;
+            const ty = y + translateY;
             // This shouldn't be needed it seems like... yet it is. We're not sure why.
             if (ty >= minY && ty <= maxY - 1 && (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) > 1)) {
-                const rowTheme = isHeader ? undefined : getRowThemeOverride?.(row);
+                const rowTheme = getRowThemeOverride?.(row);
                 toDraw.push({
                     x1: minX,
                     y1: ty,
@@ -480,7 +465,6 @@ function drawGridLines(
             }
 
             y += getRowHeight(row);
-            isHeader = false;
             row++;
         }
     }
@@ -1100,6 +1084,7 @@ function drawCells(
     getRowThemeOverride: GetRowThemeCallback | undefined,
     disabledRows: CompactSelection,
     isFocused: boolean,
+    drawFocus: boolean,
     trailingRowType: TrailingRowType,
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
@@ -1113,7 +1098,8 @@ function drawCells(
     hoverInfo: HoverInfo | undefined,
     hyperWrapping: boolean,
     outerTheme: Theme,
-    enqueue: (item: Item) => void
+    enqueue: (item: Item) => void,
+    getCellRenderer: GetCellRendererCallback
 ): Rectangle[] | undefined {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
@@ -1176,6 +1162,7 @@ function drawCells(
                 getRowHeight,
                 trailingRowType,
                 (drawY, row, rh, isSticky, isTrailingRow) => {
+                    if (row < 0) return;
                     // if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
                     //     return;
                     // }
@@ -1281,7 +1268,7 @@ function drawCells(
                         selection.columns.some(
                             index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1]
                         );
-                    if (isSelected && !isFocused) {
+                    if (isSelected && !isFocused && drawFocus) {
                         accentCount = 0;
                     } else if (isSelected) {
                         accentCount = Math.max(accentCount, 1);
@@ -1366,7 +1353,8 @@ function drawCells(
                             hyperWrapping,
                             frameTime,
                             prepResult,
-                            enqueue
+                            enqueue,
+                            getCellRenderer
                         );
                     }
 
@@ -1486,7 +1474,6 @@ function overdrawStickyBoundaries(
     effectiveCols: readonly MappedGridColumn[],
     width: number,
     height: number,
-    totalHeaderHeight: number,
     lastRowSticky: boolean,
     rows: number,
     verticalBorder: (col: number) => boolean,
@@ -1499,44 +1486,26 @@ function overdrawStickyBoundaries(
         drawFreezeBorder = verticalBorder(c.sourceIndex);
         break;
     }
+    const hColor = theme.horizontalBorderColor ?? theme.borderColor;
+    const vColor = theme.borderColor;
     const drawX = drawFreezeBorder ? getStickyWidth(effectiveCols) : 0;
-    ctx.beginPath();
 
-    // fill in header color behind header border
-    ctx.moveTo(0, totalHeaderHeight + 0.5);
-    ctx.lineTo(width, totalHeaderHeight + 0.5);
-
-    ctx.strokeStyle = theme.bgHeader;
-    ctx.stroke();
-
-    ctx.beginPath();
-
-    let doCell = false;
     if (drawX !== 0) {
+        ctx.beginPath();
         ctx.moveTo(drawX + 0.5, 0);
         ctx.lineTo(drawX + 0.5, height);
-        doCell = true;
+        ctx.strokeStyle = blend(vColor, theme.bgCell);
+        ctx.stroke();
     }
 
     if (lastRowSticky) {
         const h = getRowHeight(rows - 1);
+        ctx.beginPath();
         ctx.moveTo(0, height - h + 0.5);
         ctx.lineTo(width, height - h + 0.5);
-        doCell = true;
-    }
-
-    // fill in cell color behind other borders
-    if (doCell) {
-        ctx.strokeStyle = theme.bgCell;
+        ctx.strokeStyle = blend(hColor, theme.bgCell);
         ctx.stroke();
     }
-
-    // overdraw borders for all
-    ctx.moveTo(0, totalHeaderHeight + 0.5);
-    ctx.lineTo(width, totalHeaderHeight + 0.5);
-
-    ctx.strokeStyle = theme.borderColor;
-    ctx.stroke();
 }
 
 function drawHighlightRings(
@@ -1867,6 +1836,8 @@ function getLastRow(
 export interface DrawGridArg {
     readonly canvas: HTMLCanvasElement;
     readonly headerCanvas: HTMLCanvasElement;
+    readonly bufferA: HTMLCanvasElement;
+    readonly bufferB: HTMLCanvasElement;
     readonly width: number;
     readonly height: number;
     readonly cellXOffset: number;
@@ -1885,6 +1856,7 @@ export interface DrawGridArg {
     readonly verticalBorder: (col: number) => boolean;
     readonly isResizing: boolean;
     readonly isFocused: boolean;
+    readonly drawFocus: boolean;
     readonly selection: GridSelection;
     readonly fillHandle: boolean;
     readonly lastRowSticky: TrailingRowType;
@@ -1898,19 +1870,22 @@ export interface DrawGridArg {
     readonly prelightCells: CellList | undefined;
     readonly highlightRegions: readonly Highlight[] | undefined;
     readonly imageLoader: ImageWindowLoader;
-    readonly lastBlitData: React.MutableRefObject<BlitData>;
+    readonly lastBlitData: React.MutableRefObject<BlitData | undefined>;
     readonly damage: CellList | undefined;
     readonly hoverValues: HoverValues;
     readonly hoverInfo: HoverInfo | undefined;
     readonly spriteManager: SpriteManager;
     readonly scrolling: boolean;
     readonly touchMode: boolean;
+    readonly renderStrategy: "single-buffer" | "double-buffer" | "direct";
     readonly enqueue: (item: Item) => void;
+    readonly getCellRenderer: GetCellRendererCallback;
 }
 
 function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean | number {
+    if (last === undefined) return false;
     if (
-        current.width !== last?.width ||
+        current.width !== last.width ||
         current.height !== last.height ||
         current.theme !== last.theme ||
         current.headerHeight !== last.headerHeight ||
@@ -1981,6 +1956,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         freezeColumns,
         dragAndDropState,
         theme,
+        drawFocus,
         headerHeight,
         groupHeaderHeight,
         disabledRows,
@@ -2008,12 +1984,17 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         scrolling,
         touchMode,
         enqueue,
+        getCellRenderer,
+        renderStrategy,
+        bufferA,
+        bufferB,
     } = arg;
     let { damage } = arg;
     if (width === 0 || height === 0) return;
+    const doubleBuffer = renderStrategy === "double-buffer";
     const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
 
-    const canBlit = computeCanBlit(arg, lastArg);
+    const canBlit = renderStrategy !== "direct" && computeCanBlit(arg, lastArg);
 
     if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
         canvas.width = width * dpr;
@@ -2026,38 +2007,65 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     const overlayCanvas = headerCanvas;
     const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
-    if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== totalHeaderHeight * dpr) {
+    const overlayHeight = totalHeaderHeight + 1; // border
+    if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== overlayHeight * dpr) {
         overlayCanvas.width = width * dpr;
-        overlayCanvas.height = totalHeaderHeight * dpr;
+        overlayCanvas.height = overlayHeight * dpr;
 
         overlayCanvas.style.width = width + "px";
-        overlayCanvas.style.height = totalHeaderHeight + "px";
+        overlayCanvas.style.height = overlayHeight + "px";
+    }
+
+    if (doubleBuffer && (bufferA.width !== width * dpr || bufferA.height !== height * dpr)) {
+        bufferA.width = width * dpr;
+        bufferA.height = height * dpr;
+    }
+
+    if (doubleBuffer && (bufferB.width !== width * dpr || bufferB.height !== height * dpr)) {
+        bufferB.width = width * dpr;
+        bufferB.height = height * dpr;
     }
 
     const last = lastBlitData.current;
     if (
         canBlit === true &&
-        cellXOffset === last.cellXOffset &&
-        cellYOffset === last.cellYOffset &&
-        translateX === last.translateX &&
-        translateY === last.translateY
+        cellXOffset === last?.cellXOffset &&
+        cellYOffset === last?.cellYOffset &&
+        translateX === last?.translateX &&
+        translateY === last?.translateY
     )
         return;
 
-    const targetCtx = canvas.getContext("2d", {
-        alpha: false,
-    });
+    let mainCtx: CanvasRenderingContext2D | null = null;
+    if (doubleBuffer) {
+        mainCtx = canvas.getContext("2d", {
+            alpha: false,
+        });
+    }
     const overlayCtx = overlayCanvas.getContext("2d", {
         alpha: false,
     });
+    let targetBuffer: HTMLCanvasElement;
+    if (!doubleBuffer) {
+        targetBuffer = canvas;
+    } else if (damage !== undefined) {
+        targetBuffer = last?.lastBuffer === "b" ? bufferB : bufferA;
+    } else {
+        targetBuffer = last?.lastBuffer === "b" ? bufferA : bufferB;
+    }
+    const targetCtx = targetBuffer.getContext("2d", {
+        alpha: false,
+    });
+    const blitSource = doubleBuffer ? (targetBuffer === bufferA ? bufferB : bufferA) : canvas;
+
     if (overlayCtx === null || targetCtx === null) return;
 
-    const getRowHeight = (r: number) => (typeof rowHeight === "number" ? rowHeight : rowHeight(r));
+    const getRowHeight = typeof rowHeight === "number" ? () => rowHeight : rowHeight;
 
     overlayCtx.save();
     overlayCtx.beginPath();
     targetCtx.save();
-    targetCtx.beginPath(); // clear any path in the ctx
+    targetCtx.beginPath();
 
     overlayCtx.textBaseline = "middle";
     targetCtx.textBaseline = "middle";
@@ -2071,6 +2079,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
     let drawRegions: Rectangle[] = [];
 
+    const mustDrawFocusOnHeader = drawFocus && selection.current?.cell[1] === cellYOffset && translateY === 0;
     const drawHeaderTexture = () => {
         drawGridHeaders(
             overlayCtx,
@@ -2114,6 +2123,36 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             theme,
             true
         );
+
+        overlayCtx.beginPath();
+        overlayCtx.moveTo(0, overlayHeight - 0.5);
+        overlayCtx.lineTo(width, overlayHeight - 0.5);
+        overlayCtx.strokeStyle = blend(
+            theme.headerBottomBorderColor ?? theme.horizontalBorderColor ?? theme.borderColor,
+            theme.bgHeader
+        );
+        overlayCtx.stroke();
+
+        if (mustDrawFocusOnHeader) {
+            drawFocusRing(
+                overlayCtx,
+                width,
+                height,
+                cellYOffset,
+                translateX,
+                translateY,
+                effectiveCols,
+                mappedColumns,
+                theme,
+                totalHeaderHeight,
+                selection,
+                getRowHeight,
+                getCellContent,
+                trailingRowType,
+                fillHandle,
+                rows
+            );
+        }
     };
 
     // handle damage updates by directly drawing to the target to avoid large blits
@@ -2166,6 +2205,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 getRowThemeOverride,
                 disabledRows,
                 isFocused,
+                drawFocus,
                 trailingRowType,
                 drawRegions,
                 damage,
@@ -2179,11 +2219,13 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 hoverInfo,
                 hyperWrapping,
                 theme,
-                enqueue
+                enqueue,
+                getCellRenderer
             );
 
             if (
                 fillHandle &&
+                drawFocus &&
                 selection.current !== undefined &&
                 damage.some(x => x[0] === selection.current?.cell[0] && x[1] === selection.current?.cell[1])
             ) {
@@ -2230,17 +2272,29 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         targetCtx.restore();
         overlayCtx.restore();
 
+        if (mainCtx !== null) {
+            mainCtx.fillStyle = theme.bgCell;
+            mainCtx.fillRect(0, 0, width, height);
+            mainCtx.drawImage(targetCtx.canvas, 0, 0);
+        }
+
         return;
     }
 
-    if (canBlit !== true || cellXOffset !== last.cellXOffset || translateX !== last.translateX) {
+    if (
+        canBlit !== true ||
+        cellXOffset !== last?.cellXOffset ||
+        translateX !== last?.translateX ||
+        mustDrawFocusOnHeader !== last?.mustDrawFocusOnHeader
+    ) {
         drawHeaderTexture();
     }
 
     if (canBlit === true) {
+        assert(blitSource !== undefined && last !== undefined);
         const { regions } = blitLastFrame(
             targetCtx,
-            canvas,
+            blitSource,
             last,
             cellXOffset,
             cellYOffset,
@@ -2254,10 +2308,12 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             dpr,
             mappedColumns,
             effectiveCols,
-            rowHeight
+            rowHeight,
+            doubleBuffer
         );
         drawRegions = regions;
     } else if (canBlit !== false) {
+        assert(last !== undefined);
         const resizedCol = canBlit;
         drawRegions = blitResizedCol(
             last,
@@ -2278,7 +2334,6 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         effectiveCols,
         width,
         height,
-        totalHeaderHeight,
         trailingRowType === "sticky",
         rows,
         verticalBorder,
@@ -2287,24 +2342,26 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     );
 
     // the overdraw may have nuked out our focus ring right edge.
-    const focusRedraw = drawFocusRing(
-        targetCtx,
-        width,
-        height,
-        cellYOffset,
-        translateX,
-        translateY,
-        effectiveCols,
-        mappedColumns,
-        theme,
-        totalHeaderHeight,
-        selection,
-        getRowHeight,
-        getCellContent,
-        trailingRowType,
-        fillHandle,
-        rows
-    );
+    const focusRedraw = drawFocus
+        ? drawFocusRing(
+              targetCtx,
+              width,
+              height,
+              cellYOffset,
+              translateX,
+              translateY,
+              effectiveCols,
+              mappedColumns,
+              theme,
+              totalHeaderHeight,
+              selection,
+              getRowHeight,
+              getCellContent,
+              trailingRowType,
+              fillHandle,
+              rows
+          )
+        : undefined;
 
     const highlightRedraw = drawHighlightRings(
         targetCtx,
@@ -2353,6 +2410,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         getRowThemeOverride,
         disabledRows,
         isFocused,
+        drawFocus,
         trailingRowType,
         drawRegions,
         damage,
@@ -2366,7 +2424,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         hoverInfo,
         hyperWrapping,
         theme,
-        enqueue
+        enqueue,
+        getCellRenderer
     );
 
     drawBlanks(
@@ -2413,6 +2472,12 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     focusRedraw?.();
     highlightRedraw?.();
 
+    if (mainCtx !== null) {
+        mainCtx.fillStyle = theme.bgCell;
+        mainCtx.fillRect(0, 0, width, height);
+        mainCtx.drawImage(targetCtx.canvas, 0, 0);
+    }
+
     const lastRowDrawn = getLastRow(
         effectiveCols,
         height,
@@ -2435,7 +2500,14 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         freezeColumns
     );
 
-    lastBlitData.current = { cellXOffset, cellYOffset, translateX, translateY };
+    lastBlitData.current = {
+        cellXOffset,
+        cellYOffset,
+        translateX,
+        translateY,
+        mustDrawFocusOnHeader,
+        lastBuffer: doubleBuffer ? (targetBuffer === bufferA ? "a" : "b") : undefined,
+    };
 
     targetCtx.restore();
     overlayCtx.restore();

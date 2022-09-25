@@ -1,18 +1,11 @@
 {
-    "compilerOptions": {
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "jsx": "react",
-        "moduleResolution": "node",
-        "module": "esnext",
-        "noImplicitAny": true,
-        "noUnusedLocals": true,
-        "skipLibCheck": true,
-        "importsNotUsedAsValues": "error",
-        "noUnusedParameters": true,
-        "strict": true,
-        "target": "es6",
-        "typeRoots": ["./node_modules/@types", "../node_modules/@types"]
-    },
-    "include": ["./src/**/*.ts", "./src/**/*.tsx"]
+    "extends": "../../tsconfig.json",
+    "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+    "typedocOptions": {
+        "entryPoints": ["src/index.ts"],
+        "out": "docs",
+        "categorizeByGroup": false,
+        "name": "Glide Data Grid",
+        "categoryOrder": ["DataEditor", "*"]
+    }
 }

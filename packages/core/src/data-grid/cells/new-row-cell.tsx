@@ -8,5 +8,6 @@ export const newRowCellRenderer: InternalCellRenderer<NewRowCell> = {
     needsHover: true,
     needsHoverPosition: false,
     measure: () => 200,
-    render: a => drawNewRowCell(a, a.cell.hint, a.cell.icon),
+    draw: a => drawNewRowCell(a, a.cell.hint, a.cell.icon),
+    onPaste: () => undefined,
 };

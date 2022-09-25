@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { Theme } from "../common/styles";
-import ImageWindowLoader from "../common/image-window-loader";
+import ImageWindowLoaderImpl from "../common/image-window-loader";
 import {
     computeBounds,
     getColumnIndexForX,
@@ -31,12 +31,14 @@ import {
     groupHeaderKind,
     headerKind,
     outOfBoundsKind,
+    ImageWindowLoader,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
-import clamp from "lodash/clamp";
-import makeRange from "lodash/range";
+import clamp from "lodash/clamp.js";
+import makeRange from "lodash/range.js";
 import {
+    BlitData,
     drawCell,
     drawGrid,
     DrawGridArg,
@@ -49,10 +51,10 @@ import {
     pointInRect,
 } from "./data-grid-render";
 import { AnimationManager, StepCallback } from "./animation-manager";
-import { browserIsFirefox } from "../common/browser-detect";
-import { CellRenderers } from "./cells";
+import { browserIsFirefox, browserIsSafari } from "../common/browser-detect";
 import { useAnimationQueue } from "./use-animation-queue";
 import { assert } from "../common/support";
+import type { CellRenderer, GetCellRendererCallback } from "./cells/cell-types";
 
 export interface DataGridProps {
     readonly width: number;
@@ -61,8 +63,8 @@ export interface DataGridProps {
     readonly cellXOffset: number;
     readonly cellYOffset: number;
 
-    readonly translateX?: number;
-    readonly translateY?: number;
+    readonly translateX: number | undefined;
+    readonly translateY: number | undefined;
 
     readonly accessibilityHeight: number;
 
@@ -70,16 +72,28 @@ export interface DataGridProps {
     readonly trailingRowType: TrailingRowType;
     readonly firstColAccessible: boolean;
 
-    readonly fixedShadowX?: boolean;
-    readonly fixedShadowY?: boolean;
+    /**
+     * Enables or disables the overlay shadow when scrolling horizontally
+     * @group Style
+     */
+    readonly fixedShadowX: boolean | undefined;
+    /**
+     * Enables or disables the overlay shadow when scrolling vertical
+     * @group Style
+     */
+    readonly fixedShadowY: boolean | undefined;
 
-    readonly allowResize?: boolean;
+    readonly allowResize: boolean | undefined;
     readonly isResizing: boolean;
     readonly isDragging: boolean;
     readonly isFilling: boolean;
     readonly isFocused: boolean;
 
     readonly columns: readonly InnerGridColumn[];
+    /**
+     * The number of rows in the grid.
+     * @group Data
+     */
     readonly rows: number;
 
     readonly headerHeight: number;
@@ -87,81 +101,178 @@ export interface DataGridProps {
     readonly enableGroups: boolean;
     readonly rowHeight: number | ((index: number) => number);
 
-    readonly canvasRef?: React.MutableRefObject<HTMLCanvasElement | null>;
+    readonly canvasRef: React.MutableRefObject<HTMLCanvasElement | null> | undefined;
 
-    readonly eventTargetRef?: React.MutableRefObject<HTMLDivElement | null>;
-
-    readonly className?: string;
+    readonly eventTargetRef: React.MutableRefObject<HTMLDivElement | null> | undefined;
 
     readonly getCellContent: (cell: Item) => InnerGridCell;
-    readonly getGroupDetails?: GroupDetailsCallback;
-    readonly getRowThemeOverride?: GetRowThemeCallback;
-    readonly onHeaderMenuClick?: (col: number, screenPosition: Rectangle) => void;
+    /**
+     * Provides additional details about groups to extend group functionality.
+     * @group Data
+     */
+    readonly getGroupDetails: GroupDetailsCallback | undefined;
+    /**
+     * Provides per row theme overrides.
+     * @group Style
+     */
+    readonly getRowThemeOverride: GetRowThemeCallback | undefined;
+    /**
+     * Emitted when a header menu disclosure indicator is clicked.
+     * @group Events
+     */
+    readonly onHeaderMenuClick: ((col: number, screenPosition: Rectangle) => void) | undefined;
 
     readonly selection: GridSelection;
-    readonly prelightCells?: readonly Item[];
-    readonly highlightRegions?: readonly Highlight[];
+    readonly prelightCells: readonly Item[] | undefined;
+    /**
+     * Highlight regions provide hints to users about relations between cells and selections.
+     * @group Selection
+     */
+    readonly highlightRegions: readonly Highlight[] | undefined;
 
-    readonly fillHandle?: boolean;
+    /**
+     * Enabled/disables the fill handle.
+     * @defaultValue false
+     * @group Editing
+     */
+    readonly fillHandle: boolean | undefined;
 
-    readonly disabledRows?: CompactSelection;
+    readonly disabledRows: CompactSelection | undefined;
+    /**
+     * Allows passing a custom image window loader.
+     * @group Advanced
+     */
+    readonly imageWindowLoader: ImageWindowLoader | undefined;
 
-    readonly onItemHovered?: (args: GridMouseEventArgs) => void;
+    /**
+     * Emitted when an item is hovered.
+     * @group Events
+     */
+    readonly onItemHovered: (args: GridMouseEventArgs) => void;
     readonly onMouseMove: (args: GridMouseEventArgs) => void;
-    readonly onMouseDown?: (args: GridMouseEventArgs) => void;
-    readonly onMouseUp?: (args: GridMouseEventArgs, isOutside: boolean) => void;
-    readonly onContextMenu?: (args: GridMouseEventArgs, preventDefault: () => void) => void;
+    readonly onMouseDown: (args: GridMouseEventArgs) => void;
+    readonly onMouseUp: (args: GridMouseEventArgs, isOutside: boolean) => void;
+    readonly onContextMenu: (args: GridMouseEventArgs, preventDefault: () => void) => void;
 
-    readonly onCanvasFocused?: () => void;
-    readonly onCanvasBlur?: () => void;
-    readonly onCellFocused?: (args: Item) => void;
+    readonly onCanvasFocused: () => void;
+    readonly onCanvasBlur: () => void;
+    readonly onCellFocused: (args: Item) => void;
 
-    readonly onMouseMoveRaw?: (event: MouseEvent) => void;
+    readonly onMouseMoveRaw: (event: MouseEvent) => void;
 
-    readonly onKeyDown?: (event: GridKeyEventArgs) => void;
-    readonly onKeyUp?: (event: GridKeyEventArgs) => void;
+    /**
+     * Emitted when the canvas receives a key down event.
+     * @group Events
+     */
+    readonly onKeyDown: (event: GridKeyEventArgs) => void;
+    /**
+     * Emitted when the canvas receives a key up event.
+     * @group Events
+     */
+    readonly onKeyUp: ((event: GridKeyEventArgs) => void) | undefined;
 
     readonly verticalBorder: (col: number) => boolean;
 
-    readonly isDraggable?: boolean | "cell" | "header";
-    readonly onDragStart?: (args: GridDragEventArgs) => void;
-    readonly onDragEnd?: () => void;
+    /**
+     * Determines what can be dragged using HTML drag and drop
+     * @group Drag and Drop
+     */
+    readonly isDraggable: boolean | "cell" | "header" | undefined;
+    /**
+     * If `isDraggable` is set, the grid becomes HTML draggable, and `onDragStart` will be called when dragging starts.
+     * You can use this to build a UI where the user can drag the Grid around.
+     * @group Drag and Drop
+     */
+    readonly onDragStart: (args: GridDragEventArgs) => void;
+    readonly onDragEnd: () => void;
 
-    readonly onDragOverCell?: (cell: Item, dataTransfer: DataTransfer | null) => void;
-    readonly onDragLeave?: () => void;
-    readonly onDrop?: (cell: Item, dataTransfer: DataTransfer | null) => void;
+    /** @group Drag and Drop */
+    readonly onDragOverCell: ((cell: Item, dataTransfer: DataTransfer | null) => void) | undefined;
+    /** @group Drag and Drop */
+    readonly onDragLeave: (() => void) | undefined;
 
-    readonly drawCustomCell?: DrawCustomCellCallback;
-    readonly drawHeader?: DrawHeaderCallback;
+    /**
+     * Called when a HTML Drag and Drop event is ended on the data grid.
+     * @group Drag and Drop
+     */
+    readonly onDrop: ((cell: Item, dataTransfer: DataTransfer | null) => void) | undefined;
 
-    readonly dragAndDropState?: {
-        src: number;
-        dest: number;
-    };
+    readonly drawCustomCell: DrawCustomCellCallback | undefined;
+    /**
+     * Overrides the rendering of a header. The grid will call this for every header it needs to render. Header
+     * rendering is not as well optimized because they do not redraw as often, but very heavy drawing methods can
+     * negatively impact horizontal scrolling performance.
+     *
+     * It is possible to return `false` after rendering just a background and the regular foreground rendering
+     * will happen.
+     * @group Drawing
+     * @returns `false` if default header rendering should still happen, `true` to cancel rendering.
+     */
+    readonly drawHeader: DrawHeaderCallback | undefined;
+    /**
+     * Controls the drawing of the focus ring.
+     * @defaultValue true
+     * @group Style
+     */
+    readonly drawFocusRing: boolean | undefined;
 
-    readonly experimental?: {
-        readonly paddingRight?: number;
-        readonly paddingBottom?: number;
-        readonly enableFirefoxRescaling?: boolean;
-        readonly isSubGrid?: boolean;
-        readonly strict?: boolean;
-        readonly scrollbarWidthOverride?: number;
-        readonly hyperWrapping?: boolean;
-    };
+    readonly dragAndDropState:
+        | {
+              src: number;
+              dest: number;
+          }
+        | undefined;
 
-    readonly headerIcons?: SpriteMap;
+    /**
+     * Experimental features
+     * @group Advanced
+     * @experimental
+     */
+    readonly experimental:
+        | {
+              readonly paddingRight?: number;
+              readonly paddingBottom?: number;
+              readonly enableFirefoxRescaling?: boolean;
+              readonly isSubGrid?: boolean;
+              readonly strict?: boolean;
+              readonly scrollbarWidthOverride?: number;
+              readonly hyperWrapping?: boolean;
+              readonly renderStrategy?: "single-buffer" | "double-buffer" | "direct";
+          }
+        | undefined;
 
-    readonly smoothScrollX?: boolean;
-    readonly smoothScrollY?: boolean;
+    /**
+     * Additional header icons for use by `GridColumn`.
+     *
+     * Providing custom header icons to the data grid must be done with a somewhat non-standard mechanism to allow
+     * theming and scaling. The `headerIcons` property takes a dictionary which maps icon names to functions which can
+     * take a foreground and background color and returns back a string representation of an svg. The svg should contain
+     * a header similar to this `<svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">` and
+     * interpolate the fg/bg colors into the string.
+     *
+     * We recognize this process is not fantastic from a graphics workflow standpoint, improvements are very welcome
+     * here.
+     *
+     * @group Style
+     */
+    readonly headerIcons: SpriteMap | undefined;
+
+    /** Controls smooth scrolling in the data grid. If smooth scrolling is not enabled the grid will always be cell
+     * aligned.
+     * @defaultValue `false`
+     * @group Style
+     */
+    readonly smoothScrollX: boolean | undefined;
+    /** Controls smooth scrolling in the data grid. If smooth scrolling is not enabled the grid will always be cell
+     * aligned.
+     * @defaultValue `false`
+     * @group Style
+     */
+    readonly smoothScrollY: boolean | undefined;
 
     readonly theme: Theme;
-}
 
-interface BlitData {
-    readonly cellXOffset: number;
-    readonly cellYOffset: number;
-    readonly translateX: number;
-    readonly translateY: number;
+    readonly getCellRenderer: <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;
 }
 
 type DamageUpdateList = readonly {
@@ -175,8 +286,10 @@ export interface DataGridRef {
     damage: (cells: DamageUpdateList) => void;
 }
 
-const getRowData = (cell: InnerGridCell) => {
-    return cell.kind === GridCellKind.Custom ? cell.copyData : CellRenderers[cell.kind].getAccessibilityString(cell);
+const getRowData = (cell: InnerGridCell, getCellRenderer?: GetCellRendererCallback) => {
+    if (cell.kind === GridCellKind.Custom) return cell.copyData;
+    const r = getCellRenderer?.(cell);
+    return r?.getAccessibilityString(cell) ?? "";
 };
 
 const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p, forwardedRef) => {
@@ -184,7 +297,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         width,
         height,
         accessibilityHeight,
-        className,
         columns,
         cellXOffset: cellXOffsetReal,
         cellYOffset,
@@ -207,6 +319,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         trailingRowType: trailingRowType,
         fixedShadowX = true,
         fixedShadowY = true,
+        drawFocusRing = true,
         onMouseDown,
         onMouseUp,
         onMouseMoveRaw,
@@ -237,20 +350,23 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         onDragOverCell,
         onDrop,
         onDragLeave,
+        imageWindowLoader,
         smoothScrollX = false,
         smoothScrollY = false,
         experimental,
+        getCellRenderer,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
     const cellXOffset = Math.max(freezeColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
-    const imageLoader = React.useMemo<ImageWindowLoader>(() => new ImageWindowLoader(), []);
+    const imageWindowLoaderInternal = React.useMemo<ImageWindowLoader>(() => new ImageWindowLoaderImpl(), []);
+    const imageLoader = imageWindowLoader ?? imageWindowLoaderInternal;
     const damageRegion = React.useRef<readonly Item[] | undefined>();
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
-    const lastBlitData = React.useRef<BlitData>({ cellXOffset, cellYOffset, translateX, translateY });
+    const lastBlitData = React.useRef<BlitData | undefined>();
     const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, readonly [number, number]] | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const overlayRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -295,6 +411,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 return undefined;
             }
 
+            const scale = rect.width / width;
+
             const result = computeBounds(
                 col,
                 row,
@@ -312,6 +430,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 mappedColumns,
                 rowHeight
             );
+
+            if (scale !== 1) {
+                result.x *= scale;
+                result.y *= scale;
+                result.width *= scale;
+                result.height *= scale;
+            }
 
             result.x += rect.x;
             result.y += rect.y;
@@ -338,8 +463,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const getMouseArgsForPosition = React.useCallback(
         (canvas: HTMLCanvasElement, posX: number, posY: number, ev?: MouseEvent | TouchEvent): GridMouseEventArgs => {
             const rect = canvas.getBoundingClientRect();
-            const x = posX - rect.left;
-            const y = posY - rect.top;
+            const scale = rect.width / width;
+            const x = (posX - rect.left) / scale;
+            const y = (posY - rect.top) / scale;
             const edgeDetectionBuffer = 5;
 
             const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, undefined, translateX);
@@ -507,6 +633,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const hoverInfoRef = React.useRef(hoveredItemInfo);
     hoverInfoRef.current = hoveredItemInfo;
 
+    const [bufferA, bufferB] = React.useMemo(() => {
+        return [document.createElement("canvas"), document.createElement("canvas")];
+    }, []);
+
     const lastArgsRef = React.useRef<DrawGridArg>();
     const draw = React.useCallback(() => {
         const canvas = ref.current;
@@ -516,6 +646,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         const last = lastArgsRef.current;
         const current = {
             canvas,
+            bufferA,
+            bufferB,
             headerCanvas: overlay,
             width,
             height,
@@ -539,6 +671,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             fillHandle,
             lastRowSticky: trailingRowType,
             rows,
+            drawFocus: drawFocusRing,
             getCellContent,
             getGroupDetails: getGroupDetails ?? (name => ({ name })),
             getRowThemeOverride,
@@ -556,6 +689,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             hyperWrapping: experimental?.hyperWrapping ?? false,
             touchMode: lastWasTouch,
             enqueue: enqueueRef.current,
+            renderStrategy: experimental?.renderStrategy ?? (browserIsSafari.value ? "double-buffer" : "single-buffer"),
+            getCellRenderer,
         };
 
         // This confusing bit of code due to some poor design. Long story short, the damage property is only used
@@ -572,6 +707,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             drawGrid(current, undefined);
         }
     }, [
+        bufferA,
+        bufferB,
         width,
         height,
         cellXOffset,
@@ -594,6 +731,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         fillHandle,
         trailingRowType,
         rows,
+        drawFocusRing,
         getCellContent,
         getGroupDetails,
         getRowThemeOverride,
@@ -605,7 +743,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         spriteManager,
         scrolling,
         experimental?.hyperWrapping,
+        experimental?.renderStrategy,
         lastWasTouch,
+        getCellRenderer,
     ]);
 
     const lastDrawRef = React.useRef(draw);
@@ -681,10 +821,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         [cursor]
     );
 
+    const lastSetCursor = React.useRef<typeof cursor>("default");
     const target = eventTargetRef?.current;
-    if (target !== null && target !== undefined) {
+    if (target !== null && target !== undefined && lastSetCursor.current !== style.cursor) {
         // because we have an event target we need to set its cursor instead.
-        target.style.cursor = style.cursor;
+        target.style.cursor = lastSetCursor.current = style.cursor;
     }
 
     const groupHeaderActionForEvent = React.useCallback(
@@ -888,10 +1029,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             return;
         }
         const cell = getCellContent(hoveredItem as [number, number]);
+        const r = getCellRenderer(cell);
         am.setHovered(
-            cell.kind === GridCellKind.Custom || CellRenderers[cell.kind].needsHover ? hoveredItem : undefined
+            (r === undefined && cell.kind === GridCellKind.Custom) || r?.needsHover === true ? hoveredItem : undefined
         );
-    }, [getCellContent, hoveredItem]);
+    }, [getCellContent, getCellRenderer, hoveredItem]);
 
     const hoveredRef = React.useRef<GridMouseEventArgs>();
     const onMouseMoveImpl = React.useCallback(
@@ -913,7 +1055,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
                 if (args.kind === "cell") {
                     const toCheck = getCellContent(args.location);
-                    if (toCheck.kind === GridCellKind.Custom || CellRenderers[toCheck.kind].needsHoverPosition) {
+                    if (toCheck.kind === GridCellKind.Custom || getCellRenderer(toCheck)?.needsHoverPosition === true) {
                         damageInternal([args.location]);
                     }
                 } else if (args.kind === groupHeaderKind) {
@@ -951,6 +1093,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             onMouseMove,
             onItemHovered,
             getCellContent,
+            getCellRenderer,
             damageInternal,
             getBoundsForItem,
         ]
@@ -969,16 +1112,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             onKeyDown?.({
                 bounds,
-                cancel: () => {
-                    event.stopPropagation();
-                    event.preventDefault();
-                },
+                stopPropagation: event.stopPropagation,
+                preventDefault: event.preventDefault,
+                cancel: () => undefined,
                 ctrlKey: event.ctrlKey,
                 metaKey: event.metaKey,
                 shiftKey: event.shiftKey,
                 altKey: event.altKey,
                 key: event.key,
                 keyCode: event.keyCode,
+                rawEvent: event,
             });
         },
         [onKeyDown, selection, getBoundsForItem]
@@ -996,16 +1139,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             onKeyUp?.({
                 bounds,
-                cancel: () => {
-                    event.stopPropagation();
-                    event.preventDefault();
-                },
+                stopPropagation: event.stopPropagation,
+                preventDefault: event.preventDefault,
+                cancel: () => undefined,
                 ctrlKey: event.ctrlKey,
                 metaKey: event.metaKey,
                 shiftKey: event.shiftKey,
                 altKey: event.altKey,
                 key: event.key,
                 keyCode: event.keyCode,
+                rawEvent: event,
             });
         },
         [onKeyUp, selection, getBoundsForItem]
@@ -1122,7 +1265,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                     1,
                                     undefined,
                                     false,
-                                    0
+                                    0,
+                                    undefined,
+                                    undefined,
+                                    getCellRenderer
                                 );
                             }
                         }
@@ -1160,6 +1306,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getCellContent,
             drawCustomCell,
             imageLoader,
+            getCellRenderer,
         ]
     );
     useEventListener("dragstart", onDragStartImpl, eventTargetRef?.current ?? null, false, false);
@@ -1365,12 +1512,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                                 return onKeyDown?.({
                                                     bounds: getBoundsForItem(canvas, col, row),
                                                     cancel: () => undefined,
+                                                    preventDefault: () => undefined,
+                                                    stopPropagation: () => undefined,
                                                     ctrlKey: false,
                                                     key: "Enter",
                                                     keyCode: 13,
                                                     metaKey: false,
                                                     shiftKey: false,
                                                     altKey: false,
+                                                    rawEvent: undefined,
                                                 });
                                             }}
                                             onFocusCapture={e => {
@@ -1385,7 +1535,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                             }}
                                             ref={focused ? focusElement : undefined}
                                             tabIndex={-1}>
-                                            {getRowData(cellContent)}
+                                            {getRowData(cellContent, getCellRenderer)}
                                         </td>
                                     );
                                 })}
@@ -1477,7 +1627,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 onKeyUp={onKeyUpImpl}
                 onFocus={onCanvasFocused}
                 onBlur={onCanvasBlur}
-                className={className}
                 ref={refImpl}
                 style={style}>
                 {accessibilityTree}

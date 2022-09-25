@@ -3,6 +3,7 @@ import type { Rectangle } from "..";
 import * as React from "react";
 import { useResizeDetector } from "../common/resize-detector";
 import { browserIsSafari } from "../common/browser-detect";
+import { useEventListener } from "../common/utils";
 
 interface Props {
     readonly className?: string;
@@ -14,13 +15,14 @@ interface Props {
     readonly scrollWidth: number;
     readonly scrollHeight: number;
     readonly scrollToEnd?: boolean;
+    readonly initialScrollPosition?: readonly [scrollX: number, scrollY: number];
+    readonly initialSize?: readonly [width: number, height: number];
     readonly rightElementProps?: {
         readonly sticky?: boolean;
         readonly fill?: boolean;
     };
     readonly rightElement?: React.ReactNode;
     readonly minimap?: React.ReactNode;
-    readonly style?: React.CSSProperties;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
     readonly update: (region: Rectangle & { paddingRight: number }) => void;
 }
@@ -70,6 +72,43 @@ const ScrollRegionStyle = styled.div<{ isSafari: boolean }>`
 
 type ScrollLock = [undefined, number] | [number, undefined] | undefined;
 
+function eatEvent(e: React.MouseEvent) {
+    e.stopPropagation();
+}
+
+function useTouchUpDelayed(delay: number): boolean {
+    const [hasTouches, setHasTouches] = React.useState(false);
+
+    const cbTimer = React.useRef(0);
+    useEventListener(
+        "touchstart",
+        React.useCallback(() => {
+            window.clearTimeout(cbTimer.current);
+            setHasTouches(true);
+        }, []),
+        window,
+        true,
+        false
+    );
+
+    useEventListener(
+        "touchend",
+        React.useCallback(
+            e => {
+                if (e.touches.length === 0) {
+                    cbTimer.current = window.setTimeout(() => setHasTouches(false), delay);
+                }
+            },
+            [delay]
+        ),
+        window,
+        true,
+        false
+    );
+
+    return hasTouches;
+}
+
 export const InfiniteScroller: React.FC<Props> = p => {
     const {
         children,
@@ -86,8 +125,8 @@ export const InfiniteScroller: React.FC<Props> = p => {
         rightElementProps,
         scrollRef,
         scrollToEnd,
+        initialSize,
         minimap,
-        style,
     } = p;
     const padders: React.ReactNode[] = [];
 
@@ -113,9 +152,24 @@ export const InfiniteScroller: React.FC<Props> = p => {
         lockDirection: undefined as ScrollLock,
     });
 
-    const resetHandle = React.useRef(0);
-
     const rightWrapRef = React.useRef<HTMLDivElement | null>(null);
+
+    const hasTouches = useTouchUpDelayed(200);
+    const [isIdle, setIsIdle] = React.useState(true);
+    const idleTimer = React.useRef(0);
+
+    React.useEffect(() => {
+        if (!isIdle || hasTouches || lastScrollPosition.current.lockDirection === undefined) return;
+        const el = scroller.current;
+        if (el === null) return;
+        const [lx, ly] = lastScrollPosition.current.lockDirection;
+        if (lx !== undefined) {
+            el.scrollLeft = lx;
+        } else if (ly !== undefined) {
+            el.scrollTop = ly;
+        }
+        lastScrollPosition.current.lockDirection = undefined;
+    }, [hasTouches, isIdle]);
 
     const onScroll = React.useCallback(() => {
         const el = scroller.current;
@@ -130,13 +184,15 @@ export const InfiniteScroller: React.FC<Props> = p => {
         const dy = scrollTop - lastScrollTop;
 
         if (
+            hasTouches &&
             dx !== 0 &&
             dy !== 0 &&
+            (Math.abs(dx) > 3 || Math.abs(dy) > 3) &&
             preventDiagonalScrolling &&
             lastScrollPosition.current.lockDirection === undefined
         ) {
             lastScrollPosition.current.lockDirection =
-                Math.abs(dx) > Math.abs(dy) ? [lastScrollLeft, undefined] : [undefined, lastScrollTop];
+                Math.abs(dx) < Math.abs(dy) ? [lastScrollLeft, undefined] : [undefined, lastScrollTop];
         }
 
         const lock = lastScrollPosition.current.lockDirection;
@@ -146,10 +202,9 @@ export const InfiniteScroller: React.FC<Props> = p => {
         lastScrollPosition.current.scrollLeft = scrollLeft;
         lastScrollPosition.current.scrollTop = scrollTop;
 
-        const newY = Math.max(0, scrollTop);
+        const newY = scrollTop;
         const delta = lastScrollY.current - newY;
         const scrollableHeight = el.scrollHeight - el.clientHeight;
-        const maxFakeY = Math.max(0, scrollHeight - el.clientHeight);
         lastScrollY.current = newY;
 
         if (
@@ -162,39 +217,25 @@ export const InfiniteScroller: React.FC<Props> = p => {
             offsetY.current = recomputed - newY;
         }
 
-        if (resetHandle.current > 0) {
-            window.clearTimeout(resetHandle.current);
-        }
         if (lock !== undefined) {
-            resetHandle.current = window.setTimeout(() => {
-                const [lx, ly] = lastScrollPosition.current.lockDirection ?? [];
-                if (lx !== undefined) {
-                    el.scrollLeft = lx;
-                } else if (ly !== undefined) {
-                    el.scrollTop = ly;
-                }
-                lastScrollPosition.current.lockDirection = undefined;
-                resetHandle.current = 0;
-            }, 200);
+            window.clearTimeout(idleTimer.current);
+            setIsIdle(false);
+            idleTimer.current = window.setTimeout(() => setIsIdle(true), 200);
         }
 
         update({
-            x: Math.max(0, scrollLeft),
-            y: Math.min(maxFakeY, newY + offsetY.current),
+            x: scrollLeft,
+            y: newY + offsetY.current,
             width: el.clientWidth - paddingRight,
             height: el.clientHeight - paddingBottom,
             paddingRight: rightWrapRef.current?.clientWidth ?? 0,
         });
-    }, [paddingBottom, paddingRight, scrollHeight, update, preventDiagonalScrolling]);
+    }, [paddingBottom, paddingRight, scrollHeight, update, preventDiagonalScrolling, hasTouches]);
 
     const onScrollRef = React.useRef(onScroll);
     onScrollRef.current = onScroll;
 
     const lastProps = React.useRef<{ width?: number; height?: number }>();
-
-    const nomEvent = React.useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-    }, []);
 
     React.useEffect(() => {
         onScroll();
@@ -219,17 +260,17 @@ export const InfiniteScroller: React.FC<Props> = p => {
         h += toAdd;
     }
 
-    const { ref, width, height } = useResizeDetector<HTMLDivElement>();
+    const { ref, width, height } = useResizeDetector<HTMLDivElement>(initialSize);
 
     if (lastProps.current?.height !== height || lastProps.current?.width !== width) {
         window.setTimeout(() => onScrollRef.current(), 0);
         lastProps.current = { width, height };
     }
 
-    if ((width ?? 0) === 0 || (height ?? 0) === 0) return <div style={style} ref={ref} />;
+    if ((width ?? 0) === 0 || (height ?? 0) === 0) return <div ref={ref} />;
 
     return (
-        <div style={style} ref={ref}>
+        <div ref={ref}>
             <ScrollRegionStyle isSafari={browserIsSafari.value}>
                 {minimap}
                 <div className="dvn-underlay">{children}</div>
@@ -252,9 +293,9 @@ export const InfiniteScroller: React.FC<Props> = p => {
                                 {!rightElementFill && <div className="dvn-spacer" />}
                                 <div
                                     ref={rightWrapRef}
-                                    onMouseDown={nomEvent}
-                                    onMouseUp={nomEvent}
-                                    onMouseMove={nomEvent}
+                                    onMouseDown={eatEvent}
+                                    onMouseUp={eatEvent}
+                                    onMouseMove={eatEvent}
                                     style={{
                                         height,
                                         maxHeight: clientHeight - Math.ceil(dpr % 1),

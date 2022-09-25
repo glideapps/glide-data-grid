@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/no-identical-functions */
 import * as React from "react";
 
-import { StoryFn, StoryContext, useState, useCallback, useMemo } from "@storybook/addons";
+import { useState, useCallback, useMemo } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../../stories/story-utils";
 
 import {
@@ -19,9 +19,9 @@ export default {
     title: "Tests/TestCases",
 
     decorators: [
-        (fn: StoryFn<React.ReactElement | null>, context: StoryContext) => (
-            <BuilderThemeWrapper width={1000} height={800} context={context}>
-                {fn()}
+        (Story: React.ComponentType) => (
+            <BuilderThemeWrapper width={1000} height={800}>
+                <Story />
             </BuilderThemeWrapper>
         ),
     ],
@@ -125,8 +125,7 @@ And supports newline chars and automatic wrapping text that just needs to be lon
             data: [
                 {
                     text: "Test",
-                    img:
-                        "https://allthatsinteresting.com/wordpress/wp-content/uploads/2012/06/iconic-photos-1950-einstein.jpg",
+                    img: "https://allthatsinteresting.com/wordpress/wp-content/uploads/2012/06/iconic-photos-1950-einstein.jpg",
                 },
                 { text: "No Image" },
             ],
@@ -198,8 +197,7 @@ function getDummyRelationData([col, row]: Item): GridCell {
         data: [
             {
                 text: `Image ${col}-${row}`,
-                img:
-                    "https://allthatsinteresting.com/wordpress/wp-content/uploads/2012/06/iconic-photos-1950-einstein.jpg",
+                img: "https://allthatsinteresting.com/wordpress/wp-content/uploads/2012/06/iconic-photos-1950-einstein.jpg",
             },
             { text: `Text ${col}-${row}` },
             { text: `More text ${col}-${row}` },

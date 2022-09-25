@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/consistent-destructuring */
-import clamp from "lodash/clamp";
+import clamp from "lodash/clamp.js";
 import * as React from "react";
 import DataGrid, { DataGridProps, DataGridRef } from "../data-grid/data-grid";
 import type { GridColumn, GridMouseEventArgs, InnerGridColumn, Rectangle } from "../data-grid/data-grid-types";
@@ -7,22 +7,68 @@ import type { GridColumn, GridMouseEventArgs, InnerGridColumn, Rectangle } from 
 type Props = Omit<DataGridProps, "dragAndDropState" | "isResizing" | "isDragging" | "onMouseMoveRaw" | "allowResize">;
 
 export interface DataGridDndProps extends Props {
+    /**
+     * Called whenever a row re-order operation is completed. Setting the callback enables re-ordering by dragging the
+     * first column of a row.
+     * @group Drag and Drop
+     */
     readonly onRowMoved?: (startIndex: number, endIndex: number) => void;
+    /**
+     * Called when the user finishes moving a column. `startIndex` is the index of the column that was moved, and
+     * `endIndex` is the index at which it should end up. Note that you have to effect the move of the column, and pass
+     * the reordered columns back in the `columns` property.
+     * @group Drag and Drop
+     */
     readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
 
-    readonly onColumnResize?: (column: GridColumn, newSize: number, colIndex: number) => void; // these should not be past tense?
-    readonly onColumnResizeStart?: (column: GridColumn, newSize: number, colIndex: number) => void; // these should not be past tense?
-    readonly onColumnResizeEnd?: (column: GridColumn, newSize: number, colIndex: number) => void; // these should not be past tense?
+    /**
+     * Called when the user is resizing a column. `newSize` is the new size of the column. Note that you have change
+     * the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
+     * @group Drag and Drop
+     * @param column The `GridColumn` being resized
+     * @param newSize The new size of the grid column
+     * @param colIndex The index of the column
+     * @param newSizeWithGrow The new size of the column including any addition pixels added by the grow parameter
+     */
+    readonly onColumnResize?: (column: GridColumn, newSize: number, colIndex: number, newSizeWithGrow: number) => void;
+    /**
+     * Called when the user starts resizing a column. `newSize` is the new size of the column.
+     * @group Drag and Drop
+     * @param column The `GridColumn` being resized
+     * @param newSize The new size of the grid column
+     * @param colIndex The index of the column
+     * @param newSizeWithGrow The new size of the column including any addition pixels added by the grow parameter
+     */
+    readonly onColumnResizeStart?: (
+        column: GridColumn,
+        newSize: number,
+        colIndex: number,
+        newSizeWithGrow: number
+    ) => void;
+    /**
+     * Called when the user finishes resizing a column. `newSize` is the new size of the column.
+     * @group Drag and Drop
+     * @param column The `GridColumn` being resized
+     * @param newSize The new size of the grid column
+     * @param colIndex The index of the column
+     * @param newSizeWithGrow The new size of the column including any addition pixels added by the grow parameter
+     */
+    readonly onColumnResizeEnd?: (
+        column: GridColumn,
+        newSize: number,
+        colIndex: number,
+        newSizeWithGrow: number
+    ) => void;
 
     readonly gridRef?: React.MutableRefObject<DataGridRef | null>;
     readonly maxColumnWidth: number;
     readonly minColumnWidth: number;
     readonly lockColumns: number;
-
-    readonly smoothScrollX?: boolean;
-    readonly smoothScrollY?: boolean;
 }
 
+// Dear Past Jason,
+// Wtf does this function do? If you remember in the future come back and add a comment
+// -- Future-Past Jason
 function offsetColumnSize(column: InnerGridColumn, width: number, min: number, max: number): number {
     return clamp(Math.round(width - (column.growOffset ?? 0)), Math.ceil(min), Math.floor(max));
 }
@@ -42,6 +88,8 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
     const [dragStartY, setDragStartY] = React.useState<number>();
 
     const {
+        onHeaderMenuClick,
+        getCellContent,
         onColumnMoved,
         onColumnResize,
         onColumnResizeStart,
@@ -49,15 +97,17 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         gridRef,
         maxColumnWidth,
         minColumnWidth,
-        onHeaderMenuClick,
         onRowMoved,
         lockColumns,
-        getCellContent,
+        onMouseDown,
+        onMouseUp,
+        onItemHovered,
+        onDragStart,
     } = p;
 
     const canResize = (onColumnResize ?? onColumnResizeEnd ?? onColumnResizeStart) !== undefined;
 
-    const { onMouseDown, onMouseUp, onItemHovered, columns, selection } = p;
+    const { columns, selection } = p;
     const selectedColumns = selection.columns;
 
     const onItemHoveredImpl = React.useCallback(
@@ -91,7 +141,12 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                     if (args.isEdge && canResize) {
                         setResizeColStartX(args.bounds.x);
                         setResizeCol(col);
-                        onColumnResizeStart?.(columns[col], args.bounds.width, col);
+                        onColumnResizeStart?.(
+                            columns[col],
+                            args.bounds.width,
+                            col,
+                            args.bounds.width + (columns[col].growOffset ?? 0)
+                        );
                     } else if (args.kind === "header" && canDragCol) {
                         setDragStartX(args.bounds.x);
                         setDragCol(col);
@@ -146,32 +201,28 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                         for (const c of selectedColumns) {
                             if (c === resizeCol) continue;
                             const col = columns[c];
-                            onColumnResize?.(
+                            const newSize = offsetColumnSize(
                                 col,
-                                offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth),
-                                c
+                                lastResizeWidthRef.current,
+                                minColumnWidth,
+                                maxColumnWidth
                             );
+                            onColumnResize?.(col, newSize, c, newSize + (col.growOffset ?? 0));
                         }
                     }
 
-                    onColumnResizeEnd?.(
+                    const ns = offsetColumnSize(
                         columns[resizeCol],
-                        offsetColumnSize(
-                            columns[resizeCol],
-                            lastResizeWidthRef.current,
-                            minColumnWidth,
-                            maxColumnWidth
-                        ),
-                        resizeCol
+                        lastResizeWidthRef.current,
+                        minColumnWidth,
+                        maxColumnWidth
                     );
+                    onColumnResizeEnd?.(columns[resizeCol], ns, resizeCol, ns + (columns[resizeCol].growOffset ?? 0));
                     for (const c of selectedColumns) {
                         if (c === resizeCol) continue;
                         const col = columns[c];
-                        onColumnResizeEnd?.(
-                            col,
-                            offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth),
-                            c
-                        );
+                        const s = offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth);
+                        onColumnResizeEnd?.(col, s, c, s + (col.growOffset ?? 0));
                     }
                 }
 
@@ -229,18 +280,16 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             } else if (resizeCol !== undefined && resizeColStartX !== undefined) {
                 const column = columns[resizeCol];
                 const newWidth = event.clientX - resizeColStartX;
-                onColumnResize?.(column, offsetColumnSize(column, newWidth, minColumnWidth, maxColumnWidth), resizeCol);
+                const ns = offsetColumnSize(column, newWidth, minColumnWidth, maxColumnWidth);
+                onColumnResize?.(column, ns, resizeCol, ns + (column.growOffset ?? 0));
                 lastResizeWidthRef.current = newWidth;
 
                 if (selectedColumns?.first() === resizeCol) {
                     for (const c of selectedColumns) {
                         if (c === resizeCol) continue;
                         const col = columns[c];
-                        onColumnResize?.(
-                            col,
-                            offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth),
-                            c
-                        );
+                        const s = offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth);
+                        onColumnResize?.(col, s, c, s + (col.growOffset ?? 0));
                     }
                 }
             }
@@ -278,76 +327,76 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         [dragRow, dropRow, getCellContent]
     );
 
-    const dragStart = p.onDragStart;
-    const onDragStart = React.useCallback<NonNullable<DataGridDndProps["onDragStart"]>>(
+    const onDragStartImpl = React.useCallback<NonNullable<DataGridDndProps["onDragStart"]>>(
         args => {
-            dragStart?.(args);
+            onDragStart?.(args);
             if (!args.defaultPrevented()) {
                 clearAll();
             }
         },
-        [clearAll, dragStart]
+        [clearAll, onDragStart]
     );
 
     return (
         <DataGrid
-            // I know the below could be done with ...rest, but it adds about 2-3% cpu load in the hot loop
-            // This doesn't matter much for most devices but it will matter for low power phones and such.
             accessibilityHeight={p.accessibilityHeight}
+            canvasRef={p.canvasRef}
             cellXOffset={p.cellXOffset}
             cellYOffset={p.cellYOffset}
             columns={p.columns}
-            enableGroups={p.enableGroups}
-            freezeColumns={p.freezeColumns}
-            onCanvasFocused={p.onCanvasFocused}
-            onCanvasBlur={p.onCanvasBlur}
-            isFocused={p.isFocused}
-            onMouseMove={p.onMouseMove}
-            groupHeaderHeight={p.groupHeaderHeight}
-            fillHandle={p.fillHandle}
-            headerHeight={p.headerHeight}
-            height={p.height}
-            trailingRowType={p.trailingRowType}
-            rowHeight={p.rowHeight}
-            rows={p.rows}
-            highlightRegions={p.highlightRegions}
-            verticalBorder={p.verticalBorder}
-            width={p.width}
-            canvasRef={p.canvasRef}
-            onContextMenu={p.onContextMenu}
-            className={p.className}
-            theme={p.theme}
             disabledRows={p.disabledRows}
-            isFilling={p.isFilling}
-            firstColAccessible={p.firstColAccessible}
             drawCustomCell={p.drawCustomCell}
+            drawFocusRing={p.drawFocusRing}
             drawHeader={p.drawHeader}
+            enableGroups={p.enableGroups}
             eventTargetRef={p.eventTargetRef}
             experimental={p.experimental}
+            fillHandle={p.fillHandle}
+            firstColAccessible={p.firstColAccessible}
+            fixedShadowX={p.fixedShadowX}
+            fixedShadowY={p.fixedShadowY}
+            freezeColumns={p.freezeColumns}
+            getCellRenderer={p.getCellRenderer}
             getGroupDetails={p.getGroupDetails}
             getRowThemeOverride={p.getRowThemeOverride}
+            groupHeaderHeight={p.groupHeaderHeight}
+            headerHeight={p.headerHeight}
             headerIcons={p.headerIcons}
+            height={p.height}
+            highlightRegions={p.highlightRegions}
+            imageWindowLoader={p.imageWindowLoader}
             isDraggable={p.isDraggable}
-            onDragEnd={p.onDragEnd}
+            isFilling={p.isFilling}
+            isFocused={p.isFocused}
+            onCanvasBlur={p.onCanvasBlur}
+            onCanvasFocused={p.onCanvasFocused}
             onCellFocused={p.onCellFocused}
-            onDragStart={onDragStart}
-            onDragOverCell={p.onDragOverCell}
+            onContextMenu={p.onContextMenu}
+            onDragEnd={p.onDragEnd}
             onDragLeave={p.onDragLeave}
+            onDragOverCell={p.onDragOverCell}
             onDrop={p.onDrop}
             onKeyDown={p.onKeyDown}
             onKeyUp={p.onKeyUp}
+            onMouseMove={p.onMouseMove}
             prelightCells={p.prelightCells}
+            rowHeight={p.rowHeight}
+            rows={p.rows}
             selection={p.selection}
-            translateX={p.translateX}
-            translateY={p.translateY}
             smoothScrollX={p.smoothScrollX}
             smoothScrollY={p.smoothScrollY}
-            // handled or mutated props
+            theme={p.theme}
+            trailingRowType={p.trailingRowType}
+            translateX={p.translateX}
+            translateY={p.translateY}
+            verticalBorder={p.verticalBorder}
+            width={p.width}
             getCellContent={getMangledCellContent}
             isResizing={resizeCol !== undefined}
             onHeaderMenuClick={onHeaderMenuClickMangled}
             isDragging={dragColActive}
             onItemHovered={onItemHoveredImpl}
+            onDragStart={onDragStartImpl}
             onMouseDown={onMouseDownImpl}
             allowResize={onColumnResize !== undefined}
             onMouseUp={onMouseUpImpl}

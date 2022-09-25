@@ -16,7 +16,6 @@ import React from "react";
 import type { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
 import { split as splitText, clearCache } from "canvas-hypertxt";
-import type { DrawArgs } from "../data-editor/custom-cell-draw-args";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -251,6 +250,7 @@ function makeCacheKey(s: string, ctx: CanvasRenderingContext2D, baseline: "alpha
     return `${s}_${font ?? ctx.font}_${baseline}`;
 }
 
+/** @category Drawing */
 export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font?: string): TextMetrics {
     const key = makeCacheKey(s, ctx, "middle", font);
     let metrics = metricsCache[key];
@@ -268,6 +268,7 @@ export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font
     return metrics;
 }
 
+/** @category Drawing */
 export function getMiddleCenterBias(ctx: CanvasRenderingContext2D, font: string | Theme): number {
     if (typeof font !== "string") {
         font = `${font.baseFontStyle} ${font.fontFamily}`;
@@ -309,6 +310,7 @@ function getMiddleCenterBiasInner(ctx: CanvasRenderingContext2D, font: string): 
     return bias;
 }
 
+/** @category Drawing */
 export function drawWithLastUpdate(
     args: BaseDrawArgs,
     lastUpdate: number | undefined,
@@ -316,7 +318,7 @@ export function drawWithLastUpdate(
     lastPrep: PrepResult | undefined,
     draw: () => void
 ) {
-    const { ctx, x, y, w: width, h: height, theme } = args;
+    const { ctx, rect, theme } = args;
     let progress = Number.MAX_SAFE_INTEGER;
     const animTime = 500;
     if (lastUpdate !== undefined) {
@@ -326,7 +328,7 @@ export function drawWithLastUpdate(
             const fade = 1 - progress / animTime;
             ctx.globalAlpha = fade;
             ctx.fillStyle = theme.bgSearchResult;
-            ctx.fillRect(x, y, width, height);
+            ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
             ctx.globalAlpha = 1;
             if (lastPrep !== undefined) {
                 lastPrep.fillStyle = theme.bgSearchResult;
@@ -355,17 +357,15 @@ export function prepTextCell(
     return result;
 }
 
-export function drawTextCellExternal(args: DrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
+/** @category Drawing */
+export function drawTextCellExternal(args: BaseDrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
     const { rect, ctx, theme } = args;
 
     ctx.fillStyle = theme.textDark;
     drawTextCell(
         {
             ctx: ctx,
-            x: rect.x,
-            y: rect.y,
-            h: rect.height,
-            w: rect.width,
+            rect,
             theme: theme,
         },
         data,
@@ -393,14 +393,17 @@ function drawSingleTextLine(
     }
 }
 
+/** @category Drawing */
 export function drawTextCell(
-    args: Pick<BaseDrawArgs, "x" | "y" | "w" | "h" | "ctx" | "theme">,
+    args: Pick<BaseDrawArgs, "rect" | "ctx" | "theme">,
     data: string,
     contentAlign?: BaseGridCell["contentAlign"],
     allowWrapping?: boolean,
     hyperWrapping?: boolean
 ) {
-    const { ctx, x, y, w, h, theme } = args;
+    const { ctx, rect, theme } = args;
+
+    const { x, y, width: w, height: h } = rect;
 
     allowWrapping = allowWrapping ?? false;
 
@@ -484,7 +487,8 @@ export function drawTextCell(
 }
 
 export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) {
-    const { ctx, x, y, w, h, hoverAmount, theme, spriteManager } = args;
+    const { ctx, rect, hoverAmount, theme, spriteManager } = args;
+    const { x, y, width: w, height: h } = rect;
     ctx.beginPath();
     ctx.globalAlpha = hoverAmount;
     ctx.rect(x, y, w, h);
@@ -608,6 +612,7 @@ export function prepMarkerRowCell(args: BaseDrawArgs, lastPrep: PrepResult | und
         ctx.font = newFont;
         result.font = newFont;
     }
+    result.deprep = deprepMarkerRowCell;
     ctx.textAlign = "center";
     return result;
 }
@@ -624,7 +629,8 @@ export function drawMarkerRowCell(
     markerKind: "checkbox" | "both" | "number",
     drawHandle: boolean
 ) {
-    const { ctx, x, y, w: width, h: height, hoverAmount, theme } = args;
+    const { ctx, rect, hoverAmount, theme } = args;
+    const { x, y, width, height } = rect;
     const checkedboxAlpha = checked ? 1 : hoverAmount;
     if (markerKind !== "number" && checkedboxAlpha > 0) {
         ctx.globalAlpha = checkedboxAlpha;
@@ -670,7 +676,8 @@ export function drawMarkerRowCell(
 }
 
 export function drawProtectedCell(args: BaseDrawArgs) {
-    const { ctx, theme, x, y, h } = args;
+    const { ctx, theme, rect } = args;
+    const { x, y, height: h } = rect;
 
     ctx.beginPath();
 
@@ -716,6 +723,14 @@ function roundedRect(
         radius = { tl: radius, tr: radius, br: radius, bl: radius };
     }
 
+    // restrict radius to a reasonable max
+    radius = {
+        tl: Math.min(radius.tl, height / 2, width / 2),
+        tr: Math.min(radius.tr, height / 2, width / 2),
+        bl: Math.min(radius.bl, height / 2, width / 2),
+        br: Math.min(radius.br, height / 2, width / 2),
+    };
+
     ctx.moveTo(x + radius.tl, y);
     ctx.arcTo(x + width, y, x + width, y + radius.tr, radius.tr);
     ctx.arcTo(x + width, y + height, x + width - radius.br, y + height, radius.br);
@@ -728,7 +743,8 @@ export function drawBoolean(args: BaseDrawArgs, data: boolean | BooleanEmpty | B
         return;
     }
 
-    const { ctx, hoverAmount, theme, x, y, w, h, highlighted, hoverX, hoverY } = args;
+    const { ctx, hoverAmount, theme, rect, highlighted, hoverX, hoverY } = args;
+    const { x, y, width: w, height: h } = rect;
 
     const hoverEffect = 0.35;
 
@@ -749,7 +765,8 @@ export function drawBoolean(args: BaseDrawArgs, data: boolean | BooleanEmpty | B
 const itemMargin = 4;
 
 export function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
-    const { x, y, w, h, theme, ctx, highlighted } = args;
+    const { rect, theme, ctx, highlighted } = args;
+    const { x, y, width: w, height: h } = rect;
     const bubbleHeight = 20;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
@@ -863,7 +880,8 @@ function getAndCacheDrilldownBorder(
 }
 
 export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[]) {
-    const { x, y, w, h, theme, ctx, imageLoader, col, row } = args;
+    const { rect, theme, ctx, imageLoader, col, row } = args;
+    const { x, y, width: w, height: h } = rect;
     const bubbleHeight = 24;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
@@ -957,8 +975,9 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
     }
 }
 
-export function drawImage(args: BaseDrawArgs, data: readonly string[]) {
-    const { x, y, h, col, row, theme, ctx, imageLoader } = args;
+export function drawImage(args: BaseDrawArgs, data: readonly string[], rounding: number = 4) {
+    const { rect, col, row, theme, ctx, imageLoader } = args;
+    const { x, y, height: h } = rect;
     let drawX = x + theme.cellHorizontalPadding;
     for (const i of data) {
         if (i.length === 0) continue;
@@ -967,11 +986,15 @@ export function drawImage(args: BaseDrawArgs, data: readonly string[]) {
         if (img !== undefined) {
             const imgHeight = h - theme.cellVerticalPadding * 2;
             const imgWidth = img.width * (imgHeight / img.height);
-            roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, 4);
-            ctx.save();
-            ctx.clip();
+            if (rounding > 0) {
+                roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, rounding);
+                ctx.save();
+                ctx.clip();
+            }
             ctx.drawImage(img, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight);
-            ctx.restore();
+            if (rounding > 0) {
+                ctx.restore();
+            }
 
             drawX += imgWidth + itemMargin;
         }

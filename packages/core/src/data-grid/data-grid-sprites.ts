@@ -4,8 +4,10 @@ import { HeaderIconMap, sprites } from "./sprites";
 type HeaderIcon = keyof HeaderIconMap;
 type Sprite = HeaderIconMap["headerArray"];
 
+/** @category Columns */
 export type SpriteMap = Record<string | HeaderIcon, Sprite>;
 
+/** @category Columns */
 export type SpriteVariant = "normal" | "selected" | "special";
 
 function getColors(variant: SpriteVariant, theme: Theme): readonly [string, string] {
@@ -18,6 +20,7 @@ function getColors(variant: SpriteVariant, theme: Theme): readonly [string, stri
     }
 }
 
+/** @category Columns */
 export class SpriteManager {
     private spriteMap: Map<string, HTMLCanvasElement> = new Map();
     private headerIcons: SpriteMap;

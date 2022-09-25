@@ -1,4 +1,3 @@
-import { describe, test, expect } from "jest-without-globals";
 import { GridCellKind, isTextEditableGridCell } from "./data-grid-types";
 import { CompactSelection, isEditableGridCell } from "..";
 import { sprites } from "./sprites";
@@ -60,6 +59,23 @@ describe("data-grid-types", () => {
         expect(CompactSelection.empty().first()).toBeUndefined();
         expect(CompactSelection.empty().last()).toBeUndefined();
         expect(CompactSelection.empty().add(5).length).toBe(1);
+    });
+
+    test("Compact selection equals", () => {
+        const sel = CompactSelection.fromSingleSelection([3, 5]);
+        const other = CompactSelection.fromSingleSelection([3, 5]);
+
+        expect(sel.equals(other)).toBe(true);
+        expect(sel.equals(sel)).toBe(true);
+        expect(sel.equals(CompactSelection.fromSingleSelection([3, 6]))).toBe(false);
+        expect(sel.equals(CompactSelection.fromSingleSelection([4, 6]))).toBe(false);
+
+        expect(sel.some(x => x > 3)).toBe(true);
+    });
+
+    test("Compact selection toArray", () => {
+        const sel = CompactSelection.fromSingleSelection([3, 5]);
+        expect(sel.toArray()).toEqual([3, 4]);
     });
 
     test("Smoke test compact selection remove", () => {

@@ -3,11 +3,10 @@ import { BubblesOverlayEditorStyle } from "./bubbles-overlay-editor-style";
 
 interface Props {
     readonly bubbles: readonly string[];
-    readonly onKeyDown: (event: React.KeyboardEvent) => void;
 }
 
 const BubblesOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { bubbles, onKeyDown } = p;
+    const { bubbles } = p;
     return (
         <BubblesOverlayEditorStyle>
             {bubbles.map((b, i) => (
@@ -15,7 +14,7 @@ const BubblesOverlayEditor: React.FunctionComponent<Props> = p => {
                     {b}
                 </div>
             ))}
-            <textarea className="gdg-input" autoFocus={true} onKeyDown={onKeyDown} />
+            <textarea className="gdg-input" autoFocus={true} />
         </BubblesOverlayEditorStyle>
     );
 };

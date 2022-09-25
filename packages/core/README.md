@@ -6,7 +6,6 @@
 
 <p align="center">Built as the basis for the <a href="https://www.glideapps.com/data-editor" target="_blank">Glide Data Editor</a>. <a href="https://www.glideapps.com/jobs#open-positions" target="_blank">We're hiring</a>.</p>
 
-
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/data-grid-dark.png">
   <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/data-grid.png">
@@ -86,14 +85,14 @@ function getData([col, row]: Item): GridCell {
             kind: GridCellKind.Text,
             data: person.firstName,
             allowOverlay: false,
-            displayData: person.firstName
+            displayData: person.firstName,
         };
     } else if (col === 1) {
         return {
             kind: GridCellKind.Text,
             data: person.lastName,
             allowOverlay: false,
-            displayData: person.lastName
+            displayData: person.lastName,
         };
     } else {
         throw new Error();
@@ -103,7 +102,7 @@ function getData([col, row]: Item): GridCell {
 
 ## Full API documentation
 
-The full [API documentation is in the `API.md` file](API.md).
+The full [API documentation is on the main site](https://grid.glideapps.com/docs/index.html).
 
 # 📒 FAQ
 
@@ -152,6 +151,7 @@ There are some hacks you can do like setting timers and entering into a "low fid
 The easiest way to use the grid with Next is to create a component which wraps up your grid and then import it as a dynamic.
 
 home.tsx
+
 ```tsx
 import type { NextPage } from "next";
 import dynamic from "next/dynamic";
@@ -177,6 +177,7 @@ export const Home: NextPage = () => {
 ```
 
 grid.tsx
+
 ```tsx
 import React from "react";
 import DataEditor from "@glideapps/glide-data-grid";

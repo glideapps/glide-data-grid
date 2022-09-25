@@ -47,38 +47,48 @@ const closeX = (
 export interface DataGridSearchProps extends Omit<ScrollingDataGridProps, "prelightCells"> {
     readonly getCellsForSelection?: (selection: Rectangle, abortSignal: AbortSignal) => GetCellsThunk | CellArray;
     readonly onSearchResultsChanged?: (results: readonly Item[], navIndex: number) => void;
+    /**
+     * Controls the visibility of the search overlay.
+     * @group Search
+     */
     readonly showSearch?: boolean;
+    /**
+     * Emitted when the search window close event is triggered.
+     * @group Search
+     */
     readonly onSearchClose?: () => void;
+    readonly searchInputRef: React.MutableRefObject<HTMLInputElement | null>;
 }
 
 const targetSearchTimeMS = 10;
 
 const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const {
-        getCellsForSelection,
-        onSearchResultsChanged,
-        showSearch = false,
-        onSearchClose,
         canvasRef,
         cellYOffset,
         rows,
         columns,
+        searchInputRef,
+        getCellsForSelection,
+        onSearchResultsChanged,
+        showSearch = false,
+        onSearchClose,
     } = p;
 
     const [searchID] = React.useState(() => "search-box-" + Math.round(Math.random() * 1000));
 
     const [searchString, setSearchString] = React.useState("");
-    const [searchStatus, setSearchStatus] = React.useState<{
-        rowsSearched: number;
-        results: number;
-        selectedIndex: number;
-    }>();
+    const [searchStatus, setSearchStatus] =
+        React.useState<{
+            rowsSearched: number;
+            results: number;
+            selectedIndex: number;
+        }>();
 
     const searchStatusRef = React.useRef(searchStatus);
     searchStatusRef.current = searchStatus;
 
     const abortControllerRef = React.useRef(new AbortController());
-    const inputRef = React.useRef<HTMLInputElement | null>(null);
     const searchHandle = React.useRef<number>();
     const [searchResults, setSearchResults] = React.useState<readonly Item[]>([]);
 
@@ -227,11 +237,11 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     );
 
     React.useEffect(() => {
-        if (showSearch && inputRef.current !== null) {
+        if (showSearch && searchInputRef.current !== null) {
             setSearchString("");
-            inputRef.current.focus({ preventScroll: true });
+            searchInputRef.current.focus({ preventScroll: true });
         }
-    }, [showSearch]);
+    }, [showSearch, searchInputRef]);
 
     const onNext = React.useCallback(
         (ev?: React.MouseEvent) => {
@@ -319,7 +329,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         id={searchID}
                         aria-hidden={!showSearch}
                         data-testid="search-input"
-                        ref={inputRef}
+                        ref={searchInputRef}
                         onChange={onSearchChange}
                         value={searchString}
                         tabIndex={showSearch ? undefined : -1}
@@ -378,83 +388,88 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         searchString,
         showSearch,
         searchID,
+        searchInputRef,
     ]);
 
     return (
         <>
             <ScrollingDataGrid
-                // Dear future developer. I am sorry.
+                prelightCells={searchResults}
                 accessibilityHeight={p.accessibilityHeight}
+                canvasRef={p.canvasRef}
                 cellXOffset={p.cellXOffset}
                 cellYOffset={p.cellYOffset}
-                columns={p.columns}
-                enableGroups={p.enableGroups}
-                freezeColumns={p.freezeColumns}
-                preventDiagonalScrolling={p.preventDiagonalScrolling}
-                getCellContent={p.getCellContent}
-                groupHeaderHeight={p.groupHeaderHeight}
-                onCanvasFocused={p.onCanvasFocused}
-                onCanvasBlur={p.onCanvasBlur}
-                isFocused={p.isFocused}
-                clientSize={p.clientSize}
-                headerHeight={p.headerHeight}
-                onContextMenu={p.onContextMenu}
-                isFilling={p.isFilling}
-                fillHandle={p.fillHandle}
-                trailingRowType={p.trailingRowType}
-                firstColAccessible={p.firstColAccessible}
-                lockColumns={p.lockColumns}
-                rowHeight={p.rowHeight}
-                onMouseMove={p.onMouseMove}
-                rows={p.rows}
-                highlightRegions={p.highlightRegions}
-                verticalBorder={p.verticalBorder}
-                canvasRef={p.canvasRef}
                 className={p.className}
-                theme={p.theme}
+                clientSize={p.clientSize}
+                columns={p.columns}
                 disabledRows={p.disabledRows}
-                drawCustomCell={p.drawCustomCell}
-                drawHeader={p.drawHeader}
-                experimental={p.experimental}
+                enableGroups={p.enableGroups}
+                fillHandle={p.fillHandle}
+                firstColAccessible={p.firstColAccessible}
+                fixedShadowX={p.fixedShadowX}
+                fixedShadowY={p.fixedShadowY}
+                freezeColumns={p.freezeColumns}
+                getCellContent={p.getCellContent}
+                getCellRenderer={p.getCellRenderer}
                 getGroupDetails={p.getGroupDetails}
                 getRowThemeOverride={p.getRowThemeOverride}
+                groupHeaderHeight={p.groupHeaderHeight}
+                headerHeight={p.headerHeight}
+                highlightRegions={p.highlightRegions}
+                imageWindowLoader={p.imageWindowLoader}
+                initialSize={p.initialSize}
+                isFilling={p.isFilling}
+                isFocused={p.isFocused}
+                lockColumns={p.lockColumns}
+                maxColumnWidth={p.maxColumnWidth}
+                minColumnWidth={p.minColumnWidth}
+                onHeaderMenuClick={p.onHeaderMenuClick}
+                onMouseMove={p.onMouseMove}
+                onVisibleRegionChanged={p.onVisibleRegionChanged}
+                overscrollX={p.overscrollX}
+                overscrollY={p.overscrollY}
+                preventDiagonalScrolling={p.preventDiagonalScrolling}
+                rightElement={p.rightElement}
+                rightElementProps={p.rightElementProps}
+                rowHeight={p.rowHeight}
+                rows={p.rows}
+                scrollRef={p.scrollRef}
+                selection={p.selection}
+                showMinimap={p.showMinimap}
+                theme={p.theme}
+                trailingRowType={p.trailingRowType}
+                translateX={p.translateX}
+                translateY={p.translateY}
+                verticalBorder={p.verticalBorder}
+                drawCustomCell={p.drawCustomCell}
+                drawFocusRing={p.drawFocusRing}
+                drawHeader={p.drawHeader}
+                experimental={p.experimental}
                 gridRef={p.gridRef}
                 headerIcons={p.headerIcons}
                 isDraggable={p.isDraggable}
-                onDragEnd={p.onDragEnd}
-                minColumnWidth={p.minColumnWidth}
-                maxColumnWidth={p.maxColumnWidth}
+                onCanvasBlur={p.onCanvasBlur}
+                onCanvasFocused={p.onCanvasFocused}
                 onCellFocused={p.onCellFocused}
                 onColumnMoved={p.onColumnMoved}
                 onColumnResize={p.onColumnResize}
-                onColumnResizeStart={p.onColumnResizeStart}
                 onColumnResizeEnd={p.onColumnResizeEnd}
-                onDragStart={p.onDragStart}
-                onDragOverCell={p.onDragOverCell}
+                onColumnResizeStart={p.onColumnResizeStart}
+                onContextMenu={p.onContextMenu}
+                onDragEnd={p.onDragEnd}
                 onDragLeave={p.onDragLeave}
+                onDragOverCell={p.onDragOverCell}
+                onDragStart={p.onDragStart}
                 onDrop={p.onDrop}
-                onHeaderMenuClick={p.onHeaderMenuClick}
                 onItemHovered={p.onItemHovered}
+                onKeyDown={p.onKeyDown}
                 onKeyUp={p.onKeyUp}
                 onMouseDown={p.onMouseDown}
                 onMouseUp={p.onMouseUp}
                 onRowMoved={p.onRowMoved}
-                onVisibleRegionChanged={p.onVisibleRegionChanged}
-                overscrollX={p.overscrollX}
-                overscrollY={p.overscrollY}
-                rightElement={p.rightElement}
-                rightElementProps={p.rightElementProps}
-                scrollRef={p.scrollRef}
-                scrollToEnd={p.scrollToEnd}
-                selection={p.selection}
-                showMinimap={p.showMinimap}
                 smoothScrollX={p.smoothScrollX}
                 smoothScrollY={p.smoothScrollY}
-                translateX={p.translateX}
-                translateY={p.translateY}
-                onKeyDown={p.onKeyDown}
-                // handled props
-                prelightCells={searchResults}
+                scrollToEnd={p.scrollToEnd}
             />
             {searchbox}
         </>

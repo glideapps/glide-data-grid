@@ -7,10 +7,11 @@ const shared = {
     entryPoints: ["src/index.ts"],
     bundle: true,
     minify: false,
+    sourcemap: true,
     target: "es2018",
     plugins: [
         linaria({
-            sourceMap: false,
+            sourceMap: true,
         }),
     ],
     external: Object.keys(dependencies).concat(Object.keys(peerDependencies)),
@@ -25,7 +26,8 @@ async function f() {
 
     await build({
         ...shared,
-        outfile: "dist/js/index.js",
+        splitting: true,
+        outdir: "dist/js",
         format: "esm",
     });
 

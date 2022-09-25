@@ -1,5 +1,4 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import { describe, test, expect, beforeEach } from "jest-without-globals";
 import * as React from "react";
 import { render, fireEvent, screen, act, createEvent } from "@testing-library/react";
 import {
@@ -74,7 +73,7 @@ const makeCell = (cell: Item): GridCell => {
                 kind: GridCellKind.Boolean,
                 allowOverlay: false,
                 data: getMockBooleanData(row),
-                readonly: false,
+                readonly: row === 5,
             };
         }
         case 8: {
@@ -1166,7 +1165,7 @@ describe("data-editor", () => {
         render(<DataEditor {...basicProps} onCellEdited={spy} />, {
             wrapper: Context,
         });
-        prep();
+        prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
         fireEvent.mouseDown(canvas, {
@@ -1179,6 +1178,10 @@ describe("data-editor", () => {
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
 
+        act(() => {
+            jest.runAllTimers();
+        });
+
         fireEvent.keyDown(canvas, {
             keyCode: 74,
             key: "j",
@@ -1189,10 +1192,13 @@ describe("data-editor", () => {
             key: "j",
         });
 
+        act(() => {
+            jest.runAllTimers();
+        });
+
         const overlay = screen.getByDisplayValue("j");
         expect(overlay).toBeInTheDocument();
 
-        jest.useFakeTimers();
         fireEvent.keyDown(overlay, {
             key: "Enter",
         });
@@ -1256,6 +1262,71 @@ describe("data-editor", () => {
         fireEvent.mouseUp(canvas, { clientX: emptyX, clientY: emptyY });
 
         expect(spy).toBeCalledWith([7, 3], expect.objectContaining({ data: true }));
+    });
+
+    test("Directly toggle readonly booleans", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<DataEditor {...basicProps} onCellEdited={spy} ref={ref} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        // We need to be focused on the grid for booleans to toggle automatically
+        act(() => {
+            ref.current?.focus();
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
+
+        // [7, 0] is a checked boolean readonly
+        const [checkedX, checkedY] = getCellCenterPositionForDefaultGrid([7, 5]);
+
+        fireEvent.mouseDown(canvas, { clientX: checkedX, clientY: checkedY });
+        fireEvent.mouseUp(canvas, { clientX: checkedX, clientY: checkedY });
+
+        expect(spy).not.toBeCalled();
+    });
+
+    test("Toggle readonly boolean with space", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<DataEditor {...basicProps} onCellEdited={spy} ref={ref} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        // We need to be focused on the grid for booleans to toggle automatically
+        act(() => {
+            ref.current?.focus();
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        // [7, 0] is a checked boolean readonly
+        const [checkedX, checkedY] = getCellCenterPositionForDefaultGrid([7, 5]);
+
+        fireEvent.mouseDown(canvas, { clientX: checkedX + 20, clientY: checkedY });
+        fireEvent.mouseUp(canvas, { clientX: checkedX + 20, clientY: checkedY });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: " ",
+        });
+
+        expect(spy).not.toBeCalled();
     });
 
     test("Arrow left", async () => {
@@ -2534,7 +2605,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1, 200);
     });
 
     test("Auto Resize Column", async () => {
@@ -2566,7 +2637,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 50, 1);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 50, 1, 50);
     });
 
     test("Resize Column End Called", async () => {
@@ -2593,7 +2664,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1, 200);
     });
 
     test("Resize Multiple Column", async () => {
@@ -2666,7 +2737,7 @@ describe("data-editor", () => {
             clientY: 16,
         });
 
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1);
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1, 200);
     });
 
     test("Drag reorder row", async () => {
@@ -2731,9 +2802,17 @@ describe("data-editor", () => {
     test("Select all", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} rowMarkers="both" onGridSelectionChange={spy} />, {
-            wrapper: Context,
-        });
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                experimental={{ renderStrategy: "double-buffer" }}
+                rowMarkers="both"
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
@@ -2960,6 +3039,147 @@ describe("data-editor", () => {
         });
     });
 
+    test("Imperative scrollTo false fire", async () => {
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        act(() => {
+            ref.current?.scrollTo(5, 10);
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+        expect(Element.prototype.scrollTo).not.toBeCalled();
+    });
+
+    test("Imperative scrollTo cell", async () => {
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        act(() => {
+            ref.current?.scrollTo(5, 500);
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+        expect(Element.prototype.scrollTo).toBeCalledWith(0, 15_101);
+    });
+
+    test("Imperative scrollTo pixel", async () => {
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        act(() => {
+            ref.current?.scrollTo(5, {
+                amount: 1500,
+                unit: "px",
+            });
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+        expect(Element.prototype.scrollTo).toBeCalledWith(0, 533);
+    });
+
+    test("Imperative scrollTo pixel start", async () => {
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        act(() => {
+            ref.current?.scrollTo(
+                5,
+                {
+                    amount: 1500,
+                    unit: "px",
+                },
+                undefined,
+                undefined,
+                undefined,
+                {
+                    vAlign: "start",
+                }
+            );
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+        expect(Element.prototype.scrollTo).toBeCalledWith(0, 1464);
+    });
+
+    test("Imperative scrollTo pixel center", async () => {
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        act(() => {
+            ref.current?.scrollTo(
+                5,
+                {
+                    amount: 1500,
+                    unit: "px",
+                },
+                undefined,
+                undefined,
+                undefined,
+                {
+                    vAlign: "center",
+                }
+            );
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+        expect(Element.prototype.scrollTo).toBeCalledWith(0, 998.5);
+    });
+
+    test("Imperative scrollTo pixel end", async () => {
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        act(() => {
+            ref.current?.scrollTo(
+                5,
+                {
+                    amount: 1500,
+                    unit: "px",
+                },
+                undefined,
+                undefined,
+                undefined,
+                {
+                    vAlign: "end",
+                }
+            );
+        });
+        act(() => {
+            jest.runAllTimers();
+        });
+        expect(Element.prototype.scrollTo).toBeCalledWith(0, 533);
+    });
+
     test("Imperative damage gets right cell", async () => {
         const spy = jest.fn(basicProps.getCellContent);
         jest.useFakeTimers();
@@ -2975,6 +3195,70 @@ describe("data-editor", () => {
         });
 
         expect(spy).toBeCalledWith([1, 0]);
+    });
+
+    test("On-scroll does not spuriously fire on select", async () => {
+        const spy = jest.fn(basicProps.getCellContent);
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rowMarkers="number" getCellContent={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 965,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 965,
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(Element.prototype.scrollTo).not.toBeCalled();
+    });
+
+    test("Keyboard scroll with controlled selection does not double fire", async () => {
+        const spy = jest.fn(basicProps.getCellContent);
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor ref={ref} {...basicProps} rowMarkers="number" getCellContent={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 965,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 965,
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        // make sure we clear the mock in case a spurios scroll was emitted (test above)
+        (Element.prototype.scrollTo as jest.Mock).mockClear();
+
+        fireEvent.keyDown(canvas, { key: "ArrowDown" });
+        fireEvent.keyUp(canvas, { key: "ArrowDown" });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(Element.prototype.scrollTo).toBeCalledTimes(1);
     });
 
     test("Ctrl Arrow keys", async () => {

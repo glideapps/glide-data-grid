@@ -1,9 +1,10 @@
 import {
     CustomCell,
     ProvideEditorCallback,
-    CustomCellRenderer,
+    CustomRenderer,
     getMiddleCenterBias,
     useTheme,
+    GridCellKind,
 } from "@glideapps/glide-data-grid";
 import { styled } from "@linaria/react";
 import * as React from "react";
@@ -57,6 +58,15 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
 
     const theme = useTheme();
 
+    const values = React.useMemo(
+        () =>
+            allowedValues.map(x => ({
+                value: x,
+                label: x,
+            })),
+        [allowedValues]
+    );
+
     return (
         <Wrap>
             <Select
@@ -64,7 +74,7 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                 inputValue={inputValue}
                 onInputChange={setInputValue}
                 menuPlacement={"auto"}
-                value={{ value, label: value }}
+                value={values.find(x => x.value === value)}
                 styles={{
                     control: base => ({
                         ...base,
@@ -109,13 +119,11 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                         </PortalWrap>
                     ),
                 }}
-                options={allowedValues.map(x => ({
-                    value: x,
-                    label: x,
-                }))}
-                onChange={e => {
+                options={values}
+                onChange={async e => {
                     if (e === null) return;
                     setValue(e.value);
+                    await new Promise(r => window.requestAnimationFrame(r));
                     onFinishedEditing({
                         ...cell,
                         data: {
@@ -129,7 +137,8 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
     );
 };
 
-const renderer: CustomCellRenderer<DropdownCell> = {
+const renderer: CustomRenderer<DropdownCell> = {
+    kind: GridCellKind.Custom,
     isMatch: (c): c is DropdownCell => (c.data as any).kind === "dropdown-cell",
     draw: (args, cell) => {
         const { ctx, theme, rect } = args;

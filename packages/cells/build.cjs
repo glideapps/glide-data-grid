@@ -1,6 +1,7 @@
 const { build } = require("esbuild");
+const glob = require("glob");
 const linaria = require("@linaria/esbuild/lib/index").default;
-const { dependencies } = require("./package.json");
+const { dependencies, peerDependencies } = require("./package.json");
 const fs = require("fs");
 
 const shared = {
@@ -13,7 +14,7 @@ const shared = {
             sourceMap: false,
         }),
     ],
-    external: Object.keys(dependencies),
+    external: Object.keys(dependencies).concat(["react", "react-dom", "styled-components"]),
 };
 
 async function f() {
@@ -25,12 +26,19 @@ async function f() {
 
     await build({
         ...shared,
-        outfile: "dist/js/index.js",
+        splitting: true,
+        outdir: "dist/js",
         format: "esm",
     });
 
-    fs.copyFileSync("dist/js/index.css", "dist/index.css");
-    fs.rmSync("dist/js/index.css");
+    fs.copyFileSync("dist/cjs/index.css", "dist/index.css");
+    glob("dist/js/*.css", {}, function (_er, files) {
+        // files is an array of filenames.
+        // If the `nonull` option is set, and nothing
+        // was found, then files is ["**/*.js"]
+        // er is an error object or null.
+        files.forEach(f => fs.rmSync(f));
+    });
     fs.rmSync("dist/cjs/index.css");
 }
 

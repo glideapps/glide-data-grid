@@ -3,15 +3,16 @@ import { createPortal } from "react-dom";
 
 import ClickOutsideContainer from "../click-outside-container/click-outside-container";
 import { makeCSSStyle, Theme, ThemeContext } from "../common/styles";
-import { CellRenderers } from "../data-grid/cells";
+import type { GetCellRendererCallback } from "../data-grid/cells/cell-types";
 import {
     EditableGridCell,
     GridCell,
-    GridCellKind,
     isEditableGridCell,
+    isInnerOnlyCell,
     isObjectEditorCallbackResult,
     Item,
     ProvideEditorCallback,
+    ProvideEditorCallbackResult,
     Rectangle,
     ValidatedGridCell,
 } from "../data-grid/data-grid-types";
@@ -33,6 +34,7 @@ interface DataGridOverlayEditorProps {
     readonly forceEditMode: boolean;
     readonly highlight: boolean;
     readonly imageEditorOverride?: ImageEditorType;
+    readonly getCellRenderer: GetCellRendererCallback;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
     readonly provideEditor?: ProvideEditorCallback<GridCell>;
     readonly validateCell?: (
@@ -57,6 +59,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         id,
         cell,
         validateCell,
+        getCellRenderer,
         provideEditor,
     } = p;
 
@@ -102,7 +105,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         finished.current = true;
     }, [tempValue, onFinishEditing]);
 
-    const onCustomFinishedEditing = React.useCallback(
+    const onEditorFinished = React.useCallback(
         (newValue: GridCell | undefined) => {
             onFinishEditing(newValue, customMotion.current ?? [0, 0]);
             finished.current = true;
@@ -110,7 +113,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         [onFinishEditing]
     );
 
-    const onKeyDownCustom = React.useCallback(
+    const onKeyDown = React.useCallback(
         async (event: React.KeyboardEvent) => {
             let save = false;
             if (event.key === "Escape") {
@@ -129,45 +132,24 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 save = true;
             }
 
-            await new Promise(r => window.setTimeout(r, 0));
-
-            if (!finished.current && customMotion.current !== undefined) {
-                onFinishEditing(save ? tempValue : undefined, customMotion.current);
-                finished.current = true;
-            }
+            window.setTimeout(() => {
+                if (!finished.current && customMotion.current !== undefined) {
+                    onFinishEditing(save ? tempValue : undefined, customMotion.current);
+                    finished.current = true;
+                }
+            }, 0);
         },
         [onFinishEditing, tempValue]
     );
 
-    const onKeyDown = React.useCallback(
-        (event: React.KeyboardEvent) => {
-            if (event.key === "Escape") {
-                onFinishEditing(undefined, [0, 0]);
-                event.stopPropagation();
-                event.preventDefault();
-            } else if (event.key === "Enter" && !event.ctrlKey) {
-                onFinishEditing(tempValue, [0, event.shiftKey ? -1 : 1]);
-                event.stopPropagation();
-                event.preventDefault();
-            } else if (event.key === "Tab") {
-                onFinishEditing(tempValue, [event.shiftKey ? -1 : 1, 0]);
-                event.stopPropagation();
-                event.preventDefault();
-            }
-        },
-        [onFinishEditing, tempValue]
-    );
     const targetValue = tempValue ?? content;
 
-    const customEditor = React.useMemo(() => {
-        return provideEditor?.(content);
-    }, [content, provideEditor]);
-
-    const [CellEditor, useLabel] = React.useMemo(() => {
-        if (content.kind === GridCellKind.Custom) return [];
-        const renderer = CellRenderers[content.kind];
-        return [renderer.getEditor?.(content), renderer.useLabel];
-    }, [content]);
+    const [editorProvider, useLabel] = React.useMemo((): [ProvideEditorCallbackResult<GridCell>, boolean] | [] => {
+        if (isInnerOnlyCell(content)) return [];
+        const external = provideEditor?.(content);
+        if (external !== undefined) return [external, false];
+        return [getCellRenderer(content)?.provideEditor?.(content), false];
+    }, [content, getCellRenderer, provideEditor]);
 
     const { ref, style: stayOnScreenStyle } = useStayOnScreen();
 
@@ -176,38 +158,27 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     let style = true;
     let styleOverride: React.CSSProperties | undefined;
 
-    if (customEditor !== undefined) {
-        pad = customEditor.disablePadding !== true;
-        style = customEditor.disableStyling !== true;
-        const isObjectEditor = isObjectEditorCallbackResult(customEditor);
+    if (editorProvider !== undefined) {
+        pad = editorProvider.disablePadding !== true;
+        style = editorProvider.disableStyling !== true;
+        const isObjectEditor = isObjectEditorCallbackResult(editorProvider);
         if (isObjectEditor) {
-            styleOverride = customEditor.styleOverride;
+            styleOverride = editorProvider.styleOverride;
         }
-        const CustomEditor = isObjectEditor ? customEditor.editor : customEditor;
+        const CustomEditor = isObjectEditor ? editorProvider.editor : editorProvider;
         editor = (
             <CustomEditor
                 isHighlighted={highlight}
                 onChange={setTempValue}
                 value={targetValue}
                 initialValue={initialValue}
-                onFinishedEditing={onCustomFinishedEditing}
+                onFinishedEditing={onEditorFinished}
                 validatedSelection={isEditableGridCell(targetValue) ? targetValue.selectionRange : undefined}
-            />
-        );
-    } else if (CellEditor !== undefined) {
-        editor = (
-            <CellEditor
                 forceEditMode={forceEditMode}
-                isHighlighted={highlight}
-                onChange={setTempValue as any}
-                value={targetValue}
-                onFinishedEditing={e => onFinishEditing((e ?? tempValue) as GridCell | undefined, [0, 0])}
-                onKeyDown={onKeyDown}
                 target={target}
                 imageEditorOverride={imageEditorOverride}
                 markdownDivCreateNode={markdownDivCreateNode}
                 isValid={isValid}
-                validatedSelection={isEditableGridCell(targetValue) ? targetValue.selectionRange : undefined}
             />
         );
     }
@@ -246,7 +217,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                     targetY={target.y}
                     targetWidth={target.width}
                     targetHeight={target.height}>
-                    <div className="clip-region" onKeyDown={customEditor === undefined ? undefined : onKeyDownCustom}>
+                    <div className="clip-region" onKeyDown={onKeyDown}>
                         {editor}
                     </div>
                 </DataGridOverlayEditorStyle>
