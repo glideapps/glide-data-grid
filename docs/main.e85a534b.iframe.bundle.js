@@ -6967,7 +6967,6 @@ const DataEditorImpl = (p, forwardedRef) => {
       const moved = updateSelectedCell(col, row, false, freeMove);
 
       if (moved) {
-        console.log("Cancel");
         cancel();
       }
     };
@@ -32752,7 +32751,6 @@ var DataEditorImpl = (p, forwardedRef) => {
       const moved = updateSelectedCell(col, row, false, freeMove);
 
       if (moved) {
-        console.log("Cancel");
         cancel();
       }
     };
@@ -33319,4 +33317,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.a24e13fa.iframe.bundle.js.map
+//# sourceMappingURL=main.e85a534b.iframe.bundle.js.map
