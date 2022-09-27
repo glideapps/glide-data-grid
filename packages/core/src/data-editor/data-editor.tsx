@@ -2842,6 +2842,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                 const moved = updateSelectedCell(col, row, false, freeMove);
                 if (moved) {
+                    console.log("Cancel");
                     cancel();
                 }
             };

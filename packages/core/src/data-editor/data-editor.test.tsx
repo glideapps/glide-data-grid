@@ -393,7 +393,7 @@ describe("data-editor", () => {
         render(<DataEditor {...basicProps} onCellActivated={spy} />, {
             wrapper: Context,
         });
-        prep();
+        prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
         fireEvent.mouseDown(canvas, {
@@ -410,6 +410,8 @@ describe("data-editor", () => {
             key: "Enter",
         });
 
+        jest.runAllTimers();
+
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1]);
     });
@@ -421,7 +423,7 @@ describe("data-editor", () => {
         render(<DataEditor {...basicProps} onCellActivated={spy} />, {
             wrapper: Context,
         });
-        prep();
+        prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
         fireEvent.mouseDown(canvas, {
@@ -437,6 +439,8 @@ describe("data-editor", () => {
         fireEvent.keyDown(canvas, {
             key: " ",
         });
+
+        jest.runAllTimers();
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1]);
@@ -3708,7 +3712,7 @@ describe("data-editor", () => {
                 wrapper: Context,
             }
         );
-        prep();
+        prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
         fireEvent.mouseDown(canvas, {
@@ -3724,6 +3728,8 @@ describe("data-editor", () => {
         fireEvent.keyDown(canvas, {
             key: "Enter",
         });
+
+        jest.runAllTimers();
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
