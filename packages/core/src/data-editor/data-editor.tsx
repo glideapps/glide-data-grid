@@ -2700,8 +2700,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             void appendRow(customTargetColumn ?? col);
                         }, 0);
                     } else {
-                        onCellActivated?.([col - rowMarkerOffset, row]);
-                        reselect(bounds, true);
+                        // Timeout ensures the newly created editor does not pick up the event... somehow.
+                        // Honestly I have no idea how that happens.
+                        window.setTimeout(() => {
+                            onCellActivated?.([col - rowMarkerOffset, row]);
+                            reselect(bounds, true);
+                        }, 0);
                         cancel();
                     }
                 } else if (
