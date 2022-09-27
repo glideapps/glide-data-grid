@@ -6967,6 +6967,7 @@ const DataEditorImpl = (p, forwardedRef) => {
       const moved = updateSelectedCell(col, row, false, freeMove);
 
       if (moved) {
+        console.log("Cancel");
         cancel();
       }
     };
@@ -17791,8 +17792,8 @@ const DataGrid = (p, forwardedRef) => {
 
     onKeyDown === null || onKeyDown === void 0 ? void 0 : onKeyDown({
       bounds,
-      stopPropagation: event.stopPropagation,
-      preventDefault: event.preventDefault,
+      stopPropagation: () => event.stopPropagation(),
+      preventDefault: () => event.preventDefault(),
       cancel: () => undefined,
       ctrlKey: event.ctrlKey,
       metaKey: event.metaKey,
@@ -17814,8 +17815,8 @@ const DataGrid = (p, forwardedRef) => {
 
     onKeyUp === null || onKeyUp === void 0 ? void 0 : onKeyUp({
       bounds,
-      stopPropagation: event.stopPropagation,
-      preventDefault: event.preventDefault,
+      stopPropagation: () => event.stopPropagation(),
+      preventDefault: () => event.preventDefault(),
       cancel: () => undefined,
       ctrlKey: event.ctrlKey,
       metaKey: event.metaKey,
@@ -27659,8 +27660,8 @@ var DataGrid = (p, forwardedRef) => {
 
     onKeyDown == null ? void 0 : onKeyDown({
       bounds,
-      stopPropagation: event.stopPropagation,
-      preventDefault: event.preventDefault,
+      stopPropagation: () => event.stopPropagation(),
+      preventDefault: () => event.preventDefault(),
       cancel: () => void 0,
       ctrlKey: event.ctrlKey,
       metaKey: event.metaKey,
@@ -27682,8 +27683,8 @@ var DataGrid = (p, forwardedRef) => {
 
     onKeyUp == null ? void 0 : onKeyUp({
       bounds,
-      stopPropagation: event.stopPropagation,
-      preventDefault: event.preventDefault,
+      stopPropagation: () => event.stopPropagation(),
+      preventDefault: () => event.preventDefault(),
       cancel: () => void 0,
       ctrlKey: event.ctrlKey,
       metaKey: event.metaKey,
@@ -32751,6 +32752,7 @@ var DataEditorImpl = (p, forwardedRef) => {
       const moved = updateSelectedCell(col, row, false, freeMove);
 
       if (moved) {
+        console.log("Cancel");
         cancel();
       }
     };
@@ -33317,4 +33319,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.dd04f341.iframe.bundle.js.map
+//# sourceMappingURL=main.a24e13fa.iframe.bundle.js.map
