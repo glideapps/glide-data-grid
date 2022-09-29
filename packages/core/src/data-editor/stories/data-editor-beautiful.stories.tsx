@@ -3370,25 +3370,16 @@ export const LayoutIntegration: React.VFC = () => {
             <Description>Trying the grid in different situations</Description>
             <DataEditor
                 {...defaultProps}
-                className="white"
                 getCellContent={getCellContent}
                 columns={cols}
                 rows={10}
                 rowMarkers="both"
                 height={200}
             />
-            <DataEditor
-                {...defaultProps}
-                className="white"
-                getCellContent={getCellContent}
-                columns={cols}
-                rows={10}
-                rowMarkers="both"
-            />
+            <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={10} rowMarkers="both" />
             <div style={{ display: "flex", height: "300px" }}>
                 <DataEditor
                     {...defaultProps}
-                    className="white"
                     getCellContent={getCellContent}
                     columns={cols}
                     rows={10}
