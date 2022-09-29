@@ -15487,7 +15487,7 @@ function blitLastFrame(ctx, canvas, last, cellXOffset, cellYOffset, translateX, 
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-    if (deltaX !== 0 && deltaY === 0 && doubleBuffer) {
+    if (stickyWidth > 0 && deltaX !== 0 && deltaY === 0 && doubleBuffer) {
       ctx.drawImage(canvas, 0, 0, stickyWidth * dpr, height * dpr, 0, 0, stickyWidth * dpr, height * dpr);
     }
 
@@ -25370,7 +25370,7 @@ function blitLastFrame(ctx, canvas, last, cellXOffset, cellYOffset, translateX, 
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-    if (deltaX !== 0 && deltaY === 0 && doubleBuffer) {
+    if (stickyWidth > 0 && deltaX !== 0 && deltaY === 0 && doubleBuffer) {
       ctx.drawImage(canvas, 0, 0, stickyWidth * dpr, height * dpr, 0, 0, stickyWidth * dpr, height * dpr);
     }
 
@@ -33317,4 +33317,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.e85a534b.iframe.bundle.js.map
+//# sourceMappingURL=main.8f2a1536.iframe.bundle.js.map
