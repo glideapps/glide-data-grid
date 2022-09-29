@@ -306,7 +306,7 @@ function blitLastFrame(
         }
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        if (deltaX !== 0 && deltaY === 0 && doubleBuffer) {
+        if (stickyWidth > 0 && deltaX !== 0 && deltaY === 0 && doubleBuffer) {
             // When double buffering the freeze columns can be offset by a couple pixels vertically between the two
             // buffers. We don't want to redraw them so we need to make sure to copy them.
             ctx.drawImage(canvas, 0, 0, stickyWidth * dpr, height * dpr, 0, 0, stickyWidth * dpr, height * dpr);
