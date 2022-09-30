@@ -15752,7 +15752,7 @@ function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, ho
       }
     }
 
-    if (verticalBorder(span[0])) {
+    if (x !== 0 && verticalBorder(span[0])) {
       ctx.beginPath();
       ctx.moveTo(x + 0.5, 0);
       ctx.lineTo(x + 0.5, groupHeaderHeight);
@@ -25632,7 +25632,7 @@ function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, ho
       }
     }
 
-    if (verticalBorder(span[0])) {
+    if (x !== 0 && verticalBorder(span[0])) {
       ctx.beginPath();
       ctx.moveTo(x + 0.5, 0);
       ctx.lineTo(x + 0.5, groupHeaderHeight);
@@ -33332,4 +33332,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.20ccf478.iframe.bundle.js.map
+//# sourceMappingURL=main.ebaf038f.iframe.bundle.js.map
