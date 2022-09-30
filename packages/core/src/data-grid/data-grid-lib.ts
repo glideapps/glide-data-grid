@@ -548,20 +548,45 @@ export function drawCheckbox(
     const centerX = x + width / 2;
     const centerY = y + height / 2;
 
-    const hovered = Math.abs(hoverX - width / 2) < 10 && Math.abs(hoverY - height / 2) < 10;
+    const checkBoxWidth = height / 1.888_888_889; // checkbox width proportional to cell height
+    const emptyCheckBoxWidth = height / 2;
+
+    const hoverHelper = height / 3.4;
+    const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;
+
+    const rectBordRadius = 4;
+    const posHelperChecked = height / 4.25; //for default cell height (34px) this equals to 8px
+    const posHelperEmpty = height / 4; // 8.5px
+    const posHelperInter = height / 8.5; // 4px
 
     switch (checked) {
         case true: {
             ctx.beginPath();
-            roundedRect(ctx, centerX - 9, centerY - 9, 18, 18, 4);
+            roundedRect(
+                ctx,
+                centerX - checkBoxWidth / 2,
+                centerY - checkBoxWidth / 2,
+                checkBoxWidth,
+                checkBoxWidth,
+                rectBordRadius
+            );
 
             ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
             ctx.fill();
 
             ctx.beginPath();
-            ctx.moveTo(centerX - 8 + 3.650_05, centerY - 8 + 7.849_95);
-            ctx.lineTo(centerX - 8 + 6.375_87, centerY - 8 + 10.7304);
-            ctx.lineTo(centerX - 8 + 11.9999, centerY - 8 + 4.749_95);
+            ctx.moveTo(
+                centerX - posHelperChecked + height / 9.314_940_891,
+                centerY - posHelperChecked + height / 4.331_237_779
+            );
+            ctx.lineTo(
+                centerX - posHelperChecked + height / 5.332_605_589,
+                centerY - posHelperChecked + height / 3.168_567_807
+            );
+            ctx.lineTo(
+                centerX - posHelperChecked + height / 2.833_356_945,
+                centerY - posHelperChecked + height / 7.157_970_084
+            );
 
             ctx.strokeStyle = theme.bgCell;
             ctx.lineJoin = "round";
@@ -574,7 +599,14 @@ export function drawCheckbox(
         case BooleanEmpty:
         case false: {
             ctx.beginPath();
-            roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
+            roundedRect(
+                ctx,
+                centerX - posHelperEmpty,
+                centerY - posHelperEmpty,
+                emptyCheckBoxWidth,
+                emptyCheckBoxWidth,
+                rectBordRadius
+            );
 
             ctx.lineWidth = 1;
             ctx.strokeStyle = hovered ? theme.textDark : theme.textMedium;
@@ -584,14 +616,21 @@ export function drawCheckbox(
 
         case BooleanIndeterminate: {
             ctx.beginPath();
-            roundedRect(ctx, centerX - 8.5, centerY - 8.5, 17, 17, 4);
+            roundedRect(
+                ctx,
+                centerX - posHelperEmpty,
+                centerY - posHelperEmpty,
+                emptyCheckBoxWidth,
+                emptyCheckBoxWidth,
+                rectBordRadius
+            );
 
             ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
             ctx.fill();
 
             ctx.beginPath();
-            ctx.moveTo(centerX - 4, centerY);
-            ctx.lineTo(centerX + 4, centerY);
+            ctx.moveTo(centerX - posHelperInter, centerY);
+            ctx.lineTo(centerX + posHelperInter, centerY);
             ctx.strokeStyle = theme.bgCell;
             ctx.lineCap = "round";
             ctx.lineWidth = 1.9;
