@@ -3761,6 +3761,97 @@ describe("data-editor", () => {
         expect(spy).toBeCalledTimes(2);
     });
 
+    test("Use fill handle into blank", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} rows={3} onCellEdited={spy} fillHandle={true} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 290,
+            clientY: 36 + 30,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 290,
+            clientY: 36 + 30,
+        });
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 308,
+            clientY: 36 + 30,
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 308,
+            clientY: 36 + 32 * 5 + 16,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 308,
+            clientY: 36 + 32 * 5 + 16,
+        });
+
+        expect(spy).toBeCalledTimes(2);
+    });
+
+    test("Use fill handle into trailing row", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                rows={3}
+                onCellEdited={spy}
+                fillHandle={true}
+                onRowAppended={() => undefined}
+                trailingRowOptions={{
+                    sticky: true,
+                }}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 290,
+            clientY: 36 + 30,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 290,
+            clientY: 36 + 30,
+        });
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 308,
+            clientY: 36 + 30,
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 308,
+            clientY: 800,
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 308,
+            clientY: 995,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 308,
+            clientY: 995,
+        });
+
+        expect(spy).toBeCalledTimes(2);
+    });
+
     test("Close overlay with enter key", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();

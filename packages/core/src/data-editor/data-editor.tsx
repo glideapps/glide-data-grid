@@ -1947,6 +1947,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             if (isOutside) return;
 
+            if (mouse?.fillHandle === true && gridSelection.current !== undefined) {
+                fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
+                return;
+            }
+
             const [col, row] = args.location;
             const [lastMouseDownCol, lastMouseDownRow] = lastMouseSelectLocation.current ?? [];
 
@@ -1955,10 +1960,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             };
 
             const handleMaybeClick = (a: GridMouseCellEventArgs): boolean => {
-                if (mouse?.fillHandle === true && gridSelection.current !== undefined) {
-                    fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
-                    return false;
-                }
                 if (a.isTouch || (lastMouseDownCol === col && lastMouseDownRow === row)) {
                     onCellClicked?.([col - rowMarkerOffset, row], {
                         ...a,
@@ -2237,9 +2238,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     row = visibleRegionRef.current.y;
                 }
 
-                const landedOnLastStickyRow = lastRowSticky && row === rows;
                 const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
-                if (landedOnLastStickyRow || startedFromLastStickyRow) return;
+                if (startedFromLastStickyRow) return;
+
+                const landedOnLastStickyRow = lastRowSticky && row === rows;
+                if (landedOnLastStickyRow) {
+                    if (args.kind === outOfBoundsKind) row--;
+                    else return;
+                }
 
                 col = Math.max(col, rowMarkerOffset);
 
