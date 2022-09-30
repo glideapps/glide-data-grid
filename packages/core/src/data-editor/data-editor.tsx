@@ -1954,15 +1954,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             };
 
             const handleMaybeClick = (a: GridMouseCellEventArgs): boolean => {
-                if (lastMouseDownCol === col && lastMouseDownRow === row) {
+                if (mouse?.fillHandle === true && gridSelection.current !== undefined) {
+                    fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
+                    return false;
+                }
+                if (a.isTouch || (lastMouseDownCol === col && lastMouseDownRow === row)) {
                     onCellClicked?.([col - rowMarkerOffset, row], {
                         ...a,
                         preventDefault,
                     });
                 }
-                if (mouse?.fillHandle === true && gridSelection.current !== undefined) {
-                    fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
-                } else if (!isPrevented.current) {
+                if (!isPrevented.current) {
                     const c = getMangledCellContent(args.location);
                     const r = getCellRenderer(c);
                     if (r !== undefined && r.onClick !== undefined) {

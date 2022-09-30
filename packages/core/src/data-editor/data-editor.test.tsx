@@ -352,6 +352,38 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
     });
 
+    test("Emits cell click with touch", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellClicked={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.touchStart(canvas, {
+            touches: [
+                {
+                    clientX: 300, // Col B
+                    clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+                },
+            ],
+        });
+
+        fireEvent.touchEnd(canvas, {
+            changedTouches: [
+                {
+                    clientX: 300, // Col B
+                    clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+                },
+            ],
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    });
+
     test("Emits activated event on double click", async () => {
         const spy = jest.fn();
 
