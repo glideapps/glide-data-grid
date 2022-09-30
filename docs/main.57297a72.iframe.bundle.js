@@ -6168,15 +6168,18 @@ const DataEditorImpl = (p, forwardedRef) => {
     };
 
     const handleMaybeClick = a => {
-      if (lastMouseDownCol === col && lastMouseDownRow === row) {
+      if ((mouse === null || mouse === void 0 ? void 0 : mouse.fillHandle) === true && gridSelection.current !== undefined) {
+        fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
+        return false;
+      }
+
+      if (a.isTouch || lastMouseDownCol === col && lastMouseDownRow === row) {
         onCellClicked === null || onCellClicked === void 0 ? void 0 : onCellClicked([col - rowMarkerOffset, row], { ...a,
           preventDefault
         });
       }
 
-      if ((mouse === null || mouse === void 0 ? void 0 : mouse.fillHandle) === true && gridSelection.current !== undefined) {
-        fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
-      } else if (!isPrevented.current) {
+      if (!isPrevented.current) {
         var _mouse$previousSelect, _mouse$previousSelect2;
 
         const c = getMangledCellContent(args.location);
@@ -31965,15 +31968,18 @@ var DataEditorImpl = (p, forwardedRef) => {
     const handleMaybeClick = a => {
       var _a3, _b3, _c3;
 
-      if (lastMouseDownCol === col && lastMouseDownRow === row) {
+      if ((mouse == null ? void 0 : mouse.fillHandle) === true && gridSelection.current !== void 0) {
+        fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
+        return false;
+      }
+
+      if (a.isTouch || lastMouseDownCol === col && lastMouseDownRow === row) {
         onCellClicked == null ? void 0 : onCellClicked([col - rowMarkerOffset, row], { ...a,
           preventDefault
         });
       }
 
-      if ((mouse == null ? void 0 : mouse.fillHandle) === true && gridSelection.current !== void 0) {
-        fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
-      } else if (!isPrevented.current) {
+      if (!isPrevented.current) {
         const c = getMangledCellContent(args.location);
         const r = getCellRenderer(c);
 
@@ -33314,4 +33320,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.58436260.iframe.bundle.js.map
+//# sourceMappingURL=main.57297a72.iframe.bundle.js.map
