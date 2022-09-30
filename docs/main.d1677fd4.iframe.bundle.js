@@ -6160,6 +6160,12 @@ const DataEditorImpl = (p, forwardedRef) => {
     setMouseState(undefined);
     setScrollDir(undefined);
     if (isOutside) return;
+
+    if ((mouse === null || mouse === void 0 ? void 0 : mouse.fillHandle) === true && gridSelection.current !== undefined) {
+      fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
+      return;
+    }
+
     const [col, row] = args.location;
     const [lastMouseDownCol, lastMouseDownRow] = (_lastMouseSelectLocat = lastMouseSelectLocation.current) !== null && _lastMouseSelectLocat !== void 0 ? _lastMouseSelectLocat : [];
 
@@ -6168,11 +6174,6 @@ const DataEditorImpl = (p, forwardedRef) => {
     };
 
     const handleMaybeClick = a => {
-      if ((mouse === null || mouse === void 0 ? void 0 : mouse.fillHandle) === true && gridSelection.current !== undefined) {
-        fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
-        return false;
-      }
-
       if (a.isTouch || lastMouseDownCol === col && lastMouseDownRow === row) {
         onCellClicked === null || onCellClicked === void 0 ? void 0 : onCellClicked([col - rowMarkerOffset, row], { ...a,
           preventDefault
@@ -6396,9 +6397,14 @@ const DataEditorImpl = (p, forwardedRef) => {
         row = visibleRegionRef.current.y;
       }
 
-      const landedOnLastStickyRow = lastRowSticky && row === rows;
       const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
-      if (landedOnLastStickyRow || startedFromLastStickyRow) return;
+      if (startedFromLastStickyRow) return;
+      const landedOnLastStickyRow = lastRowSticky && row === rows;
+
+      if (landedOnLastStickyRow) {
+        if (args.kind === data_grid_types/* outOfBoundsKind */.Xv) row--;else return;
+      }
+
       col = Math.max(col, rowMarkerOffset);
       const deltaX = col - selectedCol;
       const deltaY = row - selectedRow;
@@ -31964,6 +31970,12 @@ var DataEditorImpl = (p, forwardedRef) => {
     setMouseState(void 0);
     setScrollDir(void 0);
     if (isOutside) return;
+
+    if ((mouse == null ? void 0 : mouse.fillHandle) === true && gridSelection.current !== void 0) {
+      fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
+      return;
+    }
+
     const [col, row] = args.location;
     const [lastMouseDownCol, lastMouseDownRow] = (_a2 = lastMouseSelectLocation.current) != null ? _a2 : [];
 
@@ -31973,11 +31985,6 @@ var DataEditorImpl = (p, forwardedRef) => {
 
     const handleMaybeClick = a => {
       var _a3, _b3, _c3;
-
-      if ((mouse == null ? void 0 : mouse.fillHandle) === true && gridSelection.current !== void 0) {
-        fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
-        return false;
-      }
 
       if (a.isTouch || lastMouseDownCol === col && lastMouseDownRow === row) {
         onCellClicked == null ? void 0 : onCellClicked([col - rowMarkerOffset, row], { ...a,
@@ -32196,9 +32203,14 @@ var DataEditorImpl = (p, forwardedRef) => {
         row = visibleRegionRef.current.y;
       }
 
-      const landedOnLastStickyRow = lastRowSticky && row === rows;
       const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
-      if (landedOnLastStickyRow || startedFromLastStickyRow) return;
+      if (startedFromLastStickyRow) return;
+      const landedOnLastStickyRow = lastRowSticky && row === rows;
+
+      if (landedOnLastStickyRow) {
+        if (args.kind === outOfBoundsKind) row--;else return;
+      }
+
       col = Math.max(col, rowMarkerOffset);
       const deltaX = col - selectedCol;
       const deltaY = row - selectedRow;
@@ -33332,4 +33344,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.ebaf038f.iframe.bundle.js.map
+//# sourceMappingURL=main.d1677fd4.iframe.bundle.js.map
