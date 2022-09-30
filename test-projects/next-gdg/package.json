@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "@glideapps/glide-data-grid": "^3.4.1",
-        "canvas-hypertxt": "0.0.3",
+        "canvas-hypertxt": "^0.0.6",
         "lodash": "^4.17.21",
         "marked": "^4.0.12",
         "next": "12.1.0",
