@@ -1,8 +1,8 @@
 import * as React from "react";
 import { NumberOverlayEditorStyle } from "./number-overlay-editor-style";
-import type { NumberFormatValues } from "react-number-format";
-import NumberFormat from "react-number-format";
+import { NumericFormat } from "react-number-format";
 import type { SelectionRange } from "../../data-grid/data-grid-types";
+import type { NumberFormatValues } from "react-number-format/types/types";
 
 interface Props {
     value: number | undefined;
@@ -39,7 +39,7 @@ const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
 
     return (
         <NumberOverlayEditorStyle>
-            <NumberFormat
+            <NumericFormat
                 autoFocus={true}
                 getInputRef={inputRef}
                 className="gdg-input"
