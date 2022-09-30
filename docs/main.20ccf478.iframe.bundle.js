@@ -6267,6 +6267,12 @@ const DataEditorImpl = (p, forwardedRef) => {
           preventDefault
         });
       } else {
+        if (args.kind === data_grid_types/* headerKind */.aZ) {
+          onHeaderClicked === null || onHeaderClicked === void 0 ? void 0 : onHeaderClicked(clickLocation, { ...args,
+            preventDefault
+          });
+        }
+
         handleSelect(args);
       }
 
@@ -32061,6 +32067,12 @@ var DataEditorImpl = (p, forwardedRef) => {
           preventDefault
         });
       } else {
+        if (args.kind === headerKind) {
+          onHeaderClicked == null ? void 0 : onHeaderClicked(clickLocation, { ...args,
+            preventDefault
+          });
+        }
+
         handleSelect(args);
       }
 
@@ -33320,4 +33332,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.57297a72.iframe.bundle.js.map
+//# sourceMappingURL=main.20ccf478.iframe.bundle.js.map
