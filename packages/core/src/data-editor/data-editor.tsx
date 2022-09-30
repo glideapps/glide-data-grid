@@ -41,6 +41,7 @@ import {
     ValidatedGridCell,
     ImageEditorType,
     CustomCell,
+    headerKind,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -2043,6 +2044,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else if (args.kind === groupHeaderKind) {
                     onGroupHeaderClicked?.(clickLocation, { ...args, preventDefault });
                 } else {
+                    if (args.kind === headerKind) {
+                        onHeaderClicked?.(clickLocation, {
+                            ...args,
+                            preventDefault,
+                        });
+                    }
                     handleSelect(args);
                 }
                 return;
