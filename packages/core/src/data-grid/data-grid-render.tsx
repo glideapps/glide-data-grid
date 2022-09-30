@@ -611,7 +611,7 @@ function drawGroups(
             }
         }
 
-        if (verticalBorder(span[0])) {
+        if (x !== 0 && verticalBorder(span[0])) {
             ctx.beginPath();
             ctx.moveTo(x + 0.5, 0);
             ctx.lineTo(x + 0.5, groupHeaderHeight);
