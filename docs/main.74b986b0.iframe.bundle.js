@@ -13339,7 +13339,7 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
   let hoverY = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : -20;
   const centerX = x + width / 2;
   const centerY = y + height / 2;
-  const checkBoxWidth = height / 1.888888889;
+  const checkBoxWidth = height / 1.89;
   const emptyCheckBoxWidth = height / 2;
   const hoverHelper = height / 3.4;
   const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;
@@ -13356,9 +13356,9 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
         ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(centerX - posHelperChecked + height / 9.314940891, centerY - posHelperChecked + height / 4.331237779);
-        ctx.lineTo(centerX - posHelperChecked + height / 5.332605589, centerY - posHelperChecked + height / 3.168567807);
-        ctx.lineTo(centerX - posHelperChecked + height / 2.833356945, centerY - posHelperChecked + height / 7.157970084);
+        ctx.moveTo(centerX - posHelperChecked + height / 9.31, centerY - posHelperChecked + height / 4.33);
+        ctx.lineTo(centerX - posHelperChecked + height / 5.33, centerY - posHelperChecked + height / 3.17);
+        ctx.lineTo(centerX - posHelperChecked + height / 2.83, centerY - posHelperChecked + height / 7.16);
         ctx.strokeStyle = theme.bgCell;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
@@ -24122,7 +24122,7 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
   let hoverY = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : -20;
   const centerX = x + width / 2;
   const centerY = y + height / 2;
-  const checkBoxWidth = height / 1.888888889;
+  const checkBoxWidth = height / 1.89;
   const emptyCheckBoxWidth = height / 2;
   const hoverHelper = height / 3.4;
   const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;
@@ -24139,9 +24139,9 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
         ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(centerX - posHelperChecked + height / 9.314940891, centerY - posHelperChecked + height / 4.331237779);
-        ctx.lineTo(centerX - posHelperChecked + height / 5.332605589, centerY - posHelperChecked + height / 3.168567807);
-        ctx.lineTo(centerX - posHelperChecked + height / 2.833356945, centerY - posHelperChecked + height / 7.157970084);
+        ctx.moveTo(centerX - posHelperChecked + height / 9.31, centerY - posHelperChecked + height / 4.33);
+        ctx.lineTo(centerX - posHelperChecked + height / 5.33, centerY - posHelperChecked + height / 3.17);
+        ctx.lineTo(centerX - posHelperChecked + height / 2.83, centerY - posHelperChecked + height / 7.16);
         ctx.strokeStyle = theme.bgCell;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
@@ -33358,4 +33358,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.33f630c8.iframe.bundle.js.map
+//# sourceMappingURL=main.74b986b0.iframe.bundle.js.map
