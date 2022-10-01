@@ -15591,7 +15591,7 @@ function drawGridLines(ctx, effectiveCols, cellYOffset, translateX, translateY, 
     x += c.width;
     const tx = c.sticky ? x : x + translateX;
 
-    if (tx >= minX && tx <= maxX - 1 && verticalBorder(index + 1)) {
+    if (tx >= minX && tx <= maxX && verticalBorder(index + 1)) {
       toDraw.push({
         x1: tx,
         y1: Math.max(groupHeaderHeight, minY),
@@ -25481,7 +25481,7 @@ function drawGridLines(ctx, effectiveCols, cellYOffset, translateX, translateY, 
     x += c.width;
     const tx = c.sticky ? x : x + translateX;
 
-    if (tx >= minX && tx <= maxX - 1 && verticalBorder(index + 1)) {
+    if (tx >= minX && tx <= maxX && verticalBorder(index + 1)) {
       toDraw.push({
         x1: tx,
         y1: Math.max(groupHeaderHeight, minY),
@@ -33358,4 +33358,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.068cf821.iframe.bundle.js.map
+//# sourceMappingURL=main.a70b9f05.iframe.bundle.js.map
