@@ -23,6 +23,8 @@
 
 Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-data-grid).
 
+You can also visit our [main site](https://grid.glideapps.com).
+
 ## Features
 
 -   **It scales to millions of rows**. Cells are rendered lazily on demand for memory efficiency.
