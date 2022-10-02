@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react-hooks";
 import { act } from "react-dom/test-utils";
-import { useStateWithReactiveInput } from "./utils";
+import { useStateWithReactiveInput } from "../src/common/utils";
 
 describe("useStateWithReactiveInput", () => {
     test("initial state", () => {

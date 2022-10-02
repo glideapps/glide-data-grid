@@ -1,4 +1,4 @@
-import { AnimationManager, HoverValues } from "./animation-manager";
+import { AnimationManager, HoverValues } from "../src/data-grid/animation-manager";
 
 const OG_RAF = window.requestAnimationFrame;
 const OG_CAF = window.cancelAnimationFrame;
@@ -13,7 +13,7 @@ describe("Animation manager", () => {
                 const timestamp = performance.now();
                 f(timestamp);
             }, 0);
-            return (timeoutID as unknown) as number;
+            return timeoutID as unknown as number;
         };
 
         window.cancelAnimationFrame = (rafID: number) => {

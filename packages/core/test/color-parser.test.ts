@@ -1,5 +1,5 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import { interpolateColors, parseToRgba, withAlpha, blend } from "./color-parser";
+import { blend, interpolateColors, parseToRgba, withAlpha } from "../src/data-grid/color-parser";
 
 describe("interpolateColors", () => {
     test("Smoke test", () => {

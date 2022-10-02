@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { useAnimationQueue } from "./use-animation-queue";
+import { useAnimationQueue } from "../src/data-grid/use-animation-queue";
 
 const OG_RAF = window.requestAnimationFrame;
 const OG_CAF = window.cancelAnimationFrame;
@@ -14,7 +14,7 @@ describe("use-cell-sizer", () => {
                 const timestamp = performance.now();
                 f(timestamp);
             }, 0);
-            return (timeoutID as unknown) as number;
+            return timeoutID as unknown as number;
         };
 
         window.cancelAnimationFrame = (rafID: number) => {

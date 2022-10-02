@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react-hooks";
-import type { BaseDrawArgs } from "../data-grid/cells/cell-types";
-import { CustomCell, GridCellKind } from "../data-grid/data-grid-types";
-import { useCustomCells } from "./use-custom-cells";
+import type { BaseDrawArgs } from "../src/data-grid/cells/cell-types";
+import { CustomCell, GridCellKind } from "../src/data-grid/data-grid-types";
+import { useCustomCells } from "../src/data-editor/use-custom-cells";
 
 type MyCustomCell = CustomCell<{ kind: "test"; pasted?: string }>;
 

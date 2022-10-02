@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import * as React from "react";
-import ClickOutsideContainer from "./click-outside-container";
 import userEvent from "@testing-library/user-event";
+import ClickOutsideContainer from "../src/click-outside-container/click-outside-container";
 
 describe("click-outside-container", () => {
     it("Triggers onClose when clicking outside", async () => {

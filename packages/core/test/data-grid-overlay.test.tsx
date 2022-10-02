@@ -1,11 +1,11 @@
 import * as React from "react";
 import { render } from "@testing-library/react";
-import BubblesOverlayEditor from "./private/bubbles-overlay-editor";
-import DrilldownOverlayEditor from "./private/drilldown-overlay-editor";
-import { ImageOverlayEditor } from "..";
-import { MarkdownOverlayEditor } from "./private/markdown-overlay-editor";
-import NumberOverlayEditor from "./private/number-overlay-editor";
-import UriOverlayEditor from "./private/uri-overlay-editor";
+import BubblesOverlayEditor from "../src/data-grid-overlay-editor/private/bubbles-overlay-editor";
+import DrilldownOverlayEditor from "../src/data-grid-overlay-editor/private/drilldown-overlay-editor";
+import { ImageOverlayEditor } from "../src";
+import { MarkdownOverlayEditor } from "../src/data-grid-overlay-editor/private/markdown-overlay-editor";
+import NumberOverlayEditor from "../src/data-grid-overlay-editor/private/number-overlay-editor";
+import UriOverlayEditor from "../src/data-grid-overlay-editor/private/uri-overlay-editor";
 
 describe("data-grid-overlay", () => {
     test("Smoke test bubbles", async () => {

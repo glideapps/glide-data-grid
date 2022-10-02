@@ -10,11 +10,11 @@ import {
     GridSelection,
     isSizedGridColumn,
     Item,
-} from "..";
-import type { DataEditorRef } from "./data-editor";
-import type { SizedGridColumn } from "../data-grid/data-grid-types";
+} from "../src";
+import type { SizedGridColumn } from "../src/data-grid/data-grid-types";
+import type { DataEditorRef } from "../src/data-editor/data-editor";
 
-jest.mock("../common/resize-detector", () => {
+jest.mock("../src/common/resize-detector", () => {
     return {
         useResizeDetector: () => ({ ref: undefined, width: 1000, height: 1000 }),
     };

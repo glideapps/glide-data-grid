@@ -1,11 +1,11 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { GridCell, GridCellKind, GridColumn, Rectangle } from "..";
-import { getDataEditorTheme } from "../common/styles";
-import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
-import { CellRenderers } from "../data-grid/cells";
-import type { GetCellRendererCallback } from "../data-grid/cells/cell-types";
-import type { CellArray } from "../data-grid/data-grid-types";
-import { useColumnSizer } from "./use-column-sizer";
+import { GridCell, GridCellKind, GridColumn, Rectangle } from "../src";
+import { getDataEditorTheme } from "../src/common/styles";
+import type { DataGridSearchProps } from "../src/data-grid-search/data-grid-search";
+import { CellRenderers } from "../src/data-grid/cells";
+import type { GetCellRendererCallback } from "../src/data-grid/cells/cell-types";
+import type { CellArray } from "../src/data-grid/data-grid-types";
+import { useColumnSizer } from "../src/data-editor/use-column-sizer";
 
 const COLUMNS: GridColumn[] = [
     {

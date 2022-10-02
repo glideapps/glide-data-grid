@@ -1,4 +1,4 @@
-import { decodeHTML } from "./data-editor-fns";
+import { decodeHTML } from "../src/data-editor/data-editor-fns";
 
 describe("data-editor-fns", () => {
     test("decode html", () => {

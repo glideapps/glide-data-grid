@@ -1,6 +1,6 @@
-import { deepEqual, maybe } from "./support";
 import { renderHook } from "@testing-library/react-hooks";
-import { useResizeDetector } from "./resize-detector";
+import { useResizeDetector } from "../src/common/resize-detector";
+import { maybe, deepEqual } from "../src/common/support";
 
 describe("maybe", () => {
     test("Returns when not crashing", () => {

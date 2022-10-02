@@ -1,10 +1,9 @@
 import { render } from "@testing-library/react";
-import { assert } from "../../common/support";
-import { GridCellKind, ImageCell, ImageEditorType, isObjectEditorCallbackResult, Rectangle } from "../data-grid-types";
-import { imageCellRenderer } from "./image-cell";
 import * as React from "react";
 import noop from "lodash/noop.js";
-import { getDefaultTheme } from "../..";
+import { type Rectangle, type ImageCell, GridCellKind, getDefaultTheme, isObjectEditorCallbackResult, type ImageEditorType } from "../src";
+import { assert } from "../src/common/support";
+import { imageCellRenderer } from "../src/data-grid/cells/image-cell";
 
 function getMockEditorTarget(): Rectangle {
     return {

@@ -1,9 +1,9 @@
 import * as React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
-import DataGrid, { DataGridProps, DataGridRef } from "./data-grid";
-import { CompactSelection, GridCellKind } from "./data-grid-types";
-import { getDefaultTheme } from "..";
-import { CellRenderers } from "./cells";
+import DataGrid, { DataGridProps, DataGridRef } from "../src/data-grid/data-grid";
+import { CompactSelection, GridCellKind } from "../src/data-grid/data-grid-types";
+import { getDefaultTheme } from "../src";
+import { CellRenderers } from "../src/data-grid/cells";
 
 const basicProps: DataGridProps = {
     cellXOffset: 0,

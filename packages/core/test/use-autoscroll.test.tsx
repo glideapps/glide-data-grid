@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { useAutoscroll } from "./use-autoscroll";
+import { useAutoscroll } from "../src/data-editor/use-autoscroll";
 
 describe("use-auto-scroll", () => {
     // beforeEach(() => {
