@@ -80,6 +80,10 @@ export function useColumnSizer(
 
     const [ctx] = React.useState(() => {
         const offscreen = document.createElement("canvas");
+        offscreen.style["display"] = "none";
+        offscreen.style["opacity"] = "0";
+        offscreen.style["position"] = "fixed";
+        document.documentElement.append(offscreen);
         return offscreen.getContext("2d", { alpha: false });
     });
 

@@ -68,6 +68,7 @@ export interface Theme {
     cellHorizontalPadding: number;
     cellVerticalPadding: number;
     headerFontStyle: string;
+    headerIconSize: number;
     baseFontStyle: string;
     fontFamily: string;
     editorFontSize: string;
@@ -108,6 +109,8 @@ const dataEditorBaseTheme: Theme = {
 
     cellHorizontalPadding: 8,
     cellVerticalPadding: 3,
+
+    headerIconSize: 18,
 
     headerFontStyle: "600 13px",
     baseFontStyle: "13px",

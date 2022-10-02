@@ -705,7 +705,7 @@ export function drawHeader(
         return;
     }
 
-    const xPad = 8;
+    const xPad = theme.cellHorizontalPadding;
     const fillStyle = selected ? theme.textHeaderSelected : theme.textHeader;
 
     const shouldDrawMenu = c.hasMenu === true && (isHovered || (touchMode && selected));
@@ -716,7 +716,8 @@ export function drawHeader(
         if (c.style === "highlight") {
             variant = selected ? "selected" : "special";
         }
-        spriteManager.drawSprite(c.icon, variant, ctx, drawX, y + (height - 20) / 2, 20, theme);
+        const headerSize = theme.headerIconSize;
+        spriteManager.drawSprite(c.icon, variant, ctx, drawX, y + (height - headerSize) / 2, headerSize, theme);
 
         if (c.overlayIcon !== undefined) {
             spriteManager.drawSprite(
@@ -730,7 +731,7 @@ export function drawHeader(
             );
         }
 
-        drawX += 26;
+        drawX += Math.ceil(headerSize * 1.3);
     }
 
     if (shouldDrawMenu && c.hasMenu === true && width > 35) {

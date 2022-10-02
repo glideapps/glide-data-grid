@@ -580,6 +580,8 @@ export interface DataEditorProps extends Props {
      * @group Advanced
      */
     readonly customRenderers?: readonly CustomRenderer<CustomCell<any>>[];
+
+    readonly scaleToRem?: boolean;
 }
 
 type ScrollToFn = (
@@ -655,15 +657,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const {
         rowMarkers = "none",
-        rowHeight = 34,
-        headerHeight = 36,
         rowMarkerWidth: rowMarkerWidthRaw,
         imageEditorOverride,
         getRowThemeOverride,
         markdownDivCreateNode,
-    } = p;
-
-    const {
         width,
         height,
         columns: columnsIn,
@@ -679,7 +676,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onGroupHeaderClicked,
         onCellContextMenu,
         className,
-        theme,
         onHeaderContextMenu,
         getCellsForSelection: getCellsForSelectionIn,
         onGroupHeaderContextMenu,
@@ -704,7 +700,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onDragStart,
         onMouseMove,
         onPaste,
-        groupHeaderHeight = headerHeight,
         freezeColumns = 0,
         rowSelectionMode = "auto",
         rowMarkerStartIndex = 1,
@@ -742,8 +737,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         isDraggable,
         onDragLeave,
         onRowMoved,
-        overscrollX,
-        overscrollY,
+        overscrollX: overscrollXIn,
+        overscrollY: overscrollYIn,
         preventDiagonalScrolling,
         rightElement,
         rightElementProps,
@@ -751,11 +746,46 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         smoothScrollX,
         smoothScrollY,
         scrollToEnd,
+        scaleToRem = false,
+        rowHeight: rowHeightIn = 34,
+        headerHeight: headerHeightIn = 36,
+        groupHeaderHeight: groupHeaderHeightIn = headerHeightIn,
+        theme: themeIn,
     } = p;
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
     const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
     const maxColumnAutoWidth = Math.max(maxColumnAutoWidthIn ?? maxColumnWidth, minColumnWidth);
+
+    const docStyle = React.useMemo(() => {
+        if (typeof window === "undefined") return { fontSize: "16px" };
+        return window.getComputedStyle(document.documentElement);
+    }, []);
+
+    const fontSizeStr = docStyle.fontSize;
+
+    const remSize = React.useMemo(() => Number.parseFloat(fontSizeStr), [fontSizeStr]);
+
+    const [rowHeight, headerHeight, groupHeaderHeight, theme, overscrollX, overscrollY] = React.useMemo(() => {
+        if (!scaleToRem || remSize === 16)
+            return [rowHeightIn, headerHeightIn, groupHeaderHeightIn, themeIn, overscrollXIn, overscrollYIn];
+        const scaler = remSize / 16;
+        const rh = rowHeightIn;
+        const bt = getDataEditorTheme();
+        return [
+            typeof rh === "number" ? rh * scaler : (n: number) => Math.ceil(rh(n) * scaler),
+            Math.ceil(headerHeightIn * scaler),
+            Math.ceil(groupHeaderHeightIn * scaler),
+            {
+                ...themeIn,
+                headerIconSize: (themeIn?.headerIconSize ?? bt.headerIconSize) * scaler,
+                cellHorizontalPadding: (themeIn?.cellHorizontalPadding ?? bt.cellHorizontalPadding) * scaler,
+                cellVerticalPadding: (themeIn?.cellVerticalPadding ?? bt.cellVerticalPadding) * scaler,
+            },
+            Math.ceil((overscrollXIn ?? 0) * scaler),
+            Math.ceil((overscrollYIn ?? 0) * scaler),
+        ];
+    }, [groupHeaderHeightIn, headerHeightIn, overscrollXIn, overscrollYIn, remSize, rowHeightIn, scaleToRem, themeIn]);
 
     const keybindings = React.useMemo(() => {
         return keybindingsIn === undefined
@@ -3410,7 +3440,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     experimental={experimental}
                     fixedShadowX={fixedShadowX}
                     fixedShadowY={fixedShadowY}
-                    getRowThemeOverride={p.getRowThemeOverride}
+                    getRowThemeOverride={getRowThemeOverride}
                     headerIcons={headerIcons}
                     imageWindowLoader={imageWindowLoader}
                     initialSize={initialSize}
