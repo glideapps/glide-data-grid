@@ -6366,6 +6366,7 @@ const DataEditorImpl = (p, forwardedRef) => {
   }, [onHeaderMenuClick, rowMarkerOffset]);
   const currentCell = gridSelection === null || gridSelection === void 0 ? void 0 : (_gridSelection$curren6 = gridSelection.current) === null || _gridSelection$curren6 === void 0 ? void 0 : _gridSelection$curren6.cell;
   const onVisibleRegionChangedImpl = react.useCallback((region, clientWidth, clientHeight, rightElWidth, tx, ty) => {
+    hasJustScrolled.current = false;
     let selected = currentCell;
 
     if (selected !== undefined) {
@@ -7268,10 +7269,10 @@ const DataEditorImpl = (p, forwardedRef) => {
   const [outCol, outRow] = (_gridSelectionOuter$c = gridSelectionOuter === null || gridSelectionOuter === void 0 ? void 0 : (_gridSelectionOuter$c2 = gridSelectionOuter.current) === null || _gridSelectionOuter$c2 === void 0 ? void 0 : _gridSelectionOuter$c2.cell) !== null && _gridSelectionOuter$c !== void 0 ? _gridSelectionOuter$c : [];
   const scrollToRef = react.useRef(scrollTo);
   scrollToRef.current = scrollTo;
-  react.useEffect(() => {
+  react.useLayoutEffect(() => {
     var _expectedExternalGrid, _expectedExternalGrid2, _expectedExternalGrid3, _expectedExternalGrid4;
 
-    if (outCol !== undefined && outRow !== undefined && (outCol !== ((_expectedExternalGrid = expectedExternalGridSelection.current) === null || _expectedExternalGrid === void 0 ? void 0 : (_expectedExternalGrid2 = _expectedExternalGrid.current) === null || _expectedExternalGrid2 === void 0 ? void 0 : _expectedExternalGrid2.cell[0]) || outRow !== ((_expectedExternalGrid3 = expectedExternalGridSelection.current) === null || _expectedExternalGrid3 === void 0 ? void 0 : (_expectedExternalGrid4 = _expectedExternalGrid3.current) === null || _expectedExternalGrid4 === void 0 ? void 0 : _expectedExternalGrid4.cell[1]))) {
+    if (!hasJustScrolled.current && outCol !== undefined && outRow !== undefined && (outCol !== ((_expectedExternalGrid = expectedExternalGridSelection.current) === null || _expectedExternalGrid === void 0 ? void 0 : (_expectedExternalGrid2 = _expectedExternalGrid.current) === null || _expectedExternalGrid2 === void 0 ? void 0 : _expectedExternalGrid2.cell[0]) || outRow !== ((_expectedExternalGrid3 = expectedExternalGridSelection.current) === null || _expectedExternalGrid3 === void 0 ? void 0 : (_expectedExternalGrid4 = _expectedExternalGrid3.current) === null || _expectedExternalGrid4 === void 0 ? void 0 : _expectedExternalGrid4.cell[1]))) {
       scrollToRef.current(outCol, outRow);
     }
   }, [outCol, outRow]);
@@ -32230,6 +32231,7 @@ var DataEditorImpl = (p, forwardedRef) => {
   }, [onHeaderMenuClick, rowMarkerOffset]);
   const currentCell = (_c = gridSelection == null ? void 0 : gridSelection.current) == null ? void 0 : _c.cell;
   const onVisibleRegionChangedImpl = react__WEBPACK_IMPORTED_MODULE_0__.useCallback((region, clientWidth, clientHeight, rightElWidth, tx, ty) => {
+    hasJustScrolled.current = false;
     let selected = currentCell;
 
     if (selected !== void 0) {
@@ -33114,10 +33116,10 @@ var DataEditorImpl = (p, forwardedRef) => {
   const [outCol, outRow] = (_e = (_d = gridSelectionOuter == null ? void 0 : gridSelectionOuter.current) == null ? void 0 : _d.cell) != null ? _e : [];
   const scrollToRef = react__WEBPACK_IMPORTED_MODULE_0__.useRef(scrollTo);
   scrollToRef.current = scrollTo;
-  react__WEBPACK_IMPORTED_MODULE_0__.useEffect(() => {
+  react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect(() => {
     var _a2, _b2, _c2, _d2;
 
-    if (outCol !== void 0 && outRow !== void 0 && (outCol !== ((_b2 = (_a2 = expectedExternalGridSelection.current) == null ? void 0 : _a2.current) == null ? void 0 : _b2.cell[0]) || outRow !== ((_d2 = (_c2 = expectedExternalGridSelection.current) == null ? void 0 : _c2.current) == null ? void 0 : _d2.cell[1]))) {
+    if (!hasJustScrolled.current && outCol !== void 0 && outRow !== void 0 && (outCol !== ((_b2 = (_a2 = expectedExternalGridSelection.current) == null ? void 0 : _a2.current) == null ? void 0 : _b2.cell[0]) || outRow !== ((_d2 = (_c2 = expectedExternalGridSelection.current) == null ? void 0 : _c2.current) == null ? void 0 : _d2.cell[1]))) {
       scrollToRef.current(outCol, outRow);
     }
   }, [outCol, outRow]);
@@ -33434,4 +33436,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.e267b122.iframe.bundle.js.map
+//# sourceMappingURL=main.7dbaf407.iframe.bundle.js.map
