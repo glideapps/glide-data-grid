@@ -2146,6 +2146,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             tx?: number,
             ty?: number
         ) => {
+            hasJustScrolled.current = false;
             let selected = currentCell;
             if (selected !== undefined) {
                 selected = [selected[0] - rowMarkerOffset, selected[1]];
@@ -3183,8 +3184,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const [outCol, outRow] = gridSelectionOuter?.current?.cell ?? [];
     const scrollToRef = React.useRef(scrollTo);
     scrollToRef.current = scrollTo;
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         if (
+            !hasJustScrolled.current &&
             outCol !== undefined &&
             outRow !== undefined &&
             (outCol !== expectedExternalGridSelection.current?.current?.cell[0] ||
