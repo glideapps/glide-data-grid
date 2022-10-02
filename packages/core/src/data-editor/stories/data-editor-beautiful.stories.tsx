@@ -1986,6 +1986,8 @@ export const CellActivatedEvent: React.VFC = () => {
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
+                //initialSize={[849, 967]}
+                //scrollOffsetY={10_000}
                 getCellsForSelection={true}
                 columns={cols}
                 onCellEdited={setCellValue}

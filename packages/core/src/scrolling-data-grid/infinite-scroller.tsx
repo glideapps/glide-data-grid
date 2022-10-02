@@ -15,7 +15,6 @@ interface Props {
     readonly scrollWidth: number;
     readonly scrollHeight: number;
     readonly scrollToEnd?: boolean;
-    readonly initialScrollPosition?: readonly [scrollX: number, scrollY: number];
     readonly initialSize?: readonly [width: number, height: number];
     readonly rightElementProps?: {
         readonly sticky?: boolean;
@@ -237,8 +236,10 @@ export const InfiniteScroller: React.FC<Props> = p => {
 
     const lastProps = React.useRef<{ width?: number; height?: number }>();
 
+    const didFirstScroll = React.useRef(false);
     React.useEffect(() => {
-        onScroll();
+        if (didFirstScroll.current) onScroll();
+        else didFirstScroll.current = true;
     }, [onScroll, paddingBottom, paddingRight]);
 
     const setRefs = React.useCallback(
