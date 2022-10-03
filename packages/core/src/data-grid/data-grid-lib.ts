@@ -892,8 +892,9 @@ function getAndCacheDrilldownBorder(
 
     drilldownCache[key] = canvas;
 
+    const trueRounding = Math.min(rounding, targetWidth / 2, targetHeight / 2);
     ctx.beginPath();
-    roundedRect(ctx, shadowBlur, shadowBlur, targetWidth, targetHeight, rounding);
+    roundedRect(ctx, shadowBlur, shadowBlur, targetWidth, targetHeight, trueRounding);
 
     ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
     ctx.shadowBlur = 1;
@@ -911,7 +912,7 @@ function getAndCacheDrilldownBorder(
     ctx.shadowBlur = 0;
 
     ctx.beginPath();
-    roundedRect(ctx, shadowBlur + 0.5, shadowBlur + 0.5, targetWidth, targetHeight, rounding);
+    roundedRect(ctx, shadowBlur + 0.5, shadowBlur + 0.5, targetWidth, targetHeight, trueRounding);
 
     ctx.strokeStyle = border;
     ctx.lineWidth = 1;
