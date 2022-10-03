@@ -393,6 +393,11 @@ function drawSingleTextLine(
     }
 }
 
+function getEmHeight(ctx: CanvasRenderingContext2D, fontStyle: string): number {
+    const textMetrics = measureTextCached("ABCi09jgqpy", ctx, fontStyle); // do not question the magic string
+    return textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
+}
+
 /** @category Drawing */
 export function drawTextCell(
     args: Pick<BaseDrawArgs, "rect" | "ctx" | "theme">,
@@ -449,8 +454,7 @@ export function drawTextCell(
             const fontStyle = `${theme.fontFamily} ${theme.baseFontStyle}`;
             const split = splitText(ctx, data, fontStyle, w - theme.cellHorizontalPadding * 2, hyperWrapping ?? false);
 
-            const textMetrics = measureTextCached("ABCi09jgqpy", ctx, fontStyle); // do not question the magic string
-            const emHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
+            const emHeight = getEmHeight(ctx, fontStyle);
             const lineHeight = theme.lineHeight * emHeight;
 
             const actualHeight = emHeight + lineHeight * (split.length - 1);
@@ -841,31 +845,38 @@ const drilldownCache: {
 
 function getAndCacheDrilldownBorder(
     bgCell: string,
-    border: string
+    border: string,
+    height: number
 ): {
     el: HTMLCanvasElement;
     height: number;
     width: number;
     middleWidth: number;
     sideWidth: number;
+    dpr: number;
+    padding: number;
 } | null {
     const dpr = Math.ceil(window.devicePixelRatio);
-    const targetHeight = 24;
     const shadowBlur = 5;
+    const targetHeight = height - shadowBlur * 2;
     const middleWidth = 4;
+    const rounding = 6;
 
-    const innerHeight = (targetHeight + shadowBlur * 2) * dpr; // 68
-    const innerWidth = innerHeight + middleWidth * dpr; // 76
-    const sideWidth = innerHeight / 2;
+    const innerHeight = height * dpr;
+    const sideWidth = rounding + shadowBlur;
+    const targetWidth = rounding * 3;
+    const innerWidth = (targetWidth + shadowBlur * 2) * dpr;
 
-    const key = `${bgCell},${border},${dpr}`;
+    const key = `${bgCell},${border},${dpr},${height}`;
     if (drilldownCache[key] !== undefined) {
         return {
             el: drilldownCache[key],
             height: innerHeight,
             width: innerWidth,
             middleWidth: middleWidth * dpr,
-            sideWidth,
+            sideWidth: sideWidth * dpr,
+            padding: shadowBlur * dpr,
+            dpr,
         };
     }
 
@@ -882,7 +893,7 @@ function getAndCacheDrilldownBorder(
     drilldownCache[key] = canvas;
 
     ctx.beginPath();
-    roundedRect(ctx, shadowBlur, shadowBlur, targetHeight + middleWidth, targetHeight, 6);
+    roundedRect(ctx, shadowBlur, shadowBlur, targetWidth, targetHeight, rounding);
 
     ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
     ctx.shadowBlur = 1;
@@ -900,29 +911,44 @@ function getAndCacheDrilldownBorder(
     ctx.shadowBlur = 0;
 
     ctx.beginPath();
-    roundedRect(ctx, shadowBlur + 0.5, shadowBlur + 0.5, targetHeight + middleWidth, targetHeight, 6);
+    roundedRect(ctx, shadowBlur + 0.5, shadowBlur + 0.5, targetWidth, targetHeight, rounding);
 
     ctx.strokeStyle = border;
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    return { el: canvas, height: innerHeight, width: innerWidth, sideWidth, middleWidth: middleWidth * dpr };
+    return {
+        el: canvas,
+        height: innerHeight,
+        width: innerWidth,
+        sideWidth: sideWidth * dpr,
+        middleWidth: rounding * dpr,
+        padding: shadowBlur * dpr,
+        dpr,
+    };
 }
 
 export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[]) {
     const { rect, theme, ctx, imageLoader, col, row } = args;
-    const { x, y, width: w, height: h } = rect;
-    const bubbleHeight = 24;
+    const { x, width: w } = rect;
+
+    const font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+    const emHeight = getEmHeight(ctx, font);
+    const h = Math.min(rect.height, Math.ceil(emHeight * theme.lineHeight) * 2);
+    const y = Math.floor(rect.y + (rect.height - h) / 2);
+
+    const bubbleHeight = h - 10;
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
     let renderX = x + theme.cellHorizontalPadding;
 
-    const tileMap = getAndCacheDrilldownBorder(theme.bgCell, theme.drilldownBorder);
+    const tileMap = getAndCacheDrilldownBorder(theme.bgCell, theme.drilldownBorder, h);
 
     const renderBoxes: { x: number; width: number }[] = [];
     for (const el of data) {
         if (renderX > x + w) break;
-        const textWidth = measureTextCached(el.text, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`).width;
+        const textMetrics = measureTextCached(el.text, ctx, font);
+        const textWidth = textMetrics.width;
         let imgWidth = 0;
         if (el.img !== undefined) {
             const img = imageLoader.loadOrGetImage(el.img, col, row);
@@ -940,25 +966,37 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
     }
 
     if (tileMap !== null) {
-        const { el, height, middleWidth, sideWidth, width } = tileMap;
+        const { el, height, middleWidth, sideWidth, width, dpr, padding } = tileMap;
+        const outerSideWidth = sideWidth / dpr;
+        const outerPadding = padding / dpr;
         for (const rectInfo of renderBoxes) {
             const rx = Math.floor(rectInfo.x);
             const rw = Math.floor(rectInfo.width);
             ctx.imageSmoothingEnabled = false;
-            const maxSideWidth = Math.min(17, rw / 2 + 5);
-            ctx.drawImage(el, 0, 0, sideWidth, height, rx - 5, y + h / 2 - 17, maxSideWidth, 34);
-            if (rectInfo.width > 24)
-                ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + 12, y + h / 2 - 17, rw - 24, 34);
+
+            ctx.drawImage(el, 0, 0, sideWidth, height, rx - outerPadding, y, outerSideWidth, h);
+            if (rectInfo.width > sideWidth * 2)
+                ctx.drawImage(
+                    el,
+                    sideWidth,
+                    0,
+                    middleWidth,
+                    height,
+                    rx + (outerSideWidth - outerPadding),
+                    y,
+                    rw - (outerSideWidth - outerPadding) * 2,
+                    h
+                );
             ctx.drawImage(
                 el,
                 width - sideWidth,
                 0,
                 sideWidth,
                 height,
-                rx + rw - (maxSideWidth - 5),
-                y + h / 2 - 17,
-                maxSideWidth,
-                34
+                rx + rw - (outerSideWidth - outerPadding),
+                y,
+                outerSideWidth,
+                h
             );
             ctx.imageSmoothingEnabled = true;
         }

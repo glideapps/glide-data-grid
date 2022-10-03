@@ -634,8 +634,25 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     hoverInfoRef.current = hoveredItemInfo;
 
     const [bufferA, bufferB] = React.useMemo(() => {
-        return [document.createElement("canvas"), document.createElement("canvas")];
+        const a = document.createElement("canvas");
+        const b = document.createElement("canvas");
+        a.style["display"] = "none";
+        a.style["opacity"] = "0";
+        a.style["position"] = "fixed";
+        b.style["display"] = "none";
+        b.style["opacity"] = "0";
+        b.style["position"] = "fixed";
+        return [a, b];
     }, []);
+
+    React.useLayoutEffect(() => {
+        document.documentElement.append(bufferA);
+        document.documentElement.append(bufferB);
+        return () => {
+            bufferA.remove();
+            bufferB.remove();
+        };
+    }, [bufferA, bufferB]);
 
     const lastArgsRef = React.useRef<DrawGridArg>();
     const draw = React.useCallback(() => {
