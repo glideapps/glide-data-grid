@@ -934,7 +934,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
 
     const font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     const emHeight = getEmHeight(ctx, font);
-    const h = Math.min(rect.height, Math.ceil(emHeight * theme.lineHeight) * 2);
+    const h = Math.min(rect.height, Math.max(16, Math.ceil(emHeight * theme.lineHeight) * 2));
     const y = Math.floor(rect.y + (rect.height - h) / 2);
 
     const bubbleHeight = h - 10;
