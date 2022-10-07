@@ -1029,6 +1029,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const vScrollReady = (visibleRegion.height ?? 1) > 1;
     React.useLayoutEffect(() => {
         if (scrollOffsetY !== undefined && scrollRef.current !== null && vScrollReady) {
+            if (scrollRef.current.scrollTop === scrollOffsetY) return;
             scrollRef.current.scrollTop = scrollOffsetY;
             if (scrollRef.current.scrollTop !== scrollOffsetY) {
                 empty();
@@ -1040,6 +1041,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const hScrollReady = (visibleRegion.width ?? 1) > 1;
     React.useLayoutEffect(() => {
         if (scrollOffsetX !== undefined && scrollRef.current !== null && hScrollReady) {
+            if (scrollRef.current.scrollLeft === scrollOffsetX) return;
             scrollRef.current.scrollLeft = scrollOffsetX;
             if (scrollRef.current.scrollLeft !== scrollOffsetX) {
                 empty();
