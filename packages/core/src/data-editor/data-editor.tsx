@@ -3223,6 +3223,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 outRow !== expectedExternalGridSelection.current?.current?.cell[1])
         ) {
             scrollToRef.current(outCol, outRow);
+            hasJustScrolled.current = false; //only allow skipping a single scroll
         }
     }, [outCol, outRow]);
 
