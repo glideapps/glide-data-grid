@@ -496,6 +496,13 @@ export interface DataEditorProps extends Props {
     readonly rowSelectionMode?: "auto" | "multi";
 
     /**
+     * Add table headers to copied data.
+     * @group Editing
+     * @defaultValue `false`
+     */
+    readonly copyHeaders?: boolean;
+
+    /**
      * Determins which keybindings are enabled.
      * @group Editing
      * @defaultValue is
@@ -704,6 +711,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onDragStart,
         onMouseMove,
         onPaste,
+        copyHeaders = false,
         groupHeaderHeight = headerHeight,
         freezeColumns = 0,
         rowSelectionMode = "auto",
@@ -3093,19 +3101,40 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             const selectedColumns = gridSelection.columns;
             const selectedRows = gridSelection.rows;
 
+            const copyToClipboardWithHeaders = (
+                cells: readonly (readonly GridCell[])[],
+                columnIndexes: readonly number[]
+            ) => {
+                const getColCells = (colIndexes: readonly number[]) =>
+                    colIndexes
+                        .map(index => columnsIn[index])
+                        .map(col => ({
+                            kind: GridCellKind.Text,
+                            data: col.title,
+                            displayData: col.title,
+                            allowOverlay: false,
+                        })) as GridCell[];
+
+                if (!copyHeaders) {
+                    copyToClipboard(cells, columnIndexes, e);
+                } else {
+                    const headers = getColCells(columnIndexes);
+                    copyToClipboard([headers, ...cells], columnIndexes, e);
+                }
+            };
+
             if (focused && getCellsForSelection !== undefined) {
                 if (gridSelection.current !== undefined) {
                     let thunk = getCellsForSelection(gridSelection.current.range, abortControllerRef.current.signal);
                     if (typeof thunk !== "object") {
                         thunk = await thunk();
                     }
-                    copyToClipboard(
+                    copyToClipboardWithHeaders(
                         thunk,
                         range(
                             gridSelection.current.range.x - rowMarkerOffset,
                             gridSelection.current.range.x + gridSelection.current.range.width - rowMarkerOffset
                         ),
-                        e
                     );
                 } else if (selectedRows !== undefined && selectedRows.length > 0) {
                     const toCopy = [...selectedRows];
@@ -3126,9 +3155,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     });
                     if (cells.some(x => x instanceof Promise)) {
                         const settled = await Promise.all(cells);
-                        copyToClipboard(settled, range(columnsIn.length), e);
+                        copyToClipboardWithHeaders(settled, range(columnsIn.length));
                     } else {
-                        copyToClipboard(cells as (readonly GridCell[])[], range(columnsIn.length), e);
+                        copyToClipboardWithHeaders(cells as (readonly GridCell[])[], range(columnsIn.length));
                     }
                 } else if (selectedColumns.length > 0) {
                     const results: (readonly (readonly GridCell[])[])[] = [];
@@ -3150,16 +3179,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         cols.push(col - rowMarkerOffset);
                     }
                     if (results.length === 1) {
-                        copyToClipboard(results[0], cols, e);
+                        copyToClipboardWithHeaders(results[0], cols);
                     } else {
                         // FIXME: this is dumb
                         const toCopy = results.reduce((pv, cv) => pv.map((row, index) => [...row, ...cv[index]]));
-                        copyToClipboard(toCopy, cols, e);
+                        copyToClipboardWithHeaders(toCopy, cols);
                     }
                 }
             }
         },
-        [columnsIn.length, getCellsForSelection, gridSelection, keybindings.copy, rowMarkerOffset, rows]
+        [columnsIn, getCellsForSelection, gridSelection, keybindings.copy, rowMarkerOffset, rows, copyHeaders]
     );
 
     useEventListener("copy", onCopy, window, false, false);
