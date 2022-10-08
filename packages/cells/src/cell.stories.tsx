@@ -1,6 +1,6 @@
 import { styled } from "@linaria/react";
 import * as React from "react";
-import { DataEditor, DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
+import { DataEditor, DataEditorProps, GridCell, GridCellKind, GridColumn } from "@glideapps/glide-data-grid";
 import { DropdownCell as DropdownRenderer, useExtraCells } from ".";
 import type { StarCell } from "./cells/star-cell";
 import type { SparklineCell } from "./cells/sparkline-cell";
@@ -12,6 +12,7 @@ import type { DropdownCell } from "./cells/dropdown-cell";
 import type { ArticleCell } from "./cells/article-cell-types";
 import type { RangeCell } from "./cells/range-cell";
 import type { SpinnerCell } from "./cells/spinner-cell";
+import type { TreeNode } from "./cells/tree-cell";
 import { useResizeDetector } from "react-resize-detector";
 
 import "@toast-ui/editor/dist/toastui-editor.css";
@@ -487,6 +488,186 @@ export const CustomCellEditing: React.VFC = () => {
     );
 };
 (CustomCellEditing as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const CustomTreeCell: React.VFC = () => {
+    const names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"];
+
+    const createNode = (name: string, description?: string, children: TreeNode[] = []): TreeNode => ({
+        name,
+        description: description || `Item ${name}`,
+        children
+    });
+
+    const createTree = (): TreeNode => {
+        const root = createNode("Root", "Root Item");
+
+        names.forEach(nameX => {
+            const nodeX = createNode(nameX);
+            root.children.push(nodeX);
+            names.forEach(nameY => {
+                const nameXY = `${nameX} ${nameY}`;
+                const nodeY = createNode(nameXY);
+                nodeY.collapsed = true;
+                nodeX.children.push(nodeY);
+                names.forEach(nameZ => {
+                    const nameXYZ = `${nameX} ${nameY} ${nameZ}`;
+                    const nodeZ = createNode(nameXYZ);
+                    nodeY.children.push(nodeZ);
+                });
+            });
+        });
+
+        return root;
+    };
+
+    const [root, setRoot] = React.useState(createTree());
+
+    const flatten = (tree: TreeNode): TreeNode[] => {
+        const _visit = (node: TreeNode, depth: number = 0) => {
+            node.depth = depth;
+            flattened.push(node);
+            node.children.forEach(child => (!node.collapsed) && _visit(child, depth + 1));
+        };
+
+        const flattened: TreeNode[] = [];
+
+        _visit(tree);
+
+        return flattened;
+    };
+
+    const [rows, setRows] = React.useState<TreeNode[]>([]);
+
+    React.useEffect(
+        () => {
+            const flattened = flatten(root);
+            setRows(flattened);
+            setNumRows(flattened.length);
+        },
+        [root]
+    );
+
+    const [numRows, setNumRows] = React.useState(rows.length);
+
+    const columns = React.useMemo<GridColumn[]>(() => [
+        {
+            title: "Name",
+            width: 250,
+            themeOverride: {
+                baseFontStyle: 'bold 13px'
+            }
+        },
+        { title: "Depth", width: 55 },
+        { title: "Children", width: 70 },
+        { title: "Collapsed", width: 80 },
+        { title: "Description", width: 200 }
+    ], []);
+
+    const getCellContent = React.useCallback(
+        ([col, row]: readonly [number, number]): GridCell => {
+            const node = rows[row];
+            const field = columns[col].title;
+
+            const { name, depth, children: { length }, collapsed, description } = node;
+
+
+            const collapsedString = node.children.length > 0 ? (collapsed ? "YES" : "NO") : "N/A";
+
+            switch (field) {
+                case "Name":
+                    return {
+                        kind: GridCellKind.Custom,
+                        data: {
+                            kind: "tree-cell",
+                            node,
+                        },
+                        allowOverlay: false,
+                        copyData: name,
+                    };
+
+                case "Depth":
+                    return {
+                        kind: GridCellKind.Number,
+                        data: depth,
+                        displayData: `${depth}`,
+                        allowOverlay: false,
+                    };
+
+                case "Children":
+                    return {
+                        kind: GridCellKind.Number,
+                        data: length,
+                        displayData: `${length}`,
+                        allowOverlay: false,
+                    };
+
+                case "Collapsed":
+                    return {
+                        kind: GridCellKind.Text,
+                        displayData: collapsedString,
+                        data: collapsedString,
+                        allowOverlay: false,
+                    };
+
+                case "Description":
+                    return {
+                        kind: GridCellKind.Text,
+                        displayData: description,
+                        data: description,
+                        allowOverlay: false,
+                    };
+
+                default:
+                    return {
+                        kind: GridCellKind.Text,
+                        displayData: "<unknown>",
+                        data: "",
+                        allowOverlay: false,
+                    };
+            }
+        },
+        [columns, rows]
+    );
+
+    // const { drawCell, onCellClicked } = useCustomCells([CustomTreeCellRenderer]);
+
+    const cellProps = useExtraCells();
+
+    return (
+        <BeautifulWrapper
+            title="Expandable tree"
+            description={
+                <>
+                    <Description>
+                        An example of an expandable nested tree by implementing a custom cell renderer,
+                        shifting text based on depth, and filtering out the children of collapsed items.
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                {...cellProps}
+                getCellContent={getCellContent}
+                onCellClicked={(item, event) => {
+                    const cell = getCellContent(item);
+                    /*
+                    onCellClicked(cell, event, () => {
+                        setRoot({...root});
+                    })
+                    */
+                }}
+                columns={columns}
+                rowMarkers={"none"}
+                rows={numRows}
+            />
+        </BeautifulWrapper>
+    );
+};
+(CustomTreeCell as any).parameters = {
     options: {
         showPanel: false,
     },

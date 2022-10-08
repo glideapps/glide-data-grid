@@ -11,7 +11,7 @@ export type TreeNode = {
 interface TreeCellProps {
   readonly kind: "tree-cell";
   readonly node: TreeNode;
-};
+}
 
 export type TreeCell = CustomCell<TreeCellProps>;
 
