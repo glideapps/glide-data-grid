@@ -62,21 +62,20 @@ const renderer: CustomRenderer<TreeCell> = {
 
       return true;
   },
-  /*
-  onCellClicked: (cell, event, callback) => {
-      const { item } = cell.data;
-      const { depth } = item;
-      const { localEventX } = event;
+  onClick: ({ cell, posX, preventDefault }) => {
+      const { node } = cell.data;
+      const { depth } = node;
 
       const depthOffset = (depth || 0) * 20;
 
-      if (localEventX < depthOffset || localEventX > depthOffset + 22) return;
+      if (posX < depthOffset || posX > depthOffset + 22) return;
 
-      event.preventDefault();
-      item.collapsed = !item.collapsed;
-      callback(item);
+      preventDefault();
+
+      node.collapsed = !node.collapsed
+
+      return cell
   },
-  */
   provideEditor: undefined,
 };
 

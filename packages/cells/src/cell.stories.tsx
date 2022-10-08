@@ -599,13 +599,10 @@ export const CustomTreeCell: React.VFC = () => {
                 {...defaultProps}
                 {...cellProps}
                 getCellContent={getCellContent}
-                onCellClicked={(item, event) => {
-                    const cell = getCellContent(item);
-                    /*
-                    onCellClicked(cell, event, () => {
-                        setRoot({...root});
-                    })
-                    */
+                onCellEdited={(_, item) => {
+                    if (item.kind !== GridCellKind.Custom) return
+                    if (item.data.kind !== 'tree-cell') return
+                    setRoot({...root})
                 }}
                 columns={columns}
                 rowMarkers={"none"}
