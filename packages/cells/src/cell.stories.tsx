@@ -21,6 +21,8 @@ import type { DatePickerCell } from "./cells/date-picker-cell";
 import type { LinksCell } from "./cells/links-cell";
 import type { ButtonCell } from "./cells/button-cell";
 
+import { createSampleTree, useCollapsingTreeRows } from "@glideapps/glide-data-grid-source"
+
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -494,64 +496,9 @@ export const CustomCellEditing: React.VFC = () => {
 };
 
 export const CustomTreeCell: React.VFC = () => {
-    const names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"];
+    const [root, setRoot] = React.useState(() => createSampleTree());
 
-    const createNode = (name: string, description?: string, children: TreeNode[] = []): TreeNode => ({
-        name,
-        description: description || `Item ${name}`,
-        children
-    });
-
-    const createTree = (): TreeNode => {
-        const root = createNode("Root", "Root Item");
-
-        names.forEach(nameX => {
-            const nodeX = createNode(nameX);
-            root.children.push(nodeX);
-            names.forEach(nameY => {
-                const nameXY = `${nameX} ${nameY}`;
-                const nodeY = createNode(nameXY);
-                nodeY.collapsed = true;
-                nodeX.children.push(nodeY);
-                names.forEach(nameZ => {
-                    const nameXYZ = `${nameX} ${nameY} ${nameZ}`;
-                    const nodeZ = createNode(nameXYZ);
-                    nodeY.children.push(nodeZ);
-                });
-            });
-        });
-
-        return root;
-    };
-
-    const [root, setRoot] = React.useState(createTree());
-
-    const flatten = (tree: TreeNode): TreeNode[] => {
-        const _visit = (node: TreeNode, depth: number = 0) => {
-            node.depth = depth;
-            flattened.push(node);
-            node.children.forEach(child => (!node.collapsed) && _visit(child, depth + 1));
-        };
-
-        const flattened: TreeNode[] = [];
-
-        _visit(tree);
-
-        return flattened;
-    };
-
-    const [rows, setRows] = React.useState<TreeNode[]>([]);
-
-    React.useEffect(
-        () => {
-            const flattened = flatten(root);
-            setRows(flattened);
-            setNumRows(flattened.length);
-        },
-        [root]
-    );
-
-    const [numRows, setNumRows] = React.useState(rows.length);
+    const rows = useCollapsingTreeRows(root);
 
     const columns = React.useMemo<GridColumn[]>(() => [
         {
@@ -662,7 +609,7 @@ export const CustomTreeCell: React.VFC = () => {
                 }}
                 columns={columns}
                 rowMarkers={"none"}
-                rows={numRows}
+                rows={rows.length}
             />
         </BeautifulWrapper>
     );
