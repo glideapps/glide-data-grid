@@ -2,6 +2,7 @@ import { useCustomCells } from "@glideapps/glide-data-grid";
 import StarCellRenderer, { StarCell } from "./cells/star-cell";
 import SparklineCellRenderer, { SparklineCell } from "./cells/sparkline-cell";
 import TagsCellRenderer, { TagsCell } from "./cells/tags-cell";
+import TreeCellRenderer, { TreeCell } from "./cells/tree-cell";
 import UserProfileCellRenderer, { UserProfileCell } from "./cells/user-profile-cell";
 import DropdownCellRenderer, { DropdownCell } from "./cells/dropdown-cell";
 import ArticleCellRenderer from "./cells/article-cell";
@@ -16,6 +17,7 @@ const cells = [
     StarCellRenderer,
     SparklineCellRenderer,
     TagsCellRenderer,
+    TreeCellRenderer,
     UserProfileCellRenderer,
     DropdownCellRenderer,
     ArticleCellRenderer,
@@ -34,6 +36,7 @@ export {
     StarCellRenderer as StarCell,
     SparklineCellRenderer as SparklineCell,
     TagsCellRenderer as TagsCell,
+    TreeCellRenderer as TreeCell,
     UserProfileCellRenderer as UserProfileCell,
     DropdownCellRenderer as DropdownCell,
     ArticleCellRenderer as ArticleCell,
@@ -49,6 +52,7 @@ export type {
     StarCell as StarCellType,
     SparklineCell as SparklineCellType,
     TagsCell as TagsCellType,
+    TreeCell as TreeCellType,
     UserProfileCell as UserProfileCellType,
     DropdownCell as DropdownCellType,
     ArticleCell as ArticleCellType,
