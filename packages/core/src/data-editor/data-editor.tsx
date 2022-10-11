@@ -143,16 +143,16 @@ function shiftSelection(input: GridSelection, offset: number): GridSelection {
             input.current === undefined
                 ? undefined
                 : {
-                      cell: [input.current.cell[0] + offset, input.current.cell[1]],
-                      range: {
-                          ...input.current.range,
-                          x: input.current.range.x + offset,
-                      },
-                      rangeStack: input.current.rangeStack.map(r => ({
-                          ...r,
-                          x: r.x + offset,
-                      })),
-                  },
+                    cell: [input.current.cell[0] + offset, input.current.cell[1]],
+                    range: {
+                        ...input.current.range,
+                        x: input.current.range.x + offset,
+                    },
+                    rangeStack: input.current.rangeStack.map(r => ({
+                        ...r,
+                        x: r.x + offset,
+                    })),
+                },
         rows: input.rows,
         columns: input.columns.offset(offset),
     };
@@ -769,9 +769,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return keybindingsIn === undefined
             ? keybindingDefaults
             : {
-                  ...keybindingDefaults,
-                  ...keybindingsIn,
-              };
+                ...keybindingDefaults,
+                ...keybindingsIn,
+            };
     }, [keybindingsIn]);
 
     const rowMarkerWidth = rowMarkerWidthRaw ?? (rows > 10_000 ? 48 : rows > 1000 ? 44 : rows > 100 ? 36 : 32);
@@ -944,10 +944,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         rowMarkers === "none"
             ? ""
             : numSelectedRows === 0
-            ? headerCellUnheckedMarker
-            : numSelectedRows === rows
-            ? headerCellCheckedMarker
-            : headerCellIndeterminateMarker;
+                ? headerCellUnheckedMarker
+                : numSelectedRows === rows
+                    ? headerCellCheckedMarker
+                    : headerCellIndeterminateMarker;
 
     const mangledCols = React.useMemo(() => {
         if (rowMarkers === "none") return columns;
@@ -1049,9 +1049,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 rowMarkerOffset === 0
                     ? items
                     : items.map(x => ({
-                          ...x,
-                          location: [x.location[0] - rowMarkerOffset, x.location[1]] as const,
-                      }));
+                        ...x,
+                        location: [x.location[0] - rowMarkerOffset, x.location[1]] as const,
+                    }));
             const r = onCellsEdited?.(mangledItems);
 
             if (r !== true) {
@@ -2172,11 +2172,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         freezeColumns === 0
                             ? undefined
                             : {
-                                  x: 0,
-                                  y: region.y,
-                                  width: freezeColumns,
-                                  height: region.height,
-                              },
+                                x: 0,
+                                y: region.y,
+                                width: freezeColumns,
+                                height: region.height,
+                            },
                 },
             };
             setClientSize([clientWidth, clientHeight, rightElWidth]);
@@ -3105,20 +3105,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 cells: readonly (readonly GridCell[])[],
                 columnIndexes: readonly number[]
             ) => {
-                const getColCells = (colIndexes: readonly number[]) =>
-                    colIndexes
-                        .map(index => columnsIn[index])
-                        .map(col => ({
-                            kind: GridCellKind.Text,
-                            data: col.title,
-                            displayData: col.title,
-                            allowOverlay: false,
-                        })) as GridCell[];
 
                 if (!copyHeaders) {
                     copyToClipboard(cells, columnIndexes, e);
                 } else {
-                    const headers = getColCells(columnIndexes);
+                    const headers = columnIndexes
+                        .map(index => ({
+                            kind: GridCellKind.Text,
+                            data: columnsIn[index].title,
+                            displayData: columnsIn[index].title,
+                            allowOverlay: false,
+                        })) as GridCell[];
                     copyToClipboard([headers, ...cells], columnIndexes, e);
                 }
             };
