@@ -313,6 +313,11 @@ export interface DataEditorProps extends Props {
      */
     readonly rowMarkerStartIndex?: number;
 
+    /** Changes the theme of the row marker column
+     * @group Style
+     */
+    readonly rowMarkerTheme?: Partial<Theme>;
+
     /** Sets the width of the data grid.
      * @group Style
      */
@@ -711,6 +716,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         freezeColumns = 0,
         rowSelectionMode = "auto",
         rowMarkerStartIndex = 1,
+        rowMarkerTheme,
         onHeaderMenuClick,
         getGroupDetails,
         onSearchClose: onSearchCloseIn,
@@ -988,10 +994,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 icon: undefined,
                 hasMenu: false,
                 style: "normal" as const,
+                themeOverride: rowMarkerTheme,
             },
             ...columns,
         ];
-    }, [columns, rowMarkerWidth, rowMarkers, rowMarkerHeader]);
+    }, [columns, rowMarkerWidth, rowMarkers, rowMarkerHeader, rowMarkerTheme]);
 
     const [visibleRegionY, visibleRegionTy] = React.useMemo(() => {
         return [
