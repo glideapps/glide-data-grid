@@ -13,6 +13,7 @@ import {
 } from "../src";
 import type { SizedGridColumn } from "../src/data-grid/data-grid-types";
 import type { DataEditorRef } from "../src/data-editor/data-editor";
+import { assert } from "../src/common/support";
 
 jest.mock("../src/common/resize-detector", () => {
     return {
@@ -326,6 +327,28 @@ describe("data-editor", () => {
 
         const a11ycell = screen.getByTestId("glide-cell-0-5");
         fireEvent.click(a11ycell);
+    });
+
+    test("emits contextmenu for cell", async () => {
+        const spy = jest.fn();
+        const spySelection = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellContextMenu={spy} onGridSelectionChange={spySelection} />, {
+            wrapper: Context,
+        });
+        const scroller = prep();
+
+        assert(scroller !== null);
+
+        screen.getByTestId("data-grid-canvas");
+        fireEvent.contextMenu(scroller, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+        expect(spySelection).toHaveBeenCalledWith("false");
     });
 
     test("Emits cell click", async () => {

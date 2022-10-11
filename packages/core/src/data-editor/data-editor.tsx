@@ -1891,29 +1891,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const isPrevented = React.useRef(false);
-    const onContextMenu = React.useCallback(
-        (args: GridMouseEventArgs, preventDefault: () => void) => {
-            const clickLocation = args.location[0] - rowMarkerOffset;
-            if (args.kind === "header") {
-                onHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
-            }
-
-            if (args.kind === groupHeaderKind) {
-                if (clickLocation < 0) {
-                    return;
-                }
-                onGroupHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
-            }
-
-            if (args.kind === "cell") {
-                onCellContextMenu?.([clickLocation, args.location[1]], {
-                    ...args,
-                    preventDefault,
-                });
-            }
-        },
-        [onCellContextMenu, onGroupHeaderContextMenu, onHeaderContextMenu, rowMarkerOffset]
-    );
 
     const normalSizeColumn = React.useCallback(
         async (col: number): Promise<void> => {
@@ -2939,6 +2916,31 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rangeSelect,
             lastRowSticky,
         ]
+    );
+
+    const onContextMenu = React.useCallback(
+        (args: GridMouseEventArgs, preventDefault: () => void) => {
+            const clickLocation = args.location[0] - rowMarkerOffset;
+            if (args.kind === "header") {
+                onHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
+            }
+
+            if (args.kind === groupHeaderKind) {
+                if (clickLocation < 0) {
+                    return;
+                }
+                onGroupHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
+            }
+
+            if (args.kind === "cell") {
+                onCellContextMenu?.([clickLocation, args.location[1]], {
+                    ...args,
+                    preventDefault,
+                });
+                updateSelectedCell(clickLocation, args.location[1], false, false);
+            }
+        },
+        [onCellContextMenu, onGroupHeaderContextMenu, onHeaderContextMenu, rowMarkerOffset, updateSelectedCell]
     );
 
     const onPasteInternal = React.useCallback(
