@@ -348,7 +348,45 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
-        expect(spySelection).toHaveBeenCalledWith("false");
+        expect(spySelection).toHaveBeenCalledWith(
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [1, 1] }),
+            })
+        );
+    });
+
+    test("emits contextmenu for cell row markers", async () => {
+        const spy = jest.fn();
+        const spySelection = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                rowMarkers={"both"}
+                onCellContextMenu={spy}
+                onGridSelectionChange={spySelection}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        const scroller = prep();
+
+        assert(scroller !== null);
+
+        screen.getByTestId("data-grid-canvas");
+        fireEvent.contextMenu(scroller, {
+            clientX: 320, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+        expect(spySelection).toHaveBeenCalledWith(
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [1, 1] }),
+            })
+        );
     });
 
     test("Emits cell click", async () => {

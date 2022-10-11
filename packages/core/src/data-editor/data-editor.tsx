@@ -2937,7 +2937,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     ...args,
                     preventDefault,
                 });
-                updateSelectedCell(clickLocation, args.location[1], false, false);
+                updateSelectedCell(args.location[0], args.location[1], false, false);
             }
         },
         [onCellContextMenu, onGroupHeaderContextMenu, onHeaderContextMenu, rowMarkerOffset, updateSelectedCell]
