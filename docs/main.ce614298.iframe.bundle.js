@@ -5179,6 +5179,7 @@ const DataEditorImpl = (p, forwardedRef) => {
     onDragStart,
     onMouseMove,
     onPaste,
+    copyHeaders = false,
     groupHeaderHeight = headerHeight,
     freezeColumns = 0,
     rowSelectionMode = "auto",
@@ -7193,6 +7194,20 @@ const DataEditorImpl = (p, forwardedRef) => {
     const selectedColumns = gridSelection.columns;
     const selectedRows = gridSelection.rows;
 
+    const copyToClipboardWithHeaders = (cells, columnIndexes) => {
+      if (!copyHeaders) {
+        copyToClipboard(cells, columnIndexes, e);
+      } else {
+        const headers = columnIndexes.map(index => ({
+          kind: data_grid_types/* GridCellKind.Text */.p6.Text,
+          data: columnsIn[index].title,
+          displayData: columnsIn[index].title,
+          allowOverlay: false
+        }));
+        copyToClipboard([headers, ...cells], columnIndexes, e);
+      }
+    };
+
     if (focused && getCellsForSelection !== undefined) {
       if (gridSelection.current !== undefined) {
         let thunk = getCellsForSelection(gridSelection.current.range, abortControllerRef.current.signal);
@@ -7201,7 +7216,7 @@ const DataEditorImpl = (p, forwardedRef) => {
           thunk = await thunk();
         }
 
-        copyToClipboard(thunk, range_default()(gridSelection.current.range.x - rowMarkerOffset, gridSelection.current.range.x + gridSelection.current.range.width - rowMarkerOffset), e);
+        copyToClipboardWithHeaders(thunk, range_default()(gridSelection.current.range.x - rowMarkerOffset, gridSelection.current.range.x + gridSelection.current.range.width - rowMarkerOffset));
       } else if (selectedRows !== undefined && selectedRows.length > 0) {
         const toCopy = [...selectedRows];
         const cells = toCopy.map(rowIndex => {
@@ -7221,9 +7236,9 @@ const DataEditorImpl = (p, forwardedRef) => {
 
         if (cells.some(x => x instanceof Promise)) {
           const settled = await Promise.all(cells);
-          copyToClipboard(settled, range_default()(columnsIn.length), e);
+          copyToClipboardWithHeaders(settled, range_default()(columnsIn.length));
         } else {
-          copyToClipboard(cells, range_default()(columnsIn.length), e);
+          copyToClipboardWithHeaders(cells, range_default()(columnsIn.length));
         }
       } else if (selectedColumns.length > 0) {
         const results = [];
@@ -7246,14 +7261,14 @@ const DataEditorImpl = (p, forwardedRef) => {
         }
 
         if (results.length === 1) {
-          copyToClipboard(results[0], cols, e);
+          copyToClipboardWithHeaders(results[0], cols);
         } else {
           const toCopy = results.reduce((pv, cv) => pv.map((row, index) => [...row, ...cv[index]]));
-          copyToClipboard(toCopy, cols, e);
+          copyToClipboardWithHeaders(toCopy, cols);
         }
       }
     }
-  }, [columnsIn.length, getCellsForSelection, gridSelection, keybindings.copy, rowMarkerOffset, rows]);
+  }, [columnsIn, getCellsForSelection, gridSelection, keybindings.copy, rowMarkerOffset, rows, copyHeaders]);
   (0,utils/* useEventListener */.OR)("copy", onCopy, window, false, false);
   const onSearchResultsChanged = react.useCallback((results, navIndex) => {
     if (results.length === 0 || navIndex === -1) return;
@@ -31057,6 +31072,7 @@ var DataEditorImpl = (p, forwardedRef) => {
     onDragStart,
     onMouseMove,
     onPaste,
+    copyHeaders = false,
     groupHeaderHeight = headerHeight,
     freezeColumns = 0,
     rowSelectionMode = "auto",
@@ -33040,6 +33056,20 @@ var DataEditorImpl = (p, forwardedRef) => {
     const selectedColumns = gridSelection.columns;
     const selectedRows = gridSelection.rows;
 
+    const copyToClipboardWithHeaders = (cells, columnIndexes) => {
+      if (!copyHeaders) {
+        copyToClipboard(cells, columnIndexes, e);
+      } else {
+        const headers = columnIndexes.map(index => ({
+          kind: GridCellKind.Text,
+          data: columnsIn[index].title,
+          displayData: columnsIn[index].title,
+          allowOverlay: false
+        }));
+        copyToClipboard([headers, ...cells], columnIndexes, e);
+      }
+    };
+
     if (focused && getCellsForSelection !== void 0) {
       if (gridSelection.current !== void 0) {
         let thunk = getCellsForSelection(gridSelection.current.range, abortControllerRef.current.signal);
@@ -33048,7 +33078,7 @@ var DataEditorImpl = (p, forwardedRef) => {
           thunk = await thunk();
         }
 
-        copyToClipboard(thunk, lodash_range_js__WEBPACK_IMPORTED_MODULE_4__(gridSelection.current.range.x - rowMarkerOffset, gridSelection.current.range.x + gridSelection.current.range.width - rowMarkerOffset), e);
+        copyToClipboardWithHeaders(thunk, lodash_range_js__WEBPACK_IMPORTED_MODULE_4__(gridSelection.current.range.x - rowMarkerOffset, gridSelection.current.range.x + gridSelection.current.range.width - rowMarkerOffset));
       } else if (selectedRows !== void 0 && selectedRows.length > 0) {
         const toCopy = [...selectedRows];
         const cells = toCopy.map(rowIndex => {
@@ -33068,9 +33098,9 @@ var DataEditorImpl = (p, forwardedRef) => {
 
         if (cells.some(x => x instanceof Promise)) {
           const settled = await Promise.all(cells);
-          copyToClipboard(settled, lodash_range_js__WEBPACK_IMPORTED_MODULE_4__(columnsIn.length), e);
+          copyToClipboardWithHeaders(settled, lodash_range_js__WEBPACK_IMPORTED_MODULE_4__(columnsIn.length));
         } else {
-          copyToClipboard(cells, lodash_range_js__WEBPACK_IMPORTED_MODULE_4__(columnsIn.length), e);
+          copyToClipboardWithHeaders(cells, lodash_range_js__WEBPACK_IMPORTED_MODULE_4__(columnsIn.length));
         }
       } else if (selectedColumns.length > 0) {
         const results = [];
@@ -33093,14 +33123,14 @@ var DataEditorImpl = (p, forwardedRef) => {
         }
 
         if (results.length === 1) {
-          copyToClipboard(results[0], cols, e);
+          copyToClipboardWithHeaders(results[0], cols);
         } else {
           const toCopy = results.reduce((pv, cv) => pv.map((row, index) => [...row, ...cv[index]]));
-          copyToClipboard(toCopy, cols, e);
+          copyToClipboardWithHeaders(toCopy, cols);
         }
       }
     }
-  }, [columnsIn.length, getCellsForSelection, gridSelection, keybindings.copy, rowMarkerOffset, rows]);
+  }, [columnsIn, getCellsForSelection, gridSelection, keybindings.copy, rowMarkerOffset, rows, copyHeaders]);
   useEventListener("copy", onCopy, window, false, false);
   const onSearchResultsChanged = react__WEBPACK_IMPORTED_MODULE_0__.useCallback((results, navIndex) => {
     if (results.length === 0 || navIndex === -1) return;
@@ -33436,4 +33466,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.7dbaf407.iframe.bundle.js.map
+//# sourceMappingURL=main.ce614298.iframe.bundle.js.map
