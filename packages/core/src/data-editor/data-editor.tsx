@@ -2311,7 +2311,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             onItemHovered?.({ ...args, location: [args.location[0] - rowMarkerOffset, args.location[1]] as any });
         },
-        [mouseState, gridSelection, rangeSelect, onItemHovered, rowMarkerOffset, lastRowSticky, rows, setCurrent]
+        [
+            mouseState,
+            rowMarkerOffset,
+            rowSelect,
+            gridSelection,
+            rangeSelect,
+            onItemHovered,
+            setSelectedRows,
+            lastRowSticky,
+            rows,
+            setCurrent,
+        ]
     );
 
     // 1 === move one
