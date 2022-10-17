@@ -2193,6 +2193,40 @@ describe("data-editor", () => {
         });
     });
 
+    test("Drag click row marker", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} rowMarkers="both" />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        spy.mockClear();
+
+        fireEvent.mouseMove(canvas, {
+            shiftKey: true,
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            shiftKey: true,
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection([2, 6]),
+        });
+    });
+
     test("Shift click row marker - no multi-select", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
