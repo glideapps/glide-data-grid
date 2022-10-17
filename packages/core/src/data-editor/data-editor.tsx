@@ -2255,7 +2255,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 args.location[0] === 0 &&
                 rowMarkerOffset === 1 &&
                 rowSelect === "multi" &&
-                mouseState.previousSelection
+                mouseState.previousSelection &&
+                !mouseState.previousSelection.rows.hasIndex(mouseDownData.current.location[1]) &&
+                gridSelection.rows.hasIndex(mouseDownData.current.location[1])
             ) {
                 const start = Math.min(mouseDownData.current.location[1], args.location[1]);
                 const end = Math.max(mouseDownData.current.location[1], args.location[1]) + 1;
