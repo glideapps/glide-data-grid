@@ -42,6 +42,7 @@ import {
     ImageEditorType,
     CustomCell,
     headerKind,
+    gridSelectionHasItem,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -2960,27 +2961,38 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onContextMenu = React.useCallback(
         (args: GridMouseEventArgs, preventDefault: () => void) => {
-            const clickLocation = args.location[0] - rowMarkerOffset;
+            const adjustedCol = args.location[0] - rowMarkerOffset;
             if (args.kind === "header") {
-                onHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
+                onHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
             }
 
             if (args.kind === groupHeaderKind) {
-                if (clickLocation < 0) {
+                if (adjustedCol < 0) {
                     return;
                 }
-                onGroupHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
+                onGroupHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
             }
 
             if (args.kind === "cell") {
-                onCellContextMenu?.([clickLocation, args.location[1]], {
+                const [col, row] = args.location;
+                onCellContextMenu?.([adjustedCol, row], {
                     ...args,
                     preventDefault,
                 });
-                updateSelectedCell(args.location[0], args.location[1], false, false);
+
+                if (!gridSelectionHasItem(gridSelection, args.location)) {
+                    updateSelectedCell(col, row, false, false);
+                }
             }
         },
-        [onCellContextMenu, onGroupHeaderContextMenu, onHeaderContextMenu, rowMarkerOffset, updateSelectedCell]
+        [
+            gridSelection,
+            onCellContextMenu,
+            onGroupHeaderContextMenu,
+            onHeaderContextMenu,
+            rowMarkerOffset,
+            updateSelectedCell,
+        ]
     );
 
     const onPasteInternal = React.useCallback(
