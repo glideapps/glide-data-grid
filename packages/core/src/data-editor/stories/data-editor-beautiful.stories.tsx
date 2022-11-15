@@ -1073,7 +1073,7 @@ export const ScrollShadows: React.VFC = () => {
 
     return (
         <BeautifulWrapper
-            title="Automatic Row Markers"
+            title="Scroll Shadows"
             description={
                 <>
                     <Description>You can enable and disable the horizontal/vertical scroll shadows.</Description>

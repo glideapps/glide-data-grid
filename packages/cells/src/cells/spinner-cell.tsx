@@ -16,16 +16,10 @@ const renderer: CustomRenderer<SpinnerCell> = {
 
         const x = rect.x + rect.width / 2;
         const y = rect.y + rect.height / 2;
-        ctx.arc(
-            x,
-            y,
-            Math.min(12, rect.height / 2 - 2),
-            Math.PI * 2 * progress,
-            Math.PI * 2 * progress + Math.PI * 1.5
-        );
+        ctx.arc(x, y, Math.min(12, rect.height / 6), Math.PI * 2 * progress, Math.PI * 2 * progress + Math.PI * 1.5);
 
         ctx.strokeStyle = theme.textMedium;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
 
         ctx.lineWidth = 1;
