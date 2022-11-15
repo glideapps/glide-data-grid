@@ -13,6 +13,7 @@ import {
 } from "../src";
 import type { SizedGridColumn } from "../src/data-grid/data-grid-types";
 import type { DataEditorRef } from "../src/data-editor/data-editor";
+import { assert } from "../src/common/support";
 
 jest.mock("../src/common/resize-detector", () => {
     return {
@@ -326,6 +327,208 @@ describe("data-editor", () => {
 
         const a11ycell = screen.getByTestId("glide-cell-0-5");
         fireEvent.click(a11ycell);
+    });
+
+    test("emits contextmenu for cell", async () => {
+        const spy = jest.fn();
+        const spySelection = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellContextMenu={spy} onGridSelectionChange={spySelection} />, {
+            wrapper: Context,
+        });
+        const scroller = prep();
+
+        assert(scroller !== null);
+
+        screen.getByTestId("data-grid-canvas");
+        fireEvent.contextMenu(scroller, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+        expect(spySelection).toHaveBeenCalledWith(
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [1, 1] }),
+            })
+        );
+    });
+
+    test("emits contextmenu for cell but does not change selection if already selected - rows", async () => {
+        const spy = jest.fn();
+        const spySelection = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                gridSelection={{
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.fromSingleSelection(1),
+                }}
+                onCellContextMenu={spy}
+                onGridSelectionChange={spySelection}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        const scroller = prep();
+
+        assert(scroller !== null);
+
+        screen.getByTestId("data-grid-canvas");
+        fireEvent.contextMenu(scroller, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+        expect(spySelection).not.toHaveBeenCalled();
+    });
+
+    test("emits contextmenu for cell but does not change selection if already selected - cols", async () => {
+        const spy = jest.fn();
+        const spySelection = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                gridSelection={{
+                    columns: CompactSelection.fromSingleSelection(1),
+                    rows: CompactSelection.empty(),
+                }}
+                onCellContextMenu={spy}
+                onGridSelectionChange={spySelection}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        const scroller = prep();
+
+        assert(scroller !== null);
+
+        screen.getByTestId("data-grid-canvas");
+        fireEvent.contextMenu(scroller, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+        expect(spySelection).not.toHaveBeenCalled();
+    });
+
+    test("emits contextmenu for cell but does not change selection if already selected - current.cell", async () => {
+        const spy = jest.fn();
+        const spySelection = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                gridSelection={{
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
+                    current: {
+                        cell: [1, 1],
+                        range: { x: 1, y: 1, width: 1, height: 1 },
+                        rangeStack: [],
+                    },
+                }}
+                onCellContextMenu={spy}
+                onGridSelectionChange={spySelection}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        const scroller = prep();
+
+        assert(scroller !== null);
+
+        screen.getByTestId("data-grid-canvas");
+        fireEvent.contextMenu(scroller, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+        expect(spySelection).not.toHaveBeenCalled();
+    });
+
+    test("emits contextmenu for cell but does not change selection if already selected - current.range", async () => {
+        const spy = jest.fn();
+        const spySelection = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                gridSelection={{
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
+                    current: {
+                        cell: [0, 0],
+                        range: { x: 0, y: 0, width: 2, height: 2 },
+                        rangeStack: [],
+                    },
+                }}
+                onCellContextMenu={spy}
+                onGridSelectionChange={spySelection}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        const scroller = prep();
+
+        assert(scroller !== null);
+
+        screen.getByTestId("data-grid-canvas");
+        fireEvent.contextMenu(scroller, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+        expect(spySelection).not.toHaveBeenCalled();
+    });
+
+    test("emits contextmenu for cell row markers", async () => {
+        const spy = jest.fn();
+        const spySelection = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                rowMarkers={"both"}
+                onCellContextMenu={spy}
+                onGridSelectionChange={spySelection}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        const scroller = prep();
+
+        assert(scroller !== null);
+
+        screen.getByTestId("data-grid-canvas");
+        fireEvent.contextMenu(scroller, {
+            clientX: 320, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+        expect(spySelection).toHaveBeenCalledWith(
+            expect.objectContaining({
+                current: expect.objectContaining({ cell: [1, 1] }),
+            })
+        );
     });
 
     test("Emits cell click", async () => {
@@ -2115,6 +2318,40 @@ describe("data-editor", () => {
         spy.mockClear();
 
         fireEvent.mouseDown(canvas, {
+            shiftKey: true,
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.mouseUp(canvas, {
+            shiftKey: true,
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection([2, 6]),
+        });
+    });
+
+    test("Drag click row marker", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} rowMarkers="both" />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        spy.mockClear();
+
+        fireEvent.mouseMove(canvas, {
             shiftKey: true,
             clientX: 10, // Row marker
             clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)

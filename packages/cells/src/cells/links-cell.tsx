@@ -98,7 +98,7 @@ const renderer: CustomRenderer<LinksCell> = {
 
         for (const [index, l] of links.entries()) {
             const needsComma = index < links.length - 1;
-            const metrics = measureTextCached(l.title, ctx);
+            const metrics = measureTextCached(l.title, ctx, font);
             const commaMetrics = needsComma ? measureTextCached(l.title + ",", ctx, font) : metrics;
 
             const isHovered = rectHoverX > drawX && rectHoverX < drawX + metrics.width;

@@ -92,6 +92,12 @@ export const ResizableColumns: React.VFC = () => {
                 maxColumnAutoWidth={500}
                 maxColumnWidth={2000}
                 rows={50}
+                scaleToRem={true}
+                theme={{
+                    baseFontStyle: "0.8125rem",
+                    headerFontStyle: "600 0.8125rem",
+                    editorFontSize: "0.8125rem",
+                }}
                 onColumnResize={onColumnResize}
                 getCellsForSelection={getCellsForSelection}
             />
@@ -1067,7 +1073,7 @@ export const ScrollShadows: React.VFC = () => {
 
     return (
         <BeautifulWrapper
-            title="Automatic Row Markers"
+            title="Scroll Shadows"
             description={
                 <>
                     <Description>You can enable and disable the horizontal/vertical scroll shadows.</Description>
@@ -1688,6 +1694,7 @@ export const AllCellKinds: React.VFC = () => {
                 getCellContent={getCellContent}
                 columns={cols}
                 onCellEdited={setCellValue}
+                // rowHeight={55}
                 onColumnResize={onColumnResize}
                 highlightRegions={[
                     {

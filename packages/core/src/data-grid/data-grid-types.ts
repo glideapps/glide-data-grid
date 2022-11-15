@@ -22,6 +22,19 @@ export interface GridSelection {
     readonly rows: CompactSelection;
 }
 
+export function gridSelectionHasItem(sel: GridSelection, item: Item): boolean {
+    const [col, row] = item;
+    if (sel.columns.hasIndex(col) || sel.rows.hasIndex(row)) return true;
+    if (sel.current !== undefined) {
+        if (sel.current.cell[0] === col && sel.current.cell[1] === row) return true;
+        const toCheck = [sel.current.range, ...sel.current.rangeStack];
+        for (const r of toCheck) {
+            if (col >= r.x && col < r.x + r.width && row >= r.y && row < r.y + r.height) return true;
+        }
+    }
+    return false;
+}
+
 /** @category Types */
 export type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 

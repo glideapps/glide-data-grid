@@ -398,7 +398,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             onItemHovered={onItemHoveredImpl}
             onDragStart={onDragStartImpl}
             onMouseDown={onMouseDownImpl}
-            allowResize={onColumnResize !== undefined}
+            allowResize={canResize}
             onMouseUp={onMouseUpImpl}
             dragAndDropState={dragOffset}
             onMouseMoveRaw={onMouseMove}

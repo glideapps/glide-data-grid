@@ -42,6 +42,7 @@ import {
     ImageEditorType,
     CustomCell,
     headerKind,
+    gridSelectionHasItem,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -143,16 +144,16 @@ function shiftSelection(input: GridSelection, offset: number): GridSelection {
             input.current === undefined
                 ? undefined
                 : {
-                    cell: [input.current.cell[0] + offset, input.current.cell[1]],
-                    range: {
-                        ...input.current.range,
-                        x: input.current.range.x + offset,
-                    },
-                    rangeStack: input.current.rangeStack.map(r => ({
-                        ...r,
-                        x: r.x + offset,
-                    })),
-                },
+                      cell: [input.current.cell[0] + offset, input.current.cell[1]],
+                      range: {
+                          ...input.current.range,
+                          x: input.current.range.x + offset,
+                      },
+                      rangeStack: input.current.rangeStack.map(r => ({
+                          ...r,
+                          x: r.x + offset,
+                      })),
+                  },
         rows: input.rows,
         columns: input.columns.offset(offset),
     };
@@ -312,6 +313,11 @@ export interface DataEditorProps extends Props {
      * @group Style
      */
     readonly rowMarkerStartIndex?: number;
+
+    /** Changes the theme of the row marker column
+     * @group Style
+     */
+    readonly rowMarkerTheme?: Partial<Theme>;
 
     /** Sets the width of the data grid.
      * @group Style
@@ -587,6 +593,8 @@ export interface DataEditorProps extends Props {
      * @group Advanced
      */
     readonly customRenderers?: readonly CustomRenderer<CustomCell<any>>[];
+
+    readonly scaleToRem?: boolean;
 }
 
 type ScrollToFn = (
@@ -662,15 +670,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const {
         rowMarkers = "none",
-        rowHeight = 34,
-        headerHeight = 36,
         rowMarkerWidth: rowMarkerWidthRaw,
         imageEditorOverride,
         getRowThemeOverride,
         markdownDivCreateNode,
-    } = p;
-
-    const {
         width,
         height,
         columns: columnsIn,
@@ -686,7 +689,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onGroupHeaderClicked,
         onCellContextMenu,
         className,
-        theme,
         onHeaderContextMenu,
         getCellsForSelection: getCellsForSelectionIn,
         onGroupHeaderContextMenu,
@@ -712,10 +714,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onMouseMove,
         onPaste,
         copyHeaders = false,
-        groupHeaderHeight = headerHeight,
         freezeColumns = 0,
         rowSelectionMode = "auto",
         rowMarkerStartIndex = 1,
+        rowMarkerTheme,
         onHeaderMenuClick,
         getGroupDetails,
         onSearchClose: onSearchCloseIn,
@@ -750,8 +752,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         isDraggable,
         onDragLeave,
         onRowMoved,
-        overscrollX,
-        overscrollY,
+        overscrollX: overscrollXIn,
+        overscrollY: overscrollYIn,
         preventDiagonalScrolling,
         rightElement,
         rightElementProps,
@@ -759,19 +761,54 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         smoothScrollX,
         smoothScrollY,
         scrollToEnd,
+        scaleToRem = false,
+        rowHeight: rowHeightIn = 34,
+        headerHeight: headerHeightIn = 36,
+        groupHeaderHeight: groupHeaderHeightIn = headerHeightIn,
+        theme: themeIn,
     } = p;
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
     const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
     const maxColumnAutoWidth = Math.max(maxColumnAutoWidthIn ?? maxColumnWidth, minColumnWidth);
 
+    const docStyle = React.useMemo(() => {
+        if (typeof window === "undefined") return { fontSize: "16px" };
+        return window.getComputedStyle(document.documentElement);
+    }, []);
+
+    const fontSizeStr = docStyle.fontSize;
+
+    const remSize = React.useMemo(() => Number.parseFloat(fontSizeStr), [fontSizeStr]);
+
+    const [rowHeight, headerHeight, groupHeaderHeight, theme, overscrollX, overscrollY] = React.useMemo(() => {
+        if (!scaleToRem || remSize === 16)
+            return [rowHeightIn, headerHeightIn, groupHeaderHeightIn, themeIn, overscrollXIn, overscrollYIn];
+        const scaler = remSize / 16;
+        const rh = rowHeightIn;
+        const bt = getDataEditorTheme();
+        return [
+            typeof rh === "number" ? rh * scaler : (n: number) => Math.ceil(rh(n) * scaler),
+            Math.ceil(headerHeightIn * scaler),
+            Math.ceil(groupHeaderHeightIn * scaler),
+            {
+                ...themeIn,
+                headerIconSize: (themeIn?.headerIconSize ?? bt.headerIconSize) * scaler,
+                cellHorizontalPadding: (themeIn?.cellHorizontalPadding ?? bt.cellHorizontalPadding) * scaler,
+                cellVerticalPadding: (themeIn?.cellVerticalPadding ?? bt.cellVerticalPadding) * scaler,
+            },
+            Math.ceil((overscrollXIn ?? 0) * scaler),
+            Math.ceil((overscrollYIn ?? 0) * scaler),
+        ];
+    }, [groupHeaderHeightIn, headerHeightIn, overscrollXIn, overscrollYIn, remSize, rowHeightIn, scaleToRem, themeIn]);
+
     const keybindings = React.useMemo(() => {
         return keybindingsIn === undefined
             ? keybindingDefaults
             : {
-                ...keybindingDefaults,
-                ...keybindingsIn,
-            };
+                  ...keybindingDefaults,
+                  ...keybindingsIn,
+              };
     }, [keybindingsIn]);
 
     const rowMarkerWidth = rowMarkerWidthRaw ?? (rows > 10_000 ? 48 : rows > 1000 ? 44 : rows > 100 ? 36 : 32);
@@ -944,10 +981,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         rowMarkers === "none"
             ? ""
             : numSelectedRows === 0
-                ? headerCellUnheckedMarker
-                : numSelectedRows === rows
-                    ? headerCellCheckedMarker
-                    : headerCellIndeterminateMarker;
+            ? headerCellUnheckedMarker
+            : numSelectedRows === rows
+            ? headerCellCheckedMarker
+            : headerCellIndeterminateMarker;
 
     const mangledCols = React.useMemo(() => {
         if (rowMarkers === "none") return columns;
@@ -958,10 +995,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 icon: undefined,
                 hasMenu: false,
                 style: "normal" as const,
+                themeOverride: rowMarkerTheme,
             },
             ...columns,
         ];
-    }, [columns, rowMarkerWidth, rowMarkers, rowMarkerHeader]);
+    }, [columns, rowMarkerWidth, rowMarkers, rowMarkerHeader, rowMarkerTheme]);
 
     const [visibleRegionY, visibleRegionTy] = React.useMemo(() => {
         return [
@@ -1007,6 +1045,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const vScrollReady = (visibleRegion.height ?? 1) > 1;
     React.useLayoutEffect(() => {
         if (scrollOffsetY !== undefined && scrollRef.current !== null && vScrollReady) {
+            if (scrollRef.current.scrollTop === scrollOffsetY) return;
             scrollRef.current.scrollTop = scrollOffsetY;
             if (scrollRef.current.scrollTop !== scrollOffsetY) {
                 empty();
@@ -1018,6 +1057,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const hScrollReady = (visibleRegion.width ?? 1) > 1;
     React.useLayoutEffect(() => {
         if (scrollOffsetX !== undefined && scrollRef.current !== null && hScrollReady) {
+            if (scrollRef.current.scrollLeft === scrollOffsetX) return;
             scrollRef.current.scrollLeft = scrollOffsetX;
             if (scrollRef.current.scrollLeft !== scrollOffsetX) {
                 empty();
@@ -1049,9 +1089,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 rowMarkerOffset === 0
                     ? items
                     : items.map(x => ({
-                        ...x,
-                        location: [x.location[0] - rowMarkerOffset, x.location[1]] as const,
-                    }));
+                          ...x,
+                          location: [x.location[0] - rowMarkerOffset, x.location[1]] as const,
+                      }));
             const r = onCellsEdited?.(mangledItems);
 
             if (r !== true) {
@@ -1867,29 +1907,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const isPrevented = React.useRef(false);
-    const onContextMenu = React.useCallback(
-        (args: GridMouseEventArgs, preventDefault: () => void) => {
-            const clickLocation = args.location[0] - rowMarkerOffset;
-            if (args.kind === "header") {
-                onHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
-            }
-
-            if (args.kind === groupHeaderKind) {
-                if (clickLocation < 0) {
-                    return;
-                }
-                onGroupHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
-            }
-
-            if (args.kind === "cell") {
-                onCellContextMenu?.([clickLocation, args.location[1]], {
-                    ...args,
-                    preventDefault,
-                });
-            }
-        },
-        [onCellContextMenu, onGroupHeaderContextMenu, onHeaderContextMenu, rowMarkerOffset]
-    );
 
     const normalSizeColumn = React.useCallback(
         async (col: number): Promise<void> => {
@@ -2172,11 +2189,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         freezeColumns === 0
                             ? undefined
                             : {
-                                x: 0,
-                                y: region.y,
-                                width: freezeColumns,
-                                height: region.height,
-                            },
+                                  x: 0,
+                                  y: region.y,
+                                  width: freezeColumns,
+                                  height: region.height,
+                              },
                 },
             };
             setClientSize([clientWidth, clientHeight, rightElWidth]);
@@ -2235,6 +2252,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (args: GridMouseEventArgs) => {
             if (
                 mouseState !== undefined &&
+                mouseDownData.current?.location[0] === 0 &&
+                args.location[0] === 0 &&
+                rowMarkerOffset === 1 &&
+                rowSelect === "multi" &&
+                mouseState.previousSelection &&
+                !mouseState.previousSelection.rows.hasIndex(mouseDownData.current.location[1]) &&
+                gridSelection.rows.hasIndex(mouseDownData.current.location[1])
+            ) {
+                const start = Math.min(mouseDownData.current.location[1], args.location[1]);
+                const end = Math.max(mouseDownData.current.location[1], args.location[1]) + 1;
+                setSelectedRows(CompactSelection.fromSingleSelection([start, end]), undefined, false);
+            }
+            if (
+                mouseState !== undefined &&
                 gridSelection.current !== undefined &&
                 !isActivelyDragging.current &&
                 (rangeSelect === "rect" || rangeSelect === "multi-rect")
@@ -2281,7 +2312,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             onItemHovered?.({ ...args, location: [args.location[0] - rowMarkerOffset, args.location[1]] as any });
         },
-        [mouseState, gridSelection, rangeSelect, onItemHovered, rowMarkerOffset, lastRowSticky, rows, setCurrent]
+        [
+            mouseState,
+            rowMarkerOffset,
+            rowSelect,
+            gridSelection,
+            rangeSelect,
+            onItemHovered,
+            setSelectedRows,
+            lastRowSticky,
+            rows,
+            setCurrent,
+        ]
     );
 
     // 1 === move one
@@ -2917,6 +2959,42 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
+    const onContextMenu = React.useCallback(
+        (args: GridMouseEventArgs, preventDefault: () => void) => {
+            const adjustedCol = args.location[0] - rowMarkerOffset;
+            if (args.kind === "header") {
+                onHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
+            }
+
+            if (args.kind === groupHeaderKind) {
+                if (adjustedCol < 0) {
+                    return;
+                }
+                onGroupHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
+            }
+
+            if (args.kind === "cell") {
+                const [col, row] = args.location;
+                onCellContextMenu?.([adjustedCol, row], {
+                    ...args,
+                    preventDefault,
+                });
+
+                if (!gridSelectionHasItem(gridSelection, args.location)) {
+                    updateSelectedCell(col, row, false, false);
+                }
+            }
+        },
+        [
+            gridSelection,
+            onCellContextMenu,
+            onGroupHeaderContextMenu,
+            onHeaderContextMenu,
+            rowMarkerOffset,
+            updateSelectedCell,
+        ]
+    );
+
     const onPasteInternal = React.useCallback(
         async (e?: ClipboardEvent) => {
             if (!keybindings.paste) return;
@@ -3105,17 +3183,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 cells: readonly (readonly GridCell[])[],
                 columnIndexes: readonly number[]
             ) => {
-
                 if (!copyHeaders) {
                     copyToClipboard(cells, columnIndexes, e);
                 } else {
-                    const headers = columnIndexes
-                        .map(index => ({
-                            kind: GridCellKind.Text,
-                            data: columnsIn[index].title,
-                            displayData: columnsIn[index].title,
-                            allowOverlay: false,
-                        })) as GridCell[];
+                    const headers = columnIndexes.map(index => ({
+                        kind: GridCellKind.Text,
+                        data: columnsIn[index].title,
+                        displayData: columnsIn[index].title,
+                        allowOverlay: false,
+                    })) as GridCell[];
                     copyToClipboard([headers, ...cells], columnIndexes, e);
                 }
             };
@@ -3131,7 +3207,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         range(
                             gridSelection.current.range.x - rowMarkerOffset,
                             gridSelection.current.range.x + gridSelection.current.range.width - rowMarkerOffset
-                        ),
+                        )
                     );
                 } else if (selectedRows !== undefined && selectedRows.length > 0) {
                     const toCopy = [...selectedRows];
@@ -3220,6 +3296,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ) {
             scrollToRef.current(outCol, outRow);
         }
+        hasJustScrolled.current = false; //only allow skipping a single scroll
     }, [outCol, outRow]);
 
     const disabledRows = React.useMemo(() => {
@@ -3436,7 +3513,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     experimental={experimental}
                     fixedShadowX={fixedShadowX}
                     fixedShadowY={fixedShadowY}
-                    getRowThemeOverride={p.getRowThemeOverride}
+                    getRowThemeOverride={getRowThemeOverride}
                     headerIcons={headerIcons}
                     imageWindowLoader={imageWindowLoader}
                     initialSize={initialSize}
