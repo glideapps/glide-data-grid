@@ -1,10 +1,28 @@
 import type { Theme } from "../common/styles";
+import type { SpriteProps } from "../common/utils";
 import { HeaderIconMap, sprites } from "./sprites";
 
-type HeaderIcon = keyof HeaderIconMap;
-type Sprite = HeaderIconMap["headerArray"];
+/**
+ * A known icon identifier
+ *
+ * @category Columns
+ */
+export type HeaderIcon = keyof HeaderIconMap;
 
-/** @category Columns */
+/**
+ * A method that produces an SVG array from
+ * an SVG icon configuration.
+ *
+ * @category Columns
+ */
+export type Sprite = (props: SpriteProps) => string;
+
+/**
+ * A method that maps from icon names to functions
+ * that return SVG strings.
+ *
+ * @category Columns
+ */
 export type SpriteMap = Record<string | HeaderIcon, Sprite>;
 
 /** @category Columns */

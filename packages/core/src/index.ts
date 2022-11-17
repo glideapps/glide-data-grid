@@ -1,6 +1,7 @@
 export type { OverlayImageEditorProps } from "./data-grid-overlay-editor/private/image-overlay-editor";
 export type { MarkdownDivProps } from "./markdown-div/markdown-div";
-export type { SpriteMap } from "./data-grid/data-grid-sprites";
+export type { SpriteMap, HeaderIcon, Sprite } from "./data-grid/data-grid-sprites";
+export type { SpriteProps } from "./common/utils";
 export type { Theme } from "./common/styles";
 export type { CustomCellRenderer } from "./data-editor/use-custom-cells";
 export type { CustomRenderer } from "./data-grid/cells/cell-types";

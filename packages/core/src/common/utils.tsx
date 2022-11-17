@@ -47,6 +47,11 @@ export function degreesToRadians(degrees: number) {
     return (degrees * PI) / 180;
 }
 
+/**
+ * The input provided to a sprite function.
+ *
+ * @category Columns
+ */
 export interface SpriteProps {
     fgColor: string;
     bgColor: string;
