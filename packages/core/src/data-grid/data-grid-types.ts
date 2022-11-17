@@ -238,7 +238,12 @@ export enum GridColumnIcon {
 /** @category Types */
 export type CellArray = readonly (readonly GridCell[])[];
 
-/** @category Types */
+/**
+ * This type is used to specify the coordinates of
+ * a cell within the dataset.
+ *
+ * @category Types
+ */
 export type Item = readonly [col: number, row: number];
 
 /** @category Types */

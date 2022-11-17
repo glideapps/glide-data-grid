@@ -298,7 +298,14 @@ export interface DataEditorProps extends Props {
      */
     readonly rows: number;
 
-    /** Determins if row markers should be automatically added to the grid.
+    /** Determines if row markers should be automatically added to the grid.
+     * Interactive row markers allow the user to select a row.
+     *
+     * - "clickable-number" renders a number that can be clicked to
+     *   select the row
+     * - "both" causes the row marker to show up as a number but
+     *   reveal a checkbox when the marker is hovered.
+     *
      * @defaultValue `none`
      * @group Style
      */
@@ -455,11 +462,17 @@ export interface DataEditorProps extends Props {
 
     /**
      * The current selection of the data grid. Contains all selected cells, ranges, rows, and columns.
+     * Used in conjunction with {@link onGridSelectionChange}
+     * method to implement a controlled selection.
      * @group Selection
      */
     readonly gridSelection?: GridSelection;
     /**
-     * Emitted whenever the grid selection changes.
+     * Emitted whenever the grid selection changes. Specifying
+     * this function will make the grid’s selection controlled, so
+     * so you will need to specify {@link gridSelection} as well. See
+     * the "Controlled Selection" example for details.
+     *
      * @param newSelection The new gridSelection as created by user input.
      * @group Selection
      */
