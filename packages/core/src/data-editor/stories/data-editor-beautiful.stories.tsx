@@ -42,6 +42,7 @@ import {
 } from "./utils";
 import noop from "lodash/noop.js";
 import type { GetRowThemeCallback } from "../../data-grid/data-grid-render";
+import { useUndoRedo } from "../use-undo-redo";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -3608,6 +3609,57 @@ export const DropEvents: React.VFC = () => {
     );
 };
 (DropEvents as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const UndoRedo: React.VFC = () => {
+    const { cols, getCellContent, setCellValue } = useMockDataGenerator(6);
+
+    const gridRef = React.useRef<DataEditorRef>(null);
+
+    const { gridSelection, onCellEdited, onGridSelectionChange, undo, canRedo, canUndo, redo } = useUndoRedo(
+        gridRef,
+        getCellContent,
+        setCellValue
+    );
+
+    return (
+        <BeautifulWrapper
+            title="Undo / Redo Support"
+            description={
+                <Description>
+                    A simple undo/redo implementation
+                    <MoreInfo>
+                        Use keyboard shortcuts CMD+Z and CMD+SHIFT+Z / CTRL+Z and CTRL+Y. Or click these buttons:
+                        <button onClick={undo} disabled={!canUndo} style={{ opacity: canUndo ? 1 : 0.4 }}>
+                            Undo
+                        </button>
+                        <button onClick={redo} disabled={!canRedo} style={{ opacity: canRedo ? 1 : 0.4 }}>
+                            Redo
+                        </button>
+                    </MoreInfo>
+                    <MoreInfo>
+                        It works by taking a snapshot of the content of a cell before it is edited and replaying any
+                        edits back. It may not be suitable for data sources that are expensive to read from.
+                    </MoreInfo>
+                </Description>
+            }>
+            <DataEditor
+                {...defaultProps}
+                ref={gridRef}
+                onCellEdited={onCellEdited}
+                getCellContent={getCellContent}
+                gridSelection={gridSelection ?? undefined}
+                onGridSelectionChange={onGridSelectionChange}
+                columns={cols}
+                rows={1000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(UnevenRows as any).parameters = {
     options: {
         showPanel: false,
     },
