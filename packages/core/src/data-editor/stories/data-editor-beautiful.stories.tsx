@@ -15,26 +15,33 @@ import {
     GroupHeaderClickedEventArgs,
     isEditableGridCell,
     Item,
-    Rectangle
+    Rectangle,
 } from "../../data-grid/data-grid-types";
 import { DataEditor, DataEditorProps } from "../data-editor";
 
-import { styled } from "@linaria/react";
 import faker from "faker";
-import noop from "lodash/noop.js";
-import range from "lodash/range.js";
-import { IBounds, useLayer } from "react-laag";
-import type { DataEditorRef, Theme } from "../..";
-import { useEventListener } from "../../common/utils";
-import type { GetRowThemeCallback } from "../../data-grid/data-grid-render";
-import type { SpriteMap } from "../../data-grid/data-grid-sprites";
+import { styled } from "@linaria/react";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
+import { useEventListener } from "../../common/utils";
+import { IBounds, useLayer } from "react-laag";
+import type { SpriteMap } from "../../data-grid/data-grid-sprites";
+import type { DataEditorRef, Theme } from "../..";
+import range from "lodash/range.js";
 import {
-    BeautifulStyle, BeautifulWrapper, ColumnAddButton, ContentCache, Description, getGridColumn,
-    GridColumnWithMockingInfo, lossyCopyData, MoreInfo,
-    PropName, useMockDataGenerator
+    useMockDataGenerator,
+    BeautifulWrapper,
+    Description,
+    MoreInfo,
+    PropName,
+    lossyCopyData,
+    getGridColumn,
+    GridColumnWithMockingInfo,
+    ContentCache,
+    BeautifulStyle,
+    ColumnAddButton,
 } from "./utils";
-
+import noop from "lodash/noop.js";
+import type { GetRowThemeCallback } from "../../data-grid/data-grid-render";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
