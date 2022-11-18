@@ -496,7 +496,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const shiftKey = ev?.shiftKey === true;
             const ctrlKey = ev?.ctrlKey === true;
             const metaKey = ev?.metaKey === true;
-            const isTouch = ev !== undefined && !(ev instanceof MouseEvent);
+            const isTouch = (ev !== undefined && !(ev instanceof MouseEvent)) || (ev as any)?.pointerType === "touch";
 
             const edgeSize = 20;
             const scrollEdge: GridMouseEventArgs["scrollEdge"] = [
@@ -958,6 +958,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             if (ev instanceof MouseEvent) {
                 clientX = ev.clientX;
                 clientY = ev.clientY;
+                if ((ev as any).pointerType === "touch") {
+                    return;
+                }
             } else {
                 clientX = ev.changedTouches[0].clientX;
                 clientY = ev.changedTouches[0].clientY;
@@ -1013,7 +1016,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             groupHeaderActionForEvent,
         ]
     );
-    useEventListener("mouseup", onMouseUpImpl, window, false);
+    useEventListener("click", onMouseUpImpl, window, false);
     useEventListener("touchend", onMouseUpImpl, window, false);
 
     const onContextMenuImpl = React.useCallback(
