@@ -3642,7 +3642,7 @@ export const UndoRedo: React.VFC = () => {
                     </MoreInfo>
                     <MoreInfo>
                         It works by taking a snapshot of the content of a cell before it is edited and replaying any
-                        edits back. It may not be suitable for data sources that are expensive to read from.
+                        edits back.
                     </MoreInfo>
                 </Description>
             }>
@@ -3659,7 +3659,7 @@ export const UndoRedo: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-(UnevenRows as any).parameters = {
+(UndoRedo as any).parameters = {
     options: {
         showPanel: false,
     },
