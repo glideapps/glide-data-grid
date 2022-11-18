@@ -1,6 +1,6 @@
 {
     "extends": "../../tsconfig.json",
-    "include": ["./src/**/*.ts", "./src/**/*.tsx", "./test/**/*.ts", "./test/**/*.tsx", "../source/src/use-undo-redo.ts"],
+    "include": ["./src/**/*.ts", "./src/**/*.tsx", "./test/**/*.ts", "./test/**/*.tsx"],
     "typedocOptions": {
         "entryPoints": ["src/index.ts"],
         "out": "docs",
