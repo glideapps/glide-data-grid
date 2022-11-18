@@ -1,5 +1,5 @@
-import type { EditableGridCell, GridCell, GridSelection, Item } from "../data-grid/data-grid-types";
-import type { DataEditorRef } from "./data-editor";
+import type { EditableGridCell, GridCell, GridSelection, Item, DataEditorRef } from "@glideapps/glide-data-grid";
+
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 interface Edit {
