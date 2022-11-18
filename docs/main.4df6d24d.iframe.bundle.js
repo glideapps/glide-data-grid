@@ -17480,7 +17480,7 @@ const DataGrid = (p, forwardedRef) => {
     const shiftKey = (ev === null || ev === void 0 ? void 0 : ev.shiftKey) === true;
     const ctrlKey = (ev === null || ev === void 0 ? void 0 : ev.ctrlKey) === true;
     const metaKey = (ev === null || ev === void 0 ? void 0 : ev.metaKey) === true;
-    const isTouch = ev !== undefined && !(ev instanceof MouseEvent);
+    const isTouch = ev !== undefined && !(ev instanceof MouseEvent) || (ev === null || ev === void 0 ? void 0 : ev.pointerType) === "touch";
     const edgeSize = 20;
     const scrollEdge = [Math.abs(x) < edgeSize ? -1 : Math.abs(rect.width - x) < edgeSize ? 1 : 0, Math.abs(y) < edgeSize ? -1 : Math.abs(rect.height - y) < edgeSize ? 1 : 0];
     let result;
@@ -17824,6 +17824,10 @@ const DataGrid = (p, forwardedRef) => {
     if (ev instanceof MouseEvent) {
       clientX = ev.clientX;
       clientY = ev.clientY;
+
+      if (ev.pointerType === "touch") {
+        return;
+      }
     } else {
       clientX = ev.changedTouches[0].clientX;
       clientY = ev.changedTouches[0].clientY;
@@ -17874,7 +17878,7 @@ const DataGrid = (p, forwardedRef) => {
 
     onMouseUp(args, isOutside);
   }, [onMouseUp, eventTargetRef, getMouseArgsForPosition, isOverHeaderMenu, onHeaderMenuClick, groupHeaderActionForEvent]);
-  (0,utils/* useEventListener */.OR)("mouseup", onMouseUpImpl, window, false);
+  (0,utils/* useEventListener */.OR)("click", onMouseUpImpl, window, false);
   (0,utils/* useEventListener */.OR)("touchend", onMouseUpImpl, window, false);
   const onContextMenuImpl = react.useCallback(ev => {
     const canvas = ref.current;
@@ -27437,7 +27441,7 @@ var DataGrid = (p, forwardedRef) => {
     const shiftKey = (ev == null ? void 0 : ev.shiftKey) === true;
     const ctrlKey = (ev == null ? void 0 : ev.ctrlKey) === true;
     const metaKey = (ev == null ? void 0 : ev.metaKey) === true;
-    const isTouch = ev !== void 0 && !(ev instanceof MouseEvent);
+    const isTouch = ev !== void 0 && !(ev instanceof MouseEvent) || (ev == null ? void 0 : ev.pointerType) === "touch";
     const edgeSize = 20;
     const scrollEdge = [Math.abs(x) < edgeSize ? -1 : Math.abs(rect.width - x) < edgeSize ? 1 : 0, Math.abs(y) < edgeSize ? -1 : Math.abs(rect.height - y) < edgeSize ? 1 : 0];
     let result;
@@ -27779,6 +27783,10 @@ var DataGrid = (p, forwardedRef) => {
     if (ev instanceof MouseEvent) {
       clientX = ev.clientX;
       clientY = ev.clientY;
+
+      if (ev.pointerType === "touch") {
+        return;
+      }
     } else {
       clientX = ev.changedTouches[0].clientX;
       clientY = ev.changedTouches[0].clientY;
@@ -27827,7 +27835,7 @@ var DataGrid = (p, forwardedRef) => {
 
     onMouseUp(args, isOutside);
   }, [onMouseUp, eventTargetRef, getMouseArgsForPosition, isOverHeaderMenu, onHeaderMenuClick, groupHeaderActionForEvent]);
-  useEventListener("mouseup", onMouseUpImpl, window, false);
+  useEventListener("click", onMouseUpImpl, window, false);
   useEventListener("touchend", onMouseUpImpl, window, false);
   const onContextMenuImpl = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(ev => {
     const canvas = ref.current;
@@ -33663,4 +33671,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.1b8cd988.iframe.bundle.js.map
+//# sourceMappingURL=main.4df6d24d.iframe.bundle.js.map
