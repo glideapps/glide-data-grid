@@ -8760,7 +8760,7 @@ function _extends() { _extends = Object.assign ? Object.assign.bind() : function
   title: "Glide-Data-Grid/DataEditor Demos",
   decorators: [Story => react__WEBPACK_IMPORTED_MODULE_0__.createElement(_stories_story_utils__WEBPACK_IMPORTED_MODULE_1__/* .SimpleThemeWrapper */ .X, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .BeautifulWrapper */ .m, {
     title: "Search is easy",
-    description: react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .Description */ .dk, null, "Search for any data in your grid by setting ", react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .PropName */ .Gi, null, "showSearch"), "."), react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .MoreInfo */ .OX, null, "In this story, ", react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .KeyName */ .et, null, "Ctrl"), " (", react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .KeyName */ .et, null, "\u2318"), " on Mac) + ", react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .KeyName */ .et, null, "f"), " ", "toggles the search bar. Make sure you're focused on the Data Grid!"))
+    description: react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .Description */ .dk, null, "Search for any data in your grid by setting ", react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .PropName */ .Gi, null, "showSearch"), "."), react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .MoreInfo */ .OX, null, "In this story, ", react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .KeyName */ .et, null, "Ctrl"), " (", react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .KeyName */ .et, null, "\u2318"), " on Mac) +", " ", react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .KeyName */ .et, null, "f"), " toggles the search bar. Make sure you're focused on the Data Grid!"))
   }, react__WEBPACK_IMPORTED_MODULE_0__.createElement(Story, null)))]
 });
 const BuiltInSearch = () => {
@@ -8782,10 +8782,7 @@ const BuiltInSearch = () => {
       event.preventDefault();
     }
   }, []), window, false, true);
-  return react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .BeautifulWrapper */ .m, {
-    title: "Search is easy",
-    description: react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .Description */ .dk, null, "Search for any data in your grid by setting ", react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .PropName */ .Gi, null, "showSearch"), "."), react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .MoreInfo */ .OX, null, "In this story, ", react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .KeyName */ .et, null, "Ctrl"), " (", react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .KeyName */ .et, null, "\u2318"), " on Mac) + ", react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .KeyName */ .et, null, "f"), " ", "toggles the search bar. Make sure you're focused on the Data Grid!"))
-  }, react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_data_editor__WEBPACK_IMPORTED_MODULE_5__/* .DataEditor */ .N, _extends({}, _data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .defaultProps */ .lG, {
+  return react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_data_editor__WEBPACK_IMPORTED_MODULE_5__/* .DataEditor */ .N, _extends({}, _data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .defaultProps */ .lG, {
     getCellContent: getCellContent,
     getCellsForSelection: true,
     gridSelection: selection,
@@ -8796,7 +8793,7 @@ const BuiltInSearch = () => {
     showSearch: showSearch,
     onSearchClose: () => setShowSearch(false),
     rows: 10000
-  })));
+  }));
 };
 const __namedExportsOrder = ["BuiltInSearch"];
 
@@ -39264,4 +39261,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.61c34a1f.iframe.bundle.js.map
+//# sourceMappingURL=main.f7172527.iframe.bundle.js.map
