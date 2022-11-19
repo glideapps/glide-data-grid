@@ -19,22 +19,22 @@ export default {
     decorators: [
         (Story: React.ComponentType) => (
             <SimpleThemeWrapper>
-                        <BeautifulWrapper
-            title="Search is easy"
-            description={
-                <>
-                    <Description>
-                        Search for any data in your grid by setting <PropName>showSearch</PropName>.
-                    </Description>
-                    <MoreInfo>
-                        In this story, <KeyName>Ctrl</KeyName> (<KeyName>⌘</KeyName> on Mac) + <KeyName>f</KeyName>{" "}
-                        toggles the search bar. Make sure you&apos;re focused on the Data Grid!
-                    </MoreInfo>
-                </>
-            }>
-
-                <Story />
-            </BeautifulWrapper>
+                <BeautifulWrapper
+                    title="Search is easy"
+                    description={
+                        <>
+                            <Description>
+                                Search for any data in your grid by setting <PropName>showSearch</PropName>.
+                            </Description>
+                            <MoreInfo>
+                                In this story, <KeyName>Ctrl</KeyName> (<KeyName>⌘</KeyName> on Mac) +{" "}
+                                <KeyName>f</KeyName> toggles the search bar. Make sure you&apos;re focused on the Data
+                                Grid!
+                            </MoreInfo>
+                        </>
+                    }>
+                    <Story />
+                </BeautifulWrapper>
             </SimpleThemeWrapper>
         ),
     ],
@@ -65,32 +65,18 @@ export const BuiltInSearch: React.VFC = () => {
     );
 
     return (
-        <BeautifulWrapper
-            title="Search is easy"
-            description={
-                <>
-                    <Description>
-                        Search for any data in your grid by setting <PropName>showSearch</PropName>.
-                    </Description>
-                    <MoreInfo>
-                        In this story, <KeyName>Ctrl</KeyName> (<KeyName>⌘</KeyName> on Mac) + <KeyName>f</KeyName>{" "}
-                        toggles the search bar. Make sure you&apos;re focused on the Data Grid!
-                    </MoreInfo>
-                </>
-            }>
-            <DataEditor
-                {...defaultProps}
-                getCellContent={getCellContent}
-                getCellsForSelection={true}
-                gridSelection={selection}
-                onGridSelectionChange={setSelection}
-                columns={cols}
-                onCellEdited={setCellValue}
-                onColumnResize={onColumnResize}
-                showSearch={showSearch}
-                onSearchClose={() => setShowSearch(false)}
-                rows={10_000}
-            />
-        </BeautifulWrapper>
+        <DataEditor
+            {...defaultProps}
+            getCellContent={getCellContent}
+            getCellsForSelection={true}
+            gridSelection={selection}
+            onGridSelectionChange={setSelection}
+            columns={cols}
+            onCellEdited={setCellValue}
+            onColumnResize={onColumnResize}
+            showSearch={showSearch}
+            onSearchClose={() => setShowSearch(false)}
+            rows={10_000}
+        />
     );
 };
