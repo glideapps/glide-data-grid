@@ -272,8 +272,3 @@ return <DataEditor
     );
 };
 (CopyPaste as any).storyName = "05. Copy/Paste Support";
-(CopyPaste as any).parameters = {
-    options: {
-        showPanel: false,
-    },
-};

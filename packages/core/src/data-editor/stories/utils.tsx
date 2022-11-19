@@ -1,7 +1,7 @@
+/* eslint-disable sonarjs/no-identical-functions */
 import * as React from "react";
 
 import {
-    CellArray,
     EditableGridCell,
     GridCell,
     GridCellKind,
@@ -10,7 +10,6 @@ import {
     isEditableGridCell,
     isTextEditableGridCell,
     Item,
-    Rectangle,
 } from "../../data-grid/data-grid-types";
 
 import faker from "faker";
@@ -19,6 +18,8 @@ import isArray from "lodash/isArray.js";
 import { assertNever } from "../../common/support";
 import { browserIsFirefox } from "../../common/browser-detect";
 import { useResizeDetector } from "react-resize-detector";
+import type { DataEditorProps } from "../data-editor";
+import noop from "lodash/noop.js";
 
 faker.seed(1337);
 
@@ -468,23 +469,6 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
         [readonly]
     );
 
-    const getCellsForSelection = React.useCallback(
-        (selection: Rectangle): CellArray => {
-            const result: GridCell[][] = [];
-
-            for (let y = selection.y; y < selection.y + selection.height; y++) {
-                const row: GridCell[] = [];
-                for (let x = selection.x; x < selection.x + selection.width; x++) {
-                    row.push(getCellContent([x, y]));
-                }
-                result.push(row);
-            }
-
-            return result;
-        },
-        [getCellContent]
-    );
-
     const setCellValueRaw = React.useCallback(([col, row]: Item, val: GridCell): void => {
         cache.current.set(col, row, val);
     }, []);
@@ -507,5 +491,304 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
         [colsMap]
     );
 
-    return { cols, getCellContent, onColumnResize, setCellValue, getCellsForSelection, setCellValueRaw };
+    return { cols, getCellContent, onColumnResize, setCellValue, setCellValueRaw };
+}
+
+export const KeyName = styled.kbd`
+    background-color: #f4f4f4;
+    color: #2b2b2b;
+    padding: 2px 6px;
+    font-family: monospace;
+    font-size: 14px;
+    border-radius: 4px;
+    box-shadow: 0px 1px 2px #00000040;
+    margin: 0 0.1em;
+`;
+
+export const defaultProps: Partial<DataEditorProps> = {
+    smoothScrollX: true,
+    smoothScrollY: true,
+    getCellsForSelection: true,
+    width: "100%",
+};
+
+export function clearCell(cell: GridCell): GridCell {
+    switch (cell.kind) {
+        case GridCellKind.Boolean: {
+            return {
+                ...cell,
+                data: false,
+            };
+        }
+        case GridCellKind.Image: {
+            return {
+                ...cell,
+                data: [],
+                displayData: [],
+            };
+        }
+        case GridCellKind.Drilldown:
+        case GridCellKind.Bubble: {
+            return {
+                ...cell,
+                data: [],
+            };
+        }
+        case GridCellKind.Uri:
+        case GridCellKind.Markdown: {
+            return {
+                ...cell,
+                data: "",
+            };
+        }
+        case GridCellKind.Text: {
+            return {
+                ...cell,
+                data: "",
+                displayData: "",
+            };
+        }
+        case GridCellKind.Number: {
+            return {
+                ...cell,
+                data: 0,
+                displayData: "",
+            };
+        }
+    }
+    return cell;
+}
+
+function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
+    return [
+        {
+            title: "Row ID",
+            width: 120,
+            icon: GridColumnIcon.HeaderRowID,
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.RowID,
+                    data: faker.datatype.uuid(),
+                    allowOverlay: true,
+                };
+            },
+        },
+        {
+            title: "Protected",
+            width: 120,
+            icon: GridColumnIcon.HeaderCode,
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.Protected,
+                    data: faker.finance.bitcoinAddress(),
+                    allowOverlay: false,
+                };
+            },
+        },
+        {
+            title: "Loading",
+            width: 120,
+            icon: GridColumnIcon.HeaderString,
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.Loading,
+                    allowOverlay: false,
+                };
+            },
+        },
+        {
+            title: "Text",
+            width: 120,
+            icon: GridColumnIcon.HeaderCode,
+            hasMenu: false,
+            getContent: () => {
+                const name = faker.name.firstName();
+                return {
+                    kind: GridCellKind.Text,
+                    data: name,
+                    displayData: name,
+                    allowOverlay: true,
+                };
+            },
+        },
+        {
+            title: "Number",
+            width: 120,
+            icon: GridColumnIcon.HeaderNumber,
+            hasMenu: false,
+            getContent: () => {
+                const age = faker.datatype.number(100);
+                return {
+                    kind: GridCellKind.Number,
+                    data: age,
+                    displayData: `${age}`,
+                    allowOverlay: true,
+                };
+            },
+        },
+        {
+            title: "Boolean",
+            width: 120,
+            icon: GridColumnIcon.HeaderBoolean,
+            hasMenu: false,
+            getContent: () => {
+                const roll = Math.random();
+                const checked = roll < 0.1 ? undefined : roll < 0.2 ? null : roll < 0.6;
+                // TODO: Make editable. UX looks bad by default.
+                return {
+                    kind: GridCellKind.Boolean,
+                    data: checked,
+                    allowOverlay: false,
+                    readonly: false,
+                };
+            },
+        },
+        {
+            title: "Image",
+            width: 120,
+            icon: GridColumnIcon.HeaderImage,
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.Image,
+                    data: [`${faker.image.animals(40, 40)}?random=${faker.datatype.number(100_000)}`],
+                    allowOverlay: true,
+                    allowAdd: false,
+                    readonly: true,
+                };
+            },
+        },
+        {
+            title: "Uri",
+            width: 120,
+            icon: GridColumnIcon.HeaderUri,
+            hasMenu: false,
+            getContent: () => {
+                const url = faker.internet.url();
+                return {
+                    kind: GridCellKind.Uri,
+                    data: url,
+                    allowOverlay: true,
+                };
+            },
+        },
+        {
+            title: "Markdown",
+            width: 120,
+            icon: GridColumnIcon.HeaderMarkdown,
+            hasMenu: false,
+            getContent: () => {
+                const markdown = `# Title
+Hello my name is *${faker.name.firstName()}*
+
+## TODO:
+Try out [Glide](https://www.glideapps.com/)
+`;
+                return {
+                    kind: GridCellKind.Markdown,
+                    data: markdown,
+                    allowOverlay: true,
+                };
+            },
+        },
+        {
+            title: "Bubble",
+            width: 120,
+            icon: GridColumnIcon.HeaderArray,
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.Bubble,
+                    data: [faker.lorem.word(), faker.lorem.word(), faker.lorem.word()],
+                    allowOverlay: true,
+                };
+            },
+        },
+        {
+            title: "Drilldown",
+            width: 120,
+            icon: GridColumnIcon.HeaderArray,
+            hasMenu: false,
+            getContent: () => {
+                return {
+                    kind: GridCellKind.Drilldown,
+                    data: [
+                        {
+                            text: faker.address.cityName(),
+                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100_000)}`,
+                        },
+                        {
+                            text: faker.address.cityName(),
+                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100_000)}`,
+                        },
+                    ],
+                    allowOverlay: true,
+                };
+            },
+        },
+    ];
+}
+
+export function useAllMockedKinds() {
+    const cache = React.useRef<ContentCache>(new ContentCache());
+
+    const [colsMap, setColsMap] = React.useState(getColumnsForCellTypes);
+
+    const onColumnResize = React.useCallback((column: GridColumn, newSize: number) => {
+        setColsMap(prevColsMap => {
+            const index = prevColsMap.findIndex(ci => ci.title === column.title);
+            const newArray = [...prevColsMap];
+            newArray.splice(index, 1, {
+                ...prevColsMap[index],
+                width: newSize,
+            });
+            return newArray;
+        });
+    }, []);
+
+    const cols = React.useMemo(() => {
+        return colsMap.map(getGridColumn);
+    }, [colsMap]);
+
+    const [updateVersion, setUpdateVersion] = React.useState(0);
+    const getCellContent = React.useCallback(
+        ([col, row]: Item): GridCell => {
+            // Terrible hack to force update when setCellValue requests it
+            noop(updateVersion);
+            let val = cache.current.get(col, row);
+            if (val === undefined) {
+                val = colsMap[col].getContent();
+                cache.current.set(col, row, val);
+            }
+
+            return val;
+        },
+        [colsMap, updateVersion]
+    );
+
+    const setCellValue = React.useCallback(
+        ([col, row]: Item, val: GridCell, noDisplay?: boolean, forceUpdate?: boolean): void => {
+            let current = cache.current.get(col, row);
+            if (current === undefined) {
+                current = colsMap[col].getContent();
+            }
+            if (isEditableGridCell(val) && isEditableGridCell(current)) {
+                const copied = lossyCopyData(val, current);
+                cache.current.set(col, row, {
+                    ...copied,
+                    displayData: noDisplay === true ? undefined : copied.data?.toString() ?? "",
+                } as any);
+
+                if (forceUpdate === true) {
+                    setUpdateVersion(v => v + 1);
+                }
+            }
+        },
+        [colsMap]
+    );
+
+    return { cols, getCellContent, onColumnResize, setCellValue };
 }

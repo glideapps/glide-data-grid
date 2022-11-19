@@ -61,8 +61,3 @@ Yes
     );
 };
 (FAQ as any).storyName = "00. FAQ";
-(FAQ as any).parameters = {
-    options: {
-        showPanel: false,
-    },
-};

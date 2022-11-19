@@ -337,8 +337,3 @@ return <>
     );
 };
 (Menus as any).storyName = "09. Menus";
-(Menus as any).parameters = {
-    options: {
-        showPanel: false,
-    },
-};

@@ -12,7 +12,7 @@ addons.setConfig({
     isFullscreen: false,
     showNav: true,
     showPanel: false,
-    panelPosition: "bottom",
+    panelPosition: "right",
     enableShortcuts: true,
     isToolshown: false,
     theme: glideTheme,

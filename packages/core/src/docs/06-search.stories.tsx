@@ -218,8 +218,3 @@ return <DataEditor {...rest} keybindings={{search: true}} getCellsForSelection={
     );
 };
 (Search as any).storyName = "06. Search";
-(Search as any).parameters = {
-    options: {
-        showPanel: false,
-    },
-};
