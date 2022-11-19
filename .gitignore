@@ -9,3 +9,4 @@ storybook-build/
 coverage/
 *.tsbuildinfo
 **/docs/*
+!**/docs/examples/*
