@@ -79,7 +79,7 @@ export function useColumnSizer(
     themeRef.current = theme;
 
     const [ctx] = React.useState(() => {
-        if (typeof window === undefined) return null;
+        if (typeof window === "undefined") return null;
         const offscreen = document.createElement("canvas");
         offscreen.style["display"] = "none";
         offscreen.style["opacity"] = "0";
