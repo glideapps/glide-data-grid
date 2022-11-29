@@ -16836,7 +16836,7 @@ function useColumnSizer(columns, rows, getCellsForSelection, clientWidth, minCol
   getCellsForSelectionRef.current = getCellsForSelection;
   themeRef.current = theme;
   const [ctx] = react.useState(() => {
-    if (typeof window === undefined) return null;
+    if (typeof window === "undefined") return null;
     const offscreen = document.createElement("canvas");
     offscreen.style["display"] = "none";
     offscreen.style["opacity"] = "0";
@@ -35230,7 +35230,7 @@ function useColumnSizer(columns, rows, getCellsForSelection, clientWidth, minCol
   getCellsForSelectionRef.current = getCellsForSelection;
   themeRef.current = theme;
   const [ctx] = react__WEBPACK_IMPORTED_MODULE_0__.useState(() => {
-    if (typeof window === void 0) return null;
+    if (typeof window === "undefined") return null;
     const offscreen = document.createElement("canvas");
     offscreen.style["display"] = "none";
     offscreen.style["opacity"] = "0";
@@ -39261,4 +39261,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.f7172527.iframe.bundle.js.map
+//# sourceMappingURL=main.5941c84b.iframe.bundle.js.map
