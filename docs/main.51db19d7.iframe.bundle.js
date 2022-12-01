@@ -8658,7 +8658,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    KeyName,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <Story />\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const AutomaticRowMarkers: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(6);\n\n    const dataEditor = (\n        <DataEditor {...defaultProps} rowMarkers={\"both\"} getCellContent={getCellContent} columns={cols} rows={1000} />\n    );\n\n    return (\n        <BeautifulWrapper\n            title=\"Automatic Row Markers\"\n            description={\n                <>\n                    <Description>\n                        You can enable row markers with rich selection behavior using the{\" \"}\n                        <PropName>rowMarkers</PropName> prop.\n                    </Description>\n                    <MoreInfo>\n                        Use <KeyName>⇧</KeyName> + click to make range selections, and <KeyName>Ctrl</KeyName> (\n                        <KeyName>⌘</KeyName> on Mac) + click to add/remove individual rows.\n                    </MoreInfo>\n                </>\n            }>\n            {dataEditor}\n        </BeautifulWrapper>\n    );\n};\n";
+var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    KeyName,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <Story />\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const AutomaticRowMarkers: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(6);\n\n    const dataEditor = (\n        <DataEditor\n            {...defaultProps}\n            rowMarkers={\"checkbox-visible\"}\n            getCellContent={getCellContent}\n            columns={cols}\n            rows={1000}\n        />\n    );\n\n    return (\n        <BeautifulWrapper\n            title=\"Automatic Row Markers\"\n            description={\n                <>\n                    <Description>\n                        You can enable row markers with rich selection behavior using the{\" \"}\n                        <PropName>rowMarkers</PropName> prop.\n                    </Description>\n                    <MoreInfo>\n                        Use <KeyName>⇧</KeyName> + click to make range selections, and <KeyName>Ctrl</KeyName> (\n                        <KeyName>⌘</KeyName> on Mac) + click to add/remove individual rows.\n                    </MoreInfo>\n                </>\n            }>\n            {dataEditor}\n        </BeautifulWrapper>\n    );\n};\n";
 var __LOCATIONS_MAP__ = {
   "AutomaticRowMarkers": {
     "startLoc": {
@@ -8667,7 +8667,7 @@ var __LOCATIONS_MAP__ = {
     },
     "endLoc": {
       "col": 1,
-      "line": 51
+      "line": 57
     },
     "startBody": {
       "col": 46,
@@ -8675,7 +8675,7 @@ var __LOCATIONS_MAP__ = {
     },
     "endBody": {
       "col": 1,
-      "line": 51
+      "line": 57
     }
   }
 };
@@ -8686,7 +8686,7 @@ var __LOCATIONS_MAP__ = {
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   parameters: {
     "storySource": {
-      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    KeyName,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <Story />\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const AutomaticRowMarkers: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(6);\n\n    const dataEditor = (\n        <DataEditor {...defaultProps} rowMarkers={\"both\"} getCellContent={getCellContent} columns={cols} rows={1000} />\n    );\n\n    return (\n        <BeautifulWrapper\n            title=\"Automatic Row Markers\"\n            description={\n                <>\n                    <Description>\n                        You can enable row markers with rich selection behavior using the{\" \"}\n                        <PropName>rowMarkers</PropName> prop.\n                    </Description>\n                    <MoreInfo>\n                        Use <KeyName>⇧</KeyName> + click to make range selections, and <KeyName>Ctrl</KeyName> (\n                        <KeyName>⌘</KeyName> on Mac) + click to add/remove individual rows.\n                    </MoreInfo>\n                </>\n            }>\n            {dataEditor}\n        </BeautifulWrapper>\n    );\n};\n",
+      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    KeyName,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <Story />\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const AutomaticRowMarkers: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(6);\n\n    const dataEditor = (\n        <DataEditor\n            {...defaultProps}\n            rowMarkers={\"checkbox-visible\"}\n            getCellContent={getCellContent}\n            columns={cols}\n            rows={1000}\n        />\n    );\n\n    return (\n        <BeautifulWrapper\n            title=\"Automatic Row Markers\"\n            description={\n                <>\n                    <Description>\n                        You can enable row markers with rich selection behavior using the{\" \"}\n                        <PropName>rowMarkers</PropName> prop.\n                    </Description>\n                    <MoreInfo>\n                        Use <KeyName>⇧</KeyName> + click to make range selections, and <KeyName>Ctrl</KeyName> (\n                        <KeyName>⌘</KeyName> on Mac) + click to add/remove individual rows.\n                    </MoreInfo>\n                </>\n            }>\n            {dataEditor}\n        </BeautifulWrapper>\n    );\n};\n",
       "locationsMap": {
         "automatic-row-markers": {
           "startLoc": {
@@ -8695,7 +8695,7 @@ var __LOCATIONS_MAP__ = {
           },
           "endLoc": {
             "col": 1,
-            "line": 51
+            "line": 57
           },
           "startBody": {
             "col": 46,
@@ -8703,7 +8703,7 @@ var __LOCATIONS_MAP__ = {
           },
           "endBody": {
             "col": 1,
-            "line": 51
+            "line": 57
           }
         }
       }
@@ -8718,7 +8718,7 @@ const AutomaticRowMarkers = () => {
     getCellContent
   } = (0,_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .useMockDataGenerator */ .F9)(6);
   const dataEditor = react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_data_editor__WEBPACK_IMPORTED_MODULE_3__/* .DataEditor */ .N, _extends({}, _data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .defaultProps */ .lG, {
-    rowMarkers: "both",
+    rowMarkers: "checkbox-visible",
     getCellContent: getCellContent,
     columns: cols,
     rows: 1000
@@ -22355,7 +22355,7 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle) {
     width,
     height
   } = rect;
-  const checkedboxAlpha = checked ? 1 : hoverAmount;
+  const checkedboxAlpha = checked ? 1 : markerKind === "checkbox-visible" ? 0.6 + 0.4 * hoverAmount : hoverAmount;
 
   if (markerKind !== "number" && checkedboxAlpha > 0) {
     ctx.globalAlpha = checkedboxAlpha;
@@ -30014,7 +30014,7 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle) {
     width,
     height
   } = rect;
-  const checkedboxAlpha = checked ? 1 : hoverAmount;
+  const checkedboxAlpha = checked ? 1 : markerKind === "checkbox-visible" ? 0.6 + 0.4 * hoverAmount : hoverAmount;
 
   if (markerKind !== "number" && checkedboxAlpha > 0) {
     ctx.globalAlpha = checkedboxAlpha;
@@ -39261,4 +39261,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.5941c84b.iframe.bundle.js.map
+//# sourceMappingURL=main.51db19d7.iframe.bundle.js.map
