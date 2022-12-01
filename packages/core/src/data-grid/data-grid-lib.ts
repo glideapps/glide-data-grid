@@ -660,12 +660,12 @@ export function drawMarkerRowCell(
     args: BaseDrawArgs,
     index: number,
     checked: boolean,
-    markerKind: "checkbox" | "both" | "number",
+    markerKind: "checkbox" | "both" | "number" | "checkbox-visible",
     drawHandle: boolean
 ) {
     const { ctx, rect, hoverAmount, theme } = args;
     const { x, y, width, height } = rect;
-    const checkedboxAlpha = checked ? 1 : hoverAmount;
+    const checkedboxAlpha = checked ? 1 : markerKind === "checkbox-visible" ? 0.6 + 0.4 * hoverAmount : hoverAmount;
     if (markerKind !== "number" && checkedboxAlpha > 0) {
         ctx.globalAlpha = checkedboxAlpha;
         const offsetAmount = 7 * (checked ? hoverAmount : 1);

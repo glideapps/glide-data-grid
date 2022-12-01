@@ -309,7 +309,7 @@ export interface DataEditorProps extends Props {
      * @defaultValue `none`
      * @group Style
      */
-    readonly rowMarkers?: "checkbox" | "number" | "clickable-number" | "both" | "none";
+    readonly rowMarkers?: "checkbox" | "number" | "clickable-number" | "checkbox-visible" | "both" | "none";
     /**
      * Sets the width of row markers in pixels, if unset row markers will automatically size.
      * @group Style

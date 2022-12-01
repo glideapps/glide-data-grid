@@ -27,7 +27,13 @@ export const AutomaticRowMarkers: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
     const dataEditor = (
-        <DataEditor {...defaultProps} rowMarkers={"both"} getCellContent={getCellContent} columns={cols} rows={1000} />
+        <DataEditor
+            {...defaultProps}
+            rowMarkers={"checkbox-visible"}
+            getCellContent={getCellContent}
+            columns={cols}
+            rows={1000}
+        />
     );
 
     return (

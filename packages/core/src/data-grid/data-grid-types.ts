@@ -582,7 +582,7 @@ export interface MarkerCell extends BaseGridCell {
     readonly row: number;
     readonly drawHandle: boolean;
     readonly checked: boolean;
-    readonly markerKind: "checkbox" | "number" | "both";
+    readonly markerKind: "checkbox" | "number" | "both" | "checkbox-visible";
 }
 
 /** @category Selection */
