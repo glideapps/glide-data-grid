@@ -8442,7 +8442,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Lotsa cell kinds\"\n                    description={\n                        <Description>\n                            Data grid supports plenty cell kinds. Anything under <PropName>GridCellKind</PropName>.\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const AllCellKinds: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            onCellEdited={setCellValue}\n            // rowHeight={55}\n            onColumnResize={onColumnResize}\n            highlightRegions={[\n                {\n                    color: \"#ff00ff33\",\n                    range: {\n                        x: 1,\n                        y: 1,\n                        width: 3,\n                        height: 3,\n                    },\n                },\n            ]}\n            rows={1000}\n        />\n    );\n};\n";
+var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Lotsa cell kinds\"\n                    description={\n                        <Description>\n                            Data grid supports plenty cell kinds. Anything under <PropName>GridCellKind</PropName>.\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const AllCellKinds: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            onCellEdited={setCellValue}\n            rowHeight={155}\n            onColumnResize={onColumnResize}\n            highlightRegions={[\n                {\n                    color: \"#ff00ff33\",\n                    range: {\n                        x: 1,\n                        y: 1,\n                        width: 3,\n                        height: 3,\n                    },\n                },\n            ]}\n            rows={1000}\n        />\n    );\n};\n";
 var __LOCATIONS_MAP__ = {
   "AllCellKinds": {
     "startLoc": {
@@ -8470,7 +8470,7 @@ var __LOCATIONS_MAP__ = {
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   parameters: {
     "storySource": {
-      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Lotsa cell kinds\"\n                    description={\n                        <Description>\n                            Data grid supports plenty cell kinds. Anything under <PropName>GridCellKind</PropName>.\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const AllCellKinds: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            onCellEdited={setCellValue}\n            // rowHeight={55}\n            onColumnResize={onColumnResize}\n            highlightRegions={[\n                {\n                    color: \"#ff00ff33\",\n                    range: {\n                        x: 1,\n                        y: 1,\n                        width: 3,\n                        height: 3,\n                    },\n                },\n            ]}\n            rows={1000}\n        />\n    );\n};\n",
+      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Lotsa cell kinds\"\n                    description={\n                        <Description>\n                            Data grid supports plenty cell kinds. Anything under <PropName>GridCellKind</PropName>.\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const AllCellKinds: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            onCellEdited={setCellValue}\n            rowHeight={155}\n            onColumnResize={onColumnResize}\n            highlightRegions={[\n                {\n                    color: \"#ff00ff33\",\n                    range: {\n                        x: 1,\n                        y: 1,\n                        width: 3,\n                        height: 3,\n                    },\n                },\n            ]}\n            rows={1000}\n        />\n    );\n};\n",
       "locationsMap": {
         "all-cell-kinds": {
           "startLoc": {
@@ -8510,6 +8510,7 @@ const AllCellKinds = () => {
     getCellContent: getCellContent,
     columns: cols,
     onCellEdited: setCellValue,
+    rowHeight: 155,
     onColumnResize: onColumnResize,
     highlightRegions: [{
       color: "#ff00ff33",
@@ -20903,19 +20904,26 @@ const booleanCellRenderer = {
   useLabel: false,
   needsHoverPosition: true,
   measure: () => 50,
-  draw: a => (0,_data_grid_lib__WEBPACK_IMPORTED_MODULE_1__/* .drawBoolean */ .Df)(a, a.cell.data, (0,_data_grid_types__WEBPACK_IMPORTED_MODULE_0__/* .booleanCellIsEditable */ .kf)(a.cell)),
+  draw: a => {
+    var _a$cell$maxSize;
+
+    return (0,_data_grid_lib__WEBPACK_IMPORTED_MODULE_1__/* .drawBoolean */ .Df)(a, a.cell.data, (0,_data_grid_types__WEBPACK_IMPORTED_MODULE_0__/* .booleanCellIsEditable */ .kf)(a.cell), (_a$cell$maxSize = a.cell.maxSize) !== null && _a$cell$maxSize !== void 0 ? _a$cell$maxSize : 32);
+  },
   onDelete: c => ({ ...c,
     data: false
   }),
   onClick: e => {
+    var _cell$maxSize;
+
     const {
       cell,
       posX: x,
       posY: y,
       bounds
     } = e;
+    const maxWidth = (_cell$maxSize = cell.maxSize) !== null && _cell$maxSize !== void 0 ? _cell$maxSize : 32;
 
-    if ((0,_data_grid_types__WEBPACK_IMPORTED_MODULE_0__/* .booleanCellIsEditable */ .kf)(cell) && Math.abs(x - bounds.width / 2) <= bounds.height / 3.4 && Math.abs(y - bounds.height / 2) <= bounds.height / 3.4) {
+    if ((0,_data_grid_types__WEBPACK_IMPORTED_MODULE_0__/* .booleanCellIsEditable */ .kf)(cell) && Math.abs(x - bounds.width / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4) && Math.abs(y - bounds.height / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4)) {
       return { ...cell,
         data: toggleBoolean(cell.data)
       };
@@ -22262,16 +22270,14 @@ function drawNewRowCell(args, data, icon) {
 function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
   let hoverX = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : -20;
   let hoverY = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : -20;
-  const centerX = x + width / 2;
-  const centerY = y + height / 2;
-  const checkBoxWidth = height / 1.89;
-  const emptyCheckBoxWidth = height / 2;
-  const hoverHelper = height / 3.4;
+  let maxSize = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : 32;
+  const centerX = Math.floor(x + width / 2);
+  const centerY = Math.floor(y + height / 2);
+  const checkBoxWidth = Math.min(maxSize, height / 2);
+  const hoverHelper = checkBoxWidth / 2;
   const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;
   const rectBordRadius = 4;
-  const posHelperChecked = height / 4.25;
-  const posHelperEmpty = height / 4;
-  const posHelperInter = height / 8.5;
+  const posHelperChecked = checkBoxWidth / 2;
 
   switch (checked) {
     case true:
@@ -22281,9 +22287,9 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
         ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(centerX - posHelperChecked + height / 9.31, centerY - posHelperChecked + height / 4.33);
-        ctx.lineTo(centerX - posHelperChecked + height / 5.33, centerY - posHelperChecked + height / 3.17);
-        ctx.lineTo(centerX - posHelperChecked + height / 2.83, centerY - posHelperChecked + height / 7.16);
+        ctx.moveTo(centerX - posHelperChecked + checkBoxWidth / 4.23, centerY - posHelperChecked + checkBoxWidth / 1.97);
+        ctx.lineTo(centerX - posHelperChecked + checkBoxWidth / 2.42, centerY - posHelperChecked + checkBoxWidth / 1.44);
+        ctx.lineTo(centerX - posHelperChecked + checkBoxWidth / 1.29, centerY - posHelperChecked + checkBoxWidth / 3.25);
         ctx.strokeStyle = theme.bgCell;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
@@ -22296,7 +22302,7 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
     case false:
       {
         ctx.beginPath();
-        roundedRect(ctx, centerX - posHelperEmpty, centerY - posHelperEmpty, emptyCheckBoxWidth, emptyCheckBoxWidth, rectBordRadius);
+        roundedRect(ctx, centerX - checkBoxWidth / 2 + 0.5, centerY - checkBoxWidth / 2 + 0.5, checkBoxWidth - 1, checkBoxWidth - 1, rectBordRadius);
         ctx.lineWidth = 1;
         ctx.strokeStyle = hovered ? theme.textDark : theme.textMedium;
         ctx.stroke();
@@ -22306,12 +22312,12 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
     case _data_grid_types__WEBPACK_IMPORTED_MODULE_3__/* .BooleanIndeterminate */ .sd:
       {
         ctx.beginPath();
-        roundedRect(ctx, centerX - posHelperEmpty, centerY - posHelperEmpty, emptyCheckBoxWidth, emptyCheckBoxWidth, rectBordRadius);
+        roundedRect(ctx, centerX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
         ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(centerX - posHelperInter, centerY);
-        ctx.lineTo(centerX + posHelperInter, centerY);
+        ctx.moveTo(centerX - checkBoxWidth / 3, centerY);
+        ctx.lineTo(centerX + checkBoxWidth / 3, centerY);
         ctx.strokeStyle = theme.bgCell;
         ctx.lineCap = "round";
         ctx.lineWidth = 1.9;
@@ -22457,7 +22463,7 @@ function roundedRect(ctx, x, y, width, height, radius) {
   ctx.arcTo(x, y, x + radius.tl, y, radius.tl);
 }
 
-function drawBoolean(args, data, canEdit) {
+function drawBoolean(args, data, canEdit, maxSize) {
   if (!canEdit && data === _data_grid_types__WEBPACK_IMPORTED_MODULE_3__/* .BooleanEmpty */ .qF) {
     return;
   }
@@ -22489,7 +22495,7 @@ function drawBoolean(args, data, canEdit) {
   }
 
   ctx.globalAlpha = alpha;
-  drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY);
+  drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY, maxSize);
   ctx.globalAlpha = 1;
 }
 const itemMargin = 4;
@@ -29918,16 +29924,14 @@ function drawNewRowCell(args, data, icon) {
 function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
   let hoverX = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : -20;
   let hoverY = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : -20;
-  const centerX = x + width / 2;
-  const centerY = y + height / 2;
-  const checkBoxWidth = height / 1.89;
-  const emptyCheckBoxWidth = height / 2;
-  const hoverHelper = height / 3.4;
+  let maxSize = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : 32;
+  const centerX = Math.floor(x + width / 2);
+  const centerY = Math.floor(y + height / 2);
+  const checkBoxWidth = Math.min(maxSize, height / 2);
+  const hoverHelper = checkBoxWidth / 2;
   const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;
   const rectBordRadius = 4;
-  const posHelperChecked = height / 4.25;
-  const posHelperEmpty = height / 4;
-  const posHelperInter = height / 8.5;
+  const posHelperChecked = checkBoxWidth / 2;
 
   switch (checked) {
     case true:
@@ -29937,9 +29941,9 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
         ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(centerX - posHelperChecked + height / 9.31, centerY - posHelperChecked + height / 4.33);
-        ctx.lineTo(centerX - posHelperChecked + height / 5.33, centerY - posHelperChecked + height / 3.17);
-        ctx.lineTo(centerX - posHelperChecked + height / 2.83, centerY - posHelperChecked + height / 7.16);
+        ctx.moveTo(centerX - posHelperChecked + checkBoxWidth / 4.23, centerY - posHelperChecked + checkBoxWidth / 1.97);
+        ctx.lineTo(centerX - posHelperChecked + checkBoxWidth / 2.42, centerY - posHelperChecked + checkBoxWidth / 1.44);
+        ctx.lineTo(centerX - posHelperChecked + checkBoxWidth / 1.29, centerY - posHelperChecked + checkBoxWidth / 3.25);
         ctx.strokeStyle = theme.bgCell;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
@@ -29952,7 +29956,7 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
     case false:
       {
         ctx.beginPath();
-        roundedRect(ctx, centerX - posHelperEmpty, centerY - posHelperEmpty, emptyCheckBoxWidth, emptyCheckBoxWidth, rectBordRadius);
+        roundedRect(ctx, centerX - checkBoxWidth / 2 + 0.5, centerY - checkBoxWidth / 2 + 0.5, checkBoxWidth - 1, checkBoxWidth - 1, rectBordRadius);
         ctx.lineWidth = 1;
         ctx.strokeStyle = hovered ? theme.textDark : theme.textMedium;
         ctx.stroke();
@@ -29962,12 +29966,12 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
     case BooleanIndeterminate:
       {
         ctx.beginPath();
-        roundedRect(ctx, centerX - posHelperEmpty, centerY - posHelperEmpty, emptyCheckBoxWidth, emptyCheckBoxWidth, rectBordRadius);
+        roundedRect(ctx, centerX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
         ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(centerX - posHelperInter, centerY);
-        ctx.lineTo(centerX + posHelperInter, centerY);
+        ctx.moveTo(centerX - checkBoxWidth / 3, centerY);
+        ctx.lineTo(centerX + checkBoxWidth / 3, centerY);
         ctx.strokeStyle = theme.bgCell;
         ctx.lineCap = "round";
         ctx.lineWidth = 1.9;
@@ -30117,7 +30121,7 @@ function roundedRect(ctx, x, y, width, height, radius) {
   ctx.arcTo(x, y, x + radius.tl, y, radius.tl);
 }
 
-function drawBoolean(args, data, canEdit) {
+function drawBoolean(args, data, canEdit, maxSize) {
   if (!canEdit && data === BooleanEmpty) {
     return;
   }
@@ -30149,7 +30153,7 @@ function drawBoolean(args, data, canEdit) {
   }
 
   ctx.globalAlpha = alpha;
-  drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY);
+  drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY, maxSize);
   ctx.globalAlpha = 1;
 }
 
@@ -35956,19 +35960,26 @@ var booleanCellRenderer = {
   useLabel: false,
   needsHoverPosition: true,
   measure: () => 50,
-  draw: a => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell)),
+  draw: a => {
+    var _a;
+
+    return drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell), (_a = a.cell.maxSize) != null ? _a : 32);
+  },
   onDelete: c => ({ ...c,
     data: false
   }),
   onClick: e => {
+    var _a;
+
     const {
       cell,
       posX: x,
       posY: y,
       bounds
     } = e;
+    const maxWidth = (_a = cell.maxSize) != null ? _a : 32;
 
-    if (booleanCellIsEditable(cell) && Math.abs(x - bounds.width / 2) <= bounds.height / 3.4 && Math.abs(y - bounds.height / 2) <= bounds.height / 3.4) {
+    if (booleanCellIsEditable(cell) && Math.abs(x - bounds.width / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4) && Math.abs(y - bounds.height / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4)) {
       return { ...cell,
         data: toggleBoolean(cell.data)
       };
@@ -39266,4 +39277,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.f2f08f18.iframe.bundle.js.map
+//# sourceMappingURL=main.b8a494cb.iframe.bundle.js.map
