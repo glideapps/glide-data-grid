@@ -532,6 +532,7 @@ export interface BooleanCell extends BaseGridCell {
     readonly data: boolean | BooleanEmpty | BooleanIndeterminate;
     readonly readonly?: boolean;
     readonly allowOverlay: false;
+    readonly maxSize?: number;
 }
 
 // Can be written more concisely, not easier to read if more concise.

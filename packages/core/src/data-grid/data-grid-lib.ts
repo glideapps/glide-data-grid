@@ -547,21 +547,19 @@ export function drawCheckbox(
     height: number,
     highlighted: boolean,
     hoverX: number = -20,
-    hoverY: number = -20
+    hoverY: number = -20,
+    maxSize: number = 32
 ) {
-    const centerX = x + width / 2;
-    const centerY = y + height / 2;
+    const centerX = Math.floor(x + width / 2);
+    const centerY = Math.floor(y + height / 2);
 
-    const checkBoxWidth = height / 1.89; // checkbox width proportional to cell height
-    const emptyCheckBoxWidth = height / 2;
+    const checkBoxWidth = Math.min(maxSize, height / 2);
 
-    const hoverHelper = height / 3.4;
+    const hoverHelper = checkBoxWidth / 2;
     const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;
 
     const rectBordRadius = 4;
-    const posHelperChecked = height / 4.25; //for default cell height (34px) this equals to 8px
-    const posHelperEmpty = height / 4; // 8.5px
-    const posHelperInter = height / 8.5; // 4px
+    const posHelperChecked = checkBoxWidth / 2;
 
     switch (checked) {
         case true: {
@@ -579,9 +577,18 @@ export function drawCheckbox(
             ctx.fill();
 
             ctx.beginPath();
-            ctx.moveTo(centerX - posHelperChecked + height / 9.31, centerY - posHelperChecked + height / 4.33);
-            ctx.lineTo(centerX - posHelperChecked + height / 5.33, centerY - posHelperChecked + height / 3.17);
-            ctx.lineTo(centerX - posHelperChecked + height / 2.83, centerY - posHelperChecked + height / 7.16);
+            ctx.moveTo(
+                centerX - posHelperChecked + checkBoxWidth / 4.23,
+                centerY - posHelperChecked + checkBoxWidth / 1.97
+            );
+            ctx.lineTo(
+                centerX - posHelperChecked + checkBoxWidth / 2.42,
+                centerY - posHelperChecked + checkBoxWidth / 1.44
+            );
+            ctx.lineTo(
+                centerX - posHelperChecked + checkBoxWidth / 1.29,
+                centerY - posHelperChecked + checkBoxWidth / 3.25
+            );
 
             ctx.strokeStyle = theme.bgCell;
             ctx.lineJoin = "round";
@@ -596,10 +603,10 @@ export function drawCheckbox(
             ctx.beginPath();
             roundedRect(
                 ctx,
-                centerX - posHelperEmpty,
-                centerY - posHelperEmpty,
-                emptyCheckBoxWidth,
-                emptyCheckBoxWidth,
+                centerX - checkBoxWidth / 2 + 0.5,
+                centerY - checkBoxWidth / 2 + 0.5,
+                checkBoxWidth - 1,
+                checkBoxWidth - 1,
                 rectBordRadius
             );
 
@@ -613,10 +620,10 @@ export function drawCheckbox(
             ctx.beginPath();
             roundedRect(
                 ctx,
-                centerX - posHelperEmpty,
-                centerY - posHelperEmpty,
-                emptyCheckBoxWidth,
-                emptyCheckBoxWidth,
+                centerX - checkBoxWidth / 2,
+                centerY - checkBoxWidth / 2,
+                checkBoxWidth,
+                checkBoxWidth,
                 rectBordRadius
             );
 
@@ -624,8 +631,8 @@ export function drawCheckbox(
             ctx.fill();
 
             ctx.beginPath();
-            ctx.moveTo(centerX - posHelperInter, centerY);
-            ctx.lineTo(centerX + posHelperInter, centerY);
+            ctx.moveTo(centerX - checkBoxWidth / 3, centerY);
+            ctx.lineTo(centerX + checkBoxWidth / 3, centerY);
             ctx.strokeStyle = theme.bgCell;
             ctx.lineCap = "round";
             ctx.lineWidth = 1.9;
@@ -772,7 +779,12 @@ function roundedRect(
     ctx.arcTo(x, y, x + radius.tl, y, radius.tl);
 }
 
-export function drawBoolean(args: BaseDrawArgs, data: boolean | BooleanEmpty | BooleanIndeterminate, canEdit: boolean) {
+export function drawBoolean(
+    args: BaseDrawArgs,
+    data: boolean | BooleanEmpty | BooleanIndeterminate,
+    canEdit: boolean,
+    maxSize?: number
+) {
     if (!canEdit && data === BooleanEmpty) {
         return;
     }
@@ -791,7 +803,7 @@ export function drawBoolean(args: BaseDrawArgs, data: boolean | BooleanEmpty | B
     }
     ctx.globalAlpha = alpha;
 
-    drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY);
+    drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY, maxSize);
 
     ctx.globalAlpha = 1;
 }
