@@ -7987,7 +7987,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Add and remove columns\"\n                    description={\n                        <>\n                            <Description>You can add and remove columns at your disposal</Description>\n                            <MoreInfo>Use the story&apos;s controls to change the number of columns</MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\ninterface AddColumnsProps {\n    columnsCount: number;\n}\n\nexport const AddColumns: React.FC<AddColumnsProps> = p => {\n    const { cols, getCellContent } = useMockDataGenerator(p.columnsCount);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            rowMarkers=\"number\"\n            getCellContent={getCellContent}\n            columns={cols}\n            rows={10_000}\n        />\n    );\n};\n(AddColumns as any).args = {\n    columnsCount: 10,\n};\n(AddColumns as any).argTypes = {\n    columnsCount: {\n        control: {\n            type: \"range\",\n            min: 2,\n            max: 200,\n        },\n    },\n};\n";
+var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Add and remove columns\"\n                    description={\n                        <>\n                            <Description>You can add and remove columns at your disposal</Description>\n                            <MoreInfo>Use the story&apos;s controls to change the number of columns</MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\ninterface AddColumnsProps {\n    columnsCount: number;\n}\n\nexport const AddColumns: React.FC<AddColumnsProps> = p => {\n    const { cols, getCellContent } = useMockDataGenerator(p.columnsCount);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            rowMarkers=\"number\"\n            getCellContent={getCellContent}\n            experimental={{ strict: true }}\n            columns={cols}\n            rows={10_000}\n        />\n    );\n};\n(AddColumns as any).args = {\n    columnsCount: 10,\n};\n(AddColumns as any).argTypes = {\n    columnsCount: {\n        control: {\n            type: \"range\",\n            min: 2,\n            max: 200,\n        },\n    },\n};\n";
 var __LOCATIONS_MAP__ = {
   "AddColumns": {
     "startLoc": {
@@ -7996,7 +7996,7 @@ var __LOCATIONS_MAP__ = {
     },
     "endLoc": {
       "col": 1,
-      "line": 49
+      "line": 50
     },
     "startBody": {
       "col": 53,
@@ -8004,7 +8004,7 @@ var __LOCATIONS_MAP__ = {
     },
     "endBody": {
       "col": 1,
-      "line": 49
+      "line": 50
     }
   }
 };
@@ -8015,7 +8015,7 @@ var __LOCATIONS_MAP__ = {
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   parameters: {
     "storySource": {
-      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Add and remove columns\"\n                    description={\n                        <>\n                            <Description>You can add and remove columns at your disposal</Description>\n                            <MoreInfo>Use the story&apos;s controls to change the number of columns</MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\ninterface AddColumnsProps {\n    columnsCount: number;\n}\n\nexport const AddColumns: React.FC<AddColumnsProps> = p => {\n    const { cols, getCellContent } = useMockDataGenerator(p.columnsCount);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            rowMarkers=\"number\"\n            getCellContent={getCellContent}\n            columns={cols}\n            rows={10_000}\n        />\n    );\n};\n(AddColumns as any).args = {\n    columnsCount: 10,\n};\n(AddColumns as any).argTypes = {\n    columnsCount: {\n        control: {\n            type: \"range\",\n            min: 2,\n            max: 200,\n        },\n    },\n};\n",
+      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Add and remove columns\"\n                    description={\n                        <>\n                            <Description>You can add and remove columns at your disposal</Description>\n                            <MoreInfo>Use the story&apos;s controls to change the number of columns</MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\ninterface AddColumnsProps {\n    columnsCount: number;\n}\n\nexport const AddColumns: React.FC<AddColumnsProps> = p => {\n    const { cols, getCellContent } = useMockDataGenerator(p.columnsCount);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            rowMarkers=\"number\"\n            getCellContent={getCellContent}\n            experimental={{ strict: true }}\n            columns={cols}\n            rows={10_000}\n        />\n    );\n};\n(AddColumns as any).args = {\n    columnsCount: 10,\n};\n(AddColumns as any).argTypes = {\n    columnsCount: {\n        control: {\n            type: \"range\",\n            min: 2,\n            max: 200,\n        },\n    },\n};\n",
       "locationsMap": {
         "add-columns": {
           "startLoc": {
@@ -8024,7 +8024,7 @@ var __LOCATIONS_MAP__ = {
           },
           "endLoc": {
             "col": 1,
-            "line": 49
+            "line": 50
           },
           "startBody": {
             "col": 53,
@@ -8032,7 +8032,7 @@ var __LOCATIONS_MAP__ = {
           },
           "endBody": {
             "col": 1,
-            "line": 49
+            "line": 50
           }
         }
       }
@@ -8052,6 +8052,9 @@ const AddColumns = p => {
   return react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_data_editor__WEBPACK_IMPORTED_MODULE_3__/* .DataEditor */ .N, _extends({}, _data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .defaultProps */ .lG, {
     rowMarkers: "number",
     getCellContent: getCellContent,
+    experimental: {
+      strict: true
+    },
     columns: cols,
     rows: 10000
   }));
@@ -17942,7 +17945,6 @@ const DataEditorImpl = (p, forwardedRef) => {
   }, [visibleRegionTy, visibleRegionY]);
   const hasJustScrolled = react.useRef(false);
   const [visibleRegion, setVisibleRegion, empty] = (0,utils/* useStateWithReactiveInput */.ig)(visibleRegionInput);
-  visibleRegionRef.current = visibleRegion;
   const vScrollReady = ((_visibleRegion$height = visibleRegion.height) !== null && _visibleRegion$height !== void 0 ? _visibleRegion$height : 1) > 1;
   react.useLayoutEffect(() => {
     if (scrollOffsetY !== undefined && scrollRef.current !== null && vScrollReady) {
@@ -18016,8 +18018,9 @@ const DataEditorImpl = (p, forwardedRef) => {
   }, [highlightRegionsIn, mangledCols.length, rowMarkerOffset]);
   const mangledColsRef = react.useRef(mangledCols);
   mangledColsRef.current = mangledCols;
-  const getMangledCellContent = react.useCallback(_ref => {
+  const getMangledCellContent = react.useCallback(function (_ref) {
     let [col, row] = _ref;
+    let forceStrict = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
     const isRowMarkerCol = col === 0 && hasRowMarkers;
 
@@ -18058,7 +18061,7 @@ const DataEditorImpl = (p, forwardedRef) => {
     } else {
       const outerCol = col - rowMarkerOffset;
 
-      if ((experimental === null || experimental === void 0 ? void 0 : experimental.strict) === true) {
+      if (forceStrict || (experimental === null || experimental === void 0 ? void 0 : experimental.strict) === true) {
         var _vr$extras, _vr$extras$selected, _vr$extras2, _vr$extras3;
 
         const vr = visibleRegionRef.current;
@@ -18949,8 +18952,9 @@ const DataEditorImpl = (p, forwardedRef) => {
         }
       }
     };
-    setClientSize([clientWidth, clientHeight, rightElWidth]);
+    visibleRegionRef.current = newRegion;
     setVisibleRegion(newRegion);
+    setClientSize([clientWidth, clientHeight, rightElWidth]);
     onVisibleRegionChanged === null || onVisibleRegionChanged === void 0 ? void 0 : onVisibleRegionChanged(newRegion, newRegion.tx, newRegion.ty, newRegion.extras);
   }, [currentCell, rowMarkerOffset, showTrailingBlankRow, rows, freezeColumns, setVisibleRegion, onVisibleRegionChanged]);
   const onColumnMovedImpl = (0,utils/* whenDefined */.qJ)(onColumnMoved, react.useCallback((startIndex, endIndex) => {
@@ -26121,7 +26125,7 @@ const DataGrid = (p, forwardedRef) => {
   let cursorOverride;
 
   if (hCol !== undefined && hRow !== undefined && hRow > -1) {
-    const cell = getCellContent([hCol, hRow]);
+    const cell = getCellContent([hCol, hRow], true);
     clickableInnerCellHovered = cell.kind === data_grid_types/* InnerGridCellKind.NewRow */.$o.NewRow || cell.kind === data_grid_types/* InnerGridCellKind.Marker */.$o.Marker && cell.markerKind !== "number";
     editableBoolHovered = cell.kind === data_grid_types/* GridCellKind.Boolean */.p6.Boolean && (0,data_grid_types/* booleanCellIsEditable */.kf)(cell);
     cursorOverride = cell.cursor;
@@ -27279,8 +27283,8 @@ const DataGridDnd = p => {
       }
     }
   }, [dragCol, dragStartX, dragRow, dragStartY, resizeCol, resizeColStartX, columns, minColumnWidth, maxColumnWidth, onColumnResize, selectedColumns]);
-  const getMangledCellContent = react.useCallback(cell => {
-    if (dragRow === undefined || dropRow === undefined) return getCellContent(cell);
+  const getMangledCellContent = react.useCallback((cell, forceStrict) => {
+    if (dragRow === undefined || dropRow === undefined) return getCellContent(cell, forceStrict);
     let [col, row] = cell;
 
     if (row === dropRow) {
@@ -27290,7 +27294,7 @@ const DataGridDnd = p => {
       if (row >= dragRow) row += 1;
     }
 
-    return getCellContent([col, row]);
+    return getCellContent([col, row], forceStrict);
   }, [dragRow, dropRow, getCellContent]);
   const onDragStartImpl = react.useCallback(args => {
     onDragStart === null || onDragStart === void 0 ? void 0 : onDragStart(args);
@@ -33257,7 +33261,7 @@ var DataGrid = (p, forwardedRef) => {
   let cursorOverride;
 
   if (hCol !== void 0 && hRow !== void 0 && hRow > -1) {
-    const cell = getCellContent([hCol, hRow]);
+    const cell = getCellContent([hCol, hRow], true);
     clickableInnerCellHovered = cell.kind === InnerGridCellKind.NewRow || cell.kind === InnerGridCellKind.Marker && cell.markerKind !== "number";
     editableBoolHovered = cell.kind === GridCellKind.Boolean && booleanCellIsEditable(cell);
     cursorOverride = cell.cursor;
@@ -34071,8 +34075,8 @@ var DataGridDnd = p => {
       }
     }
   }, [dragCol, dragStartX, dragRow, dragStartY, resizeCol, resizeColStartX, columns, minColumnWidth, maxColumnWidth, onColumnResize, selectedColumns]);
-  const getMangledCellContent = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(cell => {
-    if (dragRow === void 0 || dropRow === void 0) return getCellContent(cell);
+  const getMangledCellContent = react__WEBPACK_IMPORTED_MODULE_0__.useCallback((cell, forceStrict) => {
+    if (dragRow === void 0 || dropRow === void 0) return getCellContent(cell, forceStrict);
     let [col, row] = cell;
 
     if (row === dropRow) {
@@ -34082,7 +34086,7 @@ var DataGridDnd = p => {
       if (row >= dragRow) row += 1;
     }
 
-    return getCellContent([col, row]);
+    return getCellContent([col, row], forceStrict);
   }, [dragRow, dropRow, getCellContent]);
   const onDragStartImpl = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(args => {
     onDragStart == null ? void 0 : onDragStart(args);
@@ -37032,7 +37036,6 @@ var DataEditorImpl = (p, forwardedRef) => {
   }, [visibleRegionTy, visibleRegionY]);
   const hasJustScrolled = react__WEBPACK_IMPORTED_MODULE_0__.useRef(false);
   const [visibleRegion, setVisibleRegion, empty2] = useStateWithReactiveInput(visibleRegionInput);
-  visibleRegionRef.current = visibleRegion;
   const vScrollReady = ((_a = visibleRegion.height) != null ? _a : 1) > 1;
   react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect(() => {
     if (scrollOffsetY !== void 0 && scrollRef.current !== null && vScrollReady) {
@@ -37106,8 +37109,9 @@ var DataEditorImpl = (p, forwardedRef) => {
   }, [highlightRegionsIn, mangledCols.length, rowMarkerOffset]);
   const mangledColsRef = react__WEBPACK_IMPORTED_MODULE_0__.useRef(mangledCols);
   mangledColsRef.current = mangledCols;
-  const getMangledCellContent = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(_ref => {
+  const getMangledCellContent = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(function (_ref) {
     let [col, row] = _ref;
+    let forceStrict = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
     var _a2, _b2, _c2, _d2, _e2, _f, _g, _h, _i, _j;
 
@@ -37147,7 +37151,7 @@ var DataEditorImpl = (p, forwardedRef) => {
     } else {
       const outerCol = col - rowMarkerOffset;
 
-      if ((experimental == null ? void 0 : experimental.strict) === true) {
+      if (forceStrict || (experimental == null ? void 0 : experimental.strict) === true) {
         const vr = visibleRegionRef.current;
         const isOutsideMainArea = vr.x > outerCol || outerCol > vr.x + vr.width || vr.y > row || row > vr.y + vr.height;
         const isSelected = outerCol === ((_h = (_g = vr.extras) == null ? void 0 : _g.selected) == null ? void 0 : _h[0]) && row === ((_i = vr.extras) == null ? void 0 : _i.selected[1]);
@@ -38026,8 +38030,9 @@ var DataEditorImpl = (p, forwardedRef) => {
         }
       }
     };
-    setClientSize([clientWidth, clientHeight, rightElWidth]);
+    visibleRegionRef.current = newRegion;
     setVisibleRegion(newRegion);
+    setClientSize([clientWidth, clientHeight, rightElWidth]);
     onVisibleRegionChanged == null ? void 0 : onVisibleRegionChanged(newRegion, newRegion.tx, newRegion.ty, newRegion.extras);
   }, [currentCell, rowMarkerOffset, showTrailingBlankRow, rows, freezeColumns, setVisibleRegion, onVisibleRegionChanged]);
   const onColumnMovedImpl = whenDefined(onColumnMoved, react__WEBPACK_IMPORTED_MODULE_0__.useCallback((startIndex, endIndex) => {
@@ -39261,4 +39266,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.51db19d7.iframe.bundle.js.map
+//# sourceMappingURL=main.f2f08f18.iframe.bundle.js.map
