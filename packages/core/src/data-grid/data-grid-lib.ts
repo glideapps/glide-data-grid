@@ -553,7 +553,7 @@ export function drawCheckbox(
     const centerX = Math.floor(x + width / 2);
     const centerY = Math.floor(y + height / 2);
 
-    const checkBoxWidth = Math.min(maxSize, height / 2);
+    const checkBoxWidth = Math.min(maxSize, height - theme.cellVerticalPadding * 2);
 
     const hoverHelper = checkBoxWidth / 2;
     const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;

@@ -20,6 +20,8 @@ export function toggleBoolean(data: boolean | null | undefined): boolean | null 
     return data !== true;
 }
 
+const defaultCellMaxSize = 20;
+
 export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "false",
     kind: GridCellKind.Boolean,
@@ -27,14 +29,14 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     useLabel: false,
     needsHoverPosition: true,
     measure: () => 50,
-    draw: a => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell), a.cell.maxSize ?? 32),
+    draw: a => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell), a.cell.maxSize ?? defaultCellMaxSize),
     onDelete: c => ({
         ...c,
         data: false,
     }),
     onClick: e => {
         const { cell, posX: x, posY: y, bounds } = e;
-        const maxWidth = cell.maxSize ?? 32;
+        const maxWidth = cell.maxSize ?? defaultCellMaxSize;
         if (
             booleanCellIsEditable(cell) &&
             Math.abs(x - bounds.width / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4) &&
