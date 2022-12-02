@@ -8442,7 +8442,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Lotsa cell kinds\"\n                    description={\n                        <Description>\n                            Data grid supports plenty cell kinds. Anything under <PropName>GridCellKind</PropName>.\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const AllCellKinds: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            onCellEdited={setCellValue}\n            rowHeight={155}\n            onColumnResize={onColumnResize}\n            highlightRegions={[\n                {\n                    color: \"#ff00ff33\",\n                    range: {\n                        x: 1,\n                        y: 1,\n                        width: 3,\n                        height: 3,\n                    },\n                },\n            ]}\n            rows={1000}\n        />\n    );\n};\n";
+var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Lotsa cell kinds\"\n                    description={\n                        <Description>\n                            Data grid supports plenty cell kinds. Anything under <PropName>GridCellKind</PropName>.\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const AllCellKinds: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            onCellEdited={setCellValue}\n            // rowHeight={55}\n            onColumnResize={onColumnResize}\n            highlightRegions={[\n                {\n                    color: \"#ff00ff33\",\n                    range: {\n                        x: 1,\n                        y: 1,\n                        width: 3,\n                        height: 3,\n                    },\n                },\n            ]}\n            rows={1000}\n        />\n    );\n};\n";
 var __LOCATIONS_MAP__ = {
   "AllCellKinds": {
     "startLoc": {
@@ -8470,7 +8470,7 @@ var __LOCATIONS_MAP__ = {
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   parameters: {
     "storySource": {
-      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Lotsa cell kinds\"\n                    description={\n                        <Description>\n                            Data grid supports plenty cell kinds. Anything under <PropName>GridCellKind</PropName>.\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const AllCellKinds: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            onCellEdited={setCellValue}\n            rowHeight={155}\n            onColumnResize={onColumnResize}\n            highlightRegions={[\n                {\n                    color: \"#ff00ff33\",\n                    range: {\n                        x: 1,\n                        y: 1,\n                        width: 3,\n                        height: 3,\n                    },\n                },\n            ]}\n            rows={1000}\n        />\n    );\n};\n",
+      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Lotsa cell kinds\"\n                    description={\n                        <Description>\n                            Data grid supports plenty cell kinds. Anything under <PropName>GridCellKind</PropName>.\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const AllCellKinds: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            onCellEdited={setCellValue}\n            // rowHeight={55}\n            onColumnResize={onColumnResize}\n            highlightRegions={[\n                {\n                    color: \"#ff00ff33\",\n                    range: {\n                        x: 1,\n                        y: 1,\n                        width: 3,\n                        height: 3,\n                    },\n                },\n            ]}\n            rows={1000}\n        />\n    );\n};\n",
       "locationsMap": {
         "all-cell-kinds": {
           "startLoc": {
@@ -8510,7 +8510,6 @@ const AllCellKinds = () => {
     getCellContent: getCellContent,
     columns: cols,
     onCellEdited: setCellValue,
-    rowHeight: 155,
     onColumnResize: onColumnResize,
     highlightRegions: [{
       color: "#ff00ff33",
@@ -20893,6 +20892,7 @@ __webpack_require__("./packages/core/src/data-editor/stories/utils.linaria.css!=
 function toggleBoolean(data) {
   return data !== true;
 }
+const defaultCellMaxSize = 20;
 const booleanCellRenderer = {
   getAccessibilityString: c => {
     var _c$data$toString, _c$data;
@@ -20907,7 +20907,7 @@ const booleanCellRenderer = {
   draw: a => {
     var _a$cell$maxSize;
 
-    return (0,_data_grid_lib__WEBPACK_IMPORTED_MODULE_1__/* .drawBoolean */ .Df)(a, a.cell.data, (0,_data_grid_types__WEBPACK_IMPORTED_MODULE_0__/* .booleanCellIsEditable */ .kf)(a.cell), (_a$cell$maxSize = a.cell.maxSize) !== null && _a$cell$maxSize !== void 0 ? _a$cell$maxSize : 32);
+    return (0,_data_grid_lib__WEBPACK_IMPORTED_MODULE_1__/* .drawBoolean */ .Df)(a, a.cell.data, (0,_data_grid_types__WEBPACK_IMPORTED_MODULE_0__/* .booleanCellIsEditable */ .kf)(a.cell), (_a$cell$maxSize = a.cell.maxSize) !== null && _a$cell$maxSize !== void 0 ? _a$cell$maxSize : defaultCellMaxSize);
   },
   onDelete: c => ({ ...c,
     data: false
@@ -20921,7 +20921,7 @@ const booleanCellRenderer = {
       posY: y,
       bounds
     } = e;
-    const maxWidth = (_cell$maxSize = cell.maxSize) !== null && _cell$maxSize !== void 0 ? _cell$maxSize : 32;
+    const maxWidth = (_cell$maxSize = cell.maxSize) !== null && _cell$maxSize !== void 0 ? _cell$maxSize : defaultCellMaxSize;
 
     if ((0,_data_grid_types__WEBPACK_IMPORTED_MODULE_0__/* .booleanCellIsEditable */ .kf)(cell) && Math.abs(x - bounds.width / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4) && Math.abs(y - bounds.height / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4)) {
       return { ...cell,
@@ -22273,7 +22273,7 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
   let maxSize = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : 32;
   const centerX = Math.floor(x + width / 2);
   const centerY = Math.floor(y + height / 2);
-  const checkBoxWidth = Math.min(maxSize, height / 2);
+  const checkBoxWidth = Math.min(maxSize, height - theme.cellVerticalPadding * 2);
   const hoverHelper = checkBoxWidth / 2;
   const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;
   const rectBordRadius = 4;
@@ -29927,7 +29927,7 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
   let maxSize = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : 32;
   const centerX = Math.floor(x + width / 2);
   const centerY = Math.floor(y + height / 2);
-  const checkBoxWidth = Math.min(maxSize, height / 2);
+  const checkBoxWidth = Math.min(maxSize, height - theme.cellVerticalPadding * 2);
   const hoverHelper = checkBoxWidth / 2;
   const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;
   const rectBordRadius = 4;
@@ -35949,6 +35949,7 @@ function toggleBoolean(data) {
   return data !== true;
 }
 
+var defaultCellMaxSize = 20;
 var booleanCellRenderer = {
   getAccessibilityString: c => {
     var _a, _b;
@@ -35963,7 +35964,7 @@ var booleanCellRenderer = {
   draw: a => {
     var _a;
 
-    return drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell), (_a = a.cell.maxSize) != null ? _a : 32);
+    return drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell), (_a = a.cell.maxSize) != null ? _a : defaultCellMaxSize);
   },
   onDelete: c => ({ ...c,
     data: false
@@ -35977,7 +35978,7 @@ var booleanCellRenderer = {
       posY: y,
       bounds
     } = e;
-    const maxWidth = (_a = cell.maxSize) != null ? _a : 32;
+    const maxWidth = (_a = cell.maxSize) != null ? _a : defaultCellMaxSize;
 
     if (booleanCellIsEditable(cell) && Math.abs(x - bounds.width / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4) && Math.abs(y - bounds.height / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4)) {
       return { ...cell,
@@ -39277,4 +39278,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.b8a494cb.iframe.bundle.js.map
+//# sourceMappingURL=main.d0432d9b.iframe.bundle.js.map
