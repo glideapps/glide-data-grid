@@ -42,6 +42,7 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
             {...defaultProps}
             rowMarkers="number"
             getCellContent={getCellContent}
+            experimental={{ strict: true }}
             columns={cols}
             rows={10_000}
         />

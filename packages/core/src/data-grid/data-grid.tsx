@@ -105,7 +105,7 @@ export interface DataGridProps {
 
     readonly eventTargetRef: React.MutableRefObject<HTMLDivElement | null> | undefined;
 
-    readonly getCellContent: (cell: Item) => InnerGridCell;
+    readonly getCellContent: (cell: Item, forceStrict?: boolean) => InnerGridCell;
     /**
      * Provides additional details about groups to extend group functionality.
      * @group Data
@@ -809,7 +809,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     let editableBoolHovered = false;
     let cursorOverride: React.CSSProperties["cursor"] | undefined;
     if (hCol !== undefined && hRow !== undefined && hRow > -1) {
-        const cell = getCellContent([hCol, hRow]);
+        const cell = getCellContent([hCol, hRow], true);
         clickableInnerCellHovered =
             cell.kind === InnerGridCellKind.NewRow ||
             (cell.kind === InnerGridCellKind.Marker && cell.markerKind !== "number");

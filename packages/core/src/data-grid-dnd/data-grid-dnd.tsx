@@ -310,8 +310,8 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
     );
 
     const getMangledCellContent = React.useCallback<typeof getCellContent>(
-        cell => {
-            if (dragRow === undefined || dropRow === undefined) return getCellContent(cell);
+        (cell, forceStrict) => {
+            if (dragRow === undefined || dropRow === undefined) return getCellContent(cell, forceStrict);
 
             // eslint-disable-next-line prefer-const
             let [col, row] = cell;
@@ -322,7 +322,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                 if (row >= dragRow) row += 1;
             }
 
-            return getCellContent([col, row]);
+            return getCellContent([col, row], forceStrict);
         },
         [dragRow, dropRow, getCellContent]
     );

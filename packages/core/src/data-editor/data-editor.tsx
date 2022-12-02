@@ -1053,7 +1053,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const hasJustScrolled = React.useRef(false);
 
     const [visibleRegion, setVisibleRegion, empty] = useStateWithReactiveInput<VisibleRegion>(visibleRegionInput);
-    visibleRegionRef.current = visibleRegion;
 
     const vScrollReady = (visibleRegion.height ?? 1) > 1;
     React.useLayoutEffect(() => {
@@ -1140,7 +1139,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const mangledColsRef = React.useRef(mangledCols);
     mangledColsRef.current = mangledCols;
     const getMangledCellContent = React.useCallback(
-        ([col, row]: Item): InnerGridCell => {
+        ([col, row]: Item, forceStrict: boolean = false): InnerGridCell => {
             const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
             const isRowMarkerCol = col === 0 && hasRowMarkers;
             if (isRowMarkerCol) {
@@ -1176,7 +1175,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             } else {
                 const outerCol = col - rowMarkerOffset;
-                if (experimental?.strict === true) {
+                if (forceStrict || experimental?.strict === true) {
                     const vr = visibleRegionRef.current;
                     const isOutsideMainArea =
                         vr.x > outerCol || outerCol > vr.x + vr.width || vr.y > row || row > vr.y + vr.height;
@@ -2209,8 +2208,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                               },
                 },
             };
-            setClientSize([clientWidth, clientHeight, rightElWidth]);
+            visibleRegionRef.current = newRegion;
             setVisibleRegion(newRegion);
+            setClientSize([clientWidth, clientHeight, rightElWidth]);
             onVisibleRegionChanged?.(newRegion, newRegion.tx, newRegion.ty, newRegion.extras);
         },
         [
