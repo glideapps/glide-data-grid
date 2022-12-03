@@ -21717,7 +21717,7 @@ const uriCellRenderer = {
   useLabel: true,
   drawPrep: data_grid_lib/* prepTextCell */.k0,
   draw: a => (0,data_grid_lib/* drawTextCell */.uN)(a, a.cell.data, a.cell.contentAlign),
-  measure: (ctx, cell) => ctx.measureText(cell.data).width + 16,
+  measure: (ctx, cell, theme) => ctx.measureText(cell.data).width + theme.cellHorizontalPadding * 2,
   onDelete: c => ({ ...c,
     data: ""
   }),
@@ -36697,7 +36697,7 @@ var uriCellRenderer = {
   useLabel: true,
   drawPrep: prepTextCell,
   draw: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
-  measure: (ctx, cell) => ctx.measureText(cell.data).width + 16,
+  measure: (ctx, cell, theme) => ctx.measureText(cell.data).width + theme.cellHorizontalPadding * 2,
   onDelete: c => ({ ...c,
     data: ""
   }),
@@ -39286,4 +39286,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.6d1c17d8.iframe.bundle.js.map
+//# sourceMappingURL=main.a377ed23.iframe.bundle.js.map
