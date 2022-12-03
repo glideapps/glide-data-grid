@@ -18342,9 +18342,10 @@ const DataEditorImpl = (p, forwardedRef) => {
   focusCallback.current = focusOnRowFromTrailingBlankRow;
   getCellContentRef.current = getCellContent;
   rowsRef.current = rows;
-  const appendRow = react.useCallback(async col => {
+  const appendRow = react.useCallback(async function (col) {
     var _c$trailingRowOptions6;
 
+    let openOverlay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
     const c = mangledCols[col];
 
     if ((c === null || c === void 0 ? void 0 : (_c$trailingRowOptions6 = c.trailingRowOptions) === null || _c$trailingRowOptions6 === void 0 ? void 0 : _c$trailingRowOptions6.disabled) === true) {
@@ -18386,7 +18387,7 @@ const DataEditorImpl = (p, forwardedRef) => {
       }, false, false, "edit");
       const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
 
-      if (cell.allowOverlay && (0,data_grid_types/* isReadWriteCell */.Qo)(cell) && cell.readonly !== true) {
+      if (cell.allowOverlay && (0,data_grid_types/* isReadWriteCell */.Qo)(cell) && cell.readonly !== true && openOverlay) {
         window.setTimeout(() => {
           focusCallback.current(col, row);
         }, 0);
@@ -37448,7 +37449,9 @@ var DataEditorImpl = (p, forwardedRef) => {
   focusCallback.current = focusOnRowFromTrailingBlankRow;
   getCellContentRef.current = getCellContent;
   rowsRef.current = rows;
-  const appendRow = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(async col => {
+  const appendRow = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(async function (col) {
+    let openOverlay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
     var _a2;
 
     const c = mangledCols[col];
@@ -37492,7 +37495,7 @@ var DataEditorImpl = (p, forwardedRef) => {
       }, false, false, "edit");
       const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
 
-      if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true) {
+      if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true && openOverlay) {
         window.setTimeout(() => {
           focusCallback.current(col, row);
         }, 0);
@@ -39286,4 +39289,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.a377ed23.iframe.bundle.js.map
+//# sourceMappingURL=main.4c2bf0f0.iframe.bundle.js.map
