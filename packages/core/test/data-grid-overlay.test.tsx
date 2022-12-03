@@ -46,6 +46,14 @@ describe("data-grid-overlay", () => {
     test("Smoke test uri overlay editor", async () => {
         const spy = jest.fn();
 
-        render(<UriOverlayEditor forceEditMode={false} onChange={spy} readonly={false} uri={"https://google.com"} />);
+        render(
+            <UriOverlayEditor
+                forceEditMode={false}
+                onChange={spy}
+                readonly={false}
+                uri={"https://google.com"}
+                preview={"https://google.com"}
+            />
+        );
     });
 });

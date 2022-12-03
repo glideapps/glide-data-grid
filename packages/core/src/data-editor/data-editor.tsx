@@ -629,7 +629,7 @@ export interface DataEditorRef {
      * @param col The column index to focus in the new row.
      * @returns A promise which waits for the append to complete.
      */
-    appendRow: (col: number) => Promise<void>;
+    appendRow: (col: number, openOverlay: boolean) => Promise<void>;
     /**
      * Triggers cells to redraw.
      */
@@ -1471,7 +1471,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     getCellContentRef.current = getCellContent;
     rowsRef.current = rows;
     const appendRow = React.useCallback(
-        async (col: number): Promise<void> => {
+        async (col: number, openOverlay: boolean = true): Promise<void> => {
             const c = mangledCols[col];
             if (c?.trailingRowOptions?.disabled === true) {
                 return;
@@ -1514,7 +1514,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 );
 
                 const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
-                if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true) {
+                if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true && openOverlay) {
                     // wait for scroll to have a chance to process
                     window.setTimeout(() => {
                         focusCallback.current(col, row);
