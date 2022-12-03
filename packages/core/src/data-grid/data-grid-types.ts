@@ -559,6 +559,7 @@ export interface MarkdownCell extends BaseGridCell {
 export interface UriCell extends BaseGridCell {
     readonly kind: GridCellKind.Uri;
     readonly data: string;
+    readonly displayData?: string;
     readonly readonly?: boolean;
 }
 

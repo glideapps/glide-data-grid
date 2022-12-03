@@ -24,6 +24,7 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
             <UriOverlayEditor
                 forceEditMode={forceEditMode}
                 uri={value.data}
+                preview={value.displayData ?? value.data}
                 validatedSelection={validatedSelection}
                 readonly={value.readonly === true}
                 onChange={e =>

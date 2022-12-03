@@ -9,11 +9,12 @@ interface Props {
     readonly onChange: (ev: React.ChangeEvent<HTMLTextAreaElement>) => void;
     readonly forceEditMode: boolean;
     readonly readonly: boolean;
+    readonly preview: string;
     readonly validatedSelection?: SelectionRange;
 }
 
 const UriOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { uri, onChange, forceEditMode, readonly, validatedSelection } = p;
+    const { uri, onChange, forceEditMode, readonly, validatedSelection, preview } = p;
 
     const [editMode, setEditMode] = React.useState<boolean>(uri === "" || forceEditMode);
 
@@ -36,7 +37,7 @@ const UriOverlayEditor: React.FunctionComponent<Props> = p => {
     return (
         <UriOverlayEditorStyle>
             <a className="link-area" href={uri} target="_blank" rel="noopener noreferrer">
-                {uri}
+                {preview}
             </a>
             {!readonly && (
                 <div className="edit-icon" onClick={onEditClick}>
