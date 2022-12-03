@@ -21667,7 +21667,8 @@ const UriOverlayEditor = p => {
     onChange,
     forceEditMode,
     readonly,
-    validatedSelection
+    validatedSelection,
+    preview
   } = p;
   const [editMode, setEditMode] = react.useState(uri === "" || forceEditMode);
   const onEditClick = react.useCallback(() => {
@@ -21689,7 +21690,7 @@ const UriOverlayEditor = p => {
     href: uri,
     target: "_blank",
     rel: "noopener noreferrer"
-  }, uri), !readonly && react.createElement("div", {
+  }, preview), !readonly && react.createElement("div", {
     className: "edit-icon",
     onClick: onEditClick
   }, react.createElement(utils/* EditPencil */.Wy, null)), react.createElement("textarea", {
@@ -21721,6 +21722,8 @@ const uriCellRenderer = {
     data: ""
   }),
   provideEditor: () => p => {
+    var _value$displayData;
+
     const {
       onChange,
       value,
@@ -21730,6 +21733,7 @@ const uriCellRenderer = {
     return react.createElement(uri_overlay_editor, {
       forceEditMode: forceEditMode,
       uri: value.data,
+      preview: (_value$displayData = value.displayData) !== null && _value$displayData !== void 0 ? _value$displayData : value.data,
       validatedSelection: validatedSelection,
       readonly: value.readonly === true,
       onChange: e => onChange({ ...value,
@@ -36648,7 +36652,8 @@ var UriOverlayEditor = p => {
     onChange,
     forceEditMode,
     readonly,
-    validatedSelection
+    validatedSelection,
+    preview
   } = p;
   const [editMode, setEditMode] = react__WEBPACK_IMPORTED_MODULE_0__.useState(uri === "" || forceEditMode);
   const onEditClick = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(() => {
@@ -36670,7 +36675,7 @@ var UriOverlayEditor = p => {
     href: uri,
     target: "_blank",
     rel: "noopener noreferrer"
-  }, uri), !readonly && react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+  }, preview), !readonly && react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "edit-icon",
     onClick: onEditClick
   }, react__WEBPACK_IMPORTED_MODULE_0__.createElement(EditPencil, null)), react__WEBPACK_IMPORTED_MODULE_0__.createElement("textarea", {
@@ -36697,6 +36702,8 @@ var uriCellRenderer = {
     data: ""
   }),
   provideEditor: () => p => {
+    var _a;
+
     const {
       onChange,
       value,
@@ -36706,6 +36713,7 @@ var uriCellRenderer = {
     return react__WEBPACK_IMPORTED_MODULE_0__.createElement(uri_overlay_editor_default, {
       forceEditMode,
       uri: value.data,
+      preview: (_a = value.displayData) != null ? _a : value.data,
       validatedSelection,
       readonly: value.readonly === true,
       onChange: e => onChange({ ...value,
@@ -39278,4 +39286,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.d0432d9b.iframe.bundle.js.map
+//# sourceMappingURL=main.6d1c17d8.iframe.bundle.js.map
