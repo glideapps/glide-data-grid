@@ -375,6 +375,35 @@ describe("data-editor", () => {
         );
     });
 
+    test("emits contextmenu for row marker", async () => {
+        const spy = jest.fn();
+        const spySelection = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                rowMarkers="both"
+                onCellContextMenu={spy}
+                onGridSelectionChange={spySelection}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        const scroller = prep();
+
+        assert(scroller !== null);
+
+        screen.getByTestId("data-grid-canvas");
+        fireEvent.contextMenu(scroller, {
+            clientX: 10, // Row marker
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith([-1, 1], expect.anything());
+    });
+
     test("emits contextmenu for cell but does not change selection if already selected - rows", async () => {
         const spy = jest.fn();
         const spySelection = jest.fn();
