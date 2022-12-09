@@ -21,21 +21,13 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
         data: "",
     }),
     provideEditor: () => p => {
-        const {
-            onChange,
-            value,
-            target,
-            onFinishedEditing,
-            markdownDivCreateNode,
-            forceEditMode,
-            validatedSelection,
-        } = p;
+        const { onChange, value, target, onFinishedEditing, markdownDivCreateNode, forceEditMode, validatedSelection } =
+            p;
         return (
             <MarkdownOverlayEditor
                 onFinish={onFinishedEditing}
                 targetRect={target}
-                readonly={value.readonly === true}
-                markdown={value.data}
+                value={value}
                 validatedSelection={validatedSelection}
                 onChange={e =>
                     onChange({
