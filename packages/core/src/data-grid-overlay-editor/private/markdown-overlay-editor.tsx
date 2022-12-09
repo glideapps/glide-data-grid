@@ -3,23 +3,25 @@ import MarkdownDiv from "../../markdown-div/markdown-div";
 import { GrowingEntry } from "../../growing-entry/growing-entry";
 import { MarkdownOverlayEditorStyle } from "./markdown-overlay-editor-style";
 import { EditPencil, Checkmark } from "../../common/utils";
-import type { Rectangle, SelectionRange } from "../../data-grid/data-grid-types";
+import type { MarkdownCell, Rectangle, SelectionRange } from "../../data-grid/data-grid-types";
 
 interface Props {
     readonly targetRect: Rectangle;
-    readonly markdown: string;
     readonly onChange: (ev: React.ChangeEvent<HTMLTextAreaElement>) => void;
     readonly forceEditMode: boolean;
-    readonly onFinish: () => void;
+    readonly onFinish: (newValue?: MarkdownCell | undefined) => void;
     readonly validatedSelection?: SelectionRange;
 
-    readonly readonly: boolean;
+    readonly value: MarkdownCell;
 
     createNode?: (content: string) => DocumentFragment;
 }
 
 export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { markdown, onChange, forceEditMode, createNode, targetRect, readonly, onFinish, validatedSelection } = p;
+    const { value, onChange, forceEditMode, createNode, targetRect, onFinish, validatedSelection } = p;
+
+    const markdown = value.data;
+    const readonly = value.readonly === true;
 
     const [editMode, setEditMode] = React.useState<boolean>(markdown === "" || forceEditMode);
     const onEditClick = React.useCallback(() => {
@@ -40,7 +42,7 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
                     }}
                     onChange={onChange}
                 />
-                <div className={`edit-icon checkmark-hover ${addLeftPad}`} onClick={() => onFinish()}>
+                <div className={`edit-icon checkmark-hover ${addLeftPad}`} onClick={() => onFinish(value)}>
                     <Checkmark />
                 </div>
             </MarkdownOverlayEditorStyle>
