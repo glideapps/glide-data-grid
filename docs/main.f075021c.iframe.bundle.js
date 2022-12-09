@@ -21355,15 +21355,16 @@ __webpack_require__("./packages/core/src/data-grid-overlay-editor/private/markdo
 
 const MarkdownOverlayEditor = p => {
   const {
-    markdown,
+    value,
     onChange,
     forceEditMode,
     createNode,
     targetRect,
-    readonly,
     onFinish,
     validatedSelection
   } = p;
+  const markdown = value.data;
+  const readonly = value.readonly === true;
   const [editMode, setEditMode] = react.useState(markdown === "" || forceEditMode);
   const onEditClick = react.useCallback(() => {
     setEditMode(e => !e);
@@ -21384,7 +21385,7 @@ const MarkdownOverlayEditor = p => {
       onChange: onChange
     }), react.createElement("div", {
       className: `edit-icon checkmark-hover ${addLeftPad}`,
-      onClick: () => onFinish()
+      onClick: () => onFinish(value)
     }, react.createElement(utils/* Checkmark */.MC, null)));
   }
 
@@ -21439,8 +21440,7 @@ const markdownCellRenderer = {
     return react.createElement(MarkdownOverlayEditor, {
       onFinish: onFinishedEditing,
       targetRect: target,
-      readonly: value.readonly === true,
-      markdown: value.data,
+      value: value,
       validatedSelection: validatedSelection,
       onChange: e => onChange({ ...value,
         data: e.target.value
@@ -36371,15 +36371,16 @@ var MarkdownOverlayEditorStyle = (0,_chunk_UM7QR3LO_js__WEBPACK_IMPORTED_MODULE_
 
 var MarkdownOverlayEditor = p => {
   const {
-    markdown,
+    value,
     onChange,
     forceEditMode,
     createNode,
     targetRect,
-    readonly,
     onFinish,
     validatedSelection
   } = p;
+  const markdown = value.data;
+  const readonly = value.readonly === true;
   const [editMode, setEditMode] = react__WEBPACK_IMPORTED_MODULE_0__.useState(markdown === "" || forceEditMode);
   const onEditClick = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(() => {
     setEditMode(e => !e);
@@ -36400,7 +36401,7 @@ var MarkdownOverlayEditor = p => {
       onChange
     }), react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
       className: `edit-icon checkmark-hover ${addLeftPad}`,
-      onClick: () => onFinish()
+      onClick: () => onFinish(value)
     }, react__WEBPACK_IMPORTED_MODULE_0__.createElement(Checkmark, null)));
   }
 
@@ -36451,8 +36452,7 @@ var markdownCellRenderer = {
     return react__WEBPACK_IMPORTED_MODULE_0__.createElement(MarkdownOverlayEditor, {
       onFinish: onFinishedEditing,
       targetRect: target,
-      readonly: value.readonly === true,
-      markdown: value.data,
+      value,
       validatedSelection,
       onChange: e => onChange({ ...value,
         data: e.target.value
@@ -39289,4 +39289,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.4c2bf0f0.iframe.bundle.js.map
+//# sourceMappingURL=main.f075021c.iframe.bundle.js.map
