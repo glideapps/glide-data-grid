@@ -34,9 +34,9 @@ export function parseToRgba(color: string): readonly [number, number, number, nu
     div.style.color = normalizedColor;
     const computedColor = getComputedStyle(div).color;
 
-    if (computedColor !== control) throw new Error("Could not parse color");
+    if (computedColor !== control) return [0, 0, 0, 1];
 
-    const result = computedColor
+    let result = computedColor
         // eslint-disable-next-line unicorn/better-regex
         .replace(/[^\d.,]/g, "")
         .split(",")
@@ -45,6 +45,14 @@ export function parseToRgba(color: string): readonly [number, number, number, nu
     if (result.length < 4) {
         result.push(1);
     }
+    result = result.map(x => {
+        const isNaN = Number.isNaN(x);
+        if (process.env.NODE_ENV !== "production" && isNaN) {
+            // eslint-disable-next-line no-console
+            console.warn("Could not parse color", color);
+        }
+        return isNaN ? 0 : x;
+    }) as typeof result;
 
     cache[normalizedColor] = result;
     return result;
