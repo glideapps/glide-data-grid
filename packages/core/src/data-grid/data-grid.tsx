@@ -1084,7 +1084,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 }
             }
 
-            setHoveredOnEdge(args.kind === headerKind && args.isEdge && allowResize === true);
+            const notRowMarkerCol = args.location[0] >= (firstColAccessible ? 0 : 1);
+            setHoveredOnEdge(args.kind === headerKind && args.isEdge && notRowMarkerCol && allowResize === true);
 
             if (fillHandle && selection.current !== undefined) {
                 const [col, row] = selection.current.cell;
@@ -1117,6 +1118,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getCellRenderer,
             damageInternal,
             getBoundsForItem,
+            firstColAccessible,
         ]
     );
     useEventListener("mousemove", onMouseMoveImpl, window, true);
