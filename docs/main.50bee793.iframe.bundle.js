@@ -27236,13 +27236,15 @@ const DataGridDnd = p => {
         const ns = offsetColumnSize(columns[resizeCol], lastResizeWidthRef.current, minColumnWidth, maxColumnWidth);
         onColumnResizeEnd === null || onColumnResizeEnd === void 0 ? void 0 : onColumnResizeEnd(columns[resizeCol], ns, resizeCol, ns + ((_columns$resizeCol$gr = columns[resizeCol].growOffset) !== null && _columns$resizeCol$gr !== void 0 ? _columns$resizeCol$gr : 0));
 
-        for (const c of selectedColumns) {
-          var _col$growOffset2;
+        if (selectedColumns.hasIndex(resizeCol)) {
+          for (const c of selectedColumns) {
+            var _col$growOffset2;
 
-          if (c === resizeCol) continue;
-          const col = columns[c];
-          const s = offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth);
-          onColumnResizeEnd === null || onColumnResizeEnd === void 0 ? void 0 : onColumnResizeEnd(col, s, c, s + ((_col$growOffset2 = col.growOffset) !== null && _col$growOffset2 !== void 0 ? _col$growOffset2 : 0));
+            if (c === resizeCol) continue;
+            const col = columns[c];
+            const s = offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth);
+            onColumnResizeEnd === null || onColumnResizeEnd === void 0 ? void 0 : onColumnResizeEnd(col, s, c, s + ((_col$growOffset2 = col.growOffset) !== null && _col$growOffset2 !== void 0 ? _col$growOffset2 : 0));
+          }
         }
       }
 
@@ -34039,11 +34041,13 @@ var DataGridDnd = p => {
         const ns = offsetColumnSize(columns[resizeCol], lastResizeWidthRef.current, minColumnWidth, maxColumnWidth);
         onColumnResizeEnd == null ? void 0 : onColumnResizeEnd(columns[resizeCol], ns, resizeCol, ns + ((_b = columns[resizeCol].growOffset) != null ? _b : 0));
 
-        for (const c of selectedColumns) {
-          if (c === resizeCol) continue;
-          const col = columns[c];
-          const s = offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth);
-          onColumnResizeEnd == null ? void 0 : onColumnResizeEnd(col, s, c, s + ((_c = col.growOffset) != null ? _c : 0));
+        if (selectedColumns.hasIndex(resizeCol)) {
+          for (const c of selectedColumns) {
+            if (c === resizeCol) continue;
+            const col = columns[c];
+            const s = offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth);
+            onColumnResizeEnd == null ? void 0 : onColumnResizeEnd(col, s, c, s + ((_c = col.growOffset) != null ? _c : 0));
+          }
         }
       }
 
@@ -39305,4 +39309,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.01718f5d.iframe.bundle.js.map
+//# sourceMappingURL=main.50bee793.iframe.bundle.js.map
