@@ -23835,13 +23835,20 @@ function parseToRgba(color) {
   div.style.color = "#fff";
   div.style.color = normalizedColor;
   const computedColor = getComputedStyle(div).color;
-  if (computedColor !== control) throw new Error("Could not parse color");
-  const result = computedColor.replace(/[^\d.,]/g, "").split(",").map(Number.parseFloat);
+  if (computedColor !== control) return [0, 0, 0, 1];
+  let result = computedColor.replace(/[^\d.,]/g, "").split(",").map(Number.parseFloat);
 
   if (result.length < 4) {
     result.push(1);
   }
 
+  result = result.map(x => {
+    const isNaN = Number.isNaN(x);
+
+    if (false) {}
+
+    return isNaN ? 0 : x;
+  });
   cache[normalizedColor] = result;
   return result;
 }
@@ -30989,13 +30996,22 @@ function parseToRgba(color) {
   div.style.color = "#fff";
   div.style.color = normalizedColor;
   const computedColor = getComputedStyle(div).color;
-  if (computedColor !== control) throw new Error("Could not parse color");
-  const result = computedColor.replace(/[^\d.,]/g, "").split(",").map(Number.parseFloat);
+  if (computedColor !== control) return [0, 0, 0, 1];
+  let result = computedColor.replace(/[^\d.,]/g, "").split(",").map(Number.parseFloat);
 
   if (result.length < 4) {
     result.push(1);
   }
 
+  result = result.map(x => {
+    const isNaN = Number.isNaN(x);
+
+    if (isNaN) {
+      console.warn("Could not parse color", color);
+    }
+
+    return isNaN ? 0 : x;
+  });
   cache[normalizedColor] = result;
   return result;
 }
@@ -39289,4 +39305,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.f075021c.iframe.bundle.js.map
+//# sourceMappingURL=main.01718f5d.iframe.bundle.js.map
