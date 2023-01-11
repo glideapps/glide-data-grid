@@ -218,11 +218,13 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                         maxColumnWidth
                     );
                     onColumnResizeEnd?.(columns[resizeCol], ns, resizeCol, ns + (columns[resizeCol].growOffset ?? 0));
-                    for (const c of selectedColumns) {
-                        if (c === resizeCol) continue;
-                        const col = columns[c];
-                        const s = offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth);
-                        onColumnResizeEnd?.(col, s, c, s + (col.growOffset ?? 0));
+                    if (selectedColumns.hasIndex(resizeCol)) {
+                        for (const c of selectedColumns) {
+                            if (c === resizeCol) continue;
+                            const col = columns[c];
+                            const s = offsetColumnSize(col, lastResizeWidthRef.current, minColumnWidth, maxColumnWidth);
+                            onColumnResizeEnd?.(col, s, c, s + (col.growOffset ?? 0));
+                        }
                     }
                 }
 
