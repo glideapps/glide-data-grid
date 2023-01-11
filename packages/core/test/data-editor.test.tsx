@@ -252,6 +252,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         y: 0,
         toJSON: () => "",
     });
+    Object.defineProperties(HTMLElement.prototype, {
+        offsetWidth: { get() { return 1000; } }
+    });
     Image.prototype.decode = jest.fn();
 });
 
