@@ -1,7 +1,7 @@
 "use strict";
-(self["webpackChunkroot"] = self["webpackChunkroot"] || []).push([[385],{
+(self["webpackChunkroot"] = self["webpackChunkroot"] || []).push([[258],{
 
-/***/ "./packages/core/dist/js/number-overlay-editor-OFPFAI5Q.js":
+/***/ "./packages/core/dist/js/number-overlay-editor-IQSP2NXN.js":
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -37,7 +37,9 @@ var NumberOverlayEditor = p => {
     onChange,
     disabled,
     highlight,
-    validatedSelection
+    validatedSelection,
+    fixedDecimals,
+    allowNegative
   } = p;
   const inputRef = react__WEBPACK_IMPORTED_MODULE_0__.useRef();
   react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect(() => {
@@ -54,6 +56,8 @@ var NumberOverlayEditor = p => {
     className: "gdg-input",
     onFocus: e => e.target.setSelectionRange(highlight ? 0 : e.target.value.length, e.target.value.length),
     disabled: disabled === true,
+    decimalScale: fixedDecimals,
+    allowNegative,
     thousandSeparator: getThousandSeprator(),
     decimalSeparator: getDecimalSeparator(),
     value: Object.is(value, -0) ? "-" : value != null ? value : "",
@@ -67,4 +71,4 @@ var number_overlay_editor_default = NumberOverlayEditor;
 /***/ })
 
 }]);
-//# sourceMappingURL=385.820097a6.iframe.bundle.js.map
+//# sourceMappingURL=258.6b309f03.iframe.bundle.js.map

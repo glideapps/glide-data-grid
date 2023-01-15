@@ -21538,6 +21538,8 @@ const numberCellRenderer = {
       highlight: isHighlighted,
       disabled: value.readonly === true,
       value: value.data,
+      fixedDecimals: value.fixedDecimals,
+      allowNegative: value.allowNegative,
       validatedSelection: validatedSelection,
       onChange: x => {
         var _x$floatValue;
@@ -36537,7 +36539,7 @@ var newRowCellRenderer = {
   onPaste: () => void 0
 };
 
-var NumberOverlayEditor = react__WEBPACK_IMPORTED_MODULE_0__.lazy(async () => await Promise.all(/* import() */[__webpack_require__.e(333), __webpack_require__.e(385)]).then(__webpack_require__.bind(__webpack_require__, "./packages/core/dist/js/number-overlay-editor-OFPFAI5Q.js")));
+var NumberOverlayEditor = react__WEBPACK_IMPORTED_MODULE_0__.lazy(async () => await Promise.all(/* import() */[__webpack_require__.e(333), __webpack_require__.e(258)]).then(__webpack_require__.bind(__webpack_require__, "./packages/core/dist/js/number-overlay-editor-IQSP2NXN.js")));
 var numberCellRenderer = {
   getAccessibilityString: c => {
     var _a, _b;
@@ -36567,6 +36569,8 @@ var numberCellRenderer = {
       highlight: isHighlighted,
       disabled: value.readonly === true,
       value: value.data,
+      fixedDecimals: value.fixedDecimals,
+      allowNegative: value.allowNegative,
       validatedSelection,
       onChange: x => {
         var _a;
@@ -39319,4 +39323,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.e805e4c5.iframe.bundle.js.map
+//# sourceMappingURL=main.617f8edb.iframe.bundle.js.map

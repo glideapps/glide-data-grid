@@ -97,7 +97,9 @@ const NumberOverlayEditor = p => {
     onChange,
     disabled,
     highlight,
-    validatedSelection
+    validatedSelection,
+    fixedDecimals,
+    allowNegative
   } = p;
   const inputRef = react.useRef();
   react.useLayoutEffect(() => {
@@ -114,6 +116,8 @@ const NumberOverlayEditor = p => {
     className: "gdg-input",
     onFocus: e => e.target.setSelectionRange(highlight ? 0 : e.target.value.length, e.target.value.length),
     disabled: disabled === true,
+    decimalScale: fixedDecimals,
+    allowNegative: allowNegative,
     thousandSeparator: getThousandSeprator(),
     decimalSeparator: getDecimalSeparator(),
     value: Object.is(value, -0) ? "-" : value !== null && value !== void 0 ? value : "",
@@ -126,4 +130,4 @@ const NumberOverlayEditor = p => {
 /***/ })
 
 }]);
-//# sourceMappingURL=987.19432386.iframe.bundle.js.map
+//# sourceMappingURL=987.b2e75887.iframe.bundle.js.map
