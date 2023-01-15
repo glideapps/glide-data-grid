@@ -17402,7 +17402,7 @@ function decodeHTML(tableEl) {
 }
 
 function data_editor_fns_escape(str) {
-  if (/[\t\n"]/.test(str)) {
+  if (/[\t\n",]/.test(str)) {
     str = `"${str.replace(/"/g, '""')}"`;
   }
 
@@ -17428,50 +17428,54 @@ const formatBoolean = val => {
   }
 };
 
+function formatCell(cell, index, raw, columnIndexes) {
+  var _cell$data$toString, _cell$data;
+
+  const colIndex = columnIndexes[index];
+  if (cell.span !== undefined && cell.span[0] !== colIndex) return "";
+
+  switch (cell.kind) {
+    case data_grid_types/* GridCellKind.Text */.p6.Text:
+    case data_grid_types/* GridCellKind.Number */.p6.Number:
+      return data_editor_fns_escape(raw ? (_cell$data$toString = (_cell$data = cell.data) === null || _cell$data === void 0 ? void 0 : _cell$data.toString()) !== null && _cell$data$toString !== void 0 ? _cell$data$toString : "" : cell.displayData);
+
+    case data_grid_types/* GridCellKind.Markdown */.p6.Markdown:
+    case data_grid_types/* GridCellKind.RowID */.p6.RowID:
+    case data_grid_types/* GridCellKind.Uri */.p6.Uri:
+      return data_editor_fns_escape(cell.data);
+
+    case data_grid_types/* GridCellKind.Image */.p6.Image:
+    case data_grid_types/* GridCellKind.Bubble */.p6.Bubble:
+      if (cell.data.length === 0) return "";
+      return cell.data.reduce((pv, cv) => `${data_editor_fns_escape(pv)},${data_editor_fns_escape(cv)}`);
+
+    case data_grid_types/* GridCellKind.Boolean */.p6.Boolean:
+      return formatBoolean(cell.data);
+
+    case data_grid_types/* GridCellKind.Loading */.p6.Loading:
+      return raw ? "" : "#LOADING";
+
+    case data_grid_types/* GridCellKind.Protected */.p6.Protected:
+      return raw ? "" : "************";
+
+    case data_grid_types/* GridCellKind.Drilldown */.p6.Drilldown:
+      if (cell.data.length === 0) return "";
+      return cell.data.map(i => i.text).reduce((pv, cv) => `${data_editor_fns_escape(pv)},${data_editor_fns_escape(cv)}`);
+
+    case data_grid_types/* GridCellKind.Custom */.p6.Custom:
+      return data_editor_fns_escape(cell.copyData);
+
+    default:
+      (0,support/* assertNever */.vE)(cell);
+  }
+}
+function formatForCopy(cells, columnIndexes) {
+  return cells.map(row => row.map((a, b) => formatCell(a, b, false, columnIndexes)).join("\t")).join("\n");
+}
 function copyToClipboard(cells, columnIndexes, e) {
   var _window$navigator$cli;
 
-  const formatCell = (cell, index, raw) => {
-    var _cell$data$toString, _cell$data;
-
-    const colIndex = columnIndexes[index];
-    if (cell.span !== undefined && cell.span[0] !== colIndex) return "";
-
-    switch (cell.kind) {
-      case data_grid_types/* GridCellKind.Text */.p6.Text:
-      case data_grid_types/* GridCellKind.Number */.p6.Number:
-        return data_editor_fns_escape(raw ? (_cell$data$toString = (_cell$data = cell.data) === null || _cell$data === void 0 ? void 0 : _cell$data.toString()) !== null && _cell$data$toString !== void 0 ? _cell$data$toString : "" : cell.displayData);
-
-      case data_grid_types/* GridCellKind.Markdown */.p6.Markdown:
-      case data_grid_types/* GridCellKind.RowID */.p6.RowID:
-      case data_grid_types/* GridCellKind.Uri */.p6.Uri:
-        return data_editor_fns_escape(cell.data);
-
-      case data_grid_types/* GridCellKind.Image */.p6.Image:
-      case data_grid_types/* GridCellKind.Bubble */.p6.Bubble:
-        return cell.data.reduce((pv, cv) => `${data_editor_fns_escape(pv)},${data_editor_fns_escape(cv)}`);
-
-      case data_grid_types/* GridCellKind.Boolean */.p6.Boolean:
-        return formatBoolean(cell.data);
-
-      case data_grid_types/* GridCellKind.Loading */.p6.Loading:
-        return raw ? "" : "#LOADING";
-
-      case data_grid_types/* GridCellKind.Protected */.p6.Protected:
-        return raw ? "" : "************";
-
-      case data_grid_types/* GridCellKind.Drilldown */.p6.Drilldown:
-        return cell.data.map(i => i.text).reduce((pv, cv) => `${data_editor_fns_escape(pv)},${data_editor_fns_escape(cv)}`);
-
-      case data_grid_types/* GridCellKind.Custom */.p6.Custom:
-        return data_editor_fns_escape(cell.copyData);
-
-      default:
-        (0,support/* assertNever */.vE)(cell);
-    }
-  };
-
-  const str = cells.map(row => row.map((a, b) => formatCell(a, b, false)).join("\t")).join("\n");
+  const str = formatForCopy(cells, columnIndexes);
 
   if (((_window$navigator$cli = window.navigator.clipboard) === null || _window$navigator$cli === void 0 ? void 0 : _window$navigator$cli.write) !== undefined || e !== undefined) {
     var _window$navigator$cli2;
@@ -17490,7 +17494,7 @@ function copyToClipboard(cells, columnIndexes, e) {
           link.innerText = cell.data;
           cellEl.append(link);
         } else {
-          cellEl.innerText = formatCell(cell, i, true);
+          cellEl.innerText = formatCell(cell, i, true, columnIndexes);
         }
 
         rowEl.append(cellEl);
@@ -35817,7 +35821,7 @@ function decodeHTML(tableEl) {
 }
 
 function escape(str) {
-  if (/[\t\n"]/.test(str)) {
+  if (/[\t\n",]/.test(str)) {
     str = `"${str.replace(/"/g, '""')}"`;
   }
 
@@ -35843,50 +35847,56 @@ var formatBoolean = val => {
   }
 };
 
+function formatCell(cell, index, raw, columnIndexes) {
+  var _a, _b;
+
+  const colIndex = columnIndexes[index];
+  if (cell.span !== void 0 && cell.span[0] !== colIndex) return "";
+
+  switch (cell.kind) {
+    case GridCellKind.Text:
+    case GridCellKind.Number:
+      return escape(raw ? (_b = (_a = cell.data) == null ? void 0 : _a.toString()) != null ? _b : "" : cell.displayData);
+
+    case GridCellKind.Markdown:
+    case GridCellKind.RowID:
+    case GridCellKind.Uri:
+      return escape(cell.data);
+
+    case GridCellKind.Image:
+    case GridCellKind.Bubble:
+      if (cell.data.length === 0) return "";
+      return cell.data.reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
+
+    case GridCellKind.Boolean:
+      return formatBoolean(cell.data);
+
+    case GridCellKind.Loading:
+      return raw ? "" : "#LOADING";
+
+    case GridCellKind.Protected:
+      return raw ? "" : "************";
+
+    case GridCellKind.Drilldown:
+      if (cell.data.length === 0) return "";
+      return cell.data.map(i => i.text).reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
+
+    case GridCellKind.Custom:
+      return escape(cell.copyData);
+
+    default:
+      assertNever(cell);
+  }
+}
+
+function formatForCopy(cells, columnIndexes) {
+  return cells.map(row => row.map((a, b) => formatCell(a, b, false, columnIndexes)).join("	")).join("\n");
+}
+
 function copyToClipboard(cells, columnIndexes, e) {
   var _a, _b, _c, _d;
 
-  const formatCell = (cell, index, raw) => {
-    var _a2, _b2;
-
-    const colIndex = columnIndexes[index];
-    if (cell.span !== void 0 && cell.span[0] !== colIndex) return "";
-
-    switch (cell.kind) {
-      case GridCellKind.Text:
-      case GridCellKind.Number:
-        return escape(raw ? (_b2 = (_a2 = cell.data) == null ? void 0 : _a2.toString()) != null ? _b2 : "" : cell.displayData);
-
-      case GridCellKind.Markdown:
-      case GridCellKind.RowID:
-      case GridCellKind.Uri:
-        return escape(cell.data);
-
-      case GridCellKind.Image:
-      case GridCellKind.Bubble:
-        return cell.data.reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
-
-      case GridCellKind.Boolean:
-        return formatBoolean(cell.data);
-
-      case GridCellKind.Loading:
-        return raw ? "" : "#LOADING";
-
-      case GridCellKind.Protected:
-        return raw ? "" : "************";
-
-      case GridCellKind.Drilldown:
-        return cell.data.map(i => i.text).reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
-
-      case GridCellKind.Custom:
-        return escape(cell.copyData);
-
-      default:
-        assertNever(cell);
-    }
-  };
-
-  const str = cells.map(row => row.map((a, b) => formatCell(a, b, false)).join("	")).join("\n");
+  const str = formatForCopy(cells, columnIndexes);
 
   if (((_a = window.navigator.clipboard) == null ? void 0 : _a.write) !== void 0 || e !== void 0) {
     const rootEl = document.createElement("tbody");
@@ -35903,7 +35913,7 @@ function copyToClipboard(cells, columnIndexes, e) {
           link.innerText = cell.data;
           cellEl.append(link);
         } else {
-          cellEl.innerText = formatCell(cell, i, true);
+          cellEl.innerText = formatCell(cell, i, true, columnIndexes);
         }
 
         rowEl.append(cellEl);
@@ -39309,4 +39319,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.81921f33.iframe.bundle.js.map
+//# sourceMappingURL=main.e805e4c5.iframe.bundle.js.map
