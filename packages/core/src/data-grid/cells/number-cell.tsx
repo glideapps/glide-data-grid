@@ -29,6 +29,8 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
                     highlight={isHighlighted}
                     disabled={value.readonly === true}
                     value={value.data}
+                    fixedDecimals={value.fixedDecimals}
+                    allowNegative={value.allowNegative}
                     validatedSelection={validatedSelection}
                     onChange={x =>
                         onChange({

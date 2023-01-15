@@ -439,6 +439,8 @@ export interface NumberCell extends BaseGridCell {
     readonly displayData: string;
     readonly data: number | undefined;
     readonly readonly?: boolean;
+    readonly fixedDecimals?: number;
+    readonly allowNegative?: boolean;
 }
 
 /** @category Cells */
