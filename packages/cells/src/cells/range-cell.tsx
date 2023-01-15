@@ -57,30 +57,32 @@ const renderer: CustomRenderer<RangeCell> = {
 
         const rangeWidth = rect.width - theme.cellHorizontalPadding * 2 - labelWidth;
 
-        const gradient = ctx.createLinearGradient(x, yMid, x + rangeWidth, yMid);
+        if (rangeWidth >= RANGE_HEIGHT) {
+            const gradient = ctx.createLinearGradient(x, yMid, x + rangeWidth, yMid);
 
-        gradient.addColorStop(0, theme.accentColor);
-        gradient.addColorStop(fillRatio, theme.accentColor);
-        gradient.addColorStop(fillRatio, theme.bgBubble);
-        gradient.addColorStop(1, theme.bgBubble);
+            gradient.addColorStop(0, theme.accentColor);
+            gradient.addColorStop(fillRatio, theme.accentColor);
+            gradient.addColorStop(fillRatio, theme.bgBubble);
+            gradient.addColorStop(1, theme.bgBubble);
 
-        ctx.beginPath();
-        ctx.fillStyle = gradient;
-        roundedRect(ctx, x, yMid - RANGE_HEIGHT / 2, rangeWidth, RANGE_HEIGHT, RANGE_HEIGHT / 2);
-        ctx.fill();
+            ctx.beginPath();
+            ctx.fillStyle = gradient;
+            roundedRect(ctx, x, yMid - RANGE_HEIGHT / 2, rangeWidth, RANGE_HEIGHT, RANGE_HEIGHT / 2);
+            ctx.fill();
 
-        ctx.beginPath();
-        roundedRect(
-            ctx,
-            x + 0.5,
-            yMid - RANGE_HEIGHT / 2 + 0.5,
-            rangeWidth - 1,
-            RANGE_HEIGHT - 1,
-            (RANGE_HEIGHT - 1) / 2
-        );
-        ctx.strokeStyle = theme.accentLight;
-        ctx.lineWidth = 1;
-        ctx.stroke();
+            ctx.beginPath();
+            roundedRect(
+                ctx,
+                x + 0.5,
+                yMid - RANGE_HEIGHT / 2 + 0.5,
+                rangeWidth - 1,
+                RANGE_HEIGHT - 1,
+                (RANGE_HEIGHT - 1) / 2
+            );
+            ctx.strokeStyle = theme.accentLight;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
 
         if (label !== undefined) {
             ctx.textAlign = "right";
