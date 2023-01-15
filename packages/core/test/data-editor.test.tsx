@@ -1792,7 +1792,7 @@ describe("data-editor", () => {
         act(() => {
             jest.runAllTimers();
         });
-        expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
+        expect(navigator.clipboard.writeText).toBeCalledWith('"1, 2"\t"2, 2"');
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -1897,7 +1897,7 @@ describe("data-editor", () => {
         act(() => {
             jest.runAllTimers();
         });
-        expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
+        expect(navigator.clipboard.writeText).toBeCalledWith('"1, 2"\t"2, 2"');
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
