@@ -17437,6 +17437,10 @@ function formatCell(cell, index, raw, columnIndexes) {
   const colIndex = columnIndexes[index];
   if (cell.span !== undefined && cell.span[0] !== colIndex) return "";
 
+  if (cell.copyData !== undefined) {
+    return data_editor_fns_escape(cell.copyData);
+  }
+
   switch (cell.kind) {
     case data_grid_types/* GridCellKind.Text */.p6.Text:
     case data_grid_types/* GridCellKind.Number */.p6.Number:
@@ -35890,6 +35894,10 @@ function formatCell(cell, index, raw, columnIndexes) {
   const colIndex = columnIndexes[index];
   if (cell.span !== void 0 && cell.span[0] !== colIndex) return "";
 
+  if (cell.copyData !== void 0) {
+    return escape(cell.copyData);
+  }
+
   switch (cell.kind) {
     case GridCellKind.Text:
     case GridCellKind.Number:
@@ -39358,4 +39366,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.d164ca72.iframe.bundle.js.map
+//# sourceMappingURL=main.699dc603.iframe.bundle.js.map
