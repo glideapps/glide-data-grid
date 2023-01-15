@@ -232,6 +232,9 @@ const formatBoolean = (val: boolean | BooleanEmpty | BooleanIndeterminate): stri
 export function formatCell(cell: GridCell, index: number, raw: boolean, columnIndexes: readonly number[]) {
     const colIndex = columnIndexes[index];
     if (cell.span !== undefined && cell.span[0] !== colIndex) return "";
+    if (cell.copyData !== undefined) {
+        return escape(cell.copyData);
+    }
     switch (cell.kind) {
         case GridCellKind.Text:
         case GridCellKind.Number:

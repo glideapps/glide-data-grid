@@ -412,6 +412,7 @@ export interface BaseGridCell {
     readonly span?: readonly [start: number, end: number];
     readonly contentAlign?: "left" | "right" | "center";
     readonly cursor?: CSSProperties["cursor"];
+    readonly copyData?: string;
 }
 
 /** @category Cells */

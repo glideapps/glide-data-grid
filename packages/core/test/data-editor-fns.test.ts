@@ -54,4 +54,20 @@ describe("data-editor-fns", () => {
             )
         ).toEqual('"foo, bar",baz');
     });
+
+    test("format respects copyData", () => {
+        expect(
+            formatCell(
+                {
+                    kind: GridCellKind.Bubble,
+                    allowOverlay: true,
+                    data: ["foo, bar", "baz"],
+                    copyData: "override",
+                },
+                0,
+                false,
+                [0]
+            )
+        ).toEqual("override");
+    });
 });
