@@ -204,7 +204,7 @@ export function decodeHTML(tableEl: HTMLTableElement): string[][] | undefined {
 }
 
 function escape(str: string): string {
-    if (/[\t\n"]/.test(str)) {
+    if (/[\t\n",]/.test(str)) {
         str = `"${str.replace(/"/g, '""')}"`;
     }
     return str;
@@ -229,41 +229,47 @@ const formatBoolean = (val: boolean | BooleanEmpty | BooleanIndeterminate): stri
     }
 };
 
+export function formatCell(cell: GridCell, index: number, raw: boolean, columnIndexes: readonly number[]) {
+    const colIndex = columnIndexes[index];
+    if (cell.span !== undefined && cell.span[0] !== colIndex) return "";
+    switch (cell.kind) {
+        case GridCellKind.Text:
+        case GridCellKind.Number:
+            return escape(raw ? cell.data?.toString() ?? "" : cell.displayData);
+        case GridCellKind.Markdown:
+        case GridCellKind.RowID:
+        case GridCellKind.Uri:
+            return escape(cell.data);
+        case GridCellKind.Image:
+        case GridCellKind.Bubble:
+            if (cell.data.length === 0) return "";
+            return cell.data.reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
+        case GridCellKind.Boolean:
+            return formatBoolean(cell.data);
+        case GridCellKind.Loading:
+            return raw ? "" : "#LOADING";
+        case GridCellKind.Protected:
+            return raw ? "" : "************";
+        case GridCellKind.Drilldown:
+            if (cell.data.length === 0) return "";
+            return cell.data.map(i => i.text).reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
+        case GridCellKind.Custom:
+            return escape(cell.copyData);
+        default:
+            assertNever(cell);
+    }
+}
+
+export function formatForCopy(cells: readonly (readonly GridCell[])[], columnIndexes: readonly number[]): string {
+    return cells.map(row => row.map((a, b) => formatCell(a, b, false, columnIndexes)).join("\t")).join("\n");
+}
+
 export function copyToClipboard(
     cells: readonly (readonly GridCell[])[],
     columnIndexes: readonly number[],
     e?: ClipboardEvent
 ) {
-    const formatCell = (cell: GridCell, index: number, raw: boolean): string => {
-        const colIndex = columnIndexes[index];
-        if (cell.span !== undefined && cell.span[0] !== colIndex) return "";
-        switch (cell.kind) {
-            case GridCellKind.Text:
-            case GridCellKind.Number:
-                return escape(raw ? cell.data?.toString() ?? "" : cell.displayData);
-            case GridCellKind.Markdown:
-            case GridCellKind.RowID:
-            case GridCellKind.Uri:
-                return escape(cell.data);
-            case GridCellKind.Image:
-            case GridCellKind.Bubble:
-                return cell.data.reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
-            case GridCellKind.Boolean:
-                return formatBoolean(cell.data);
-            case GridCellKind.Loading:
-                return raw ? "" : "#LOADING";
-            case GridCellKind.Protected:
-                return raw ? "" : "************";
-            case GridCellKind.Drilldown:
-                return cell.data.map(i => i.text).reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
-            case GridCellKind.Custom:
-                return escape(cell.copyData);
-            default:
-                assertNever(cell);
-        }
-    };
-
-    const str = cells.map(row => row.map((a, b) => formatCell(a, b, false)).join("\t")).join("\n");
+    const str = formatForCopy(cells, columnIndexes);
 
     if (window.navigator.clipboard?.write !== undefined || e !== undefined) {
         const rootEl = document.createElement("tbody");
@@ -279,7 +285,7 @@ export function copyToClipboard(
                     link.innerText = cell.data;
                     cellEl.append(link);
                 } else {
-                    cellEl.innerText = formatCell(cell, i, true);
+                    cellEl.innerText = formatCell(cell, i, true, columnIndexes);
                 }
                 rowEl.append(cellEl);
             }
