@@ -17138,7 +17138,7 @@ function useSelectionBehavior(gridSelection, setGridSelection, rangeBehavior, co
 ;// CONCATENATED MODULE: ./packages/core/src/data-editor/use-cells-for-selection.ts
 
 
-function useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerOffset, abortController) {
+function useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerOffset, abortController, rows) {
   const getCellsForSelectionDirectWhenValid = react.useCallback(rect => {
     var _getCellsForSelection;
 
@@ -17149,7 +17149,7 @@ function useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerO
         const row = [];
 
         for (let x = rect.x; x < rect.x + rect.width; x++) {
-          if (x < 0) {
+          if (x < 0 || y >= rows) {
             row.push({
               kind: data_grid_types/* GridCellKind.Loading */.p6.Loading,
               allowOverlay: false
@@ -17166,7 +17166,7 @@ function useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerO
     }
 
     return (_getCellsForSelection = getCellsForSelectionIn === null || getCellsForSelectionIn === void 0 ? void 0 : getCellsForSelectionIn(rect, abortController.signal)) !== null && _getCellsForSelection !== void 0 ? _getCellsForSelection : [];
-  }, [abortController.signal, getCellContent, getCellsForSelectionIn]);
+  }, [abortController.signal, getCellContent, getCellsForSelectionIn, rows]);
   const getCellsForSelectionDirect = getCellsForSelectionIn !== undefined ? getCellsForSelectionDirectWhenValid : undefined;
   const getCellsForSelectionMangled = react.useCallback(rect => {
     if (getCellsForSelectionDirect === undefined) return [];
@@ -17843,7 +17843,7 @@ const DataEditorImpl = (p, forwardedRef) => {
       abortControllerRef === null || abortControllerRef === void 0 ? void 0 : abortControllerRef.current.abort();
     };
   }, []);
-  const [getCellsForSelection, getCellsForSeletionDirect] = useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerOffset, abortControllerRef.current);
+  const [getCellsForSelection, getCellsForSeletionDirect] = useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerOffset, abortControllerRef.current, rows);
   const validateCell = react.useCallback((cell, newValue, prevValue) => {
     if (validateCellIn === undefined) return true;
     const item = [cell[0] - rowMarkerOffset, cell[1]];
@@ -26676,7 +26676,7 @@ const DataGrid = (p, forwardedRef) => {
       const focused = fCol === col && fRow === row;
       const selected = range !== undefined && col >= range.x && col < range.x + range.width && row >= range.y && row < range.y + range.height;
       const id = `glide-cell-${col}-${row}`;
-      const cellContent = getCellContent([col, row]);
+      const cellContent = getCellContent([col, row], true);
       return react.createElement("td", {
         key: key,
         role: "gridcell",
@@ -33821,7 +33821,7 @@ var DataGrid = (p, forwardedRef) => {
       const focused = fCol === col && fRow === row;
       const selected = range2 !== void 0 && col >= range2.x && col < range2.x + range2.width && row >= range2.y && row < range2.y + range2.height;
       const id = `glide-cell-${col}-${row}`;
-      const cellContent = getCellContent([col, row]);
+      const cellContent = getCellContent([col, row], true);
       return react__WEBPACK_IMPORTED_MODULE_0__.createElement("td", {
         key,
         role: "gridcell",
@@ -35556,7 +35556,7 @@ function useSelectionBehavior(gridSelection, setGridSelection, rangeBehavior, co
 
 
 
-function useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerOffset, abortController) {
+function useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerOffset, abortController, rows) {
   const getCellsForSelectionDirectWhenValid = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(rect => {
     var _a;
 
@@ -35567,7 +35567,7 @@ function useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerO
         const row = [];
 
         for (let x = rect.x; x < rect.x + rect.width; x++) {
-          if (x < 0) {
+          if (x < 0 || y >= rows) {
             row.push({
               kind: GridCellKind.Loading,
               allowOverlay: false
@@ -35584,7 +35584,7 @@ function useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerO
     }
 
     return (_a = getCellsForSelectionIn == null ? void 0 : getCellsForSelectionIn(rect, abortController.signal)) != null ? _a : [];
-  }, [abortController.signal, getCellContent, getCellsForSelectionIn]);
+  }, [abortController.signal, getCellContent, getCellsForSelectionIn, rows]);
   const getCellsForSelectionDirect = getCellsForSelectionIn !== void 0 ? getCellsForSelectionDirectWhenValid : void 0;
   const getCellsForSelectionMangled = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(rect => {
     if (getCellsForSelectionDirect === void 0) return [];
@@ -36975,7 +36975,7 @@ var DataEditorImpl = (p, forwardedRef) => {
       abortControllerRef == null ? void 0 : abortControllerRef.current.abort();
     };
   }, []);
-  const [getCellsForSelection, getCellsForSeletionDirect] = useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerOffset, abortControllerRef.current);
+  const [getCellsForSelection, getCellsForSeletionDirect] = useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerOffset, abortControllerRef.current, rows);
   const validateCell = react__WEBPACK_IMPORTED_MODULE_0__.useCallback((cell, newValue, prevValue) => {
     if (validateCellIn === void 0) return true;
     const item = [cell[0] - rowMarkerOffset, cell[1]];
@@ -39309,4 +39309,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.50bee793.iframe.bundle.js.map
+//# sourceMappingURL=main.81921f33.iframe.bundle.js.map
