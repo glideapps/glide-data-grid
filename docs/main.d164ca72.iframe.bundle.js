@@ -21146,7 +21146,7 @@ const imageCellRenderer = {
   draw: a => {
     var _a$cell$displayData;
 
-    return (0,data_grid_lib/* drawImage */.AE)(a, (_a$cell$displayData = a.cell.displayData) !== null && _a$cell$displayData !== void 0 ? _a$cell$displayData : a.cell.data, a.cell.rounding);
+    return (0,data_grid_lib/* drawImage */.AE)(a, (_a$cell$displayData = a.cell.displayData) !== null && _a$cell$displayData !== void 0 ? _a$cell$displayData : a.cell.data, a.cell.rounding, a.cell.contentAlign);
   },
   measure: (_ctx, cell) => cell.data.length * 50,
   onDelete: c => ({ ...c,
@@ -22732,6 +22732,7 @@ function drawDrilldownCell(args, data) {
 }
 function drawImage(args, data) {
   let rounding = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 4;
+  let contentAlign = arguments.length > 3 ? arguments[3] : undefined;
   const {
     rect,
     col,
@@ -22743,32 +22744,47 @@ function drawImage(args, data) {
   const {
     x,
     y,
-    height: h
+    height: h,
+    width: w
   } = rect;
-  let drawX = x + theme.cellHorizontalPadding;
+  const imgHeight = h - theme.cellVerticalPadding * 2;
+  const images = [];
+  let totalWidth = 0;
 
-  for (const i of data) {
+  for (let index = 0; index < data.length; index++) {
+    const i = data[index];
     if (i.length === 0) continue;
     const img = imageLoader.loadOrGetImage(i, col, row);
 
     if (img !== undefined) {
-      const imgHeight = h - theme.cellVerticalPadding * 2;
+      images[index] = img;
       const imgWidth = img.width * (imgHeight / img.height);
-
-      if (rounding > 0) {
-        roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, rounding);
-        ctx.save();
-        ctx.clip();
-      }
-
-      ctx.drawImage(img, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight);
-
-      if (rounding > 0) {
-        ctx.restore();
-      }
-
-      drawX += imgWidth + itemMargin;
+      totalWidth += imgWidth + itemMargin;
     }
+  }
+
+  if (totalWidth === 0) return;
+  totalWidth -= itemMargin;
+  let drawX = x + theme.cellHorizontalPadding;
+  if (contentAlign === "right") drawX = Math.floor(x + w - theme.cellHorizontalPadding - totalWidth);else if (contentAlign === "center") drawX = Math.floor(x + w / 2 - totalWidth / 2);
+
+  for (const img of images) {
+    if (img === undefined) continue;
+    const imgWidth = img.width * (imgHeight / img.height);
+
+    if (rounding > 0) {
+      roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, rounding);
+      ctx.save();
+      ctx.clip();
+    }
+
+    ctx.drawImage(img, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight);
+
+    if (rounding > 0) {
+      ctx.restore();
+    }
+
+    drawX += imgWidth + itemMargin;
   }
 }
 function roundedPoly(ctx, points, radiusAll) {
@@ -30403,6 +30419,7 @@ function drawDrilldownCell(args, data) {
 
 function drawImage(args, data) {
   let rounding = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 4;
+  let contentAlign = arguments.length > 3 ? arguments[3] : undefined;
   const {
     rect,
     col,
@@ -30414,32 +30431,47 @@ function drawImage(args, data) {
   const {
     x,
     y,
-    height: h
+    height: h,
+    width: w
   } = rect;
-  let drawX = x + theme.cellHorizontalPadding;
+  const imgHeight = h - theme.cellVerticalPadding * 2;
+  const images = [];
+  let totalWidth = 0;
 
-  for (const i of data) {
+  for (let index = 0; index < data.length; index++) {
+    const i = data[index];
     if (i.length === 0) continue;
     const img = imageLoader.loadOrGetImage(i, col, row);
 
     if (img !== void 0) {
-      const imgHeight = h - theme.cellVerticalPadding * 2;
+      images[index] = img;
       const imgWidth = img.width * (imgHeight / img.height);
-
-      if (rounding > 0) {
-        roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, rounding);
-        ctx.save();
-        ctx.clip();
-      }
-
-      ctx.drawImage(img, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight);
-
-      if (rounding > 0) {
-        ctx.restore();
-      }
-
-      drawX += imgWidth + itemMargin;
+      totalWidth += imgWidth + itemMargin;
     }
+  }
+
+  if (totalWidth === 0) return;
+  totalWidth -= itemMargin;
+  let drawX = x + theme.cellHorizontalPadding;
+  if (contentAlign === "right") drawX = Math.floor(x + w - theme.cellHorizontalPadding - totalWidth);else if (contentAlign === "center") drawX = Math.floor(x + w / 2 - totalWidth / 2);
+
+  for (const img of images) {
+    if (img === void 0) continue;
+    const imgWidth = img.width * (imgHeight / img.height);
+
+    if (rounding > 0) {
+      roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, rounding);
+      ctx.save();
+      ctx.clip();
+    }
+
+    ctx.drawImage(img, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight);
+
+    if (rounding > 0) {
+      ctx.restore();
+    }
+
+    drawX += imgWidth + itemMargin;
   }
 }
 
@@ -36217,7 +36249,7 @@ var imageCellRenderer = {
   draw: a => {
     var _a;
 
-    return drawImage(a, (_a = a.cell.displayData) != null ? _a : a.cell.data, a.cell.rounding);
+    return drawImage(a, (_a = a.cell.displayData) != null ? _a : a.cell.data, a.cell.rounding, a.cell.contentAlign);
   },
   measure: (_ctx, cell) => cell.data.length * 50,
   onDelete: c => ({ ...c,
@@ -39326,4 +39358,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.85f562fe.iframe.bundle.js.map
+//# sourceMappingURL=main.d164ca72.iframe.bundle.js.map
