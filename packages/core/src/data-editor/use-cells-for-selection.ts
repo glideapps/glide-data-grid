@@ -8,7 +8,8 @@ export function useCellsForSelection(
     getCellsForSelectionIn: CellsForSelectionCallback | true | undefined,
     getCellContent: DataEditorProps["getCellContent"],
     rowMarkerOffset: number,
-    abortController: AbortController
+    abortController: AbortController,
+    rows: number
 ) {
     const getCellsForSelectionDirectWhenValid = React.useCallback<CellsForSelectionCallback>(
         rect => {
@@ -18,7 +19,7 @@ export function useCellsForSelection(
                 for (let y = rect.y; y < rect.y + rect.height; y++) {
                     const row: GridCell[] = [];
                     for (let x = rect.x; x < rect.x + rect.width; x++) {
-                        if (x < 0) {
+                        if (x < 0 || y >= rows) {
                             row.push({
                                 kind: GridCellKind.Loading,
                                 allowOverlay: false,
@@ -34,7 +35,7 @@ export function useCellsForSelection(
             }
             return getCellsForSelectionIn?.(rect, abortController.signal) ?? [];
         },
-        [abortController.signal, getCellContent, getCellsForSelectionIn]
+        [abortController.signal, getCellContent, getCellsForSelectionIn, rows]
     );
     const getCellsForSelectionDirect =
         getCellsForSelectionIn !== undefined ? getCellsForSelectionDirectWhenValid : undefined;

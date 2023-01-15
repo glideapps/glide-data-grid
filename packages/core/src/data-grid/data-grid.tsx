@@ -1515,7 +1515,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                         row >= range.y &&
                                         row < range.y + range.height;
                                     const id = `glide-cell-${col}-${row}`;
-                                    const cellContent = getCellContent([col, row]);
+                                    const cellContent = getCellContent([col, row], true);
                                     return (
                                         <td
                                             key={key}

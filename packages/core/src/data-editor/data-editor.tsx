@@ -858,7 +858,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         getCellsForSelectionIn,
         getCellContent,
         rowMarkerOffset,
-        abortControllerRef.current
+        abortControllerRef.current,
+        rows
     );
 
     const validateCell = React.useCallback<NonNullable<typeof validateCellIn>>(

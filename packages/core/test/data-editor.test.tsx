@@ -3890,4 +3890,43 @@ describe("data-editor", () => {
             },
         });
     });
+
+    test("Enter key does not trigger disallowed row fetch", async () => {
+        const spy = jest.fn(basicProps.getCellContent);
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                rows={2}
+                getCellContent={spy}
+                onRowAppended={jest.fn()}
+                trailingRowOptions={{
+                    sticky: true,
+                    tint: true,
+                }}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "Enter",
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "Enter",
+        });
+
+        jest.runAllTimers();
+        expect(spy.mock.calls.findIndex(x => x[0][1] > 1)).toBe(-1);
+    });
 });
