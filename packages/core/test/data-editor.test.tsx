@@ -11,7 +11,7 @@ import {
     isSizedGridColumn,
     Item,
 } from "../src";
-import type { SizedGridColumn } from "../src/data-grid/data-grid-types";
+import type { CustomCell, SizedGridColumn } from "../src/data-grid/data-grid-types";
 import type { DataEditorRef } from "../src/data-editor/data-editor";
 import { assert } from "../src/common/support";
 
@@ -1186,6 +1186,58 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalledWith([2, 2], expect.anything());
+    });
+
+    test.only("Delete custom", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                getCellContent={() => ({
+                    kind: GridCellKind.Custom,
+                    allowOverlay: true,
+                    copyData: "fake",
+                    data: "fake",
+                })}
+                customRenderers={[
+                    {
+                        draw: () => undefined,
+                        isMatch: (c): c is CustomCell => c.kind === GridCellKind.Custom,
+                        kind: GridCellKind.Custom,
+                        onDelete: spy,
+                    },
+                ]}
+                onDelete={sel => sel}
+                gridSelection={{
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
+                    current: {
+                        cell: [2, 2],
+                        range: {
+                            x: 2,
+                            y: 2,
+                            height: 1,
+                            width: 1,
+                        },
+                        rangeStack: [],
+                    },
+                }}
+                rowMarkers="both"
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.keyDown(canvas, {
+            key: "Delete",
+        });
+
+        expect(spy).toHaveBeenCalledWith({ allowOverlay: true, copyData: "fake", data: "fake", kind: "custom" });
     });
 
     test("Delete row", async () => {

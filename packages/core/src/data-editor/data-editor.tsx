@@ -2679,8 +2679,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             if (!cellValue.allowOverlay && cellValue.kind !== GridCellKind.Boolean) continue;
                             let newVal: InnerGridCell | undefined = undefined;
                             if (cellValue.kind === GridCellKind.Custom) {
-                                const editor = provideEditor?.(cellValue);
-                                if (isObjectEditorCallbackResult(editor)) {
+                                const toDelete = getCellRenderer(cellValue);
+                                const editor = toDelete?.provideEditor?.(cellValue);
+                                if (toDelete?.onDelete !== undefined) {
+                                    newVal = toDelete.onDelete(cellValue);
+                                } else if (isObjectEditorCallbackResult(editor)) {
                                     newVal = editor?.deletedValue?.(cellValue);
                                 }
                             } else if (
@@ -2954,7 +2957,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             overlayID,
             focus,
             mangledOnCellsEdited,
-            provideEditor,
             getCellRenderer,
             onDelete,
             mangledCols.length,
