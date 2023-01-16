@@ -46,6 +46,7 @@ export const ResizableColumns: React.VFC = () => {
             {...defaultProps}
             getCellContent={getCellContent}
             columns={cols}
+            rowMarkers="both"
             overscrollX={200}
             overscrollY={200}
             maxColumnAutoWidth={500}
