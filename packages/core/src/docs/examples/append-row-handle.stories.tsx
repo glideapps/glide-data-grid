@@ -32,7 +32,7 @@ export const AppendRowHandle: React.VFC = () => {
     const ref = React.useRef<DataEditorRef>(null);
 
     const onClick = React.useCallback(() => {
-        void ref.current?.appendRow(3);
+        void ref.current?.appendRow(3, false);
     }, [ref]);
 
     const onRowAppended = React.useCallback(() => {
