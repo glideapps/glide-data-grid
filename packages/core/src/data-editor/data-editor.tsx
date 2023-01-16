@@ -650,6 +650,10 @@ export interface DataEditorRef {
      * Scrolls to the desired cell or location in the grid.
      */
     scrollTo: ScrollToFn;
+    /**
+     * Causes the columns in the selection to have their natural size recomputed and re-emitted as a resize event.
+     */
+    remeasureColumns: (cols: CompactSelection) => void;
 }
 
 const loadingCell: GridCell = {
@@ -1922,9 +1926,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const isPrevented = React.useRef(false);
 
     const normalSizeColumn = React.useCallback(
-        async (col: number): Promise<void> => {
+        async (col: number, force: boolean = false): Promise<void> => {
             if (
-                mouseDownData.current?.wasDoubleClick === true &&
+                (mouseDownData.current?.wasDoubleClick === true || force) &&
                 getCellsForSelection !== undefined &&
                 onColumnResize !== undefined
             ) {
@@ -3421,8 +3425,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             },
             scrollTo,
+            remeasureColumns: cols => {
+                for (const col of cols) {
+                    void normalSizeColumn(col + rowMarkerOffset, true);
+                }
+            },
         }),
-        [appendRow, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
+        [appendRow, normalSizeColumn, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
     );
 
     const [selCol, selRow] = currentCell ?? [];

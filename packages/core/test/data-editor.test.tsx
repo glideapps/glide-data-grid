@@ -1188,7 +1188,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith([2, 2], expect.anything());
     });
 
-    test.only("Delete custom", async () => {
+    test("Delete custom", async () => {
         const spy = jest.fn();
 
         jest.useFakeTimers();
@@ -2735,6 +2735,20 @@ describe("data-editor", () => {
             clientX: 310,
             clientY: 16,
         });
+
+        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 50, 1, 50);
+    });
+
+    test("Auto Resize Column Ref", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<EventedDataEditor {...basicProps} ref={ref} onColumnResize={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        ref.current?.remeasureColumns(CompactSelection.fromSingleSelection(1));
 
         expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 50, 1, 50);
     });
