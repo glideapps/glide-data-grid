@@ -698,7 +698,7 @@ export function drawHeader(
         if (checked !== true) {
             ctx.globalAlpha = hoverAmount;
         }
-        drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined);
+        drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined, 18);
         if (checked !== true) {
             ctx.globalAlpha = 1;
         }

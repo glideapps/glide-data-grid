@@ -684,7 +684,10 @@ export function drawMarkerRowCell(
             y,
             drawHandle ? width - offsetAmount : width,
             height,
-            true
+            true,
+            undefined,
+            undefined,
+            18
         );
         if (drawHandle) {
             ctx.globalAlpha = hoverAmount;
