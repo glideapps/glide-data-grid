@@ -1372,6 +1372,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
 
                     const scrollBounds = canvas.getBoundingClientRect();
+                    const scale = scrollBounds.width / canvas.offsetWidth;
 
                     if (desiredX !== undefined) {
                         targetRect = {
@@ -1405,10 +1406,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             trailingRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
                         }
 
-                        let sLeft = frozenWidth + scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
+                        // scrollBounds is already scaled
+                        let sLeft = frozenWidth * scale + scrollBounds.left + rowMarkerOffset * rowMarkerWidth * scale;
                         let sRight = scrollBounds.right;
-                        let sTop = scrollBounds.top + totalHeaderHeight;
-                        let sBottom = scrollBounds.bottom - trailingRowHeight;
+                        let sTop = scrollBounds.top + totalHeaderHeight * scale;
+                        let sBottom = scrollBounds.bottom - trailingRowHeight * scale;
 
                         const minx = targetRect.width + paddingX * 2;
                         switch (options?.hAlign) {
@@ -1457,6 +1459,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }
 
                         if (scrollX !== 0 || scrollY !== 0) {
+                            // Remove scaling as scrollTo method is unaffected by transform scale.
+                            if (scale !== 1) {
+                                scrollX /= scale
+                                scrollY /= scale
+                            }
                             scrollRef.current.scrollTo(
                                 scrollX + scrollRef.current.scrollLeft,
                                 scrollY + scrollRef.current.scrollTop
