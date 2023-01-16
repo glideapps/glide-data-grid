@@ -22404,7 +22404,7 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle) {
   if (markerKind !== "number" && checkedboxAlpha > 0) {
     ctx.globalAlpha = checkedboxAlpha;
     const offsetAmount = 7 * (checked ? hoverAmount : 1);
-    drawCheckbox(ctx, theme, checked, drawHandle ? x + offsetAmount : x, y, drawHandle ? width - offsetAmount : width, height, true);
+    drawCheckbox(ctx, theme, checked, drawHandle ? x + offsetAmount : x, y, drawHandle ? width - offsetAmount : width, height, true, undefined, undefined, 18);
 
     if (drawHandle) {
       ctx.globalAlpha = hoverAmount;
@@ -24453,7 +24453,7 @@ function drawHeader(ctx, x, y, width, height, c, selected, theme, isHovered, has
       ctx.globalAlpha = hoverAmount;
     }
 
-    (0,data_grid_lib/* drawCheckbox */._u)(ctx, theme, checked, x, y, width, height, false, undefined, undefined);
+    (0,data_grid_lib/* drawCheckbox */._u)(ctx, theme, checked, x, y, width, height, false, undefined, undefined, 18);
 
     if (checked !== true) {
       ctx.globalAlpha = 1;
@@ -30086,7 +30086,7 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle) {
   if (markerKind !== "number" && checkedboxAlpha > 0) {
     ctx.globalAlpha = checkedboxAlpha;
     const offsetAmount = 7 * (checked ? hoverAmount : 1);
-    drawCheckbox(ctx, theme, checked, drawHandle ? x + offsetAmount : x, y, drawHandle ? width - offsetAmount : width, height, true);
+    drawCheckbox(ctx, theme, checked, drawHandle ? x + offsetAmount : x, y, drawHandle ? width - offsetAmount : width, height, true, void 0, void 0, 18);
 
     if (drawHandle) {
       ctx.globalAlpha = hoverAmount;
@@ -31628,7 +31628,7 @@ function drawHeader(ctx, x, y, width, height, c, selected, theme, isHovered, has
       ctx.globalAlpha = hoverAmount;
     }
 
-    drawCheckbox(ctx, theme, checked, x, y, width, height, false, void 0, void 0);
+    drawCheckbox(ctx, theme, checked, x, y, width, height, false, void 0, void 0, 18);
 
     if (checked !== true) {
       ctx.globalAlpha = 1;
@@ -39392,4 +39392,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.ad32865f.iframe.bundle.js.map
+//# sourceMappingURL=main.2a3ca045.iframe.bundle.js.map
