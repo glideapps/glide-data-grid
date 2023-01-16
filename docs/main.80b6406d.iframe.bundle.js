@@ -19359,9 +19359,14 @@ const DataEditorImpl = (p, forwardedRef) => {
             let newVal = undefined;
 
             if (cellValue.kind === data_grid_types/* GridCellKind.Custom */.p6.Custom) {
-              const editor = provideEditor === null || provideEditor === void 0 ? void 0 : provideEditor(cellValue);
+              var _toDelete$provideEdit;
 
-              if ((0,data_grid_types/* isObjectEditorCallbackResult */.DP)(editor)) {
+              const toDelete = getCellRenderer(cellValue);
+              const editor = toDelete === null || toDelete === void 0 ? void 0 : (_toDelete$provideEdit = toDelete.provideEditor) === null || _toDelete$provideEdit === void 0 ? void 0 : _toDelete$provideEdit.call(toDelete, cellValue);
+
+              if ((toDelete === null || toDelete === void 0 ? void 0 : toDelete.onDelete) !== undefined) {
+                newVal = toDelete.onDelete(cellValue);
+              } else if ((0,data_grid_types/* isObjectEditorCallbackResult */.DP)(editor)) {
                 var _editor$deletedValue;
 
                 newVal = editor === null || editor === void 0 ? void 0 : (_editor$deletedValue = editor.deletedValue) === null || _editor$deletedValue === void 0 ? void 0 : _editor$deletedValue.call(editor, cellValue);
@@ -19603,7 +19608,7 @@ const DataEditorImpl = (p, forwardedRef) => {
     };
 
     void fn();
-  }, [onKeyDownIn, overlay, gridSelection, keybindings.selectAll, keybindings.search, keybindings.selectColumn, keybindings.selectRow, keybindings.downFill, keybindings.rightFill, keybindings.pageDown, keybindings.pageUp, keybindings.first, keybindings.last, keybindings.clear, columnSelect, rowSelect, getCellContent, rowMarkerOffset, updateSelectedCell, setGridSelection, onSelectionCleared, columnsIn.length, rows, overlayID, focus, mangledOnCellsEdited, provideEditor, getCellRenderer, onDelete, mangledCols.length, setSelectedColumns, setSelectedRows, showTrailingBlankRow, getCustomNewRowTargetColumn, appendRow, onCellActivated, reselect, fillDown, getMangledCellContent, adjustSelection, rangeSelect, lastRowSticky]);
+  }, [onKeyDownIn, overlay, gridSelection, keybindings.selectAll, keybindings.search, keybindings.selectColumn, keybindings.selectRow, keybindings.downFill, keybindings.rightFill, keybindings.pageDown, keybindings.pageUp, keybindings.first, keybindings.last, keybindings.clear, columnSelect, rowSelect, getCellContent, rowMarkerOffset, updateSelectedCell, setGridSelection, onSelectionCleared, columnsIn.length, rows, overlayID, focus, mangledOnCellsEdited, getCellRenderer, onDelete, mangledCols.length, setSelectedColumns, setSelectedRows, showTrailingBlankRow, getCustomNewRowTargetColumn, appendRow, onCellActivated, reselect, fillDown, getMangledCellContent, adjustSelection, rangeSelect, lastRowSticky]);
   const onContextMenu = react.useCallback((args, preventDefault) => {
     const adjustedCol = args.location[0] - rowMarkerOffset;
 
@@ -38511,7 +38516,7 @@ var DataEditorImpl = (p, forwardedRef) => {
       }
 
       function deleteRange(r) {
-        var _a3, _b3, _c3;
+        var _a3, _b3, _c3, _d3;
 
         focus();
         const editList = [];
@@ -38523,14 +38528,17 @@ var DataEditorImpl = (p, forwardedRef) => {
             let newVal = void 0;
 
             if (cellValue.kind === GridCellKind.Custom) {
-              const editor = provideEditor == null ? void 0 : provideEditor(cellValue);
+              const toDelete = getCellRenderer(cellValue);
+              const editor = (_a3 = toDelete == null ? void 0 : toDelete.provideEditor) == null ? void 0 : _a3.call(toDelete, cellValue);
 
-              if (isObjectEditorCallbackResult(editor)) {
-                newVal = (_a3 = editor == null ? void 0 : editor.deletedValue) == null ? void 0 : _a3.call(editor, cellValue);
+              if ((toDelete == null ? void 0 : toDelete.onDelete) !== void 0) {
+                newVal = toDelete.onDelete(cellValue);
+              } else if (isObjectEditorCallbackResult(editor)) {
+                newVal = (_b3 = editor == null ? void 0 : editor.deletedValue) == null ? void 0 : _b3.call(editor, cellValue);
               }
             } else if (isEditableGridCell(cellValue) && cellValue.allowOverlay || cellValue.kind === GridCellKind.Boolean) {
               const toDelete = getCellRenderer(cellValue);
-              newVal = (_b3 = toDelete == null ? void 0 : toDelete.onDelete) == null ? void 0 : _b3.call(toDelete, cellValue);
+              newVal = (_c3 = toDelete == null ? void 0 : toDelete.onDelete) == null ? void 0 : _c3.call(toDelete, cellValue);
             }
 
             if (newVal !== void 0 && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
@@ -38543,7 +38551,7 @@ var DataEditorImpl = (p, forwardedRef) => {
         }
 
         mangledOnCellsEdited(editList);
-        (_c3 = gridRef.current) == null ? void 0 : _c3.damage(editList.map(x => ({
+        (_d3 = gridRef.current) == null ? void 0 : _d3.damage(editList.map(x => ({
           cell: x.location
         })));
       }
@@ -38759,7 +38767,7 @@ var DataEditorImpl = (p, forwardedRef) => {
     };
 
     void fn();
-  }, [onKeyDownIn, overlay, gridSelection, keybindings.selectAll, keybindings.search, keybindings.selectColumn, keybindings.selectRow, keybindings.downFill, keybindings.rightFill, keybindings.pageDown, keybindings.pageUp, keybindings.first, keybindings.last, keybindings.clear, columnSelect, rowSelect, getCellContent, rowMarkerOffset, updateSelectedCell, setGridSelection, onSelectionCleared, columnsIn.length, rows, overlayID, focus, mangledOnCellsEdited, provideEditor, getCellRenderer, onDelete, mangledCols.length, setSelectedColumns, setSelectedRows, showTrailingBlankRow, getCustomNewRowTargetColumn, appendRow, onCellActivated, reselect, fillDown, getMangledCellContent, adjustSelection, rangeSelect, lastRowSticky]);
+  }, [onKeyDownIn, overlay, gridSelection, keybindings.selectAll, keybindings.search, keybindings.selectColumn, keybindings.selectRow, keybindings.downFill, keybindings.rightFill, keybindings.pageDown, keybindings.pageUp, keybindings.first, keybindings.last, keybindings.clear, columnSelect, rowSelect, getCellContent, rowMarkerOffset, updateSelectedCell, setGridSelection, onSelectionCleared, columnsIn.length, rows, overlayID, focus, mangledOnCellsEdited, getCellRenderer, onDelete, mangledCols.length, setSelectedColumns, setSelectedRows, showTrailingBlankRow, getCustomNewRowTargetColumn, appendRow, onCellActivated, reselect, fillDown, getMangledCellContent, adjustSelection, rangeSelect, lastRowSticky]);
   const onContextMenu = react__WEBPACK_IMPORTED_MODULE_0__.useCallback((args, preventDefault) => {
     const adjustedCol = args.location[0] - rowMarkerOffset;
 
@@ -39366,4 +39374,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.699dc603.iframe.bundle.js.map
+//# sourceMappingURL=main.80b6406d.iframe.bundle.js.map
