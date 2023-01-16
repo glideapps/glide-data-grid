@@ -26417,7 +26417,8 @@ const DataGrid = (p, forwardedRef) => {
       }
     }
 
-    setHoveredOnEdge(args.kind === data_grid_types/* headerKind */.aZ && args.isEdge && allowResize === true);
+    const notRowMarkerCol = args.location[0] >= (firstColAccessible ? 0 : 1);
+    setHoveredOnEdge(args.kind === data_grid_types/* headerKind */.aZ && args.isEdge && notRowMarkerCol && allowResize === true);
 
     if (fillHandle && selection.current !== undefined) {
       const [col, row] = selection.current.cell;
@@ -26432,7 +26433,7 @@ const DataGrid = (p, forwardedRef) => {
 
     onMouseMoveRaw === null || onMouseMoveRaw === void 0 ? void 0 : onMouseMoveRaw(ev);
     onMouseMove(args);
-  }, [getMouseArgsForPosition, allowResize, fillHandle, selection, onMouseMoveRaw, onMouseMove, onItemHovered, getCellContent, getCellRenderer, damageInternal, getBoundsForItem]);
+  }, [getMouseArgsForPosition, allowResize, fillHandle, selection, onMouseMoveRaw, onMouseMove, onItemHovered, getCellContent, getCellRenderer, damageInternal, getBoundsForItem, firstColAccessible]);
   (0,utils/* useEventListener */.OR)("mousemove", onMouseMoveImpl, window, true);
   const onKeyDownImpl = react.useCallback(event => {
     const canvas = ref.current;
@@ -33578,7 +33579,8 @@ var DataGrid = (p, forwardedRef) => {
       }
     }
 
-    setHoveredOnEdge(args.kind === headerKind && args.isEdge && allowResize === true);
+    const notRowMarkerCol = args.location[0] >= (firstColAccessible ? 0 : 1);
+    setHoveredOnEdge(args.kind === headerKind && args.isEdge && notRowMarkerCol && allowResize === true);
 
     if (fillHandle && selection.current !== void 0) {
       const [col, row] = selection.current.cell;
@@ -33593,7 +33595,7 @@ var DataGrid = (p, forwardedRef) => {
 
     onMouseMoveRaw == null ? void 0 : onMouseMoveRaw(ev);
     onMouseMove(args);
-  }, [getMouseArgsForPosition, allowResize, fillHandle, selection, onMouseMoveRaw, onMouseMove, onItemHovered, getCellContent, getCellRenderer, damageInternal, getBoundsForItem]);
+  }, [getMouseArgsForPosition, allowResize, fillHandle, selection, onMouseMoveRaw, onMouseMove, onItemHovered, getCellContent, getCellRenderer, damageInternal, getBoundsForItem, firstColAccessible]);
   useEventListener("mousemove", onMouseMoveImpl, window, true);
   const onKeyDownImpl = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(event => {
     const canvas = ref.current;
@@ -39393,4 +39395,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.077f516b.iframe.bundle.js.map
+//# sourceMappingURL=main.422ce1b7.iframe.bundle.js.map
