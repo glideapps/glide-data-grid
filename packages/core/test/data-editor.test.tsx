@@ -253,7 +253,11 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         toJSON: () => "",
     });
     Object.defineProperties(HTMLElement.prototype, {
-        offsetWidth: { get() { return 1000; } }
+        offsetWidth: {
+            get() {
+                return 1000;
+            },
+        },
     });
     Image.prototype.decode = jest.fn();
 });
@@ -3957,6 +3961,33 @@ describe("data-editor", () => {
                 },
                 rangeStack: [],
             },
+        });
+    });
+
+    test("Clear selection when suddenly out of range", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        const { rerender } = render(<EventedDataEditor {...basicProps} rows={10} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 5 + 16,
+        });
+
+        jest.runAllTimers();
+        spy.mockClear();
+
+        rerender(<EventedDataEditor {...basicProps} rows={1} onGridSelectionChange={spy} />);
+
+        jest.runAllTimers();
+        expect(spy).toBeCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+            current: undefined,
         });
     });
 

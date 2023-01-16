@@ -24,13 +24,20 @@ export default {
 export const OneMillionRows: React.VFC = () => {
     const { cols, getCellContent } = useMockDataGenerator(6);
 
+    const [rows, setRows] = React.useState(1_000_000);
+
+    React.useEffect(() => {
+        window.setTimeout(() => setRows(5), 3000);
+    }, []);
+
     return (
         <DataEditor
             {...defaultProps}
+            height="100%"
             getCellContent={getCellContent}
             columns={cols}
             rowHeight={31}
-            rows={1_000_000}
+            rows={rows}
             rowMarkers="number"
         />
     );

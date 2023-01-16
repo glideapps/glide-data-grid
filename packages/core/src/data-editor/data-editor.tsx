@@ -1461,8 +1461,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         if (scrollX !== 0 || scrollY !== 0) {
                             // Remove scaling as scrollTo method is unaffected by transform scale.
                             if (scale !== 1) {
-                                scrollX /= scale
-                                scrollY /= scale
+                                scrollX /= scale;
+                                scrollY /= scale;
                             }
                             scrollRef.current.scrollTo(
                                 scrollX + scrollRef.current.scrollLeft,
@@ -3325,6 +3325,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         }
         hasJustScrolled.current = false; //only allow skipping a single scroll
     }, [outCol, outRow]);
+
+    const selectionOutOfBounds =
+        gridSelection.current !== undefined &&
+        (gridSelection.current.cell[0] >= columnsIn.length || gridSelection.current.cell[1] >= mangledRows);
+    React.useLayoutEffect(() => {
+        if (selectionOutOfBounds) {
+            setGridSelection(emptyGridSelection, false);
+        }
+    }, [selectionOutOfBounds, setGridSelection]);
 
     const disabledRows = React.useMemo(() => {
         if (showTrailingBlankRow === true && trailingRowOptions?.tint === true) {
