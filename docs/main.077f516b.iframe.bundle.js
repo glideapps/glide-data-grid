@@ -12071,7 +12071,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Resizable columns\"\n                    description={\n                        <>\n                            <Description>\n                                You can resize columns by dragging their edges, as long as you respond to the{\" \"}\n                                <PropName>onColumnResize</PropName> prop.\n                            </Description>\n                            <MoreInfo>\n                                By setting the <PropName>overscrollX</PropName> property extra space can be allocated at\n                                the end of the grid to allow for easier resizing of the final column. You can highlight\n                                multiple columns to resize them all at once.\n                            </MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ResizableColumns: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(60);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            overscrollX={200}\n            overscrollY={200}\n            maxColumnAutoWidth={500}\n            maxColumnWidth={2000}\n            rows={50}\n            scaleToRem={true}\n            theme={{\n                baseFontStyle: \"0.8125rem\",\n                headerFontStyle: \"600 0.8125rem\",\n                editorFontSize: \"0.8125rem\",\n            }}\n            onColumnResize={onColumnResize}\n        />\n    );\n};\n";
+var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Resizable columns\"\n                    description={\n                        <>\n                            <Description>\n                                You can resize columns by dragging their edges, as long as you respond to the{\" \"}\n                                <PropName>onColumnResize</PropName> prop.\n                            </Description>\n                            <MoreInfo>\n                                By setting the <PropName>overscrollX</PropName> property extra space can be allocated at\n                                the end of the grid to allow for easier resizing of the final column. You can highlight\n                                multiple columns to resize them all at once.\n                            </MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ResizableColumns: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(60);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            rowMarkers=\"both\"\n            overscrollX={200}\n            overscrollY={200}\n            maxColumnAutoWidth={500}\n            maxColumnWidth={2000}\n            rows={50}\n            scaleToRem={true}\n            theme={{\n                baseFontStyle: \"0.8125rem\",\n                headerFontStyle: \"600 0.8125rem\",\n                editorFontSize: \"0.8125rem\",\n            }}\n            onColumnResize={onColumnResize}\n        />\n    );\n};\n";
 var __LOCATIONS_MAP__ = {
   "ResizableColumns": {
     "startLoc": {
@@ -12080,7 +12080,7 @@ var __LOCATIONS_MAP__ = {
     },
     "endLoc": {
       "col": 1,
-      "line": 63
+      "line": 64
     },
     "startBody": {
       "col": 43,
@@ -12088,7 +12088,7 @@ var __LOCATIONS_MAP__ = {
     },
     "endBody": {
       "col": 1,
-      "line": 63
+      "line": 64
     }
   }
 };
@@ -12099,7 +12099,7 @@ var __LOCATIONS_MAP__ = {
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   parameters: {
     "storySource": {
-      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Resizable columns\"\n                    description={\n                        <>\n                            <Description>\n                                You can resize columns by dragging their edges, as long as you respond to the{\" \"}\n                                <PropName>onColumnResize</PropName> prop.\n                            </Description>\n                            <MoreInfo>\n                                By setting the <PropName>overscrollX</PropName> property extra space can be allocated at\n                                the end of the grid to allow for easier resizing of the final column. You can highlight\n                                multiple columns to resize them all at once.\n                            </MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ResizableColumns: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(60);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            overscrollX={200}\n            overscrollY={200}\n            maxColumnAutoWidth={500}\n            maxColumnWidth={2000}\n            rows={50}\n            scaleToRem={true}\n            theme={{\n                baseFontStyle: \"0.8125rem\",\n                headerFontStyle: \"600 0.8125rem\",\n                editorFontSize: \"0.8125rem\",\n            }}\n            onColumnResize={onColumnResize}\n        />\n    );\n};\n",
+      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Resizable columns\"\n                    description={\n                        <>\n                            <Description>\n                                You can resize columns by dragging their edges, as long as you respond to the{\" \"}\n                                <PropName>onColumnResize</PropName> prop.\n                            </Description>\n                            <MoreInfo>\n                                By setting the <PropName>overscrollX</PropName> property extra space can be allocated at\n                                the end of the grid to allow for easier resizing of the final column. You can highlight\n                                multiple columns to resize them all at once.\n                            </MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ResizableColumns: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize } = useMockDataGenerator(60);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            rowMarkers=\"both\"\n            overscrollX={200}\n            overscrollY={200}\n            maxColumnAutoWidth={500}\n            maxColumnWidth={2000}\n            rows={50}\n            scaleToRem={true}\n            theme={{\n                baseFontStyle: \"0.8125rem\",\n                headerFontStyle: \"600 0.8125rem\",\n                editorFontSize: \"0.8125rem\",\n            }}\n            onColumnResize={onColumnResize}\n        />\n    );\n};\n",
       "locationsMap": {
         "resizable-columns": {
           "startLoc": {
@@ -12108,7 +12108,7 @@ var __LOCATIONS_MAP__ = {
           },
           "endLoc": {
             "col": 1,
-            "line": 63
+            "line": 64
           },
           "startBody": {
             "col": 43,
@@ -12116,7 +12116,7 @@ var __LOCATIONS_MAP__ = {
           },
           "endBody": {
             "col": 1,
-            "line": 63
+            "line": 64
           }
         }
       }
@@ -12137,6 +12137,7 @@ const ResizableColumns = () => {
   return react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_data_editor__WEBPACK_IMPORTED_MODULE_3__/* .DataEditor */ .N, _extends({}, _data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .defaultProps */ .lG, {
     getCellContent: getCellContent,
     columns: cols,
+    rowMarkers: "both",
     overscrollX: 200,
     overscrollY: 200,
     maxColumnAutoWidth: 500,
@@ -39392,4 +39393,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.2a3ca045.iframe.bundle.js.map
+//# sourceMappingURL=main.077f516b.iframe.bundle.js.map
