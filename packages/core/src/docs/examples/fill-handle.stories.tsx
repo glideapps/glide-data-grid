@@ -73,6 +73,7 @@ export const FillHandle: React.VFC = () => {
             rowMarkers={"both"}
             onPaste={true}
             fillHandle={true}
+            keybindings={{ downFill: true, rightFill: true }}
             onCellEdited={setCellValue}
             trailingRowOptions={{
                 sticky: true,
