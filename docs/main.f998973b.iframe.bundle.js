@@ -8756,6 +8756,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+var __STORY__ = "import React from \"react\";\nimport { useEventListener } from \"../../common/utils\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    KeyName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport type { GridSelection } from \"../../data-grid/data-grid-types\";\nimport { CompactSelection } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Search is easy\"\n                    description={\n                        <>\n                            <Description>\n                                Search for any data in your grid by setting <PropName>showSearch</PropName>.\n                            </Description>\n                            <MoreInfo>\n                                In this story, <KeyName>Ctrl</KeyName> (<KeyName>⌘</KeyName> on Mac) +{\" \"}\n                                <KeyName>f</KeyName> toggles the search bar. Make sure you&apos;re focused on the Data\n                                Grid!\n                            </MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const BuiltInSearch: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();\n\n    const [showSearch, setShowSearch] = React.useState(false);\n\n    const [selection, setSelection] = React.useState<GridSelection>({\n        rows: CompactSelection.empty(),\n        columns: CompactSelection.empty(),\n    });\n\n    useEventListener(\n        \"keydown\",\n        React.useCallback(event => {\n            if ((event.ctrlKey || event.metaKey) && event.code === \"KeyF\") {\n                setShowSearch(cv => !cv);\n                event.stopPropagation();\n                event.preventDefault();\n            }\n        }, []),\n        window,\n        false,\n        true\n    );\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            getCellsForSelection={true}\n            gridSelection={selection}\n            onGridSelectionChange={setSelection}\n            columns={cols}\n            onCellEdited={setCellValue}\n            onColumnResize={onColumnResize}\n            showSearch={showSearch}\n            onSearchClose={() => setShowSearch(false)}\n            rows={10_000}\n        />\n    );\n};\n";
+var __LOCATIONS_MAP__ = {
+  "BuiltInSearch": {
+    "startLoc": {
+      "col": 40,
+      "line": 44
+    },
+    "endLoc": {
+      "col": 1,
+      "line": 83
+    },
+    "startBody": {
+      "col": 40,
+      "line": 44
+    },
+    "endBody": {
+      "col": 1,
+      "line": 83
+    }
+  }
+};
 
 
 
@@ -8763,6 +8784,31 @@ function _extends() { _extends = Object.assign ? Object.assign.bind() : function
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  parameters: {
+    "storySource": {
+      "source": "import React from \"react\";\nimport { useEventListener } from \"../../common/utils\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    KeyName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport type { GridSelection } from \"../../data-grid/data-grid-types\";\nimport { CompactSelection } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Search is easy\"\n                    description={\n                        <>\n                            <Description>\n                                Search for any data in your grid by setting <PropName>showSearch</PropName>.\n                            </Description>\n                            <MoreInfo>\n                                In this story, <KeyName>Ctrl</KeyName> (<KeyName>⌘</KeyName> on Mac) +{\" \"}\n                                <KeyName>f</KeyName> toggles the search bar. Make sure you&apos;re focused on the Data\n                                Grid!\n                            </MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const BuiltInSearch: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();\n\n    const [showSearch, setShowSearch] = React.useState(false);\n\n    const [selection, setSelection] = React.useState<GridSelection>({\n        rows: CompactSelection.empty(),\n        columns: CompactSelection.empty(),\n    });\n\n    useEventListener(\n        \"keydown\",\n        React.useCallback(event => {\n            if ((event.ctrlKey || event.metaKey) && event.code === \"KeyF\") {\n                setShowSearch(cv => !cv);\n                event.stopPropagation();\n                event.preventDefault();\n            }\n        }, []),\n        window,\n        false,\n        true\n    );\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            getCellsForSelection={true}\n            gridSelection={selection}\n            onGridSelectionChange={setSelection}\n            columns={cols}\n            onCellEdited={setCellValue}\n            onColumnResize={onColumnResize}\n            showSearch={showSearch}\n            onSearchClose={() => setShowSearch(false)}\n            rows={10_000}\n        />\n    );\n};\n",
+      "locationsMap": {
+        "built-in-search": {
+          "startLoc": {
+            "col": 40,
+            "line": 44
+          },
+          "endLoc": {
+            "col": 1,
+            "line": 83
+          },
+          "startBody": {
+            "col": 40,
+            "line": 44
+          },
+          "endBody": {
+            "col": 1,
+            "line": 83
+          }
+        }
+      }
+    }
+  },
   title: "Glide-Data-Grid/DataEditor Demos",
   decorators: [Story => react__WEBPACK_IMPORTED_MODULE_0__.createElement(_stories_story_utils__WEBPACK_IMPORTED_MODULE_1__/* .SimpleThemeWrapper */ .X, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .BeautifulWrapper */ .m, {
     title: "Search is easy",
@@ -8920,12 +8966,58 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport type { GridColumn, GroupHeaderClickedEventArgs } from \"../../data-grid/data-grid-types\";\nimport { CompactSelection } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Group collapse\"\n                    description={\n                        <>\n                            <Description>\n                                Through clever usage of <PropName>onGroupHeaderClicked</PropName> you can implement\n                                group collapsing. This is a very basic version however it is possible to go much\n                                further.\n                            </Description>\n                            <MoreInfo>\n                                Cells under a certain size will not attempt to render to save some frames.\n                            </MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nfunction useCollapsableColumnGroups(cols: readonly GridColumn[]) {\n    const [collapsed, setCollapsed] = React.useState<readonly string[]>([]);\n\n    const onGroupHeaderClicked = React.useCallback(\n        (colIndex: number, args: GroupHeaderClickedEventArgs) => {\n            const group = cols[colIndex].group ?? \"\";\n            setCollapsed(cv => (cv.includes(group) ? cv.filter(g => g !== group) : [...cv, group]));\n            args.preventDefault();\n        },\n        [cols]\n    );\n\n    const [selectedColumns, setSelectedColumns] = React.useState<CompactSelection>(CompactSelection.empty());\n\n    const setCols = React.useCallback((newVal: CompactSelection, trigger: string) => {\n        if (trigger === \"group\") return;\n\n        setSelectedColumns(newVal);\n    }, []);\n\n    const columns = React.useMemo(() => {\n        return cols.map(c => {\n            if (!collapsed.includes(c.group ?? \"\"))\n                return {\n                    ...c,\n                    hasMenu: true,\n                };\n            return {\n                ...c,\n                width: 8,\n                hasMenu: true,\n            };\n        });\n    }, [collapsed, cols]);\n\n    return {\n        columns,\n        onGroupHeaderClicked,\n        selectedColumns,\n        onSelectedColumnsChange: setCols,\n    };\n}\n\nexport const ColumnGroupCollapse: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(100, true, true);\n\n    const groupHeaderArgs = useCollapsableColumnGroups(cols);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            {...groupHeaderArgs}\n            getCellContent={getCellContent}\n            groupHeaderHeight={24}\n            rows={1000}\n            rowMarkers=\"both\"\n        />\n    );\n};\n";
+var __LOCATIONS_MAP__ = {
+  "ColumnGroupCollapse": {
+    "startLoc": {
+      "col": 46,
+      "line": 85
+    },
+    "endLoc": {
+      "col": 1,
+      "line": 100
+    },
+    "startBody": {
+      "col": 46,
+      "line": 85
+    },
+    "endBody": {
+      "col": 1,
+      "line": 100
+    }
+  }
+};
 
 
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  parameters: {
+    "storySource": {
+      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport type { GridColumn, GroupHeaderClickedEventArgs } from \"../../data-grid/data-grid-types\";\nimport { CompactSelection } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Group collapse\"\n                    description={\n                        <>\n                            <Description>\n                                Through clever usage of <PropName>onGroupHeaderClicked</PropName> you can implement\n                                group collapsing. This is a very basic version however it is possible to go much\n                                further.\n                            </Description>\n                            <MoreInfo>\n                                Cells under a certain size will not attempt to render to save some frames.\n                            </MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nfunction useCollapsableColumnGroups(cols: readonly GridColumn[]) {\n    const [collapsed, setCollapsed] = React.useState<readonly string[]>([]);\n\n    const onGroupHeaderClicked = React.useCallback(\n        (colIndex: number, args: GroupHeaderClickedEventArgs) => {\n            const group = cols[colIndex].group ?? \"\";\n            setCollapsed(cv => (cv.includes(group) ? cv.filter(g => g !== group) : [...cv, group]));\n            args.preventDefault();\n        },\n        [cols]\n    );\n\n    const [selectedColumns, setSelectedColumns] = React.useState<CompactSelection>(CompactSelection.empty());\n\n    const setCols = React.useCallback((newVal: CompactSelection, trigger: string) => {\n        if (trigger === \"group\") return;\n\n        setSelectedColumns(newVal);\n    }, []);\n\n    const columns = React.useMemo(() => {\n        return cols.map(c => {\n            if (!collapsed.includes(c.group ?? \"\"))\n                return {\n                    ...c,\n                    hasMenu: true,\n                };\n            return {\n                ...c,\n                width: 8,\n                hasMenu: true,\n            };\n        });\n    }, [collapsed, cols]);\n\n    return {\n        columns,\n        onGroupHeaderClicked,\n        selectedColumns,\n        onSelectedColumnsChange: setCols,\n    };\n}\n\nexport const ColumnGroupCollapse: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(100, true, true);\n\n    const groupHeaderArgs = useCollapsableColumnGroups(cols);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            {...groupHeaderArgs}\n            getCellContent={getCellContent}\n            groupHeaderHeight={24}\n            rows={1000}\n            rowMarkers=\"both\"\n        />\n    );\n};\n",
+      "locationsMap": {
+        "column-group-collapse": {
+          "startLoc": {
+            "col": 46,
+            "line": 85
+          },
+          "endLoc": {
+            "col": 1,
+            "line": 100
+          },
+          "startBody": {
+            "col": 46,
+            "line": 85
+          },
+          "endBody": {
+            "col": 1,
+            "line": 100
+          }
+        }
+      }
+    }
+  },
   title: "Glide-Data-Grid/DataEditor Demos",
   decorators: [Story => react__WEBPACK_IMPORTED_MODULE_0__.createElement(_stories_story_utils__WEBPACK_IMPORTED_MODULE_1__/* .SimpleThemeWrapper */ .X, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .BeautifulWrapper */ .m, {
     title: "Group collapse",
@@ -9203,12 +9295,58 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport type { GridSelection } from \"../../data-grid/data-grid-types\";\nimport { CompactSelection } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <Story />\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ControlledSelection: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(30, true, true);\n\n    const [selection, setSelection] = React.useState<GridSelection>({\n        columns: CompactSelection.empty(),\n        rows: CompactSelection.empty(),\n    });\n\n    return (\n        <BeautifulWrapper\n            title=\"Controlled Selection\"\n            description={\n                <Description>\n                    The selection of the grid can be controlled via <PropName>GridSelection</PropName> and{\" \"}\n                    <PropName>onGridSelectionChange</PropName>.\n                    <input\n                        type=\"range\"\n                        min={0}\n                        max={29}\n                        value={selection.current?.cell[0] ?? 0}\n                        onChange={e => {\n                            const newCol = e.target.valueAsNumber;\n                            setSelection(cv => ({\n                                ...cv,\n                                current: {\n                                    cell: [newCol, cv.current?.cell[1] ?? 0],\n                                    range: {\n                                        x: newCol,\n                                        y: cv.current?.cell[1] ?? 0,\n                                        width: 1,\n                                        height: 1,\n                                    },\n                                    rangeStack: [],\n                                },\n                            }));\n                        }}\n                    />\n                    <input\n                        type=\"range\"\n                        min={0}\n                        max={99}\n                        value={selection.current?.cell[1] ?? 0}\n                        onChange={e => {\n                            const newRow = e.target.valueAsNumber;\n                            setSelection(cv => ({\n                                ...cv,\n                                current: {\n                                    cell: [cv.current?.cell[0] ?? 0, newRow],\n                                    range: {\n                                        x: cv.current?.cell[0] ?? 0,\n                                        y: newRow,\n                                        width: 1,\n                                        height: 1,\n                                    },\n                                    rangeStack: [],\n                                },\n                            }));\n                        }}\n                    />\n                </Description>\n            }>\n            <DataEditor\n                {...defaultProps}\n                getCellContent={getCellContent}\n                gridSelection={selection}\n                onGridSelectionChange={setSelection}\n                columns={cols}\n                rows={100}\n                rowMarkers=\"both\"\n            />\n        </BeautifulWrapper>\n    );\n};\n";
+var __LOCATIONS_MAP__ = {
+  "ControlledSelection": {
+    "startLoc": {
+      "col": 46,
+      "line": 26
+    },
+    "endLoc": {
+      "col": 1,
+      "line": 98
+    },
+    "startBody": {
+      "col": 46,
+      "line": 26
+    },
+    "endBody": {
+      "col": 1,
+      "line": 98
+    }
+  }
+};
 
 
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  parameters: {
+    "storySource": {
+      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport type { GridSelection } from \"../../data-grid/data-grid-types\";\nimport { CompactSelection } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <Story />\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ControlledSelection: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(30, true, true);\n\n    const [selection, setSelection] = React.useState<GridSelection>({\n        columns: CompactSelection.empty(),\n        rows: CompactSelection.empty(),\n    });\n\n    return (\n        <BeautifulWrapper\n            title=\"Controlled Selection\"\n            description={\n                <Description>\n                    The selection of the grid can be controlled via <PropName>GridSelection</PropName> and{\" \"}\n                    <PropName>onGridSelectionChange</PropName>.\n                    <input\n                        type=\"range\"\n                        min={0}\n                        max={29}\n                        value={selection.current?.cell[0] ?? 0}\n                        onChange={e => {\n                            const newCol = e.target.valueAsNumber;\n                            setSelection(cv => ({\n                                ...cv,\n                                current: {\n                                    cell: [newCol, cv.current?.cell[1] ?? 0],\n                                    range: {\n                                        x: newCol,\n                                        y: cv.current?.cell[1] ?? 0,\n                                        width: 1,\n                                        height: 1,\n                                    },\n                                    rangeStack: [],\n                                },\n                            }));\n                        }}\n                    />\n                    <input\n                        type=\"range\"\n                        min={0}\n                        max={99}\n                        value={selection.current?.cell[1] ?? 0}\n                        onChange={e => {\n                            const newRow = e.target.valueAsNumber;\n                            setSelection(cv => ({\n                                ...cv,\n                                current: {\n                                    cell: [cv.current?.cell[0] ?? 0, newRow],\n                                    range: {\n                                        x: cv.current?.cell[0] ?? 0,\n                                        y: newRow,\n                                        width: 1,\n                                        height: 1,\n                                    },\n                                    rangeStack: [],\n                                },\n                            }));\n                        }}\n                    />\n                </Description>\n            }>\n            <DataEditor\n                {...defaultProps}\n                getCellContent={getCellContent}\n                gridSelection={selection}\n                onGridSelectionChange={setSelection}\n                columns={cols}\n                rows={100}\n                rowMarkers=\"both\"\n            />\n        </BeautifulWrapper>\n    );\n};\n",
+      "locationsMap": {
+        "controlled-selection": {
+          "startLoc": {
+            "col": 46,
+            "line": 26
+          },
+          "endLoc": {
+            "col": 1,
+            "line": 98
+          },
+          "startBody": {
+            "col": 46,
+            "line": 26
+          },
+          "endBody": {
+            "col": 1,
+            "line": 98
+          }
+        }
+      }
+    }
+  },
   title: "Glide-Data-Grid/DataEditor Demos",
   decorators: [Story => react__WEBPACK_IMPORTED_MODULE_0__.createElement(_stories_story_utils__WEBPACK_IMPORTED_MODULE_1__/* .SimpleThemeWrapper */ .X, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(Story, null))]
 });
@@ -9847,12 +9985,58 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+var __STORY__ = "import React from \"react\";\nimport { DataEditor, DataEditorProps } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport type { Item } from \"../../data-grid/data-grid-types\";\nimport { GridCellKind } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <Story />\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\n// A few supported mime types for drag and drop into cells.\nconst SUPPORTED_IMAGE_TYPES = new Set([\"image/png\", \"image/gif\", \"image/bmp\", \"image/jpeg\"]);\n\nexport const DropEvents: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();\n\n    const [highlights, setHighlights] = React.useState<DataEditorProps[\"highlightRegions\"]>([]);\n\n    const [lastDropCell, setLastDropCell] = React.useState<Item | undefined>();\n\n    const onDrop = React.useCallback(\n        (cell: Item, dataTransfer: DataTransfer | null) => {\n            setHighlights([]);\n\n            if (dataTransfer === null) {\n                return;\n            }\n\n            const { files } = dataTransfer;\n            // This only supports one image, for simplicity.\n            if (files.length !== 1) {\n                return;\n            }\n\n            const [file] = files;\n            if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {\n                return;\n            }\n\n            const imgUrl = URL.createObjectURL(file);\n\n            setCellValue(\n                cell,\n                {\n                    kind: GridCellKind.Image,\n                    data: [imgUrl],\n                    allowOverlay: true,\n                    allowAdd: false,\n                },\n                true,\n                true\n            );\n\n            setLastDropCell(cell);\n        },\n        [setCellValue]\n    );\n\n    const onDragOverCell = React.useCallback(\n        (cell: Item, dataTransfer: DataTransfer | null) => {\n            if (dataTransfer === null) {\n                return;\n            }\n\n            const { items } = dataTransfer;\n            // This only supports one image, for simplicity.\n            if (items.length !== 1) {\n                return;\n            }\n\n            const [item] = items;\n            if (!SUPPORTED_IMAGE_TYPES.has(item.type)) {\n                return;\n            }\n\n            const [col, row] = cell;\n            if (getCellContent(cell).kind === GridCellKind.Image) {\n                setHighlights([\n                    {\n                        color: \"#44BB0022\",\n                        range: {\n                            x: col,\n                            y: row,\n                            width: 1,\n                            height: 1,\n                        },\n                    },\n                ]);\n            } else {\n                setHighlights([]);\n            }\n        },\n        [getCellContent]\n    );\n\n    const onDragLeave = React.useCallback(() => {\n        setHighlights([]);\n    }, []);\n\n    return (\n        <BeautifulWrapper\n            title=\"Drop events\"\n            description={\n                <>\n                    <Description>\n                        You can drag and drop into cells by using <PropName>onDragOverCell</PropName> and{\" \"}\n                        <PropName>onDrop</PropName>.\n                    </Description>\n\n                    <div>\n                        {lastDropCell === undefined ? (\n                            <MoreInfo>Nothing dropped, yet</MoreInfo>\n                        ) : (\n                            <>\n                                <MoreInfo>\n                                    You last dropped in cell <PropName>{JSON.stringify(lastDropCell)}</PropName>\n                                </MoreInfo>\n                            </>\n                        )}\n                    </div>\n                </>\n            }>\n            <DataEditor\n                {...defaultProps}\n                getCellContent={getCellContent}\n                columns={cols}\n                onCellEdited={setCellValue}\n                onColumnResize={onColumnResize}\n                rows={1000}\n                onDrop={onDrop}\n                onDragOverCell={onDragOverCell}\n                onDragLeave={onDragLeave}\n                highlightRegions={highlights}\n                rowMarkers=\"none\"\n            />\n        </BeautifulWrapper>\n    );\n};\n";
+var __LOCATIONS_MAP__ = {
+  "DropEvents": {
+    "startLoc": {
+      "col": 37,
+      "line": 30
+    },
+    "endLoc": {
+      "col": 1,
+      "line": 154
+    },
+    "startBody": {
+      "col": 37,
+      "line": 30
+    },
+    "endBody": {
+      "col": 1,
+      "line": 154
+    }
+  }
+};
 
 
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  parameters: {
+    "storySource": {
+      "source": "import React from \"react\";\nimport { DataEditor, DataEditorProps } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport type { Item } from \"../../data-grid/data-grid-types\";\nimport { GridCellKind } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <Story />\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\n// A few supported mime types for drag and drop into cells.\nconst SUPPORTED_IMAGE_TYPES = new Set([\"image/png\", \"image/gif\", \"image/bmp\", \"image/jpeg\"]);\n\nexport const DropEvents: React.VFC = () => {\n    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();\n\n    const [highlights, setHighlights] = React.useState<DataEditorProps[\"highlightRegions\"]>([]);\n\n    const [lastDropCell, setLastDropCell] = React.useState<Item | undefined>();\n\n    const onDrop = React.useCallback(\n        (cell: Item, dataTransfer: DataTransfer | null) => {\n            setHighlights([]);\n\n            if (dataTransfer === null) {\n                return;\n            }\n\n            const { files } = dataTransfer;\n            // This only supports one image, for simplicity.\n            if (files.length !== 1) {\n                return;\n            }\n\n            const [file] = files;\n            if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {\n                return;\n            }\n\n            const imgUrl = URL.createObjectURL(file);\n\n            setCellValue(\n                cell,\n                {\n                    kind: GridCellKind.Image,\n                    data: [imgUrl],\n                    allowOverlay: true,\n                    allowAdd: false,\n                },\n                true,\n                true\n            );\n\n            setLastDropCell(cell);\n        },\n        [setCellValue]\n    );\n\n    const onDragOverCell = React.useCallback(\n        (cell: Item, dataTransfer: DataTransfer | null) => {\n            if (dataTransfer === null) {\n                return;\n            }\n\n            const { items } = dataTransfer;\n            // This only supports one image, for simplicity.\n            if (items.length !== 1) {\n                return;\n            }\n\n            const [item] = items;\n            if (!SUPPORTED_IMAGE_TYPES.has(item.type)) {\n                return;\n            }\n\n            const [col, row] = cell;\n            if (getCellContent(cell).kind === GridCellKind.Image) {\n                setHighlights([\n                    {\n                        color: \"#44BB0022\",\n                        range: {\n                            x: col,\n                            y: row,\n                            width: 1,\n                            height: 1,\n                        },\n                    },\n                ]);\n            } else {\n                setHighlights([]);\n            }\n        },\n        [getCellContent]\n    );\n\n    const onDragLeave = React.useCallback(() => {\n        setHighlights([]);\n    }, []);\n\n    return (\n        <BeautifulWrapper\n            title=\"Drop events\"\n            description={\n                <>\n                    <Description>\n                        You can drag and drop into cells by using <PropName>onDragOverCell</PropName> and{\" \"}\n                        <PropName>onDrop</PropName>.\n                    </Description>\n\n                    <div>\n                        {lastDropCell === undefined ? (\n                            <MoreInfo>Nothing dropped, yet</MoreInfo>\n                        ) : (\n                            <>\n                                <MoreInfo>\n                                    You last dropped in cell <PropName>{JSON.stringify(lastDropCell)}</PropName>\n                                </MoreInfo>\n                            </>\n                        )}\n                    </div>\n                </>\n            }>\n            <DataEditor\n                {...defaultProps}\n                getCellContent={getCellContent}\n                columns={cols}\n                onCellEdited={setCellValue}\n                onColumnResize={onColumnResize}\n                rows={1000}\n                onDrop={onDrop}\n                onDragOverCell={onDragOverCell}\n                onDragLeave={onDragLeave}\n                highlightRegions={highlights}\n                rowMarkers=\"none\"\n            />\n        </BeautifulWrapper>\n    );\n};\n",
+      "locationsMap": {
+        "drop-events": {
+          "startLoc": {
+            "col": 37,
+            "line": 30
+          },
+          "endLoc": {
+            "col": 1,
+            "line": 154
+          },
+          "startBody": {
+            "col": 37,
+            "line": 30
+          },
+          "endBody": {
+            "col": 1,
+            "line": 154
+          }
+        }
+      }
+    }
+  },
   title: "Glide-Data-Grid/DataEditor Demos",
   decorators: [Story => react__WEBPACK_IMPORTED_MODULE_0__.createElement(_stories_story_utils__WEBPACK_IMPORTED_MODULE_1__/* .SimpleThemeWrapper */ .X, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(Story, null))]
 });
@@ -10345,12 +10529,58 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+var __STORY__ = "import React from \"react\";\nimport { DataEditor, DataEditorProps } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport type { GridSelection } from \"../../data-grid/data-grid-types\";\nimport { CompactSelection } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"HighlightCells\"\n                    description={\n                        <Description>\n                            The <PropName>highlightRegions</PropName> prop can be set to provide additional hinting or\n                            context for the current selection.\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const HighlightCells: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(100);\n\n    const [gridSelection, setGridSelection] = React.useState<GridSelection>({\n        columns: CompactSelection.empty(),\n        rows: CompactSelection.empty(),\n    });\n\n    const highlights = React.useMemo<DataEditorProps[\"highlightRegions\"]>(() => {\n        if (gridSelection.current === undefined) return undefined;\n        const [col, row] = gridSelection.current.cell;\n        return [\n            {\n                color: \"#44BB0022\",\n                range: {\n                    x: col + 2,\n                    y: row,\n                    width: 10,\n                    height: 10,\n                },\n                style: \"solid\",\n            },\n            {\n                color: \"#b000b021\",\n                range: {\n                    x: col,\n                    y: row + 2,\n                    width: 1,\n                    height: 1,\n                },\n            },\n        ];\n    }, [gridSelection]);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            rowMarkers=\"both\"\n            freezeColumns={1}\n            highlightRegions={highlights}\n            gridSelection={gridSelection}\n            onGridSelectionChange={setGridSelection}\n            getCellContent={getCellContent}\n            columns={cols}\n            verticalBorder={c => c > 0}\n            rows={1000}\n        />\n    );\n};\n";
+var __LOCATIONS_MAP__ = {
+  "HighlightCells": {
+    "startLoc": {
+      "col": 41,
+      "line": 35
+    },
+    "endLoc": {
+      "col": 1,
+      "line": 83
+    },
+    "startBody": {
+      "col": 41,
+      "line": 35
+    },
+    "endBody": {
+      "col": 1,
+      "line": 83
+    }
+  }
+};
 
 
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  parameters: {
+    "storySource": {
+      "source": "import React from \"react\";\nimport { DataEditor, DataEditorProps } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport type { GridSelection } from \"../../data-grid/data-grid-types\";\nimport { CompactSelection } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"HighlightCells\"\n                    description={\n                        <Description>\n                            The <PropName>highlightRegions</PropName> prop can be set to provide additional hinting or\n                            context for the current selection.\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const HighlightCells: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(100);\n\n    const [gridSelection, setGridSelection] = React.useState<GridSelection>({\n        columns: CompactSelection.empty(),\n        rows: CompactSelection.empty(),\n    });\n\n    const highlights = React.useMemo<DataEditorProps[\"highlightRegions\"]>(() => {\n        if (gridSelection.current === undefined) return undefined;\n        const [col, row] = gridSelection.current.cell;\n        return [\n            {\n                color: \"#44BB0022\",\n                range: {\n                    x: col + 2,\n                    y: row,\n                    width: 10,\n                    height: 10,\n                },\n                style: \"solid\",\n            },\n            {\n                color: \"#b000b021\",\n                range: {\n                    x: col,\n                    y: row + 2,\n                    width: 1,\n                    height: 1,\n                },\n            },\n        ];\n    }, [gridSelection]);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            rowMarkers=\"both\"\n            freezeColumns={1}\n            highlightRegions={highlights}\n            gridSelection={gridSelection}\n            onGridSelectionChange={setGridSelection}\n            getCellContent={getCellContent}\n            columns={cols}\n            verticalBorder={c => c > 0}\n            rows={1000}\n        />\n    );\n};\n",
+      "locationsMap": {
+        "highlight-cells": {
+          "startLoc": {
+            "col": 41,
+            "line": 35
+          },
+          "endLoc": {
+            "col": 1,
+            "line": 83
+          },
+          "startBody": {
+            "col": 41,
+            "line": 35
+          },
+          "endBody": {
+            "col": 1,
+            "line": 83
+          }
+        }
+      }
+    }
+  },
   title: "Glide-Data-Grid/DataEditor Demos",
   decorators: [Story => react__WEBPACK_IMPORTED_MODULE_0__.createElement(_stories_story_utils__WEBPACK_IMPORTED_MODULE_1__/* .SimpleThemeWrapper */ .X, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .BeautifulWrapper */ .m, {
     title: "HighlightCells",
@@ -11792,12 +12022,58 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+var __STORY__ = "import React from \"react\";\nimport { DataEditor, DataEditorRef } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    useMockDataGenerator,\n    KeyName,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport type { Item } from \"../../data-grid/data-grid-types\";\nimport { GridCellKind } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <Story />\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nlet num: number = 1;\nfunction rand(): number {\n    return (num = (num * 16_807) % 2_147_483_647);\n}\n\nexport const RapidUpdates: React.VFC = () => {\n    const { cols, getCellContent, setCellValueRaw } = useMockDataGenerator(100);\n\n    const ref = React.useRef<DataEditorRef>(null);\n\n    const countRef = React.useRef(0);\n    const displayCountRef = React.useRef<HTMLElement>(null);\n\n    React.useEffect(() => {\n        let rafID = 0;\n\n        const sendUpdate = () => {\n            const cells: {\n                cell: Item;\n            }[] = [];\n            const now = performance.now();\n            for (let x = 0; x < 5000; x++) {\n                const col = Math.max(10, rand() % 100);\n                const row = rand() % 10_000;\n\n                setCellValueRaw([col, row], {\n                    kind: GridCellKind.Text,\n                    data: x.toString(),\n                    displayData: `${x}k`,\n                    themeOverride:\n                        x % 5 !== 0\n                            ? {\n                                  bgCell: \"#f2fff4\",\n                                  textDark: \"#00d41c\",\n                              }\n                            : {\n                                  bgCell: \"#fff6f6\",\n                                  textDark: \"#d40000\",\n                              },\n                    allowOverlay: true,\n                    lastUpdated: now,\n                });\n                cells.push({ cell: [col, row] });\n            }\n            countRef.current += 5000;\n            if (displayCountRef.current !== null) {\n                displayCountRef.current.textContent = `${countRef.current}`;\n            }\n\n            ref.current?.updateCells(cells);\n\n            rafID = window.requestAnimationFrame(sendUpdate);\n        };\n\n        sendUpdate();\n\n        return () => {\n            cancelAnimationFrame(rafID);\n        };\n    }, [setCellValueRaw]);\n\n    return (\n        <BeautifulWrapper\n            title=\"Rapid updating\"\n            description={\n                <>\n                    <Description>\n                        Data grid can support many thousands of updates per seconds. The data grid can easily update\n                        data faster than a human can read it, more importantly the faster the data grid can update, the\n                        more time your code can spend doing more valuable work.\n                    </Description>\n                    <MoreInfo>\n                        Updates processed: <KeyName ref={displayCountRef} /> We could do this faster but we wrote a\n                        really crappy data store for this demo which is actually slowing down the data grid.\n                    </MoreInfo>\n                </>\n            }>\n            <DataEditor {...defaultProps} ref={ref} getCellContent={getCellContent} columns={cols} rows={10_000} />\n        </BeautifulWrapper>\n    );\n};\n";
+var __LOCATIONS_MAP__ = {
+  "RapidUpdates": {
+    "startLoc": {
+      "col": 39,
+      "line": 32
+    },
+    "endLoc": {
+      "col": 1,
+      "line": 107
+    },
+    "startBody": {
+      "col": 39,
+      "line": 32
+    },
+    "endBody": {
+      "col": 1,
+      "line": 107
+    }
+  }
+};
 
 
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  parameters: {
+    "storySource": {
+      "source": "import React from \"react\";\nimport { DataEditor, DataEditorRef } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    useMockDataGenerator,\n    KeyName,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport type { Item } from \"../../data-grid/data-grid-types\";\nimport { GridCellKind } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <Story />\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nlet num: number = 1;\nfunction rand(): number {\n    return (num = (num * 16_807) % 2_147_483_647);\n}\n\nexport const RapidUpdates: React.VFC = () => {\n    const { cols, getCellContent, setCellValueRaw } = useMockDataGenerator(100);\n\n    const ref = React.useRef<DataEditorRef>(null);\n\n    const countRef = React.useRef(0);\n    const displayCountRef = React.useRef<HTMLElement>(null);\n\n    React.useEffect(() => {\n        let rafID = 0;\n\n        const sendUpdate = () => {\n            const cells: {\n                cell: Item;\n            }[] = [];\n            const now = performance.now();\n            for (let x = 0; x < 5000; x++) {\n                const col = Math.max(10, rand() % 100);\n                const row = rand() % 10_000;\n\n                setCellValueRaw([col, row], {\n                    kind: GridCellKind.Text,\n                    data: x.toString(),\n                    displayData: `${x}k`,\n                    themeOverride:\n                        x % 5 !== 0\n                            ? {\n                                  bgCell: \"#f2fff4\",\n                                  textDark: \"#00d41c\",\n                              }\n                            : {\n                                  bgCell: \"#fff6f6\",\n                                  textDark: \"#d40000\",\n                              },\n                    allowOverlay: true,\n                    lastUpdated: now,\n                });\n                cells.push({ cell: [col, row] });\n            }\n            countRef.current += 5000;\n            if (displayCountRef.current !== null) {\n                displayCountRef.current.textContent = `${countRef.current}`;\n            }\n\n            ref.current?.updateCells(cells);\n\n            rafID = window.requestAnimationFrame(sendUpdate);\n        };\n\n        sendUpdate();\n\n        return () => {\n            cancelAnimationFrame(rafID);\n        };\n    }, [setCellValueRaw]);\n\n    return (\n        <BeautifulWrapper\n            title=\"Rapid updating\"\n            description={\n                <>\n                    <Description>\n                        Data grid can support many thousands of updates per seconds. The data grid can easily update\n                        data faster than a human can read it, more importantly the faster the data grid can update, the\n                        more time your code can spend doing more valuable work.\n                    </Description>\n                    <MoreInfo>\n                        Updates processed: <KeyName ref={displayCountRef} /> We could do this faster but we wrote a\n                        really crappy data store for this demo which is actually slowing down the data grid.\n                    </MoreInfo>\n                </>\n            }>\n            <DataEditor {...defaultProps} ref={ref} getCellContent={getCellContent} columns={cols} rows={10_000} />\n        </BeautifulWrapper>\n    );\n};\n",
+      "locationsMap": {
+        "rapid-updates": {
+          "startLoc": {
+            "col": 39,
+            "line": 32
+          },
+          "endLoc": {
+            "col": 1,
+            "line": 107
+          },
+          "startBody": {
+            "col": 39,
+            "line": 32
+          },
+          "endBody": {
+            "col": 1,
+            "line": 107
+          }
+        }
+      }
+    }
+  },
   title: "Glide-Data-Grid/DataEditor Demos",
   decorators: [Story => react__WEBPACK_IMPORTED_MODULE_0__.createElement(_stories_story_utils__WEBPACK_IMPORTED_MODULE_1__/* .SimpleThemeWrapper */ .X, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(Story, null))]
 });
@@ -12002,6 +12278,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+var __STORY__ = "import { range } from \"lodash\";\nimport React from \"react\";\nimport { DataEditor, DataEditorProps } from \"../../data-editor/data-editor\";\nimport { BeautifulWrapper, Description, PropName, defaultProps } from \"../../data-editor/stories/utils\";\nimport type { GridColumn } from \"../../data-grid/data-grid-types\";\nimport { GridCellKind } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Reorder Rows\"\n                    description={\n                        <>\n                            <Description>\n                                Rows can be re-arranged by using the <PropName>onRowMoved</PropName> callback. When set\n                                the first row can be used to drag and drop.\n                            </Description>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ReorderRows: React.VFC = () => {\n    const cols = React.useMemo<GridColumn[]>(\n        () => [\n            {\n                title: \"Col A\",\n                width: 150,\n            },\n            {\n                title: \"Col B\",\n                width: 150,\n            },\n        ],\n        []\n    );\n\n    const [rowData, setRowData] = React.useState(() => {\n        return range(0, 50).map(x => [`A: ${x}`, `B: ${x}`]);\n    });\n\n    const getCellContent = React.useCallback<DataEditorProps[\"getCellContent\"]>(\n        ([col, row]) => {\n            return {\n                kind: GridCellKind.Text,\n                allowOverlay: false,\n                data: rowData[row][col],\n                displayData: rowData[row][col],\n            };\n        },\n        [rowData]\n    );\n\n    const reorderRows = React.useCallback((from: number, to: number) => {\n        setRowData(cv => {\n            const d = [...cv];\n            const removed = d.splice(from, 1);\n            d.splice(to, 0, ...removed);\n            return d;\n        });\n    }, []);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            rowMarkers={\"both\"}\n            onRowMoved={reorderRows}\n            getCellContent={getCellContent}\n            columns={cols}\n            rows={50}\n        />\n    );\n};\n";
+var __LOCATIONS_MAP__ = {
+  "ReorderRows": {
+    "startLoc": {
+      "col": 38,
+      "line": 32
+    },
+    "endLoc": {
+      "col": 1,
+      "line": 82
+    },
+    "startBody": {
+      "col": 38,
+      "line": 32
+    },
+    "endBody": {
+      "col": 1,
+      "line": 82
+    }
+  }
+};
 
 
 
@@ -12009,6 +12306,31 @@ function _extends() { _extends = Object.assign ? Object.assign.bind() : function
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  parameters: {
+    "storySource": {
+      "source": "import { range } from \"lodash\";\nimport React from \"react\";\nimport { DataEditor, DataEditorProps } from \"../../data-editor/data-editor\";\nimport { BeautifulWrapper, Description, PropName, defaultProps } from \"../../data-editor/stories/utils\";\nimport type { GridColumn } from \"../../data-grid/data-grid-types\";\nimport { GridCellKind } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Reorder Rows\"\n                    description={\n                        <>\n                            <Description>\n                                Rows can be re-arranged by using the <PropName>onRowMoved</PropName> callback. When set\n                                the first row can be used to drag and drop.\n                            </Description>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ReorderRows: React.VFC = () => {\n    const cols = React.useMemo<GridColumn[]>(\n        () => [\n            {\n                title: \"Col A\",\n                width: 150,\n            },\n            {\n                title: \"Col B\",\n                width: 150,\n            },\n        ],\n        []\n    );\n\n    const [rowData, setRowData] = React.useState(() => {\n        return range(0, 50).map(x => [`A: ${x}`, `B: ${x}`]);\n    });\n\n    const getCellContent = React.useCallback<DataEditorProps[\"getCellContent\"]>(\n        ([col, row]) => {\n            return {\n                kind: GridCellKind.Text,\n                allowOverlay: false,\n                data: rowData[row][col],\n                displayData: rowData[row][col],\n            };\n        },\n        [rowData]\n    );\n\n    const reorderRows = React.useCallback((from: number, to: number) => {\n        setRowData(cv => {\n            const d = [...cv];\n            const removed = d.splice(from, 1);\n            d.splice(to, 0, ...removed);\n            return d;\n        });\n    }, []);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            rowMarkers={\"both\"}\n            onRowMoved={reorderRows}\n            getCellContent={getCellContent}\n            columns={cols}\n            rows={50}\n        />\n    );\n};\n",
+      "locationsMap": {
+        "reorder-rows": {
+          "startLoc": {
+            "col": 38,
+            "line": 32
+          },
+          "endLoc": {
+            "col": 1,
+            "line": 82
+          },
+          "startBody": {
+            "col": 38,
+            "line": 32
+          },
+          "endBody": {
+            "col": 1,
+            "line": 82
+          }
+        }
+      }
+    }
+  },
   title: "Glide-Data-Grid/DataEditor Demos",
   decorators: [Story => react__WEBPACK_IMPORTED_MODULE_1__.createElement(_stories_story_utils__WEBPACK_IMPORTED_MODULE_2__/* .SimpleThemeWrapper */ .X, null, react__WEBPACK_IMPORTED_MODULE_1__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_3__/* .BeautifulWrapper */ .m, {
     title: "Reorder Rows",
@@ -12625,12 +12947,58 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+var __STORY__ = "import React from \"react\";\nimport type { Theme } from \"../../common/styles\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport { BeautifulWrapper, Description, useMockDataGenerator, defaultProps } from \"../../data-editor/stories/utils\";\nimport type { GridSelection } from \"../../data-grid/data-grid-types\";\nimport { CompactSelection } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Scroll Shadows\"\n                    description={\n                        <>\n                            <Description>\n                                You can enable and disable the horizontal/vertical scroll shadows.\n                            </Description>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ScrollShadows: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(6);\n\n    const [selection, setSelection] = React.useState<GridSelection>({\n        rows: CompactSelection.empty(),\n        columns: CompactSelection.empty(),\n    });\n\n    const onSelectionChange = React.useCallback((newSel: GridSelection) => {\n        let newRows = CompactSelection.empty();\n        if (newSel.current !== undefined) {\n            newRows = newRows.add([newSel.current.range.y, newSel.current.range.y + newSel.current.range.height]);\n        }\n        for (const b of newSel.current?.rangeStack ?? []) {\n            newRows = newRows.add([b.y, b.y + b.height]);\n        }\n        setSelection({\n            ...newSel,\n            rows: newRows,\n        });\n    }, []);\n\n    const theme = React.useMemo<Partial<Theme>>(\n        () => ({\n            accentLight: \"#b1f6ff\",\n            horizontalBorderColor: \"transparent\",\n            headerBottomBorderColor: \"rgba(115, 116, 131, 0.16)\",\n        }),\n        []\n    );\n\n    const getRowThemeOverride = React.useCallback(row => (row % 2 === 0 ? undefined : { bgCell: \"#f5f5f6\" }), []);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            rowMarkers={\"number\"}\n            gridSelection={selection}\n            onGridSelectionChange={onSelectionChange}\n            fixedShadowX={false}\n            headerHeight={26}\n            drawFocusRing={false}\n            rowHeight={22}\n            fixedShadowY={false}\n            getRowThemeOverride={getRowThemeOverride}\n            verticalBorder={false}\n            getCellContent={getCellContent}\n            columns={cols}\n            rows={1000}\n            theme={theme}\n        />\n    );\n};\n";
+var __LOCATIONS_MAP__ = {
+  "ScrollShadows": {
+    "startLoc": {
+      "col": 40,
+      "line": 31
+    },
+    "endLoc": {
+      "col": 1,
+      "line": 83
+    },
+    "startBody": {
+      "col": 40,
+      "line": 31
+    },
+    "endBody": {
+      "col": 1,
+      "line": 83
+    }
+  }
+};
 
 
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  parameters: {
+    "storySource": {
+      "source": "import React from \"react\";\nimport type { Theme } from \"../../common/styles\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport { BeautifulWrapper, Description, useMockDataGenerator, defaultProps } from \"../../data-editor/stories/utils\";\nimport type { GridSelection } from \"../../data-grid/data-grid-types\";\nimport { CompactSelection } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Scroll Shadows\"\n                    description={\n                        <>\n                            <Description>\n                                You can enable and disable the horizontal/vertical scroll shadows.\n                            </Description>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ScrollShadows: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(6);\n\n    const [selection, setSelection] = React.useState<GridSelection>({\n        rows: CompactSelection.empty(),\n        columns: CompactSelection.empty(),\n    });\n\n    const onSelectionChange = React.useCallback((newSel: GridSelection) => {\n        let newRows = CompactSelection.empty();\n        if (newSel.current !== undefined) {\n            newRows = newRows.add([newSel.current.range.y, newSel.current.range.y + newSel.current.range.height]);\n        }\n        for (const b of newSel.current?.rangeStack ?? []) {\n            newRows = newRows.add([b.y, b.y + b.height]);\n        }\n        setSelection({\n            ...newSel,\n            rows: newRows,\n        });\n    }, []);\n\n    const theme = React.useMemo<Partial<Theme>>(\n        () => ({\n            accentLight: \"#b1f6ff\",\n            horizontalBorderColor: \"transparent\",\n            headerBottomBorderColor: \"rgba(115, 116, 131, 0.16)\",\n        }),\n        []\n    );\n\n    const getRowThemeOverride = React.useCallback(row => (row % 2 === 0 ? undefined : { bgCell: \"#f5f5f6\" }), []);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            rowMarkers={\"number\"}\n            gridSelection={selection}\n            onGridSelectionChange={onSelectionChange}\n            fixedShadowX={false}\n            headerHeight={26}\n            drawFocusRing={false}\n            rowHeight={22}\n            fixedShadowY={false}\n            getRowThemeOverride={getRowThemeOverride}\n            verticalBorder={false}\n            getCellContent={getCellContent}\n            columns={cols}\n            rows={1000}\n            theme={theme}\n        />\n    );\n};\n",
+      "locationsMap": {
+        "scroll-shadows": {
+          "startLoc": {
+            "col": 40,
+            "line": 31
+          },
+          "endLoc": {
+            "col": 1,
+            "line": 83
+          },
+          "startBody": {
+            "col": 40,
+            "line": 31
+          },
+          "endBody": {
+            "col": 1,
+            "line": 83
+          }
+        }
+      }
+    }
+  },
   title: "Glide-Data-Grid/DataEditor Demos",
   decorators: [Story => react__WEBPACK_IMPORTED_MODULE_0__.createElement(_stories_story_utils__WEBPACK_IMPORTED_MODULE_1__/* .SimpleThemeWrapper */ .X, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .BeautifulWrapper */ .m, {
     title: "Scroll Shadows",
@@ -13664,12 +14032,58 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+var __STORY__ = "import React from \"react\";\nimport type { IBounds } from \"react-laag\";\nimport { useLayer } from \"react-laag\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport type { GridMouseEventArgs } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Tooltips\"\n                    className=\"double\"\n                    description={\n                        <Description>\n                            Using the <PropName>onItemHovered</PropName> event makes it easy to create tooltips. This\n                            story is intentionally forced to scroll vertically so layout in scrolling documents can be\n                            confirmed.\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nconst zeroBounds = {\n    left: 0,\n    top: 0,\n    width: 0,\n    height: 0,\n    bottom: 0,\n    right: 0,\n};\n\nexport const Tooltips: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(6);\n\n    const [tooltip, setTooltip] = React.useState<{ val: string; bounds: IBounds } | undefined>();\n\n    const timeoutRef = React.useRef(0);\n\n    const onItemHovered = React.useCallback((args: GridMouseEventArgs) => {\n        if (args.kind === \"cell\") {\n            window.clearTimeout(timeoutRef.current);\n            setTooltip(undefined);\n            timeoutRef.current = window.setTimeout(() => {\n                setTooltip({\n                    val: `Tooltip for ${args.location[0]}, ${args.location[1]}`,\n                    bounds: {\n                        // translate to react-laag types\n                        left: args.bounds.x,\n                        top: args.bounds.y,\n                        width: args.bounds.width,\n                        height: args.bounds.height,\n                        right: args.bounds.x + args.bounds.width,\n                        bottom: args.bounds.y + args.bounds.height,\n                    },\n                });\n            }, 1000);\n        } else {\n            window.clearTimeout(timeoutRef.current);\n            timeoutRef.current = 0;\n            setTooltip(undefined);\n        }\n    }, []);\n\n    React.useEffect(() => () => window.clearTimeout(timeoutRef.current), []);\n\n    const isOpen = tooltip !== undefined;\n    const { renderLayer, layerProps } = useLayer({\n        isOpen,\n        triggerOffset: 4,\n        auto: true,\n        container: \"portal\",\n        trigger: {\n            getBounds: () => tooltip?.bounds ?? zeroBounds,\n        },\n    });\n\n    return (\n        <>\n            <DataEditor\n                {...defaultProps}\n                onItemHovered={onItemHovered}\n                getCellContent={getCellContent}\n                columns={cols}\n                rows={1000}\n            />\n            {isOpen &&\n                renderLayer(\n                    <div\n                        {...layerProps}\n                        style={{\n                            ...layerProps.style,\n                            padding: \"8px 12px\",\n                            color: \"white\",\n                            font: \"500 13px Inter\",\n                            backgroundColor: \"rgba(0, 0, 0, 0.85)\",\n                            borderRadius: 9,\n                        }}>\n                        {tooltip.val}\n                    </div>\n                )}\n        </>\n    );\n};\n";
+var __LOCATIONS_MAP__ = {
+  "Tooltips": {
+    "startLoc": {
+      "col": 35,
+      "line": 47
+    },
+    "endLoc": {
+      "col": 1,
+      "line": 118
+    },
+    "startBody": {
+      "col": 35,
+      "line": 47
+    },
+    "endBody": {
+      "col": 1,
+      "line": 118
+    }
+  }
+};
 
 
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  parameters: {
+    "storySource": {
+      "source": "import React from \"react\";\nimport type { IBounds } from \"react-laag\";\nimport { useLayer } from \"react-laag\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport type { GridMouseEventArgs } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Tooltips\"\n                    className=\"double\"\n                    description={\n                        <Description>\n                            Using the <PropName>onItemHovered</PropName> event makes it easy to create tooltips. This\n                            story is intentionally forced to scroll vertically so layout in scrolling documents can be\n                            confirmed.\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nconst zeroBounds = {\n    left: 0,\n    top: 0,\n    width: 0,\n    height: 0,\n    bottom: 0,\n    right: 0,\n};\n\nexport const Tooltips: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(6);\n\n    const [tooltip, setTooltip] = React.useState<{ val: string; bounds: IBounds } | undefined>();\n\n    const timeoutRef = React.useRef(0);\n\n    const onItemHovered = React.useCallback((args: GridMouseEventArgs) => {\n        if (args.kind === \"cell\") {\n            window.clearTimeout(timeoutRef.current);\n            setTooltip(undefined);\n            timeoutRef.current = window.setTimeout(() => {\n                setTooltip({\n                    val: `Tooltip for ${args.location[0]}, ${args.location[1]}`,\n                    bounds: {\n                        // translate to react-laag types\n                        left: args.bounds.x,\n                        top: args.bounds.y,\n                        width: args.bounds.width,\n                        height: args.bounds.height,\n                        right: args.bounds.x + args.bounds.width,\n                        bottom: args.bounds.y + args.bounds.height,\n                    },\n                });\n            }, 1000);\n        } else {\n            window.clearTimeout(timeoutRef.current);\n            timeoutRef.current = 0;\n            setTooltip(undefined);\n        }\n    }, []);\n\n    React.useEffect(() => () => window.clearTimeout(timeoutRef.current), []);\n\n    const isOpen = tooltip !== undefined;\n    const { renderLayer, layerProps } = useLayer({\n        isOpen,\n        triggerOffset: 4,\n        auto: true,\n        container: \"portal\",\n        trigger: {\n            getBounds: () => tooltip?.bounds ?? zeroBounds,\n        },\n    });\n\n    return (\n        <>\n            <DataEditor\n                {...defaultProps}\n                onItemHovered={onItemHovered}\n                getCellContent={getCellContent}\n                columns={cols}\n                rows={1000}\n            />\n            {isOpen &&\n                renderLayer(\n                    <div\n                        {...layerProps}\n                        style={{\n                            ...layerProps.style,\n                            padding: \"8px 12px\",\n                            color: \"white\",\n                            font: \"500 13px Inter\",\n                            backgroundColor: \"rgba(0, 0, 0, 0.85)\",\n                            borderRadius: 9,\n                        }}>\n                        {tooltip.val}\n                    </div>\n                )}\n        </>\n    );\n};\n",
+      "locationsMap": {
+        "tooltips": {
+          "startLoc": {
+            "col": 35,
+            "line": 47
+          },
+          "endLoc": {
+            "col": 1,
+            "line": 118
+          },
+          "startBody": {
+            "col": 35,
+            "line": 47
+          },
+          "endBody": {
+            "col": 1,
+            "line": 118
+          }
+        }
+      }
+    }
+  },
   title: "Glide-Data-Grid/DataEditor Demos",
   decorators: [Story => react__WEBPACK_IMPORTED_MODULE_0__.createElement(_stories_story_utils__WEBPACK_IMPORTED_MODULE_1__/* .SimpleThemeWrapper */ .X, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .BeautifulWrapper */ .m, {
     title: "Tooltips",
@@ -39395,4 +39809,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.422ce1b7.iframe.bundle.js.map
+//# sourceMappingURL=main.f998973b.iframe.bundle.js.map
