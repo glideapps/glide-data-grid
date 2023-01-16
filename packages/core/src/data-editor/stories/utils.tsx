@@ -234,10 +234,11 @@ interface BeautifulProps {
     title: string;
     description?: React.ReactNode;
     className?: string;
+    scale?: string;
 }
 
 export const BeautifulWrapper: React.FC<BeautifulProps> = p => {
-    const { title, children, description, className } = p;
+    const { title, children, description, className, scale } = p;
 
     const { ref, width, height } = useResizeDetector();
 
@@ -245,7 +246,7 @@ export const BeautifulWrapper: React.FC<BeautifulProps> = p => {
         <BeautifulStyle className={className + (browserIsFirefox.value ? " firefox" : "")}>
             <h1>{title}</h1>
             {description}
-            <div className="sizer">
+            <div style={{ scale }} className="sizer">
                 <div className="sizer-clip" ref={ref}>
                     <div
                         style={{
