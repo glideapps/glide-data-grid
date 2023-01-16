@@ -18732,10 +18732,12 @@ const DataEditorImpl = (p, forwardedRef) => {
     })));
   }, [getMangledCellContent, gridSelection, mangledOnCellsEdited]);
   const isPrevented = react.useRef(false);
-  const normalSizeColumn = react.useCallback(async col => {
+  const normalSizeColumn = react.useCallback(async function (col) {
     var _mouseDownData$curren3;
 
-    if (((_mouseDownData$curren3 = mouseDownData.current) === null || _mouseDownData$curren3 === void 0 ? void 0 : _mouseDownData$curren3.wasDoubleClick) === true && getCellsForSelection !== undefined && onColumnResize !== undefined) {
+    let force = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+    if ((((_mouseDownData$curren3 = mouseDownData.current) === null || _mouseDownData$curren3 === void 0 ? void 0 : _mouseDownData$curren3.wasDoubleClick) === true || force) && getCellsForSelection !== undefined && onColumnResize !== undefined) {
       const start = visibleRegionRef.current.y;
       const end = visibleRegionRef.current.height;
       let cells = getCellsForSelection({
@@ -20027,8 +20029,13 @@ const DataEditorImpl = (p, forwardedRef) => {
           break;
       }
     },
-    scrollTo
-  }), [appendRow, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]);
+    scrollTo,
+    remeasureColumns: cols => {
+      for (const col of cols) {
+        void normalSizeColumn(col + rowMarkerOffset, true);
+      }
+    }
+  }), [appendRow, normalSizeColumn, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]);
   const [selCol, selRow] = currentCell !== null && currentCell !== void 0 ? currentCell : [];
   const onCellFocused = react.useCallback(cell => {
     const [col, row] = cell;
@@ -37907,10 +37914,12 @@ var DataEditorImpl = (p, forwardedRef) => {
     })));
   }, [getMangledCellContent, gridSelection, mangledOnCellsEdited]);
   const isPrevented = react__WEBPACK_IMPORTED_MODULE_0__.useRef(false);
-  const normalSizeColumn = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(async col => {
+  const normalSizeColumn = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(async function (col) {
+    let force = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
     var _a2;
 
-    if (((_a2 = mouseDownData.current) == null ? void 0 : _a2.wasDoubleClick) === true && getCellsForSelection !== void 0 && onColumnResize !== void 0) {
+    if ((((_a2 = mouseDownData.current) == null ? void 0 : _a2.wasDoubleClick) === true || force) && getCellsForSelection !== void 0 && onColumnResize !== void 0) {
       const start = visibleRegionRef.current.y;
       const end = visibleRegionRef.current.height;
       let cells = getCellsForSelection({
@@ -39178,8 +39187,13 @@ var DataEditorImpl = (p, forwardedRef) => {
           break;
       }
     },
-    scrollTo
-  }), [appendRow, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]);
+    scrollTo,
+    remeasureColumns: cols => {
+      for (const col of cols) {
+        void normalSizeColumn(col + rowMarkerOffset, true);
+      }
+    }
+  }), [appendRow, normalSizeColumn, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]);
   const [selCol, selRow] = currentCell != null ? currentCell : [];
   const onCellFocused = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(cell => {
     const [col, row] = cell;
@@ -39378,4 +39392,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.a66119b6.iframe.bundle.js.map
+//# sourceMappingURL=main.ad32865f.iframe.bundle.js.map
