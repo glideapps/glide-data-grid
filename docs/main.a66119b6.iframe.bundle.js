@@ -9971,7 +9971,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n    clearCell,\n} from \"../../data-editor/stories/utils\";\nimport { GridCellKind } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Fill handle\"\n                    description={\n                        <>\n                            <Description>Fill handles can be used to downfill data with the mouse.</Description>\n                            <MoreInfo>\n                                Just click and drag, the top row will be copied down. Enable using the{\" \"}\n                                <PropName>fillHandle</PropName> prop.\n                            </MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const FillHandle: React.VFC = () => {\n    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);\n\n    const [numRows, setNumRows] = React.useState(50);\n\n    const getCellContentMangled = React.useCallback<typeof getCellContent>(\n        i => {\n            let val = getCellContent(i);\n            if (i[0] === 1 && val.kind === GridCellKind.Text) {\n                val = {\n                    ...val,\n                    readonly: true,\n                };\n            }\n\n            return val;\n        },\n        [getCellContent]\n    );\n\n    const onRowAppended = React.useCallback(() => {\n        const newRow = numRows;\n        for (let c = 0; c < 6; c++) {\n            const cell = getCellContent([c, newRow]);\n            setCellValueRaw([c, newRow], clearCell(cell));\n        }\n        setNumRows(cv => cv + 1);\n    }, [getCellContent, numRows, setCellValueRaw]);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContentMangled}\n            columns={cols}\n            rowMarkers={\"both\"}\n            onPaste={true}\n            fillHandle={true}\n            onCellEdited={setCellValue}\n            trailingRowOptions={{\n                sticky: true,\n                tint: true,\n                hint: \"New row...\",\n            }}\n            rows={numRows}\n            onRowAppended={onRowAppended}\n        />\n    );\n};\n";
+var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n    clearCell,\n} from \"../../data-editor/stories/utils\";\nimport { GridCellKind } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Fill handle\"\n                    description={\n                        <>\n                            <Description>Fill handles can be used to downfill data with the mouse.</Description>\n                            <MoreInfo>\n                                Just click and drag, the top row will be copied down. Enable using the{\" \"}\n                                <PropName>fillHandle</PropName> prop.\n                            </MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const FillHandle: React.VFC = () => {\n    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);\n\n    const [numRows, setNumRows] = React.useState(50);\n\n    const getCellContentMangled = React.useCallback<typeof getCellContent>(\n        i => {\n            let val = getCellContent(i);\n            if (i[0] === 1 && val.kind === GridCellKind.Text) {\n                val = {\n                    ...val,\n                    readonly: true,\n                };\n            }\n\n            return val;\n        },\n        [getCellContent]\n    );\n\n    const onRowAppended = React.useCallback(() => {\n        const newRow = numRows;\n        for (let c = 0; c < 6; c++) {\n            const cell = getCellContent([c, newRow]);\n            setCellValueRaw([c, newRow], clearCell(cell));\n        }\n        setNumRows(cv => cv + 1);\n    }, [getCellContent, numRows, setCellValueRaw]);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContentMangled}\n            columns={cols}\n            rowMarkers={\"both\"}\n            onPaste={true}\n            fillHandle={true}\n            keybindings={{ downFill: true, rightFill: true }}\n            onCellEdited={setCellValue}\n            trailingRowOptions={{\n                sticky: true,\n                tint: true,\n                hint: \"New row...\",\n            }}\n            rows={numRows}\n            onRowAppended={onRowAppended}\n        />\n    );\n};\n";
 var __LOCATIONS_MAP__ = {
   "FillHandle": {
     "startLoc": {
@@ -9980,7 +9980,7 @@ var __LOCATIONS_MAP__ = {
     },
     "endLoc": {
       "col": 1,
-      "line": 86
+      "line": 87
     },
     "startBody": {
       "col": 37,
@@ -9988,7 +9988,7 @@ var __LOCATIONS_MAP__ = {
     },
     "endBody": {
       "col": 1,
-      "line": 86
+      "line": 87
     }
   }
 };
@@ -10000,7 +10000,7 @@ var __LOCATIONS_MAP__ = {
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   parameters: {
     "storySource": {
-      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n    clearCell,\n} from \"../../data-editor/stories/utils\";\nimport { GridCellKind } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Fill handle\"\n                    description={\n                        <>\n                            <Description>Fill handles can be used to downfill data with the mouse.</Description>\n                            <MoreInfo>\n                                Just click and drag, the top row will be copied down. Enable using the{\" \"}\n                                <PropName>fillHandle</PropName> prop.\n                            </MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const FillHandle: React.VFC = () => {\n    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);\n\n    const [numRows, setNumRows] = React.useState(50);\n\n    const getCellContentMangled = React.useCallback<typeof getCellContent>(\n        i => {\n            let val = getCellContent(i);\n            if (i[0] === 1 && val.kind === GridCellKind.Text) {\n                val = {\n                    ...val,\n                    readonly: true,\n                };\n            }\n\n            return val;\n        },\n        [getCellContent]\n    );\n\n    const onRowAppended = React.useCallback(() => {\n        const newRow = numRows;\n        for (let c = 0; c < 6; c++) {\n            const cell = getCellContent([c, newRow]);\n            setCellValueRaw([c, newRow], clearCell(cell));\n        }\n        setNumRows(cv => cv + 1);\n    }, [getCellContent, numRows, setCellValueRaw]);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContentMangled}\n            columns={cols}\n            rowMarkers={\"both\"}\n            onPaste={true}\n            fillHandle={true}\n            onCellEdited={setCellValue}\n            trailingRowOptions={{\n                sticky: true,\n                tint: true,\n                hint: \"New row...\",\n            }}\n            rows={numRows}\n            onRowAppended={onRowAppended}\n        />\n    );\n};\n",
+      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n    clearCell,\n} from \"../../data-editor/stories/utils\";\nimport { GridCellKind } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Fill handle\"\n                    description={\n                        <>\n                            <Description>Fill handles can be used to downfill data with the mouse.</Description>\n                            <MoreInfo>\n                                Just click and drag, the top row will be copied down. Enable using the{\" \"}\n                                <PropName>fillHandle</PropName> prop.\n                            </MoreInfo>\n                        </>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const FillHandle: React.VFC = () => {\n    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);\n\n    const [numRows, setNumRows] = React.useState(50);\n\n    const getCellContentMangled = React.useCallback<typeof getCellContent>(\n        i => {\n            let val = getCellContent(i);\n            if (i[0] === 1 && val.kind === GridCellKind.Text) {\n                val = {\n                    ...val,\n                    readonly: true,\n                };\n            }\n\n            return val;\n        },\n        [getCellContent]\n    );\n\n    const onRowAppended = React.useCallback(() => {\n        const newRow = numRows;\n        for (let c = 0; c < 6; c++) {\n            const cell = getCellContent([c, newRow]);\n            setCellValueRaw([c, newRow], clearCell(cell));\n        }\n        setNumRows(cv => cv + 1);\n    }, [getCellContent, numRows, setCellValueRaw]);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContentMangled}\n            columns={cols}\n            rowMarkers={\"both\"}\n            onPaste={true}\n            fillHandle={true}\n            keybindings={{ downFill: true, rightFill: true }}\n            onCellEdited={setCellValue}\n            trailingRowOptions={{\n                sticky: true,\n                tint: true,\n                hint: \"New row...\",\n            }}\n            rows={numRows}\n            onRowAppended={onRowAppended}\n        />\n    );\n};\n",
       "locationsMap": {
         "fill-handle": {
           "startLoc": {
@@ -10009,7 +10009,7 @@ var __LOCATIONS_MAP__ = {
           },
           "endLoc": {
             "col": 1,
-            "line": 86
+            "line": 87
           },
           "startBody": {
             "col": 37,
@@ -10017,7 +10017,7 @@ var __LOCATIONS_MAP__ = {
           },
           "endBody": {
             "col": 1,
-            "line": 86
+            "line": 87
           }
         }
       }
@@ -10064,6 +10064,10 @@ const FillHandle = () => {
     rowMarkers: "both",
     onPaste: true,
     fillHandle: true,
+    keybindings: {
+      downFill: true,
+      rightFill: true
+    },
     onCellEdited: setCellValue,
     trailingRowOptions: {
       sticky: true,
@@ -39374,4 +39378,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.80b6406d.iframe.bundle.js.map
+//# sourceMappingURL=main.a66119b6.iframe.bundle.js.map
