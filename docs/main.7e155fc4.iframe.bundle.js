@@ -13449,12 +13449,58 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+var __STORY__ = "\nimport React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { GridCellKind } from \"../../data-grid/data-grid-types\";\nimport type { Rectangle, CellArray, GridCell } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Spans\"\n                    description={\n                        <Description>\n                            By setting the <PropName>span</PropName> of a cell you can create spans in your grid. All\n                            cells within a span must return consistent data for defined behavior.\n                            <MoreInfo>\n                                Spans will always be split if they span frozen and non-frozen columns. By default\n                                selections are always expanded to include a span. This can be disabled using the{\" \"}\n                                <PropName>spanRangeBehavior</PropName> prop.\n                            </MoreInfo>\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const SpanCell: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(100, true, true);\n\n    const mangledGetCellContent = React.useCallback<typeof getCellContent>(\n        cell => {\n            const [col, row] = cell;\n            if (row === 6 && col >= 3 && col <= 4) {\n                return {\n                    kind: GridCellKind.Text,\n                    allowOverlay: false,\n                    data: \"Span Cell that is very long and will go past the cell limits\",\n                    span: [3, 4],\n                    displayData: \"Span Cell that is very long and will go past the cell limits\",\n                };\n            }\n            if (row === 5) {\n                return {\n                    kind: GridCellKind.Text,\n                    allowOverlay: false,\n                    data: \"Span Cell that is very long and will go past the cell limits\",\n                    span: [0, 99],\n                    displayData: \"Span Cell that is very long and will go past the cell limits\",\n                };\n            }\n            return getCellContent(cell);\n        },\n        [getCellContent]\n    );\n\n    const getCellsForSelection = React.useCallback(\n        (selection: Rectangle): CellArray => {\n            const result: GridCell[][] = [];\n\n            for (let y = selection.y; y < selection.y + selection.height; y++) {\n                const row: GridCell[] = [];\n                for (let x = selection.x; x < selection.x + selection.width; x++) {\n                    row.push(mangledGetCellContent([x, y]));\n                }\n                result.push(row);\n            }\n\n            return result;\n        },\n        [mangledGetCellContent]\n    );\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={mangledGetCellContent}\n            getCellsForSelection={getCellsForSelection}\n            columns={cols}\n            freezeColumns={2}\n            rows={300}\n            rowMarkers=\"both\"\n        />\n    );\n};\n";
+var __LOCATIONS_MAP__ = {
+  "SpanCell": {
+    "startLoc": {
+      "col": 35,
+      "line": 42
+    },
+    "endLoc": {
+      "col": 1,
+      "line": 99
+    },
+    "startBody": {
+      "col": 35,
+      "line": 42
+    },
+    "endBody": {
+      "col": 1,
+      "line": 99
+    }
+  }
+};
 
 
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  parameters: {
+    "storySource": {
+      "source": "\nimport React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    MoreInfo,\n    PropName,\n    useMockDataGenerator,\n    defaultProps,\n} from \"../../data-editor/stories/utils\";\nimport { GridCellKind } from \"../../data-grid/data-grid-types\";\nimport type { Rectangle, CellArray, GridCell } from \"../../data-grid/data-grid-types\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Spans\"\n                    description={\n                        <Description>\n                            By setting the <PropName>span</PropName> of a cell you can create spans in your grid. All\n                            cells within a span must return consistent data for defined behavior.\n                            <MoreInfo>\n                                Spans will always be split if they span frozen and non-frozen columns. By default\n                                selections are always expanded to include a span. This can be disabled using the{\" \"}\n                                <PropName>spanRangeBehavior</PropName> prop.\n                            </MoreInfo>\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const SpanCell: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(100, true, true);\n\n    const mangledGetCellContent = React.useCallback<typeof getCellContent>(\n        cell => {\n            const [col, row] = cell;\n            if (row === 6 && col >= 3 && col <= 4) {\n                return {\n                    kind: GridCellKind.Text,\n                    allowOverlay: false,\n                    data: \"Span Cell that is very long and will go past the cell limits\",\n                    span: [3, 4],\n                    displayData: \"Span Cell that is very long and will go past the cell limits\",\n                };\n            }\n            if (row === 5) {\n                return {\n                    kind: GridCellKind.Text,\n                    allowOverlay: false,\n                    data: \"Span Cell that is very long and will go past the cell limits\",\n                    span: [0, 99],\n                    displayData: \"Span Cell that is very long and will go past the cell limits\",\n                };\n            }\n            return getCellContent(cell);\n        },\n        [getCellContent]\n    );\n\n    const getCellsForSelection = React.useCallback(\n        (selection: Rectangle): CellArray => {\n            const result: GridCell[][] = [];\n\n            for (let y = selection.y; y < selection.y + selection.height; y++) {\n                const row: GridCell[] = [];\n                for (let x = selection.x; x < selection.x + selection.width; x++) {\n                    row.push(mangledGetCellContent([x, y]));\n                }\n                result.push(row);\n            }\n\n            return result;\n        },\n        [mangledGetCellContent]\n    );\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={mangledGetCellContent}\n            getCellsForSelection={getCellsForSelection}\n            columns={cols}\n            freezeColumns={2}\n            rows={300}\n            rowMarkers=\"both\"\n        />\n    );\n};\n",
+      "locationsMap": {
+        "span-cell": {
+          "startLoc": {
+            "col": 35,
+            "line": 42
+          },
+          "endLoc": {
+            "col": 1,
+            "line": 99
+          },
+          "startBody": {
+            "col": 35,
+            "line": 42
+          },
+          "endBody": {
+            "col": 1,
+            "line": 99
+          }
+        }
+      }
+    }
+  },
   title: "Glide-Data-Grid/DataEditor Demos",
   decorators: [Story => react__WEBPACK_IMPORTED_MODULE_0__.createElement(_stories_story_utils__WEBPACK_IMPORTED_MODULE_1__/* .SimpleThemeWrapper */ .X, null, react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .BeautifulWrapper */ .m, {
     title: "Spans",
@@ -39955,4 +40001,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.e19cb75e.iframe.bundle.js.map
+//# sourceMappingURL=main.7e155fc4.iframe.bundle.js.map
