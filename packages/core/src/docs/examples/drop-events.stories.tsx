@@ -8,7 +8,8 @@ import {
     defaultProps,
     useAllMockedKinds,
 } from "../../data-editor/stories/utils";
-import { type Item, GridCellKind } from "../../data-grid/data-grid-types";
+import type { Item } from "../../data-grid/data-grid-types";
+import { GridCellKind } from "../../data-grid/data-grid-types";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 
 export default {
@@ -151,4 +152,3 @@ export const DropEvents: React.VFC = () => {
         </BeautifulWrapper>
     );
 };
-

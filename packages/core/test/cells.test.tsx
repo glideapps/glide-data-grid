@@ -1,7 +1,8 @@
 import { render } from "@testing-library/react";
 import * as React from "react";
 import noop from "lodash/noop.js";
-import { type Rectangle, type ImageCell, GridCellKind, getDefaultTheme, isObjectEditorCallbackResult, type ImageEditorType } from "../src";
+import type { Rectangle, ImageCell, ImageEditorType } from "../src";
+import { GridCellKind, getDefaultTheme, isObjectEditorCallbackResult } from "../src";
 import { assert } from "../src/common/support";
 import { imageCellRenderer } from "../src/data-grid/cells/image-cell";
 

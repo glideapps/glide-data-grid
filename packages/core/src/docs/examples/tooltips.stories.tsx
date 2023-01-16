@@ -1,5 +1,6 @@
 import React from "react";
-import { type IBounds, useLayer } from "react-laag";
+import type { IBounds } from "react-laag";
+import { useLayer } from "react-laag";
 import { DataEditor } from "../../data-editor/data-editor";
 import {
     BeautifulWrapper,
@@ -17,15 +18,16 @@ export default {
     decorators: [
         (Story: React.ComponentType) => (
             <SimpleThemeWrapper>
-                            <BeautifulWrapper
-                title="Tooltips"
-                className="double"
-                description={
-                    <Description>
-                        Using the <PropName>onItemHovered</PropName> event makes it easy to create tooltips. This story
-                        is intentionally forced to scroll vertically so layout in scrolling documents can be confirmed.
-                    </Description>
-                }>
+                <BeautifulWrapper
+                    title="Tooltips"
+                    className="double"
+                    description={
+                        <Description>
+                            Using the <PropName>onItemHovered</PropName> event makes it easy to create tooltips. This
+                            story is intentionally forced to scroll vertically so layout in scrolling documents can be
+                            confirmed.
+                        </Description>
+                    }>
                     <Story />
                 </BeautifulWrapper>
             </SimpleThemeWrapper>

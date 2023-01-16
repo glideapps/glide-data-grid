@@ -8,7 +8,8 @@ import {
     useMockDataGenerator,
     defaultProps,
 } from "../../data-editor/stories/utils";
-import { type GridColumn, type GroupHeaderClickedEventArgs, CompactSelection } from "../../data-grid/data-grid-types";
+import type { GridColumn, GroupHeaderClickedEventArgs } from "../../data-grid/data-grid-types";
+import { CompactSelection } from "../../data-grid/data-grid-types";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 
 export default {
@@ -18,19 +19,21 @@ export default {
         (Story: React.ComponentType) => (
             <SimpleThemeWrapper>
                 <BeautifulWrapper
-            title="Group collapse"
-            description={
-                <>
-                    <Description>
-                        Through clever usage of <PropName>onGroupHeaderClicked</PropName> you can implement group
-                        collapsing. This is a very basic version however it is possible to go much further.
-                    </Description>
-                    <MoreInfo>Cells under a certain size will not attempt to render to save some frames.</MoreInfo>
-                </>
-            }>
-
-                <Story />
-            </BeautifulWrapper>
+                    title="Group collapse"
+                    description={
+                        <>
+                            <Description>
+                                Through clever usage of <PropName>onGroupHeaderClicked</PropName> you can implement
+                                group collapsing. This is a very basic version however it is possible to go much
+                                further.
+                            </Description>
+                            <MoreInfo>
+                                Cells under a certain size will not attempt to render to save some frames.
+                            </MoreInfo>
+                        </>
+                    }>
+                    <Story />
+                </BeautifulWrapper>
             </SimpleThemeWrapper>
         ),
     ],
@@ -85,13 +88,13 @@ export const ColumnGroupCollapse: React.VFC = () => {
     const groupHeaderArgs = useCollapsableColumnGroups(cols);
 
     return (
-            <DataEditor
-                {...defaultProps}
-                {...groupHeaderArgs}
-                getCellContent={getCellContent}
-                groupHeaderHeight={24}
-                rows={1000}
-                rowMarkers="both"
-            />
+        <DataEditor
+            {...defaultProps}
+            {...groupHeaderArgs}
+            getCellContent={getCellContent}
+            groupHeaderHeight={24}
+            rows={1000}
+            rowMarkers="both"
+        />
     );
 };

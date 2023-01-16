@@ -1,13 +1,9 @@
 import React from "react";
 import type { Theme } from "../../common/styles";
 import { DataEditor } from "../../data-editor/data-editor";
-import {
-    BeautifulWrapper,
-    Description,
-    useMockDataGenerator,
-    defaultProps,
-} from "../../data-editor/stories/utils";
-import { type GridSelection, CompactSelection } from "../../data-grid/data-grid-types";
+import { BeautifulWrapper, Description, useMockDataGenerator, defaultProps } from "../../data-editor/stories/utils";
+import type { GridSelection } from "../../data-grid/data-grid-types";
+import { CompactSelection } from "../../data-grid/data-grid-types";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 
 export default {
@@ -17,15 +13,16 @@ export default {
         (Story: React.ComponentType) => (
             <SimpleThemeWrapper>
                 <BeautifulWrapper
-            title="Scroll Shadows"
-            description={
-                <>
-                    <Description>You can enable and disable the horizontal/vertical scroll shadows.</Description>
-                </>
-            }>
-
-                <Story />
-            </BeautifulWrapper>
+                    title="Scroll Shadows"
+                    description={
+                        <>
+                            <Description>
+                                You can enable and disable the horizontal/vertical scroll shadows.
+                            </Description>
+                        </>
+                    }>
+                    <Story />
+                </BeautifulWrapper>
             </SimpleThemeWrapper>
         ),
     ],

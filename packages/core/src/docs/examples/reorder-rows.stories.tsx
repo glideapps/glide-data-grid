@@ -1,13 +1,9 @@
 import { range } from "lodash";
 import React from "react";
 import { DataEditor, DataEditorProps } from "../../data-editor/data-editor";
-import {
-    BeautifulWrapper,
-    Description,
-    PropName,
-    defaultProps,
-} from "../../data-editor/stories/utils";
-import { type GridColumn, GridCellKind } from "../../data-grid/data-grid-types";
+import { BeautifulWrapper, Description, PropName, defaultProps } from "../../data-editor/stories/utils";
+import type { GridColumn } from "../../data-grid/data-grid-types";
+import { GridCellKind } from "../../data-grid/data-grid-types";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 
 export default {
@@ -16,19 +12,18 @@ export default {
     decorators: [
         (Story: React.ComponentType) => (
             <SimpleThemeWrapper>
-                        <BeautifulWrapper
-            title="Reorder Rows"
-            description={
-                <>
-                    <Description>
-                        Rows can be re-arranged by using the <PropName>onRowMoved</PropName> callback. When set the
-                        first row can be used to drag and drop.
-                    </Description>
-                </>
-            }>
-
-                <Story />
-            </BeautifulWrapper>
+                <BeautifulWrapper
+                    title="Reorder Rows"
+                    description={
+                        <>
+                            <Description>
+                                Rows can be re-arranged by using the <PropName>onRowMoved</PropName> callback. When set
+                                the first row can be used to drag and drop.
+                            </Description>
+                        </>
+                    }>
+                    <Story />
+                </BeautifulWrapper>
             </SimpleThemeWrapper>
         ),
     ],

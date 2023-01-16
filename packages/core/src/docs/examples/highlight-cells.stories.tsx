@@ -7,7 +7,8 @@ import {
     useMockDataGenerator,
     defaultProps,
 } from "../../data-editor/stories/utils";
-import { type GridSelection, CompactSelection } from "../../data-grid/data-grid-types";
+import type { GridSelection } from "../../data-grid/data-grid-types";
+import { CompactSelection } from "../../data-grid/data-grid-types";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 
 export default {
@@ -80,4 +81,3 @@ export const HighlightCells: React.VFC = () => {
         />
     );
 };
-
