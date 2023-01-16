@@ -11501,7 +11501,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport { BeautifulWrapper, Description, useMockDataGenerator, defaultProps } from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"One Million Rows\"\n                    description={\n                        <Description>Data grid supports over 1 million rows. Your limit is mostly RAM.</Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const OneMillionRows: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(6);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            rowHeight={31}\n            rows={1_000_000}\n            rowMarkers=\"number\"\n        />\n    );\n};\n";
+var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport { BeautifulWrapper, Description, useMockDataGenerator, defaultProps } from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"One Million Rows\"\n                    description={\n                        <Description>Data grid supports over 1 million rows. Your limit is mostly RAM.</Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const OneMillionRows: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(6);\n\n    const [rows, setRows] = React.useState(1_000_000);\n\n    React.useEffect(() => {\n        window.setTimeout(() => setRows(5), 3000);\n    }, []);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            height=\"100%\"\n            getCellContent={getCellContent}\n            columns={cols}\n            rowHeight={31}\n            rows={rows}\n            rowMarkers=\"number\"\n        />\n    );\n};\n";
 var __LOCATIONS_MAP__ = {
   "OneMillionRows": {
     "startLoc": {
@@ -11510,7 +11510,7 @@ var __LOCATIONS_MAP__ = {
     },
     "endLoc": {
       "col": 1,
-      "line": 37
+      "line": 44
     },
     "startBody": {
       "col": 41,
@@ -11518,7 +11518,7 @@ var __LOCATIONS_MAP__ = {
     },
     "endBody": {
       "col": 1,
-      "line": 37
+      "line": 44
     }
   }
 };
@@ -11529,7 +11529,7 @@ var __LOCATIONS_MAP__ = {
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   parameters: {
     "storySource": {
-      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport { BeautifulWrapper, Description, useMockDataGenerator, defaultProps } from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"One Million Rows\"\n                    description={\n                        <Description>Data grid supports over 1 million rows. Your limit is mostly RAM.</Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const OneMillionRows: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(6);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            getCellContent={getCellContent}\n            columns={cols}\n            rowHeight={31}\n            rows={1_000_000}\n            rowMarkers=\"number\"\n        />\n    );\n};\n",
+      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport { BeautifulWrapper, Description, useMockDataGenerator, defaultProps } from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"One Million Rows\"\n                    description={\n                        <Description>Data grid supports over 1 million rows. Your limit is mostly RAM.</Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const OneMillionRows: React.VFC = () => {\n    const { cols, getCellContent } = useMockDataGenerator(6);\n\n    const [rows, setRows] = React.useState(1_000_000);\n\n    React.useEffect(() => {\n        window.setTimeout(() => setRows(5), 3000);\n    }, []);\n\n    return (\n        <DataEditor\n            {...defaultProps}\n            height=\"100%\"\n            getCellContent={getCellContent}\n            columns={cols}\n            rowHeight={31}\n            rows={rows}\n            rowMarkers=\"number\"\n        />\n    );\n};\n",
       "locationsMap": {
         "one-million-rows": {
           "startLoc": {
@@ -11538,7 +11538,7 @@ var __LOCATIONS_MAP__ = {
           },
           "endLoc": {
             "col": 1,
-            "line": 37
+            "line": 44
           },
           "startBody": {
             "col": 41,
@@ -11546,7 +11546,7 @@ var __LOCATIONS_MAP__ = {
           },
           "endBody": {
             "col": 1,
-            "line": 37
+            "line": 44
           }
         }
       }
@@ -11563,11 +11563,16 @@ const OneMillionRows = () => {
     cols,
     getCellContent
   } = (0,_data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .useMockDataGenerator */ .F9)(6);
+  const [rows, setRows] = react__WEBPACK_IMPORTED_MODULE_0__.useState(1000000);
+  react__WEBPACK_IMPORTED_MODULE_0__.useEffect(() => {
+    window.setTimeout(() => setRows(5), 3000);
+  }, []);
   return react__WEBPACK_IMPORTED_MODULE_0__.createElement(_data_editor_data_editor__WEBPACK_IMPORTED_MODULE_3__/* .DataEditor */ .N, _extends({}, _data_editor_stories_utils__WEBPACK_IMPORTED_MODULE_2__/* .defaultProps */ .lG, {
+    height: "100%",
     getCellContent: getCellContent,
     columns: cols,
     rowHeight: 31,
-    rows: 1000000,
+    rows: rows,
     rowMarkers: "number"
   }));
 };
@@ -20429,6 +20434,12 @@ const DataEditorImpl = (p, forwardedRef) => {
 
     hasJustScrolled.current = false;
   }, [outCol, outRow]);
+  const selectionOutOfBounds = gridSelection.current !== undefined && (gridSelection.current.cell[0] >= columnsIn.length || gridSelection.current.cell[1] >= mangledRows);
+  react.useLayoutEffect(() => {
+    if (selectionOutOfBounds) {
+      setGridSelection(emptyGridSelection, false);
+    }
+  }, [selectionOutOfBounds, setGridSelection]);
   const disabledRows = react.useMemo(() => {
     if (showTrailingBlankRow === true && (trailingRowOptions === null || trailingRowOptions === void 0 ? void 0 : trailingRowOptions.tint) === true) {
       return data_grid_types/* CompactSelection.fromSingleSelection */.EV.fromSingleSelection(mangledRows - 1);
@@ -39620,6 +39631,12 @@ var DataEditorImpl = (p, forwardedRef) => {
 
     hasJustScrolled.current = false;
   }, [outCol, outRow]);
+  const selectionOutOfBounds = gridSelection.current !== void 0 && (gridSelection.current.cell[0] >= columnsIn.length || gridSelection.current.cell[1] >= mangledRows);
+  react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect(() => {
+    if (selectionOutOfBounds) {
+      setGridSelection(emptyGridSelection, false);
+    }
+  }, [selectionOutOfBounds, setGridSelection]);
   const disabledRows = react__WEBPACK_IMPORTED_MODULE_0__.useMemo(() => {
     if (showTrailingBlankRow === true && (trailingRowOptions == null ? void 0 : trailingRowOptions.tint) === true) {
       return CompactSelection.fromSingleSelection(mangledRows - 1);
@@ -39938,4 +39955,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.9ab44081.iframe.bundle.js.map
+//# sourceMappingURL=main.e19cb75e.iframe.bundle.js.map
