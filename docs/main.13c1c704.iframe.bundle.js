@@ -18761,6 +18761,7 @@ const DataEditorImpl = (p, forwardedRef) => {
         }
 
         const scrollBounds = canvas.getBoundingClientRect();
+        const scale = scrollBounds.width / canvas.offsetWidth;
 
         if (desiredX !== undefined) {
           targetRect = { ...targetRect,
@@ -18795,10 +18796,10 @@ const DataEditorImpl = (p, forwardedRef) => {
             trailingRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
           }
 
-          let sLeft = frozenWidth + scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
+          let sLeft = frozenWidth * scale + scrollBounds.left + rowMarkerOffset * rowMarkerWidth * scale;
           let sRight = scrollBounds.right;
-          let sTop = scrollBounds.top + totalHeaderHeight;
-          let sBottom = scrollBounds.bottom - trailingRowHeight;
+          let sTop = scrollBounds.top + totalHeaderHeight * scale;
+          let sBottom = scrollBounds.bottom - trailingRowHeight * scale;
           const minx = targetRect.width + paddingX * 2;
 
           switch (options === null || options === void 0 ? void 0 : options.hAlign) {
@@ -18852,6 +18853,11 @@ const DataEditorImpl = (p, forwardedRef) => {
           }
 
           if (scrollX !== 0 || scrollY !== 0) {
+            if (scale !== 1) {
+              scrollX /= scale;
+              scrollY /= scale;
+            }
+
             scrollRef.current.scrollTo(scrollX + scrollRef.current.scrollLeft, scrollY + scrollRef.current.scrollTop);
           }
         }
@@ -37973,6 +37979,7 @@ var DataEditorImpl = (p, forwardedRef) => {
         }
 
         const scrollBounds = canvas.getBoundingClientRect();
+        const scale = scrollBounds.width / canvas.offsetWidth;
 
         if (desiredX !== void 0) {
           targetRect = { ...targetRect,
@@ -38007,10 +38014,10 @@ var DataEditorImpl = (p, forwardedRef) => {
             trailingRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
           }
 
-          let sLeft = frozenWidth + scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
+          let sLeft = frozenWidth * scale + scrollBounds.left + rowMarkerOffset * rowMarkerWidth * scale;
           let sRight = scrollBounds.right;
-          let sTop = scrollBounds.top + totalHeaderHeight;
-          let sBottom = scrollBounds.bottom - trailingRowHeight;
+          let sTop = scrollBounds.top + totalHeaderHeight * scale;
+          let sBottom = scrollBounds.bottom - trailingRowHeight * scale;
           const minx = targetRect.width + paddingX * 2;
 
           switch (options == null ? void 0 : options.hAlign) {
@@ -38064,6 +38071,11 @@ var DataEditorImpl = (p, forwardedRef) => {
           }
 
           if (scrollX !== 0 || scrollY !== 0) {
+            if (scale !== 1) {
+              scrollX /= scale;
+              scrollY /= scale;
+            }
+
             scrollRef.current.scrollTo(scrollX + scrollRef.current.scrollLeft, scrollY + scrollRef.current.scrollTop);
           }
         }
@@ -39926,4 +39938,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.9d551332.iframe.bundle.js.map
+//# sourceMappingURL=main.13c1c704.iframe.bundle.js.map
