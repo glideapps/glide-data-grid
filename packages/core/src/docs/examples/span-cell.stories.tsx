@@ -9,7 +9,8 @@ import {
     useMockDataGenerator,
     defaultProps,
 } from "../../data-editor/stories/utils";
-import { GridCellKind, type Rectangle, type CellArray, type GridCell } from "../../data-grid/data-grid-types";
+import { GridCellKind } from "../../data-grid/data-grid-types";
+import type { Rectangle, CellArray, GridCell } from "../../data-grid/data-grid-types";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 
 export default {
@@ -18,22 +19,21 @@ export default {
     decorators: [
         (Story: React.ComponentType) => (
             <SimpleThemeWrapper>
-                        <BeautifulWrapper
-            title="Spans"
-            description={
-                <Description>
-                    By setting the <PropName>span</PropName> of a cell you can create spans in your grid. All cells
-                    within a span must return consistent data for defined behavior.
-                    <MoreInfo>
-                        Spans will always be split if they span frozen and non-frozen columns. By default selections are
-                        always expanded to include a span. This can be disabled using the{" "}
-                        <PropName>spanRangeBehavior</PropName> prop.
-                    </MoreInfo>
-                </Description>
-            }>
-
-                <Story />
-            </BeautifulWrapper>
+                <BeautifulWrapper
+                    title="Spans"
+                    description={
+                        <Description>
+                            By setting the <PropName>span</PropName> of a cell you can create spans in your grid. All
+                            cells within a span must return consistent data for defined behavior.
+                            <MoreInfo>
+                                Spans will always be split if they span frozen and non-frozen columns. By default
+                                selections are always expanded to include a span. This can be disabled using the{" "}
+                                <PropName>spanRangeBehavior</PropName> prop.
+                            </MoreInfo>
+                        </Description>
+                    }>
+                    <Story />
+                </BeautifulWrapper>
             </SimpleThemeWrapper>
         ),
     ],
