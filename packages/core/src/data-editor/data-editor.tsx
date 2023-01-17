@@ -3328,7 +3328,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const selectionOutOfBounds =
         gridSelection.current !== undefined &&
-        (gridSelection.current.cell[0] >= columnsIn.length || gridSelection.current.cell[1] >= mangledRows);
+        (gridSelection.current.cell[0] >= mangledCols.length || gridSelection.current.cell[1] >= mangledRows);
     React.useLayoutEffect(() => {
         if (selectionOutOfBounds) {
             setGridSelection(emptyGridSelection, false);
