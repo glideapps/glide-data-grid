@@ -21,7 +21,7 @@
 
 # 👩‍💻 Demo and features
 
-Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-data-grid).
+Lots of fun examples are in our [Storybook](https://glideapps.github.io/glide-data-grid).
 
 You can also visit our [main site](https://grid.glideapps.com).
 
