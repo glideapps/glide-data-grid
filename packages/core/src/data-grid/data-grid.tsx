@@ -152,6 +152,7 @@ export interface DataGridProps {
     readonly onMouseMove: (args: GridMouseEventArgs) => void;
     readonly onMouseDown: (args: GridMouseEventArgs) => void;
     readonly onMouseUp: (args: GridMouseEventArgs, isOutside: boolean) => void;
+    readonly onClick: (args: GridMouseEventArgs) => void;
     readonly onContextMenu: (args: GridMouseEventArgs, preventDefault: () => void) => void;
 
     readonly onCanvasFocused: () => void;
@@ -323,6 +324,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         drawFocusRing = true,
         onMouseDown,
         onMouseUp,
+        onClick,
         onMouseMoveRaw,
         onMouseMove,
         onItemHovered,
@@ -984,18 +986,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 ev.preventDefault();
             }
 
-            if (args.kind === headerKind && isOverHeaderMenu(canvas, args.location[0], clientX, clientY)) {
-                const [col] = args.location;
-                const headerBounds = isOverHeaderMenu(canvas, col, clientX, clientY);
-                if (headerBounds !== undefined) {
-                    if (args.button === 0 && downPosition.current?.[0] === col && downPosition.current?.[1] === -1) {
-                        onHeaderMenuClick?.(col, headerBounds);
-                    } else {
-                        // force outside so that click will not process
-                        onMouseUp(args, true);
-                    }
-                    return;
+            const [col] = args.location;
+            const headerBounds = isOverHeaderMenu(canvas, col, clientX, clientY);
+            if (args.kind === headerKind && headerBounds !== undefined) {
+                if (args.button !== 0 || downPosition.current?.[0] !== col || downPosition.current?.[1] !== -1) {
+                    // force outside so that click will not process
+                    onMouseUp(args, true);
                 }
+                return;
             } else if (args.kind === groupHeaderKind) {
                 const action = groupHeaderActionForEvent(args.group, args.bounds, args.localEventX, args.localEventY);
                 if (action !== undefined) {
@@ -1008,8 +1006,60 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             onMouseUp(args, isOutside);
         },
+        [onMouseUp, eventTargetRef, getMouseArgsForPosition, isOverHeaderMenu, groupHeaderActionForEvent]
+    );
+    useEventListener("mouseup", onMouseUpImpl, window, false);
+    useEventListener("touchend", onMouseUpImpl, window, false);
+
+    const onClickImpl = React.useCallback(
+        (ev: MouseEvent | TouchEvent) => {
+            const canvas = ref.current;
+            if (canvas === null) return;
+            const eventTarget = eventTargetRef?.current;
+
+            const isOutside = ev.target !== canvas && ev.target !== eventTarget;
+
+            let clientX: number;
+            let clientY: number;
+            if (ev instanceof MouseEvent) {
+                clientX = ev.clientX;
+                clientY = ev.clientY;
+            } else {
+                clientX = ev.changedTouches[0].clientX;
+                clientY = ev.changedTouches[0].clientY;
+            }
+
+            const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
+
+            if (lastWasTouchRef.current !== args.isTouch) {
+                setLastWasTouch(args.isTouch);
+            }
+
+            if (!isOutside && ev.cancelable) {
+                ev.preventDefault();
+            }
+
+            const [col] = args.location;
+            const headerBounds = isOverHeaderMenu(canvas, col, clientX, clientY);
+            if (args.kind === headerKind && headerBounds !== undefined) {
+                if (args.button === 0 && downPosition.current?.[0] === col && downPosition.current?.[1] === -1) {
+                    onHeaderMenuClick?.(col, headerBounds);
+                }
+                return;
+            } else if (args.kind === groupHeaderKind) {
+                const action = groupHeaderActionForEvent(args.group, args.bounds, args.localEventX, args.localEventY);
+                if (action !== undefined) {
+                    if (args.button === 0) {
+                        action.onClick(args);
+                    }
+                    return;
+                }
+            }
+
+            onClick?.(args);
+        },
         [
-            onMouseUp,
+            onClick,
             eventTargetRef,
             getMouseArgsForPosition,
             isOverHeaderMenu,
@@ -1017,8 +1067,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             groupHeaderActionForEvent,
         ]
     );
-    useEventListener("click", onMouseUpImpl, window, false);
-    useEventListener("touchend", onMouseUpImpl, window, false);
+    useEventListener("click", onClickImpl, window, false);
 
     const onContextMenuImpl = React.useCallback(
         (ev: MouseEvent) => {
