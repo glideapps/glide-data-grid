@@ -152,7 +152,6 @@ export interface DataGridProps {
     readonly onMouseMove: (args: GridMouseEventArgs) => void;
     readonly onMouseDown: (args: GridMouseEventArgs) => void;
     readonly onMouseUp: (args: GridMouseEventArgs, isOutside: boolean) => void;
-    readonly onClick: (args: GridMouseEventArgs) => void;
     readonly onContextMenu: (args: GridMouseEventArgs, preventDefault: () => void) => void;
 
     readonly onCanvasFocused: () => void;
@@ -324,7 +323,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         drawFocusRing = true,
         onMouseDown,
         onMouseUp,
-        onClick,
         onMouseMoveRaw,
         onMouseMove,
         onItemHovered,
@@ -1045,27 +1043,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 if (args.button === 0 && downPosition.current?.[0] === col && downPosition.current?.[1] === -1) {
                     onHeaderMenuClick?.(col, headerBounds);
                 }
-                return;
             } else if (args.kind === groupHeaderKind) {
                 const action = groupHeaderActionForEvent(args.group, args.bounds, args.localEventX, args.localEventY);
-                if (action !== undefined) {
-                    if (args.button === 0) {
-                        action.onClick(args);
-                    }
-                    return;
+                if (action !== undefined && args.button === 0) {
+                    action.onClick(args);
                 }
             }
-
-            onClick?.(args);
         },
-        [
-            onClick,
-            eventTargetRef,
-            getMouseArgsForPosition,
-            isOverHeaderMenu,
-            onHeaderMenuClick,
-            groupHeaderActionForEvent,
-        ]
+        [eventTargetRef, getMouseArgsForPosition, isOverHeaderMenu, onHeaderMenuClick, groupHeaderActionForEvent]
     );
     useEventListener("click", onClickImpl, window, false);
 
