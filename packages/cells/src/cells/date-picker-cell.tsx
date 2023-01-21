@@ -28,6 +28,8 @@ const renderer: CustomRenderer<DatePickerCell> = {
             val = date.toISOString();
             if (format === "date") {
                 val = val.split("T")[0];
+            } else {
+                val = val.substring(0, 23);
             }
         }
         return (
