@@ -1467,6 +1467,106 @@ describe("data-editor", () => {
         expect(overlay).not.toBeInTheDocument();
     });
 
+    test("Send edit with click off", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellEdited={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        fireEvent.keyUp(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        const overlay = screen.getByDisplayValue("j");
+        expect(overlay).toBeInTheDocument();
+
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 5 + 16, // Row 1 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(spy).toBeCalledWith([1, 1], expect.objectContaining({ data: "j" }));
+        expect(overlay).not.toBeInTheDocument();
+    });
+
+    test("Send edit with touch off", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellEdited={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        fireEvent.keyUp(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        const overlay = screen.getByDisplayValue("j");
+        expect(overlay).toBeInTheDocument();
+
+        sendTouchClick(canvas, {
+            touches: [
+                {
+                    clientX: 300, // Col B
+                    clientY: 36 + 32 * 5 + 16, // Row 1 (0 indexed)}
+                },
+            ],
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(spy).toBeCalledWith([1, 1], expect.objectContaining({ data: "j" }));
+        expect(overlay).not.toBeInTheDocument();
+    });
+
     test("Directly toggle booleans", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
