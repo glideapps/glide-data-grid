@@ -104,12 +104,10 @@ type Props = Partial<
         | "onMouseDown"
         | "onMouseMove"
         | "onMouseUp"
-        | "onSearchResultsChanged"
         | "onVisibleRegionChanged"
         | "rowHeight"
         | "rows"
         | "scrollRef"
-        | "searchColOffset"
         | "searchInputRef"
         | "selectedColumns"
         | "selection"
@@ -712,6 +710,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onGroupHeaderRenamed,
         onCellEdited,
         onCellsEdited,
+        onSearchResultsChanged: onSearchResultsChangedIn,
+        searchResults,
+        onSearchValueChange,
+        searchValue,
         onKeyDown: onKeyDownIn,
         onKeyUp: onKeyUpIn,
         keybindings: keybindingsIn,
@@ -3295,6 +3297,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onSearchResultsChanged = React.useCallback(
         (results: readonly Item[], navIndex: number) => {
+            if (onSearchResultsChangedIn !== undefined) {
+                if (rowMarkerOffset !== 0) {
+                    results = results.map(item => [item[0] - rowMarkerOffset, item[1]]);
+                }
+                onSearchResultsChangedIn(results, navIndex);
+                return;
+            }
             if (results.length === 0 || navIndex === -1) return;
 
             const [col, row] = results[navIndex];
@@ -3304,7 +3313,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             lastSent.current = [col, row];
             updateSelectedCell(col, row, false, false);
         },
-        [updateSelectedCell]
+        [onSearchResultsChangedIn, rowMarkerOffset, updateSelectedCell]
     );
 
     // this effects purpose in life is to scroll the newly selected cell into view when and ONLY when that cell
@@ -3622,6 +3631,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onVisibleRegionChanged={onVisibleRegionChangedImpl}
                     clientSize={[clientSize[0], clientSize[1]]}
                     rowHeight={rowHeight}
+                    searchResults={searchResults}
+                    searchValue={searchValue}
+                    onSearchValueChange={onSearchValueChange}
                     rows={mangledRows}
                     scrollRef={scrollRef}
                     selection={gridSelection}
