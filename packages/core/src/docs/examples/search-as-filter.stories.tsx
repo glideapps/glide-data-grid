@@ -1,13 +1,7 @@
 import React from "react";
 import { useEventListener } from "../../common/utils";
 import { DataEditor } from "../../data-editor/data-editor";
-import {
-    BeautifulWrapper,
-    Description,
-    PropName,
-    defaultProps,
-    useAllMockedKinds,
-} from "../../data-editor/stories/utils";
+import { BeautifulWrapper, Description, defaultProps, useAllMockedKinds } from "../../data-editor/stories/utils";
 import type { GridSelection } from "../../data-grid/data-grid-types";
 import { CompactSelection } from "../../data-grid/data-grid-types";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
