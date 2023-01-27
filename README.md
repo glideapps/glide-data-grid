@@ -102,6 +102,8 @@ function getData([col, row]: Item): GridCell {
 }
 ```
 
+You can edit [this example live](https://codesandbox.io/s/glide-data-grid-template-ydvnnk) on CodeSandbox
+
 ## Full API documentation
 
 The full [API documentation is on the main site](https://grid.glideapps.com/docs/index.html).
