@@ -19,7 +19,7 @@ export type DateKind = "date" | "time" | "datetime-local";
 
 export const formatValueForHTMLInput = (dateKind: DateKind, date: Date | undefined): string => {
     if (date === undefined) {
-        return ""
+        return "";
     }
     switch (dateKind) {
         case "date":
