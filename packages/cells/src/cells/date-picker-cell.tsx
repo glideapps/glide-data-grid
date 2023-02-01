@@ -6,6 +6,7 @@ import {
     drawTextCell,
     GridCellKind,
     ProvideEditorCallback,
+    TextCellEntry,
 } from "@glideapps/glide-data-grid";
 
 interface DatePickerCellProps {
@@ -13,6 +14,10 @@ interface DatePickerCellProps {
     readonly date: Date | undefined;
     readonly displayDate: string;
     readonly format: DateKind;
+    readonly readonly?: boolean;
+    readonly min?: string;
+    readonly max?: string;
+    readonly step?: string;
 }
 
 export type DateKind = "date" | "time" | "datetime-local";
@@ -37,37 +42,40 @@ export type DatePickerCell = CustomCell<DatePickerCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
     const cellData = cell.value.data;
-    const { date, displayDate, format } = cellData;
+    const { min, max, step, readonly, format, displayDate } = cellData;
     const value = formatValueForHTMLInput(format, cellData.date);
-
+    if (readonly) {
+        return (
+            <TextCellEntry
+                highlight={true}
+                autoFocus={false}
+                disabled={true}
+                value={displayDate ?? ""}
+                onChange={() => undefined}
+            />
+        );
+    }
     return (
         <input
             required
             style={{ minHeight: 26, border: "none", outline: "none" }}
             type={format}
             value={value}
+            min={min}
+            max={max}
+            step={step}
             autoFocus={true}
             onChange={event => {
-                // handle when clear is clicked and value has been wiped
                 if (event.target.value === "") {
-                    try {
-                        cell.onChange({
-                            ...cell.value,
-                            data: {
-                                ...cell.value.data,
-                                // attempt to reset to cached date
-                                date: date !== undefined ? date : new Date(displayDate),
-                            },
-                        });
-                    } catch (error) {
-                        cell.onChange({
-                            ...cell.value,
-                            data: {
-                                ...cell.value.data,
-                                displayDate: String(error),
-                            },
-                        });
-                    }
+                    cell.onChange({
+                        ...cell.value,
+                        data: {
+                            ...cell.value.data,
+                            // just set the value to undefined if submitted (enter or clicking out)
+                            // escape still works
+                            date: undefined,
+                        },
+                    });
                 } else {
                     cell.onChange({
                         ...cell.value,
