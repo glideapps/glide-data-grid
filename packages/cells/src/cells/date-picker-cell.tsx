@@ -1,4 +1,5 @@
 import React from "react";
+import { assertNever } from "../../../core/src/common/support";
 import {
     CustomCell,
     CustomRenderer,
@@ -11,20 +12,22 @@ interface DatePickerCellProps {
     readonly kind: "date-picker-cell";
     readonly date: Date | undefined;
     readonly displayDate: string;
-    readonly format: "date" | "time" | "datetime-local";
+    readonly format: DateType;
 }
 
-export const formatValueForHTMLInput = (format: "date" | "time" | "datetime-local", date: Date): string => {
-    if (format === "date") {
-        return date.toISOString().split("T")[0];
+export type DateType = "date" | "time" | "datetime-local";
+
+export const formatValueForHTMLInput = (format: DateType, date: Date): string => {
+    switch (format) {
+        case "date":
+            return date.toISOString().split("T")[0];
+        case "datetime-local":
+            return date.toISOString().replace("Z", "");
+        case "time":
+            return date.toISOString().split("T")[1].replace("Z", "");
+        default:
+            assertNever(format);
     }
-    if (format === "time") {
-        return date.toISOString().split("T")[1].replace("Z", "");
-    }
-    if (format === "datetime-local") {
-        return date.toISOString().replace("Z", "");
-    }
-    return "";
 };
 
 export type DatePickerCell = CustomCell<DatePickerCellProps>;
@@ -48,35 +51,25 @@ const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
             onChange={event => {
                 // handle when clear is clicked and value has been wiped
                 if (event.target.value === "") {
-                    try {
-                        cell.onChange({
-                            ...cell.value,
-                            data: {
-                                ...cell.value.data,
-                                // attempt to reset to cached date
-                                date: date !== undefined ? date : new Date(displayDate),
-                            },
-                        });
-                    } catch (error) {
-                        cell.onChange({
-                            ...cell.value,
-                            data: {
-                                ...cell.value.data,
-                                displayDate: String(error),
-                            },
-                        });
-                    }
-                    return;
+                    cell.onChange({
+                        ...cell.value,
+                        data: {
+                            ...cell.value.data,
+                            // attempt to reset to cached date
+                            date: date !== undefined ? date : new Date(displayDate),
+                        },
+                    });
+                } else {
+                    cell.onChange({
+                        ...cell.value,
+                        data: {
+                            ...cell.value.data,
+                            // use valueAsNumber because valueAsDate is null for "datetime-local"
+                            // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local#technical_summary
+                            date: new Date(event.target.valueAsNumber) ?? cellDataDate,
+                        },
+                    });
                 }
-                cell.onChange({
-                    ...cell.value,
-                    data: {
-                        ...cell.value.data,
-                        // use valueAsNumber because valueAsDate is null for "datetime-local"
-                        // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local#technical_summary
-                        date: new Date(event.target.valueAsNumber) ?? cellDataDate,
-                    },
-                });
             }}
         />
     );
