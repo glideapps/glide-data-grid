@@ -2094,9 +2094,10 @@ describe("data-editor", () => {
         render(
             <EventedDataEditor
                 {...basicProps}
+                rowMarkers="both"
                 gridSelection={{
                     current: undefined,
-                    rows: CompactSelection.fromSingleSelection([3, 6]),
+                    rows: CompactSelection.fromSingleSelection([3, 4]),
                     columns: CompactSelection.empty(),
                 }}
             />,
@@ -2111,7 +2112,9 @@ describe("data-editor", () => {
 
         fireEvent.copy(window);
         await new Promise(resolve => setTimeout(resolve, 10));
-        expect(navigator.clipboard.writeText).toBeCalled();
+        expect(navigator.clipboard.writeText).toBeCalledWith(
+            '"Data: 0, 3"\t"1, 3"\t"2, 3"\t3\tFoobar\t************\tFoobar\t\t"שלום 8, 3"\t"# Header: 9, 3"\thttps://example.com/10/3'
+        );
     });
 
     test("Copy cols", async () => {

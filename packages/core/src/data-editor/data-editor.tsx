@@ -3245,7 +3245,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             {
                                 x: rowMarkerOffset,
                                 y: rowIndex,
-                                width: columnsIn.length - rowMarkerOffset,
+                                width: columnsIn.length,
                                 height: 1,
                             },
                             abortControllerRef.current.signal
