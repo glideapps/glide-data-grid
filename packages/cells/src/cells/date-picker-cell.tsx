@@ -12,13 +12,13 @@ interface DatePickerCellProps {
     readonly kind: "date-picker-cell";
     readonly date: Date | undefined;
     readonly displayDate: string;
-    readonly format: DateType;
+    readonly dateKind: DateType;
 }
 
 export type DateType = "date" | "time" | "datetime-local";
 
-export const formatValueForHTMLInput = (format: DateType, date: Date): string => {
-    switch (format) {
+export const formatValueForHTMLInput = (dateKind: DateType, date: Date): string => {
+    switch (dateKind) {
         case "date":
             return date.toISOString().split("T")[0];
         case "datetime-local":
@@ -26,7 +26,7 @@ export const formatValueForHTMLInput = (format: DateType, date: Date): string =>
         case "time":
             return date.toISOString().split("T")[1].replace("Z", "");
         default:
-            assertNever(format);
+            assertNever(dateKind);
     }
 };
 
@@ -34,18 +34,18 @@ export type DatePickerCell = CustomCell<DatePickerCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
     const cellData = cell.value.data;
-    const { date, displayDate, format } = cellData;
+    const { date, displayDate, dateKind } = cellData;
     const cellDataDate =
         cellData.date ??
         // now as date with adjusted timezone to allow for displayDate to be correct
         new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000);
-    const value = formatValueForHTMLInput(format, cellDataDate);
+    const value = formatValueForHTMLInput(dateKind, cellDataDate);
 
     return (
         <input
             required
             style={{ minHeight: 26, border: "none", outline: "none" }}
-            type={format}
+            type={dateKind}
             value={value}
             autoFocus={true}
             onChange={event => {
