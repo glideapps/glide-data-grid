@@ -12,12 +12,15 @@ interface DatePickerCellProps {
     readonly kind: "date-picker-cell";
     readonly date: Date | undefined;
     readonly displayDate: string;
-    readonly dateKind: DateType;
+    readonly format: DateKind;
 }
 
-export type DateType = "date" | "time" | "datetime-local";
+export type DateKind = "date" | "time" | "datetime-local";
 
-export const formatValueForHTMLInput = (dateKind: DateType, date: Date): string => {
+export const formatValueForHTMLInput = (dateKind: DateKind, date: Date | undefined): string => {
+    if (date === undefined) {
+        return ""
+    }
     switch (dateKind) {
         case "date":
             return date.toISOString().split("T")[0];
@@ -34,18 +37,14 @@ export type DatePickerCell = CustomCell<DatePickerCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
     const cellData = cell.value.data;
-    const { date, displayDate, dateKind } = cellData;
-    const cellDataDate =
-        cellData.date ??
-        // now as date with adjusted timezone to allow for displayDate to be correct
-        new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000);
-    const value = formatValueForHTMLInput(dateKind, cellDataDate);
+    const { date, displayDate, format } = cellData;
+    const value = formatValueForHTMLInput(format, cellData.date);
 
     return (
         <input
             required
             style={{ minHeight: 26, border: "none", outline: "none" }}
-            type={dateKind}
+            type={format}
             value={value}
             autoFocus={true}
             onChange={event => {
@@ -76,7 +75,7 @@ const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
                             ...cell.value.data,
                             // use valueAsNumber because valueAsDate is null for "datetime-local"
                             // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local#technical_summary
-                            date: new Date(event.target.valueAsNumber) ?? cellDataDate,
+                            date: new Date(event.target.valueAsNumber) ?? cellData.date,
                         },
                     });
                 }
