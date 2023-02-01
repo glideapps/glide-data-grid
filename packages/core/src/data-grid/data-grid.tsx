@@ -34,7 +34,7 @@ import {
     ImageWindowLoader,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
-import { useDebouncedMemo, useEventListener } from "../common/utils";
+import { direction, useDebouncedMemo, useEventListener } from "../common/utils";
 import clamp from "lodash/clamp.js";
 import makeRange from "lodash/range.js";
 import {
@@ -874,7 +874,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     headerBounds.x,
                     headerBounds.y,
                     headerBounds.width,
-                    headerBounds.height
+                    headerBounds.height,
+                    direction(header.title) === "rtl"
                 );
                 if (
                     clientX > menuBounds.x &&
