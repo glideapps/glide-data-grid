@@ -225,7 +225,7 @@ const formatBoolean = (val: boolean | BooleanEmpty | BooleanIndeterminate): stri
             return "";
 
         default:
-            assertNever(val);
+            assertNever(val, `A boolean was formated with invalid type: ${typeof val}`);
     }
 };
 
@@ -259,7 +259,7 @@ export function formatCell(cell: GridCell, index: number, raw: boolean, columnIn
         case GridCellKind.Custom:
             return escape(cell.copyData);
         default:
-            assertNever(cell);
+            assertNever(cell, `A cell was passed with an invalid kind: ${(cell as any).kind}`);
     }
 }
 

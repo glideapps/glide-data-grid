@@ -323,7 +323,7 @@ export const CustomCells: React.VFC = () => {
                                 kind: "date-picker-cell",
                                 date: new Date(),
                                 displayDate: new Date().toISOString(),
-                                format: "date",
+                                format: "datetime-local",
                             },
                         };
                         return d;

@@ -1467,6 +1467,106 @@ describe("data-editor", () => {
         expect(overlay).not.toBeInTheDocument();
     });
 
+    test("Send edit with click off", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellEdited={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        fireEvent.keyUp(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        const overlay = screen.getByDisplayValue("j");
+        expect(overlay).toBeInTheDocument();
+
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 5 + 16, // Row 1 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(spy).toBeCalledWith([1, 1], expect.objectContaining({ data: "j" }));
+        expect(overlay).not.toBeInTheDocument();
+    });
+
+    test("Send edit with touch off", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellEdited={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        fireEvent.keyUp(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        const overlay = screen.getByDisplayValue("j");
+        expect(overlay).toBeInTheDocument();
+
+        sendTouchClick(canvas, {
+            touches: [
+                {
+                    clientX: 300, // Col B
+                    clientY: 36 + 32 * 5 + 16, // Row 1 (0 indexed)}
+                },
+            ],
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(spy).toBeCalledWith([1, 1], expect.objectContaining({ data: "j" }));
+        expect(overlay).not.toBeInTheDocument();
+    });
+
     test("Directly toggle booleans", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
@@ -1994,9 +2094,10 @@ describe("data-editor", () => {
         render(
             <EventedDataEditor
                 {...basicProps}
+                rowMarkers="both"
                 gridSelection={{
                     current: undefined,
-                    rows: CompactSelection.fromSingleSelection([3, 6]),
+                    rows: CompactSelection.fromSingleSelection([3, 4]),
                     columns: CompactSelection.empty(),
                 }}
             />,
@@ -2011,7 +2112,9 @@ describe("data-editor", () => {
 
         fireEvent.copy(window);
         await new Promise(resolve => setTimeout(resolve, 10));
-        expect(navigator.clipboard.writeText).toBeCalled();
+        expect(navigator.clipboard.writeText).toBeCalledWith(
+            '"Data: 0, 3"\t"1, 3"\t"2, 3"\t3\tFoobar\t************\tFoobar\t\t"שלום 8, 3"\t"# Header: 9, 3"\thttps://example.com/10/3'
+        );
     });
 
     test("Copy cols", async () => {

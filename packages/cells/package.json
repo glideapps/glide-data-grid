@@ -1,6 +1,6 @@
 {
     "name": "@glideapps/glide-data-grid-cells",
-    "version": "5.2.1",
+    "version": "5.2.2-beta2",
     "description": "Extra cells for glide-data-grid",
     "sideEffects": [
         "**/*.css"
@@ -27,7 +27,8 @@
         "build": "npm run build-js && npm run build-types",
         "build-js": "node build.cjs && tsc-esm-fix --target='dist/js'",
         "build-types": "tsc -p tsconfig.types.json",
-        "lint": "eslint src --ext .ts,.tsx"
+        "lint": "eslint src --ext .ts,.tsx",
+        "test": "jest"
     },
     "repository": {
         "type": "git",
@@ -50,7 +51,7 @@
         "canvas"
     ],
     "dependencies": {
-        "@glideapps/glide-data-grid": "5.2.1",
+        "@glideapps/glide-data-grid": "5.2.2-beta2",
         "@toast-ui/editor": "3.1.10",
         "@toast-ui/react-editor": "3.1.10",
         "react-select": "^5.2.2"
