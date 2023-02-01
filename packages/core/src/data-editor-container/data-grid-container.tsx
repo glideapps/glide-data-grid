@@ -27,6 +27,8 @@ const Wrapper = styled.div<{ innerWidth: string; innerHeight: string }>`
 
     contain: strict;
 
+    direction: ltr;
+
     > :first-child {
         position: absolute;
         left: 0;
