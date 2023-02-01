@@ -1,5 +1,5 @@
 import React from "react";
-import { assertNever } from "./common/support"
+import { assertNever } from "./common/support";
 import {
     CustomCell,
     CustomRenderer,
@@ -51,14 +51,24 @@ const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
             onChange={event => {
                 // handle when clear is clicked and value has been wiped
                 if (event.target.value === "") {
-                    cell.onChange({
-                        ...cell.value,
-                        data: {
-                            ...cell.value.data,
-                            // attempt to reset to cached date
-                            date: date !== undefined ? date : new Date(displayDate),
-                        },
-                    });
+                    try {
+                        cell.onChange({
+                            ...cell.value,
+                            data: {
+                                ...cell.value.data,
+                                // attempt to reset to cached date
+                                date: date !== undefined ? date : new Date(displayDate),
+                            },
+                        });
+                    } catch (error) {
+                        cell.onChange({
+                            ...cell.value,
+                            data: {
+                                ...cell.value.data,
+                                displayDate: String(error),
+                            },
+                        });
+                    }
                 } else {
                     cell.onChange({
                         ...cell.value,
