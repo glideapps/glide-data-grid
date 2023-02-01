@@ -1,5 +1,5 @@
 import React from "react";
-import { assertNever } from "../../../core/src/common/support";
+import { assertNever } from "./common/support"
 import {
     CustomCell,
     CustomRenderer,
