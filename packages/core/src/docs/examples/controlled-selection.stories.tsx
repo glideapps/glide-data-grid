@@ -31,6 +31,9 @@ export const ControlledSelection: React.VFC = () => {
         rows: CompactSelection.empty(),
     });
 
+    const [centerScroll, setCenterScroll] = React.useState(false);
+    const handleCenterScroll = () => setCenterScroll(s => !s);
+
     return (
         <BeautifulWrapper
             title="Controlled Selection"
@@ -82,12 +85,26 @@ export const ControlledSelection: React.VFC = () => {
                             }));
                         }}
                     />
+                    <div>
+                        <span style={{ fontSize: "14px", display: "flex", alignItems: "center" }}>
+                            <input
+                                type="checkbox"
+                                name="site_name"
+                                checked={centerScroll}
+                                onChange={handleCenterScroll}
+                            />
+                            <span onClick={handleCenterScroll}>Centered scrolling</span>
+                        </span>
+                    </div>
                 </Description>
             }>
             <DataEditor
                 {...defaultProps}
                 getCellContent={getCellContent}
                 gridSelection={selection}
+                gridSelectionScrollOptions={
+                    centerScroll ? { options: { hAlign: "center", vAlign: "center" } } : undefined
+                }
                 onGridSelectionChange={setSelection}
                 columns={cols}
                 rows={100}
