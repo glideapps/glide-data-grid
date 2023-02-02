@@ -11,7 +11,7 @@ import {
     BooleanEmpty,
     BooleanIndeterminate,
 } from "./data-grid-types";
-import { degreesToRadians, direction } from "../common/utils";
+import { degreesToRadians, direction, pointIsWithinBB } from "../common/utils";
 import React from "react";
 import type { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
@@ -574,14 +574,14 @@ export function drawCheckbox(
 
     // Checkbox bounding box coordinates
     const bb = {
-        ix: posX - checkBoxHalfWidth,
-        iy: centerY - checkBoxHalfWidth,
-        ax: posX + checkBoxHalfWidth,
-        ay: centerY + checkBoxHalfWidth,
+        x1: posX - checkBoxHalfWidth,
+        y1: centerY - checkBoxHalfWidth,
+        x2: posX + checkBoxHalfWidth,
+        y2: centerY + checkBoxHalfWidth,
     };
     const hX = x + hoverX;
     const hY = y + hoverY;
-    const hovered = bb.ix <= hX && hX <= bb.ax && bb.iy <= hY && hY <= bb.ay;
+    const hovered = pointIsWithinBB(hX, hY, bb);
 
     switch (checked) {
         case true: {

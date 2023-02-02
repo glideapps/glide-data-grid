@@ -47,6 +47,11 @@ export function degreesToRadians(degrees: number) {
     return (degrees * PI) / 180;
 }
 
+type BoundingBox = { x1: number; y1: number; x2: number; y2: number };
+export function pointIsWithinBB(x: number, y: number, bb: BoundingBox) {
+    return bb.x1 <= x && x <= bb.x2 && bb.y1 <= y && y <= bb.y2;
+}
+
 /**
  * The input provided to a sprite function.
  *
