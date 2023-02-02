@@ -556,24 +556,33 @@ export function drawCheckbox(
 
     const checkBoxWidth = Math.min(maxSize, height - theme.cellVerticalPadding * 2);
 
-    const hoverHelper = checkBoxWidth / 2;
-    const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;
-
     const rectBordRadius = 4;
-    const posHelperChecked = checkBoxWidth / 2;
+    const checkBoxHalfWidth = checkBoxWidth / 2;
 
     let posX;
     switch (alignment) {
         case "left":
-            posX = Math.floor(x) + theme.cellHorizontalPadding + posHelperChecked;
+            posX = Math.floor(x) + theme.cellHorizontalPadding + checkBoxHalfWidth;
             break;
         case "center":
             posX = centerX;
             break;
         case "right":
-            posX = Math.floor(x + width) - theme.cellHorizontalPadding - posHelperChecked;
+            posX = Math.floor(x + width) - theme.cellHorizontalPadding - checkBoxHalfWidth;
             break;
     }
+
+    // Checkbox bounding box coordinates
+    const bb = {
+        ix: posX - checkBoxHalfWidth,
+        iy: centerY - checkBoxHalfWidth,
+        ax: posX + checkBoxHalfWidth,
+        ay: centerY + checkBoxHalfWidth,
+    };
+    const hX = x + hoverX;
+    const hY = y + hoverY;
+    const hovered = bb.ix <= hX && hX <= bb.ax && bb.iy <= hY && hY <= bb.ay;
+
     switch (checked) {
         case true: {
             ctx.beginPath();
@@ -591,16 +600,16 @@ export function drawCheckbox(
 
             ctx.beginPath();
             ctx.moveTo(
-                posX - posHelperChecked + checkBoxWidth / 4.23,
-                centerY - posHelperChecked + checkBoxWidth / 1.97
+                posX - checkBoxHalfWidth + checkBoxWidth / 4.23,
+                centerY - checkBoxHalfWidth + checkBoxWidth / 1.97
             );
             ctx.lineTo(
-                posX - posHelperChecked + checkBoxWidth / 2.42,
-                centerY - posHelperChecked + checkBoxWidth / 1.44
+                posX - checkBoxHalfWidth + checkBoxWidth / 2.42,
+                centerY - checkBoxHalfWidth + checkBoxWidth / 1.44
             );
             ctx.lineTo(
-                posX - posHelperChecked + checkBoxWidth / 1.29,
-                centerY - posHelperChecked + checkBoxWidth / 3.25
+                posX - checkBoxHalfWidth + checkBoxWidth / 1.29,
+                centerY - checkBoxHalfWidth + checkBoxWidth / 3.25
             );
 
             ctx.strokeStyle = theme.bgCell;
