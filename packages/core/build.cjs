@@ -4,7 +4,7 @@ const { dependencies, peerDependencies } = require("./package.json");
 const fs = require("fs");
 
 const shared = {
-    entryPoints: ["src/index.ts"],
+    entryPoints: ["src/index.ts", "src/data-editor-base.ts"],
     bundle: true,
     minify: false,
     sourcemap: true,
@@ -20,7 +20,7 @@ const shared = {
 async function f() {
     await build({
         ...shared,
-        outfile: "dist/cjs/index.js",
+        outdir: "dist/cjs",
         format: "cjs",
     });
 

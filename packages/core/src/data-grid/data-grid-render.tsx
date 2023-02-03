@@ -33,7 +33,6 @@ import {
     cellIsInRange,
     computeBounds,
     getMiddleCenterBias,
-    drawCheckbox,
 } from "./data-grid-lib";
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import type { Theme } from "../common/styles";
@@ -41,6 +40,7 @@ import { blend, withAlpha } from "./color-parser";
 import type { DrawArgs, GetCellRendererCallback, PrepResult } from "./cells/cell-types";
 import { assert, deepEqual } from "../common/support";
 import { direction } from "../common/utils";
+import { drawCheckbox } from "./data-grid-drawing";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when

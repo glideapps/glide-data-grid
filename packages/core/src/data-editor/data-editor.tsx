@@ -59,8 +59,7 @@ import { unquote, expandSelection, copyToClipboard, decodeHTML } from "./data-ed
 import { DataEditorContainer } from "../data-editor-container/data-grid-container";
 import { toggleBoolean } from "../data-grid/cells/boolean-cell";
 import { useAutoscroll } from "./use-autoscroll";
-import type { CustomRenderer, CellRenderer } from "../data-grid/cells/cell-types";
-import { CellRenderers } from "../data-grid/cells";
+import type { CustomRenderer, CellRenderer, InternalCellRenderer } from "../data-grid/cells/cell-types";
 
 let idCounter = 0;
 
@@ -605,6 +604,8 @@ export interface DataEditorProps extends Props {
      */
     readonly customRenderers?: readonly CustomRenderer<CustomCell<any>>[];
 
+    readonly renderers?: readonly InternalCellRenderer<InnerGridCell>[];
+
     readonly scaleToRem?: boolean;
 }
 
@@ -785,6 +786,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         headerHeight: headerHeightIn = 36,
         groupHeaderHeight: groupHeaderHeightIn = headerHeightIn,
         theme: themeIn,
+        renderers,
     } = p;
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
@@ -968,14 +970,23 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const [clientSize, setClientSize] = React.useState<readonly [number, number, number]>([10, 10, 0]);
 
+    const rendererMap = React.useMemo(() => {
+        if (renderers === undefined) return {};
+        const result: Partial<Record<InnerGridCellKind | GridCellKind, InternalCellRenderer<InnerGridCell>>> = {};
+        for (const r of renderers) {
+            result[r.kind] = r;
+        }
+        return result;
+    }, [renderers]);
+
     const getCellRenderer: <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined = React.useCallback(
         <T extends InnerGridCell>(cell: T) => {
             if (cell.kind !== GridCellKind.Custom) {
-                return CellRenderers[cell.kind] as unknown as CellRenderer<T>;
+                return rendererMap[cell.kind] as CellRenderer<T> | undefined;
             }
             return additionalRenderers?.find(x => x.isMatch(cell)) as CellRenderer<T>;
         },
-        [additionalRenderers]
+        [additionalRenderers, rendererMap]
     );
 
     const columns = useColumnSizer(

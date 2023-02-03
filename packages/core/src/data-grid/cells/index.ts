@@ -1,6 +1,7 @@
-import { GridCellKind, InnerGridCellKind } from "../data-grid-types";
+import type { InnerGridCell } from "../data-grid-types";
 import { booleanCellRenderer } from "./boolean-cell";
 import { bubbleCellRenderer } from "./bubble-cell";
+import type { InternalCellRenderer } from "./cell-types";
 import { drilldownCellRenderer } from "./drilldown-cell";
 import { imageCellRenderer } from "./image-cell";
 import { loadingCellRenderer } from "./loading-cell";
@@ -13,18 +14,18 @@ import { rowIDCellRenderer } from "./row-id-cell";
 import { textCellRenderer } from "./text-cell";
 import { uriCellRenderer } from "./uri-cell";
 
-export const CellRenderers = {
-    [InnerGridCellKind.Marker]: markerCellRenderer,
-    [InnerGridCellKind.NewRow]: newRowCellRenderer,
-    [GridCellKind.Boolean]: booleanCellRenderer,
-    [GridCellKind.Bubble]: bubbleCellRenderer,
-    [GridCellKind.Drilldown]: drilldownCellRenderer,
-    [GridCellKind.Image]: imageCellRenderer,
-    [GridCellKind.Loading]: loadingCellRenderer,
-    [GridCellKind.Markdown]: markdownCellRenderer,
-    [GridCellKind.Number]: numberCellRenderer,
-    [GridCellKind.Protected]: protectedCellRenderer,
-    [GridCellKind.RowID]: rowIDCellRenderer,
-    [GridCellKind.Text]: textCellRenderer,
-    [GridCellKind.Uri]: uriCellRenderer,
-};
+export const CellRenderers = [
+    markerCellRenderer,
+    newRowCellRenderer,
+    booleanCellRenderer,
+    bubbleCellRenderer,
+    drilldownCellRenderer,
+    imageCellRenderer,
+    loadingCellRenderer,
+    markdownCellRenderer,
+    numberCellRenderer,
+    protectedCellRenderer,
+    rowIDCellRenderer,
+    textCellRenderer,
+    uriCellRenderer,
+] as InternalCellRenderer<InnerGridCell>[];

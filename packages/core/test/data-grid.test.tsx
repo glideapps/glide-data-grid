@@ -100,7 +100,7 @@ const basicProps: DataGridProps = {
     verticalBorder: () => true,
     getCellRenderer: cell => {
         if (cell.kind === GridCellKind.Custom) return undefined;
-        return CellRenderers[cell.kind] as any;
+        return CellRenderers.find(x => x.kind === cell.kind) as any;
     },
 };
 

@@ -1,4 +1,4 @@
-import { drawBoolean } from "../data-grid-lib";
+import { drawCheckbox } from "../data-grid-drawing";
 import {
     GridCellKind,
     BooleanCell,
@@ -6,7 +6,7 @@ import {
     BooleanEmpty,
     BooleanIndeterminate,
 } from "../data-grid-types";
-import type { InternalCellRenderer } from "./cell-types";
+import type { BaseDrawArgs, InternalCellRenderer } from "./cell-types";
 
 /**
  * Checkbox behavior:
@@ -26,7 +26,6 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "false",
     kind: GridCellKind.Boolean,
     needsHover: true,
-    useLabel: false,
     needsHoverPosition: true,
     measure: () => 50,
     draw: a => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell), a.cell.maxSize ?? defaultCellMaxSize),
@@ -66,3 +65,32 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
               };
     },
 };
+
+function drawBoolean(
+    args: BaseDrawArgs,
+    data: boolean | BooleanEmpty | BooleanIndeterminate,
+    canEdit: boolean,
+    maxSize?: number
+) {
+    if (!canEdit && data === BooleanEmpty) {
+        return;
+    }
+
+    const { ctx, hoverAmount, theme, rect, highlighted, hoverX, hoverY } = args;
+    const { x, y, width: w, height: h } = rect;
+
+    const hoverEffect = 0.35;
+
+    let alpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
+    if (data === BooleanEmpty) {
+        alpha *= hoverAmount;
+    }
+    if (alpha === 0) {
+        return;
+    }
+    ctx.globalAlpha = alpha;
+
+    drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY, maxSize);
+
+    ctx.globalAlpha = 1;
+}
