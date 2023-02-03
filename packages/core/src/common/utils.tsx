@@ -54,6 +54,25 @@ export const getSquareBB = (posX: number, posY: number, squareSideLength: number
     y2: posY + squareSideLength / 2,
 });
 
+export const getSquareXPosFromAlign = (
+    alignment: "left" | "center" | "right",
+    containerX: number,
+    containerWidth: number,
+    horizontalPadding: number,
+    squareWidth: number
+) => {
+    switch (alignment) {
+        case "left":
+            return Math.floor(containerX) + horizontalPadding + squareWidth / 2;
+        case "center":
+            return Math.floor(containerX + containerWidth / 2);
+        case "right":
+            return Math.floor(containerX + containerWidth) - horizontalPadding - squareWidth / 2;
+    }
+};
+export const getSquareWidth = (maxSize: number, containerHeight: number, verticalPadding: number) =>
+    Math.min(maxSize, containerHeight - verticalPadding * 2);
+
 type BoundingBox = { x1: number; y1: number; x2: number; y2: number };
 export const pointIsWithinBB = (x: number, y: number, bb: BoundingBox) =>
     bb.x1 <= x && x <= bb.x2 && bb.y1 <= y && y <= bb.y2;

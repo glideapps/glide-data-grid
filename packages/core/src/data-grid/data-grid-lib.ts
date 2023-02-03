@@ -11,12 +11,18 @@ import {
     BooleanEmpty,
     BooleanIndeterminate,
 } from "./data-grid-types";
-import { degreesToRadians, direction, getSquareBB, pointIsWithinBB } from "../common/utils";
+import {
+    degreesToRadians,
+    direction,
+    getSquareWidth,
+    getSquareXPosFromAlign,
+    getSquareBB,
+    pointIsWithinBB,
+} from "../common/utils";
 import React from "react";
 import type { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
 import { split as splitText, clearCache } from "canvas-hypertxt";
-import { getCheckBoxWidth, getCheckBoxXPos } from "./cells/boolean-cell";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -554,9 +560,9 @@ export function drawCheckbox(
 ) {
     const centerY = Math.floor(y + height / 2);
     const rectBordRadius = 4;
-    const checkBoxWidth = getCheckBoxWidth(maxSize, height, theme.cellVerticalPadding);
+    const checkBoxWidth = getSquareWidth(maxSize, height, theme.cellVerticalPadding);
     const checkBoxHalfWidth = checkBoxWidth / 2;
-    const posX = getCheckBoxXPos(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);
+    const posX = getSquareXPosFromAlign(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);
     const bb = getSquareBB(posX, centerY, checkBoxWidth);
     const hovered = pointIsWithinBB(x + hoverX, y + hoverY, bb);
 

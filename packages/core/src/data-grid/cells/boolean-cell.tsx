@@ -1,4 +1,4 @@
-import { getSquareBB, pointIsWithinBB } from "../../common/utils";
+import { getSquareWidth, getSquareXPosFromAlign, getSquareBB, pointIsWithinBB } from "../../common/utils";
 import { drawBoolean } from "../data-grid-lib";
 import {
     GridCellKind,
@@ -23,25 +23,7 @@ export function toggleBoolean(data: boolean | null | undefined): boolean | null 
 
 const defaultCellMaxSize = 20;
 
-// Utils (keep pure)
-export const getCheckBoxXPos = (
-    alignment: "left" | "center" | "right",
-    cellX: number,
-    cellWidth: number,
-    horizontalPadding: number,
-    checkBoxWidth: number
-) => {
-    switch (alignment) {
-        case "left":
-            return Math.floor(cellX) + horizontalPadding + checkBoxWidth / 2;
-        case "center":
-            return Math.floor(cellX + cellWidth / 2);
-        case "right":
-            return Math.floor(cellX + cellWidth) - horizontalPadding - checkBoxWidth / 2;
-    }
-};
-export const getCheckBoxWidth = (maxSize: number, cellHeight: number, verticalPadding: number) =>
-    Math.min(maxSize, cellHeight - verticalPadding * 2);
+
 
 export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "false",
@@ -60,8 +42,8 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
         const { width, height, x: cellX, y: cellY } = bounds;
         const maxWidth = cell.maxSize ?? defaultCellMaxSize;
         const cellCenterY = Math.floor(bounds.y + height / 2);
-        const checkBoxWidth = getCheckBoxWidth(maxWidth, height, theme.cellVerticalPadding);
-        const posX = getCheckBoxXPos(
+        const checkBoxWidth = getSquareWidth(maxWidth, height, theme.cellVerticalPadding);
+        const posX = getSquareXPosFromAlign(
             cell.contentAlign ?? "center",
             cellX,
             width,
