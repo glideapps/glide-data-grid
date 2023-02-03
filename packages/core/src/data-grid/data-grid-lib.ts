@@ -11,11 +11,12 @@ import {
     BooleanEmpty,
     BooleanIndeterminate,
 } from "./data-grid-types";
-import { degreesToRadians, direction, pointIsWithinBB } from "../common/utils";
+import { degreesToRadians, direction, getSquareBB, pointIsWithinBB } from "../common/utils";
 import React from "react";
 import type { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
 import { split as splitText, clearCache } from "canvas-hypertxt";
+import { getCheckBoxWidth, getCheckBoxXPos } from "./cells/boolean-cell";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -551,37 +552,13 @@ export function drawCheckbox(
     maxSize: number = 32,
     alignment: BaseGridCell["contentAlign"] = "center"
 ) {
-    const centerX = Math.floor(x + width / 2);
     const centerY = Math.floor(y + height / 2);
-
-    const checkBoxWidth = Math.min(maxSize, height - theme.cellVerticalPadding * 2);
-
     const rectBordRadius = 4;
+    const checkBoxWidth = getCheckBoxWidth(maxSize, height, theme.cellVerticalPadding);
     const checkBoxHalfWidth = checkBoxWidth / 2;
-
-    let posX;
-    switch (alignment) {
-        case "left":
-            posX = Math.floor(x) + theme.cellHorizontalPadding + checkBoxHalfWidth;
-            break;
-        case "center":
-            posX = centerX;
-            break;
-        case "right":
-            posX = Math.floor(x + width) - theme.cellHorizontalPadding - checkBoxHalfWidth;
-            break;
-    }
-
-    // Checkbox bounding box coordinates
-    const bb = {
-        x1: posX - checkBoxHalfWidth,
-        y1: centerY - checkBoxHalfWidth,
-        x2: posX + checkBoxHalfWidth,
-        y2: centerY + checkBoxHalfWidth,
-    };
-    const hX = x + hoverX;
-    const hY = y + hoverY;
-    const hovered = pointIsWithinBB(hX, hY, bb);
+    const posX = getCheckBoxXPos(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);
+    const bb = getSquareBB(posX, centerY, checkBoxWidth);
+    const hovered = pointIsWithinBB(x + hoverX, y + hoverY, bb);
 
     switch (checked) {
         case true: {
