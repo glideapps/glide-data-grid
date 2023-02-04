@@ -511,7 +511,6 @@ export const CustomTreeCell: React.VFC = () => {
         { title: "Depth", width: 55 },
         { title: "Children", width: 70 },
         { title: "Collapsed", width: 80 },
-        { title: "Description", width: 200 }
     ], []);
 
     const getCellContent = React.useCallback(
@@ -519,7 +518,7 @@ export const CustomTreeCell: React.VFC = () => {
             const node = rows[row];
             const field = columns[col].title;
 
-            const { name, depth, children: { length }, collapsed, description } = node;
+            const { name, depth, children: { length }, collapsed } = node;
 
 
             const collapsedString = node.children.length > 0 ? (collapsed ? "YES" : "NO") : "N/A";
@@ -557,14 +556,6 @@ export const CustomTreeCell: React.VFC = () => {
                         kind: GridCellKind.Text,
                         displayData: collapsedString,
                         data: collapsedString,
-                        allowOverlay: false,
-                    };
-
-                case "Description":
-                    return {
-                        kind: GridCellKind.Text,
-                        displayData: description,
-                        data: description,
                         allowOverlay: false,
                     };
 

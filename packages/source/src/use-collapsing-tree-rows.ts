@@ -3,9 +3,8 @@ import React from "react";
 
 const names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"];
 
-const createNode = (name: string, description?: string, children: TreeNode[] = []): TreeNode => ({
+const createNode = (name: string, children: TreeNode[] = []): TreeNode => ({
     name,
-    description: description ?? `Item ${name}`,
     children
 });
 
@@ -24,7 +23,7 @@ const flattenTree = (tree: TreeNode): TreeNode[] => {
 }
 
 export function createSampleTree(): TreeNode {
-    const root = createNode("Root", "Root Item");
+    const root = createNode("Root");
 
     names.forEach(nameX => {
         const nodeX = createNode(nameX);

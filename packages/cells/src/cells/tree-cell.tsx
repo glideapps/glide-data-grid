@@ -2,7 +2,6 @@ import { CustomCell, CustomRenderer, GridCellKind, Rectangle, drawTextCell } fro
 
 export type TreeNode = {
   name: string;
-  description: string;
   depth?: number;
   collapsed?: boolean;
   children: TreeNode[];
