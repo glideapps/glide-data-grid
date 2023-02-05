@@ -49,6 +49,12 @@ export const ContentAlignment: React.VFC = () => {
                     contentAlign: "right",
                 };
             }
+            if (col === 5) {
+                return {
+                    ...getCellContent(cell),
+                    contentAlign: "left",
+                };
+            }
             return getCellContent(cell);
         },
         [getCellContent]
