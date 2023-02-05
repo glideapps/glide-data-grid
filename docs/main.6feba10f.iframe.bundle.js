@@ -9189,7 +9189,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stories_story_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/stories/story-utils.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Content Alignment\"\n                    description={\n                        <Description>\n                            You can customize the content alignment by setting <PropName>contentAlign</PropName> of a\n                            cell to <PropName>left</PropName>, <PropName>right</PropName> or <PropName>center</PropName>\n                            .\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ContentAlignment: React.VFC = () => {\n    const { cols, getCellContent } = useAllMockedKinds();\n\n    const mangledGetCellContent = React.useCallback<typeof getCellContent>(\n        cell => {\n            const [col, _row] = cell;\n            if (col === 3) {\n                return {\n                    ...getCellContent(cell),\n                    contentAlign: \"center\",\n                };\n            }\n            if (col === 4) {\n                return {\n                    ...getCellContent(cell),\n                    contentAlign: \"right\",\n                };\n            }\n            return getCellContent(cell);\n        },\n        [getCellContent]\n    );\n\n    return <DataEditor {...defaultProps} getCellContent={mangledGetCellContent} columns={cols} rows={300} />;\n};\n";
+var __STORY__ = "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Content Alignment\"\n                    description={\n                        <Description>\n                            You can customize the content alignment by setting <PropName>contentAlign</PropName> of a\n                            cell to <PropName>left</PropName>, <PropName>right</PropName> or <PropName>center</PropName>\n                            .\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ContentAlignment: React.VFC = () => {\n    const { cols, getCellContent } = useAllMockedKinds();\n\n    const mangledGetCellContent = React.useCallback<typeof getCellContent>(\n        cell => {\n            const [col, _row] = cell;\n            if (col === 3) {\n                return {\n                    ...getCellContent(cell),\n                    contentAlign: \"center\",\n                };\n            }\n            if (col === 4) {\n                return {\n                    ...getCellContent(cell),\n                    contentAlign: \"right\",\n                };\n            }\n            if (col === 5) {\n                return {\n                    ...getCellContent(cell),\n                    contentAlign: \"left\",\n                };\n            }\n            return getCellContent(cell);\n        },\n        [getCellContent]\n    );\n\n    return <DataEditor {...defaultProps} getCellContent={mangledGetCellContent} columns={cols} rows={300} />;\n};\n";
 var __LOCATIONS_MAP__ = {
   "ContentAlignment": {
     "startLoc": {
@@ -9198,7 +9198,7 @@ var __LOCATIONS_MAP__ = {
     },
     "endLoc": {
       "col": 1,
-      "line": 58
+      "line": 64
     },
     "startBody": {
       "col": 43,
@@ -9206,7 +9206,7 @@ var __LOCATIONS_MAP__ = {
     },
     "endBody": {
       "col": 1,
-      "line": 58
+      "line": 64
     }
   }
 };
@@ -9217,7 +9217,7 @@ var __LOCATIONS_MAP__ = {
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   parameters: {
     "storySource": {
-      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Content Alignment\"\n                    description={\n                        <Description>\n                            You can customize the content alignment by setting <PropName>contentAlign</PropName> of a\n                            cell to <PropName>left</PropName>, <PropName>right</PropName> or <PropName>center</PropName>\n                            .\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ContentAlignment: React.VFC = () => {\n    const { cols, getCellContent } = useAllMockedKinds();\n\n    const mangledGetCellContent = React.useCallback<typeof getCellContent>(\n        cell => {\n            const [col, _row] = cell;\n            if (col === 3) {\n                return {\n                    ...getCellContent(cell),\n                    contentAlign: \"center\",\n                };\n            }\n            if (col === 4) {\n                return {\n                    ...getCellContent(cell),\n                    contentAlign: \"right\",\n                };\n            }\n            return getCellContent(cell);\n        },\n        [getCellContent]\n    );\n\n    return <DataEditor {...defaultProps} getCellContent={mangledGetCellContent} columns={cols} rows={300} />;\n};\n",
+      "source": "import React from \"react\";\nimport { DataEditor } from \"../../data-editor/data-editor\";\nimport {\n    BeautifulWrapper,\n    Description,\n    PropName,\n    defaultProps,\n    useAllMockedKinds,\n} from \"../../data-editor/stories/utils\";\nimport { SimpleThemeWrapper } from \"../../stories/story-utils\";\n\nexport default {\n    title: \"Glide-Data-Grid/DataEditor Demos\",\n\n    decorators: [\n        (Story: React.ComponentType) => (\n            <SimpleThemeWrapper>\n                <BeautifulWrapper\n                    title=\"Content Alignment\"\n                    description={\n                        <Description>\n                            You can customize the content alignment by setting <PropName>contentAlign</PropName> of a\n                            cell to <PropName>left</PropName>, <PropName>right</PropName> or <PropName>center</PropName>\n                            .\n                        </Description>\n                    }>\n                    <Story />\n                </BeautifulWrapper>\n            </SimpleThemeWrapper>\n        ),\n    ],\n};\n\nexport const ContentAlignment: React.VFC = () => {\n    const { cols, getCellContent } = useAllMockedKinds();\n\n    const mangledGetCellContent = React.useCallback<typeof getCellContent>(\n        cell => {\n            const [col, _row] = cell;\n            if (col === 3) {\n                return {\n                    ...getCellContent(cell),\n                    contentAlign: \"center\",\n                };\n            }\n            if (col === 4) {\n                return {\n                    ...getCellContent(cell),\n                    contentAlign: \"right\",\n                };\n            }\n            if (col === 5) {\n                return {\n                    ...getCellContent(cell),\n                    contentAlign: \"left\",\n                };\n            }\n            return getCellContent(cell);\n        },\n        [getCellContent]\n    );\n\n    return <DataEditor {...defaultProps} getCellContent={mangledGetCellContent} columns={cols} rows={300} />;\n};\n",
       "locationsMap": {
         "content-alignment": {
           "startLoc": {
@@ -9226,7 +9226,7 @@ var __LOCATIONS_MAP__ = {
           },
           "endLoc": {
             "col": 1,
-            "line": 58
+            "line": 64
           },
           "startBody": {
             "col": 43,
@@ -9234,7 +9234,7 @@ var __LOCATIONS_MAP__ = {
           },
           "endBody": {
             "col": 1,
-            "line": 58
+            "line": 64
           }
         }
       }
@@ -9263,6 +9263,12 @@ const ContentAlignment = () => {
     if (col === 4) {
       return { ...getCellContent(cell),
         contentAlign: "right"
+      };
+    }
+
+    if (col === 5) {
+      return { ...getCellContent(cell),
+        contentAlign: "left"
       };
     }
 
@@ -16377,11 +16383,15 @@ function deepEqual(foo, bar) {
 /* harmony export */   "Iz": () => (/* binding */ getScrollBarWidth),
 /* harmony export */   "MC": () => (/* binding */ Checkmark),
 /* harmony export */   "OR": () => (/* binding */ useEventListener),
+/* harmony export */   "Qo": () => (/* binding */ getSquareWidth),
 /* harmony export */   "Qy": () => (/* binding */ useDebouncedMemo),
 /* harmony export */   "Wy": () => (/* binding */ EditPencil),
+/* harmony export */   "XC": () => (/* binding */ getSquareXPosFromAlign),
 /* harmony export */   "ig": () => (/* binding */ useStateWithReactiveInput),
+/* harmony export */   "kq": () => (/* binding */ getSquareBB),
 /* harmony export */   "o7": () => (/* binding */ direction),
-/* harmony export */   "qJ": () => (/* binding */ whenDefined)
+/* harmony export */   "qJ": () => (/* binding */ whenDefined),
+/* harmony export */   "qq": () => (/* binding */ pointIsWithinBB)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var lodash_debounce_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/lodash/debounce.js");
@@ -16420,6 +16430,26 @@ const PI = Math.PI;
 function degreesToRadians(degrees) {
   return degrees * PI / 180;
 }
+const getSquareBB = (posX, posY, squareSideLength) => ({
+  x1: posX - squareSideLength / 2,
+  y1: posY - squareSideLength / 2,
+  x2: posX + squareSideLength / 2,
+  y2: posY + squareSideLength / 2
+});
+const getSquareXPosFromAlign = (alignment, containerX, containerWidth, horizontalPadding, squareWidth) => {
+  switch (alignment) {
+    case "left":
+      return Math.floor(containerX) + horizontalPadding + squareWidth / 2;
+
+    case "center":
+      return Math.floor(containerX + containerWidth / 2);
+
+    case "right":
+      return Math.floor(containerX + containerWidth) - horizontalPadding - squareWidth / 2;
+  }
+};
+const getSquareWidth = (maxSize, containerHeight, verticalPadding) => Math.min(maxSize, containerHeight - verticalPadding * 2);
+const pointIsWithinBB = (x, y, bb) => bb.x1 <= x && x <= bb.x2 && bb.y1 <= y && y <= bb.y2;
 const EditPencil = props => {
   var _props$fgColor;
 
@@ -21487,8 +21517,10 @@ __webpack_require__("./packages/core/src/data-editor/stories/utils.linaria.css!=
 /* harmony export */   "D": () => (/* binding */ toggleBoolean),
 /* harmony export */   "j": () => (/* binding */ booleanCellRenderer)
 /* harmony export */ });
+/* harmony import */ var _common_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./packages/core/src/common/utils.tsx");
 /* harmony import */ var _data_grid_lib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/data-grid/data-grid-lib.ts");
 /* harmony import */ var _data_grid_types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./packages/core/src/data-grid/data-grid-types.ts");
+
 
 
 function toggleBoolean(data) {
@@ -21515,17 +21547,29 @@ const booleanCellRenderer = {
     data: false
   }),
   onClick: e => {
-    var _cell$maxSize;
+    var _cell$maxSize, _cell$contentAlign;
 
     const {
       cell,
-      posX: x,
-      posY: y,
-      bounds
+      posX: pointerX,
+      posY: pointerY,
+      bounds,
+      theme
     } = e;
+    const {
+      width,
+      height,
+      x: cellX,
+      y: cellY
+    } = bounds;
     const maxWidth = (_cell$maxSize = cell.maxSize) !== null && _cell$maxSize !== void 0 ? _cell$maxSize : defaultCellMaxSize;
+    const cellCenterY = Math.floor(bounds.y + height / 2);
+    const checkBoxWidth = (0,_common_utils__WEBPACK_IMPORTED_MODULE_2__/* .getSquareWidth */ .Qo)(maxWidth, height, theme.cellVerticalPadding);
+    const posX = (0,_common_utils__WEBPACK_IMPORTED_MODULE_2__/* .getSquareXPosFromAlign */ .XC)((_cell$contentAlign = cell.contentAlign) !== null && _cell$contentAlign !== void 0 ? _cell$contentAlign : "center", cellX, width, theme.cellHorizontalPadding, checkBoxWidth);
+    const bb = (0,_common_utils__WEBPACK_IMPORTED_MODULE_2__/* .getSquareBB */ .kq)(posX, cellCenterY, checkBoxWidth);
+    const checkBoxClicked = (0,_common_utils__WEBPACK_IMPORTED_MODULE_2__/* .pointIsWithinBB */ .qq)(cellX + pointerX, cellY + pointerY, bb);
 
-    if ((0,_data_grid_types__WEBPACK_IMPORTED_MODULE_0__/* .booleanCellIsEditable */ .kf)(cell) && Math.abs(x - bounds.width / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4) && Math.abs(y - bounds.height / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4)) {
+    if ((0,_data_grid_types__WEBPACK_IMPORTED_MODULE_0__/* .booleanCellIsEditable */ .kf)(cell) && checkBoxClicked) {
       return { ...cell,
         data: toggleBoolean(cell.data)
       };
@@ -22879,25 +22923,26 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
   let hoverX = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : -20;
   let hoverY = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : -20;
   let maxSize = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : 32;
-  const centerX = Math.floor(x + width / 2);
+  let alignment = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : "center";
   const centerY = Math.floor(y + height / 2);
-  const checkBoxWidth = Math.min(maxSize, height - theme.cellVerticalPadding * 2);
-  const hoverHelper = checkBoxWidth / 2;
-  const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;
   const rectBordRadius = 4;
-  const posHelperChecked = checkBoxWidth / 2;
+  const checkBoxWidth = (0,_common_utils__WEBPACK_IMPORTED_MODULE_2__/* .getSquareWidth */ .Qo)(maxSize, height, theme.cellVerticalPadding);
+  const checkBoxHalfWidth = checkBoxWidth / 2;
+  const posX = (0,_common_utils__WEBPACK_IMPORTED_MODULE_2__/* .getSquareXPosFromAlign */ .XC)(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);
+  const bb = (0,_common_utils__WEBPACK_IMPORTED_MODULE_2__/* .getSquareBB */ .kq)(posX, centerY, checkBoxWidth);
+  const hovered = (0,_common_utils__WEBPACK_IMPORTED_MODULE_2__/* .pointIsWithinBB */ .qq)(x + hoverX, y + hoverY, bb);
 
   switch (checked) {
     case true:
       {
         ctx.beginPath();
-        roundedRect(ctx, centerX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
+        roundedRect(ctx, posX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
         ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(centerX - posHelperChecked + checkBoxWidth / 4.23, centerY - posHelperChecked + checkBoxWidth / 1.97);
-        ctx.lineTo(centerX - posHelperChecked + checkBoxWidth / 2.42, centerY - posHelperChecked + checkBoxWidth / 1.44);
-        ctx.lineTo(centerX - posHelperChecked + checkBoxWidth / 1.29, centerY - posHelperChecked + checkBoxWidth / 3.25);
+        ctx.moveTo(posX - checkBoxHalfWidth + checkBoxWidth / 4.23, centerY - checkBoxHalfWidth + checkBoxWidth / 1.97);
+        ctx.lineTo(posX - checkBoxHalfWidth + checkBoxWidth / 2.42, centerY - checkBoxHalfWidth + checkBoxWidth / 1.44);
+        ctx.lineTo(posX - checkBoxHalfWidth + checkBoxWidth / 1.29, centerY - checkBoxHalfWidth + checkBoxWidth / 3.25);
         ctx.strokeStyle = theme.bgCell;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
@@ -22910,7 +22955,7 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
     case false:
       {
         ctx.beginPath();
-        roundedRect(ctx, centerX - checkBoxWidth / 2 + 0.5, centerY - checkBoxWidth / 2 + 0.5, checkBoxWidth - 1, checkBoxWidth - 1, rectBordRadius);
+        roundedRect(ctx, posX - checkBoxWidth / 2 + 0.5, centerY - checkBoxWidth / 2 + 0.5, checkBoxWidth - 1, checkBoxWidth - 1, rectBordRadius);
         ctx.lineWidth = 1;
         ctx.strokeStyle = hovered ? theme.textDark : theme.textMedium;
         ctx.stroke();
@@ -22920,12 +22965,12 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
     case _data_grid_types__WEBPACK_IMPORTED_MODULE_3__/* .BooleanIndeterminate */ .sd:
       {
         ctx.beginPath();
-        roundedRect(ctx, centerX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
+        roundedRect(ctx, posX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
         ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(centerX - checkBoxWidth / 3, centerY);
-        ctx.lineTo(centerX + checkBoxWidth / 3, centerY);
+        ctx.moveTo(posX - checkBoxWidth / 3, centerY);
+        ctx.lineTo(posX + checkBoxWidth / 3, centerY);
         ctx.strokeStyle = theme.bgCell;
         ctx.lineCap = "round";
         ctx.lineWidth = 1.9;
@@ -23083,7 +23128,10 @@ function drawBoolean(args, data, canEdit, maxSize) {
     rect,
     highlighted,
     hoverX,
-    hoverY
+    hoverY,
+    cell: {
+      contentAlign
+    }
   } = args;
   const {
     x,
@@ -23103,7 +23151,7 @@ function drawBoolean(args, data, canEdit, maxSize) {
   }
 
   ctx.globalAlpha = alpha;
-  drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY, maxSize);
+  drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY, maxSize, contentAlign);
   ctx.globalAlpha = 1;
 }
 const itemMargin = 4;
@@ -29960,6 +30008,30 @@ function degreesToRadians(degrees) {
   return degrees * PI / 180;
 }
 
+var getSquareBB = (posX, posY, squareSideLength) => ({
+  x1: posX - squareSideLength / 2,
+  y1: posY - squareSideLength / 2,
+  x2: posX + squareSideLength / 2,
+  y2: posY + squareSideLength / 2
+});
+
+var getSquareXPosFromAlign = (alignment, containerX, containerWidth, horizontalPadding, squareWidth) => {
+  switch (alignment) {
+    case "left":
+      return Math.floor(containerX) + horizontalPadding + squareWidth / 2;
+
+    case "center":
+      return Math.floor(containerX + containerWidth / 2);
+
+    case "right":
+      return Math.floor(containerX + containerWidth) - horizontalPadding - squareWidth / 2;
+  }
+};
+
+var getSquareWidth = (maxSize, containerHeight, verticalPadding) => Math.min(maxSize, containerHeight - verticalPadding * 2);
+
+var pointIsWithinBB = (x, y, bb) => bb.x1 <= x && x <= bb.x2 && bb.y1 <= y && y <= bb.y2;
+
 var EditPencil = props => {
   var _a;
 
@@ -30570,25 +30642,26 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
   let hoverX = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : -20;
   let hoverY = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : -20;
   let maxSize = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : 32;
-  const centerX = Math.floor(x + width / 2);
+  let alignment = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : "center";
   const centerY = Math.floor(y + height / 2);
-  const checkBoxWidth = Math.min(maxSize, height - theme.cellVerticalPadding * 2);
-  const hoverHelper = checkBoxWidth / 2;
-  const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;
   const rectBordRadius = 4;
-  const posHelperChecked = checkBoxWidth / 2;
+  const checkBoxWidth = getSquareWidth(maxSize, height, theme.cellVerticalPadding);
+  const checkBoxHalfWidth = checkBoxWidth / 2;
+  const posX = getSquareXPosFromAlign(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);
+  const bb = getSquareBB(posX, centerY, checkBoxWidth);
+  const hovered = pointIsWithinBB(x + hoverX, y + hoverY, bb);
 
   switch (checked) {
     case true:
       {
         ctx.beginPath();
-        roundedRect(ctx, centerX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
+        roundedRect(ctx, posX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
         ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(centerX - posHelperChecked + checkBoxWidth / 4.23, centerY - posHelperChecked + checkBoxWidth / 1.97);
-        ctx.lineTo(centerX - posHelperChecked + checkBoxWidth / 2.42, centerY - posHelperChecked + checkBoxWidth / 1.44);
-        ctx.lineTo(centerX - posHelperChecked + checkBoxWidth / 1.29, centerY - posHelperChecked + checkBoxWidth / 3.25);
+        ctx.moveTo(posX - checkBoxHalfWidth + checkBoxWidth / 4.23, centerY - checkBoxHalfWidth + checkBoxWidth / 1.97);
+        ctx.lineTo(posX - checkBoxHalfWidth + checkBoxWidth / 2.42, centerY - checkBoxHalfWidth + checkBoxWidth / 1.44);
+        ctx.lineTo(posX - checkBoxHalfWidth + checkBoxWidth / 1.29, centerY - checkBoxHalfWidth + checkBoxWidth / 3.25);
         ctx.strokeStyle = theme.bgCell;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
@@ -30601,7 +30674,7 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
     case false:
       {
         ctx.beginPath();
-        roundedRect(ctx, centerX - checkBoxWidth / 2 + 0.5, centerY - checkBoxWidth / 2 + 0.5, checkBoxWidth - 1, checkBoxWidth - 1, rectBordRadius);
+        roundedRect(ctx, posX - checkBoxWidth / 2 + 0.5, centerY - checkBoxWidth / 2 + 0.5, checkBoxWidth - 1, checkBoxWidth - 1, rectBordRadius);
         ctx.lineWidth = 1;
         ctx.strokeStyle = hovered ? theme.textDark : theme.textMedium;
         ctx.stroke();
@@ -30611,12 +30684,12 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
     case BooleanIndeterminate:
       {
         ctx.beginPath();
-        roundedRect(ctx, centerX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
+        roundedRect(ctx, posX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
         ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(centerX - checkBoxWidth / 3, centerY);
-        ctx.lineTo(centerX + checkBoxWidth / 3, centerY);
+        ctx.moveTo(posX - checkBoxWidth / 3, centerY);
+        ctx.lineTo(posX + checkBoxWidth / 3, centerY);
         ctx.strokeStyle = theme.bgCell;
         ctx.lineCap = "round";
         ctx.lineWidth = 1.9;
@@ -30778,7 +30851,10 @@ function drawBoolean(args, data, canEdit, maxSize) {
     rect,
     highlighted,
     hoverX,
-    hoverY
+    hoverY,
+    cell: {
+      contentAlign
+    }
   } = args;
   const {
     x,
@@ -30798,7 +30874,7 @@ function drawBoolean(args, data, canEdit, maxSize) {
   }
 
   ctx.globalAlpha = alpha;
-  drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY, maxSize);
+  drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY, maxSize, contentAlign);
   ctx.globalAlpha = 1;
 }
 
@@ -36663,17 +36739,29 @@ var booleanCellRenderer = {
     data: false
   }),
   onClick: e => {
-    var _a;
+    var _a, _b;
 
     const {
       cell,
-      posX: x,
-      posY: y,
-      bounds
+      posX: pointerX,
+      posY: pointerY,
+      bounds,
+      theme
     } = e;
+    const {
+      width,
+      height,
+      x: cellX,
+      y: cellY
+    } = bounds;
     const maxWidth = (_a = cell.maxSize) != null ? _a : defaultCellMaxSize;
+    const cellCenterY = Math.floor(bounds.y + height / 2);
+    const checkBoxWidth = getSquareWidth(maxWidth, height, theme.cellVerticalPadding);
+    const posX = getSquareXPosFromAlign((_b = cell.contentAlign) != null ? _b : "center", cellX, width, theme.cellHorizontalPadding, checkBoxWidth);
+    const bb = getSquareBB(posX, cellCenterY, checkBoxWidth);
+    const checkBoxClicked = pointIsWithinBB(cellX + pointerX, cellY + pointerY, bb);
 
-    if (booleanCellIsEditable(cell) && Math.abs(x - bounds.width / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4) && Math.abs(y - bounds.height / 2) <= Math.min(maxWidth / 2, bounds.height / 3.4)) {
+    if (booleanCellIsEditable(cell) && checkBoxClicked) {
       return { ...cell,
         data: toggleBoolean(cell.data)
       };
@@ -40001,4 +40089,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.7e155fc4.iframe.bundle.js.map
+//# sourceMappingURL=main.6feba10f.iframe.bundle.js.map
