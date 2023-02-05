@@ -21,7 +21,7 @@
 
 # 👩‍💻 Demo and features
 
-Lot's of fun examples are in our [Storybook](https://glideapps.github.io/glide-data-grid).
+Lots of fun examples are in our [Storybook](https://glideapps.github.io/glide-data-grid).
 
 You can also visit our [main site](https://grid.glideapps.com).
 
@@ -101,6 +101,8 @@ function getData([col, row]: Item): GridCell {
     }
 }
 ```
+
+You can [edit this example live](https://codesandbox.io/s/glide-data-grid-template-ydvnnk) on CodeSandbox
 
 ## Full API documentation
 
