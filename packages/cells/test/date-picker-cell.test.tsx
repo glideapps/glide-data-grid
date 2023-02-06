@@ -73,10 +73,39 @@ describe("editor", () => {
     expect(result.value === "04:47:44.584");
   });
 
+  it.each([
+      ['date'],
+      ['time'],
+      ['datetime']
+  ])("renders with correct type", (format: string) => {
+    // @ts-ignore
+    const Editor = renderer.provideEditor?.(
+        // @ts-ignore
+        getMockDateCell({ data: { format: format } })
+      // @ts-ignore
+      ).editor;
+      // const target = getMockEditorTarget();
+      assert(Editor !== undefined);
+      assert(!isObjectEditorCallbackResult(Editor));
+  
+      assert(Editor !== undefined);
+      const result = render(
+        <Editor isHighlighted={false} value={getMockDateCell()} />
+      );
+    // Check if the element is actually there
+    const input = result.getByTestId("test-id");
+    expect(input).not.toBeUndefined();
+    
+    // @ts-ignore
+    expect(input.format === format);
+  })
+
   it("renders textarea when readonly is true", () => {
     // @ts-ignore
     const Editor = renderer.provideEditor?.(
+      // @ts-ignore
       getMockDateCell({ data: { readonly: true } })
+    // @ts-ignore
     ).editor;
     // const target = getMockEditorTarget();
     assert(Editor !== undefined);
