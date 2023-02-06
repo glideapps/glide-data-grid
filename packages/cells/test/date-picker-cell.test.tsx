@@ -239,4 +239,10 @@ describe("onPaste", () => {
     const { date } = renderer.onPaste(input, {});
     expect(date.getTime()).toBe(Number.NaN);
   });
+
+  it('provides extra time support for onPaste', () => {
+      // @ts-ignore
+    const { date } = renderer.onPaste("00:00:00.000", {format: "time"});
+    expect(date).toStrictEqual(new Date("1970-01-01T00:00:00.000Z"));
+  })
 });
