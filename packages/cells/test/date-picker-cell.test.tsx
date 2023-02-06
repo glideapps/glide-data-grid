@@ -74,14 +74,13 @@ describe("editor", () => {
   it.each([
       ['date'],
       ['time'],
-      ['datetime']
+      ['datetime-local']
   ])("renders with correct format", (format: string) => {
     // @ts-ignore
     const Editor = renderer.provideEditor?.(
+        getMockDateCell({ data: { format: format } } as DatePickerCell)
         // @ts-ignore
-        getMockDateCell({ data: { format: format } })
-      // @ts-ignore
-      ).editor; 
+        ).editor; 
       assert(Editor !== undefined);
       assert(!isObjectEditorCallbackResult(Editor));
   
@@ -98,8 +97,7 @@ describe("editor", () => {
   it("renders textarea when readonly is true", () => {
     // @ts-ignore
     const Editor = renderer.provideEditor?.(
-      // @ts-ignore
-      getMockDateCell({ data: { readonly: true } })
+      getMockDateCell({ data: { readonly: true } } as DatePickerCell)
     // @ts-ignore
     ).editor;
     assert(Editor !== undefined);
@@ -115,11 +113,14 @@ describe("editor", () => {
   });
 
   it("contains max, min, step when passed in", () => {
+    const min = "2018-01-01"
+    const max = "2018-12-31"
+    const step = ".001"
     const extraProps = {
       data: {
-        min: "2018-01-01",
-        max: "2018-12-31",
-        step: ".001",
+        min,
+        max,
+        step,
       },
     };
 
@@ -135,11 +136,11 @@ describe("editor", () => {
     expect(input).not.toBeUndefined();
 
     // @ts-ignore
-    expect(input.min === "2018-01-01");
+    expect(input.min === min);
     // @ts-ignore
-    expect(input.max === "2018-12-31");
+    expect(input.max === max);
     // @ts-ignore
-    expect(input.step === ".001");
+    expect(input.step === step);
   });
 
   it('properly sets date when value is NOT ""', async () => {
