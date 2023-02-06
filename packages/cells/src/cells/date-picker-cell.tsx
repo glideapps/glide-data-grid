@@ -9,7 +9,7 @@ import {
     TextCellEntry,
 } from "@glideapps/glide-data-grid";
 
-interface DatePickerCellProps {
+export interface DatePickerCellProps {
     readonly kind: "date-picker-cell";
     readonly date: Date | undefined;
     readonly displayDate: string;
@@ -57,6 +57,7 @@ const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
     }
     return (
         <input
+            data-testid={""}
             required
             style={{ minHeight: 26, border: "none", outline: "none" }}
             type={format}
