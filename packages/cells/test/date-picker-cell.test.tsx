@@ -216,15 +216,27 @@ describe("editor", () => {
 });
 
 describe("onPaste", () => {
-  it("correctly returns a value when onPaste is called with valid value", () => {
+  it.each([
+      ["2023-02-06T04:47:44.584Z"],
+      ["1995-12-17T03:24:00"],
+      ["Sun Dec 17 1995 03:24:00 GMT"],
+      [new Date(1995, 11, 17)],
+      [100],
+      [-1],
+  ])("correctly returns a value when onPaste is called with valid value: %p", (input: string | number | Date) => {
     // @ts-ignore
-    const { date } = renderer.onPaste("2023-02-06T04:47:44.584Z", {});
-    expect(date).toStrictEqual(new Date("2023-02-06T04:47:44.584Z"));
+    const { date } = renderer.onPaste(input, {});
+    expect(date).toStrictEqual(new Date(input));
   });
 
-  it("correctly returns no value when onPaste is called with invalid value", () => {
+  it.each([
+    [""],
+    ["invalid"],
+    ["2020-20-12"],
+    ["2020/20/12"],
+  ])("correctly returns no value when onPaste is called with invalid value: %p", (input: string) => {
     // @ts-ignore
-    const { date } = renderer.onPaste("", {});
+    const { date } = renderer.onPaste(input, {});
     expect(date.getTime()).toBe(Number.NaN);
   });
 });
