@@ -57,11 +57,9 @@ describe("editor", () => {
   it("renders into the dom with correct value", () => {
     // @ts-ignore
     const Editor = renderer.provideEditor?.(getMockDateCell()).editor;
-    // const target = getMockEditorTarget();
     assert(Editor !== undefined);
     assert(!isObjectEditorCallbackResult(Editor));
 
-    assert(Editor !== undefined);
     const result = render(
       <Editor isHighlighted={false} value={getMockDateCell()} />
     );
@@ -77,22 +75,19 @@ describe("editor", () => {
       ['date'],
       ['time'],
       ['datetime']
-  ])("renders with correct type", (format: string) => {
+  ])("renders with correct format", (format: string) => {
     // @ts-ignore
     const Editor = renderer.provideEditor?.(
         // @ts-ignore
         getMockDateCell({ data: { format: format } })
       // @ts-ignore
-      ).editor;
-      // const target = getMockEditorTarget();
+      ).editor; 
       assert(Editor !== undefined);
       assert(!isObjectEditorCallbackResult(Editor));
   
-      assert(Editor !== undefined);
       const result = render(
         <Editor isHighlighted={false} value={getMockDateCell()} />
       );
-    // Check if the element is actually there
     const input = result.getByTestId("test-id");
     expect(input).not.toBeUndefined();
     
@@ -107,11 +102,9 @@ describe("editor", () => {
       getMockDateCell({ data: { readonly: true } })
     // @ts-ignore
     ).editor;
-    // const target = getMockEditorTarget();
     assert(Editor !== undefined);
     assert(!isObjectEditorCallbackResult(Editor));
 
-    assert(Editor !== undefined);
     const result = render(
       <Editor isHighlighted={false} value={getMockDateCell()} />
     );
@@ -132,15 +125,12 @@ describe("editor", () => {
 
     // @ts-ignore
     const Editor = renderer.provideEditor?.(getMockDateCell(extraProps)).editor;
-    // const target = getMockEditorTarget();
     assert(Editor !== undefined);
     assert(!isObjectEditorCallbackResult(Editor));
 
-    assert(Editor !== undefined);
     const result = render(
       <Editor isHighlighted={false} value={getMockDateCell()} />
     );
-    // Check if the element is actually there
     const input = result.getByTestId("test-id");
     expect(input).not.toBeUndefined();
 
@@ -157,11 +147,9 @@ describe("editor", () => {
 
     // @ts-ignore
     const Editor = renderer.provideEditor?.(getMockDateCell()).editor;
-    // const target = getMockEditorTarget();
     assert(Editor !== undefined);
     assert(!isObjectEditorCallbackResult(Editor));
 
-    assert(Editor !== undefined);
     const mockCellOnChange = jest.fn();
     const result = render(
       <Editor
@@ -196,11 +184,9 @@ describe("editor", () => {
   it('properly sets new date to undefined when value is ""', async () => {
     // @ts-ignore
     const Editor = renderer.provideEditor?.(getMockDateCell()).editor;
-    // const target = getMockEditorTarget();
     assert(Editor !== undefined);
     assert(!isObjectEditorCallbackResult(Editor));
 
-    assert(Editor !== undefined);
     const mockCellOnChange = jest.fn();
     const result = render(
       <Editor
