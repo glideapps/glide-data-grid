@@ -44,7 +44,6 @@ export const formatValueForHTMLInput = (
 export type DatePickerCell = CustomCell<DatePickerCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = (cell) => {
-  console.log(cell);
   const cellData = cell.value.data;
   const { min, max, step, readonly, format, displayDate } = cellData;
   const value = formatValueForHTMLInput(format, cellData.date);
