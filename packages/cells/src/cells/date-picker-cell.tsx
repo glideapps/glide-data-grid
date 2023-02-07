@@ -111,7 +111,7 @@ const renderer: CustomRenderer<DatePickerCell> = {
   onPaste: (v, d) => {
     let newDate: Date | undefined;
     if (d.format === "time") {
-      v = `1970-01-01T${v}Z`
+      v = `1970-01-01T${v}Z`;
     }
     try {
       newDate = new Date(v);
