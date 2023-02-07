@@ -330,6 +330,36 @@ export const CustomCells: React.VFC = () => {
                     } else if (col === 10) {
                         num = row + 1;
                         rand();
+                        const d: DatePickerCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "date-picker-cell",
+                                date: new Date(),
+                                displayDate: new Date().toISOString().split("T")[0],
+                                format: "date",
+                            },
+                        };
+                        return d;
+                    } else if (col === 11) {
+                        num = row + 1;
+                        rand();
+                        const d: DatePickerCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "date-picker-cell",
+                                date: new Date(),
+                                displayDate: new Date().toISOString().split("T")[1],
+                                format: "time",
+                            },
+                        };
+                        return d;
+                    } else if (col === 12) {
+                        num = row + 1;
+                        rand();
                         const d: LinksCell = {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
@@ -350,7 +380,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 11) {
+                    } else if (col === 13) {
                         num = row + 1;
                         rand();
                         const d: ButtonCell = {
@@ -414,7 +444,15 @@ export const CustomCells: React.VFC = () => {
                         width: 150,
                     },
                     {
+                        title: "Datetime Picker",
+                        width: 150,
+                    },
+                    {
                         title: "Date Picker",
+                        width: 150,
+                    },
+                    {
+                        title: "Time Picker",
                         width: 150,
                     },
                     {
