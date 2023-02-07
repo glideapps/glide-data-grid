@@ -105,19 +105,16 @@ const renderer: CustomRenderer<DatePickerCell> = {
         editor: Editor,
     }),
     onPaste: (v, d) => {
-        let newDate: Date | undefined;
-        try {
-            newDate = new Date(v);
-        } catch {
-            /* do nothing */
+        let parseDate = Date.parse(v);
+        if (d.format === "time" && Number.isNaN(parseDate)) {
+            // The pasted value was not a valid date string
+            // Try to interpret value as time string instead (HH:mm:ss)
+            parseDate = Date.parse(`1970-01-01T${v}Z`);
         }
-        if (Number.isNaN(newDate)) {
-            // Try to interpret value as time string (HH:mm:ss)
-            newDate = new Date(`1970-01-01T${v}Z`);
-        }
+
         return {
             ...d,
-            date: Number.isNaN(newDate) ? undefined : newDate,
+            date: Number.isNaN(parseDate) ? undefined : new Date(parseDate),
         };
     },
 };
