@@ -1,5 +1,5 @@
 import React from "react";
-import { assertNever } from "./common/support";
+
 import {
     CustomCell,
     CustomRenderer,
@@ -34,7 +34,7 @@ export const formatValueForHTMLInput = (dateKind: DateKind, date: Date | undefin
         case "time":
             return date.toISOString().split("T")[1].replace("Z", "");
         default:
-            assertNever(dateKind);
+            throw new Error(`Unknown date kind ${dateKind}`);
     }
 };
 
@@ -106,13 +106,14 @@ const renderer: CustomRenderer<DatePickerCell> = {
     }),
     onPaste: (v, d) => {
         let newDate: Date | undefined;
-        if (d.format === "time") {
-            v = `1970-01-01T${v}Z`;
-        }
         try {
             newDate = new Date(v);
         } catch {
             /* do nothing */
+        }
+        if (Number.isNaN(newDate)) {
+            // Try to interpret value as time string (HH:mm:ss)
+            newDate = new Date(`1970-01-01T${v}Z`);
         }
         return {
             ...d,
