@@ -1,6 +1,9 @@
-import { GridCellKind } from "@glideapps/glide-data-grid";
+import {
+  GridCellKind,
+  isObjectEditorCallbackResult,
+} from "@glideapps/glide-data-grid";
 import * as React from "react";
-import { assert } from "../src/cells/common/support";
+import { assert } from "console";
 import { fireEvent, render } from "@testing-library/react";
 import renderer, {
   DateKind,
@@ -55,6 +58,7 @@ describe("editor", () => {
     // @ts-ignore
     const Editor = renderer.provideEditor?.(getMockDateCell()).editor;
     assert(Editor !== undefined);
+    assert(!isObjectEditorCallbackResult(Editor));
 
     const result = render(
       <Editor isHighlighted={false} value={getMockDateCell()} />
@@ -67,34 +71,37 @@ describe("editor", () => {
     expect(result.value === "04:47:44.584");
   });
 
-  it.each([["date"], ["time"], ["datetime-local"]])(
-    "renders with correct format",
-    (format: string) => {
-      // @ts-ignore
-      const Editor = renderer.provideEditor?.(
+  it.each([
+      ['date'],
+      ['time'],
+      ['datetime-local']
+  ])("renders with correct format", (format: string) => {
+    // @ts-ignore
+    const Editor = renderer.provideEditor?.(
         getMockDateCell({ data: { format: format } } as DatePickerCell)
         // @ts-ignore
-      ).editor;
+        ).editor; 
       assert(Editor !== undefined);
-
+      assert(!isObjectEditorCallbackResult(Editor));
+  
       const result = render(
         <Editor isHighlighted={false} value={getMockDateCell()} />
       );
-      const input = result.getByTestId("test-id");
-      expect(input).not.toBeUndefined();
-
-      // @ts-ignore
-      expect(input.format === format);
-    }
-  );
+    const input = result.getByTestId("test-id");
+    expect(input).not.toBeUndefined();
+    
+    // @ts-ignore
+    expect(input.format === format);
+  })
 
   it("renders textarea when readonly is true", () => {
     // @ts-ignore
     const Editor = renderer.provideEditor?.(
       getMockDateCell({ data: { readonly: true } } as DatePickerCell)
-      // @ts-ignore
+    // @ts-ignore
     ).editor;
     assert(Editor !== undefined);
+    assert(!isObjectEditorCallbackResult(Editor));
 
     const result = render(
       <Editor isHighlighted={false} value={getMockDateCell()} />
@@ -106,9 +113,9 @@ describe("editor", () => {
   });
 
   it("contains max, min, step when passed in", () => {
-    const min = "2018-01-01";
-    const max = "2018-12-31";
-    const step = ".001";
+    const min = "2018-01-01"
+    const max = "2018-12-31"
+    const step = ".001"
     const extraProps = {
       data: {
         min,
@@ -120,6 +127,7 @@ describe("editor", () => {
     // @ts-ignore
     const Editor = renderer.provideEditor?.(getMockDateCell(extraProps)).editor;
     assert(Editor !== undefined);
+    assert(!isObjectEditorCallbackResult(Editor));
 
     const result = render(
       <Editor isHighlighted={false} value={getMockDateCell()} />
@@ -141,6 +149,7 @@ describe("editor", () => {
     // @ts-ignore
     const Editor = renderer.provideEditor?.(getMockDateCell()).editor;
     assert(Editor !== undefined);
+    assert(!isObjectEditorCallbackResult(Editor));
 
     const mockCellOnChange = jest.fn();
     const result = render(
@@ -177,6 +186,7 @@ describe("editor", () => {
     // @ts-ignore
     const Editor = renderer.provideEditor?.(getMockDateCell()).editor;
     assert(Editor !== undefined);
+    assert(!isObjectEditorCallbackResult(Editor));
 
     const mockCellOnChange = jest.fn();
     const result = render(
@@ -208,33 +218,32 @@ describe("editor", () => {
 
 describe("onPaste", () => {
   it.each([
-    ["2023-02-06T04:47:44.584Z"],
-    ["1995-12-17T03:24:00"],
-    ["Sun Dec 17 1995 03:24:00 GMT"],
-    [new Date(1995, 11, 17)],
-    [100],
-    [-1],
-  ])(
-    "correctly returns a value when onPaste is called with valid value: %p",
-    (input: string | number | Date) => {
-      // @ts-ignore
-      const { date } = renderer.onPaste(input, {});
-      expect(date).toStrictEqual(new Date(input));
-    }
-  );
-
-  it.each([[""], ["invalid"], ["2020-20-12"], ["2020/20/12"]])(
-    "correctly returns no value when onPaste is called with invalid value: %p",
-    (input: string) => {
-      // @ts-ignore
-      const { date } = renderer.onPaste(input, {});
-      expect(date.getTime()).toBe(Number.NaN);
-    }
-  );
-
-  it("provides extra time support for onPaste", () => {
+      ["2023-02-06T04:47:44.584Z"],
+      ["1995-12-17T03:24:00"],
+      ["Sun Dec 17 1995 03:24:00 GMT"],
+      [new Date(1995, 11, 17)],
+      [100],
+      [-1],
+  ])("correctly returns a value when onPaste is called with valid value: %p", (input: string | number | Date) => {
     // @ts-ignore
-    const { date } = renderer.onPaste("00:00:00.000", { format: "time" });
-    expect(date).toStrictEqual(new Date("1970-01-01T00:00:00.000Z"));
+    const { date } = renderer.onPaste(input, {});
+    expect(date).toStrictEqual(new Date(input));
   });
+
+  it.each([
+    [""],
+    ["invalid"],
+    ["2020-20-12"],
+    ["2020/20/12"],
+  ])("correctly returns no value when onPaste is called with invalid value: %p", (input: string) => {
+    // @ts-ignore
+    const { date } = renderer.onPaste(input, {});
+    expect(date.getTime()).toBe(Number.NaN);
+  });
+
+  it('provides extra time support for onPaste', () => {
+      // @ts-ignore
+    const { date } = renderer.onPaste("00:00:00.000", {format: "time"});
+    expect(date).toStrictEqual(new Date("1970-01-01T00:00:00.000Z"));
+  })
 });
