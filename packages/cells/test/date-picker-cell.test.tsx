@@ -13,7 +13,7 @@ describe("formatValueForHTMLInput", () => {
         expect(formatValueForHTMLInput(format as DateKind, date)).toStrictEqual(valueForHTML);
     });
     it("throws an error when a weird value is passed", () => {
-        expect(() => formatValueForHTMLInput("weird" as DateKind, new Date())).toThrow("Hell froze over");
+        expect(() => formatValueForHTMLInput("weird" as DateKind, new Date())).toThrow("Unknown date kind weird");
     });
 });
 
@@ -43,7 +43,7 @@ describe("editor", () => {
 
         const result = render(<Editor isHighlighted={false} value={getMockDateCell()} />);
         // Check if the element is actually there
-        const input = result.getByTestId("test-id");
+        const input = result.getByTestId("date-picker-cell");
         expect(input).not.toBeUndefined();
 
         // @ts-ignore
@@ -61,7 +61,7 @@ describe("editor", () => {
         }
 
         const result = render(<Editor isHighlighted={false} value={getMockDateCell()} />);
-        const input = result.getByTestId("test-id");
+        const input = result.getByTestId("date-picker-cell");
         expect(input).not.toBeUndefined();
 
         // @ts-ignore
@@ -102,7 +102,7 @@ describe("editor", () => {
         }
 
         const result = render(<Editor isHighlighted={false} value={getMockDateCell()} />);
-        const input = result.getByTestId("test-id");
+        const input = result.getByTestId("date-picker-cell");
         expect(input).not.toBeUndefined();
 
         // @ts-ignore
@@ -124,8 +124,8 @@ describe("editor", () => {
 
         const mockCellOnChange = jest.fn();
         const result = render(<Editor isHighlighted={false} value={getMockDateCell()} onChange={mockCellOnChange} />);
-        const input = await result.findByTestId("test-id");
-        expect(result.findByTestId("test-id")).not.toBeUndefined();
+        const input = await result.findByTestId("date-picker-cell");
+        expect(result.findByTestId("date-picker-cell")).not.toBeUndefined();
         fireEvent.change(input, {
             target: {
                 value: "2023-02-06T18:15:33.103Z",
@@ -156,8 +156,8 @@ describe("editor", () => {
 
         const mockCellOnChange = jest.fn();
         const result = render(<Editor isHighlighted={false} value={getMockDateCell()} onChange={mockCellOnChange} />);
-        const input = await result.findByTestId("test-id");
-        expect(result.findByTestId("test-id")).not.toBeUndefined();
+        const input = await result.findByTestId("date-picker-cell");
+        expect(result.findByTestId("date-picker-cell")).not.toBeUndefined();
         fireEvent.change(input, { target: { value: "" } });
         expect(mockCellOnChange).toHaveBeenCalledTimes(1);
         expect(mockCellOnChange).toBeCalledWith({
@@ -178,30 +178,33 @@ describe("editor", () => {
 
 describe("onPaste", () => {
     it.each([
-        ["2023-02-06T04:47:44.584Z"],
-        ["1995-12-17T03:24:00"],
-        ["Sun Dec 17 1995 03:24:00 GMT"],
-        [new Date(1995, 11, 17)],
-        [100],
-        [-1],
-    ])("correctly returns a value when onPaste is called with valid value: %p", (input: string | number | Date) => {
+        ["2023-02-06T04:47:44.584Z", "2023-02-06T04:47:44.584Z"],
+        ["1995-12-17", "1995-12-17T00:00:00.000Z"],
+        ["1995-12-17T03:24:00Z", "1995-12-17T03:24:00.000Z"],
+        ["1995-12-17T03:24:00", "1995-12-17T02:24:00.000Z"],
+        ["Sun Dec 17 1995 03:24:00 GMT", "1995-12-17T03:24:00.000Z"],
+        [new Date(1995, 11, 17), "1995-12-16T23:00:00.000Z"],
+        [100, "1970-01-01T00:00:00.100Z"],
+        [-1, "1969-12-31T23:59:59.999Z"],
+        [-1, "1969-12-31T23:59:59.999Z"],
+    ])("correctly interprets pasted value %p as %p", (input: string | number | Date, expected: string) => {
         // @ts-ignore
         const { date } = renderer.onPaste(input, {});
-        expect(date).toStrictEqual(new Date(input));
+        expect(date.toISOString()).toStrictEqual(expected);
     });
 
-    it.each([[""], ["invalid"], ["2020-20-12"], ["2020/20/12"]])(
+    it.each([[""], ["invalid"], ["2020-20-12"], ["2020/20/12"], [undefined], [null], ["2020-12-10-10"]])(
         "correctly returns no value when onPaste is called with invalid value: %p",
-        (input: string) => {
+        (input: string | undefined | null) => {
             // @ts-ignore
             const { date } = renderer.onPaste(input, {});
-            expect(date.getTime()).toBe(Number.NaN);
+            expect(date).toBe(undefined);
         }
     );
 
-    it("provides extra time support for onPaste", () => {
+    it("support time strings in onPaste", () => {
         // @ts-ignore
-        const { date } = renderer.onPaste("00:00:00.000", { format: "time" });
-        expect(date).toStrictEqual(new Date("1970-01-01T00:00:00.000Z"));
+        const { date } = renderer.onPaste("01:02:03.400", { format: "time" });
+        expect(date).toStrictEqual(new Date("1970-01-01T01:02:03.400Z"));
     });
 });

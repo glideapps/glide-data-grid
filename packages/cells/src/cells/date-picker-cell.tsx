@@ -11,19 +11,15 @@ import {
 } from "@glideapps/glide-data-grid";
 
 export const StyledInputBox = styled.input`
+    min-height: 26px;
+    border: none;
+    outline: none;
     background-color: transparent;
     font-size: var(--gdg-editor-font-size);
     font-family: var(--gdg-font-family);
     color: var(--gdg-text-dark);
     ::-webkit-calendar-picker-indicator {
         background-color: white;
-    }
-    ::placeholder {
-        color: var(--gdg-text-light);
-    }
-    .invalid & {
-        text-decoration: underline;
-        text-decoration-color: #d60606;
     }
 `;
 
@@ -75,9 +71,8 @@ const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
     }
     return (
         <StyledInputBox
-            data-testid={"test-id"}
+            data-testid={"date-picker-cell"}
             required
-            style={{ minHeight: 26, border: "none", outline: "none" }}
             type={format}
             value={value}
             min={min}
@@ -123,16 +118,25 @@ const renderer: CustomRenderer<DatePickerCell> = {
         editor: Editor,
     }),
     onPaste: (v, d) => {
-        let parseDate = Date.parse(v);
-        if (d.format === "time" && Number.isNaN(parseDate)) {
-            // The pasted value was not a valid date string
-            // Try to interpret value as time string instead (HH:mm:ss)
-            parseDate = Date.parse(`1970-01-01T${v}Z`);
-        }
+        let parseDateTimestamp: number = NaN;
+        // We only try to parse the value if it is not empty/undefined/null:
+        if (v) {
+            // Support for unix timestamps (milliseconds since 1970-01-01):
+            parseDateTimestamp = new Number(v).valueOf();
 
+            if (Number.isNaN(parseDateTimestamp)) {
+                // Support for parsing ISO 8601 date strings:
+                parseDateTimestamp = Date.parse(v);
+                if (d.format === "time" && Number.isNaN(parseDateTimestamp)) {
+                    // The pasted value was not a valid date string
+                    // Try to interpret value as time string instead (HH:mm:ss)
+                    parseDateTimestamp = Date.parse(`1970-01-01T${v}Z`);
+                }
+            }
+        }
         return {
             ...d,
-            date: Number.isNaN(parseDate) ? undefined : new Date(parseDate),
+            date: Number.isNaN(parseDateTimestamp) ? undefined : new Date(parseDateTimestamp),
         };
     },
 };
