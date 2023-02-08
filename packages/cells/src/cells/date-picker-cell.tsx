@@ -1,4 +1,5 @@
 import React from "react";
+import { styled } from "@linaria/react";
 
 import {
     CustomCell,
@@ -8,6 +9,23 @@ import {
     ProvideEditorCallback,
     TextCellEntry,
 } from "@glideapps/glide-data-grid";
+
+export const StyledInputBox = styled.input`
+    background-color: transparent;
+    font-size: var(--gdg-editor-font-size);
+    font-family: var(--gdg-font-family);
+    color: var(--gdg-text-dark);
+    ::-webkit-calendar-picker-indicator {
+        background-color: white;
+    }
+    ::placeholder {
+        color: var(--gdg-text-light);
+    }
+    .invalid & {
+        text-decoration: underline;
+        text-decoration-color: #d60606;
+    }
+`;
 
 export interface DatePickerCellProps {
     readonly kind: "date-picker-cell";
@@ -56,7 +74,7 @@ const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
         );
     }
     return (
-        <input
+        <StyledInputBox
             data-testid={"test-id"}
             required
             style={{ minHeight: 26, border: "none", outline: "none" }}
