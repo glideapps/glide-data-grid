@@ -12,7 +12,8 @@ const flattenTree = (tree: TreeNode): TreeNode[] => {
     const _visit = (node: TreeNode, depth: number = 0) => {
         node.depth = depth;
         flattened.push(node);
-        node.children.forEach(child => { if (!(node.collapsed === true)) _visit(child, depth + 1) });
+        if (node.collapsed === true) return;
+        node.children.forEach(child => { _visit(child, depth + 1) });
     };
 
     const flattened: TreeNode[] = [];
