@@ -28,7 +28,6 @@ export interface DatePickerCellProps {
     readonly date: Date | undefined;
     readonly displayDate: string;
     readonly format: DateKind;
-    readonly readonly?: boolean;
     readonly min?: string;
     readonly max?: string;
     readonly step?: string;
@@ -56,9 +55,10 @@ export type DatePickerCell = CustomCell<DatePickerCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
     const cellData = cell.value.data;
-    const { min, max, step, readonly, format, displayDate } = cellData;
+    const { min, max, step, format, displayDate } = cellData;
     const value = formatValueForHTMLInput(format, cellData.date);
-    if (readonly) {
+
+    if (cell.value.readonly) {
         return (
             <TextCellEntry
                 highlight={true}
@@ -69,6 +69,7 @@ const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
             />
         );
     }
+
     return (
         <StyledInputBox
             data-testid={"date-picker-cell"}

@@ -24,12 +24,12 @@ describe("editor", () => {
             kind: GridCellKind.Custom,
             allowOverlay: true,
             copyData: "4",
+            readonly: false,
             data: {
                 kind: "date-picker-cell",
                 date: new Date("2023-02-06T04:47:44.584Z"),
                 displayDate: new Date("2023-02-06T04:47:44.584Z").toISOString(),
                 format: "time",
-                readonly: false,
             },
         };
     }
@@ -71,7 +71,7 @@ describe("editor", () => {
     it("renders textarea when readonly is true", () => {
         // @ts-ignore
         const Editor = renderer.provideEditor?.(
-            getMockDateCell({ data: { readonly: true } } as DatePickerCell)
+            getMockDateCell({ readonly: true } as DatePickerCell)
             // @ts-ignore
         ).editor;
         if (Editor === undefined) {
@@ -137,12 +137,12 @@ describe("editor", () => {
             kind: GridCellKind.Custom,
             allowOverlay: true,
             copyData: "4",
+            readonly: false,
             data: {
                 kind: "date-picker-cell",
                 date: new Date(valueAsNumber),
                 displayDate: new Date("2023-02-06T04:47:44.584Z").toISOString(),
                 format: "time",
-                readonly: false,
             },
         });
     });
@@ -164,13 +164,13 @@ describe("editor", () => {
             kind: GridCellKind.Custom,
             allowOverlay: true,
             copyData: "4",
+            readonly: false,
             data: {
                 kind: "date-picker-cell",
                 // should be undefined since value is ''
                 date: undefined,
                 displayDate: new Date("2023-02-06T04:47:44.584Z").toISOString(),
                 format: "time",
-                readonly: false,
             },
         });
     });
