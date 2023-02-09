@@ -54,7 +54,7 @@ const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
                 decimalScale={fixedDecimals}
                 allowNegative={allowNegative}
                 thousandSeparator={thousandSeparator ?? getThousandSeprator()}
-                decimalSeparator={decimalSeparator || getDecimalSeparator()}
+                decimalSeparator={decimalSeparator ?? getDecimalSeparator()}
                 value={Object.is(value, -0) ? "-" : value ?? ""}
                 // decimalScale={3}
                 // prefix={"$"}
