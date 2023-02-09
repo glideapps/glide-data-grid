@@ -352,7 +352,7 @@ export const CustomCells: React.VFC = () => {
                             data: {
                                 kind: "date-picker-cell",
                                 date: new Date(),
-                                displayDate: new Date().toISOString().split("T")[1],
+                                displayDate: new Date().toISOString().split("T")[1].replace("Z", ""),
                                 format: "time",
                             },
                         };
