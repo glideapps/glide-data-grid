@@ -12,6 +12,8 @@ interface Props {
     readonly validatedSelection?: SelectionRange;
     readonly fixedDecimals?: number;
     readonly allowNegative?: boolean;
+    readonly thousandSeparator?: boolean | string;
+    readonly decimalSeparator?: string;
 }
 
 function getDecimalSeparator() {
@@ -28,7 +30,7 @@ function getThousandSeprator() {
 }
 
 const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
-    const { value, onChange, disabled, highlight, validatedSelection, fixedDecimals, allowNegative } = p;
+    const { value, onChange, disabled, highlight, validatedSelection, fixedDecimals, allowNegative, thousandSeparator, decimalSeparator } = p;
 
     const inputRef = React.useRef<HTMLInputElement>();
 
@@ -51,8 +53,8 @@ const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
                 disabled={disabled === true}
                 decimalScale={fixedDecimals}
                 allowNegative={allowNegative}
-                thousandSeparator={getThousandSeprator()}
-                decimalSeparator={getDecimalSeparator()}
+                thousandSeparator={thousandSeparator ?? getThousandSeprator()}
+                decimalSeparator={decimalSeparator || getDecimalSeparator()}
                 value={Object.is(value, -0) ? "-" : value ?? ""}
                 // decimalScale={3}
                 // prefix={"$"}
