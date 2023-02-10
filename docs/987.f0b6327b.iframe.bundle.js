@@ -99,7 +99,9 @@ const NumberOverlayEditor = p => {
     highlight,
     validatedSelection,
     fixedDecimals,
-    allowNegative
+    allowNegative,
+    thousandSeparator,
+    decimalSeparator
   } = p;
   const inputRef = react.useRef();
   react.useLayoutEffect(() => {
@@ -118,8 +120,8 @@ const NumberOverlayEditor = p => {
     disabled: disabled === true,
     decimalScale: fixedDecimals,
     allowNegative: allowNegative,
-    thousandSeparator: getThousandSeprator(),
-    decimalSeparator: getDecimalSeparator(),
+    thousandSeparator: thousandSeparator !== null && thousandSeparator !== void 0 ? thousandSeparator : getThousandSeprator(),
+    decimalSeparator: decimalSeparator !== null && decimalSeparator !== void 0 ? decimalSeparator : getDecimalSeparator(),
     value: Object.is(value, -0) ? "-" : value !== null && value !== void 0 ? value : "",
     onValueChange: onChange
   }));
@@ -130,4 +132,4 @@ const NumberOverlayEditor = p => {
 /***/ })
 
 }]);
-//# sourceMappingURL=987.b2e75887.iframe.bundle.js.map
+//# sourceMappingURL=987.f0b6327b.iframe.bundle.js.map
