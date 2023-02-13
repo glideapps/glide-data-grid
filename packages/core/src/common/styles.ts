@@ -33,6 +33,7 @@ export function makeCSSStyle(theme: Theme): Record<string, string> {
         "--gdg-cell-vertical-padding": `${theme.cellVerticalPadding}px`,
         "--gdg-header-font-style": theme.headerFontStyle,
         "--gdg-base-font-style": theme.baseFontStyle,
+        "--gdg-marker-font-style": theme.markerFontStyle,
         "--gdg-font-family": theme.fontFamily,
         "--gdg-editor-font-size": theme.editorFontSize,
     };
@@ -70,6 +71,7 @@ export interface Theme {
     headerFontStyle: string;
     headerIconSize: number;
     baseFontStyle: string;
+    markerFontStyle: string;
     fontFamily: string;
     editorFontSize: string;
     lineHeight: number;
@@ -114,6 +116,7 @@ const dataEditorBaseTheme: Theme = {
 
     headerFontStyle: "600 13px",
     baseFontStyle: "13px",
+    markerFontStyle: "9px",
     fontFamily:
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
     editorFontSize: "13px",
