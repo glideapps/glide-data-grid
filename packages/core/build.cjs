@@ -2,9 +2,12 @@ const { build } = require("esbuild");
 const linaria = require("@linaria/esbuild/lib/index").default;
 const { dependencies, peerDependencies } = require("./package.json");
 const fs = require("fs");
+const glob = require("glob");
+
+const allCells = glob.sync("src/data-grid/cells/*-cell.tsx");
 
 const shared = {
-    entryPoints: ["src/index.ts", "src/data-editor-base.ts"],
+    entryPoints: ["src/index.ts", "src/data-editor-base.ts", "src/data-grid/sprites.ts", ...allCells],
     bundle: true,
     minify: false,
     sourcemap: true,

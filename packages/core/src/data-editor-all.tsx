@@ -6,7 +6,11 @@ import { sprites } from "./data-grid/sprites";
 export type DataEditorAllProps = Omit<DataEditorProps, "renderers">;
 
 const DataEditorAllImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorAllProps> = (p, ref) => {
-    return <DataEditor {...p} renderers={CellRenderers} headerIcons={sprites} ref={ref} />;
+    const allSprites = React.useMemo(() => {
+        return { ...sprites, ...p.headerIcons };
+    }, [p.headerIcons]);
+
+    return <DataEditor {...p} renderers={CellRenderers} headerIcons={allSprites} ref={ref} />;
 };
 
 export const DataEditorAll = React.forwardRef(DataEditorAllImpl);

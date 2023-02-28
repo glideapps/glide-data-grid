@@ -5,6 +5,7 @@
         "composite": true,
         "jsx": "react",
         "moduleResolution": "node",
+        "declarationMap": true,
         "module": "esnext",
         "noImplicitAny": true,
         "noUnusedLocals": true,
