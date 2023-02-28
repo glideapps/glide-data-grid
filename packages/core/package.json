@@ -18,46 +18,43 @@
             "sprites": [
                 "./dist/ts/data-grid/sprites.d.ts"
             ],
-            "boolean-cell": [
+            "cells/boolean": [
                 "./dist/ts/data-grid/cells/boolean-cell.d.ts"
             ],
-            "bubble-cell": [
+            "cells/bubble": [
                 "./dist/ts/data-grid/cells/bubble-cell.d.ts"
             ],
-            "cell-types": [
-                "./dist/ts/data-grid/cells/cell-types.d.ts"
-            ],
-            "drilldown-cell": [
+            "cells/drilldown": [
                 "./dist/ts/data-grid/cells/drilldown-cell.d.ts"
             ],
-            "image-cell": [
+            "cells/image": [
                 "./dist/ts/data-grid/cells/image-cell.d.ts"
             ],
-            "loading-cell": [
+            "cells/loading": [
                 "./dist/ts/data-grid/cells/loading-cell.d.ts"
             ],
-            "markdown-cell": [
+            "cells/markdown": [
                 "./dist/ts/data-grid/cells/markdown-cell.d.ts"
             ],
-            "marker-cell": [
+            "cells/marker": [
                 "./dist/ts/data-grid/cells/marker-cell.d.ts"
             ],
-            "new-row-cell": [
+            "cells/new-row": [
                 "./dist/ts/data-grid/cells/new-row-cell.d.ts"
             ],
-            "number-cell": [
+            "cells/number": [
                 "./dist/ts/data-grid/cells/number-cell.d.ts"
             ],
-            "protected-cell": [
+            "cells/protected": [
                 "./dist/ts/data-grid/cells/protected-cell.d.ts"
             ],
-            "row-id-cell": [
+            "cells/row-id": [
                 "./dist/ts/data-grid/cells/row-id-cell.d.ts"
             ],
-            "text-cell": [
+            "cells/text": [
                 "./dist/ts/data-grid/cells/text-cell.d.ts"
             ],
-            "uri-cell": [
+            "cells/uri": [
                 "./dist/ts/data-grid/cells/uri-cell.d.ts"
             ]
         }
@@ -102,11 +99,6 @@
             "import": "./dist/js/data-grid/cells/bubble-cell.js",
             "require": "./dist/cjs/data-grid/cells/bubble-cell.js",
             "types": "./dist/ts/data-grid/cells/bubble-cell.d.ts"
-        },
-        "./cells/cell-types": {
-            "import": "./dist/js/data-grid/cells/cell-types.js",
-            "require": "./dist/cjs/data-grid/cells/cell-types.js",
-            "types": "./dist/ts/data-grid/cells/cell-types.d.ts"
         },
         "./cells/drilldown": {
             "import": "./dist/js/data-grid/cells/drilldown-cell.js",
