@@ -25,18 +25,30 @@ export const StyledInputBox = styled.input`
 
 export interface DatePickerCellProps {
     readonly kind: "date-picker-cell";
-    readonly date: Date | undefined;
+    /* The current value of the datetime cell. */
+    readonly date: Date | undefined | null;
+    /* The current display value of the datetime cell. */
     readonly displayDate: string;
+    /* Defines the type of the HTML input element. */
     readonly format: DateKind;
+    /* Timezone offset in minutes. 
+    This can be used to adjust the date by a given timezone offset. */
+    readonly timezoneOffset?: number;
+    /* Minimum value that can be entered by the user.
+    This is passed to the min attribute of the HTML input element. */
     readonly min?: string;
+    /* Maximum value that can be entered by the user.
+    This is passed to the max attribute of the HTML input element. */
     readonly max?: string;
+    /* Granularity that the date must adhere. 
+    This is passed to the step attribute of the HTML input element. */
     readonly step?: string;
 }
 
 export type DateKind = "date" | "time" | "datetime-local";
 
-export const formatValueForHTMLInput = (dateKind: DateKind, date: Date | undefined): string => {
-    if (date === undefined) {
+export const formatValueForHTMLInput = (dateKind: DateKind, date: Date | undefined | null): string => {
+    if (date === undefined || date === null) {
         return "";
     }
     switch (dateKind) {
@@ -56,8 +68,14 @@ export type DatePickerCell = CustomCell<DatePickerCellProps>;
 const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
     const cellData = cell.value.data;
     const { min, max, step, format, displayDate } = cellData;
-    const value = formatValueForHTMLInput(format, cellData.date);
-
+    let date = cellData.date;
+    // Convert timezone offset to milliseconds
+    const timezoneOffsetMs = cellData.timezoneOffset ? cellData.timezoneOffset * 60 * 1000 : 0;
+    if (timezoneOffsetMs && date) {
+        // Adjust based on the timezone offset
+        date = new Date(date.getTime() + timezoneOffsetMs);
+    }
+    const value = formatValueForHTMLInput(format, date);
     if (cell.value.readonly) {
         return (
             <TextCellEntry
@@ -75,19 +93,18 @@ const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
             data-testid={"date-picker-cell"}
             required
             type={format}
-            value={value}
+            defaultValue={value}
             min={min}
             max={max}
             step={step}
             autoFocus={true}
             onChange={event => {
-                if (event.target.value === "") {
+                if (isNaN(event.target.valueAsNumber)) {
+                    // The user has cleared the date, contribute as undefined
                     cell.onChange({
                         ...cell.value,
                         data: {
                             ...cell.value.data,
-                            // just set the value to undefined if submitted (enter or clicking out)
-                            // escape still works
                             date: undefined,
                         },
                     });
@@ -98,7 +115,7 @@ const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
                             ...cell.value.data,
                             // use valueAsNumber because valueAsDate is null for "datetime-local"
                             // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local#technical_summary
-                            date: new Date(event.target.valueAsNumber) ?? cellData.date,
+                            date: new Date(event.target.valueAsNumber - timezoneOffsetMs),
                         },
                     });
                 }
@@ -115,15 +132,19 @@ const renderer: CustomRenderer<DatePickerCell> = {
         drawTextCell(args, displayDate, cell.contentAlign);
         return true;
     },
+    measure: (ctx, cell) => {
+        const { displayDate } = cell.data;
+        return ctx.measureText(displayDate).width + 16;
+    },
     provideEditor: () => ({
         editor: Editor,
     }),
     onPaste: (v, d) => {
-        let parseDateTimestamp: number = NaN;
+        let parseDateTimestamp = NaN;
         // We only try to parse the value if it is not empty/undefined/null:
         if (v) {
             // Support for unix timestamps (milliseconds since 1970-01-01):
-            parseDateTimestamp = new Number(v).valueOf();
+            parseDateTimestamp = Number(v).valueOf();
 
             if (Number.isNaN(parseDateTimestamp)) {
                 // Support for parsing ISO 8601 date strings:
