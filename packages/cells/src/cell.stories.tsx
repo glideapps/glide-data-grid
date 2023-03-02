@@ -178,6 +178,7 @@ export const CustomCells: React.VFC = () => {
                 onPaste={true}
                 // eslint-disable-next-line no-console
                 onCellEdited={(...args) => console.log("Edit Cell", ...args)}
+                getCellsForSelection={true}
                 getCellContent={cell => {
                     const [col, row] = cell;
                     if (col === 0) {
@@ -398,8 +399,8 @@ export const CustomCells: React.VFC = () => {
                         width: 150,
                     },
                     {
+                        id: "dropdown",
                         title: "Dropdown",
-                        width: 150,
                     },
                     {
                         title: "Range",
