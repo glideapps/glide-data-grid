@@ -20,8 +20,8 @@ const CustomMenu: React.FC<CustomMenuProps> = p => {
 
 interface DropdownCellProps {
     readonly kind: "dropdown-cell";
-    readonly value: string;
-    readonly allowedValues: readonly string[];
+    readonly value: string | undefined | null;
+    readonly allowedValues: readonly (string | undefined | null)[];
     readonly readonly?: boolean;
 }
 
@@ -154,17 +154,19 @@ const renderer: CustomRenderer<DropdownCell> = {
     draw: (args, cell) => {
         const { ctx, theme, rect } = args;
         const { value } = cell.data;
-        ctx.fillStyle = theme.textDark;
-        ctx.fillText(
-            value,
-            rect.x + theme.cellHorizontalPadding,
-            rect.y + rect.height / 2 + getMiddleCenterBias(ctx, theme)
-        );
-
+        if (value) {
+            ctx.fillStyle = theme.textDark;
+            ctx.fillText(
+                value,
+                rect.x + theme.cellHorizontalPadding,
+                rect.y + rect.height / 2 + getMiddleCenterBias(ctx, theme)
+            );
+        }
         return true;
     },
     measure: (ctx, cell) => {
         const { value } = cell.data;
+        if (value === null || value === undefined) return 16;
         return ctx.measureText(value).width + 16;
     },
     provideEditor: () => ({
