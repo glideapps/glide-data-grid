@@ -178,6 +178,7 @@ export const CustomCells: React.VFC = () => {
                 onPaste={true}
                 // eslint-disable-next-line no-console
                 onCellEdited={(...args) => console.log("Edit Cell", ...args)}
+                getCellsForSelection={true}
                 getCellContent={cell => {
                     const [col, row] = cell;
                     if (col === 0) {
