@@ -461,7 +461,6 @@ export const CustomCellEditing: React.VFC = () => {
                         data.current[cell[1]] = newVal.data.value;
                     }
                 }}
-                getCellsForSelection={true}
                 getCellContent={cell => {
                     const [, row] = cell;
                     const val = data.current[row] ?? "A";
