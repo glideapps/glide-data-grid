@@ -166,8 +166,11 @@ const renderer: CustomRenderer<DropdownCell> = {
     },
     measure: (ctx, cell) => {
         const { value } = cell.data;
-        if (value === null || value === undefined) return 16;
-        return ctx.measureText(value).width + 16;
+        if (value) {
+            return ctx.measureText(value).width + 16;
+        } else {
+            return 16;
+        }
     },
     provideEditor: () => ({
         editor: Editor,
