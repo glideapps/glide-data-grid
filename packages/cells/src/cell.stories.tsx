@@ -399,8 +399,8 @@ export const CustomCells: React.VFC = () => {
                         width: 150,
                     },
                     {
-                        id: "dropdown",
                         title: "Dropdown",
+                        width: 150,
                     },
                     {
                         title: "Range",

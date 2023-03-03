@@ -152,10 +152,6 @@ const renderer: CustomRenderer<DropdownCell> = {
 
         return true;
     },
-    measure: (ctx, cell) => {
-        const { value } = cell.data;
-        return ctx.measureText(value).width + 16;
-    },
     provideEditor: () => ({
         editor: Editor,
         disablePadding: true,
