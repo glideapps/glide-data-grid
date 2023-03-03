@@ -81,6 +81,17 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                         border: 0,
                         boxShadow: "none",
                     }),
+                    option: base => ({
+                        ...base,
+                        fontSize: theme.editorFontSize,
+                        fontFamily: theme.fontFamily,
+                        // Add some content in case the option is empty
+                        // so that the option height can be calculated correctly
+                        ":empty::after": {
+                            content: '"&nbsp;"',
+                            visibility: "hidden",
+                        },
+                    }),
                 }}
                 theme={t => {
                     return {
@@ -151,6 +162,10 @@ const renderer: CustomRenderer<DropdownCell> = {
         );
 
         return true;
+    },
+    measure: (ctx, cell) => {
+        const { value } = cell.data;
+        return ctx.measureText(value).width + 16;
     },
     provideEditor: () => ({
         editor: Editor,
