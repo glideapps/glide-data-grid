@@ -5,6 +5,7 @@ import {
     getMiddleCenterBias,
     useTheme,
     GridCellKind,
+    TextCellEntry,
 } from "@glideapps/glide-data-grid";
 import { styled } from "@linaria/react";
 import * as React from "react";
@@ -22,7 +23,6 @@ interface DropdownCellProps {
     readonly kind: "dropdown-cell";
     readonly value: string | undefined | null;
     readonly allowedValues: readonly (string | undefined | null)[];
-    readonly readonly?: boolean;
 }
 
 export type DropdownCell = CustomCell<DropdownCellProps>;
@@ -49,6 +49,14 @@ const PortalWrap = styled.div`
     }
 `;
 
+// This is required since the padding is disabled for this cell type
+// The settings are based on the "pad" settings in the data-grid-overlay-editor-style.tsx
+const ReadOnlyWrap = styled.div`
+    display: "flex";
+    margin: auto 8.5px;
+    padding-bottom: 3px;
+`;
+
 const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
     const { value: cell, onFinishedEditing, initialValue } = p;
     const { allowedValues, value: valueIn } = cell.data;
@@ -66,6 +74,20 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
             })),
         [allowedValues]
     );
+
+    if (cell.readonly) {
+        return (
+            <ReadOnlyWrap>
+                <TextCellEntry
+                    highlight={true}
+                    autoFocus={false}
+                    disabled={true}
+                    value={value ?? ""}
+                    onChange={() => undefined}
+                />
+            </ReadOnlyWrap>
+        );
+    }
 
     return (
         <Wrap>
