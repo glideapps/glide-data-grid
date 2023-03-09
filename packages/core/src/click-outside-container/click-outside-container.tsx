@@ -1,6 +1,7 @@
 import * as React from "react";
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
     onClickOutside: () => void;
+    isOutsideClick?: (event: MouseEvent) => boolean;
 }
 
 export default class ClickOutsideContainer extends React.PureComponent<Props> {
@@ -17,6 +18,9 @@ export default class ClickOutsideContainer extends React.PureComponent<Props> {
     }
 
     private clickOutside = (event: MouseEvent) => {
+        if (this.props.isOutsideClick && !this.props.isOutsideClick(event)) {
+            return;
+        }
         if (this.wrapperRef.current !== null && !this.wrapperRef.current.contains(event.target as Node | null)) {
             let node = event.target as Element | null;
             while (node !== null) {
@@ -31,7 +35,7 @@ export default class ClickOutsideContainer extends React.PureComponent<Props> {
     };
 
     public render(): React.ReactNode {
-        const { onClickOutside, ...rest } = this.props;
+        const { onClickOutside, isOutsideClick, ...rest } = this.props;
         return (
             <div {...rest} ref={this.wrapperRef}>
                 {this.props.children}
