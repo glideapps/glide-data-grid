@@ -525,8 +525,8 @@ export interface DataEditorProps extends Props {
      * Determins which keybindings are enabled.
      * @group Editing
      * @defaultValue is
-     
-            {  
+
+            {
                 selectAll: true,
                 selectRow: true,
                 selectColumn: true,
@@ -608,6 +608,14 @@ export interface DataEditorProps extends Props {
     readonly customRenderers?: readonly CustomRenderer<CustomCell<any>>[];
 
     readonly scaleToRem?: boolean;
+
+    /**
+     * Custom predicate function to decide whether the click event occurred outside the grid
+     * Especially used when custom editor is opened with the portal and is outside the grid, but there is no possibility
+     * to add a class "click-outside-ignore"
+     * If this function is supplied and returns false, the click event is ignored
+     */
+    readonly isOutsideClick?: (e: MouseEvent) => boolean;
 }
 
 type ScrollToFn = (
@@ -783,6 +791,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         headerHeight: headerHeightIn = 36,
         groupHeaderHeight: groupHeaderHeightIn = headerHeightIn,
         theme: themeIn,
+        isOutsideClick,
     } = p;
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
@@ -3644,6 +3653,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         imageEditorOverride={imageEditorOverride}
                         onFinishEditing={onFinishEditing}
                         markdownDivCreateNode={markdownDivCreateNode}
+                        isOutsideClick={isOutsideClick}
                     />
                 )}
             </DataEditorContainer>
