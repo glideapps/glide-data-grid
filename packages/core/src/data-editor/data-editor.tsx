@@ -3373,6 +3373,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             shiftKey: false,
                             altKey: false,
                             rawEvent: undefined,
+                            location: {},
                         });
                         break;
                     case "fill-right":
@@ -3388,6 +3389,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             shiftKey: false,
                             altKey: false,
                             rawEvent: undefined,
+                            location: {},
                         });
                         break;
                     case "fill-down":
@@ -3403,6 +3405,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             shiftKey: false,
                             altKey: false,
                             rawEvent: undefined,
+                            location: {},
                         });
                         break;
                     case "copy":
