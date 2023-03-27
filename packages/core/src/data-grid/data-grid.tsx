@@ -1054,9 +1054,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const hoveredRef = React.useRef<GridMouseEventArgs>();
     const onMouseMoveImpl = React.useCallback(
-        (ev: MouseEvent) => {
+        (ev: MouseEvent) => {        
+
             const canvas = ref.current;
-            if (canvas === null) return;
+            const eventTarget = eventTargetRef?.current;
+
+
+            
+            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) {
+                return;
+            }
 
             const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
             if (!isSameItem(args, hoveredRef.current)) {
