@@ -1,5 +1,5 @@
 {
-    "name": "@glideapps/glide-data-grid-cells",
+    "name": "@workfront-grid/glide-data-grid-cells",
     "version": "5.2.1",
     "description": "Extra cells for glide-data-grid",
     "sideEffects": [
