@@ -49,7 +49,7 @@
     "author": "Glide",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/Workfront/glide-data-grid/issues"
+        "url": "https://github.com/workfront/glide-data-grid/issues"
     },
     "homepage": "https://grid.glideapps.com",
     "dependencies": {
