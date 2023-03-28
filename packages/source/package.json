@@ -1,5 +1,5 @@
 {
-    "name": "@glideapps/glide-data-grid-source",
+    "name": "@workfront-grid/glide-data-grid-source",
     "version": "5.2.1",
     "description": "Useful data source hooks for Glide Data Grid",
     "sideEffects": false,
