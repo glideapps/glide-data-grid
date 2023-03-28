@@ -34,10 +34,6 @@
         "url": "git+https://github.com/Workfront/glide-data-grid.git",
         "directory": "packages/core"
     },
-    "publishConfig": {
-        "access": "public",
-        "registry": "https://registry.npmjs.com"
-    },
     "keywords": [
         "react",
         "datagrid",
