@@ -50,9 +50,9 @@
         "canvas"
     ],
     "dependencies": {
-        "@glideapps/glide-data-grid": "5.2.1",
         "@toast-ui/editor": "3.1.10",
         "@toast-ui/react-editor": "3.1.10",
+        "@workfront-grid/glide-data-grid": "5.2.3-0",
         "react-select": "^5.2.2"
     },
     "devDependencies": {
