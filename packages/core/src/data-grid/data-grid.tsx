@@ -175,7 +175,6 @@ export interface DataGridProps {
 
     /**
      * Determines what can be dragged using HTML drag and drop
-     * @defaultValue false
      * @group Drag and Drop
      */
     readonly isDraggable: boolean | "cell" | "header" | undefined;

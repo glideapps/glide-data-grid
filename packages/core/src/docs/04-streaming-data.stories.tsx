@@ -432,3 +432,8 @@ const getContent = React.useCallback((cell: Item): GridCell => {
     );
 };
 (StreamingData as any).storyName = "04. Streaming Data";
+(StreamingData as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};

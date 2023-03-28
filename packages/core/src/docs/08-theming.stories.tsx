@@ -404,3 +404,8 @@ const getContent = React.useCallback((cell: Item): GridCell => {
     );
 };
 (Theming as any).storyName = "08. Theming";
+(Theming as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};

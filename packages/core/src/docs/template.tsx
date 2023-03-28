@@ -68,3 +68,8 @@ const columns: GridColumn[] = [
     );
 };
 (Template as any).storyName = "00. Template";
+(Template as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};

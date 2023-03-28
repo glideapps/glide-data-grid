@@ -358,3 +358,8 @@ const onCellEdited = React.useCallback((cell: Item, newValue: EditableGridCell) 
     );
 };
 (EditingData as any).storyName = "02. Editing Data";
+(EditingData as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};

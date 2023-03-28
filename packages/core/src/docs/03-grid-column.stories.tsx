@@ -145,3 +145,8 @@ const columns: GridColumn[] = [
     );
 };
 (GridColumns as any).storyName = "03. Grid Columns";
+(GridColumns as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};

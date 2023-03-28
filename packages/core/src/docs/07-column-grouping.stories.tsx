@@ -211,3 +211,8 @@ const columns = React.useMemo<GridColumn[]>(() => {
     );
 };
 (ColumnGrouping as any).storyName = "07. Column Grouping";
+(ColumnGrouping as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};

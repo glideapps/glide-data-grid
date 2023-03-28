@@ -298,3 +298,8 @@ Here are a few to play with.`}
     );
 };
 (GettingStarted as any).storyName = "01. Getting Started";
+(GettingStarted as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
