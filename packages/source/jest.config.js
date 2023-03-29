@@ -9,4 +9,7 @@ export default {
         "^.+\\.(ts|tsx)?$": "ts-jest",
         "^.+\\.(js|jsx)$": "babel-jest",
     },
+    moduleNameMapper: {
+        "@glideapps/(.*)": "@workfront-grid/$1"
+    }
 };
