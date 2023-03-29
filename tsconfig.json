@@ -13,6 +13,10 @@
         "noUnusedParameters": true,
         "strict": true,
         "target": "es6",
-        "types": ["jest", "node"]
+        "types": ["jest", "node"],
+        "baseUrl": ".",
+        "paths": {
+            "@glideapps/*": ["node_modules/@workfront-grid/*"]
+        }
     }
 }
