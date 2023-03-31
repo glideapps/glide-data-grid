@@ -1,6 +1,6 @@
 {
-    "name": "@glideapps/glide-data-grid-source",
-    "version": "5.2.1",
+    "name": "@workfront-grid/glide-data-grid-source",
+    "version": "5.2.3-0",
     "description": "Useful data source hooks for Glide Data Grid",
     "sideEffects": false,
     "type": "module",
@@ -25,10 +25,10 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/glideapps/glide-data-grid.git",
+        "url": "git+https://github.com/workfront/glide-data-grid.git",
         "directory": "packages/source"
     },
-    "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/cells",
+    "homepage": "https://github.com/workfront/glide-data-grid/tree/main/cells",
     "author": "Glide",
     "license": "MIT",
     "keywords": [
@@ -44,7 +44,7 @@
         "canvas"
     ],
     "dependencies": {
-        "@glideapps/glide-data-grid": "5.2.1"
+        "@workfront-grid/glide-data-grid": "5.2.3-0"
     },
     "peerDependencies": {
         "lodash": "^4.17.19",
