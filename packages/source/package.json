@@ -1,6 +1,6 @@
 {
     "name": "@workfront-grid/glide-data-grid-source",
-    "version": "5.2.3-0",
+    "version": "5.3.1",
     "description": "Useful data source hooks for Glide Data Grid",
     "sideEffects": false,
     "type": "module",
@@ -44,7 +44,7 @@
         "canvas"
     ],
     "dependencies": {
-        "@workfront-grid/glide-data-grid": "5.2.3-0"
+        "@workfront-grid/glide-data-grid": "5.3.1"
     },
     "peerDependencies": {
         "lodash": "^4.17.19",
