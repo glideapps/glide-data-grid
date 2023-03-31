@@ -23,8 +23,7 @@
         "./packages/source"
     ],
     "publishConfig": {
-        "access": "public",
-        "registry": "https://registry.npmjs.com"
+        "access": "public"
     },
     "devDependencies": {
         "@babel/cli": "^7.16.0",

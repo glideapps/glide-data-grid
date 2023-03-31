@@ -35,8 +35,7 @@
         "directory": "packages/core"
     },
     "publishConfig": {
-        "access": "public",
-        "registry": "https://registry.npmjs.com"
+        "access": "public"
     },
     "keywords": [
         "react",
