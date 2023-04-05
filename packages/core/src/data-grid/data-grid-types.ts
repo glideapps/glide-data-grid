@@ -450,6 +450,8 @@ export interface BubbleCell extends BaseGridCell {
 /** @category Renderers */
 export type SelectionRange = number | readonly [number, number];
 
+export type KeyboardEventHandlingMode = "manual" | "auto";
+
 /** @category Renderers */
 export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComponent<{
     readonly onChange: (newValue: T) => void;
@@ -463,6 +465,12 @@ export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComp
     readonly target: Rectangle;
     readonly forceEditMode: boolean;
     readonly isValid?: boolean;
+    /**
+     * set the keyboard event handling mode
+     * "manual": glide will not handle the "Enter", "Tab" and "Escape" events
+     * "auto": glide will handle the "Enter", "Tab" and "Escape" events by appropriate actions
+     */
+    readonly setKeyboardEventHandlingMode: (mode: KeyboardEventHandlingMode) => void;
 }>;
 
 type ObjectEditorCallbackResult<T extends InnerGridCell> = {

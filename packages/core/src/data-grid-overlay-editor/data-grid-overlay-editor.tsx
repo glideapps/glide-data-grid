@@ -11,6 +11,7 @@ import {
     isInnerOnlyCell,
     isObjectEditorCallbackResult,
     Item,
+    KeyboardEventHandlingMode,
     ProvideEditorCallback,
     ProvideEditorCallbackResult,
     Rectangle,
@@ -115,8 +116,14 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         [onFinishEditing]
     );
 
+    const [keyboardEventHandlingMode, setKeyboardEventHandlingMode] = React.useState<KeyboardEventHandlingMode>("auto");
+
     const onKeyDown = React.useCallback(
         async (event: React.KeyboardEvent) => {
+            // if the mode is manual, no need to handle the keyboard events
+            if (keyboardEventHandlingMode === "manual") {
+                return;
+            }
             let save = false;
             if (event.key === "Escape") {
                 event.stopPropagation();
@@ -141,7 +148,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 }
             }, 0);
         },
-        [onFinishEditing, tempValue]
+        [onFinishEditing, tempValue, keyboardEventHandlingMode]
     );
 
     const targetValue = tempValue ?? content;
@@ -172,6 +179,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
             <CustomEditor
                 isHighlighted={highlight}
                 onChange={setTempValue}
+                setKeyboardEventHandlingMode={setKeyboardEventHandlingMode}
                 value={targetValue}
                 initialValue={initialValue}
                 onFinishedEditing={onEditorFinished}
