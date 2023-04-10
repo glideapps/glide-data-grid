@@ -1,6 +1,6 @@
 {
     "name": "@workfront-grid/glide-data-grid-cells",
-    "version": "5.4.2",
+    "version": "5.4.3",
     "description": "Extra cells for glide-data-grid",
     "sideEffects": [
         "**/*.css"
@@ -52,7 +52,7 @@
     "dependencies": {
         "@toast-ui/editor": "3.1.10",
         "@toast-ui/react-editor": "3.1.10",
-        "@workfront-grid/glide-data-grid": "5.4.2",
+        "@workfront-grid/glide-data-grid": "5.4.3",
         "react-select": "^5.2.2"
     },
     "devDependencies": {
