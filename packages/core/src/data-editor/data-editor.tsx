@@ -2559,7 +2559,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     ]);
                 });
             }
-            focus();
+            focus(true);
             setOverlay(undefined);
 
             const [movX, movY] = movement;
