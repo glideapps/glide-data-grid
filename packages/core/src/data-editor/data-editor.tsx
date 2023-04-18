@@ -1324,7 +1324,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (!content.allowOverlay) {
                 return;
             }
-            setOverlay(undefined);
             setOverlaySimple({
                 target: bounds,
                 content,
