@@ -8,12 +8,12 @@ export default class ClickOutsideContainer extends React.PureComponent<Props> {
     private wrapperRef = React.createRef<HTMLDivElement>();
 
     public componentDidMount() {
-        document.addEventListener("mousedown", this.clickOutside, true);
+        document.addEventListener("pointerdown", this.clickOutside, true);
         document.addEventListener("contextmenu", this.clickOutside, true);
     }
 
     public componentWillUnmount() {
-        document.removeEventListener("mousedown", this.clickOutside, true);
+        document.removeEventListener("pointerdown", this.clickOutside, true);
         document.removeEventListener("contextmenu", this.clickOutside, true);
     }
 
