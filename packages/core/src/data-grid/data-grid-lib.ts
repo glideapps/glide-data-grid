@@ -1282,3 +1282,13 @@ export function computeBounds(
 
     return result;
 }
+
+
+export function drawColumnResizeOutline(ctx: CanvasRenderingContext2D, yOffset: number, xOffset: number, height: number, theme: Theme) {
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.moveTo(yOffset, xOffset);
+    ctx.lineTo(yOffset, height);
+    ctx.strokeStyle= theme.accentColor
+    ctx.stroke();
+} 
