@@ -95,6 +95,7 @@ const basicProps: DataGridProps = {
     isDragging: false,
     isResizing: false,
     trailingRowType: "none",
+    resizeCol: undefined,
     rowHeight: 32,
     rows: 1000,
     verticalBorder: () => true,
