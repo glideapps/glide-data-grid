@@ -1821,7 +1821,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (args: GridMouseEventArgs) => {
             isPrevented.current = false;
             touchDownArgs.current = visibleRegionRef.current;
-            if (args.button !== 0) {
+            if (args.button !== 0 && args.button !== 1) {
                 mouseDownData.current = undefined;
                 return;
             }
@@ -2130,7 +2130,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
 
-            if (args.kind === "cell" && args.button === 0) {
+            if (args.kind === "cell" && (args.button === 0 || args.button === 1)) {
                 handleMaybeClick(args);
             }
 
