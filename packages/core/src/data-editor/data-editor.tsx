@@ -617,6 +617,8 @@ type ScrollToFn = (
     }
 ) => void;
 
+type EnterCellEditModeFn = (location: Item, initialValue?: string) => void;
+
 /** @category DataEditor */
 export interface DataEditorRef {
     /**
@@ -645,6 +647,10 @@ export interface DataEditorRef {
      * Scrolls to the desired cell or location in the grid.
      */
     scrollTo: ScrollToFn;
+    /**
+     * Enters edit mode of the provided cell.
+     */
+    enterCellEditMode: EnterCellEditModeFn;
 }
 
 const loadingCell: GridCell = {
@@ -1521,6 +1527,27 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             doFocus();
         },
         [mangledCols, onRowAppended, rowMarkerOffset, rows, scrollTo, setCurrent]
+    );
+
+    const enterCellEditMode: EnterCellEditModeFn = React.useCallback(
+        ([col, row], initialValue): void => {
+           
+            const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
+            const bounds = gridRef.current?.getBounds(col, row);
+
+            if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true && bounds) {
+                setOverlaySimple({
+                    target: bounds,
+                    content: cell,
+                    initialValue,
+                    cell: [col, row],
+                    highlight: true,
+                    forceEditMode: true,
+                });
+            }
+            
+        },
+        [rowMarkerOffset, setOverlaySimple]
     );
 
     const getCustomNewRowTargetColumn = React.useCallback(
@@ -3357,6 +3384,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return gridRef.current?.getBounds(col + rowMarkerOffset, row);
             },
             focus: () => gridRef.current?.focus(),
+            enterCellEditMode,
             emit: async e => {
                 switch (e) {
                     case "delete":
@@ -3417,7 +3445,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             },
             scrollTo,
         }),
-        [appendRow, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
+        [appendRow, enterCellEditMode, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
     );
 
     const [selCol, selRow] = currentCell ?? [];
