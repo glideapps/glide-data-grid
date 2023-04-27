@@ -7,6 +7,7 @@ import type {
     CustomCell,
     ProvideEditorCallback,
     BaseGridMouseEventArgs,
+    Item,
 } from "../data-grid-types";
 
 export interface BaseDrawArgs {
@@ -63,7 +64,7 @@ interface BaseCellRenderer<T extends InnerGridCell> {
             readonly posY: number;
             readonly bounds: Rectangle;
             readonly theme: Theme;
-            readonly editCell: () => void,
+            readonly location: Item;
             readonly preventDefault: () => void;
         } & BaseGridMouseEventArgs
     ) => T | undefined;
