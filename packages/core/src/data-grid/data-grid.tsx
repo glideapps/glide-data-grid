@@ -1111,19 +1111,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             onMouseMoveRaw?.(ev);
             onMouseMove(args);
         },
-        [
-            getMouseArgsForPosition,
-            allowResize,
-            fillHandle,
-            selection,
-            onMouseMoveRaw,
-            onMouseMove,
-            onItemHovered,
-            getCellContent,
-            getCellRenderer,
-            damageInternal,
-            getBoundsForItem,
-        ]
+        [eventTargetRef, getMouseArgsForPosition, allowResize, fillHandle, selection, onMouseMoveRaw, onMouseMove, onItemHovered, getCellContent, getCellRenderer, damageInternal, getBoundsForItem]
     );
     useEventListener("mousemove", onMouseMoveImpl, window, true);
 
