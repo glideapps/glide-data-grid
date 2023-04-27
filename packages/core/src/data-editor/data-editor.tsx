@@ -1974,7 +1974,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const [scrollDir, setScrollDir] = React.useState<GridMouseEventArgs["scrollEdge"]>();
 
     const editCell = React.useCallback(
-        async (args:GridMouseCellEventArgs): Promise<void> => {
+         (args:GridMouseCellEventArgs): void => {
            
             const [col, row] = args.location
             const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
