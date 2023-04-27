@@ -1562,6 +1562,27 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [getRowThemeOverride, mangledCols, mergedTheme]
     );
 
+    const editCell = React.useCallback(
+        (args:GridMouseCellEventArgs): void => {
+          
+           const [col, row] = args.location
+           const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
+
+           if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true) {
+               setOverlaySimple({
+                   target: args.bounds,
+                   content: cell,
+                   initialValue: undefined,
+                   cell: [col, row],
+                   highlight: true,
+                   forceEditMode: true,
+               });
+           }
+           
+       },
+       [rowMarkerOffset, setOverlaySimple]
+   );
+
     const handleSelect = React.useCallback(
         (args: GridMouseEventArgs) => {
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
@@ -1768,30 +1789,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 lastSelectedColRef.current = undefined;
             }
         },
-        [
-            appendRow,
-            columnSelect,
-            focus,
-            getCellRenderer,
-            getCustomNewRowTargetColumn,
-            getMangledCellContent,
-            gridSelection,
-            hasRowMarkers,
-            lastRowSticky,
-            onSelectionCleared,
-            onRowMoved,
-            rowMarkerOffset,
-            rowMarkers,
-            rowSelect,
-            rowSelectionMode,
-            rows,
-            setCurrent,
-            setGridSelection,
-            setSelectedColumns,
-            setSelectedRows,
-            showTrailingBlankRow,
-            themeForCell,
-        ]
+        [rowSelect, columnSelect, gridSelection, hasRowMarkers, rowMarkerOffset, showTrailingBlankRow, rows, rowMarkers, getMangledCellContent, onRowMoved, focus, rowSelectionMode, getCellRenderer, themeForCell, editCell, setSelectedRows, getCustomNewRowTargetColumn, appendRow, lastRowSticky, setCurrent, setSelectedColumns, setGridSelection, onSelectionCleared]
     );
 
     const lastMouseSelectLocation = React.useRef<[number, number]>();
@@ -1972,27 +1970,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const [scrollDir, setScrollDir] = React.useState<GridMouseEventArgs["scrollEdge"]>();
-
-    const editCell = React.useCallback(
-         (args:GridMouseCellEventArgs): void => {
-           
-            const [col, row] = args.location
-            const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
-
-            if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true) {
-                setOverlaySimple({
-                    target: args.bounds,
-                    content: cell,
-                    initialValue: undefined,
-                    cell: [col, row],
-                    highlight: true,
-                    forceEditMode: true,
-                });
-            }
-            
-        },
-        [rowMarkerOffset, setOverlaySimple]
-    );
 
     const onMouseUp = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
