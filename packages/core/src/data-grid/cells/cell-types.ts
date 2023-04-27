@@ -63,6 +63,7 @@ interface BaseCellRenderer<T extends InnerGridCell> {
             readonly posY: number;
             readonly bounds: Rectangle;
             readonly theme: Theme;
+            readonly editCell: () => void,
             readonly preventDefault: () => void;
         } & BaseGridMouseEventArgs
     ) => T | undefined;

@@ -1601,6 +1601,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             bounds: args.bounds,
                             theme: themeForCell(markerCell, args.location),
                             preventDefault: () => undefined,
+                            editCell: () => editCell(args)
                         }) as MarkerCell | undefined;
                         if (postClick === undefined || postClick.checked === markerCell.checked) return;
                     }
@@ -1972,6 +1973,27 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const [scrollDir, setScrollDir] = React.useState<GridMouseEventArgs["scrollEdge"]>();
 
+    const editCell = React.useCallback(
+        async (args:GridMouseCellEventArgs): Promise<void> => {
+           
+            const [col, row] = args.location
+            const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
+
+            if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true) {
+                setOverlaySimple({
+                    target: args.bounds,
+                    content: cell,
+                    initialValue: undefined,
+                    cell: [col, row],
+                    highlight: true,
+                    forceEditMode: true,
+                });
+            }
+            
+        },
+        [rowMarkerOffset, setOverlaySimple]
+    );
+
     const onMouseUp = React.useCallback(
         (args: GridMouseEventArgs, isOutside: boolean) => {
             const mouse = mouseState;
@@ -2011,6 +2033,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             bounds: a.bounds,
                             theme: themeForCell(c, args.location),
                             preventDefault,
+                            editCell: () => editCell(a),
                         });
                         if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
                             mangledOnCellsEdited([{ location: a.location, value: newVal }]);
