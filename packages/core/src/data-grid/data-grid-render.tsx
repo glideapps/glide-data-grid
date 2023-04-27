@@ -34,6 +34,7 @@ import {
     computeBounds,
     getMiddleCenterBias,
     drawCheckbox,
+    drawColumnResizeOutline,
 } from "./data-grid-lib";
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import type { Theme } from "../common/styles";
@@ -1856,6 +1857,7 @@ export interface DrawGridArg {
     readonly groupHeaderHeight: number;
     readonly disabledRows: CompactSelection;
     readonly rowHeight: number | ((index: number) => number);
+    readonly resizeCol: number | undefined,
     readonly verticalBorder: (col: number) => boolean;
     readonly isResizing: boolean;
     readonly isFocused: boolean;
@@ -1970,6 +1972,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         fillHandle,
         lastRowSticky: trailingRowType,
         rows,
+        resizeCol,
         getCellContent,
         getGroupDetails,
         getRowThemeOverride,
@@ -2171,7 +2174,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             );
         });
 
-        if (damage.length > 0) {
+        if (!isResizing && damage.length > 0) {
             clipDamage(
                 targetCtx,
                 effectiveCols,
@@ -2254,7 +2257,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             }
         }
 
-        if (doHeaders) {
+        if (!isResizing && doHeaders) {
             clipDamage(
                 overlayCtx,
                 effectiveCols,
@@ -2514,6 +2517,18 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         lastBuffer: doubleBuffer ? (targetBuffer === bufferA ? "a" : "b") : undefined,
     };
 
+
+    if(isResizing){
+        walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x) => {
+        
+            if(c.sourceIndex === resizeCol) {
+                drawColumnResizeOutline(overlayCtx, x+c.width, 0, totalHeaderHeight+1, theme );
+                drawColumnResizeOutline(targetCtx, x+c.width, totalHeaderHeight, height, theme );
+            }        
+        });
+    
+    }
+    
     targetCtx.restore();
     overlayCtx.restore();
 }

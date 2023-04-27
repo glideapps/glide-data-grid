@@ -95,7 +95,7 @@ export interface DataGridProps {
      * @group Data
      */
     readonly rows: number;
-
+    readonly resizeCol: number | undefined;
     readonly headerHeight: number;
     readonly groupHeaderHeight: number;
     readonly enableGroups: boolean;
@@ -305,6 +305,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         groupHeaderHeight,
         rowHeight,
         rows,
+        resizeCol,
         getCellContent,
         getRowThemeOverride,
         onHeaderMenuClick,
@@ -688,6 +689,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             fillHandle,
             lastRowSticky: trailingRowType,
             rows,
+            resizeCol,
             drawFocus: drawFocusRing,
             getCellContent,
             getGroupDetails: getGroupDetails ?? (name => ({ name })),
@@ -763,6 +765,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         experimental?.renderStrategy,
         lastWasTouch,
         getCellRenderer,
+        resizeCol
     ]);
 
     const lastDrawRef = React.useRef(draw);
@@ -1108,19 +1111,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             onMouseMoveRaw?.(ev);
             onMouseMove(args);
         },
-        [
-            getMouseArgsForPosition,
-            allowResize,
-            fillHandle,
-            selection,
-            onMouseMoveRaw,
-            onMouseMove,
-            onItemHovered,
-            getCellContent,
-            getCellRenderer,
-            damageInternal,
-            getBoundsForItem,
-        ]
+        [eventTargetRef, getMouseArgsForPosition, allowResize, fillHandle, selection, onMouseMoveRaw, onMouseMove, onItemHovered, getCellContent, getCellRenderer, damageInternal, getBoundsForItem]
     );
     useEventListener("mousemove", onMouseMoveImpl, window, true);
 

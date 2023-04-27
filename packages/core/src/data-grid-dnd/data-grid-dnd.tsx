@@ -4,7 +4,7 @@ import * as React from "react";
 import DataGrid, { DataGridProps, DataGridRef } from "../data-grid/data-grid";
 import type { GridColumn, GridMouseEventArgs, InnerGridColumn, Rectangle } from "../data-grid/data-grid-types";
 
-type Props = Omit<DataGridProps, "dragAndDropState" | "isResizing" | "isDragging" | "onMouseMoveRaw" | "allowResize">;
+type Props = Omit<DataGridProps, "dragAndDropState" | "isResizing" | 'resizeCol' | "isDragging" | "onMouseMoveRaw" | "allowResize">;
 
 export interface DataGridDndProps extends Props {
     /**
@@ -382,6 +382,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             prelightCells={p.prelightCells}
             rowHeight={p.rowHeight}
             rows={p.rows}
+            resizeCol={resizeCol}
             selection={p.selection}
             smoothScrollX={p.smoothScrollX}
             smoothScrollY={p.smoothScrollY}
