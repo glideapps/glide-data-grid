@@ -617,6 +617,8 @@ type ScrollToFn = (
     }
 ) => void;
 
+type EnterCellEditModeFn = (location: Item, initialValue?: string) => void;
+
 /** @category DataEditor */
 export interface DataEditorRef {
     /**
@@ -645,6 +647,10 @@ export interface DataEditorRef {
      * Scrolls to the desired cell or location in the grid.
      */
     scrollTo: ScrollToFn;
+    /**
+     * Enters edit mode of the provided cell.
+     */
+    enterCellEditMode: EnterCellEditModeFn;
 }
 
 const loadingCell: GridCell = {
@@ -1523,8 +1529,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [mangledCols, onRowAppended, rowMarkerOffset, rows, scrollTo, setCurrent]
     );
 
-    const enterCellEditMode = React.useCallback(
-        ([col, row]: Item, initialValue?: string): void => {
+    const enterCellEditMode: EnterCellEditModeFn = React.useCallback(
+        ([col, row], initialValue): void => {
            
             const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
             const bounds = gridRef.current?.getBounds(col, row);
