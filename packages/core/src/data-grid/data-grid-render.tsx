@@ -855,7 +855,7 @@ function drawGridHeaders(
         const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
 
         const y = enableGroups ? groupHeaderHeight : 0;
-        const xOffset = c.sourceIndex === 0 || !verticalBorder(c.sourceIndex) ? 0 : 1;
+        const xOffset = c.sourceIndex === 0 ? 0 : 1;
 
         if (selected) {
             ctx.fillStyle = bgFillStyle;
@@ -930,8 +930,7 @@ function clipDamage(
     getRowHeight: (row: number) => number,
     trailingRowType: TrailingRowType,
     damage: CellList | undefined,
-    includeCells: boolean,
-    verticalBorder: (col: number) => boolean,
+    includeCells: boolean
 ): void {
     if (damage === undefined || damage.length === 0) return;
 
@@ -958,9 +957,8 @@ function clipDamage(
         (c, drawX, colDrawY, clipX, startRow) => {
             const diff = Math.max(0, clipX - drawX);
 
-            const xOffset = verticalBorder(c.sourceIndex) ? 1 : 0
-            const finalX = drawX + diff + xOffset;
-            const finalWidth = c.width - diff - xOffset;
+            const finalX = drawX + diff + 1;
+            const finalWidth = c.width - diff - 1;
             for (let i = 0; i < damage.length; i++) {
                 const d = damage[i];
                 if (d[0] === c.sourceIndex && (d[1] === -1 || d[1] === undefined)) {
@@ -2189,8 +2187,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 getRowHeight,
                 trailingRowType,
                 damage,
-                true,
-                verticalBorder
+                true
             );
 
             targetCtx.fillStyle = theme.bgCell;
@@ -2272,8 +2269,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 getRowHeight,
                 trailingRowType,
                 damage,
-                false,
-                verticalBorder
+                false
             );
             drawHeaderTexture();
         }
