@@ -12,7 +12,7 @@ import {
     Item,
 } from "../../data-grid/data-grid-types";
 
-import faker from "faker";
+import { faker } from "@faker-js/faker";
 import { styled } from "@linaria/react";
 import isArray from "lodash/isArray.js";
 import { assertNever } from "../../common/support";
