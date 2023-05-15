@@ -898,7 +898,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         (ev: MouseEvent | TouchEvent) => {
             const canvas = ref.current;
             const eventTarget = eventTargetRef?.current;
-            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) return;
+            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget && ((eventTarget?.contains(ev.target as Node)) === false))) return;
 
             let clientX: number;
             let clientY: number;
@@ -1064,7 +1064,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
 
             
-            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) {
+            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget && ((eventTarget?.contains(ev.target as Node)) === false))) {
                 return;
             }
 
