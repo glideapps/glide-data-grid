@@ -71,10 +71,6 @@ const ScrollRegionStyle = styled.div<{ isSafari: boolean }>`
 
 type ScrollLock = [undefined, number] | [number, undefined] | undefined;
 
-function eatEvent(e: React.MouseEvent) {
-    e.stopPropagation();
-}
-
 function useTouchUpDelayed(delay: number): boolean {
     const [hasTouches, setHasTouches] = React.useState(false);
 
@@ -294,9 +290,6 @@ export const InfiniteScroller: React.FC<Props> = p => {
                                 {!rightElementFill && <div className="dvn-spacer" />}
                                 <div
                                     ref={rightWrapRef}
-                                    onMouseDown={eatEvent}
-                                    onMouseUp={eatEvent}
-                                    onMouseMove={eatEvent}
                                     style={{
                                         height,
                                         maxHeight: clientHeight - Math.ceil(dpr % 1),
