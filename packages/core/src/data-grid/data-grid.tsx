@@ -898,7 +898,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         (ev: MouseEvent | TouchEvent) => {
             const canvas = ref.current;
             const eventTarget = eventTargetRef?.current;
-            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget && ((eventTarget?.contains(ev.target as Node)) === false))) return;
+            const isScrollbarContainsTarget = eventTarget?.contains(ev.target as Node) ?? false
+
+            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget && !isScrollbarContainsTarget)) return;
 
             let clientX: number;
             let clientY: number;
@@ -1061,10 +1063,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             const canvas = ref.current;
             const eventTarget = eventTargetRef?.current;
+            const isScrollbarContainsTarget = eventTarget?.contains(ev.target as Node) ?? false
 
-
-            
-            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget && ((eventTarget?.contains(ev.target as Node)) === false))) {
+            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget && !isScrollbarContainsTarget)) {
                 return;
             }
 
