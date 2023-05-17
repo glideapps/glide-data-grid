@@ -19,7 +19,9 @@ export function useResizeDetector<T extends HTMLElement = HTMLElement>(
         const resizeCallback: ResizeObserverCallback = entries => {
             for (const entry of entries) {
                 const { width, height } = (entry && entry.contentRect) || {};
-                setSize(cv => (cv.width === width && cv.height === height ? cv : { width, height }));
+                window.requestAnimationFrame(() => {
+                    setSize(cv => (cv.width === width && cv.height === height ? cv : { width, height }));
+                });
             }
         };
 
