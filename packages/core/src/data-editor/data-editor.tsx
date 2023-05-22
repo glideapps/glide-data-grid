@@ -1531,7 +1531,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const enterCellEditMode: EnterCellEditModeFn = React.useCallback(
         ([col, row], initialValue): void => {
-           
             const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
             const bounds = gridRef.current?.getBounds(col, row);
 
@@ -1545,7 +1544,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     forceEditMode: true,
                 });
             }
-            
         },
         [rowMarkerOffset, setOverlaySimple]
     );
@@ -3251,7 +3249,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             {
                                 x: rowMarkerOffset,
                                 y: rowIndex,
-                                width: columnsIn.length - rowMarkerOffset,
+                                width: columnsIn.length,
                                 height: 1,
                             },
                             abortControllerRef.current.signal
