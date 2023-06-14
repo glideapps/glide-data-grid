@@ -66,6 +66,7 @@ describe("Image cell", () => {
                 value={cell}
                 target={target}
                 forceEditMode={false}
+                location={{ row: 0, col: 0 }}
                 setKeyboardEventHandlingMode={noop}
             />
         );
@@ -99,6 +100,7 @@ describe("Image cell", () => {
                 value={cell}
                 target={target}
                 forceEditMode={false}
+                location={{ row: 0, col: 0 }}
                 setKeyboardEventHandlingMode={noop}
             />
         );
