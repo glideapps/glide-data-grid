@@ -465,6 +465,10 @@ export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComp
     readonly target: Rectangle;
     readonly forceEditMode: boolean;
     readonly isValid?: boolean;
+    readonly location: {
+        row: number;
+        col: number;
+    };
     /**
      * set the keyboard event handling mode
      * "manual": glide will not handle the "Enter", "Tab" and "Escape" events
