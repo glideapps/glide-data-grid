@@ -160,6 +160,11 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         return [getCellRenderer(content)?.provideEditor?.(content), false];
     }, [content, getCellRenderer, provideEditor]);
 
+    const location = React.useMemo(() => {
+        const [col, row] = cell;
+        return { col, row };
+    }, [cell]);
+
     const { ref, style: stayOnScreenStyle } = useStayOnScreen();
 
     let pad = true;
@@ -189,6 +194,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 imageEditorOverride={imageEditorOverride}
                 markdownDivCreateNode={markdownDivCreateNode}
                 isValid={isValid}
+                location={location}
             />
         );
     }
