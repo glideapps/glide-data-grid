@@ -665,6 +665,17 @@ export function drawHeader(
 ) {
     const isCheckboxHeader = c.title.startsWith(headerCellCheckboxPrefix);
     const menuBounds = getHeaderMenuBounds(x, y, width, height);
+
+    let checked: boolean | BooleanIndeterminate = undefined;
+
+    if (isCheckboxHeader) {
+        if (c.title === headerCellCheckedMarker) checked = true;
+        if (c.title === headerCellUnheckedMarker) checked = false;
+        if (checked !== true) {
+            ctx.globalAlpha = hoverAmount;
+        }
+    }
+
     if (drawHeaderCallback !== undefined) {
         let passCol = c;
         if (isCheckboxHeader) {
@@ -693,12 +704,6 @@ export function drawHeader(
     }
 
     if (isCheckboxHeader) {
-        let checked: boolean | BooleanIndeterminate = undefined;
-        if (c.title === headerCellCheckedMarker) checked = true;
-        if (c.title === headerCellUnheckedMarker) checked = false;
-        if (checked !== true) {
-            ctx.globalAlpha = hoverAmount;
-        }
         drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined);
         if (checked !== true) {
             ctx.globalAlpha = 1;
@@ -1855,7 +1860,7 @@ export interface DrawGridArg {
     readonly groupHeaderHeight: number;
     readonly disabledRows: CompactSelection;
     readonly rowHeight: number | ((index: number) => number);
-    readonly resizeCol: number | undefined,
+    readonly resizeCol: number | undefined;
     readonly verticalBorder: (col: number) => boolean;
     readonly isResizing: boolean;
     readonly isFocused: boolean;
@@ -2516,15 +2521,15 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
     if(isResizing){
         walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x) => {
-        
+
             if(c.sourceIndex === resizeCol) {
                 drawColumnResizeOutline(overlayCtx, x+c.width, 0, totalHeaderHeight+1, theme );
                 drawColumnResizeOutline(targetCtx, x+c.width, totalHeaderHeight, height, theme );
-            }        
+            }
         });
-    
+
     }
-    
+
     targetCtx.restore();
     overlayCtx.restore();
 }
