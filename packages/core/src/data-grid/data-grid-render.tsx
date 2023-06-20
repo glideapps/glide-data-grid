@@ -996,7 +996,7 @@ function clipDamage(
                         const h = bottom - top;
 
                         if (h > 0) {
-                            ctx.rect(finalX, top, finalWidth, h);
+                            ctx.rect(finalX, top, finalWidth, h - 1);
                         }
                     }
                 }
@@ -1763,10 +1763,11 @@ function drawFocusRing(
                         ctx.rect(clipX, 0, width - clipX, height);
                         ctx.clip();
                     }
+                    const lineWidth = 1;
                     ctx.beginPath();
-                    ctx.rect(cellX + 0.5, drawY + 0.5, cellWidth, rh);
+                    ctx.rect(cellX + 0.5, drawY + 0.5, cellWidth, rh - lineWidth);
                     ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
-                    ctx.lineWidth = 1;
+                    ctx.lineWidth = lineWidth;
                     ctx.stroke();
 
                     if (fillHandle) {
@@ -2518,16 +2519,13 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         lastBuffer: doubleBuffer ? (targetBuffer === bufferA ? "a" : "b") : undefined,
     };
 
-
-    if(isResizing){
+    if (isResizing) {
         walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x) => {
-
-            if(c.sourceIndex === resizeCol) {
-                drawColumnResizeOutline(overlayCtx, x+c.width, 0, totalHeaderHeight+1, theme );
-                drawColumnResizeOutline(targetCtx, x+c.width, totalHeaderHeight, height, theme );
+            if (c.sourceIndex === resizeCol) {
+                drawColumnResizeOutline(overlayCtx, x + c.width, 0, totalHeaderHeight + 1, theme);
+                drawColumnResizeOutline(targetCtx, x + c.width, totalHeaderHeight, height, theme);
             }
         });
-
     }
 
     targetCtx.restore();
