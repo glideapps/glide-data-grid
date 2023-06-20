@@ -1529,6 +1529,25 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [mangledCols, onRowAppended, rowMarkerOffset, rows, scrollTo, setCurrent]
     );
 
+    const focusToCell = React.useCallback(
+        (item: Item) => {
+            const [col, row] = item;
+
+            setGridSelection(
+                {
+                    ...gridSelection,
+                    current: {
+                        range: { x: col, y: row, width: 1, height: 1 },
+                        cell: [col, row],
+                        rangeStack: [],
+                    },
+                },
+                true
+            );
+        },
+        [gridSelection, setGridSelection]
+    );
+
     const enterCellEditMode: EnterCellEditModeFn = React.useCallback(
         ([col, row], initialValue): void => {
             const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
@@ -2916,21 +2935,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else if (key === "Tab") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        // if we are on the second row, first column, pressing "Shift+Tab" should take us to the last column of the first row.
-                        if (col === 1 && row !== 0) {
-                            col = columns.length;
-                            row--;
-                        } else {
-                            col--;
-                        }
+                        col--;
                     } else {
-                        // if we are on the last column of a row, the desired outcome is to move to the first column of the next row.
-                        if (col === columns.length) {
-                            col = 0;
-                            row++;
-                        } else {
-                            col++;
-                        }
+                        col++;
                     }
                 } else if (
                     !metaKey &&
@@ -3380,6 +3387,34 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const mangledFreezeColumns = Math.min(mangledCols.length, freezeColumns + (hasRowMarkers ? 1 : 0));
 
+    const [selCol, selRow] = currentCell ?? [];
+    const onCellFocused = React.useCallback(
+        (cell: Item) => {
+            const [col, row] = cell;
+
+            if (row === -1) {
+                if (columnSelect !== "none") {
+                    setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, false);
+                    focus();
+                }
+                return;
+            }
+
+            if (selCol === col && selRow === row) return;
+            setCurrent(
+                {
+                    cell,
+                    range: { x: col, y: row, width: 1, height: 1 },
+                },
+                true,
+                false,
+                "keyboard-nav"
+            );
+            scrollTo(col, row);
+        },
+        [columnSelect, focus, scrollTo, selCol, selRow, setCurrent, setSelectedColumns]
+    );
+
     React.useImperativeHandle(
         forwardedRef,
         () => ({
@@ -3454,36 +3489,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             },
             scrollTo,
+            focusToCell,
         }),
-        [appendRow, enterCellEditMode, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
-    );
-
-    const [selCol, selRow] = currentCell ?? [];
-    const onCellFocused = React.useCallback(
-        (cell: Item) => {
-            const [col, row] = cell;
-
-            if (row === -1) {
-                if (columnSelect !== "none") {
-                    setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, false);
-                    focus();
-                }
-                return;
-            }
-
-            if (selCol === col && selRow === row) return;
-            setCurrent(
-                {
-                    cell,
-                    range: { x: col, y: row, width: 1, height: 1 },
-                },
-                true,
-                false,
-                "keyboard-nav"
-            );
-            scrollTo(col, row);
-        },
-        [columnSelect, focus, scrollTo, selCol, selRow, setCurrent, setSelectedColumns]
+        [appendRow, enterCellEditMode, focusToCell, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
     );
 
     const [isFocused, setIsFocused] = React.useState(false);
