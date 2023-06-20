@@ -2916,9 +2916,21 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else if (key === "Tab") {
                     setOverlay(undefined);
                     if (shiftKey) {
-                        col--;
+                        // if we are on the second row, first column, pressing "Shift+Tab" should take us to the last column of the first row.
+                        if (col === 1 && row !== 0) {
+                            col = columns.length;
+                            row--;
+                        } else {
+                            col--;
+                        }
                     } else {
-                        col++;
+                        // if we are on the last column of a row, the desired outcome is to move to the first column of the next row.
+                        if (col === columns.length) {
+                            col = 0;
+                            row++;
+                        } else {
+                            col++;
+                        }
                     }
                 } else if (
                     !metaKey &&
