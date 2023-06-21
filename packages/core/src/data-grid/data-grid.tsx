@@ -1063,7 +1063,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             const canvas = ref.current;
             const eventTarget = eventTargetRef?.current;
-            const scrollerContainsTarget = eventTarget?.contains(ev.target as Node) ?? false
 
             if (canvas === null) {
                 return;
@@ -1072,7 +1071,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
 
             // when the cursor is in the grid area, but it's on a overlay element like a popup which is not part of the grid
-            if ((args.kind !== outOfBoundsKind && ev.target !== canvas && ev.target !== eventTarget && !scrollerContainsTarget)) {
+            if ((args.kind !== outOfBoundsKind && ev.target !== canvas && ev.target !== eventTarget)) {
                 return;
             }
 
