@@ -1763,11 +1763,10 @@ function drawFocusRing(
                         ctx.rect(clipX, 0, width - clipX, height);
                         ctx.clip();
                     }
-                    const lineWidth = 1;
                     ctx.beginPath();
-                    ctx.rect(cellX + 0.5, drawY + 0.5, cellWidth, rh - lineWidth);
+                    ctx.rect(cellX + 0.5, drawY + 0.5, cellWidth, rh - 1);
                     ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
-                    ctx.lineWidth = lineWidth;
+                    ctx.lineWidth = 1;
                     ctx.stroke();
 
                     if (fillHandle) {
