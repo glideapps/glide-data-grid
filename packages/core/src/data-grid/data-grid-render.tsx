@@ -996,7 +996,7 @@ function clipDamage(
                         const h = bottom - top;
 
                         if (h > 0) {
-                            ctx.rect(finalX, top, finalWidth, h - 1);
+                            ctx.rect(finalX, top, finalWidth, h);
                         }
                     }
                 }
@@ -1764,7 +1764,7 @@ function drawFocusRing(
                         ctx.clip();
                     }
                     ctx.beginPath();
-                    ctx.rect(cellX + 0.5, drawY + 0.5, cellWidth, rh - 1);
+                    ctx.rect(cellX + 0.5, drawY + 0.5, cellWidth, rh);
                     ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
                     ctx.lineWidth = 1;
                     ctx.stroke();
