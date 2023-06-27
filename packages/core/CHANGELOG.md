@@ -9,7 +9,7 @@ Glide Data Grid 5.0 no longer depends on `styled-components`! This means the The
 Because Glide Data Grid no longer uses a CSS-in-JS solution, the CSS must be imported by consumers. This is usually achieved by doing the following somewhere in your project source.
 
 ```ts
-import "@glideapps/glide-data-grid/dist/index.css";
+import "@workfront-grid/glide-data-grid/dist/index.css";
 ```
 
 Your bundler will take care of packing this in with the rest of the CSS your project requires. This is tested working with both next-js and create-react-app. Examples can be found in the [test-projects](https://github.com/glideapps/glide-data-grid/tree/main/test-projects) folder.
@@ -81,7 +81,7 @@ All variables except `lineHeight` are available in this manner. The full list in
 The theme can be accessed in JS by using the new `useTheme` hook:
 
 ```tsx
-import { useTheme } from "@glideapps/glide-data-grid";
+import { useTheme } from "@workfront-grid/glide-data-grid";
 
 const MyComponent: React.VFC = () => {
     const dataGridTheme = useTheme();
@@ -723,7 +723,7 @@ interface CustomCell<T extends {} = {}> extends BaseGridCell {
 }
 ```
 
-Custom cell can be used to create new cell types quickly and easily. We are already using it in our [glide-data-grid-cells](https://www.npmjs.com/package/@glideapps/glide-data-grid-cells) package in order to ship to you brand new cells. These cells can include custom input editors as well!
+Custom cell can be used to create new cell types quickly and easily. We are already using it in our [glide-data-grid-cells](https://www.npmjs.com/package/@workfront-grid/glide-data-grid-cells) package in order to ship to you brand new cells. These cells can include custom input editors as well!
 
 #### 🌽 Round image corners
 

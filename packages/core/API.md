@@ -1179,11 +1179,11 @@ declare function useCustomCells(
 ): { drawCell: DrawCustomCellCallback; provideEditor: ProvideEditorCallback<GridCell> };
 ```
 
-The useCustomCells hook provides a standardized method of integrating custom cells into the Glide Data Grid. All cells in the `@glideapps/glide-data-grid-source` package are already in this format and can be used individually by passing them to this hook as so. The result of the hook is an object which can be spread on the DataEditor to implement the cells.
+The useCustomCells hook provides a standardized method of integrating custom cells into the Glide Data Grid. All cells in the `@workfront-grid/glide-data-grid-source` package are already in this format and can be used individually by passing them to this hook as so. The result of the hook is an object which can be spread on the DataEditor to implement the cells.
 
 ```tsx
-import StarCell from "@glideapps/glide-data-grid-cells/cells/star-cell";
-import DropdownCell from "@glideapps/glide-data-grid-cells/cells/dropdown-cell";
+import StarCell from "@workfront-grid/glide-data-grid-cells/cells/star-cell";
+import DropdownCell from "@workfront-grid/glide-data-grid-cells/cells/dropdown-cell";
 
 const MyGrid = () => {
     const args = useCustomCells([StarCell, DropdownCell]);

@@ -5,7 +5,7 @@ import {
     getMiddleCenterBias,
     useTheme,
     GridCellKind,
-} from "@glideapps/glide-data-grid";
+} from "@workfront-grid/glide-data-grid";
 import { styled } from "@linaria/react";
 import * as React from "react";
 import Select, { MenuProps, components } from "react-select";

@@ -7,7 +7,7 @@ import {
     CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
-} from "@glideapps/glide-data-grid";
+} from "@workfront-grid/glide-data-grid";
 
 interface UserProfileCellProps {
     readonly kind: "user-profile-cell";

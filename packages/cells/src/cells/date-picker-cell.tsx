@@ -1,5 +1,5 @@
 import * as React from "react";
-import { CustomCell, CustomRenderer, drawTextCell, GridCellKind } from "@glideapps/glide-data-grid";
+import { CustomCell, CustomRenderer, drawTextCell, GridCellKind } from "@workfront-grid/glide-data-grid";
 
 interface DatePickerCellProps {
     readonly kind: "date-picker-cell";

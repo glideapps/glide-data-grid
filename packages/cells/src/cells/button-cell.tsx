@@ -4,7 +4,7 @@ import {
     getMiddleCenterBias,
     GridCellKind,
     interpolateColors,
-} from "@glideapps/glide-data-grid";
+} from "@workfront-grid/glide-data-grid";
 import { roundedRect } from "../draw-fns";
 
 type PackedColor = string | readonly [normal: string, hover: string];

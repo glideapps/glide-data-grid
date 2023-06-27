@@ -5,7 +5,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import styles from "../styles/Home.module.css";
 
-import { CompactSelection } from "@glideapps/glide-data-grid";
+import { CompactSelection } from "@workfront-grid/glide-data-grid";
 
 const Grid = dynamic(
     () => {

@@ -37,7 +37,7 @@ Data Grid is agnostic about the way you load/store/generate/mutate your data. Wh
 
 ### Does it do sorting?
 
-Yes through the [glide-data-grid-source](https://www.npmjs.com/package/@glideapps/glide-data-grid-source) package.
+Yes through the [glide-data-grid-source](https://www.npmjs.com/package/@workfront-grid/glide-data-grid-source) package.
 
 ### Does it do search?
 

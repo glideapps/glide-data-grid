@@ -1,6 +1,6 @@
 import type { ArticleCell } from "./article-cell-types";
 import * as React from "react";
-import { CustomRenderer, getMiddleCenterBias, GridCellKind } from "@glideapps/glide-data-grid";
+import { CustomRenderer, getMiddleCenterBias, GridCellKind } from "@workfront-grid/glide-data-grid";
 
 const ArticleCellEditor = React.lazy(async () => await import("./article-cell-editor"));
 

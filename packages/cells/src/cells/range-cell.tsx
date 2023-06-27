@@ -4,7 +4,7 @@ import {
     CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
-} from "@glideapps/glide-data-grid";
+} from "@workfront-grid/glide-data-grid";
 import * as React from "react";
 import { roundedRect } from "../draw-fns";
 

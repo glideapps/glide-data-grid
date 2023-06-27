@@ -1,4 +1,4 @@
-import { useCustomCells } from "@glideapps/glide-data-grid";
+import { useCustomCells } from "@workfront-grid/glide-data-grid";
 import StarCellRenderer, { StarCell } from "./cells/star-cell";
 import SparklineCellRenderer, { SparklineCell } from "./cells/sparkline-cell";
 import TagsCellRenderer, { TagsCell } from "./cells/tags-cell";

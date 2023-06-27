@@ -617,7 +617,7 @@ type ScrollToFn = (
     }
 ) => void;
 
-type EnterCellEditModeFn = (location: Item, initialValue?: string) => void;
+type EnterCellEditModeFn = (cellLocation: Item, initialValue?: string) => void;
 
 /** @category DataEditor */
 export interface DataEditorRef {

@@ -15,8 +15,5 @@
         "target": "es6",
         "types": ["jest", "node"],
         "baseUrl": ".",
-        "paths": {
-            "@glideapps/*": ["node_modules/@workfront-grid/*"]
-        }
     }
 }

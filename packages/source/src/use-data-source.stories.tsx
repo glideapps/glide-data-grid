@@ -1,7 +1,7 @@
 import { styled } from "@linaria/react";
 import * as React from "react";
 import { useResizeDetector } from "react-resize-detector";
-import { DataEditor, DataEditorProps, GridCellKind, GridColumn, Theme } from "@glideapps/glide-data-grid";
+import { DataEditor, DataEditorProps, GridCellKind, GridColumn, Theme } from "@workfront-grid/glide-data-grid";
 import faker from "faker";
 import { useCollapsingGroups, useColumnSort, useMoveableColumns } from ".";
 

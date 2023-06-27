@@ -9,7 +9,7 @@
         "lint": "next lint"
     },
     "dependencies": {
-        "@glideapps/glide-data-grid": "^3.4.1",
+        "@workfront-grid/glide-data-grid": "^3.4.1",
         "canvas-hypertxt": "^0.0.7",
         "lodash": "^4.17.21",
         "marked": "^4.0.12",

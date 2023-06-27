@@ -1,5 +1,5 @@
 import React from "react";
-import DataEditor, { DataEditorProps, GridCellKind, GridColumn } from "@glideapps/glide-data-grid";
+import DataEditor, { DataEditorProps, GridCellKind, GridColumn } from "@workfront-grid/glide-data-grid";
 
 export default function Grid() {
     const getData = React.useCallback<DataEditorProps["getCellContent"]>(
