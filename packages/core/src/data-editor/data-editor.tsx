@@ -2618,6 +2618,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onKeyDown = React.useCallback(
         (event: GridKeyEventArgs) => {
             const fn = async () => {
+
+                // TODO: why can me undefined?
+                const markerCell = getMangledCellContent([event.location.col!, event.location.row!]);
+
+                const renderer = getCellRenderer(markerCell);
+
+                renderer?.onKeyDown?.({
+                    ...event,
+                    cell: markerCell,
+                })
+
                 let cancelled = false;
                 if (onKeyDownIn !== undefined) {
                     onKeyDownIn({

@@ -1,4 +1,4 @@
-import type { Theme } from "../..";
+import type { Theme, GridKeyEventArgs } from "../..";
 import type { SpriteManager } from "../data-grid-sprites";
 import type {
     InnerGridCell,
@@ -68,6 +68,12 @@ interface BaseCellRenderer<T extends InnerGridCell> {
             readonly preventDefault: () => void;
         } & BaseGridMouseEventArgs
     ) => T | undefined;
+
+    readonly onKeyDown?: (
+        args: {
+            readonly cell: T;
+        } & GridKeyEventArgs
+    ) => void;
 
     readonly onSelect?: (
         args: {
