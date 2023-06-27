@@ -68,6 +68,7 @@
     },
     "devDependencies": {
         "@babel/cli": "^7.16.0",
+        "@glideapps/ts-helper": "0.0.5",
         "@skypack/package-check": "^0.2.2",
         "@types/jest": "^28.1.8",
         "esbuild": "^0.14.47",
