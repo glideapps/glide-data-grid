@@ -83,7 +83,7 @@ publish:
     - npm install standard-version -g
     - 'standard-version --bumpFiles package.json ./packages/*/package.json --no-verify --releaseCommitMessageFormat "chore: {{currentTag}}"'
     - npm publish --workspaces
-    - git push --follow-tags origin ${CI_BUILD_REF_NAME}
+    - git push --follow-tags origin ${CI_BUILD_REF_NAME} -o ci.skip
 
 include:
   - project: 'devtools/reusable-jobs'
