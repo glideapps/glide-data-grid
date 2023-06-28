@@ -113,12 +113,13 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                 components={{
                     DropdownIndicator: () => null,
                     IndicatorSeparator: () => null,
-                    Menu: props => (
+                    Menu: function CustomMenuPortal(props) {
+                        return (
                         <PortalWrap>
                             <CustomMenu className={"click-outside-ignore"} {...props} />
                         </PortalWrap>
-                    ),
-                }}
+                    );
+                }}}
                 options={values}
                 onChange={async e => {
                     if (e === null) return;

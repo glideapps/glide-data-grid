@@ -32,7 +32,7 @@ const renderer: CustomRenderer<ArticleCell> = {
         return true;
     },
     provideEditor: () => ({
-        editor: p => {
+        editor: function ArticleCellEditorSuspense(p) {
             return (
                 <React.Suspense fallback={null}>
                     <ArticleCellEditor {...p} />

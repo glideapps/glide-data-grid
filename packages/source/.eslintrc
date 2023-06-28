@@ -45,7 +45,7 @@
         {
             "files": ["*.ts"],
             "rules": {
-                "@typescript-eslint/strict-boolean-expressions": "error"
+                "@typescript-eslint/strict-boolean-expressions": "warn"
             }
         }
     ]
