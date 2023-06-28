@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.6.7](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.6.6...v5.6.7) (2023-06-28)
+
+
+### Bug Fixes
+
+* skip CI when pushing a release ([b63d79e](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/b63d79e07d771a661090774b4c1597a761069e9b))
+
 ### [5.6.6](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.6.5...v5.6.6) (2023-06-28)
 
 ### [5.6.5](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.6.4...v5.6.5) (2023-06-28)
