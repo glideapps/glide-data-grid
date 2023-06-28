@@ -80,7 +80,7 @@ publish:
   script:
     - git remote set-url origin git@${CI_SERVER_HOST}:${CI_PROJECT_PATH}
     - git checkout -B ${CI_BUILD_REF_NAME}
-    - standard-version --bumpFiles package.json ./packages/*/package.json --no-verify --releaseCommitMessageFormat "chore(release):\ {{currentTag}}"
+    - npx run standard-version --bumpFiles package.json ./packages/*/package.json --no-verify --releaseCommitMessageFormat "chore(release):\ {{currentTag}}"
     - npm publish --workspaces
     - git push --follow-tags origin ${CI_BUILD_REF_NAME}
 
