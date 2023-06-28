@@ -1,0 +1,94 @@
+variables:
+  npm_config_cache: '$CI_PROJECT_DIR/.npm'
+  NPM_CONFIG_USERCONFIG: '${ADOBE_NPMRC}'
+
+default:
+  image: "docker-wf-dev.dr-uw2.adobeitc.com/core-platform/gitlab-runner-node16:latest"
+  before_script:
+    - git config --global user.name $JARVIS_NAME
+    - git config --global user.email $JARVIS_EMAIL
+    - npm ci
+  cache:
+    key: '$CI_COMMIT_REF_SLUG'
+    paths:
+      - .cache
+    policy: pull
+
+stages:
+  - build
+  - test
+  - test-18
+  - analyze
+  - publish
+
+warm_cache:
+  stage: .pre
+  interruptible: true
+  cache:
+    key: '$CI_COMMIT_REF_SLUG'
+    paths:
+      - .cache
+    policy: pull-push
+  script:
+    - echo "Warmed cache for further jobs. Yay!"
+
+.build-job-template: &build_job_definition
+  stage: build
+  interruptible: true
+
+build:
+  <<: *build_job_definition
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - packages/core/dist/
+      - packages/cells/dist/
+      - packages/source/dist/
+
+.test-job-template: &test_job_definition
+  needs: ['warm_cache']
+  stage: test
+  interruptible: true
+
+lint:
+  <<: *test_job_definition
+  script:
+    - npm run lint
+
+test:
+  <<: *test_job_definition
+  script:
+    - npm run test --ci --no-interactive
+
+
+test-18:
+  <<: *test_job_definition
+  script:
+    - npm run test-18 --ci --no-interactive
+
+
+publish:
+  stage: publish
+  dependencies:
+    - build
+  interruptible: false
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_MERGE_REQUEST_IID == null'
+      when: manual
+  script:
+    - git remote set-url origin git@${CI_SERVER_HOST}:${CI_PROJECT_PATH}
+    - git checkout -B ${CI_BUILD_REF_NAME}
+    - npm publish --workspaces
+
+include:
+  - project: 'devtools/reusable-jobs'
+    ref: main
+    file: '/templates/jobs/commitlint.yml'
+
+commitlint:
+  stage: .pre
+  extends: .commitlint
+  before_script:
+    - ''
+

@@ -56,7 +56,8 @@
         "@typescript-eslint/strict-boolean-expressions": "error",
         "@typescript-eslint/ban-ts-comment": "off",
         "@typescript-eslint/explicit-module-boundary-types": "off",
-        "@typescript-eslint/ban-types": "off"
+        "@typescript-eslint/ban-types": "off",
+        "unicorn/expiring-todo-comments": "off" // TODO: enable this within unicorn version upgrade. this version has an error on this.
     },
     "ignorePatterns": ["**/node_modules/*", "**/dist/*"]
 }
