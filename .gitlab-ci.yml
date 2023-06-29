@@ -19,8 +19,7 @@ pages:
     - npm run build-storybook
   artifacts:
     paths:
-      - storybook-build
-  publish: storybook-build
+      - public
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
 
@@ -63,7 +62,7 @@ build-storybook:
     - npm run build-storybook
   artifacts:
     paths:
-    - storybook-build
+    - public
 
 .test-job-template: &test_job_definition
   needs: ['warm_cache']
