@@ -14,8 +14,20 @@ default:
       - .cache
     policy: pull
 
+pages:
+  script:
+    - npm run build-storybook
+  artifacts:
+    paths:
+      - storybook-build
+  publish: storybook-build
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+
+
 stages:
   - build
+  - build-storybook
   - test
   - test-18
   - analyze
@@ -45,6 +57,13 @@ build:
       - packages/core/dist/
       - packages/cells/dist/
       - packages/source/dist/
+
+build-storybook:
+  script:
+    - npm run build-storybook
+  artifacts:
+    paths:
+    - storybook-build
 
 .test-job-template: &test_job_definition
   needs: ['warm_cache']
