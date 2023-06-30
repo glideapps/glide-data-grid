@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.7.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.6.9...v5.7.0) (2023-06-30)
+
+
+### Features
+
+* added onkeydown for renderer ([d5a70d2](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/d5a70d2cfbec888ce29b5ea408c4345fd3d280e5))
+
 ### [5.6.9](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.6.8...v5.6.9) (2023-06-29)
 
 
