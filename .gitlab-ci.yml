@@ -1,6 +1,6 @@
 variables:
   npm_config_cache: '$CI_PROJECT_DIR/.npm'
-  NPM_CONFIG_USERCONFIG: '${ADOBE_NPMRC}'
+  NPM_CONFIG_USERCONFIG: '${ADOBE_NPMRC_V7}'
 
 default:
   image: "docker-wf-dev.dr-uw2.adobeitc.com/core-platform/gitlab-runner-node16:latest"
