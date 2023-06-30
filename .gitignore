@@ -9,3 +9,6 @@ public/
 coverage/
 *.tsbuildinfo
 **/docs/*
+/test-results/
+/playwright-report/
+/playwright/.cache/

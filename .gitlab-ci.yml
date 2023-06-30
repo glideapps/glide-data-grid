@@ -14,21 +14,11 @@ default:
       - .cache
     policy: pull
 
-pages:
-  script:
-    - npm run build-storybook
-  artifacts:
-    paths:
-      - public
-  rules:
-    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
-
 
 stages:
   - build
-  - build-storybook
   - test
-  - test-18
+  - review
   - analyze
   - publish
 
@@ -58,11 +48,23 @@ build:
       - packages/source/dist/
 
 build-storybook:
+  stage: build
   script:
     - npm run build-storybook
   artifacts:
     paths:
     - public
+
+pages:
+  script:
+    - 'echo "Deploying storybook to GitLab pages..."'
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+  dependencies:
+    - build-storybook
 
 .test-job-template: &test_job_definition
   needs: ['warm_cache']
@@ -85,6 +87,16 @@ test-18:
   script:
     - npm run test-18 --ci --no-interactive
 
+test-e2e:
+  <<: *test_job_definition
+  image: 'mcr.microsoft.com/playwright:v1.35.1-focal'
+  script:
+    - npm run test:e2e
+  artifacts:
+    paths:
+      - test-results
+      - playwright-report
+    expire_in: 2 day
 
 publish:
   stage: publish
@@ -99,7 +111,7 @@ publish:
     - git remote set-url origin git@${CI_SERVER_HOST}:${CI_PROJECT_PATH}
     - git checkout -B ${CI_BUILD_REF_NAME}
     - npm install standard-version -g
-    - 'standard-version --bumpFiles package.json ./packages/*/package.json --no-verify --releaseCommitMessageFormat "chore: {{currentTag}}"'
+    - 'standard-version --bumpFiles package.json package-lock.json ./packages/*/package.json --no-verify --releaseCommitMessageFormat "chore: {{currentTag}}"'
     - npm publish --workspaces
     - git push --follow-tags origin ${CI_BUILD_REF_NAME} -o ci.skip
 

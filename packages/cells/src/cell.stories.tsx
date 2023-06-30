@@ -248,7 +248,7 @@ export const CustomCells: React.VFC = () => {
                             copyData: "4",
                             data: {
                                 kind: "user-profile-cell",
-                                image: row % 2 ? undefined : "https://i.redd.it/aqc1hwhalsz71.jpg",
+                                image: '/assets/image-40x40.jpg',
                                 initial: "B",
                                 tint: "#F1D86E",
                                 name: row % 5 ? undefined : "Bee bb",
