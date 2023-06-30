@@ -3,6 +3,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = {
     stories: ["../**/src/**/*.stories.tsx"],
     addons: ["@storybook/addon-controls"],
+    staticDirs: [{ from: './assets/', to: '/assets' }],
     core: {
         builder: "webpack5",
     },

@@ -109,7 +109,7 @@ export function lossyCopyData<T extends EditableGridCell>(source: EditableGridCe
 }
 
 export type GridColumnWithMockingInfo = GridColumn & {
-    getContent(): GridCell;
+    getContent(col: number, row:number): GridCell;
 };
 
 export function getGridColumn(columnWithMock: GridColumnWithMockingInfo): GridColumn {
@@ -324,11 +324,11 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
             icon: GridColumnIcon.HeaderImage,
             hasMenu: false,
             getContent: () => {
-                const n = Math.round(Math.random() * 100);
+
                 return {
                     kind: GridCellKind.Image,
-                    data: [`https://picsum.photos/id/${n}/900/900`],
-                    displayData: [`https://picsum.photos/id/${n}/40/40`],
+                    data: [`/assets/image-900x900.jpg`],
+                    displayData: ['/assets/image-40x40.jpg'],
                     allowOverlay: true,
                     allowAdd: false,
                     readonly: true,
@@ -457,7 +457,7 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
         ([col, row]: Item): GridCell => {
             let val = cache.current.get(col, row);
             if (val === undefined) {
-                val = colsMapRef.current[col].getContent();
+                val = colsMapRef.current[col].getContent(col, row);
                 if (!readonly && isTextEditableGridCell(val)) {
                     val = { ...val, readonly };
                 }
@@ -493,7 +493,7 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
         ([col, row]: Item, val: GridCell): void => {
             let current = cache.current.get(col, row);
             if (current === undefined) {
-                current = colsMap[col].getContent();
+                current = colsMap[col].getContent(col, row);
             }
             if (isEditableGridCell(val) && isEditableGridCell(current)) {
                 const copied = lossyCopyData(val, current);

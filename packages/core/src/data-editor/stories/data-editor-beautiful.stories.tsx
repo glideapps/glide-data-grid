@@ -1519,9 +1519,11 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             width: 120,
             icon: GridColumnIcon.HeaderBoolean,
             hasMenu: false,
-            getContent: () => {
-                const roll = Math.random();
-                const checked = roll < 0.1 ? undefined : roll < 0.2 ? null : roll < 0.6;
+            getContent: (_col, row) => {
+                let checked: boolean | undefined = row % 2 === 0;
+                if(row % 3 === 0) {
+                    checked = undefined
+                }
                 // TODO: Make editable. UX looks bad by default.
                 return {
                     kind: GridCellKind.Boolean,
@@ -1539,7 +1541,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             getContent: () => {
                 return {
                     kind: GridCellKind.Image,
-                    data: [`${faker.image.animals(40, 40)}?random=${faker.datatype.number(100_000)}`],
+                    data: ["/assets/image-40x40.jpg"],
                     allowOverlay: true,
                     allowAdd: false,
                     readonly: true,
@@ -1603,11 +1605,11 @@ Try out [Glide](https://www.glideapps.com/)
                     data: [
                         {
                             text: faker.address.cityName(),
-                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100_000)}`,
+                            img: "/assets/image-40x40.jpg",
                         },
                         {
                             text: faker.address.cityName(),
-                            img: `${faker.image.nature(40, 40)}?random=${faker.datatype.number(100_000)}`,
+                            img: "/assets/image-40x40.jpg",
                         },
                     ],
                     allowOverlay: true,
@@ -1645,7 +1647,7 @@ function useAllMockedKinds() {
             noop(updateVersion);
             let val = cache.current.get(col, row);
             if (val === undefined) {
-                val = colsMap[col].getContent();
+                val = colsMap[col].getContent(col, row);
                 cache.current.set(col, row, val);
             }
 
@@ -1658,7 +1660,7 @@ function useAllMockedKinds() {
         ([col, row]: Item, val: GridCell, noDisplay?: boolean, forceUpdate?: boolean): void => {
             let current = cache.current.get(col, row);
             if (current === undefined) {
-                current = colsMap[col].getContent();
+                current = colsMap[col].getContent(col, row);
             }
             if (isEditableGridCell(val) && isEditableGridCell(current)) {
                 const copied = lossyCopyData(val, current);
@@ -2384,100 +2386,6 @@ export const RightElement: React.VFC = () => {
     );
 };
 (RightElement as any).parameters = {
-    options: {
-        showPanel: false,
-    },
-};
-
-let num: number = 1;
-function rand(): number {
-    return (num = (num * 16_807) % 2_147_483_647);
-}
-
-export const RapidUpdates: React.VFC = () => {
-    const { cols, getCellContent, setCellValueRaw, getCellsForSelection } = useMockDataGenerator(100);
-
-    const ref = React.useRef<DataEditorRef>(null);
-
-    const countRef = React.useRef(0);
-    const displayCountRef = React.useRef<HTMLElement>(null);
-
-    React.useEffect(() => {
-        let rafID = 0;
-
-        const sendUpdate = () => {
-            const cells: {
-                cell: Item;
-            }[] = [];
-            const now = performance.now();
-            for (let x = 0; x < 5000; x++) {
-                const col = Math.max(10, rand() % 100);
-                const row = rand() % 10_000;
-
-                setCellValueRaw([col, row], {
-                    kind: GridCellKind.Text,
-                    data: x.toString(),
-                    displayData: `${x}k`,
-                    themeOverride:
-                        x % 5 !== 0
-                            ? {
-                                  bgCell: "#f2fff4",
-                                  textDark: "#00d41c",
-                              }
-                            : {
-                                  bgCell: "#fff6f6",
-                                  textDark: "#d40000",
-                              },
-                    allowOverlay: true,
-                    lastUpdated: now,
-                });
-                cells.push({ cell: [col, row] });
-            }
-            countRef.current += 5000;
-            if (displayCountRef.current !== null) {
-                displayCountRef.current.textContent = `${countRef.current}`;
-            }
-
-            ref.current?.updateCells(cells);
-
-            rafID = window.requestAnimationFrame(sendUpdate);
-        };
-
-        sendUpdate();
-
-        return () => {
-            cancelAnimationFrame(rafID);
-        };
-    }, [setCellValueRaw]);
-
-    return (
-        <BeautifulWrapper
-            title="Rapid updating"
-            description={
-                <>
-                    <Description>
-                        Data grid can support many thousands of updates per seconds. The data grid can easily update
-                        data faster than a human can read it, more importantly the faster the data grid can update, the
-                        more time your code can spend doing more valuable work.
-                    </Description>
-                    <MoreInfo>
-                        Updates processed: <KeyName ref={displayCountRef} /> We could do this faster but we wrote a
-                        really crappy data store for this demo which is actually slowing down the data grid.
-                    </MoreInfo>
-                </>
-            }>
-            <DataEditor
-                {...defaultProps}
-                ref={ref}
-                getCellContent={getCellContent}
-                getCellsForSelection={getCellsForSelection}
-                columns={cols}
-                rows={10_000}
-            />
-        </BeautifulWrapper>
-    );
-};
-(RapidUpdates as any).parameters = {
     options: {
         showPanel: false,
     },
