@@ -2,7 +2,7 @@ import { styled } from "@linaria/react";
 import * as React from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { DataEditor, DataEditorProps, GridCellKind, GridColumn, Theme } from "@workfront-grid/glide-data-grid";
-import faker from "faker";
+import {faker} from "@faker-js/faker";
 import { useCollapsingGroups, useColumnSort, useMoveableColumns } from ".";
 
 faker.seed(1337);
@@ -213,7 +213,7 @@ export const UseDataSource: React.VFC = () => {
 
             const key = `${col},${row}`;
             if (cache.current[key] === undefined) {
-                cache.current[key] = faker.name.firstName() + " " + faker.name.lastName();
+                cache.current[key] = faker.person.firstName() + " " + faker.person.lastName();
             }
             const d = cache.current[key];
 

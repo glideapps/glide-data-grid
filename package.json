@@ -58,7 +58,6 @@
     "@testing-library/react-hooks": "^8.0.1",
     "@testing-library/user-event": "^13.5.0",
     "@types/cheerio": "^0.22.30",
-    "@types/faker": "^5.5.8",
     "@types/jest": "^28.1.8",
     "@types/lodash": "^4.14.177",
     "@types/marked": "^4.0.2",
@@ -81,7 +80,6 @@
     "eslint-plugin-react-hooks": "4.6.0",
     "eslint-plugin-sonarjs": "0.13.0",
     "eslint-plugin-unicorn": "43.0.1",
-    "faker": "^5.5.3",
     "http-server": "^14.1.1",
     "jest-canvas-mock": "^2.3.1",
     "lodash": "^4.17.21",
@@ -96,6 +94,8 @@
     "tsc-esm-fix": "^2.7.8",
     "typedoc": "^0.23.13",
     "typescript": "4.8.2",
-    "webpack": "^5.73.0"
+    "webpack": "^5.73.0",
+    "@faker-js/faker": "^8.0.2"
+
   }
 }

@@ -13,14 +13,13 @@ import {
     Rectangle,
 } from "../../data-grid/data-grid-types";
 
-import faker from "faker";
+import { faker } from '@faker-js/faker';
+
 import { styled } from "@linaria/react";
 import isArray from "lodash/isArray.js";
 import { assertNever } from "../../common/support";
 import { browserIsFirefox } from "../../common/browser-detect";
 import { useResizeDetector } from "react-resize-detector";
-
-faker.seed(1337);
 
 function isTruthy(x: any): boolean {
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
@@ -267,7 +266,8 @@ function createTextColumnInfo(index: number, group: boolean): GridColumnWithMock
         group: group ? `Group ${Math.round(index / 3)}` : undefined,
         icon: GridColumnIcon.HeaderString,
         hasMenu: false,
-        getContent: () => {
+        getContent: (_col, row) => {
+            faker.seed(row);
             const text = faker.lorem.word();
 
             return {
@@ -289,8 +289,9 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
             group: group ? "Name" : undefined,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
-            getContent: () => {
-                const firstName = faker.name.firstName();
+            getContent: (_col, row) => {
+                faker.seed(row)
+                const firstName = faker.person.firstName()
                 return {
                     kind: GridCellKind.Text,
                     displayData: firstName,
@@ -306,8 +307,9 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
             group: group ? "Name" : undefined,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
-            getContent: () => {
-                const lastName = faker.name.lastName();
+            getContent: (_col, row) => {
+                faker.seed(row);
+                const lastName = faker.person.lastName();
                 return {
                     kind: GridCellKind.Text,
                     displayData: lastName,
@@ -341,7 +343,8 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
             group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
-            getContent: () => {
+            getContent: (_col, row) => {
+                faker.seed(row);
                 const email = faker.internet.email();
                 return {
                     kind: GridCellKind.Text,
@@ -358,8 +361,9 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
             group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
-            getContent: () => {
-                const company = faker.name.jobTitle();
+            getContent: (_col, row) => {
+                faker.seed(row);
+                const company = faker.person.jobTitle();
                 return {
                     kind: GridCellKind.Text,
                     displayData: company,
@@ -375,7 +379,8 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
             group: group ? "Info" : undefined,
             icon: GridColumnIcon.HeaderUri,
             hasMenu: false,
-            getContent: () => {
+            getContent: (_col, row) => {
+                faker.seed(row);
                 const url = faker.internet.url();
                 return {
                     kind: GridCellKind.Uri,
