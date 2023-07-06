@@ -19,7 +19,8 @@ import {
 } from "../../data-grid/data-grid-types";
 import { DataEditor, DataEditorProps } from "../data-editor";
 
-import faker from "faker";
+import { faker } from "@faker-js/faker";
+
 import { styled } from "@linaria/react";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 import { useEventListener } from "../../common/utils";
@@ -1454,7 +1455,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             getContent: () => {
                 return {
                     kind: GridCellKind.RowID,
-                    data: faker.datatype.uuid(),
+                    data: faker.string.uuid(),
                     allowOverlay: true,
                 };
             },
@@ -1490,7 +1491,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             icon: GridColumnIcon.HeaderCode,
             hasMenu: false,
             getContent: () => {
-                const name = faker.name.firstName();
+                const name = faker.person.firstName();
                 return {
                     kind: GridCellKind.Text,
                     data: name,
@@ -1505,7 +1506,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             icon: GridColumnIcon.HeaderNumber,
             hasMenu: false,
             getContent: () => {
-                const age = faker.datatype.number(100);
+                const age = faker.number.int(100);
                 return {
                     kind: GridCellKind.Number,
                     data: age,
@@ -1569,7 +1570,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             hasMenu: false,
             getContent: () => {
                 const markdown = `# Title
-Hello my name is *${faker.name.firstName()}*
+Hello my name is *${faker.person.firstName()}*
 
 ## TODO:
 Try out [Glide](https://www.glideapps.com/)
@@ -1604,11 +1605,11 @@ Try out [Glide](https://www.glideapps.com/)
                     kind: GridCellKind.Drilldown,
                     data: [
                         {
-                            text: faker.address.cityName(),
+                            text: faker.location.city(),
                             img: "/assets/image-40x40.jpg",
                         },
                         {
-                            text: faker.address.cityName(),
+                            text: faker.location.city(),
                             img: "/assets/image-40x40.jpg",
                         },
                     ],
@@ -3273,41 +3274,6 @@ export const HighlightCells: React.VFC = () => {
     );
 };
 (HighlightCells as any).parameters = {
-    options: {
-        showPanel: false,
-    },
-};
-
-export const LayoutIntegration: React.VFC = () => {
-    const { cols, getCellContent } = useMockDataGenerator(1000, true, true);
-
-    return (
-        <BeautifulStyle>
-            <h1>Layout Integration</h1>
-            <Description>Trying the grid in different situations</Description>
-            <DataEditor
-                {...defaultProps}
-                getCellContent={getCellContent}
-                columns={cols}
-                rows={10}
-                rowMarkers="both"
-                height={200}
-            />
-            <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rows={10} rowMarkers="both" />
-            <div style={{ display: "flex", height: "300px" }}>
-                <DataEditor
-                    {...defaultProps}
-                    getCellContent={getCellContent}
-                    columns={cols}
-                    rows={10}
-                    rowMarkers="both"
-                />
-                <div style={{ flexShrink: 0 }}>This is some text what happens here?</div>
-            </div>
-        </BeautifulStyle>
-    );
-};
-(LayoutIntegration as any).parameters = {
     options: {
         showPanel: false,
     },

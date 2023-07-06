@@ -659,17 +659,17 @@
         "__isArgsStory": true
       }
     },
-    "glide-data-grid-dataeditor-demos--layout-integration": {
-      "id": "glide-data-grid-dataeditor-demos--layout-integration",
+    "glide-data-grid-layout-integration--layout-integration": {
+      "id": "glide-data-grid-layout-integration--layout-integration",
       "name": "Layout Integration",
-      "title": "Glide-Data-Grid/DataEditor Demos",
-      "importPath": "./packages/core/src/data-editor/stories/data-editor-beautiful.stories.tsx",
-      "kind": "Glide-Data-Grid/DataEditor Demos",
+      "title": "Glide-Data-Grid/Layout Integration",
+      "importPath": "./packages/core/src/data-editor/stories/layout-integration.stories.tsx",
+      "kind": "Glide-Data-Grid/Layout Integration",
       "story": "Layout Integration",
       "parameters": {
-        "fileName": "./packages/core/src/data-editor/stories/data-editor-beautiful.stories.tsx",
+        "fileName": "./packages/core/src/data-editor/stories/layout-integration.stories.tsx",
         "framework": "react",
-        "__id": "glide-data-grid-dataeditor-demos--layout-integration",
+        "__id": "glide-data-grid-layout-integration--layout-integration",
         "__isArgsStory": false
       }
     },
