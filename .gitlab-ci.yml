@@ -93,6 +93,7 @@ test-e2e:
   script:
     - npm run test:e2e
   artifacts:
+    when: always
     paths:
       - test-results
       - playwright-report

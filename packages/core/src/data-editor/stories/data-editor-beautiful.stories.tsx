@@ -797,8 +797,8 @@ export const ObserveVisibleRegion: React.VFC = () => {
                         The visible region can be observed using <PropName>onVisibleRegionChanged</PropName>
                     </Description>
                     <MoreInfo>
-                        Then current visible region is x:<KeyName>{visibleRegion.x}</KeyName> y:
-                        <KeyName>{visibleRegion.y}</KeyName> width:
+                        Then current visible region is x:<KeyName data-testid="visible-region-x">{visibleRegion.x}</KeyName> y:
+                        <KeyName data-testid="visible-region-y">{visibleRegion.y}</KeyName> width:
                         <KeyName>{visibleRegion.width}</KeyName> height:<KeyName>{visibleRegion.height}</KeyName>
                     </MoreInfo>
                 </>
@@ -1148,6 +1148,7 @@ export const WrappingText: React.VFC<{
     const { cols, getCellContent, onColumnResize } = useMockDataGenerator(6);
 
     const suffix = React.useMemo(() => {
+        faker.seed(6);
         return range(0, 100).map(() => faker.lorem.sentence(p.length));
     }, [p.length]);
 
@@ -1452,7 +1453,8 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             width: 120,
             icon: GridColumnIcon.HeaderRowID,
             hasMenu: false,
-            getContent: () => {
+            getContent: (_col, row) => {
+                faker.seed(row);
                 return {
                     kind: GridCellKind.RowID,
                     data: faker.string.uuid(),
@@ -1465,7 +1467,8 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             width: 120,
             icon: GridColumnIcon.HeaderCode,
             hasMenu: false,
-            getContent: () => {
+            getContent: (_col, row) => {
+                faker.seed(row);
                 return {
                     kind: GridCellKind.Protected,
                     data: faker.finance.bitcoinAddress(),
@@ -1490,7 +1493,8 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             width: 120,
             icon: GridColumnIcon.HeaderCode,
             hasMenu: false,
-            getContent: () => {
+            getContent: (_col, row) => {
+                faker.seed(row);
                 const name = faker.person.firstName();
                 return {
                     kind: GridCellKind.Text,
@@ -1505,7 +1509,8 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             width: 120,
             icon: GridColumnIcon.HeaderNumber,
             hasMenu: false,
-            getContent: () => {
+            getContent: (_col, row) => {
+                faker.seed(row);
                 const age = faker.number.int(100);
                 return {
                     kind: GridCellKind.Number,
@@ -1554,7 +1559,8 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             width: 120,
             icon: GridColumnIcon.HeaderUri,
             hasMenu: false,
-            getContent: () => {
+            getContent: (_col, row) => {
+                faker.seed(row);
                 const url = faker.internet.url();
                 return {
                     kind: GridCellKind.Uri,
@@ -1568,7 +1574,8 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             width: 120,
             icon: GridColumnIcon.HeaderMarkdown,
             hasMenu: false,
-            getContent: () => {
+            getContent: (_col, row) => {
+                faker.seed(row);
                 const markdown = `# Title
 Hello my name is *${faker.person.firstName()}*
 
@@ -1587,7 +1594,8 @@ Try out [Glide](https://www.glideapps.com/)
             width: 120,
             icon: GridColumnIcon.HeaderArray,
             hasMenu: false,
-            getContent: () => {
+            getContent: (_col, row) => {
+                faker.seed(row);
                 return {
                     kind: GridCellKind.Bubble,
                     data: [faker.lorem.word(), faker.lorem.word(), faker.lorem.word()],
@@ -1600,7 +1608,8 @@ Try out [Glide](https://www.glideapps.com/)
             width: 120,
             icon: GridColumnIcon.HeaderArray,
             hasMenu: false,
-            getContent: () => {
+            getContent: (_col, row) => {
+                faker.seed(row);
                 return {
                     kind: GridCellKind.Drilldown,
                     data: [
@@ -2245,7 +2254,7 @@ export const HeaderMenus: React.VFC = () => {
             />
             {isOpen &&
                 renderLayer(
-                    <SimpleMenu {...layerProps}>
+                    <SimpleMenu {...layerProps} data-testid="header-menu">
                         <div onClick={() => setMenu(undefined)}>These do nothing</div>
                         <div onClick={() => setMenu(undefined)}>Add column right</div>
                         <div onClick={() => setMenu(undefined)}>Add column left</div>
