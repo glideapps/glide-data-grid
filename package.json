@@ -1,6 +1,6 @@
 {
   "name": "root",
-  "version": "5.7.2",
+  "version": "5.7.3",
   "scripts": {
     "start": "npm run storybook",
     "version": "./update-version.sh",
@@ -96,6 +96,5 @@
     "typescript": "4.8.2",
     "webpack": "^5.73.0",
     "@faker-js/faker": "^8.0.2"
-
   }
 }
