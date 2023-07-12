@@ -17,9 +17,8 @@ default:
 
 stages:
   - build
-  - test
+  - validate
   - review
-  - analyze
   - publish
 
 warm_cache:
@@ -32,10 +31,16 @@ warm_cache:
     policy: pull-push
   script:
     - echo "Warmed cache for further jobs. Yay!"
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - when: never
 
 .build-job-template: &build_job_definition
   stage: build
   interruptible: true
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - when: never
 
 build:
   <<: *build_job_definition
@@ -47,15 +52,8 @@ build:
       - packages/cells/dist/
       - packages/source/dist/
 
-build-storybook:
-  stage: build
-  script:
-    - npm run build-storybook
-  artifacts:
-    paths:
-    - public
-
 pages:
+  stage: 'publish'
   script:
     - 'echo "Deploying storybook to GitLab pages..."'
   artifacts:
@@ -68,8 +66,11 @@ pages:
 
 .test-job-template: &test_job_definition
   needs: ['warm_cache']
-  stage: test
+  stage: validate
   interruptible: true
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - when: never
 
 lint:
   <<: *test_job_definition
@@ -99,6 +100,48 @@ test-e2e:
       - playwright-report
     expire_in: 2 day
 
+build-storybook:
+  stage: validate
+  script:
+    - npm run build-storybook
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - when: never
+
+review:
+  stage: review
+  script:
+    - ./deploy/deploy.sh
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    url: http://phoenix.workfront.tech/review/$CI_PROJECT_ID/$CI_COMMIT_REF_NAME/index.html
+    on_stop: stop_review
+  needs:
+    - job: build-storybook
+      optional: true
+  dependencies:
+    - build-storybook
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - when: never
+  allow_failure: true
+
+stop_review:
+  stage: review
+  script:
+    - ./deploy/cleanup-review.sh
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    action: stop
+  dependencies: []
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual
+  allow_failure: true
+
 publish:
   stage: publish
   dependencies:
@@ -126,4 +169,3 @@ commitlint:
   extends: .commitlint
   before_script:
     - ''
-
