@@ -771,17 +771,17 @@
         "__isArgsStory": false
       }
     },
-    "glide-data-grid-dataeditor-demos--one-hundred-thousand-cols": {
-      "id": "glide-data-grid-dataeditor-demos--one-hundred-thousand-cols",
+    "glide-data-grid-large-data--one-hundred-thousand-cols": {
+      "id": "glide-data-grid-large-data--one-hundred-thousand-cols",
       "name": "One Hundred Thousand Cols",
-      "title": "Glide-Data-Grid/DataEditor Demos",
-      "importPath": "./packages/core/src/data-editor/stories/data-editor-beautiful.stories.tsx",
-      "kind": "Glide-Data-Grid/DataEditor Demos",
+      "title": "Glide-Data-Grid/Large Data",
+      "importPath": "./packages/core/src/data-editor/stories/large-data.stories.tsx",
+      "kind": "Glide-Data-Grid/Large Data",
       "story": "One Hundred Thousand Cols",
       "parameters": {
-        "fileName": "./packages/core/src/data-editor/stories/data-editor-beautiful.stories.tsx",
+        "fileName": "./packages/core/src/data-editor/stories/large-data.stories.tsx",
         "framework": "react",
-        "__id": "glide-data-grid-dataeditor-demos--one-hundred-thousand-cols",
+        "__id": "glide-data-grid-large-data--one-hundred-thousand-cols",
         "__isArgsStory": false
       }
     },
