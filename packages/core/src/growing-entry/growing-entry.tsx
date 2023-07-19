@@ -23,6 +23,8 @@ export const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
 
     assert(onChange !== undefined, "GrowingEntry must be a controlled input area");
 
+    const [inputID] = React.useState(() => "input-box-" + Math.round(Math.random() * 1000));
+
     React.useEffect(() => {
         const ta = inputRef.current;
         if (ta === null) return;
@@ -57,6 +59,7 @@ export const GrowingEntry: React.FunctionComponent<Props> = (props: Props) => {
             <InputBox
                 {...rest}
                 className={(className ?? "") + " gdg-input"}
+                id={inputID}
                 ref={inputRef}
                 onKeyDown={onKeyDownInner}
                 value={useText}
