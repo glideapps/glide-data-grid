@@ -603,6 +603,12 @@ export interface DataEditorProps extends Props {
      * If this function is supplied and returns false, the click event is ignored
      */
     readonly isOutsideClick?: (e: MouseEvent) => boolean;
+
+    /**
+     * Used as hint for scrollTo function
+     * avoid scroll when canvas didn't reach the height of the scroller (nothing to scroll)
+     */
+    readonly maxScrollerHeight?: number;
 }
 
 type ScrollToFn = (
@@ -781,6 +787,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         groupHeaderHeight: groupHeaderHeightIn = headerHeightIn,
         theme: themeIn,
         isOutsideClick,
+        maxScrollerHeight,
     } = p;
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
@@ -1344,122 +1351,127 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const scrollTo = React.useCallback<ScrollToFn>(
         (col, row, dir = "both", paddingX = 0, paddingY = 0, options = undefined): void => {
-            if (scrollRef.current !== null) {
-                const grid = gridRef.current;
-                const canvas = canvasRef.current;
+            if (scrollRef.current === null) return;
 
-                const trueCol = typeof col !== "number" ? (col.unit === "cell" ? col.amount : undefined) : col;
-                const trueRow = typeof row !== "number" ? (row.unit === "cell" ? row.amount : undefined) : row;
-                const desiredX = typeof col !== "number" && col.unit === "px" ? col.amount : undefined;
-                const desiredY = typeof row !== "number" && row.unit === "px" ? row.amount : undefined;
-                if (grid !== null && canvas !== null) {
-                    let targetRect: Rectangle = {
-                        x: 0,
-                        y: 0,
-                        width: 0,
-                        height: 0,
-                    };
+            const grid = gridRef.current;
+            const canvas = canvasRef.current;
 
-                    let scrollX = 0;
-                    let scrollY = 0;
+            if (canvas === null || grid === null) return;
 
-                    if (trueCol !== undefined || trueRow !== undefined) {
-                        targetRect = grid.getBounds((trueCol ?? 0) + rowMarkerOffset, trueRow ?? 0) ?? targetRect;
-                        if (targetRect.width === 0 || targetRect.height === 0) return;
-                    }
+            // If the canvas is smaller than the scroll area, don't scroll
+            if (typeof maxScrollerHeight === "number" && canvas.scrollHeight < maxScrollerHeight) {
+                return;
+            }
 
-                    const scrollBounds = canvas.getBoundingClientRect();
+            const trueCol = typeof col !== "number" ? (col.unit === "cell" ? col.amount : undefined) : col;
+            const trueRow = typeof row !== "number" ? (row.unit === "cell" ? row.amount : undefined) : row;
+            const desiredX = typeof col !== "number" && col.unit === "px" ? col.amount : undefined;
+            const desiredY = typeof row !== "number" && row.unit === "px" ? row.amount : undefined;
+            let targetRect: Rectangle = {
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0,
+            };
 
-                    if (desiredX !== undefined) {
-                        targetRect = {
-                            ...targetRect,
-                            x: desiredX - scrollBounds.left - scrollRef.current.scrollLeft,
-                            width: 1,
-                        };
-                    }
-                    if (desiredY !== undefined) {
-                        targetRect = {
-                            ...targetRect,
-                            y: desiredY + scrollBounds.top - scrollRef.current.scrollTop,
-                            height: 1,
-                        };
-                    }
+            let scrollX = 0;
+            let scrollY = 0;
 
-                    if (targetRect !== undefined) {
-                        const bounds = {
-                            x: targetRect.x - paddingX,
-                            y: targetRect.y - paddingY,
-                            width: targetRect.width + 2 * paddingX,
-                            height: targetRect.height + 2 * paddingY,
-                        };
+            if (trueCol !== undefined || trueRow !== undefined) {
+                targetRect = grid.getBounds((trueCol ?? 0) + rowMarkerOffset, trueRow ?? 0) ?? targetRect;
+                if (targetRect.width === 0 || targetRect.height === 0) return;
+            }
 
-                        let frozenWidth = 0;
-                        for (let i = 0; i < freezeColumns; i++) {
-                            frozenWidth += columns[i].width;
-                        }
-                        let trailingRowHeight = 0;
-                        if (lastRowSticky) {
-                            trailingRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
-                        }
+            const scrollBounds = canvas.getBoundingClientRect();
 
-                        let sLeft = frozenWidth + scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
-                        let sRight = scrollBounds.right;
-                        let sTop = scrollBounds.top + totalHeaderHeight;
-                        let sBottom = scrollBounds.bottom - trailingRowHeight;
+            if (desiredX !== undefined) {
+                targetRect = {
+                    ...targetRect,
+                    x: desiredX - scrollBounds.left - scrollRef.current.scrollLeft,
+                    width: 1,
+                };
+            }
+            if (desiredY !== undefined) {
+                targetRect = {
+                    ...targetRect,
+                    y: desiredY + scrollBounds.top - scrollRef.current.scrollTop,
+                    height: 1,
+                };
+            }
 
-                        const minx = targetRect.width + paddingX * 2;
-                        switch (options?.hAlign) {
-                            case "start":
-                                sRight = sLeft + minx;
-                                break;
-                            case "end":
-                                sLeft = sRight - minx;
-                                break;
-                            case "center":
-                                sLeft = Math.floor((sLeft + sRight) / 2) - minx / 2;
-                                sRight = sLeft + minx;
-                                break;
-                        }
+            if (targetRect !== undefined) {
+                const bounds = {
+                    x: targetRect.x - paddingX,
+                    y: targetRect.y - paddingY,
+                    width: targetRect.width + 2 * paddingX,
+                    height: targetRect.height + 2 * paddingY,
+                };
 
-                        const miny = targetRect.height + paddingY * 2;
-                        switch (options?.vAlign) {
-                            case "start":
-                                sBottom = sTop + miny;
-                                break;
-                            case "end":
-                                sTop = sBottom - miny;
-                                break;
-                            case "center":
-                                sTop = Math.floor((sTop + sBottom) / 2) - miny / 2;
-                                sBottom = sTop + miny;
-                                break;
-                        }
+                let frozenWidth = 0;
+                for (let i = 0; i < freezeColumns; i++) {
+                    frozenWidth += columns[i].width;
+                }
+                let trailingRowHeight = 0;
+                if (lastRowSticky) {
+                    trailingRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
+                }
 
-                        if (sLeft > bounds.x) {
-                            scrollX = bounds.x - sLeft;
-                        } else if (sRight < bounds.x + bounds.width) {
-                            scrollX = bounds.x + bounds.width - sRight;
-                        }
+                let sLeft = frozenWidth + scrollBounds.left + rowMarkerOffset * rowMarkerWidth;
+                let sRight = scrollBounds.right;
+                let sTop = scrollBounds.top + totalHeaderHeight;
+                let sBottom = scrollBounds.bottom - trailingRowHeight;
 
-                        if (sTop > bounds.y) {
-                            scrollY = bounds.y - sTop;
-                        } else if (sBottom < bounds.y + bounds.height) {
-                            scrollY = bounds.y + bounds.height - sBottom;
-                        }
+                const minx = targetRect.width + paddingX * 2;
+                switch (options?.hAlign) {
+                    case "start":
+                        sRight = sLeft + minx;
+                        break;
+                    case "end":
+                        sLeft = sRight - minx;
+                        break;
+                    case "center":
+                        sLeft = Math.floor((sLeft + sRight) / 2) - minx / 2;
+                        sRight = sLeft + minx;
+                        break;
+                }
 
-                        if (dir === "vertical" || col < freezeColumns) {
-                            scrollX = 0;
-                        } else if (dir === "horizontal") {
-                            scrollY = 0;
-                        }
+                const miny = targetRect.height + paddingY * 2;
+                switch (options?.vAlign) {
+                    case "start":
+                        sBottom = sTop + miny;
+                        break;
+                    case "end":
+                        sTop = sBottom - miny;
+                        break;
+                    case "center":
+                        sTop = Math.floor((sTop + sBottom) / 2) - miny / 2;
+                        sBottom = sTop + miny;
+                        break;
+                }
 
-                        if (scrollX !== 0 || scrollY !== 0) {
-                            scrollRef.current.scrollTo(
-                                scrollX + scrollRef.current.scrollLeft,
-                                scrollY + scrollRef.current.scrollTop
-                            );
-                        }
-                    }
+                if (sLeft > bounds.x) {
+                    scrollX = bounds.x - sLeft;
+                } else if (sRight < bounds.x + bounds.width) {
+                    scrollX = bounds.x + bounds.width - sRight;
+                }
+
+                if (sTop > bounds.y) {
+                    scrollY = bounds.y - sTop;
+                } else if (sBottom < bounds.y + bounds.height) {
+                    scrollY = bounds.y + bounds.height - sBottom;
+                }
+
+                if (dir === "vertical" || col < freezeColumns) {
+                    scrollX = 0;
+                } else if (dir === "horizontal") {
+                    scrollY = 0;
+                }
+
+                if (scrollX !== 0 || scrollY !== 0) {
+                    scrollRef.current.scrollTo(
+                        scrollX + scrollRef.current.scrollLeft,
+                        scrollY + scrollRef.current.scrollTop
+                    );
                 }
             }
         },
@@ -2620,14 +2632,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             const fn = async () => {
                 let cancelled = false;
 
-                if((event.location.col !== undefined) && (event.location.row !== undefined)){
+                if (event.location.col !== undefined && event.location.row !== undefined) {
                     const markerCell = getMangledCellContent([event.location.col, event.location.row]);
                     const renderer = getCellRenderer(markerCell);
                     renderer?.onKeyDown?.({
                         ...event,
                         cancel: () => {
                             cancelled = true;
-                        }})
+                        },
+                    });
                 }
                 if (onKeyDownIn !== undefined) {
                     onKeyDownIn({
