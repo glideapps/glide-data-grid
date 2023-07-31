@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 /**
  * Read environment variables from file.
@@ -9,43 +9,43 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
-const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:9009/';
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:9009/";
 export default defineConfig({
-  testDir: './playwright',
-  /* Run tests in files in parallel */
-  fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: 2,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  use: {
-    /* Story URL to use in actions like `await page.goto('/')`. */
-    baseURL: baseURL,
+    testDir: "./playwright",
+    /* Run tests in files in parallel */
+    fullyParallel: true,
+    /* Fail the build on CI if you accidentally left test.only in the source code. */
+    forbidOnly: !!process.env.CI,
+    /* Retry on CI only */
+    retries: process.env.CI ? 2 : 0,
+    /* Opt out of parallel tests on CI. */
+    workers: 2,
+    /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+    reporter: "html",
+    /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+    use: {
+        /* Story URL to use in actions like `await page.goto('/')`. */
+        baseURL: baseURL,
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'retain-on-failure',
-    launchOptions: { args: ['--hide-scrollbars'] },
-    permissions: ['clipboard-read', 'clipboard-write'],
-  },
+        /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+        trace: "retain-on-failure",
+        launchOptions: { args: ["--hide-scrollbars"] },
+        permissions: ["clipboard-read", "clipboard-write"],
+    },
 
-  /* Configure projects for major browsers */
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    }
-  ],
+    /* Configure projects for major browsers */
+    projects: [
+        {
+            name: "chromium",
+            use: { ...devices["Desktop Chrome"] },
+        },
+    ],
 
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'npm run storybook -- --ci --quiet',
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000
-  },
+    /* Run your local dev server before starting the tests */
+    webServer: {
+        command: "npm run storybook -- --ci --quiet",
+        url: baseURL,
+        reuseExistingServer: true,
+        timeout: 120000,
+    },
 });

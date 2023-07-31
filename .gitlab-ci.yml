@@ -144,8 +144,9 @@ stop_review:
 
 publish:
   stage: publish
-  dependencies:
-    - build
+  needs:
+    - job: build
+      artifacts: true
   interruptible: false
   rules:
     - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_MERGE_REQUEST_IID == null'
