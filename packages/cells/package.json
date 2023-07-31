@@ -1,6 +1,6 @@
 {
     "name": "@workfront-grid/glide-data-grid-cells",
-    "version": "5.7.3",
+    "version": "5.7.5",
     "description": "Extra cells for glide-data-grid",
     "sideEffects": [
         "**/*.css"

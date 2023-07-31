@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.7.5](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.7.3...v5.7.5) (2023-07-31)
+
+
+### Bug Fixes
+
+* avoid scroll, when canvas fits the container ([1e6f168](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/1e6f168dbbbfe4a6d9fc94dca6154d2306ebcacb))
+* gitlab configs ([93a9b5b](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/93a9b5bc9496ac4cd75a3d3b099c13524c2c4d28))
+* gitlab configs (1) ([4858dda](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/4858ddab4465a987e90849ac42c9dcdccb131e7b))
+* overlay position fix ([102e0b1](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/102e0b14a5dbe994bcef189839d001735616d64d))
+* release 5.7.5 (manual trigger) ([1df018c](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/1df018c276a2869a4b9b60f64ca602b774bd3996))
+
 ### [5.7.3](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.7.2...v5.7.3) (2023-07-12)
 
 ### [5.7.2](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.7.1...v5.7.2) (2023-07-03)
