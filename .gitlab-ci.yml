@@ -157,11 +157,11 @@ publish:
     - when: never
   script:
     - git remote set-url origin git@${CI_SERVER_HOST}:${CI_PROJECT_PATH}
-    - git checkout -B ${CI_BUILD_REF_NAME}
+    - git checkout -B ${CI_COMMIT_REF_NAME}
     - npm install standard-version -g
     - 'standard-version --bumpFiles package.json package-lock.json ./packages/*/package.json --no-verify --releaseCommitMessageFormat "chore: {{currentTag}}"'
     - npm publish --workspaces
-    - git push --follow-tags origin ${CI_BUILD_REF_NAME} -o ci.skip
+    - git push --follow-tags origin ${CI_COMMIT_REF_NAME} -o ci.skip
 
 include:
   - project: 'devtools/reusable-jobs'
