@@ -1359,9 +1359,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (canvas === null || grid === null) return;
 
             // If the canvas is smaller than the scroll area, don't scroll
-            if (typeof maxScrollerHeight === "number" && canvas.scrollHeight < maxScrollerHeight) {
-                return;
-            }
+            const skipVerticalScroll = typeof maxScrollerHeight === "number" && canvas.scrollHeight < maxScrollerHeight;
 
             const trueCol = typeof col !== "number" ? (col.unit === "cell" ? col.amount : undefined) : col;
             const trueRow = typeof row !== "number" ? (row.unit === "cell" ? row.amount : undefined) : row;
@@ -1465,6 +1463,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     scrollX = 0;
                 } else if (dir === "horizontal") {
                     scrollY = 0;
+                }
+
+                // if needs to scroll vertically only and skipVerticalScroll is true, don't scroll at all
+                if (skipVerticalScroll && scrollX === 0) {
+                    return;
                 }
 
                 if (scrollX !== 0 || scrollY !== 0) {
