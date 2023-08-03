@@ -163,6 +163,7 @@ export const ResizableColumnsWithColumnsDND: React.VFC = () => {
                 isDraggable
                 onColumnMoved={onColumnMoved}
                 freezeColumns={1}
+                rowMarkers="checkbox"
             />
         </BeautifulWrapper>
     );
