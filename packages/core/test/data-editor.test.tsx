@@ -1,6 +1,6 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
-import { render, fireEvent, screen, act, createEvent } from "@testing-library/react";
+import { render, fireEvent, screen, act } from "@testing-library/react";
 import {
     CompactSelection,
     DataEditor,
@@ -2844,48 +2844,6 @@ describe("data-editor", () => {
         expect(spy).toBeCalledTimes(1000);
     });
 
-    test("DND Columns", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onColumnMoved={spy} />, {
-            wrapper: Context,
-        });
-        prep();
-        const canvas = screen.getByTestId("data-grid-canvas");
-
-        fireEvent.mouseDown(canvas, {
-            clientX: 300, // Col B
-            clientY: 16, // Header
-        });
-
-        fireEvent.mouseMove(canvas, {
-            clientX: 250,
-            clientY: 16,
-        });
-
-        fireEvent.mouseMove(canvas, {
-            clientX: 200,
-            clientY: 16,
-        });
-
-        fireEvent.mouseMove(canvas, {
-            clientX: 150,
-            clientY: 16,
-        });
-
-        fireEvent.mouseMove(canvas, {
-            clientX: 100,
-            clientY: 16,
-        });
-
-        fireEvent.mouseUp(canvas, {
-            clientX: 100, // Col A
-            clientY: 16, // Header
-        });
-
-        expect(spy).toBeCalledWith(1, 0);
-    });
-
     test("Resize Column", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
@@ -3150,47 +3108,6 @@ describe("data-editor", () => {
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
         });
-    });
-
-    test("Draggable", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
-        render(
-            <EventedDataEditor
-                {...basicProps}
-                rowMarkers="both"
-                onDragStart={e => {
-                    spy(e);
-                    e.setData("text/plain", "payload");
-                }}
-                isDraggable={true}
-            />,
-            {
-                wrapper: Context,
-            }
-        );
-        const scroller = prep();
-        // const canvas = screen.getByTestId("data-grid-canvas");
-
-        if (scroller !== null) {
-            const mockDownEv = createEvent.mouseDown(scroller);
-            fireEvent(scroller, mockDownEv);
-            expect(mockDownEv.defaultPrevented).toBe(false);
-
-            const mockEv = createEvent.dragStart(scroller);
-            Object.assign(mockEv, {
-                clientX: 100,
-                clientY: 100,
-                dataTransfer: {
-                    setData: () => undefined,
-                    setDragImage: () => undefined,
-                    effectAllowed: null,
-                },
-            });
-            fireEvent(scroller, mockEv);
-        }
-
-        expect(spy).toHaveBeenCalled();
     });
 
     test("Minimap issues scroll", async () => {

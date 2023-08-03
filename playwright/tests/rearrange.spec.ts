@@ -1,8 +1,7 @@
 import { Grid } from "../pages/Grid";
-import { test, expect,  } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 
 test.describe("Rearrange rows, columns, resize", () => {
-
     test("reorder rows", async ({ page }) => {
         const gridPage = new Grid(page, { columnsWidth: [32, 150, 150] });
         await gridPage.goToStory("glide-data-grid-dataeditor-demos--reorder-rows");

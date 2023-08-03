@@ -1888,6 +1888,10 @@ export interface DrawGridArg {
     readonly renderStrategy: "single-buffer" | "double-buffer" | "direct";
     readonly enqueue: (item: Item) => void;
     readonly getCellRenderer: GetCellRendererCallback;
+    readonly disabledDragColsAndRows?: {
+        rows?: number[];
+        cols?: number[];
+    };
 }
 
 function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean | number {
@@ -1997,6 +2001,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         renderStrategy,
         bufferA,
         bufferB,
+        disabledDragColsAndRows,
     } = arg;
     let { damage } = arg;
     if (width === 0 || height === 0) return;
@@ -2084,7 +2089,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         targetCtx.scale(dpr, dpr);
     }
 
-    const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
+    const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, translateX);
 
     let drawRegions: Rectangle[] = [];
 
@@ -2523,6 +2528,24 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             if (c.sourceIndex === resizeCol) {
                 drawColumnResizeOutline(overlayCtx, x + c.width, 0, totalHeaderHeight + 1, theme);
                 drawColumnResizeOutline(targetCtx, x + c.width, totalHeaderHeight, height, theme);
+            }
+        });
+    }
+
+    if (
+        dragAndDropState !== undefined &&
+        (disabledDragColsAndRows?.cols === undefined ||
+            disabledDragColsAndRows?.cols?.includes(dragAndDropState.dest) === false)
+    ) {
+        walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x) => {
+            if (c.sourceIndex === dragAndDropState.dest) {
+                const isRightDirection = dragAndDropState.src < dragAndDropState.dest;
+                const xPosition = isRightDirection ? x + c.width : x;
+
+                if (!(freezeColumns && !isRightDirection && x < effectiveCols[freezeColumns - 1].width)) {
+                    drawColumnResizeOutline(overlayCtx, xPosition, 0, totalHeaderHeight + 1, theme);
+                    drawColumnResizeOutline(targetCtx, xPosition, totalHeaderHeight, height, theme);
+                }
             }
         });
     }

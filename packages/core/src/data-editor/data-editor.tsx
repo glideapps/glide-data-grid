@@ -605,6 +605,14 @@ export interface DataEditorProps extends Props {
     readonly isOutsideClick?: (e: MouseEvent) => boolean;
 
     /**
+     * If set index of col or row, the grid will not allow dragging.
+     */
+    readonly disabledDragColsAndRows?: {
+        rows?: number[];
+        cols?: number[];
+    };
+
+    /**
      * Used as hint for scrollTo function
      * avoid scroll when canvas didn't reach the height of the scroller (nothing to scroll)
      */
@@ -769,7 +777,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         headerIcons,
         imageWindowLoader,
         initialSize,
-        isDraggable,
         onDragLeave,
         onRowMoved,
         overscrollX: overscrollXIn,
@@ -787,8 +794,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         groupHeaderHeight: groupHeaderHeightIn = headerHeightIn,
         theme: themeIn,
         isOutsideClick,
+        disabledDragColsAndRows,
         maxScrollerHeight,
     } = p;
+
+    const isDraggable = React.useMemo(
+        () => (onColumnMoved && onRowAppended ? true : onColumnMoved ? "header" : onRowMoved ? "cell" : false),
+        [onColumnMoved, onRowAppended, onRowMoved]
+    );
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
     const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
@@ -2200,7 +2213,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [mouseState, onMouseMove, rowMarkerOffset]
     );
 
-    useAutoscroll(scrollDir, scrollRef);
+    const isActivelyDragging = React.useRef(false);
+
+    useAutoscroll(scrollDir, scrollRef, isActivelyDragging.current);
 
     const onHeaderMenuClickInner = React.useCallback(
         (col: number, screenPosition: Rectangle) => {
@@ -2263,8 +2278,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnMoved,
         React.useCallback(
             (startIndex: number, endIndex: number) => {
-                onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset);
                 if (columnSelect !== "none") {
+                    onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset);
                     setSelectedColumns(CompactSelection.fromSingleSelection(endIndex), undefined, true);
                 }
             },
@@ -2272,7 +2287,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         )
     );
 
-    const isActivelyDragging = React.useRef(false);
     const onDragStartImpl = React.useCallback(
         (args: GridDragEventArgs) => {
             if (args.location[0] === 0 && rowMarkerOffset > 0) {
@@ -3653,6 +3667,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     gridRef={gridRef}
                     getCellRenderer={getCellRenderer}
                     scrollToEnd={scrollToEnd}
+                    disabledDragColsAndRows={disabledDragColsAndRows}
                 />
                 {renameGroupNode}
                 {overlay !== undefined && (
