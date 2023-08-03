@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.8.1](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.8.0...v5.8.1) (2023-08-03)
+
+
+### Bug Fixes
+
+* columns dnd first item drop case ([61b1191](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/61b11919dcdedca8cb1de055ea32b23e6dd69f08))
+
 ## [5.8.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.7.6...v5.8.0) (2023-08-03)
 
 
