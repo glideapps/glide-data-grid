@@ -103,6 +103,7 @@ const basicProps: DataGridProps = {
         if (cell.kind === GridCellKind.Custom) return undefined;
         return CellRenderers[cell.kind] as any;
     },
+    lockColumns: 0,
 };
 
 beforeEach(() => {
@@ -229,23 +230,25 @@ describe("data-grid", () => {
 
         render(
             <>
-        <DataGrid {...basicProps} onItemHovered={spy} />
-        <div data-testid="outside-element" style={{
-            position: 'absolute',
-            width: '100vh',
-            height: '100vh',
-        }} />
-        </>
+                <DataGrid {...basicProps} onItemHovered={spy} />
+                <div
+                    data-testid="outside-element"
+                    style={{
+                        position: "absolute",
+                        width: "100vh",
+                        height: "100vh",
+                    }}
+                />
+            </>
         );
 
-
-        const outsideElement = screen.getByTestId('outside-element');
+        const outsideElement = screen.getByTestId("outside-element");
         fireEvent.mouseMove(outsideElement, {
             clientX: 350, // Col C
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
 
-        expect(spy).not.toHaveBeenCalled()
+        expect(spy).not.toHaveBeenCalled();
     });
 
     test("Header hovered", () => {

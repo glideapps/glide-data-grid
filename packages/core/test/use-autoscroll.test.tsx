@@ -14,11 +14,15 @@ describe("use-auto-scroll", () => {
         const scrollBy = jest.fn();
         jest.useFakeTimers();
         renderHook(() =>
-            useAutoscroll([0, 0], {
-                current: {
-                    scrollBy,
-                },
-            } as any)
+            useAutoscroll(
+                [0, 0],
+                {
+                    current: {
+                        scrollBy,
+                    },
+                } as any,
+                false
+            )
         );
 
         jest.advanceTimersByTime(100);
@@ -29,11 +33,15 @@ describe("use-auto-scroll", () => {
         const scrollBy = jest.fn();
         jest.useFakeTimers();
         renderHook(() =>
-            useAutoscroll([-1, 0], {
-                current: {
-                    scrollBy,
-                },
-            } as any)
+            useAutoscroll(
+                [-1, 0],
+                {
+                    current: {
+                        scrollBy,
+                    },
+                } as any,
+                false
+            )
         );
 
         jest.runOnlyPendingTimers(); // the first one primes the pump
@@ -49,11 +57,15 @@ describe("use-auto-scroll", () => {
         const scrollBy = jest.fn();
         jest.useFakeTimers();
         renderHook(() =>
-            useAutoscroll([1, 0], {
-                current: {
-                    scrollBy,
-                },
-            } as any)
+            useAutoscroll(
+                [1, 0],
+                {
+                    current: {
+                        scrollBy,
+                    },
+                } as any,
+                false
+            )
         );
 
         jest.runOnlyPendingTimers(); // the first one primes the pump
@@ -69,11 +81,15 @@ describe("use-auto-scroll", () => {
         const scrollBy = jest.fn();
         jest.useFakeTimers();
         renderHook(() =>
-            useAutoscroll([0, 1], {
-                current: {
-                    scrollBy,
-                },
-            } as any)
+            useAutoscroll(
+                [0, 1],
+                {
+                    current: {
+                        scrollBy,
+                    },
+                } as any,
+                false
+            )
         );
 
         jest.runOnlyPendingTimers(); // the first one primes the pump
@@ -89,11 +105,15 @@ describe("use-auto-scroll", () => {
         const scrollBy = jest.fn();
         jest.useFakeTimers();
         renderHook(() =>
-            useAutoscroll([0, -1], {
-                current: {
-                    scrollBy,
-                },
-            } as any)
+            useAutoscroll(
+                [0, -1],
+                {
+                    current: {
+                        scrollBy,
+                    },
+                } as any,
+                false
+            )
         );
 
         jest.runOnlyPendingTimers(); // the first one primes the pump

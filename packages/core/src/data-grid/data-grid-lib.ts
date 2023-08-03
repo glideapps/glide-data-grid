@@ -89,44 +89,10 @@ export function cellIsInRange(location: Item, cell: InnerGridCell, selection: Gr
     return result;
 }
 
-function remapForDnDState(
-    columns: readonly MappedGridColumn[],
-    dndState?: {
-        src: number;
-        dest: number;
-    }
-) {
-    let mappedCols = columns;
-    if (dndState !== undefined) {
-        let writable = [...columns];
-        const temp = mappedCols[dndState.src];
-        if (dndState.src > dndState.dest) {
-            writable.splice(dndState.src, 1);
-            writable.splice(dndState.dest, 0, temp);
-        } else {
-            writable.splice(dndState.dest + 1, 0, temp);
-            writable.splice(dndState.src, 1);
-        }
-        writable = writable.map((c, i) => ({
-            ...c,
-            sticky: columns[i].sticky,
-        }));
-        mappedCols = writable;
-    }
-    return mappedCols;
-}
-
-export function getStickyWidth(
-    columns: readonly MappedGridColumn[],
-    dndState?: {
-        src: number;
-        dest: number;
-    }
-): number {
+export function getStickyWidth(columns: readonly MappedGridColumn[]): number {
     let result = 0;
-    const remapped = remapForDnDState(columns, dndState);
-    for (let i = 0; i < remapped.length; i++) {
-        const c = remapped[i];
+    for (let i = 0; i < columns.length; i++) {
+        const c = columns[i];
         if (c.sticky) result += c.width;
         else break;
     }
@@ -138,16 +104,10 @@ export function getEffectiveColumns(
     columns: readonly MappedGridColumn[],
     cellXOffset: number,
     width: number,
-    dndState?: {
-        src: number;
-        dest: number;
-    },
     tx?: number
 ): readonly MappedGridColumn[] {
-    const mappedCols = remapForDnDState(columns, dndState);
-
     const sticky: MappedGridColumn[] = [];
-    for (const c of mappedCols) {
+    for (const c of columns) {
         if (c.sticky) {
             sticky.push(c);
         } else {
@@ -162,13 +122,13 @@ export function getEffectiveColumns(
     let endIndex = cellXOffset;
     let curX = tx ?? 0;
 
-    while (curX <= width && endIndex < mappedCols.length) {
-        curX += mappedCols[endIndex].width;
+    while (curX <= width && endIndex < columns.length) {
+        curX += columns[endIndex].width;
         endIndex++;
     }
 
     for (let i = cellXOffset; i < endIndex; i++) {
-        const c = mappedCols[i];
+        const c = columns[i];
         if (!c.sticky) {
             sticky.push(c);
         }
@@ -1283,12 +1243,17 @@ export function computeBounds(
     return result;
 }
 
-
-export function drawColumnResizeOutline(ctx: CanvasRenderingContext2D, yOffset: number, xOffset: number, height: number, theme: Theme) {
+export function drawColumnResizeOutline(
+    ctx: CanvasRenderingContext2D,
+    yOffset: number,
+    xOffset: number,
+    height: number,
+    theme: Theme
+) {
     ctx.beginPath();
     ctx.lineWidth = 2;
     ctx.moveTo(yOffset, xOffset);
     ctx.lineTo(yOffset, height);
-    ctx.strokeStyle= theme.accentColor
+    ctx.strokeStyle = theme.accentColor;
     ctx.stroke();
-} 
+}

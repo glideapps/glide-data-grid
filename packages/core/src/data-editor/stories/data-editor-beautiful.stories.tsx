@@ -110,6 +110,69 @@ export const ResizableColumns: React.VFC = () => {
     },
 };
 
+export const ResizableColumnsWithColumnsDND: React.VFC = () => {
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(60);
+
+    const [columns, setColumns] = React.useState(cols);
+
+    const onColumnMoved = React.useCallback(
+        (startIndex: number, endIndex: number) => {
+            const newColumns = [...columns];
+            const element = newColumns[startIndex];
+            newColumns.splice(startIndex, 1);
+            newColumns.splice(endIndex, 0, element);
+            setColumns(newColumns);
+        },
+        [columns]
+    );
+
+    const onColumnResize = React.useCallback((column: GridColumn, newSize: number) => {
+        setColumns(prevColsMap => {
+            const index = prevColsMap.findIndex(ci => ci.title === column.title);
+            const newArray = [...prevColsMap];
+            newArray.splice(index, 1, {
+                ...prevColsMap[index],
+                width: newSize,
+            });
+            return newArray;
+        });
+    }, []);
+
+    return (
+        <BeautifulWrapper title="Resizable columns with columns DND">
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                disabledDragColsAndRows={{
+                    cols: [0],
+                }}
+                columns={columns}
+                overscrollX={200}
+                overscrollY={200}
+                maxColumnAutoWidth={500}
+                maxColumnWidth={2000}
+                rows={50}
+                scaleToRem={true}
+                theme={{
+                    baseFontStyle: "0.8125rem",
+                    headerFontStyle: "600 0.8125rem",
+                    editorFontSize: "0.8125rem",
+                }}
+                onColumnResize={onColumnResize}
+                getCellsForSelection={getCellsForSelection}
+                isDraggable
+                onColumnMoved={onColumnMoved}
+                freezeColumns={1}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ResizableColumns as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 interface OverscrollProps {
     overscrollX: number;
     overscrollY: number;
@@ -796,7 +859,8 @@ export const ObserveVisibleRegion: React.VFC = () => {
                         The visible region can be observed using <PropName>onVisibleRegionChanged</PropName>
                     </Description>
                     <MoreInfo>
-                        Then current visible region is x:<KeyName data-testid="visible-region-x">{visibleRegion.x}</KeyName> y:
+                        Then current visible region is x:
+                        <KeyName data-testid="visible-region-x">{visibleRegion.x}</KeyName> y:
                         <KeyName data-testid="visible-region-y">{visibleRegion.y}</KeyName> width:
                         <KeyName>{visibleRegion.width}</KeyName> height:<KeyName>{visibleRegion.height}</KeyName>
                     </MoreInfo>
@@ -1498,8 +1562,8 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
             hasMenu: false,
             getContent: (_col, row) => {
                 let checked: boolean | undefined = row % 2 === 0;
-                if(row % 3 === 0) {
-                    checked = undefined
+                if (row % 3 === 0) {
+                    checked = undefined;
                 }
                 // TODO: Make editable. UX looks bad by default.
                 return {
