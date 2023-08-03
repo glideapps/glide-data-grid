@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.8.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.7.6...v5.8.0) (2023-08-03)
+
+
+### Features
+
+* drag and drop cols ([654320d](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/654320d35efa8841b339e0f8021f757283c96dde))
+
 ### [5.7.6](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.7.5...v5.7.6) (2023-08-02)
 
 ### [5.7.5](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.7.3...v5.7.5) (2023-07-31)
