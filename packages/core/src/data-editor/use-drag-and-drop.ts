@@ -343,13 +343,12 @@ const useDragAndDrop = ({
             const args = getMouseArgsForPosition(canvas, event.clientX, event.clientY);
 
             const [rawCol, row] = args.location;
-            const col = rawCol - (firstColAccessible ? 0 : 1) + lockColumns;
-
-            if (disabledDragColsAndRows?.cols?.includes(col) === true) {
+            const col = rawCol - (firstColAccessible ? 0 : 1);
+            if (disabledDragColsAndRows?.cols?.includes(col) === true || col <= 0) {
                 return;
             }
 
-            onDrop([col, row], event.dataTransfer);
+            onDrop([col + lockColumns, row], event.dataTransfer);
         },
         [canvasRef, disabledDragColsAndRows?.cols, firstColAccessible, getMouseArgsForPosition, lockColumns, onDrop]
     );
