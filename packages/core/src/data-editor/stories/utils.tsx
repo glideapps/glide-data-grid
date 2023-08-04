@@ -284,11 +284,10 @@ function createTextColumnInfo(index: number, group: boolean): GridColumnWithMock
 function getResizableColumns(amount: number, group: boolean): GridColumnWithMockingInfo[] {
     const defaultColumns: GridColumnWithMockingInfo[] = [
         {
-            title: "First name First name First name First name",
+            title: "First name",
             id: "First name",
             group: group ? "Name" : undefined,
             icon: GridColumnIcon.HeaderString,
-            width: 250,
             hasMenu: false,
             getContent: (_col, row) => {
                 faker.seed(row)
