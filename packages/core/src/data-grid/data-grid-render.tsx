@@ -765,9 +765,8 @@ export function drawHeader(
     const actualPadding = drawX - x;
     const textMaxWidth  = width - actualPadding;
 
-
     ctx.fillText(
-        clipCanvasString(c.title, textMaxWidth, ctx, font),
+        clipCanvasString(c.title, textMaxWidth, ctx, `${c.title}_${textMaxWidth}`, font),
         drawX,
         y + height / 2 + getMiddleCenterBias(ctx, font)
     );

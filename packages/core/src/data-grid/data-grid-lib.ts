@@ -197,7 +197,7 @@ let metricsSize = 0;
 let metricsCache: Record<string, TextMetrics | undefined> = {};
 const isSSR = typeof window === "undefined";
 
-export const ellipsisStrCache = new LRUCache<string, string>(5000);
+export const ellipsisStrCache = new LRUCache<string, string>(10_000);
 
 
 async function clearCacheOnLoad() {
@@ -1297,10 +1297,9 @@ export const clipCanvasString = (
     str: string,
     maxWidth: number,
     ctx: CanvasRenderingContext2D,
+    cacheKey: string,
     font: string
 ) => {
-
-    const cacheKey = `${str}_${maxWidth}`;
 
     const cachedStr = ellipsisStrCache.get(cacheKey);
 
