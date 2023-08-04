@@ -56,6 +56,10 @@ export interface Theme {
     bgCellMedium: string;
     bgHeader: string;
     bgHeaderHasFocus: string;
+    /**
+     * the background color of row group header
+     */
+    bgGroup: string;
     bgHeaderHovered: string;
     bgBubble: string;
     bgBubbleSelected: string;
@@ -73,13 +77,16 @@ export interface Theme {
     fontFamily: string;
     editorFontSize: string;
     lineHeight: number;
+    /**
+     * the nested group indent is the amount of pixels to indent each nested group
+     */
+    nestedGroupIndent: number;
 }
 
 const dataEditorBaseTheme: Theme = {
     accentColor: "#4F5DFF",
     accentFg: "#FFFFFF",
-    accentLight: "rgba(62, 116, 253, 0.1)",
-
+    accentLight: "#ebf1ff",
     textDark: "#313139",
     textMedium: "#737383",
     textLight: "#B2B2C0",
@@ -94,6 +101,7 @@ const dataEditorBaseTheme: Theme = {
     bgCell: "#FFFFFF",
     bgCellMedium: "#FAFAFB",
     bgHeader: "#F7F7F8",
+    bgGroup: "#EFEFF1",
     bgHeaderHasFocus: "#E9E9EB",
     bgHeaderHovered: "#EFEFF1",
 
@@ -118,6 +126,7 @@ const dataEditorBaseTheme: Theme = {
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
     editorFontSize: "13px",
     lineHeight: 1.4, //unitless scaler depends on your font
+    nestedGroupIndent: 20,
 };
 
 /** @category Theme */

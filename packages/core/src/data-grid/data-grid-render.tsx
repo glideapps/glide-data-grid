@@ -19,6 +19,8 @@ import {
     TrailingRowType,
     ImageWindowLoader,
     GridCell,
+    GridRow,
+    GridRowKind,
 } from "./data-grid-types";
 import groupBy from "lodash/groupBy.js";
 import type { HoverValues } from "./animation-manager";
@@ -114,7 +116,8 @@ export function drawCell(
     frameTime: number,
     lastPrep: PrepResult | undefined,
     enqueue: ((item: Item) => void) | undefined,
-    getCellRenderer: GetCellRendererCallback
+    getCellRenderer: GetCellRendererCallback,
+    rowDetails?: GridRow,
 ): PrepResult | undefined {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
@@ -123,13 +126,22 @@ export function drawCell(
         hoverY = hoverInfo[1][1];
     }
     let result: PrepResult | undefined = undefined;
+    let drawX = x;
+
+    if (col === 1 && rowDetails?.kind === GridRowKind.GroupContent && rowDetails?.level !== undefined) {
+        const shiftDrawX =  rowDetails.level * theme.nestedGroupIndent;
+        if(shiftDrawX > drawX) {
+            drawX = shiftDrawX;
+        }
+    }
+
     const args: DrawArgs<typeof cell> = {
         ctx,
         theme,
         col,
         row,
         cell,
-        rect: { x, y, width: w, height: h },
+        rect: { x: drawX, y, width: w, height: h },
         highlighted,
         hoverAmount,
         hoverX,
@@ -1013,7 +1025,7 @@ function getSpanBounds(
     cellW: number,
     cellH: number,
     column: MappedGridColumn,
-    allColumns: readonly MappedGridColumn[]
+    allColumns: readonly MappedGridColumn[],
 ): [Rectangle | undefined, Rectangle | undefined] {
     const [startCol, endCol] = span;
 
@@ -1106,7 +1118,8 @@ function drawCells(
     hyperWrapping: boolean,
     outerTheme: Theme,
     enqueue: (item: Item) => void,
-    getCellRenderer: GetCellRendererCallback
+    getCellRenderer: GetCellRendererCallback,
+    getRowDetails?: (row: number) => GridRow
 ): Rectangle[] | undefined {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
@@ -1213,6 +1226,7 @@ function drawCells(
                     const rowDisabled = disabledRows.hasIndex(row);
 
                     const cell: InnerGridCell = row < rows ? getCellContent([c.sourceIndex, row]) : loadingCell;
+                    const rowDetails = getRowDetails?.(row);
 
                     let cellX = drawX;
                     let cellWidth = c.width;
@@ -1294,31 +1308,37 @@ function drawCells(
                         fill = blend(bgCell, fill);
                     }
 
-                    if (accentCount > 0 || rowDisabled) {
-                        if (rowDisabled) {
-                            fill = blend(theme.bgHeader, fill);
-                        }
-                        for (let i = 0; i < accentCount; i++) {
-                            fill = blend(theme.accentLight, fill);
-                        }
-                    } else {
-                        if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
-                            fill = blend(theme.bgSearchResult, fill);
+                    if(rowDetails?.kind === GridRowKind.Group){
+                        fill = blend(theme.bgGroup, fill);
+                    }
+
+                    if(rowDetails === undefined || rowDetails.kind === GridRowKind.GroupContent) {
+                        if (accentCount > 0 || rowDisabled) {
+                            if (rowDisabled) {
+                                fill = blend(theme.bgHeader, fill);
+                            }
+                            for (let i = 0; i < accentCount; i++) {
+                                fill = blend(theme.accentLight, fill);
+                            }
+                        } else {
+                            if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
+                                fill = blend(theme.bgSearchResult, fill);
+                            }
                         }
                     }
 
                     if (highlightRegions !== undefined) {
-                        for (const region of highlightRegions) {
-                            const r = region.range;
-                            if (
-                                r.x <= c.sourceIndex &&
-                                c.sourceIndex < r.x + r.width &&
-                                r.y <= row &&
-                                row < r.y + r.height
-                            ) {
-                                fill = blend(region.color, fill);
-                            }
-                        }
+                                for (const region of highlightRegions) {
+                                    const r = region.range;
+                                    if (
+                                        r.x <= c.sourceIndex &&
+                                        c.sourceIndex < r.x + r.width &&
+                                        r.y <= row &&
+                                        row < r.y + r.height
+                                    ) {
+                                        fill = blend(region.color, fill);
+                                    }
+                                }
                     }
 
                     if (fill !== undefined) {
@@ -1326,7 +1346,7 @@ function drawCells(
                         if (prepResult !== undefined) {
                             prepResult.fillStyle = fill;
                         }
-                        ctx.fillRect(cellX, drawY, cellWidth, rh);
+                         ctx.fillRect(cellX, drawY, cellWidth, rh);
                     }
 
                     if (cell.style === "faded") {
@@ -1361,7 +1381,8 @@ function drawCells(
                             frameTime,
                             prepResult,
                             enqueue,
-                            getCellRenderer
+                            getCellRenderer,
+                            rowDetails
                         );
                     }
 
@@ -1716,7 +1737,8 @@ function drawFocusRing(
     getCellContent: (cell: Item) => InnerGridCell,
     trailingRowType: TrailingRowType,
     fillHandle: boolean,
-    rows: number
+    rows: number,
+    getRowDetails?: (row: number) => GridRow
 ): (() => void) | undefined {
     if (selectedCell.current === undefined || !effectiveCols.some(c => c.sourceIndex === selectedCell.current?.cell[0]))
         return undefined;
@@ -1747,6 +1769,8 @@ function drawFocusRing(
                 let cellX = drawX;
                 let cellWidth = col.width;
 
+                const rowDetails = getRowDetails?.(row);
+                if(rowDetails !==undefined && rowDetails.kind !== GridRowKind.GroupContent) return undefined
                 if (cell.span !== undefined) {
                     const areas = getSpanBounds(cell.span, drawX, drawY, col.width, rh, col, allColumns);
                     const area = col.sticky ? areas[0] : areas[1];
@@ -1892,6 +1916,7 @@ export interface DrawGridArg {
         rows?: number[];
         cols?: number[];
     };
+    readonly getRowDetails?: (row: number) => GridRow;
 }
 
 function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean | number {
@@ -2002,6 +2027,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         bufferA,
         bufferB,
         disabledDragColsAndRows,
+        getRowDetails,
     } = arg;
     let { damage } = arg;
     if (width === 0 || height === 0) return;
@@ -2164,7 +2190,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 getCellContent,
                 trailingRowType,
                 fillHandle,
-                rows
+                rows,
+                getRowDetails
             );
         }
     };
@@ -2234,7 +2261,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 hyperWrapping,
                 theme,
                 enqueue,
-                getCellRenderer
+                getCellRenderer,
+                getRowDetails
             );
 
             if (
@@ -2259,7 +2287,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                     getCellContent,
                     trailingRowType,
                     fillHandle,
-                    rows
+                    rows,
+                    getRowDetails
                 );
             }
         }
@@ -2373,7 +2402,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
               getCellContent,
               trailingRowType,
               fillHandle,
-              rows
+              rows,
+              getRowDetails
           )
         : undefined;
 
@@ -2439,7 +2469,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         hyperWrapping,
         theme,
         enqueue,
-        getCellRenderer
+        getCellRenderer,
+        getRowDetails
     );
 
     drawBlanks(

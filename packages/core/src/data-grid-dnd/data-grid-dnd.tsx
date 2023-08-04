@@ -105,6 +105,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         onMouseUp,
         onItemHovered,
         onDragStart,
+        getRowDetails,
         onDragOverCell,
         onDrop,
     } = p;
@@ -422,6 +423,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             ref={gridRef}
             lockColumns={lockColumns}
             disabledDragColsAndRows={p.disabledDragColsAndRows}
+            getRowDetails={getRowDetails}
         />
     );
 };

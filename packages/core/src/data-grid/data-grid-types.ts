@@ -142,6 +142,7 @@ export interface GridKeyEventArgs {
     readonly preventDefault: () => void;
     readonly rawEvent: React.KeyboardEvent<HTMLElement> | undefined;
     readonly location: { col?: number; row?: number };
+    readonly onRowDetailsUpdated?: (newValue: GridRow) => void;
 }
 
 interface DragHandler {
@@ -349,7 +350,11 @@ export function isTextEditableGridCell(cell: GridCell): cell is ReadWriteGridCel
 
 /** @category Cells */
 export function isInnerOnlyCell(cell: InnerGridCell): cell is InnerOnlyGridCell {
-    return cell.kind === InnerGridCellKind.Marker || cell.kind === InnerGridCellKind.NewRow;
+    return (
+        cell.kind === InnerGridCellKind.Marker ||
+        cell.kind === InnerGridCellKind.NewRow ||
+        cell.kind === GridRowKind.Group
+    );
 }
 
 /** @category Cells */
@@ -377,11 +382,41 @@ export type GridCell =
     | LoadingCell
     | ProtectedCell
     | DrilldownCell
-    | CustomCell;
+    | CustomCell
 
-type InnerOnlyGridCell = NewRowCell | MarkerCell;
+type InnerOnlyGridCell = NewRowCell | MarkerCell | GroupCell;
 /** @category Cells */
 export type InnerGridCell = GridCell | InnerOnlyGridCell;
+
+export enum GridRowKind {
+    Group = 'group',
+    GroupContent = 'group-content',
+    Custom = 'custom',
+}
+export interface GroupRow {
+    kind: GridRowKind.Group
+    level: number
+    name: string
+    expanded: boolean
+    id: string,
+    themeOverride?: Partial<Theme>
+    readonly allowOverlay: false;
+}
+
+export interface GroupContentRow {
+    kind: GridRowKind.GroupContent,
+    level: number,
+    index: number,
+    themeOverride?: Partial<Theme>
+}
+
+export interface CustomRow {
+    kind: GridRowKind.Custom,
+    data: {}
+    themeOverride?: Partial<Theme>
+}
+
+export type GridRow = GroupRow | GroupContentRow | CustomRow;
 
 /** @category Cells */
 export type CellList = readonly Item[];
@@ -403,6 +438,7 @@ export interface BaseGridCell {
     readonly span?: readonly [start: number, end: number];
     readonly contentAlign?: "left" | "right" | "center";
     readonly cursor?: CSSProperties["cursor"];
+    readonly groupLevel?: number
 }
 
 /** @category Cells */
@@ -568,6 +604,7 @@ export interface UriCell extends BaseGridCell {
 export enum InnerGridCellKind {
     NewRow = "new-row",
     Marker = "marker",
+    Group = "group",
 }
 
 /** @category Cells */
@@ -577,6 +614,8 @@ export interface NewRowCell extends BaseGridCell {
     readonly allowOverlay: false;
     readonly icon?: string;
 }
+
+export type GroupCell = BaseGridCell & GroupRow;
 
 /** @category Cells */
 export interface MarkerCell extends BaseGridCell {

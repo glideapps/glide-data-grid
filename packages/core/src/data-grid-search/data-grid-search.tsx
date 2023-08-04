@@ -73,6 +73,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         onSearchResultsChanged,
         showSearch = false,
         onSearchClose,
+        getRowDetails
     } = p;
 
     const [searchID] = React.useState(() => "search-box-" + Math.round(Math.random() * 1000));
@@ -470,6 +471,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 smoothScrollX={p.smoothScrollX}
                 smoothScrollY={p.smoothScrollY}
                 scrollToEnd={p.scrollToEnd}
+                getRowDetails={getRowDetails}
                 disabledDragColsAndRows={p.disabledDragColsAndRows}
             />
             {searchbox}

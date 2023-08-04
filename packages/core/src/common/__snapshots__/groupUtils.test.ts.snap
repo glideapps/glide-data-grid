@@ -1,0 +1,506 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`flattenGroups collapses first group 1`] = `
+Array [
+  Object {
+    "allowOverlay": false,
+    "expanded": false,
+    "id": "1",
+    "kind": "group",
+    "level": 1,
+    "name": "Group 1",
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "2",
+    "kind": "group",
+    "level": 1,
+    "name": "Group 2",
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "2-1",
+    "kind": "group",
+    "level": 2,
+    "name": "Group 2-1",
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "2-1-1",
+    "kind": "group",
+    "level": 3,
+    "name": "Group 2-1-1",
+  },
+  Object {
+    "index": 3,
+    "kind": "group-content",
+    "level": 4,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "2-1-2",
+    "kind": "group",
+    "level": 3,
+    "name": "Group 2-1-2",
+  },
+  Object {
+    "index": 4,
+    "kind": "group-content",
+    "level": 4,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "2-2",
+    "kind": "group",
+    "level": 2,
+    "name": "Group 2-2",
+  },
+  Object {
+    "index": 5,
+    "kind": "group-content",
+    "level": 3,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "3",
+    "kind": "group",
+    "level": 1,
+    "name": "Group 3",
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "3-1",
+    "kind": "group",
+    "level": 2,
+    "name": "Group 3-1",
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "3-1-1",
+    "kind": "group",
+    "level": 3,
+    "name": "Group 3-1-1",
+  },
+  Object {
+    "index": 6,
+    "kind": "group-content",
+    "level": 4,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "3-1-2",
+    "kind": "group",
+    "level": 3,
+    "name": "Group 3-1-2",
+  },
+  Object {
+    "index": 7,
+    "kind": "group-content",
+    "level": 4,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "3-2",
+    "kind": "group",
+    "level": 2,
+    "name": "Group 3-2",
+  },
+  Object {
+    "index": 8,
+    "kind": "group-content",
+    "level": 3,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+]
+`;
+
+exports[`flattenGroups has single level group 1`] = `
+Array [
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "1",
+    "kind": "group",
+    "level": 1,
+    "name": "Group 1",
+  },
+  Object {
+    "index": 1,
+    "kind": "group-content",
+    "level": 2,
+  },
+  Object {
+    "index": 2,
+    "kind": "group-content",
+    "level": 2,
+  },
+  Object {
+    "index": 3,
+    "kind": "group-content",
+    "level": 2,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": false,
+    "id": "2",
+    "kind": "group",
+    "level": 1,
+    "name": "Group 2",
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "3",
+    "kind": "group",
+    "level": 1,
+    "name": "Group 2",
+  },
+  Object {
+    "index": 7,
+    "kind": "group-content",
+    "level": 2,
+  },
+  Object {
+    "index": 8,
+    "kind": "group-content",
+    "level": 2,
+  },
+  Object {
+    "index": 9,
+    "kind": "group-content",
+    "level": 2,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+]
+`;
+
+exports[`flattenGroups matches snapshot 1`] = `
+Array [
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "1",
+    "kind": "group",
+    "level": 1,
+    "name": "Group 1",
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "1-1",
+    "kind": "group",
+    "level": 2,
+    "name": "Group 1-1",
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "1-1-1",
+    "kind": "group",
+    "level": 3,
+    "name": "Group 1-1-1",
+  },
+  Object {
+    "index": 0,
+    "kind": "group-content",
+    "level": 4,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "1-1-2",
+    "kind": "group",
+    "level": 3,
+    "name": "Group 1-1-2",
+  },
+  Object {
+    "index": 1,
+    "kind": "group-content",
+    "level": 4,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "1-2",
+    "kind": "group",
+    "level": 2,
+    "name": "Group 1-2",
+  },
+  Object {
+    "index": 2,
+    "kind": "group-content",
+    "level": 3,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "2",
+    "kind": "group",
+    "level": 1,
+    "name": "Group 2",
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "2-1",
+    "kind": "group",
+    "level": 2,
+    "name": "Group 2-1",
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "2-1-1",
+    "kind": "group",
+    "level": 3,
+    "name": "Group 2-1-1",
+  },
+  Object {
+    "index": 3,
+    "kind": "group-content",
+    "level": 4,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "2-1-2",
+    "kind": "group",
+    "level": 3,
+    "name": "Group 2-1-2",
+  },
+  Object {
+    "index": 4,
+    "kind": "group-content",
+    "level": 4,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "2-2",
+    "kind": "group",
+    "level": 2,
+    "name": "Group 2-2",
+  },
+  Object {
+    "index": 5,
+    "kind": "group-content",
+    "level": 3,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "3",
+    "kind": "group",
+    "level": 1,
+    "name": "Group 3",
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "3-1",
+    "kind": "group",
+    "level": 2,
+    "name": "Group 3-1",
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "3-1-1",
+    "kind": "group",
+    "level": 3,
+    "name": "Group 3-1-1",
+  },
+  Object {
+    "index": 6,
+    "kind": "group-content",
+    "level": 4,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "3-1-2",
+    "kind": "group",
+    "level": 3,
+    "name": "Group 3-1-2",
+  },
+  Object {
+    "index": 7,
+    "kind": "group-content",
+    "level": 4,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+  Object {
+    "allowOverlay": false,
+    "expanded": true,
+    "id": "3-2",
+    "kind": "group",
+    "level": 2,
+    "name": "Group 3-2",
+  },
+  Object {
+    "index": 8,
+    "kind": "group-content",
+    "level": 3,
+  },
+  Object {
+    "data": Object {
+      "kind": "AddRow",
+    },
+    "kind": "custom",
+    "themeOverride": Object {
+      "bgCell": "#F7F7F8",
+    },
+  },
+]
+`;
