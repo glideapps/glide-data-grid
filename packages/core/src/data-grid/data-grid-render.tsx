@@ -37,6 +37,7 @@ import {
     getMiddleCenterBias,
     drawCheckbox,
     drawColumnResizeOutline,
+    clipCanvasString,
 } from "./data-grid-lib";
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import type { Theme } from "../common/styles";
@@ -771,10 +772,15 @@ export function drawHeader(
     } else {
         ctx.fillStyle = fillStyle;
     }
+
+    const font = `${theme.headerFontStyle} ${theme.fontFamily}`;
+    const actualPadding = drawX - x;
+    const textMaxWidth  = width - actualPadding;
+
     ctx.fillText(
-        c.title,
+        clipCanvasString(c.title, textMaxWidth, ctx, `${c.title}_${textMaxWidth}`, font),
         drawX,
-        y + height / 2 + getMiddleCenterBias(ctx, `${theme.headerFontStyle} ${theme.fontFamily}`)
+        y + height / 2 + getMiddleCenterBias(ctx, font)
     );
 
     if (shouldDrawMenu && c.hasMenu === true) {

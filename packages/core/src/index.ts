@@ -16,6 +16,8 @@ export {
     measureTextCached,
     getMiddleCenterBias,
     drawTextCellExternal as drawTextCell,
+    ellipsisStrCache,
+    clipCanvasString
 } from "./data-grid/data-grid-lib";
 export { getDataEditorTheme as getDefaultTheme, useTheme } from "./common/styles";
 export { useColumnSizer } from "./data-editor/use-column-sizer";
