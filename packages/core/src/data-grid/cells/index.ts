@@ -12,10 +12,12 @@ import { protectedCellRenderer } from "./protected-cell";
 import { rowIDCellRenderer } from "./row-id-cell";
 import { textCellRenderer } from "./text-cell";
 import { uriCellRenderer } from "./uri-cell";
+import { groupRenderer } from "./group-cell";
 
 export const CellRenderers = {
     [InnerGridCellKind.Marker]: markerCellRenderer,
     [InnerGridCellKind.NewRow]: newRowCellRenderer,
+    [InnerGridCellKind.Group]: groupRenderer,
     [GridCellKind.Boolean]: booleanCellRenderer,
     [GridCellKind.Bubble]: bubbleCellRenderer,
     [GridCellKind.Drilldown]: drilldownCellRenderer,

@@ -10,28 +10,30 @@ import {
     useMappedColumns,
 } from "./data-grid-lib";
 import {
-    GridCellKind,
-    Rectangle,
-    GridSelection,
-    GridMouseEventArgs,
-    GridDragEventArgs,
-    GridKeyEventArgs,
-    InnerGridCell,
-    InnerGridCellKind,
+    booleanCellIsEditable,
+    CellList,
     CompactSelection,
     DrawCustomCellCallback,
-    CellList,
-    Item,
     DrawHeaderCallback,
-    isReadWriteCell,
-    isInnerOnlyCell,
-    booleanCellIsEditable,
-    InnerGridColumn,
-    TrailingRowType,
+    GridCellKind,
+    GridDragEventArgs,
+    GridKeyEventArgs,
+    GridMouseEventArgs,
+    GridRow,
+    GridRowKind,
+    GridSelection,
     groupHeaderKind,
     headerKind,
-    outOfBoundsKind,
     ImageWindowLoader,
+    InnerGridCell,
+    InnerGridCellKind,
+    InnerGridColumn,
+    isInnerOnlyCell,
+    isReadWriteCell,
+    Item,
+    outOfBoundsKind,
+    Rectangle,
+    TrailingRowType,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
 import { useDebouncedMemo, useEventListener } from "../common/utils";
@@ -105,6 +107,11 @@ export interface DataGridProps {
     readonly eventTargetRef: React.MutableRefObject<HTMLDivElement | null> | undefined;
 
     readonly getCellContent: (cell: Item) => InnerGridCell;
+    /**
+     * Provides additional details about rows, can be used to render groups and custom rows.
+     * @group Data
+     */
+    readonly getRowDetails?: (row: number) => GridRow;
     /**
      * Provides additional details about groups to extend group functionality.
      * @group Data
@@ -364,6 +371,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         getCellRenderer,
         lockColumns,
         disabledDragColsAndRows,
+        getRowDetails,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -719,6 +727,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             renderStrategy: experimental?.renderStrategy ?? (browserIsSafari.value ? "double-buffer" : "single-buffer"),
             getCellRenderer,
             disabledDragColsAndRows,
+            getRowDetails,
         };
 
         // This confusing bit of code due to some poor design. Long story short, the damage property is only used
@@ -824,6 +833,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         const cell = getCellContent([hCol, hRow]);
         clickableInnerCellHovered =
             cell.kind === InnerGridCellKind.NewRow ||
+            cell.kind === GridRowKind.Group ||
             (cell.kind === InnerGridCellKind.Marker && cell.markerKind !== "number");
         editableBoolHovered = cell.kind === GridCellKind.Boolean && booleanCellIsEditable(cell);
         cursorOverride = cell.cursor;

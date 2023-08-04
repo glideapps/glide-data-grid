@@ -43,6 +43,7 @@ import {
     CustomCell,
     headerKind,
     gridSelectionHasItem,
+    GridRowKind, GridRow,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -203,6 +204,10 @@ export interface DataEditorProps extends Props {
      * @group Editing
      */
     readonly onCellEdited?: (cell: Item, newValue: EditableGridCell) => void;
+    /** Emitted whenever a row details is updated. For example a group row is expanded/collapsed.
+     * @group Editing
+     */
+    readonly onRowDetailsUpdated?: (row: number, newValue: GridRow) => void;
     /** Emitted whenever a cell mutation is completed and provides all edits inbound as a single batch.
      * @group Editing
      */
@@ -707,6 +712,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         columns: columnsIn,
         rows,
         getCellContent,
+        getRowDetails,
+        onRowDetailsUpdated,
         onCellClicked,
         onCellActivated,
         onFinishedEditing,
@@ -1165,16 +1172,44 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ([col, row]: Item): InnerGridCell => {
             const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
             const isRowMarkerCol = col === 0 && hasRowMarkers;
+            const rowDetails = getRowDetails?.(row);
+
+            if (rowDetails !== undefined && rowDetails.kind === GridRowKind.Group) {
+                return {
+                    kind: GridRowKind.Group,
+                    allowOverlay: false,
+                    level: rowDetails.level,
+                    expanded: rowDetails.expanded,
+                    id: rowDetails.id,
+                    span: [0, columnsIn.length],
+                    name: rowDetails.name,
+                    themeOverride: rowDetails.themeOverride,
+                };
+            }
+
+            if (rowDetails !== undefined && rowDetails.kind === GridRowKind.Custom) {
+                return {
+                    kind: GridCellKind.Custom,
+                    allowOverlay: false,
+                    data: rowDetails.data,
+                    copyData: '',
+                    span: [0, columnsIn.length],
+                    themeOverride: rowDetails.themeOverride,
+                };
+            }
+
             if (isRowMarkerCol) {
+                // when it marker column but the onRowAppended functionality is enabled it draws nothing
                 if (isTrailing) {
                     return loadingCell;
                 }
+
                 return {
                     kind: InnerGridCellKind.Marker,
                     allowOverlay: false,
                     checked: gridSelection?.rows.hasIndex(row) === true,
                     markerKind: rowMarkers === "clickable-number" ? "number" : rowMarkers,
-                    row: rowMarkerStartIndex + row,
+                    row: rowDetails?.index ?? rowMarkerStartIndex + row,
                     drawHandle: onRowMoved !== undefined,
                 };
             } else if (isTrailing) {
@@ -1654,6 +1689,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             bounds: args.bounds,
                             theme: themeForCell(markerCell, args.location),
                             preventDefault: () => undefined,
+                            onRowDetailsUpdated: (newValue) => {
+                                onRowDetailsUpdated?.(row, newValue);
+                            },
                         }) as MarkerCell | undefined;
                         if (postClick === undefined || postClick.checked === markerCell.checked) return;
                     }
@@ -2063,8 +2101,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             posY: a.localEventY,
                             bounds: a.bounds,
                             theme: themeForCell(c, args.location),
+                            onRowDetailsUpdated: (newValue) => {
+                                onRowDetailsUpdated?.(row, newValue);
+                            },
                             preventDefault,
                         });
+
+                        if (newVal !== undefined && newVal.kind === GridRowKind.Group) {
+                            onRowDetailsUpdated?.(row, newVal);
+                            gridRef.current?.damage(columns.map((_, i) => ({ cell: [i, row] })));
+                        }
+
                         if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
                             mangledOnCellsEdited([{ location: a.location, value: newVal }]);
                             gridRef.current?.damage([
@@ -2657,6 +2704,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         cancel: () => {
                             cancelled = true;
                         },
+                        onRowDetailsUpdated: (newValue) => {
+                            onRowDetailsUpdated?.(event.location.row!, newValue);
+                        },
+                        cell: markerCell
                     });
                 }
                 if (onKeyDownIn !== undefined) {
@@ -3667,6 +3718,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     gridRef={gridRef}
                     getCellRenderer={getCellRenderer}
                     scrollToEnd={scrollToEnd}
+                    getRowDetails={getRowDetails}
                     disabledDragColsAndRows={disabledDragColsAndRows}
                 />
                 {renameGroupNode}
