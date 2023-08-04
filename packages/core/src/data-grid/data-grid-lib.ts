@@ -16,6 +16,7 @@ import React from "react";
 import type { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
 import { split as splitText, clearCache } from "canvas-hypertxt";
+import { LRUCache } from "./LRUCache";
 
 export interface MappedGridColumn extends SizedGridColumn {
     sourceIndex: number;
@@ -195,6 +196,9 @@ export function getRowIndexForY(
 let metricsSize = 0;
 let metricsCache: Record<string, TextMetrics | undefined> = {};
 const isSSR = typeof window === "undefined";
+
+export const ellipsisStrCache = new LRUCache<string, string>(5000);
+
 
 async function clearCacheOnLoad() {
     if (isSSR || document?.fonts?.ready === undefined) return;
@@ -1257,3 +1261,76 @@ export function drawColumnResizeOutline(
     ctx.strokeStyle = theme.accentColor;
     ctx.stroke();
 }
+
+
+
+const binarySearch = ({
+                          max,
+                          getValue,
+                          match,
+                      }: {
+    max: number;
+    match: number;
+    getValue: (g: number) => number;
+}) => {
+    let min = 0;
+
+    while (min <= max) {
+        const guess = Math.floor((min + max) / 2);
+        const compareVal = getValue(guess);
+
+        if (compareVal === match) {
+            return guess;
+        }
+        if (compareVal < match) {
+            min = guess + 1;
+        } else {
+            max = guess - 1;
+        }
+    }
+
+    return max;
+};
+
+
+export const clipCanvasString = (
+    str: string,
+    maxWidth: number,
+    ctx: CanvasRenderingContext2D,
+    font: string
+) => {
+
+    const cacheKey = `${str}_${maxWidth}`;
+
+    const cachedStr = ellipsisStrCache.get(cacheKey);
+
+    if(cachedStr !== undefined){
+        return cachedStr;
+    }
+
+    const ellipsis = '…';
+
+
+    const width = measureTextCached(str, ctx, font).width;
+
+    const ellipsisWidth = measureTextCached(ellipsis, ctx, font).width;
+
+    if (width <= maxWidth || width <= ellipsisWidth) {
+        return str;
+    }
+
+    const index = binarySearch({
+        max: str.length,
+        getValue: (guess: number) => ctx.measureText(str.slice(0, Math.max(0, guess))).width,
+        match: maxWidth - ellipsisWidth,
+    });
+
+
+
+    const finalStr = str.slice(0, index) + ellipsis;
+
+    ellipsisStrCache.put(cacheKey, finalStr);
+
+    return finalStr
+};
+
