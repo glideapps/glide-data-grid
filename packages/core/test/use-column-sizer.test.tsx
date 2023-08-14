@@ -234,4 +234,26 @@ describe("use-column-sizer", () => {
 
         expect(result.current).toBe(A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE);
     });
+
+    it("Removes the canvas from the DOM when unmounted", async () => {
+        const { unmount } = renderHook(() =>
+            useColumnSizer(
+                COLUMNS,
+                1000,
+                getShortCellsForSelection,
+                400,
+                20,
+                500,
+                theme,
+                getCellRenderer,
+                abortController
+            )
+        );
+
+        expect(document.querySelector("canvas")).toBeDefined();
+
+        unmount();
+
+        expect(document.querySelector("canvas")).toBeNull();
+    });
 });
