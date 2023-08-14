@@ -17395,7 +17395,6 @@ const defaultSize = 150;
 function measureCell(ctx, cell, theme, getCellRenderer) {
   var _r$measure, _r$measure2;
 
-  if (cell.kind === data_grid_types/* GridCellKind.Custom */.p6.Custom) return defaultSize;
   const r = getCellRenderer(cell);
   return (_r$measure = r === null || r === void 0 ? void 0 : (_r$measure2 = r.measure) === null || _r$measure2 === void 0 ? void 0 : _r$measure2.call(r, ctx, cell, theme)) !== null && _r$measure !== void 0 ? _r$measure : defaultSize;
 }
@@ -35978,7 +35977,6 @@ var defaultSize = 150;
 function measureCell(ctx, cell, theme, getCellRenderer) {
   var _a, _b;
 
-  if (cell.kind === GridCellKind.Custom) return defaultSize;
   const r = getCellRenderer(cell);
   return (_b = (_a = r == null ? void 0 : r.measure) == null ? void 0 : _a.call(r, ctx, cell, theme)) != null ? _b : defaultSize;
 }
@@ -40113,4 +40111,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.fe3cea95.iframe.bundle.js.map
+//# sourceMappingURL=main.d928c1e5.iframe.bundle.js.map
