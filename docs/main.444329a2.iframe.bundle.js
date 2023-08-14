@@ -21922,6 +21922,7 @@ function _extends() { _extends = Object.assign ? Object.assign.bind() : function
 
 
 
+let globalInputID = 0;
 const GrowingEntry = props => {
   const {
     placeholder,
@@ -21939,6 +21940,7 @@ const GrowingEntry = props => {
   const inputRef = react.useRef(null);
   const useText = value !== null && value !== void 0 ? value : "";
   (0,support/* assert */.hu)(onChange !== undefined, "GrowingEntry must be a controlled input area");
+  const [inputID] = react.useState(() => "input-box-" + (globalInputID = (globalInputID + 1) % 10000000));
   react.useEffect(() => {
     const ta = inputRef.current;
     if (ta === null) return;
@@ -21968,6 +21970,7 @@ const GrowingEntry = props => {
     className: className
   }, useText + "\n"), react.createElement(InputBox, _extends({}, rest, {
     className: (className !== null && className !== void 0 ? className : "") + " gdg-input",
+    id: inputID,
     ref: inputRef,
     onKeyDown: onKeyDownInner,
     value: useText,
@@ -37079,6 +37082,7 @@ var GrowingEntryStyle = (0,_chunk_UM7QR3LO_js__WEBPACK_IMPORTED_MODULE_8__/* .st
   name: "GrowingEntryStyle",
   class: "gf8vzix"
 });
+var globalInputID = 0;
 
 var GrowingEntry = props => {
   const {
@@ -37097,6 +37101,7 @@ var GrowingEntry = props => {
   const inputRef = react__WEBPACK_IMPORTED_MODULE_0__.useRef(null);
   const useText = value != null ? value : "";
   assert(onChange !== void 0, "GrowingEntry must be a controlled input area");
+  const [inputID] = react__WEBPACK_IMPORTED_MODULE_0__.useState(() => "input-box-" + (globalInputID = (globalInputID + 1) % 1e7));
   react__WEBPACK_IMPORTED_MODULE_0__.useEffect(() => {
     const ta = inputRef.current;
     if (ta === null) return;
@@ -37126,6 +37131,7 @@ var GrowingEntry = props => {
     className
   }, useText + "\n"), react__WEBPACK_IMPORTED_MODULE_0__.createElement(InputBox, { ...rest,
     className: (className != null ? className : "") + " gdg-input",
+    id: inputID,
     ref: inputRef,
     onKeyDown: onKeyDownInner,
     value: useText,
@@ -40090,4 +40096,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.1b1bf9d6.iframe.bundle.js.map
+//# sourceMappingURL=main.444329a2.iframe.bundle.js.map
