@@ -4,7 +4,7 @@ import { getDataEditorTheme } from "../src/common/styles";
 import type { DataGridSearchProps } from "../src/data-grid-search/data-grid-search";
 import { CellRenderers } from "../src/data-grid/cells";
 import type { GetCellRendererCallback } from "../src/data-grid/cells/cell-types";
-import type { CellArray } from "../src/data-grid/data-grid-types";
+import type { CellArray, CustomCell } from "../src/data-grid/data-grid-types";
 import { useColumnSizer } from "../src/data-editor/use-column-sizer";
 
 const COLUMNS: GridColumn[] = [
@@ -77,6 +77,13 @@ const theme = getDataEditorTheme();
 
 const abortController = new AbortController();
 
+const SINGLE_COLUMN = [
+    {
+        title: "A",
+        id: "ColumnA",
+    },
+];
+
 const getCellRenderer: GetCellRendererCallback = cell => {
     if (cell.kind === GridCellKind.Custom) return undefined;
     return CellRenderers[cell.kind] as any;
@@ -107,6 +114,50 @@ describe("use-column-sizer", () => {
         // Keep in sync with the `displayData` up there.
         expect(columnA?.width).toBe(32);
         expect(columnB?.width).toBe(160);
+    });
+
+    //a test to see that it can measure a custom cell
+    it("Measures a custom cell", async () => {
+        const { result } = renderHook(() =>
+            useColumnSizer(
+                SINGLE_COLUMN,
+                1000,
+                (selection: Rectangle): CellArray => {
+                    const r: GridCell[][] = [];
+
+                    for (let y = selection.y; y < selection.y + selection.height; y++) {
+                        const row: GridCell[] = [];
+                        for (let x = selection.x; x < selection.x + selection.width; x++) {
+                            const data = `${x} ${y}`;
+                            row.push({
+                                allowOverlay: false,
+                                kind: GridCellKind.Custom,
+                                data,
+                                copyData: data,
+                            });
+                        }
+                        r.push(row);
+                    }
+
+                    return r;
+                },
+                400,
+                20,
+                500,
+                theme,
+                () => {
+                    return {
+                        draw: () => true,
+                        kind: GridCellKind.Custom,
+                        measure: () => 212,
+                        isMatch: (_cell: CustomCell): _cell is CustomCell => true,
+                    } as any;
+                },
+                abortController
+            )
+        );
+
+        expect(result.current[0].width).toBe(212);
     });
 
     it("Measures the last row", async () => {
