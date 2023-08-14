@@ -16641,8 +16641,8 @@ class ClickOutsideContainer extends react.PureComponent {
   }
 
   componentWillUnmount() {
-    document.removeEventListener("mousedown", this.clickOutside);
-    document.removeEventListener("contextmenu", this.clickOutside);
+    document.removeEventListener("mousedown", this.clickOutside, true);
+    document.removeEventListener("contextmenu", this.clickOutside, true);
   }
 
   render() {
@@ -29176,8 +29176,8 @@ var ClickOutsideContainer = class extends react__WEBPACK_IMPORTED_MODULE_0__.Pur
   }
 
   componentWillUnmount() {
-    document.removeEventListener("mousedown", this.clickOutside);
-    document.removeEventListener("contextmenu", this.clickOutside);
+    document.removeEventListener("mousedown", this.clickOutside, true);
+    document.removeEventListener("contextmenu", this.clickOutside, true);
   }
 
   render() {
@@ -40111,4 +40111,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.d928c1e5.iframe.bundle.js.map
+//# sourceMappingURL=main.48b124df.iframe.bundle.js.map
