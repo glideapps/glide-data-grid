@@ -78,15 +78,21 @@ export function useColumnSizer(
     getCellsForSelectionRef.current = getCellsForSelection;
     themeRef.current = theme;
 
-    const [ctx] = React.useState(() => {
-        if (typeof window === "undefined") return null;
+    const [canvas, ctx] = React.useMemo(() => {
+        if (typeof window === "undefined") return [null, null];
         const offscreen = document.createElement("canvas");
         offscreen.style["display"] = "none";
         offscreen.style["opacity"] = "0";
         offscreen.style["position"] = "fixed";
-        document.documentElement.append(offscreen);
-        return offscreen.getContext("2d", { alpha: false });
-    });
+        return [offscreen, offscreen.getContext("2d", { alpha: false })];
+    }, []);
+
+    React.useLayoutEffect(() => {
+        if (canvas) document.documentElement.append(canvas);
+        return () => {
+            canvas?.remove();
+        };
+    }, [canvas]);
 
     const memoMap = React.useRef<Record<string, number>>({});
 
