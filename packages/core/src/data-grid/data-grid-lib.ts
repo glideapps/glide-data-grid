@@ -1001,10 +1001,11 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
         for (const rectInfo of renderBoxes) {
             const rx = Math.floor(rectInfo.x);
             const rw = Math.floor(rectInfo.width);
+            const outerMiddleWidth = rw - (outerSideWidth - outerPadding) * 2
             ctx.imageSmoothingEnabled = false;
 
             ctx.drawImage(el, 0, 0, sideWidth, height, rx - outerPadding, y, outerSideWidth, h);
-            if (rectInfo.width > sideWidth * 2)
+            if (outerMiddleWidth > 0)
                 ctx.drawImage(
                     el,
                     sideWidth,
@@ -1013,7 +1014,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
                     height,
                     rx + (outerSideWidth - outerPadding),
                     y,
-                    rw - (outerSideWidth - outerPadding) * 2,
+                    outerMiddleWidth,
                     h
                 );
             ctx.drawImage(
