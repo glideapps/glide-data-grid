@@ -132,6 +132,7 @@ export function useColumnSizer(
                 }
             }
             lastColumns.current = columns;
+            console.log("Setting selection data");
             setSelectionData(toSet);
         };
         void fn();
