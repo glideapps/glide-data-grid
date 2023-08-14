@@ -20259,10 +20259,10 @@ const DataEditorImpl = (p, forwardedRef) => {
         if (r === undefined) return undefined;
 
         if (r.kind === data_grid_types/* GridCellKind.Custom */.p6.Custom) {
-          var _r$onPaste;
+          var _onPaste, _ref2;
 
           (0,support/* assert */.hu)(inner.kind === data_grid_types/* GridCellKind.Custom */.p6.Custom);
-          const newVal = (_r$onPaste = r.onPaste) === null || _r$onPaste === void 0 ? void 0 : _r$onPaste.call(r, toPaste, inner);
+          const newVal = (_onPaste = (_ref2 = r).onPaste) === null || _onPaste === void 0 ? void 0 : _onPaste.call(_ref2, toPaste, inner.data);
           if (newVal === undefined) return undefined;
           return {
             location: target,
@@ -20271,9 +20271,9 @@ const DataEditorImpl = (p, forwardedRef) => {
             }
           };
         } else {
-          var _r$onPaste2;
+          var _r$onPaste;
 
-          const newVal = (_r$onPaste2 = r.onPaste) === null || _r$onPaste2 === void 0 ? void 0 : _r$onPaste2.call(r, toPaste, inner);
+          const newVal = (_r$onPaste = r.onPaste) === null || _r$onPaste === void 0 ? void 0 : _r$onPaste.call(r, toPaste, inner);
           if (newVal === undefined) return undefined;
           (0,support/* assert */.hu)(newVal.kind === inner.kind);
           return {
@@ -20358,10 +20358,10 @@ const DataEditorImpl = (p, forwardedRef) => {
 
       do {
         if (onPaste === undefined) {
-          var _ref2, _text, _data;
+          var _ref3, _text, _data;
 
           const cellData = getMangledCellContent(target);
-          const newVal = pasteToCell(cellData, target, (_ref2 = (_text = text) !== null && _text !== void 0 ? _text : (_data = data) === null || _data === void 0 ? void 0 : _data.map(r => r.join("\t")).join("\t")) !== null && _ref2 !== void 0 ? _ref2 : "");
+          const newVal = pasteToCell(cellData, target, (_ref3 = (_text = text) !== null && _text !== void 0 ? _text : (_data = data) === null || _data === void 0 ? void 0 : _data.map(r => r.join("\t")).join("\t")) !== null && _ref3 !== void 0 ? _ref3 : "");
 
           if (newVal !== undefined) {
             editList.push(newVal);
@@ -39530,7 +39530,7 @@ var DataEditorImpl = (p, forwardedRef) => {
 
         if (r.kind === GridCellKind.Custom) {
           assert(inner.kind === GridCellKind.Custom);
-          const newVal = (_a3 = r.onPaste) == null ? void 0 : _a3.call(r, toPaste, inner);
+          const newVal = (_a3 = r.onPaste) == null ? void 0 : _a3.call(r, toPaste, inner.data);
           if (newVal === void 0) return void 0;
           return {
             location: target2,
@@ -40090,4 +40090,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.f73b0eee.iframe.bundle.js.map
+//# sourceMappingURL=main.1b1bf9d6.iframe.bundle.js.map
