@@ -1884,6 +1884,61 @@ describe("data-editor", () => {
         );
     });
 
+    test("Paste custom cell does not crash", async () => {
+        jest.useFakeTimers();
+
+        // eslint-disable-next-line unicorn/consistent-function-scoping
+        const alwaysCustomCell = (_cell: Item): GridCell => {
+            return {
+                kind: GridCellKind.Custom,
+                allowOverlay: true,
+                data: "custom-cell-data",
+                copyData: "custom-cell-copy-data",
+            };
+        };
+
+        const spy = jest.fn();
+
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                getCellContent={alwaysCustomCell}
+                customRenderers={[
+                    {
+                        kind: GridCellKind.Custom,
+                        draw: () => true,
+                        onPaste: spy,
+                        isMatch: (_cell: CustomCell): _cell is CustomCell => true,
+                    },
+                ]}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.paste(window);
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
+        await new Promise(r => window.setTimeout(r, 10));
+
+        expect(spy).toBeCalledWith(expect.anything(), "custom-cell-data");
+    });
+
     test("onCellsEdited blocks onCellEdited", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
