@@ -15087,7 +15087,7 @@ function tryParse(val) {
   if (typeof val === "number") return val;
 
   if (val.length > 0) {
-    const x = parseFloat(val);
+    const x = Number(val);
 
     if (!isNaN(x)) {
       val = x;
@@ -40113,4 +40113,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.70dca856.iframe.bundle.js.map
+//# sourceMappingURL=main.fe3cea95.iframe.bundle.js.map
