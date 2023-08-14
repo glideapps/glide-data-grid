@@ -17431,17 +17431,22 @@ function useColumnSizer(columns, rows, getCellsForSelection, clientWidth, minCol
   rowsRef.current = rows;
   getCellsForSelectionRef.current = getCellsForSelection;
   themeRef.current = theme;
-  const [ctx] = react.useState(() => {
-    if (typeof window === "undefined") return null;
+  const [canvas, ctx] = react.useMemo(() => {
+    if (typeof window === "undefined") return [null, null];
     const offscreen = document.createElement("canvas");
     offscreen.style["display"] = "none";
     offscreen.style["opacity"] = "0";
     offscreen.style["position"] = "fixed";
-    document.documentElement.append(offscreen);
-    return offscreen.getContext("2d", {
+    return [offscreen, offscreen.getContext("2d", {
       alpha: false
-    });
-  });
+    })];
+  }, []);
+  react.useLayoutEffect(() => {
+    if (canvas) document.documentElement.append(canvas);
+    return () => {
+      canvas === null || canvas === void 0 ? void 0 : canvas.remove();
+    };
+  }, [canvas]);
   const memoMap = react.useRef({});
   const lastColumns = react.useRef();
   const [selectedData, setSelectionData] = react.useState();
@@ -35998,17 +36003,22 @@ function useColumnSizer(columns, rows, getCellsForSelection, clientWidth, minCol
   rowsRef.current = rows;
   getCellsForSelectionRef.current = getCellsForSelection;
   themeRef.current = theme;
-  const [ctx] = react__WEBPACK_IMPORTED_MODULE_0__.useState(() => {
-    if (typeof window === "undefined") return null;
+  const [canvas, ctx] = react__WEBPACK_IMPORTED_MODULE_0__.useMemo(() => {
+    if (typeof window === "undefined") return [null, null];
     const offscreen = document.createElement("canvas");
     offscreen.style["display"] = "none";
     offscreen.style["opacity"] = "0";
     offscreen.style["position"] = "fixed";
-    document.documentElement.append(offscreen);
-    return offscreen.getContext("2d", {
+    return [offscreen, offscreen.getContext("2d", {
       alpha: false
-    });
-  });
+    })];
+  }, []);
+  react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect(() => {
+    if (canvas) document.documentElement.append(canvas);
+    return () => {
+      canvas == null ? void 0 : canvas.remove();
+    };
+  }, [canvas]);
   const memoMap = react__WEBPACK_IMPORTED_MODULE_0__.useRef({});
   const lastColumns = react__WEBPACK_IMPORTED_MODULE_0__.useRef();
   const [selectedData, setSelectionData] = react__WEBPACK_IMPORTED_MODULE_0__.useState();
@@ -40096,4 +40106,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.444329a2.iframe.bundle.js.map
+//# sourceMappingURL=main.affb1997.iframe.bundle.js.map
