@@ -5,7 +5,6 @@ import type { GetCellRendererCallback } from "../data-grid/cells/cell-types";
 import {
     CellArray,
     GridCell,
-    GridCellKind,
     GridColumn,
     InnerGridColumn,
     isSizedGridColumn,
@@ -22,7 +21,7 @@ function measureCell(
     getCellRenderer: GetCellRendererCallback
 ): number {
     const r = getCellRenderer(cell);
-    return ('measure' in r && r?.measure?.(ctx, cell, theme)) ?? defaultSize;
+    return r?.measure?.(ctx, cell, theme) ?? defaultSize;
 }
 
 export function measureColumn(
