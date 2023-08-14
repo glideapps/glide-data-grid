@@ -13,7 +13,7 @@ export default class ClickOutsideContainer extends React.PureComponent<Props> {
     }
 
     public componentWillUnmount() {
-        document.addEventListener("touchend", this.clickOutside, true);
+        document.removeEventListener("touchend", this.clickOutside, true);
         document.removeEventListener("mousedown", this.clickOutside, true);
         document.removeEventListener("contextmenu", this.clickOutside, true);
     }
