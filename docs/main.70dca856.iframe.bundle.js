@@ -27016,7 +27016,12 @@ const DataGrid = (p, forwardedRef) => {
   const hoveredRef = react.useRef();
   const onMouseMoveImpl = react.useCallback(ev => {
     const canvas = ref.current;
-    if (canvas === null) return;
+    const eventTarget = eventTargetRef === null || eventTargetRef === void 0 ? void 0 : eventTargetRef.current;
+
+    if (canvas === null || ev.target !== canvas && ev.target !== eventTarget) {
+      return;
+    }
+
     const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
 
     if (!isSameItem(args, hoveredRef.current)) {
@@ -34220,7 +34225,12 @@ var DataGrid = (p, forwardedRef) => {
     var _a2;
 
     const canvas = ref.current;
-    if (canvas === null) return;
+    const eventTarget = eventTargetRef == null ? void 0 : eventTargetRef.current;
+
+    if (canvas === null || ev.target !== canvas && ev.target !== eventTarget) {
+      return;
+    }
+
     const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
 
     if (!isSameItem(args, hoveredRef.current)) {
@@ -40103,4 +40113,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.0af05e9e.iframe.bundle.js.map
+//# sourceMappingURL=main.70dca856.iframe.bundle.js.map
