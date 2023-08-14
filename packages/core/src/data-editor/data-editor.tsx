@@ -3042,7 +3042,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (r === undefined) return undefined;
                     if (r.kind === GridCellKind.Custom) {
                         assert(inner.kind === GridCellKind.Custom);
-                        const newVal = (r as unknown as CustomRenderer<CustomCell<any>>) .onPaste?.(toPaste, inner.data);
+                        const newVal = (r as unknown as CustomRenderer<CustomCell<any>>).onPaste?.(toPaste, inner.data);
                         if (newVal === undefined) return undefined;
                         return {
                             location: target,
