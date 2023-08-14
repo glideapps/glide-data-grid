@@ -23332,9 +23332,10 @@ function drawDrilldownCell(args, data) {
     for (const rectInfo of renderBoxes) {
       const rx = Math.floor(rectInfo.x);
       const rw = Math.floor(rectInfo.width);
+      const outerMiddleWidth = rw - (outerSideWidth - outerPadding) * 2;
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(el, 0, 0, sideWidth, height, rx - outerPadding, y, outerSideWidth, h);
-      if (rectInfo.width > sideWidth * 2) ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + (outerSideWidth - outerPadding), y, rw - (outerSideWidth - outerPadding) * 2, h);
+      if (outerMiddleWidth > 0) ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + (outerSideWidth - outerPadding), y, outerMiddleWidth, h);
       ctx.drawImage(el, width - sideWidth, 0, sideWidth, height, rx + rw - (outerSideWidth - outerPadding), y, outerSideWidth, h);
       ctx.imageSmoothingEnabled = true;
     }
@@ -31058,9 +31059,10 @@ function drawDrilldownCell(args, data) {
     for (const rectInfo of renderBoxes) {
       const rx = Math.floor(rectInfo.x);
       const rw = Math.floor(rectInfo.width);
+      const outerMiddleWidth = rw - (outerSideWidth - outerPadding) * 2;
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(el, 0, 0, sideWidth, height, rx - outerPadding, y, outerSideWidth, h);
-      if (rectInfo.width > sideWidth * 2) ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + (outerSideWidth - outerPadding), y, rw - (outerSideWidth - outerPadding) * 2, h);
+      if (outerMiddleWidth > 0) ctx.drawImage(el, sideWidth, 0, middleWidth, height, rx + (outerSideWidth - outerPadding), y, outerMiddleWidth, h);
       ctx.drawImage(el, width - sideWidth, 0, sideWidth, height, rx + rw - (outerSideWidth - outerPadding), y, outerSideWidth, h);
       ctx.imageSmoothingEnabled = true;
     }
@@ -40106,4 +40108,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.affb1997.iframe.bundle.js.map
+//# sourceMappingURL=main.7be57179.iframe.bundle.js.map
