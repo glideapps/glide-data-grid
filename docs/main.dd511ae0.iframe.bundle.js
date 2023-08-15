@@ -16660,6 +16660,10 @@ class ClickOutsideContainer extends react.PureComponent {
     this.wrapperRef = react.createRef();
 
     this.clickOutside = event => {
+      if (this.props.isOutsideClick && !this.props.isOutsideClick(event)) {
+        return;
+      }
+
       if (this.wrapperRef.current !== null && !this.wrapperRef.current.contains(event.target)) {
         let node = event.target;
 
@@ -16689,6 +16693,7 @@ class ClickOutsideContainer extends react.PureComponent {
   render() {
     const {
       onClickOutside,
+      isOutsideClick,
       ...rest
     } = this.props;
     return react.createElement("div", _extends({}, rest, {
@@ -16813,7 +16818,8 @@ const DataGridOverlayEditor = p => {
     cell,
     validateCell,
     getCellRenderer,
-    provideEditor
+    provideEditor,
+    isOutsideClick
   } = p;
   const [tempValue, setTempValueRaw] = react.useState(forceEditMode ? content : undefined);
   const lastValueRef = react.useRef(tempValue !== null && tempValue !== void 0 ? tempValue : content);
@@ -16947,7 +16953,8 @@ const DataGridOverlayEditor = p => {
   }, react.createElement(ClickOutsideContainer, {
     style: (0,styles/* makeCSSStyle */.be)(theme),
     className: className,
-    onClickOutside: onClickOutside
+    onClickOutside: onClickOutside,
+    isOutsideClick: isOutsideClick
   }, react.createElement(DataGridOverlayEditorStyle, {
     ref: ref,
     id: id,
@@ -18429,7 +18436,8 @@ const DataEditorImpl = (p, forwardedRef) => {
     rowHeight: rowHeightIn = 34,
     headerHeight: headerHeightIn = 36,
     groupHeaderHeight: groupHeaderHeightIn = headerHeightIn,
-    theme: themeIn
+    theme: themeIn,
+    isOutsideClick
   } = p;
   const minColumnWidth = Math.max(minColumnWidthIn, 20);
   const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
@@ -20843,7 +20851,8 @@ const DataEditorImpl = (p, forwardedRef) => {
     provideEditor: provideEditor,
     imageEditorOverride: imageEditorOverride,
     onFinishEditing: onFinishEditing,
-    markdownDivCreateNode: markdownDivCreateNode
+    markdownDivCreateNode: markdownDivCreateNode,
+    isOutsideClick: isOutsideClick
   }))));
 };
 
@@ -29198,6 +29207,10 @@ var ClickOutsideContainer = class extends react__WEBPACK_IMPORTED_MODULE_0__.Pur
     this.wrapperRef = react__WEBPACK_IMPORTED_MODULE_0__.createRef();
 
     this.clickOutside = event => {
+      if (this.props.isOutsideClick && !this.props.isOutsideClick(event)) {
+        return;
+      }
+
       if (this.wrapperRef.current !== null && !this.wrapperRef.current.contains(event.target)) {
         let node = event.target;
 
@@ -29227,6 +29240,7 @@ var ClickOutsideContainer = class extends react__WEBPACK_IMPORTED_MODULE_0__.Pur
   render() {
     const {
       onClickOutside,
+      isOutsideClick,
       ...rest
     } = this.props;
     return react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { ...rest,
@@ -29712,7 +29726,8 @@ var DataGridOverlayEditor = p => {
     cell,
     validateCell,
     getCellRenderer,
-    provideEditor
+    provideEditor,
+    isOutsideClick
   } = p;
   const [tempValue, setTempValueRaw] = react__WEBPACK_IMPORTED_MODULE_0__.useState(forceEditMode ? content : void 0);
   const lastValueRef = react__WEBPACK_IMPORTED_MODULE_0__.useRef(tempValue != null ? tempValue : content);
@@ -29846,7 +29861,8 @@ var DataGridOverlayEditor = p => {
   }, react__WEBPACK_IMPORTED_MODULE_0__.createElement(ClickOutsideContainer, {
     style: makeCSSStyle(theme),
     className,
-    onClickOutside
+    onClickOutside,
+    isOutsideClick
   }, react__WEBPACK_IMPORTED_MODULE_0__.createElement(DataGridOverlayEditorStyle, {
     ref,
     id,
@@ -37748,7 +37764,8 @@ var DataEditorImpl = (p, forwardedRef) => {
     rowHeight: rowHeightIn = 34,
     headerHeight: headerHeightIn = 36,
     groupHeaderHeight: groupHeaderHeightIn = headerHeightIn,
-    theme: themeIn
+    theme: themeIn,
+    isOutsideClick
   } = p;
   const minColumnWidth = Math.max(minColumnWidthIn, 20);
   const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
@@ -40130,7 +40147,8 @@ var DataEditorImpl = (p, forwardedRef) => {
     provideEditor,
     imageEditorOverride,
     onFinishEditing,
-    markdownDivCreateNode
+    markdownDivCreateNode,
+    isOutsideClick
   })));
 };
 
@@ -40160,4 +40178,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.ef611ef9.iframe.bundle.js.map
+//# sourceMappingURL=main.dd511ae0.iframe.bundle.js.map
