@@ -1912,14 +1912,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (gridSelection.current === undefined) return;
             const v: EditListItem[] = [];
             const r = gridSelection.current.range;
-            let selectedCells;
+            let selectedCells: CellArray | undefined;
             if (onFill !== undefined && getCellsForSelection !== undefined) {
-                let thunk = getCellsForSelection(r, abortControllerRef.current.signal);
-                if (typeof thunk !== "object") {
-                    selectedCells = await thunk();
-                } else {
-                    selectedCells = thunk;
-                }
+                const thunk = getCellsForSelection(r, abortControllerRef.current.signal);
+                selectedCells = typeof thunk !== "object" ? (await thunk()) : thunk;
             }
             for (let x = 0; x < r.width; x++) {
                 const fillCol = x + r.x;
@@ -1951,7 +1947,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }))
             );
         },
-        [getMangledCellContent, gridSelection, mangledOnCellsEdited, onFill]
+        [getCellsForSelection, getMangledCellContent, gridSelection, mangledOnCellsEdited, onFill, rowMarkerOffset]
     );
 
     const isPrevented = React.useRef(false);
@@ -2021,7 +2017,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (isOutside) return;
 
             if (mouse?.fillHandle === true && gridSelection.current !== undefined) {
-                fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
+                void fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
                 return;
             }
 
@@ -2828,7 +2824,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     gridSelection.current.range.height > 1
                 ) {
                     // ctrl/cmd + d
-                    fillDown(false);
+                    void fillDown(false);
                     cancel();
                 } else if (
                     keybindings.rightFill &&
