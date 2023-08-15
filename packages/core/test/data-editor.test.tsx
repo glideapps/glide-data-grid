@@ -11,7 +11,7 @@ import {
     isSizedGridColumn,
     Item,
 } from "../src";
-import type { CustomCell, SizedGridColumn } from "../src/data-grid/data-grid-types";
+import type { CustomCell, GridKeyEventArgs, SizedGridColumn } from "../src/data-grid/data-grid-types";
 import type { DataEditorRef } from "../src/data-editor/data-editor";
 import { assert } from "../src/common/support";
 
@@ -702,6 +702,38 @@ describe("data-editor", () => {
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1]);
+    });
+
+    test("keyDown and keyUp events include the cell location", async () => {
+        let keyDownEvent: GridKeyEventArgs | undefined;
+        let keyUpEvent: GridKeyEventArgs | undefined;
+        const keyDown = (e: GridKeyEventArgs) => { keyDownEvent = e; };
+        const keyUp = (e: GridKeyEventArgs) => { keyUpEvent = e; };
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onKeyDown={keyDown} onKeyUp={keyUp} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: " ",
+        });
+
+        fireEvent.keyUp(canvas, {
+            key: " ",
+        });
+
+        jest.runAllTimers();
+
+        expect(keyDownEvent?.location).toEqual({"col": 1, "row": 1});
+        expect(keyUpEvent?.location).toEqual({"col": 1, "row": 1});
     });
 
     test("Doesn't emit cell click if mouseDown happened in a different cell", async () => {
