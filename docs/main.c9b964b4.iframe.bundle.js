@@ -20545,7 +20545,7 @@ const DataEditorImpl = (p, forwardedRef) => {
   }, [onGroupHeaderRenamed, renameGroup]);
   const mangledFreezeColumns = Math.min(mangledCols.length, freezeColumns + (hasRowMarkers ? 1 : 0));
   react.useImperativeHandle(forwardedRef, () => ({
-    appendRow: col => appendRow(col + rowMarkerOffset),
+    appendRow: (col, openOverlay) => appendRow(col + rowMarkerOffset, openOverlay),
     updateCells: damageList => {
       var _gridRef$current11;
 
@@ -39825,7 +39825,7 @@ var DataEditorImpl = (p, forwardedRef) => {
   }, [onGroupHeaderRenamed, renameGroup]);
   const mangledFreezeColumns = Math.min(mangledCols.length, freezeColumns + (hasRowMarkers ? 1 : 0));
   react__WEBPACK_IMPORTED_MODULE_0__.useImperativeHandle(forwardedRef, () => ({
-    appendRow: col => appendRow(col + rowMarkerOffset),
+    appendRow: (col, openOverlay) => appendRow(col + rowMarkerOffset, openOverlay),
     updateCells: damageList => {
       var _a2;
 
@@ -40111,4 +40111,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.48b124df.iframe.bundle.js.map
+//# sourceMappingURL=main.c9b964b4.iframe.bundle.js.map
