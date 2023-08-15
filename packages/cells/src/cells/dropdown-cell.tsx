@@ -5,6 +5,7 @@ import {
     getMiddleCenterBias,
     useTheme,
     GridCellKind,
+    TextCellEntry,
 } from "@glideapps/glide-data-grid";
 import { styled } from "@linaria/react";
 import * as React from "react";
@@ -20,9 +21,8 @@ const CustomMenu: React.FC<CustomMenuProps> = p => {
 
 interface DropdownCellProps {
     readonly kind: "dropdown-cell";
-    readonly value: string;
-    readonly allowedValues: readonly string[];
-    readonly readonly?: boolean;
+    readonly value: string | undefined | null;
+    readonly allowedValues: readonly (string | undefined | null)[];
 }
 
 export type DropdownCell = CustomCell<DropdownCellProps>;
@@ -49,6 +49,14 @@ const PortalWrap = styled.div`
     }
 `;
 
+// This is required since the padding is disabled for this cell type
+// The settings are based on the "pad" settings in the data-grid-overlay-editor-style.tsx
+const ReadOnlyWrap = styled.div`
+    display: "flex";
+    margin: auto 8.5px;
+    padding-bottom: 3px;
+`;
+
 const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
     const { value: cell, onFinishedEditing, initialValue } = p;
     const { allowedValues, value: valueIn } = cell.data;
@@ -67,6 +75,20 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
         [allowedValues]
     );
 
+    if (cell.readonly) {
+        return (
+            <ReadOnlyWrap>
+                <TextCellEntry
+                    highlight={true}
+                    autoFocus={false}
+                    disabled={true}
+                    value={value ?? ""}
+                    onChange={() => undefined}
+                />
+            </ReadOnlyWrap>
+        );
+    }
+
     return (
         <Wrap>
             <Select
@@ -80,6 +102,17 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                         ...base,
                         border: 0,
                         boxShadow: "none",
+                    }),
+                    option: base => ({
+                        ...base,
+                        fontSize: theme.editorFontSize,
+                        fontFamily: theme.fontFamily,
+                        // Add some content in case the option is empty
+                        // so that the option height can be calculated correctly
+                        ":empty::after": {
+                            content: '"&nbsp;"',
+                            visibility: "hidden",
+                        },
                     }),
                 }}
                 theme={t => {
@@ -143,14 +176,23 @@ const renderer: CustomRenderer<DropdownCell> = {
     draw: (args, cell) => {
         const { ctx, theme, rect } = args;
         const { value } = cell.data;
-        ctx.fillStyle = theme.textDark;
-        ctx.fillText(
-            value,
-            rect.x + theme.cellHorizontalPadding,
-            rect.y + rect.height / 2 + getMiddleCenterBias(ctx, theme)
-        );
-
+        if (value) {
+            ctx.fillStyle = theme.textDark;
+            ctx.fillText(
+                value,
+                rect.x + theme.cellHorizontalPadding,
+                rect.y + rect.height / 2 + getMiddleCenterBias(ctx, theme)
+            );
+        }
         return true;
+    },
+    measure: (ctx, cell) => {
+        const { value } = cell.data;
+        if (value) {
+            return ctx.measureText(value).width + 16;
+        } else {
+            return 16;
+        }
     },
     provideEditor: () => ({
         editor: Editor,
