@@ -252,7 +252,7 @@ export interface DataEditorProps extends Props {
     /** Emitted when a cell should be filled. It allows you to override the filled value.
      * @group Events
      */
-    readonly onFill?: (fillValue: ReadWriteGridCell, targetCell: Item, selectedCells?: CellArray) => ReadWriteGridCell | undefined;
+    readonly onFill?: (direction: "down" | "right", fillValue: ReadWriteGridCell, targetCell: Item, selectedCells?: CellArray) => ReadWriteGridCell | undefined;
     /** Used for validating cell values during editing.
      * @group Editing
      * @param cell The cell which is being validated.
@@ -1927,7 +1927,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     const target = [fillCol, fillRow] as const;
                     let actualFillVal = fillVal;
                     if (onFill) {
-                        const mangledFillVal = onFill(fillVal, rowMarkerOffset === 0 ? target : [target[0] - rowMarkerOffset, target[1]], selectedCells);
+                        const mangledFillVal = onFill("down", fillVal, rowMarkerOffset === 0 ? target : [target[0] - rowMarkerOffset, target[1]], selectedCells);
                         if (mangledFillVal !== undefined) {
                             actualFillVal = mangledFillVal;
                         }
@@ -1949,6 +1949,47 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [getCellsForSelection, getMangledCellContent, gridSelection, mangledOnCellsEdited, onFill, rowMarkerOffset]
     );
+
+    const fillRight = React.useCallback(
+        async () => {
+            if (gridSelection.current === undefined) return;
+            const editList: EditListItem[] = [];
+            const r = gridSelection.current.range;
+            let selectedCells: CellArray | undefined;
+            if (onFill !== undefined && getCellsForSelection !== undefined) {
+                const thunk = getCellsForSelection(r, abortControllerRef.current.signal);
+                selectedCells = typeof thunk !== "object" ? (await thunk()) : thunk;
+            }
+            for (let y = 0; y < r.height; y++) {
+                const fillRow = y + r.y;
+                const fillVal = getMangledCellContent([r.x, fillRow]);
+
+                if (isInnerOnlyCell(fillVal) || !isReadWriteCell(fillVal)) continue;
+                for (let x = 1; x < r.width; x++) {
+                    const fillCol = x + r.x;
+                    const target = [fillCol, fillRow] as const;
+                    let actualFillVal = fillVal;
+                    if (onFill) {
+                        const mangledFillVal = onFill("right", fillVal, rowMarkerOffset === 0 ? target : [target[0] - rowMarkerOffset, target[1]], selectedCells);
+                        if (mangledFillVal !== undefined) {
+                            actualFillVal = mangledFillVal;
+                        }
+                    }
+                    editList.push({
+                        location: target,
+                        value: { ...actualFillVal },
+                    });
+                }
+            }
+
+            mangledOnCellsEdited(editList);
+
+            gridRef.current?.damage(
+                editList.map(c => ({
+                    cell: c.location,
+                }))
+            );
+        }, [getCellsForSelection, getMangledCellContent, gridSelection, mangledOnCellsEdited, onFill, rowMarkerOffset]);
 
     const isPrevented = React.useRef(false);
 
@@ -2832,27 +2873,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     gridSelection.current.range.width > 1
                 ) {
                     // ctrl/cmd + r
-                    const editList: EditListItem[] = [];
-                    const r = gridSelection.current.range;
-                    for (let y = 0; y < r.height; y++) {
-                        const fillRow = y + r.y;
-                        const fillVal = getMangledCellContent([r.x, fillRow]);
-                        if (isInnerOnlyCell(fillVal) || !isReadWriteCell(fillVal)) continue;
-                        for (let x = 1; x < r.width; x++) {
-                            const fillCol = x + r.x;
-                            const target = [fillCol, fillRow] as const;
-                            editList.push({
-                                location: target,
-                                value: { ...fillVal },
-                            });
-                        }
-                    }
-                    mangledOnCellsEdited(editList);
-                    gridRef.current?.damage(
-                        editList.map(c => ({
-                            cell: c.location,
-                        }))
-                    );
+                    void fillRight();
                     cancel();
                 } else if (keybindings.pageDown && isHotkey("PageDown", event)) {
                     row += Math.max(1, visibleRegionRef.current.height - 4); // partial cell accounting

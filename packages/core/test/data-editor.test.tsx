@@ -2471,6 +2471,47 @@ describe("data-editor", () => {
         expect(multiSpy).toHaveBeenCalled();
     });
 
+    test("onFill is called when filling down", async () => {
+        const onCellEdited = jest.fn();
+        const onCellsEdited = jest.fn();
+        const onFill = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                keybindings={{ downFill: true }}
+                onCellEdited={onCellEdited}
+                onCellsEdited={onCellsEdited}
+                onFill={onFill}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        sendClick(canvas, {
+            shiftKey: true,
+            clientX: 400, // Col C
+            clientY: 36 + 32 * 6 + 16, // Row 6 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 68,
+            ctrlKey: true,
+        });
+
+        expect(onCellEdited).toHaveBeenCalledTimes(8);
+        expect(onCellsEdited).toHaveBeenCalled();
+        expect(onFill).toHaveBeenCalledTimes(8);
+    });
+
     test("Fill right", async () => {
         const spy = jest.fn();
         const multiSpy = jest.fn();
@@ -2507,6 +2548,47 @@ describe("data-editor", () => {
 
         expect(spy).toHaveBeenCalledTimes(5);
         expect(multiSpy).toHaveBeenCalled();
+    });
+
+    test("onFill is called when filling right", async () => {
+        const onCellEdited = jest.fn();
+        const onCellsEdited = jest.fn();
+        const onFill = jest.fn();
+        jest.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                keybindings={{ rightFill: true }}
+                onCellEdited={onCellEdited}
+                onCellsEdited={onCellsEdited}
+                onFill={onFill}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        sendClick(canvas, {
+            shiftKey: true,
+            clientX: 400, // Col C
+            clientY: 36 + 32 * 6 + 16, // Row 6 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 82,
+            ctrlKey: true,
+        });
+
+        expect(onCellEdited).toHaveBeenCalledTimes(5);
+        expect(onCellsEdited).toHaveBeenCalled();
+        expect(onFill).toHaveBeenCalledTimes(5);
     });
 
     test("Clear selection", async () => {
