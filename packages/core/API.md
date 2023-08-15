@@ -397,7 +397,7 @@ Requests the data grid to scroll to a particular location. If only one direction
 ## appendRow
 
 ```ts
-appendRow: (col: number) => Promise<void>;
+appendRow: (col: number, openOverlay: boolean = true) => Promise<void>;
 ```
 
 Appends a row to the data grid.
