@@ -1158,6 +1158,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     markerKind: rowMarkers === "clickable-number" ? "number" : rowMarkers,
                     row: rowMarkerStartIndex + row,
                     drawHandle: onRowMoved !== undefined,
+                    cursor: rowMarkers === "clickable-number" ? "pointer" : undefined
                 };
             } else if (isTrailing) {
                 //If the grid is empty, we will return text
