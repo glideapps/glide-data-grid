@@ -16292,6 +16292,7 @@ function makeCSSStyle(theme) {
     "--gdg-cell-vertical-padding": `${theme.cellVerticalPadding}px`,
     "--gdg-header-font-style": theme.headerFontStyle,
     "--gdg-base-font-style": theme.baseFontStyle,
+    "--gdg-marker-font-style": theme.markerFontStyle,
     "--gdg-font-family": theme.fontFamily,
     "--gdg-editor-font-size": theme.editorFontSize
   };
@@ -16325,6 +16326,7 @@ const dataEditorBaseTheme = {
   headerIconSize: 18,
   headerFontStyle: "600 13px",
   baseFontStyle: "13px",
+  markerFontStyle: "9px",
   fontFamily: "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
   editorFontSize: "13px",
   lineHeight: 1.4
@@ -18674,7 +18676,8 @@ const DataEditorImpl = (p, forwardedRef) => {
         checked: (gridSelection === null || gridSelection === void 0 ? void 0 : gridSelection.rows.hasIndex(row)) === true,
         markerKind: rowMarkers === "clickable-number" ? "number" : rowMarkers,
         row: rowMarkerStartIndex + row,
-        drawHandle: onRowMoved !== undefined
+        drawHandle: onRowMoved !== undefined,
+        cursor: rowMarkers === "clickable-number" ? "pointer" : undefined
       };
     } else if (isTrailing) {
       var _trailingRowOptions$h, _c$trailingRowOptions;
@@ -23085,6 +23088,7 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle) {
 
   if (markerKind === "number" || markerKind === "both" && !checked) {
     const text = index.toString();
+    const fontStyle = `${theme.markerFontStyle} ${theme.fontFamily}`;
     const start = x + width / 2;
 
     if (markerKind === "both" && hoverAmount !== 0) {
@@ -23092,7 +23096,8 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle) {
     }
 
     ctx.fillStyle = theme.textLight;
-    ctx.fillText(text, start, y + height / 2 + getMiddleCenterBias(ctx, `9px ${theme.fontFamily}`));
+    ctx.font = fontStyle;
+    ctx.fillText(text, start, y + height / 2 + getMiddleCenterBias(ctx, fontStyle));
 
     if (hoverAmount !== 0) {
       ctx.globalAlpha = 1;
@@ -29264,6 +29269,7 @@ function makeCSSStyle(theme) {
     "--gdg-cell-vertical-padding": `${theme.cellVerticalPadding}px`,
     "--gdg-header-font-style": theme.headerFontStyle,
     "--gdg-base-font-style": theme.baseFontStyle,
+    "--gdg-marker-font-style": theme.markerFontStyle,
     "--gdg-font-family": theme.fontFamily,
     "--gdg-editor-font-size": theme.editorFontSize
   };
@@ -29298,6 +29304,7 @@ var dataEditorBaseTheme = {
   headerIconSize: 18,
   headerFontStyle: "600 13px",
   baseFontStyle: "13px",
+  markerFontStyle: "9px",
   fontFamily: "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
   editorFontSize: "13px",
   lineHeight: 1.4
@@ -30813,6 +30820,7 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle) {
 
   if (markerKind === "number" || markerKind === "both" && !checked) {
     const text = index.toString();
+    const fontStyle = `${theme.markerFontStyle} ${theme.fontFamily}`;
     const start = x + width / 2;
 
     if (markerKind === "both" && hoverAmount !== 0) {
@@ -30820,7 +30828,8 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle) {
     }
 
     ctx.fillStyle = theme.textLight;
-    ctx.fillText(text, start, y + height / 2 + getMiddleCenterBias(ctx, `9px ${theme.fontFamily}`));
+    ctx.font = fontStyle;
+    ctx.fillText(text, start, y + height / 2 + getMiddleCenterBias(ctx, fontStyle));
 
     if (hoverAmount !== 0) {
       ctx.globalAlpha = 1;
@@ -37989,7 +37998,8 @@ var DataEditorImpl = (p, forwardedRef) => {
         checked: (gridSelection == null ? void 0 : gridSelection.rows.hasIndex(row)) === true,
         markerKind: rowMarkers === "clickable-number" ? "number" : rowMarkers,
         row: rowMarkerStartIndex + row,
-        drawHandle: onRowMoved !== void 0
+        drawHandle: onRowMoved !== void 0,
+        cursor: rowMarkers === "clickable-number" ? "pointer" : void 0
       };
     } else if (isTrailing) {
       const isFirst = col === rowMarkerOffset;
@@ -40150,4 +40160,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.1cc85f4a.iframe.bundle.js.map
+//# sourceMappingURL=main.ef611ef9.iframe.bundle.js.map
