@@ -26935,8 +26935,7 @@ const DataGrid = (p, forwardedRef) => {
 
     if (ev.target === eventTarget && eventTarget !== null) {
       const bounds = eventTarget.getBoundingClientRect();
-      if (clientX > bounds.left + eventTarget.clientWidth) return;
-      if (clientY > bounds.top + eventTarget.clientHeight) return;
+      if (clientX > bounds.right || clientY > bounds.bottom) return;
     }
 
     const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
@@ -34153,8 +34152,7 @@ var DataGrid = (p, forwardedRef) => {
 
     if (ev.target === eventTarget && eventTarget !== null) {
       const bounds = eventTarget.getBoundingClientRect();
-      if (clientX > bounds.left + eventTarget.clientWidth) return;
-      if (clientY > bounds.top + eventTarget.clientHeight) return;
+      if (clientX > bounds.right || clientY > bounds.bottom) return;
     }
 
     const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
@@ -40178,4 +40176,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.6eefe2d3.iframe.bundle.js.map
+//# sourceMappingURL=main.9eb77bd4.iframe.bundle.js.map
