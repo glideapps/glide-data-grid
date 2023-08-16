@@ -108,8 +108,8 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     }, [tempValue, onFinishEditing]);
 
     const onEditorFinished = React.useCallback(
-        (newValue: GridCell | undefined) => {
-            onFinishEditing(newValue, customMotion.current ?? [0, 0]);
+        (newValue: GridCell | undefined, movement?: readonly [-1 | 0 | 1, -1 | 0 | 1]) => {
+            onFinishEditing(newValue, movement ?? customMotion.current ?? [0, 0]);
             finished.current = true;
         },
         [onFinishEditing]

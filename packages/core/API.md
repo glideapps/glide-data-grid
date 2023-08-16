@@ -506,19 +506,29 @@ onVisibleRegionChanged?: (range: Rectangle) => void;
 ## provideEditor
 
 ```ts
-interface EditorProps {
-    readonly onChange: (newValue: GridCell) => void;
-    readonly onFinishedEditing: (newValue?: GridCell) => void;
+export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComponent<{
+    readonly onChange: (newValue: T) => void;
+    readonly onFinishedEditing: (newValue?: T, movement?: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly isHighlighted: boolean;
-    readonly value: GridCell;
-}
+    readonly value: T;
+    readonly initialValue?: string;
+    readonly validatedSelection?: SelectionRange;
+    readonly imageEditorOverride?: ImageEditorType;
+    readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
+    readonly target: Rectangle;
+    readonly forceEditMode: boolean;
+    readonly isValid?: boolean;
+}>;
 
-type ProvideEditorCallback = (cell: GridCell) =>
-    (React.FunctionComponent<EditorProps> & {
+export type ProvideEditorCallbackResult<T extends InnerGridCell> =
+    | (ProvideEditorComponent<T> & {
           disablePadding?: boolean;
           disableStyling?: boolean;
       })
+    | ObjectEditorCallbackResult<T>
     | undefined;
+
+export type ProvideEditorCallback<T extends InnerGridCell> = (cell: T) => ProvideEditorCallbackResult<T>;
 
 provideEditor?: ProvideEditorCallback<GridCell>;
 ```
