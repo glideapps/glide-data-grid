@@ -16853,10 +16853,10 @@ const DataGridOverlayEditor = p => {
     onFinishEditing(tempValue, [0, 0]);
     finished.current = true;
   }, [tempValue, onFinishEditing]);
-  const onEditorFinished = react.useCallback(newValue => {
-    var _customMotion$current;
+  const onEditorFinished = react.useCallback((newValue, movement) => {
+    var _ref;
 
-    onFinishEditing(newValue, (_customMotion$current = customMotion.current) !== null && _customMotion$current !== void 0 ? _customMotion$current : [0, 0]);
+    onFinishEditing(newValue, (_ref = movement !== null && movement !== void 0 ? movement : customMotion.current) !== null && _ref !== void 0 ? _ref : [0, 0]);
     finished.current = true;
   }, [onFinishEditing]);
   const onKeyDown = react.useCallback(async event => {
@@ -29761,10 +29761,10 @@ var DataGridOverlayEditor = p => {
     onFinishEditing(tempValue, [0, 0]);
     finished.current = true;
   }, [tempValue, onFinishEditing]);
-  const onEditorFinished = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(newValue => {
+  const onEditorFinished = react__WEBPACK_IMPORTED_MODULE_0__.useCallback((newValue, movement) => {
     var _a;
 
-    onFinishEditing(newValue, (_a = customMotion.current) != null ? _a : [0, 0]);
+    onFinishEditing(newValue, (_a = movement != null ? movement : customMotion.current) != null ? _a : [0, 0]);
     finished.current = true;
   }, [onFinishEditing]);
   const onKeyDown = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(async event => {
@@ -40178,4 +40178,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.dd511ae0.iframe.bundle.js.map
+//# sourceMappingURL=main.6eefe2d3.iframe.bundle.js.map
