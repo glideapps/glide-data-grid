@@ -910,8 +910,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
             if (ev.target === eventTarget && eventTarget !== null) {
                 const bounds = eventTarget.getBoundingClientRect();
-                if (clientX > bounds.left + eventTarget.clientWidth) return;
-                if (clientY > bounds.top + eventTarget.clientHeight) return;
+                if (clientX > bounds.right || clientY > bounds.bottom) return;
             }
 
             const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
@@ -1093,13 +1092,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const hoveredRef = React.useRef<GridMouseEventArgs>();
     const onMouseMoveImpl = React.useCallback(
-        (ev: MouseEvent) => {        
-
+        (ev: MouseEvent) => {
             const canvas = ref.current;
             const eventTarget = eventTargetRef?.current;
 
-
-            
             if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) {
                 return;
             }
@@ -1149,6 +1145,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             onMouseMove(args);
         },
         [
+            eventTargetRef,
             getMouseArgsForPosition,
             allowResize,
             fillHandle,

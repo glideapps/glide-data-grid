@@ -711,13 +711,15 @@ export function drawMarkerRowCell(
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
         const text = index.toString();
+        const fontStyle = `${theme.markerFontStyle} ${theme.fontFamily}`;
 
         const start = x + width / 2;
         if (markerKind === "both" && hoverAmount !== 0) {
             ctx.globalAlpha = 1 - hoverAmount;
         }
         ctx.fillStyle = theme.textLight;
-        ctx.fillText(text, start, y + height / 2 + getMiddleCenterBias(ctx, `9px ${theme.fontFamily}`));
+        ctx.font = fontStyle;
+        ctx.fillText(text, start, y + height / 2 + getMiddleCenterBias(ctx, fontStyle));
         if (hoverAmount !== 0) {
             ctx.globalAlpha = 1;
         }

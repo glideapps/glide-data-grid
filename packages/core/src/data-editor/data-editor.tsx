@@ -523,8 +523,8 @@ export interface DataEditorProps extends Props {
      * Determins which keybindings are enabled.
      * @group Editing
      * @defaultValue is
-     
-            {  
+
+            {
                 selectAll: true,
                 selectRow: true,
                 selectColumn: true,
@@ -606,6 +606,14 @@ export interface DataEditorProps extends Props {
     readonly customRenderers?: readonly CustomRenderer<CustomCell<any>>[];
 
     readonly scaleToRem?: boolean;
+
+    /**
+     * Custom predicate function to decide whether the click event occurred outside the grid
+     * Especially used when custom editor is opened with the portal and is outside the grid, but there is no possibility
+     * to add a class "click-outside-ignore"
+     * If this function is supplied and returns false, the click event is ignored
+     */
+    readonly isOutsideClick?: (e: MouseEvent | TouchEvent) => boolean;
 }
 
 type ScrollToFn = (
@@ -627,7 +635,7 @@ export interface DataEditorRef {
      * @param col The column index to focus in the new row.
      * @returns A promise which waits for the append to complete.
      */
-    appendRow: (col: number, openOverlay: boolean) => Promise<void>;
+    appendRow: (col: number, openOverlay?: boolean) => Promise<void>;
     /**
      * Triggers cells to redraw.
      */
@@ -785,6 +793,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         headerHeight: headerHeightIn = 36,
         groupHeaderHeight: groupHeaderHeightIn = headerHeightIn,
         theme: themeIn,
+        isOutsideClick,
     } = p;
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
@@ -1160,6 +1169,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     markerKind: rowMarkers === "clickable-number" ? "number" : rowMarkers,
                     row: rowMarkerStartIndex + row,
                     drawHandle: onRowMoved !== undefined,
+                    cursor: rowMarkers === "clickable-number" ? "pointer" : undefined,
                 };
             } else if (isTrailing) {
                 //If the grid is empty, we will return text
@@ -1454,7 +1464,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             scrollY = bounds.y + bounds.height - sBottom;
                         }
 
-                        if (dir === "vertical" || col < freezeColumns) {
+                        if (dir === "vertical" || (typeof col === "number" && col < freezeColumns)) {
                             scrollX = 0;
                         } else if (dir === "horizontal") {
                             scrollY = 0;
@@ -3383,7 +3393,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     React.useImperativeHandle(
         forwardedRef,
         () => ({
-            appendRow: (col: number) => appendRow(col + rowMarkerOffset),
+            appendRow: (col: number, openOverlay?: boolean) => appendRow(col + rowMarkerOffset, openOverlay),
             updateCells: damageList => {
                 if (rowMarkerOffset !== 0) {
                     damageList = damageList.map(x => ({ cell: [x.cell[0] + rowMarkerOffset, x.cell[1]] }));
@@ -3656,6 +3666,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         imageEditorOverride={imageEditorOverride}
                         onFinishEditing={onFinishEditing}
                         markdownDivCreateNode={markdownDivCreateNode}
+                        isOutsideClick={isOutsideClick}
                     />
                 )}
             </DataEditorContainer>
