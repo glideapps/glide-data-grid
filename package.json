@@ -1,6 +1,6 @@
 {
     "name": "root",
-    "version": "5.2.2-beta2",
+    "version": "5.2.2-beta5",
     "scripts": {
         "start": "npm run storybook",
         "version": "./update-version.sh",
@@ -30,6 +30,7 @@
         "@babel/preset-env": "^7.16.4",
         "@babel/preset-react": "^7.8.3",
         "@babel/preset-typescript": "^7.9.0",
+        "@faker-js/faker": "^7.6.0",
         "@linaria/babel-preset": "^4.1.3",
         "@linaria/core": "^4.1.3",
         "@linaria/esbuild": "^4.1.3",
@@ -49,7 +50,6 @@
         "@testing-library/react-hooks": "^8.0.1",
         "@testing-library/user-event": "^13.5.0",
         "@types/cheerio": "^0.22.30",
-        "@types/faker": "^5.5.8",
         "@types/jest": "^28.1.8",
         "@types/lodash": "^4.14.177",
         "@types/marked": "^4.0.2",
@@ -72,7 +72,6 @@
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-plugin-sonarjs": "^0.13.0",
         "eslint-plugin-unicorn": "^43.0.1",
-        "faker": "^5.5.3",
         "http-server": "^14.1.1",
         "jest-canvas-mock": "^2.3.1",
         "lodash": "^4.17.21",

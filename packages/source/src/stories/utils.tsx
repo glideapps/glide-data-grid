@@ -14,7 +14,7 @@ import {
     Rectangle,
 } from "@glideapps/glide-data-grid";
 
-import faker from "faker";
+import { faker } from "@faker-js/faker";
 
 faker.seed(1337);
 

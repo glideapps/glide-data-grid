@@ -9,7 +9,7 @@ import {
     GridColumn,
     Theme,
 } from "@glideapps/glide-data-grid";
-import faker from "faker";
+import { faker } from "@faker-js/faker";
 import { useCollapsingGroups, useColumnSort, useMoveableColumns } from "..";
 import { useUndoRedo } from "../use-undo-redo";
 import { useMockDataGenerator } from "./utils";

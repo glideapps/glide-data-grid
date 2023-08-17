@@ -31,6 +31,8 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
                     value={value.data}
                     fixedDecimals={value.fixedDecimals}
                     allowNegative={value.allowNegative}
+                    thousandSeparator={value.thousandSeparator}
+                    decimalSeparator={value.decimalSeparator}
                     validatedSelection={validatedSelection}
                     onChange={x =>
                         onChange({

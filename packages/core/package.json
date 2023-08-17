@@ -1,6 +1,6 @@
 {
     "name": "@glideapps/glide-data-grid",
-    "version": "5.2.2-beta2",
+    "version": "5.2.2-beta5",
     "description": "React data grid for beautifully displaying and editing large amounts of data with amazing performance.",
     "sideEffects": [
         "**/*.css"
@@ -12,6 +12,7 @@
     "types": "dist/ts/index.d.ts",
     "exports": {
         ".": {
+            "types": "./dist/ts/index.d.ts",
             "import": "./dist/js/index.js",
             "require": "./dist/cjs/index.js"
         },

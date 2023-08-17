@@ -10,7 +10,7 @@ import {
 import { GridCellKind } from "../../data-grid/data-grid-types";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
 import range from "lodash/range.js";
-import faker from "faker";
+import { faker } from "@faker-js/faker";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -53,7 +53,7 @@ export const WrappingText: React.VFC<{
                     kind: GridCellKind.Text,
                     allowOverlay: true,
                     displayData: `${row},\n${suffix[row % suffix.length]}`,
-                    data: `${row}, ${suffix}`,
+                    data: `${row}, \n${suffix}`,
                     allowWrapping: true,
                     contentAlign: p.alignment,
                 };
