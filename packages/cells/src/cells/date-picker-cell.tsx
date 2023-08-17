@@ -36,10 +36,10 @@ export interface DatePickerCellProps {
     readonly timezoneOffset?: number;
     /* Minimum value that can be entered by the user.
     This is passed to the min attribute of the HTML input element. */
-    readonly min?: string;
+    readonly min?: string | Date;
     /* Maximum value that can be entered by the user.
     This is passed to the max attribute of the HTML input element. */
-    readonly max?: string;
+    readonly max?: string | Date;
     /* Granularity that the date must adhere. 
     This is passed to the step attribute of the HTML input element. */
     readonly step?: string;
@@ -51,13 +51,14 @@ export const formatValueForHTMLInput = (dateKind: DateKind, date: Date | undefin
     if (date === undefined || date === null) {
         return "";
     }
+    const isoDate = date.toISOString();
     switch (dateKind) {
         case "date":
-            return date.toISOString().split("T")[0];
+            return isoDate.split("T")[0];
         case "datetime-local":
-            return date.toISOString().replace("Z", "");
+            return isoDate.replace("Z", "");
         case "time":
-            return date.toISOString().split("T")[1].replace("Z", "");
+            return isoDate.split("T")[1].replace("Z", "");
         default:
             throw new Error(`Unknown date kind ${dateKind}`);
     }
@@ -67,7 +68,14 @@ export type DatePickerCell = CustomCell<DatePickerCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
     const cellData = cell.value.data;
-    const { min, max, step, format, displayDate } = cellData;
+    const { format, displayDate } = cellData;
+    const step =
+        cellData.step !== undefined && !Number.isNaN(Number(cellData.step)) ? Number(cellData.step) : undefined;
+
+    const minValue = cellData.min instanceof Date ? formatValueForHTMLInput(format, cellData.min) : cellData.min;
+
+    const maxValue = cellData.max instanceof Date ? formatValueForHTMLInput(format, cellData.max) : cellData.max;
+
     let date = cellData.date;
     // Convert timezone offset to milliseconds
     const timezoneOffsetMs = cellData.timezoneOffset ? cellData.timezoneOffset * 60 * 1000 : 0;
@@ -94,8 +102,8 @@ const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
             required
             type={format}
             defaultValue={value}
-            min={min}
-            max={max}
+            min={minValue}
+            max={maxValue}
             step={step}
             autoFocus={true}
             onChange={event => {

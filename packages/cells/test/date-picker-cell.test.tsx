@@ -85,7 +85,7 @@ describe("editor", () => {
 
     it("contains max, min, step when passed in", () => {
         const min = "2018-01-01";
-        const max = "2018-12-31";
+        const max = new Date("2018-12-31");
         const step = ".001";
         const extraProps = {
             data: {
@@ -108,7 +108,7 @@ describe("editor", () => {
         // @ts-ignore
         expect(input.min === min);
         // @ts-ignore
-        expect(input.max === max);
+        expect(input.max === "2018-12-31");
         // @ts-ignore
         expect(input.step === step);
     });
