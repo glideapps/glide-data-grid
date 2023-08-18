@@ -1168,8 +1168,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             if (canvas === null) return;
 
             let bounds: Rectangle | undefined;
+            let location: Item | undefined = undefined;
             if (selection.current !== undefined) {
                 bounds = getBoundsForItem(canvas, selection.current.cell[0], selection.current.cell[1]);
+                location = selection.current.cell;
             }
 
             onKeyDown?.({
@@ -1184,6 +1186,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 key: event.key,
                 keyCode: event.keyCode,
                 rawEvent: event,
+                location,
             });
         },
         [onKeyDown, selection, getBoundsForItem]
@@ -1195,8 +1198,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             if (canvas === null) return;
 
             let bounds: Rectangle | undefined;
+            let location: Item | undefined = undefined;
             if (selection.current !== undefined) {
                 bounds = getBoundsForItem(canvas, selection.current.cell[0], selection.current.cell[1]);
+                location = selection.current.cell;
             }
 
             onKeyUp?.({
@@ -1211,6 +1216,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 key: event.key,
                 keyCode: event.keyCode,
                 rawEvent: event,
+                location,
             });
         },
         [onKeyUp, selection, getBoundsForItem]
@@ -1556,7 +1562,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                         row >= range.y &&
                                         row < range.y + range.height;
                                     const id = `glide-cell-${col}-${row}`;
-                                    const cellContent = getCellContent([col, row], true);
+                                    const location: Item = [col, row];
+                                    const cellContent = getCellContent(location, true);
                                     return (
                                         <td
                                             key={key}
@@ -1583,6 +1590,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                                     shiftKey: false,
                                                     altKey: false,
                                                     rawEvent: undefined,
+                                                    location,
                                                 });
                                             }}
                                             onFocusCapture={e => {
@@ -1592,8 +1600,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                                         lastFocusedSubdomNode.current?.[1] === row)
                                                 )
                                                     return;
-                                                lastFocusedSubdomNode.current = [col, row];
-                                                return onCellFocused?.([col, row]);
+                                                lastFocusedSubdomNode.current = location;
+                                                return onCellFocused?.(location);
                                             }}
                                             ref={focused ? focusElement : undefined}
                                             tabIndex={-1}>
