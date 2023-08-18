@@ -3944,6 +3944,40 @@ describe("data-editor", () => {
         expect(spy).not.toHaveBeenCalled();
     });
 
+    test("Dragging header disables vertical autoscroll", async () => {
+        const spy = Element.prototype.scrollBy as jest.Mock;
+        spy.mockClear();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor {...basicProps} />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        fireEvent.mouseDown(canvas, {
+            clientX: 300, // Col B
+            clientY: 16, // Header
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 300, // Col B
+            clientY: 0,
+        });
+
+        await new Promise(r => window.setTimeout(r, 100));
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 300, // Col B
+            clientY: 0,
+        });
+
+        expect(spy).not.toHaveBeenCalled();
+    });
+
     test("Use fill handle", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
