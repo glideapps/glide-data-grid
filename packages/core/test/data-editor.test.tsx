@@ -477,6 +477,37 @@ describe("data-editor", () => {
         expect(spySelection).not.toHaveBeenCalled();
     });
 
+    test("middle click does not change selection", async () => {
+        const spySelection = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                gridSelection={{
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
+                }}
+                onGridSelectionChange={spySelection}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+            button: 1,
+        });
+
+        expect(spySelection).not.toHaveBeenCalled();
+    });
+
     test("emits contextmenu for cell but does not change selection if already selected - current.cell", async () => {
         const spy = jest.fn();
         const spySelection = jest.fn();
@@ -3201,6 +3232,41 @@ describe("data-editor", () => {
                 current: { cell: [1, 2], range: { height: 11, width: 3, x: 1, y: 2 }, rangeStack: [] },
             })
         );
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 600, // Col B
+            clientY: 36 + 32 * 12 + 16, // Row 2
+        });
+    });
+
+    test.only("Select range with mouse middle click fails", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            button: 0,
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2
+        });
+
+        fireEvent.mouseDown(canvas, {
+            button: 1,
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2
+        });
+
+        spy.mockClear();
+        fireEvent.mouseMove(canvas, {
+            clientX: 600, // Col B
+            clientY: 36 + 32 * 12 + 16, // Row 2
+        });
+
+        expect(spy).not.toBeCalled();
 
         fireEvent.mouseUp(canvas, {
             clientX: 600, // Col B

@@ -1821,12 +1821,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
     const isActivelyDraggingHeader = React.useRef(false);
-    const lastMouseSelectLocation = React.useRef<[number, number]>();
+    const lastMouseSelectLocation = React.useRef<readonly [number, number]>();
     const touchDownArgs = React.useRef(visibleRegion);
     const mouseDownData =
         React.useRef<{
             wasDoubleClick: boolean;
             time: number;
+            button: number;
             location: Item;
         }>();
     const onMouseDown = React.useCallback(
@@ -1842,6 +1843,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             const wasDoubleClick = time - (mouseDownData.current?.time ?? -1000) < 250;
             mouseDownData.current = {
                 wasDoubleClick,
+                button: args.button,
                 time,
                 location: args.location,
             };
@@ -1860,8 +1862,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             });
             lastMouseSelectLocation.current = undefined;
 
-            if (!args.isTouch) {
+            if (!args.isTouch && args.button === 0) {
                 handleSelect(args);
+            } else if (!args.isTouch && args.button === 1) {
+                lastMouseSelectLocation.current = args.location;
             }
         },
         [gridSelection, handleSelect]
@@ -2294,6 +2298,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
+            if (mouseDownData?.current?.button !== undefined && mouseDownData.current.button >= 1) return;
             if (
                 mouseState !== undefined &&
                 mouseDownData.current?.location[0] === 0 &&
