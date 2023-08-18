@@ -28,4 +28,29 @@ describe("click-outside-container", () => {
         await userEvent.click(outsideElement);
         expect(onClickOutside).toHaveBeenCalledTimes(1);
     });
+
+    it(`Does not trigger onClose when clicking outside but 'isOutsideClick' returns false`, async () => {
+        const onClickOutside = jest.fn();
+        const isOutsideClick = jest.fn();
+
+        const result = render(
+            <main>
+                <div>
+                    <p>I am outside</p>
+                </div>
+                <ClickOutsideContainer onClickOutside={onClickOutside} isOutsideClick={isOutsideClick} />
+            </main>
+        );
+
+        const outsideElement = await result.findByText("I am outside");
+
+        isOutsideClick.mockReturnValueOnce(true);
+
+        expect(onClickOutside).not.toHaveBeenCalled();
+        await userEvent.click(outsideElement);
+        expect(onClickOutside).toHaveBeenCalledTimes(1);
+        isOutsideClick.mockReturnValueOnce(false);
+        await userEvent.click(outsideElement);
+        expect(onClickOutside).toHaveBeenCalledTimes(1);
+    });
 });

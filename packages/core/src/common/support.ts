@@ -11,8 +11,8 @@ export function assert(fact: boolean, message: string = "Assertion failed"): ass
     return panic(message);
 }
 
-export function assertNever(_never: never): never {
-    return panic("Hell froze over");
+export function assertNever(_never: never, msg?: string): never {
+    return panic(msg ?? "Hell froze over");
 }
 export function maybe<T>(fn: () => T, defaultValue: T) {
     try {

@@ -34,7 +34,7 @@ import {
     ImageWindowLoader,
 } from "./data-grid-types";
 import { SpriteManager, SpriteMap } from "./data-grid-sprites";
-import { useDebouncedMemo, useEventListener } from "../common/utils";
+import { direction, useDebouncedMemo, useEventListener } from "../common/utils";
 import clamp from "lodash/clamp.js";
 import makeRange from "lodash/range.js";
 import {
@@ -874,7 +874,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     headerBounds.x,
                     headerBounds.y,
                     headerBounds.width,
-                    headerBounds.height
+                    headerBounds.height,
+                    direction(header.title) === "rtl"
                 );
                 if (
                     clientX > menuBounds.x &&
@@ -909,8 +910,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
             if (ev.target === eventTarget && eventTarget !== null) {
                 const bounds = eventTarget.getBoundingClientRect();
-                if (clientX > bounds.left + eventTarget.clientWidth) return;
-                if (clientY > bounds.top + eventTarget.clientHeight) return;
+                if (clientX > bounds.right || clientY > bounds.bottom) return;
             }
 
             const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
@@ -984,18 +984,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 ev.preventDefault();
             }
 
-            if (args.kind === headerKind && isOverHeaderMenu(canvas, args.location[0], clientX, clientY)) {
-                const [col] = args.location;
-                const headerBounds = isOverHeaderMenu(canvas, col, clientX, clientY);
-                if (headerBounds !== undefined) {
-                    if (args.button === 0 && downPosition.current?.[0] === col && downPosition.current?.[1] === -1) {
-                        onHeaderMenuClick?.(col, headerBounds);
-                    } else {
-                        // force outside so that click will not process
-                        onMouseUp(args, true);
-                    }
-                    return;
+            const [col] = args.location;
+            const headerBounds = isOverHeaderMenu(canvas, col, clientX, clientY);
+            if (args.kind === headerKind && headerBounds !== undefined) {
+                if (args.button !== 0 || downPosition.current?.[0] !== col || downPosition.current?.[1] !== -1) {
+                    // force outside so that click will not process
+                    onMouseUp(args, true);
                 }
+                return;
             } else if (args.kind === groupHeaderKind) {
                 const action = groupHeaderActionForEvent(args.group, args.bounds, args.localEventX, args.localEventY);
                 if (action !== undefined) {
@@ -1008,17 +1004,55 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             onMouseUp(args, isOutside);
         },
-        [
-            onMouseUp,
-            eventTargetRef,
-            getMouseArgsForPosition,
-            isOverHeaderMenu,
-            onHeaderMenuClick,
-            groupHeaderActionForEvent,
-        ]
+        [onMouseUp, eventTargetRef, getMouseArgsForPosition, isOverHeaderMenu, groupHeaderActionForEvent]
     );
-    useEventListener("click", onMouseUpImpl, window, false);
+    useEventListener("mouseup", onMouseUpImpl, window, false);
     useEventListener("touchend", onMouseUpImpl, window, false);
+
+    const onClickImpl = React.useCallback(
+        (ev: MouseEvent | TouchEvent) => {
+            const canvas = ref.current;
+            if (canvas === null) return;
+            const eventTarget = eventTargetRef?.current;
+
+            const isOutside = ev.target !== canvas && ev.target !== eventTarget;
+
+            let clientX: number;
+            let clientY: number;
+            if (ev instanceof MouseEvent) {
+                clientX = ev.clientX;
+                clientY = ev.clientY;
+            } else {
+                clientX = ev.changedTouches[0].clientX;
+                clientY = ev.changedTouches[0].clientY;
+            }
+
+            const args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
+
+            if (lastWasTouchRef.current !== args.isTouch) {
+                setLastWasTouch(args.isTouch);
+            }
+
+            if (!isOutside && ev.cancelable) {
+                ev.preventDefault();
+            }
+
+            const [col] = args.location;
+            const headerBounds = isOverHeaderMenu(canvas, col, clientX, clientY);
+            if (args.kind === headerKind && headerBounds !== undefined) {
+                if (args.button === 0 && downPosition.current?.[0] === col && downPosition.current?.[1] === -1) {
+                    onHeaderMenuClick?.(col, headerBounds);
+                }
+            } else if (args.kind === groupHeaderKind) {
+                const action = groupHeaderActionForEvent(args.group, args.bounds, args.localEventX, args.localEventY);
+                if (action !== undefined && args.button === 0) {
+                    action.onClick(args);
+                }
+            }
+        },
+        [eventTargetRef, getMouseArgsForPosition, isOverHeaderMenu, onHeaderMenuClick, groupHeaderActionForEvent]
+    );
+    useEventListener("click", onClickImpl, window, false);
 
     const onContextMenuImpl = React.useCallback(
         (ev: MouseEvent) => {
@@ -1060,7 +1094,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const onMouseMoveImpl = React.useCallback(
         (ev: MouseEvent) => {
             const canvas = ref.current;
-            if (canvas === null) return;
+            const eventTarget = eventTargetRef?.current;
+
+            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) {
+                return;
+            }
 
             const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
             if (!isSameItem(args, hoveredRef.current)) {
@@ -1107,6 +1145,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             onMouseMove(args);
         },
         [
+            eventTargetRef,
             getMouseArgsForPosition,
             allowResize,
             fillHandle,

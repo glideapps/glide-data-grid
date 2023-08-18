@@ -42,6 +42,7 @@ interface DataGridOverlayEditorProps {
         newValue: EditableGridCell,
         prevValue: GridCell
     ) => boolean | ValidatedGridCell;
+    readonly isOutsideClick?: (e: MouseEvent | TouchEvent) => boolean;
 }
 
 const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps> = p => {
@@ -61,6 +62,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         validateCell,
         getCellRenderer,
         provideEditor,
+        isOutsideClick,
     } = p;
 
     const [tempValue, setTempValueRaw] = React.useState<GridCell | undefined>(forceEditMode ? content : undefined);
@@ -106,8 +108,8 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     }, [tempValue, onFinishEditing]);
 
     const onEditorFinished = React.useCallback(
-        (newValue: GridCell | undefined) => {
-            onFinishEditing(newValue, customMotion.current ?? [0, 0]);
+        (newValue: GridCell | undefined, movement?: readonly [-1 | 0 | 1, -1 | 0 | 1]) => {
+            onFinishEditing(newValue, movement ?? customMotion.current ?? [0, 0]);
             finished.current = true;
         },
         [onFinishEditing]
@@ -206,7 +208,11 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     return createPortal(
         <ThemeContext.Provider value={theme}>
-            <ClickOutsideContainer style={makeCSSStyle(theme)} className={className} onClickOutside={onClickOutside}>
+            <ClickOutsideContainer
+                style={makeCSSStyle(theme)}
+                className={className}
+                onClickOutside={onClickOutside}
+                isOutsideClick={isOutsideClick}>
                 <DataGridOverlayEditorStyle
                     ref={ref}
                     id={id}

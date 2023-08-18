@@ -711,13 +711,15 @@ export function drawMarkerRowCell(
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
         const text = index.toString();
+        const fontStyle = `${theme.markerFontStyle} ${theme.fontFamily}`;
 
         const start = x + width / 2;
         if (markerKind === "both" && hoverAmount !== 0) {
             ctx.globalAlpha = 1 - hoverAmount;
         }
         ctx.fillStyle = theme.textLight;
-        ctx.fillText(text, start, y + height / 2 + getMiddleCenterBias(ctx, `9px ${theme.fontFamily}`));
+        ctx.font = fontStyle;
+        ctx.fillText(text, start, y + height / 2 + getMiddleCenterBias(ctx, fontStyle));
         if (hoverAmount !== 0) {
             ctx.globalAlpha = 1;
         }
@@ -1001,10 +1003,11 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
         for (const rectInfo of renderBoxes) {
             const rx = Math.floor(rectInfo.x);
             const rw = Math.floor(rectInfo.width);
+            const outerMiddleWidth = rw - (outerSideWidth - outerPadding) * 2
             ctx.imageSmoothingEnabled = false;
 
             ctx.drawImage(el, 0, 0, sideWidth, height, rx - outerPadding, y, outerSideWidth, h);
-            if (rectInfo.width > sideWidth * 2)
+            if (outerMiddleWidth > 0)
                 ctx.drawImage(
                     el,
                     sideWidth,
@@ -1013,7 +1016,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
                     height,
                     rx + (outerSideWidth - outerPadding),
                     y,
-                    rw - (outerSideWidth - outerPadding) * 2,
+                    outerMiddleWidth,
                     h
                 );
             ctx.drawImage(
