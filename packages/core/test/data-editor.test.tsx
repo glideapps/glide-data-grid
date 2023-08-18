@@ -3239,7 +3239,7 @@ describe("data-editor", () => {
         });
     });
 
-    test.only("Select range with mouse middle click fails", async () => {
+    test("Select range with mouse middle click fails", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
