@@ -376,7 +376,7 @@ export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
     ) {
         return cell.readonly !== true;
     }
-    assertNever(cell);
+    assertNever(cell, "A cell was passed with an invalid kind");
 }
 
 /** @category Cells */
@@ -468,7 +468,7 @@ export type SelectionRange = number | readonly [number, number];
 /** @category Renderers */
 export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComponent<{
     readonly onChange: (newValue: T) => void;
-    readonly onFinishedEditing: (newValue?: T) => void;
+    readonly onFinishedEditing: (newValue?: T, movement?: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly isHighlighted: boolean;
     readonly value: T;
     readonly initialValue?: string;

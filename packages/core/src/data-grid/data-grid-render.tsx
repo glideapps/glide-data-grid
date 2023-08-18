@@ -40,6 +40,7 @@ import type { Theme } from "../common/styles";
 import { blend, withAlpha } from "./color-parser";
 import type { DrawArgs, GetCellRendererCallback, PrepResult } from "./cells/cell-types";
 import { assert, deepEqual } from "../common/support";
+import { direction } from "../common/utils";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when
@@ -637,7 +638,8 @@ function drawGroups(
 }
 
 const menuButtonSize = 30;
-export function getHeaderMenuBounds(x: number, y: number, width: number, height: number): Rectangle {
+export function getHeaderMenuBounds(x: number, y: number, width: number, height: number, isRtl: boolean): Rectangle {
+    if (isRtl) return { x, y, width: menuButtonSize, height: Math.min(menuButtonSize, height) };
     return {
         x: x + width - menuButtonSize, // right align
         y: Math.max(y, y + height / 2 - menuButtonSize / 2), // center vertically
@@ -663,7 +665,9 @@ export function drawHeader(
     touchMode: boolean
 ) {
     const isCheckboxHeader = c.title.startsWith(headerCellCheckboxPrefix);
-    const menuBounds = getHeaderMenuBounds(x, y, width, height);
+    const isRtl = direction(c.title) === "rtl";
+    const menuBounds = getHeaderMenuBounds(x, y, width, height, isRtl);
+
     if (drawHeaderCallback !== undefined) {
         let passCol = c;
         if (isCheckboxHeader) {
@@ -710,34 +714,44 @@ export function drawHeader(
 
     const shouldDrawMenu = c.hasMenu === true && (isHovered || (touchMode && selected));
 
-    let drawX = x + xPad;
+    const dirScalar = isRtl ? -1 : 1;
+
+    let drawX = isRtl ? x + width - xPad : x + xPad;
     if (c.icon !== undefined) {
         let variant: SpriteVariant = selected ? "selected" : "normal";
         if (c.style === "highlight") {
             variant = selected ? "selected" : "special";
         }
         const headerSize = theme.headerIconSize;
-        spriteManager.drawSprite(c.icon, variant, ctx, drawX, y + (height - headerSize) / 2, headerSize, theme);
+        spriteManager.drawSprite(
+            c.icon,
+            variant,
+            ctx,
+            isRtl ? drawX - headerSize : drawX,
+            y + (height - headerSize) / 2,
+            headerSize,
+            theme
+        );
 
         if (c.overlayIcon !== undefined) {
             spriteManager.drawSprite(
                 c.overlayIcon,
                 selected ? "selected" : "special",
                 ctx,
-                drawX + 9,
+                isRtl ? drawX - headerSize + 9 : drawX + 9,
                 y + ((height - 18) / 2 + 6),
                 18,
                 theme
             );
         }
 
-        drawX += Math.ceil(headerSize * 1.3);
+        drawX += Math.ceil(headerSize * 1.3) * dirScalar;
     }
 
     if (shouldDrawMenu && c.hasMenu === true && width > 35) {
         const fadeWidth = 35;
-        const fadeStart = width - fadeWidth;
-        const fadeEnd = width - fadeWidth * 0.7;
+        const fadeStart = isRtl ? fadeWidth : width - fadeWidth;
+        const fadeEnd = isRtl ? fadeWidth * 0.7 : width - fadeWidth * 0.7;
 
         const fadeStartPercent = fadeStart / width;
         const fadeEndPercent = fadeEnd / width;
@@ -745,19 +759,26 @@ export function drawHeader(
         const grad = ctx.createLinearGradient(x, 0, x + width, 0);
         const trans = withAlpha(fillStyle, 0);
 
-        grad.addColorStop(0, fillStyle);
+        grad.addColorStop(isRtl ? 1 : 0, fillStyle);
         grad.addColorStop(fadeStartPercent, fillStyle);
         grad.addColorStop(fadeEndPercent, trans);
-        grad.addColorStop(1, trans);
+        grad.addColorStop(isRtl ? 0 : 1, trans);
         ctx.fillStyle = grad;
     } else {
         ctx.fillStyle = fillStyle;
+    }
+
+    if (isRtl) {
+        ctx.textAlign = "right";
     }
     ctx.fillText(
         c.title,
         drawX,
         y + height / 2 + getMiddleCenterBias(ctx, `${theme.headerFontStyle} ${theme.fontFamily}`)
     );
+    if (isRtl) {
+        ctx.textAlign = "left";
+    }
 
     if (shouldDrawMenu && c.hasMenu === true) {
         ctx.beginPath();
