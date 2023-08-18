@@ -1821,19 +1821,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
     const isActivelyDraggingHeader = React.useRef(false);
-    const lastMouseSelectLocation = React.useRef<[number, number]>();
+    const lastMouseSelectLocation = React.useRef<readonly [number, number]>();
     const touchDownArgs = React.useRef(visibleRegion);
     const mouseDownData =
         React.useRef<{
             wasDoubleClick: boolean;
             time: number;
+            button: number;
             location: Item;
         }>();
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
             isPrevented.current = false;
             touchDownArgs.current = visibleRegionRef.current;
-            if (args.button !== 0) {
+            if (args.button !== 0 && args.button !== 1) {
                 mouseDownData.current = undefined;
                 return;
             }
@@ -1842,6 +1843,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             const wasDoubleClick = time - (mouseDownData.current?.time ?? -1000) < 250;
             mouseDownData.current = {
                 wasDoubleClick,
+                button: args.button,
                 time,
                 location: args.location,
             };
@@ -1860,8 +1862,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             });
             lastMouseSelectLocation.current = undefined;
 
-            if (!args.isTouch) {
+            if (!args.isTouch && args.button === 0) {
                 handleSelect(args);
+            } else if (!args.isTouch && args.button === 1) {
+                lastMouseSelectLocation.current = args.location;
             }
         },
         [gridSelection, handleSelect]
@@ -2032,6 +2036,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         preventDefault,
                     });
                 }
+                if (a.button === 1) return !isPrevented.current;
                 if (!isPrevented.current) {
                     const c = getMangledCellContent(args.location);
                     const r = getCellRenderer(c);
@@ -2147,7 +2152,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
 
-            if (args.kind === "cell" && args.button === 0) {
+            if (args.kind === "cell" && (args.button === 0 || args.button === 1)) {
                 handleMaybeClick(args);
             }
 
@@ -2293,6 +2298,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
+            if (mouseDownData?.current?.button !== undefined && mouseDownData.current.button >= 1) return;
             if (
                 mouseState !== undefined &&
                 mouseDownData.current?.location[0] === 0 &&

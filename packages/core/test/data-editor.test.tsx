@@ -477,6 +477,37 @@ describe("data-editor", () => {
         expect(spySelection).not.toHaveBeenCalled();
     });
 
+    test("middle click does not change selection", async () => {
+        const spySelection = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                gridSelection={{
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
+                }}
+                onGridSelectionChange={spySelection}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+            button: 1,
+        });
+
+        expect(spySelection).not.toHaveBeenCalled();
+    });
+
     test("emits contextmenu for cell but does not change selection if already selected - current.cell", async () => {
         const spy = jest.fn();
         const spySelection = jest.fn();
@@ -607,6 +638,47 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
     });
 
+    test("Emits cell clicked with middle button", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellClicked={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            button: 1,
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    });
+
+    test("Does not emits cell clicked with back button", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellClicked={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            button: 4,
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).not.toHaveBeenCalled();
+    });
+
     test("Emits cell click with touch", async () => {
         const spy = jest.fn();
 
@@ -652,6 +724,31 @@ describe("data-editor", () => {
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1]);
+    });
+
+    test("Does not emit activated event on double click with different buttons", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellActivated={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            button: 0,
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        sendClick(canvas, {
+            button: 1,
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).not.toHaveBeenCalled();
     });
 
     test("Emits activated event on Enter key", async () => {
@@ -3142,6 +3239,41 @@ describe("data-editor", () => {
         });
     });
 
+    test("Select range with mouse middle click fails", async () => {
+        const spy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            button: 0,
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2
+        });
+
+        fireEvent.mouseDown(canvas, {
+            button: 1,
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2
+        });
+
+        spy.mockClear();
+        fireEvent.mouseMove(canvas, {
+            clientX: 600, // Col B
+            clientY: 36 + 32 * 12 + 16, // Row 2
+        });
+
+        expect(spy).not.toBeCalled();
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 600, // Col B
+            clientY: 36 + 32 * 12 + 16, // Row 2
+        });
+    });
+
     test("Select all", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();
@@ -3949,12 +4081,9 @@ describe("data-editor", () => {
         spy.mockClear();
 
         jest.useFakeTimers();
-        render(
-            <DataEditor {...basicProps} />,
-            {
-                wrapper: Context,
-            }
-        );
+        render(<DataEditor {...basicProps} />, {
+            wrapper: Context,
+        });
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
