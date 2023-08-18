@@ -893,11 +893,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const downTime = React.useRef(0);
     const downPosition = React.useRef<Item>();
+    const mouseDown = React.useRef(false);
     const onMouseDownImpl = React.useCallback(
         (ev: MouseEvent | TouchEvent) => {
             const canvas = ref.current;
             const eventTarget = eventTargetRef?.current;
             if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) return;
+            mouseDown.current = true;
 
             let clientX: number;
             let clientY: number;
@@ -949,6 +951,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const onMouseUpImpl = React.useCallback(
         (ev: MouseEvent | TouchEvent) => {
             const canvas = ref.current;
+            mouseDown.current = false;
             if (onMouseUp === undefined || canvas === null) return;
             const eventTarget = eventTargetRef?.current;
 
@@ -1094,13 +1097,18 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const onMouseMoveImpl = React.useCallback(
         (ev: MouseEvent) => {
             const canvas = ref.current;
-            const eventTarget = eventTargetRef?.current;
+            if (canvas === null) return;
 
-            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) {
+            const eventTarget = eventTargetRef?.current;
+            const isIndirect = ev.target !== canvas && ev.target !== eventTarget;
+
+            const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
+            if (args.kind !== "out-of-bounds" && isIndirect && !mouseDown.current && !args.isTouch) {
+                // we are obscured by something else, so we want to not register events if we are not doing anything
+                // important already
                 return;
             }
 
-            const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
             if (!isSameItem(args, hoveredRef.current)) {
                 onItemHovered?.(args);
                 setHoveredItemInfo(
@@ -1147,6 +1155,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         [
             eventTargetRef,
             getMouseArgsForPosition,
+            firstColAccessible,
             allowResize,
             fillHandle,
             selection,
@@ -1157,7 +1166,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getCellRenderer,
             damageInternal,
             getBoundsForItem,
-            firstColAccessible,
         ]
     );
     useEventListener("mousemove", onMouseMoveImpl, window, true);
