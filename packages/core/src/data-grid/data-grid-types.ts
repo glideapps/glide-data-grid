@@ -141,7 +141,7 @@ export interface GridKeyEventArgs {
     readonly stopPropagation: () => void;
     readonly preventDefault: () => void;
     readonly rawEvent: React.KeyboardEvent<HTMLElement> | undefined;
-    readonly location: { col?: number; row?: number };
+    readonly location: Item | undefined;
 }
 
 interface DragHandler {

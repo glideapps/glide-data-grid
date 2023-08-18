@@ -804,8 +804,12 @@ describe("data-editor", () => {
     test("keyDown and keyUp events include the cell location", async () => {
         let keyDownEvent: GridKeyEventArgs | undefined;
         let keyUpEvent: GridKeyEventArgs | undefined;
-        const keyDown = (e: GridKeyEventArgs) => { keyDownEvent = e; };
-        const keyUp = (e: GridKeyEventArgs) => { keyUpEvent = e; };
+        const keyDown = (e: GridKeyEventArgs) => {
+            keyDownEvent = e;
+        };
+        const keyUp = (e: GridKeyEventArgs) => {
+            keyUpEvent = e;
+        };
 
         jest.useFakeTimers();
         render(<DataEditor {...basicProps} onKeyDown={keyDown} onKeyUp={keyUp} />, {
@@ -829,8 +833,8 @@ describe("data-editor", () => {
 
         jest.runAllTimers();
 
-        expect(keyDownEvent?.location).toEqual({"col": 1, "row": 1});
-        expect(keyUpEvent?.location).toEqual({"col": 1, "row": 1});
+        expect(keyDownEvent?.location).toEqual([1, 1]);
+        expect(keyUpEvent?.location).toEqual([1, 1]);
     });
 
     test("Doesn't emit cell click if mouseDown happened in a different cell", async () => {
