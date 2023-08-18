@@ -19269,6 +19269,7 @@ const DataEditorImpl = (p, forwardedRef) => {
       lastSelectedColRef.current = undefined;
     }
   }, [appendRow, columnSelect, focus, getCellRenderer, getCustomNewRowTargetColumn, getMangledCellContent, gridSelection, hasRowMarkers, lastRowSticky, onSelectionCleared, onRowMoved, rowMarkerOffset, rowMarkers, rowSelect, rowSelectionMode, rows, setCurrent, setGridSelection, setSelectedColumns, setSelectedRows, showTrailingBlankRow, themeForCell]);
+  const isActivelyDraggingHeader = react.useRef(false);
   const lastMouseSelectLocation = react.useRef();
   const touchDownArgs = react.useRef(visibleRegion);
   const mouseDownData = react.useRef();
@@ -19290,6 +19291,11 @@ const DataEditorImpl = (p, forwardedRef) => {
       time,
       location: args.location
     };
+
+    if ((args === null || args === void 0 ? void 0 : args.kind) === "header") {
+      isActivelyDraggingHeader.current = true;
+    }
+
     const fh = args.kind === "cell" && args.isFillHandle;
     if (!fh && args.kind !== "cell" && args.isEdge) return;
     setMouseState({
@@ -19412,6 +19418,7 @@ const DataEditorImpl = (p, forwardedRef) => {
     const mouse = mouseState;
     setMouseState(undefined);
     setScrollDir(undefined);
+    isActivelyDraggingHeader.current = false;
     if (isOutside) return;
 
     if ((mouse === null || mouse === void 0 ? void 0 : mouse.fillHandle) === true && gridSelection.current !== undefined) {
@@ -19577,6 +19584,7 @@ const DataEditorImpl = (p, forwardedRef) => {
     setScrollDir(cv => {
       var _mouseDownData$curren4, _mouseDownData$curren5;
 
+      if (isActivelyDraggingHeader.current) return [args.scrollEdge[0], 0];
       if (args.scrollEdge[0] === (cv === null || cv === void 0 ? void 0 : cv[0]) && args.scrollEdge[1] === cv[1]) return cv;
       return mouseState === undefined || ((_mouseDownData$curren4 = (_mouseDownData$curren5 = mouseDownData.current) === null || _mouseDownData$curren5 === void 0 ? void 0 : _mouseDownData$curren5.location[0]) !== null && _mouseDownData$curren4 !== void 0 ? _mouseDownData$curren4 : 0) < rowMarkerOffset ? undefined : args.scrollEdge;
     });
@@ -38587,6 +38595,7 @@ var DataEditorImpl = (p, forwardedRef) => {
       lastSelectedColRef.current = void 0;
     }
   }, [appendRow, columnSelect, focus, getCellRenderer, getCustomNewRowTargetColumn, getMangledCellContent, gridSelection, hasRowMarkers, lastRowSticky, onSelectionCleared, onRowMoved, rowMarkerOffset, rowMarkers, rowSelect, rowSelectionMode, rows, setCurrent, setGridSelection, setSelectedColumns, setSelectedRows, showTrailingBlankRow, themeForCell]);
+  const isActivelyDraggingHeader = react__WEBPACK_IMPORTED_MODULE_0__.useRef(false);
   const lastMouseSelectLocation = react__WEBPACK_IMPORTED_MODULE_0__.useRef();
   const touchDownArgs = react__WEBPACK_IMPORTED_MODULE_0__.useRef(visibleRegion);
   const mouseDownData = react__WEBPACK_IMPORTED_MODULE_0__.useRef();
@@ -38608,6 +38617,11 @@ var DataEditorImpl = (p, forwardedRef) => {
       time,
       location: args.location
     };
+
+    if ((args == null ? void 0 : args.kind) === "header") {
+      isActivelyDraggingHeader.current = true;
+    }
+
     const fh = args.kind === "cell" && args.isFillHandle;
     if (!fh && args.kind !== "cell" && args.isEdge) return;
     setMouseState({
@@ -38730,6 +38744,7 @@ var DataEditorImpl = (p, forwardedRef) => {
     const mouse = mouseState;
     setMouseState(void 0);
     setScrollDir(void 0);
+    isActivelyDraggingHeader.current = false;
     if (isOutside) return;
 
     if ((mouse == null ? void 0 : mouse.fillHandle) === true && gridSelection.current !== void 0) {
@@ -38891,6 +38906,7 @@ var DataEditorImpl = (p, forwardedRef) => {
     setScrollDir(cv => {
       var _a2, _b2;
 
+      if (isActivelyDraggingHeader.current) return [args.scrollEdge[0], 0];
       if (args.scrollEdge[0] === (cv == null ? void 0 : cv[0]) && args.scrollEdge[1] === cv[1]) return cv;
       return mouseState === void 0 || ((_b2 = (_a2 = mouseDownData.current) == null ? void 0 : _a2.location[0]) != null ? _b2 : 0) < rowMarkerOffset ? void 0 : args.scrollEdge;
     });
@@ -40176,4 +40192,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.9eb77bd4.iframe.bundle.js.map
+//# sourceMappingURL=main.ace7738f.iframe.bundle.js.map
