@@ -607,6 +607,47 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
     });
 
+    test("Emits cell clicked with middle button", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellClicked={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            button: 1,
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    });
+
+    test("Does not emits cell clicked with back button", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellClicked={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            button: 4,
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).not.toHaveBeenCalled();
+    });
+
     test("Emits cell click with touch", async () => {
         const spy = jest.fn();
 
@@ -652,6 +693,31 @@ describe("data-editor", () => {
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1]);
+    });
+
+    test("Does not emit activated event on double click with different buttons", async () => {
+        const spy = jest.fn();
+
+        jest.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellActivated={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            button: 0,
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        sendClick(canvas, {
+            button: 1,
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).not.toHaveBeenCalled();
     });
 
     test("Emits activated event on Enter key", async () => {
@@ -3949,12 +4015,9 @@ describe("data-editor", () => {
         spy.mockClear();
 
         jest.useFakeTimers();
-        render(
-            <DataEditor {...basicProps} />,
-            {
-                wrapper: Context,
-            }
-        );
+        render(<DataEditor {...basicProps} />, {
+            wrapper: Context,
+        });
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
