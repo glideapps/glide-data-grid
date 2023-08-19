@@ -1,14 +1,136 @@
-import * as React from "react";
-import { CustomCell, CustomRenderer, drawTextCell, GridCellKind } from "@glideapps/glide-data-grid";
+import React from "react";
+import { styled } from "@linaria/react";
 
-interface DatePickerCellProps {
+import {
+    CustomCell,
+    CustomRenderer,
+    drawTextCell,
+    GridCellKind,
+    ProvideEditorCallback,
+    TextCellEntry,
+} from "@glideapps/glide-data-grid";
+
+export const StyledInputBox = styled.input`
+    min-height: 26px;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    font-size: var(--gdg-editor-font-size);
+    font-family: var(--gdg-font-family);
+    color: var(--gdg-text-dark);
+    ::-webkit-calendar-picker-indicator {
+        background-color: white;
+    }
+`;
+
+export interface DatePickerCellProps {
     readonly kind: "date-picker-cell";
-    readonly date: Date | undefined;
+    /* The current value of the datetime cell. */
+    readonly date: Date | undefined | null;
+    /* The current display value of the datetime cell. */
     readonly displayDate: string;
-    readonly format: "date" | "datetime-local";
+    /* Defines the type of the HTML input element. */
+    readonly format: DateKind;
+    /* Timezone offset in minutes. 
+    This can be used to adjust the date by a given timezone offset. */
+    readonly timezoneOffset?: number;
+    /* Minimum value that can be entered by the user.
+    This is passed to the min attribute of the HTML input element. */
+    readonly min?: string | Date;
+    /* Maximum value that can be entered by the user.
+    This is passed to the max attribute of the HTML input element. */
+    readonly max?: string | Date;
+    /* Granularity that the date must adhere. 
+    This is passed to the step attribute of the HTML input element. */
+    readonly step?: string;
 }
 
+export type DateKind = "date" | "time" | "datetime-local";
+
+export const formatValueForHTMLInput = (dateKind: DateKind, date: Date | undefined | null): string => {
+    if (date === undefined || date === null) {
+        return "";
+    }
+    const isoDate = date.toISOString();
+    switch (dateKind) {
+        case "date":
+            return isoDate.split("T")[0];
+        case "datetime-local":
+            return isoDate.replace("Z", "");
+        case "time":
+            return isoDate.split("T")[1].replace("Z", "");
+        default:
+            throw new Error(`Unknown date kind ${dateKind}`);
+    }
+};
+
 export type DatePickerCell = CustomCell<DatePickerCellProps>;
+
+const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
+    const cellData = cell.value.data;
+    const { format, displayDate } = cellData;
+    const step =
+        cellData.step !== undefined && !Number.isNaN(Number(cellData.step)) ? Number(cellData.step) : undefined;
+
+    const minValue = cellData.min instanceof Date ? formatValueForHTMLInput(format, cellData.min) : cellData.min;
+
+    const maxValue = cellData.max instanceof Date ? formatValueForHTMLInput(format, cellData.max) : cellData.max;
+
+    let date = cellData.date;
+    // Convert timezone offset to milliseconds
+    const timezoneOffsetMs = cellData.timezoneOffset ? cellData.timezoneOffset * 60 * 1000 : 0;
+    if (timezoneOffsetMs && date) {
+        // Adjust based on the timezone offset
+        date = new Date(date.getTime() + timezoneOffsetMs);
+    }
+    const value = formatValueForHTMLInput(format, date);
+    if (cell.value.readonly) {
+        return (
+            <TextCellEntry
+                highlight={true}
+                autoFocus={false}
+                disabled={true}
+                value={displayDate ?? ""}
+                onChange={() => undefined}
+            />
+        );
+    }
+
+    return (
+        <StyledInputBox
+            data-testid={"date-picker-cell"}
+            required
+            type={format}
+            defaultValue={value}
+            min={minValue}
+            max={maxValue}
+            step={step}
+            autoFocus={true}
+            onChange={event => {
+                if (isNaN(event.target.valueAsNumber)) {
+                    // The user has cleared the date, contribute as undefined
+                    cell.onChange({
+                        ...cell.value,
+                        data: {
+                            ...cell.value.data,
+                            date: undefined,
+                        },
+                    });
+                } else {
+                    cell.onChange({
+                        ...cell.value,
+                        data: {
+                            ...cell.value.data,
+                            // use valueAsNumber because valueAsDate is null for "datetime-local"
+                            // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local#technical_summary
+                            date: new Date(event.target.valueAsNumber - timezoneOffsetMs),
+                        },
+                    });
+                }
+            }}
+        />
+    );
+};
 
 const renderer: CustomRenderer<DatePickerCell> = {
     kind: GridCellKind.Custom,
@@ -18,47 +140,33 @@ const renderer: CustomRenderer<DatePickerCell> = {
         drawTextCell(args, displayDate, cell.contentAlign);
         return true;
     },
-    // eslint-disable-next-line react/display-name
-    provideEditor: () => p => {
-        const cellData = p.value.data;
-        const { format, date } = cellData;
+    measure: (ctx, cell) => {
+        const { displayDate } = cell.data;
+        return ctx.measureText(displayDate).width + 16;
+    },
+    provideEditor: () => ({
+        editor: Editor,
+    }),
+    onPaste: (v, d) => {
+        let parseDateTimestamp = NaN;
+        // We only try to parse the value if it is not empty/undefined/null:
+        if (v) {
+            // Support for unix timestamps (milliseconds since 1970-01-01):
+            parseDateTimestamp = Number(v).valueOf();
 
-        let val = "";
-        if (date !== undefined) {
-            val = date.toISOString();
-            if (format === "date") {
-                val = val.split("T")[0];
+            if (Number.isNaN(parseDateTimestamp)) {
+                // Support for parsing ISO 8601 date strings:
+                parseDateTimestamp = Date.parse(v);
+                if (d.format === "time" && Number.isNaN(parseDateTimestamp)) {
+                    // The pasted value was not a valid date string
+                    // Try to interpret value as time string instead (HH:mm:ss)
+                    parseDateTimestamp = Date.parse(`1970-01-01T${v}Z`);
+                }
             }
         }
-        return (
-            <input
-                style={{ minHeight: 26, border: "none", outline: "none" }}
-                type={format}
-                autoFocus={true}
-                value={val}
-                onChange={e => {
-                    p.onChange({
-                        ...p.value,
-                        data: {
-                            ...p.value.data,
-                            date: e.target.valueAsDate ?? undefined,
-                        },
-                    });
-                }}
-            />
-        );
-    },
-    onPaste: (v, d) => {
-        let newDate: Date | undefined;
-        try {
-            newDate = new Date(v);
-        } catch {
-            /* do nothing */
-        }
-
         return {
             ...d,
-            date: Number.isNaN(newDate) ? undefined : newDate,
+            date: Number.isNaN(parseDateTimestamp) ? undefined : new Date(parseDateTimestamp),
         };
     },
 };

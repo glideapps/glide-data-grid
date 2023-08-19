@@ -53,7 +53,7 @@ export const WrappingText: React.VFC<{
                     kind: GridCellKind.Text,
                     allowOverlay: true,
                     displayData: `${row},\n${suffix[row % suffix.length]}`,
-                    data: `${row}, ${suffix}`,
+                    data: `${row}, \n${suffix}`,
                     allowWrapping: true,
                     contentAlign: p.alignment,
                 };

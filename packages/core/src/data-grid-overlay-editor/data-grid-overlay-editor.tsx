@@ -42,7 +42,7 @@ interface DataGridOverlayEditorProps {
         newValue: EditableGridCell,
         prevValue: GridCell
     ) => boolean | ValidatedGridCell;
-    readonly isOutsideClick?: (e: MouseEvent) => boolean;
+    readonly isOutsideClick?: (e: MouseEvent | TouchEvent) => boolean;
 }
 
 const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps> = p => {

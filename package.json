@@ -1,6 +1,6 @@
 {
     "name": "root",
-    "version": "5.2.1",
+    "version": "5.3.0",
     "scripts": {
         "start": "npm run storybook",
         "version": "./update-version.sh",
@@ -13,6 +13,7 @@
         "test": "cd packages/core && npm run test --",
         "test-18": "./setup-react-18-test.sh && cd packages/core && npm run test --",
         "test-source": "cd packages/source && npm run test",
+        "test-cells": "cd packages/cells && npm run test",
         "test-projects": "cd test-projects/ && ./bootstrap-projects.sh"
     },
     "author": "Glide",

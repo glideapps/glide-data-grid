@@ -1,23 +1,25 @@
 import * as React from "react";
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
     onClickOutside: () => void;
-    isOutsideClick?: (event: MouseEvent) => boolean;
+    isOutsideClick?: (event: MouseEvent | TouchEvent) => boolean;
 }
 
 export default class ClickOutsideContainer extends React.PureComponent<Props> {
     private wrapperRef = React.createRef<HTMLDivElement>();
 
     public componentDidMount() {
+        document.addEventListener("touchend", this.clickOutside, true);
         document.addEventListener("mousedown", this.clickOutside, true);
         document.addEventListener("contextmenu", this.clickOutside, true);
     }
 
     public componentWillUnmount() {
+        document.removeEventListener("touchend", this.clickOutside, true);
         document.removeEventListener("mousedown", this.clickOutside, true);
         document.removeEventListener("contextmenu", this.clickOutside, true);
     }
 
-    private clickOutside = (event: MouseEvent) => {
+    private clickOutside = (event: MouseEvent | TouchEvent) => {
         if (this.props.isOutsideClick && !this.props.isOutsideClick(event)) {
             return;
         }

@@ -141,6 +141,7 @@ export interface GridKeyEventArgs {
     readonly stopPropagation: () => void;
     readonly preventDefault: () => void;
     readonly rawEvent: React.KeyboardEvent<HTMLElement> | undefined;
+    readonly location: Item | undefined;
 }
 
 interface DragHandler {
@@ -375,7 +376,7 @@ export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
     ) {
         return cell.readonly !== true;
     }
-    assertNever(cell);
+    assertNever(cell, "A cell was passed with an invalid kind");
 }
 
 /** @category Cells */
