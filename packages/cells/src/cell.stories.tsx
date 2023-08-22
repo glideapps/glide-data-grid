@@ -496,7 +496,7 @@ export const CustomCellEditing: React.VFC = () => {
                 onCellEdited={(cell, newVal) => {
                     if (newVal.kind !== GridCellKind.Custom) return;
                     if (DropdownRenderer.isMatch(newVal)) {
-                        data.current[cell[1]] = newVal.data.value;
+                        data.current[cell[1]] = newVal.data.value ?? "";
                     }
                 }}
                 getCellsForSelection={true}
