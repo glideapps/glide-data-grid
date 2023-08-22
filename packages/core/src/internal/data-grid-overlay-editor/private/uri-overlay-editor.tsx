@@ -36,11 +36,11 @@ const UriOverlayEditor: React.FunctionComponent<Props> = p => {
 
     return (
         <UriOverlayEditorStyle>
-            <a className="link-area" href={uri} target="_blank" rel="noopener noreferrer">
+            <a className="gdg-link-area" href={uri} target="_blank" rel="noopener noreferrer">
                 {preview}
             </a>
             {!readonly && (
-                <div className="edit-icon" onClick={onEditClick}>
+                <div className="gdg-edit-icon" onClick={onEditClick}>
                     <EditPencil />
                 </div>
             )}

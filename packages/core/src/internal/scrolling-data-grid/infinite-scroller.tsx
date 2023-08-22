@@ -34,7 +34,7 @@ const ScrollRegionStyle = styled.div<{ isSafari: boolean }>`
         transform: translate3d(0, 0, 0);
     }
 
-    .hidden {
+    .dvn-hidden {
         visibility: hidden;
     }
 
@@ -290,7 +290,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                     }}
                     className={"dvn-scroller " + (className ?? "")}
                     onScroll={onScroll}>
-                    <div className={"dvn-scroll-inner" + (rightElement === undefined ? " hidden" : "")}>
+                    <div className={"dvn-scroll-inner" + (rightElement === undefined ? " dvn-hidden" : "")}>
                         <div className="dvn-stack">{padders}</div>
                         {rightElement !== undefined && (
                             <>

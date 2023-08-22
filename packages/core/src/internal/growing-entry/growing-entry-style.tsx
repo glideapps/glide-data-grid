@@ -29,7 +29,7 @@ export const InputBox = styled.textarea`
     padding: 0;
     margin: 0;
 
-    .invalid & {
+    .gdg-invalid & {
         text-decoration: underline;
         text-decoration-color: #d60606;
     }

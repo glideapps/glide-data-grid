@@ -47,11 +47,11 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
         animation: glide_fade_in 60ms 1;
     }
 
-    &.pad {
+    &.gdg-pad {
         padding: ${p => Math.max(0, (p.targetHeight - 28) / 2)}px 8.5px 3px;
     }
 
-    .clip-region {
+    .gdg-clip-region {
         display: flex;
         flex-direction: column;
         overflow-y: auto;

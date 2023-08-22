@@ -19,16 +19,16 @@ export const SearchWrapper = styled.div`
     }
     animation: gdg-search-fadein 0.15s forwards;
 
-    .search-bar-inner {
+    .gdg-search-bar-inner {
         display: flex;
     }
 
-    .search-status {
+    .gdg-search-status {
         padding-top: 4px;
         font-size: 11px;
     }
 
-    .search-progress {
+    .gdg-search-progress {
         position: absolute;
         height: 4px;
         left: 0;

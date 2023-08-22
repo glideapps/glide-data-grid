@@ -199,11 +199,11 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     let classWrap = style ? "gdg-style" : "gdg-unstyle";
     if (!isValid) {
-        classWrap += " invalid";
+        classWrap += " gdg-invalid";
     }
 
     if (pad) {
-        classWrap += " pad";
+        classWrap += " gdg-pad";
     }
 
     return createPortal(
@@ -223,7 +223,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                     targetY={target.y}
                     targetWidth={target.width}
                     targetHeight={target.height}>
-                    <div className="clip-region" onKeyDown={onKeyDown}>
+                    <div className="gdg-clip-region" onKeyDown={onKeyDown}>
                         {editor}
                     </div>
                 </DataGridOverlayEditorStyle>

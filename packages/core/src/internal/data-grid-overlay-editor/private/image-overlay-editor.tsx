@@ -35,14 +35,14 @@ export const ImageOverlayEditor: React.FunctionComponent<OverlayImageEditorProps
                 {filtered.map(url => {
                     const innerContent = renderImage?.(url) ?? <img draggable={false} src={url} />;
                     return (
-                        <div className="centering-container" key={url}>
+                        <div className="gdg-centering-container" key={url}>
                             {innerContent}
                         </div>
                     );
                 })}
             </Carousel>
             {canWrite && onEditClick && (
-                <button className="edit-icon" onClick={onEditClick}>
+                <button className="gdg-edit-icon" onClick={onEditClick}>
                     <EditPencil />
                 </button>
             )}
