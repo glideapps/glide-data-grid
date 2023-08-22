@@ -17,16 +17,16 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
     transform: translateX(${p => (p.showSearch ? 0 : 400)}px);
     transition: transform 0.15s;
 
-    .search-bar-inner {
+    .gdg-search-bar-inner {
         display: flex;
     }
 
-    .search-status {
+    .gdg-search-status {
         padding-top: 4px;
         font-size: 11px;
     }
 
-    .search-progress {
+    .gdg-search-progress {
         position: absolute;
         height: 4px;
         left: 0;

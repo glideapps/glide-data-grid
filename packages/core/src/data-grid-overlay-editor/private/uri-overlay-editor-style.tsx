@@ -9,7 +9,7 @@ export const UriOverlayEditorStyle = styled.div`
 
     min-height: 21px;
 
-    .link-area {
+    .gdg-link-area {
         flex-grow: 1;
         flex-shrink: 1;
 
@@ -24,7 +24,7 @@ export const UriOverlayEditorStyle = styled.div`
         text-decoration: underline !important;
     }
 
-    .edit-icon {
+    .gdg-edit-icon {
         flex-shrink: 0;
         width: 32px;
         color: var(--gdg-accent-color);

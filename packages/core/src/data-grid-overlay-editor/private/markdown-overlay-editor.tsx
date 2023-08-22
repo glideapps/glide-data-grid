@@ -27,7 +27,7 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
     const onEditClick = React.useCallback(() => {
         setEditMode(e => !e);
     }, []);
-    const addLeftPad = markdown ? "ml-6" : "";
+    const addLeftPad = markdown ? "gdg-ml-6" : "";
 
     if (editMode) {
         return (
@@ -42,7 +42,7 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
                     }}
                     onChange={onChange}
                 />
-                <div className={`edit-icon checkmark-hover ${addLeftPad}`} onClick={() => onFinish(value)}>
+                <div className={`gdg-edit-icon gdg-checkmark-hover ${addLeftPad}`} onClick={() => onFinish(value)}>
                     <Checkmark />
                 </div>
             </MarkdownOverlayEditorStyle>
@@ -54,12 +54,12 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
             {!readonly && (
                 <>
                     <div className="spacer" />
-                    <div className={`edit-icon edit-hover ${addLeftPad}`} onClick={onEditClick}>
+                    <div className={`gdg-edit-icon gdg-edit-hover ${addLeftPad}`} onClick={onEditClick}>
                         <EditPencil />
                     </div>
                 </>
             )}
-            <textarea className="md-edit-textarea gdg-input" autoFocus={true} />
+            <textarea className="gdg-md-edit-textarea gdg-input" autoFocus={true} />
         </MarkdownOverlayEditorStyle>
     );
 };

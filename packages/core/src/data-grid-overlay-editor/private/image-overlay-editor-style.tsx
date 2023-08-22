@@ -5,7 +5,7 @@ export const ImageOverlayEditorStyle = styled.div`
 
     height: 100%;
 
-    .centering-container {
+    .gdg-centering-container {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -24,7 +24,7 @@ export const ImageOverlayEditorStyle = styled.div`
         }
     }
 
-    .edit-icon {
+    .gdg-edit-icon {
         position: absolute;
         top: 12px;
         right: 0;

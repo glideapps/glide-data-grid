@@ -47,7 +47,7 @@ const EditorWrap = styled.div<{ tagHeight: number; innerPad: number }>`
             width: auto;
         }
 
-        .pill {
+        .gdg-pill {
             margin-left: 8px;
             margin-right: 6px;
             margin-bottom: 6px;
@@ -64,19 +64,19 @@ const EditorWrap = styled.div<{ tagHeight: number; innerPad: number }>`
 
             transition: box-shadow 150ms;
 
-            &.unselected {
+            &.gdg-unselected {
                 opacity: 0.8;
             }
         }
     }
-    label:hover .pill {
+    label:hover .gdg-pill {
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
     }
 
-    &&&&.readonly label {
+    &&&&.gdg-readonly label {
         cursor: default;
 
-        .pill {
+        .gdg-pill {
             box-shadow: none !important;
         }
     }
@@ -134,7 +134,7 @@ const renderer: CustomRenderer<TagsCell> = {
             const { onChange, value } = p;
             const { possibleTags, tags, readonly = false } = value.data;
             return (
-                <EditorWrap tagHeight={tagHeight} innerPad={innerPad} className={readonly ? "readonly" : ""}>
+                <EditorWrap tagHeight={tagHeight} innerPad={innerPad} className={readonly ? "gdg-readonly" : ""}>
                     {possibleTags.map(t => {
                         const selected = tags.indexOf(t.tag) !== -1;
                         return (
@@ -157,7 +157,7 @@ const renderer: CustomRenderer<TagsCell> = {
                                     />
                                 )}
                                 <div
-                                    className={"pill " + (selected ? "selected" : "unselected")}
+                                    className={"gdg-pill " + (selected ? "gdg-selected" : "gdg-unselected")}
                                     style={{ backgroundColor: selected ? t.color : undefined }}>
                                     {t.tag}
                                 </div>

@@ -94,7 +94,7 @@ const MinimapStyle = styled.div`
 
     overflow: hidden;
 
-    .header {
+    .gdg-header {
         position: absolute;
         left: 0;
         top: 0;
@@ -104,7 +104,7 @@ const MinimapStyle = styled.div`
         box-shadow: 0 0 0 1px var(--gdg-border-color);
     }
 
-    .locationMarker {
+    .gdg-locationMarker {
         position: absolute;
 
         border: 1px solid var(--gdg-accent-color);
@@ -336,9 +336,9 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                     handleMouse(e);
                 }}
                 onClick={handleMouse}>
-                <div className="header" />
+                <div className="gdg-header" />
                 <div
-                    className="locationMarker"
+                    className="gdg-locationMarker"
                     onDragStart={e => e.preventDefault()}
                     style={{
                         left,

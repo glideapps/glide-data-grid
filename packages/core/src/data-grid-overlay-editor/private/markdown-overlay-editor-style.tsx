@@ -19,11 +19,11 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
         min-width: 0;
     }
 
-    .spacer {
+    .gdg-spacer {
         flex: 1;
     }
 
-    .edit-icon {
+    .gdg-edit-icon {
         position: relative;
         cursor: pointer;
 
@@ -49,21 +49,21 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
         }
     }
 
-    .edit-hover {
+    .gdg-edit-hover {
         :hover {
             background-color: var(--gdg-accent-light);
             transition: background-color 150ms;
         }
     }
 
-    .checkmark-hover {
+    .gdg-checkmark-hover {
         :hover {
             color: #ffffff;
             background-color: var(--gdg-accent-color);
         }
     }
 
-    .md-edit-textarea {
+    .gdg-md-edit-textarea {
         position: relative;
         top: 0px;
         left: 0px;
@@ -74,7 +74,7 @@ export const MarkdownOverlayEditorStyle = styled.div<Props>`
         padding: 0;
     }
 
-    .ml-6 {
+    .gdg-ml-6 {
         margin-left: 6px;
     }
 `;
