@@ -35,7 +35,8 @@ describe("data-editor-fns", () => {
                 },
                 0,
                 false,
-                [0]
+                [0],
+                true
             )
         ).toEqual("");
     });
@@ -50,7 +51,8 @@ describe("data-editor-fns", () => {
                 },
                 0,
                 false,
-                [0]
+                [0],
+                true
             )
         ).toEqual('"foo, bar",baz');
     });
@@ -66,7 +68,8 @@ describe("data-editor-fns", () => {
                 },
                 0,
                 false,
-                [0]
+                [0],
+                true
             )
         ).toEqual("override");
     });

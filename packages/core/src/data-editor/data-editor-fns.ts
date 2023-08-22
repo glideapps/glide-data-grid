@@ -327,7 +327,7 @@ export function copyToClipboard(
         }
     };
 
-    if (window.navigator.clipboard?.write !== undefined || e !== undefined) {
+    if (window.navigator.clipboard?.write !== undefined || e?.clipboardData !== undefined) {
         const rootEl = document.createElement("tbody");
 
         for (const row of cells) {
