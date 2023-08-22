@@ -18682,7 +18682,9 @@ function decodeHTML(tableEl) {
   return result;
 }
 
-function data_editor_fns_escape(str) {
+function data_editor_fns_escape(str, actuallyEscape) {
+  if (!actuallyEscape) return str;
+
   if (/[\t\n",]/.test(str)) {
     str = `"${str.replace(/"/g, '""')}"`;
   }
@@ -18709,30 +18711,30 @@ const formatBoolean = val => {
   }
 };
 
-function formatCell(cell, index, raw, columnIndexes) {
+function formatCell(cell, index, raw, columnIndexes, escapeValues) {
   var _cell$data$toString, _cell$data;
 
   const colIndex = columnIndexes[index];
   if (cell.span !== undefined && cell.span[0] !== colIndex) return "";
 
   if (cell.copyData !== undefined) {
-    return data_editor_fns_escape(cell.copyData);
+    return data_editor_fns_escape(cell.copyData, escapeValues);
   }
 
   switch (cell.kind) {
     case data_grid_types/* GridCellKind.Text */.p6.Text:
     case data_grid_types/* GridCellKind.Number */.p6.Number:
-      return data_editor_fns_escape(raw ? (_cell$data$toString = (_cell$data = cell.data) === null || _cell$data === void 0 ? void 0 : _cell$data.toString()) !== null && _cell$data$toString !== void 0 ? _cell$data$toString : "" : cell.displayData);
+      return data_editor_fns_escape(raw ? (_cell$data$toString = (_cell$data = cell.data) === null || _cell$data === void 0 ? void 0 : _cell$data.toString()) !== null && _cell$data$toString !== void 0 ? _cell$data$toString : "" : cell.displayData, escapeValues);
 
     case data_grid_types/* GridCellKind.Markdown */.p6.Markdown:
     case data_grid_types/* GridCellKind.RowID */.p6.RowID:
     case data_grid_types/* GridCellKind.Uri */.p6.Uri:
-      return data_editor_fns_escape(cell.data);
+      return data_editor_fns_escape(cell.data, escapeValues);
 
     case data_grid_types/* GridCellKind.Image */.p6.Image:
     case data_grid_types/* GridCellKind.Bubble */.p6.Bubble:
       if (cell.data.length === 0) return "";
-      return cell.data.reduce((pv, cv) => `${data_editor_fns_escape(pv)},${data_editor_fns_escape(cv)}`);
+      return cell.data.reduce((pv, cv) => `${data_editor_fns_escape(pv, escapeValues)},${data_editor_fns_escape(cv, escapeValues)}`);
 
     case data_grid_types/* GridCellKind.Boolean */.p6.Boolean:
       return formatBoolean(cell.data);
@@ -18745,26 +18747,61 @@ function formatCell(cell, index, raw, columnIndexes) {
 
     case data_grid_types/* GridCellKind.Drilldown */.p6.Drilldown:
       if (cell.data.length === 0) return "";
-      return cell.data.map(i => i.text).reduce((pv, cv) => `${data_editor_fns_escape(pv)},${data_editor_fns_escape(cv)}`);
+      return cell.data.map(i => i.text).reduce((pv, cv) => `${data_editor_fns_escape(pv, escapeValues)},${data_editor_fns_escape(cv, escapeValues)}`);
 
     case data_grid_types/* GridCellKind.Custom */.p6.Custom:
-      return data_editor_fns_escape(cell.copyData);
+      return data_editor_fns_escape(cell.copyData, escapeValues);
 
     default:
       (0,support/* assertNever */.vE)(cell, `A cell was passed with an invalid kind: ${cell.kind}`);
   }
 }
 function formatForCopy(cells, columnIndexes) {
-  return cells.map(row => row.map((a, b) => formatCell(a, b, false, columnIndexes)).join("\t")).join("\n");
+  return cells.map(row => row.map((a, b) => formatCell(a, b, false, columnIndexes, true)).join("\t")).join("\n");
 }
 function copyToClipboard(cells, columnIndexes, e) {
-  var _window$navigator$cli;
+  var _window$navigator$cli3;
 
   const str = formatForCopy(cells, columnIndexes);
+  const styleTag = `<style type="text/css"><!--br {mso-data-placement:same-cell;}--></style>`;
 
-  if (((_window$navigator$cli = window.navigator.clipboard) === null || _window$navigator$cli === void 0 ? void 0 : _window$navigator$cli.write) !== undefined || e !== undefined) {
+  const copyWithWriteText = s => {
+    var _window$navigator$cli;
+
+    void ((_window$navigator$cli = window.navigator.clipboard) === null || _window$navigator$cli === void 0 ? void 0 : _window$navigator$cli.writeText(s));
+  };
+
+  const copyWithWrite = (s, html) => {
     var _window$navigator$cli2;
 
+    if (((_window$navigator$cli2 = window.navigator.clipboard) === null || _window$navigator$cli2 === void 0 ? void 0 : _window$navigator$cli2.write) === undefined) return false;
+    void window.navigator.clipboard.write([new ClipboardItem({
+      "text/plain": new Blob([s], {
+        type: "text/plain"
+      }),
+      "text/html": new Blob([`${styleTag}<table>${html}</table>`], {
+        type: "text/html"
+      })
+    })]);
+    return true;
+  };
+
+  const copyWithClipboardData = (s, html) => {
+    try {
+      var _e$clipboardData, _e$clipboardData2;
+
+      if (e === undefined || e.clipboardData === null) throw new Error("No clipboard data");
+      const formattedHtml = `${styleTag}<table>${html.replace(/\t/g, "    ").replace(/ /g, "<span>&nbsp;</span>")}</table>`;
+      e === null || e === void 0 ? void 0 : (_e$clipboardData = e.clipboardData) === null || _e$clipboardData === void 0 ? void 0 : _e$clipboardData.setData("text/plain", s);
+      e === null || e === void 0 ? void 0 : (_e$clipboardData2 = e.clipboardData) === null || _e$clipboardData2 === void 0 ? void 0 : _e$clipboardData2.setData("text/html", formattedHtml);
+    } catch {
+      if (!copyWithWrite(s, html)) {
+        copyWithWriteText(s);
+      }
+    }
+  };
+
+  if (((_window$navigator$cli3 = window.navigator.clipboard) === null || _window$navigator$cli3 === void 0 ? void 0 : _window$navigator$cli3.write) !== undefined || (e === null || e === void 0 ? void 0 : e.clipboardData) !== undefined) {
     const rootEl = document.createElement("tbody");
 
     for (const row of cells) {
@@ -18779,7 +18816,7 @@ function copyToClipboard(cells, columnIndexes, e) {
           link.innerText = cell.data;
           cellEl.append(link);
         } else {
-          cellEl.innerText = formatCell(cell, i, true, columnIndexes);
+          cellEl.innerText = formatCell(cell, i, true, columnIndexes, false);
         }
 
         rowEl.append(cellEl);
@@ -18788,29 +18825,9 @@ function copyToClipboard(cells, columnIndexes, e) {
       rootEl.append(rowEl);
     }
 
-    if (((_window$navigator$cli2 = window.navigator.clipboard) === null || _window$navigator$cli2 === void 0 ? void 0 : _window$navigator$cli2.write) !== undefined) {
-      void window.navigator.clipboard.write([new ClipboardItem({
-        "text/plain": new Blob([str], {
-          type: "text/plain"
-        }),
-        "text/html": new Blob([`<table>${rootEl.outerHTML}</table>`], {
-          type: "text/html"
-        })
-      })]);
-    } else if (e !== undefined && (e === null || e === void 0 ? void 0 : e.clipboardData) !== null) {
-      try {
-        e.clipboardData.setData("text/plain", str);
-        e.clipboardData.setData("text/html", `<table>${rootEl.outerHTML}</table>`);
-      } catch {
-        var _window$navigator$cli3;
-
-        void ((_window$navigator$cli3 = window.navigator.clipboard) === null || _window$navigator$cli3 === void 0 ? void 0 : _window$navigator$cli3.writeText(str));
-      }
-    }
+    void copyWithClipboardData(str, rootEl.outerHTML);
   } else {
-    var _window$navigator$cli4;
-
-    void ((_window$navigator$cli4 = window.navigator.clipboard) === null || _window$navigator$cli4 === void 0 ? void 0 : _window$navigator$cli4.writeText(str));
+    void copyWithWriteText(str);
   }
 
   e === null || e === void 0 ? void 0 : e.preventDefault();
@@ -37480,7 +37497,9 @@ function decodeHTML(tableEl) {
   return result;
 }
 
-function escape(str) {
+function escape(str, actuallyEscape) {
+  if (!actuallyEscape) return str;
+
   if (/[\t\n",]/.test(str)) {
     str = `"${str.replace(/"/g, '""')}"`;
   }
@@ -37507,30 +37526,30 @@ var formatBoolean = val => {
   }
 };
 
-function formatCell(cell, index, raw, columnIndexes) {
+function formatCell(cell, index, raw, columnIndexes, escapeValues) {
   var _a, _b;
 
   const colIndex = columnIndexes[index];
   if (cell.span !== void 0 && cell.span[0] !== colIndex) return "";
 
   if (cell.copyData !== void 0) {
-    return escape(cell.copyData);
+    return escape(cell.copyData, escapeValues);
   }
 
   switch (cell.kind) {
     case GridCellKind.Text:
     case GridCellKind.Number:
-      return escape(raw ? (_b = (_a = cell.data) == null ? void 0 : _a.toString()) != null ? _b : "" : cell.displayData);
+      return escape(raw ? (_b = (_a = cell.data) == null ? void 0 : _a.toString()) != null ? _b : "" : cell.displayData, escapeValues);
 
     case GridCellKind.Markdown:
     case GridCellKind.RowID:
     case GridCellKind.Uri:
-      return escape(cell.data);
+      return escape(cell.data, escapeValues);
 
     case GridCellKind.Image:
     case GridCellKind.Bubble:
       if (cell.data.length === 0) return "";
-      return cell.data.reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
+      return cell.data.reduce((pv, cv) => `${escape(pv, escapeValues)},${escape(cv, escapeValues)}`);
 
     case GridCellKind.Boolean:
       return formatBoolean(cell.data);
@@ -37543,10 +37562,10 @@ function formatCell(cell, index, raw, columnIndexes) {
 
     case GridCellKind.Drilldown:
       if (cell.data.length === 0) return "";
-      return cell.data.map(i => i.text).reduce((pv, cv) => `${escape(pv)},${escape(cv)}`);
+      return cell.data.map(i => i.text).reduce((pv, cv) => `${escape(pv, escapeValues)},${escape(cv, escapeValues)}`);
 
     case GridCellKind.Custom:
-      return escape(cell.copyData);
+      return escape(cell.copyData, escapeValues);
 
     default:
       assertNever(cell, `A cell was passed with an invalid kind: ${cell.kind}`);
@@ -37554,15 +37573,52 @@ function formatCell(cell, index, raw, columnIndexes) {
 }
 
 function formatForCopy(cells, columnIndexes) {
-  return cells.map(row => row.map((a, b) => formatCell(a, b, false, columnIndexes)).join("	")).join("\n");
+  return cells.map(row => row.map((a, b) => formatCell(a, b, false, columnIndexes, true)).join("	")).join("\n");
 }
 
 function copyToClipboard(cells, columnIndexes, e) {
-  var _a, _b, _c, _d;
+  var _a;
 
   const str = formatForCopy(cells, columnIndexes);
+  const styleTag = `<style type="text/css"><!--br {mso-data-placement:same-cell;}--></style>`;
 
-  if (((_a = window.navigator.clipboard) == null ? void 0 : _a.write) !== void 0 || e !== void 0) {
+  const copyWithWriteText = s => {
+    var _a2;
+
+    void ((_a2 = window.navigator.clipboard) == null ? void 0 : _a2.writeText(s));
+  };
+
+  const copyWithWrite = (s, html) => {
+    var _a2;
+
+    if (((_a2 = window.navigator.clipboard) == null ? void 0 : _a2.write) === void 0) return false;
+    void window.navigator.clipboard.write([new ClipboardItem({
+      "text/plain": new Blob([s], {
+        type: "text/plain"
+      }),
+      "text/html": new Blob([`${styleTag}<table>${html}</table>`], {
+        type: "text/html"
+      })
+    })]);
+    return true;
+  };
+
+  const copyWithClipboardData = (s, html) => {
+    var _a2, _b;
+
+    try {
+      if (e === void 0 || e.clipboardData === null) throw new Error("No clipboard data");
+      const formattedHtml = `${styleTag}<table>${html.replace(/\t/g, "    ").replace(/ /g, "<span>&nbsp;</span>")}</table>`;
+      (_a2 = e == null ? void 0 : e.clipboardData) == null ? void 0 : _a2.setData("text/plain", s);
+      (_b = e == null ? void 0 : e.clipboardData) == null ? void 0 : _b.setData("text/html", formattedHtml);
+    } catch (e2) {
+      if (!copyWithWrite(s, html)) {
+        copyWithWriteText(s);
+      }
+    }
+  };
+
+  if (((_a = window.navigator.clipboard) == null ? void 0 : _a.write) !== void 0 || (e == null ? void 0 : e.clipboardData) !== void 0) {
     const rootEl = document.createElement("tbody");
 
     for (const row of cells) {
@@ -37577,7 +37633,7 @@ function copyToClipboard(cells, columnIndexes, e) {
           link.innerText = cell.data;
           cellEl.append(link);
         } else {
-          cellEl.innerText = formatCell(cell, i, true, columnIndexes);
+          cellEl.innerText = formatCell(cell, i, true, columnIndexes, false);
         }
 
         rowEl.append(cellEl);
@@ -37586,25 +37642,9 @@ function copyToClipboard(cells, columnIndexes, e) {
       rootEl.append(rowEl);
     }
 
-    if (((_b = window.navigator.clipboard) == null ? void 0 : _b.write) !== void 0) {
-      void window.navigator.clipboard.write([new ClipboardItem({
-        "text/plain": new Blob([str], {
-          type: "text/plain"
-        }),
-        "text/html": new Blob([`<table>${rootEl.outerHTML}</table>`], {
-          type: "text/html"
-        })
-      })]);
-    } else if (e !== void 0 && (e == null ? void 0 : e.clipboardData) !== null) {
-      try {
-        e.clipboardData.setData("text/plain", str);
-        e.clipboardData.setData("text/html", `<table>${rootEl.outerHTML}</table>`);
-      } catch (e2) {
-        void ((_c = window.navigator.clipboard) == null ? void 0 : _c.writeText(str));
-      }
-    }
+    void copyWithClipboardData(str, rootEl.outerHTML);
   } else {
-    void ((_d = window.navigator.clipboard) == null ? void 0 : _d.writeText(str));
+    void copyWithWriteText(str);
   }
 
   e == null ? void 0 : e.preventDefault();
@@ -41067,4 +41107,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.c07d2dd3.iframe.bundle.js.map
+//# sourceMappingURL=main.900bdfde.iframe.bundle.js.map
