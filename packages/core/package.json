@@ -27,6 +27,7 @@
         "lint": "npm run cycle-check && eslint src --ext .ts,.tsx",
         "cycle-check": "ts-helper -p ./tsconfig.json -r ./src/index.ts -c",
         "test": "jest",
+        "test-18": "jest --setupFilesAfterEnv=./src/setupTests-18.ts",
         "check-package": "package-check"
     },
     "repository": {
