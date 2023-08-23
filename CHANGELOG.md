@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.9.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.8.3...v5.9.0) (2023-08-23)
+
+
+### Features
+
+* add sorting support in header ([b294d7a](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/b294d7a80c401b83af0533743d873c8b2260fa4c))
+
+
+### Bug Fixes
+
+* failling e2e tests ([68945ed](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/68945ed7defa6b7b9eb1f7351d9eb1b221e8763b))
+* react 18 tests ([115bd6d](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/115bd6d9dc9d8b0291bccfab97e1abecdcc45d50))
+* replace roundRect to roundedRect ([13992ba](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/13992bab541b3496b5459386ce8ad3d56dfd70ee))
+
 ### [5.8.3](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.8.2...v5.8.3) (2023-08-04)
 
 
