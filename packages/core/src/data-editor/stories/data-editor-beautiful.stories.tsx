@@ -42,6 +42,7 @@ import {
 } from "./utils";
 import noop from "lodash/noop.js";
 import type { GetRowThemeCallback } from "../../data-grid/data-grid-render";
+import { SortingDirection } from "../../data-grid/data-grid-lib";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -2303,6 +2304,44 @@ export const HeaderMenus: React.VFC = () => {
     );
 };
 (HeaderMenus as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
+export const HeaderSorting: React.VFC = () => {
+    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
+
+    const realCols = React.useMemo(() => {
+        return cols.map((c,index) => ({
+            ...c,
+            sorting: index % 2 === 1 ? { direction: SortingDirection.Ascending, order: index } : undefined,
+        }));
+    }, [cols]);
+
+    return (
+        <BeautifulWrapper
+            title="Header Sorting"
+            description={
+                <>
+                    <Description>
+                        Headers on the data grid can be configured to support sorting.
+                    </Description>
+                </>
+            }>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={realCols}
+                onCellContextMenu={(_, e) => e.preventDefault()}
+                onCellEdited={setCellValue}
+                onColumnResize={onColumnResize}
+                rows={1000}
+            />
+        </BeautifulWrapper>
+    );
+};
+(HeaderSorting as any).parameters = {
     options: {
         showPanel: false,
     },

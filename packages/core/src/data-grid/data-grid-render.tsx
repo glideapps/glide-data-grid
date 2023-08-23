@@ -38,6 +38,9 @@ import {
     drawCheckbox,
     drawColumnResizeOutline,
     clipCanvasString,
+    measureTextCached,
+    drawSorting,
+    getSortingSize,
 } from "./data-grid-lib";
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import type { Theme } from "../common/styles";
@@ -775,13 +778,25 @@ export function drawHeader(
 
     const font = `${theme.headerFontStyle} ${theme.fontFamily}`;
     const actualPadding = drawX - x;
-    const textMaxWidth  = width - actualPadding;
 
-    ctx.fillText(
-        clipCanvasString(c.title, textMaxWidth, ctx, `${c.title}_${textMaxWidth}`, font),
-        drawX,
-        y + height / 2 + getMiddleCenterBias(ctx, font)
-    );
+    const sortingIconSize = c.sorting ? getSortingSize() : { width: 0, height: 0 }
+    const menuWidth = c.hasMenu === true ? menuBounds.width : 0;
+ 
+    const textMaxWidth = Math.max(width - actualPadding - sortingIconSize.width - menuWidth, 0);
+
+    const clippedText = clipCanvasString(c.title, textMaxWidth, ctx, `${c.title}_${textMaxWidth}`, font);
+
+    ctx.fillText(clippedText, drawX, y + height / 2 + getMiddleCenterBias(ctx, font));
+
+    if (c.sorting) {
+        const sortingSize = getSortingSize()
+        const clippedTextMetrics = measureTextCached(clippedText, ctx, font);
+        const clippedTextWidth = clippedTextMetrics.width;
+        const sortingLeft = drawX + clippedTextWidth + 4;
+        const sortingTop = y + height / 2 - sortingSize.height / 2;
+        
+        drawSorting(ctx, sortingLeft, sortingTop, c.sorting.direction, c.sorting.order, font);
+    }
 
     if (shouldDrawMenu && c.hasMenu === true) {
         ctx.beginPath();
@@ -1334,17 +1349,17 @@ function drawCells(
                     }
 
                     if (highlightRegions !== undefined) {
-                                for (const region of highlightRegions) {
-                                    const r = region.range;
-                                    if (
-                                        r.x <= c.sourceIndex &&
-                                        c.sourceIndex < r.x + r.width &&
-                                        r.y <= row &&
-                                        row < r.y + r.height
-                                    ) {
-                                        fill = blend(region.color, fill);
-                                    }
-                                }
+                        for (const region of highlightRegions) {
+                            const r = region.range;
+                            if (
+                                r.x <= c.sourceIndex &&
+                                c.sourceIndex < r.x + r.width &&
+                                r.y <= row &&
+                                row < r.y + r.height
+                            ) {
+                                fill = blend(region.color, fill);
+                            }
+                        }
                     }
 
                     if (fill !== undefined) {
@@ -1352,7 +1367,7 @@ function drawCells(
                         if (prepResult !== undefined) {
                             prepResult.fillStyle = fill;
                         }
-                         ctx.fillRect(cellX, drawY, cellWidth, rh);
+                        ctx.fillRect(cellX, drawY, cellWidth, rh);
                     }
 
                     if (cell.style === "faded") {

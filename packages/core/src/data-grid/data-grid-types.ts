@@ -5,6 +5,7 @@ import type React from "react";
 import type { CSSProperties } from "react";
 import type { SpriteManager } from "./data-grid-sprites";
 import type { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor";
+import type { SortingDirection } from "./data-grid-lib";
 
 // Thoughts:
 // rows/columns are called out as selected, but when selected they must also be added
@@ -258,6 +259,7 @@ interface BaseGridColumn {
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
     readonly hasMenu?: boolean;
+    readonly sorting?: { order: number, direction: SortingDirection };
     readonly grow?: number;
     readonly style?: "normal" | "highlight";
     readonly themeOverride?: Partial<Theme>;
