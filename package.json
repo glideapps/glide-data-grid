@@ -12,7 +12,7 @@
     "build-storybook": "npm run build --workspaces && build-storybook -o public/",
     "prod-storybook": "npm run build-storybook && npx http-server public -p 9009",
     "test": "cd packages/core && npm run test --",
-    "test-18": "./setup-react-18-test.sh && cd packages/core && npm run test --",
+    "test-18": "./setup-react-18-test.sh && cd packages/core && npm run test-18 --",
     "test:e2e": "playwright test",
     "test:e2e:debug": "playwright test --debug --ui",
     "test:e2e:snapshot": "playwright/update-snapshots.sh",

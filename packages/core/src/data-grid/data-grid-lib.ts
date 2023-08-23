@@ -1263,16 +1263,86 @@ export function drawColumnResizeOutline(
 }
 
 
+export const SORTING_SIZE = { width: 38, height: 17 };
 
-const binarySearch = ({
-                          max,
-                          getValue,
-                          match,
-                      }: {
-    max: number;
-    match: number;
-    getValue: (g: number) => number;
-}) => {
+const sortingAsc = `
+    <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18">
+        <rect fill="#0265DC" height="2" rx="0.5" width="6" x="1" y="4" />
+        <rect fill="#0265DC" height="2" rx="0.5" width="8" x="1" y="8" />
+        <rect fill="#0265DC" height="2" rx="0.5" width="10" x="1" y="12" />
+        <path fill="#0265DC" d="M15.99951,6H14.99634v7.5a.49378.49378,0,0,1-.49317.5h-.49633a.5.5,0,0,1-.5-.49951L13.50366,6H12.50049A.24984.24984,0,0,1,12.25,5.74823a.24439.24439,0,0,1,.07373-.175L14.0918,3.5564a.25007.25007,0,0,1,.3164,0l1.76807,2.01684a.24439.24439,0,0,1,.07373.175A.24984.24984,0,0,1,15.99951,6Z" />
+    </svg>
+`;
+
+const sortingDesc = `
+    <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18">
+        <rect fill="#0265DC" height="2" rx="0.5" width="6" x="1" y="12" />
+        <rect fill="#0265DC" height="2" rx="0.5" width="8" x="1" y="8" />
+        <rect fill="#0265DC" height="2" rx="0.5" width="10" x="1" y="4" />
+        <path fill="#0265DC" d="M16,12H14.9965V4.5a.494.494,0,0,0-.488-.5L14.503,4h-.496a.5.5,0,0,0-.5.5L13.5035,12H12.5a.25.25,0,0,0-.25.25.245.245,0,0,0,.0735.175l1.7685,2.0165a.25.25,0,0,0,.316,0l1.7685-2.0165a.245.245,0,0,0,.0735-.175A.25.25,0,0,0,16,12Z" />
+    </svg>
+`;
+
+export enum SortingDirection {
+    Ascending = "asc",
+    Descending = "desc",
+}
+
+function getSortingIcon(sortingSvg: string) {
+    const sortingIcon = new Image();
+    sortingIcon.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(sortingSvg)}`
+    return sortingIcon
+}
+
+// We store the sorting icons in outside of the function to avoid creating them every time
+const sortingIconMap = {
+    [SortingDirection.Ascending]: getSortingIcon(sortingAsc),
+    [SortingDirection.Descending]: getSortingIcon(sortingDesc),
+}
+
+export function drawSorting(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    sortingDirection: SortingDirection,
+    order: number,
+    font: string,
+    theme: Theme,
+) {
+    const { width, height } = SORTING_SIZE;
+
+    ctx.beginPath();
+    ctx.fillStyle = theme.sortIndicatorBackgroundColor;
+    roundedRect(ctx, x, y, width, height, 2);
+    ctx.fill();
+    ctx.closePath();
+ 
+    const padding = 3;
+
+    const iconLeft = x + padding;
+    const iconTop = y;
+    const iconHeight = height;
+    const iconWidth = iconHeight;
+    const iconRight = iconLeft + iconWidth;
+
+    ctx.beginPath();
+    const sortingIcon = sortingIconMap[sortingDirection]
+    ctx.drawImage(sortingIcon, iconLeft, iconTop, iconWidth, iconHeight);
+    ctx.closePath();
+
+    const orderText = `${order}`
+    const orderTextWidth = measureTextCached(orderText, ctx, font).width;
+    const orderTextFreeSpace = width - (2 * padding) - iconWidth;
+    const orderLeft = iconRight + (orderTextFreeSpace - orderTextWidth) / 2;
+    const orderTop = y + height / 2 + getMiddleCenterBias(ctx, font) - 0.3
+
+    ctx.beginPath();
+    ctx.fillStyle = theme.sortIndicatorColor;
+    ctx.fillText(orderText, orderLeft, orderTop);
+    ctx.closePath();
+}
+
+const binarySearch = ({ max, getValue, match }: { max: number; match: number; getValue: (g: number) => number }) => {
     let min = 0;
 
     while (min <= max) {

@@ -81,6 +81,8 @@ export interface Theme {
      * the nested group indent is the amount of pixels to indent each nested group
      */
     nestedGroupIndent: number;
+    sortIndicatorBackgroundColor: string;
+    sortIndicatorColor: string;
 }
 
 const dataEditorBaseTheme: Theme = {
@@ -127,6 +129,8 @@ const dataEditorBaseTheme: Theme = {
     editorFontSize: "13px",
     lineHeight: 1.4, //unitless scaler depends on your font
     nestedGroupIndent: 20,
+    sortIndicatorBackgroundColor: "#B5DEFF",
+    sortIndicatorColor: "#0265DC",
 };
 
 /** @category Theme */
