@@ -1314,7 +1314,7 @@ export function drawSorting(
 
     ctx.beginPath();
     ctx.fillStyle = "#B5DEFF"
-    ctx.roundRect(x, y, width, height, 2);
+    roundedRect(ctx, x, y, width, height, 2);
     ctx.fill();
     ctx.closePath();
  
