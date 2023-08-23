@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
 import { render, fireEvent, screen, act } from "@testing-library/react";
-import { DataEditor, DataEditorProps, GridCell, GridCellKind, GridSelection, Item } from "../src";
+import { DataEditor, type DataEditorProps, type GridCell, GridCellKind, type GridSelection, type Item } from "../src";
 import type { DataEditorRef } from "../src/data-editor/data-editor";
 import { CompactSelection } from "../src/data-grid/data-grid-types";
 

@@ -1,16 +1,16 @@
 import { useCustomCells } from "@glideapps/glide-data-grid";
-import StarCellRenderer, { StarCell } from "./cells/star-cell";
-import SparklineCellRenderer, { SparklineCell } from "./cells/sparkline-cell";
-import TagsCellRenderer, { TagsCell } from "./cells/tags-cell";
-import UserProfileCellRenderer, { UserProfileCell } from "./cells/user-profile-cell";
-import DropdownCellRenderer, { DropdownCell } from "./cells/dropdown-cell";
+import StarCellRenderer, { type StarCell } from "./cells/star-cell";
+import SparklineCellRenderer, { type SparklineCell } from "./cells/sparkline-cell";
+import TagsCellRenderer, { type TagsCell } from "./cells/tags-cell";
+import UserProfileCellRenderer, { type UserProfileCell } from "./cells/user-profile-cell";
+import DropdownCellRenderer, { type DropdownCell } from "./cells/dropdown-cell";
 import ArticleCellRenderer from "./cells/article-cell";
 import type { ArticleCell } from "./cells/article-cell-types";
-import RangeCellRenderer, { RangeCell } from "./cells/range-cell";
-import SpinnerCellRenderer, { SpinnerCell } from "./cells/spinner-cell";
-import DatePickerRenderer, { DatePickerCell } from "./cells/date-picker-cell";
-import LinksCellRenderer, { LinksCell } from "./cells/links-cell";
-import ButtonCellRenderer, { ButtonCell } from "./cells/button-cell";
+import RangeCellRenderer, { type RangeCell } from "./cells/range-cell";
+import SpinnerCellRenderer, { type SpinnerCell } from "./cells/spinner-cell";
+import DatePickerRenderer, { type DatePickerCell } from "./cells/date-picker-cell";
+import LinksCellRenderer, { type LinksCell } from "./cells/links-cell";
+import ButtonCellRenderer, { type ButtonCell } from "./cells/button-cell";
 
 const cells = [
     StarCellRenderer,

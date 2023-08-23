@@ -1,6 +1,6 @@
 import {
-    CustomCell,
-    CustomRenderer,
+    type CustomCell,
+    type CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
     interpolateColors,

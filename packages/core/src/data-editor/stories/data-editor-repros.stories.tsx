@@ -3,7 +3,7 @@ import * as React from "react";
 import { useState, useMemo } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../../stories/story-utils";
 
-import { GridCell, GridCellKind, Item } from "../../data-grid/data-grid-types";
+import { type GridCell, GridCellKind, type Item } from "../../data-grid/data-grid-types";
 import { DataEditor } from "../data-editor";
 import { styled } from "@linaria/react";
 

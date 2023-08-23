@@ -1,7 +1,7 @@
 import {
-    CustomCell,
-    ProvideEditorCallback,
-    CustomRenderer,
+    type CustomCell,
+    type ProvideEditorCallback,
+    type CustomRenderer,
     getMiddleCenterBias,
     useTheme,
     GridCellKind,
@@ -9,7 +9,7 @@ import {
 } from "@glideapps/glide-data-grid";
 import { styled } from "@linaria/react";
 import * as React from "react";
-import Select, { MenuProps, components } from "react-select";
+import Select, { type MenuProps, components } from "react-select";
 
 interface CustomMenuProps extends MenuProps<any> {}
 

@@ -1,13 +1,13 @@
 import {
-    CellArray,
+    type CellArray,
     CompactSelection,
-    DataEditorProps,
-    DataEditorRef,
-    EditableGridCell,
-    GridCell,
+    type DataEditorProps,
+    type DataEditorRef,
+    type EditableGridCell,
+    type GridCell,
     GridCellKind,
-    Item,
-    Rectangle,
+    type Item,
+    type Rectangle,
 } from "@glideapps/glide-data-grid";
 import range from "lodash/range.js";
 import chunk from "lodash/chunk.js";

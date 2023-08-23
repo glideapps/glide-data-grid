@@ -1,5 +1,5 @@
 import React from "react";
-import { DataEditor, DataEditorRef } from "../../data-editor/data-editor";
+import { DataEditor, type DataEditorRef } from "../../data-editor/data-editor";
 import {
     BeautifulWrapper,
     Description,

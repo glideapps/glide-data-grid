@@ -1,13 +1,13 @@
 /* eslint-disable unicorn/no-for-loop */
 import type { Theme } from "../common/styles";
 import {
-    DrilldownCellData,
-    Item,
-    GridSelection,
-    InnerGridCell,
-    SizedGridColumn,
-    Rectangle,
-    BaseGridCell,
+    type DrilldownCellData,
+    type Item,
+    type GridSelection,
+    type InnerGridCell,
+    type SizedGridColumn,
+    type Rectangle,
+    type BaseGridCell,
     BooleanEmpty,
     BooleanIndeterminate,
 } from "./data-grid-types";
@@ -1003,7 +1003,7 @@ export function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCe
         for (const rectInfo of renderBoxes) {
             const rx = Math.floor(rectInfo.x);
             const rw = Math.floor(rectInfo.width);
-            const outerMiddleWidth = rw - (outerSideWidth - outerPadding) * 2
+            const outerMiddleWidth = rw - (outerSideWidth - outerPadding) * 2;
             ctx.imageSmoothingEnabled = false;
 
             ctx.drawImage(el, 0, 0, sideWidth, height, rx - outerPadding, y, outerSideWidth, h);

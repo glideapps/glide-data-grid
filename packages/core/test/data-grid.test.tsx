@@ -1,6 +1,6 @@
 import * as React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
-import DataGrid, { DataGridProps, DataGridRef } from "../src/data-grid/data-grid";
+import DataGrid, { type DataGridProps, type DataGridRef } from "../src/data-grid/data-grid";
 import { CompactSelection, GridCellKind } from "../src/data-grid/data-grid-types";
 import { getDefaultTheme } from "../src";
 import { CellRenderers } from "../src/data-grid/cells";
@@ -248,23 +248,25 @@ describe("data-grid", () => {
 
         render(
             <>
-        <DataGrid {...basicProps} onItemHovered={spy} />
-        <div data-testid="outside-element" style={{
-            position: 'absolute',
-            width: '100vh',
-            height: '100vh',
-        }} />
-        </>
+                <DataGrid {...basicProps} onItemHovered={spy} />
+                <div
+                    data-testid="outside-element"
+                    style={{
+                        position: "absolute",
+                        width: "100vh",
+                        height: "100vh",
+                    }}
+                />
+            </>
         );
 
-
-        const outsideElement = screen.getByTestId('outside-element');
+        const outsideElement = screen.getByTestId("outside-element");
         fireEvent.mouseMove(outsideElement, {
             clientX: 350, // Col C
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
 
-        expect(spy).not.toHaveBeenCalled()
+        expect(spy).not.toHaveBeenCalled();
     });
 
     test("Header hovered", () => {

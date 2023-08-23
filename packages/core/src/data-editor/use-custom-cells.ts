@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { CustomRenderer } from "../data-grid/cells/cell-types";
-import { CustomCell, GridCellKind } from "../data-grid/data-grid-types";
+import { type CustomCell, GridCellKind } from "../data-grid/data-grid-types";
 import type { DataEditorProps } from "./data-editor";
 
 /**

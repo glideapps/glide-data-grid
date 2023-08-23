@@ -1,5 +1,5 @@
 const { build } = require("esbuild");
-const linaria = require("@linaria/esbuild/lib/index").default;
+const linaria = require("@linaria/esbuild").default;
 const { dependencies, peerDependencies } = require("./package.json");
 const fs = require("fs");
 

@@ -1,7 +1,13 @@
 /* eslint-disable unicorn/consistent-destructuring */
 import * as React from "react";
-import { CellArray, GetCellsThunk, GridCellKind, Item, Rectangle } from "../data-grid/data-grid-types";
-import ScrollingDataGrid, { ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
+import {
+    type CellArray,
+    type GetCellsThunk,
+    GridCellKind,
+    type Item,
+    type Rectangle,
+} from "../data-grid/data-grid-types";
+import ScrollingDataGrid, { type ScrollingDataGridProps } from "../scrolling-data-grid/scrolling-data-grid";
 import { SearchWrapper } from "./data-grid-search-style";
 import { assert } from "../common/support";
 
@@ -114,12 +120,11 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         [onSearchValueChange]
     );
 
-    const [searchStatus, setSearchStatus] =
-        React.useState<{
-            rowsSearched: number;
-            results: number;
-            selectedIndex: number;
-        }>();
+    const [searchStatus, setSearchStatus] = React.useState<{
+        rowsSearched: number;
+        results: number;
+        selectedIndex: number;
+    }>();
 
     const searchStatusRef = React.useRef(searchStatus);
     searchStatusRef.current = searchStatus;

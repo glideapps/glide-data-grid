@@ -3,10 +3,10 @@ import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import {
     BooleanEmpty,
     BooleanIndeterminate,
-    GridCell,
+    type GridCell,
     GridCellKind,
-    GridSelection,
-    Rectangle,
+    type GridSelection,
+    type Rectangle,
 } from "../data-grid/data-grid-types";
 
 export function expandSelection(

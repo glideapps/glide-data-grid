@@ -1,6 +1,6 @@
 import { range } from "lodash";
 import React from "react";
-import { DataEditor, DataEditorProps } from "../../data-editor/data-editor";
+import { DataEditor, type DataEditorProps } from "../../data-editor/data-editor";
 import { BeautifulWrapper, Description, PropName, defaultProps } from "../../data-editor/stories/utils";
 import type { GridColumn } from "../../data-grid/data-grid-types";
 import { GridCellKind } from "../../data-grid/data-grid-types";

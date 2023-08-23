@@ -11,46 +11,46 @@ import {
 } from "./data-grid-lib";
 import {
     GridCellKind,
-    Rectangle,
-    GridSelection,
-    GridMouseEventArgs,
-    GridDragEventArgs,
-    GridKeyEventArgs,
-    InnerGridCell,
+    type Rectangle,
+    type GridSelection,
+    type GridMouseEventArgs,
+    type GridDragEventArgs,
+    type GridKeyEventArgs,
+    type InnerGridCell,
     InnerGridCellKind,
     CompactSelection,
-    DrawCustomCellCallback,
-    CellList,
-    Item,
-    DrawHeaderCallback,
+    type DrawCustomCellCallback,
+    type CellList,
+    type Item,
+    type DrawHeaderCallback,
     isReadWriteCell,
     isInnerOnlyCell,
     booleanCellIsEditable,
-    InnerGridColumn,
-    TrailingRowType,
+    type InnerGridColumn,
+    type TrailingRowType,
     groupHeaderKind,
     headerKind,
     outOfBoundsKind,
-    ImageWindowLoader,
+    type ImageWindowLoader,
 } from "./data-grid-types";
-import { SpriteManager, SpriteMap } from "./data-grid-sprites";
+import { SpriteManager, type SpriteMap } from "./data-grid-sprites";
 import { direction, useDebouncedMemo, useEventListener } from "../common/utils";
 import clamp from "lodash/clamp.js";
 import makeRange from "lodash/range.js";
 import {
-    BlitData,
+    type BlitData,
     drawCell,
     drawGrid,
-    DrawGridArg,
+    type DrawGridArg,
     drawHeader,
     getActionBoundsForGroup,
     getHeaderMenuBounds,
-    GetRowThemeCallback,
-    GroupDetailsCallback,
-    Highlight,
+    type GetRowThemeCallback,
+    type GroupDetailsCallback,
+    type Highlight,
     pointInRect,
 } from "./data-grid-render";
-import { AnimationManager, StepCallback } from "./animation-manager";
+import { AnimationManager, type StepCallback } from "./animation-manager";
 import { browserIsFirefox, browserIsSafari } from "../common/browser-detect";
 import { useAnimationQueue } from "./use-animation-queue";
 import { assert } from "../common/support";

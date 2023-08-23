@@ -1,6 +1,6 @@
 import type { Theme } from "../common/styles";
 import type { SpriteProps } from "../common/utils";
-import { HeaderIconMap, sprites } from "./sprites";
+import { type HeaderIconMap, sprites } from "./sprites";
 
 /**
  * A known icon identifier
@@ -44,7 +44,10 @@ export class SpriteManager {
     private headerIcons: SpriteMap;
     private inFlight = 0;
 
-    constructor(headerIcons: SpriteMap | undefined, private onSettled: () => void) {
+    constructor(
+        headerIcons: SpriteMap | undefined,
+        private onSettled: () => void
+    ) {
         this.headerIcons = {
             ...sprites,
             ...headerIcons,

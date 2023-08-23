@@ -6,12 +6,12 @@ import { BuilderThemeWrapper } from "../../stories/story-utils";
 
 import {
     CompactSelection,
-    EditableGridCell,
-    GridCell,
+    type EditableGridCell,
+    type GridCell,
     GridCellKind,
-    GridColumn,
-    GridSelection,
-    Item,
+    type GridColumn,
+    type GridSelection,
+    type Item,
 } from "../../data-grid/data-grid-types";
 import { DataEditor } from "../data-editor";
 
@@ -148,7 +148,7 @@ function getDummyCols() {
                 width: 120 + (i % 4) * 10,
                 icon: "headerString",
                 hasMenu: true,
-            } as GridColumn)
+            }) as GridColumn
     );
 }
 

@@ -1,8 +1,8 @@
 import {
-    CustomCell,
-    Rectangle,
+    type CustomCell,
+    type Rectangle,
     measureTextCached,
-    CustomRenderer,
+    type CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
 } from "@glideapps/glide-data-grid";

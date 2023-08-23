@@ -1,7 +1,7 @@
 import React from "react";
 import { GrowingEntry } from "../../growing-entry/growing-entry";
 import { drawTextCell, prepTextCell } from "../data-grid-lib";
-import { GridCellKind, RowIDCell } from "../data-grid-types";
+import { GridCellKind, type RowIDCell } from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";
 
 export const rowIDCellRenderer: InternalCellRenderer<RowIDCell> = {

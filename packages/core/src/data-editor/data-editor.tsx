@@ -8,52 +8,52 @@ import range from "lodash/range.js";
 import debounce from "lodash/debounce.js";
 import DataGridOverlayEditor from "../data-grid-overlay-editor/data-grid-overlay-editor";
 import {
-    EditableGridCell,
-    GridCell,
+    type EditableGridCell,
+    type GridCell,
     GridCellKind,
-    GridDragEventArgs,
-    GridKeyEventArgs,
-    GridMouseEventArgs,
-    GridSelection,
+    type GridDragEventArgs,
+    type GridKeyEventArgs,
+    type GridMouseEventArgs,
+    type GridSelection,
     isEditableGridCell,
-    Rectangle,
+    type Rectangle,
     isReadWriteCell,
-    InnerGridCell,
+    type InnerGridCell,
     InnerGridCellKind,
     CompactSelection,
-    Slice,
+    type Slice,
     isInnerOnlyCell,
-    ProvideEditorCallback,
-    DrawCustomCellCallback,
-    GridMouseCellEventArgs,
-    GridColumn,
+    type ProvideEditorCallback,
+    type DrawCustomCellCallback,
+    type GridMouseCellEventArgs,
+    type GridColumn,
     isObjectEditorCallbackResult,
-    GroupHeaderClickedEventArgs,
-    HeaderClickedEventArgs,
-    CellClickedEventArgs,
-    Item,
-    MarkerCell,
+    type GroupHeaderClickedEventArgs,
+    type HeaderClickedEventArgs,
+    type CellClickedEventArgs,
+    type Item,
+    type MarkerCell,
     headerCellUnheckedMarker,
     headerCellCheckedMarker,
     headerCellIndeterminateMarker,
     groupHeaderKind,
     outOfBoundsKind,
-    ValidatedGridCell,
-    ImageEditorType,
-    CustomCell,
+    type ValidatedGridCell,
+    type ImageEditorType,
+    type CustomCell,
     headerKind,
     gridSelectionHasItem,
 } from "../data-grid/data-grid-types";
-import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
+import DataGridSearch, { type DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
-import { getDataEditorTheme, makeCSSStyle, Theme, ThemeContext } from "../common/styles";
+import { getDataEditorTheme, makeCSSStyle, type Theme, ThemeContext } from "../common/styles";
 import type { DataGridRef } from "../data-grid/data-grid";
 import { getScrollBarWidth, useEventListener, useStateWithReactiveInput, whenDefined } from "../common/utils";
 import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
 import { measureColumn, useColumnSizer } from "./use-column-sizer";
 import { isHotkey } from "../common/is-hotkey";
-import { SelectionBlending, useSelectionBehavior } from "../data-grid/use-selection-behavior";
+import { type SelectionBlending, useSelectionBehavior } from "../data-grid/use-selection-behavior";
 import { useCellsForSelection } from "./use-cells-for-selection";
 import { unquote, expandSelection, copyToClipboard, decodeHTML } from "./data-editor-fns";
 import { DataEditorContainer } from "../data-editor-container/data-grid-container";

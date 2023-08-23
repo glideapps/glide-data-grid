@@ -4,12 +4,12 @@ import { render, fireEvent, screen, act, createEvent } from "@testing-library/re
 import {
     CompactSelection,
     DataEditor,
-    DataEditorProps,
-    GridCell,
+    type DataEditorProps,
+    type GridCell,
     GridCellKind,
-    GridSelection,
+    type GridSelection,
     isSizedGridColumn,
-    Item,
+    type Item,
 } from "../src";
 import type { CustomCell, GridKeyEventArgs, SizedGridColumn } from "../src/data-grid/data-grid-types";
 import type { DataEditorRef } from "../src/data-editor/data-editor";
@@ -3453,7 +3453,7 @@ describe("data-editor", () => {
         const spy = jest.fn();
         jest.useFakeTimers();
 
-        const getCellContent: typeof basicProps["getCellContent"] = c => {
+        const getCellContent: (typeof basicProps)["getCellContent"] = c => {
             const [col, row] = c;
 
             if (row === 3 && col >= 2 && col <= 3) {

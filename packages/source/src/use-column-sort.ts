@@ -1,4 +1,4 @@
-import { DataEditorProps, GridCell, GridCellKind, GridColumn } from "@glideapps/glide-data-grid";
+import { type DataEditorProps, type GridCell, GridCellKind, type GridColumn } from "@glideapps/glide-data-grid";
 import range from "lodash/range.js";
 import * as React from "react";
 

@@ -1,16 +1,16 @@
 import React from "react";
 import {
     CompactSelection,
-    EditableGridCell,
-    GridCell,
+    type EditableGridCell,
+    type GridCell,
     GridCellKind,
-    GridColumn,
-    Rectangle,
-    Item,
-    CellArray,
+    type GridColumn,
+    type Rectangle,
+    type Item,
+    type CellArray,
 } from "../../data-grid/data-grid-types";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
-import { DataEditor, DataEditorProps, DataEditorRef } from "../data-editor";
+import { DataEditor, type DataEditorProps, type DataEditorRef } from "../data-editor";
 import { BeautifulWrapper, Description } from "./utils";
 import range from "lodash/range.js";
 import chunk from "lodash/chunk.js";

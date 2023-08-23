@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import DataGrid from "./data-grid";
-import { CompactSelection, GridCellKind, GridSelection } from "./data-grid-types";
+import { CompactSelection, GridCellKind, type GridSelection } from "./data-grid-types";
 import { getDataEditorTheme } from "../common/styles";
 import type { GetCellRendererCallback } from "./cells/cell-types";
 import { CellRenderers } from "./cells";

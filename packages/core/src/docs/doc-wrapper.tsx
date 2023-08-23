@@ -14,7 +14,9 @@ export const Wrapper = styled.div<WrapperProps>`
 
     border-radius: 12px;
 
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.4);
+    box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.2),
+        0 0 1px rgba(0, 0, 0, 0.4);
 
     width: 100%;
     height: ${p => p.height}px;
@@ -464,6 +466,7 @@ const BeautifulStyle = styled.div`
         }
         * {
             -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
     }
 `;

@@ -2,19 +2,19 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 
 import ClickOutsideContainer from "../click-outside-container/click-outside-container";
-import { makeCSSStyle, Theme, ThemeContext } from "../common/styles";
+import { makeCSSStyle, type Theme, ThemeContext } from "../common/styles";
 import type { GetCellRendererCallback } from "../data-grid/cells/cell-types";
 import {
-    EditableGridCell,
-    GridCell,
+    type EditableGridCell,
+    type GridCell,
     isEditableGridCell,
     isInnerOnlyCell,
     isObjectEditorCallbackResult,
-    Item,
-    ProvideEditorCallback,
-    ProvideEditorCallbackResult,
-    Rectangle,
-    ValidatedGridCell,
+    type Item,
+    type ProvideEditorCallback,
+    type ProvideEditorCallbackResult,
+    type Rectangle,
+    type ValidatedGridCell,
 } from "../data-grid/data-grid-types";
 import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style";
 import type { OverlayImageEditorProps } from "./private/image-overlay-editor";

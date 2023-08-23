@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { GridCell, GridCellKind, GridColumn, Rectangle } from "../src";
+import { type GridCell, GridCellKind, type GridColumn, type Rectangle } from "../src";
 import { getDataEditorTheme } from "../src/common/styles";
 import type { DataGridSearchProps } from "../src/data-grid-search/data-grid-search";
 import { CellRenderers } from "../src/data-grid/cells";
@@ -287,6 +287,7 @@ describe("use-column-sizer", () => {
     });
 
     it("Removes the canvas from the DOM when unmounted", async () => {
+        // eslint-disable-next-line sonarjs/no-identical-functions
         const { unmount } = renderHook(() =>
             useColumnSizer(
                 COLUMNS,
