@@ -675,16 +675,15 @@ const emptyGridSelection: GridSelection = {
 
 const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorProps> = (p, forwardedRef) => {
     const [gridSelectionInner, setGridSelectionInner] = React.useState<GridSelection>(emptyGridSelection);
-    const [overlay, setOverlay] =
-        React.useState<{
-            target: Rectangle;
-            content: GridCell;
-            theme: Theme;
-            initialValue: string | undefined;
-            cell: Item;
-            highlight: boolean;
-            forceEditMode: boolean;
-        }>();
+    const [overlay, setOverlay] = React.useState<{
+        target: Rectangle;
+        content: GridCell;
+        theme: Theme;
+        initialValue: string | undefined;
+        cell: Item;
+        highlight: boolean;
+        forceEditMode: boolean;
+    }>();
     const searchInputRef = React.useRef<HTMLInputElement | null>(null);
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
     const [mouseState, setMouseState] = React.useState<MouseState>();
@@ -1823,13 +1822,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const isActivelyDraggingHeader = React.useRef(false);
     const lastMouseSelectLocation = React.useRef<readonly [number, number]>();
     const touchDownArgs = React.useRef(visibleRegion);
-    const mouseDownData =
-        React.useRef<{
-            wasDoubleClick: boolean;
-            time: number;
-            button: number;
-            location: Item;
-        }>();
+    const mouseDownData = React.useRef<{
+        wasDoubleClick: boolean;
+        time: number;
+        button: number;
+        location: Item;
+    }>();
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
             isPrevented.current = false;
@@ -1871,11 +1869,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [gridSelection, handleSelect]
     );
 
-    const [renameGroup, setRenameGroup] =
-        React.useState<{
-            group: string;
-            bounds: Rectangle;
-        }>();
+    const [renameGroup, setRenameGroup] = React.useState<{
+        group: string;
+        bounds: Rectangle;
+    }>();
 
     const handleGroupHeaderSelection = React.useCallback(
         (args: GridMouseEventArgs) => {
