@@ -205,7 +205,7 @@ export function decodeHTML(tableEl: HTMLTableElement): string[][] | undefined {
 
 function escape(str: string, actuallyEscape: boolean): string {
     if (!actuallyEscape) return str;
-    if (/[\t\n",]/.test(str)) {
+    if (/[\t\n"]/.test(str)) {
         str = `"${str.replace(/"/g, '""')}"`;
     }
     return str;
