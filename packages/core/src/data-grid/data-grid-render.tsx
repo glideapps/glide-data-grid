@@ -40,7 +40,7 @@ import {
     clipCanvasString,
     measureTextCached,
     drawSorting,
-    getSortingSize,
+    SORTING_SIZE,
 } from "./data-grid-lib";
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import type { Theme } from "../common/styles";
@@ -779,7 +779,7 @@ export function drawHeader(
     const font = `${theme.headerFontStyle} ${theme.fontFamily}`;
     const actualPadding = drawX - x;
 
-    const sortingIconSize = c.sorting ? getSortingSize() : { width: 0, height: 0 }
+    const sortingIconSize = c.sorting ? SORTING_SIZE : { width: 0, height: 0 }
     const menuWidth = c.hasMenu === true ? menuBounds.width : 0;
  
     const textMaxWidth = Math.max(width - actualPadding - sortingIconSize.width - menuWidth, 0);
@@ -789,13 +789,12 @@ export function drawHeader(
     ctx.fillText(clippedText, drawX, y + height / 2 + getMiddleCenterBias(ctx, font));
 
     if (c.sorting) {
-        const sortingSize = getSortingSize()
         const clippedTextMetrics = measureTextCached(clippedText, ctx, font);
         const clippedTextWidth = clippedTextMetrics.width;
         const sortingLeft = drawX + clippedTextWidth + 4;
-        const sortingTop = y + height / 2 - sortingSize.height / 2;
+        const sortingTop = y + height / 2 - SORTING_SIZE.height / 2;
         
-        drawSorting(ctx, sortingLeft, sortingTop, c.sorting.direction, c.sorting.order, font);
+        drawSorting(ctx, sortingLeft, sortingTop, c.sorting.direction, c.sorting.order, font, theme);
     }
 
     if (shouldDrawMenu && c.hasMenu === true) {

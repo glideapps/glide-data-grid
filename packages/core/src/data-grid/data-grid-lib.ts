@@ -1263,9 +1263,7 @@ export function drawColumnResizeOutline(
 }
 
 
-export function getSortingSize() {
-    return { width: 38, height: 17 };
-}
+export const SORTING_SIZE = { width: 38, height: 17 };
 
 const sortingAsc = `
     <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18">
@@ -1308,12 +1306,13 @@ export function drawSorting(
     y: number,
     sortingDirection: SortingDirection,
     order: number,
-    font: string
+    font: string,
+    theme: Theme,
 ) {
-    const { width, height } = getSortingSize()
+    const { width, height } = SORTING_SIZE;
 
     ctx.beginPath();
-    ctx.fillStyle = "#B5DEFF"
+    ctx.fillStyle = theme.sortIndicatorBackgroundColor;
     roundedRect(ctx, x, y, width, height, 2);
     ctx.fill();
     ctx.closePath();
@@ -1338,7 +1337,7 @@ export function drawSorting(
     const orderTop = y + height / 2 + getMiddleCenterBias(ctx, font) - 0.3
 
     ctx.beginPath();
-    ctx.fillStyle = "#0265DC"
+    ctx.fillStyle = theme.sortIndicatorColor;
     ctx.fillText(orderText, orderLeft, orderTop);
     ctx.closePath();
 }
