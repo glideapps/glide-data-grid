@@ -62,6 +62,8 @@ const renderer: CustomRenderer<ButtonCell> = {
         const width = Math.ceil(rect.width - theme.cellHorizontalPadding * 2 - 1);
         const height = Math.ceil(rect.height - theme.cellVerticalPadding * 2 - 1);
 
+        if (width <= 0 || height <= 0) return true;
+
         if (backgroundColor !== undefined) {
             ctx.beginPath();
             roundedRect(ctx, x, y, width, height, borderRadius ?? 0);
