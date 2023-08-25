@@ -1294,11 +1294,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         const boundsForDragTarget = getBoundsForItem(canvas, col, row);
 
                         assert(boundsForDragTarget !== undefined);
-                        offscreen.width = boundsForDragTarget.width;
-                        offscreen.height = boundsForDragTarget.height;
+                        const dpr = Math.ceil(window.devicePixelRatio ?? 1);
+                        offscreen.width = boundsForDragTarget.width * dpr;
+                        offscreen.height = boundsForDragTarget.height * dpr;
 
                         const ctx = offscreen.getContext("2d");
                         if (ctx !== null) {
+                            ctx.scale(dpr, dpr);
                             ctx.textBaseline = "middle";
                             if (row === -1) {
                                 ctx.font = `${theme.headerFontStyle} ${theme.fontFamily}`;
@@ -1351,6 +1353,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
                         offscreen.style.left = "-100%";
                         offscreen.style.position = "absolute";
+                        offscreen.style.width = `${boundsForDragTarget.width}px`;
+                        offscreen.style.height = `${boundsForDragTarget.height}px`;
 
                         document.body.append(offscreen);
 
