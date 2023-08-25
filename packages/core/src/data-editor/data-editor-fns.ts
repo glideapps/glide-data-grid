@@ -203,9 +203,9 @@ export function decodeHTML(tableEl: HTMLTableElement): string[][] | undefined {
     return result;
 }
 
-function maybeEscape(str: string, actuallyEscape: boolean): string {
+function maybeEscape(str: string, actuallyEscape: boolean, withComma = false): string {
     if (actuallyEscape === false) return str;
-    if (/[\t\n"]/.test(str)) {
+    if ((withComma ? /[\t\n",]/ : /[\t\n"]/).test(str)) {
         str = `"${str.replace(/"/g, '""')}"`;
     }
     return str;
@@ -253,7 +253,7 @@ export function formatCell(
         case GridCellKind.Image:
         case GridCellKind.Bubble:
             if (cell.data.length === 0) return "";
-            return cell.data.reduce((pv, cv) => `${maybeEscape(pv, escapeValues)},${maybeEscape(cv, escapeValues)}`);
+            return cell.data.map(i => maybeEscape(i, escapeValues, true)).join(",");
         case GridCellKind.Boolean:
             return formatBoolean(cell.data);
         case GridCellKind.Loading:
@@ -262,9 +262,7 @@ export function formatCell(
             return raw ? "" : "************";
         case GridCellKind.Drilldown:
             if (cell.data.length === 0) return "";
-            return cell.data
-                .map(i => i.text)
-                .reduce((pv, cv) => `${maybeEscape(pv, escapeValues)},${maybeEscape(cv, escapeValues)}`);
+            return cell.data.map(i => maybeEscape(i.text, escapeValues, true)).join(",");
         case GridCellKind.Custom:
             return maybeEscape(cell.copyData, escapeValues);
         default:

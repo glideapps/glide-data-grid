@@ -1086,6 +1086,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith({
             rows: CompactSelection.empty(),
+            current: undefined,
             columns: CompactSelection.fromSingleSelection([0, 11]),
         });
     });
@@ -1520,6 +1521,61 @@ describe("data-editor", () => {
         render(<DataEditor {...basicProps} />, {
             wrapper: Context,
         });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        fireEvent.keyUp(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        const overlay = screen.getByDisplayValue("j");
+        expect(overlay).toBeInTheDocument();
+
+        jest.useFakeTimers();
+        fireEvent.keyDown(overlay, {
+            key: "Escape",
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(overlay).not.toBeInTheDocument();
+    });
+
+    test("Open overlay with keypress when prior is disabled", async () => {
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                getCellContent={cell => {
+                    const r = basicProps.getCellContent(cell);
+
+                    if (cell[0] === 1 && cell[1] === 0)
+                        return {
+                            ...r,
+                            allowOverlay: false,
+                            readonly: true,
+                        };
+
+                    return r;
+                }}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
@@ -2084,7 +2140,7 @@ describe("data-editor", () => {
         act(() => {
             jest.runAllTimers();
         });
-        expect(navigator.clipboard.writeText).toBeCalledWith('"1, 2"\t"2, 2"');
+        expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -2244,7 +2300,7 @@ describe("data-editor", () => {
         act(() => {
             jest.runAllTimers();
         });
-        expect(navigator.clipboard.writeText).toBeCalledWith('"1, 2"\t"2, 2"');
+        expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -2301,7 +2357,7 @@ describe("data-editor", () => {
         fireEvent.copy(window);
         await new Promise(resolve => setTimeout(resolve, 10));
         expect(navigator.clipboard.writeText).toBeCalledWith(
-            '"Data: 0, 3"\t"1, 3"\t"2, 3"\t3\tFoobar\t************\tFoobar\t\t"שלום 8, 3"\t"# Header: 9, 3"\thttps://example.com/10/3'
+            "Data: 0, 3\t1, 3\t2, 3\t3\tFoobar\t************\tFoobar\t\tשלום 8, 3\t# Header: 9, 3\thttps://example.com/10/3"
         );
     });
 
@@ -2503,6 +2559,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection(2),
+            current: undefined,
         });
     });
 
@@ -2531,6 +2588,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection([2, 6]),
+            current: undefined,
         });
     });
 
@@ -2565,6 +2623,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection([2, 6]),
+            current: undefined,
         });
     });
 
@@ -2596,6 +2655,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection(5),
+            current: undefined,
         });
     });
 
@@ -2624,6 +2684,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection(2).add(5),
+            current: undefined,
         });
 
         spy.mockClear();
@@ -2637,6 +2698,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection(2),
+            current: undefined,
         });
     });
 
@@ -2668,6 +2730,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection(5),
+            current: undefined,
         });
 
         spy.mockClear();
@@ -2681,6 +2744,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
+            current: undefined,
         });
     });
 
@@ -2831,6 +2895,7 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
+            current: undefined,
         });
     });
 
@@ -2897,6 +2962,7 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
+            current: undefined,
         });
     });
 
@@ -3335,6 +3401,7 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection([0, 1000]),
+            current: undefined,
         });
 
         sendClick(canvas, {
@@ -3345,6 +3412,7 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
+            current: undefined,
         });
     });
 

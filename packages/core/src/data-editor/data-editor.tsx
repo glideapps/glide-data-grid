@@ -2943,7 +2943,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     key.length === 1 &&
                     /[ -~]/g.test(key) &&
                     bounds !== undefined &&
-                    isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, row - 1)]))
+                    isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, Math.min(row, rows - 1))]))
                 ) {
                     if (
                         (!lastRowSticky || row !== rows) &&
