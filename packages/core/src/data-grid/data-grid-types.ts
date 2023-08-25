@@ -639,21 +639,21 @@ export class CompactSelection {
         return CompactSelection.empty().add(selection);
     };
 
-    offset = (amount: number): CompactSelection => {
+    public offset(amount: number): CompactSelection {
         if (amount === 0) return this;
         const newItems = this.items.map(x => [x[0] + amount, x[1] + amount] as Slice);
         return new CompactSelection(newItems);
-    };
+    }
 
-    add = (selection: number | Slice): CompactSelection => {
+    public add(selection: number | Slice): CompactSelection {
         const slice: Slice = typeof selection === "number" ? [selection, selection + 1] : selection;
 
         const newItems = mergeRanges([...this.items, slice]);
 
         return new CompactSelection(newItems);
-    };
+    }
 
-    remove = (selection: number | Slice): CompactSelection => {
+    public remove(selection: number | Slice): CompactSelection {
         const items = [...this.items];
 
         const selMin = typeof selection === "number" ? selection : selection[0];
@@ -674,41 +674,41 @@ export class CompactSelection {
             }
         }
         return new CompactSelection(items);
-    };
+    }
 
-    first = (): number | undefined => {
+    public first(): number | undefined {
         if (this.items.length === 0) return undefined;
         return this.items[0][0];
-    };
+    }
 
-    last = (): number | undefined => {
+    public last(): number | undefined {
         if (this.items.length === 0) return undefined;
         return this.items.slice(-1)[0][1] - 1;
-    };
+    }
 
-    hasIndex = (index: number): boolean => {
+    public hasIndex(index: number): boolean {
         for (let i = 0; i < this.items.length; i++) {
             const [start, end] = this.items[i];
             if (index >= start && index < end) return true;
         }
         return false;
-    };
+    }
 
-    hasAll = (index: Slice): boolean => {
+    public hasAll(index: Slice): boolean {
         for (let x = index[0]; x < index[1]; x++) {
             if (!this.hasIndex(x)) return false;
         }
         return true;
-    };
+    }
 
-    some = (predicate: (index: number) => boolean): boolean => {
+    public some(predicate: (index: number) => boolean): boolean {
         for (const i of this) {
             if (predicate(i)) return true;
         }
         return false;
-    };
+    }
 
-    equals = (other: CompactSelection): boolean => {
+    public equals(other: CompactSelection): boolean {
         if (other === this) return true;
 
         if (other.items.length !== this.items.length) return false;
@@ -721,13 +721,13 @@ export class CompactSelection {
         }
 
         return true;
-    };
+    }
 
     // Really old JS wont have access to the iterator and babel will stop people using it
     // when trying to support browsers so old we don't support them anyway. What goes on
     // between an engineer and their bundler in the privacy of their CI server is none of
     // my business anyway.
-    toArray = (): number[] => {
+    public toArray(): number[] {
         const result: number[] = [];
         for (const [start, end] of this.items) {
             for (let x = start; x < end; x++) {
@@ -735,7 +735,7 @@ export class CompactSelection {
             }
         }
         return result;
-    };
+    }
 
     get length(): number {
         let len = 0;

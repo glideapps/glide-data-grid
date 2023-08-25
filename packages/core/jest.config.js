@@ -6,7 +6,7 @@ export default {
     setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"],
     testPathIgnorePatterns: ["/node_modules/", "/dist/"],
     transform: {
-        "^.+\\.(ts|tsx)?$": "ts-jest",
+        "^.+\\.(ts|tsx)?$": ["ts-jest", { isolatedModules: true, useESM: true }],
         "^.+\\.(js|jsx)$": "babel-jest",
     },
     globals: {
