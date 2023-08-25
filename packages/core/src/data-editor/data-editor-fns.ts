@@ -203,8 +203,8 @@ export function decodeHTML(tableEl: HTMLTableElement): string[][] | undefined {
     return result;
 }
 
-function escape(str: string, actuallyEscape: boolean): string {
-    if (!actuallyEscape) return str;
+function maybeEscape(str: string, actuallyEscape: boolean): string {
+    if (actuallyEscape === false) return str;
     if (/[\t\n"]/.test(str)) {
         str = `"${str.replace(/"/g, '""')}"`;
     }
@@ -240,20 +240,20 @@ export function formatCell(
     const colIndex = columnIndexes[index];
     if (cell.span !== undefined && cell.span[0] !== colIndex) return "";
     if (cell.copyData !== undefined) {
-        return escape(cell.copyData, escapeValues);
+        return maybeEscape(cell.copyData, escapeValues);
     }
     switch (cell.kind) {
         case GridCellKind.Text:
         case GridCellKind.Number:
-            return escape(raw ? cell.data?.toString() ?? "" : cell.displayData, escapeValues);
+            return maybeEscape(raw ? cell.data?.toString() ?? "" : cell.displayData, escapeValues);
         case GridCellKind.Markdown:
         case GridCellKind.RowID:
         case GridCellKind.Uri:
-            return escape(cell.data, escapeValues);
+            return maybeEscape(cell.data, escapeValues);
         case GridCellKind.Image:
         case GridCellKind.Bubble:
             if (cell.data.length === 0) return "";
-            return cell.data.reduce((pv, cv) => `${escape(pv, escapeValues)},${escape(cv, escapeValues)}`);
+            return cell.data.reduce((pv, cv) => `${maybeEscape(pv, escapeValues)},${maybeEscape(cv, escapeValues)}`);
         case GridCellKind.Boolean:
             return formatBoolean(cell.data);
         case GridCellKind.Loading:
@@ -264,9 +264,9 @@ export function formatCell(
             if (cell.data.length === 0) return "";
             return cell.data
                 .map(i => i.text)
-                .reduce((pv, cv) => `${escape(pv, escapeValues)},${escape(cv, escapeValues)}`);
+                .reduce((pv, cv) => `${maybeEscape(pv, escapeValues)},${maybeEscape(cv, escapeValues)}`);
         case GridCellKind.Custom:
-            return escape(cell.copyData, escapeValues);
+            return maybeEscape(cell.copyData, escapeValues);
         default:
             assertNever(cell, `A cell was passed with an invalid kind: ${(cell as any).kind}`);
     }
