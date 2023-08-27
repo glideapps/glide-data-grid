@@ -192,7 +192,13 @@ export function decodeHTML(tableEl: HTMLTableElement): string[][] | undefined {
             current = [];
             walkEl.push(...[...el.children].reverse());
         } else if (el instanceof HTMLTableCellElement) {
-            current?.push(el.innerText ?? el.textContent ?? "");
+            // be careful not to use innerText here as its behavior is not well defined for non DOM attached nodes
+            const clone: HTMLTableCellElement = el.cloneNode(true) as HTMLTableCellElement;
+            const brs = clone.querySelectorAll("br");
+            for (const br of brs) {
+                br.replaceWith("\n");
+            }
+            current?.push(clone.textContent ?? "");
         }
     }
 

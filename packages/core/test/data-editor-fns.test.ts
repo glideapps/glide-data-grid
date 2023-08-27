@@ -25,6 +25,29 @@ describe("data-editor-fns", () => {
         ]);
     });
 
+    test("decode html line breaks", () => {
+        const root = document.createElement("table");
+        root.innerHTML = `
+            <tbody>
+                <tr>
+                    <td>1<br>1.1</td>
+                    <td>2<br/>2.1</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>4</td>
+                </tr>
+            </tbody>
+        `;
+
+        const decoded = decodeHTML(root);
+
+        expect(decoded).toEqual([
+            ["1\n1.1", "2\n2.1"],
+            ["3", "4"],
+        ]);
+    });
+
     test("format empty bubble cell", () => {
         expect(
             formatCell(
