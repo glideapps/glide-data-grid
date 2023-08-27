@@ -2228,6 +2228,130 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith(expect.anything(), "custom-cell-data");
     });
 
+    test("CustomCell onClick", async () => {
+        jest.useFakeTimers();
+
+        const onClickSpy = jest.fn();
+
+        // eslint-disable-next-line unicorn/consistent-function-scoping, sonarjs/no-identical-functions
+        const alwaysCustomCell = (_cell: Item): GridCell => {
+            return {
+                kind: GridCellKind.Custom,
+                allowOverlay: true,
+                data: "custom-cell-data",
+                copyData: "custom-cell-copy-data",
+            };
+        };
+
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                getCellContent={alwaysCustomCell}
+                customRenderers={[
+                    {
+                        kind: GridCellKind.Custom,
+                        draw: () => true,
+                        onClick: onClickSpy,
+                        isMatch: (_cell: CustomCell): _cell is CustomCell => true,
+                    },
+                ]}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+
+        // mouse down col b row 2
+        fireEvent.mouseDown(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 2 + 16,
+        });
+
+        // mouse move col b row 3
+        fireEvent.mouseMove(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 2 + 16,
+        });
+
+        // mouse up
+        fireEvent.mouseUp(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 2 + 16,
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(onClickSpy).toBeCalled();
+    });
+
+    test("CustomCell onClick fires with same restriction as onCellClicked", async () => {
+        jest.useFakeTimers();
+
+        const onClickSpy = jest.fn();
+
+        // eslint-disable-next-line unicorn/consistent-function-scoping, sonarjs/no-identical-functions
+        const alwaysCustomCell = (_cell: Item): GridCell => {
+            return {
+                kind: GridCellKind.Custom,
+                allowOverlay: true,
+                data: "custom-cell-data",
+                copyData: "custom-cell-copy-data",
+            };
+        };
+
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                getCellContent={alwaysCustomCell}
+                customRenderers={[
+                    {
+                        kind: GridCellKind.Custom,
+                        draw: () => true,
+                        onClick: onClickSpy,
+                        isMatch: (_cell: CustomCell): _cell is CustomCell => true,
+                    },
+                ]}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+
+        // mouse down col b row 2
+        fireEvent.mouseDown(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 2 + 16,
+        });
+
+        // mouse move col b row 3
+        fireEvent.mouseMove(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 3 + 16,
+        });
+
+        // mouse up
+        fireEvent.mouseUp(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 3 + 16,
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(onClickSpy).not.toBeCalled();
+    });
+
     test("onCellsEdited blocks onCellEdited", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();

@@ -2027,7 +2027,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             };
 
             const handleMaybeClick = (a: GridMouseCellEventArgs): boolean => {
-                if (a.isTouch || (lastMouseDownCol === col && lastMouseDownRow === row)) {
+                const isValidClick = a.isTouch || (lastMouseDownCol === col && lastMouseDownRow === row);
+                if (isValidClick) {
                     onCellClicked?.([col - rowMarkerOffset, row], {
                         ...a,
                         preventDefault,
@@ -2037,7 +2038,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (!isPrevented.current) {
                     const c = getMangledCellContent(args.location);
                     const r = getCellRenderer(c);
-                    if (r !== undefined && r.onClick !== undefined) {
+                    if (r !== undefined && r.onClick !== undefined && isValidClick) {
                         const newVal = r.onClick({
                             ...a,
                             cell: c,
