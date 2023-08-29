@@ -168,6 +168,7 @@ interface Keybinds {
     readonly clear: boolean;
     readonly copy: boolean;
     readonly paste: boolean;
+    readonly cut: boolean;
     readonly search: boolean;
     readonly first: boolean;
     readonly last: boolean;
@@ -184,6 +185,7 @@ const keybindingDefaults: Keybinds = {
     clear: true,
     copy: true,
     paste: true,
+    cut: true,
     search: false,
     first: true,
     last: true,
@@ -2629,6 +2631,41 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return `gdg-overlay-${idCounter++}`;
     }, []);
 
+    const deleteRange = React.useCallback(
+        (r: Rectangle) => {
+            focus();
+            const editList: EditListItem[] = [];
+            for (let x = r.x; x < r.x + r.width; x++) {
+                for (let y = r.y; y < r.y + r.height; y++) {
+                    const cellValue = getCellContent([x - rowMarkerOffset, y]);
+                    if (!cellValue.allowOverlay && cellValue.kind !== GridCellKind.Boolean) continue;
+                    let newVal: InnerGridCell | undefined = undefined;
+                    if (cellValue.kind === GridCellKind.Custom) {
+                        const toDelete = getCellRenderer(cellValue);
+                        const editor = toDelete?.provideEditor?.(cellValue);
+                        if (toDelete?.onDelete !== undefined) {
+                            newVal = toDelete.onDelete(cellValue);
+                        } else if (isObjectEditorCallbackResult(editor)) {
+                            newVal = editor?.deletedValue?.(cellValue);
+                        }
+                    } else if (
+                        (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
+                        cellValue.kind === GridCellKind.Boolean
+                    ) {
+                        const toDelete = getCellRenderer(cellValue);
+                        newVal = toDelete?.onDelete?.(cellValue);
+                    }
+                    if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
+                        editList.push({ location: [x, y], value: newVal });
+                    }
+                }
+            }
+            mangledOnCellsEdited(editList);
+            gridRef.current?.damage(editList.map(x => ({ cell: x.location })));
+        },
+        [focus, getCellContent, getCellRenderer, mangledOnCellsEdited, rowMarkerOffset]
+    );
+
     const onKeyDown = React.useCallback(
         (event: GridKeyEventArgs) => {
             const fn = async () => {
@@ -2701,38 +2738,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     cancel();
                     searchInputRef?.current?.focus({ preventScroll: true });
                     setShowSearchInner(true);
-                }
-
-                function deleteRange(r: Rectangle) {
-                    focus();
-                    const editList: EditListItem[] = [];
-                    for (let x = r.x; x < r.x + r.width; x++) {
-                        for (let y = r.y; y < r.y + r.height; y++) {
-                            const cellValue = getCellContent([x - rowMarkerOffset, y]);
-                            if (!cellValue.allowOverlay && cellValue.kind !== GridCellKind.Boolean) continue;
-                            let newVal: InnerGridCell | undefined = undefined;
-                            if (cellValue.kind === GridCellKind.Custom) {
-                                const toDelete = getCellRenderer(cellValue);
-                                const editor = toDelete?.provideEditor?.(cellValue);
-                                if (toDelete?.onDelete !== undefined) {
-                                    newVal = toDelete.onDelete(cellValue);
-                                } else if (isObjectEditorCallbackResult(editor)) {
-                                    newVal = editor?.deletedValue?.(cellValue);
-                                }
-                            } else if (
-                                (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
-                                cellValue.kind === GridCellKind.Boolean
-                            ) {
-                                const toDelete = getCellRenderer(cellValue);
-                                newVal = toDelete?.onDelete?.(cellValue);
-                            }
-                            if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
-                                editList.push({ location: [x, y], value: newVal });
-                            }
-                        }
-                    }
-                    mangledOnCellsEdited(editList);
-                    gridRef.current?.damage(editList.map(x => ({ cell: x.location })));
                 }
 
                 if (isDeleteKey) {
@@ -2965,6 +2970,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [
             onKeyDownIn,
+            deleteRange,
             overlay,
             gridSelection,
             keybindings.selectAll,
@@ -2988,9 +2994,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             columnsIn.length,
             rows,
             overlayID,
-            focus,
             mangledOnCellsEdited,
-            getCellRenderer,
             onDelete,
             mangledCols.length,
             setSelectedColumns,
@@ -3180,6 +3184,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         if (row + gridRow >= rows) break;
                         for (const [col, dataItem] of dataRow.entries()) {
                             const index = [col + gridCol, row + gridRow] as const;
+                            const [writeCol, writeRow] = index;
+                            if (writeCol >= mangledCols.length) continue;
+                            if (writeRow >= mangledRows) continue;
                             const cellData = getMangledCellContent(index);
                             const newVal = pasteToCell(cellData, index, dataItem);
                             if (newVal !== undefined) {
@@ -3205,7 +3212,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             getMangledCellContent,
             gridSelection,
             keybindings.paste,
+            mangledCols.length,
             mangledOnCellsEdited,
+            mangledRows,
             onPaste,
             rowMarkerOffset,
             rows,
@@ -3314,6 +3323,24 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     useEventListener("copy", onCopy, window, false, false);
+
+    const onCut = React.useCallback(
+        async (e?: ClipboardEvent) => {
+            if (!keybindings.cut) return;
+            const focused =
+                scrollRef.current?.contains(document.activeElement) === true ||
+                canvasRef.current?.contains(document.activeElement) === true;
+
+            if (!focused) return;
+            await onCopy(e);
+            if (gridSelection.current !== undefined) {
+                deleteRange(gridSelection.current.range);
+            }
+        },
+        [deleteRange, gridSelection, keybindings.cut, onCopy]
+    );
+
+    useEventListener("cut", onCut, window, false, false);
 
     const onSearchResultsChanged = React.useCallback(
         (results: readonly Item[], navIndex: number) => {

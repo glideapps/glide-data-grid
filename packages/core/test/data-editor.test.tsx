@@ -121,6 +121,9 @@ const makeCell = (cell: Item): GridCell => {
         }
         // No default
     }
+    if (col > 10) {
+        throw new Error(`Unexpected column: ${col}`);
+    }
     return {
         kind: GridCellKind.Text,
         allowOverlay: true,
@@ -2171,6 +2174,86 @@ describe("data-editor", () => {
                 ],
             ]
         );
+    });
+
+    test("Paste out of range does not crash", async () => {
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onPaste={true} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "ArrowRight",
+            ctrlKey: true,
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.paste(window);
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
+        await new Promise(r => window.setTimeout(r, 10));
+    });
+
+    test("Cut cell", async () => {
+        const spy = jest.fn();
+        const editSpy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} onCellsEdited={editSpy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "ArrowRight",
+            shiftKey: true,
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.cut(window);
+        jest.useRealTimers();
+        await new Promise(r => window.setTimeout(r, 10));
+        expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
+        expect(editSpy).toHaveBeenCalledWith([
+            {
+                location: [1, 2],
+                value: expect.objectContaining({ data: "" }),
+            },
+            {
+                location: [2, 2],
+                value: expect.objectContaining({ data: "" }),
+            },
+        ]);
     });
 
     test("Paste custom cell does not crash", async () => {
