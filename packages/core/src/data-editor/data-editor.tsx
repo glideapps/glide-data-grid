@@ -1785,7 +1785,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             } else if (args.kind === groupHeaderKind) {
                 lastMouseSelectLocation.current = [col, row];
-            } else if (args.kind === outOfBoundsKind) {
+            } else if (args.kind === outOfBoundsKind && !args.isMaybeScrollbar) {
                 setGridSelection(emptyGridSelection, false);
                 setOverlay(undefined);
                 focus();

@@ -34,7 +34,7 @@ import {
     type ImageWindowLoader,
 } from "./data-grid-types";
 import { SpriteManager, type SpriteMap } from "./data-grid-sprites";
-import { direction, useDebouncedMemo, useEventListener } from "../common/utils";
+import { direction, getScrollBarWidth, useDebouncedMemo, useEventListener } from "../common/utils";
 import clamp from "lodash/clamp.js";
 import makeRange from "lodash/range.js";
 import {
@@ -517,6 +517,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isEdge = posX < b.x + b.width + edgeDetectionBuffer;
                 }
 
+                // This is used to ensure that clicking on the scrollbar doesn't unset the selection.
+                // Unfortunately this doesn't work for overlay scrollbars because they are just a broken interaction
+                // by design.
+                const isMaybeScrollbar =
+                    (x > width && x < width + getScrollBarWidth()) || (y > height && y < height + getScrollBarWidth());
+
                 result = {
                     kind: outOfBoundsKind,
                     location: [col !== -1 ? col : x < 0 ? 0 : mappedColumns.length - 1, row ?? rows - 1],
@@ -528,6 +534,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isTouch,
                     button,
                     scrollEdge,
+                    isMaybeScrollbar,
                 };
             } else if (row <= -1) {
                 let bounds = getBoundsForItem(canvas, col, row);
