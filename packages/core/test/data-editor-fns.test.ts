@@ -1,5 +1,5 @@
 import { GridCellKind } from "../src";
-import { decodeHTML, formatCell } from "../src/data-editor/data-editor-fns";
+import { decodeHTML, formatCell, formatHtmlForCopy } from "../src/data-editor/data-editor-fns";
 
 describe("data-editor-fns", () => {
     test("decode html", () => {
@@ -78,6 +78,16 @@ describe("data-editor-fns", () => {
                 true
             )
         ).toEqual("https://www.google.com");
+    });
+
+    test("formatHtmlForCopy", () => {
+        expect(
+            formatHtmlForCopy(
+                `<tr><td><a href='https://www.google.com'>Google</a></td><td>This is  a test	tab</td></tr>`
+            )
+        ).toEqual(
+            "<style type=\"text/css\"><!--br {mso-data-placement:same-cell;}--></style><table><tr><td><a href='https://www.google.com'>Google</a></td><td>This is<span>&nbsp;</span><span>&nbsp;</span>a test<span>&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span>tab</td></tr></table>"
+        );
     });
 
     test("format empty bubble cell with comma", () => {

@@ -280,14 +280,24 @@ export function formatForCopy(cells: readonly (readonly GridCell[])[], columnInd
     return cells.map(row => row.map((a, b) => formatCell(a, b, false, columnIndexes, true)).join("\t")).join("\n");
 }
 
+export function formatHtmlForCopy(html: string): string {
+    const styleTag = `<style type="text/css"><!--br {mso-data-placement:same-cell;}--></style>`;
+    // The following formatting for the `html` variable ensures that when pasting,
+    // spaces are preserved in both Google Sheets and Excel. This is done by:
+    // 1. Replacing tabs with four spaces for consistency. Also google sheets disallows any tabs.
+    // 2. Wrapping each space with a span element to prevent them from being collapsed or ignored during the
+    //    paste operation
+    return `${styleTag}<table>${html
+        .replace(/\t/g, "    ")
+        .replace(/(?<=\s) | (?=\s)/g, "<span>&nbsp;</span>")}</table>`;
+}
+
 export function copyToClipboard(
     cells: readonly (readonly GridCell[])[],
     columnIndexes: readonly number[],
     e?: ClipboardEvent
 ) {
     const str = formatForCopy(cells, columnIndexes);
-
-    const styleTag = `<style type="text/css"><!--br {mso-data-placement:same-cell;}--></style>`;
 
     // eslint-disable-next-line unicorn/consistent-function-scoping
     const copyWithWriteText = (s: string) => {
@@ -300,7 +310,7 @@ export function copyToClipboard(
             new ClipboardItem({
                 // eslint-disable-next-line sonarjs/no-duplicate-string
                 "text/plain": new Blob([s], { type: "text/plain" }),
-                "text/html": new Blob([`${styleTag}<table>${html}</table>`], {
+                "text/html": new Blob([formatHtmlForCopy(html)], {
                     type: "text/html",
                 }),
             }),
@@ -312,18 +322,9 @@ export function copyToClipboard(
         try {
             if (e === undefined || e.clipboardData === null) throw new Error("No clipboard data");
 
-            // The following formatting for the `formattedHtml` variable ensures that when pasting,
-            // spaces are preserved in both Google Sheets and Excel. This is done by:
-            // 1. Replacing tabs with four spaces for consistency. Also google sheets disallows any tabs.
-            // 2. Wrapping each space with a span element to prevent them from being collapsed or ignored during the
-            //    paste operation.
-            const formattedHtml = `${styleTag}<table>${html
-                .replace(/\t/g, "    ")
-                .replace(/(?<=\s) | (?=\s)/g, "<span>&nbsp;</span>")}</table>`;
-
             // This might fail if we had to await the thunk
             e?.clipboardData?.setData("text/plain", s);
-            e?.clipboardData?.setData("text/html", formattedHtml);
+            e?.clipboardData?.setData("text/html", formatHtmlForCopy(html));
         } catch {
             if (!copyWithWrite(s, html)) {
                 copyWithWriteText(s);
