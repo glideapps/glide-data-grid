@@ -319,7 +319,7 @@ export function copyToClipboard(
             //    paste operation.
             const formattedHtml = `${styleTag}<table>${html
                 .replace(/\t/g, "    ")
-                .replace(/ /g, "<span>&nbsp;</span>")}</table>`;
+                .replace(/(?<=\s) | (?=\s)/g, "<span>&nbsp;</span>")}</table>`;
 
             // This might fail if we had to await the thunk
             e?.clipboardData?.setData("text/plain", s);

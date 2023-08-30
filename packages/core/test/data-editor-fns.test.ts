@@ -64,6 +64,22 @@ describe("data-editor-fns", () => {
         ).toEqual("");
     });
 
+    test("format url cell", () => {
+        expect(
+            formatCell(
+                {
+                    kind: GridCellKind.Uri,
+                    allowOverlay: true,
+                    data: "https://www.google.com",
+                },
+                0,
+                false,
+                [0],
+                true
+            )
+        ).toEqual("https://www.google.com");
+    });
+
     test("format empty bubble cell with comma", () => {
         expect(
             formatCell(
