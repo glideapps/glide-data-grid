@@ -30,9 +30,8 @@ Step 1: Add the extra cells to your grid.
 import { useExtraCells } from "@glideapps/glide-data-grid-cells";
 
 const Grid = () => {
-    const { drawCell, provideEditor } = useExtraCells();
-
-    return <DataEditor {...rest} drawCell={drawCell} provideEditor={provideEditor} />;
+    const { customRenderers } = useExtraCells();
+    return <DataEditor customRenderers={customRenderers} {...rest} />;
 };
 ```
 
