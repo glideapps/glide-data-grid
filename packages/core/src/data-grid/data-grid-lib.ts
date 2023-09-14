@@ -460,7 +460,8 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
     ctx.beginPath();
     ctx.globalAlpha = hoverAmount;
     ctx.rect(x, y, w, h);
-    ctx.fillStyle = theme.bgHeaderHovered;
+    // TODO: hover effect does not work as intended for span cells, should be fixed
+    // ctx.fillStyle = theme.bgHeaderHovered;
     ctx.fill();
     ctx.globalAlpha = 1;
     ctx.beginPath();

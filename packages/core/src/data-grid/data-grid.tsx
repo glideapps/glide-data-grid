@@ -743,8 +743,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         } else {
             drawGrid(current, undefined);
         }
-    }, [
-        bufferA,
+    }, [bufferA,
         bufferB,
         width,
         height,
@@ -785,6 +784,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         lastWasTouch,
         getCellRenderer,
         disabledDragColsAndRows,
+        getRowDetails
     ]);
 
     const lastDrawRef = React.useRef(draw);

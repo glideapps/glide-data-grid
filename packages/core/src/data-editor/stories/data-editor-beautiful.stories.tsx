@@ -579,6 +579,7 @@ export const TrailingRowOptions: React.VFC = () => {
     },
 };
 
+
 export const AddDataToTop: React.VFC = () => {
     const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
 

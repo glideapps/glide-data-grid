@@ -1,20 +1,20 @@
-import { CustomRow, GridRow, GridRowKind } from "../data-grid/data-grid-types";
+import { GridRow, GridRowKind } from "../data-grid/data-grid-types";
 import type { RowGroup } from "../data-editor/use-groups";
 
 export const getNestedGroupRowsCount = (group: RowGroup): number => {
     if (group === undefined) return 0;
 
-    return group.rows.length + group.groups.reduce((acc, currentGroup) => acc + getNestedGroupRowsCount(currentGroup), 0);
+    return group.rowsCount + group.groups.reduce((acc, currentGroup) => acc + getNestedGroupRowsCount(currentGroup), 0);
 };
 
 
 export const recursiveFlattenGroups = (
-    groups: RowGroup[],
+    groups: readonly RowGroup[],
     rows: GridRow[],
     level = 1,
     rowIndex = 0,
-    groupExtraRow?: CustomRow
-): GridRow[] => {
+    hasTrailingRow: boolean
+): {rows:GridRow[], rowIndex: number} => {
     for (const group of groups) {
         rows.push({
             kind: GridRowKind.Group,
@@ -25,29 +25,43 @@ export const recursiveFlattenGroups = (
             allowOverlay: false,
         });
 
-        if (!group.expanded) continue;
+        if (!group.expanded) {
+            rowIndex+=getNestedGroupRowsCount(group);
+            continue
+        }
+
 
         if (group.groups.length > 0) {
-            recursiveFlattenGroups(group.groups, rows, level + 1, rowIndex, groupExtraRow);
+
+            rowIndex = recursiveFlattenGroups(group.groups, rows, level + 1, rowIndex, hasTrailingRow).rowIndex;
+
         } else {
-            for (const row of group.rows) {
+            for (let i = 0; i < group.rowsCount; i++) {
                 rows.push({
                     kind: GridRowKind.GroupContent,
                     level: level + 1,
-                    index: row,
+                    index: rowIndex+i,
                 });
-
             }
-            if(groupExtraRow){
-                rows.push(groupExtraRow)
+            rowIndex+= group.rowsCount
+
+            if(hasTrailingRow){
+                rows.push(
+                    {
+                        kind: GridRowKind.NewRow,
+                        index: rowIndex,
+                        level: level + 1,
+                        groupId: group.id,
+                    }
+                )
             }
         }
     }
 
-    return rows;
+    return {rows, rowIndex};
 };
 
-export const flattenGroups = (groups: RowGroup[], groupExtraRow?: CustomRow): GridRow[] => {
+export const flattenGroups = (groups: readonly RowGroup[], hasTrailingRow: boolean): GridRow[] => {
     const rows: GridRow[] = [];
-   return recursiveFlattenGroups(groups, rows, 1, 0, groupExtraRow);
+   return recursiveFlattenGroups(groups, rows, 1, 0, hasTrailingRow).rows;
 };
