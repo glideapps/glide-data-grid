@@ -2,19 +2,6 @@ import { BeautifulWrapper, Description, useGroupMockDataGenerator, useMockDataGe
 import React from "react";
 import { DataEditor, DataEditorProps } from "../data-editor";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
-import { useGroups } from "../use-groups";
-import type { CellRenderer } from "../../data-grid/cells/cell-types";
-import {
-    CellArray,
-    CustomCell,
-    CustomRow,
-    GridCell,
-    GridCellKind,
-    GridRowKind,
-    Rectangle,
-} from "../../data-grid/data-grid-types";
-import { getMiddleCenterBias } from "../../data-grid/data-grid-lib";
-import { useMemo } from "@storybook/addons";
 
 const defaultProps: Partial<DataEditorProps> = {
     smoothScrollX: true,
@@ -25,25 +12,6 @@ const defaultProps: Partial<DataEditorProps> = {
     width: "100%",
 };
 
-const ADD_ROW = 'AddRow'
-type AddRowCell = CustomCell<{kind: typeof ADD_ROW}>;
-
-const addRowRenderer: CellRenderer<AddRowCell> = {
-    kind: GridCellKind.Custom,
-    isMatch(cell: CustomCell): cell is AddRowCell {
-        return (cell.data as AddRowCell['data']).kind === "AddRow";
-    },
-    draw: (args) => {
-        const {ctx , rect, theme} = args;
-        const drawX = rect.x + theme.cellHorizontalPadding
-        ctx.fillStyle = theme.textDark;
-        ctx.fillText(
-            "+ New Campaign",
-            drawX+ 10,
-            rect.y + rect.height / 2 + getMiddleCenterBias(ctx, `${theme.headerFontStyle} ${theme.fontFamily}`)
-        );
-    }
-}
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
 
@@ -58,8 +26,7 @@ export default {
 
 export const RowGroups: React.VFC = () => {
     const { setCellValue, getCellContent, cols } = useMockDataGenerator(20, false, false);
-    const { groups, toggleGroup } = useGroupMockDataGenerator(10, 30);
-
+    const { groups, toggleGroup } = useGroupMockDataGenerator(100, 5);
 
     const colsWithWidths = React.useMemo(() => {
         const c = [...cols];
@@ -70,50 +37,23 @@ export const RowGroups: React.VFC = () => {
         return c;
     }, [cols]);
 
-    const addRecordRow: CustomRow = useMemo(()=> ({
-        kind: GridRowKind.Custom,
-        data: {
-            kind: ADD_ROW,
-        },
-        themeOverride: {
-            bgCell: '#F7F7F8'
-        },
-    }),[])
-
-    const { getRowDetails, onRowDetailsUpdated, rowsCount, getCellLocation } = useGroups(groups, toggleGroup, addRecordRow);
-
     const mangledGetCellContent = React.useCallback(
         cellLocation => {
-            return getCellContent(getCellLocation(cellLocation));
+            return getCellContent(cellLocation);
         },
-        [getCellContent, getCellLocation]
+        [getCellContent]
     );
     const mangledEditCell = React.useCallback(
-        (cellLocation, cell) => setCellValue(getCellLocation(cellLocation), cell),
-        [getCellLocation, setCellValue]
+        (cellLocation, cell) => setCellValue(cellLocation, cell),
+        [setCellValue]
     );
 
-    const getCellsForSelection = React.useCallback(
-        (selection: Rectangle): CellArray => {
-            const result: GridCell[][] = [];
-            for (let y = selection.y; y < selection.y + selection.height; y++) {
-                const rowDetails = getRowDetails(y)
-                if(rowDetails.kind !== GridRowKind.GroupContent) {
-                    continue;
-                }
-                const row: GridCell[] = [];
-                for (let x = selection.x; x < selection.x + selection.width; x++) {
-                    row.push(mangledGetCellContent([x,y]));
-                }
-
-
-
-                result.push(row);
-            }
-            return result;
-        },
-        [getCellContent, getCellLocation]
-    );
+    const onRowAppended = React.useCallback(
+        async (row?: number, groupId?: string) => {
+            console.log('append row', { row, groupId })
+            return undefined
+        }
+    ,[])
 
     return (
         <BeautifulWrapper
@@ -123,15 +63,20 @@ export const RowGroups: React.VFC = () => {
                 {...defaultProps}
                 getCellContent={mangledGetCellContent}
                 columns={colsWithWidths}
-                rows={rowsCount}
+                rows={100}
                 verticalBorder={false}
                 rowMarkers="both"
                 onCellEdited={mangledEditCell}
-                getCellsForSelection={getCellsForSelection}
-                onRowDetailsUpdated={onRowDetailsUpdated}
-                getRowDetails={getRowDetails}
-                customRenderers={[addRowRenderer]}
+                groups={groups}
+                onGroupToggle={toggleGroup}
                 freezeColumns={1}
+                onRowAppended={onRowAppended}
+                trailingRowOptions={{
+                    sticky: true,
+                    tint: true,
+                    hint: "New row...",
+                    inEachGroup: true,
+                }}
             />
         </BeautifulWrapper>
     );

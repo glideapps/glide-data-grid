@@ -1,22 +1,21 @@
-import { useCallback } from "@storybook/addons";
-import type { CustomRow, GridRow, GroupContentRow, GroupRow, Item } from "../data-grid/data-grid-types";
+import type { GridRow, GroupContentRow, GroupRow, Item } from "../data-grid/data-grid-types";
 import { GridRowKind } from "../data-grid/data-grid-types";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import type { DataEditorProps } from "./data-editor";
 import { flattenGroups } from "../common/groupUtils";
 
-export type RowGroup = { name: string; rows: number[]; id: string; groups: RowGroup[]; expanded: boolean };
+export type RowGroup = { name: string; rowsCount: number; id: string; groups: RowGroup[]; expanded: boolean };
 
-export const useGroups = (groups: RowGroup[], toggleGroup: (groupLocation: string) => void, groupExtraRow?: CustomRow) => {
+export const useGroups = (groups: readonly RowGroup[] = [], toggleGroup?: (groupLocation: string) => void, hasTrailingRow: boolean = false) => {
     const [rowsCount, setRowsCount] = useState(0);
     const groupRows = useRef<GridRow[]>([]);
 
     useEffect(() => {
         if (groups.length > 0) {
-            groupRows.current = flattenGroups(groups, groupExtraRow);
+            groupRows.current = flattenGroups(groups, hasTrailingRow);
             setRowsCount(groupRows.current.length);
         }
-    }, [groupExtraRow, groups]);
+    }, [hasTrailingRow, groups]);
 
     const getRowDetails: DataEditorProps['getRowDetails'] = useCallback(
         (row: number): GridRow => {
@@ -25,17 +24,16 @@ export const useGroups = (groups: RowGroup[], toggleGroup: (groupLocation: strin
         [groupRows]
     );
 
-    const getCellLocation = ([col, row]: Item): Item => {
+    const getMangledCellLocation = ([col, row]: Item): Item => {
         if (groupRows.current[row] !== undefined && groupRows.current[row].kind === GridRowKind.GroupContent) {
-            return [col, (groupRows.current[row] as GroupContentRow).index - 1 ?? row];
+            return [col, (groupRows.current[row] as GroupContentRow).index ?? row];
         }
         return [col, row];
     };
-
-    const onRowDetailsUpdated: DataEditorProps["onRowDetailsUpdated"] = useCallback(
-        (row: number, newRowValue) => {
+    const onRowDetailsUpdated = useCallback(
+        (row: number, newRowValue: GridRow) => {
             if (groupRows.current[row] !== undefined && groupRows.current[row].kind === GridRowKind.Group) {
-                toggleGroup((newRowValue as GroupRow).id);
+                toggleGroup?.((newRowValue as GroupRow).id);
             }
         },
         [toggleGroup]
@@ -44,7 +42,7 @@ export const useGroups = (groups: RowGroup[], toggleGroup: (groupLocation: strin
     return {
         getRowDetails,
         onRowDetailsUpdated,
-        getCellLocation,
+        getMangledCellLocation,
         rowsCount: rowsCount,
     };
 };

@@ -1,46 +1,46 @@
 /* eslint-disable unicorn/no-for-loop */
 import {
-    GridSelection,
-    DrawHeaderCallback,
-    InnerGridCell,
-    Rectangle,
+    BooleanIndeterminate,
+    CellList,
     CompactSelection,
     DrawCustomCellCallback,
-    GridColumnIcon,
-    Item,
-    CellList,
-    GridMouseGroupHeaderEventArgs,
-    headerCellCheckboxPrefix,
-    GridCellKind,
-    isInnerOnlyCell,
-    BooleanIndeterminate,
-    headerCellCheckedMarker,
-    headerCellUnheckedMarker,
-    TrailingRowType,
-    ImageWindowLoader,
+    DrawHeaderCallback,
     GridCell,
+    GridCellKind,
+    GridColumnIcon,
+    GridMouseGroupHeaderEventArgs,
     GridRow,
     GridRowKind,
+    GridSelection,
+    headerCellCheckboxPrefix,
+    headerCellCheckedMarker,
+    headerCellUnheckedMarker,
+    ImageWindowLoader,
+    InnerGridCell,
+    isInnerOnlyCell,
+    Item,
+    Rectangle,
+    TrailingRowType,
 } from "./data-grid-types";
 import groupBy from "lodash/groupBy.js";
 import type { HoverValues } from "./animation-manager";
 import {
-    getEffectiveColumns,
-    getStickyWidth,
-    MappedGridColumn,
-    roundedPoly,
-    drawWithLastUpdate,
-    isGroupEqual,
-    cellIsSelected,
     cellIsInRange,
+    cellIsSelected,
+    clipCanvasString,
     computeBounds,
-    getMiddleCenterBias,
     drawCheckbox,
     drawColumnResizeOutline,
-    clipCanvasString,
-    measureTextCached,
+    drawWithLastUpdate,
+    getEffectiveColumns,
+    getMiddleCenterBias,
+    getStickyWidth,
+    isGroupEqual,
+    MappedGridColumn,
+    roundedPoly,
     drawSorting,
     SORTING_SIZE,
+    measureTextCached,
 } from "./data-grid-lib";
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites";
 import type { Theme } from "../common/styles";
@@ -792,7 +792,7 @@ export function drawHeader(
         const clippedTextWidth = clippedTextMetrics.width;
         const sortingLeft = drawX + clippedTextWidth + 4;
         const sortingTop = y + height / 2 - SORTING_SIZE.height / 2;
-        
+
         drawSorting(ctx, sortingLeft, sortingTop, c.sorting.direction, c.sorting.order, font, theme);
     }
 
@@ -1192,7 +1192,6 @@ function drawCells(
             }
             reclip();
             let prepResult: PrepResult | undefined = undefined;
-
             walkRowsInCol(
                 startRow,
                 colDrawStartY,
@@ -1242,6 +1241,7 @@ function drawCells(
                     }
 
                     const rowSelected = selection.rows.hasIndex(row);
+                    const rowActivated = selection.current?.cell[1] === row;
                     const rowDisabled = disabledRows.hasIndex(row);
 
                     const cell: InnerGridCell = row < rows ? getCellContent([c.sourceIndex, row]) : loadingCell;
@@ -1343,6 +1343,10 @@ function drawCells(
                             if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
                                 fill = blend(theme.bgSearchResult, fill);
                             }
+                        }
+                    } else if(rowDetails.kind === GridRowKind.Group && rowActivated) {
+                        for (let i = 0; i < accentCount; i++) {
+                            fill = blend(theme.accentLight, fill);
                         }
                     }
 

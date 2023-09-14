@@ -520,75 +520,67 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
 export const useGroupMockDataGenerator = (groupCount: number, rowsInEachGroup: number) => {
     const initialGroups = React.useMemo(() => {
         const groups: RowGroup[] = [];
-        let rowIndex = 0;
-        for (let i = 1; i <= groupCount; i++) {
+        for (let i = 0; i < groupCount; i++) {
             const group: RowGroup = {
-                name: `Group ${i}`,
-                rows: [],
+                name: `Group ${i+1}`,
+                rowsCount: 0,
                 expanded: true,
                 id: `${i}`,
                 groups: [
                     {
-                        name: `Group ${i}-1`,
-                        rows: [],
-                        id: `${i}-1`,
+                        name: `Group ${i+1}-1`,
+                        rowsCount: 0,
+                        id: `${i}-0`,
                         groups: [
                             {
-                                name: `Group ${i}-1-1`,
-                                rows: [],
+                                name: `Group ${i+1}-1-1`,
+                                rowsCount: rowsInEachGroup,
                                 groups: [],
                                 expanded: true,
-                                id: `${i}-1-1`,
+                                id: `${i}-0-0`,
                             },
                             {
-                                name: `Group ${i}-1-2`,
-                                rows: [],
+                                name: `Group ${i+1}-1-2`,
+                                rowsCount: rowsInEachGroup,
                                 groups: [],
                                 expanded: true,
-                                id: `${i}-1-2`,
+                                id: `${i}-0-1`,
                             },
                         ],
                         expanded: true,
                     },
                     {
-                        name: `Group ${i}-2`,
-                        rows: [],
-                        groups: [],
+                        name: `Group ${i+1}-2`,
+                        rowsCount: 0,
+                        groups: [
+                            {
+                                name: `Group ${i+1}-1-2`,
+                                rowsCount: rowsInEachGroup,
+                                groups: [],
+                                expanded: true,
+                                id: `${i}-1-0`,
+                            },
+                        ],
                         expanded: true,
-                        id: `${i}-2`,
+                        id: `${i}-1`,
                     },
                 ],
             };
 
-            for (let j = 0; j < rowsInEachGroup; j++) {
-               // break this loop to 3 equal parts
-                if (j < rowsInEachGroup / 3) {
-                    group.groups[0].groups[0].rows.push(j+rowIndex);
-                } else if (j < rowsInEachGroup / 3 * 2) {
-                    group.groups[0].groups[1].rows.push(j+rowIndex);
-                } else {
-                    group.groups[1].rows.push(j+rowIndex);
-                }
-            }
-            rowIndex+=rowsInEachGroup;
             groups.push(group);
         }
         return groups;
-    }, [groupCount, rowsInEachGroup]);
+    }, [groupCount]);
 
     const [groups, setGroups] = React.useState<RowGroup[]>(initialGroups);
 
     const findGroup = useCallback((currentGroups: RowGroup[], groupId: string): RowGroup | undefined => {
-        // nested search on groups
-        for (const group of currentGroups) {
-            if (group.id === groupId) {
-                return group;
-            }
-            const found = findGroup(group.groups, groupId);
-            if (found) {
-                return found;
-            }
+        const ids = groupId.split("-");
+        let group = currentGroups[Number.parseInt(ids[0])];
+        for (let i = 1; i<ids.length; i++) {
+            group = group.groups[Number.parseInt(ids[i])];
         }
+        return group
     }, []);
 
     const toggleGroup = (groupId: string) => {

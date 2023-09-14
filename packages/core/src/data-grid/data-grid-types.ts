@@ -393,7 +393,7 @@ export type InnerGridCell = GridCell | InnerOnlyGridCell;
 export enum GridRowKind {
     Group = 'group',
     GroupContent = 'group-content',
-    Custom = 'custom',
+    NewRow = 'new-row',
 }
 export interface GroupRow {
     kind: GridRowKind.Group
@@ -412,13 +412,14 @@ export interface GroupContentRow {
     themeOverride?: Partial<Theme>
 }
 
-export interface CustomRow {
-    kind: GridRowKind.Custom,
-    data: {}
-    themeOverride?: Partial<Theme>
+export interface NewRow {
+    kind: GridRowKind.NewRow,
+    level: number,
+    index: number,
+    groupId: string,
 }
 
-export type GridRow = GroupRow | GroupContentRow | CustomRow;
+export type GridRow = GroupRow | GroupContentRow | NewRow;
 
 /** @category Cells */
 export type CellList = readonly Item[];
