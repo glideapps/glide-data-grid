@@ -232,7 +232,7 @@ export const Overscroll: React.VFC<OverscrollProps> = p => {
     },
 };
 
-function clearCell(cell: GridCell): GridCell {
+export function clearCell(cell: GridCell): GridCell {
     switch (cell.kind) {
         case GridCellKind.Boolean: {
             return {
