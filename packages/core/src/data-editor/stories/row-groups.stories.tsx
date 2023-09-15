@@ -1,7 +1,8 @@
-import { BeautifulWrapper, Description, useGroupMockDataGenerator, useMockDataGenerator } from "./utils";
+import { BeautifulWrapper, Description, findGroup, useGroupMockDataGenerator, useMockDataGenerator } from "./utils";
 import React from "react";
 import { DataEditor, DataEditorProps } from "../data-editor";
 import { SimpleThemeWrapper } from "../../stories/story-utils";
+import { clearCell } from "./data-editor-beautiful.stories";
 
 const defaultProps: Partial<DataEditorProps> = {
     smoothScrollX: true,
@@ -25,8 +26,8 @@ export default {
 };
 
 export const RowGroups: React.VFC = () => {
-    const { setCellValue, getCellContent, cols } = useMockDataGenerator(20, false, false);
-    const { groups, toggleGroup } = useGroupMockDataGenerator(100, 5);
+    const { setCellValue, getCellContent, cols, setCellValueRaw } = useMockDataGenerator(20, false, false);
+    const { groups, toggleGroup, setGroups } = useGroupMockDataGenerator(100, 5);
 
     const colsWithWidths = React.useMemo(() => {
         const c = [...cols];
@@ -48,12 +49,26 @@ export const RowGroups: React.VFC = () => {
         [setCellValue]
     );
 
-    const onRowAppended = React.useCallback(
-        async (row?: number, groupId?: string) => {
-            console.log('append row', { row, groupId })
-            return undefined
+    const onRowAppended = React.useCallback((row, groupId) => {
+        setGroups((oldGroups) => {
+            const copyGroups = [...oldGroups];
+            const group = findGroup(copyGroups, groupId)
+            if(group){
+                group.rowsCount++;
+            }
+
+            return copyGroups
+        })
+
+
+        for (let c = 0; c < 6; c++) {
+            const cell = getCellContent([c, row]);
+            setCellValueRaw([c, row], clearCell(cell));
         }
-    ,[])
+
+
+
+    }, [getCellContent, setCellValueRaw, setGroups]);
 
     return (
         <BeautifulWrapper

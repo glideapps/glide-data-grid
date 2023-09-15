@@ -21,7 +21,6 @@ import { assertNever } from "../../common/support";
 import { browserIsFirefox } from "../../common/browser-detect";
 import { useResizeDetector } from "react-resize-detector";
 import type { RowGroup } from "../use-groups";
-import { useCallback } from "@storybook/addons";
 
 function isTruthy(x: any): boolean {
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
@@ -574,15 +573,6 @@ export const useGroupMockDataGenerator = (groupCount: number, rowsInEachGroup: n
 
     const [groups, setGroups] = React.useState<RowGroup[]>(initialGroups);
 
-    const findGroup = useCallback((currentGroups: RowGroup[], groupId: string): RowGroup | undefined => {
-        const ids = groupId.split("-");
-        let group = currentGroups[Number.parseInt(ids[0])];
-        for (let i = 1; i<ids.length; i++) {
-            group = group.groups[Number.parseInt(ids[i])];
-        }
-        return group
-    }, []);
-
     const toggleGroup = (groupId: string) => {
         setGroups(prevState => {
             const newGroups = [...prevState];
@@ -595,5 +585,15 @@ export const useGroupMockDataGenerator = (groupCount: number, rowsInEachGroup: n
         });
     };
 
-    return { groups, toggleGroup };
+    return { groups, toggleGroup, setGroups };
 };
+
+
+export const findGroup = (currentGroups: RowGroup[], groupId: string): RowGroup | undefined => {
+    const ids = groupId.split("-");
+    let group = currentGroups[Number.parseInt(ids[0])];
+    for (let i = 1; i<ids.length; i++) {
+        group = group.groups[Number.parseInt(ids[i])];
+    }
+    return group
+}
