@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.9.2](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.9.1...v5.9.2) (2023-09-15)
+
+
+### Bug Fixes
+
+* add rows inside groups ([15f56d0](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/15f56d098a667574b395fe38e9ac36a0c1f02e2e))
+
 ### [5.9.1](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.9.0...v5.9.1) (2023-09-14)
 
 ## [5.9.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.8.3...v5.9.0) (2023-08-23)
