@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
+import { noop } from "lodash";
 import { assert, assertNever, maybe } from "../common/support";
 import clamp from "lodash/clamp.js";
 import uniq from "lodash/uniq.js";
@@ -47,7 +48,7 @@ import {
     Slice,
     ValidatedGridCell,
 } from "../data-grid/data-grid-types";
-import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
+import DataGridSearch, { DataGridSearchProps, DataGridSearchRef } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
 import { getDataEditorTheme, makeCSSStyle, Theme, ThemeContext } from "../common/styles";
 import type { DataGridRef } from "../data-grid/data-grid";
@@ -3463,6 +3464,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const mangledFreezeColumns = Math.min(mangledCols.length, freezeColumns + (hasRowMarkers ? 1 : 0));
 
+    const dataGridSearchRef = React.useRef<DataGridSearchRef>(null)
+    
+    const {
+        search: dataGridSearch = noop,
+        searchNextResult: dataGridSearchNextResult = noop,
+        searchPrevResult: dataGridSearchPrevResult = noop,
+        subscribeToSearch: dataGridSubscribeToSearch = noop,
+    } = dataGridSearchRef.current ?? {}
+
     React.useImperativeHandle(
         forwardedRef,
         () => ({
@@ -3537,8 +3547,24 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             },
             scrollTo,
+            search: dataGridSearch,
+            searchNextResult: dataGridSearchNextResult,
+            searchPrevResult: dataGridSearchPrevResult,
+            subscribeToSearch: dataGridSubscribeToSearch
         }),
-        [appendRow, enterCellEditMode, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
+        [
+            appendRow,
+            enterCellEditMode,
+            onCopy,
+            onKeyDown,
+            onPasteInternal,
+            rowMarkerOffset,
+            scrollTo,
+            dataGridSearch,
+            dataGridSearchNextResult,
+            dataGridSearchPrevResult,
+            dataGridSubscribeToSearch
+        ]
     );
 
     const [selCol, selRow] = currentCell ?? [];
@@ -3640,6 +3666,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 inWidth={width ?? idealWidth}
                 inHeight={height ?? idealHeight}>
                 <DataGridSearch
+                    ref={dataGridSearchRef}
                     fillHandle={fillHandle}
                     drawFocusRing={drawFocusRing}
                     experimental={experimental}
