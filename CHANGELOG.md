@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.9.3](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.9.2...v5.9.3) (2023-09-18)
+
 ### [5.9.2](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.9.1...v5.9.2) (2023-09-15)
 
 
