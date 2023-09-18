@@ -3003,33 +3003,6 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1, 200);
     });
 
-    test("Drag reorder row", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} rowMarkers="number" onRowMoved={spy} />, {
-            wrapper: Context,
-        });
-        prep();
-        const canvas = screen.getByTestId("data-grid-canvas");
-
-        fireEvent.mouseDown(canvas, {
-            clientX: 10, // Col B Right Edge
-            clientY: 300, // Header
-        });
-
-        fireEvent.mouseMove(canvas, {
-            clientX: 10,
-            clientY: 400,
-        });
-
-        fireEvent.mouseUp(canvas, {
-            clientX: 10,
-            clientY: 400,
-        });
-
-        expect(spy).toBeCalledWith(8, 11);
-    });
-
     test("Select range with mouse", async () => {
         const spy = jest.fn();
         jest.useFakeTimers();

@@ -259,7 +259,7 @@ interface BaseGridColumn {
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
     readonly hasMenu?: boolean;
-    readonly sorting?: { order: number, direction: SortingDirection };
+    readonly sorting?: { order: number; direction: SortingDirection };
     readonly grow?: number;
     readonly style?: "normal" | "highlight";
     readonly themeOverride?: Partial<Theme>;
@@ -384,39 +384,39 @@ export type GridCell =
     | LoadingCell
     | ProtectedCell
     | DrilldownCell
-    | CustomCell
+    | CustomCell;
 
 type InnerOnlyGridCell = NewRowCell | MarkerCell | GroupCell;
 /** @category Cells */
 export type InnerGridCell = GridCell | InnerOnlyGridCell;
 
 export enum GridRowKind {
-    Group = 'group',
-    GroupContent = 'group-content',
-    NewRow = 'new-row',
+    Group = "group",
+    GroupContent = "group-content",
+    NewRow = "new-row",
 }
 export interface GroupRow {
-    kind: GridRowKind.Group
-    level: number
-    name: string
-    expanded: boolean
-    id: string,
-    themeOverride?: Partial<Theme>
+    kind: GridRowKind.Group;
+    level: number;
+    name: string;
+    expanded: boolean;
+    id: string;
+    themeOverride?: Partial<Theme>;
     readonly allowOverlay: false;
 }
 
 export interface GroupContentRow {
-    kind: GridRowKind.GroupContent,
-    level: number,
-    index: number,
-    themeOverride?: Partial<Theme>
+    kind: GridRowKind.GroupContent;
+    level: number;
+    index: number;
+    themeOverride?: Partial<Theme>;
 }
 
 export interface NewRow {
-    kind: GridRowKind.NewRow,
-    level: number,
-    index: number,
-    groupId: string,
+    kind: GridRowKind.NewRow;
+    level: number;
+    index: number;
+    groupId: string;
 }
 
 export type GridRow = GroupRow | GroupContentRow | NewRow;
@@ -441,7 +441,7 @@ export interface BaseGridCell {
     readonly span?: readonly [start: number, end: number];
     readonly contentAlign?: "left" | "right" | "center";
     readonly cursor?: CSSProperties["cursor"];
-    readonly groupLevel?: number
+    readonly groupLevel?: number;
 }
 
 /** @category Cells */

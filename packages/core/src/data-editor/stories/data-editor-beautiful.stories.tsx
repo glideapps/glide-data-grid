@@ -112,9 +112,22 @@ export const ResizableColumns: React.VFC = () => {
 };
 
 export const ResizableColumnsWithColumnsDND: React.VFC = () => {
-    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(60);
+    const { cols, getCellsForSelection, colsMap } = useMockDataGenerator(60);
 
     const [columns, setColumns] = React.useState(cols);
+
+    const [rowData, setRowData] = React.useState(() => {
+        return range(0, 50).map((_, rowIndex) =>
+            colsMap.map((columnItem, columnItemIndex) => columnItem.getContent(columnItemIndex, rowIndex))
+        );
+    });
+
+    const getCellContent = React.useCallback(
+        ([col, row]: Item): GridCell => {
+            return rowData[row][col];
+        },
+        [rowData]
+    );
 
     const onColumnMoved = React.useCallback(
         (startIndex: number, endIndex: number) => {
@@ -139,6 +152,19 @@ export const ResizableColumnsWithColumnsDND: React.VFC = () => {
         });
     }, []);
 
+    const onRowMoved = React.useCallback((from: number[], to: number) => {
+        const firstElementToMove = from.at(0);
+        const lastElementToMove = from.at(-1);
+        const [fromRow] = from;
+        setRowData(cv => {
+            const d = [...cv];
+            const newRows = from.map((item, index) => d.splice(item - index, 1)[0]);
+            const start = firstElementToMove > to ? to : to - (newRows.length - 1);
+            d.splice(start, 0, ...newRows);
+            return d;
+        });
+    }, []);
+
     return (
         <BeautifulWrapper title="Resizable columns with columns DND">
             <DataEditor
@@ -147,9 +173,8 @@ export const ResizableColumnsWithColumnsDND: React.VFC = () => {
                 disabledDragColsAndRows={{
                     cols: [0],
                 }}
+                onRowMoved={onRowMoved}
                 columns={columns}
-                overscrollX={200}
-                overscrollY={200}
                 maxColumnAutoWidth={500}
                 maxColumnWidth={2000}
                 rows={50}
@@ -164,7 +189,9 @@ export const ResizableColumnsWithColumnsDND: React.VFC = () => {
                 isDraggable
                 onColumnMoved={onColumnMoved}
                 freezeColumns={1}
-                rowMarkers="checkbox"
+                rowMarkers="both"
+                rowSelectionMode="multi"
+                rowSelect="multi"
             />
         </BeautifulWrapper>
     );
@@ -578,7 +605,6 @@ export const TrailingRowOptions: React.VFC = () => {
         showPanel: false,
     },
 };
-
 
 export const AddDataToTop: React.VFC = () => {
     const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
@@ -1329,20 +1355,22 @@ export const DrawCustomCells: React.VFC = () => {
 };
 
 export const RearrangeColumns: React.VFC = () => {
-    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(60);
+    const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(10);
 
     // This is a dirty hack because the mock generator doesn't really support changing this. In a real data source
     // you should track indexes properly
     const [sortableCols, setSortableCols] = React.useState(cols);
 
-    const onColMoved = React.useCallback((startIndex: number, endIndex: number): void => {
-        setSortableCols(old => {
-            const newCols = [...old];
-            const [toMove] = newCols.splice(startIndex, 1);
-            newCols.splice(endIndex, 0, toMove);
-            return newCols;
-        });
-    }, []);
+    const onColMoved = React.useCallback(
+        (startIndex: number, endIndex: number): void => {
+            const newColumns = [...sortableCols];
+            const element = newColumns[startIndex];
+            newColumns.splice(startIndex, 1);
+            newColumns.splice(endIndex, 0, element);
+            setSortableCols(newColumns);
+        },
+        [sortableCols]
+    );
 
     const getCellContentMangled = React.useCallback(
         ([col, row]: Item): GridCell => {
@@ -2314,7 +2342,7 @@ export const HeaderSorting: React.VFC = () => {
     const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
     const realCols = React.useMemo(() => {
-        return cols.map((c,index) => ({
+        return cols.map((c, index) => ({
             ...c,
             sorting: index % 2 === 1 ? { direction: SortingDirection.Ascending, order: index } : undefined,
         }));
@@ -2325,9 +2353,7 @@ export const HeaderSorting: React.VFC = () => {
             title="Header Sorting"
             description={
                 <>
-                    <Description>
-                        Headers on the data grid can be configured to support sorting.
-                    </Description>
+                    <Description>Headers on the data grid can be configured to support sorting.</Description>
                 </>
             }>
             <DataEditor
@@ -2613,12 +2639,35 @@ export const ReorderRows: React.VFC = () => {
                 title: "Col B",
                 width: 150,
             },
+            {
+                title: "Col C",
+                width: 150,
+            },
+            {
+                title: "Col D",
+                width: 150,
+            },
+            {
+                title: "Col E",
+                width: 150,
+            },
+            {
+                title: "Col F",
+                width: 150,
+            },
         ],
         []
     );
 
     const [rowData, setRowData] = React.useState(() => {
-        return range(0, 50).map(x => [`A: ${x}`, `B: ${x}`]);
+        return range(0, 50).map(x => [
+            `Summer Essentials: ${x}`,
+            `B: ${x}`,
+            `C: ${x}`,
+            `D: ${x}`,
+            `E: ${x}`,
+            `F: ${x}`,
+        ]);
     });
 
     const getCellContent = React.useCallback<DataEditorProps["getCellContent"]>(
@@ -2633,11 +2682,16 @@ export const ReorderRows: React.VFC = () => {
         [rowData]
     );
 
-    const reorderRows = React.useCallback((from: number, to: number) => {
+    const reorderRows = React.useCallback((from: number[], to: number) => {
+        const [fromRow] = from;
         setRowData(cv => {
             const d = [...cv];
-            const removed = d.splice(from, 1);
-            d.splice(to, 0, ...removed);
+            const newRows = from.map(item => {
+                return d.splice(fromRow, 1)[0];
+            });
+
+            d.splice(to, 0, ...newRows);
+
             return d;
         });
     }, []);

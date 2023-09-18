@@ -1073,7 +1073,7 @@ Emitted any time the mouse moves. Most behaviors relying on this should be debou
 ## onRowMoved
 
 ```ts
-onRowMoved?: (startIndex: number, endIndex: number) => void;
+onRowMoved?: (rowsIndex: number[], endIndex: number) => void;
 ```
 
 Called whenever a row re-order operation is completed. Setting the callback enables re-ordering by dragging the first column of a row.

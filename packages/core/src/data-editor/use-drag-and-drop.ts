@@ -18,6 +18,8 @@ const SCROLL_MOVEMENT = 100;
 const SCROLL_LEFT_FREEZE_THRESHOLD = 50;
 const SCROLL_RIGHT_THRESHOLD = 200;
 const SCROLL_LEFT_THRESHOLD = 200;
+const SCROLL_TOP_THRESHOLD = 100;
+const SCROLL_BOTTOM_THRESHOLD = 100;
 
 interface IProps
     extends Pick<
@@ -39,6 +41,7 @@ interface IProps
         | "freezeColumns"
         | "firstColAccessible"
         | "width"
+        | "selection"
     > {
     readonly canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
     readonly eventTargetRef: React.MutableRefObject<HTMLDivElement | null> | undefined;
@@ -80,8 +83,10 @@ const useDragAndDrop = ({
     onDragLeave,
     width,
     eventTargetRef,
+    selection,
 }: IProps) => {
     const activeDropTarget = React.useRef<Item | undefined>();
+    const initialDropTarget = React.useRef<Item | undefined>();
 
     const onDragStartImpl = React.useCallback(
         (event: DragEvent) => {
@@ -97,6 +102,16 @@ const useDragAndDrop = ({
             const args = getMouseArgsForPosition(canvas, event.clientX, event.clientY);
 
             if (disabledDragColsAndRows?.cols?.includes(args.location[0] - lockColumns) === true) {
+                event.preventDefault();
+                return;
+            }
+
+            if (args.kind === "header" && args.location[0] === 0) {
+                event.preventDefault();
+                return;
+            }
+
+            if (args.kind === "cell" && (args.location[0] !== 0 || args.localEventX > 9)) {
                 event.preventDefault();
                 return;
             }
@@ -156,9 +171,9 @@ const useDragAndDrop = ({
                         offscreen.style.width = boundsForDragTarget.width + "px";
                         offscreen.style.height = canvas.clientHeight + "px";
                         const ctx = offscreen.getContext("2d");
-                        ctx?.scale(ratio, ratio);
 
                         if (ctx !== null) {
+                            ctx.scale(ratio, ratio);
                             ctx.textBaseline = "middle";
                             if (row === -1) {
                                 ctx.font = `${theme.headerFontStyle} ${theme.fontFamily}`;
@@ -181,18 +196,55 @@ const useDragAndDrop = ({
                                     false
                                 );
                             } else {
+                                const isDraggableRowInSelection = selection?.rows.hasIndex(row);
+                                const dragRowCount = isDraggableRowInSelection ? selection?.rows.length : 1;
+
+                                ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+                                const shadowStyles = {
+                                    firstLevel: {
+                                        background: "#F8F8F8",
+                                        width: 283,
+                                        height: 5,
+                                        x: 5,
+                                        y: 40,
+                                    },
+                                    secondLevel: {
+                                        background: "#E6E6E6",
+                                        width: 273,
+                                        height: 5,
+                                        x: 10,
+                                        y: 45,
+                                    },
+                                };
+
+                                const dragElementWidth = 293;
+                                const dragElementHeight = 50;
+                                const baseCellHeight = 40;
+                                offscreen.width = dragElementWidth;
+                                offscreen.height = dragElementHeight;
+
+                                offscreen.width = dragElementWidth * ratio;
+                                offscreen.height = dragElementHeight * ratio;
+                                offscreen.style.width = dragElementWidth + "px";
+                                offscreen.style.height = dragElementHeight + "px";
+
+                                ctx.scale(ratio, ratio);
                                 ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
                                 ctx.fillStyle = theme.bgCell;
-                                ctx.fillRect(0, 0, offscreen.width, offscreen.height);
+
+                                // drawCellBackground
+                                ctx.fillStyle = "#fff";
+                                ctx.fillRect(0, 0, 293, 40);
+
                                 drawCell(
                                     ctx,
                                     row,
-                                    getCellContent([col, row]),
-                                    0,
-                                    0,
-                                    0,
-                                    boundsForDragTarget.width,
-                                    boundsForDragTarget.height,
+                                    getCellContent([col + 1, row]),
+                                    1,
+                                    dragRowCount > 1 ? 40 : 20,
+                                    4,
+                                    293,
+                                    baseCellHeight,
                                     false,
                                     theme,
                                     drawCustomCell,
@@ -206,6 +258,37 @@ const useDragAndDrop = ({
                                     undefined,
                                     getCellRenderer
                                 );
+
+                                if (dragRowCount > 1) {
+                                    // drawFirstShadow
+                                    ctx.fillStyle = shadowStyles.firstLevel.background;
+                                    ctx.fillRect(
+                                        shadowStyles.firstLevel.x,
+                                        shadowStyles.firstLevel.y,
+                                        shadowStyles.firstLevel.width,
+                                        shadowStyles.firstLevel.height
+                                    );
+
+                                    // drawCircleWithText
+                                    ctx.fillStyle = "#147AF3";
+                                    ctx.arc(30, 20, 20 / 2, 0, 2 * Math.PI, false);
+                                    ctx.fill();
+                                    ctx.fillStyle = "#fff";
+                                    ctx.textAlign = "center";
+                                    ctx.fillText(`${dragRowCount}`, 30, 20 + 4.5);
+                                    ctx.beginPath();
+                                }
+
+                                if (dragRowCount > 2) {
+                                    // drawSecondShadow
+                                    ctx.fillStyle = shadowStyles.secondLevel.background;
+                                    ctx.fillRect(
+                                        shadowStyles.secondLevel.x,
+                                        shadowStyles.secondLevel.y,
+                                        shadowStyles.secondLevel.width,
+                                        shadowStyles.secondLevel.height
+                                    );
+                                }
                             }
                         }
 
@@ -219,6 +302,8 @@ const useDragAndDrop = ({
                             boundsForDragTarget.width / 2,
                             boundsForDragTarget.height / 2
                         );
+
+                        initialDropTarget.current = [col, row];
 
                         window.setTimeout(() => {
                             offscreen.remove();
@@ -244,24 +329,27 @@ const useDragAndDrop = ({
             lockColumns,
             mappedColumns,
             onDragStart,
+            selection?.rows,
             spriteManager,
             theme,
         ]
     );
 
     const updateScrollPosition = React.useCallback(
-        (position: number) => {
+        (left?: number, top?: number) => {
             eventTargetRef?.current?.scrollBy({
-                left: SCROLL_MOVEMENT * position,
-                top: 0,
+                left: left,
+                top: top,
                 behavior: "smooth",
             });
         },
         [eventTargetRef]
     );
 
+    // SCROLL_MOVEMENT * position
+
     const handleScrollThrottled = React.useMemo(
-        () => throttle((position: number) => updateScrollPosition(position), 100),
+        () => throttle((left?: number, top?: number) => updateScrollPosition(left, top), 100),
         [updateScrollPosition]
     );
 
@@ -288,6 +376,7 @@ const useDragAndDrop = ({
             const rect = canvas.getBoundingClientRect();
             const scale = rect.width / width;
             const mouseX = (event.clientX - rect.left) / scale;
+            const mouseY = (event.clientY - rect.top) / scale;
 
             const args = getMouseArgsForPosition(canvas, event.clientX, event.clientY);
 
@@ -295,21 +384,36 @@ const useDragAndDrop = ({
             const col = rawCol - (firstColAccessible ? 0 : 1);
             const [activeCol, activeRow] = activeDropTarget.current ?? [];
 
+            const isHeader = args.kind === "header";
+            const isCell = args.kind === "cell";
+
             if (activeCol !== col || activeRow !== row) {
                 activeDropTarget.current = [col, row];
                 onDragOverCell([col + lockColumns, row], event.dataTransfer);
             }
 
-            if (mouseX + SCROLL_RIGHT_THRESHOLD > rect.width) {
-                handleScrollThrottled(1);
+            if (isHeader) {
+                if (mouseX + SCROLL_RIGHT_THRESHOLD > rect.width) {
+                    handleScrollThrottled(SCROLL_MOVEMENT * 1);
+                }
+
+                if (
+                    freezeColumnsWidth
+                        ? mouseX < freezeColumnsWidth + SCROLL_LEFT_FREEZE_THRESHOLD
+                        : mouseX < SCROLL_LEFT_THRESHOLD
+                ) {
+                    handleScrollThrottled(SCROLL_MOVEMENT * -1);
+                }
             }
 
-            if (
-                freezeColumnsWidth
-                    ? mouseX < freezeColumnsWidth + SCROLL_LEFT_FREEZE_THRESHOLD
-                    : mouseX < SCROLL_LEFT_THRESHOLD
-            ) {
-                handleScrollThrottled(-1);
+            if (isCell) {
+                if (mouseY + SCROLL_TOP_THRESHOLD > rect.height) {
+                    handleScrollThrottled(undefined, SCROLL_MOVEMENT * 1);
+                }
+
+                if (mouseY < SCROLL_BOTTOM_THRESHOLD) {
+                    handleScrollThrottled(undefined, SCROLL_MOVEMENT * -1);
+                }
             }
         },
         [
@@ -327,6 +431,7 @@ const useDragAndDrop = ({
 
     const onDragEndImpl = React.useCallback(() => {
         activeDropTarget.current = undefined;
+        initialDropTarget.current = undefined;
         onDragEnd?.();
     }, [onDragEnd]);
 
@@ -344,7 +449,12 @@ const useDragAndDrop = ({
 
             const [rawCol, row] = args.location;
             const col = rawCol - (firstColAccessible ? 0 : 1);
-            if (disabledDragColsAndRows?.cols?.includes(col) === true || col <= 0) {
+
+            if (
+                initialDropTarget.current !== undefined &&
+                initialDropTarget.current[0] !== 0 &&
+                (disabledDragColsAndRows?.cols?.includes(col) === true || col <= 0)
+            ) {
                 return;
             }
 

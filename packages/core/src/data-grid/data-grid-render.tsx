@@ -96,8 +96,14 @@ export interface BlitData {
 }
 
 interface DragAndDropState {
-    src: number;
-    dest: number;
+    column?: {
+        src: number;
+        dest: number;
+    };
+    cell?: {
+        src: number;
+        dest: number;
+    };
 }
 
 export function drawCell(
@@ -121,7 +127,7 @@ export function drawCell(
     lastPrep: PrepResult | undefined,
     enqueue: ((item: Item) => void) | undefined,
     getCellRenderer: GetCellRendererCallback,
-    rowDetails?: GridRow,
+    rowDetails?: GridRow
 ): PrepResult | undefined {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
@@ -133,8 +139,8 @@ export function drawCell(
     let drawX = x;
 
     if (col === 1 && rowDetails?.kind === GridRowKind.GroupContent && rowDetails?.level !== undefined) {
-        const shiftDrawX =  rowDetails.level * theme.nestedGroupIndent;
-        if(shiftDrawX > drawX) {
+        const shiftDrawX = rowDetails.level * theme.nestedGroupIndent;
+        if (shiftDrawX > drawX) {
             drawX = shiftDrawX;
         }
     }
@@ -401,7 +407,8 @@ function drawGridLines(
     trailingRowType: TrailingRowType,
     rows: number,
     theme: Theme,
-    verticalOnly: boolean = false
+    verticalOnly: boolean = false,
+    dragAndDropState: DragAndDropState | undefined
 ) {
     if (spans !== undefined) {
         ctx.beginPath();
@@ -456,6 +463,7 @@ function drawGridLines(
     }
 
     const stickyHeight = getRowHeight(rows - 1);
+
     const stickyRowY = height - stickyHeight + 0.5;
     const lastRowSticky = trailingRowType === "sticky";
     if (lastRowSticky) {
@@ -472,15 +480,31 @@ function drawGridLines(
             // This shouldn't be needed it seems like... yet it is. We're not sure why.
             if (ty >= minY && ty <= maxY - 1 && (!lastRowSticky || row !== rows - 1 || Math.abs(ty - stickyRowY) > 1)) {
                 const rowTheme = getRowThemeOverride?.(row);
+                const isBottomDirection =
+                    dragAndDropState?.cell?.src !== undefined &&
+                    dragAndDropState?.cell?.src < dragAndDropState?.cell?.dest;
+                const isDragAndDropRow = dragAndDropState?.cell?.dest === (isBottomDirection ? row - 1 : row);
+
+                if (rows - 1 === row && dragAndDropState?.cell?.dest === row) {
+                    toDraw.push({
+                        x1: minX,
+                        y1: ty + stickyHeight - 1,
+                        x2: maxX,
+                        y2: ty + stickyHeight - 1,
+                        color: theme.accentColor,
+                    });
+                }
+
                 toDraw.push({
                     x1: minX,
-                    y1: ty,
+                    y1: isDragAndDropRow && dragAndDropState?.cell?.dest === 0 ? ty + 1 : ty,
                     x2: maxX,
                     y2: ty,
-                    color: rowTheme?.horizontalBorderColor ?? rowTheme?.borderColor ?? hColor,
+                    color: isDragAndDropRow
+                        ? theme.accentColor
+                        : rowTheme?.horizontalBorderColor ?? rowTheme?.borderColor ?? hColor,
                 });
             }
-
             y += getRowHeight(row);
             row++;
         }
@@ -720,7 +744,8 @@ export function drawHeader(
     }
 
     if (isCheckboxHeader) {
-        drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined);
+        // as we always show drag handle in rows, we need move to 3px header checkbox position
+        drawCheckbox(ctx, theme, checked, x + 3, y, width, height, false, undefined, undefined);
         if (checked !== true) {
             ctx.globalAlpha = 1;
         }
@@ -780,7 +805,7 @@ export function drawHeader(
     const actualPadding = drawX - x;
 
     const menuWidth = c.hasMenu === true ? menuBounds.width : 0;
-    const sortingAndMenuIconWidth = c.sorting !== undefined ? SORTING_SIZE.width + menuWidth : 0
+    const sortingAndMenuIconWidth = c.sorting !== undefined ? SORTING_SIZE.width + menuWidth : 0;
     const textMaxWidth = Math.max(width - actualPadding - sortingAndMenuIconWidth, 0);
 
     const clippedText = clipCanvasString(c.title, textMaxWidth, ctx, `${c.title}_${textMaxWidth}`, font);
@@ -1044,7 +1069,7 @@ function getSpanBounds(
     cellW: number,
     cellH: number,
     column: MappedGridColumn,
-    allColumns: readonly MappedGridColumn[],
+    allColumns: readonly MappedGridColumn[]
 ): [Rectangle | undefined, Rectangle | undefined] {
     const [startCol, endCol] = span;
 
@@ -1327,11 +1352,11 @@ function drawCells(
                         fill = blend(bgCell, fill);
                     }
 
-                    if(rowDetails?.kind === GridRowKind.Group){
+                    if (rowDetails?.kind === GridRowKind.Group) {
                         fill = blend(theme.bgGroup, fill);
                     }
 
-                    if(rowDetails === undefined || rowDetails.kind === GridRowKind.GroupContent) {
+                    if (rowDetails === undefined || rowDetails.kind === GridRowKind.GroupContent) {
                         if (accentCount > 0 || rowDisabled) {
                             if (rowDisabled) {
                                 fill = blend(theme.bgHeader, fill);
@@ -1344,7 +1369,7 @@ function drawCells(
                                 fill = blend(theme.bgSearchResult, fill);
                             }
                         }
-                    } else if(rowDetails.kind === GridRowKind.Group && rowActivated) {
+                    } else if (rowDetails.kind === GridRowKind.Group && rowActivated) {
                         for (let i = 0; i < accentCount; i++) {
                             fill = blend(theme.accentLight, fill);
                         }
@@ -1793,7 +1818,7 @@ function drawFocusRing(
                 let cellWidth = col.width;
 
                 const rowDetails = getRowDetails?.(row);
-                if(rowDetails !==undefined && rowDetails.kind !== GridRowKind.GroupContent) return undefined
+                if (rowDetails !== undefined && rowDetails.kind !== GridRowKind.GroupContent) return undefined;
                 if (cell.span !== undefined) {
                     const areas = getSpanBounds(cell.span, drawX, drawY, col.width, rh, col, allColumns);
                     const area = col.sticky ? areas[0] : areas[1];
@@ -2184,7 +2209,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             trailingRowType,
             rows,
             theme,
-            true
+            true,
+            dragAndDropState
         );
 
         overlayCtx.beginPath();
@@ -2534,7 +2560,9 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         verticalBorder,
         trailingRowType,
         rows,
-        theme
+        theme,
+        false,
+        dragAndDropState
     );
 
     focusRedraw?.();
@@ -2588,12 +2616,13 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
     if (
         dragAndDropState !== undefined &&
+        dragAndDropState?.column !== undefined &&
         (disabledDragColsAndRows?.cols === undefined ||
-            disabledDragColsAndRows?.cols?.includes(dragAndDropState.dest) === false)
+            disabledDragColsAndRows?.cols?.includes(dragAndDropState?.column?.dest) === false)
     ) {
         walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x) => {
-            if (c.sourceIndex === dragAndDropState.dest) {
-                const isRightDirection = dragAndDropState.src < dragAndDropState.dest;
+            if (dragAndDropState.column !== undefined && c.sourceIndex === dragAndDropState.column.dest) {
+                const isRightDirection = dragAndDropState.column.src < dragAndDropState.column.dest;
                 const xPosition = isRightDirection ? x + c.width : x;
 
                 if (!(freezeColumns && !isRightDirection && x < effectiveCols[freezeColumns - 1].width)) {
