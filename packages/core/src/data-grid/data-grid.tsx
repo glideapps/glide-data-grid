@@ -224,8 +224,14 @@ export interface DataGridProps {
 
     readonly dragAndDropState:
         | {
-              src: number;
-              dest: number;
+              column?: {
+                  src: number;
+                  dest: number;
+              };
+              cell?: {
+                  src: number;
+                  dest: number;
+              };
           }
         | undefined;
 
@@ -743,48 +749,49 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         } else {
             drawGrid(current, undefined);
         }
-    }, [bufferA,
+    }, [
+        bufferA,
         bufferB,
-        width,
-        height,
         cellXOffset,
         cellYOffset,
-        translateX,
-        translateY,
-        mappedColumns,
-        enableGroups,
-        freezeColumns,
-        dragAndDropState,
-        theme,
-        headerHeight,
-        groupHeaderHeight,
+        disabledDragColsAndRows,
         disabledRows,
-        rowHeight,
-        verticalBorder,
-        isResizing,
-        isFocused,
-        selection,
-        fillHandle,
-        trailingRowType,
-        rows,
-        resizeCol,
-        drawFocusRing,
-        getCellContent,
-        getGroupDetails,
-        getRowThemeOverride,
+        dragAndDropState,
         drawCustomCell,
+        drawFocusRing,
         drawHeaderCallback,
-        prelightCells,
-        highlightRegions,
-        imageLoader,
-        spriteManager,
-        scrolling,
+        enableGroups,
         experimental?.hyperWrapping,
         experimental?.renderStrategy,
-        lastWasTouch,
+        fillHandle,
+        freezeColumns,
+        getCellContent,
         getCellRenderer,
-        disabledDragColsAndRows,
-        getRowDetails
+        getGroupDetails,
+        getRowDetails,
+        getRowThemeOverride,
+        groupHeaderHeight,
+        headerHeight,
+        height,
+        highlightRegions,
+        imageLoader,
+        isFocused,
+        isResizing,
+        lastWasTouch,
+        mappedColumns,
+        prelightCells,
+        resizeCol,
+        rowHeight,
+        rows,
+        scrolling,
+        selection,
+        spriteManager,
+        theme,
+        trailingRowType,
+        translateX,
+        translateY,
+        verticalBorder,
+        width,
     ]);
 
     const lastDrawRef = React.useRef(draw);
@@ -1252,6 +1259,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         onDragLeave,
         width,
         eventTargetRef,
+        selection,
     });
 
     const selectionRef = React.useRef(selection);

@@ -11,7 +11,14 @@ import {
     BooleanEmpty,
     BooleanIndeterminate,
 } from "./data-grid-types";
-import { degreesToRadians, direction } from "../common/utils";
+import {
+    degreesToRadians,
+    direction,
+    getSquareBB,
+    getSquareWidth,
+    getSquareXPosFromAlign,
+    pointIsWithinBB,
+} from "../common/utils";
 import React from "react";
 import type { BaseDrawArgs, PrepResult } from "./cells/cell-types";
 import { assertNever } from "../common/support";
@@ -198,7 +205,6 @@ let metricsCache: Record<string, TextMetrics | undefined> = {};
 const isSSR = typeof window === "undefined";
 
 export const ellipsisStrCache = new LRUCache<string, string>(10_000);
-
 
 async function clearCacheOnLoad() {
     if (isSSR || document?.fonts?.ready === undefined) return;
@@ -512,41 +518,46 @@ export function drawCheckbox(
     height: number,
     highlighted: boolean,
     hoverX: number = -20,
-    hoverY: number = -20
+    hoverY: number = -20,
+    maxSize: number = 12,
+    alignment: BaseGridCell["contentAlign"] = "center"
 ) {
-    const centerX = x + width / 2;
-    const centerY = y + height / 2;
-
-    const checkBoxWidth = height / 1.89; // checkbox width proportional to cell height
-    const emptyCheckBoxWidth = height / 2;
-
-    const hoverHelper = height / 3.4;
-    const hovered = Math.abs(hoverX - width / 2) < hoverHelper && Math.abs(hoverY - height / 2) < hoverHelper;
-
-    const rectBordRadius = 4;
-    const posHelperChecked = height / 4.25; //for default cell height (34px) this equals to 8px
-    const posHelperEmpty = height / 4; // 8.5px
-    const posHelperInter = height / 8.5; // 4px
+    const centerY = Math.floor(y + height / 2);
+    const rectBorderRadius = 2;
+    const checkBoxWidth = getSquareWidth(maxSize, height, theme.cellVerticalPadding);
+    const checkBoxHalfWidth = checkBoxWidth / 2;
+    const posX = getSquareXPosFromAlign(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);
+    const bb = getSquareBB(posX, centerY, checkBoxWidth);
+    const hovered = pointIsWithinBB(x + hoverX, y + hoverY, bb);
 
     switch (checked) {
         case true: {
             ctx.beginPath();
             roundedRect(
                 ctx,
-                centerX - checkBoxWidth / 2,
+                posX - checkBoxWidth / 2,
                 centerY - checkBoxWidth / 2,
                 checkBoxWidth,
                 checkBoxWidth,
-                rectBordRadius
+                rectBorderRadius
             );
 
             ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
             ctx.fill();
 
             ctx.beginPath();
-            ctx.moveTo(centerX - posHelperChecked + height / 9.31, centerY - posHelperChecked + height / 4.33);
-            ctx.lineTo(centerX - posHelperChecked + height / 5.33, centerY - posHelperChecked + height / 3.17);
-            ctx.lineTo(centerX - posHelperChecked + height / 2.83, centerY - posHelperChecked + height / 7.16);
+            ctx.moveTo(
+                posX - checkBoxHalfWidth + checkBoxWidth / 4.23,
+                centerY - checkBoxHalfWidth + checkBoxWidth / 1.97
+            );
+            ctx.lineTo(
+                posX - checkBoxHalfWidth + checkBoxWidth / 2.42,
+                centerY - checkBoxHalfWidth + checkBoxWidth / 1.44
+            );
+            ctx.lineTo(
+                posX - checkBoxHalfWidth + checkBoxWidth / 1.29,
+                centerY - checkBoxHalfWidth + checkBoxWidth / 3.25
+            );
 
             ctx.strokeStyle = theme.bgCell;
             ctx.lineJoin = "round";
@@ -561,11 +572,11 @@ export function drawCheckbox(
             ctx.beginPath();
             roundedRect(
                 ctx,
-                centerX - posHelperEmpty,
-                centerY - posHelperEmpty,
-                emptyCheckBoxWidth,
-                emptyCheckBoxWidth,
-                rectBordRadius
+                posX - checkBoxWidth / 2 + 0.5,
+                centerY - checkBoxWidth / 2 + 0.5,
+                checkBoxWidth - 1,
+                checkBoxWidth - 1,
+                rectBorderRadius
             );
 
             ctx.lineWidth = 1;
@@ -578,19 +589,19 @@ export function drawCheckbox(
             ctx.beginPath();
             roundedRect(
                 ctx,
-                centerX - posHelperEmpty,
-                centerY - posHelperEmpty,
-                emptyCheckBoxWidth,
-                emptyCheckBoxWidth,
-                rectBordRadius
+                posX - checkBoxWidth / 2,
+                centerY - checkBoxWidth / 2,
+                checkBoxWidth,
+                checkBoxWidth,
+                rectBorderRadius
             );
 
             ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
             ctx.fill();
 
             ctx.beginPath();
-            ctx.moveTo(centerX - posHelperInter, centerY);
-            ctx.lineTo(centerX + posHelperInter, centerY);
+            ctx.moveTo(posX - checkBoxWidth / 3, centerY);
+            ctx.lineTo(posX + checkBoxWidth / 3, centerY);
             ctx.strokeStyle = theme.bgCell;
             ctx.lineCap = "round";
             ctx.lineWidth = 1.9;
@@ -630,22 +641,14 @@ export function drawMarkerRowCell(
 ) {
     const { ctx, rect, hoverAmount, theme } = args;
     const { x, y, width, height } = rect;
+
     const checkedboxAlpha = checked ? 1 : hoverAmount;
     if (markerKind !== "number" && checkedboxAlpha > 0) {
         ctx.globalAlpha = checkedboxAlpha;
-        const offsetAmount = 7 * (checked ? hoverAmount : 1);
-        drawCheckbox(
-            ctx,
-            theme,
-            checked,
-            drawHandle ? x + offsetAmount : x,
-            y,
-            drawHandle ? width - offsetAmount : width,
-            height,
-            true
-        );
+        const offsetAmount = 7;
+        drawCheckbox(ctx, theme, checked, x + offsetAmount, y, width - offsetAmount, height, true);
         if (drawHandle) {
-            ctx.globalAlpha = hoverAmount;
+            ctx.globalAlpha = checked || hoverAmount ? 1 : 0;
             ctx.beginPath();
             for (const xOffset of [3, 6]) {
                 for (const yOffset of [-5, -1, 3]) {
@@ -1263,7 +1266,6 @@ export function drawColumnResizeOutline(
     ctx.stroke();
 }
 
-
 export const SORTING_SIZE = { width: 38, height: 17 };
 
 const sortingAsc = `
@@ -1291,15 +1293,15 @@ export enum SortingDirection {
 
 function getSortingIcon(sortingSvg: string) {
     const sortingIcon = new Image();
-    sortingIcon.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(sortingSvg)}`
-    return sortingIcon
+    sortingIcon.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(sortingSvg)}`;
+    return sortingIcon;
 }
 
 // We store the sorting icons in outside of the function to avoid creating them every time
 const sortingIconMap = {
     [SortingDirection.Ascending]: getSortingIcon(sortingAsc),
     [SortingDirection.Descending]: getSortingIcon(sortingDesc),
-}
+};
 
 export function drawSorting(
     ctx: CanvasRenderingContext2D,
@@ -1308,7 +1310,7 @@ export function drawSorting(
     sortingDirection: SortingDirection,
     order: number,
     font: string,
-    theme: Theme,
+    theme: Theme
 ) {
     const { width, height } = SORTING_SIZE;
 
@@ -1317,7 +1319,7 @@ export function drawSorting(
     roundedRect(ctx, x, y, width, height, 2);
     ctx.fill();
     ctx.closePath();
- 
+
     const padding = 3;
 
     const iconLeft = x + padding;
@@ -1327,15 +1329,15 @@ export function drawSorting(
     const iconRight = iconLeft + iconWidth;
 
     ctx.beginPath();
-    const sortingIcon = sortingIconMap[sortingDirection]
+    const sortingIcon = sortingIconMap[sortingDirection];
     ctx.drawImage(sortingIcon, iconLeft, iconTop, iconWidth, iconHeight);
     ctx.closePath();
 
-    const orderText = `${order}`
+    const orderText = `${order}`;
     const orderTextWidth = measureTextCached(orderText, ctx, font).width;
-    const orderTextFreeSpace = width - (2 * padding) - iconWidth;
+    const orderTextFreeSpace = width - 2 * padding - iconWidth;
     const orderLeft = iconRight + (orderTextFreeSpace - orderTextWidth) / 2;
-    const orderTop = y + height / 2 + getMiddleCenterBias(ctx, font) - 0.3
+    const orderTop = y + height / 2 + getMiddleCenterBias(ctx, font) - 0.3;
 
     ctx.beginPath();
     ctx.fillStyle = theme.sortIndicatorColor;
@@ -1363,7 +1365,6 @@ const binarySearch = ({ max, getValue, match }: { max: number; match: number; ge
     return max;
 };
 
-
 export const clipCanvasString = (
     str: string,
     maxWidth: number,
@@ -1371,15 +1372,13 @@ export const clipCanvasString = (
     cacheKey: string,
     font: string
 ) => {
-
     const cachedStr = ellipsisStrCache.get(cacheKey);
 
-    if(cachedStr !== undefined){
+    if (cachedStr !== undefined) {
         return cachedStr;
     }
 
-    const ellipsis = '…';
-
+    const ellipsis = "…";
 
     const width = measureTextCached(str, ctx, font).width;
 
@@ -1395,12 +1394,9 @@ export const clipCanvasString = (
         match: maxWidth - ellipsisWidth,
     });
 
-
-
     const finalStr = str.slice(0, index) + ellipsis;
 
     ellipsisStrCache.put(cacheKey, finalStr);
 
-    return finalStr
+    return finalStr;
 };
-

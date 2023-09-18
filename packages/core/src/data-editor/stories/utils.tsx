@@ -13,7 +13,7 @@ import {
     Rectangle,
 } from "../../data-grid/data-grid-types";
 
-import { faker } from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
 import { styled } from "@linaria/react";
 import isArray from "lodash/isArray.js";
@@ -109,7 +109,7 @@ export function lossyCopyData<T extends EditableGridCell>(source: EditableGridCe
 }
 
 export type GridColumnWithMockingInfo = GridColumn & {
-    getContent(col: number, row:number): GridCell;
+    getContent(col: number, row: number): GridCell;
 };
 
 export function getGridColumn(columnWithMock: GridColumnWithMockingInfo): GridColumn {
@@ -291,8 +291,8 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
             icon: GridColumnIcon.HeaderString,
             hasMenu: false,
             getContent: (_col, row) => {
-                faker.seed(row)
-                const firstName = faker.person.firstName()
+                faker.seed(row);
+                const firstName = faker.person.firstName();
                 return {
                     kind: GridCellKind.Text,
                     displayData: firstName,
@@ -327,11 +327,10 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
             icon: GridColumnIcon.HeaderImage,
             hasMenu: false,
             getContent: () => {
-
                 return {
                     kind: GridCellKind.Image,
                     data: [`/assets/image-900x900.jpg`],
-                    displayData: ['/assets/image-40x40.jpg'],
+                    displayData: ["/assets/image-40x40.jpg"],
                     allowOverlay: true,
                     allowAdd: false,
                     readonly: true,
@@ -513,7 +512,15 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
         [colsMap]
     );
 
-    return { cols, getCellContent, onColumnResize, setCellValue, getCellsForSelection, setCellValueRaw };
+    return {
+        cols,
+        getCellContent,
+        onColumnResize,
+        setCellValue,
+        getCellsForSelection,
+        setCellValueRaw,
+        colsMap,
+    };
 }
 
 export const useGroupMockDataGenerator = (groupCount: number, rowsInEachGroup: number) => {
@@ -521,25 +528,25 @@ export const useGroupMockDataGenerator = (groupCount: number, rowsInEachGroup: n
         const groups: RowGroup[] = [];
         for (let i = 0; i < groupCount; i++) {
             const group: RowGroup = {
-                name: `Group ${i+1}`,
+                name: `Group ${i + 1}`,
                 rowsCount: 0,
                 expanded: true,
                 id: `${i}`,
                 groups: [
                     {
-                        name: `Group ${i+1}-1`,
+                        name: `Group ${i + 1}-1`,
                         rowsCount: 0,
                         id: `${i}-0`,
                         groups: [
                             {
-                                name: `Group ${i+1}-1-1`,
+                                name: `Group ${i + 1}-1-1`,
                                 rowsCount: rowsInEachGroup,
                                 groups: [],
                                 expanded: true,
                                 id: `${i}-0-0`,
                             },
                             {
-                                name: `Group ${i+1}-1-2`,
+                                name: `Group ${i + 1}-1-2`,
                                 rowsCount: rowsInEachGroup,
                                 groups: [],
                                 expanded: true,
@@ -549,11 +556,11 @@ export const useGroupMockDataGenerator = (groupCount: number, rowsInEachGroup: n
                         expanded: true,
                     },
                     {
-                        name: `Group ${i+1}-2`,
+                        name: `Group ${i + 1}-2`,
                         rowsCount: 0,
                         groups: [
                             {
-                                name: `Group ${i+1}-1-2`,
+                                name: `Group ${i + 1}-1-2`,
                                 rowsCount: rowsInEachGroup,
                                 groups: [],
                                 expanded: true,
@@ -588,12 +595,11 @@ export const useGroupMockDataGenerator = (groupCount: number, rowsInEachGroup: n
     return { groups, toggleGroup, setGroups };
 };
 
-
 export const findGroup = (currentGroups: RowGroup[], groupId: string): RowGroup | undefined => {
     const ids = groupId.split("-");
     let group = currentGroups[Number.parseInt(ids[0])];
-    for (let i = 1; i<ids.length; i++) {
+    for (let i = 1; i < ids.length; i++) {
         group = group.groups[Number.parseInt(ids[i])];
     }
-    return group
-}
+    return group;
+};

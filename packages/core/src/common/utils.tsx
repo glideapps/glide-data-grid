@@ -47,6 +47,39 @@ export function degreesToRadians(degrees: number) {
     return (degrees * PI) / 180;
 }
 
+export const getSquareWidth = (maxSize: number, containerHeight: number, verticalPadding: number) => {
+    const width = Math.min(maxSize, containerHeight - verticalPadding * 2);
+    return width > 0 ? width : maxSize;
+};
+
+export const getSquareXPosFromAlign = (
+    alignment: "left" | "center" | "right",
+    containerX: number,
+    containerWidth: number,
+    horizontalPadding: number,
+    squareWidth: number
+) => {
+    switch (alignment) {
+        case "left":
+            return Math.floor(containerX) + horizontalPadding + squareWidth / 2;
+        case "center":
+            return Math.floor(containerX + containerWidth / 2);
+        case "right":
+            return Math.floor(containerX + containerWidth) - horizontalPadding - squareWidth / 2;
+    }
+};
+
+export const getSquareBB = (posX: number, posY: number, squareSideLength: number) => ({
+    x1: posX - squareSideLength / 2,
+    y1: posY - squareSideLength / 2,
+    x2: posX + squareSideLength / 2,
+    y2: posY + squareSideLength / 2,
+});
+
+type BoundingBox = { x1: number; y1: number; x2: number; y2: number };
+export const pointIsWithinBB = (x: number, y: number, bb: BoundingBox) =>
+    bb.x1 <= x && x <= bb.x2 && bb.y1 <= y && y <= bb.y2;
+
 export interface SpriteProps {
     fgColor: string;
     bgColor: string;
