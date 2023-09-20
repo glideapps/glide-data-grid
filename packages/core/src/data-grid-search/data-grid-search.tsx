@@ -321,10 +321,8 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
 
     const subscriptionCallbacksRef = React.useRef<Array<(searchStatus?: SearchStatus) => void>>([]);
 
-    React.useEffect(() => {
-        const subscriptionCallbacks = subscriptionCallbacksRef.current;
-       
-        for (const callback of subscriptionCallbacks) {
+    React.useEffect(() => {  
+        for (const callback of subscriptionCallbacksRef.current) {
             callback(searchStatus);
         }
     }, [searchStatus])
