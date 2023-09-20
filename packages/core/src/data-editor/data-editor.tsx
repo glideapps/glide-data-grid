@@ -1,12 +1,12 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
-import { noop } from "lodash";
 import { assert, assertNever, maybe } from "../common/support";
 import clamp from "lodash/clamp.js";
 import uniq from "lodash/uniq.js";
 import flatten from "lodash/flatten.js";
 import range from "lodash/range.js";
 import debounce from "lodash/debounce.js";
+import noop  from "lodash/noop.js";
 import DataGridOverlayEditor from "../data-grid-overlay-editor/data-grid-overlay-editor";
 import {
     CellClickedEventArgs,
