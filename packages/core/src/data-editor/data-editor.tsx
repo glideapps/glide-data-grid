@@ -3464,14 +3464,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const mangledFreezeColumns = Math.min(mangledCols.length, freezeColumns + (hasRowMarkers ? 1 : 0));
 
-    const dataGridSearchRef = React.useRef<DataGridSearchRef>(null)
-    
-    const {
-        search: dataGridSearch = noop,
-        searchNextResult: dataGridSearchNextResult = noop,
-        searchPrevResult: dataGridSearchPrevResult = noop,
-        subscribeToSearch: dataGridSubscribeToSearch = noop,
-    } = dataGridSearchRef.current ?? {}
+    const dataGridSearchRef = React.useRef<DataGridSearchRef>({
+        search: noop,
+        searchNextResult: noop,
+        searchPrevResult: noop,
+        subscribeToSearch: noop,
+        searchKeyDown: noop,
+    });
+
+    const searchFunctions = dataGridSearchRef.current;
 
     React.useImperativeHandle(
         forwardedRef,
@@ -3547,10 +3548,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             },
             scrollTo,
-            search: dataGridSearch,
-            searchNextResult: dataGridSearchNextResult,
-            searchPrevResult: dataGridSearchPrevResult,
-            subscribeToSearch: dataGridSubscribeToSearch
+            ...searchFunctions,
         }),
         [
             appendRow,
@@ -3560,10 +3558,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onPasteInternal,
             rowMarkerOffset,
             scrollTo,
-            dataGridSearch,
-            dataGridSearchNextResult,
-            dataGridSearchPrevResult,
-            dataGridSubscribeToSearch
+            searchFunctions,
         ]
     );
 

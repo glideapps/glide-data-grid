@@ -44,11 +44,19 @@ const closeX = (
     </svg>
 );
 
+interface SearchStatus {
+    rowsSearched: number;
+    results: number;
+    foundedRowsCount: number;
+    selectedIndex: number;
+}
+
 export interface DataGridSearchRef {
     search: (query: string) => void; 
     searchNextResult: VoidFunction;
     searchPrevResult: VoidFunction;
-    subscribeToSearch: (callback: (searchStatus: any) => void) => void;
+    searchKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void
+    subscribeToSearch: (callback: (searchStatus?: SearchStatus) => void) => void;
 }
 
 export interface DataGridSearchProps extends Omit<ScrollingDataGridProps, "prelightCells"> {
@@ -86,13 +94,7 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
     const [searchID] = React.useState(() => "search-box-" + Math.round(Math.random() * 1000));
 
     const [searchString, setSearchString] = React.useState("");
-    const [searchStatus, setSearchStatus] =
-        React.useState<{
-            rowsSearched: number;
-            results: number;
-            foundedRowsCount: number;
-            selectedIndex: number;
-        }>();
+    const [searchStatus, setSearchStatus] = React.useState<SearchStatus>();
 
     const searchStatusRef = React.useRef(searchStatus);
     searchStatusRef.current = searchStatus;
@@ -317,10 +319,13 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
         };
     }, [cancelSearch]);
 
-    const subscriptionCallbackRef = React.useRef<(searchStatus: string) => void>();
+    const subscriptionCallbacksRef = React.useRef<Array<(searchStatus?: SearchStatus) => void>>([]);
 
     React.useEffect(() => {
-        subscriptionCallbackRef.current?.(searchStatus)
+        const subscriptionCallbacks = subscriptionCallbacksRef.current;
+        for (const callback of subscriptionCallbacks) {
+            callback(searchStatus);
+        }
     }, [searchStatus])
 
     React.useImperativeHandle(
@@ -329,11 +334,16 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
             search: onSearch,
             searchNextResult: onNext,
             searchPrevResult: onPrev,
-            subscribeToSearch: (callback: (searchStatus: string) => void) => {
-                subscriptionCallbackRef.current = callback;
-            }
+            searchKeyDown: onSearchKeyDown,
+            subscribeToSearch: (callback: (searchStatus?: SearchStatus) => void) => {
+                subscriptionCallbacksRef.current.push(callback);
+                return () => {
+                    subscriptionCallbacksRef.current = subscriptionCallbacksRef.current.filter((cb) => cb !== callback);
+                }
+            },
+            
         }),
-       [onSearch, onNext, onPrev]
+       [onSearch, onNext, onPrev, onSearchKeyDown]
      );
 
     const searchbox = React.useMemo(() => {
