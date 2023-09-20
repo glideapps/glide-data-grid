@@ -699,6 +699,7 @@ export interface DataEditorRef {
      * Enters edit mode of the provided cell.
      */
     enterCellEditMode: EnterCellEditModeFn;
+    searchRef: React.MutableRefObject<DataGridSearchRef>;
 }
 
 const loadingCell: GridCell = {
@@ -3472,8 +3473,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         searchKeyDown: noop,
     });
 
-    const searchFunctions = dataGridSearchRef.current;
-
     React.useImperativeHandle(
         forwardedRef,
         () => ({
@@ -3548,7 +3547,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             },
             scrollTo,
-            ...searchFunctions,
+            searchRef: dataGridSearchRef,
         }),
         [
             appendRow,
@@ -3558,7 +3557,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onPasteInternal,
             rowMarkerOffset,
             scrollTo,
-            searchFunctions,
         ]
     );
 

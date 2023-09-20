@@ -323,6 +323,7 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
 
     React.useEffect(() => {
         const subscriptionCallbacks = subscriptionCallbacksRef.current;
+       
         for (const callback of subscriptionCallbacks) {
             callback(searchStatus);
         }
