@@ -6,6 +6,7 @@ import uniq from "lodash/uniq.js";
 import flatten from "lodash/flatten.js";
 import range from "lodash/range.js";
 import debounce from "lodash/debounce.js";
+import noop  from "lodash/noop.js";
 import DataGridOverlayEditor from "../data-grid-overlay-editor/data-grid-overlay-editor";
 import {
     CellClickedEventArgs,
@@ -47,7 +48,7 @@ import {
     Slice,
     ValidatedGridCell,
 } from "../data-grid/data-grid-types";
-import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
+import DataGridSearch, { DataGridSearchProps, DataGridSearchRef } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
 import { getDataEditorTheme, makeCSSStyle, Theme, ThemeContext } from "../common/styles";
 import type { DataGridRef } from "../data-grid/data-grid";
@@ -703,6 +704,7 @@ export interface DataEditorRef {
      * Enters edit mode of the provided cell.
      */
     enterCellEditMode: EnterCellEditModeFn;
+    searchRef: React.MutableRefObject<DataGridSearchRef>;
 }
 
 const loadingCell: GridCell = {
@@ -3570,6 +3572,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const mangledFreezeColumns = Math.min(mangledCols.length, freezeColumns + (hasRowMarkers ? 1 : 0));
 
+    const dataGridSearchRef = React.useRef<DataGridSearchRef>({
+        search: noop,
+        searchNextResult: noop,
+        searchPrevResult: noop,
+        subscribeToSearch: noop,
+        searchKeyDown: noop,
+    });
+
     React.useImperativeHandle(
         forwardedRef,
         () => ({
@@ -3644,8 +3654,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             },
             scrollTo,
+            searchRef: dataGridSearchRef,
         }),
-        [appendRow, enterCellEditMode, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
+        [
+            appendRow,
+            enterCellEditMode,
+            onCopy,
+            onKeyDown,
+            onPasteInternal,
+            rowMarkerOffset,
+            scrollTo,
+        ]
     );
 
     const [selCol, selRow] = currentCell ?? [];
@@ -3747,6 +3766,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 inWidth={width ?? idealWidth}
                 inHeight={height ?? idealHeight}>
                 <DataGridSearch
+                    ref={dataGridSearchRef}
                     fillHandle={fillHandle}
                     drawFocusRing={drawFocusRing}
                     experimental={experimental}

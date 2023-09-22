@@ -44,6 +44,21 @@ const closeX = (
     </svg>
 );
 
+interface SearchStatus {
+    rowsSearched: number;
+    results: number;
+    foundedRowsCount: number;
+    selectedIndex: number;
+}
+
+export interface DataGridSearchRef {
+    search: (query: string) => void; 
+    searchNextResult: VoidFunction;
+    searchPrevResult: VoidFunction;
+    searchKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void
+    subscribeToSearch: (callback: (searchStatus?: SearchStatus) => void) => void;
+}
+
 export interface DataGridSearchProps extends Omit<ScrollingDataGridProps, "prelightCells"> {
     readonly getCellsForSelection?: (selection: Rectangle, abortSignal: AbortSignal) => GetCellsThunk | CellArray;
     readonly onSearchResultsChanged?: (results: readonly Item[], navIndex: number) => void;
@@ -62,7 +77,7 @@ export interface DataGridSearchProps extends Omit<ScrollingDataGridProps, "preli
 
 const targetSearchTimeMS = 10;
 
-const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
+const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGridSearchProps> = (p, forwardedRef) => {
     const {
         canvasRef,
         cellYOffset,
@@ -79,12 +94,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const [searchID] = React.useState(() => "search-box-" + Math.round(Math.random() * 1000));
 
     const [searchString, setSearchString] = React.useState("");
-    const [searchStatus, setSearchStatus] =
-        React.useState<{
-            rowsSearched: number;
-            results: number;
-            selectedIndex: number;
-        }>();
+    const [searchStatus, setSearchStatus] = React.useState<SearchStatus>();
 
     const searchStatusRef = React.useRef(searchStatus);
     searchStatusRef.current = searchStatus;
@@ -121,6 +131,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
             const runningResult: [number, number][] = [];
 
+            let foundedRowsCount = 0;
             const tick = async () => {
                 if (getCellsForSelection === undefined) return;
                 const tStart = performance.now();
@@ -140,7 +151,9 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 }
 
                 let added = false;
+              
                 for (const [row, d] of data.entries()) {
+                    let isFoundedInCurrentRow = false;
                     for (const [col, cell] of d.entries()) {
                         let testString: string | undefined;
                         switch (cell.kind) {
@@ -168,6 +181,10 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         }
 
                         if (testString !== undefined && regex.test(testString)) {
+                            if (!isFoundedInCurrentRow) {
+                                foundedRowsCount++
+                                isFoundedInCurrentRow = true;
+                            }
                             runningResult.push([col, row + startY]);
                             added = true;
                         }
@@ -187,6 +204,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 setSearchStatus({
                     results: runningResult.length,
                     rowsSearched,
+                    foundedRowsCount,
                     selectedIndex,
                 });
                 onSearchResultsChanged?.(runningResult, selectedIndex);
@@ -223,18 +241,22 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         canvasRef?.current?.focus();
     }, [cancelSearch, canvasRef, onSearchClose, onSearchResultsChanged]);
 
+    const onSearch = React.useCallback((query: string) => {
+        setSearchString(query);
+        if (query === "") {
+            setSearchStatus(undefined);
+            setSearchResults([]);
+            cancelSearch();
+        } else {
+            beginSearch(query);
+        }
+    }, [beginSearch, cancelSearch])
+
     const onSearchChange = React.useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
-            setSearchString(event.target.value);
-            if (event.target.value === "") {
-                setSearchStatus(undefined);
-                setSearchResults([]);
-                cancelSearch();
-            } else {
-                beginSearch(event.target.value);
-            }
+            onSearch(event.target.value);
         },
-        [beginSearch, cancelSearch]
+        [onSearch]
     );
 
     React.useEffect(() => {
@@ -296,6 +318,32 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
             cancelSearch();
         };
     }, [cancelSearch]);
+
+    const subscriptionCallbacksRef = React.useRef<Array<(searchStatus?: SearchStatus) => void>>([]);
+
+    React.useEffect(() => {  
+        for (const callback of subscriptionCallbacksRef.current) {
+            callback(searchStatus);
+        }
+    }, [searchStatus])
+
+    React.useImperativeHandle(
+       forwardedRef,
+       () => ({
+            search: onSearch,
+            searchNextResult: onNext,
+            searchPrevResult: onPrev,
+            searchKeyDown: onSearchKeyDown,
+            subscribeToSearch: (callback: (searchStatus?: SearchStatus) => void) => {
+                subscriptionCallbacksRef.current.push(callback);
+                return () => {
+                    subscriptionCallbacksRef.current = subscriptionCallbacksRef.current.filter((cb) => cb !== callback);
+                }
+            },
+            
+        }),
+       [onSearch, onNext, onPrev, onSearchKeyDown]
+     );
 
     const searchbox = React.useMemo(() => {
         let resultString: string | undefined;
@@ -479,4 +527,4 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     );
 };
 
-export default DataGridSearch;
+export default React.forwardRef(DataGridSearch);

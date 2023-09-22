@@ -2149,6 +2149,111 @@ export const BuiltInSearch: React.VFC = () => {
     },
 };
 
+export const ExternalSearch: React.VFC = () => {
+    const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
+
+    const rowsCount = 10_000;
+
+    const gridRef = React.useRef<DataEditorRef>(null);
+
+    const [searchStatus, setSearchStatus] =
+        React.useState<
+            | {
+                  rowsSearched: number;
+                  results: number;
+                  foundedRowsCount: number;
+                  selectedIndex: number;
+              }
+            | undefined
+        >(); 
+
+    const [searchQuery, setSearchQuery] = React.useState("");
+
+    React.useEffect(() => {
+        gridRef.current?.searchRef.current.search(searchQuery);
+        return gridRef.current?.searchRef.current.subscribeToSearch(setSearchStatus);
+    }, [searchQuery]);
+
+    const onPrev = React.useCallback(() => {
+        gridRef.current?.searchRef.current.searchPrevResult();
+    }, []);
+
+    const onNext = React.useCallback(() => {
+        gridRef.current?.searchRef.current.searchNextResult();
+    }, []);
+
+    const onChange = React.useCallback(e => {
+        setSearchQuery(e.target.value);
+    }, []);
+
+    return (
+        <BeautifulWrapper
+            title="External search"
+            description={
+                <>
+                    <Description>
+                        Search for any data from outside.
+                    </Description>
+                </>
+            }>
+            <div style={{ padding: 10, color: '#000' }}>
+               
+
+
+                <div style={{ width: 150 }}>
+                    <div style={{ display: 'flex' }}>
+                        <input
+                            width="150px"
+                            onChange={onChange}
+                            onKeyDown={gridRef.current?.searchRef.current.searchKeyDown}
+                            type="search"
+                            placeholder="Search ..."
+                        />
+                         {searchStatus ? (
+                            <>
+                                <button onClick={onPrev}>prev</button>
+                                <button onClick={onNext}>next</button>
+                            </>
+                        ) : null}
+                    </div>
+                    {searchStatus
+                        ? <div style={{
+                            marginTop: 2,
+                            height: 4,
+                            width: `${searchStatus.rowsSearched * 100 / rowsCount}%`,
+                            background: 'orange'
+                        }}/>
+                        : null
+                    }
+                </div>
+
+                {searchStatus?.selectedIndex !== undefined ? (
+                    <span>
+                        {searchStatus?.selectedIndex + 1} of {searchStatus?.results}
+                    </span>
+                ) : (
+                    <span>{searchStatus?.results}</span>
+                )}
+            </div>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                getCellsForSelection={true}
+                columns={cols}
+                onCellEdited={setCellValue}
+                onColumnResize={onColumnResize}
+                ref={gridRef}
+                rows={rowsCount}
+            />
+        </BeautifulWrapper>
+    );
+};
+(ExternalSearch as any).parameters = {
+    options: {
+        showPanel: false,
+    },
+};
+
 interface ImperativeScrollProps {
     paddingY: number;
     paddingX: number;
