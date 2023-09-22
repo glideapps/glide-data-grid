@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.10.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.9.3...v5.10.0) (2023-09-22)
+
+
+### Features
+
+* add search functions ([8cc5558](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/8cc5558f2bc973e7e87386f0f38a3c1eabd1d88d))
+* add search related functions and data into gridRef ([ed69891](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/ed698912683dc22c235426ba0ebf2fa84787dab2))
+* add storybook ([6cdbdef](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/6cdbdef62c61f60dcf5cf13db4a61a3e055717c3))
+
+
+### Bug Fixes
+
+* mr review comment ([2b4ee29](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/2b4ee29c050e710a9e72e36aab757c0ae570ef88))
+
 ### [5.9.3](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.9.2...v5.9.3) (2023-09-18)
 
 ### [5.9.2](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.9.1...v5.9.2) (2023-09-15)
