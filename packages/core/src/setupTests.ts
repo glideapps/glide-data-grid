@@ -8,3 +8,19 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
     unobserve: jest.fn(),
     disconnect: jest.fn(),
 }));
+
+Object.defineProperty(global.navigator, "clipboard", {
+    value: { write: () => void 0 },
+    writable: true,
+});
+
+Object.defineProperties(global, {
+    ClipboardItem: { value: jest.fn() },
+    Blob: { value: jest.fn() },
+});
+
+Object.defineProperty(HTMLElement.prototype, 'innerText', {
+    set: function(v) {
+        this.textContent = v
+    }
+})

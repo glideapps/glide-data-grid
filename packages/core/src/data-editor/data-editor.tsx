@@ -3421,7 +3421,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 columnIndexes: readonly number[]
             ) => {
                 if (!copyHeaders) {
-                    copyToClipboard(cells, columnIndexes, e);
+                    copyToClipboard(cells, columnIndexes, getCellRenderer, e);
                 } else {
                     const headers = columnIndexes.map(index => ({
                         kind: GridCellKind.Text,
@@ -3429,7 +3429,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         displayData: columnsIn[index].title,
                         allowOverlay: false,
                     })) as GridCell[];
-                    copyToClipboard([headers, ...cells], columnIndexes, e);
+                    copyToClipboard([headers, ...cells], columnIndexes, getCellRenderer, e);
                 }
             };
 

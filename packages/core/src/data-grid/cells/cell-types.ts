@@ -100,6 +100,7 @@ export interface InternalCellRenderer<T extends InnerGridCell> extends BaseCellR
 export interface CustomRenderer<T extends CustomCell = CustomCell> extends BaseCellRenderer<T> {
     readonly isMatch: (cell: CustomCell) => cell is T;
     readonly onPaste?: (val: string, cellData: T["data"]) => T["data"] | undefined;
+    readonly onCopy?: (cellElement: HTMLTableCellElement, cell: T) => void;
 }
 
 /** @category Renderers */
