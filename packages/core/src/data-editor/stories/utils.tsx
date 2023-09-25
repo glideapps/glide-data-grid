@@ -523,60 +523,65 @@ export function useMockDataGenerator(numCols: number, readonly: boolean = true, 
     };
 }
 
-export const useGroupMockDataGenerator = (groupCount: number, rowsInEachGroup: number) => {
-    const initialGroups = React.useMemo(() => {
-        const groups: RowGroup[] = [];
-        for (let i = 0; i < groupCount; i++) {
-            const group: RowGroup = {
-                name: `Group ${i + 1}`,
-                rowsCount: 0,
-                expanded: true,
-                id: `${i}`,
-                groups: [
-                    {
-                        name: `Group ${i + 1}-1`,
-                        rowsCount: 0,
-                        id: `${i}-0`,
-                        groups: [
-                            {
-                                name: `Group ${i + 1}-1-1`,
-                                rowsCount: rowsInEachGroup,
-                                groups: [],
-                                expanded: true,
-                                id: `${i}-0-0`,
-                            },
-                            {
-                                name: `Group ${i + 1}-1-2`,
-                                rowsCount: rowsInEachGroup,
-                                groups: [],
-                                expanded: true,
-                                id: `${i}-0-1`,
-                            },
-                        ],
-                        expanded: true,
-                    },
-                    {
-                        name: `Group ${i + 1}-2`,
-                        rowsCount: 0,
-                        groups: [
-                            {
-                                name: `Group ${i + 1}-1-2`,
-                                rowsCount: rowsInEachGroup,
-                                groups: [],
-                                expanded: true,
-                                id: `${i}-1-0`,
-                            },
-                        ],
-                        expanded: true,
-                        id: `${i}-1`,
-                    },
-                ],
-            };
+export const createInitialGroups = (groupCount: number, rowsInEachGroup: number) => {
+    const groups: RowGroup[] = [];
+    for (let i = 0; i < groupCount; i++) {
+        const group: RowGroup = {
+            name: `Group ${i + 1}`,
+            rowsCount: 0,
+            expanded: true,
+            id: `${i}`,
+            groups: [
+                {
+                    name: `Group ${i + 1}-1`,
+                    rowsCount: 0,
+                    id: `${i}-0`,
+                    groups: [
+                        {
+                            name: `Group ${i + 1}-1-1`,
+                            rowsCount: rowsInEachGroup,
+                            groups: [],
+                            expanded: true,
+                            id: `${i}-0-0`,
+                        },
+                        {
+                            name: `Group ${i + 1}-1-2`,
+                            rowsCount: rowsInEachGroup,
+                            groups: [],
+                            expanded: true,
+                            id: `${i}-0-1`,
+                        },
+                    ],
+                    expanded: true,
+                },
+                {
+                    name: `Group ${i + 1}-2`,
+                    rowsCount: 0,
+                    groups: [
+                        {
+                            name: `Group ${i + 1}-1-2`,
+                            rowsCount: rowsInEachGroup,
+                            groups: [],
+                            expanded: true,
+                            id: `${i}-1-0`,
+                        },
+                    ],
+                    expanded: true,
+                    id: `${i}-1`,
+                },
+            ],
+        };
 
-            groups.push(group);
-        }
-        return groups;
-    }, [groupCount]);
+        groups.push(group);
+    }
+    return groups;
+};
+
+export const useGroupMockDataGenerator = (groupCount: number, rowsInEachGroup: number) => {
+    const initialGroups = React.useMemo(
+        () => createInitialGroups(groupCount, rowsInEachGroup),
+        [groupCount, rowsInEachGroup]
+    );
 
     const [groups, setGroups] = React.useState<RowGroup[]>(initialGroups);
 

@@ -6,7 +6,7 @@ import uniq from "lodash/uniq.js";
 import flatten from "lodash/flatten.js";
 import range from "lodash/range.js";
 import debounce from "lodash/debounce.js";
-import noop  from "lodash/noop.js";
+import noop from "lodash/noop.js";
 import DataGridOverlayEditor from "../data-grid-overlay-editor/data-grid-overlay-editor";
 import {
     CellClickedEventArgs,
@@ -3198,7 +3198,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onContextMenu = React.useCallback(
         (args: GridMouseEventArgs, preventDefault: () => void) => {
-            const adjustedCol = args.location[0] - rowMarkerOffset;
+            const [col, row] = args.location;
+            const adjustedCol = col - rowMarkerOffset;
+
+            const cellContent = getMangledCellContent([adjustedCol, row]);
+
             if (args.kind === "header") {
                 onHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
             }
@@ -3210,8 +3214,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 onGroupHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
             }
 
-            if (args.kind === "cell") {
-                const [col, row] = args.location;
+            if (args.kind === "cell" && cellContent.kind !== "group") {
                 onCellContextMenu?.([adjustedCol, row], {
                     ...args,
                     preventDefault,
@@ -3229,6 +3232,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onHeaderContextMenu,
             rowMarkerOffset,
             updateSelectedCell,
+            getMangledCellContent,
         ]
     );
 
@@ -3656,15 +3660,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             scrollTo,
             searchRef: dataGridSearchRef,
         }),
-        [
-            appendRow,
-            enterCellEditMode,
-            onCopy,
-            onKeyDown,
-            onPasteInternal,
-            rowMarkerOffset,
-            scrollTo,
-        ]
+        [appendRow, enterCellEditMode, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
     );
 
     const [selCol, selRow] = currentCell ?? [];
