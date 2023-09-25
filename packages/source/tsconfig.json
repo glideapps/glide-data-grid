@@ -1,8 +1,8 @@
 {
-    "compilerOptions": {
-        "lib": ["dom", "ES6", "ES2017"]
-    },
-    "extends": "../../tsconfig.json",
-    "include": ["./src/**/*.ts", "./src/**/*.tsx"],
-    "references": [{ "path": "../core" }]
+  "compilerOptions": {
+    "lib": ["dom", "ES6", "ES2017"]
+  },
+  "extends": "../../tsconfig.json",
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+  "references": [{ "path": "../core" }]
 }

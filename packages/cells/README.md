@@ -1,6 +1,5 @@
 > :warning: **This is a temporary fork until our bug fixes have been merged into [@workfront-grid/glide-data-grid](https://github.com/glideapps/glide-data-grid). Afterwards the fork will be removed.**
 
-
 <h1 align="center">
   <img src="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/icon.png" width="224px"/><br/>
   <b>Glide Data Grid Cells</b>
@@ -17,46 +16,46 @@
 
 Current cells
 
--   Star (Rating) Cell
--   Sparklines
--   Article
--   Dropdown
--   Range
--   User profile
--   Tags
+- Star (Rating) Cell
+- Sparklines
+- Article
+- Dropdown
+- Range
+- User profile
+- Tags
 
 # Usage
 
 Step 1: Add the extra cells to your grid.
 
 ```tsx
-import { useExtraCells } from "@workfront-grid/glide-data-grid-cells";
+import { useExtraCells } from '@workfront-grid/glide-data-grid-cells';
 
 const Grid = () => {
-    const { drawCell, provideEditor } = useExtraCells();
+  const { drawCell, provideEditor } = useExtraCells();
 
-    return <DataEditor {...rest} drawCell={drawCell} provideEditor={provideEditor} />;
+  return <DataEditor {...rest} drawCell={drawCell} provideEditor={provideEditor} />;
 };
 ```
 
 Step 2: Use the cells in your `getCellContent` callback
 
 ```ts
-import type { StarCell } from "@workfront-grid/glide-data-grid-cells";
+import type { StarCell } from '@workfront-grid/glide-data-grid-cells';
 
 const getCellContent = React.useCallback(() => {
-    const starCell: StarCell = {
-        kind: GridCellKind.Custom,
-        allowOverlay: true,
-        copyData: "4 out of 5",
-        data: {
-            kind: "star-cell",
-            label: "Test",
-            rating: 4,
-        },
-    };
+  const starCell: StarCell = {
+    kind: GridCellKind.Custom,
+    allowOverlay: true,
+    copyData: '4 out of 5',
+    data: {
+      kind: 'star-cell',
+      label: 'Test',
+      rating: 4,
+    },
+  };
 
-    return starCell;
+  return starCell;
 }, []);
 ```
 

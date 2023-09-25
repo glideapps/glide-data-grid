@@ -23,7 +23,7 @@ Note that there is currently no way to tell the grid that data has changed. It h
 If you want to use the default Image overlay preview you must remember to include the react-responsive-carousel css file or it will not function correctly. This should be available in your node-modules.
 
 ```ts
-import "react-responsive-carousel/lib/styles/carousel.min.css";
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 ```
 
 ## A note on col/row values
@@ -203,30 +203,30 @@ Grid columns are the basic horizontal building block of the data grid. At their 
 
 ```ts
 interface BaseGridColumn {
-    readonly title: string;
-    readonly group?: string;
-    readonly icon?: GridColumnIcon | string;
-    readonly overlayIcon?: GridColumnIcon | string;
-    readonly hasMenu?: boolean;
-    readonly style?: "normal" | "highlight";
-    readonly grow?: number;
+  readonly title: string;
+  readonly group?: string;
+  readonly icon?: GridColumnIcon | string;
+  readonly overlayIcon?: GridColumnIcon | string;
+  readonly hasMenu?: boolean;
+  readonly style?: 'normal' | 'highlight';
+  readonly grow?: number;
+  readonly themeOverride?: Partial<Theme>;
+  readonly trailingRowOptions?: {
+    readonly hint?: string;
+    readonly addIcon?: string;
+    readonly targetColumn?: number | GridColumn;
     readonly themeOverride?: Partial<Theme>;
-    readonly trailingRowOptions?: {
-        readonly hint?: string;
-        readonly addIcon?: string;
-        readonly targetColumn?: number | GridColumn;
-        readonly themeOverride?: Partial<Theme>;
-        readonly disabled?: boolean;
-    };
+    readonly disabled?: boolean;
+  };
 }
 
 interface SizedGridColumn extends BaseGridColumn {
-    readonly width: number;
-    readonly id?: string;
+  readonly width: number;
+  readonly id?: string;
 }
 
 interface AutoGridColumn extends BaseGridColumn {
-    readonly id: string;
+  readonly id: string;
 }
 
 export type GridColumn = SizedGridColumn | AutoGridColumn;
@@ -269,13 +269,13 @@ All grid cells support the following properties
 
 ```ts
 interface BaseGridCell {
-    readonly allowOverlay: boolean;
-    readonly lastUpdated?: number;
-    readonly style?: "normal" | "faded";
-    readonly themeOverride?: Partial<Theme>;
-    readonly span?: readonly [number, number];
-    readonly contentAlign?: "left" | "right" | "center";
-    readonly cursor?: CSSProperties["cursor"];
+  readonly allowOverlay: boolean;
+  readonly lastUpdated?: number;
+  readonly style?: 'normal' | 'faded';
+  readonly themeOverride?: Partial<Theme>;
+  readonly span?: readonly [number, number];
+  readonly contentAlign?: 'left' | 'right' | 'center';
+  readonly cursor?: CSSProperties['cursor'];
 }
 ```
 
@@ -299,13 +299,13 @@ The `rows` and `columns` properties both account for the columns or rows which h
 
 ```ts
 interface GridSelection {
-    readonly current?: {
-        readonly cell: Item;
-        readonly range: Readonly<Rectangle>;
-        readonly rangeStack: readonly Readonly<Rectangle>[];
-    };
-    readonly columns: CompactSelection;
-    readonly rows: CompactSelection;
+  readonly current?: {
+    readonly cell: Item;
+    readonly range: Readonly<Rectangle>;
+    readonly rangeStack: readonly Readonly<Rectangle>[];
+  };
+  readonly columns: CompactSelection;
+  readonly rows: CompactSelection;
 }
 ```
 
@@ -1154,40 +1154,41 @@ Behavior not defined or officially supported. Feel free to check out what this d
 ```ts
 // arguments passed to the draw callback
 interface DrawArgs {
-    ctx: CanvasRenderingContext2D;
-    theme: Theme;
-    rect: Rectangle;
-    hoverAmount: number;
-    hoverX: number | undefined;
-    hoverY: number | undefined;
-    col: number;
-    row: number;
-    highlighted: boolean;
-    imageLoader: ImageWindowLoader;
+  ctx: CanvasRenderingContext2D;
+  theme: Theme;
+  rect: Rectangle;
+  hoverAmount: number;
+  hoverX: number | undefined;
+  hoverY: number | undefined;
+  col: number;
+  row: number;
+  highlighted: boolean;
+  imageLoader: ImageWindowLoader;
 }
 
 // a standardized cell renderer consumed by the hook
 type CustomCellRenderer<T extends CustomCell> = {
-    isMatch: (cell: CustomCell) => cell is T;
-    draw: (args: DrawArgs, cell: T) => boolean;
-    provideEditor: ProvideEditorCallback<T>;
+  isMatch: (cell: CustomCell) => cell is T;
+  draw: (args: DrawArgs, cell: T) => boolean;
+  provideEditor: ProvideEditorCallback<T>;
 };
 
 // the hook itself
-declare function useCustomCells(
-    cells: readonly CustomCellRenderer<any>[]
-): { drawCell: DrawCustomCellCallback; provideEditor: ProvideEditorCallback<GridCell> };
+declare function useCustomCells(cells: readonly CustomCellRenderer<any>[]): {
+  drawCell: DrawCustomCellCallback;
+  provideEditor: ProvideEditorCallback<GridCell>;
+};
 ```
 
 The useCustomCells hook provides a standardized method of integrating custom cells into the Glide Data Grid. All cells in the `@workfront-grid/glide-data-grid-source` package are already in this format and can be used individually by passing them to this hook as so. The result of the hook is an object which can be spread on the DataEditor to implement the cells.
 
 ```tsx
-import StarCell from "@workfront-grid/glide-data-grid-cells/cells/star-cell";
-import DropdownCell from "@workfront-grid/glide-data-grid-cells/cells/dropdown-cell";
+import StarCell from '@workfront-grid/glide-data-grid-cells/cells/star-cell';
+import DropdownCell from '@workfront-grid/glide-data-grid-cells/cells/dropdown-cell';
 
 const MyGrid = () => {
-    const args = useCustomCells([StarCell, DropdownCell]);
+  const args = useCustomCells([StarCell, DropdownCell]);
 
-    return <DataEditor {...args} />;
+  return <DataEditor {...args} />;
 };
 ```

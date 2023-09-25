@@ -3,7 +3,7 @@ variables:
   NPM_CONFIG_USERCONFIG: '${ADOBE_NPMRC_V7}'
 
 default:
-  image: "docker-wf-dev.dr-uw2.adobeitc.com/core-platform/gitlab-runner-node16:latest"
+  image: 'docker-wf-dev.dr-uw2.adobeitc.com/core-platform/gitlab-runner-node16:latest'
   before_script:
     - git config --global user.name $JARVIS_NAME
     - git config --global user.email $JARVIS_EMAIL
@@ -13,7 +13,6 @@ default:
     paths:
       - .cache
     policy: pull
-
 
 stages:
   - build
@@ -84,7 +83,6 @@ test:
   <<: *test_job_definition
   script:
     - npm run test --ci --no-interactive
-
 
 test-18:
   <<: *test_job_definition
