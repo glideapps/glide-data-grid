@@ -14,6 +14,7 @@ import {
 import type { SizedGridColumn } from "../src/data-grid/data-grid-types";
 import type { DataEditorRef } from "../src/data-editor/data-editor";
 import { assert } from "../src/common/support";
+import { createInitialGroups } from "../src/data-editor/stories/utils";
 
 jest.mock("../src/common/resize-detector", () => {
     return {
@@ -353,6 +354,37 @@ describe("data-editor", () => {
                 current: expect.objectContaining({ cell: [1, 1] }),
             })
         );
+    });
+
+    test("don't emits contextmenu for group row", async () => {
+        const groups = createInitialGroups(1000, 500);
+        const spy = jest.fn();
+        const spySelection = jest.fn();
+
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                rowMarkers="both"
+                onCellContextMenu={spy}
+                onGridSelectionChange={spySelection}
+                groups={groups}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        const scroller = prep();
+
+        assert(scroller !== null);
+
+        screen.getByTestId("data-grid-canvas");
+        fireEvent.contextMenu(scroller, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        expect(spy).not.toHaveBeenCalled();
     });
 
     test("emits contextmenu for cell but does not change selection if already selected - rows", async () => {
