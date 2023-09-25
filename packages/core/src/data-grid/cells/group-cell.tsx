@@ -8,8 +8,7 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
     kind: GridRowKind.Group,
     draw: args => {
         const { ctx, rect, theme, cell, spriteManager } = args;
-
-        const drawX = rect.x + cell.level * theme.nestedGroupIndent;
+        const drawX = rect.x - 4 + cell.level * theme.nestedGroupIndent;
 
         const icon = cell.expanded ? "expandIcon" : "collapseIcon";
         const iconDrawY = rect.y + rect.height / 2 - 9;
@@ -24,22 +23,22 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
         );
         return true;
     },
-    onClick: (e) => {
+    onClick: e => {
         if (e.onRowDetailsUpdated) {
             e.onRowDetailsUpdated({ ...e.cell, expanded: !e.cell.expanded });
         }
 
         return undefined;
     },
-    onKeyDown: (e) => {
-        if(e.onRowDetailsUpdated && (e.key === "ArrowLeft" || e.key === "ArrowRight") ) {
-            if(e.cell.expanded && e.key === "ArrowLeft") {
-                e.onRowDetailsUpdated({ ...e.cell, expanded: false })
+    onKeyDown: e => {
+        if (e.onRowDetailsUpdated && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+            if (e.cell.expanded && e.key === "ArrowLeft") {
+                e.onRowDetailsUpdated({ ...e.cell, expanded: false });
             }
-            if(!e.cell.expanded && e.key === "ArrowRight") {
-                e.onRowDetailsUpdated({ ...e.cell, expanded: true })
+            if (!e.cell.expanded && e.key === "ArrowRight") {
+                e.onRowDetailsUpdated({ ...e.cell, expanded: true });
             }
-            e.cancel()
+            e.cancel();
         }
     },
     onPaste: () => undefined,
