@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.11.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.10.0...v5.11.0) (2023-09-25)
+
+
+### Features
+
+* onCopy callback in custom cell renderer definition ([a047f9a](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/a047f9a85d2df1c7a2d7dcea3ce4a13d9607da18))
+
 ## [5.10.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.9.3...v5.10.0) (2023-09-22)
 
 
