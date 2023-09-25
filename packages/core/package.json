@@ -1,82 +1,82 @@
 {
-    "name": "@workfront-grid/glide-data-grid",
-    "version": "5.11.1",
-    "description": "React data grid for beautifully displaying and editing large amounts of data with amazing performance.",
-    "sideEffects": [
-        "**/*.css"
-    ],
-    "type": "module",
-    "browser": "dist/js/index.js",
-    "main": "dist/cjs/index.js",
-    "module": "dist/js/index.js",
-    "types": "dist/ts/index.d.ts",
-    "exports": {
-        ".": {
-            "import": "./dist/js/index.js",
-            "require": "./dist/cjs/index.js"
-        },
-        "./dist/index.css": {
-            "import": "./dist/index.css",
-            "require": "./dist/index.css"
-        }
+  "name": "@workfront-grid/glide-data-grid",
+  "version": "5.11.1",
+  "description": "React data grid for beautifully displaying and editing large amounts of data with amazing performance.",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "type": "module",
+  "browser": "dist/js/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/js/index.js",
+  "types": "dist/ts/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/js/index.js",
+      "require": "./dist/cjs/index.js"
     },
-    "scripts": {
-        "build": "npm run build-js && npm run build-types",
-        "build-js": "node build.cjs && tsc-esm-fix --target='dist/js'",
-        "build-types": "tsc -p tsconfig.types.json",
-        "lint": "npm run cycle-check && eslint src --ext .ts,.tsx",
-        "cycle-check": "ts-helper -p ./tsconfig.json -r ./src/index.ts -c",
-        "test": "jest",
-        "test-18": "jest --setupFilesAfterEnv=./src/setupTests-18.ts",
-        "check-package": "package-check"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Workfront/glide-data-grid.git",
-        "directory": "packages/core"
-    },
-    "publishConfig": {
-        "access": "public"
-    },
-    "keywords": [
-        "react",
-        "datagrid",
-        "data-grid",
-        "editor",
-        "reactjs",
-        "scrolling",
-        "data",
-        "table",
-        "cell",
-        "canvas"
-    ],
-    "author": "Glide",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/Workfront/glide-data-grid/issues"
-    },
-    "homepage": "https://grid.glideapps.com",
-    "dependencies": {
-        "canvas-hypertxt": "^0.0.7",
-        "react-number-format": "^5.0.0"
-    },
-    "peerDependencies": {
-        "lodash": "^4.17.19",
-        "marked": "^4.0.10",
-        "react": "^16.12.0 || 17.x || 18.x",
-        "react-dom": "^16.12.0 || 17.x || 18.x",
-        "react-responsive-carousel": "^3.2.7"
-    },
-    "devDependencies": {
-        "@babel/cli": "^7.16.0",
-        "@glideapps/ts-helper": "0.0.5",
-        "@skypack/package-check": "^0.2.2",
-        "@types/jest": "^28.1.8",
-        "esbuild": "^0.14.47",
-        "eslint": "8.43.0",
-        "jest": "^27.4.2",
-        "react-resize-detector": "^7.1.2",
-        "tsc-esm-fix": "^2.7.8",
-        "typedoc": "^0.23.13"
+    "./dist/index.css": {
+      "import": "./dist/index.css",
+      "require": "./dist/index.css"
     }
+  },
+  "scripts": {
+    "build": "npm run build-js && npm run build-types",
+    "build-js": "node build.cjs && tsc-esm-fix --target='dist/js'",
+    "build-types": "tsc -p tsconfig.types.json",
+    "lint": "npm run cycle-check && eslint src --ext .ts,.tsx",
+    "cycle-check": "ts-helper -p ./tsconfig.json -r ./src/index.ts -c",
+    "test": "jest",
+    "test-18": "jest --setupFilesAfterEnv=./src/setupTests-18.ts",
+    "check-package": "package-check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Workfront/glide-data-grid.git",
+    "directory": "packages/core"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "react",
+    "datagrid",
+    "data-grid",
+    "editor",
+    "reactjs",
+    "scrolling",
+    "data",
+    "table",
+    "cell",
+    "canvas"
+  ],
+  "author": "Glide",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Workfront/glide-data-grid/issues"
+  },
+  "homepage": "https://grid.glideapps.com",
+  "dependencies": {
+    "canvas-hypertxt": "^0.0.7",
+    "react-number-format": "^5.0.0"
+  },
+  "peerDependencies": {
+    "lodash": "^4.17.19",
+    "marked": "^4.0.10",
+    "react": "^16.12.0 || 17.x || 18.x",
+    "react-dom": "^16.12.0 || 17.x || 18.x",
+    "react-responsive-carousel": "^3.2.7"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.16.0",
+    "@glideapps/ts-helper": "0.0.5",
+    "@skypack/package-check": "^0.2.2",
+    "@types/jest": "^28.1.8",
+    "esbuild": "^0.14.47",
+    "eslint": "8.43.0",
+    "jest": "^27.4.2",
+    "react-resize-detector": "^7.1.2",
+    "tsc-esm-fix": "^2.7.8",
+    "typedoc": "^0.23.13"
+  }
 }

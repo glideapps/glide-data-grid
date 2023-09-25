@@ -1,6 +1,5 @@
 > :warning: **This is a temporary fork until our bug fixes have been merged into [@workfront-grid/glide-data-grid](https://github.com/glideapps/glide-data-grid). Afterwards the fork will be removed.**
 
-
 <h1 align="center">
   <img src="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/icon.png" width="224px"/><br/>
   <b>Glide Data Grid</b>
@@ -30,16 +29,16 @@ You can also visit our [main site](https://grid.glideapps.com).
 
 ## Features
 
--   **It scales to millions of rows**. Cells are rendered lazily on demand for memory efficiency.
--   **Scrolling is extremely fast**. Native scrolling keeps everything buttery smooth.
--   **Supports multiple types of cells**. Numbers, text, markdown, bubble, image, drilldown, uri
--   **Fully Free & Open Source**. [MIT licensed](LICENSE), so you can use Grid in commercial projects.
--   **Editing is built in**.
--   **Resizable and movable columns**.
--   **Variable sized rows**.
--   **Merged cells**.
--   **Single and multi-select rows, cells, and columns**.
--   **Cell rendering can be fully customized**.
+- **It scales to millions of rows**. Cells are rendered lazily on demand for memory efficiency.
+- **Scrolling is extremely fast**. Native scrolling keeps everything buttery smooth.
+- **Supports multiple types of cells**. Numbers, text, markdown, bubble, image, drilldown, uri
+- **Fully Free & Open Source**. [MIT licensed](LICENSE), so you can use Grid in commercial projects.
+- **Editing is built in**.
+- **Resizable and movable columns**.
+- **Variable sized rows**.
+- **Merged cells**.
+- **Single and multi-select rows, cells, and columns**.
+- **Cell rendering can be fully customized**.
 
 # ⚡ Quick Start
 
@@ -64,7 +63,7 @@ Create a new `DataEditor` wherever you need to display lots and lots of data
 Don't forget to import mandatory CSS
 
 ```ts
-import "@workfront-grid/glide-data-grid/dist/index.css";
+import '@workfront-grid/glide-data-grid/dist/index.css';
 ```
 
 Making your columns is easy
@@ -72,8 +71,8 @@ Making your columns is easy
 ```ts
 // Grid columns may also provide icon, overlayIcon, menu, style, and theme overrides
 const columns: GridColumn[] = [
-    { title: "First Name", width: 100 },
-    { title: "Last Name", width: 100 },
+  { title: 'First Name', width: 100 },
+  { title: 'Last Name', width: 100 },
 ];
 ```
 
@@ -83,25 +82,25 @@ Last provide data to the grid
 // If fetching data is slow you can use the DataEditor ref to send updates for cells
 // once data is loaded.
 function getData([col, row]: Item): GridCell {
-    const person = getData(row);
+  const person = getData(row);
 
-    if (col === 0) {
-        return {
-            kind: GridCellKind.Text,
-            data: person.firstName,
-            allowOverlay: false,
-            displayData: person.firstName,
-        };
-    } else if (col === 1) {
-        return {
-            kind: GridCellKind.Text,
-            data: person.lastName,
-            allowOverlay: false,
-            displayData: person.lastName,
-        };
-    } else {
-        throw new Error();
-    }
+  if (col === 0) {
+    return {
+      kind: GridCellKind.Text,
+      data: person.firstName,
+      allowOverlay: false,
+      displayData: person.firstName,
+    };
+  } else if (col === 1) {
+    return {
+      kind: GridCellKind.Text,
+      data: person.lastName,
+      allowOverlay: false,
+      displayData: person.lastName,
+    };
+  } else {
+    throw new Error();
+  }
 }
 ```
 
@@ -158,36 +157,36 @@ The easiest way to use the grid with Next is to create a component which wraps u
 home.tsx
 
 ```tsx
-import type { NextPage } from "next";
-import dynamic from "next/dynamic";
-import styles from "../styles/Home.module.css";
+import type { NextPage } from 'next';
+import dynamic from 'next/dynamic';
+import styles from '../styles/Home.module.css';
 
 const Grid = dynamic(
-    () => {
-        return import("../components/Grid");
-    },
-    { ssr: false }
+  () => {
+    return import('../components/Grid');
+  },
+  { ssr: false }
 );
 
 export const Home: NextPage = () => {
-    return (
-        <div className={styles.container}>
-            <main className={styles.main}>
-                <h1 className={styles.title}>Hi</h1>
-                <Grid />
-            </main>
-        </div>
-    );
+  return (
+    <div className={styles.container}>
+      <main className={styles.main}>
+        <h1 className={styles.title}>Hi</h1>
+        <Grid />
+      </main>
+    </div>
+  );
 };
 ```
 
 grid.tsx
 
 ```tsx
-import React from "react";
-import DataEditor from "@workfront-grid/glide-data-grid";
+import React from 'react';
+import DataEditor from '@workfront-grid/glide-data-grid';
 
 export default function Grid() {
-    return <DataEditor {...args} />;
+  return <DataEditor {...args} />;
 }
 ```

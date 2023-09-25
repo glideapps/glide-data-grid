@@ -1,12 +1,12 @@
-import { drawBoolean } from "../data-grid-lib";
+import { drawBoolean } from '../data-grid-lib';
 import {
-    GridCellKind,
-    BooleanCell,
-    booleanCellIsEditable,
-    BooleanEmpty,
-    BooleanIndeterminate,
-} from "../data-grid-types";
-import type { InternalCellRenderer } from "./cell-types";
+  GridCellKind,
+  BooleanCell,
+  booleanCellIsEditable,
+  BooleanEmpty,
+  BooleanIndeterminate,
+} from '../data-grid-types';
+import type { InternalCellRenderer } from './cell-types';
 
 /**
  * Checkbox behavior:
@@ -17,49 +17,49 @@ import type { InternalCellRenderer } from "./cell-types";
  * empty + click -> checked
  */
 export function toggleBoolean(data: boolean | null | undefined): boolean | null | undefined {
-    return data !== true;
+  return data !== true;
 }
 
 export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
-    getAccessibilityString: c => c.data?.toString() ?? "false",
-    kind: GridCellKind.Boolean,
-    needsHover: true,
-    useLabel: false,
-    needsHoverPosition: true,
-    measure: () => 50,
-    draw: a => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell)),
-    onDelete: c => ({
-        ...c,
-        data: false,
-    }),
-    onClick: e => {
-        const { cell, posX: x, posY: y, bounds } = e;
-        if (
-            booleanCellIsEditable(cell) &&
-            Math.abs(x - bounds.width / 2) <= bounds.height / 3.4 &&
-            Math.abs(y - bounds.height / 2) <= bounds.height / 3.4
-        ) {
-            return {
-                ...cell,
-                data: toggleBoolean(cell.data),
-            };
-        }
-        return undefined;
-    },
-    onPaste: (toPaste, cell) => {
-        let newVal: boolean | BooleanEmpty | BooleanIndeterminate = BooleanEmpty;
-        if (toPaste.toLowerCase() === "true") {
-            newVal = true;
-        } else if (toPaste.toLowerCase() === "false") {
-            newVal = false;
-        } else if (toPaste.toLowerCase() === "indeterminate") {
-            newVal = BooleanIndeterminate;
-        }
-        return newVal === cell.data
-            ? undefined
-            : {
-                  ...cell,
-                  data: newVal,
-              };
-    },
+  getAccessibilityString: (c) => c.data?.toString() ?? 'false',
+  kind: GridCellKind.Boolean,
+  needsHover: true,
+  useLabel: false,
+  needsHoverPosition: true,
+  measure: () => 50,
+  draw: (a) => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell)),
+  onDelete: (c) => ({
+    ...c,
+    data: false,
+  }),
+  onClick: (e) => {
+    const { cell, posX: x, posY: y, bounds } = e;
+    if (
+      booleanCellIsEditable(cell) &&
+      Math.abs(x - bounds.width / 2) <= bounds.height / 3.4 &&
+      Math.abs(y - bounds.height / 2) <= bounds.height / 3.4
+    ) {
+      return {
+        ...cell,
+        data: toggleBoolean(cell.data),
+      };
+    }
+    return undefined;
+  },
+  onPaste: (toPaste, cell) => {
+    let newVal: boolean | BooleanEmpty | BooleanIndeterminate = BooleanEmpty;
+    if (toPaste.toLowerCase() === 'true') {
+      newVal = true;
+    } else if (toPaste.toLowerCase() === 'false') {
+      newVal = false;
+    } else if (toPaste.toLowerCase() === 'indeterminate') {
+      newVal = BooleanIndeterminate;
+    }
+    return newVal === cell.data
+      ? undefined
+      : {
+          ...cell,
+          data: newVal,
+        };
+  },
 };

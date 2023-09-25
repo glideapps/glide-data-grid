@@ -1,24 +1,24 @@
-import * as React from "react";
+import * as React from 'react';
 
-import { SimpleThemeWrapper } from "../stories/story-utils";
-import { DocWrapper, Marked } from "./doc-wrapper";
+import { SimpleThemeWrapper } from '../stories/story-utils';
+import { DocWrapper, Marked } from './doc-wrapper';
 
 export default {
-    title: "Glide-Data-Grid/Docs",
-    decorators: [
-        (Story: React.ComponentType) => (
-            <SimpleThemeWrapper>
-                <Story />
-            </SimpleThemeWrapper>
-        ),
-    ],
+  title: 'Glide-Data-Grid/Docs',
+  decorators: [
+    (Story: React.ComponentType) => (
+      <SimpleThemeWrapper>
+        <Story />
+      </SimpleThemeWrapper>
+    ),
+  ],
 };
 
 export const FAQ: React.VFC = () => {
-    return (
-        <DocWrapper>
-            <Marked>
-                {`
+  return (
+    <DocWrapper>
+      <Marked>
+        {`
 # FAQ
 
 ### Nothing shows up? It crashes when I edit a cell?
@@ -56,13 +56,13 @@ Yes
 Yes
 
 `}
-            </Marked>
-        </DocWrapper>
-    );
+      </Marked>
+    </DocWrapper>
+  );
 };
-(FAQ as any).storyName = "00. FAQ";
+(FAQ as any).storyName = '00. FAQ';
 (FAQ as any).parameters = {
-    options: {
-        showPanel: false,
-    },
+  options: {
+    showPanel: false,
+  },
 };

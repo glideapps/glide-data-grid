@@ -6,6 +6,7 @@
     "version": "./update-version.sh",
     "lint": "npm run lint --workspaces",
     "build": "npm run build --workspaces",
+    "format": "prettier . --write",
     "typedoc": "typedoc --readme none --disableSources --tsconfig packages/core/tsconfig.json",
     "serve-docs": "http-server packages/core/docs",
     "storybook": "start-storybook -p 9009",
@@ -18,7 +19,8 @@
     "test:e2e:snapshot": "playwright/update-snapshots.sh",
     "test-source": "cd packages/source && npm run test",
     "test-projects": "cd test-projects/ && ./bootstrap-projects.sh",
-    "storybook:extract": "npm run build-storybook && sb extract public playwright/stories.json"
+    "storybook:extract": "npm run build-storybook && sb extract public playwright/stories.json",
+    "prepare": "husky install"
   },
   "author": "Glide",
   "license": "MIT",
@@ -37,6 +39,7 @@
     "@babel/preset-env": "^7.16.4",
     "@babel/preset-react": "^7.8.3",
     "@babel/preset-typescript": "^7.9.0",
+    "@faker-js/faker": "^8.0.2",
     "@linaria/babel-preset": "^4.1.3",
     "@linaria/core": "^4.1.3",
     "@linaria/esbuild": "^4.1.3",
@@ -81,6 +84,7 @@
     "eslint-plugin-sonarjs": "0.13.0",
     "eslint-plugin-unicorn": "43.0.1",
     "http-server": "^14.1.1",
+    "husky": "^8.0.3",
     "jest-canvas-mock": "^2.3.1",
     "lodash": "^4.17.21",
     "marked": "^4.0.10",
@@ -94,7 +98,6 @@
     "tsc-esm-fix": "^2.7.8",
     "typedoc": "^0.23.13",
     "typescript": "4.8.2",
-    "webpack": "^5.73.0",
-    "@faker-js/faker": "^8.0.2"
+    "webpack": "^5.73.0"
   }
 }
