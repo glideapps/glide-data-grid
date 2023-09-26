@@ -41,7 +41,7 @@ import {
   isReadWriteCell,
   Item,
   MarkerCell,
-  NewRow,
+  GroupNewRow,
   outOfBoundsKind,
   ProvideEditorCallback,
   Rectangle,
@@ -232,7 +232,10 @@ export interface DataEditorProps extends Props {
   /** Emitted whenever the user has requested the deletion of the selection.
    * @group Editing
    */
-  readonly onDelete?: (selection: GridSelection) => boolean | GridSelection;
+  readonly onDelete?: (
+    selection: GridSelection,
+    groupRows: GroupContentRow[]
+  ) => boolean | GridSelection;
   /** Emitted whenever a cell edit is completed.
    * @group Editing
    */
@@ -861,7 +864,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     onRowDetailsUpdated,
     rowsCount: rowsCountWidthGroups,
     getMangledCellLocation,
-  } = useGroups(groups, onGroupToggle, trailingRowOptions?.inEachGroup);
+  } = useGroups({
+    groups,
+    toggleGroup: onGroupToggle,
+    hasTrailingRow: trailingRowOptions?.inEachGroup,
+  });
 
   const hasGroups = groups !== undefined && groups.length > 0;
   const rows = hasGroups ? rowsCountWidthGroups : initialRowsCount;
@@ -1050,20 +1057,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     )
   );
 
-  const onDelete = React.useCallback<NonNullable<DataEditorProps['onDelete']>>(
-    (sel) => {
-      if (onDeleteIn !== undefined) {
-        const result = onDeleteIn(shiftSelection(sel, -rowMarkerOffset, getMangledCellLocation));
-        if (typeof result === 'boolean') {
-          return result;
-        }
-        return shiftSelection(result, rowMarkerOffset);
-      }
-      return true;
-    },
-    [getMangledCellLocation, onDeleteIn, rowMarkerOffset]
-  );
-
   const [setCurrent, setSelectedRows, setSelectedColumns] = useSelectionBehavior(
     gridSelection,
     setGridSelection,
@@ -1071,6 +1064,35 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     columnSelectionBlending,
     rowSelectionBlending,
     rangeSelect
+  );
+
+  const onDelete = React.useCallback<NonNullable<DataEditorProps['onDelete']>>(
+    (sel) => {
+      if (onDeleteIn !== undefined) {
+        let groupRows: GroupContentRow[] = [];
+
+        if (hasGroups) {
+          groupRows = sel.rows
+            .toArray()
+            .map(getRowDetails)
+            .filter((item) => item.kind === GridRowKind.GroupContent) as GroupContentRow[];
+        }
+
+        const result = onDeleteIn(
+          shiftSelection(sel, -rowMarkerOffset, getMangledCellLocation),
+          groupRows
+        );
+
+        setSelectedRows(CompactSelection.empty(), undefined, false);
+        if (typeof result === 'boolean') {
+          return result;
+        }
+
+        return shiftSelection(result, rowMarkerOffset);
+      }
+      return true;
+    },
+    [getMangledCellLocation, getRowDetails, hasGroups, onDeleteIn, rowMarkerOffset, setSelectedRows]
   );
 
   const mergedTheme = React.useMemo(() => {
@@ -1315,7 +1337,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
           allowOverlay: false,
           checked: gridSelection?.rows.hasIndex(row) === true,
           markerKind: rowMarkers === 'clickable-number' ? 'number' : rowMarkers,
-          row: hasRowDetails ? (rowDetails as NewRow).index + 1 : rowMarkerStartIndex + row,
+          row: hasRowDetails ? (rowDetails as GroupNewRow).index + 1 : rowMarkerStartIndex + row,
           drawHandle: onRowMoved !== undefined,
         };
       } else if (isTrailing) {
@@ -3038,7 +3060,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         }
 
         if (isDeleteKey) {
-          const callbackResult = onDelete?.(gridSelection) ?? true;
+          const callbackResult = onDelete?.(gridSelection, []) ?? true;
           cancel();
           if (callbackResult !== false) {
             const toDelete = callbackResult === true ? gridSelection : callbackResult;

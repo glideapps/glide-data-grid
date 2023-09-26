@@ -429,16 +429,17 @@ export interface GroupContentRow {
   level: number;
   index: number;
   themeOverride?: Partial<Theme>;
+  groupId: string;
 }
 
-export interface NewRow {
+export interface GroupNewRow {
   kind: GridRowKind.NewRow;
   level: number;
   index: number;
   groupId: string;
 }
 
-export type GridRow = GroupRow | GroupContentRow | NewRow;
+export type GridRow = GroupRow | GroupContentRow | GroupNewRow;
 
 /** @category Cells */
 export type CellList = readonly Item[];

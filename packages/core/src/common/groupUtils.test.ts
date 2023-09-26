@@ -1,5 +1,5 @@
 import type { RowGroup } from '../data-editor/use-groups';
-import { flattenGroups } from './groupUtils';
+import { deleteGroupByGroupRowId, flattenGroups } from './groupUtils';
 
 const getGroups = (): RowGroup[] => {
   return [
@@ -120,5 +120,31 @@ describe('flattenGroups', () => {
 
     groups[1].expanded = false;
     expect(flattenGroups(groups, true)).toMatchSnapshot();
+  });
+
+  it('should delete a group by groupRowId and return true', () => {
+    const targetGroupRowId = '1-1-1';
+    const mockData = getGroups();
+    deleteGroupByGroupRowId(mockData, targetGroupRowId);
+
+    // Ensure the group is deleted
+    expect(mockData).toMatchSnapshot();
+  });
+  it('should return false when the groupRowId does not exist', () => {
+    const targetGroupRowId = '4-3-1';
+    const mockData = getGroups();
+    const result = deleteGroupByGroupRowId(mockData, targetGroupRowId);
+
+    expect(result).toBe(false);
+  });
+
+  it('should handle deleting a root-level group', () => {
+    const targetGroupRowId = '1-1-1';
+    const mockData = getGroups();
+    const result = deleteGroupByGroupRowId(mockData, targetGroupRowId);
+
+    expect(result).toBe(true);
+    // Ensure the root-level group is deleted
+    expect(mockData).toMatchSnapshot();
   });
 });

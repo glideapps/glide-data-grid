@@ -12,11 +12,13 @@ export type RowGroup = {
   expanded: boolean;
 };
 
-export const useGroups = (
-  groups: readonly RowGroup[] = [],
-  toggleGroup?: (groupLocation: string) => void,
-  hasTrailingRow: boolean = false
-) => {
+export interface UseGroupsProps {
+  groups?: readonly RowGroup[];
+  hasTrailingRow?: boolean;
+  toggleGroup?: (groupLocation: string) => void;
+}
+
+export const useGroups = ({ groups = [], hasTrailingRow = false, toggleGroup }: UseGroupsProps) => {
   const [rowsCount, setRowsCount] = useState(0);
   const groupRows = useRef<GridRow[]>([]);
 
