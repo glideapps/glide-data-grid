@@ -34,7 +34,7 @@ export const useGroups = (
     [groupRows]
   );
 
-  const getMangledCellLocation = ([col, row]: Item): Item => {
+  const getMangledCellLocation = useCallback(([col, row]: Item): Item => {
     if (
       groupRows.current[row] !== undefined &&
       groupRows.current[row].kind === GridRowKind.GroupContent
@@ -42,7 +42,8 @@ export const useGroups = (
       return [col, (groupRows.current[row] as GroupContentRow).index ?? row];
     }
     return [col, row];
-  };
+  }, []);
+
   const onRowDetailsUpdated = useCallback(
     (row: number, newRowValue: GridRow) => {
       if (
