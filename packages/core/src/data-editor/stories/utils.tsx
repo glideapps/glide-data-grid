@@ -539,11 +539,13 @@ export const createInitialGroups = (groupCount: number, rowsInEachGroup: number)
       rowsCount: 0,
       expanded: true,
       id: `${i}`,
+      parentId: '',
       groups: [
         {
           name: `Group ${i + 1}-1`,
           rowsCount: 0,
           id: `${i}-0`,
+          parentId: `${i}`,
           groups: [
             {
               name: `Group ${i + 1}-1-1`,
@@ -551,6 +553,7 @@ export const createInitialGroups = (groupCount: number, rowsInEachGroup: number)
               groups: [],
               expanded: true,
               id: `${i}-0-0`,
+              parentId: `${i}-0`,
             },
             {
               name: `Group ${i + 1}-1-2`,
@@ -558,6 +561,7 @@ export const createInitialGroups = (groupCount: number, rowsInEachGroup: number)
               groups: [],
               expanded: true,
               id: `${i}-0-1`,
+              parentId: `${i}-0`,
             },
           ],
           expanded: true,
@@ -565,6 +569,7 @@ export const createInitialGroups = (groupCount: number, rowsInEachGroup: number)
         {
           name: `Group ${i + 1}-2`,
           rowsCount: 0,
+          parentId: `${i}`,
           groups: [
             {
               name: `Group ${i + 1}-1-2`,
@@ -572,6 +577,7 @@ export const createInitialGroups = (groupCount: number, rowsInEachGroup: number)
               groups: [],
               expanded: true,
               id: `${i}-1-0`,
+              parentId: `${i}-1`,
             },
           ],
           expanded: true,

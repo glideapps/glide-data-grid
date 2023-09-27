@@ -8,11 +8,13 @@ const getGroups = (): RowGroup[] => {
       rowsCount: 0,
       expanded: true,
       id: '1',
+      parentId: '',
       groups: [
         {
           name: 'Group 1-1',
           rowsCount: 0,
           id: '1-1',
+          parentId: '1',
           groups: [
             {
               name: 'Group 1-1-1',
@@ -20,12 +22,20 @@ const getGroups = (): RowGroup[] => {
               groups: [],
               expanded: true,
               id: '1-1-1',
+              parentId: '1-1',
             },
-            { name: 'Group 1-1-2', rowsCount: 1, groups: [], expanded: true, id: '1-1-2' },
+            {
+              name: 'Group 1-1-2',
+              rowsCount: 1,
+              groups: [],
+              expanded: true,
+              id: '1-1-2',
+              parentId: '1-1',
+            },
           ],
           expanded: true,
         },
-        { name: 'Group 1-2', rowsCount: 1, groups: [], expanded: true, id: '1-2' },
+        { name: 'Group 1-2', rowsCount: 1, groups: [], expanded: true, id: '1-2', parentId: '1' },
       ],
     },
     {
@@ -33,11 +43,13 @@ const getGroups = (): RowGroup[] => {
       rowsCount: 0,
       expanded: true,
       id: '2',
+      parentId: '',
       groups: [
         {
           name: 'Group 2-1',
           rowsCount: 0,
           id: '2-1',
+          parentId: '2',
           groups: [
             {
               name: 'Group 2-1-1',
@@ -45,12 +57,20 @@ const getGroups = (): RowGroup[] => {
               groups: [],
               expanded: true,
               id: '2-1-1',
+              parentId: '2-1',
             },
-            { name: 'Group 2-1-2', rowsCount: 1, groups: [], expanded: true, id: '2-1-2' },
+            {
+              name: 'Group 2-1-2',
+              rowsCount: 1,
+              groups: [],
+              expanded: true,
+              id: '2-1-2',
+              parentId: '2-1',
+            },
           ],
           expanded: true,
         },
-        { name: 'Group 2-2', rowsCount: 1, groups: [], expanded: true, id: '2-2' },
+        { name: 'Group 2-2', rowsCount: 1, groups: [], expanded: true, id: '2-2', parentId: '2' },
       ],
     },
     {
@@ -58,11 +78,13 @@ const getGroups = (): RowGroup[] => {
       rowsCount: 0,
       expanded: true,
       id: '3',
+      parentId: '',
       groups: [
         {
           name: 'Group 3-1',
           rowsCount: 0,
           id: '3-1',
+          parentId: '3',
           groups: [
             {
               name: 'Group 3-1-1',
@@ -70,12 +92,20 @@ const getGroups = (): RowGroup[] => {
               groups: [],
               expanded: true,
               id: '3-1-1',
+              parentId: '3-1',
             },
-            { name: 'Group 3-1-2', rowsCount: 1, groups: [], expanded: true, id: '3-1-2' },
+            {
+              name: 'Group 3-1-2',
+              rowsCount: 1,
+              groups: [],
+              expanded: true,
+              id: '3-1-2',
+              parentId: '3-1',
+            },
           ],
           expanded: true,
         },
-        { name: 'Group 3-2', rowsCount: 1, groups: [], expanded: true, id: '3-2' },
+        { name: 'Group 3-2', rowsCount: 1, groups: [], expanded: true, id: '3-2', parentId: '3-1' },
       ],
     },
   ];
@@ -101,6 +131,7 @@ describe('flattenGroups', () => {
         expanded: true,
         id: '1',
         groups: [],
+        parentId: '',
       },
       {
         name: `Group 2`,
@@ -108,6 +139,7 @@ describe('flattenGroups', () => {
         expanded: true,
         id: '2',
         groups: [],
+        parentId: '',
       },
       {
         name: `Group 2`,
@@ -115,6 +147,7 @@ describe('flattenGroups', () => {
         expanded: true,
         id: '3',
         groups: [],
+        parentId: '',
       },
     ];
 

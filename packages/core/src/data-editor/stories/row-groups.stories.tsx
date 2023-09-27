@@ -113,7 +113,6 @@ export const RowGroups: React.VFC<RowGroupsProps> = ({ enableGroups }) => {
 
   const groups1 = enableGroups ? groups : [];
 
-  console.log(groups1);
   return (
     <BeautifulWrapper
       title="Row Grouping"
@@ -127,7 +126,7 @@ export const RowGroups: React.VFC<RowGroupsProps> = ({ enableGroups }) => {
         verticalBorder={false}
         rowMarkers="both"
         onCellEdited={mangledEditCell}
-        groups={groups}
+        groups={groups1}
         onGroupToggle={toggleGroup}
         freezeColumns={1}
         onRowAppended={onRowAppended}

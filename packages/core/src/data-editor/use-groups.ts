@@ -10,6 +10,7 @@ export type RowGroup = {
   id: string;
   groups: RowGroup[];
   expanded: boolean;
+  parentId: string;
 };
 
 export interface UseGroupsProps {

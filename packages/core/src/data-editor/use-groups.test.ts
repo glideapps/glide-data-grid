@@ -27,6 +27,7 @@ describe('useGroups', () => {
         id: 'group1',
         groups: [],
         expanded: true,
+        parentId: '',
       },
     ];
 
@@ -66,6 +67,7 @@ describe('useGroups', () => {
         id: 'group1',
         groups: [],
         expanded: true,
+        parentId: '',
       },
     ];
 
@@ -91,6 +93,7 @@ describe('useGroups', () => {
         id: 'group1',
         groups: [],
         expanded: true,
+        parentId: '',
       },
     ];
 
