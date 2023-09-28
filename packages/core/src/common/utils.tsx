@@ -254,3 +254,20 @@ export function useStateWithReactiveInput<T>(inputState: T): [T, React.Dispatch<
 
     return [inputStateRef.current[0] === empty ? state : inputStateRef.current[0], setStateOuter, onEmpty];
 }
+
+export function makeAccessibilityStringForArray(arr: readonly string[]): string {
+    // this is basically just .join(", ") but checks to make sure it is not going to allocate
+    // a string that is so large it might crash the browser
+    if (arr.length === 0) {
+        return "";
+    }
+
+    let index = 0;
+    let count = 0;
+    for (const str of arr) {
+        count += str.length;
+        if (count > 10_000) break;
+        index++;
+    }
+    return arr.slice(0, index).join(", ");
+}

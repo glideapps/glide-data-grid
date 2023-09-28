@@ -4,9 +4,10 @@ import DrilldownOverlayEditor from "../../data-grid-overlay-editor/private/drill
 import { drawDrilldownCell } from "../data-grid-lib";
 import { GridCellKind, type DrilldownCell } from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";
+import { makeAccessibilityStringForArray } from "../../common/utils";
 
 export const drilldownCellRenderer: InternalCellRenderer<DrilldownCell> = {
-    getAccessibilityString: c => c.data.map(d => d.text).join(", "),
+    getAccessibilityString: c => makeAccessibilityStringForArray(c.data.map(d => d.text)),
     kind: GridCellKind.Drilldown,
     needsHover: false,
     useLabel: false,

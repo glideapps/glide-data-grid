@@ -4,9 +4,10 @@ import BubblesOverlayEditor from "../../data-grid-overlay-editor/private/bubbles
 import { drawBubbles } from "../data-grid-lib";
 import { GridCellKind, type BubbleCell } from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";
+import { makeAccessibilityStringForArray } from "../../common/utils";
 
 export const bubbleCellRenderer: InternalCellRenderer<BubbleCell> = {
-    getAccessibilityString: c => c.data?.toString() ?? "",
+    getAccessibilityString: c => makeAccessibilityStringForArray(c.data),
     kind: GridCellKind.Bubble,
     needsHover: false,
     useLabel: false,
