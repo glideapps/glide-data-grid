@@ -96,6 +96,9 @@ export const RowGroups: React.VFC = () => {
         onGroupToggle={toggleGroup}
         freezeColumns={1}
         onRowAppended={onRowAppended}
+        onRowMoved={() => {
+          console.log(11);
+        }}
         trailingRowOptions={{
           sticky: true,
           tint: true,
