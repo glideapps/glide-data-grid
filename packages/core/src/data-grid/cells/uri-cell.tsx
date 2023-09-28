@@ -36,5 +36,8 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
             />
         );
     },
-    onPaste: (toPaste, cell) => (toPaste === cell.data ? undefined : { ...cell, data: toPaste }),
+    onPaste: (toPaste, cell, details) =>
+        toPaste === cell.data
+            ? undefined
+            : { ...cell, data: toPaste, displayData: details.formattedString ?? cell.displayData },
 };

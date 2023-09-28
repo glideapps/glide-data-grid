@@ -44,9 +44,12 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
             </React.Suspense>
         );
     },
-    onPaste: (toPaste, cell) => {
-        const newNumber = Number.parseFloat(toPaste);
+    onPaste: (toPaste, cell, details) => {
+        const newNumber =
+            typeof details.rawValue === "number"
+                ? details.rawValue
+                : Number.parseFloat(typeof details.rawValue === "string" ? details.rawValue : toPaste);
         if (Number.isNaN(newNumber) || cell.data === newNumber) return undefined;
-        return { ...cell, data: newNumber };
+        return { ...cell, data: newNumber, displayData: details.formattedString ?? cell.displayData };
     },
 };

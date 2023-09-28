@@ -44,5 +44,8 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
             );
         },
     }),
-    onPaste: (toPaste, cell) => (toPaste === cell.data ? undefined : { ...cell, data: toPaste }),
+    onPaste: (toPaste, cell, details) =>
+        toPaste === cell.data
+            ? undefined
+            : { ...cell, data: toPaste, displayData: details.formattedString ?? cell.displayData },
 };

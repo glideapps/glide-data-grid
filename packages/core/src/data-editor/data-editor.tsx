@@ -43,6 +43,8 @@ import {
     type CustomCell,
     headerKind,
     gridSelectionHasItem,
+    BooleanEmpty,
+    BooleanIndeterminate,
 } from "../data-grid/data-grid-types";
 import DataGridSearch, { type DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
@@ -55,12 +57,13 @@ import { measureColumn, useColumnSizer } from "./use-column-sizer";
 import { isHotkey } from "../common/is-hotkey";
 import { type SelectionBlending, useSelectionBehavior } from "../data-grid/use-selection-behavior";
 import { useCellsForSelection } from "./use-cells-for-selection";
-import { unquote, expandSelection, copyToClipboard, decodeHTML } from "./data-editor-fns";
+import { unquote, expandSelection, copyToClipboard } from "./data-editor-fns";
 import { DataEditorContainer } from "../data-editor-container/data-grid-container";
 import { toggleBoolean } from "../data-grid/cells/boolean-cell";
 import { useAutoscroll } from "./use-autoscroll";
 import type { CustomRenderer, CellRenderer } from "../data-grid/cells/cell-types";
 import { CellRenderers } from "../data-grid/cells";
+import { decodeHTML, type CopyBuffer } from "./copy-paste";
 
 let idCounter = 0;
 
@@ -3051,9 +3054,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onPasteInternal = React.useCallback(
         async (e?: ClipboardEvent) => {
             if (!keybindings.paste) return;
-            function pasteToCell(inner: InnerGridCell, target: Item, toPaste: string): EditListItem | undefined {
+            function pasteToCell(
+                inner: InnerGridCell,
+                target: Item,
+                rawValue: string | boolean | string[] | number | boolean | BooleanEmpty | BooleanIndeterminate,
+                formatted?: string | string[]
+            ): EditListItem | undefined {
+                const stringifiedRawValue =
+                    typeof rawValue === "object" ? rawValue?.join("\n") ?? "" : rawValue?.toString() ?? "";
+
                 if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
-                    const coerced = coercePasteValue?.(toPaste, inner);
+                    const coerced = coercePasteValue?.(stringifiedRawValue, inner);
                     if (coerced !== undefined && isEditableGridCell(coerced)) {
                         if (process.env.NODE_ENV !== "production" && coerced.kind !== inner.kind) {
                             // eslint-disable-next-line no-console
@@ -3068,7 +3079,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (r === undefined) return undefined;
                     if (r.kind === GridCellKind.Custom) {
                         assert(inner.kind === GridCellKind.Custom);
-                        const newVal = (r as unknown as CustomRenderer<CustomCell<any>>).onPaste?.(toPaste, inner.data);
+                        const newVal = (r as unknown as CustomRenderer<CustomCell<any>>).onPaste?.(
+                            stringifiedRawValue,
+                            inner.data
+                        );
                         if (newVal === undefined) return undefined;
                         return {
                             location: target,
@@ -3078,7 +3092,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             },
                         };
                     } else {
-                        const newVal = r.onPaste?.(toPaste, inner);
+                        const newVal = r.onPaste?.(stringifiedRawValue, inner, {
+                            formatted,
+                            formattedString: typeof formatted === "string" ? formatted : formatted?.join("\n"),
+                            rawValue,
+                        });
                         if (newVal === undefined) return undefined;
                         assert(newVal.kind === inner.kind);
                         return {
@@ -3105,7 +3123,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             if (focused && target !== undefined) {
-                let data: string[][] | undefined;
+                let data: CopyBuffer | undefined;
                 let text: string | undefined;
 
                 const textPlain = "text/plain";
@@ -3118,11 +3136,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         if (item.types.includes(textHtml)) {
                             const htmlBlob = await item.getType(textHtml);
                             const html = await htmlBlob.text();
-                            const fragment = document.createElement("html");
-                            fragment.innerHTML = html;
-                            const el = fragment.querySelector("table");
-                            if (el !== null) {
-                                data = decodeHTML(el);
+                            const decoded = decodeHTML(html);
+                            if (decoded !== undefined) {
+                                data = decoded;
                                 break;
                             }
                         }
@@ -3136,12 +3152,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else if (e !== undefined && e?.clipboardData !== null) {
                     if (e.clipboardData.types.includes(textHtml)) {
                         const html = e.clipboardData.getData(textHtml);
-                        const fragment = document.createElement("html");
-                        fragment.innerHTML = html;
-                        const el = fragment.querySelector("table");
-                        if (el !== null) {
-                            data = decodeHTML(el);
-                        }
+                        data = decodeHTML(html);
                     }
                     if (data === undefined && e.clipboardData.types.includes(textPlain)) {
                         text = e.clipboardData.getData(textPlain);
@@ -3156,11 +3167,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 do {
                     if (onPaste === undefined) {
                         const cellData = getMangledCellContent(target);
-                        const newVal = pasteToCell(
-                            cellData,
-                            target,
-                            text ?? data?.map(r => r.join("\t")).join("\t") ?? ""
-                        );
+                        const rawValue = text ?? data?.map(r => r.map(cb => cb.rawValue).join("\t")).join("\t") ?? "";
+                        const newVal = pasteToCell(cellData, target, rawValue, undefined);
                         if (newVal !== undefined) {
                             editList.push(newVal);
                         }
@@ -3175,7 +3183,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (
                         onPaste === false ||
                         (typeof onPaste === "function" &&
-                            onPaste?.([target[0] - rowMarkerOffset, target[1]], data) !== true)
+                            onPaste?.(
+                                [target[0] - rowMarkerOffset, target[1]],
+                                data.map(r => r.map(cb => cb.rawValue?.toString() ?? ""))
+                            ) !== true)
                     ) {
                         return;
                     }
@@ -3188,7 +3199,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             if (writeCol >= mangledCols.length) continue;
                             if (writeRow >= mangledRows) continue;
                             const cellData = getMangledCellContent(index);
-                            const newVal = pasteToCell(cellData, index, dataItem);
+                            const newVal = pasteToCell(cellData, index, dataItem.rawValue, dataItem.formatted);
                             if (newVal !== undefined) {
                                 editList.push(newVal);
                             }

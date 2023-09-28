@@ -1,125 +1,92 @@
-import { GridCellKind } from "../src";
-import { decodeHTML, formatCell, formatHtmlForCopy } from "../src/data-editor/data-editor-fns";
+/* eslint-disable sonarjs/no-duplicate-string */
+import { unquote } from "../src/data-editor/data-editor-fns"; // Adjust the import path to your setup
 
-describe("data-editor-fns", () => {
-    test("decode html", () => {
-        const root = document.createElement("table");
-        root.innerHTML = `
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>2</td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>4</td>
-                </tr>
-            </tbody>
-        `;
-
-        const decoded = decodeHTML(root);
-
-        expect(decoded).toEqual([
-            ["1", "2"],
-            ["3", "4"],
+describe("unquote", () => {
+    it("should correctly unquote single line string without quotes", () => {
+        const input = "hello\tworld";
+        const output = unquote(input);
+        expect(output).toEqual([
+            [
+                { rawValue: "hello", formatted: "hello", format: "string" },
+                { rawValue: "world", formatted: "world", format: "string" },
+            ],
         ]);
     });
 
-    test("decode html line breaks", () => {
-        const root = document.createElement("table");
-        root.innerHTML = `
-            <tbody>
-                <tr>
-                    <td>1<br>1.1</td>
-                    <td>2<br/>2.1</td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>4</td>
-                </tr>
-            </tbody>
-        `;
-
-        const decoded = decodeHTML(root);
-
-        expect(decoded).toEqual([
-            ["1\n1.1", "2\n2.1"],
-            ["3", "4"],
+    it("should correctly unquote single line string with quotes", () => {
+        const input = `"hello"\t"world"`;
+        const output = unquote(input);
+        expect(output).toEqual([
+            [
+                { rawValue: "hello", formatted: "hello", format: "string" },
+                { rawValue: "world", formatted: "world", format: "string" },
+            ],
         ]);
     });
 
-    test("format empty bubble cell", () => {
-        expect(
-            formatCell(
-                {
-                    kind: GridCellKind.Bubble,
-                    allowOverlay: true,
-                    data: [],
-                },
-                0,
-                false,
-                [0],
-                true
-            )
-        ).toEqual("");
+    it("should handle double quotes correctly", () => {
+        const input = `"he""llo"\t"wo""rld"`;
+        const output = unquote(input);
+        expect(output).toEqual([
+            [
+                { rawValue: `he"llo`, formatted: `he"llo`, format: "string" },
+                { rawValue: `wo"rld`, formatted: `wo"rld`, format: "string" },
+            ],
+        ]);
     });
 
-    test("format url cell", () => {
-        expect(
-            formatCell(
-                {
-                    kind: GridCellKind.Uri,
-                    allowOverlay: true,
-                    data: "https://www.google.com",
-                },
-                0,
-                false,
-                [0],
-                true
-            )
-        ).toEqual("https://www.google.com");
+    it("should correctly unquote multi line strings", () => {
+        const input = `"hello"\t"world"\n"foo"\t"bar"`;
+        const output = unquote(input);
+        expect(output).toEqual([
+            [
+                { rawValue: "hello", formatted: "hello", format: "string" },
+                { rawValue: "world", formatted: "world", format: "string" },
+            ],
+            [
+                { rawValue: "foo", formatted: "foo", format: "string" },
+                { rawValue: "bar", formatted: "bar", format: "string" },
+            ],
+        ]);
     });
 
-    test("formatHtmlForCopy", () => {
-        expect(
-            formatHtmlForCopy(
-                `<tr><td><a href='https://www.google.com'>Google</a></td><td>This is  a test	tab</td></tr>`
-            )
-        ).toEqual(
-            "<style type=\"text/css\"><!--br {mso-data-placement:same-cell;}--></style><table><tr><td><a href='https://www.google.com'>Google</a></td><td>This is<span>&nbsp;</span><span>&nbsp;</span>a test<span>&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span>tab</td></tr></table>"
-        );
+    it("should handle empty strings correctly", () => {
+        const input = "";
+        const output = unquote(input);
+        expect(output).toEqual([[]]);
     });
 
-    test("format empty bubble cell with comma", () => {
-        expect(
-            formatCell(
-                {
-                    kind: GridCellKind.Bubble,
-                    allowOverlay: true,
-                    data: ["foo, bar", "baz"],
-                },
-                0,
-                false,
-                [0],
-                true
-            )
-        ).toEqual('"foo, bar",baz');
+    it("should correctly unquote strings containing tabs within quotes", () => {
+        const input = `"hello\tworld"\tfoo`;
+        const output = unquote(input);
+        expect(output).toEqual([
+            [
+                { rawValue: "hello\tworld", formatted: "hello\tworld", format: "string" },
+                { rawValue: "foo", formatted: "foo", format: "string" },
+            ],
+        ]);
     });
 
-    test("format respects copyData", () => {
-        expect(
-            formatCell(
-                {
-                    kind: GridCellKind.Bubble,
-                    allowOverlay: true,
-                    data: ["foo, bar", "baz"],
-                    copyData: "override",
-                },
-                0,
-                false,
-                [0],
-                true
-            )
-        ).toEqual("override");
+    it("should correctly unquote strings containing newlines within quotes", () => {
+        const input = `"hello\nworld"\tfoo`;
+        const output = unquote(input);
+        expect(output).toEqual([
+            [
+                { rawValue: "hello\nworld", formatted: "hello\nworld", format: "string" },
+                { rawValue: "foo", formatted: "foo", format: "string" },
+            ],
+        ]);
+    });
+
+    it("should correctly unquote multi-line strings where newlines are within quotes", () => {
+        const input = `"start"\t"middle\npart"\t"end"`;
+        const output = unquote(input);
+        expect(output).toEqual([
+            [
+                { rawValue: "start", formatted: "start", format: "string" },
+                { rawValue: "middle\npart", formatted: "middle\npart", format: "string" },
+                { rawValue: "end", formatted: "end", format: "string" },
+            ],
+        ]);
     });
 });

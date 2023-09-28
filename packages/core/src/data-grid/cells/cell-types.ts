@@ -7,6 +7,8 @@ import type {
     CustomCell,
     ProvideEditorCallback,
     BaseGridMouseEventArgs,
+    BooleanEmpty,
+    BooleanIndeterminate,
 } from "../data-grid-types";
 
 export interface BaseDrawArgs {
@@ -85,7 +87,16 @@ interface BaseCellRenderer<T extends InnerGridCell> {
 export interface InternalCellRenderer<T extends InnerGridCell> extends BaseCellRenderer<T> {
     readonly useLabel?: boolean;
     readonly getAccessibilityString: (cell: T) => string;
-    readonly onPaste: (val: string, cell: T) => T | undefined;
+    readonly onPaste: (
+        val: string,
+        cell: T,
+        details: {
+            // fixme this should become the only argument
+            readonly rawValue: string | string[] | number | boolean | BooleanEmpty | BooleanIndeterminate;
+            readonly formatted?: string | string[];
+            readonly formattedString?: string; // convenience
+        }
+    ) => T | undefined;
 }
 
 /** @category Renderers */
