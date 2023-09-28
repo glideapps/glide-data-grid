@@ -27,7 +27,13 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
   },
   onClick: (e) => {
     if (e.onRowDetailsUpdated) {
-      e.onRowDetailsUpdated({ ...e.cell, expanded: !e.cell.expanded });
+      const iconXPosition = e.cell.level * e.theme.nestedGroupIndent + 4;
+      if (e.posX >= iconXPosition - 6 && e.posX <= iconXPosition + 6) {
+        e.onRowDetailsUpdated({ ...e.cell, expanded: !e.cell.expanded });
+      }
+      if (e.doubleClick) {
+        e.onRowDetailsUpdated({ ...e.cell, expanded: !e.cell.expanded });
+      }
     }
 
     return undefined;

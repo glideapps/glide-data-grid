@@ -2271,6 +2271,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
               onRowDetailsUpdated: (newValue) => {
                 onRowDetailsUpdated?.(row, newValue);
               },
+              doubleClick: mouseDownData.current?.wasDoubleClick ?? false,
               preventDefault,
             });
 
