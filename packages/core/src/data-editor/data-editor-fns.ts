@@ -10,91 +10,90 @@ export function expandSelection(
     abortController: AbortController
 ): GridSelection {
     const origVal = newVal;
-    if (spanRangeBehavior === "allowPartial" || newVal.current === undefined) return newVal;
-    if (getCellsForSelection !== undefined) {
-        let isFilled = false;
-        do {
-            if (newVal?.current === undefined) break;
-            const r: Rectangle = newVal.current?.range;
-            const cells: (readonly GridCell[])[] = [];
-            if (r.width > 2) {
-                const leftCells = getCellsForSelection(
-                    {
-                        x: r.x,
-                        y: r.y,
-                        width: 1,
-                        height: r.height,
-                    },
-                    abortController.signal
-                );
+    if (spanRangeBehavior === "allowPartial" || newVal.current === undefined || getCellsForSelection === undefined)
+        return newVal;
+    let isFilled = false;
+    do {
+        if (newVal?.current === undefined) break;
+        const r: Rectangle = newVal.current?.range;
+        const cells: (readonly GridCell[])[] = [];
+        if (r.width > 2) {
+            const leftCells = getCellsForSelection(
+                {
+                    x: r.x,
+                    y: r.y,
+                    width: 1,
+                    height: r.height,
+                },
+                abortController.signal
+            );
 
-                if (typeof leftCells === "function") {
-                    return origVal;
-                }
-
-                cells.push(...leftCells);
-
-                const rightCells = getCellsForSelection(
-                    {
-                        x: r.x + r.width - 1,
-                        y: r.y,
-                        width: 1,
-                        height: r.height,
-                    },
-                    abortController.signal
-                );
-
-                if (typeof rightCells === "function") {
-                    return origVal;
-                }
-
-                cells.push(...rightCells);
-            } else {
-                const rCells = getCellsForSelection(
-                    {
-                        x: r.x,
-                        y: r.y,
-                        width: r.width,
-                        height: r.height,
-                    },
-                    abortController.signal
-                );
-                if (typeof rCells === "function") {
-                    return origVal;
-                }
-                cells.push(...rCells);
+            if (typeof leftCells === "function") {
+                return origVal;
             }
 
-            let left = r.x - rowMarkerOffset;
-            let right = r.x + r.width - 1 - rowMarkerOffset;
-            for (const row of cells) {
-                for (const cell of row) {
-                    if (cell.span === undefined) continue;
-                    left = Math.min(cell.span[0], left);
-                    right = Math.max(cell.span[1], right);
-                }
+            cells.push(...leftCells);
+
+            const rightCells = getCellsForSelection(
+                {
+                    x: r.x + r.width - 1,
+                    y: r.y,
+                    width: 1,
+                    height: r.height,
+                },
+                abortController.signal
+            );
+
+            if (typeof rightCells === "function") {
+                return origVal;
             }
 
-            if (left === r.x - rowMarkerOffset && right === r.x + r.width - 1 - rowMarkerOffset) {
-                isFilled = true;
-            } else {
-                newVal = {
-                    current: {
-                        cell: newVal.current.cell ?? [0, 0],
-                        range: {
-                            x: left + rowMarkerOffset,
-                            y: r.y,
-                            width: right - left + 1,
-                            height: r.height,
-                        },
-                        rangeStack: newVal.current.rangeStack,
-                    },
-                    columns: newVal.columns,
-                    rows: newVal.rows,
-                };
+            cells.push(...rightCells);
+        } else {
+            const rCells = getCellsForSelection(
+                {
+                    x: r.x,
+                    y: r.y,
+                    width: r.width,
+                    height: r.height,
+                },
+                abortController.signal
+            );
+            if (typeof rCells === "function") {
+                return origVal;
             }
-        } while (!isFilled);
-    }
+            cells.push(...rCells);
+        }
+
+        let left = r.x - rowMarkerOffset;
+        let right = r.x + r.width - 1 - rowMarkerOffset;
+        for (const row of cells) {
+            for (const cell of row) {
+                if (cell.span === undefined) continue;
+                left = Math.min(cell.span[0], left);
+                right = Math.max(cell.span[1], right);
+            }
+        }
+
+        if (left === r.x - rowMarkerOffset && right === r.x + r.width - 1 - rowMarkerOffset) {
+            isFilled = true;
+        } else {
+            newVal = {
+                current: {
+                    cell: newVal.current.cell ?? [0, 0],
+                    range: {
+                        x: left + rowMarkerOffset,
+                        y: r.y,
+                        width: right - left + 1,
+                        height: r.height,
+                    },
+                    rangeStack: newVal.current.rangeStack,
+                },
+                columns: newVal.columns,
+                rows: newVal.rows,
+            };
+        }
+    } while (!isFilled);
     return newVal;
 }
 

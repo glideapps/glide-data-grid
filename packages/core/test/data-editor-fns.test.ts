@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import { unquote } from "../src/data-editor/data-editor-fns"; // Adjust the import path to your setup
+import { CompactSelection, type GridSelection } from "../src";
+import { expandSelection, unquote } from "../src/data-editor/data-editor-fns"; // Adjust the import path to your setup
 
 describe("unquote", () => {
     it("should correctly unquote single line string without quotes", () => {
@@ -88,5 +89,64 @@ describe("unquote", () => {
                 { rawValue: "end", formatted: "end", format: "string" },
             ],
         ]);
+    });
+});
+
+describe("expandSelection", () => {
+    const getCellsForSelection = jest.fn();
+    const abortController = new AbortController();
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it("should return the original selection if spanRangeBehavior is allowPartial", () => {
+        const selection: GridSelection = {
+            current: {
+                cell: [0, 0],
+                range: {
+                    x: 0,
+                    y: 0,
+                    width: 1,
+                    height: 1,
+                },
+                rangeStack: [],
+            },
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+        };
+        const result = expandSelection(selection, getCellsForSelection, 0, "allowPartial", abortController);
+        expect(result).toEqual(selection);
+    });
+
+    it("should return the original selection if current selection is undefined", () => {
+        const selection = {
+            current: undefined,
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+        };
+        const result = expandSelection(selection, getCellsForSelection, 0, "default", abortController);
+        expect(result).toEqual(selection);
+    });
+
+    it("should return the original selection if getCellsForSelection returns a function", () => {
+        const selection: GridSelection = {
+            current: {
+                cell: [0, 0],
+                range: {
+                    x: 0,
+                    y: 0,
+                    width: 1,
+                    height: 1,
+                },
+                rangeStack: [],
+            },
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+        };
+        getCellsForSelection.mockReturnValue(() => ({}));
+        const result = expandSelection(selection, getCellsForSelection, 0, "default", abortController);
+        expect(result).toEqual(selection);
+        expect(getCellsForSelection).toHaveBeenCalledTimes(1);
     });
 });
