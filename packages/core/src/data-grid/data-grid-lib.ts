@@ -96,7 +96,7 @@ export function cellIsInRange(location: Item, cell: InnerGridCell, selection: Gr
     return result;
 }
 
-function remapForDnDState(
+export function remapForDnDState(
     columns: readonly MappedGridColumn[],
     dndState?: {
         src: number;
