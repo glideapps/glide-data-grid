@@ -64,6 +64,7 @@ import { useAutoscroll } from "./use-autoscroll";
 import type { CustomRenderer, CellRenderer } from "../data-grid/cells/cell-types";
 import { CellRenderers } from "../data-grid/cells";
 import { decodeHTML, type CopyBuffer } from "./copy-paste";
+import { useRemAdjuster } from "./use-rem-adjuster";
 
 let idCounter = 0;
 
@@ -813,26 +814,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const remSize = React.useMemo(() => Number.parseFloat(fontSizeStr), [fontSizeStr]);
 
-    const [rowHeight, headerHeight, groupHeaderHeight, theme, overscrollX, overscrollY] = React.useMemo(() => {
-        if (!scaleToRem || remSize === 16)
-            return [rowHeightIn, headerHeightIn, groupHeaderHeightIn, themeIn, overscrollXIn, overscrollYIn];
-        const scaler = remSize / 16;
-        const rh = rowHeightIn;
-        const bt = getDataEditorTheme();
-        return [
-            typeof rh === "number" ? rh * scaler : (n: number) => Math.ceil(rh(n) * scaler),
-            Math.ceil(headerHeightIn * scaler),
-            Math.ceil(groupHeaderHeightIn * scaler),
-            {
-                ...themeIn,
-                headerIconSize: (themeIn?.headerIconSize ?? bt.headerIconSize) * scaler,
-                cellHorizontalPadding: (themeIn?.cellHorizontalPadding ?? bt.cellHorizontalPadding) * scaler,
-                cellVerticalPadding: (themeIn?.cellVerticalPadding ?? bt.cellVerticalPadding) * scaler,
-            },
-            Math.ceil((overscrollXIn ?? 0) * scaler),
-            Math.ceil((overscrollYIn ?? 0) * scaler),
-        ];
-    }, [groupHeaderHeightIn, headerHeightIn, overscrollXIn, overscrollYIn, remSize, rowHeightIn, scaleToRem, themeIn]);
+    const { rowHeight, headerHeight, groupHeaderHeight, theme, overscrollX, overscrollY } = useRemAdjuster({
+        groupHeaderHeight: groupHeaderHeightIn,
+        headerHeight: headerHeightIn,
+        overscrollX: overscrollXIn,
+        overscrollY: overscrollYIn,
+        remSize,
+        rowHeight: rowHeightIn,
+        scaleToRem,
+        theme: themeIn,
+    });
 
     const keybindings = React.useMemo(() => {
         return keybindingsIn === undefined
