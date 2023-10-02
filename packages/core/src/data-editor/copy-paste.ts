@@ -256,10 +256,18 @@ export function decodeHTML(html: string): CopyBuffer | undefined {
         } else if (el instanceof HTMLTableCellElement) {
             // be careful not to use innerText here as its behavior is not well defined for non DOM attached nodes
             const clone: HTMLTableCellElement = el.cloneNode(true) as HTMLTableCellElement;
+
+            // Apple numbers seems to always wrap the cell in a p tag and a font tag. It also puts both <br> and \n
+            // linebreak markers in the code. This is both unneeded and causes issues with the paste code.
+            const firstTagIsPara = clone.children.length === 1 && clone.children[0].nodeName === "P";
+            const para = firstTagIsPara ? clone.children[0] : null;
+            const isAppleNumbers = para?.children.length === 1 && para.children[0].nodeName === "FONT";
+
             const brs = clone.querySelectorAll("br");
             for (const br of brs) {
                 br.replaceWith("\n");
             }
+
             const attributeValue = clone.getAttribute("gdg-raw-value");
             const formatValue = (clone.getAttribute("gdg-format") ?? "string") as any; // fix me at some point
             if (clone.querySelector("a") !== null) {
@@ -283,9 +291,15 @@ export function decodeHTML(html: string): CopyBuffer | undefined {
                     format: formatValue,
                 });
             } else {
+                let textContent = clone.textContent ?? "";
+                if (isAppleNumbers) {
+                    // replace and newline not preceded by a newline
+                    textContent = textContent.replace(/(?<!\n)\n/g, "");
+                }
+
                 current?.push({
-                    rawValue: clone.textContent ?? "",
-                    formatted: clone.textContent ?? "",
+                    rawValue: textContent ?? "",
+                    formatted: textContent ?? "",
                     format: formatValue,
                 });
             }

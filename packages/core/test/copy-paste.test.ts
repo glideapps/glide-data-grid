@@ -409,6 +409,37 @@ test("decode ordered list", () => {
     ]);
 });
 
+test("decode apple numbers", () => {
+    const html = `
+<table cellspacing="0" cellpadding="0" style="border-collapse: collapse">
+<tbody>
+<tr>
+<td valign="top" style="width: 89.0px; height: 11.0px; border-style: solid; border-width: 1.0px 1.0px 1.0px 1.0px; border-color: #000000 #000000 #000000 #000000; padding: 4.0px 4.0px 4.0px 4.0px">
+<p style="margin: 0.0px 0.0px 0.0px 0.0px"><font face="Helvetica Neue" size="2" color="#000000" style="font: 10.0px 'Helvetica Neue'; font-variant-ligatures: common-ligatures; color: #000000">Test</font></p>
+</td>
+<td valign="top" style="width: 89.0px; height: 11.0px; border-style: solid; border-width: 1.0px 1.0px 1.0px 1.0px; border-color: #000000 #000000 #000000 #000000; padding: 4.0px 4.0px 4.0px 4.0px">
+<p style="margin: 0.0px 0.0px 0.0px 0.0px"><font face="Helvetica Neue" size="2" color="#000000" style="font: 10.0px 'Helvetica Neue'; font-variant-ligatures: common-ligatures; color: #000000">This</font></p>
+</td>
+</tr>
+<tr>
+<td valign="top" style="width: 89.0px; height: 23.0px; border-style: solid; border-width: 1.0px 1.0px 1.0px 1.0px; border-color: #000000 #000000 #000000 #000000; padding: 4.0px 4.0px 4.0px 4.0px">
+<p style="margin: 0.0px 0.0px 0.0px 0.0px"><font face="Helvetica Neue" size="2" color="#000000" style="font: 10.0px 'Helvetica Neue'; font-variant-ligatures: common-ligatures; color: #000000">Out</font></p>
+</td>
+<td valign="top" style="width: 89.0px; height: 23.0px; border-style: solid; border-width: 1.0px 1.0px 1.0px 1.0px; border-color: #000000 #000000 #000000 #000000; padding: 4.0px 4.0px 4.0px 4.0px">
+<p style="margin: 0.0px 0.0px 0.0px 0.0px"><font face="Helvetica Neue" size="2" color="#000000" style="font: 10.0px 'Helvetica Neue'; font-variant-ligatures: common-ligatures; color: #000000">With a<br>
+newline and such</font></p>
+</td>
+</tr>
+</tbody>
+</table>    
+    `;
+    const decoded = decodeHTML(html);
+    expect(decoded).toEqual([
+        [makeCellBuffer("Test"), makeCellBuffer("This")],
+        [makeCellBuffer("Out"), makeCellBuffer("With a\nnewline and such")],
+    ]);
+});
+
 test("decode html attributes", () => {
     const html = `
         <table>
