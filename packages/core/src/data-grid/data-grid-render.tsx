@@ -137,6 +137,7 @@ export function drawCell(
   }
   let result: PrepResult | undefined = undefined;
   let drawX = x;
+  let fixedWidthGrouping = w;
 
   if (
     col === 1 &&
@@ -145,6 +146,7 @@ export function drawCell(
   ) {
     const shiftDrawX = rowDetails.level * theme.nestedGroupIndent;
     if (shiftDrawX > drawX) {
+      fixedWidthGrouping = w - shiftDrawX / 2;
       drawX = shiftDrawX;
     }
   }
@@ -155,7 +157,7 @@ export function drawCell(
     col,
     row,
     cell,
-    rect: { x: drawX, y, width: w, height: h },
+    rect: { x: drawX, y, width: fixedWidthGrouping, height: h },
     highlighted,
     hoverAmount,
     hoverX,
