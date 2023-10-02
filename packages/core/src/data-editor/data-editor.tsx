@@ -2268,6 +2268,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
               bounds: a.bounds,
               location: mangledLocation,
               theme: themeForCell(c, mangledLocation),
+              rowMarkerWidth,
               onRowDetailsUpdated: (newValue) => {
                 onRowDetailsUpdated?.(row, newValue);
               },
@@ -2411,6 +2412,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       onHeaderClicked,
       normalSizeColumn,
       handleGroupHeaderSelection,
+      rowMarkerWidth,
     ]
   );
 

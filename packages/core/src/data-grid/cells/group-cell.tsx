@@ -3,6 +3,7 @@ import { GridRowKind, GroupCell } from '../data-grid-types';
 import { getMiddleCenterBias } from '../data-grid-lib';
 
 const GROUP_ICON_SIZE = 18;
+const GROUP_ICON_CLICK_PADDING = 6;
 export const groupRenderer: InternalCellRenderer<GroupCell> = {
   getAccessibilityString: () => 'Group',
   kind: GridRowKind.Group,
@@ -27,11 +28,19 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
   },
   onClick: (e) => {
     if (e.onRowDetailsUpdated) {
+      let posX = e.posX;
       const iconXPosition = e.cell.level * e.theme.nestedGroupIndent + 4;
-      if (e.posX >= iconXPosition - 6 && e.posX <= iconXPosition + 6) {
+      const column = e.location[0];
+      if (column !== 0 && e.rowMarkerWidth !== undefined) {
+        posX = posX + e.rowMarkerWidth;
+      }
+      if (
+        posX >= iconXPosition - GROUP_ICON_CLICK_PADDING &&
+        posX <= iconXPosition + GROUP_ICON_CLICK_PADDING
+      ) {
         e.onRowDetailsUpdated({ ...e.cell, expanded: !e.cell.expanded });
       }
-      if (e.doubleClick) {
+      if (e.doubleClick !== undefined && e.doubleClick === true) {
         e.onRowDetailsUpdated({ ...e.cell, expanded: !e.cell.expanded });
       }
     }
