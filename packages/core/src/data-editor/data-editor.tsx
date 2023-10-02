@@ -1070,8 +1070,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     rangeSelect
   );
 
-  const onDelete = React.useCallback<NonNullable<DataEditorProps['onDelete']>>(
-    (sel) => {
+  const onDelete = React.useCallback(
+    (sel: GridSelection) => {
       if (onDeleteIn !== undefined) {
         let groupRows: GroupContentRow[] = [];
 
@@ -3079,7 +3079,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         }
 
         if (isDeleteKey) {
-          const callbackResult = onDelete?.(gridSelection, []) ?? true;
+          const callbackResult = onDelete?.(gridSelection) ?? true;
           cancel();
           if (callbackResult !== false) {
             const toDelete = callbackResult === true ? gridSelection : callbackResult;

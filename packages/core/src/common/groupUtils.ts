@@ -87,13 +87,9 @@ export const deleteGroupByGroupRowId = (
   rootGroups: RowGroup[],
   targetGroupRowId: string
 ): boolean => {
-  // Extract the parent ID from the targetGroupRowId
-
-  // Find the parent group and the group to delete
-
   const groupToDelete = findGroupById(rootGroups, targetGroupRowId);
 
-  const parentId = groupToDelete?.parentId;
+  const parentId = groupToDelete?.parentId ?? '';
 
   const parentGroup =
     parentId !== undefined && parentId !== ''
@@ -112,7 +108,7 @@ export const deleteGroupByGroupRowId = (
 
     // Recursively delete empty parent groups
     if (parentGroup.length === 0) {
-      deleteGroupByGroupRowId(rootGroups, parentId!);
+      deleteGroupByGroupRowId(rootGroups, parentId);
     }
 
     return true;
