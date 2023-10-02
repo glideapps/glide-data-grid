@@ -2018,6 +2018,99 @@ describe('data-editor', () => {
     );
   });
 
+  test('Copy/paste with grouping', async () => {
+    const groups = createInitialGroups(1000, 500);
+    const spy = jest.fn();
+    const pasteSpy = jest.fn((_target: any, _values: any) => true);
+    jest.useFakeTimers();
+    render(
+      <EventedDataEditor
+        {...basicProps}
+        groups={groups}
+        rowMarkers="both"
+        onGridSelectionChange={spy}
+        onPaste={(...args) => pasteSpy(...args)}
+      />,
+      {
+        wrapper: Context,
+      }
+    );
+    prep(false);
+
+    const canvas = screen.getByTestId('data-grid-canvas');
+    jest.spyOn(document, 'activeElement', 'get').mockImplementation(() => canvas);
+    fireEvent.mouseDown(canvas, {
+      clientX: 340, // Col B
+      clientY: 36 + 32 * 2 + 16 + 20, // Row 2 (0 indexed)
+    });
+
+    fireEvent.mouseUp(canvas, {
+      clientX: 340, // Col B
+      clientY: 36 + 32 * 2 + 16 + 20, // Row 2 (0 indexed)
+    });
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    spy.mockClear();
+    fireEvent.keyDown(canvas, {
+      key: 'ArrowRight',
+      shiftKey: true,
+    });
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(spy).toBeCalledWith(
+      expect.objectContaining({
+        current: expect.objectContaining({
+          cell: [1, 3],
+          range: { x: 1, y: 3, width: 2, height: 1 },
+        }),
+      })
+    );
+
+    fireEvent.copy(window);
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(navigator.clipboard.writeText).toBeCalledWith('1, 3\t2, 3');
+
+    spy.mockClear();
+    fireEvent.keyDown(canvas, {
+      key: 'ArrowDown',
+    });
+
+    expect(spy).toBeCalledWith(
+      expect.objectContaining({ current: expect.objectContaining({ cell: [1, 4] }) })
+    );
+
+    fireEvent.paste(window);
+    act(() => {
+      jest.runAllTimers();
+    });
+    jest.useRealTimers();
+    await new Promise((r) => window.setTimeout(r, 10));
+    expect(pasteSpy).toBeCalledWith(
+      [1, 1],
+      [
+        ['Sunday', 'Dogs', 'https://google.com'],
+        ['Monday', 'Cats', 'https://google.com'],
+        ['Tuesday', 'Turtles', 'https://google.com'],
+        ['Wednesday', 'Bears', 'https://google.com'],
+        ['Thursday', 'L  ions', 'https://google.com'],
+        ['Friday', 'Pigs', 'https://google.com'],
+        [
+          'Saturday',
+          'Turkeys and some "quotes" and\na new line char "more quotes" plus a tab  .',
+          'https://google.com',
+        ],
+      ]
+    );
+  });
+
   test('onCellsEdited blocks onCellEdited', async () => {
     const spy = jest.fn();
     jest.useFakeTimers();

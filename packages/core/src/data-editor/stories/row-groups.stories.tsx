@@ -70,7 +70,7 @@ export const RowGroups: React.VFC<RowGroupsProps> = ({ enableGroups }) => {
       const newGroups = structuredClone(groups);
       deleteGroups.forEach((item) => {
         const group = findGroupById(newGroups, item.groupId);
-        if (group) {
+        if (group !== undefined) {
           group.rowsCount--;
           if (group.rowsCount === 0) {
             deleteGroupByGroupRowId(newGroups, group.id);
@@ -144,5 +144,16 @@ export const RowGroups: React.VFC<RowGroupsProps> = ({ enableGroups }) => {
 (RowGroups as any).parameters = {
   options: {
     showPanel: false,
+  },
+};
+
+(RowGroups as any).args = {
+  enableGroups: true,
+};
+(RowGroups as any).argTypes = {
+  enableGroups: {
+    control: {
+      type: 'boolean',
+    },
   },
 };

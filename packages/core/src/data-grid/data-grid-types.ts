@@ -428,8 +428,8 @@ export interface GroupContentRow {
   kind: GridRowKind.GroupContent;
   level: number;
   index: number;
-  themeOverride?: Partial<Theme>;
   groupId: string;
+  themeOverride?: Partial<Theme>;
 }
 
 export interface GroupNewRow {

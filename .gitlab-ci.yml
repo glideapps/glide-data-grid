@@ -57,14 +57,10 @@ build:
 pages:
   stage: 'publish'
   script:
+    - npm run build-storybook
     - 'echo "Deploying storybook to GitLab pages..."'
-  artifacts:
-    paths:
-      - public
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
-  dependencies:
-    - build-storybook
 
 .test-job-template: &test_job_definition
   needs: ['warm_cache']

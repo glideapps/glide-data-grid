@@ -103,9 +103,9 @@ const dataEditorBaseTheme: Theme = {
   bgCell: '#FFFFFF',
   bgCellMedium: '#FAFAFB',
   bgHeader: '#F7F7F8',
-  bgGroup: '#EFEFF1',
+  bgGroup: '#E6E6E6',
   bgHeaderHasFocus: '#E9E9EB',
-  bgHeaderHovered: '#EFEFF1',
+  bgHeaderHovered: '#E6E6E6',
 
   bgBubble: '#EDEDF3',
   bgBubbleSelected: '#FFFFFF',
@@ -128,7 +128,7 @@ const dataEditorBaseTheme: Theme = {
     'Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif',
   editorFontSize: '13px',
   lineHeight: 1.4, //unitless scaler depends on your font
-  nestedGroupIndent: 20,
+  nestedGroupIndent: 16,
   sortIndicatorBackgroundColor: '#B5DEFF',
   sortIndicatorColor: '#0265DC',
 };

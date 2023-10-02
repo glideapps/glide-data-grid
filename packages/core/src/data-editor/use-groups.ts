@@ -24,7 +24,7 @@ export const useGroups = ({ groups = [], hasTrailingRow = false, toggleGroup }: 
   const groupRows = useRef<GridRow[]>([]);
 
   useEffect(() => {
-    if (groups.length > 0) {
+    if (Array.isArray(groups)) {
       groupRows.current = flattenGroups(groups, hasTrailingRow);
       setRowsCount(groupRows.current.length);
     }
@@ -37,7 +37,7 @@ export const useGroups = ({ groups = [], hasTrailingRow = false, toggleGroup }: 
     [groupRows]
   );
 
-  const getMangledCellLocation = ([col, row]: Item): Item => {
+  const getMangledCellLocation = useCallback(([col, row]: Item): Item => {
     if (
       groupRows.current[row] !== undefined &&
       groupRows.current[row].kind === GridRowKind.GroupContent
@@ -45,7 +45,8 @@ export const useGroups = ({ groups = [], hasTrailingRow = false, toggleGroup }: 
       return [col, (groupRows.current[row] as GroupContentRow).index ?? row];
     }
     return [col, row];
-  };
+  }, []);
+
   const onRowDetailsUpdated = useCallback(
     (row: number, newRowValue: GridRow) => {
       if (
