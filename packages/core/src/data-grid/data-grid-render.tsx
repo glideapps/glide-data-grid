@@ -1441,11 +1441,9 @@ function drawCells(
                 fill = blend(theme.accentLight, fill);
               }
             } else {
-              if (
-                prelightCells?.some((pre) => pre[0] === c.sourceIndex && pre[1] === row) === true
-              ) {
-                fill = blend(theme.bgSearchResult, fill);
-              }
+              if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
+                fill = isSelected ? blend(theme.bgSelectedSearchResult, fill) : blend(theme.bgSearchResult, fill);
+            }
             }
           } else if (rowDetails.kind === GridRowKind.Group && rowActivated) {
             for (let i = 0; i < accentCount; i++) {

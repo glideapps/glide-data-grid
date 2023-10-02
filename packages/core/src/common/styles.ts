@@ -64,6 +64,7 @@ export interface Theme {
   bgBubble: string;
   bgBubbleSelected: string;
   bgSearchResult: string;
+  bgSelectedSearchResult: string;
   borderColor: string;
   horizontalBorderColor?: string;
   headerBottomBorderColor?: string;
@@ -111,6 +112,7 @@ const dataEditorBaseTheme: Theme = {
   bgBubbleSelected: '#FFFFFF',
 
   bgSearchResult: '#fff9e3',
+  bgSelectedSearchResult: "#FFDFAD",
 
   borderColor: 'rgba(115, 116, 131, 0.16)',
   drilldownBorder: 'rgba(0, 0, 0, 0)',
