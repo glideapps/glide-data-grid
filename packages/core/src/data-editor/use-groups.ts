@@ -12,16 +12,18 @@ export type RowGroup = {
   expanded: boolean;
 };
 
-export const useGroups = (
-  groups: readonly RowGroup[] = [],
-  toggleGroup?: (groupLocation: string) => void,
-  hasTrailingRow: boolean = false
-) => {
+export interface UseGroupsProps {
+  groups?: readonly RowGroup[];
+  toggleGroup?: (groupLocation: string) => void;
+  hasTrailingRow?: boolean;
+}
+
+export const useGroups = ({ groups = [], toggleGroup, hasTrailingRow = false }: UseGroupsProps) => {
   const [rowsCount, setRowsCount] = useState(0);
   const groupRows = useRef<GridRow[]>([]);
 
   useEffect(() => {
-    if (groups.length > 0) {
+    if (Array.isArray(groups)) {
       groupRows.current = flattenGroups(groups, hasTrailingRow);
       setRowsCount(groupRows.current.length);
     }

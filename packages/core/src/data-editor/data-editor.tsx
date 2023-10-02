@@ -865,7 +865,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     onRowDetailsUpdated,
     rowsCount: rowsCountWidthGroups,
     getMangledCellLocation,
-  } = useGroups(groups, onGroupToggle, trailingRowOptions?.inEachGroup);
+  } = useGroups({
+    groups,
+    toggleGroup: onGroupToggle,
+    hasTrailingRow: trailingRowOptions?.inEachGroup,
+  });
 
   const hasGroups = groups !== undefined && groups.length > 0;
   const rows = hasGroups ? rowsCountWidthGroups : initialRowsCount;

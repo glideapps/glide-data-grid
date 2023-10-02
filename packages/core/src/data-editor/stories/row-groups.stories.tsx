@@ -31,7 +31,11 @@ export default {
   ],
 };
 
-export const RowGroups: React.VFC = () => {
+interface RowGroupsProps {
+  enableGroups: number;
+}
+
+export const RowGroups: React.VFC<RowGroupsProps> = ({ enableGroups }) => {
   const { setCellValue, getCellContent, cols, setCellValueRaw } = useMockDataGenerator(
     20,
     false,
@@ -79,6 +83,8 @@ export const RowGroups: React.VFC = () => {
     [getCellContent, setCellValueRaw, setGroups]
   );
 
+  const groups1 = enableGroups ? groups : [];
+
   return (
     <BeautifulWrapper
       title="Row Grouping"
@@ -92,7 +98,7 @@ export const RowGroups: React.VFC = () => {
         verticalBorder={false}
         rowMarkers="both"
         onCellEdited={mangledEditCell}
-        groups={groups}
+        groups={groups1}
         onGroupToggle={toggleGroup}
         freezeColumns={1}
         onRowAppended={onRowAppended}
@@ -109,5 +115,16 @@ export const RowGroups: React.VFC = () => {
 (RowGroups as any).parameters = {
   options: {
     showPanel: false,
+  },
+};
+
+(RowGroups as any).args = {
+  enableGroups: true,
+};
+(RowGroups as any).argTypes = {
+  enableGroups: {
+    control: {
+      type: 'boolean',
+    },
   },
 };
