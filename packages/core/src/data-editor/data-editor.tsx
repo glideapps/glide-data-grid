@@ -21,6 +21,7 @@ import {
   GridKeyEventArgs,
   GridMouseCellEventArgs,
   GridMouseEventArgs,
+  GridRow,
   GridRowKind,
   GridSelection,
   gridSelectionHasItem,
@@ -152,14 +153,17 @@ function getSpanStops(cells: readonly (readonly GridCell[])[]): number[] {
 function shiftSelection(
   input: GridSelection,
   offset: number,
-  getMangledCellLocation?: (item: Item) => Item
+  getMangledCellLocation?: (item: Item) => Item,
+  getRowDetails?: (row: number) => GridRow
 ): GridSelection {
   if (input === undefined) return input;
 
   let rows = input.rows;
-  if (getMangledCellLocation !== undefined) {
+  if (getMangledCellLocation !== undefined && getRowDetails !== undefined) {
     let mangledSelection = CompactSelection.empty();
     for (const row of rows.toArray()) {
+      const rowDetails = getRowDetails(row);
+      if (rowDetails.kind !== GridRowKind.GroupContent) continue;
       const mangledRow = getMangledCellLocation([0, row])[1];
       mangledSelection = mangledSelection.add(mangledRow);
     }
@@ -3484,7 +3488,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
           if (
             onPaste === false ||
             (typeof onPaste === 'function' &&
-              onPaste?.([target[0] - rowMarkerOffset, target[1]], data) !== true)
+              onPaste?.(
+                [
+                  getMangledCellLocation([0, target[0] - rowMarkerOffset])[1],
+                  getMangledCellLocation([0, target[1]])[1],
+                ],
+                data
+              ) !== true)
           ) {
             return;
           }
@@ -3539,8 +3549,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         canvasRef.current?.contains(document.activeElement) === true;
 
       const selectedColumns = gridSelection.columns;
-      const selectedRows = gridSelection.rows;
 
+      let selectedRows = gridSelection.rows;
+      if (hasGroups) {
+        selectedRows = shiftSelection(gridSelection, 0, getMangledCellLocation, getRowDetails).rows;
+      }
       const copyToClipboardWithHeaders = (
         cells: readonly (readonly GridCell[])[],
         columnIndexes: readonly number[]

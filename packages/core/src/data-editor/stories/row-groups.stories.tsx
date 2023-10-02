@@ -37,7 +37,7 @@ export const RowGroups: React.VFC = () => {
     false,
     false
   );
-  const { groups, toggleGroup, setGroups } = useGroupMockDataGenerator(100, 5);
+  const { groups, toggleGroup, setGroups } = useGroupMockDataGenerator(10, 5);
 
   const colsWithWidths = React.useMemo(() => {
     const c = [...cols];
