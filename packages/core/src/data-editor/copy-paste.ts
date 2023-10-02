@@ -293,7 +293,7 @@ export function decodeHTML(html: string): CopyBuffer | undefined {
             } else {
                 let textContent = clone.textContent ?? "";
                 if (isAppleNumbers) {
-                    // replace and newline not preceded by a newline
+                    // replace any newline not preceded by a newline
                     textContent = textContent.replace(/(?<!\n)\n/g, "");
                 }
 
