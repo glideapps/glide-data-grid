@@ -131,6 +131,7 @@ export const RowGroups: React.VFC<RowGroupsProps> = ({ enableGroups }) => {
         freezeColumns={1}
         onRowAppended={onRowAppended}
         onDelete={onDelete}
+        rowMarkerWidth={45}
         trailingRowOptions={{
           sticky: true,
           tint: true,
