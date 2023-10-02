@@ -46,6 +46,7 @@ export const recursiveFlattenGroups = (
           kind: GridRowKind.GroupContent,
           level: level + 1,
           index: rowIndex + i,
+          groupId: group.id,
         });
       }
       rowIndex += group.rowsCount;

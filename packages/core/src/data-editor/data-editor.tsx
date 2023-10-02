@@ -2523,6 +2523,21 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     onRowMoved,
     React.useCallback(
       (rowsIndex: number[], endIndex: number) => {
+        if (hasGroups) {
+          const movedRowsDetails = rowsIndex.map((rowIndex) => getRowDetails?.(rowIndex));
+          const endIndexDetails = getRowDetails?.(endIndex);
+          const isMoveOutsideGroup = movedRowsDetails.some((rowDetails) => {
+            if (
+              rowDetails.kind !== GridRowKind.GroupContent ||
+              endIndexDetails.kind !== GridRowKind.GroupContent
+            ) {
+              return false;
+            }
+            return rowDetails?.groupId !== endIndexDetails?.groupId;
+          });
+          if (isMoveOutsideGroup) return false;
+        }
+
         onRowMoved?.(rowsIndex, endIndex);
         const selectedRowLength = gridSelection.rows.length;
         const firstDragRow = rowsIndex[0];
@@ -2547,7 +2562,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
           }
         }
       },
-      [gridSelection.rows, onRowMoved, setSelectedRows]
+      [getRowDetails, gridSelection.rows, hasGroups, onRowMoved, setSelectedRows]
     )
   );
 
