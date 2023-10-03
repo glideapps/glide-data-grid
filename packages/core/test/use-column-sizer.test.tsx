@@ -308,4 +308,52 @@ describe("use-column-sizer", () => {
 
         expect(document.querySelector("canvas")).toBeNull();
     });
+
+    it("Distributes extra width among columns if total column width is less than client width", async () => {
+        // Setup columns with a known total width smaller than the clientWidth
+        const SMALL_COLUMNS: GridColumn[] = [
+            {
+                title: "A",
+                id: "ColumnA",
+                width: 100,
+            },
+            {
+                title: "B",
+                id: "ColumnB",
+                width: 150,
+            },
+            {
+                title: "C",
+                id: "ColumnC",
+                grow: 1,
+            },
+        ];
+
+        const { result } = renderHook(() =>
+            useColumnSizer(
+                SMALL_COLUMNS,
+                500,
+                getShortCellsForSelection,
+                400,
+                20,
+                500,
+                theme,
+                getCellRenderer,
+                abortController
+            )
+        );
+
+        const columnA = result.current.find(col => col.title === "A");
+        const columnB = result.current.find(col => col.title === "B");
+        const columnC = result.current.find(col => col.title === "C");
+
+        expect(columnA).toBeDefined();
+        expect(columnB).toBeDefined();
+        expect(columnC).toBeDefined();
+
+        // The original widths
+        expect(columnA?.width).toBe(100);
+        expect(columnB?.width).toBe(150);
+        expect(columnC?.width).toBe(150);
+    });
 });
