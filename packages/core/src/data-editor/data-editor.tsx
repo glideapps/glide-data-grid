@@ -1080,6 +1080,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             .toArray()
             .map(getRowDetails)
             .filter((item) => item.kind === GridRowKind.GroupContent) as GroupContentRow[];
+          if (sel.rows.length > 0) {
+            setSelectedRows(CompactSelection.empty(), undefined, false);
+          }
         }
 
         const result = onDeleteIn(
@@ -1087,7 +1090,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
           groupRows
         );
 
-        setSelectedRows(CompactSelection.empty(), undefined, false);
         if (typeof result === 'boolean') {
           return result;
         }
