@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import type { BaseDrawArgs } from "../src";
 import { getDataEditorTheme, type Theme } from "../src/common/styles";
-import { remapForDnDState, type MappedGridColumn, drawImage } from "../src/data-grid/data-grid-lib";
+import { remapForDnDState, type MappedGridColumn, drawImage, drawWithLastUpdate } from "../src/data-grid/data-grid-lib";
 import { GridCellKind, type ImageWindowLoader, type Rectangle } from "../src/data-grid/data-grid-types";
 
 describe("remapForDnDState", () => {
@@ -263,5 +263,157 @@ describe("drawImage", () => {
         drawImage(baseDrawArgs, [""]);
 
         expect(mockCtx.drawImage).not.toHaveBeenCalled();
+    });
+});
+
+describe("drawWithLastUpdate", () => {
+    const mockCtx: jest.Mocked<CanvasRenderingContext2D> = {} as any;
+    let mockTheme: Theme;
+    let mockRect: Rectangle;
+    let mockDraw: jest.Mock;
+
+    beforeEach(() => {
+        mockCtx.fillRect = jest.fn();
+        mockCtx.fillStyle = "";
+        mockCtx.globalAlpha = 1;
+
+        mockTheme = {
+            ...getDataEditorTheme(),
+            bgSearchResult: "some-color",
+        };
+
+        mockRect = {
+            x: 10,
+            y: 20,
+            width: 50,
+            height: 60,
+        };
+
+        mockDraw = jest.fn();
+    });
+
+    it("should do nothing if lastUpdate is undefined", () => {
+        const result = drawWithLastUpdate(
+            {
+                ctx: mockCtx,
+                theme: mockTheme,
+                rect: mockRect,
+                cell: { kind: GridCellKind.Text, allowOverlay: false, data: "Test", displayData: "Test" },
+                col: 0,
+                row: 0,
+                highlighted: false,
+                hoverAmount: 0,
+                hoverX: undefined,
+                hoverY: undefined,
+                hyperWrapping: false,
+                requestAnimationFrame: jest.fn(),
+                imageLoader: {} as any,
+                spriteManager: {} as any,
+            },
+            undefined,
+            1000,
+            undefined,
+            mockDraw
+        );
+
+        expect(mockCtx.fillStyle).toBe("");
+        expect(mockDraw).toHaveBeenCalled();
+        expect(result).toBe(false);
+    });
+
+    it("should not animate if progress is >= animTime", () => {
+        const lastUpdate = 400;
+        const frameTime = 1000;
+
+        const result = drawWithLastUpdate(
+            {
+                ctx: mockCtx,
+                theme: mockTheme,
+                rect: mockRect,
+                cell: { kind: GridCellKind.Text, allowOverlay: false, data: "Test", displayData: "Test" },
+                col: 0,
+                row: 0,
+                highlighted: false,
+                hoverAmount: 0,
+                hoverX: undefined,
+                hoverY: undefined,
+                hyperWrapping: false,
+                requestAnimationFrame: jest.fn(),
+                imageLoader: {} as any,
+                spriteManager: {} as any,
+            },
+            lastUpdate,
+            frameTime,
+            undefined,
+            mockDraw
+        );
+
+        expect(mockCtx.fillStyle).toBe("");
+        expect(mockDraw).toHaveBeenCalled();
+        expect(result).toBe(false);
+    });
+
+    it("should animate if progress is < animTime", () => {
+        const lastUpdate = 600;
+        const frameTime = 1000;
+
+        const result = drawWithLastUpdate(
+            {
+                ctx: mockCtx,
+                theme: mockTheme,
+                rect: mockRect,
+                cell: { kind: GridCellKind.Text, allowOverlay: false, data: "Test", displayData: "Test" },
+                col: 0,
+                row: 0,
+                highlighted: false,
+                hoverAmount: 0,
+                hoverX: undefined,
+                hoverY: undefined,
+                hyperWrapping: false,
+                requestAnimationFrame: jest.fn(),
+                imageLoader: {} as any,
+                spriteManager: {} as any,
+            },
+            lastUpdate,
+            frameTime,
+            undefined,
+            mockDraw
+        );
+
+        expect(mockCtx.fillStyle).toBe(mockTheme.bgSearchResult);
+        expect(mockCtx.fillRect).toHaveBeenCalledWith(mockRect.x, mockRect.y, mockRect.width, mockRect.height);
+        expect(mockDraw).toHaveBeenCalled();
+        expect(result).toBe(true);
+    });
+
+    it("should update lastPrep's fillStyle if defined", () => {
+        const lastUpdate = 600;
+        const frameTime = 1000;
+        const mockLastPrep = { fillStyle: "", deprep: jest.fn(), font: "some-font", renderer: {} };
+
+        drawWithLastUpdate(
+            {
+                ctx: mockCtx,
+                theme: mockTheme,
+                rect: mockRect,
+                cell: { kind: GridCellKind.Text, allowOverlay: false, data: "Test", displayData: "Test" },
+                col: 0,
+                row: 0,
+                highlighted: false,
+                hoverAmount: 0,
+                hoverX: undefined,
+                hoverY: undefined,
+                hyperWrapping: false,
+                requestAnimationFrame: jest.fn(),
+                imageLoader: {} as any,
+                spriteManager: {} as any,
+            },
+            lastUpdate,
+            frameTime,
+            mockLastPrep,
+            mockDraw
+        );
+
+        expect(mockLastPrep.fillStyle).toBe(mockTheme.bgSearchResult);
     });
 });
