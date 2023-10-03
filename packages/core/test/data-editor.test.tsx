@@ -1217,20 +1217,23 @@ describe('data-editor', () => {
       key: 'Delete',
     });
 
-    expect(spy).toHaveBeenCalledWith({
-      columns: CompactSelection.empty(),
-      rows: CompactSelection.empty(),
-      current: {
-        cell: [2, 2],
-        range: {
-          x: 2,
-          y: 2,
-          height: 1,
-          width: 1,
+    expect(spy).toHaveBeenCalledWith(
+      {
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
+        current: {
+          cell: [2, 2],
+          range: {
+            x: 2,
+            y: 2,
+            height: 1,
+            width: 1,
+          },
+          rangeStack: [],
         },
-        rangeStack: [],
       },
-    });
+      []
+    );
   });
 
   test('Delete cell callback result', async () => {
@@ -1331,15 +1334,18 @@ describe('data-editor', () => {
       key: 'Delete',
     });
 
-    expect(spy).toHaveBeenCalledWith({
-      columns: CompactSelection.empty(),
-      rows: CompactSelection.empty(),
-      current: {
-        cell: [2, 2],
-        range: { x: 2, y: 2, width: 4, height: 10 },
-        rangeStack: [],
+    expect(spy).toHaveBeenCalledWith(
+      {
+        columns: CompactSelection.empty(),
+        rows: CompactSelection.empty(),
+        current: {
+          cell: [2, 2],
+          range: { x: 2, y: 2, width: 4, height: 10 },
+          rangeStack: [],
+        },
       },
-    });
+      []
+    );
   });
 
   test('Open and close overlay', async () => {

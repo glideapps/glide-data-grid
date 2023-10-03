@@ -474,3 +474,249 @@ Array [
   },
 ]
 `;
+
+exports[`flattenGroups should delete a group by groupRowId and return true 1`] = `
+Array [
+  Object {
+    "expanded": true,
+    "groups": Array [
+      Object {
+        "expanded": true,
+        "groups": Array [
+          Object {
+            "expanded": true,
+            "groups": Array [],
+            "id": "1-1-2",
+            "name": "Group 1-1-2",
+            "parentId": "1-1",
+            "rowsCount": 1,
+          },
+        ],
+        "id": "1-1",
+        "name": "Group 1-1",
+        "parentId": "1",
+        "rowsCount": 0,
+      },
+      Object {
+        "expanded": true,
+        "groups": Array [],
+        "id": "1-2",
+        "name": "Group 1-2",
+        "parentId": "1",
+        "rowsCount": 1,
+      },
+    ],
+    "id": "1",
+    "name": "Group 1",
+    "parentId": "",
+    "rowsCount": 0,
+  },
+  Object {
+    "expanded": true,
+    "groups": Array [
+      Object {
+        "expanded": true,
+        "groups": Array [
+          Object {
+            "expanded": true,
+            "groups": Array [],
+            "id": "2-1-1",
+            "name": "Group 2-1-1",
+            "parentId": "2-1",
+            "rowsCount": 1,
+          },
+          Object {
+            "expanded": true,
+            "groups": Array [],
+            "id": "2-1-2",
+            "name": "Group 2-1-2",
+            "parentId": "2-1",
+            "rowsCount": 1,
+          },
+        ],
+        "id": "2-1",
+        "name": "Group 2-1",
+        "parentId": "2",
+        "rowsCount": 0,
+      },
+      Object {
+        "expanded": true,
+        "groups": Array [],
+        "id": "2-2",
+        "name": "Group 2-2",
+        "parentId": "2",
+        "rowsCount": 1,
+      },
+    ],
+    "id": "2",
+    "name": "Group 2",
+    "parentId": "",
+    "rowsCount": 0,
+  },
+  Object {
+    "expanded": true,
+    "groups": Array [
+      Object {
+        "expanded": true,
+        "groups": Array [
+          Object {
+            "expanded": true,
+            "groups": Array [],
+            "id": "3-1-1",
+            "name": "Group 3-1-1",
+            "parentId": "3-1",
+            "rowsCount": 1,
+          },
+          Object {
+            "expanded": true,
+            "groups": Array [],
+            "id": "3-1-2",
+            "name": "Group 3-1-2",
+            "parentId": "3-1",
+            "rowsCount": 1,
+          },
+        ],
+        "id": "3-1",
+        "name": "Group 3-1",
+        "parentId": "3",
+        "rowsCount": 0,
+      },
+      Object {
+        "expanded": true,
+        "groups": Array [],
+        "id": "3-2",
+        "name": "Group 3-2",
+        "parentId": "3-1",
+        "rowsCount": 1,
+      },
+    ],
+    "id": "3",
+    "name": "Group 3",
+    "parentId": "",
+    "rowsCount": 0,
+  },
+]
+`;
+
+exports[`flattenGroups should handle deleting a root-level group 1`] = `
+Array [
+  Object {
+    "expanded": true,
+    "groups": Array [
+      Object {
+        "expanded": true,
+        "groups": Array [
+          Object {
+            "expanded": true,
+            "groups": Array [],
+            "id": "1-1-2",
+            "name": "Group 1-1-2",
+            "parentId": "1-1",
+            "rowsCount": 1,
+          },
+        ],
+        "id": "1-1",
+        "name": "Group 1-1",
+        "parentId": "1",
+        "rowsCount": 0,
+      },
+      Object {
+        "expanded": true,
+        "groups": Array [],
+        "id": "1-2",
+        "name": "Group 1-2",
+        "parentId": "1",
+        "rowsCount": 1,
+      },
+    ],
+    "id": "1",
+    "name": "Group 1",
+    "parentId": "",
+    "rowsCount": 0,
+  },
+  Object {
+    "expanded": true,
+    "groups": Array [
+      Object {
+        "expanded": true,
+        "groups": Array [
+          Object {
+            "expanded": true,
+            "groups": Array [],
+            "id": "2-1-1",
+            "name": "Group 2-1-1",
+            "parentId": "2-1",
+            "rowsCount": 1,
+          },
+          Object {
+            "expanded": true,
+            "groups": Array [],
+            "id": "2-1-2",
+            "name": "Group 2-1-2",
+            "parentId": "2-1",
+            "rowsCount": 1,
+          },
+        ],
+        "id": "2-1",
+        "name": "Group 2-1",
+        "parentId": "2",
+        "rowsCount": 0,
+      },
+      Object {
+        "expanded": true,
+        "groups": Array [],
+        "id": "2-2",
+        "name": "Group 2-2",
+        "parentId": "2",
+        "rowsCount": 1,
+      },
+    ],
+    "id": "2",
+    "name": "Group 2",
+    "parentId": "",
+    "rowsCount": 0,
+  },
+  Object {
+    "expanded": true,
+    "groups": Array [
+      Object {
+        "expanded": true,
+        "groups": Array [
+          Object {
+            "expanded": true,
+            "groups": Array [],
+            "id": "3-1-1",
+            "name": "Group 3-1-1",
+            "parentId": "3-1",
+            "rowsCount": 1,
+          },
+          Object {
+            "expanded": true,
+            "groups": Array [],
+            "id": "3-1-2",
+            "name": "Group 3-1-2",
+            "parentId": "3-1",
+            "rowsCount": 1,
+          },
+        ],
+        "id": "3-1",
+        "name": "Group 3-1",
+        "parentId": "3",
+        "rowsCount": 0,
+      },
+      Object {
+        "expanded": true,
+        "groups": Array [],
+        "id": "3-2",
+        "name": "Group 3-2",
+        "parentId": "3-1",
+        "rowsCount": 1,
+      },
+    ],
+    "id": "3",
+    "name": "Group 3",
+    "parentId": "",
+    "rowsCount": 0,
+  },
+]
+`;
