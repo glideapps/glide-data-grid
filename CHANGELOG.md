@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.11.8](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.7...v5.11.8) (2023-10-03)
+
+
+### Bug Fixes
+
+* delete group row case ([434d4ad](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/434d4ad3063bc79cecc84f362d008df4066a64aa))
+
 ### [5.11.7](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.4...v5.11.7) (2023-10-03)
 
 ### [5.11.6](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.3...v5.11.4) (2023-09-27)
