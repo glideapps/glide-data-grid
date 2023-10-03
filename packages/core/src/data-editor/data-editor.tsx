@@ -1309,6 +1309,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
           span: [0, columnsIn.length],
           name: rowDetails.name,
           themeOverride: rowDetails.themeOverride,
+          rowsCount: rowDetails.rowsCount,
         };
       }
 
