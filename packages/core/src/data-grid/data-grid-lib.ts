@@ -762,7 +762,7 @@ interface CornerRadius {
   br: number;
 }
 
-function roundedRect(
+export function roundedRect(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,

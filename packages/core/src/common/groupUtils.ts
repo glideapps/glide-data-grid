@@ -18,17 +18,19 @@ export const recursiveFlattenGroups = (
   hasTrailingRow: boolean
 ): { rows: GridRow[]; rowIndex: number } => {
   for (const group of groups) {
+    const rowsCount = getNestedGroupRowsCount(group);
     rows.push({
       kind: GridRowKind.Group,
       level: level,
       name: group.name,
       expanded: group.expanded,
+      rowsCount: rowsCount,
       id: group.id,
       allowOverlay: false,
     });
 
     if (!group.expanded) {
-      rowIndex += getNestedGroupRowsCount(group);
+      rowIndex += rowsCount;
       continue;
     }
 

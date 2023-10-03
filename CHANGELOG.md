@@ -6,10 +6,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [5.11.3](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.2...v5.11.3) (2023-09-27)
 
-
 ### Bug Fixes
 
-* references-0 - fixed unnecessary re-renders ([8acd299](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/8acd2992539208229e243d3259b10810f74a8e3e))
+- references-0 - fixed unnecessary re-renders ([8acd299](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/8acd2992539208229e243d3259b10810f74a8e3e))
 
 ### [5.11.2](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.1...v5.11.2) (2023-09-25)
 

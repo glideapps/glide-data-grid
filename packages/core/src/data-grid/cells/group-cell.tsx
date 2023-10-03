@@ -1,6 +1,11 @@
 import type { InternalCellRenderer } from './cell-types';
 import { GridRowKind, GroupCell } from '../data-grid-types';
-import { clipCanvasString, getMiddleCenterBias } from '../data-grid-lib';
+import {
+  getMiddleCenterBias,
+  measureTextCached,
+  roundedRect,
+  clipCanvasString,
+} from '../data-grid-lib';
 
 const GROUP_ICON_SIZE = 18;
 const GROUP_ICON_CLICK_PADDING = 6;
@@ -34,6 +39,43 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
         rect.height / 2 +
         getMiddleCenterBias(ctx, `${theme.headerFontStyle} ${theme.fontFamily}`)
     );
+
+    const textWidth = measureTextCached(
+      cell.name,
+      ctx,
+      `${theme.headerFontStyle} ${theme.fontFamily}`
+    );
+
+    const countWidth = measureTextCached(
+      `${cell.rowsCount}`,
+      ctx,
+      `${theme.headerFontStyle} ${theme.fontFamily}`
+    );
+    ctx.fillStyle = '#0000001A';
+
+    const groupCountWidth = countWidth.width > 13 ? countWidth.width + 8 : 16;
+    const groupCountHeight = 14;
+    const circleX = groupCountWidth + textWidth.width + drawX + 20;
+    const circleY =
+      rect.y +
+      rect.height / 2 +
+      getMiddleCenterBias(ctx, `${theme.headerFontStyle} ${theme.fontFamily}`) -
+      1;
+
+    roundedRect(
+      ctx,
+      circleX - groupCountWidth / 2,
+      circleY - groupCountHeight / 2,
+      groupCountWidth,
+      groupCountHeight,
+      6
+    );
+
+    ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${cell.rowsCount}`, circleX, circleY + 1);
+
     return true;
   },
   onClick: (e) => {

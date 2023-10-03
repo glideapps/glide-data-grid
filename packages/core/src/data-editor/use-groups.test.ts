@@ -50,6 +50,7 @@ describe('useGroups', () => {
       kind: 'group',
       level: 1,
       name: 'Group 1',
+      rowsCount: 2,
     });
     expect(result.current.getRowDetails(1)).toEqual({
       index: 0,

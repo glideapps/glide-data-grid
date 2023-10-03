@@ -421,6 +421,7 @@ export interface GroupRow {
   expanded: boolean;
   id: string;
   themeOverride?: Partial<Theme>;
+  rowsCount: number;
   readonly allowOverlay: false;
 }
 
