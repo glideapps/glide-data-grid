@@ -18,17 +18,19 @@ export const recursiveFlattenGroups = (
   hasTrailingRow: boolean
 ): { rows: GridRow[]; rowIndex: number } => {
   for (const group of groups) {
+    const rowsCount = getNestedGroupRowsCount(group);
     rows.push({
       kind: GridRowKind.Group,
       level: level,
       name: group.name,
       expanded: group.expanded,
+      rowsCount: rowsCount,
       id: group.id,
       allowOverlay: false,
     });
 
     if (!group.expanded) {
-      rowIndex += getNestedGroupRowsCount(group);
+      rowIndex += rowsCount;
       continue;
     }
 
@@ -68,4 +70,51 @@ export const recursiveFlattenGroups = (
 export const flattenGroups = (groups: readonly RowGroup[], hasTrailingRow: boolean): GridRow[] => {
   const rows: GridRow[] = [];
   return recursiveFlattenGroups(groups, rows, 1, 0, hasTrailingRow).rows;
+};
+
+export const findGroupById = (currentGroups: RowGroup[], groupId: string): RowGroup | undefined => {
+  for (const group of currentGroups) {
+    if (group.id === groupId) {
+      return group;
+    }
+
+    const foundGroup = findGroupById(group.groups, groupId);
+    if (foundGroup) {
+      return foundGroup;
+    }
+  }
+};
+
+export const deleteGroupByGroupRowId = (
+  rootGroups: RowGroup[],
+  targetGroupRowId: string
+): boolean => {
+  const groupToDelete = findGroupById(rootGroups, targetGroupRowId);
+
+  const parentId = groupToDelete?.parentId ?? '';
+
+  const parentGroup =
+    parentId !== undefined && parentId !== ''
+      ? findGroupById(rootGroups, parentId)?.groups
+      : rootGroups;
+
+  if (!parentGroup || !groupToDelete) {
+    return false;
+  }
+
+  // Find the index of the group to delete within its parent's groups
+  const index = parentGroup.indexOf(groupToDelete);
+
+  if (index >= 0) {
+    parentGroup.splice(index, 1);
+
+    // Recursively delete empty parent groups
+    if (parentGroup.length === 0) {
+      deleteGroupByGroupRowId(rootGroups, parentId);
+    }
+
+    return true;
+  }
+
+  return false;
 };

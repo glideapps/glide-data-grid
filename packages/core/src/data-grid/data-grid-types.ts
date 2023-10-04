@@ -421,6 +421,7 @@ export interface GroupRow {
   expanded: boolean;
   id: string;
   themeOverride?: Partial<Theme>;
+  rowsCount: number;
   readonly allowOverlay: false;
 }
 
@@ -432,14 +433,14 @@ export interface GroupContentRow {
   themeOverride?: Partial<Theme>;
 }
 
-export interface NewRow {
+export interface GroupNewRow {
   kind: GridRowKind.NewRow;
   level: number;
   index: number;
   groupId: string;
 }
 
-export type GridRow = GroupRow | GroupContentRow | NewRow;
+export type GridRow = GroupRow | GroupContentRow | GroupNewRow;
 
 /** @category Cells */
 export type CellList = readonly Item[];

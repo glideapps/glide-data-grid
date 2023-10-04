@@ -27,6 +27,7 @@ describe('useGroups', () => {
         id: 'group1',
         groups: [],
         expanded: true,
+        parentId: '',
       },
     ];
 
@@ -49,8 +50,14 @@ describe('useGroups', () => {
       kind: 'group',
       level: 1,
       name: 'Group 1',
+      rowsCount: 2,
     });
-    expect(result.current.getRowDetails(1)).toEqual({ index: 0, kind: 'group-content', level: 2 });
+    expect(result.current.getRowDetails(1)).toEqual({
+      index: 0,
+      kind: 'group-content',
+      level: 2,
+      groupId: 'group1',
+    });
   });
 
   it('should toggle a group when onRowDetailsUpdated is called with a GroupRow', () => {
@@ -61,6 +68,7 @@ describe('useGroups', () => {
         id: 'group1',
         groups: [],
         expanded: true,
+        parentId: '',
       },
     ];
 
@@ -86,6 +94,7 @@ describe('useGroups', () => {
         id: 'group1',
         groups: [],
         expanded: true,
+        parentId: '',
       },
     ];
 

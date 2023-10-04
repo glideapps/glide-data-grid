@@ -22,6 +22,7 @@ export {
 export { getDataEditorTheme as getDefaultTheme, useTheme } from './common/styles';
 export { useColumnSizer } from './data-editor/use-column-sizer';
 export { useCustomCells } from './data-editor/use-custom-cells';
+export { findGroupById, deleteGroupByGroupRowId } from './common/groupUtils';
 
 /**
  * @category DataEditor

@@ -10,15 +10,16 @@ export type RowGroup = {
   id: string;
   groups: RowGroup[];
   expanded: boolean;
+  parentId: string;
 };
 
 export interface UseGroupsProps {
   groups?: readonly RowGroup[];
-  toggleGroup?: (groupLocation: string) => void;
   hasTrailingRow?: boolean;
+  toggleGroup?: (groupLocation: string) => void;
 }
 
-export const useGroups = ({ groups = [], toggleGroup, hasTrailingRow = false }: UseGroupsProps) => {
+export const useGroups = ({ groups = [], hasTrailingRow = false, toggleGroup }: UseGroupsProps) => {
   const [rowsCount, setRowsCount] = useState(0);
   const groupRows = useRef<GridRow[]>([]);
 

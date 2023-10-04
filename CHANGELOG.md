@@ -2,14 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [5.11.4](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.3...v5.11.4) (2023-09-27)
-
-### [5.11.3](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.2...v5.11.3) (2023-09-27)
+### [5.11.8](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.7...v5.11.8) (2023-10-03)
 
 
 ### Bug Fixes
 
-* references-0 - fixed unnecessary re-renders ([8acd299](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/8acd2992539208229e243d3259b10810f74a8e3e))
+* delete group row case ([434d4ad](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/434d4ad3063bc79cecc84f362d008df4066a64aa))
+
+### [5.11.7](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.4...v5.11.7) (2023-10-03)
+
+### [5.11.6](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.3...v5.11.4) (2023-09-27)
+
+### [5.11.3](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.2...v5.11.3) (2023-09-27)
+
+### Bug Fixes
+
+- references-0 - fixed unnecessary re-renders ([8acd299](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/8acd2992539208229e243d3259b10810f74a8e3e))
 
 ### [5.11.2](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.1...v5.11.2) (2023-09-25)
 
