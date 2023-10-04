@@ -13,7 +13,7 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
     useLabel: true,
     drawPrep: prepTextCell,
     draw: a => drawTextCell(a, a.cell.displayData ?? a.cell.data, a.cell.contentAlign),
-    measure: (ctx, cell, theme) => ctx.measureText(a.cell.displayData ?? cell.data).width + theme.cellHorizontalPadding * 2,
+    measure: (ctx, cell, theme) => ctx.measureText(cell.displayData ?? cell.data).width + theme.cellHorizontalPadding * 2,
     onDelete: c => ({
         ...c,
         data: "",
