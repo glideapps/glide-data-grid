@@ -1202,7 +1202,7 @@ function getSpanBounds(
 // - Prep next item, giving previous result
 // - If next item type is different, de-prep
 // - Result per column
-function drawCells(
+export function drawCells(
   ctx: CanvasRenderingContext2D,
   effectiveColumns: readonly MappedGridColumn[],
   allColumns: readonly MappedGridColumn[],
