@@ -339,13 +339,22 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
     };
   }, [cancelSearch]);
 
-  const subscriptionCallbacksRef = React.useRef<Array<(searchStatus?: SearchStatus) => void>>([]);
+  const subscriptionCallbacksRef = React.useRef<Set<(searchStatus?: SearchStatus) => void>>(
+    new Set()
+  );
 
   React.useEffect(() => {
     for (const callback of subscriptionCallbacksRef.current) {
       callback(searchStatus);
     }
   }, [searchStatus]);
+
+  const subscribeToSearch = React.useCallback((callback: (searchStatus?: SearchStatus) => void) => {
+    subscriptionCallbacksRef.current.add(callback);
+    return () => {
+      subscriptionCallbacksRef.current.delete(callback);
+    };
+  }, []);
 
   React.useImperativeHandle(
     forwardedRef,
@@ -354,16 +363,9 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
       searchNextResult: onNext,
       searchPrevResult: onPrev,
       searchKeyDown: onSearchKeyDown,
-      subscribeToSearch: (callback: (searchStatus?: SearchStatus) => void) => {
-        subscriptionCallbacksRef.current.push(callback);
-        return () => {
-          subscriptionCallbacksRef.current = subscriptionCallbacksRef.current.filter(
-            (cb) => cb !== callback
-          );
-        };
-      },
+      subscribeToSearch,
     }),
-    [onSearch, onNext, onPrev, onSearchKeyDown]
+    [onSearch, onNext, onPrev, onSearchKeyDown, subscribeToSearch]
   );
 
   const searchbox = React.useMemo(() => {
