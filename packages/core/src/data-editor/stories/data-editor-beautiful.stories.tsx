@@ -2260,6 +2260,7 @@ export const ExternalSearch: React.VFC = () => {
         <div style={{ width: 150 }}>
           <div style={{ display: 'flex' }}>
             <input
+              data-testid="search-query-input"
               width="150px"
               onChange={onChange}
               onKeyDown={gridRef.current?.searchRef.current.searchKeyDown}
@@ -2268,8 +2269,8 @@ export const ExternalSearch: React.VFC = () => {
             />
             {searchStatus ? (
               <>
-                <button onClick={onPrev}>prev</button>
-                <button onClick={onNext}>next</button>
+                <button data-testid="prev-search" onClick={onPrev}>prev</button>
+                <button data-testid="next-search" onClick={onNext}>next</button>
               </>
             ) : null}
           </div>

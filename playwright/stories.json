@@ -267,6 +267,20 @@
         "__isArgsStory": false
       }
     },
+    "glide-data-grid-dataeditor-demos--external-search": {
+      "id": "glide-data-grid-dataeditor-demos--external-search",
+      "name": "External Search",
+      "title": "Glide-Data-Grid/DataEditor Demos",
+      "importPath": "./packages/core/src/data-editor/stories/data-editor-beautiful.stories.tsx",
+      "kind": "Glide-Data-Grid/DataEditor Demos",
+      "story": "External Search",
+      "parameters": {
+        "fileName": "./packages/core/src/data-editor/stories/data-editor-beautiful.stories.tsx",
+        "framework": "react",
+        "__id": "glide-data-grid-dataeditor-demos--external-search",
+        "__isArgsStory": false
+      }
+    },
     "tests-testcases--can-edit-boolean": {
       "id": "tests-testcases--can-edit-boolean",
       "name": "Can Edit Boolean",
