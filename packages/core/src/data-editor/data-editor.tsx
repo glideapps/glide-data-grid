@@ -3441,7 +3441,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             },
             getBounds: (col, row) => {
 
-                if (canvasRef.current === null || scrollRef.current === null) {
+                if (canvasRef?.current === null || scrollRef?.current === null) {
                     return undefined
                 }
 
