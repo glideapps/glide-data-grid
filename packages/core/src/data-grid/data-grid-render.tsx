@@ -106,7 +106,7 @@ interface DragAndDropState {
   };
 }
 
-export function drawCell(
+function drawCell(
   ctx: CanvasRenderingContext2D,
   row: number,
   cell: InnerGridCell,
