@@ -106,7 +106,7 @@ interface DragAndDropState {
   };
 }
 
-function drawCell(
+export function drawCell(
   ctx: CanvasRenderingContext2D,
   row: number,
   cell: InnerGridCell,
@@ -1202,7 +1202,7 @@ function getSpanBounds(
 // - Prep next item, giving previous result
 // - If next item type is different, de-prep
 // - Result per column
-export function drawCells(
+function drawCells(
   ctx: CanvasRenderingContext2D,
   effectiveColumns: readonly MappedGridColumn[],
   allColumns: readonly MappedGridColumn[],
