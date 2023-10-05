@@ -3440,7 +3440,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return gridRef.current?.damage(damageList);
             },
             getBounds: (col, row) => {
-                if (col === undefined && row === undefined && scrollRef.current && canvasRef.current) {
+
+                if (canvasRef.current == undefined || scrollRef.current == undefined) {
+                    return undefined
+                }
+
+                if (col === undefined && row === undefined) {
                     // Return the bounds of the entire scroll area:
                     const rect = canvasRef.current.getBoundingClientRect()
                     const scale = rect.width / scrollRef.current.clientWidth
@@ -3451,7 +3456,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                          height: scrollRef.current.scrollHeight * scale,
                      };
                 }
-                return gridRef.current?.getBounds(col !== undefined ? col + rowMarkerOffset : undefined, row);
+                return gridRef.current?.getBounds( col ?? 0 + rowMarkerOffset, row);
             },
             focus: () => gridRef.current?.focus(),
             emit: async e => {
