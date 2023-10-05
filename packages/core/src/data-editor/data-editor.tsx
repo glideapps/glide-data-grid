@@ -3443,11 +3443,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (col === undefined && row === undefined && scrollRef.current && canvasRef.current) {
                     // Return the bounds of the entire scroll area:
                     const rect = canvasRef.current.getBoundingClientRect()
+                    const scale = rect.width / scrollRef.current.clientWidth
                     return {   
-                         x: rect.x - scrollRef.current.scrollLeft,
-                         y: rect.y - scrollRef.current.scrollTop,
-                         width: scrollRef.current.scrollWidth,
-                         height: scrollRef.current.scrollHeight,
+                         x: rect.x - scrollRef.current.scrollLeft * scale,
+                         y: rect.y - scrollRef.current.scrollTop * scale,
+                         width: scrollRef.current.scrollWidth * scale,
+                         height: scrollRef.current.scrollHeight * scale,
                      };
                 }
                 return gridRef.current?.getBounds(col !== undefined ? col + rowMarkerOffset : undefined, row);
