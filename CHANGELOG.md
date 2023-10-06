@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.12.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.8...v5.12.0) (2023-10-06)
+
+
+### Features
+
+* change bg color of selected cell ([c0a2e52](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/c0a2e5282d1f3187180ab128683f52d3e3c62897))
+* change bg color of selected cell ([7f8f8ad](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/7f8f8ad4037be896da7b44ecee8868176d0d81e5))
+
+
+### Bug Fixes
+
+* remove unused export ([6628270](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/662827063d8d9c6b79cae9879c1f0c3e3f1092ac))
+* remove unused export ([4752028](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/4752028493204ebc59a9625c662e6b793e802f21))
+
 ### [5.11.8](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.11.7...v5.11.8) (2023-10-03)
 
 
