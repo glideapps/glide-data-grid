@@ -126,7 +126,7 @@ Yes. Unfortunately none of the primary developers are accessibility users so the
 
 Yes.
 
-Data  Grid is agnostic about the way you load/store/generate/mutate your data. What it requires is that you tell it which columns you have, how many rows, and to give it a function it can call to get the data for a cell in a specific row and column.
+Data Grid is agnostic about the way you load/store/generate/mutate your data. What it requires is that you tell it which columns you have, how many rows, and to give it a function it can call to get the data for a cell in a specific row and column.
 
 **Does it do sorting, searching, and filtering?**
 

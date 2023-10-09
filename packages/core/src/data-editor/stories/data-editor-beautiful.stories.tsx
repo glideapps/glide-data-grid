@@ -2269,8 +2269,12 @@ export const ExternalSearch: React.VFC = () => {
             />
             {searchStatus ? (
               <>
-                <button data-testid="prev-search" onClick={onPrev}>prev</button>
-                <button data-testid="next-search" onClick={onNext}>next</button>
+                <button data-testid="prev-search" onClick={onPrev}>
+                  prev
+                </button>
+                <button data-testid="next-search" onClick={onNext}>
+                  next
+                </button>
               </>
             ) : null}
           </div>

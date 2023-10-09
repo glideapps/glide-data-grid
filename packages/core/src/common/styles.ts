@@ -112,7 +112,7 @@ const dataEditorBaseTheme: Theme = {
   bgBubbleSelected: '#FFFFFF',
 
   bgSearchResult: '#fff9e3',
-  bgSelectedSearchResult: "#FFDFAD",
+  bgSelectedSearchResult: '#FFDFAD',
 
   borderColor: 'rgba(115, 116, 131, 0.16)',
   drilldownBorder: 'rgba(0, 0, 0, 0)',
