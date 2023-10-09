@@ -6,10 +6,8 @@ import {
   GridCell,
   GridCellKind,
   GridSelection,
-  InnerGridCell,
   Rectangle,
 } from '../data-grid/data-grid-types';
-import type { CellRenderer } from '../data-grid/cells/cell-types';
 
 export function expandSelection(
   newVal: GridSelection,
@@ -234,7 +232,6 @@ const formatBoolean = (val: boolean | BooleanEmpty | BooleanIndeterminate): stri
 export function copyToClipboard(
   cells: readonly (readonly GridCell[])[],
   columnIndexes: readonly number[],
-  getCellRenderer: <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined,
   e?: ClipboardEvent
 ) {
   const formatCell = (cell: GridCell, index: number, raw: boolean): string => {
@@ -281,13 +278,6 @@ export function copyToClipboard(
           link.href = cell.data;
           link.innerText = cell.data;
           cellEl.append(link);
-        } else if (cell.kind === GridCellKind.Custom) {
-          const customCopyHandler = getCellRenderer(cell)?.onCopy;
-          if (customCopyHandler) {
-            customCopyHandler(cellEl, cell);
-          } else {
-            cellEl.innerText = formatCell(cell, i, true);
-          }
         } else {
           cellEl.innerText = formatCell(cell, i, true);
         }

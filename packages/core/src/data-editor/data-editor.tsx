@@ -629,6 +629,14 @@ export interface DataEditorProps extends Props {
   readonly verticalBorder?: DataGridSearchProps['verticalBorder'] | boolean;
 
   /**
+   * Called when a copy command is executed. If a function is provided, you need to manually write what to do with
+   * the selected data and carefully set it in the clipboard. If left undefined, the built-in copyToClipboard will
+   * execute which is CSV format for text/plain mime type and HTMLTable for text/html mime type.
+   * @group Editing
+   */
+  readonly onCopy?: (cells: readonly (readonly GridCell[])[], e?: ClipboardEvent) => void;
+
+  /**
    * Called when data is pasted into the grid. If left undefined, the `DataEditor` will operate in a
    * fallback mode and attempt to paste the text buffer into the current cell assuming the current cell is not
    * readonly and can accept the data type. If `onPaste` is set to false or the function returns false, the grid will
@@ -804,6 +812,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     onDelete: onDeleteIn,
     onDragStart,
     onMouseMove,
+    onCopy,
     onPaste,
     copyHeaders = false,
     freezeColumns = 0,
@@ -3583,7 +3592,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
   // While this function is async, we deeply prefer not to await if we don't have to. This will lead to unpacking
   // promises in rather awkward ways when possible to avoid awaiting. We have to use fallback copy mechanisms when
   // an await has happened.
-  const onCopy = React.useCallback(
+  const onCopyInternal = React.useCallback(
     async (e?: ClipboardEvent, ignoreFocus?: boolean) => {
       if (!keybindings.copy) return;
       const focused =
@@ -3602,7 +3611,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         columnIndexes: readonly number[]
       ) => {
         if (!copyHeaders) {
-          copyToClipboard(cells, columnIndexes, getCellRenderer, e);
+          typeof onCopy === 'function'
+            ? onCopy(cells, e)
+            : copyToClipboard(cells, columnIndexes, e);
         } else {
           const headers = columnIndexes.map((index) => ({
             kind: GridCellKind.Text,
@@ -3610,7 +3621,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             displayData: columnsIn[index].title,
             allowOverlay: false,
           })) as GridCell[];
-          copyToClipboard([headers, ...cells], columnIndexes, getCellRenderer, e);
+          typeof onCopy === 'function'
+            ? onCopy([headers, ...cells], e)
+            : copyToClipboard([headers, ...cells], columnIndexes, e);
         }
       };
 
@@ -3695,7 +3708,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     ]
   );
 
-  useEventListener('copy', onCopy, window, false, false);
+  useEventListener('copy', onCopyInternal, window, false, false);
 
   const onSearchResultsChanged = React.useCallback(
     (results: readonly Item[], navIndex: number) => {
@@ -3847,7 +3860,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             });
             break;
           case 'copy':
-            await onCopy(undefined, true);
+            await onCopyInternal(undefined, true);
             break;
           case 'paste':
             await onPasteInternal();
@@ -3857,7 +3870,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       scrollTo,
       searchRef: dataGridSearchRef,
     }),
-    [appendRow, enterCellEditMode, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
+    [
+      appendRow,
+      enterCellEditMode,
+      onCopyInternal,
+      onKeyDown,
+      onPasteInternal,
+      rowMarkerOffset,
+      scrollTo,
+    ]
   );
 
   const [selCol, selRow] = currentCell ?? [];
