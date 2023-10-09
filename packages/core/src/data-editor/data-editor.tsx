@@ -647,7 +647,13 @@ export interface DataEditorProps extends Props {
    * advisable to simply return false from onPaste and handle the paste manually.
    * @group Editing
    */
-  readonly onPaste?: ((target: Item, values: readonly (readonly string[])[]) => boolean) | boolean;
+  readonly onPaste?:
+    | ((
+        target: Item,
+        values: readonly (readonly string[])[],
+        clipboardData?: ClipboardEvent['clipboardData']
+      ) => boolean)
+    | boolean;
 
   /**
    * The theme used by the data grid to get all color and font information
@@ -3476,6 +3482,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         const textPlain = 'text/plain';
         const textHtml = 'text/html';
 
+        // Once you call await you're no longer in the original call stack.
+        // Cloning the original clipboardData to pass it with the onPaste prop.
+        const clonedClipboardData = new DataTransfer();
+        if (e?.clipboardData) {
+          for (const item of e.clipboardData.items) {
+            clonedClipboardData.setData(item.type, e.clipboardData.getData(item.type));
+          }
+        }
+
         if (navigator.clipboard.read !== undefined) {
           const clipboardContent = await navigator.clipboard.read();
 
@@ -3545,7 +3560,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                   getMangledCellLocation([0, target[0] - rowMarkerOffset])[1],
                   getMangledCellLocation([0, target[1]])[1],
                 ],
-                data
+                data,
+                clonedClipboardData
               ) !== true)
           ) {
             return;

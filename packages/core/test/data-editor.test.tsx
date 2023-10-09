@@ -1930,7 +1930,7 @@ describe('data-editor', () => {
 
   test('Copy/paste', async () => {
     const spy = jest.fn();
-    const pasteSpy = jest.fn((_target: any, _values: any) => true);
+    const pasteSpy = jest.fn((_target: any, _values: any, _clipboardData?: any) => true);
     jest.useFakeTimers();
     render(
       <EventedDataEditor
@@ -2014,14 +2014,15 @@ describe('data-editor', () => {
           'Turkeys and some "quotes" and\na new line char "more quotes" plus a tab  .',
           'https://google.com',
         ],
-      ]
+      ],
+      expect.anything()
     );
   });
 
   test('Copy/paste with grouping', async () => {
     const groups = createInitialGroups(1000, 500);
     const spy = jest.fn();
-    const pasteSpy = jest.fn((_target: any, _values: any) => true);
+    const pasteSpy = jest.fn((_target: any, _values: any, _clipboardData?: any) => true);
     jest.useFakeTimers();
     render(
       <EventedDataEditor
@@ -2107,7 +2108,8 @@ describe('data-editor', () => {
           'Turkeys and some "quotes" and\na new line char "more quotes" plus a tab  .',
           'https://google.com',
         ],
-      ]
+      ],
+      expect.anything()
     );
   });
 
@@ -2146,7 +2148,7 @@ describe('data-editor', () => {
 
   test('Copy/paste with simple getCellsForSelection', async () => {
     const spy = jest.fn();
-    const pasteSpy = jest.fn((_target: any, _values: any) => true);
+    const pasteSpy = jest.fn((_target: any, _values: any, _clipboardData?: any) => true);
     jest.useFakeTimers();
     render(
       <EventedDataEditor
@@ -2227,7 +2229,8 @@ describe('data-editor', () => {
           'Turkeys and some "quotes" and\na new line char "more quotes" plus a tab  .',
           'https://google.com',
         ],
-      ]
+      ],
+      expect.anything()
     );
   });
 
