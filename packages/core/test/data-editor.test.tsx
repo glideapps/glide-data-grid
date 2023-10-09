@@ -2015,6 +2015,49 @@ describe('data-editor', () => {
           'https://google.com',
         ],
       ],
+      expect.any(DataTransfer)
+    );
+  });
+
+  test('Custom Copy', async () => {
+    const spy = jest.fn();
+    const onCopySpy = jest.fn();
+    const onPasteSpy = jest.fn();
+    jest.useFakeTimers();
+    render(
+      <EventedDataEditor
+        {...basicProps}
+        onGridSelectionChange={spy}
+        onCopy={onCopySpy}
+        onPaste={onPasteSpy}
+      />,
+      {
+        wrapper: Context,
+      }
+    );
+    prep(false);
+
+    const canvas = screen.getByTestId('data-grid-canvas');
+    jest.spyOn(document, 'activeElement', 'get').mockImplementation(() => canvas);
+
+    fireEvent.focus(canvas);
+    fireEvent.keyDown(canvas, {
+      key: 'ArrowRight',
+    });
+    fireEvent.keyDown(canvas, {
+      key: 'ArrowRight',
+      shiftKey: true,
+    });
+
+    fireEvent.copy(window);
+
+    expect(onCopySpy).toHaveBeenCalledWith(
+      [
+        [
+          expect.objectContaining({ displayData: '1, 0' }),
+          expect.objectContaining({ displayData: '2, 0' }),
+        ],
+      ],
       expect.anything()
     );
   });
@@ -2109,7 +2152,7 @@ describe('data-editor', () => {
           'https://google.com',
         ],
       ],
-      expect.anything()
+      expect.any(DataTransfer)
     );
   });
 
@@ -2230,7 +2273,7 @@ describe('data-editor', () => {
           'https://google.com',
         ],
       ],
-      expect.anything()
+      expect.any(DataTransfer)
     );
   });
 
