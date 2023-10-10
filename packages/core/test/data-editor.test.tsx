@@ -259,6 +259,12 @@ function prep(resetTimers: boolean = true) {
   return scroller;
 }
 
+function scrollWidthMockImpl() {
+  return basicProps.columns
+    .map((c) => (isSizedGridColumn(c) ? c.width : 150))
+    .reduce((pv, cv) => pv + cv, 0);
+}
+
 const Context: React.FC = (p) => {
   return (
     <>
@@ -1930,7 +1936,7 @@ describe('data-editor', () => {
 
   test('Copy/paste', async () => {
     const spy = jest.fn();
-    const pasteSpy = jest.fn((_target: any, _values: any) => true);
+    const pasteSpy = jest.fn((_target: any, _values: any, _clipboardData?: any) => true);
     jest.useFakeTimers();
     render(
       <EventedDataEditor
@@ -2014,14 +2020,58 @@ describe('data-editor', () => {
           'Turkeys and some "quotes" and\na new line char "more quotes" plus a tab  .',
           'https://google.com',
         ],
-      ]
+      ],
+      expect.any(DataTransfer)
+    );
+  });
+
+  test('Custom Copy', async () => {
+    const spy = jest.fn();
+    const onCopySpy = jest.fn();
+    const onPasteSpy = jest.fn();
+    jest.useFakeTimers();
+    render(
+      <EventedDataEditor
+        {...basicProps}
+        onGridSelectionChange={spy}
+        onCopy={onCopySpy}
+        onPaste={onPasteSpy}
+      />,
+      {
+        wrapper: Context,
+      }
+    );
+    prep(false);
+
+    const canvas = screen.getByTestId('data-grid-canvas');
+    jest.spyOn(document, 'activeElement', 'get').mockImplementation(() => canvas);
+
+    fireEvent.focus(canvas);
+    fireEvent.keyDown(canvas, {
+      key: 'ArrowRight',
+    });
+    fireEvent.keyDown(canvas, {
+      key: 'ArrowRight',
+      shiftKey: true,
+    });
+
+    fireEvent.copy(window);
+
+    expect(onCopySpy).toHaveBeenCalledWith(
+      [
+        [
+          expect.objectContaining({ displayData: '1, 0' }),
+          expect.objectContaining({ displayData: '2, 0' }),
+        ],
+      ],
+      expect.anything()
     );
   });
 
   test('Copy/paste with grouping', async () => {
     const groups = createInitialGroups(1000, 500);
     const spy = jest.fn();
-    const pasteSpy = jest.fn((_target: any, _values: any) => true);
+    const pasteSpy = jest.fn((_target: any, _values: any, _clipboardData?: any) => true);
     jest.useFakeTimers();
     render(
       <EventedDataEditor
@@ -2107,7 +2157,8 @@ describe('data-editor', () => {
           'Turkeys and some "quotes" and\na new line char "more quotes" plus a tab  .',
           'https://google.com',
         ],
-      ]
+      ],
+      expect.any(DataTransfer)
     );
   });
 
@@ -2146,7 +2197,7 @@ describe('data-editor', () => {
 
   test('Copy/paste with simple getCellsForSelection', async () => {
     const spy = jest.fn();
-    const pasteSpy = jest.fn((_target: any, _values: any) => true);
+    const pasteSpy = jest.fn((_target: any, _values: any, _clipboardData?: any) => true);
     jest.useFakeTimers();
     render(
       <EventedDataEditor
@@ -2227,7 +2278,8 @@ describe('data-editor', () => {
           'Turkeys and some "quotes" and\na new line char "more quotes" plus a tab  .',
           'https://google.com',
         ],
-      ]
+      ],
+      expect.any(DataTransfer)
     );
   });
 
@@ -2334,13 +2386,7 @@ describe('data-editor', () => {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     if (scroller !== null) {
-      jest
-        .spyOn(scroller, 'scrollWidth', 'get')
-        .mockImplementation(() =>
-          basicProps.columns
-            .map((c) => (isSizedGridColumn(c) ? c.width : 150))
-            .reduce((pv, cv) => pv + cv, 0)
-        );
+      jest.spyOn(scroller, 'scrollWidth', 'get').mockImplementation(scrollWidthMockImpl);
       jest.spyOn(scroller, 'scrollHeight', 'get').mockImplementation(() => 1000 * 32 + 36);
       jest.spyOn(scroller, 'scrollLeft', 'get').mockImplementation(() => 0);
       jest.spyOn(scroller, 'scrollTop', 'get').mockImplementation(() => 0);
@@ -2384,13 +2430,7 @@ describe('data-editor', () => {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     if (scroller !== null) {
-      jest
-        .spyOn(scroller, 'scrollWidth', 'get')
-        .mockImplementation(() =>
-          basicProps.columns
-            .map((c) => (isSizedGridColumn(c) ? c.width : 150))
-            .reduce((pv, cv) => pv + cv, 0)
-        );
+      jest.spyOn(scroller, 'scrollWidth', 'get').mockImplementation(scrollWidthMockImpl);
       jest.spyOn(scroller, 'scrollHeight', 'get').mockImplementation(() => 1000 * 32 + 36);
       jest.spyOn(scroller, 'scrollLeft', 'get').mockImplementation(() => 55);
       jest.spyOn(scroller, 'scrollTop', 'get').mockImplementation(() => 0);
@@ -2400,13 +2440,7 @@ describe('data-editor', () => {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     if (scroller !== null) {
-      jest
-        .spyOn(scroller, 'scrollWidth', 'get')
-        .mockImplementation(() =>
-          basicProps.columns
-            .map((c) => (isSizedGridColumn(c) ? c.width : 150))
-            .reduce((pv, cv) => pv + cv, 0)
-        );
+      jest.spyOn(scroller, 'scrollWidth', 'get').mockImplementation(scrollWidthMockImpl);
       jest.spyOn(scroller, 'scrollHeight', 'get').mockImplementation(() => 1000 * 32 + 36);
       jest.spyOn(scroller, 'scrollLeft', 'get').mockImplementation(() => 0);
       jest.spyOn(scroller, 'scrollTop', 'get').mockImplementation(() => 0);

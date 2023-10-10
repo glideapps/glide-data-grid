@@ -24,3 +24,7 @@ Object.defineProperty(HTMLElement.prototype, 'innerText', {
     this.textContent = v;
   },
 });
+
+Object.defineProperty(global, 'DataTransfer', {
+  value: jest.fn(),
+});
