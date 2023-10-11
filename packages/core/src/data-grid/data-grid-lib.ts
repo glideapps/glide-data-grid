@@ -1319,13 +1319,13 @@ export function drawColumnResizeOutline(
   yOffset: number,
   xOffset: number,
   height: number,
-  theme: Theme
+  strokeStyle: string
 ) {
   ctx.beginPath();
   ctx.lineWidth = 2;
   ctx.moveTo(yOffset, xOffset);
   ctx.lineTo(yOffset, height);
-  ctx.strokeStyle = theme.accentColor;
+  ctx.strokeStyle = strokeStyle;
   ctx.stroke();
 }
 
