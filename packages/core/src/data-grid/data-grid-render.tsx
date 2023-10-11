@@ -521,7 +521,7 @@ function drawGridLines(
             y1: ty + stickyHeight - 1,
             x2: maxX,
             y2: ty + stickyHeight - 1,
-            color: theme.accentColor,
+            color: theme.dragAndDropAccentColor,
           });
         }
 
@@ -531,7 +531,7 @@ function drawGridLines(
           x2: maxX,
           y2: ty,
           color: isDragAndDropRow
-            ? theme.accentColor
+            ? theme.dragAndDropAccentColor
             : rowTheme?.horizontalBorderColor ?? rowTheme?.borderColor ?? hColor,
         });
       }
@@ -2710,8 +2710,20 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
   if (isResizing) {
     walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x) => {
       if (c.sourceIndex === resizeCol) {
-        drawColumnResizeOutline(overlayCtx, x + c.width, 0, totalHeaderHeight + 1, theme);
-        drawColumnResizeOutline(targetCtx, x + c.width, totalHeaderHeight, height, theme);
+        drawColumnResizeOutline(
+          overlayCtx,
+          x + c.width,
+          0,
+          totalHeaderHeight + 1,
+          theme.accentColor
+        );
+        drawColumnResizeOutline(
+          targetCtx,
+          x + c.width,
+          totalHeaderHeight,
+          height,
+          theme.accentColor
+        );
       }
     });
   }
@@ -2728,8 +2740,20 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         const xPosition = isRightDirection ? x + c.width : x;
 
         if (!(freezeColumns && !isRightDirection && x < effectiveCols[freezeColumns - 1].width)) {
-          drawColumnResizeOutline(overlayCtx, xPosition, 0, totalHeaderHeight + 1, theme);
-          drawColumnResizeOutline(targetCtx, xPosition, totalHeaderHeight, height, theme);
+          drawColumnResizeOutline(
+            overlayCtx,
+            xPosition,
+            0,
+            totalHeaderHeight + 1,
+            theme.dragAndDropAccentColor
+          );
+          drawColumnResizeOutline(
+            targetCtx,
+            xPosition,
+            totalHeaderHeight,
+            height,
+            theme.dragAndDropAccentColor
+          );
         }
       }
     });

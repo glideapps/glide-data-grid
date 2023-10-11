@@ -84,6 +84,7 @@ export interface Theme {
   nestedGroupIndent: number;
   sortIndicatorBackgroundColor: string;
   sortIndicatorColor: string;
+  dragAndDropAccentColor: string;
 }
 
 const dataEditorBaseTheme: Theme = {
@@ -133,6 +134,7 @@ const dataEditorBaseTheme: Theme = {
   nestedGroupIndent: 16,
   sortIndicatorBackgroundColor: '#B5DEFF',
   sortIndicatorColor: '#0265DC',
+  dragAndDropAccentColor: '#4F5DFF',
 };
 
 /** @category Theme */

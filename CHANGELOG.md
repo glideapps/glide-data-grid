@@ -4,11 +4,10 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [5.13.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.12.2...v5.13.0) (2023-10-10)
 
-
 ### Features
 
-* add onCopy prop to the DataEditor for custom copy implementation ([d58e52d](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/d58e52d5ddd522780e593b2e09a5693c2da711cd))
-* include clipboardData in the onPaste callback ([4657a1e](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/4657a1ec4f6f204160fd0fcaa9ee113236e1c0b8))
+- add onCopy prop to the DataEditor for custom copy implementation ([d58e52d](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/d58e52d5ddd522780e593b2e09a5693c2da711cd))
+- include clipboardData in the onPaste callback ([4657a1e](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/4657a1ec4f6f204160fd0fcaa9ee113236e1c0b8))
 
 ### [5.12.2](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.12.1...v5.12.2) (2023-10-09)
 
