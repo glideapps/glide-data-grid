@@ -55,7 +55,7 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
 
     const groupCountWidth = countWidth.width > 13 ? countWidth.width + 8 : 16;
     const groupCountHeight = 14;
-    const circleX = groupCountWidth + textWidth.width + drawX + 20;
+    const circleX = groupCountWidth + textWidth.width + drawX + 30;
     const circleY =
       rect.y +
       rect.height / 2 +
