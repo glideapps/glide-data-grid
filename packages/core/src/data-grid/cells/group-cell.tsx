@@ -10,7 +10,9 @@ import {
 const GROUP_ICON_SIZE = 18;
 const GROUP_ICON_CLICK_PADDING = 6;
 export const groupRenderer: InternalCellRenderer<GroupCell> = {
-  getAccessibilityString: () => 'Group',
+  getAccessibilityString: (cell) => {
+    return cell.name;
+  },
   kind: GridRowKind.Group,
   draw: (args) => {
     const { ctx, rect, theme, cell, spriteManager } = args;
@@ -107,14 +109,23 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
     return undefined;
   },
   onKeyDown: (e) => {
-    if (e.onRowDetailsUpdated && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
-      if (e.cell.expanded && e.key === 'ArrowLeft') {
-        e.onRowDetailsUpdated({ ...e.cell, expanded: false });
+    if (e.onRowDetailsUpdated) {
+      // https://www.w3.org/WAI/ARIA/apg/patterns/treegrid/
+      // In this document, you can read about TreeGrid accessibility techniques. It states that we should open by using the arrow keys or by pressing enter.
+      if (e.key === 'Enter') {
+        e.onRowDetailsUpdated({ ...e.cell, expanded: !e.cell.expanded });
+        e.cancel();
       }
-      if (!e.cell.expanded && e.key === 'ArrowRight') {
-        e.onRowDetailsUpdated({ ...e.cell, expanded: true });
+
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        if (e.cell.expanded && e.key === 'ArrowLeft') {
+          e.onRowDetailsUpdated({ ...e.cell, expanded: false });
+        }
+        if (!e.cell.expanded && e.key === 'ArrowRight') {
+          e.onRowDetailsUpdated({ ...e.cell, expanded: true });
+        }
+        e.cancel();
       }
-      e.cancel();
     }
   },
   onPaste: () => undefined,

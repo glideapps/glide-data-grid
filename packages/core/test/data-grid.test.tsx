@@ -104,6 +104,7 @@ const basicProps: DataGridProps = {
     return CellRenderers[cell.kind] as any;
   },
   lockColumns: 0,
+  getGroupRowDetails: () => undefined,
 };
 
 beforeEach(() => {

@@ -111,7 +111,7 @@ export interface DataGridProps {
    * Provides additional details about rows, can be used to render groups and custom rows.
    * @group Data
    */
-  readonly getRowDetails?: (row: number) => GridRow;
+  readonly getGroupRowDetails: (row: number) => GridRow | undefined;
   /**
    * Provides additional details about groups to extend group functionality.
    * @group Data
@@ -305,9 +305,20 @@ export interface DataGridRef {
   damage: (cells: DamageUpdateList) => void;
 }
 
-const getRowData = (cell: InnerGridCell, getCellRenderer?: GetCellRendererCallback) => {
+const getRowData = (
+  cell: InnerGridCell,
+  index: number,
+  getCellRenderer?: GetCellRendererCallback
+) => {
   if (cell.kind === GridCellKind.Custom) return cell.copyData;
   const r = getCellRenderer?.(cell);
+
+  if (index !== 0 && cell.kind === 'group') {
+    /**
+     * We render group row by cells; repeating the same name in multiple cells causes readers to read it multiple times. Thus, we only render the name in the first cell, index 0, and skip the others.
+     */
+    return '';
+  }
   return r?.getAccessibilityString(cell) ?? '';
 };
 
@@ -377,7 +388,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     getCellRenderer,
     lockColumns,
     disabledDragColsAndRows,
-    getRowDetails,
+    getGroupRowDetails,
   } = p;
   const translateX = p.translateX ?? 0;
   const translateY = p.translateY ?? 0;
@@ -743,7 +754,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         experimental?.renderStrategy ?? (browserIsSafari.value ? 'double-buffer' : 'single-buffer'),
       getCellRenderer,
       disabledDragColsAndRows,
-      getRowDetails,
+      getGroupRowDetails,
     };
 
     // This confusing bit of code due to some poor design. Long story short, the damage property is only used
@@ -778,7 +789,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     getCellContent,
     getCellRenderer,
     getGroupDetails,
-    getRowDetails,
+    getGroupRowDetails,
     getRowThemeOverride,
     groupHeaderHeight,
     headerHeight,
@@ -1398,12 +1409,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
       return (
         <table
           key="access-tree"
-          role="grid"
+          role="treegrid"
           aria-rowcount={rows + 1}
           aria-multiselectable="true"
           aria-colcount={mappedColumns.length + colOffset}
         >
-          <thead role="rowgroup">
+          <thead>
             <tr role="row" aria-rowindex={1}>
               {effectiveCols.map((c) => (
                 <th
@@ -1423,71 +1434,85 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             </tr>
           </thead>
           <tbody role="rowgroup">
-            {visibleRows.map((row) => (
-              <tr
-                role="row"
-                aria-selected={selection.rows.hasIndex(row)}
-                key={row}
-                aria-rowindex={row + 2}
-              >
-                {effectiveCols.map((c) => {
-                  const col = c.sourceIndex;
-                  const key = `${col},${row}`;
-                  const focused = fCol === col && fRow === row;
-                  const selected =
-                    range !== undefined &&
-                    col >= range.x &&
-                    col < range.x + range.width &&
-                    row >= range.y &&
-                    row < range.y + range.height;
-                  const id = `glide-cell-${col}-${row}`;
-                  const cellContent = getCellContent([col, row]);
-                  return (
-                    <td
-                      key={key}
-                      role="gridcell"
-                      aria-colindex={col + 1 + colOffset}
-                      aria-selected={selected}
-                      aria-readonly={isInnerOnlyCell(cellContent) || !isReadWriteCell(cellContent)}
-                      id={id}
-                      data-testid={id}
-                      onClick={() => {
-                        const canvas = canvasRef?.current;
-                        if (canvas === null || canvas === undefined) return;
-                        return onKeyDown?.({
-                          bounds: getBoundsForItem(canvas, col, row),
-                          cancel: () => undefined,
-                          preventDefault: () => undefined,
-                          stopPropagation: () => undefined,
-                          ctrlKey: false,
-                          key: 'Enter',
-                          keyCode: 13,
-                          metaKey: false,
-                          shiftKey: false,
-                          altKey: false,
-                          rawEvent: undefined,
-                          location: { col, row },
-                        });
-                      }}
-                      onFocusCapture={(e) => {
-                        if (
-                          e.target === focusRef.current ||
-                          (lastFocusedSubdomNode.current?.[0] === col &&
-                            lastFocusedSubdomNode.current?.[1] === row)
-                        )
-                          return;
-                        lastFocusedSubdomNode.current = [col, row];
-                        return onCellFocused?.([col, row]);
-                      }}
-                      ref={focused ? focusElement : undefined}
-                      tabIndex={-1}
-                    >
-                      {getRowData(cellContent, getCellRenderer)}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+            {visibleRows.map((row) => {
+              const ariaElements: React.AriaAttributes = {};
+              const rowDetails = getGroupRowDetails(row);
+
+              if (rowDetails?.kind === GridRowKind.Group) {
+                ariaElements['aria-expanded'] = rowDetails.expanded;
+                ariaElements['aria-level'] = rowDetails.level;
+              }
+              return (
+                <tr
+                  role="row"
+                  aria-selected={selection.rows.hasIndex(row)}
+                  key={row}
+                  aria-rowindex={row + 2}
+                  id={`row-${row}`}
+                  tabIndex={0}
+                  {...ariaElements}
+                >
+                  {effectiveCols.map((c, index) => {
+                    const col = c.sourceIndex;
+                    const key = `${col},${row}`;
+                    const focused = fCol === col && fRow === row;
+                    const selected =
+                      range !== undefined &&
+                      col >= range.x &&
+                      col < range.x + range.width &&
+                      row >= range.y &&
+                      row < range.y + range.height;
+                    const id = `glide-cell-${col}-${row}`;
+                    const cellContent = getCellContent([col, row]);
+                    return (
+                      <td
+                        key={key}
+                        role="gridcell"
+                        aria-colindex={col + 1 + colOffset}
+                        aria-selected={selected}
+                        aria-readonly={
+                          isInnerOnlyCell(cellContent) || !isReadWriteCell(cellContent)
+                        }
+                        id={id}
+                        data-testid={id}
+                        onClick={() => {
+                          const canvas = canvasRef?.current;
+                          if (canvas === null || canvas === undefined) return;
+                          return onKeyDown?.({
+                            bounds: getBoundsForItem(canvas, col, row),
+                            cancel: () => undefined,
+                            preventDefault: () => undefined,
+                            stopPropagation: () => undefined,
+                            ctrlKey: false,
+                            key: 'Enter',
+                            keyCode: 13,
+                            metaKey: false,
+                            shiftKey: false,
+                            altKey: false,
+                            rawEvent: undefined,
+                            location: { col, row },
+                          });
+                        }}
+                        onFocusCapture={(e) => {
+                          if (
+                            e.target === focusRef.current ||
+                            (lastFocusedSubdomNode.current?.[0] === col &&
+                              lastFocusedSubdomNode.current?.[1] === row)
+                          )
+                            return;
+                          lastFocusedSubdomNode.current = [col, row];
+                          return onCellFocused?.([col, row]);
+                        }}
+                        ref={focused ? focusElement : undefined}
+                        tabIndex={cellContent.kind === 'group' ? undefined : -1}
+                      >
+                        {getRowData(cellContent, index, getCellRenderer)}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       );

@@ -137,7 +137,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = (p) => {
     smoothScrollX = false,
     smoothScrollY = false,
     isDraggable,
-    getRowDetails,
+    getGroupRowDetails,
   } = p;
   const { paddingRight, paddingBottom } = experimental ?? {};
 
@@ -449,7 +449,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = (p) => {
         smoothScrollX={p.smoothScrollX}
         smoothScrollY={p.smoothScrollY}
         disabledDragColsAndRows={p.disabledDragColsAndRows}
-        getRowDetails={getRowDetails}
+        getGroupRowDetails={getGroupRowDetails}
       />
     </InfiniteScroller>
   );

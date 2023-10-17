@@ -1234,7 +1234,7 @@ function drawCells(
   outerTheme: Theme,
   enqueue: (item: Item) => void,
   getCellRenderer: GetCellRendererCallback,
-  getRowDetails?: (row: number) => GridRow
+  getGroupRowDetails?: (row: number) => GridRow | undefined
 ): Rectangle[] | undefined {
   let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
   const frameTime = performance.now();
@@ -1344,7 +1344,7 @@ function drawCells(
 
           const cell: InnerGridCell =
             row < rows ? getCellContent([c.sourceIndex, row]) : loadingCell;
-          const rowDetails = getRowDetails?.(row);
+          const rowDetails = getGroupRowDetails?.(row);
 
           let cellX = drawX;
           let cellWidth = c.width;
@@ -1449,7 +1449,10 @@ function drawCells(
                   : blend(theme.bgSearchResult, fill);
               }
             }
-          } else if (rowDetails.kind === GridRowKind.Group && rowActivated) {
+          } else if (
+            (rowDetails.kind === GridRowKind.Group || rowDetails.kind === GridRowKind.NewRow) &&
+            rowActivated
+          ) {
             for (let i = 0; i < accentCount; i++) {
               fill = blend(theme.accentLight, fill);
             }
@@ -1868,7 +1871,7 @@ function drawFocusRing(
   trailingRowType: TrailingRowType,
   fillHandle: boolean,
   rows: number,
-  getRowDetails?: (row: number) => GridRow
+  getGroupRowDetails?: (row: number) => GridRow | undefined
 ): (() => void) | undefined {
   if (
     selectedCell.current === undefined ||
@@ -1910,7 +1913,7 @@ function drawFocusRing(
           let cellX = drawX;
           let cellWidth = col.width;
 
-          const rowDetails = getRowDetails?.(row);
+          const rowDetails = getGroupRowDetails?.(row);
           if (rowDetails !== undefined && rowDetails.kind !== GridRowKind.GroupContent)
             return undefined;
           if (cell.span !== undefined) {
@@ -2059,7 +2062,7 @@ export interface DrawGridArg {
     rows?: number[];
     cols?: number[];
   };
-  readonly getRowDetails?: (row: number) => GridRow;
+  readonly getGroupRowDetails?: (row: number) => GridRow | undefined;
 }
 
 function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean | number {
@@ -2173,7 +2176,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     bufferA,
     bufferB,
     disabledDragColsAndRows,
-    getRowDetails,
+    getGroupRowDetails,
   } = arg;
   let { damage } = arg;
   if (width === 0 || height === 0) return;
@@ -2339,7 +2342,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         trailingRowType,
         fillHandle,
         rows,
-        getRowDetails
+        getGroupRowDetails
       );
     }
   };
@@ -2411,7 +2414,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         theme,
         enqueue,
         getCellRenderer,
-        getRowDetails
+        getGroupRowDetails
       );
 
       if (
@@ -2439,7 +2442,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
           trailingRowType,
           fillHandle,
           rows,
-          getRowDetails
+          getGroupRowDetails
         );
       }
     }
@@ -2554,7 +2557,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         trailingRowType,
         fillHandle,
         rows,
-        getRowDetails
+        getGroupRowDetails
       )
     : undefined;
 
@@ -2621,7 +2624,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     theme,
     enqueue,
     getCellRenderer,
-    getRowDetails
+    getGroupRowDetails
   );
 
   drawBlanks(

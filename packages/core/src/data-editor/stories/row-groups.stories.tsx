@@ -123,7 +123,6 @@ export const RowGroups: React.VFC<RowGroupsProps> = ({ enableGroups }) => {
         getCellContent={getCellContent}
         columns={colsWithWidths}
         rows={rowsCount}
-        verticalBorder={false}
         rowMarkers="both"
         onCellEdited={mangledEditCell}
         groups={groups1}

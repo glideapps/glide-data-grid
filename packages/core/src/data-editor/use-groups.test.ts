@@ -15,7 +15,7 @@ describe('useGroups', () => {
     );
 
     expect(result.current.rowsCount).toBe(0);
-    expect(result.current.getRowDetails(0)).toBeUndefined();
+    expect(result.current.getGroupRowDetails(0)).toBeUndefined();
     expect(result.current.getMangledCellLocation([0, 0])).toEqual([0, 0]);
   });
 
@@ -43,7 +43,7 @@ describe('useGroups', () => {
     rerender({ groups, toggleGroup, hasTrailingRow: false });
 
     expect(result.current.rowsCount).toBe(3);
-    expect(result.current.getRowDetails(0)).toEqual({
+    expect(result.current.getGroupRowDetails(0)).toEqual({
       allowOverlay: false,
       expanded: true,
       id: 'group1',
@@ -52,7 +52,7 @@ describe('useGroups', () => {
       name: 'Group 1',
       rowsCount: 2,
     });
-    expect(result.current.getRowDetails(1)).toEqual({
+    expect(result.current.getGroupRowDetails(1)).toEqual({
       index: 0,
       kind: 'group-content',
       level: 2,
@@ -79,7 +79,7 @@ describe('useGroups', () => {
       })
     );
 
-    const groupRow = result.current.getRowDetails(0) as unknown as GroupRow;
+    const groupRow = result.current.getGroupRowDetails(0) as unknown as GroupRow;
 
     result.current.onRowDetailsUpdated(0, groupRow);
 
@@ -100,7 +100,7 @@ describe('useGroups', () => {
 
     const { result } = renderHook(() => useGroups({ groups }));
 
-    const groupContentRow = result.current.getRowDetails(1) as unknown as GroupContentRow;
+    const groupContentRow = result.current.getGroupRowDetails(1) as unknown as GroupContentRow;
     const mangledCellLocation = result.current.getMangledCellLocation([0, 1]);
 
     expect(mangledCellLocation).toEqual([0, groupContentRow.index]);
