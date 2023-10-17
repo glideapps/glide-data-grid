@@ -9,6 +9,7 @@ import {
 
 const GROUP_ICON_SIZE = 18;
 const GROUP_ICON_CLICK_PADDING = 6;
+const GROUP_ELLIPSIS_TITLE_PADDING = 25;
 export const groupRenderer: InternalCellRenderer<GroupCell> = {
   getAccessibilityString: () => 'Group',
   kind: GridRowKind.Group,
@@ -24,9 +25,16 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
     ctx.fillStyle = theme.textDark;
     ctx.font = font;
 
+    const countWidth = measureTextCached(
+      `${cell.rowsCount}`,
+      ctx,
+      `${theme.headerFontStyle} ${theme.fontFamily}`
+    );
+    const groupCountWidth = countWidth.width > 13 ? countWidth.width + 8 : 16;
+
     const clippedText = clipCanvasString(
       cell.name,
-      rect.width - drawX * 2,
+      rect.width - drawX * 2 - groupCountWidth - GROUP_ELLIPSIS_TITLE_PADDING,
       ctx,
       `${cell.name}_${rect.width}`,
       font
@@ -41,21 +49,15 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
     );
 
     const textWidth = measureTextCached(
-      cell.name,
+      clippedText,
       ctx,
       `${theme.headerFontStyle} ${theme.fontFamily}`
     );
 
-    const countWidth = measureTextCached(
-      `${cell.rowsCount}`,
-      ctx,
-      `${theme.headerFontStyle} ${theme.fontFamily}`
-    );
     ctx.fillStyle = '#0000001A';
 
-    const groupCountWidth = countWidth.width > 13 ? countWidth.width + 8 : 16;
     const groupCountHeight = 14;
-    const circleX = groupCountWidth + textWidth.width + drawX + 20;
+    const circleX = groupCountWidth + textWidth.width + drawX + 30;
     const circleY =
       rect.y +
       rect.height / 2 +
