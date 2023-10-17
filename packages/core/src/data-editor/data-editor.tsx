@@ -2980,12 +2980,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       if (gridSelection.current !== undefined && (movX !== 0 || movY !== 0)) {
         const isEditingTrailingRow =
           gridSelection.current.cell[1] === mangledRows - 1 && newValue !== undefined;
-        updateSelectedCell(
-          clamp(gridSelection.current.cell[0] + movX, 0, mangledCols.length - 1),
-          clamp(gridSelection.current.cell[1] + movY, 0, mangledRows - 1),
-          isEditingTrailingRow,
-          false
-        );
+        const row = clamp(gridSelection.current.cell[1] + movY, 0, mangledRows - 1);
+        const rowDetails = getGroupRowDetails(row);
+        if (
+          rowDetails?.kind === undefined ||
+          ![GridRowKind.Group, GridRowKind.NewRow].includes(rowDetails?.kind)
+        ) {
+          updateSelectedCell(
+            clamp(gridSelection.current.cell[0] + movX, 0, mangledCols.length - 1),
+            row,
+            isEditingTrailingRow,
+            false
+          );
+        }
       }
       onFinishedEditing?.(newValue, movement);
     },
@@ -2998,6 +3005,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       mangledRows,
       updateSelectedCell,
       mangledCols.length,
+      getGroupRowDetails,
     ]
   );
 
