@@ -150,6 +150,8 @@ export interface GridKeyEventArgs {
   readonly rawEvent: React.KeyboardEvent<HTMLElement> | undefined;
   readonly location: { col?: number; row?: number };
   readonly onRowDetailsUpdated?: (newValue: GridRow) => void;
+  readonly appendRow?: VoidFunction;
+  readonly cell?: InnerGridCell;
 }
 
 interface DragHandler {
@@ -639,6 +641,7 @@ export interface NewRowCell extends BaseGridCell {
   readonly hint: string;
   readonly allowOverlay: false;
   readonly icon?: string;
+  readonly groupId?: string;
 }
 
 export type GroupCell = BaseGridCell & GroupRow;

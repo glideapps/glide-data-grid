@@ -102,7 +102,7 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
     onSearchResultsChanged,
     showSearch = false,
     onSearchClose,
-    getRowDetails,
+    getGroupRowDetails,
   } = p;
 
   const [searchID] = React.useState(() => 'search-box-' + Math.round(Math.random() * 1000));
@@ -546,7 +546,7 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
         smoothScrollX={p.smoothScrollX}
         smoothScrollY={p.smoothScrollY}
         scrollToEnd={p.scrollToEnd}
-        getRowDetails={getRowDetails}
+        getGroupRowDetails={getGroupRowDetails}
         disabledDragColsAndRows={p.disabledDragColsAndRows}
       />
       {searchbox}
