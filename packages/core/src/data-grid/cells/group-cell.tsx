@@ -9,8 +9,11 @@ import {
 
 const GROUP_ICON_SIZE = 18;
 const GROUP_ICON_CLICK_PADDING = 6;
+const GROUP_ELLIPSIS_TITLE_PADDING = 25;
 export const groupRenderer: InternalCellRenderer<GroupCell> = {
-  getAccessibilityString: () => 'Group',
+  getAccessibilityString: (cell) => {
+    return cell.name;
+  },
   kind: GridRowKind.Group,
   draw: (args) => {
     const { ctx, rect, theme, cell, spriteManager } = args;
@@ -24,9 +27,16 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
     ctx.fillStyle = theme.textDark;
     ctx.font = font;
 
+    const countWidth = measureTextCached(
+      `${cell.rowsCount}`,
+      ctx,
+      `${theme.headerFontStyle} ${theme.fontFamily}`
+    );
+    const groupCountWidth = countWidth.width > 13 ? countWidth.width + 8 : 16;
+
     const clippedText = clipCanvasString(
       cell.name,
-      rect.width - drawX * 2,
+      rect.width - drawX * 2 - groupCountWidth - GROUP_ELLIPSIS_TITLE_PADDING,
       ctx,
       `${cell.name}_${rect.width}`,
       font
@@ -41,21 +51,15 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
     );
 
     const textWidth = measureTextCached(
-      cell.name,
+      clippedText,
       ctx,
       `${theme.headerFontStyle} ${theme.fontFamily}`
     );
 
-    const countWidth = measureTextCached(
-      `${cell.rowsCount}`,
-      ctx,
-      `${theme.headerFontStyle} ${theme.fontFamily}`
-    );
     ctx.fillStyle = '#0000001A';
 
-    const groupCountWidth = countWidth.width > 13 ? countWidth.width + 8 : 16;
     const groupCountHeight = 14;
-    const circleX = groupCountWidth + textWidth.width + drawX + 20;
+    const circleX = groupCountWidth + textWidth.width + drawX + 30;
     const circleY =
       rect.y +
       rect.height / 2 +
@@ -107,14 +111,23 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
     return undefined;
   },
   onKeyDown: (e) => {
-    if (e.onRowDetailsUpdated && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
-      if (e.cell.expanded && e.key === 'ArrowLeft') {
-        e.onRowDetailsUpdated({ ...e.cell, expanded: false });
+    if (e.onRowDetailsUpdated) {
+      // https://www.w3.org/WAI/ARIA/apg/patterns/treegrid/
+      // In this document, you can read about TreeGrid accessibility techniques. It states that we should open by using the arrow keys or by pressing enter.
+      if (e.key === 'Enter') {
+        e.onRowDetailsUpdated({ ...e.cell, expanded: !e.cell.expanded });
+        e.cancel();
       }
-      if (!e.cell.expanded && e.key === 'ArrowRight') {
-        e.onRowDetailsUpdated({ ...e.cell, expanded: true });
+
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        if (e.cell.expanded && e.key === 'ArrowLeft') {
+          e.onRowDetailsUpdated({ ...e.cell, expanded: false });
+        }
+        if (!e.cell.expanded && e.key === 'ArrowRight') {
+          e.onRowDetailsUpdated({ ...e.cell, expanded: true });
+        }
+        e.cancel();
       }
-      e.cancel();
     }
   },
   onPaste: () => undefined,

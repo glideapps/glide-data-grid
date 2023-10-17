@@ -491,10 +491,10 @@ export function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) 
   const { ctx, rect, hoverAmount, theme, spriteManager } = args;
   const { x, y, width: w, height: h } = rect;
   ctx.beginPath();
-  ctx.globalAlpha = hoverAmount;
+  ctx.globalAlpha = 0;
   ctx.rect(x, y, w, h);
   // TODO: hover effect does not work as intended for span cells, should be fixed
-  // ctx.fillStyle = theme.bgHeaderHovered;
+  ctx.fillStyle = theme.bgHeaderHovered;
   ctx.fill();
   ctx.globalAlpha = 1;
   ctx.beginPath();

@@ -30,8 +30,8 @@ export const useGroups = ({ groups = [], hasTrailingRow = false, toggleGroup }: 
     }
   }, [hasTrailingRow, groups]);
 
-  const getRowDetails: DataEditorProps['getRowDetails'] = useCallback(
-    (row: number): GridRow => {
+  const getGroupRowDetails: DataEditorProps['getGroupRowDetails'] = useCallback(
+    (row: number): GridRow | undefined => {
       return groupRows.current[row];
     },
     [groupRows]
@@ -60,7 +60,7 @@ export const useGroups = ({ groups = [], hasTrailingRow = false, toggleGroup }: 
   );
 
   return {
-    getRowDetails,
+    getGroupRowDetails,
     onRowDetailsUpdated,
     getMangledCellLocation,
     rowsCount: rowsCount,

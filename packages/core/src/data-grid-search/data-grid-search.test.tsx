@@ -24,6 +24,7 @@ const basicProps = {
   onKeyUp: () => undefined,
   onMouseDown: () => undefined,
   onMouseUp: () => undefined,
+  getGroupRowDetails: () => undefined,
   smoothScrollX: undefined,
   smoothScrollY: undefined,
   canvasRef: undefined,
