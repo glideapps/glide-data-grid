@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   CellArray,
   GetCellsThunk,
+  GridCell,
   GridCellKind,
   Item,
   Rectangle,
@@ -12,6 +13,7 @@ import ScrollingDataGrid, {
 } from '../scrolling-data-grid/scrolling-data-grid';
 import { SearchWrapper } from './data-grid-search-style';
 import { assert } from '../common/support';
+import { useCellsForSelection } from '../data-editor/use-cells-for-selection';
 
 // icons
 const upArrow = (
@@ -98,12 +100,29 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
     rows,
     columns,
     searchInputRef,
-    getCellsForSelection,
     onSearchResultsChanged,
     showSearch = false,
     onSearchClose,
     getGroupRowDetails,
+    getCellContent,
+    lockColumns,
   } = p;
+
+  const abortControllerRef = React.useRef(new AbortController());
+
+  const getCellContentIn = React.useCallback(
+    (cell: Item): GridCell => {
+      return getCellContent([cell[0] + lockColumns, cell[1]]) as GridCell;
+    },
+    [getCellContent, lockColumns]
+  );
+
+  const [getCellsForSelection] = useCellsForSelection(
+    true,
+    getCellContentIn,
+    lockColumns,
+    abortControllerRef.current
+  );
 
   const [searchID] = React.useState(() => 'search-box-' + Math.round(Math.random() * 1000));
 
@@ -113,7 +132,6 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
   const searchStatusRef = React.useRef(searchStatus);
   searchStatusRef.current = searchStatus;
 
-  const abortControllerRef = React.useRef(new AbortController());
   const searchHandle = React.useRef<number>();
   const [searchResults, setSearchResults] = React.useState<readonly Item[]>([]);
 

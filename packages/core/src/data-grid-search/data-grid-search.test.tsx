@@ -127,7 +127,7 @@ describe('DataGridSearch', () => {
 
     expect(subscriber).toBeCalledWith({
       foundedRowsCount: 100,
-      results: 100,
+      results: 200,
       rowsSearched: 100,
       selectedIndex: -1,
     });
@@ -146,7 +146,7 @@ describe('DataGridSearch', () => {
 
     expect(subscriber).toBeCalledWith({
       foundedRowsCount: 100,
-      results: 100,
+      results: 200,
       rowsSearched: 100,
       selectedIndex: -1,
     });
@@ -157,7 +157,7 @@ describe('DataGridSearch', () => {
 
     expect(subscriber).toBeCalledWith({
       foundedRowsCount: 100,
-      results: 100,
+      results: 200,
       rowsSearched: 100,
       selectedIndex: 0,
     });
@@ -168,9 +168,9 @@ describe('DataGridSearch', () => {
 
     expect(subscriber).toBeCalledWith({
       foundedRowsCount: 100,
-      results: 100,
+      results: 200,
       rowsSearched: 100,
-      selectedIndex: 99,
+      selectedIndex: 199,
     });
   });
 });
