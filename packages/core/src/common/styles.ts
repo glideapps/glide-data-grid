@@ -65,6 +65,7 @@ export interface Theme {
   bgBubbleSelected: string;
   bgSearchResult: string;
   bgSelectedSearchResult: string;
+  bgSelectedColumnIcon: string;
   borderColor: string;
   horizontalBorderColor?: string;
   headerBottomBorderColor?: string;
@@ -108,6 +109,7 @@ const dataEditorBaseTheme: Theme = {
   bgGroup: '#E6E6E6',
   bgHeaderHasFocus: '#E9E9EB',
   bgHeaderHovered: '#E6E6E6',
+  bgSelectedColumnIcon: '#3892f3',
 
   bgBubble: '#EDEDF3',
   bgBubbleSelected: '#FFFFFF',
