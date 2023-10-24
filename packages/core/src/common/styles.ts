@@ -66,6 +66,8 @@ export interface Theme {
   bgSearchResult: string;
   bgSelectedSearchResult: string;
   bgSelectedColumnIcon: string;
+  bgSelectedColumnHeader: string;
+  bgSelectedCell: string;
   borderColor: string;
   horizontalBorderColor?: string;
   headerBottomBorderColor?: string;
@@ -110,6 +112,8 @@ const dataEditorBaseTheme: Theme = {
   bgHeaderHasFocus: '#E9E9EB',
   bgHeaderHovered: '#E6E6E6',
   bgSelectedColumnIcon: '#fff',
+  bgSelectedColumnHeader: "#4F5DFF",
+  bgSelectedCell: "#ebf1ff",
 
   bgBubble: '#EDEDF3',
   bgBubbleSelected: '#FFFFFF',
