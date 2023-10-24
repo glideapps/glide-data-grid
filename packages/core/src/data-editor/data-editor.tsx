@@ -2584,21 +2584,29 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     React.useCallback(
       (rowsIndex: number[], endIndex: number) => {
         if (hasGroups) {
-          const movedRowsDetails = rowsIndex.map((rowIndex) => getGroupRowDetails?.(rowIndex));
-          const endIndexDetails = getGroupRowDetails?.(endIndex);
-          const isMoveOutsideGroup = movedRowsDetails.some((rowDetails) => {
-            if (
-              rowDetails?.kind !== GridRowKind.GroupContent ||
-              endIndexDetails?.kind !== GridRowKind.GroupContent
-            ) {
+          const originalRowsIndex = [];
+          const endIndexDetails = getGroupRowDetails(endIndex);
+
+          if (endIndexDetails?.kind !== GridRowKind.GroupContent) return false;
+
+          for (const rowIndex of rowsIndex) {
+            const rowDetailsIndex = getGroupRowDetails(rowIndex);
+            if (rowDetailsIndex?.kind !== GridRowKind.GroupContent) {
               return false;
             }
-            return rowDetails?.groupId !== endIndexDetails?.groupId;
-          });
-          if (isMoveOutsideGroup) return false;
+
+            if (rowDetailsIndex?.groupId !== endIndexDetails?.groupId) {
+              return false;
+            }
+
+            originalRowsIndex.push(rowDetailsIndex.index);
+          }
+
+          onRowMoved?.(originalRowsIndex, endIndexDetails.index);
+        } else {
+          onRowMoved?.(rowsIndex, endIndex);
         }
 
-        onRowMoved?.(rowsIndex, endIndex);
         const selectedRowLength = gridSelection.rows.length;
         const firstDragRow = rowsIndex[0];
         const isDragInSelection = gridSelection.rows.hasIndex(firstDragRow);
