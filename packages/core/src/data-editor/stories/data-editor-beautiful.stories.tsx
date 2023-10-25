@@ -2102,6 +2102,62 @@ export const ThemePerRow: React.VFC = () => {
   },
 };
 
+
+export const SelectedColumnCustomization: React.VFC = () => {
+  const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
+
+  const [numRows, setNumRows] = React.useState(1000);
+
+  const onRowAppended = React.useCallback(() => {
+    const newRow = numRows;
+    setNumRows((cv) => cv + 1);
+    for (let c = 0; c < 6; c++) {
+      setCellValue([c, newRow], {
+        displayData: '',
+        data: '',
+      } as any);
+    }
+  }, [numRows, setCellValue]);
+
+  return (
+    <BeautifulWrapper
+      title="Selected Column Customization"
+      description={
+        <>
+          <Description>
+           You can customize selected column stylings via <PropName>bgSelectedCell</PropName>, <PropName>bgSelectedColumnIcon</PropName>, <PropName>bgSelectedColumnHeader</PropName> theme variables.
+          </Description>
+        </>
+      }
+    >
+      <DataEditor
+        {...defaultProps}
+        theme={{
+          bgSelectedCell: 'pink',
+          bgSelectedColumnIcon:"yellow",
+          bgSelectedColumnHeader:"green",
+      
+        }}
+        getCellContent={getCellContent}
+        columns={cols}
+        onRowAppended={onRowAppended}
+        trailingRowOptions={{
+          tint: true,
+          sticky: true,
+        }}
+        onCellEdited={setCellValue}
+        onColumnResize={onColumnResize}
+        rows={numRows}
+      />
+    </BeautifulWrapper>
+  );
+};
+(SelectedColumnCustomization as any).parameters = {
+  options: {
+    showPanel: false,
+  },
+};
+
 export const CellActivatedEvent: React.VFC = () => {
   const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 

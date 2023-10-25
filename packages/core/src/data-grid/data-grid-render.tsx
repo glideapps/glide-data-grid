@@ -970,7 +970,7 @@ function drawGridHeaders(
       selection?.current !== undefined && selection.current.cell[0] === c.sourceIndex;
 
     const bgFillStyle = selected
-      ? theme.accentColor
+      ? theme.bgSelectedColumnHeader 
       : hasSelectedCell
       ? theme.bgHeaderHasFocus
       : theme.bgHeader;
@@ -1438,7 +1438,7 @@ function drawCells(
                 fill = blend(theme.bgHeader, fill);
               }
               for (let i = 0; i < accentCount; i++) {
-                fill = blend(theme.accentLight, fill);
+                fill = blend(theme.bgSelectedCell, fill);
               }
             } else {
               if (

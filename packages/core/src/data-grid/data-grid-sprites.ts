@@ -14,7 +14,7 @@ function getColors(variant: SpriteVariant, theme: Theme): readonly [string, stri
   if (variant === 'normal') {
     return [theme.bgIconHeader, theme.fgIconHeader];
   } else if (variant === 'selected') {
-    return ['white', theme.accentColor];
+    return [theme.bgSelectedColumnIcon, theme.accentColor];
   } else {
     return [theme.accentColor, theme.bgHeader];
   }
