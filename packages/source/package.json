@@ -1,6 +1,6 @@
 {
   "name": "@workfront-grid/glide-data-grid-source",
-  "version": "5.13.6",
+  "version": "5.14.0",
   "description": "Useful data source hooks for Glide Data Grid",
   "sideEffects": false,
   "type": "module",
