@@ -1101,7 +1101,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         }
 
         const result = onDeleteIn(
-          shiftSelection(sel, -rowMarkerOffset, getMangledCellLocation),
+          shiftSelection(sel, -rowMarkerOffset, getMangledCellLocation, getGroupRowDetails),
           groupRows
         );
 
