@@ -1101,7 +1101,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         }
 
         const result = onDeleteIn(
-          shiftSelection(sel, -rowMarkerOffset, getMangledCellLocation, getGroupRowDetails),
+          shiftSelection(
+            sel,
+            -rowMarkerOffset,
+            getMangledCellLocation,
+            hasGroups ? getGroupRowDetails : undefined
+          ),
           groupRows
         );
 
@@ -1773,7 +1778,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
           'edit'
         );
 
-        const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
+        const cell = getCellContentRef.current(
+          getMangledCellLocation([col - rowMarkerOffset, row])
+        );
         if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true) {
           // wait for scroll to have a chance to process
           window.setTimeout(() => {
@@ -1784,7 +1791,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       // Queue up to allow the consumer to react to the event and let us check if they did
       doFocus();
     },
-    [getGroupRowDetails, mangledCols, onRowAppended, rowMarkerOffset, rows, scrollTo, setCurrent]
+    [
+      getGroupRowDetails,
+      getMangledCellLocation,
+      mangledCols,
+      onRowAppended,
+      rowMarkerOffset,
+      rows,
+      scrollTo,
+      setCurrent,
+    ]
   );
 
   const enterCellEditMode: EnterCellEditModeFn = React.useCallback(
