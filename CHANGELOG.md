@@ -4,10 +4,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [5.14.2](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.14.1...v5.14.2) (2023-10-26)
 
-
 ### Bug Fixes
 
-* row delete case and add new row when grouping applied ([c4fec73](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/c4fec73fe2a65b96016e8093cdb1a150f5db3d98))
+- row delete case and add new row when grouping applied ([c4fec73](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/c4fec73fe2a65b96016e8093cdb1a150f5db3d98))
 
 ### [5.14.1](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.14.0...v5.14.1) (2023-10-26)
 
