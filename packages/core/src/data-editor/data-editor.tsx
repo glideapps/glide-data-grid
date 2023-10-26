@@ -3897,7 +3897,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
   React.useImperativeHandle(
     forwardedRef,
     () => ({
-      appendRow: (col: number) => appendRow(col + rowMarkerOffset),
+      appendRow: (col: number, row?: number) => appendRow(col + rowMarkerOffset, row),
       updateCells: (damageList) => {
         if (rowMarkerOffset !== 0) {
           damageList = damageList.map((x) => ({ cell: [x.cell[0] + rowMarkerOffset, x.cell[1]] }));
@@ -4191,6 +4191,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onFinishEditing={onFinishEditing}
             markdownDivCreateNode={markdownDivCreateNode}
             isOutsideClick={isOutsideClick}
+            appendRow={appendRow}
+            getGroupRowDetails={getGroupRowDetails}
           />
         )}
       </DataEditorContainer>

@@ -112,8 +112,8 @@ const dataEditorBaseTheme: Theme = {
   bgHeaderHasFocus: '#E9E9EB',
   bgHeaderHovered: '#E6E6E6',
   bgSelectedColumnIcon: '#fff',
-  bgSelectedColumnHeader: "#4F5DFF",
-  bgSelectedCell: "#ebf1ff",
+  bgSelectedColumnHeader: '#4F5DFF',
+  bgSelectedCell: '#ebf1ff',
 
   bgBubble: '#EDEDF3',
   bgBubbleSelected: '#FFFFFF',

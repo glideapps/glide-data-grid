@@ -7,6 +7,8 @@ import type { GetCellRendererCallback } from '../data-grid/cells/cell-types';
 import {
   EditableGridCell,
   GridCell,
+  GridRow,
+  GridRowKind,
   isEditableGridCell,
   isInnerOnlyCell,
   isObjectEditorCallbackResult,
@@ -47,6 +49,8 @@ interface DataGridOverlayEditorProps {
     prevValue: GridCell
   ) => boolean | ValidatedGridCell;
   readonly isOutsideClick?: (e: MouseEvent) => boolean;
+  readonly appendRow: (col: number, rowLocation?: number, groupId?: string) => Promise<void>;
+  readonly getGroupRowDetails: (row: number) => GridRow | undefined;
 }
 
 const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps> = (p) => {
@@ -67,6 +71,8 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     getCellRenderer,
     provideEditor,
     isOutsideClick,
+    appendRow,
+    getGroupRowDetails,
   } = p;
 
   const [tempValue, setTempValueRaw] = React.useState<GridCell | undefined>(
@@ -133,6 +139,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         return;
       }
       let save = false;
+      let shouldAddNewRow = false;
       if (event.key === 'Escape') {
         event.stopPropagation();
         event.preventDefault();
@@ -146,6 +153,10 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         event.stopPropagation();
         event.preventDefault();
         customMotion.current = [event.shiftKey ? -1 : 1, 0];
+      } else if (event.key === 'Enter' && event.shiftKey) {
+        save = true;
+        customMotion.current = [0, 0];
+        shouldAddNewRow = true;
         save = true;
       }
 
@@ -153,10 +164,17 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         if (!finished.current && customMotion.current !== undefined) {
           onFinishEditing(save ? tempValue : undefined, customMotion.current);
           finished.current = true;
+
+          if (shouldAddNewRow) {
+            const rowDetails = getGroupRowDetails(cell[1]);
+            const groupId =
+              rowDetails?.kind === GridRowKind.GroupContent ? rowDetails.groupId : undefined;
+            void appendRow(cell[0], cell[1], groupId);
+          }
         }
       }, 0);
     },
-    [onFinishEditing, tempValue, keyboardEventHandlingMode]
+    [keyboardEventHandlingMode, getGroupRowDetails, cell, appendRow, onFinishEditing, tempValue]
   );
 
   const targetValue = tempValue ?? content;

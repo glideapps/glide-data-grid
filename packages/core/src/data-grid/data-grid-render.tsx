@@ -970,7 +970,7 @@ function drawGridHeaders(
       selection?.current !== undefined && selection.current.cell[0] === c.sourceIndex;
 
     const bgFillStyle = selected
-      ? theme.bgSelectedColumnHeader 
+      ? theme.bgSelectedColumnHeader
       : hasSelectedCell
       ? theme.bgHeaderHasFocus
       : theme.bgHeader;
