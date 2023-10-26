@@ -153,8 +153,8 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         event.stopPropagation();
         event.preventDefault();
         customMotion.current = [event.shiftKey ? -1 : 1, 0];
-      } else if (event.key === 'Enter' && event.shiftKey) {
         save = true;
+      } else if (event.key === 'Enter' && event.shiftKey) {
         customMotion.current = [0, 0];
         shouldAddNewRow = true;
         save = true;
