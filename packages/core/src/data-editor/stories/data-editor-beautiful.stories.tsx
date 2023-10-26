@@ -2102,7 +2102,6 @@ export const ThemePerRow: React.VFC = () => {
   },
 };
 
-
 export const SelectedColumnCustomization: React.VFC = () => {
   const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
@@ -2125,7 +2124,9 @@ export const SelectedColumnCustomization: React.VFC = () => {
       description={
         <>
           <Description>
-           You can customize selected column stylings via <PropName>bgSelectedCell</PropName>, <PropName>bgSelectedColumnIcon</PropName>, <PropName>bgSelectedColumnHeader</PropName> theme variables.
+            You can customize selected column stylings via <PropName>bgSelectedCell</PropName>,{' '}
+            <PropName>bgSelectedColumnIcon</PropName>, <PropName>bgSelectedColumnHeader</PropName>{' '}
+            theme variables.
           </Description>
         </>
       }
@@ -2134,9 +2135,8 @@ export const SelectedColumnCustomization: React.VFC = () => {
         {...defaultProps}
         theme={{
           bgSelectedCell: 'pink',
-          bgSelectedColumnIcon:"yellow",
-          bgSelectedColumnHeader:"green",
-      
+          bgSelectedColumnIcon: 'yellow',
+          bgSelectedColumnHeader: 'green',
         }}
         getCellContent={getCellContent}
         columns={cols}

@@ -4,19 +4,17 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [5.14.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.13.6...v5.14.0) (2023-10-25)
 
-
 ### Features
 
-* add new style variable ([c2e7cd6](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/c2e7cd6a1c43110f88b1e238744081f78a704d9e))
-* add story ([4a04b01](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/4a04b014304e46a18550953932c8f191bf14c564))
-* add style variables ([8d263a1](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/8d263a135593500e5cb8ad1e58393879abeb8db2))
+- add new style variable ([c2e7cd6](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/c2e7cd6a1c43110f88b1e238744081f78a704d9e))
+- add story ([4a04b01](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/4a04b014304e46a18550953932c8f191bf14c564))
+- add style variables ([8d263a1](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/8d263a135593500e5cb8ad1e58393879abeb8db2))
 
 ### [5.13.6](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.13.5...v5.13.6) (2023-10-25)
 
-
 ### Bug Fixes
 
-* group row delete position ([8079762](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/8079762241bec41bf887ec6a488898750d879827))
+- group row delete position ([8079762](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/8079762241bec41bf887ec6a488898750d879827))
 
 ### [5.13.5](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.13.4...v5.13.5) (2023-10-24)
 
