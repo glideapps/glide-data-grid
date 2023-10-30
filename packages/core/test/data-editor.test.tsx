@@ -1936,7 +1936,10 @@ describe('data-editor', () => {
 
   test('Copy/paste', async () => {
     const spy = jest.fn();
-    const pasteSpy = jest.fn((_target: any, _values: any, _clipboardData?: any) => true);
+    const pasteSpy = jest.fn(
+      (_target: any, _values: any, _clipboardData?: any, _groupId?: any, _startGroupRow?: any) =>
+        true
+    );
     jest.useFakeTimers();
     render(
       <EventedDataEditor
@@ -2021,7 +2024,9 @@ describe('data-editor', () => {
           'https://google.com',
         ],
       ],
-      expect.any(DataTransfer)
+      expect.any(DataTransfer),
+      undefined,
+      undefined
     );
   });
 
@@ -2071,7 +2076,10 @@ describe('data-editor', () => {
   test('Copy/paste with grouping', async () => {
     const groups = createInitialGroups(1000, 500);
     const spy = jest.fn();
-    const pasteSpy = jest.fn((_target: any, _values: any, _clipboardData?: any) => true);
+    const pasteSpy = jest.fn(
+      (_target: any, _values: any, _clipboardData?: any, _groupId?: any, _startGroupRow?: any) =>
+        true
+    );
     jest.useFakeTimers();
     render(
       <EventedDataEditor
@@ -2126,7 +2134,7 @@ describe('data-editor', () => {
     act(() => {
       jest.runAllTimers();
     });
-    expect(navigator.clipboard.writeText).toBeCalledWith('1, 3\t2, 3');
+    expect(navigator.clipboard.writeText).toBeCalledWith('1, 0\t2, 0');
 
     spy.mockClear();
     fireEvent.keyDown(canvas, {
@@ -2158,7 +2166,9 @@ describe('data-editor', () => {
           'https://google.com',
         ],
       ],
-      expect.any(DataTransfer)
+      expect.any(DataTransfer),
+      '0-0-0',
+      0
     );
   });
 
@@ -2197,7 +2207,10 @@ describe('data-editor', () => {
 
   test('Copy/paste with simple getCellsForSelection', async () => {
     const spy = jest.fn();
-    const pasteSpy = jest.fn((_target: any, _values: any, _clipboardData?: any) => true);
+    const pasteSpy = jest.fn(
+      (_target: any, _values: any, _clipboardData?: any, _groupId?: any, _startGroupRow?: any) =>
+        true
+    );
     jest.useFakeTimers();
     render(
       <EventedDataEditor
@@ -2279,7 +2292,9 @@ describe('data-editor', () => {
           'https://google.com',
         ],
       ],
-      expect.any(DataTransfer)
+      expect.any(DataTransfer),
+      undefined,
+      undefined
     );
   });
 

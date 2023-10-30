@@ -651,7 +651,9 @@ export interface DataEditorProps extends Props {
     | ((
         target: Item,
         values: readonly (readonly string[])[],
-        clipboardData?: ClipboardEvent['clipboardData']
+        clipboardData?: ClipboardEvent['clipboardData'],
+        groupId?: string,
+        startGroupRow?: number
       ) => boolean)
     | boolean;
 
@@ -3646,6 +3648,30 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             data = unquote(text);
           }
 
+          let startGroupRow = undefined;
+          if (hasGroups) {
+            let count = 0;
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+              const x = target[1] - count;
+              const rowDetails = getGroupRowDetails(x);
+              if (rowDetails?.kind === GridRowKind.Group) {
+                startGroupRow = target[1] - count;
+                break;
+              }
+              if (rowDetails?.kind === GridRowKind.GroupContent) {
+                count++;
+              }
+              if (rowDetails?.kind === GridRowKind.NewRow) {
+                break;
+              }
+            }
+          }
+
+          const rowDetails = getGroupRowDetails(target[1]);
+          const groupId =
+            rowDetails?.kind === GridRowKind.GroupContent ? rowDetails.groupId : undefined;
+
           if (
             onPaste === false ||
             (typeof onPaste === 'function' &&
@@ -3655,7 +3681,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                   getMangledCellLocation([0, target[1]])[1],
                 ],
                 data,
-                clonedClipboardData
+                clonedClipboardData,
+                groupId,
+                startGroupRow !== undefined
+                  ? getMangledCellLocation([0, startGroupRow + 1])[1]
+                  : undefined
               ) !== true)
           ) {
             return;
@@ -3745,8 +3775,29 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
       if (focused && getCellsForSelection !== undefined) {
         if (gridSelection.current !== undefined) {
+          let startRow = gridSelection.current.range.y;
+          let maxHeight = gridSelection.current.range.height;
+          if (hasGroups) {
+            startRow = getMangledCellLocation([0, gridSelection.current.range.y])[1];
+            maxHeight = range(gridSelection.current.range.height).reduce((acc, item) => {
+              if (gridSelection.current !== undefined) {
+                const rowDetails = getGroupRowDetails(item + gridSelection.current.range.y);
+
+                if (rowDetails?.kind === GridRowKind.GroupContent) {
+                  return acc + 1;
+                }
+              }
+
+              return acc;
+            }, 0);
+          }
+
           let thunk = getCellsForSelection(
-            gridSelection.current.range,
+            {
+              ...gridSelection.current.range,
+              y: startRow,
+              height: maxHeight,
+            },
             abortControllerRef.current.signal
           );
           if (typeof thunk !== 'object') {
@@ -3791,7 +3842,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 x: col,
                 y: 0,
                 width: 1,
-                height: rows,
+                height: initialRowsCount,
               },
               abortControllerRef.current.signal
             );
@@ -3814,13 +3865,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       }
     },
     [
-      columnsIn,
-      getCellsForSelection,
-      gridSelection,
       keybindings.copy,
-      rowMarkerOffset,
-      rows,
+      gridSelection,
+      hasGroups,
+      getCellsForSelection,
+      getMangledCellLocation,
+      getGroupRowDetails,
       copyHeaders,
+      onCopy,
+      columnsIn,
+      rowMarkerOffset,
+      initialRowsCount,
     ]
   );
 
