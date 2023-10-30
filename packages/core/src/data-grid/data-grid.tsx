@@ -1504,7 +1504,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                           return onCellFocused?.([col, row]);
                         }}
                         ref={focused ? focusElement : undefined}
-                        tabIndex={cellContent.kind === 'group' ? undefined : -1}
+                        tabIndex={-1}
                       >
                         {getRowData(cellContent, index, getCellRenderer)}
                       </td>

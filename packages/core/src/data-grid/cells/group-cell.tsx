@@ -23,7 +23,7 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
     const iconDrawY = rect.y + rect.height / 2 - 9;
     spriteManager.drawSprite(icon, 'normal', ctx, drawX, iconDrawY, GROUP_ICON_SIZE, theme, 1);
 
-    const font = `${theme.headerFontStyle} ${theme.fontFamily}`;
+    const font = `${theme.rowGroupTitleFontStyle} ${theme.fontFamily}`;
     ctx.fillStyle = theme.textDark;
     ctx.font = font;
 
@@ -45,9 +45,7 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
     ctx.fillText(
       clippedText,
       drawX + GROUP_ICON_SIZE + theme.cellHorizontalPadding,
-      rect.y +
-        rect.height / 2 +
-        getMiddleCenterBias(ctx, `${theme.headerFontStyle} ${theme.fontFamily}`)
+      rect.y + rect.height / 2 + getMiddleCenterBias(ctx, font)
     );
 
     const textWidth = measureTextCached(
@@ -78,6 +76,7 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
     ctx.fill();
     ctx.fillStyle = '#000';
     ctx.textAlign = 'center';
+    ctx.font = `${theme.rowGroupCountFontStyle} ${theme.fontFamily}`;
     ctx.fillText(`${cell.rowsCount}`, circleX, circleY + 1);
 
     return true;

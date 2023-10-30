@@ -60,6 +60,8 @@ export interface Theme {
    * the background color of row group header
    */
   bgGroup: string;
+  rowGroupTitleFontStyle: string;
+  rowGroupCountFontStyle: string;
   bgHeaderHovered: string;
   bgBubble: string;
   bgBubbleSelected: string;
@@ -132,6 +134,8 @@ const dataEditorBaseTheme: Theme = {
   headerIconSize: 18,
 
   headerFontStyle: '600 13px',
+  rowGroupCountFontStyle: '600 13px',
+  rowGroupTitleFontStyle: '600 13px',
   baseFontStyle: '13px',
   fontFamily:
     'Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif',
