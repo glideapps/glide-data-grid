@@ -3067,7 +3067,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
               event.location.col !== undefined &&
               appendRow(
                 event.location.col,
-                event.location.row !== undefined ? event.location.row : undefined
+                event.location.row !== undefined ? event.location.row - 1 : undefined,
+                markerCell.kind === InnerGridCellKind.NewRow ? markerCell.groupId : undefined
               ),
             cell: markerCell,
           });
