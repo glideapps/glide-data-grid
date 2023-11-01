@@ -1339,9 +1339,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
           preventScroll: true,
         });
       } else if (el !== null) {
-        el.focus({
-          preventScroll: true,
-        });
+        if (el.dataset.group === 'true') {
+          el.parentElement?.focus({
+            preventScroll: true,
+          });
+        } else {
+          el.focus({
+            preventScroll: true,
+          });
+        }
       }
       focusRef.current = el;
     },
@@ -1475,6 +1481,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         }
                         id={id}
                         data-testid={id}
+                        data-group={cellContent.kind === 'group' ? 'true' : undefined}
                         onClick={() => {
                           const canvas = canvasRef?.current;
                           if (canvas === null || canvas === undefined) return;
@@ -1504,7 +1511,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                           return onCellFocused?.([col, row]);
                         }}
                         ref={focused ? focusElement : undefined}
-                        tabIndex={-1}
+                        tabIndex={cellContent.kind === 'group' ? 0 : -1}
                       >
                         {getRowData(cellContent, index, getCellRenderer)}
                       </td>

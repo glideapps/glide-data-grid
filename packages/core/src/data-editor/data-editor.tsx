@@ -2962,16 +2962,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
       scrollTo(col - rowMarkerOffset, row);
 
-      const rowDetails = getGroupRowDetails(row);
-
-      /**
-       * If we want accessibility to work properly,
-       * we need to focus on the entire row when moving to a row group.
-       */
-      if (rowDetails?.kind === GridRowKind.Group) {
-        document.getElementById(`row-${row}`)?.focus();
-      }
-
       return true;
     },
     [
@@ -2983,7 +2973,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       scrollTo,
       setGridSelection,
       setCurrent,
-      getGroupRowDetails,
     ]
   );
 
