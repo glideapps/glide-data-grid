@@ -3677,10 +3677,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onPaste === false ||
             (typeof onPaste === 'function' &&
               onPaste?.(
-                [
-                  getMangledCellLocation([0, target[0] - rowMarkerOffset])[1],
-                  getMangledCellLocation([0, target[1]])[1],
-                ],
+                [target[0] - rowMarkerOffset, getMangledCellLocation([0, target[1]])[1]],
                 data,
                 clonedClipboardData,
                 groupId,
