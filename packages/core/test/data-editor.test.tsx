@@ -888,6 +888,34 @@ describe('data-editor', () => {
     expect(spy).toHaveBeenCalledWith(1, expect.anything());
   });
 
+  test('Emits header doubleclick', async () => {
+    const spy = jest.fn();
+
+    jest.useFakeTimers();
+    render(<DataEditor {...basicProps} onHeaderDoubleClicked={spy} />, {
+      wrapper: Context,
+    });
+    prep();
+
+    const canvas = screen.getByTestId('data-grid-canvas');
+    fireEvent.mouseDown(canvas, {
+      clientX: 300, // Col B
+      clientY: 16, // Header
+    });
+    fireEvent.mouseDown(canvas, {
+      clientX: 300, // Col B
+      clientY: 16, // Header
+    });
+
+    fireEvent.mouseUp(canvas, {
+      clientX: 300, // Col B
+      clientY: 16, // Header
+    });
+
+    expect(spy).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledWith(1, expect.anything());
+  });
+
   test('Emits header click on touch', async () => {
     const spy = jest.fn();
 

@@ -264,6 +264,10 @@ export interface DataEditorProps extends Props {
    * @group Events
    */
   readonly onHeaderClicked?: (colIndex: number, event: HeaderClickedEventArgs) => void;
+  /** Emitted when a column header doubleClicked.
+   * @group Events
+   */
+  readonly onHeaderDoubleClicked?: (colIndex: number, event: HeaderClickedEventArgs) => void;
   /** Emitted when a group header is clicked.
    * @group Events
    */
@@ -828,6 +832,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     rowMarkerStartIndex = 1,
     rowMarkerTheme,
     onHeaderMenuClick,
+    onHeaderDoubleClicked,
     getGroupDetails,
     onSearchClose: onSearchCloseIn,
     onItemHovered,
@@ -2448,6 +2453,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
         if (args.isEdge) {
           void normalSizeColumn(col);
+        } else if (mouseDownData.current?.wasDoubleClick === true) {
+          if (onHeaderDoubleClicked !== undefined) {
+            onHeaderDoubleClicked(clickLocation, { ...args, preventDefault });
+          }
         } else if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
           onHeaderClicked?.(clickLocation, { ...args, preventDefault });
         }
@@ -2496,6 +2505,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       normalSizeColumn,
       handleGroupHeaderSelection,
       rowMarkerWidth,
+      onHeaderDoubleClicked,
     ]
   );
 
