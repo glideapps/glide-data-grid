@@ -465,6 +465,7 @@ export interface BaseGridCell {
   readonly contentAlign?: 'left' | 'right' | 'center';
   readonly cursor?: CSSProperties['cursor'];
   readonly groupLevel?: number;
+  readonly allowMoveToFirst?: boolean;
 }
 
 /** @category Cells */

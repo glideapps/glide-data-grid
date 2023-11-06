@@ -462,7 +462,8 @@ const useDragAndDrop = ({
       if (
         initialDropTarget.current !== undefined &&
         initialDropTarget.current[0] !== 0 &&
-        (disabledDragColsAndRows?.cols?.includes(col) === true || col <= 0)
+        (disabledDragColsAndRows?.cols?.includes(col) === true ||
+        col < ((getCellContent(initialDropTarget.current).allowMoveToFirst ?? false) ? 0 : 1))
       ) {
         return;
       }
@@ -476,6 +477,7 @@ const useDragAndDrop = ({
       getMouseArgsForPosition,
       lockColumns,
       onDrop,
+      getCellContent,
     ]
   );
 

@@ -2742,7 +2742,12 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         const isRightDirection = dragAndDropState.column.src < dragAndDropState.column.dest;
         const xPosition = isRightDirection ? x + c.width : x;
 
-        if (!(freezeColumns && !isRightDirection && x < effectiveCols[freezeColumns - 1].width)) {
+        // TODO: improve this logic S.Y.
+
+        const allowMoveToFirst = getCellContent([dragAndDropState.column.src, -1]).allowMoveToFirst ?? false;     
+        const ww = allowMoveToFirst ? !x : x < effectiveCols[freezeColumns - 1].width;
+
+        if (!(freezeColumns && !isRightDirection && ww)) {
           drawColumnResizeOutline(
             overlayCtx,
             xPosition,

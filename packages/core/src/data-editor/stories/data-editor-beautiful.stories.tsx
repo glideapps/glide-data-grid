@@ -1457,6 +1457,74 @@ export const RearrangeColumns: React.VFC = () => {
   },
 };
 
+export const RearrangePrimaryColumn: React.VFC = () => {
+  const { cols, getCellContent, getCellsForSelection } = useMockDataGenerator(10);
+
+  const [sortableCols, setSortableCols] = React.useState(cols);
+
+  const onColMoved = React.useCallback(
+    (startIndex: number, endIndex: number): void => {
+      const newColumns = [...sortableCols];
+      const element = newColumns[startIndex];
+      newColumns.splice(startIndex, 1);
+      newColumns.splice(endIndex, 0, element);
+      setSortableCols(newColumns);
+    },
+    [sortableCols]
+  );
+
+  const getCellContentMangled = React.useCallback(
+    ([col, row]: Item): GridCell => {
+      const remappedCol = cols.findIndex((c) => c.title === sortableCols[col].title);
+      return getCellContent([remappedCol, row]);
+    },
+    [cols, getCellContent, sortableCols]
+  );
+
+  return (
+    <BeautifulWrapper
+      title="Rearrange Primary Column"
+      description={
+        <>
+        <Description>
+         Columns, that have <PropName>allowMoveToFirst</PropName> property, can be moved to the first column by just drag and dropping, before drop, you can confirm or cancel the action by using {' '}
+        <PropName>confirmColumnMove</PropName> callback.
+        </Description>
+          <MoreInfo>
+          In this example only 
+            <KeyName>Avatar</KeyName> column is the candidate for moving to the first column.
+          </MoreInfo>
+          </>
+      }
+    >
+      <DataEditor
+        {...defaultProps}
+        freezeColumns={3}
+        rowMarkers="both"
+        getCellContent={getCellContentMangled}
+        getCellsForSelection={getCellsForSelection}
+        columns={sortableCols}
+        onColumnMoved={onColMoved}
+        confirmColumnMove={(targetCol) => {
+          if (targetCol === 1) {
+            return new Promise((resolve) => {
+              const isConfirmed = confirm('Are you sure you want to move this column?');
+              resolve(isConfirmed);
+            })  
+          }
+          return Promise.resolve(true);
+        }}
+        rows={1000}
+      />
+    </BeautifulWrapper>
+  );
+};
+(RearrangePrimaryColumn as any).parameters = {
+  options: {
+    showPanel: false,
+  },
+};
+
 interface RowAndHeaderSizesProps {
   rowHeight: number;
   headerHeight: number;

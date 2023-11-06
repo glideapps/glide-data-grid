@@ -73,6 +73,8 @@ export interface DataGridDndProps extends Props {
     newSizeWithGrow: number
   ) => void;
 
+  readonly confirmColumnMove?: (targetCol: number, dragCol: number) => Promise<boolean>;
+
   readonly gridRef?: React.MutableRefObject<DataGridRef | null>;
   readonly maxColumnWidth: number;
   readonly minColumnWidth: number;
@@ -122,6 +124,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
     getGroupRowDetails,
     onDragOverCell,
     onDrop,
+    confirmColumnMove = () => Promise.resolve(true),
   } = p;
 
   const canResize = (onColumnResize ?? onColumnResizeEnd ?? onColumnResizeStart) !== undefined;
@@ -358,14 +361,13 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
   );
 
   const onDropImpl = React.useCallback<NonNullable<DataGridDndProps['onDrop']>>(
-    (args, data) => {
+   async (args, data) => {
       if (dragCol !== args[0] && dragCol !== undefined) {
         const targetCol = args[0];
-        onColumnMoved?.(dragCol, targetCol);
-      }
-      if (dragCol !== args[0] && dragCol !== undefined) {
-        const targetCol = args[0];
-        onColumnMoved?.(dragCol, targetCol);
+        const columnMoveConfirmed = await confirmColumnMove(targetCol, dragCol)
+        if (columnMoveConfirmed) {
+          onColumnMoved?.(dragCol, targetCol);
+        }
       }
       if (dragRow !== undefined && dropRow !== undefined) {
         const targetRow = args[1];
@@ -379,7 +381,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
       onDrop?.(args, data);
       clearAll();
     },
-    [clearAll, dragCol, dragRow, dropRow, onColumnMoved, onDrop, onRowMoved, p.selection.rows]
+    [clearAll, dragCol, dragRow, dropRow, onColumnMoved, confirmColumnMove, onDrop, onRowMoved, p.selection.rows]
   );
 
   return (
