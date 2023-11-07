@@ -967,10 +967,10 @@ onCellActivated?: (cell: Item) => void;
 ## onColumnMoved
 
 ```ts
-onColumnMoved?: (startIndex: number, endIndex: number) => void;
+onColumnMoved?: (startIndex: number, endIndex: number) => Promise<boolean>;
 ```
 
-`onColumnMoved` is called when the user finishes moving a column. `startIndex` is the index of the column that was moved, and `endIndex` is the index at which it should end up. Note that you have to effect the move of the column, and pass the reordered columns back in the `columns` property.
+`onColumnMoved` is called when the user finishes moving a column. It should return a promise, and when the promise is resolved with true, that means the move is confirmed. When the promise is rejected or resolved with false, that means the move is canceled. `startIndex` is the index of the column that was moved, and `endIndex` is the index at which it should end up. Note that you have to effect the move of the column, and pass the reordered columns back in the `columns` property.
 
 ---
 

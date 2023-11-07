@@ -22,7 +22,9 @@ export interface DataGridDndProps extends Props {
    */
   readonly onRowMoved?: (rowsIndex: number[], endIndex: number) => void;
   /**
-   * Called when the user finishes moving a column. `startIndex` is the index of the column that was moved, and
+   * Called when the user finishes moving a column. It should return a promise, and when the promise is resolved
+   * with true, that means the move is confirmed. When the promise is rejected or resolved with false, that means
+   * the move is canceled. `startIndex` is the index of the column that was moved, and
    * `endIndex` is the index at which it should end up. Note that you have to effect the move of the column, and pass
    * the reordered columns back in the `columns` property.
    * @group Drag and Drop
@@ -358,10 +360,11 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
   );
 
   const onDropImpl = React.useCallback<NonNullable<DataGridDndProps['onDrop']>>(
-    (args, data) => {
+    async (args, data) => {
+      let isConfirmed = true;
       if (dragCol !== args[0] && dragCol !== undefined) {
         const targetCol = args[0];
-        onColumnMoved?.(dragCol, targetCol);
+        isConfirmed = await onColumnMoved?.(dragCol, targetCol) ?? true;
       }
       if (dragRow !== undefined && dropRow !== undefined) {
         const targetRow = args[1];
@@ -372,7 +375,9 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
           onRowMoved?.([dragRow], targetRow);
         }
       }
-      onDrop?.(args, data);
+      if (isConfirmed) {
+        onDrop?.(args, data);
+      }
       clearAll();
     },
     [clearAll, dragCol, dragRow, dropRow, onColumnMoved, onDrop, onRowMoved, p.selection.rows]

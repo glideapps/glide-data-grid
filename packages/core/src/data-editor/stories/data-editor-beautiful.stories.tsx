@@ -1485,12 +1485,10 @@ export const RearrangePrimaryColumn: React.VFC = () => {
     <BeautifulWrapper
       title="Rearrange Primary Column"
       description={
-        <>
         <Description>
-         Columns can be moved to the first column by just drag and dropping, before drop, you can confirm or cancel the action by using {' '}
-        <PropName>onColMoved</PropName> callback.
+          Columns can be moved to the first column by just drag and dropping, before drop, you can confirm or cancel the action by using {' '}
+          <PropName>onColMoved</PropName> callback.
         </Description>
-          </>
       }
     >
       <DataEditor
