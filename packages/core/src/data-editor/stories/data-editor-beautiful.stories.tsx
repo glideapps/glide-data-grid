@@ -1487,13 +1487,9 @@ export const RearrangePrimaryColumn: React.VFC = () => {
       description={
         <>
         <Description>
-         Columns, that have <PropName>allowMoveToFirst</PropName> property, can be moved to the first column by just drag and dropping, before drop, you can confirm or cancel the action by using {' '}
-        <PropName>confirmColumnMove</PropName> callback.
+         Columns can be moved to the first column by just drag and dropping, before drop, you can confirm or cancel the action by using {' '}
+        <PropName>onColMoved</PropName> callback.
         </Description>
-          <MoreInfo>
-          In this example only 
-            <KeyName>Avatar</KeyName> column is the candidate for moving to the first column.
-          </MoreInfo>
           </>
       }
     >
