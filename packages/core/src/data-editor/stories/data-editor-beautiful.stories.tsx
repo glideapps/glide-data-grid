@@ -1504,12 +1504,14 @@ export const RearrangePrimaryColumn: React.VFC = () => {
         getCellContent={getCellContentMangled}
         getCellsForSelection={getCellsForSelection}
         columns={sortableCols}
-        onColumnMoved={onColMoved}
-        confirmColumnMove={(targetCol) => {
-          if (targetCol === 1) {
+        onColumnMoved={(startIndex, endIndex) => {
+          if (endIndex === 0) {
             return new Promise((resolve) => {
               const isConfirmed = confirm('Are you sure you want to move this column?');
               resolve(isConfirmed);
+              if (isConfirmed) {
+                onColMoved(startIndex, endIndex)
+              }
             })  
           }
           return Promise.resolve(true);

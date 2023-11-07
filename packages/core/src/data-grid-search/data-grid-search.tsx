@@ -546,7 +546,6 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
         onCanvasFocused={p.onCanvasFocused}
         onCellFocused={p.onCellFocused}
         onColumnMoved={p.onColumnMoved}
-        confirmColumnMove={p.confirmColumnMove}
         onColumnResize={p.onColumnResize}
         onColumnResizeEnd={p.onColumnResizeEnd}
         onColumnResizeStart={p.onColumnResizeStart}

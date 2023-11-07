@@ -812,7 +812,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     keybindings: keybindingsIn,
     onRowAppended,
     onColumnMoved,
-    confirmColumnMove,
     validateCell: validateCellIn,
     highlightRegions: highlightRegionsIn,
     drawCell,
@@ -2598,10 +2597,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
   const onColumnMovedImpl = whenDefined(
     onColumnMoved,
     React.useCallback(
-      (startIndex: number, endIndex: number) => {
+      async (startIndex: number, endIndex: number) => {
         if (columnSelect !== 'none') {
-          onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset);
-          setSelectedColumns(CompactSelection.fromSingleSelection(endIndex), undefined, true);
+          const isConfirmed = await onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset)
+          isConfirmed && setSelectedColumns(CompactSelection.fromSingleSelection(endIndex), undefined, true);
         }
       },
       [columnSelect, onColumnMoved, rowMarkerOffset, setSelectedColumns]
@@ -4220,7 +4219,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
           onColumnResizeStart={onColumnResizeStart}
           onCellFocused={onCellFocused}
           onColumnMoved={onColumnMovedImpl}
-          confirmColumnMove={confirmColumnMove}
           onDragStart={onDragStartImpl}
           onHeaderMenuClick={onHeaderMenuClickInner}
           onItemHovered={onItemHoveredImpl}

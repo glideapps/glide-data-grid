@@ -336,7 +336,6 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
           data: [`/assets/image-900x900.jpg`],
           displayData: ['/assets/image-40x40.jpg'],
           allowOverlay: true,
-          allowMoveToFirst: true,
           allowAdd: false,
           readonly: true,
         };

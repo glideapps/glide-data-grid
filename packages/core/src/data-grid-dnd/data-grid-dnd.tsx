@@ -27,7 +27,7 @@ export interface DataGridDndProps extends Props {
    * the reordered columns back in the `columns` property.
    * @group Drag and Drop
    */
-  readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
+  readonly onColumnMoved?: (startIndex: number, endIndex: number) => Promise<boolean>;
 
   /**
    * Called when the user is resizing a column. `newSize` is the new size of the column. Note that you have change
@@ -72,8 +72,6 @@ export interface DataGridDndProps extends Props {
     colIndex: number,
     newSizeWithGrow: number
   ) => void;
-
-  readonly confirmColumnMove?: (targetCol: number, dragCol: number) => Promise<boolean>;
 
   readonly gridRef?: React.MutableRefObject<DataGridRef | null>;
   readonly maxColumnWidth: number;
@@ -124,7 +122,6 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
     getGroupRowDetails,
     onDragOverCell,
     onDrop,
-    confirmColumnMove = () => Promise.resolve(true),
   } = p;
 
   const canResize = (onColumnResize ?? onColumnResizeEnd ?? onColumnResizeStart) !== undefined;
@@ -361,13 +358,10 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
   );
 
   const onDropImpl = React.useCallback<NonNullable<DataGridDndProps['onDrop']>>(
-   async (args, data) => {
+    (args, data) => {
       if (dragCol !== args[0] && dragCol !== undefined) {
         const targetCol = args[0];
-        const columnMoveConfirmed = await confirmColumnMove(targetCol, dragCol)
-        if (columnMoveConfirmed) {
-          onColumnMoved?.(dragCol, targetCol);
-        }
+        onColumnMoved?.(dragCol, targetCol);
       }
       if (dragRow !== undefined && dropRow !== undefined) {
         const targetRow = args[1];
@@ -381,7 +375,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
       onDrop?.(args, data);
       clearAll();
     },
-    [clearAll, dragCol, dragRow, dropRow, onColumnMoved, confirmColumnMove, onDrop, onRowMoved, p.selection.rows]
+    [clearAll, dragCol, dragRow, dropRow, onColumnMoved, onDrop, onRowMoved, p.selection.rows]
   );
 
   return (
