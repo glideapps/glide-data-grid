@@ -173,6 +173,11 @@ export function unquote(str: string): string[][] {
     return result;
 }
 
+function normalizeHTMLString(input: string): string {
+    // Convert &nbsp; to regular spaces
+    return input.replace(/\u00A0/g, ' ');
+}
+
 export function decodeHTML(tableEl: HTMLTableElement): string[][] | undefined {
     const walkEl: Element[] = [tableEl];
     const result: string[][] = [];
@@ -192,7 +197,7 @@ export function decodeHTML(tableEl: HTMLTableElement): string[][] | undefined {
             current = [];
             walkEl.push(...[...el.children].reverse());
         } else if (el instanceof HTMLTableCellElement) {
-            current?.push(el.innerText ?? el.textContent ?? "");
+            current?.push(normalizeHTMLString(el.innerText ?? el.textContent ?? ""));
         }
     }
 

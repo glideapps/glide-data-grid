@@ -25,6 +25,27 @@ describe("data-editor-fns", () => {
         ]);
     });
 
+    test("decode html converts &nbsp; characters to regular spaces", () => {
+        const root = document.createElement("table");
+        root.innerHTML = `
+            <tbody>
+                <tr>
+                    <td>hi&nbsp;mom!</td>
+                </tr>
+                <tr>
+                    <td>&nbsp; &nbsp;</td>
+                </tr>
+            </tbody>
+        `;
+
+        const decoded = decodeHTML(root);
+
+        expect(decoded).toEqual([
+            ["hi mom!"],
+            ["   "]
+        ]);
+    });
+
     test("format empty bubble cell", () => {
         expect(
             formatCell(
