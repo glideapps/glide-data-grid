@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.15.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.14.8...v5.15.0) (2023-11-08)
+
+
+### Features
+
+* change stroybook ([4873908](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/487390856b4d57dcd471edceab1408bd273337df))
+* change stroybook ([02f630c](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/02f630c0c25c88161f9492d97c867c98a9130c74))
+* rearrange primary  column ([6df7532](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/6df75327d2ecb3948b39f2db97f187efe7bca25b))
+
 ### [5.14.8](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.14.7...v5.14.8) (2023-11-06)
 
 ### [5.14.7](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.14.6...v5.14.7) (2023-11-01)
