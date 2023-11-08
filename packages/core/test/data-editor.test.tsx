@@ -1,6 +1,6 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import * as React from 'react';
-import { render, fireEvent, screen, act } from '@testing-library/react';
+import { render, fireEvent, screen, act, waitFor } from '@testing-library/react';
 import {
   CompactSelection,
   DataEditor,
@@ -4360,4 +4360,65 @@ describe('data-editor', () => {
       },
     });
   });
+
+  test('should call onDrop when onColumnMoved resolves with true', async () => {
+    const spyOnDrop = jest.fn();
+    const spyOnColumnMoved = jest.fn(() => Promise.resolve(true));
+
+    jest.useFakeTimers();
+
+    render(
+      <EventedDataEditor
+        {...basicProps}
+        onRowMoved={jest.fn()}
+        onColumnMoved={spyOnColumnMoved}
+        onDrop={spyOnDrop}
+      />
+    );
+
+    const scroller = prep(false);
+
+    act(() => fireDragStartEvent(scroller));
+    act(() => fireDropEvent(scroller));
+
+    expect(spyOnColumnMoved).toBeCalled();
+    await waitFor(() => expect(spyOnDrop).toBeCalled());
+  });
+
+  test("shouldn't call onDrop when onColumnMoved resolves with false", async () => {
+    const spyOnDrop = jest.fn();
+    const spyOnColumnMoved = jest.fn(() => Promise.resolve(false));
+
+    jest.useFakeTimers();
+
+    render(
+      <EventedDataEditor
+        {...basicProps}
+        onRowMoved={jest.fn()}
+        onColumnMoved={spyOnColumnMoved}
+        onDrop={spyOnDrop}
+      />
+    );
+
+    const scroller = prep(false);
+
+    act(() => fireDragStartEvent(scroller));
+    act(() => fireDropEvent(scroller));
+
+    expect(spyOnColumnMoved).toBeCalled();
+    await waitFor(() => expect(spyOnDrop).not.toBeCalled());
+  });
 });
+
+function fireDragStartEvent(element: Element | null) {
+  const dragStartEvent = new Event('dragstart', { bubbles: true });
+  Object.defineProperty(dragStartEvent, 'clientX', { value: 300 });
+  Object.defineProperty(dragStartEvent, 'clientY', { value: 16 });
+  Object.defineProperty(dragStartEvent, 'dataTransfer', { value: null });
+  element?.dispatchEvent(dragStartEvent);
+}
+
+function fireDropEvent(element: Element | null) {
+  const dropEvent = new Event('drop', { bubbles: true });
+  element?.dispatchEvent(dropEvent);
+}

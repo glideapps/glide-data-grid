@@ -462,7 +462,7 @@ const useDragAndDrop = ({
       if (
         initialDropTarget.current !== undefined &&
         initialDropTarget.current[0] !== 0 &&
-        (disabledDragColsAndRows?.cols?.includes(col) === true || col <= 0)
+        (disabledDragColsAndRows?.cols?.includes(col) === true || col < 0)
       ) {
         return;
       }
