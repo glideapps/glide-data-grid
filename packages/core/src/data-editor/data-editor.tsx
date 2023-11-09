@@ -2603,6 +2603,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
           isConfirmed = await onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset) ?? true
           if (isConfirmed) {
             setSelectedColumns(CompactSelection.fromSingleSelection(endIndex), undefined, true);
+          }else{
+            setSelectedColumns(CompactSelection.fromSingleSelection(startIndex), undefined, true);
           }
         }
         return isConfirmed
