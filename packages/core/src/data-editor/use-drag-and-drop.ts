@@ -448,8 +448,7 @@ const useDragAndDrop = ({
   }, [onDragEnd, clearInteractionStates]);
 
   const onDropImpl = React.useCallback(
-    (event: DragEvent) => {
-      debugger;
+    (event: DragEvent) => {      
       const canvas = canvasRef.current;
       if (canvas === null || onDrop === undefined) {
         return;
