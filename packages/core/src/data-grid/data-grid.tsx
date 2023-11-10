@@ -292,6 +292,8 @@ export interface DataGridProps {
     rows?: number[];
     cols?: number[];
   };
+
+  readonly clearInteractionStates: VoidFunction;
 }
 
 type DamageUpdateList = readonly {
@@ -389,6 +391,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     lockColumns,
     disabledDragColsAndRows,
     getGroupRowDetails,
+    clearInteractionStates,
   } = p;
   const translateX = p.translateX ?? 0;
   const translateY = p.translateY ?? 0;
@@ -1325,6 +1328,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     width,
     eventTargetRef,
     selection,
+    clearInteractionStates,
   });
 
   const selectionRef = React.useRef(selection);

@@ -2598,16 +2598,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     onColumnMoved,
     React.useCallback(
       async (startIndex: number, endIndex: number) => {
-        let isConfirmed = false
+        let isConfirmed = false;
         if (columnSelect !== 'none') {
-          isConfirmed = await onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset) ?? true
+          isConfirmed =
+            (await onColumnMoved?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset)) ??
+            true;
           if (isConfirmed) {
             setSelectedColumns(CompactSelection.fromSingleSelection(endIndex), undefined, true);
-          }else{
+          } else {
             setSelectedColumns(CompactSelection.fromSingleSelection(startIndex), undefined, true);
           }
         }
-        return isConfirmed
+        return isConfirmed;
       },
       [columnSelect, onColumnMoved, rowMarkerOffset, setSelectedColumns]
     )
