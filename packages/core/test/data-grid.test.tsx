@@ -25,7 +25,7 @@ const basicProps: DataGridProps = {
   onMouseDown: () => undefined,
   onMouseMoveRaw: () => undefined,
   onMouseUp: () => undefined,
-  clearInteractionStates: ()=> undefined,
+  resetDragAndDropState: ()=> undefined,
   smoothScrollX: undefined,
   smoothScrollY: undefined,
   allowResize: undefined,

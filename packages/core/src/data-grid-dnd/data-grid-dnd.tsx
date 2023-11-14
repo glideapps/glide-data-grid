@@ -17,7 +17,7 @@ type Props = Omit<
   | 'isDragging'
   | 'onMouseMoveRaw'
   | 'allowResize'
-  | 'clearInteractionStates'
+  | 'resetDragAndDropState'
 >;
 
 export interface DataGridDndProps extends Props {
@@ -459,7 +459,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
       lockColumns={lockColumns}
       disabledDragColsAndRows={p.disabledDragColsAndRows}
       getGroupRowDetails={getGroupRowDetails}
-      clearInteractionStates={clearAll}
+      resetDragAndDropState={clearAll}
     />
   );
 };
