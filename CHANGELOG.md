@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.15.1](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.15.0...v5.15.1) (2023-11-14)
+
+
+### Bug Fixes
+
+* dnd issues ([75cdeb9](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/75cdeb9106c2850ed0bcf9afd4d50a3af035fafc))
+* remove debugger ([71005af](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/71005af9d28206e1f01c2051c226e99b56d14ec3))
+* select column after drop was canceled ([0796a4e](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/0796a4e7fd1f001de3e39d22bb0b0ca62207bb93))
+* type error ([4762aa3](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/4762aa3d672d1024212fc2694bf20ad6ca61a667))
+* type error ([15724e2](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/15724e2a378a81e4013ec63cfe84be70637d7e24))
+
 ## [5.15.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.14.8...v5.15.0) (2023-11-08)
 
 
