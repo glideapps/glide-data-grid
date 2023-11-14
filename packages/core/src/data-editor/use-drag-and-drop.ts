@@ -42,7 +42,9 @@ interface IProps
     | 'firstColAccessible'
     | 'width'
     | 'selection'
+    | 'resetDragAndDropState'
   > {
+    
   readonly canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
   readonly eventTargetRef: React.MutableRefObject<HTMLDivElement | null> | undefined;
   readonly getMouseArgsForPosition: (
@@ -88,6 +90,7 @@ const useDragAndDrop = ({
   width,
   eventTargetRef,
   selection,
+  resetDragAndDropState,
 }: IProps) => {
   const activeDropTarget = React.useRef<Item | undefined>();
   const initialDropTarget = React.useRef<Item | undefined>();
@@ -442,10 +445,11 @@ const useDragAndDrop = ({
     activeDropTarget.current = undefined;
     initialDropTarget.current = undefined;
     onDragEnd?.();
-  }, [onDragEnd]);
+    resetDragAndDropState();
+  }, [onDragEnd, resetDragAndDropState]);
 
   const onDropImpl = React.useCallback(
-    (event: DragEvent) => {
+    (event: DragEvent) => {      
       const canvas = canvasRef.current;
       if (canvas === null || onDrop === undefined) {
         return;
@@ -464,6 +468,7 @@ const useDragAndDrop = ({
         initialDropTarget.current[0] !== 0 &&
         (disabledDragColsAndRows?.cols?.includes(col) === true || col < 0)
       ) {
+        resetDragAndDropState();
         return;
       }
 
@@ -476,6 +481,7 @@ const useDragAndDrop = ({
       getMouseArgsForPosition,
       lockColumns,
       onDrop,
+      resetDragAndDropState,
     ]
   );
 

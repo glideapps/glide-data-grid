@@ -11,7 +11,13 @@ import type {
 
 type Props = Omit<
   DataGridProps,
-  'dragAndDropState' | 'isResizing' | 'resizeCol' | 'isDragging' | 'onMouseMoveRaw' | 'allowResize'
+  | 'dragAndDropState'
+  | 'isResizing'
+  | 'resizeCol'
+  | 'isDragging'
+  | 'onMouseMoveRaw'
+  | 'allowResize'
+  | 'resetDragAndDropState'
 >;
 
 export interface DataGridDndProps extends Props {
@@ -362,9 +368,10 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
   const onDropImpl = React.useCallback<NonNullable<DataGridDndProps['onDrop']>>(
     async (args, data) => {
       let isConfirmed = true;
+      clearAll();
       if (dragCol !== args[0] && dragCol !== undefined) {
         const targetCol = args[0];
-        isConfirmed = await onColumnMoved?.(dragCol, targetCol) ?? true;
+        isConfirmed = (await onColumnMoved?.(dragCol, targetCol)) ?? true;
       }
       if (dragRow !== undefined && dropRow !== undefined) {
         const targetRow = args[1];
@@ -378,7 +385,6 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
       if (isConfirmed) {
         onDrop?.(args, data);
       }
-      clearAll();
     },
     [clearAll, dragCol, dragRow, dropRow, onColumnMoved, onDrop, onRowMoved, p.selection.rows]
   );
@@ -453,6 +459,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
       lockColumns={lockColumns}
       disabledDragColsAndRows={p.disabledDragColsAndRows}
       getGroupRowDetails={getGroupRowDetails}
+      resetDragAndDropState={clearAll}
     />
   );
 };
