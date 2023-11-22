@@ -1486,8 +1486,8 @@ export const RearrangePrimaryColumn: React.VFC = () => {
       title="Rearrange Primary Column"
       description={
         <Description>
-          Columns can be moved to the first column by just drag and dropping, before drop, you can confirm or cancel the action by using {' '}
-          <PropName>onColMoved</PropName> callback.
+          Columns can be moved to the first column by just drag and dropping, before drop, you can
+          confirm or cancel the action by using <PropName>onColMoved</PropName> callback.
         </Description>
       }
     >
@@ -1504,9 +1504,9 @@ export const RearrangePrimaryColumn: React.VFC = () => {
               const isConfirmed = confirm('Are you sure you want to move this column?');
               resolve(isConfirmed);
               if (isConfirmed) {
-                onColMoved(startIndex, endIndex)
+                onColMoved(startIndex, endIndex);
               }
-            })  
+            });
           }
           return Promise.resolve(true);
         }}

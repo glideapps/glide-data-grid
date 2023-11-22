@@ -359,7 +359,33 @@ describe('data-editor', () => {
       clientY: 36 + 32 + 16, // Row 1 (0 indexed)
     });
 
-    expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    expect(spy).toHaveBeenCalledWith(
+      {
+        allowOverlay: true,
+        allowWrapping: true,
+        data: 'Data: 1, 1',
+        displayData: '1, 1',
+        kind: 'text',
+      },
+      [1, 1],
+      {
+        bounds: { height: 33, width: 161, x: 150, y: 68 },
+        button: 0,
+        ctrlKey: false,
+        isEdge: false,
+        isFillHandle: false,
+        isTouch: false,
+        kind: 'cell',
+        localEventX: 150,
+        localEventY: 16,
+        location: [1, 1],
+        metaKey: false,
+        preventDefault: expect.anything(),
+        scrollEdge: [0, 0],
+        shiftKey: false,
+      },
+      undefined
+    );
     expect(spySelection).toHaveBeenCalledWith(
       expect.objectContaining({
         current: expect.objectContaining({ cell: [1, 1] }),
@@ -427,7 +453,33 @@ describe('data-editor', () => {
       clientY: 36 + 32 + 16, // Row 1 (0 indexed)
     });
 
-    expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    expect(spy).toHaveBeenCalledWith(
+      {
+        allowOverlay: true,
+        allowWrapping: true,
+        data: 'Data: 1, 1',
+        displayData: '1, 1',
+        kind: 'text',
+      },
+      [1, 1],
+      {
+        bounds: { height: 33, width: 161, x: 150, y: 68 },
+        button: 0,
+        ctrlKey: false,
+        isEdge: false,
+        isFillHandle: false,
+        isTouch: false,
+        kind: 'cell',
+        localEventX: 150,
+        localEventY: 16,
+        location: [1, 1],
+        metaKey: false,
+        preventDefault: expect.anything(),
+        scrollEdge: [0, 0],
+        shiftKey: false,
+      },
+      undefined
+    );
     expect(spySelection).not.toHaveBeenCalled();
   });
 
@@ -460,7 +512,33 @@ describe('data-editor', () => {
       clientY: 36 + 32 + 16, // Row 1 (0 indexed)
     });
 
-    expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    expect(spy).toHaveBeenCalledWith(
+      {
+        allowOverlay: true,
+        allowWrapping: true,
+        data: 'Data: 1, 1',
+        displayData: '1, 1',
+        kind: 'text',
+      },
+      [1, 1],
+      {
+        bounds: { height: 33, width: 161, x: 150, y: 68 },
+        button: 0,
+        ctrlKey: false,
+        isEdge: false,
+        isFillHandle: false,
+        isTouch: false,
+        kind: 'cell',
+        localEventX: 150,
+        localEventY: 16,
+        location: [1, 1],
+        metaKey: false,
+        preventDefault: expect.anything(),
+        scrollEdge: [0, 0],
+        shiftKey: false,
+      },
+      undefined
+    );
     expect(spySelection).not.toHaveBeenCalled();
   });
 
@@ -498,7 +576,33 @@ describe('data-editor', () => {
       clientY: 36 + 32 + 16, // Row 1 (0 indexed)
     });
 
-    expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    expect(spy).toHaveBeenCalledWith(
+      {
+        allowOverlay: true,
+        allowWrapping: true,
+        data: 'Data: 1, 1',
+        displayData: '1, 1',
+        kind: 'text',
+      },
+      [1, 1],
+      {
+        bounds: { height: 33, width: 161, x: 150, y: 68 },
+        button: 0,
+        ctrlKey: false,
+        isEdge: false,
+        isFillHandle: false,
+        isTouch: false,
+        kind: 'cell',
+        localEventX: 150,
+        localEventY: 16,
+        location: [1, 1],
+        metaKey: false,
+        preventDefault: expect.anything(),
+        scrollEdge: [0, 0],
+        shiftKey: false,
+      },
+      undefined
+    );
     expect(spySelection).not.toHaveBeenCalled();
   });
 
@@ -536,7 +640,33 @@ describe('data-editor', () => {
       clientY: 36 + 32 + 16, // Row 1 (0 indexed)
     });
 
-    expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    expect(spy).toHaveBeenCalledWith(
+      {
+        allowOverlay: true,
+        allowWrapping: true,
+        data: 'Data: 1, 1',
+        displayData: '1, 1',
+        kind: 'text',
+      },
+      [1, 1],
+      {
+        bounds: { height: 33, width: 161, x: 150, y: 68 },
+        button: 0,
+        ctrlKey: false,
+        isEdge: false,
+        isFillHandle: false,
+        isTouch: false,
+        kind: 'cell',
+        localEventX: 150,
+        localEventY: 16,
+        location: [1, 1],
+        metaKey: false,
+        preventDefault: expect.anything(),
+        scrollEdge: [0, 0],
+        shiftKey: false,
+      },
+      undefined
+    );
     expect(spySelection).not.toHaveBeenCalled();
   });
 
@@ -566,7 +696,33 @@ describe('data-editor', () => {
       clientY: 36 + 32 + 16, // Row 1 (0 indexed)
     });
 
-    expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    expect(spy).toHaveBeenCalledWith(
+      {
+        allowOverlay: true,
+        allowWrapping: true,
+        data: 'Data: 1, 1',
+        displayData: '1, 1',
+        kind: 'text',
+      },
+      [1, 1],
+      {
+        bounds: { height: 33, width: 161, x: 186, y: 68 },
+        button: 0,
+        ctrlKey: false,
+        isEdge: false,
+        isFillHandle: false,
+        isTouch: false,
+        kind: 'cell',
+        localEventX: 134,
+        localEventY: 16,
+        location: [2, 1],
+        metaKey: false,
+        preventDefault: expect.anything(),
+        scrollEdge: [0, 0],
+        shiftKey: false,
+      },
+      undefined
+    );
     expect(spySelection).toHaveBeenCalledWith(
       expect.objectContaining({
         current: expect.objectContaining({ cell: [1, 1] }),

@@ -67,6 +67,7 @@ interface BaseCellRenderer<T extends InnerGridCell> {
       readonly location: Item;
       readonly doubleClick?: boolean;
       readonly rowMarkerWidth?: number;
+      readonly groupId?: string;
       readonly preventDefault: () => void;
       readonly onRowDetailsUpdated?: (newValue: GridRow) => void;
     } & BaseGridMouseEventArgs

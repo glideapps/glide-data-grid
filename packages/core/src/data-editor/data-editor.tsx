@@ -302,7 +302,12 @@ export interface DataEditorProps extends Props {
   /** Emitted when a cell should show a context menu. Usually right click.
    * @group Events
    */
-  readonly onCellContextMenu?: (cell: Item, event: CellClickedEventArgs) => void;
+  readonly onCellContextMenu?: (
+    cell: InnerGridCell,
+    cellLocation: Item,
+    event: CellClickedEventArgs,
+    groupId?: string
+  ) => void;
   /** Used for validating cell values during editing.
    * @group Editing
    * @param cell The cell which is being validated.
@@ -2348,6 +2353,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
           const r = getCellRenderer(c);
           if (r !== undefined && r.onClick !== undefined) {
             const mangledLocation = getMangledCellLocation(args.location);
+            const rowDetails = getGroupRowDetails(row);
+            const groupId =
+              rowDetails?.kind === GridRowKind.GroupContent ? rowDetails.groupId : undefined;
             const newVal = r.onClick({
               ...a,
               cell: c,
@@ -2362,6 +2370,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
               },
               doubleClick: mouseDownData.current?.wasDoubleClick ?? false,
               preventDefault,
+              groupId,
             });
 
             if (newVal !== undefined && newVal.kind === GridRowKind.Group) {
@@ -2410,10 +2419,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             gridSelection?.current?.cell[0] === col &&
             gridSelection?.current?.cell[1] === row
           ) {
-            onCellContextMenu?.([clickLocation, args.location[1]], {
-              ...args,
-              preventDefault,
-            });
+            const cellContent = getMangledCellContent([col, row]);
+            const rowDetails = getGroupRowDetails(row);
+            const groupId =
+              rowDetails?.kind === GridRowKind.GroupContent ? rowDetails.groupId : undefined;
+
+            onCellContextMenu?.(
+              cellContent,
+              [clickLocation, args.location[1]],
+              {
+                ...args,
+                preventDefault,
+              },
+              groupId
+            );
             return;
           } else if (args.kind === 'header' && gridSelection.columns.hasIndex(col)) {
             onHeaderContextMenu?.(clickLocation, { ...args, preventDefault });
@@ -3484,7 +3503,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       const [col, row] = args.location;
       const adjustedCol = col - rowMarkerOffset;
 
-      const cellContent = getMangledCellContent([adjustedCol, row]);
+      const cellContent = getMangledCellContent([col, row]);
+      const rowDetails = getGroupRowDetails(row);
 
       if (args.kind === 'header') {
         onHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
@@ -3497,11 +3517,22 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onGroupHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
       }
 
-      if (args.kind === 'cell' && cellContent.kind !== 'group') {
-        onCellContextMenu?.([adjustedCol, row], {
-          ...args,
-          preventDefault,
-        });
+      const groupId =
+        rowDetails?.kind === GridRowKind.GroupContent ? rowDetails.groupId : undefined;
+
+      if (rowDetails?.kind === GridRowKind.NewRow || rowDetails?.kind === GridRowKind.Group) {
+        return;
+      }
+      if (args.kind === 'cell') {
+        onCellContextMenu?.(
+          cellContent,
+          [adjustedCol, row],
+          {
+            ...args,
+            preventDefault,
+          },
+          groupId
+        );
 
         if (!gridSelectionHasItem(gridSelection, args.location)) {
           updateSelectedCell(col, row, false, false);
@@ -3516,6 +3547,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       rowMarkerOffset,
       updateSelectedCell,
       getMangledCellContent,
+      getGroupRowDetails,
     ]
   );
 
