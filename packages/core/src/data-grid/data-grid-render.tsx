@@ -2741,7 +2741,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
       if (dragAndDropState.column !== undefined && c.sourceIndex === dragAndDropState.column.dest) {
         const isRightDirection = dragAndDropState.column.src < dragAndDropState.column.dest;
         const xPosition = isRightDirection ? x + c.width : x;
-        
+
         if (!freezeColumns || isRightDirection || x !== 0) {
           drawColumnResizeOutline(
             overlayCtx,

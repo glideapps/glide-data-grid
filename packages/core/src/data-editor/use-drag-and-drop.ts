@@ -44,7 +44,6 @@ interface IProps
     | 'selection'
     | 'resetDragAndDropState'
   > {
-    
   readonly canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
   readonly eventTargetRef: React.MutableRefObject<HTMLDivElement | null> | undefined;
   readonly getMouseArgsForPosition: (
@@ -449,7 +448,7 @@ const useDragAndDrop = ({
   }, [onDragEnd, resetDragAndDropState]);
 
   const onDropImpl = React.useCallback(
-    (event: DragEvent) => {      
+    (event: DragEvent) => {
       const canvas = canvasRef.current;
       if (canvas === null || onDrop === undefined) {
         return;
