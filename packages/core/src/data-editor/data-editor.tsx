@@ -2419,8 +2419,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             gridSelection?.current?.cell[0] === col &&
             gridSelection?.current?.cell[1] === row
           ) {
-            const adjustedCol = col - rowMarkerOffset;
-            const cellContent = getMangledCellContent([adjustedCol, row]);
+            const cellContent = getMangledCellContent([col, row]);
             const rowDetails = getGroupRowDetails(row);
             const groupId =
               rowDetails?.kind === GridRowKind.GroupContent ? rowDetails.groupId : undefined;
@@ -4006,7 +4005,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
   React.useImperativeHandle(
     forwardedRef,
     () => ({
-      getGroupRowDetails: getGroupRowDetails,
       appendRow: (col: number, row?: number) => appendRow(col + rowMarkerOffset, row),
       updateCells: (damageList) => {
         if (rowMarkerOffset !== 0) {
