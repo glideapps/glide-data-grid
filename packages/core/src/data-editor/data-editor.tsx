@@ -303,7 +303,6 @@ export interface DataEditorProps extends Props {
    * @group Events
    */
   readonly onCellContextMenu?: (
-    cell: InnerGridCell,
     cellLocation: Item,
     event: CellClickedEventArgs,
     groupId?: string
@@ -2419,13 +2418,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             gridSelection?.current?.cell[0] === col &&
             gridSelection?.current?.cell[1] === row
           ) {
-            const cellContent = getMangledCellContent([col, row]);
             const rowDetails = getGroupRowDetails(row);
             const groupId =
               rowDetails?.kind === GridRowKind.GroupContent ? rowDetails.groupId : undefined;
 
             onCellContextMenu?.(
-              cellContent,
               [clickLocation, args.location[1]],
               {
                 ...args,
@@ -2509,7 +2506,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       getMangledCellContent,
       getCellRenderer,
       getMangledCellLocation,
+      getGroupRowDetails,
       themeForCell,
+      rowMarkerWidth,
       onRowDetailsUpdated,
       columns,
       mangledOnCellsEdited,
@@ -2522,9 +2521,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       onGroupHeaderClicked,
       onHeaderClicked,
       normalSizeColumn,
-      handleGroupHeaderSelection,
-      rowMarkerWidth,
       onHeaderDoubleClicked,
+      handleGroupHeaderSelection,
     ]
   );
 
@@ -3503,7 +3501,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       const [col, row] = args.location;
       const adjustedCol = col - rowMarkerOffset;
 
-      const cellContent = getMangledCellContent([col, row]);
       const rowDetails = getGroupRowDetails(row);
 
       if (args.kind === 'header') {
@@ -3525,7 +3522,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       }
       if (args.kind === 'cell') {
         onCellContextMenu?.(
-          cellContent,
           [adjustedCol, row],
           {
             ...args,
