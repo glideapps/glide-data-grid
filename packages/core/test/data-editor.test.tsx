@@ -360,13 +360,6 @@ describe('data-editor', () => {
     });
 
     expect(spy).toHaveBeenCalledWith(
-      {
-        allowOverlay: true,
-        allowWrapping: true,
-        data: 'Data: 1, 1',
-        displayData: '1, 1',
-        kind: 'text',
-      },
       [1, 1],
       {
         bounds: { height: 33, width: 161, x: 150, y: 68 },
@@ -454,13 +447,6 @@ describe('data-editor', () => {
     });
 
     expect(spy).toHaveBeenCalledWith(
-      {
-        allowOverlay: true,
-        allowWrapping: true,
-        data: 'Data: 1, 1',
-        displayData: '1, 1',
-        kind: 'text',
-      },
       [1, 1],
       {
         bounds: { height: 33, width: 161, x: 150, y: 68 },
@@ -513,13 +499,6 @@ describe('data-editor', () => {
     });
 
     expect(spy).toHaveBeenCalledWith(
-      {
-        allowOverlay: true,
-        allowWrapping: true,
-        data: 'Data: 1, 1',
-        displayData: '1, 1',
-        kind: 'text',
-      },
       [1, 1],
       {
         bounds: { height: 33, width: 161, x: 150, y: 68 },
@@ -577,13 +556,6 @@ describe('data-editor', () => {
     });
 
     expect(spy).toHaveBeenCalledWith(
-      {
-        allowOverlay: true,
-        allowWrapping: true,
-        data: 'Data: 1, 1',
-        displayData: '1, 1',
-        kind: 'text',
-      },
       [1, 1],
       {
         bounds: { height: 33, width: 161, x: 150, y: 68 },
@@ -641,13 +613,6 @@ describe('data-editor', () => {
     });
 
     expect(spy).toHaveBeenCalledWith(
-      {
-        allowOverlay: true,
-        allowWrapping: true,
-        data: 'Data: 1, 1',
-        displayData: '1, 1',
-        kind: 'text',
-      },
       [1, 1],
       {
         bounds: { height: 33, width: 161, x: 150, y: 68 },
@@ -697,13 +662,6 @@ describe('data-editor', () => {
     });
 
     expect(spy).toHaveBeenCalledWith(
-      {
-        allowOverlay: true,
-        allowWrapping: true,
-        data: 'Data: 1, 1',
-        displayData: '1, 1',
-        kind: 'text',
-      },
       [1, 1],
       {
         bounds: { height: 33, width: 161, x: 186, y: 68 },
