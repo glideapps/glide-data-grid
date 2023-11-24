@@ -1,4 +1,4 @@
-import type { ImageWindowLoader, Item, Rectangle } from "../data-grid/data-grid-types";
+import type { ImageWindowLoader, Item, Rectangle } from "../internal/data-grid/data-grid-types.js";
 import throttle from "lodash/throttle.js";
 
 interface LoadResult {

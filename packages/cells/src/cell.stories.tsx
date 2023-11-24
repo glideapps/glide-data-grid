@@ -1,24 +1,24 @@
 import { styled } from "@linaria/react";
 import * as React from "react";
 import { DataEditor, type DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
-import { DropdownCell as DropdownRenderer, useExtraCells } from ".";
-import type { StarCell } from "./cells/star-cell";
-import type { SparklineCell } from "./cells/sparkline-cell";
+import { DropdownCell as DropdownRenderer, useExtraCells } from "./index.js";
+import type { StarCell } from "./cells/star-cell.js";
+import type { SparklineCell } from "./cells/sparkline-cell.js";
 import range from "lodash/range.js";
 import uniq from "lodash/uniq.js";
-import type { TagsCell } from "./cells/tags-cell";
-import type { UserProfileCell } from "./cells/user-profile-cell";
-import type { DropdownCell } from "./cells/dropdown-cell";
-import type { ArticleCell } from "./cells/article-cell-types";
-import type { RangeCell } from "./cells/range-cell";
-import type { SpinnerCell } from "./cells/spinner-cell";
+import type { TagsCell } from "./cells/tags-cell.js";
+import type { UserProfileCell } from "./cells/user-profile-cell.js";
+import type { DropdownCell } from "./cells/dropdown-cell.js";
+import type { ArticleCell } from "./cells/article-cell-types.js";
+import type { RangeCell } from "./cells/range-cell.js";
+import type { SpinnerCell } from "./cells/spinner-cell.js";
 import { useResizeDetector } from "react-resize-detector";
 
 import "@toast-ui/editor/dist/toastui-editor.css";
 import "@glideapps/glide-data-grid/dist/index.css";
-import type { DatePickerCell } from "./cells/date-picker-cell";
-import type { LinksCell } from "./cells/links-cell";
-import type { ButtonCell } from "./cells/button-cell";
+import type { DatePickerCell } from "./cells/date-picker-cell.js";
+import type { LinksCell } from "./cells/links-cell.js";
+import type { ButtonCell } from "./cells/button-cell.js";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;

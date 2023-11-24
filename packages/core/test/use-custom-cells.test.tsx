@@ -1,11 +1,16 @@
-import { renderHook } from "@testing-library/react-hooks";
-import type { BaseDrawArgs } from "../src/data-grid/cells/cell-types";
-import { type CustomCell, GridCellKind } from "../src/data-grid/data-grid-types";
-import { useCustomCells } from "../src/data-editor/use-custom-cells";
+import { renderHook, cleanup } from "@testing-library/react-hooks";
+import type { BaseDrawArgs } from "../src/cells/cell-types.js";
+import { type CustomCell, GridCellKind } from "../src/internal/data-grid/data-grid-types.js";
+import { useCustomCells } from "../src/data-editor/use-custom-cells.js";
+import { expect, describe, it, afterEach } from "vitest";
 
 type MyCustomCell = CustomCell<{ kind: "test"; pasted?: string }>;
 
 describe("use-column-sizer", () => {
+    afterEach(async () => {
+        await cleanup();
+    });
+
     it("Set up cells", async () => {
         const { result } = renderHook(() =>
             useCustomCells([

@@ -1,8 +1,14 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import type { BaseDrawArgs } from "../src";
-import { getDataEditorTheme, type Theme } from "../src/common/styles";
-import { remapForDnDState, type MappedGridColumn, drawImage, drawWithLastUpdate } from "../src/data-grid/data-grid-lib";
-import { GridCellKind, type ImageWindowLoader, type Rectangle } from "../src/data-grid/data-grid-types";
+import type { BaseDrawArgs } from "../src/index.js";
+import { getDataEditorTheme, type Theme } from "../src/common/styles.js";
+import {
+    remapForDnDState,
+    type MappedGridColumn,
+    drawImage,
+    drawWithLastUpdate,
+} from "../src/internal/data-grid/data-grid-lib.js";
+import { GridCellKind, type ImageWindowLoader, type Rectangle } from "../src/internal/data-grid/data-grid-types.js";
+import { vi, type Mocked, type Mock, expect, describe, test, it, beforeEach } from "vitest";
 
 describe("remapForDnDState", () => {
     const sampleColumns: MappedGridColumn[] = [
@@ -50,26 +56,26 @@ describe("remapForDnDState", () => {
 });
 
 describe("drawImage", () => {
-    let mockCtx: jest.Mocked<CanvasRenderingContext2D>;
-    let mockImageLoader: jest.Mocked<ImageWindowLoader>;
+    let mockCtx: Mocked<CanvasRenderingContext2D>;
+    let mockImageLoader: Mocked<ImageWindowLoader>;
     let mockTheme: Theme;
     let mockRect: Rectangle;
 
     beforeEach(() => {
         // Initialize your mocks here
         mockCtx = {
-            drawImage: jest.fn(),
-            moveTo: jest.fn(),
-            arcTo: jest.fn(),
-            save: jest.fn(),
-            restore: jest.fn(),
-            clip: jest.fn(),
+            drawImage: vi.fn(),
+            moveTo: vi.fn(),
+            arcTo: vi.fn(),
+            save: vi.fn(),
+            restore: vi.fn(),
+            clip: vi.fn(),
         } as any;
 
         mockImageLoader = {
-            loadOrGetImage: jest.fn((_a, _b, _c) => new HTMLImageElement()),
-            setCallback: jest.fn(),
-            setWindow: jest.fn(),
+            loadOrGetImage: vi.fn((_a, _b, _c) => new HTMLImageElement()),
+            setCallback: vi.fn(),
+            setWindow: vi.fn(),
         };
 
         mockTheme = getDataEditorTheme();
@@ -101,7 +107,7 @@ describe("drawImage", () => {
             hoverX: undefined,
             hoverY: undefined,
             hyperWrapping: false,
-            requestAnimationFrame: jest.fn(),
+            requestAnimationFrame: vi.fn(),
             spriteManager: {} as any,
         };
 
@@ -140,7 +146,7 @@ describe("drawImage", () => {
             hoverX: undefined,
             hoverY: undefined,
             hyperWrapping: false,
-            requestAnimationFrame: jest.fn(),
+            requestAnimationFrame: vi.fn(),
             spriteManager: {} as any,
         };
 
@@ -176,7 +182,7 @@ describe("drawImage", () => {
             hoverX: undefined,
             hoverY: undefined,
             hyperWrapping: false,
-            requestAnimationFrame: jest.fn(),
+            requestAnimationFrame: vi.fn(),
             spriteManager: {} as any,
         };
 
@@ -216,7 +222,7 @@ describe("drawImage", () => {
             hoverX: undefined,
             hoverY: undefined,
             hyperWrapping: false,
-            requestAnimationFrame: jest.fn(),
+            requestAnimationFrame: vi.fn(),
             spriteManager: {} as any,
         };
 
@@ -256,7 +262,7 @@ describe("drawImage", () => {
             hoverX: undefined,
             hoverY: undefined,
             hyperWrapping: false,
-            requestAnimationFrame: jest.fn(),
+            requestAnimationFrame: vi.fn(),
             spriteManager: {} as any,
         };
 
@@ -267,13 +273,13 @@ describe("drawImage", () => {
 });
 
 describe("drawWithLastUpdate", () => {
-    const mockCtx: jest.Mocked<CanvasRenderingContext2D> = {} as any;
+    const mockCtx: Mocked<CanvasRenderingContext2D> = {} as any;
     let mockTheme: Theme;
     let mockRect: Rectangle;
-    let mockDraw: jest.Mock;
+    let mockDraw: Mock;
 
     beforeEach(() => {
-        mockCtx.fillRect = jest.fn();
+        mockCtx.fillRect = vi.fn();
         mockCtx.fillStyle = "";
         mockCtx.globalAlpha = 1;
 
@@ -289,7 +295,7 @@ describe("drawWithLastUpdate", () => {
             height: 60,
         };
 
-        mockDraw = jest.fn();
+        mockDraw = vi.fn();
     });
 
     it("should do nothing if lastUpdate is undefined", () => {
@@ -306,7 +312,7 @@ describe("drawWithLastUpdate", () => {
                 hoverX: undefined,
                 hoverY: undefined,
                 hyperWrapping: false,
-                requestAnimationFrame: jest.fn(),
+                requestAnimationFrame: vi.fn(),
                 imageLoader: {} as any,
                 spriteManager: {} as any,
             },
@@ -338,7 +344,7 @@ describe("drawWithLastUpdate", () => {
                 hoverX: undefined,
                 hoverY: undefined,
                 hyperWrapping: false,
-                requestAnimationFrame: jest.fn(),
+                requestAnimationFrame: vi.fn(),
                 imageLoader: {} as any,
                 spriteManager: {} as any,
             },
@@ -370,7 +376,7 @@ describe("drawWithLastUpdate", () => {
                 hoverX: undefined,
                 hoverY: undefined,
                 hyperWrapping: false,
-                requestAnimationFrame: jest.fn(),
+                requestAnimationFrame: vi.fn(),
                 imageLoader: {} as any,
                 spriteManager: {} as any,
             },
@@ -389,7 +395,7 @@ describe("drawWithLastUpdate", () => {
     it("should update lastPrep's fillStyle if defined", () => {
         const lastUpdate = 600;
         const frameTime = 1000;
-        const mockLastPrep = { fillStyle: "", deprep: jest.fn(), font: "some-font", renderer: {} };
+        const mockLastPrep = { fillStyle: "", deprep: vi.fn(), font: "some-font", renderer: {} };
 
         drawWithLastUpdate(
             {
@@ -404,7 +410,7 @@ describe("drawWithLastUpdate", () => {
                 hoverX: undefined,
                 hoverY: undefined,
                 hyperWrapping: false,
-                requestAnimationFrame: jest.fn(),
+                requestAnimationFrame: vi.fn(),
                 imageLoader: {} as any,
                 spriteManager: {} as any,
             },

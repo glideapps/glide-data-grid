@@ -6,7 +6,7 @@ import {
     GridCellKind,
 } from "@glideapps/glide-data-grid";
 import * as React from "react";
-import { roundedRect } from "../draw-fns";
+import { roundedRect } from "../draw-fns.js";
 
 interface RangeCellProps {
     readonly kind: "range-cell";

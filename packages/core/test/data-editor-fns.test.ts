@@ -1,6 +1,7 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import { CompactSelection, type GridSelection } from "../src";
-import { expandSelection, unquote } from "../src/data-editor/data-editor-fns"; // Adjust the import path to your setup
+import { CompactSelection, type GridSelection } from "../src/index.js";
+import { expandSelection, unquote } from "../src/data-editor/data-editor-fns.js"; // Adjust the import path to your setup
+import { vi, expect, describe, it, afterEach } from "vitest";
 
 describe("unquote", () => {
     it("should correctly unquote single line string without quotes", () => {
@@ -93,11 +94,11 @@ describe("unquote", () => {
 });
 
 describe("expandSelection", () => {
-    const getCellsForSelection = jest.fn();
+    const getCellsForSelection = vi.fn();
     const abortController = new AbortController();
 
     afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     it("should return the original selection if spanRangeBehavior is allowPartial", () => {

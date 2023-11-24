@@ -1,8 +1,8 @@
 import React from "react";
 import { styled } from "@linaria/react";
 import { css } from "@linaria/core";
-import ClickOutsideContainer from "../click-outside-container/click-outside-container";
-import type { Rectangle } from "../data-grid/data-grid-types";
+import ClickOutsideContainer from "../internal/click-outside-container/click-outside-container.js";
+import type { Rectangle } from "../internal/data-grid/data-grid-types.js";
 
 interface Props {
     readonly bounds: Rectangle;

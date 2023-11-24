@@ -1,6 +1,6 @@
-import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
-import { type GridCell, type GridSelection, type Rectangle } from "../data-grid/data-grid-types";
-import { getCopyBufferContents, type CopyBuffer } from "./copy-paste";
+import type { DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
+import { type GridCell, type GridSelection, type Rectangle } from "../internal/data-grid/data-grid-types.js";
+import { getCopyBufferContents, type CopyBuffer } from "./copy-paste.js";
 
 export function expandSelection(
     newVal: GridSelection,
