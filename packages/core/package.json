@@ -23,8 +23,10 @@
     },
     "scripts": {
         "build": "npm run build-js && npm run build-types",
+        "build-tsc": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
         "build-js": "node build.cjs && tsc-esm-fix --target='dist/js'",
         "build-types": "tsc -p tsconfig.types.json",
+        "build-babel": "./babel.sh",
         "lint": "npm run cycle-check && eslint src --ext .ts,.tsx",
         "cycle-check": "ts-helper -p ./tsconfig.json -r ./src/index.ts -c",
         "test": "jest",

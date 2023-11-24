@@ -4,7 +4,7 @@
         "esModuleInterop": true,
         "composite": true,
         "jsx": "react",
-        "moduleResolution": "node",
+        "moduleResolution": "node", // make node-16
         "module": "esnext",
         "noImplicitAny": true,
         "noUnusedLocals": true,
@@ -12,7 +12,7 @@
         "importsNotUsedAsValues": "error",
         "noUnusedParameters": true,
         "strict": true,
-        "target": "es6",
+        "target": "es6", // es2022
         "types": ["jest", "node"]
     }
 }

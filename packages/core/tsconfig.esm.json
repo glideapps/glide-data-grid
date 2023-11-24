@@ -1,0 +1,19 @@
+{
+    "extends": "../../tsconfig.json",
+    "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./dist/esm",
+        "declarationDir": "./dist/dts",
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true
+    },
+    "typedocOptions": {
+        "entryPoints": ["src/index.ts"],
+        "out": "docs",
+        "categorizeByGroup": false,
+        "name": "Glide Data Grid",
+        "categoryOrder": ["DataEditor", "*"]
+    }
+}
