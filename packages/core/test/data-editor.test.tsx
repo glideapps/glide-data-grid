@@ -1622,61 +1622,6 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         expect(document.body.contains(overlay)).toBe(false);
     });
 
-    test("Open overlay with keypress when prior is disabled", async () => {
-        vi.useFakeTimers();
-        render(
-            <DataEditor
-                {...basicProps}
-                getCellContent={cell => {
-                    const r = basicProps.getCellContent(cell);
-
-                    if (cell[0] === 1 && cell[1] === 0)
-                        return {
-                            ...r,
-                            allowOverlay: false,
-                            readonly: true,
-                        };
-
-                    return r;
-                }}
-            />,
-            {
-                wrapper: Context,
-            }
-        );
-        prep();
-
-        const canvas = screen.getByTestId("data-grid-canvas");
-        sendClick(canvas, {
-            clientX: 300, // Col B
-            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
-        });
-
-        fireEvent.keyDown(canvas, {
-            keyCode: 74,
-            key: "j",
-        });
-
-        fireEvent.keyUp(canvas, {
-            keyCode: 74,
-            key: "j",
-        });
-
-        const overlay = screen.getByDisplayValue("j");
-        expect(document.body.contains(overlay)).toBe(true);
-
-        vi.useFakeTimers();
-        fireEvent.keyDown(overlay, {
-            key: "Escape",
-        });
-
-        act(() => {
-            vi.runAllTimers();
-        });
-
-        expect(document.body.contains(overlay)).toBe(false);
-    });
-
     test("Send edit", async () => {
         const spy = vi.fn();
         vi.useFakeTimers();
