@@ -2,7 +2,7 @@ import { getSquareWidth, getSquareXPosFromAlign, getSquareBB, pointIsWithinBB } 
 import { drawBoolean } from "../data-grid-lib";
 import {
     GridCellKind,
-    BooleanCell,
+    type BooleanCell,
     booleanCellIsEditable,
     BooleanEmpty,
     BooleanIndeterminate,
@@ -22,8 +22,6 @@ export function toggleBoolean(data: boolean | null | undefined): boolean | null 
 }
 
 const defaultCellMaxSize = 20;
-
-
 
 export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "false",

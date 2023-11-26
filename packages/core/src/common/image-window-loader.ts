@@ -34,14 +34,14 @@ class ImageWindowLoaderImpl implements ImageWindowLoader {
     private imageLoaded: (locations: readonly Item[]) => void = () => undefined;
     private loadedLocations: [number, number][] = [];
 
-    private visibleWindow: Rectangle = {
+    public visibleWindow: Rectangle = {
         x: 0,
         y: 0,
         width: 0,
         height: 0,
     };
 
-    private freezeCols: number = 0;
+    public freezeCols: number = 0;
 
     private isInWindow = (packed: number) => {
         const col = unpackCol(packed);

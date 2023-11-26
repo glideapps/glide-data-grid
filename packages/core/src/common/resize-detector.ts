@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
-import { useLayoutEffect, useState, useRef, MutableRefObject } from "react";
+import { useLayoutEffect, useState, useRef, type MutableRefObject } from "react";
 interface ReactResizeDetectorDimensions {
     height?: number;
     width?: number;

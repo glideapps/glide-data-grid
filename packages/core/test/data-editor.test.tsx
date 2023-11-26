@@ -4,12 +4,12 @@ import { render, fireEvent, screen, act, createEvent } from "@testing-library/re
 import {
     CompactSelection,
     DataEditor,
-    DataEditorProps,
-    GridCell,
+    type DataEditorProps,
+    type GridCell,
     GridCellKind,
-    GridSelection,
+    type GridSelection,
     isSizedGridColumn,
-    Item,
+    type Item,
 } from "../src";
 import type { CustomCell, GridKeyEventArgs, SizedGridColumn } from "../src/data-grid/data-grid-types";
 import type { DataEditorRef } from "../src/data-editor/data-editor";
@@ -120,6 +120,9 @@ const makeCell = (cell: Item): GridCell => {
             };
         }
         // No default
+    }
+    if (col > 10) {
+        throw new Error(`Unexpected column: ${col}`);
     }
     return {
         kind: GridCellKind.Text,
@@ -1086,6 +1089,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith({
             rows: CompactSelection.empty(),
+            current: undefined,
             columns: CompactSelection.fromSingleSelection([0, 11]),
         });
     });
@@ -1520,6 +1524,61 @@ describe("data-editor", () => {
         render(<DataEditor {...basicProps} />, {
             wrapper: Context,
         });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        fireEvent.keyUp(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        const overlay = screen.getByDisplayValue("j");
+        expect(overlay).toBeInTheDocument();
+
+        jest.useFakeTimers();
+        fireEvent.keyDown(overlay, {
+            key: "Escape",
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(overlay).not.toBeInTheDocument();
+    });
+
+    test("Open overlay with keypress when prior is disabled", async () => {
+        jest.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                getCellContent={cell => {
+                    const r = basicProps.getCellContent(cell);
+
+                    if (cell[0] === 1 && cell[1] === 0)
+                        return {
+                            ...r,
+                            allowOverlay: false,
+                            readonly: true,
+                        };
+
+                    return r;
+                }}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
@@ -2084,7 +2143,7 @@ describe("data-editor", () => {
         act(() => {
             jest.runAllTimers();
         });
-        expect(navigator.clipboard.writeText).toBeCalledWith('"1, 2"\t"2, 2"');
+        expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -2115,6 +2174,86 @@ describe("data-editor", () => {
                 ],
             ]
         );
+    });
+
+    test("Paste out of range does not crash", async () => {
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onPaste={true} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "ArrowRight",
+            ctrlKey: true,
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.paste(window);
+        act(() => {
+            jest.runAllTimers();
+        });
+        jest.useRealTimers();
+        await new Promise(r => window.setTimeout(r, 10));
+    });
+
+    test("Cut cell", async () => {
+        const spy = jest.fn();
+        const editSpy = jest.fn();
+        jest.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} onCellsEdited={editSpy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "ArrowRight",
+            shiftKey: true,
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        fireEvent.cut(window);
+        jest.useRealTimers();
+        await new Promise(r => window.setTimeout(r, 10));
+        expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
+        expect(editSpy).toHaveBeenCalledWith([
+            {
+                location: [1, 2],
+                value: expect.objectContaining({ data: "" }),
+            },
+            {
+                location: [2, 2],
+                value: expect.objectContaining({ data: "" }),
+            },
+        ]);
     });
 
     test("Paste custom cell does not crash", async () => {
@@ -2170,6 +2309,130 @@ describe("data-editor", () => {
         await new Promise(r => window.setTimeout(r, 10));
 
         expect(spy).toBeCalledWith(expect.anything(), "custom-cell-data");
+    });
+
+    test("CustomCell onClick", async () => {
+        jest.useFakeTimers();
+
+        const onClickSpy = jest.fn();
+
+        // eslint-disable-next-line unicorn/consistent-function-scoping, sonarjs/no-identical-functions
+        const alwaysCustomCell = (_cell: Item): GridCell => {
+            return {
+                kind: GridCellKind.Custom,
+                allowOverlay: true,
+                data: "custom-cell-data",
+                copyData: "custom-cell-copy-data",
+            };
+        };
+
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                getCellContent={alwaysCustomCell}
+                customRenderers={[
+                    {
+                        kind: GridCellKind.Custom,
+                        draw: () => true,
+                        onClick: onClickSpy,
+                        isMatch: (_cell: CustomCell): _cell is CustomCell => true,
+                    },
+                ]}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+
+        // mouse down col b row 2
+        fireEvent.mouseDown(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 2 + 16,
+        });
+
+        // mouse move col b row 3
+        fireEvent.mouseMove(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 2 + 16,
+        });
+
+        // mouse up
+        fireEvent.mouseUp(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 2 + 16,
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(onClickSpy).toBeCalled();
+    });
+
+    test("CustomCell onClick fires with same restriction as onCellClicked", async () => {
+        jest.useFakeTimers();
+
+        const onClickSpy = jest.fn();
+
+        // eslint-disable-next-line unicorn/consistent-function-scoping, sonarjs/no-identical-functions
+        const alwaysCustomCell = (_cell: Item): GridCell => {
+            return {
+                kind: GridCellKind.Custom,
+                allowOverlay: true,
+                data: "custom-cell-data",
+                copyData: "custom-cell-copy-data",
+            };
+        };
+
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                getCellContent={alwaysCustomCell}
+                customRenderers={[
+                    {
+                        kind: GridCellKind.Custom,
+                        draw: () => true,
+                        onClick: onClickSpy,
+                        isMatch: (_cell: CustomCell): _cell is CustomCell => true,
+                    },
+                ]}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+
+        // mouse down col b row 2
+        fireEvent.mouseDown(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 2 + 16,
+        });
+
+        // mouse move col b row 3
+        fireEvent.mouseMove(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 3 + 16,
+        });
+
+        // mouse up
+        fireEvent.mouseUp(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 3 + 16,
+        });
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(onClickSpy).not.toBeCalled();
     });
 
     test("onCellsEdited blocks onCellEdited", async () => {
@@ -2244,7 +2507,7 @@ describe("data-editor", () => {
         act(() => {
             jest.runAllTimers();
         });
-        expect(navigator.clipboard.writeText).toBeCalledWith('"1, 2"\t"2, 2"');
+        expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -2301,7 +2564,7 @@ describe("data-editor", () => {
         fireEvent.copy(window);
         await new Promise(resolve => setTimeout(resolve, 10));
         expect(navigator.clipboard.writeText).toBeCalledWith(
-            '"Data: 0, 3"\t"1, 3"\t"2, 3"\t3\tFoobar\t************\tFoobar\t\t"שלום 8, 3"\t"# Header: 9, 3"\thttps://example.com/10/3'
+            "Data: 0, 3\t1, 3\t2, 3\t3\tFoobar\t************\tFoobar\t\tשלום 8, 3\t# Header: 9, 3\thttps://example.com/10/3"
         );
     });
 
@@ -2503,6 +2766,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection(2),
+            current: undefined,
         });
     });
 
@@ -2531,6 +2795,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection([2, 6]),
+            current: undefined,
         });
     });
 
@@ -2565,6 +2830,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection([2, 6]),
+            current: undefined,
         });
     });
 
@@ -2596,6 +2862,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection(5),
+            current: undefined,
         });
     });
 
@@ -2624,6 +2891,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection(2).add(5),
+            current: undefined,
         });
 
         spy.mockClear();
@@ -2637,6 +2905,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection(2),
+            current: undefined,
         });
     });
 
@@ -2668,6 +2937,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection(5),
+            current: undefined,
         });
 
         spy.mockClear();
@@ -2681,6 +2951,7 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
+            current: undefined,
         });
     });
 
@@ -2831,6 +3102,7 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
+            current: undefined,
         });
     });
 
@@ -2897,6 +3169,7 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
+            current: undefined,
         });
     });
 
@@ -3335,6 +3608,7 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.fromSingleSelection([0, 1000]),
+            current: undefined,
         });
 
         sendClick(canvas, {
@@ -3345,6 +3619,7 @@ describe("data-editor", () => {
         expect(spy).toBeCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
+            current: undefined,
         });
     });
 
@@ -3453,7 +3728,7 @@ describe("data-editor", () => {
         const spy = jest.fn();
         jest.useFakeTimers();
 
-        const getCellContent: typeof basicProps["getCellContent"] = c => {
+        const getCellContent: (typeof basicProps)["getCellContent"] = c => {
             const [col, row] = c;
 
             if (row === 3 && col >= 2 && col <= 3) {

@@ -2,16 +2,16 @@ import * as React from "react";
 import isArray from "lodash/isArray.js";
 
 import {
-    CellArray,
-    EditableGridCell,
-    GridCell,
+    type CellArray,
+    type EditableGridCell,
+    type GridCell,
     GridCellKind,
-    GridColumn,
+    type GridColumn,
     GridColumnIcon,
     isEditableGridCell,
     isTextEditableGridCell,
-    Item,
-    Rectangle,
+    type Item,
+    type Rectangle,
 } from "@glideapps/glide-data-grid";
 
 import { faker } from "@faker-js/faker";

@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/consistent-destructuring */
 import clamp from "lodash/clamp.js";
 import * as React from "react";
-import DataGrid, { DataGridProps, DataGridRef } from "../data-grid/data-grid";
+import DataGrid, { type DataGridProps, type DataGridRef } from "../data-grid/data-grid";
 import type { GridColumn, GridMouseEventArgs, InnerGridColumn, Rectangle } from "../data-grid/data-grid-types";
 
 type Props = Omit<DataGridProps, "dragAndDropState" | "isResizing" | "isDragging" | "onMouseMoveRaw" | "allowResize">;
@@ -146,12 +146,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                         const rect = canvas.getBoundingClientRect();
                         const scale = rect.width / canvas.offsetWidth;
                         const width = args.bounds.width / scale;
-                        onColumnResizeStart?.(
-                            columns[col],
-                            width,
-                            col,
-                            width + (columns[col].growOffset ?? 0)
-                        );
+                        onColumnResizeStart?.(columns[col], width, col, width + (columns[col].growOffset ?? 0));
                     } else if (args.kind === "header" && canDragCol) {
                         setDragStartX(args.bounds.x);
                         setDragCol(col);

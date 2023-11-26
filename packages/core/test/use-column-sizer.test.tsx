@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { GridCell, GridCellKind, GridColumn, Rectangle } from "../src";
+import { type GridCell, GridCellKind, type GridColumn, type Rectangle } from "../src";
 import { getDataEditorTheme } from "../src/common/styles";
 import type { DataGridSearchProps } from "../src/data-grid-search/data-grid-search";
 import { CellRenderers } from "../src/data-grid/cells";
@@ -287,6 +287,7 @@ describe("use-column-sizer", () => {
     });
 
     it("Removes the canvas from the DOM when unmounted", async () => {
+        // eslint-disable-next-line sonarjs/no-identical-functions
         const { unmount } = renderHook(() =>
             useColumnSizer(
                 COLUMNS,
@@ -306,5 +307,53 @@ describe("use-column-sizer", () => {
         unmount();
 
         expect(document.querySelector("canvas")).toBeNull();
+    });
+
+    it("Distributes extra width among columns if total column width is less than client width", async () => {
+        // Setup columns with a known total width smaller than the clientWidth
+        const SMALL_COLUMNS: GridColumn[] = [
+            {
+                title: "A",
+                id: "ColumnA",
+                width: 100,
+            },
+            {
+                title: "B",
+                id: "ColumnB",
+                width: 150,
+            },
+            {
+                title: "C",
+                id: "ColumnC",
+                grow: 1,
+            },
+        ];
+
+        const { result } = renderHook(() =>
+            useColumnSizer(
+                SMALL_COLUMNS,
+                500,
+                getShortCellsForSelection,
+                400,
+                20,
+                500,
+                theme,
+                getCellRenderer,
+                abortController
+            )
+        );
+
+        const columnA = result.current.find(col => col.title === "A");
+        const columnB = result.current.find(col => col.title === "B");
+        const columnC = result.current.find(col => col.title === "C");
+
+        expect(columnA).toBeDefined();
+        expect(columnB).toBeDefined();
+        expect(columnC).toBeDefined();
+
+        // The original widths
+        expect(columnA?.width).toBe(100);
+        expect(columnB?.width).toBe(150);
+        expect(columnC?.width).toBe(150);
     });
 });

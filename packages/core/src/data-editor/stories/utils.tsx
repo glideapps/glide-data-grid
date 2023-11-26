@@ -2,14 +2,14 @@
 import * as React from "react";
 
 import {
-    EditableGridCell,
-    GridCell,
+    type EditableGridCell,
+    type GridCell,
     GridCellKind,
-    GridColumn,
+    type GridColumn,
     GridColumnIcon,
     isEditableGridCell,
     isTextEditableGridCell,
-    Item,
+    type Item,
 } from "../../data-grid/data-grid-types";
 
 import { faker } from "@faker-js/faker";
@@ -174,7 +174,9 @@ export const BeautifulStyle = styled.div`
         background-color: white;
 
         border-radius: 12px;
-        box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
+        box-shadow:
+            rgba(9, 30, 66, 0.25) 0px 4px 8px -2px,
+            rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
 
         .sizer-clip {
             border-radius: 12px;

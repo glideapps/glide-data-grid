@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { GridCell, GridCellKind, GridColumn, Item, Rectangle } from "../data-grid/data-grid-types";
+import { type GridCell, GridCellKind, type GridColumn, type Item, type Rectangle } from "../data-grid/data-grid-types";
 import { DataEditor } from "../data-editor/data-editor";
 
 import { SimpleThemeWrapper } from "../stories/story-utils";

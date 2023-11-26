@@ -8,59 +8,63 @@ import range from "lodash/range.js";
 import debounce from "lodash/debounce.js";
 import DataGridOverlayEditor from "../data-grid-overlay-editor/data-grid-overlay-editor";
 import {
-    EditableGridCell,
-    GridCell,
+    type EditableGridCell,
+    type GridCell,
     GridCellKind,
-    GridDragEventArgs,
-    GridKeyEventArgs,
-    GridMouseEventArgs,
-    GridSelection,
+    type GridDragEventArgs,
+    type GridKeyEventArgs,
+    type GridMouseEventArgs,
+    type GridSelection,
     isEditableGridCell,
-    Rectangle,
+    type Rectangle,
     isReadWriteCell,
-    InnerGridCell,
+    type InnerGridCell,
     InnerGridCellKind,
     CompactSelection,
-    Slice,
+    type Slice,
     isInnerOnlyCell,
-    ProvideEditorCallback,
-    DrawCustomCellCallback,
-    GridMouseCellEventArgs,
-    GridColumn,
+    type ProvideEditorCallback,
+    type DrawCustomCellCallback,
+    type GridMouseCellEventArgs,
+    type GridColumn,
     isObjectEditorCallbackResult,
-    GroupHeaderClickedEventArgs,
-    HeaderClickedEventArgs,
-    CellClickedEventArgs,
-    Item,
-    MarkerCell,
+    type GroupHeaderClickedEventArgs,
+    type HeaderClickedEventArgs,
+    type CellClickedEventArgs,
+    type Item,
+    type MarkerCell,
     headerCellUnheckedMarker,
     headerCellCheckedMarker,
     headerCellIndeterminateMarker,
     groupHeaderKind,
     outOfBoundsKind,
-    ValidatedGridCell,
-    ImageEditorType,
-    CustomCell,
+    type ValidatedGridCell,
+    type ImageEditorType,
+    type CustomCell,
     headerKind,
     gridSelectionHasItem,
+    BooleanEmpty,
+    BooleanIndeterminate,
 } from "../data-grid/data-grid-types";
-import DataGridSearch, { DataGridSearchProps } from "../data-grid-search/data-grid-search";
+import DataGridSearch, { type DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import { browserIsOSX } from "../common/browser-detect";
-import { getDataEditorTheme, makeCSSStyle, Theme, ThemeContext } from "../common/styles";
+import { getDataEditorTheme, makeCSSStyle, type Theme, ThemeContext } from "../common/styles";
 import type { DataGridRef } from "../data-grid/data-grid";
 import { getScrollBarWidth, useEventListener, useStateWithReactiveInput, whenDefined } from "../common/utils";
 import { isGroupEqual } from "../data-grid/data-grid-lib";
 import { GroupRename } from "./group-rename";
 import { measureColumn, useColumnSizer } from "./use-column-sizer";
 import { isHotkey } from "../common/is-hotkey";
-import { SelectionBlending, useSelectionBehavior } from "../data-grid/use-selection-behavior";
+import { type SelectionBlending, useSelectionBehavior } from "../data-grid/use-selection-behavior";
 import { useCellsForSelection } from "./use-cells-for-selection";
-import { unquote, expandSelection, copyToClipboard, decodeHTML } from "./data-editor-fns";
+import { unquote, expandSelection, copyToClipboard } from "./data-editor-fns";
 import { DataEditorContainer } from "../data-editor-container/data-grid-container";
 import { toggleBoolean } from "../data-grid/cells/boolean-cell";
 import { useAutoscroll } from "./use-autoscroll";
 import type { CustomRenderer, CellRenderer } from "../data-grid/cells/cell-types";
 import { CellRenderers } from "../data-grid/cells";
+import { decodeHTML, type CopyBuffer } from "./copy-paste";
+import { useRemAdjuster } from "./use-rem-adjuster";
 
 let idCounter = 0;
 
@@ -168,6 +172,7 @@ interface Keybinds {
     readonly clear: boolean;
     readonly copy: boolean;
     readonly paste: boolean;
+    readonly cut: boolean;
     readonly search: boolean;
     readonly first: boolean;
     readonly last: boolean;
@@ -184,6 +189,7 @@ const keybindingDefaults: Keybinds = {
     clear: true,
     copy: true,
     paste: true,
+    cut: true,
     search: false,
     first: true,
     last: true,
@@ -675,16 +681,15 @@ const emptyGridSelection: GridSelection = {
 
 const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorProps> = (p, forwardedRef) => {
     const [gridSelectionInner, setGridSelectionInner] = React.useState<GridSelection>(emptyGridSelection);
-    const [overlay, setOverlay] =
-        React.useState<{
-            target: Rectangle;
-            content: GridCell;
-            theme: Theme;
-            initialValue: string | undefined;
-            cell: Item;
-            highlight: boolean;
-            forceEditMode: boolean;
-        }>();
+    const [overlay, setOverlay] = React.useState<{
+        target: Rectangle;
+        content: GridCell;
+        theme: Theme;
+        initialValue: string | undefined;
+        cell: Item;
+        highlight: boolean;
+        forceEditMode: boolean;
+    }>();
     const searchInputRef = React.useRef<HTMLInputElement | null>(null);
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
     const [mouseState, setMouseState] = React.useState<MouseState>();
@@ -809,26 +814,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const remSize = React.useMemo(() => Number.parseFloat(fontSizeStr), [fontSizeStr]);
 
-    const [rowHeight, headerHeight, groupHeaderHeight, theme, overscrollX, overscrollY] = React.useMemo(() => {
-        if (!scaleToRem || remSize === 16)
-            return [rowHeightIn, headerHeightIn, groupHeaderHeightIn, themeIn, overscrollXIn, overscrollYIn];
-        const scaler = remSize / 16;
-        const rh = rowHeightIn;
-        const bt = getDataEditorTheme();
-        return [
-            typeof rh === "number" ? rh * scaler : (n: number) => Math.ceil(rh(n) * scaler),
-            Math.ceil(headerHeightIn * scaler),
-            Math.ceil(groupHeaderHeightIn * scaler),
-            {
-                ...themeIn,
-                headerIconSize: (themeIn?.headerIconSize ?? bt.headerIconSize) * scaler,
-                cellHorizontalPadding: (themeIn?.cellHorizontalPadding ?? bt.cellHorizontalPadding) * scaler,
-                cellVerticalPadding: (themeIn?.cellVerticalPadding ?? bt.cellVerticalPadding) * scaler,
-            },
-            Math.ceil((overscrollXIn ?? 0) * scaler),
-            Math.ceil((overscrollYIn ?? 0) * scaler),
-        ];
-    }, [groupHeaderHeightIn, headerHeightIn, overscrollXIn, overscrollYIn, remSize, rowHeightIn, scaleToRem, themeIn]);
+    const { rowHeight, headerHeight, groupHeaderHeight, theme, overscrollX, overscrollY } = useRemAdjuster({
+        groupHeaderHeight: groupHeaderHeightIn,
+        headerHeight: headerHeightIn,
+        overscrollX: overscrollXIn,
+        overscrollY: overscrollYIn,
+        remSize,
+        rowHeight: rowHeightIn,
+        scaleToRem,
+        theme: themeIn,
+    });
 
     const keybindings = React.useMemo(() => {
         return keybindingsIn === undefined
@@ -1786,7 +1781,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             } else if (args.kind === groupHeaderKind) {
                 lastMouseSelectLocation.current = [col, row];
-            } else if (args.kind === outOfBoundsKind) {
+            } else if (args.kind === outOfBoundsKind && !args.isMaybeScrollbar) {
                 setGridSelection(emptyGridSelection, false);
                 setOverlay(undefined);
                 focus();
@@ -1823,13 +1818,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const isActivelyDraggingHeader = React.useRef(false);
     const lastMouseSelectLocation = React.useRef<readonly [number, number]>();
     const touchDownArgs = React.useRef(visibleRegion);
-    const mouseDownData =
-        React.useRef<{
-            wasDoubleClick: boolean;
-            time: number;
-            button: number;
-            location: Item;
-        }>();
+    const mouseDownData = React.useRef<{
+        wasDoubleClick: boolean;
+        time: number;
+        button: number;
+        location: Item;
+    }>();
     const onMouseDown = React.useCallback(
         (args: GridMouseEventArgs) => {
             isPrevented.current = false;
@@ -1871,11 +1865,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [gridSelection, handleSelect]
     );
 
-    const [renameGroup, setRenameGroup] =
-        React.useState<{
-            group: string;
-            bounds: Rectangle;
-        }>();
+    const [renameGroup, setRenameGroup] = React.useState<{
+        group: string;
+        bounds: Rectangle;
+    }>();
 
     const handleGroupHeaderSelection = React.useCallback(
         (args: GridMouseEventArgs) => {
@@ -2030,7 +2023,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             };
 
             const handleMaybeClick = (a: GridMouseCellEventArgs): boolean => {
-                if (a.isTouch || (lastMouseDownCol === col && lastMouseDownRow === row)) {
+                const isValidClick = a.isTouch || (lastMouseDownCol === col && lastMouseDownRow === row);
+                if (isValidClick) {
                     onCellClicked?.([col - rowMarkerOffset, row], {
                         ...a,
                         preventDefault,
@@ -2040,7 +2034,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (!isPrevented.current) {
                     const c = getMangledCellContent(args.location);
                     const r = getCellRenderer(c);
-                    if (r !== undefined && r.onClick !== undefined) {
+                    if (r !== undefined && r.onClick !== undefined && isValidClick) {
                         const newVal = r.onClick({
                             ...a,
                             cell: c,
@@ -2631,6 +2625,41 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return `gdg-overlay-${idCounter++}`;
     }, []);
 
+    const deleteRange = React.useCallback(
+        (r: Rectangle) => {
+            focus();
+            const editList: EditListItem[] = [];
+            for (let x = r.x; x < r.x + r.width; x++) {
+                for (let y = r.y; y < r.y + r.height; y++) {
+                    const cellValue = getCellContent([x - rowMarkerOffset, y]);
+                    if (!cellValue.allowOverlay && cellValue.kind !== GridCellKind.Boolean) continue;
+                    let newVal: InnerGridCell | undefined = undefined;
+                    if (cellValue.kind === GridCellKind.Custom) {
+                        const toDelete = getCellRenderer(cellValue);
+                        const editor = toDelete?.provideEditor?.(cellValue);
+                        if (toDelete?.onDelete !== undefined) {
+                            newVal = toDelete.onDelete(cellValue);
+                        } else if (isObjectEditorCallbackResult(editor)) {
+                            newVal = editor?.deletedValue?.(cellValue);
+                        }
+                    } else if (
+                        (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
+                        cellValue.kind === GridCellKind.Boolean
+                    ) {
+                        const toDelete = getCellRenderer(cellValue);
+                        newVal = toDelete?.onDelete?.(cellValue);
+                    }
+                    if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
+                        editList.push({ location: [x, y], value: newVal });
+                    }
+                }
+            }
+            mangledOnCellsEdited(editList);
+            gridRef.current?.damage(editList.map(x => ({ cell: x.location })));
+        },
+        [focus, getCellContent, getCellRenderer, mangledOnCellsEdited, rowMarkerOffset]
+    );
+
     const onKeyDown = React.useCallback(
         (event: GridKeyEventArgs) => {
             const fn = async () => {
@@ -2703,38 +2732,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     cancel();
                     searchInputRef?.current?.focus({ preventScroll: true });
                     setShowSearchInner(true);
-                }
-
-                function deleteRange(r: Rectangle) {
-                    focus();
-                    const editList: EditListItem[] = [];
-                    for (let x = r.x; x < r.x + r.width; x++) {
-                        for (let y = r.y; y < r.y + r.height; y++) {
-                            const cellValue = getCellContent([x - rowMarkerOffset, y]);
-                            if (!cellValue.allowOverlay && cellValue.kind !== GridCellKind.Boolean) continue;
-                            let newVal: InnerGridCell | undefined = undefined;
-                            if (cellValue.kind === GridCellKind.Custom) {
-                                const toDelete = getCellRenderer(cellValue);
-                                const editor = toDelete?.provideEditor?.(cellValue);
-                                if (toDelete?.onDelete !== undefined) {
-                                    newVal = toDelete.onDelete(cellValue);
-                                } else if (isObjectEditorCallbackResult(editor)) {
-                                    newVal = editor?.deletedValue?.(cellValue);
-                                }
-                            } else if (
-                                (isEditableGridCell(cellValue) && cellValue.allowOverlay) ||
-                                cellValue.kind === GridCellKind.Boolean
-                            ) {
-                                const toDelete = getCellRenderer(cellValue);
-                                newVal = toDelete?.onDelete?.(cellValue);
-                            }
-                            if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal)) {
-                                editList.push({ location: [x, y], value: newVal });
-                            }
-                        }
-                    }
-                    mangledOnCellsEdited(editList);
-                    gridRef.current?.damage(editList.map(x => ({ cell: x.location })));
                 }
 
                 if (isDeleteKey) {
@@ -2946,7 +2943,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     key.length === 1 &&
                     /[ -~]/g.test(key) &&
                     bounds !== undefined &&
-                    isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, row - 1)]))
+                    isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, Math.min(row, rows - 1))]))
                 ) {
                     if (
                         (!lastRowSticky || row !== rows) &&
@@ -2967,6 +2964,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [
             onKeyDownIn,
+            deleteRange,
             overlay,
             gridSelection,
             keybindings.selectAll,
@@ -2990,9 +2988,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             columnsIn.length,
             rows,
             overlayID,
-            focus,
             mangledOnCellsEdited,
-            getCellRenderer,
             onDelete,
             mangledCols.length,
             setSelectedColumns,
@@ -3049,9 +3045,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onPasteInternal = React.useCallback(
         async (e?: ClipboardEvent) => {
             if (!keybindings.paste) return;
-            function pasteToCell(inner: InnerGridCell, target: Item, toPaste: string): EditListItem | undefined {
+            function pasteToCell(
+                inner: InnerGridCell,
+                target: Item,
+                rawValue: string | boolean | string[] | number | boolean | BooleanEmpty | BooleanIndeterminate,
+                formatted?: string | string[]
+            ): EditListItem | undefined {
+                const stringifiedRawValue =
+                    typeof rawValue === "object" ? rawValue?.join("\n") ?? "" : rawValue?.toString() ?? "";
+
                 if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
-                    const coerced = coercePasteValue?.(toPaste, inner);
+                    const coerced = coercePasteValue?.(stringifiedRawValue, inner);
                     if (coerced !== undefined && isEditableGridCell(coerced)) {
                         if (process.env.NODE_ENV !== "production" && coerced.kind !== inner.kind) {
                             // eslint-disable-next-line no-console
@@ -3066,7 +3070,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (r === undefined) return undefined;
                     if (r.kind === GridCellKind.Custom) {
                         assert(inner.kind === GridCellKind.Custom);
-                        const newVal = (r as unknown as CustomRenderer<CustomCell<any>>).onPaste?.(toPaste, inner.data);
+                        const newVal = (r as unknown as CustomRenderer<CustomCell<any>>).onPaste?.(
+                            stringifiedRawValue,
+                            inner.data
+                        );
                         if (newVal === undefined) return undefined;
                         return {
                             location: target,
@@ -3076,7 +3083,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             },
                         };
                     } else {
-                        const newVal = r.onPaste?.(toPaste, inner);
+                        const newVal = r.onPaste?.(stringifiedRawValue, inner, {
+                            formatted,
+                            formattedString: typeof formatted === "string" ? formatted : formatted?.join("\n"),
+                            rawValue,
+                        });
                         if (newVal === undefined) return undefined;
                         assert(newVal.kind === inner.kind);
                         return {
@@ -3103,7 +3114,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             if (focused && target !== undefined) {
-                let data: string[][] | undefined;
+                let data: CopyBuffer | undefined;
                 let text: string | undefined;
 
                 const textPlain = "text/plain";
@@ -3116,11 +3127,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         if (item.types.includes(textHtml)) {
                             const htmlBlob = await item.getType(textHtml);
                             const html = await htmlBlob.text();
-                            const fragment = document.createElement("html");
-                            fragment.innerHTML = html;
-                            const el = fragment.querySelector("table");
-                            if (el !== null) {
-                                data = decodeHTML(el);
+                            const decoded = decodeHTML(html);
+                            if (decoded !== undefined) {
+                                data = decoded;
                                 break;
                             }
                         }
@@ -3134,12 +3143,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else if (e !== undefined && e?.clipboardData !== null) {
                     if (e.clipboardData.types.includes(textHtml)) {
                         const html = e.clipboardData.getData(textHtml);
-                        const fragment = document.createElement("html");
-                        fragment.innerHTML = html;
-                        const el = fragment.querySelector("table");
-                        if (el !== null) {
-                            data = decodeHTML(el);
-                        }
+                        data = decodeHTML(html);
                     }
                     if (data === undefined && e.clipboardData.types.includes(textPlain)) {
                         text = e.clipboardData.getData(textPlain);
@@ -3154,11 +3158,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 do {
                     if (onPaste === undefined) {
                         const cellData = getMangledCellContent(target);
-                        const newVal = pasteToCell(
-                            cellData,
-                            target,
-                            text ?? data?.map(r => r.join("\t")).join("\t") ?? ""
-                        );
+                        const rawValue = text ?? data?.map(r => r.map(cb => cb.rawValue).join("\t")).join("\t") ?? "";
+                        const newVal = pasteToCell(cellData, target, rawValue, undefined);
                         if (newVal !== undefined) {
                             editList.push(newVal);
                         }
@@ -3173,7 +3174,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (
                         onPaste === false ||
                         (typeof onPaste === "function" &&
-                            onPaste?.([target[0] - rowMarkerOffset, target[1]], data) !== true)
+                            onPaste?.(
+                                [target[0] - rowMarkerOffset, target[1]],
+                                data.map(r => r.map(cb => cb.rawValue?.toString() ?? ""))
+                            ) !== true)
                     ) {
                         return;
                     }
@@ -3182,8 +3186,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         if (row + gridRow >= rows) break;
                         for (const [col, dataItem] of dataRow.entries()) {
                             const index = [col + gridCol, row + gridRow] as const;
+                            const [writeCol, writeRow] = index;
+                            if (writeCol >= mangledCols.length) continue;
+                            if (writeRow >= mangledRows) continue;
                             const cellData = getMangledCellContent(index);
-                            const newVal = pasteToCell(cellData, index, dataItem);
+                            const newVal = pasteToCell(cellData, index, dataItem.rawValue, dataItem.formatted);
                             if (newVal !== undefined) {
                                 editList.push(newVal);
                             }
@@ -3207,7 +3214,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             getMangledCellContent,
             gridSelection,
             keybindings.paste,
+            mangledCols.length,
             mangledOnCellsEdited,
+            mangledRows,
             onPaste,
             rowMarkerOffset,
             rows,
@@ -3317,6 +3326,24 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     useEventListener("copy", onCopy, window, false, false);
 
+    const onCut = React.useCallback(
+        async (e?: ClipboardEvent) => {
+            if (!keybindings.cut) return;
+            const focused =
+                scrollRef.current?.contains(document.activeElement) === true ||
+                canvasRef.current?.contains(document.activeElement) === true;
+
+            if (!focused) return;
+            await onCopy(e);
+            if (gridSelection.current !== undefined) {
+                deleteRange(gridSelection.current.range);
+            }
+        },
+        [deleteRange, gridSelection, keybindings.cut, onCopy]
+    );
+
+    useEventListener("cut", onCut, window, false, false);
+
     const onSearchResultsChanged = React.useCallback(
         (results: readonly Item[], navIndex: number) => {
             if (onSearchResultsChangedIn !== undefined) {
@@ -3413,7 +3440,23 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return gridRef.current?.damage(damageList);
             },
             getBounds: (col, row) => {
-                return gridRef.current?.getBounds(col + rowMarkerOffset, row);
+
+                if (canvasRef?.current === null || scrollRef?.current === null) {
+                    return undefined
+                }
+
+                if (col === undefined && row === undefined) {
+                    // Return the bounds of the entire scroll area:
+                    const rect = canvasRef.current.getBoundingClientRect()
+                    const scale = rect.width / scrollRef.current.clientWidth
+                    return {   
+                         x: rect.x - scrollRef.current.scrollLeft * scale,
+                         y: rect.y - scrollRef.current.scrollTop * scale,
+                         width: scrollRef.current.scrollWidth * scale,
+                         height: scrollRef.current.scrollHeight * scale,
+                     };
+                }
+                return gridRef.current?.getBounds( col ?? 0 + rowMarkerOffset, row);
             },
             focus: () => gridRef.current?.focus(),
             emit: async e => {

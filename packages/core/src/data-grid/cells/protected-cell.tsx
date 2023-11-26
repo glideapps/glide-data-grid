@@ -1,5 +1,5 @@
 import { drawProtectedCell } from "../data-grid-lib";
-import { GridCellKind, ProtectedCell } from "../data-grid-types";
+import { GridCellKind, type ProtectedCell } from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";
 
 export const protectedCellRenderer: InternalCellRenderer<ProtectedCell> = {

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
-import { GridCellKind, isSizedGridColumn, TextCell, Item } from "@glideapps/glide-data-grid";
+import { GridCellKind, isSizedGridColumn, type TextCell, type Item } from "@glideapps/glide-data-grid";
 import { useColumnSort } from ".";
 import { compareSmart } from "./use-column-sort";
 

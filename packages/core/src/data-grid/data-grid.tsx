@@ -11,46 +11,46 @@ import {
 } from "./data-grid-lib";
 import {
     GridCellKind,
-    Rectangle,
-    GridSelection,
-    GridMouseEventArgs,
-    GridDragEventArgs,
-    GridKeyEventArgs,
-    InnerGridCell,
+    type Rectangle,
+    type GridSelection,
+    type GridMouseEventArgs,
+    type GridDragEventArgs,
+    type GridKeyEventArgs,
+    type InnerGridCell,
     InnerGridCellKind,
     CompactSelection,
-    DrawCustomCellCallback,
-    CellList,
-    Item,
-    DrawHeaderCallback,
+    type DrawCustomCellCallback,
+    type CellList,
+    type Item,
+    type DrawHeaderCallback,
     isReadWriteCell,
     isInnerOnlyCell,
     booleanCellIsEditable,
-    InnerGridColumn,
-    TrailingRowType,
+    type InnerGridColumn,
+    type TrailingRowType,
     groupHeaderKind,
     headerKind,
     outOfBoundsKind,
-    ImageWindowLoader,
+    type ImageWindowLoader,
 } from "./data-grid-types";
-import { SpriteManager, SpriteMap } from "./data-grid-sprites";
-import { direction, useDebouncedMemo, useEventListener } from "../common/utils";
+import { SpriteManager, type SpriteMap } from "./data-grid-sprites";
+import { direction, getScrollBarWidth, useDebouncedMemo, useEventListener } from "../common/utils";
 import clamp from "lodash/clamp.js";
 import makeRange from "lodash/range.js";
 import {
-    BlitData,
+    type BlitData,
     drawCell,
     drawGrid,
-    DrawGridArg,
+    type DrawGridArg,
     drawHeader,
     getActionBoundsForGroup,
     getHeaderMenuBounds,
-    GetRowThemeCallback,
-    GroupDetailsCallback,
-    Highlight,
+    type GetRowThemeCallback,
+    type GroupDetailsCallback,
+    type Highlight,
     pointInRect,
 } from "./data-grid-render";
-import { AnimationManager, StepCallback } from "./animation-manager";
+import { AnimationManager, type StepCallback } from "./animation-manager";
 import { browserIsFirefox, browserIsSafari } from "../common/browser-detect";
 import { useAnimationQueue } from "./use-animation-queue";
 import { assert } from "../common/support";
@@ -283,7 +283,7 @@ type DamageUpdateList = readonly {
 
 export interface DataGridRef {
     focus: () => void;
-    getBounds: (col: number, row?: number) => Rectangle | undefined;
+    getBounds: (col?: number, row?: number) => Rectangle | undefined;
     damage: (cells: DamageUpdateList) => void;
 }
 
@@ -517,6 +517,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isEdge = posX < b.x + b.width + edgeDetectionBuffer;
                 }
 
+                // This is used to ensure that clicking on the scrollbar doesn't unset the selection.
+                // Unfortunately this doesn't work for overlay scrollbars because they are just a broken interaction
+                // by design.
+                const isMaybeScrollbar =
+                    (x > width && x < width + getScrollBarWidth()) || (y > height && y < height + getScrollBarWidth());
+
                 result = {
                     kind: outOfBoundsKind,
                     location: [col !== -1 ? col : x < 0 ? 0 : mappedColumns.length - 1, row ?? rows - 1],
@@ -528,6 +534,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isTouch,
                     button,
                     scrollEdge,
+                    isMaybeScrollbar,
                 };
             } else if (row <= -1) {
                 let bounds = getBoundsForItem(canvas, col, row);
@@ -1294,11 +1301,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         const boundsForDragTarget = getBoundsForItem(canvas, col, row);
 
                         assert(boundsForDragTarget !== undefined);
-                        offscreen.width = boundsForDragTarget.width;
-                        offscreen.height = boundsForDragTarget.height;
+                        const dpr = Math.ceil(window.devicePixelRatio ?? 1);
+                        offscreen.width = boundsForDragTarget.width * dpr;
+                        offscreen.height = boundsForDragTarget.height * dpr;
 
                         const ctx = offscreen.getContext("2d");
                         if (ctx !== null) {
+                            ctx.scale(dpr, dpr);
                             ctx.textBaseline = "middle";
                             if (row === -1) {
                                 ctx.font = `${theme.headerFontStyle} ${theme.fontFamily}`;
@@ -1351,6 +1360,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
                         offscreen.style.left = "-100%";
                         offscreen.style.position = "absolute";
+                        offscreen.style.width = `${boundsForDragTarget.width}px`;
+                        offscreen.style.height = `${boundsForDragTarget.height}px`;
 
                         document.body.append(offscreen);
 
@@ -1488,12 +1499,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     });
                 }
             },
-            getBounds: (col: number, row?: number) => {
+            getBounds: (col?: number, row?: number) => {
                 if (canvasRef === undefined || canvasRef.current === null) {
                     return undefined;
                 }
 
-                return getBoundsForItem(canvasRef.current, col, row ?? -1);
+                return getBoundsForItem(canvasRef.current, col ?? 0, row ?? -1);
             },
             damage,
         }),

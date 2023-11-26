@@ -1,6 +1,6 @@
 import { styled } from "@linaria/react";
 import * as React from "react";
-import { DataEditor, DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
+import { DataEditor, type DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
 import { DropdownCell as DropdownRenderer, useExtraCells } from ".";
 import type { StarCell } from "./cells/star-cell";
 import type { SparklineCell } from "./cells/sparkline-cell";
@@ -79,7 +79,9 @@ const BeautifulStyle = styled.div`
         background-color: white;
 
         border-radius: 12px;
-        box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
+        box-shadow:
+            rgba(9, 30, 66, 0.25) 0px 4px 8px -2px,
+            rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
 
         .sizer-clip {
             border-radius: 12px;

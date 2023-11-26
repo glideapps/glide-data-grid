@@ -1,7 +1,7 @@
 import {
-    CustomCell,
+    type CustomCell,
     measureTextCached,
-    CustomRenderer,
+    type CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
     blend,
@@ -267,7 +267,9 @@ const LinksCellEditorStyle = styled.div`
 
             cursor: pointer;
 
-            transition: background-color 200ms, color 200ms;
+            transition:
+                background-color 200ms,
+                color 200ms;
 
             color: var(--gdg-text-medium);
 

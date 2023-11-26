@@ -3,7 +3,7 @@ import * as React from "react";
 import { BuilderThemeWrapper } from "../stories/story-utils";
 import GridScroller from "./scrolling-data-grid";
 import { styled } from "@linaria/react";
-import { CompactSelection, GridCell, GridCellKind, Rectangle, Item } from "../data-grid/data-grid-types";
+import { CompactSelection, type GridCell, GridCellKind, type Rectangle, type Item } from "../data-grid/data-grid-types";
 import { getDefaultTheme } from "..";
 import type { GetCellRendererCallback } from "../data-grid/cells/cell-types";
 import { CellRenderers } from "../data-grid/cells";

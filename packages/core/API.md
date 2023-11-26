@@ -368,10 +368,10 @@ Causes the data grid to rerender these specific cells. Rerendering a single cell
 ## getBounds
 
 ```ts
-getBounds: (col: number, row?: number) => Rectangle | undefined;
+getBounds: (col?: number, row?: number) => Rectangle | undefined;
 ```
 
-`getBounds` returns the current bounding box of a cell. This does not need to be a currently rendered cell.
+`getBounds` returns the current bounding box of a cell. This does not need to be a currently rendered cell. If called with `col` and `row` as undefined, the bounding box of the entire data grid scroll area is returned.
 
 ---
 

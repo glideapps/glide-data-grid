@@ -1,10 +1,10 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
 import {
-    CustomCell,
+    type CustomCell,
     measureTextCached,
     TextCellEntry,
-    CustomRenderer,
+    type CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
 } from "@glideapps/glide-data-grid";

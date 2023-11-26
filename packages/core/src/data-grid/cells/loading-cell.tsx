@@ -1,4 +1,4 @@
-import { GridCellKind, LoadingCell } from "../data-grid-types";
+import { GridCellKind, type LoadingCell } from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";
 
 export const loadingCellRenderer: InternalCellRenderer<LoadingCell> = {

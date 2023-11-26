@@ -2,7 +2,7 @@
 import * as React from "react";
 import { MarkdownOverlayEditor } from "../../data-grid-overlay-editor/private/markdown-overlay-editor";
 import { drawTextCell, prepTextCell } from "../data-grid-lib";
-import { GridCellKind, MarkdownCell } from "../data-grid-types";
+import { GridCellKind, type MarkdownCell } from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";
 
 export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {

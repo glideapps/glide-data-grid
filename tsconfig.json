@@ -9,7 +9,7 @@
         "noImplicitAny": true,
         "noUnusedLocals": true,
         "skipLibCheck": true,
-        "importsNotUsedAsValues": "error",
+        "verbatimModuleSyntax": true,
         "noUnusedParameters": true,
         "strict": true,
         "target": "es6",

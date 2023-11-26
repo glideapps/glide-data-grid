@@ -1,6 +1,6 @@
 import * as React from "react";
 import { styled } from "@linaria/react";
-import DataGridDnd, { DataGridDndProps } from "../data-grid-dnd/data-grid-dnd";
+import DataGridDnd, { type DataGridDndProps } from "../data-grid-dnd/data-grid-dnd";
 import type { Rectangle } from "../data-grid/data-grid-types";
 import { InfiniteScroller } from "./infinite-scroller";
 import clamp from "lodash/clamp.js";
@@ -90,7 +90,9 @@ const MinimapStyle = styled.div`
     background: linear-gradient(var(--gdg-bg-cell), var(--gdg-bg-cell-medium));
     border-radius: 4px;
     z-index: 1;
-    box-shadow: 0 0 0 1px var(--gdg-border-color), 0 2px 5px rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 0 0 1px var(--gdg-border-color),
+        0 2px 5px rgba(0, 0, 0, 0.08);
 
     overflow: hidden;
 

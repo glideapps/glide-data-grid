@@ -2,7 +2,7 @@ import * as React from "react";
 import { fireEvent, render } from "@testing-library/react";
 
 import { GridCellKind } from "@glideapps/glide-data-grid";
-import renderer, { DateKind, DatePickerCell, formatValueForHTMLInput } from "../src/cells/date-picker-cell";
+import renderer, { type DateKind, type DatePickerCell, formatValueForHTMLInput } from "../src/cells/date-picker-cell";
 
 describe("formatValueForHTMLInput", () => {
     it.each([

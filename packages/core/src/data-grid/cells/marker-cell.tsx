@@ -1,5 +1,5 @@
 import { drawMarkerRowCell, prepMarkerRowCell } from "../data-grid-lib";
-import { InnerGridCellKind, MarkerCell } from "../data-grid-types";
+import { InnerGridCellKind, type MarkerCell } from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";
 
 export const markerCellRenderer: InternalCellRenderer<MarkerCell> = {

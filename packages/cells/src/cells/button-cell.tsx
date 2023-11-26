@@ -1,6 +1,6 @@
 import {
-    CustomCell,
-    CustomRenderer,
+    type CustomCell,
+    type CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
     interpolateColors,
@@ -61,6 +61,8 @@ const renderer: CustomRenderer<ButtonCell> = {
         const y = Math.floor(rect.y + theme.cellVerticalPadding + 1);
         const width = Math.ceil(rect.width - theme.cellHorizontalPadding * 2 - 1);
         const height = Math.ceil(rect.height - theme.cellVerticalPadding * 2 - 1);
+
+        if (width <= 0 || height <= 0) return true;
 
         if (backgroundColor !== undefined) {
             ctx.beginPath();

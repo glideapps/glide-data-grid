@@ -2,11 +2,11 @@ import React from "react";
 import { styled } from "@linaria/react";
 
 import {
-    CustomCell,
-    CustomRenderer,
+    type CustomCell,
+    type CustomRenderer,
     drawTextCell,
     GridCellKind,
-    ProvideEditorCallback,
+    type ProvideEditorCallback,
     TextCellEntry,
 } from "@glideapps/glide-data-grid";
 

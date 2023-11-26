@@ -1,4 +1,4 @@
-import { AnimationManager, HoverValues } from "../src/data-grid/animation-manager";
+import { AnimationManager, type HoverValues } from "../src/data-grid/animation-manager";
 
 const OG_RAF = window.requestAnimationFrame;
 const OG_CAF = window.cancelAnimationFrame;

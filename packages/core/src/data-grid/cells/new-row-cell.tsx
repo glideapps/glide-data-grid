@@ -1,5 +1,5 @@
 import { drawNewRowCell } from "../data-grid-lib";
-import { InnerGridCellKind, NewRowCell } from "../data-grid-types";
+import { InnerGridCellKind, type NewRowCell } from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";
 
 export const newRowCellRenderer: InternalCellRenderer<NewRowCell> = {

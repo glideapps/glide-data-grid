@@ -3,13 +3,13 @@ import type { Theme } from "../common/styles";
 import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
 import type { GetCellRendererCallback } from "../data-grid/cells/cell-types";
 import {
-    CellArray,
-    GridCell,
-    GridColumn,
-    InnerGridColumn,
+    type CellArray,
+    type GridCell,
+    type GridColumn,
+    type InnerGridColumn,
     isSizedGridColumn,
     resolveCellsThunk,
-    SizedGridColumn,
+    type SizedGridColumn,
 } from "../data-grid/data-grid-types";
 
 const defaultSize = 150;

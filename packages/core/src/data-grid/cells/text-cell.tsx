@@ -2,7 +2,7 @@
 import * as React from "react";
 import { GrowingEntry } from "../../growing-entry/growing-entry";
 import { drawTextCell, prepTextCell } from "../data-grid-lib";
-import { GridCellKind, TextCell } from "../data-grid-types";
+import { GridCellKind, type TextCell } from "../data-grid-types";
 import type { InternalCellRenderer } from "./cell-types";
 
 export const textCellRenderer: InternalCellRenderer<TextCell> = {
@@ -44,5 +44,8 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
             );
         },
     }),
-    onPaste: (toPaste, cell) => (toPaste === cell.data ? undefined : { ...cell, data: toPaste }),
+    onPaste: (toPaste, cell, details) =>
+        toPaste === cell.data
+            ? undefined
+            : { ...cell, data: toPaste, displayData: details.formattedString ?? cell.displayData },
 };

@@ -3,11 +3,11 @@ import * as React from "react";
 import { useResizeDetector } from "react-resize-detector";
 import {
     DataEditor,
-    DataEditorProps,
-    DataEditorRef,
+    type DataEditorProps,
+    type DataEditorRef,
     GridCellKind,
-    GridColumn,
-    Theme,
+    type GridColumn,
+    type Theme,
 } from "@glideapps/glide-data-grid";
 import { faker } from "@faker-js/faker";
 import { useCollapsingGroups, useColumnSort, useMoveableColumns } from "..";
@@ -75,7 +75,9 @@ const BeautifulStyle = styled.div`
         background-color: white;
 
         border-radius: 12px;
-        box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
+        box-shadow:
+            rgba(9, 30, 66, 0.25) 0px 4px 8px -2px,
+            rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
 
         .sizer-clip {
             border-radius: 12px;
@@ -174,6 +176,9 @@ const testTheme: Theme = {
 
     bgBubble: "#EDEDF3",
     bgBubbleSelected: "#FFFFFF",
+
+    headerIconSize: 20,
+    markerFontStyle: "13px",
 
     bgSearchResult: "#fff9e3",
 
