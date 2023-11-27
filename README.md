@@ -1,6 +1,6 @@
 > :warning: **This is a temporary fork until our bug fixes have been merged into [@workfront-grid/glide-data-grid](https://github.com/glideapps/glide-data-grid). Afterwards the fork will be removed.**
 
-<h1  align="center">
+<h1 align="center">
   <img src="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/icon.png" width="224px"/><br/>
   <b>Glide Data Grid</b>
 </h1>
