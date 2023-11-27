@@ -3522,7 +3522,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       }
       if (args.kind === 'cell') {
         onCellContextMenu?.(
-          [adjustedCol, row],
+          getMangledCellLocation([adjustedCol, row]),
           {
             ...args,
             preventDefault,
@@ -3536,14 +3536,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       }
     },
     [
-      gridSelection,
-      onCellContextMenu,
-      onGroupHeaderContextMenu,
-      onHeaderContextMenu,
       rowMarkerOffset,
-      updateSelectedCell,
-      getMangledCellContent,
       getGroupRowDetails,
+      onHeaderContextMenu,
+      onGroupHeaderContextMenu,
+      onCellContextMenu,
+      getMangledCellLocation,
+      gridSelection,
+      updateSelectedCell,
     ]
   );
 
