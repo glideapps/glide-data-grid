@@ -1,0 +1,24 @@
+{
+    "assumptions": {
+        "setPublicClassFields": true,
+        "setSpreadProperties": true
+    },
+    "presets": [
+        [
+            "@babel/preset-env",
+            {
+                "targets": {
+                    "firefox": "60",
+                    "chrome": "67",
+                    "safari": "12.1"
+                },
+                "exclude": ["@babel/plugin-transform-template-literals"]
+            }
+        ],
+        "@babel/preset-react",
+        "@babel/preset-typescript"
+    ],
+    "plugins": ["@babel/plugin-proposal-class-properties"],
+    "comments": false,
+    "sourceMaps": true
+}
