@@ -4,6 +4,7 @@ import * as React from "react";
 import { useResizeDetector } from "../../common/resize-detector.js";
 import { browserIsSafari } from "../../common/browser-detect.js";
 import { useEventListener } from "../../common/utils.js";
+import useKineticScroll from "./use-kinetic-scroll.js";
 
 interface Props {
     readonly className?: string;
@@ -226,6 +227,8 @@ export const InfiniteScroller: React.FC<Props> = p => {
             paddingRight: rightWrapRef.current?.clientWidth ?? 0,
         });
     }, [paddingBottom, paddingRight, scrollHeight, update, preventDiagonalScrolling, hasTouches]);
+
+    useKineticScroll(browserIsSafari.value, onScroll, scroller);
 
     const onScrollRef = React.useRef(onScroll);
     onScrollRef.current = onScroll;

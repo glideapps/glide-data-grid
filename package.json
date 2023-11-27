@@ -1,6 +1,6 @@
 {
     "name": "root",
-    "version": "5.99.9-alpha1",
+    "version": "5.99.9-alpha2",
     "scripts": {
         "start": "npm run storybook",
         "version": "./update-version.sh",
