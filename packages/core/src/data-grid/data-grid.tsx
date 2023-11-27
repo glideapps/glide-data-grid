@@ -510,6 +510,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 const horizontal = x > width ? -1 : x < 0 ? 1 : 0;
                 const vertical = y > height ? 1 : y < 0 ? -1 : 0;
 
+                let innerHorizontal: -1 | 0 | 1 = horizontal;
+                let innerVertical: -1 | 0 | 1 = vertical;
+                if (horizontal === 0 && vertical === 0) {
+                    innerHorizontal = col === -1 ? -1 : 0;
+                    innerVertical = row === undefined? 1 : 0;
+                }
+
                 let isEdge = false;
                 if (col === -1 && row === -1) {
                     const b = getBoundsForItem(canvas, mappedColumns.length - 1, -1);
@@ -527,6 +534,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     kind: outOfBoundsKind,
                     location: [col !== -1 ? col : x < 0 ? 0 : mappedColumns.length - 1, row ?? rows - 1],
                     direction: [horizontal, vertical],
+                    innerDirection: [innerHorizontal, innerVertical],
                     shiftKey,
                     ctrlKey,
                     metaKey,
@@ -626,6 +634,19 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     function isSameItem(item: GridMouseEventArgs | undefined, other: GridMouseEventArgs | undefined) {
         if (item === other) return true;
+
+        if (item?.kind === "out-of-bounds") {
+            return (
+                item?.kind === other?.kind &&
+                item?.location[0] === other?.location[0] &&
+                item?.location[1] === other?.location[1] &&
+                item?.direction[0] === other?.direction[0] &&
+                item?.direction[1] === other?.direction[1] &&
+                item?.innerDirection[0] === other?.innerDirection[0] &&
+                item?.innerDirection[1] === other?.innerDirection[1]
+            );
+        }
+
         return (
             item?.kind === other?.kind &&
             item?.location[0] === other?.location[0] &&

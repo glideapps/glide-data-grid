@@ -127,6 +127,7 @@ export interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {
     readonly location: Item;
     readonly direction: readonly [-1 | 0 | 1, -1 | 0 | 1];
     readonly isMaybeScrollbar: boolean;
+    readonly innerDirection: readonly [-1 | 0 | 1, -1 | 0 | 1];
 }
 
 /** @category Types */
