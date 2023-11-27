@@ -1,5 +1,5 @@
 import React from "react";
-import { DataEditor, type DataEditorRef } from "../../data-editor/data-editor.js";
+import { type DataEditorRef } from "../../data-editor/data-editor.js";
 import {
     BeautifulWrapper,
     Description,
@@ -11,6 +11,7 @@ import {
 import type { Item } from "../../internal/data-grid/data-grid-types.js";
 import { GridCellKind } from "../../internal/data-grid/data-grid-types.js";
 import { SimpleThemeWrapper } from "../../stories/story-utils.js";
+import { DataEditorAll } from "../../data-editor-all.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -101,7 +102,7 @@ export const RapidUpdates: React.VFC = () => {
                     </MoreInfo>
                 </>
             }>
-            <DataEditor {...defaultProps} ref={ref} getCellContent={getCellContent} columns={cols} rows={10_000} />
+            <DataEditorAll {...defaultProps} ref={ref} getCellContent={getCellContent} columns={cols} rows={10_000} />
         </BeautifulWrapper>
     );
 };
