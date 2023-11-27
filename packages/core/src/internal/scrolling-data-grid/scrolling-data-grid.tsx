@@ -358,6 +358,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             scrollRef={scrollRef}
             minimap={minimap}
             className={className}
+            kineticScrollPerfHack={experimental?.kineticScrollPerfHack}
             preventDiagonalScrolling={preventDiagonalScrolling}
             draggable={isDraggable === true || typeof isDraggable === "string"}
             scrollWidth={width + (paddingRight ?? 0)}

@@ -22,6 +22,7 @@ interface Props {
         readonly fill?: boolean;
     };
     readonly rightElement?: React.ReactNode;
+    readonly kineticScrollPerfHack?: boolean;
     readonly minimap?: React.ReactNode;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
     readonly update: (region: Rectangle & { paddingRight: number }) => void;
@@ -119,6 +120,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
         paddingRight = 0,
         rightElement,
         rightElementProps,
+        kineticScrollPerfHack = false,
         scrollRef,
         scrollToEnd,
         initialSize,
@@ -228,7 +230,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
         });
     }, [paddingBottom, paddingRight, scrollHeight, update, preventDiagonalScrolling, hasTouches]);
 
-    useKineticScroll(browserIsSafari.value, onScroll, scroller);
+    useKineticScroll(kineticScrollPerfHack && browserIsSafari.value, onScroll, scroller);
 
     const onScrollRef = React.useRef(onScroll);
     onScrollRef.current = onScroll;

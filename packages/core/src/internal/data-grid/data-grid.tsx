@@ -234,6 +234,7 @@ export interface DataGridProps {
               readonly paddingRight?: number;
               readonly paddingBottom?: number;
               readonly enableFirefoxRescaling?: boolean;
+              readonly kineticScrollPerfHack?: boolean;
               readonly isSubGrid?: boolean;
               readonly strict?: boolean;
               readonly scrollbarWidthOverride?: number;
