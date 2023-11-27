@@ -3173,7 +3173,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
           const editList: EditListItem[] = [];
           for (let x = r.x; x < r.x + r.width; x++) {
             for (let y = r.y; y < r.y + r.height; y++) {
-              const cellValue = getCellContent([x - rowMarkerOffset, y]);
+              const cellValue = getMangledCellContent([x, y]);
               if (!cellValue.allowOverlay && cellValue.kind !== GridCellKind.Boolean) continue;
               let newVal: InnerGridCell | undefined = undefined;
               if (cellValue.kind === GridCellKind.Custom) {
