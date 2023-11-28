@@ -158,8 +158,6 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     cellYOffsetRef.current = cellYOffset;
     const beginSearch = React.useCallback(
         (str: string) => {
-            // eslint-disable-next-line no-console
-            console.log("beginSearch", str);
             const regex = new RegExp(str.replace(/([$()*+.?[\\\]^{|}-])/g, "\\$1"), "i");
 
             let startY = cellYOffsetRef.current;
@@ -178,8 +176,6 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
             const tick = async () => {
                 if (getCellsForSelection === undefined) return;
-                // eslint-disable-next-line no-console
-                console.log("tick", str);
                 const tStart = performance.now();
                 const rowsLeft = rows - rowsSearched;
                 let data = getCellsForSelection(
