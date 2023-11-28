@@ -177,6 +177,7 @@ export function direction(value: string): "rtl" | "ltr" | "neutral" {
 
 let scrollbarWidthCache: number | undefined = undefined;
 export function getScrollBarWidth(): number {
+    if (typeof document === "undefined") return 0;
     if (scrollbarWidthCache !== undefined) return scrollbarWidthCache;
     const inner = document.createElement("p");
     inner.style.width = "100%";

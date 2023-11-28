@@ -76,6 +76,8 @@ type ScrollLock = [undefined, number] | [number, undefined] | undefined;
 function useTouchUpDelayed(delay: number): boolean {
     const [hasTouches, setHasTouches] = React.useState(false);
 
+    const safeWindow = typeof window === "undefined" ? null : window;
+
     const cbTimer = React.useRef(0);
     useEventListener(
         "touchstart",
@@ -83,7 +85,7 @@ function useTouchUpDelayed(delay: number): boolean {
             window.clearTimeout(cbTimer.current);
             setHasTouches(true);
         }, []),
-        window,
+        safeWindow,
         true,
         false
     );
@@ -98,7 +100,7 @@ function useTouchUpDelayed(delay: number): boolean {
             },
             [delay]
         ),
-        window,
+        safeWindow,
         true,
         false
     );
@@ -135,7 +137,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
     const lastScrollY = React.useRef(0);
     const scroller = React.useRef<HTMLDivElement | null>(null);
 
-    const dpr = window.devicePixelRatio;
+    const dpr = typeof window === "undefined" ? 1 : window.devicePixelRatio;
 
     React.useEffect(() => {
         const el = scroller.current;
@@ -264,7 +266,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
 
     const { ref, width, height } = useResizeDetector<HTMLDivElement>(initialSize);
 
-    if (lastProps.current?.height !== height || lastProps.current?.width !== width) {
+    if (typeof window !== "undefined" && (lastProps.current?.height !== height || lastProps.current?.width !== width)) {
         window.setTimeout(() => onScrollRef.current(), 0);
         lastProps.current = { width, height };
     }

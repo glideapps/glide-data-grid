@@ -697,6 +697,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
     const lastSent = React.useRef<[number, number]>();
 
+    const safeWindow = typeof window === "undefined" ? null : window;
+
     const {
         rowMarkers = "none",
         rowMarkerWidth: rowMarkerWidthRaw,
@@ -3234,7 +3236,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
-    useEventListener("paste", onPasteInternal, window, false, true);
+    useEventListener("paste", onPasteInternal, safeWindow, false, true);
 
     // While this function is async, we deeply prefer not to await if we don't have to. This will lead to unpacking
     // promises in rather awkward ways when possible to avoid awaiting. We have to use fallback copy mechanisms when
@@ -3335,7 +3337,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [columnsIn, getCellsForSelection, gridSelection, keybindings.copy, rowMarkerOffset, rows, copyHeaders]
     );
 
-    useEventListener("copy", onCopy, window, false, false);
+    useEventListener("copy", onCopy, safeWindow, false, false);
 
     const onCut = React.useCallback(
         async (e?: ClipboardEvent) => {
@@ -3353,7 +3355,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [deleteRange, gridSelection, keybindings.cut, onCopy]
     );
 
-    useEventListener("cut", onCut, window, false, false);
+    useEventListener("cut", onCut, safeWindow, false, false);
 
     const onSearchResultsChanged = React.useCallback(
         (results: readonly Item[], navIndex: number) => {
