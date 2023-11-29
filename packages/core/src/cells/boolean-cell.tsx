@@ -66,7 +66,7 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     },
 };
 
-export function drawBoolean(
+function drawBoolean(
     args: BaseDrawArgs,
     data: boolean | BooleanEmpty | BooleanIndeterminate,
     canEdit: boolean,
