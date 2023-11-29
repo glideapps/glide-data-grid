@@ -1,6 +1,5 @@
 import * as React from "react";
 import type { Theme } from "../../common/styles.js";
-import ImageWindowLoaderImpl from "../../common/image-window-loader.js";
 import {
     computeBounds,
     getColumnIndexForX,
@@ -142,7 +141,7 @@ export interface DataGridProps {
      * Allows passing a custom image window loader.
      * @group Advanced
      */
-    readonly imageWindowLoader: ImageWindowLoader | undefined;
+    readonly imageWindowLoader: ImageWindowLoader;
 
     /**
      * Emitted when an item is hovered.
@@ -363,8 +362,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const cellXOffset = Math.max(freezeColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
-    const imageWindowLoaderInternal = React.useMemo<ImageWindowLoader>(() => new ImageWindowLoaderImpl(), []);
-    const imageLoader = imageWindowLoader ?? imageWindowLoaderInternal;
+    const imageLoader = imageWindowLoader;
     const damageRegion = React.useRef<readonly Item[] | undefined>();
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);

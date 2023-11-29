@@ -7,6 +7,7 @@ import { CompactSelection, GridCellKind, type GridSelection } from "./data-grid-
 import { getDataEditorTheme } from "../../common/styles.js";
 import type { GetCellRendererCallback } from "../../cells/cell-types.js";
 import { AllCellRenderers } from "../../cells/index.js";
+import ImageWindowLoaderImpl from "../../common/image-window-loader.js";
 
 export default {
     title: "Subcomponents/DataGrid",
@@ -89,7 +90,7 @@ export function Simplenotest() {
             getGroupDetails={undefined}
             getRowThemeOverride={undefined}
             highlightRegions={undefined}
-            imageWindowLoader={undefined}
+            imageWindowLoader={new ImageWindowLoaderImpl()}
             onHeaderMenuClick={undefined}
             prelightCells={undefined}
             translateX={undefined}
@@ -172,7 +173,7 @@ export function SelectedCellnotest() {
             getGroupDetails={undefined}
             getRowThemeOverride={undefined}
             highlightRegions={undefined}
-            imageWindowLoader={undefined}
+            imageWindowLoader={new ImageWindowLoaderImpl()}
             onHeaderMenuClick={undefined}
             prelightCells={undefined}
             translateX={undefined}
@@ -262,7 +263,7 @@ export function SelectedRownotest() {
             getGroupDetails={undefined}
             getRowThemeOverride={undefined}
             highlightRegions={undefined}
-            imageWindowLoader={undefined}
+            imageWindowLoader={new ImageWindowLoaderImpl()}
             onHeaderMenuClick={undefined}
             prelightCells={undefined}
             translateX={undefined}
@@ -346,7 +347,7 @@ export const SelectedColumnnotest = () => {
             getGroupDetails={undefined}
             getRowThemeOverride={undefined}
             highlightRegions={undefined}
-            imageWindowLoader={undefined}
+            imageWindowLoader={new ImageWindowLoaderImpl()}
             onHeaderMenuClick={undefined}
             prelightCells={undefined}
             translateX={undefined}

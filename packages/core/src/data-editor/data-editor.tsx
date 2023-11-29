@@ -96,6 +96,7 @@ type Props = Partial<
         | "headerHeight"
         | "isFilling"
         | "isFocused"
+        | "imageWindowLoader"
         | "lockColumns"
         | "maxColumnWidth"
         | "minColumnWidth"
@@ -197,7 +198,7 @@ const keybindingDefaults: Keybinds = {
 /**
  * @category DataEditor
  */
-export interface DataEditorProps extends Props {
+export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "imageWindowLoader"> {
     /** Emitted whenever the user has requested the deletion of the selection.
      * @group Editing
      */

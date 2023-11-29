@@ -5,6 +5,7 @@ import { CompactSelection, GridCellKind } from "../src/internal/data-grid/data-g
 import { getDefaultTheme } from "../src/index.js";
 import { AllCellRenderers } from "../src/cells/index.js";
 import { vi, expect, describe, test, beforeEach, afterEach } from "vitest";
+import ImageWindowLoaderImpl from "../src/common/image-window-loader.js";
 
 const basicProps: DataGridProps = {
     cellXOffset: 0,
@@ -38,7 +39,7 @@ const basicProps: DataGridProps = {
     getGroupDetails: undefined,
     getRowThemeOverride: undefined,
     highlightRegions: undefined,
-    imageWindowLoader: undefined,
+    imageWindowLoader: new ImageWindowLoaderImpl(),
     onHeaderMenuClick: undefined,
     prelightCells: undefined,
     translateX: undefined,

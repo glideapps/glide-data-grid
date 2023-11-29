@@ -13,6 +13,7 @@ import {
 import { getDefaultTheme } from "../../index.js";
 import type { GetCellRendererCallback } from "../../cells/cell-types.js";
 import { AllCellRenderers } from "../../cells/index.js";
+import ImageWindowLoaderImpl from "../../common/image-window-loader.js";
 
 const InnerContainer = styled.div`
     width: 100%;
@@ -113,7 +114,7 @@ export function Simplenotest() {
             getGroupDetails={undefined}
             getRowThemeOverride={undefined}
             highlightRegions={undefined}
-            imageWindowLoader={undefined}
+            imageWindowLoader={new ImageWindowLoaderImpl()}
             onHeaderMenuClick={undefined}
             prelightCells={undefined}
             drawCustomCell={undefined}
