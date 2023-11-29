@@ -1115,23 +1115,46 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 return;
             }
 
+            // the point here is not to trigger re-renders every time the mouse moves over a cell
+            // that doesn't care about the mouse positon.
+            const maybeSetHoveredInfo = (newVal: typeof hoveredItemInfo, needPosition: boolean) => {
+                setHoveredItemInfo(cv => {
+                    if (cv === newVal) return cv;
+                    if (
+                        cv?.[0][0] === newVal?.[0][0] &&
+                        cv?.[0][1] === newVal?.[0][1] &&
+                        ((cv?.[1][0] === newVal?.[1][0] && cv?.[1][1] === newVal?.[1][1]) || !needPosition)
+                    ) {
+                        return cv;
+                    }
+                    return newVal;
+                });
+            };
+
             if (!isSameItem(args, hoveredRef.current)) {
                 onItemHovered?.(args);
-                setHoveredItemInfo(
-                    args.kind === outOfBoundsKind ? undefined : [args.location, [args.localEventX, args.localEventY]]
+                maybeSetHoveredInfo(
+                    args.kind === outOfBoundsKind ? undefined : [args.location, [args.localEventX, args.localEventY]],
+                    true
                 );
                 hoveredRef.current = args;
             } else if (args.kind === "cell" || args.kind === headerKind || args.kind === groupHeaderKind) {
-                const newInfo: typeof hoverInfoRef.current = [args.location, [args.localEventX, args.localEventY]];
-                setHoveredItemInfo(newInfo);
-                hoverInfoRef.current = newInfo;
+                let needsDamageCell = false;
+                let needsHoverPosition = true;
 
                 if (args.kind === "cell") {
                     const toCheck = getCellContent(args.location);
-                    if (toCheck.kind === GridCellKind.Custom || getCellRenderer(toCheck)?.needsHoverPosition === true) {
-                        damageInternal([args.location]);
-                    }
+                    needsHoverPosition =
+                        toCheck.kind === GridCellKind.Custom || getCellRenderer(toCheck)?.needsHoverPosition === true;
+                    needsDamageCell = needsHoverPosition;
                 } else if (args.kind === groupHeaderKind) {
+                    needsDamageCell = true;
+                }
+
+                const newInfo: typeof hoverInfoRef.current = [args.location, [args.localEventX, args.localEventY]];
+                maybeSetHoveredInfo(newInfo, needsHoverPosition);
+                hoverInfoRef.current = newInfo;
+                if (needsDamageCell) {
                     damageInternal([args.location]);
                 }
             }
