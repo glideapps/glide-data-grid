@@ -6,7 +6,6 @@ import uniq from "lodash/uniq.js";
 import flatten from "lodash/flatten.js";
 import range from "lodash/range.js";
 import debounce from "lodash/debounce.js";
-import DataGridOverlayEditor from "../internal/data-grid-overlay-editor/data-grid-overlay-editor.js";
 import {
     type EditableGridCell,
     type GridCell,
@@ -63,6 +62,10 @@ import { useAutoscroll } from "./use-autoscroll.js";
 import type { CustomRenderer, CellRenderer, InternalCellRenderer } from "../cells/cell-types.js";
 import { decodeHTML, type CopyBuffer } from "./copy-paste.js";
 import { useRemAdjuster } from "./use-rem-adjuster.js";
+
+const DataGridOverlayEditor = React.lazy(
+    async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
+);
 
 let idCounter = 0;
 
@@ -3726,18 +3729,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 />
                 {renameGroupNode}
                 {overlay !== undefined && (
-                    <DataGridOverlayEditor
-                        {...overlay}
-                        validateCell={validateCell}
-                        id={overlayID}
-                        getCellRenderer={getCellRenderer}
-                        className={experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
-                        provideEditor={provideEditor}
-                        imageEditorOverride={imageEditorOverride}
-                        onFinishEditing={onFinishEditing}
-                        markdownDivCreateNode={markdownDivCreateNode}
-                        isOutsideClick={isOutsideClick}
-                    />
+                    <React.Suspense fallback={null}>
+                        <DataGridOverlayEditor
+                            {...overlay}
+                            validateCell={validateCell}
+                            id={overlayID}
+                            getCellRenderer={getCellRenderer}
+                            className={experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
+                            provideEditor={provideEditor}
+                            imageEditorOverride={imageEditorOverride}
+                            onFinishEditing={onFinishEditing}
+                            markdownDivCreateNode={markdownDivCreateNode}
+                            isOutsideClick={isOutsideClick}
+                        />
+                    </React.Suspense>
                 )}
             </DataEditorContainer>
         </ThemeContext.Provider>
