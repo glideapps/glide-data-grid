@@ -213,3 +213,15 @@ export function copyToClipboard(
 
     e?.preventDefault();
 }
+
+/**
+ * Checkbox behavior:
+ *
+ * true + click -> unchecked
+ * false + click -> checked
+ * indeterminate + click -> checked
+ * empty + click -> checked
+ */
+export function toggleBoolean(data: boolean | null | undefined): boolean | null | undefined {
+    return data !== true;
+}

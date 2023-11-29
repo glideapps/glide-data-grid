@@ -1,4 +1,5 @@
 import { getSquareWidth, getSquareXPosFromAlign, getSquareBB, pointIsWithinBB } from "../common/utils.js";
+import { toggleBoolean } from "../data-editor/data-editor-fns.js";
 import {
     GridCellKind,
     type BooleanCell,
@@ -8,18 +9,6 @@ import {
 } from "../internal/data-grid/data-grid-types.js";
 import { drawCheckbox } from "../internal/data-grid/draw-checkbox.js";
 import type { BaseDrawArgs, InternalCellRenderer } from "./cell-types.js";
-
-/**
- * Checkbox behavior:
- *
- * true + click -> unchecked
- * false + click -> checked
- * indeterminate + click -> checked
- * empty + click -> checked
- */
-export function toggleBoolean(data: boolean | null | undefined): boolean | null | undefined {
-    return data !== true;
-}
 
 const defaultCellMaxSize = 20;
 
