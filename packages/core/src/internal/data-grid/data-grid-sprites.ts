@@ -1,6 +1,6 @@
 import type { Theme } from "../../common/styles.js";
 import type { SpriteProps } from "../../common/utils.js";
-import { type HeaderIconMap, sprites } from "./sprites.js";
+import { type HeaderIconMap } from "./sprites.js";
 
 /**
  * A known icon identifier
@@ -48,10 +48,7 @@ export class SpriteManager {
         headerIcons: SpriteMap | undefined,
         private onSettled: () => void
     ) {
-        this.headerIcons = {
-            ...sprites,
-            ...headerIcons,
-        };
+        this.headerIcons = headerIcons ?? {};
     }
 
     public drawSprite(
