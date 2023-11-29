@@ -3,7 +3,7 @@ import { render, fireEvent, screen, cleanup } from "@testing-library/react";
 import DataGrid, { type DataGridProps, type DataGridRef } from "../src/internal/data-grid/data-grid.js";
 import { CompactSelection, GridCellKind } from "../src/internal/data-grid/data-grid-types.js";
 import { getDefaultTheme } from "../src/index.js";
-import { CellRenderers } from "../src/cells/index.js";
+import { AllCellRenderers } from "../src/cells/index.js";
 import { vi, expect, describe, test, beforeEach, afterEach } from "vitest";
 
 const basicProps: DataGridProps = {
@@ -101,7 +101,7 @@ const basicProps: DataGridProps = {
     verticalBorder: () => true,
     getCellRenderer: cell => {
         if (cell.kind === GridCellKind.Custom) return undefined;
-        return CellRenderers[cell.kind] as any;
+        return AllCellRenderers.find(x => x.kind === cell.kind) as any;
     },
 };
 

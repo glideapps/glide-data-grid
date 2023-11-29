@@ -12,7 +12,7 @@ import {
 } from "../data-grid/data-grid-types.js";
 import { getDefaultTheme } from "../../index.js";
 import type { GetCellRendererCallback } from "../../cells/cell-types.js";
-import { CellRenderers } from "../../cells/index.js";
+import { AllCellRenderers } from "../../cells/index.js";
 
 const InnerContainer = styled.div`
     width: 100%;
@@ -27,7 +27,7 @@ const InnerContainer = styled.div`
 
 const getCellRenderer: GetCellRendererCallback = cell => {
     if (cell.kind === GridCellKind.Custom) return undefined;
-    return CellRenderers[cell.kind] as any;
+    return AllCellRenderers.find(x => x.kind === cell.kind) as any;
 };
 
 export default {

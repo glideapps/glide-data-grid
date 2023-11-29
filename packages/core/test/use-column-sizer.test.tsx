@@ -2,7 +2,7 @@ import { renderHook, cleanup } from "@testing-library/react-hooks";
 import { type GridCell, GridCellKind, type GridColumn, type Rectangle } from "../src/index.js";
 import { getDataEditorTheme } from "../src/common/styles.js";
 import type { DataGridSearchProps } from "../src/internal/data-grid-search/data-grid-search.js";
-import { CellRenderers } from "../src/cells/index.js";
+import { AllCellRenderers } from "../src/cells/index.js";
 import type { GetCellRendererCallback } from "../src/cells/cell-types.js";
 import type { CellArray, CustomCell } from "../src/internal/data-grid/data-grid-types.js";
 import { useColumnSizer } from "../src/data-editor/use-column-sizer.js";
@@ -82,7 +82,7 @@ const SINGLE_COLUMN = [
 
 const getCellRenderer: GetCellRendererCallback = cell => {
     if (cell.kind === GridCellKind.Custom) return undefined;
-    return CellRenderers[cell.kind] as any;
+    return AllCellRenderers.find(x => x.kind === cell.kind) as any;
 };
 
 describe("use-column-sizer", () => {

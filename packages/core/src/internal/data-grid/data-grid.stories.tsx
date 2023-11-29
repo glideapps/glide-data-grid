@@ -6,7 +6,7 @@ import DataGrid from "./data-grid.js";
 import { CompactSelection, GridCellKind, type GridSelection } from "./data-grid-types.js";
 import { getDataEditorTheme } from "../../common/styles.js";
 import type { GetCellRendererCallback } from "../../cells/cell-types.js";
-import { CellRenderers } from "../../cells/index.js";
+import { AllCellRenderers } from "../../cells/index.js";
 
 export default {
     title: "Subcomponents/DataGrid",
@@ -32,7 +32,7 @@ const emptyGridSelection: GridSelection = {
 
 const getCellRenderer: GetCellRendererCallback = cell => {
     if (cell.kind === GridCellKind.Custom) return undefined;
-    return CellRenderers[cell.kind] as any;
+    return AllCellRenderers.find(x => x.kind === cell.kind) as any;
 };
 
 export function Simplenotest() {

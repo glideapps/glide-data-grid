@@ -33,7 +33,6 @@ import {
     cellIsInRange,
     computeBounds,
     getMiddleCenterBias,
-    drawCheckbox,
 } from "./data-grid-lib.js";
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites.js";
 import type { Theme } from "../../common/styles.js";
@@ -41,6 +40,7 @@ import { blend, withAlpha } from "./color-parser.js";
 import type { DrawArgs, GetCellRendererCallback, PrepResult } from "../../cells/cell-types.js";
 import { assert, deepEqual } from "../../common/support.js";
 import { direction } from "../../common/utils.js";
+import { drawCheckbox } from "./draw-checkbox.js";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when

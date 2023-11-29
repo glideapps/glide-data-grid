@@ -1,4 +1,4 @@
-import { GridCellKind, InnerGridCellKind, type InnerGridCell } from "../internal/data-grid/data-grid-types.js";
+import { type InnerGridCell } from "../internal/data-grid/data-grid-types.js";
 import { booleanCellRenderer } from "./boolean-cell.js";
 import { bubbleCellRenderer } from "./bubble-cell.js";
 import type { InternalCellRenderer } from "./cell-types.js";
@@ -13,22 +13,6 @@ import { protectedCellRenderer } from "./protected-cell.js";
 import { rowIDCellRenderer } from "./row-id-cell.js";
 import { textCellRenderer } from "./text-cell.js";
 import { uriCellRenderer } from "./uri-cell.js";
-
-export const CellRenderers = {
-    [InnerGridCellKind.Marker]: markerCellRenderer,
-    [InnerGridCellKind.NewRow]: newRowCellRenderer,
-    [GridCellKind.Boolean]: booleanCellRenderer,
-    [GridCellKind.Bubble]: bubbleCellRenderer,
-    [GridCellKind.Drilldown]: drilldownCellRenderer,
-    [GridCellKind.Image]: imageCellRenderer,
-    [GridCellKind.Loading]: loadingCellRenderer,
-    [GridCellKind.Markdown]: markdownCellRenderer,
-    [GridCellKind.Number]: numberCellRenderer,
-    [GridCellKind.Protected]: protectedCellRenderer,
-    [GridCellKind.RowID]: rowIDCellRenderer,
-    [GridCellKind.Text]: textCellRenderer,
-    [GridCellKind.Uri]: uriCellRenderer,
-};
 
 export const AllCellRenderers = [
     markerCellRenderer,

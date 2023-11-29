@@ -1,5 +1,4 @@
 import { getSquareWidth, getSquareXPosFromAlign, getSquareBB, pointIsWithinBB } from "../common/utils.js";
-import { drawBoolean } from "../internal/data-grid/data-grid-lib.js";
 import {
     GridCellKind,
     type BooleanCell,
@@ -7,7 +6,8 @@ import {
     BooleanEmpty,
     BooleanIndeterminate,
 } from "../internal/data-grid/data-grid-types.js";
-import type { InternalCellRenderer } from "./cell-types.js";
+import { drawCheckbox } from "../internal/data-grid/draw-checkbox.js";
+import type { BaseDrawArgs, InternalCellRenderer } from "./cell-types.js";
 
 /**
  * Checkbox behavior:
@@ -76,3 +76,40 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
               };
     },
 };
+
+export function drawBoolean(
+    args: BaseDrawArgs,
+    data: boolean | BooleanEmpty | BooleanIndeterminate,
+    canEdit: boolean,
+    maxSize?: number
+) {
+    if (!canEdit && data === BooleanEmpty) {
+        return;
+    }
+    const {
+        ctx,
+        hoverAmount,
+        theme,
+        rect,
+        highlighted,
+        hoverX,
+        hoverY,
+        cell: { contentAlign },
+    } = args;
+    const { x, y, width: w, height: h } = rect;
+
+    const hoverEffect = 0.35;
+
+    let alpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
+    if (data === BooleanEmpty) {
+        alpha *= hoverAmount;
+    }
+    if (alpha === 0) {
+        return;
+    }
+    ctx.globalAlpha = alpha;
+
+    drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY, maxSize, contentAlign);
+
+    ctx.globalAlpha = 1;
+}
