@@ -60,7 +60,7 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
 
 const itemMargin = 4;
 
-function drawImage(
+export function drawImage(
     args: BaseDrawArgs,
     data: readonly string[],
     rounding: number = 4,

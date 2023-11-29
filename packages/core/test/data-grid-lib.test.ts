@@ -4,11 +4,11 @@ import { getDataEditorTheme, type Theme } from "../src/common/styles.js";
 import {
     remapForDnDState,
     type MappedGridColumn,
-    drawImage,
     drawWithLastUpdate,
 } from "../src/internal/data-grid/data-grid-lib.js";
 import { GridCellKind, type ImageWindowLoader, type Rectangle } from "../src/internal/data-grid/data-grid-types.js";
 import { vi, type Mocked, type Mock, expect, describe, test, it, beforeEach } from "vitest";
+import { drawImage } from "../src/cells/image-cell.js";
 
 describe("remapForDnDState", () => {
     const sampleColumns: MappedGridColumn[] = [
