@@ -933,6 +933,8 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "j",
         });
 
+        await new Promise(r => window.setTimeout(r, 1000));
+
         const overlay = screen.getByDisplayValue("j");
 
         vi.useFakeTimers();
@@ -967,6 +969,8 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             keyCode: 74,
             key: "j",
         });
+
+        await new Promise(r => window.setTimeout(r, 1000));
 
         const overlay = screen.getByDisplayValue("j");
 
