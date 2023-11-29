@@ -351,7 +351,22 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         };
     }, [cancelSearch]);
 
+    const [isAnimatingOut, setIsAnimatingOut] = React.useState(false);
+
+    React.useEffect(() => {
+        if (showSearch) {
+            setIsAnimatingOut(true);
+        } else {
+            const timeoutId = setTimeout(() => setIsAnimatingOut(false), 150);
+            return () => clearTimeout(timeoutId);
+        }
+    }, [showSearch]);
+
     const searchbox = React.useMemo(() => {
+        if (!showSearch && !isAnimatingOut) {
+            return null;
+        }
+
         let resultString: string | undefined;
         if (searchStatus !== undefined) {
             resultString =
@@ -374,7 +389,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
         return (
             <SearchWrapper
-                showSearch={showSearch}
+                className={showSearch ? "" : "out"}
                 onMouseDown={cancelEvent}
                 onMouseMove={cancelEvent}
                 onMouseUp={cancelEvent}
@@ -432,18 +447,19 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
             </SearchWrapper>
         );
     }, [
-        onClose,
-        onNext,
-        onPrev,
-        onSearchChange,
-        onSearchClose,
-        onSearchKeyDown,
-        rows,
-        searchStatus,
-        searchString,
         showSearch,
+        isAnimatingOut,
+        searchStatus,
+        rows,
         searchID,
         searchInputRef,
+        onSearchChange,
+        searchString,
+        onSearchKeyDown,
+        onPrev,
+        onNext,
+        onSearchClose,
+        onClose,
     ]);
 
     return (

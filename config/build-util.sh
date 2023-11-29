@@ -43,6 +43,6 @@ remove_all_css_imports() {
         sed_cmd="sed -i ''"  # BSD sed
     fi
 
-    find "$directory" -type f -name "*.js" -exec $sed_cmd "/require('.\/.*\.css');/d" {} +
-    find "$directory" -type f -name "*.js" -exec $sed_cmd "/import \".\/.*\.css\";/d" {} +
+    find "$directory" -type f -name "*.js" -exec bash -c "$sed_cmd \"/require('.\/.*\.css');/d\" {}" \;
+    find "$directory" -type f -name "*.js" -exec bash -c "$sed_cmd \"/import \\\".*\.css\\\";/d\" {}" \;
 }

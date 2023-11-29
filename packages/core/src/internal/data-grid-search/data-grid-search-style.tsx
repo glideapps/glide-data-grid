@@ -1,6 +1,6 @@
 import { styled } from "@linaria/react";
 
-export const SearchWrapper = styled.div<{ showSearch: boolean }>`
+export const SearchWrapper = styled.div`
     position: absolute;
     top: 4px;
     right: 20px;
@@ -14,8 +14,10 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
 
     font-size: var(--gdg-editor-font-size);
 
-    transform: translateX(${p => (p.showSearch ? 0 : 400)}px);
-    transition: transform 0.15s;
+    &.out {
+        animation: gdg-search-fadeout 0.15s forwards;
+    }
+    animation: gdg-search-fadein 0.15s forwards;
 
     .search-bar-inner {
         display: flex;
@@ -71,6 +73,24 @@ export const SearchWrapper = styled.div<{ showSearch: boolean }>`
         :disabled {
             opacity: 0.4;
             pointer-events: none;
+        }
+    }
+
+    @keyframes gdg-search-fadeout {
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(400px);
+        }
+    }
+
+    @keyframes gdg-search-fadein {
+        from {
+            transform: translateX(400px);
+        }
+        to {
+            transform: translateX(0);
         }
     }
 `;
