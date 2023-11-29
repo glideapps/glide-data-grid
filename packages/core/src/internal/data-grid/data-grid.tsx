@@ -1144,8 +1144,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
                 if (args.kind === "cell") {
                     const toCheck = getCellContent(args.location);
-                    needsHoverPosition =
-                        toCheck.kind === GridCellKind.Custom || getCellRenderer(toCheck)?.needsHoverPosition === true;
+                    const rendererNeeds = getCellRenderer(toCheck)?.needsHoverPosition;
+                    // custom cells we will assume need the position if they don't explicitly say they don't, everything
+                    // else we will assume doesn't need it.
+                    needsHoverPosition = rendererNeeds ?? toCheck.kind === GridCellKind.Custom;
                     needsDamageCell = needsHoverPosition;
                 } else if (args.kind === groupHeaderKind) {
                     needsDamageCell = true;
