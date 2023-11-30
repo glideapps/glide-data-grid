@@ -122,12 +122,24 @@ export interface GridMouseGroupHeaderEventArgs extends BaseGridMouseEventArgs, P
 /** @category Types */
 export const outOfBoundsKind = "out-of-bounds" as const;
 /** @category Types */
+
+export enum OutOfBoundsRegionAxis {
+    Start = -2,
+    StartPadding = -1,
+    Center = 0,
+    EndPadding = 1,
+    End = 2,
+}
+
 export interface GridMouseOutOfBoundsEventArgs extends BaseGridMouseEventArgs {
     readonly kind: typeof outOfBoundsKind;
     readonly location: Item;
+    /**
+     * @deprecated
+     */
     readonly direction: readonly [-1 | 0 | 1, -1 | 0 | 1];
     readonly isMaybeScrollbar: boolean;
-    readonly innerDirection: readonly [-1 | 0 | 1, -1 | 0 | 1];
+    readonly region: readonly [OutOfBoundsRegionAxis, OutOfBoundsRegionAxis];
 }
 
 /** @category Types */
