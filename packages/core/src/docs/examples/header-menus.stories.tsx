@@ -1,10 +1,10 @@
 import { styled } from "@linaria/react";
 import React from "react";
 import { useLayer } from "react-laag";
-import { DataEditor } from "../../data-editor/data-editor";
-import { BeautifulWrapper, Description, defaultProps, useAllMockedKinds } from "../../data-editor/stories/utils";
-import type { Rectangle } from "../../data-grid/data-grid-types";
-import { SimpleThemeWrapper } from "../../stories/story-utils";
+import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
+import { BeautifulWrapper, Description, defaultProps, useAllMockedKinds } from "../../data-editor/stories/utils.js";
+import type { Rectangle } from "../../internal/data-grid/data-grid-types.js";
+import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -33,7 +33,9 @@ const SimpleMenu = styled.div`
     width: 175px;
     padding: 8px 0;
     border-radius: 6px;
-    box-shadow: 0px 0px 1px rgba(62, 65, 86, 0.7), 0px 6px 12px rgba(62, 65, 86, 0.35);
+    box-shadow:
+        0px 0px 1px rgba(62, 65, 86, 0.7),
+        0px 6px 12px rgba(62, 65, 86, 0.35);
 
     display: flex;
     flex-direction: column;
@@ -73,11 +75,10 @@ export const HeaderMenus: React.VFC = () => {
         }));
     }, [cols]);
 
-    const [menu, setMenu] =
-        React.useState<{
-            col: number;
-            bounds: Rectangle;
-        }>();
+    const [menu, setMenu] = React.useState<{
+        col: number;
+        bounds: Rectangle;
+    }>();
 
     const isOpen = menu !== undefined;
 

@@ -1,7 +1,8 @@
-import { renderHook } from "@testing-library/react-hooks";
-import { useResizeDetector } from "../src/common/resize-detector";
-import { maybe, deepEqual } from "../src/common/support";
-import { makeAccessibilityStringForArray } from "../src/common/utils";
+import { renderHook, cleanup } from "@testing-library/react-hooks";
+import { useResizeDetector } from "../src/common/resize-detector.js";
+import { maybe, deepEqual } from "../src/common/support.js";
+import { makeAccessibilityStringForArray } from "../src/common/utils.js";
+import { expect, describe, test, it, afterEach } from "vitest";
 
 describe("maybe", () => {
     test("Returns when not crashing", () => {
@@ -30,6 +31,10 @@ describe("deepEqual", () => {
 });
 
 describe("resizeDetector", () => {
+    afterEach(async () => {
+        await cleanup();
+    });
+
     test("Smoke test", () => {
         const { result } = renderHook(() => useResizeDetector());
         expect(result.current.width === undefined && result.current.height === undefined);

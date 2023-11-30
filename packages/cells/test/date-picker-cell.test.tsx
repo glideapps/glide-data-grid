@@ -1,8 +1,13 @@
 import * as React from "react";
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, cleanup } from "@testing-library/react";
 
 import { GridCellKind } from "@glideapps/glide-data-grid";
-import renderer, { type DateKind, type DatePickerCell, formatValueForHTMLInput } from "../src/cells/date-picker-cell";
+import renderer, {
+    type DateKind,
+    type DatePickerCell,
+    formatValueForHTMLInput,
+} from "../src/cells/date-picker-cell.js";
+import { vi, expect, describe, it, afterEach } from "vitest";
 
 describe("formatValueForHTMLInput", () => {
     it.each([
@@ -18,6 +23,8 @@ describe("formatValueForHTMLInput", () => {
 });
 
 describe("editor", () => {
+    afterEach(cleanup);
+
     function getMockDateCell(props: Partial<DatePickerCell> = {}): DatePickerCell {
         return {
             ...props,
@@ -122,7 +129,7 @@ describe("editor", () => {
             throw new Error("Editor is invalid");
         }
 
-        const mockCellOnChange = jest.fn();
+        const mockCellOnChange = vi.fn();
         const result = render(<Editor isHighlighted={false} value={getMockDateCell()} onChange={mockCellOnChange} />);
         const input = await result.findByTestId("date-picker-cell");
         expect(result.findByTestId("date-picker-cell")).not.toBeUndefined();
@@ -154,7 +161,7 @@ describe("editor", () => {
             throw new Error("Editor is invalid");
         }
 
-        const mockCellOnChange = jest.fn();
+        const mockCellOnChange = vi.fn();
         const result = render(<Editor isHighlighted={false} value={getMockDateCell()} onChange={mockCellOnChange} />);
         const input = await result.findByTestId("date-picker-cell");
         expect(result.findByTestId("date-picker-cell")).not.toBeUndefined();

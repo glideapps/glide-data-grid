@@ -1,6 +1,7 @@
-import { GridCellKind, isTextEditableGridCell } from "../src/data-grid/data-grid-types";
-import { CompactSelection, isEditableGridCell } from "../src";
-import { sprites } from "../src/data-grid/sprites";
+import { GridCellKind, isTextEditableGridCell } from "../src/internal/data-grid/data-grid-types.js";
+import { CompactSelection, isEditableGridCell } from "../src/index.js";
+import { sprites } from "../src/internal/data-grid/sprites.js";
+import { expect, describe, test } from "vitest";
 
 describe("data-grid-types", () => {
     test("Smoke test type checks", () => {

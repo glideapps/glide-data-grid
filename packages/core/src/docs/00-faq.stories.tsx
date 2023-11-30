@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import { SimpleThemeWrapper } from "../stories/story-utils";
-import { DocWrapper, Marked } from "./doc-wrapper";
+import { SimpleThemeWrapper } from "../stories/story-utils.js";
+import { DocWrapper, Marked } from "./doc-wrapper.js";
 
 export default {
     title: "Glide-Data-Grid/Docs",

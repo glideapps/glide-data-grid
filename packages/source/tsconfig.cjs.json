@@ -1,0 +1,14 @@
+{
+    "extends": "../../tsconfig.json",
+    "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+    "exclude": ["./src/**/*.stories.tsx", "./src/stories/*.tsx", "./src/docs/*.tsx"],
+    "references": [{ "path": "../core" }],
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./dist/cjs",
+        "declarationDir": "./dist/dts",
+        "module": "CommonJS",
+        "verbatimModuleSyntax": false,
+        "sourceMap": true
+    }
+}

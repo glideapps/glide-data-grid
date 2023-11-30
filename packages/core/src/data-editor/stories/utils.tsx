@@ -10,15 +10,14 @@ import {
     isEditableGridCell,
     isTextEditableGridCell,
     type Item,
-} from "../../data-grid/data-grid-types";
-
+} from "../../internal/data-grid/data-grid-types.js";
 import { faker } from "@faker-js/faker";
 import { styled } from "@linaria/react";
 import isArray from "lodash/isArray.js";
-import { assertNever } from "../../common/support";
-import { browserIsFirefox } from "../../common/browser-detect";
+import { assertNever } from "../../common/support.js";
+import { browserIsFirefox } from "../../common/browser-detect.js";
 import { useResizeDetector } from "react-resize-detector";
-import type { DataEditorProps } from "../data-editor";
+import type { DataEditorProps } from "../data-editor.js";
 import noop from "lodash/noop.js";
 
 faker.seed(1337);

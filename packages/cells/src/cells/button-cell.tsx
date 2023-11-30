@@ -5,7 +5,7 @@ import {
     GridCellKind,
     interpolateColors,
 } from "@glideapps/glide-data-grid";
-import { roundedRect } from "../draw-fns";
+import { roundedRect } from "../draw-fns.js";
 
 type PackedColor = string | readonly [normal: string, hover: string];
 

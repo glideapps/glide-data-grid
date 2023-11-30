@@ -1,11 +1,12 @@
-import { renderHook } from "@testing-library/react-hooks";
-import { type GridCell, GridCellKind, type GridColumn, type Rectangle } from "../src";
-import { getDataEditorTheme } from "../src/common/styles";
-import type { DataGridSearchProps } from "../src/data-grid-search/data-grid-search";
-import { CellRenderers } from "../src/data-grid/cells";
-import type { GetCellRendererCallback } from "../src/data-grid/cells/cell-types";
-import type { CellArray, CustomCell } from "../src/data-grid/data-grid-types";
-import { useColumnSizer } from "../src/data-editor/use-column-sizer";
+import { renderHook, cleanup } from "@testing-library/react-hooks";
+import { type GridCell, GridCellKind, type GridColumn, type Rectangle } from "../src/index.js";
+import { getDataEditorTheme } from "../src/common/styles.js";
+import type { DataGridSearchProps } from "../src/internal/data-grid-search/data-grid-search.js";
+import { AllCellRenderers } from "../src/cells/index.js";
+import type { GetCellRendererCallback } from "../src/cells/cell-types.js";
+import type { CellArray, CustomCell } from "../src/internal/data-grid/data-grid-types.js";
+import { useColumnSizer } from "../src/data-editor/use-column-sizer.js";
+import { vi, expect, describe, it, beforeEach, afterEach } from "vitest";
 
 const COLUMNS: GridColumn[] = [
     {
@@ -63,15 +64,10 @@ function buildCellsForSelectionGetter(dataBuilder: DataBuilder): DataGridSearchP
     };
 }
 
-const getShortCellsForSelection = jest.fn(buildCellsForSelectionGetter((x, y) => `column ${x} row ${y}`));
-const getLongCellsForSelection = jest.fn(
-    buildCellsForSelectionGetter((x, y) => `This cell is in column number ${x} and row number ${y}`)
+const getShortCellsForSelection = vi.fn(buildCellsForSelectionGetter((x, y) => `column ${x} row ${y}`) as any);
+const getLongCellsForSelection = vi.fn(
+    buildCellsForSelectionGetter((x, y) => `This cell is in column number ${x} and row number ${y}`) as any
 );
-
-beforeEach(() => {
-    getShortCellsForSelection.mockClear();
-    getLongCellsForSelection.mockClear();
-});
 
 const theme = getDataEditorTheme();
 
@@ -86,10 +82,19 @@ const SINGLE_COLUMN = [
 
 const getCellRenderer: GetCellRendererCallback = cell => {
     if (cell.kind === GridCellKind.Custom) return undefined;
-    return CellRenderers[cell.kind] as any;
+    return AllCellRenderers.find(x => x.kind === cell.kind) as any;
 };
 
 describe("use-column-sizer", () => {
+    beforeEach(() => {
+        getShortCellsForSelection.mockClear();
+        getLongCellsForSelection.mockClear();
+    });
+
+    afterEach(async () => {
+        await cleanup();
+    });
+
     it("Measures a simple cell", async () => {
         const { result } = renderHook(() =>
             useColumnSizer(

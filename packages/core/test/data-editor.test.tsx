@@ -1,6 +1,6 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
-import { render, fireEvent, screen, act, createEvent } from "@testing-library/react";
+import { render, fireEvent, screen, act, createEvent, cleanup } from "@testing-library/react";
 import {
     CompactSelection,
     DataEditor,
@@ -10,16 +10,11 @@ import {
     type GridSelection,
     isSizedGridColumn,
     type Item,
-} from "../src";
-import type { CustomCell, GridKeyEventArgs, SizedGridColumn } from "../src/data-grid/data-grid-types";
-import type { DataEditorRef } from "../src/data-editor/data-editor";
-import { assert } from "../src/common/support";
-
-jest.mock("../src/common/resize-detector", () => {
-    return {
-        useResizeDetector: () => ({ ref: undefined, width: 1000, height: 1000 }),
-    };
-});
+} from "../src/index.js";
+import type { CustomCell, GridKeyEventArgs, SizedGridColumn } from "../src/internal/data-grid/data-grid-types.js";
+import type { DataEditorRef } from "../src/data-editor/data-editor.js";
+import { assert } from "../src/common/support.js";
+import { vi, type Mock, expect, describe, test, beforeEach, afterEach } from "vitest";
 
 const BOOLEAN_DATA_LOOKUP: (boolean | null | undefined)[] = [true, false, undefined, null];
 function getMockBooleanData(row: number): boolean | null | undefined {
@@ -217,69 +212,21 @@ function getCellCenterPositionForDefaultGrid(cell: Item): [number, number] {
     return [xStart + xOffset, yStart + yOffset];
 }
 
-// const { ResizeObserver } = window;
-
-beforeEach(() => {
-    // delete (window as any).ResizeObserver;
-    // window.ResizeObserver = jest.fn().mockImplementation(() => ({
-    //     observe: jest.fn(),
-    //     unobserve: jest.fn(),
-    //     disconnect: jest.fn(),
-    // }));
-
-    Element.prototype.scrollTo = jest.fn();
-    Element.prototype.scrollBy = jest.fn();
-    Object.assign(navigator, {
-        clipboard: {
-            writeText: jest.fn(() => Promise.resolve()),
-            readText: jest.fn(() =>
-                Promise.resolve(`Sunday	Dogs	https://google.com
-Monday	Cats	https://google.com
-Tuesday	Turtles	https://google.com
-Wednesday	Bears	https://google.com
-Thursday	"L  ions"	https://google.com
-Friday	Pigs	https://google.com
-Saturday	"Turkeys and some ""quotes"" and
-a new line char ""more quotes"" plus a tab  ."	https://google.com`)
-            ),
-        },
-    });
-    Element.prototype.getBoundingClientRect = () => ({
-        bottom: 1000,
-        height: 1000,
-        left: 0,
-        right: 1000,
-        top: 0,
-        width: 1000,
-        x: 0,
-        y: 0,
-        toJSON: () => "",
-    });
-    Object.defineProperties(HTMLElement.prototype, {
-        offsetWidth: {
-            get() {
-                return 1000;
-            },
-        },
-    });
-    Image.prototype.decode = jest.fn();
-});
-
 function prep(resetTimers: boolean = true) {
     const scroller = document.getElementsByClassName("dvn-scroller").item(0);
     if (scroller !== null) {
-        jest.spyOn(scroller, "clientWidth", "get").mockImplementation(() => 1000);
-        jest.spyOn(scroller, "clientHeight", "get").mockImplementation(() => 1000);
+        vi.spyOn(scroller, "clientWidth", "get").mockImplementation(() => 1000);
+        vi.spyOn(scroller, "clientHeight", "get").mockImplementation(() => 1000);
     }
 
     act(() => {
-        jest.runAllTimers();
+        vi.runAllTimers();
     });
     if (resetTimers) {
-        jest.useRealTimers();
+        vi.useRealTimers();
     } else {
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
     }
 
@@ -326,13 +273,76 @@ const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, r
 });
 
 describe("data-editor", () => {
+    vi.mock("../src/common/resize-detector", () => {
+        return {
+            useResizeDetector: () => ({ ref: undefined, width: 1000, height: 1000 }),
+        };
+    });
+
+    // beforeAll(() => {
+    //     vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation((callback: FrameRequestCallback) => {
+    //         return setTimeout(callback, 10);
+    //     });
+    // });
+
+    // afterAll(() => {
+    //     vi.restoreAllMocks();
+    // });
+
+    beforeEach(() => {
+        // delete (window as any).ResizeObserver;
+        // window.ResizeObserver = vi.fn().mockImplementation(() => ({
+        //     observe: vi.fn(),
+        //     unobserve: vi.fn(),
+        //     disconnect: vi.fn(),
+        // }));
+
+        Element.prototype.scrollTo = vi.fn() as any;
+        Element.prototype.scrollBy = vi.fn() as any;
+        Object.assign(navigator, {
+            clipboard: {
+                writeText: vi.fn(() => Promise.resolve()),
+                readText: vi.fn(() =>
+                    Promise.resolve(`Sunday	Dogs	https://google.com
+Monday	Cats	https://google.com
+Tuesday	Turtles	https://google.com
+Wednesday	Bears	https://google.com
+Thursday	"L  ions"	https://google.com
+Friday	Pigs	https://google.com
+Saturday	"Turkeys and some ""quotes"" and
+a new line char ""more quotes"" plus a tab  ."	https://google.com`)
+                ),
+            },
+        });
+        Element.prototype.getBoundingClientRect = () => ({
+            bottom: 1000,
+            height: 1000,
+            left: 0,
+            right: 1000,
+            top: 0,
+            width: 1000,
+            x: 0,
+            y: 0,
+            toJSON: () => "",
+        });
+        Object.defineProperties(HTMLElement.prototype, {
+            offsetWidth: {
+                get() {
+                    return 1000;
+                },
+            },
+        });
+        Image.prototype.decode = vi.fn();
+    });
+
     afterEach(() => {
-        jest.clearAllTimers();
+        vi.clearAllTimers();
+        cleanup();
     });
 
     test("Focus a11y cell", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -349,7 +359,7 @@ describe("data-editor", () => {
     });
 
     test("Click a11y cell", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} />, {
             wrapper: Context,
         });
@@ -360,10 +370,10 @@ describe("data-editor", () => {
     });
 
     test("emits contextmenu for cell", async () => {
-        const spy = jest.fn();
-        const spySelection = jest.fn();
+        const spy = vi.fn();
+        const spySelection = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellContextMenu={spy} onGridSelectionChange={spySelection} />, {
             wrapper: Context,
         });
@@ -386,10 +396,10 @@ describe("data-editor", () => {
     });
 
     test("emits contextmenu for row marker", async () => {
-        const spy = jest.fn();
-        const spySelection = jest.fn();
+        const spy = vi.fn();
+        const spySelection = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -415,10 +425,10 @@ describe("data-editor", () => {
     });
 
     test("emits contextmenu for cell but does not change selection if already selected - rows", async () => {
-        const spy = jest.fn();
-        const spySelection = jest.fn();
+        const spy = vi.fn();
+        const spySelection = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -448,10 +458,10 @@ describe("data-editor", () => {
     });
 
     test("emits contextmenu for cell but does not change selection if already selected - cols", async () => {
-        const spy = jest.fn();
-        const spySelection = jest.fn();
+        const spy = vi.fn();
+        const spySelection = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -481,9 +491,9 @@ describe("data-editor", () => {
     });
 
     test("middle click does not change selection", async () => {
-        const spySelection = jest.fn();
+        const spySelection = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -512,10 +522,10 @@ describe("data-editor", () => {
     });
 
     test("emits contextmenu for cell but does not change selection if already selected - current.cell", async () => {
-        const spy = jest.fn();
-        const spySelection = jest.fn();
+        const spy = vi.fn();
+        const spySelection = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -550,10 +560,10 @@ describe("data-editor", () => {
     });
 
     test("emits contextmenu for cell but does not change selection if already selected - current.range", async () => {
-        const spy = jest.fn();
-        const spySelection = jest.fn();
+        const spy = vi.fn();
+        const spySelection = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -588,10 +598,10 @@ describe("data-editor", () => {
     });
 
     test("emits contextmenu for cell row markers", async () => {
-        const spy = jest.fn();
-        const spySelection = jest.fn();
+        const spy = vi.fn();
+        const spySelection = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -622,9 +632,9 @@ describe("data-editor", () => {
     });
 
     test("Emits cell click", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellClicked={spy} />, {
             wrapper: Context,
         });
@@ -642,9 +652,9 @@ describe("data-editor", () => {
     });
 
     test("Emits cell clicked with middle button", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellClicked={spy} />, {
             wrapper: Context,
         });
@@ -663,9 +673,9 @@ describe("data-editor", () => {
     });
 
     test("Does not emits cell clicked with back button", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellClicked={spy} />, {
             wrapper: Context,
         });
@@ -683,9 +693,9 @@ describe("data-editor", () => {
     });
 
     test("Emits cell click with touch", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellClicked={spy} />, {
             wrapper: Context,
         });
@@ -706,9 +716,9 @@ describe("data-editor", () => {
     });
 
     test("Emits activated event on double click", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellActivated={spy} />, {
             wrapper: Context,
         });
@@ -730,9 +740,9 @@ describe("data-editor", () => {
     });
 
     test("Does not emit activated event on double click with different buttons", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellActivated={spy} />, {
             wrapper: Context,
         });
@@ -755,9 +765,9 @@ describe("data-editor", () => {
     });
 
     test("Emits activated event on Enter key", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellActivated={spy} />, {
             wrapper: Context,
         });
@@ -773,16 +783,16 @@ describe("data-editor", () => {
             key: "Enter",
         });
 
-        jest.runAllTimers();
+        vi.runAllTimers();
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1]);
     });
 
     test("Emits activated event on Space key", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellActivated={spy} />, {
             wrapper: Context,
         });
@@ -798,7 +808,7 @@ describe("data-editor", () => {
             key: " ",
         });
 
-        jest.runAllTimers();
+        vi.runAllTimers();
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1]);
@@ -814,7 +824,7 @@ describe("data-editor", () => {
             keyUpEvent = e;
         };
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onKeyDown={keyDown} onKeyUp={keyUp} />, {
             wrapper: Context,
         });
@@ -834,16 +844,16 @@ describe("data-editor", () => {
             key: " ",
         });
 
-        jest.runAllTimers();
+        vi.runAllTimers();
 
         expect(keyDownEvent?.location).toEqual([1, 1]);
         expect(keyUpEvent?.location).toEqual([1, 1]);
     });
 
     test("Doesn't emit cell click if mouseDown happened in a different cell", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellClicked={spy} />, {
             wrapper: Context,
         });
@@ -864,9 +874,9 @@ describe("data-editor", () => {
     });
 
     test("Doesn't emit header click if mouseDown happened in a different cell", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onHeaderClicked={spy} />, {
             wrapper: Context,
         });
@@ -887,9 +897,9 @@ describe("data-editor", () => {
     });
 
     test("Uneven rows cell click", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellClicked={spy} rowHeight={r => (r % 2 === 0 ? 32 : 64)} />, {
             wrapper: Context,
         });
@@ -906,8 +916,8 @@ describe("data-editor", () => {
     });
 
     test("Emits finished editing", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onFinishedEditing={spy} />, {
             wrapper: Context,
         });
@@ -923,15 +933,17 @@ describe("data-editor", () => {
             key: "j",
         });
 
+        await new Promise(r => window.setTimeout(r, 1000));
+
         const overlay = screen.getByDisplayValue("j");
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         fireEvent.keyDown(overlay, {
             key: "Enter",
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         expect(spy).toBeCalledWith(
@@ -941,8 +953,8 @@ describe("data-editor", () => {
     });
 
     test("Does not edit when validation fails", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellEdited={spy} validateCell={() => false} />, {
             wrapper: Context,
         });
@@ -958,24 +970,26 @@ describe("data-editor", () => {
             key: "j",
         });
 
+        await new Promise(r => window.setTimeout(r, 1000));
+
         const overlay = screen.getByDisplayValue("j");
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         fireEvent.keyDown(overlay, {
             key: "Enter",
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         expect(spy).not.toBeCalled();
     });
 
     test("Emits header click", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onHeaderClicked={spy} />, {
             wrapper: Context,
         });
@@ -992,9 +1006,9 @@ describe("data-editor", () => {
     });
 
     test("Emits header click on touch", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onHeaderClicked={spy} />, {
             wrapper: Context,
         });
@@ -1015,9 +1029,9 @@ describe("data-editor", () => {
     });
 
     test("Does emit header click on row marker column", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} rowMarkers="both" onHeaderClicked={spy} />, {
             wrapper: Context,
         });
@@ -1033,9 +1047,9 @@ describe("data-editor", () => {
     });
 
     test("Group header sections", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -1095,9 +1109,9 @@ describe("data-editor", () => {
     });
 
     test("Rename group header shows", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -1125,7 +1139,7 @@ describe("data-editor", () => {
 
         expect(spy).not.toHaveBeenCalled();
         const groupInput = screen.getByTestId("group-rename-input");
-        expect(groupInput).toBeInTheDocument();
+        expect(document.body.contains(groupInput)).toBe(true);
 
         fireEvent.change(groupInput, {
             target: {
@@ -1141,9 +1155,9 @@ describe("data-editor", () => {
     });
 
     test("Emits header menu click", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -1174,9 +1188,9 @@ describe("data-editor", () => {
     });
 
     test("Emits group header clicked on touch", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -1205,9 +1219,9 @@ describe("data-editor", () => {
     });
 
     test("Emits item hover on correct location", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} rowMarkers="both" onItemHovered={spy} />, {
             wrapper: Context,
         });
@@ -1224,9 +1238,9 @@ describe("data-editor", () => {
     });
 
     test("Emits mouse move on correct location", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} rowMarkers="both" onMouseMove={spy} />, {
             wrapper: Context,
         });
@@ -1243,9 +1257,9 @@ describe("data-editor", () => {
     });
 
     test("Delete cell", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -1294,9 +1308,9 @@ describe("data-editor", () => {
     });
 
     test("Delete cell callback result", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -1333,9 +1347,9 @@ describe("data-editor", () => {
     });
 
     test("Delete custom", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -1385,9 +1399,9 @@ describe("data-editor", () => {
     });
 
     test("Delete row", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -1414,9 +1428,9 @@ describe("data-editor", () => {
     });
 
     test("Delete range", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -1455,7 +1469,7 @@ describe("data-editor", () => {
     });
 
     test("Open and close overlay", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} />, {
             wrapper: Context,
         });
@@ -1473,22 +1487,22 @@ describe("data-editor", () => {
         });
 
         const overlay = screen.getByDisplayValue("Data: 1, 1");
-        expect(overlay).toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(true);
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         fireEvent.keyDown(canvas, {
             key: "Escape",
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
-        expect(overlay).not.toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(false);
     });
 
     test("Open markdown overlay", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} />, {
             wrapper: Context,
         });
@@ -1506,21 +1520,21 @@ describe("data-editor", () => {
         });
 
         const overlay = screen.getByText("Header: 9, 1");
-        expect(overlay).toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(true);
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         fireEvent.keyDown(canvas, {
             key: "Escape",
         });
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
-        expect(overlay).not.toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(false);
     });
 
     test("Open overlay with keypress", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} />, {
             wrapper: Context,
         });
@@ -1543,22 +1557,22 @@ describe("data-editor", () => {
         });
 
         const overlay = screen.getByDisplayValue("j");
-        expect(overlay).toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(true);
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         fireEvent.keyDown(overlay, {
             key: "Escape",
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
-        expect(overlay).not.toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(false);
     });
 
     test("Open overlay with keypress when prior is disabled", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -1598,23 +1612,23 @@ describe("data-editor", () => {
         });
 
         const overlay = screen.getByDisplayValue("j");
-        expect(overlay).toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(true);
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         fireEvent.keyDown(overlay, {
             key: "Escape",
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
-        expect(overlay).not.toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(false);
     });
 
     test("Send edit", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellEdited={spy} />, {
             wrapper: Context,
         });
@@ -1627,7 +1641,7 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         fireEvent.keyDown(canvas, {
@@ -1641,27 +1655,27 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         const overlay = screen.getByDisplayValue("j");
-        expect(overlay).toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(true);
 
         fireEvent.keyDown(overlay, {
             key: "Enter",
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         expect(spy).toBeCalledWith([1, 1], expect.objectContaining({ data: "j" }));
-        expect(overlay).not.toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(false);
     });
 
     test("Send edit with click off", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellEdited={spy} />, {
             wrapper: Context,
         });
@@ -1674,7 +1688,7 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         fireEvent.keyDown(canvas, {
@@ -1688,11 +1702,11 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         const overlay = screen.getByDisplayValue("j");
-        expect(overlay).toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(true);
 
         sendClick(canvas, {
             clientX: 300, // Col B
@@ -1700,16 +1714,16 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         expect(spy).toBeCalledWith([1, 1], expect.objectContaining({ data: "j" }));
-        expect(overlay).not.toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(false);
     });
 
     test("Send edit with touch off", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} onCellEdited={spy} />, {
             wrapper: Context,
         });
@@ -1722,7 +1736,7 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         fireEvent.keyDown(canvas, {
@@ -1736,11 +1750,11 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         const overlay = screen.getByDisplayValue("j");
-        expect(overlay).toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(true);
 
         sendTouchClick(canvas, {
             touches: [
@@ -1752,16 +1766,16 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         expect(spy).toBeCalledWith([1, 1], expect.objectContaining({ data: "j" }));
-        expect(overlay).not.toBeInTheDocument();
+        expect(document.body.contains(overlay)).toBe(false);
     });
 
     test("Directly toggle booleans", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<DataEditor {...basicProps} onCellEdited={spy} ref={ref} />, {
             wrapper: Context,
@@ -1775,9 +1789,9 @@ describe("data-editor", () => {
             ref.current?.focus();
         });
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
-        jest.useRealTimers();
+        vi.useRealTimers();
 
         // [7, 0] is a checked boolean
         const [checkedX, checkedY] = getCellCenterPositionForDefaultGrid([7, 0]);
@@ -1809,8 +1823,8 @@ describe("data-editor", () => {
     });
 
     test("Directly toggle readonly booleans", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<DataEditor {...basicProps} onCellEdited={spy} ref={ref} />, {
             wrapper: Context,
@@ -1824,9 +1838,9 @@ describe("data-editor", () => {
             ref.current?.focus();
         });
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
-        jest.useRealTimers();
+        vi.useRealTimers();
 
         // [7, 0] is a checked boolean readonly
         const [checkedX, checkedY] = getCellCenterPositionForDefaultGrid([7, 5]);
@@ -1837,8 +1851,8 @@ describe("data-editor", () => {
     });
 
     test("Toggle readonly boolean with space", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<DataEditor {...basicProps} onCellEdited={spy} ref={ref} />, {
             wrapper: Context,
@@ -1852,7 +1866,7 @@ describe("data-editor", () => {
             ref.current?.focus();
         });
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         // [7, 0] is a checked boolean readonly
@@ -1861,7 +1875,7 @@ describe("data-editor", () => {
         sendClick(canvas, { clientX: checkedX + 20, clientY: checkedY });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         fireEvent.keyDown(canvas, {
@@ -1872,8 +1886,8 @@ describe("data-editor", () => {
     });
 
     test("Arrow left", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -1894,8 +1908,8 @@ describe("data-editor", () => {
     });
 
     test("Arrow shift left", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -1921,8 +1935,8 @@ describe("data-editor", () => {
     });
 
     test("Arrow right", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -1943,8 +1957,8 @@ describe("data-editor", () => {
     });
 
     test("Arrow shift right", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -1970,8 +1984,8 @@ describe("data-editor", () => {
     });
 
     test("Tab navigation", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -2000,8 +2014,8 @@ describe("data-editor", () => {
     });
 
     test("Arrow down", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -2022,8 +2036,8 @@ describe("data-editor", () => {
     });
 
     test("Arrow up", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -2044,8 +2058,8 @@ describe("data-editor", () => {
     });
 
     test("Search close", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} showSearch={true} onSearchClose={spy} />, {
             wrapper: Context,
         });
@@ -2054,20 +2068,20 @@ describe("data-editor", () => {
         const searchClose = screen.getByTestId("search-close-button");
         fireEvent.click(searchClose);
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
         expect(spy).toBeCalled();
     });
 
     test("Trigger search results", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} showSearch={true} onSearchClose={spy} />, {
             wrapper: Context,
         });
         prep();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const searchInput = screen.getByTestId("search-input");
         fireEvent.change(searchInput, {
             target: {
@@ -2075,12 +2089,13 @@ describe("data-editor", () => {
             },
         });
         act(() => {
-            jest.runAllTimers();
+            vi.advanceTimersByTime(1000);
+            vi.runAllTimers();
         });
 
         const searchResult = screen.getByTestId("search-result-area");
 
-        expect(searchResult).toHaveTextContent("111 results");
+        expect(searchResult.textContent).toBe("111 results");
 
         fireEvent.keyDown(searchInput, {
             key: "Enter",
@@ -2094,16 +2109,16 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         expect(spy).toHaveBeenCalled();
     });
 
     test("Copy/paste", async () => {
-        const spy = jest.fn();
-        const pasteSpy = jest.fn((_target: any, _values: any) => true);
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        const pasteSpy = vi.fn((_target: any, _values: any) => true);
+        vi.useFakeTimers();
         render(
             <EventedDataEditor {...basicProps} onGridSelectionChange={spy} onPaste={(...args) => pasteSpy(...args)} />,
             {
@@ -2113,14 +2128,14 @@ describe("data-editor", () => {
         prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
         sendClick(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         spy.mockClear();
@@ -2130,7 +2145,7 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         expect(spy).toBeCalledWith(
@@ -2141,7 +2156,7 @@ describe("data-editor", () => {
 
         fireEvent.copy(window);
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
         expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
 
@@ -2154,9 +2169,9 @@ describe("data-editor", () => {
 
         fireEvent.paste(window);
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
-        jest.useRealTimers();
+        vi.useRealTimers();
         await new Promise(r => window.setTimeout(r, 10));
         expect(pasteSpy).toBeCalledWith(
             [1, 3],
@@ -2177,21 +2192,21 @@ describe("data-editor", () => {
     });
 
     test("Paste out of range does not crash", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onPaste={true} />, {
             wrapper: Context,
         });
         prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
         sendClick(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         fireEvent.keyDown(canvas, {
@@ -2200,35 +2215,35 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         fireEvent.paste(window);
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
-        jest.useRealTimers();
+        vi.useRealTimers();
         await new Promise(r => window.setTimeout(r, 10));
     });
 
     test("Cut cell", async () => {
-        const spy = jest.fn();
-        const editSpy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        const editSpy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} onCellsEdited={editSpy} />, {
             wrapper: Context,
         });
         prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
         sendClick(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         fireEvent.keyDown(canvas, {
@@ -2237,11 +2252,11 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         fireEvent.cut(window);
-        jest.useRealTimers();
+        vi.useRealTimers();
         await new Promise(r => window.setTimeout(r, 10));
         expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
         expect(editSpy).toHaveBeenCalledWith([
@@ -2257,7 +2272,7 @@ describe("data-editor", () => {
     });
 
     test("Paste custom cell does not crash", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
 
         // eslint-disable-next-line unicorn/consistent-function-scoping
         const alwaysCustomCell = (_cell: Item): GridCell => {
@@ -2269,7 +2284,7 @@ describe("data-editor", () => {
             };
         };
 
-        const spy = jest.fn();
+        const spy = vi.fn();
 
         render(
             <EventedDataEditor
@@ -2291,30 +2306,30 @@ describe("data-editor", () => {
         prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
         sendClick(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         fireEvent.paste(window);
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
-        jest.useRealTimers();
+        vi.useRealTimers();
         await new Promise(r => window.setTimeout(r, 10));
 
         expect(spy).toBeCalledWith(expect.anything(), "custom-cell-data");
     });
 
     test("CustomCell onClick", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
 
-        const onClickSpy = jest.fn();
+        const onClickSpy = vi.fn();
 
         // eslint-disable-next-line unicorn/consistent-function-scoping, sonarjs/no-identical-functions
         const alwaysCustomCell = (_cell: Item): GridCell => {
@@ -2346,7 +2361,7 @@ describe("data-editor", () => {
         prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
 
         // mouse down col b row 2
         fireEvent.mouseDown(canvas, {
@@ -2367,16 +2382,16 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         expect(onClickSpy).toBeCalled();
     });
 
     test("CustomCell onClick fires with same restriction as onCellClicked", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
 
-        const onClickSpy = jest.fn();
+        const onClickSpy = vi.fn();
 
         // eslint-disable-next-line unicorn/consistent-function-scoping, sonarjs/no-identical-functions
         const alwaysCustomCell = (_cell: Item): GridCell => {
@@ -2408,7 +2423,7 @@ describe("data-editor", () => {
         prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
 
         // mouse down col b row 2
         fireEvent.mouseDown(canvas, {
@@ -2429,44 +2444,44 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         expect(onClickSpy).not.toBeCalled();
     });
 
     test("onCellsEdited blocks onCellEdited", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onCellEdited={spy} onCellsEdited={() => true} />, {
             wrapper: Context,
         });
         prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
         sendClick(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         fireEvent.paste(window);
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
-        jest.useRealTimers();
+        vi.useRealTimers();
         await new Promise(r => window.setTimeout(r, 10));
         expect(spy).not.toBeCalled();
     });
 
     test("Copy/paste with simple getCellsForSelection", async () => {
-        const spy = jest.fn();
-        const pasteSpy = jest.fn((_target: any, _values: any) => true);
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        const pasteSpy = vi.fn((_target: any, _values: any) => true);
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -2481,14 +2496,14 @@ describe("data-editor", () => {
         prep(false);
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
         sendClick(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         spy.mockClear();
@@ -2505,7 +2520,7 @@ describe("data-editor", () => {
 
         fireEvent.copy(window);
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
         expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
 
@@ -2518,9 +2533,9 @@ describe("data-editor", () => {
 
         fireEvent.paste(window);
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
-        jest.useRealTimers();
+        vi.useRealTimers();
         await new Promise(resolve => setTimeout(resolve, 10));
         expect(pasteSpy).toBeCalledWith(
             [1, 3],
@@ -2541,7 +2556,7 @@ describe("data-editor", () => {
     });
 
     test("Copy rows", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -2559,7 +2574,7 @@ describe("data-editor", () => {
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
 
         fireEvent.copy(window);
         await new Promise(resolve => setTimeout(resolve, 10));
@@ -2569,7 +2584,7 @@ describe("data-editor", () => {
     });
 
     test("Copy cols", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -2586,7 +2601,7 @@ describe("data-editor", () => {
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        jest.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
+        vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
 
         fireEvent.copy(window);
         await new Promise(resolve => setTimeout(resolve, 10));
@@ -2594,9 +2609,9 @@ describe("data-editor", () => {
     });
 
     test("Hover header does not fetch invalid cell", async () => {
-        const spy = jest.fn(basicProps.getCellContent);
+        const spy = vi.fn(basicProps.getCellContent);
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} rowMarkers="both" getCellContent={spy} />, {
             wrapper: Context,
         });
@@ -2615,7 +2630,7 @@ describe("data-editor", () => {
     });
 
     test("Blit does not crash vertical scroll", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} />, {
             wrapper: Context,
         });
@@ -2630,34 +2645,34 @@ describe("data-editor", () => {
         await new Promise(resolve => setTimeout(resolve, 100));
 
         if (scroller !== null) {
-            jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
+            vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
                 basicProps.columns.map(c => (isSizedGridColumn(c) ? c.width : 150)).reduce((pv, cv) => pv + cv, 0)
             );
-            jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
-            jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
-            jest.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 55);
+            vi.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
+            vi.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
+            vi.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 55);
             fireEvent.scroll(scroller);
         }
 
         await new Promise(resolve => setTimeout(resolve, 100));
 
         if (scroller !== null) {
-            jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
+            vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
                 basicProps.columns.map(c => (isSizedGridColumn(c) ? c.width : 150)).reduce((pv, cv) => pv + cv, 0)
             );
-            jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
-            jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
-            jest.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 0);
+            vi.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
+            vi.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
+            vi.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 0);
             fireEvent.scroll(scroller);
         }
 
         await new Promise(resolve => setTimeout(resolve, 100));
 
-        expect(canvas).toBeInTheDocument();
+        expect(document.body.contains(canvas)).toBe(true);
     });
 
     test("Blit does not crash horizontal scroll", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 highlightRegions={[
@@ -2688,35 +2703,35 @@ describe("data-editor", () => {
         await new Promise(resolve => setTimeout(resolve, 100));
 
         if (scroller !== null) {
-            jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
+            vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
                 basicProps.columns.map(c => (isSizedGridColumn(c) ? c.width : 150)).reduce((pv, cv) => pv + cv, 0)
             );
-            jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
-            jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 55);
-            jest.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 0);
+            vi.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
+            vi.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 55);
+            vi.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 0);
             fireEvent.scroll(scroller);
         }
 
         await new Promise(resolve => setTimeout(resolve, 100));
 
         if (scroller !== null) {
-            jest.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
+            vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
                 basicProps.columns.map(c => (isSizedGridColumn(c) ? c.width : 150)).reduce((pv, cv) => pv + cv, 0)
             );
-            jest.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
-            jest.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
-            jest.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 0);
+            vi.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000 * 32 + 36);
+            vi.spyOn(scroller, "scrollLeft", "get").mockImplementation(() => 0);
+            vi.spyOn(scroller, "scrollTop", "get").mockImplementation(() => 0);
             fireEvent.scroll(scroller);
         }
 
         await new Promise(resolve => setTimeout(resolve, 100));
 
-        expect(canvas).toBeInTheDocument();
+        expect(document.body.contains(canvas)).toBe(true);
     });
 
     test("New row", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -2732,7 +2747,7 @@ describe("data-editor", () => {
         );
         prep();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const canvas = screen.getByTestId("data-grid-canvas");
         sendClick(canvas, {
             clientX: 300, // Col B
@@ -2742,21 +2757,21 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalled();
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         expect(Element.prototype.scrollTo).toHaveBeenCalled();
     });
 
     test("Click row marker", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} rowMarkers="both" />, {
             wrapper: Context,
         });
         prep();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const canvas = screen.getByTestId("data-grid-canvas");
         sendClick(canvas, {
             clientX: 10, // Row marker
@@ -2771,8 +2786,8 @@ describe("data-editor", () => {
     });
 
     test("Shift click row marker", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} rowMarkers="both" />, {
             wrapper: Context,
         });
@@ -2800,8 +2815,8 @@ describe("data-editor", () => {
     });
 
     test("Drag click row marker", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} rowMarkers="both" />, {
             wrapper: Context,
         });
@@ -2835,8 +2850,8 @@ describe("data-editor", () => {
     });
 
     test("Shift click row marker - no multi-select", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor {...basicProps} rowSelect={"single"} onGridSelectionChange={spy} rowMarkers="both" />,
             {
@@ -2867,8 +2882,8 @@ describe("data-editor", () => {
     });
 
     test("Ctrl click row marker", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} rowMarkers="both" />, {
             wrapper: Context,
         });
@@ -2910,8 +2925,8 @@ describe("data-editor", () => {
     });
 
     test("Ctrl click row marker - no multi", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor {...basicProps} rowSelect={"single"} onGridSelectionChange={spy} rowMarkers="both" />,
             {
@@ -2956,8 +2971,8 @@ describe("data-editor", () => {
     });
 
     test("Shift click grid selection", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -2994,9 +3009,9 @@ describe("data-editor", () => {
     });
 
     test("Fill down", async () => {
-        const spy = jest.fn();
-        const multiSpy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        const multiSpy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -3034,9 +3049,9 @@ describe("data-editor", () => {
     });
 
     test("Fill right", async () => {
-        const spy = jest.fn();
-        const multiSpy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        const multiSpy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -3072,8 +3087,8 @@ describe("data-editor", () => {
     });
 
     test("Clear selection", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -3107,8 +3122,8 @@ describe("data-editor", () => {
     });
 
     test("Delete range", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onCellEdited={spy} />, {
             wrapper: Context,
         });
@@ -3136,8 +3151,8 @@ describe("data-editor", () => {
     });
 
     test("Click out of bounds", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor {...basicProps} columns={basicProps.columns.slice(0, 2)} onGridSelectionChange={spy} />,
             {
@@ -3174,8 +3189,8 @@ describe("data-editor", () => {
     });
 
     test("Delete Column", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onCellEdited={spy} />, {
             wrapper: Context,
         });
@@ -3195,8 +3210,8 @@ describe("data-editor", () => {
     });
 
     test("DND Columns", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onColumnMoved={spy} />, {
             wrapper: Context,
         });
@@ -3242,8 +3257,8 @@ describe("data-editor", () => {
     });
 
     test("Resize Column", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onColumnMoved={spy} onColumnResize={spy} />, {
             wrapper: Context,
         });
@@ -3274,8 +3289,8 @@ describe("data-editor", () => {
     });
 
     test("Auto Resize Column", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onColumnResize={spy} />, {
             wrapper: Context,
         });
@@ -3311,8 +3326,8 @@ describe("data-editor", () => {
     });
 
     test("Auto Resize Column Ref", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<EventedDataEditor {...basicProps} ref={ref} onColumnResize={spy} />, {
             wrapper: Context,
@@ -3325,9 +3340,9 @@ describe("data-editor", () => {
     });
 
     test("Resize Column End Called", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onColumnResize={jest.fn()} onColumnResizeEnd={spy} />, {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onColumnResize={vi.fn()} onColumnResizeEnd={spy} />, {
             wrapper: Context,
         });
         prep();
@@ -3358,12 +3373,12 @@ describe("data-editor", () => {
     });
 
     test("Resize column end called correct number of times", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
-                onColumnResize={jest.fn()}
+                onColumnResize={vi.fn()}
                 onColumnResizeEnd={spy}
                 gridSelection={{
                     columns: CompactSelection.fromSingleSelection(3),
@@ -3402,8 +3417,8 @@ describe("data-editor", () => {
     });
 
     test("Resize Multiple Column", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -3445,8 +3460,8 @@ describe("data-editor", () => {
     });
 
     test("Resize Last Column", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -3485,8 +3500,8 @@ describe("data-editor", () => {
     });
 
     test("Drag reorder row", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} rowMarkers="number" onRowMoved={spy} />, {
             wrapper: Context,
         });
@@ -3517,8 +3532,8 @@ describe("data-editor", () => {
     });
 
     test("Select range with mouse", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -3549,8 +3564,8 @@ describe("data-editor", () => {
     });
 
     test("Select range with mouse middle click fails", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -3584,8 +3599,8 @@ describe("data-editor", () => {
     });
 
     test("Select all", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -3624,8 +3639,8 @@ describe("data-editor", () => {
     });
 
     test("Draggable", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -3665,8 +3680,8 @@ describe("data-editor", () => {
     });
 
     test("Minimap issues scroll", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} rowMarkers="both" showMinimap={true} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -3694,8 +3709,8 @@ describe("data-editor", () => {
     });
 
     test("Click cell does not double-emit selectedrows/columns", async () => {
-        const gridSelectionSpy = jest.fn();
-        jest.useFakeTimers();
+        const gridSelectionSpy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={gridSelectionSpy} />, {
             wrapper: Context,
         });
@@ -3725,8 +3740,8 @@ describe("data-editor", () => {
     });
 
     test("Span expansion", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
 
         const getCellContent: (typeof basicProps)["getCellContent"] = c => {
             const [col, row] = c;
@@ -3785,8 +3800,8 @@ describe("data-editor", () => {
     });
 
     test("Imperative Handle works", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<EventedDataEditor ref={ref} {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
@@ -3806,7 +3821,7 @@ describe("data-editor", () => {
     });
 
     test("Imperative scrollTo false fire", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
             wrapper: Context,
@@ -3817,13 +3832,13 @@ describe("data-editor", () => {
             ref.current?.scrollTo(5, 10);
         });
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
         expect(Element.prototype.scrollTo).not.toBeCalled();
     });
 
     test("Imperative scrollTo cell", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
             wrapper: Context,
@@ -3834,13 +3849,13 @@ describe("data-editor", () => {
             ref.current?.scrollTo(5, 500);
         });
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
         expect(Element.prototype.scrollTo).toBeCalledWith(0, 15_101);
     });
 
     test("Imperative scrollTo pixel", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
             wrapper: Context,
@@ -3854,13 +3869,13 @@ describe("data-editor", () => {
             });
         });
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
         expect(Element.prototype.scrollTo).toBeCalledWith(0, 533);
     });
 
     test("Imperative scrollTo pixel start", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
             wrapper: Context,
@@ -3883,13 +3898,13 @@ describe("data-editor", () => {
             );
         });
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
         expect(Element.prototype.scrollTo).toBeCalledWith(0, 1464);
     });
 
     test("Imperative scrollTo pixel center", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
             wrapper: Context,
@@ -3912,13 +3927,13 @@ describe("data-editor", () => {
             );
         });
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
         expect(Element.prototype.scrollTo).toBeCalledWith(0, 998.5);
     });
 
     test("Imperative scrollTo pixel end", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<EventedDataEditor ref={ref} {...basicProps} rows={10_000} />, {
             wrapper: Context,
@@ -3941,14 +3956,14 @@ describe("data-editor", () => {
             );
         });
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
         expect(Element.prototype.scrollTo).toBeCalledWith(0, 533);
     });
 
     test("Imperative damage gets right cell", async () => {
-        const spy = jest.fn(basicProps.getCellContent);
-        jest.useFakeTimers();
+        const spy = vi.fn(basicProps.getCellContent);
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<EventedDataEditor ref={ref} {...basicProps} rowMarkers="number" getCellContent={spy} />, {
             wrapper: Context,
@@ -3964,8 +3979,8 @@ describe("data-editor", () => {
     });
 
     test("On-scroll does not spuriously fire on select", async () => {
-        const spy = jest.fn(basicProps.getCellContent);
-        jest.useFakeTimers();
+        const spy = vi.fn(basicProps.getCellContent);
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<EventedDataEditor ref={ref} {...basicProps} rowMarkers="number" getCellContent={spy} />, {
             wrapper: Context,
@@ -3979,15 +3994,15 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         expect(Element.prototype.scrollTo).not.toBeCalled();
     });
 
     test("Keyboard scroll with controlled selection does not double fire", async () => {
-        const spy = jest.fn(basicProps.getCellContent);
-        jest.useFakeTimers();
+        const spy = vi.fn(basicProps.getCellContent);
+        vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
         render(<EventedDataEditor ref={ref} {...basicProps} rowMarkers="number" getCellContent={spy} />, {
             wrapper: Context,
@@ -4001,25 +4016,25 @@ describe("data-editor", () => {
         });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         // make sure we clear the mock in case a spurios scroll was emitted (test above)
-        (Element.prototype.scrollTo as jest.Mock).mockClear();
+        (Element.prototype.scrollTo as Mock).mockClear();
 
         fireEvent.keyDown(canvas, { key: "ArrowDown" });
         fireEvent.keyUp(canvas, { key: "ArrowDown" });
 
         act(() => {
-            jest.runAllTimers();
+            vi.runAllTimers();
         });
 
         expect(Element.prototype.scrollTo).toBeCalledTimes(1);
     });
 
     test("Ctrl Arrow keys", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -4097,8 +4112,8 @@ describe("data-editor", () => {
     });
 
     test("Select range with mouse going out of bounds", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         const columns = basicProps.columns.slice(0, 2);
         render(<EventedDataEditor {...basicProps} columns={columns} onGridSelectionChange={spy} />, {
             wrapper: Context,
@@ -4130,8 +4145,8 @@ describe("data-editor", () => {
     });
 
     test("Select all keybind", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} keybindings={{ selectAll: true }} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -4160,8 +4175,8 @@ describe("data-editor", () => {
     });
 
     test("Select column with blending", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -4205,8 +4220,8 @@ describe("data-editor", () => {
     });
 
     test("Select column", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -4232,8 +4247,8 @@ describe("data-editor", () => {
     });
 
     test("Select row with blending", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -4277,8 +4292,8 @@ describe("data-editor", () => {
     });
 
     test("Select row", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -4304,8 +4319,8 @@ describe("data-editor", () => {
     });
 
     test("Select range with mouse then permissive move", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -4346,9 +4361,9 @@ describe("data-editor", () => {
     });
 
     test("Does not emits header menu click when move", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(
             <DataEditor
                 {...basicProps}
@@ -4388,10 +4403,10 @@ describe("data-editor", () => {
     });
 
     test("Dragging header disables vertical autoscroll", async () => {
-        const spy = Element.prototype.scrollBy as jest.Mock;
+        const spy = Element.prototype.scrollBy as Mock;
         spy.mockClear();
 
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         render(<DataEditor {...basicProps} />, {
             wrapper: Context,
         });
@@ -4419,8 +4434,8 @@ describe("data-editor", () => {
     });
 
     test("Use fill handle", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} onCellEdited={spy} fillHandle={true} />, {
             wrapper: Context,
         });
@@ -4456,8 +4471,8 @@ describe("data-editor", () => {
     });
 
     test("Use fill handle into blank", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} rows={3} onCellEdited={spy} fillHandle={true} />, {
             wrapper: Context,
         });
@@ -4493,8 +4508,8 @@ describe("data-editor", () => {
     });
 
     test("Use fill handle into trailing row", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -4547,8 +4562,8 @@ describe("data-editor", () => {
     });
 
     test("Close overlay with enter key", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 experimental={{
@@ -4573,7 +4588,7 @@ describe("data-editor", () => {
             key: "Enter",
         });
 
-        jest.runAllTimers();
+        vi.runAllTimers();
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -4597,8 +4612,8 @@ describe("data-editor", () => {
     });
 
     test("Clear selection when suddenly out of range", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         const { rerender } = render(<EventedDataEditor {...basicProps} rows={10} onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -4610,12 +4625,12 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 5 + 16,
         });
 
-        jest.runAllTimers();
+        vi.runAllTimers();
         spy.mockClear();
 
         rerender(<EventedDataEditor {...basicProps} rows={1} onGridSelectionChange={spy} />);
 
-        jest.runAllTimers();
+        vi.runAllTimers();
         expect(spy).toBeCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
@@ -4624,14 +4639,14 @@ describe("data-editor", () => {
     });
 
     test("Enter key does not trigger disallowed row fetch", async () => {
-        const spy = jest.fn(basicProps.getCellContent);
-        jest.useFakeTimers();
+        const spy = vi.fn(basicProps.getCellContent);
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
                 rows={2}
                 getCellContent={spy}
-                onRowAppended={jest.fn()}
+                onRowAppended={vi.fn()}
                 trailingRowOptions={{
                     sticky: true,
                     tint: true,
@@ -4658,7 +4673,7 @@ describe("data-editor", () => {
             key: "Enter",
         });
 
-        jest.runAllTimers();
+        vi.runAllTimers();
         expect(spy.mock.calls.findIndex(x => x[0][1] > 1)).toBe(-1);
     });
 });

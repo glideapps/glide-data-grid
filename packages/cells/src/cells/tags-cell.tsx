@@ -8,7 +8,7 @@ import {
 } from "@glideapps/glide-data-grid";
 import { styled } from "@linaria/react";
 import * as React from "react";
-import { roundedRect } from "../draw-fns";
+import { roundedRect } from "../draw-fns.js";
 
 interface TagsCellProps {
     readonly kind: "tags-cell";

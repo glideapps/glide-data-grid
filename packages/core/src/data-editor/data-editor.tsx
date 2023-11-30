@@ -1,12 +1,11 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
-import { assert, assertNever, maybe } from "../common/support";
+import { assert, assertNever, maybe } from "../common/support.js";
 import clamp from "lodash/clamp.js";
 import uniq from "lodash/uniq.js";
 import flatten from "lodash/flatten.js";
 import range from "lodash/range.js";
 import debounce from "lodash/debounce.js";
-import DataGridOverlayEditor from "../data-grid-overlay-editor/data-grid-overlay-editor";
 import {
     type EditableGridCell,
     type GridCell,
@@ -45,26 +44,28 @@ import {
     gridSelectionHasItem,
     BooleanEmpty,
     BooleanIndeterminate,
-} from "../data-grid/data-grid-types";
-import DataGridSearch, { type DataGridSearchProps } from "../data-grid-search/data-grid-search";
-import { browserIsOSX } from "../common/browser-detect";
-import { getDataEditorTheme, makeCSSStyle, type Theme, ThemeContext } from "../common/styles";
-import type { DataGridRef } from "../data-grid/data-grid";
-import { getScrollBarWidth, useEventListener, useStateWithReactiveInput, whenDefined } from "../common/utils";
-import { isGroupEqual } from "../data-grid/data-grid-lib";
-import { GroupRename } from "./group-rename";
-import { measureColumn, useColumnSizer } from "./use-column-sizer";
-import { isHotkey } from "../common/is-hotkey";
-import { type SelectionBlending, useSelectionBehavior } from "../data-grid/use-selection-behavior";
-import { useCellsForSelection } from "./use-cells-for-selection";
-import { unquote, expandSelection, copyToClipboard } from "./data-editor-fns";
-import { DataEditorContainer } from "../data-editor-container/data-grid-container";
-import { toggleBoolean } from "../data-grid/cells/boolean-cell";
-import { useAutoscroll } from "./use-autoscroll";
-import type { CustomRenderer, CellRenderer } from "../data-grid/cells/cell-types";
-import { CellRenderers } from "../data-grid/cells";
-import { decodeHTML, type CopyBuffer } from "./copy-paste";
-import { useRemAdjuster } from "./use-rem-adjuster";
+} from "../internal/data-grid/data-grid-types.js";
+import DataGridSearch, { type DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
+import { browserIsOSX } from "../common/browser-detect.js";
+import { getDataEditorTheme, makeCSSStyle, type Theme, ThemeContext } from "../common/styles.js";
+import type { DataGridRef } from "../internal/data-grid/data-grid.js";
+import { getScrollBarWidth, useEventListener, useStateWithReactiveInput, whenDefined } from "../common/utils.js";
+import { isGroupEqual } from "../internal/data-grid/data-grid-lib.js";
+import { GroupRename } from "./group-rename.js";
+import { measureColumn, useColumnSizer } from "./use-column-sizer.js";
+import { isHotkey } from "../common/is-hotkey.js";
+import { type SelectionBlending, useSelectionBehavior } from "../internal/data-grid/use-selection-behavior.js";
+import { useCellsForSelection } from "./use-cells-for-selection.js";
+import { unquote, expandSelection, copyToClipboard, toggleBoolean } from "./data-editor-fns.js";
+import { DataEditorContainer } from "../internal/data-editor-container/data-grid-container.js";
+import { useAutoscroll } from "./use-autoscroll.js";
+import type { CustomRenderer, CellRenderer, InternalCellRenderer } from "../cells/cell-types.js";
+import { decodeHTML, type CopyBuffer } from "./copy-paste.js";
+import { useRemAdjuster } from "./use-rem-adjuster.js";
+
+const DataGridOverlayEditor = React.lazy(
+    async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
+);
 
 let idCounter = 0;
 
@@ -97,6 +98,7 @@ type Props = Partial<
         | "headerHeight"
         | "isFilling"
         | "isFocused"
+        | "imageWindowLoader"
         | "lockColumns"
         | "maxColumnWidth"
         | "minColumnWidth"
@@ -198,7 +200,7 @@ const keybindingDefaults: Keybinds = {
 /**
  * @category DataEditor
  */
-export interface DataEditorProps extends Props {
+export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "imageWindowLoader"> {
     /** Emitted whenever the user has requested the deletion of the selection.
      * @group Editing
      */
@@ -605,6 +607,8 @@ export interface DataEditorProps extends Props {
      */
     readonly theme?: Partial<Theme>;
 
+    readonly renderers?: readonly InternalCellRenderer<InnerGridCell>[];
+
     /**
      * An array of custom renderers which can be used to extend the data grid.
      * @group Advanced
@@ -695,6 +699,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const [mouseState, setMouseState] = React.useState<MouseState>();
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
     const lastSent = React.useRef<[number, number]>();
+
+    const safeWindow = typeof window === "undefined" ? null : window;
 
     const {
         rowMarkers = "none",
@@ -799,6 +805,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         groupHeaderHeight: groupHeaderHeightIn = headerHeightIn,
         theme: themeIn,
         isOutsideClick,
+        renderers,
     } = p;
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
@@ -972,14 +979,23 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const [clientSize, setClientSize] = React.useState<readonly [number, number, number]>([10, 10, 0]);
 
+    const rendererMap = React.useMemo(() => {
+        if (renderers === undefined) return {};
+        const result: Partial<Record<InnerGridCellKind | GridCellKind, InternalCellRenderer<InnerGridCell>>> = {};
+        for (const r of renderers) {
+            result[r.kind] = r;
+        }
+        return result;
+    }, [renderers]);
+
     const getCellRenderer: <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined = React.useCallback(
         <T extends InnerGridCell>(cell: T) => {
             if (cell.kind !== GridCellKind.Custom) {
-                return CellRenderers[cell.kind] as unknown as CellRenderer<T>;
+                return rendererMap[cell.kind] as unknown as CellRenderer<T>;
             }
             return additionalRenderers?.find(x => x.isMatch(cell)) as CellRenderer<T>;
         },
-        [additionalRenderers]
+        [additionalRenderers, rendererMap]
     );
 
     const columns = useColumnSizer(
@@ -3223,7 +3239,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
-    useEventListener("paste", onPasteInternal, window, false, true);
+    useEventListener("paste", onPasteInternal, safeWindow, false, true);
 
     // While this function is async, we deeply prefer not to await if we don't have to. This will lead to unpacking
     // promises in rather awkward ways when possible to avoid awaiting. We have to use fallback copy mechanisms when
@@ -3324,7 +3340,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [columnsIn, getCellsForSelection, gridSelection, keybindings.copy, rowMarkerOffset, rows, copyHeaders]
     );
 
-    useEventListener("copy", onCopy, window, false, false);
+    useEventListener("copy", onCopy, safeWindow, false, false);
 
     const onCut = React.useCallback(
         async (e?: ClipboardEvent) => {
@@ -3336,13 +3352,26 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (!focused) return;
             await onCopy(e);
             if (gridSelection.current !== undefined) {
-                deleteRange(gridSelection.current.range);
+                let effectiveSelection: GridSelection = {
+                    current: {
+                        cell: gridSelection.current.cell,
+                        range: gridSelection.current.range,
+                        rangeStack: [],
+                    },
+                    rows: CompactSelection.empty(),
+                    columns: CompactSelection.empty(),
+                };
+                const onDeleteResult = onDelete?.(effectiveSelection);
+                if (onDeleteResult === false) return;
+                effectiveSelection = onDeleteResult === true ? effectiveSelection : onDeleteResult;
+                if (effectiveSelection.current === undefined) return;
+                deleteRange(effectiveSelection.current.range);
             }
         },
-        [deleteRange, gridSelection, keybindings.cut, onCopy]
+        [deleteRange, gridSelection, keybindings.cut, onCopy, onDelete]
     );
 
-    useEventListener("cut", onCut, window, false, false);
+    useEventListener("cut", onCut, safeWindow, false, false);
 
     const onSearchResultsChanged = React.useCallback(
         (results: readonly Item[], navIndex: number) => {
@@ -3440,23 +3469,22 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return gridRef.current?.damage(damageList);
             },
             getBounds: (col, row) => {
-
                 if (canvasRef?.current === null || scrollRef?.current === null) {
-                    return undefined
+                    return undefined;
                 }
 
                 if (col === undefined && row === undefined) {
                     // Return the bounds of the entire scroll area:
-                    const rect = canvasRef.current.getBoundingClientRect()
-                    const scale = rect.width / scrollRef.current.clientWidth
-                    return {   
-                         x: rect.x - scrollRef.current.scrollLeft * scale,
-                         y: rect.y - scrollRef.current.scrollTop * scale,
-                         width: scrollRef.current.scrollWidth * scale,
-                         height: scrollRef.current.scrollHeight * scale,
-                     };
+                    const rect = canvasRef.current.getBoundingClientRect();
+                    const scale = rect.width / scrollRef.current.clientWidth;
+                    return {
+                        x: rect.x - scrollRef.current.scrollLeft * scale,
+                        y: rect.y - scrollRef.current.scrollTop * scale,
+                        width: scrollRef.current.scrollWidth * scale,
+                        height: scrollRef.current.scrollHeight * scale,
+                    };
                 }
-                return gridRef.current?.getBounds( col ?? 0 + rowMarkerOffset, row);
+                return gridRef.current?.getBounds(col ?? 0 + rowMarkerOffset, row);
             },
             focus: () => gridRef.current?.focus(),
             emit: async e => {
@@ -3714,18 +3742,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 />
                 {renameGroupNode}
                 {overlay !== undefined && (
-                    <DataGridOverlayEditor
-                        {...overlay}
-                        validateCell={validateCell}
-                        id={overlayID}
-                        getCellRenderer={getCellRenderer}
-                        className={experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
-                        provideEditor={provideEditor}
-                        imageEditorOverride={imageEditorOverride}
-                        onFinishEditing={onFinishEditing}
-                        markdownDivCreateNode={markdownDivCreateNode}
-                        isOutsideClick={isOutsideClick}
-                    />
+                    <React.Suspense fallback={null}>
+                        <DataGridOverlayEditor
+                            {...overlay}
+                            validateCell={validateCell}
+                            id={overlayID}
+                            getCellRenderer={getCellRenderer}
+                            className={experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}
+                            provideEditor={provideEditor}
+                            imageEditorOverride={imageEditorOverride}
+                            onFinishEditing={onFinishEditing}
+                            markdownDivCreateNode={markdownDivCreateNode}
+                            isOutsideClick={isOutsideClick}
+                        />
+                    </React.Suspense>
                 )}
             </DataEditorContainer>
         </ThemeContext.Provider>

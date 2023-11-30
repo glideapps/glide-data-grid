@@ -1,5 +1,5 @@
 import React from "react";
-import { getDataEditorTheme, type Theme } from "../common/styles";
+import { getDataEditorTheme, type Theme } from "../common/styles.js";
 
 interface DataEditorDimensions {
     rowHeight: number | ((n: number) => number);
