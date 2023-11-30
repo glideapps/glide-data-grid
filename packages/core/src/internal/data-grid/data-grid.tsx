@@ -31,6 +31,7 @@ import {
     headerKind,
     outOfBoundsKind,
     type ImageWindowLoader,
+    OutOfBoundsRegionAxis,
 } from "./data-grid-types.js";
 import { SpriteManager, type SpriteMap } from "./data-grid-sprites.js";
 import { direction, getScrollBarWidth, useDebouncedMemo, useEventListener } from "../../common/utils.js";
@@ -506,8 +507,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             let result: GridMouseEventArgs;
             if (col === -1 || y < 0 || x < 0 || row === undefined || x > width || y > height) {
-                const horizontal = x > width ? -1 : x < 0 ? 1 : 0;
+                const horizontal = x > width ? 1 : x < 0 ? -1 : 0;
                 const vertical = y > height ? 1 : y < 0 ? -1 : 0;
+
+                let innerHorizontal: OutOfBoundsRegionAxis = horizontal * 2;
+                let innerVertical: OutOfBoundsRegionAxis = vertical * 2;
+                if (horizontal === 0)
+                    innerHorizontal = col === -1 ? OutOfBoundsRegionAxis.EndPadding : OutOfBoundsRegionAxis.Center;
+                if (vertical === 0)
+                    innerVertical = row === undefined ? OutOfBoundsRegionAxis.EndPadding : OutOfBoundsRegionAxis.Center;
 
                 let isEdge = false;
                 if (col === -1 && row === -1) {
@@ -525,7 +533,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 result = {
                     kind: outOfBoundsKind,
                     location: [col !== -1 ? col : x < 0 ? 0 : mappedColumns.length - 1, row ?? rows - 1],
-                    direction: [horizontal, vertical],
+                    direction: [-horizontal as -1 | 0 | 1, vertical], // negative horizontal for backcompat
+                    region: [innerHorizontal, innerVertical],
                     shiftKey,
                     ctrlKey,
                     metaKey,
@@ -625,6 +634,17 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     function isSameItem(item: GridMouseEventArgs | undefined, other: GridMouseEventArgs | undefined) {
         if (item === other) return true;
+
+        if (item?.kind === "out-of-bounds") {
+            return (
+                item?.kind === other?.kind &&
+                item?.location[0] === other?.location[0] &&
+                item?.location[1] === other?.location[1] &&
+                item?.region[0] === other?.region[0] &&
+                item?.region[1] === other?.region[1]
+            );
+        }
+
         return (
             item?.kind === other?.kind &&
             item?.location[0] === other?.location[0] &&
