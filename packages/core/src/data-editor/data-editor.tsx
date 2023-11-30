@@ -3352,10 +3352,23 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (!focused) return;
             await onCopy(e);
             if (gridSelection.current !== undefined) {
-                deleteRange(gridSelection.current.range);
+                let effectiveSelection: GridSelection = {
+                    current: {
+                        cell: gridSelection.current.cell,
+                        range: gridSelection.current.range,
+                        rangeStack: [],
+                    },
+                    rows: CompactSelection.empty(),
+                    columns: CompactSelection.empty(),
+                };
+                const onDeleteResult = onDelete?.(effectiveSelection);
+                if (onDeleteResult === false) return;
+                effectiveSelection = onDeleteResult === true ? effectiveSelection : onDeleteResult;
+                if (effectiveSelection.current === undefined) return;
+                deleteRange(effectiveSelection.current.range);
             }
         },
-        [deleteRange, gridSelection, keybindings.cut, onCopy]
+        [deleteRange, gridSelection, keybindings.cut, onCopy, onDelete]
     );
 
     useEventListener("cut", onCut, safeWindow, false, false);
