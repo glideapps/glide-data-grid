@@ -964,7 +964,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             onMouseDown?.(args);
-            if (!args.isTouch && isDraggable !== true && isDraggable !== args.kind) {
+            if (!args.isTouch && isDraggable !== true && isDraggable !== args.kind && args.button < 3) {
                 // preventing default in touch events stops scroll
                 ev.preventDefault();
             }
@@ -985,9 +985,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             let clientX: number;
             let clientY: number;
+            let canCancel = true;
             if (ev instanceof MouseEvent) {
                 clientX = ev.clientX;
                 clientY = ev.clientY;
+                canCancel = ev.button < 3;
                 if ((ev as any).pointerType === "touch") {
                     return;
                 }
@@ -1009,7 +1011,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 setLastWasTouch(args.isTouch);
             }
 
-            if (!isOutside && ev.cancelable) {
+            if (!isOutside && ev.cancelable && canCancel) {
                 ev.preventDefault();
             }
 
@@ -1048,9 +1050,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             let clientX: number;
             let clientY: number;
+            let canCancel = true;
             if (ev instanceof MouseEvent) {
                 clientX = ev.clientX;
                 clientY = ev.clientY;
+                canCancel = ev.button < 3;
             } else {
                 clientX = ev.changedTouches[0].clientX;
                 clientY = ev.changedTouches[0].clientY;
@@ -1062,7 +1066,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 setLastWasTouch(args.isTouch);
             }
 
-            if (!isOutside && ev.cancelable) {
+            if (!isOutside && ev.cancelable && canCancel) {
                 ev.preventDefault();
             }
 
