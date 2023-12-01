@@ -1,6 +1,6 @@
 {
     "name": "@glideapps/glide-data-grid-cells",
-    "version": "5.3.1",
+    "version": "5.3.2",
     "description": "Extra cells for glide-data-grid",
     "sideEffects": [
         "**/*.css"
@@ -52,7 +52,7 @@
         "canvas"
     ],
     "dependencies": {
-        "@glideapps/glide-data-grid": "5.3.1",
+        "@glideapps/glide-data-grid": "5.3.2",
         "@toast-ui/editor": "3.1.10",
         "@toast-ui/react-editor": "3.1.10",
         "react-select": "^5.2.2"
