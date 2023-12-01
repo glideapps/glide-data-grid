@@ -82,6 +82,27 @@ describe("copy-paste", () => {
         expect(result.textHtml).toContain('<td gdg-raw-value="Hello" gdg-format="string">Display Hello</td>');
     });
 
+    test("Simple text cell with multiple spaces", () => {
+        const cells: GridCell[][] = [
+            [
+                {
+                    kind: GridCellKind.Text,
+                    data: "Hello",
+                    allowOverlay: true,
+                    displayData: "Display  Hello",
+                },
+            ],
+        ];
+        const columnIndexes = [0];
+
+        const result = getCopyBufferContents(cells, columnIndexes);
+
+        expect(result.textPlain).toBe("Display  Hello");
+        expect(result.textHtml).toContain(
+            '<td gdg-raw-value="Hello" gdg-format="string">Display<span> </span><span> </span>Hello</td>'
+        );
+    });
+
     test("Simple text cell with special chars", () => {
         const cells: GridCell[][] = [
             [
