@@ -16331,7 +16331,7 @@ function createTextBuffer(copyBuffer) {
   return lines.join("\n");
 }
 function formatHtmlTextContent(text) {
-  return text.replace(/\t/g, "    ").replace(/\t/g, "    ").replace(/(?<=\s) | (?=\s)/g, "<span> </span>");
+  return text.replace(/\t/g, "    ").replace(/ {2,}/g, match => "<span> </span>".repeat(match.length));
 }
 function formatHtmlAttributeContent(attrText) {
   return '"' + attrText.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '"';
@@ -16434,7 +16434,7 @@ function decodeHTML(html) {
         var _clone$textContent3, _current4, _textContent, _textContent2;
         let textContent = (_clone$textContent3 = clone.textContent) !== null && _clone$textContent3 !== void 0 ? _clone$textContent3 : "";
         if (isAppleNumbers) {
-          textContent = textContent.replace(/(?<!\n)\n/g, "");
+          textContent = textContent.replace(/\n(?!\n)/g, "");
         }
         (_current4 = current) === null || _current4 === void 0 ? void 0 : _current4.push({
           rawValue: (_textContent = textContent) !== null && _textContent !== void 0 ? _textContent : "",
@@ -33207,7 +33207,7 @@ function createTextBuffer(copyBuffer) {
   return lines.join("\n");
 }
 function formatHtmlTextContent(text) {
-  return text.replace(/\t/g, "    ").replace(/\t/g, "    ").replace(/(?<=\s) | (?=\s)/g, "<span> </span>");
+  return text.replace(/\t/g, "    ").replace(/ {2,}/g, match => "<span> </span>".repeat(match.length));
 }
 function formatHtmlAttributeContent(attrText) {
   return '"' + attrText.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '"';
@@ -33306,7 +33306,7 @@ function decodeHTML(html) {
       } else {
         let textContent = (_f = clone.textContent) != null ? _f : "";
         if (isAppleNumbers) {
-          textContent = textContent.replace(/(?<!\n)\n/g, "");
+          textContent = textContent.replace(/\n(?!\n)/g, "");
         }
         current == null ? void 0 : current.push({
           rawValue: textContent != null ? textContent : "",
@@ -36726,4 +36726,4 @@ function useCustomCells(cells) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.46ef4746.iframe.bundle.js.map
+//# sourceMappingURL=main.bd484d73.iframe.bundle.js.map
