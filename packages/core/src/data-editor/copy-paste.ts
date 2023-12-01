@@ -154,10 +154,7 @@ function formatHtmlTextContent(text: string): string {
     // 1. Replacing tabs with four spaces for consistency. Also google sheets disallows any tabs.
     // 2. Wrapping each space with a span element to prevent them from being collapsed or ignored during the
     //    paste operation
-    return text
-        .replace(/\t/g, "    ")
-        .replace(/\t/g, "    ")
-        .replace(/(?<=\s) | (?=\s)/g, "<span> </span>");
+    return text.replace(/\t/g, "    ").replace(/ {2,}/g, match => "<span> </span>".repeat(match.length));
 }
 
 function formatHtmlAttributeContent(attrText: string): string {
@@ -299,7 +296,7 @@ export function decodeHTML(html: string): CopyBuffer | undefined {
                 let textContent = clone.textContent ?? "";
                 if (isAppleNumbers) {
                     // replace any newline not preceded by a newline
-                    textContent = textContent.replace(/(?<!\n)\n/g, "");
+                    textContent = textContent.replace(/\n(?!\n)/g, "");
                 }
 
                 current?.push({
