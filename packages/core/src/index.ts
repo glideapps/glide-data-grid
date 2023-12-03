@@ -28,6 +28,20 @@ export type { DataEditorAllProps as DataEditorProps } from "./data-editor-all.js
 export { DataEditor as DataEditorCore } from "./data-editor/data-editor.js";
 export type { DataEditorProps as DataEditorCoreProps } from "./data-editor/data-editor.js";
 
+export { booleanCellRenderer } from "./cells/boolean-cell.js";
+export { imageCellRenderer } from "./cells/image-cell.js";
+export { markdownCellRenderer } from "./cells/markdown-cell.js";
+export { numberCellRenderer } from "./cells/number-cell.js";
+export { textCellRenderer } from "./cells/text-cell.js";
+export { uriCellRenderer } from "./cells/uri-cell.js";
+export { drilldownCellRenderer } from "./cells/drilldown-cell.js";
+export { loadingCellRenderer } from "./cells/loading-cell.js";
+export { newRowCellRenderer } from "./cells/new-row-cell.js";
+export { markerCellRenderer } from "./cells/marker-cell.js";
+export { bubbleCellRenderer } from "./cells/bubble-cell.js";
+export { protectedCellRenderer } from "./cells/protected-cell.js";
+export { rowIDCellRenderer } from "./cells/row-id-cell.js";
+
 /**
  * @category DataEditor
  * @hidden
