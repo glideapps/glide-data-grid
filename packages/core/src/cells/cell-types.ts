@@ -9,6 +9,7 @@ import type {
     BaseGridMouseEventArgs,
     BooleanEmpty,
     BooleanIndeterminate,
+    Item,
 } from "../internal/data-grid/data-grid-types.js";
 
 export interface BaseDrawArgs {
@@ -65,6 +66,7 @@ interface BaseCellRenderer<T extends InnerGridCell> {
             readonly posX: number;
             readonly posY: number;
             readonly bounds: Rectangle;
+            readonly location: Item;
             readonly theme: Theme;
             readonly preventDefault: () => void;
         } & BaseGridMouseEventArgs

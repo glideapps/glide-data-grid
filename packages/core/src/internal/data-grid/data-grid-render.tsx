@@ -41,6 +41,7 @@ import type { DrawArgs, GetCellRendererCallback, PrepResult } from "../../cells/
 import { assert, deepEqual } from "../../common/support.js";
 import { direction } from "../../common/utils.js";
 import { drawCheckbox } from "./draw-checkbox.js";
+import type { DragAndDropState, DrawGridArg, HoverInfo } from "./draw-grid-arg.js";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when
@@ -52,8 +53,6 @@ import { drawCheckbox } from "./draw-checkbox.js";
 // - Retain mode for drawing cells. Instead of drawing cells as we come across them, first build a data
 //   structure which contains all operations to perform, then sort them all by "prep" requirement, then do
 //   all like operations at once.
-
-type HoverInfo = readonly [Item, Item];
 
 export interface Highlight {
     readonly color: string;
@@ -87,11 +86,6 @@ export interface BlitData {
     readonly translateY: number;
     readonly mustDrawFocusOnHeader: boolean;
     readonly lastBuffer: "a" | "b" | undefined;
-}
-
-interface DragAndDropState {
-    src: number;
-    dest: number;
 }
 
 export function drawCell(
@@ -1715,6 +1709,25 @@ function drawHighlightRings(
     return drawCb;
 }
 
+function drawColumnResizeOutline(
+    ctx: CanvasRenderingContext2D,
+    yOffset: number,
+    xOffset: number,
+    height: number,
+    theme: Theme
+) {
+    ctx.beginPath();
+    ctx.moveTo(yOffset, xOffset);
+    ctx.lineTo(yOffset, height);
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = theme.accentColor;
+
+    ctx.stroke();
+
+    ctx.globalAlpha = 1;
+}
+
 function drawFocusRing(
     ctx: CanvasRenderingContext2D,
     width: number,
@@ -1855,55 +1868,6 @@ function getLastRow(
     return result;
 }
 
-export interface DrawGridArg {
-    readonly canvas: HTMLCanvasElement;
-    readonly headerCanvas: HTMLCanvasElement;
-    readonly bufferA: HTMLCanvasElement;
-    readonly bufferB: HTMLCanvasElement;
-    readonly width: number;
-    readonly height: number;
-    readonly cellXOffset: number;
-    readonly cellYOffset: number;
-    readonly translateX: number;
-    readonly translateY: number;
-    readonly mappedColumns: readonly MappedGridColumn[];
-    readonly enableGroups: boolean;
-    readonly freezeColumns: number;
-    readonly dragAndDropState: DragAndDropState | undefined;
-    readonly theme: Theme;
-    readonly headerHeight: number;
-    readonly groupHeaderHeight: number;
-    readonly disabledRows: CompactSelection;
-    readonly rowHeight: number | ((index: number) => number);
-    readonly verticalBorder: (col: number) => boolean;
-    readonly isResizing: boolean;
-    readonly isFocused: boolean;
-    readonly drawFocus: boolean;
-    readonly selection: GridSelection;
-    readonly fillHandle: boolean;
-    readonly lastRowSticky: TrailingRowType;
-    readonly hyperWrapping: boolean;
-    readonly rows: number;
-    readonly getCellContent: (cell: Item) => InnerGridCell;
-    readonly getGroupDetails: GroupDetailsCallback;
-    readonly getRowThemeOverride: GetRowThemeCallback | undefined;
-    readonly drawCustomCell: DrawCustomCellCallback | undefined;
-    readonly drawHeaderCallback: DrawHeaderCallback | undefined;
-    readonly prelightCells: CellList | undefined;
-    readonly highlightRegions: readonly Highlight[] | undefined;
-    readonly imageLoader: ImageWindowLoader;
-    readonly lastBlitData: React.MutableRefObject<BlitData | undefined>;
-    readonly damage: CellList | undefined;
-    readonly hoverValues: HoverValues;
-    readonly hoverInfo: HoverInfo | undefined;
-    readonly spriteManager: SpriteManager;
-    readonly scrolling: boolean;
-    readonly touchMode: boolean;
-    readonly renderStrategy: "single-buffer" | "double-buffer" | "direct";
-    readonly enqueue: (item: Item) => void;
-    readonly getCellRenderer: GetCellRendererCallback;
-}
-
 function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean | number {
     if (last === undefined) return false;
     if (
@@ -1997,6 +1961,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         drawHeaderCallback,
         prelightCells,
         highlightRegions,
+        resizeCol,
         imageLoader,
         lastBlitData,
         hoverValues,
@@ -2493,6 +2458,17 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
     focusRedraw?.();
     highlightRedraw?.();
+
+    if (isResizing) {
+        walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x) => {
+            if (c.sourceIndex === resizeCol) {
+                drawColumnResizeOutline(overlayCtx, x + c.width, 0, totalHeaderHeight + 1, theme);
+                drawColumnResizeOutline(targetCtx, x + c.width, totalHeaderHeight, height, theme);
+                return true;
+            }
+            return false;
+        });
+    }
 
     if (mainCtx !== null) {
         mainCtx.fillStyle = theme.bgCell;

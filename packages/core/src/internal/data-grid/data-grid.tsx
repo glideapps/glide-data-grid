@@ -41,7 +41,6 @@ import {
     type BlitData,
     drawCell,
     drawGrid,
-    type DrawGridArg,
     drawHeader,
     getActionBoundsForGroup,
     getHeaderMenuBounds,
@@ -55,6 +54,7 @@ import { browserIsFirefox, browserIsSafari } from "../../common/browser-detect.j
 import { useAnimationQueue } from "./use-animation-queue.js";
 import { assert } from "../../common/support.js";
 import type { CellRenderer, GetCellRendererCallback } from "../../cells/cell-types.js";
+import type { DrawGridArg } from "./draw-grid-arg.js";
 
 export interface DataGridProps {
     readonly width: number;
@@ -85,6 +85,7 @@ export interface DataGridProps {
 
     readonly allowResize: boolean | undefined;
     readonly isResizing: boolean;
+    readonly resizeColumn: number | undefined;
     readonly isDragging: boolean;
     readonly isFilling: boolean;
     readonly isFocused: boolean;
@@ -337,6 +338,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         onDragEnd,
         eventTargetRef,
         isResizing,
+        resizeColumn: resizeCol,
         isDragging,
         isDraggable = false,
         allowResize,
@@ -710,6 +712,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             rowHeight,
             verticalBorder,
             isResizing,
+            resizeCol,
             isFocused,
             selection,
             fillHandle,
@@ -770,6 +773,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         rowHeight,
         verticalBorder,
         isResizing,
+        resizeCol,
         isFocused,
         selection,
         fillHandle,

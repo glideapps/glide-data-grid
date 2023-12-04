@@ -78,6 +78,7 @@ export function Simplenotest() {
             onMouseDown={() => undefined}
             onMouseMoveRaw={() => undefined}
             onMouseUp={() => undefined}
+            resizeColumn={undefined}
             smoothScrollX={undefined}
             smoothScrollY={undefined}
             allowResize={undefined}
@@ -162,6 +163,7 @@ export function SelectedCellnotest() {
             onMouseMoveRaw={() => undefined}
             onMouseUp={() => undefined}
             smoothScrollX={undefined}
+            resizeColumn={undefined}
             smoothScrollY={undefined}
             allowResize={undefined}
             canvasRef={undefined}
@@ -232,6 +234,7 @@ export function SelectedRownotest() {
             cellXOffset={0}
             cellYOffset={0}
             isFocused={true}
+            resizeColumn={undefined}
             drawHeader={undefined}
             experimental={undefined}
             headerIcons={undefined}
@@ -316,6 +319,7 @@ export const SelectedColumnnotest = () => {
             cellXOffset={0}
             cellYOffset={0}
             isFocused={true}
+            resizeColumn={undefined}
             drawHeader={undefined}
             experimental={undefined}
             headerIcons={undefined}
