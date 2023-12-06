@@ -15,6 +15,8 @@ export { parseToRgba, withAlpha, blend, interpolateColors } from "./internal/dat
 export {
     measureTextCached,
     getMiddleCenterBias,
+    roundedPoly,
+    roundedRect,
     drawTextCellExternal as drawTextCell,
 } from "./internal/data-grid/data-grid-lib.js";
 export { getDataEditorTheme as getDefaultTheme, useTheme } from "./common/styles.js";

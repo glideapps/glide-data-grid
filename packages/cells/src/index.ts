@@ -11,6 +11,7 @@ import SpinnerCellRenderer, { type SpinnerCell } from "./cells/spinner-cell.js";
 import DatePickerRenderer, { type DatePickerCell } from "./cells/date-picker-cell.js";
 import LinksCellRenderer, { type LinksCell } from "./cells/links-cell.js";
 import ButtonCellRenderer, { type ButtonCell } from "./cells/button-cell.js";
+import TreeViewCellRenderer, { type TreeViewCell } from "./cells/tree-view-cell.js";
 
 const cells = [
     StarCellRenderer,
@@ -24,6 +25,7 @@ const cells = [
     DatePickerRenderer,
     LinksCellRenderer,
     ButtonCellRenderer,
+    TreeViewCellRenderer,
 ];
 
 export function useExtraCells() {
@@ -42,6 +44,7 @@ export {
     DatePickerRenderer as DatePickerCell,
     LinksCellRenderer as LinksCell,
     ButtonCellRenderer as ButtonCell,
+    TreeViewCellRenderer as TreeViewCell,
     cells as allCells,
 };
 
@@ -57,4 +60,5 @@ export type {
     DatePickerCell as DatePickerType,
     LinksCell as LinksCellType,
     ButtonCell as ButtonCellType,
+    TreeViewCell as TreeViewCellType,
 };

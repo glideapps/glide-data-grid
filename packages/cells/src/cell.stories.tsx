@@ -19,6 +19,7 @@ import "@glideapps/glide-data-grid/dist/index.css";
 import type { DatePickerCell } from "./cells/date-picker-cell.js";
 import type { LinksCell } from "./cells/links-cell.js";
 import type { ButtonCell } from "./cells/button-cell.js";
+import type { TreeViewCell } from "./cells/tree-view-cell.js";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -406,6 +407,21 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
+                    } else if (col === 14) {
+                        const t: TreeViewCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: false,
+                            copyData: "4",
+                            data: {
+                                canOpen: true,
+                                depth: row % 3,
+                                isOpen: row % 7 === 0,
+                                kind: "tree-view-cell",
+                                text: "Row " + row,
+                            },
+                            readonly: true,
+                        };
+                        return t;
                     }
                     throw new Error("Fail");
                 }}
@@ -465,6 +481,10 @@ export const CustomCells: React.VFC = () => {
                     {
                         title: "Button",
                         width: 120,
+                    },
+                    {
+                        title: "TreeView",
+                        width: 200,
                     },
                 ]}
                 rows={500}
