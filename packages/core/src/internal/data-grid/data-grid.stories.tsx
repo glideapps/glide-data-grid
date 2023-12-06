@@ -86,6 +86,7 @@ export function Simplenotest() {
             disabledRows={undefined}
             eventTargetRef={undefined}
             fillHandle={undefined}
+            fillHandleLocation="selected-cell"
             fixedShadowX={undefined}
             fixedShadowY={undefined}
             getGroupDetails={undefined}
@@ -170,6 +171,7 @@ export function SelectedCellnotest() {
             disabledRows={undefined}
             eventTargetRef={undefined}
             fillHandle={undefined}
+            fillHandleLocation="selected-cell"
             fixedShadowX={undefined}
             fixedShadowY={undefined}
             getGroupDetails={undefined}
@@ -261,6 +263,7 @@ export function SelectedRownotest() {
             disabledRows={undefined}
             eventTargetRef={undefined}
             fillHandle={undefined}
+            fillHandleLocation="selected-cell"
             fixedShadowX={undefined}
             fixedShadowY={undefined}
             getGroupDetails={undefined}
@@ -346,6 +349,7 @@ export const SelectedColumnnotest = () => {
             disabledRows={undefined}
             eventTargetRef={undefined}
             fillHandle={undefined}
+            fillHandleLocation="selected-cell"
             fixedShadowX={undefined}
             fixedShadowY={undefined}
             getGroupDetails={undefined}

@@ -1,5 +1,6 @@
 import clamp from "lodash/clamp.js";
 import type { Item } from "./data-grid-types.js";
+import { itemsAreEqual } from "./data-grid-lib.js";
 
 type StateItem = { item: Item; hoverAmount: number };
 export type HoverValues = readonly Readonly<StateItem>[];
@@ -20,12 +21,8 @@ export class AnimationManager {
 
     private lastAnimationTime: number | undefined;
 
-    private areSameItems = (left: Item | undefined, right: Item | undefined) => {
-        return left?.[0] === right?.[0] && left?.[1] === right?.[1];
-    };
-
     private addToLeavingItems = (item: StateItem) => {
-        const isAlreadyLeaving = this.leavingItems.some(i => this.areSameItems(i.item, item.item));
+        const isAlreadyLeaving = this.leavingItems.some(i => itemsAreEqual(i.item, item.item));
 
         if (isAlreadyLeaving) {
             return;
@@ -38,7 +35,7 @@ export class AnimationManager {
      * @returns the hover amount of the item, if it was leaving (0 if not).
      */
     private removeFromLeavingItems = (item: Item): number => {
-        const leavingItem = this.leavingItems.find(e => this.areSameItems(e.item, item));
+        const leavingItem = this.leavingItems.find(e => itemsAreEqual(e.item, item));
 
         this.leavingItems = this.leavingItems.filter(i => i !== leavingItem);
 
@@ -94,7 +91,7 @@ export class AnimationManager {
     };
 
     public setHovered = (item: Item | undefined): void => {
-        if (this.areSameItems(this.currentHoveredItem?.item, item)) {
+        if (itemsAreEqual(this.currentHoveredItem?.item, item)) {
             return;
         }
 

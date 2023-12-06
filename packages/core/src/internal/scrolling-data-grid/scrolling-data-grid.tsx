@@ -383,6 +383,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                 disabledRows={p.disabledRows}
                 enableGroups={p.enableGroups}
                 fillHandle={p.fillHandle}
+                fillHandleLocation={p.fillHandleLocation}
                 firstColAccessible={p.firstColAccessible}
                 fixedShadowX={p.fixedShadowX}
                 fixedShadowY={p.fixedShadowY}

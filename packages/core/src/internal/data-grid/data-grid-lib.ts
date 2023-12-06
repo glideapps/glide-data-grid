@@ -33,6 +33,19 @@ export function useMappedColumns(
     );
 }
 
+export function gridSelectionHasItem(sel: GridSelection, item: Item): boolean {
+    const [col, row] = item;
+    if (sel.columns.hasIndex(col) || sel.rows.hasIndex(row)) return true;
+    if (sel.current !== undefined) {
+        if (itemsAreEqual(sel.current.cell, item)) return true;
+        const toCheck = [sel.current.range, ...sel.current.rangeStack];
+        for (const r of toCheck) {
+            if (col >= r.x && col < r.x + r.width && row >= r.y && row < r.y + r.height) return true;
+        }
+    }
+    return false;
+}
+
 export function isGroupEqual(left: string | undefined, right: string | undefined): boolean {
     return (left ?? "") === (right ?? "");
 }
@@ -49,6 +62,20 @@ export function cellIsSelected(location: Item, cell: InnerGridCell, selection: G
     }
 
     return col >= cell.span[0] && col <= cell.span[1];
+}
+
+export function itemIsInRect(location: Item, rect: Rectangle): boolean {
+    const [x, y] = location;
+
+    return x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height;
+}
+
+export function itemsAreEqual(a: Item | undefined, b: Item | undefined): boolean {
+    return a?.[0] === b?.[0] && a?.[1] === b?.[1];
+}
+
+export function rectBottomRight(rect: Rectangle): Item {
+    return [rect.x + rect.width - 1, rect.y + rect.height - 1];
 }
 
 function cellIsInRect(location: Item, cell: InnerGridCell, rect: Rectangle): boolean {

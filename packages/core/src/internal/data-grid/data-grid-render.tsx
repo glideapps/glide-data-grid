@@ -33,6 +33,8 @@ import {
     cellIsInRange,
     computeBounds,
     getMiddleCenterBias,
+    rectBottomRight,
+    itemsAreEqual,
 } from "./data-grid-lib.js";
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites.js";
 import type { Theme } from "../../common/styles.js";
@@ -57,7 +59,7 @@ import type { DragAndDropState, DrawGridArg, HoverInfo } from "./draw-grid-arg.j
 export interface Highlight {
     readonly color: string;
     readonly range: Rectangle;
-    readonly style?: "dashed" | "solid" | "no-outline";
+    readonly style?: "dashed" | "solid" | "no-outline" | "solid-outline";
 }
 
 interface GroupDetails {
@@ -1318,6 +1320,7 @@ function drawCells(
 
                     if (highlightRegions !== undefined) {
                         for (const region of highlightRegions) {
+                            if (region.style === "solid-outline") continue;
                             const r = region.range;
                             if (
                                 r.x <= c.sourceIndex &&
@@ -1542,6 +1545,7 @@ function drawHighlightRings(
     allHighlightRegions: readonly Highlight[] | undefined
 ): (() => void) | undefined {
     const highlightRegions = allHighlightRegions?.filter(x => x.style !== "no-outline");
+
     if (highlightRegions === undefined || highlightRegions.length === 0) return undefined;
     const drawRects = highlightRegions.map(h => {
         const r = h.range;
@@ -1682,7 +1686,7 @@ function drawHighlightRings(
             ) {
                 setDashed(s.style === "dashed");
                 ctx.strokeStyle = withAlpha(s.color, 1);
-                ctx.strokeRect(s.rect.x + 1, s.rect.y + 1, s.rect.width - 2, s.rect.height - 2);
+                ctx.strokeRect(s.rect.x + 0.5, s.rect.y + 0.5, s.rect.width - 1, s.rect.height - 1);
             }
         }
         let clipped = false;
@@ -1698,8 +1702,8 @@ function drawHighlightRings(
                     ctx.clip();
                     clipped = true;
                 }
-                ctx.strokeStyle = withAlpha(s.color, 1);
-                ctx.strokeRect(s.rect.x + 1, s.rect.y + 1, s.rect.width - 2, s.rect.height - 2);
+                ctx.strokeStyle = s.style === "solid-outline" ? s.color : withAlpha(s.color, 1);
+                ctx.strokeRect(s.rect.x + 0.5, s.rect.y + 0.5, s.rect.width - 1, s.rect.height - 1);
             }
         }
         ctx.restore();
@@ -1744,10 +1748,20 @@ function drawFocusRing(
     getCellContent: (cell: Item) => InnerGridCell,
     trailingRowType: TrailingRowType,
     fillHandle: boolean,
+    fillHandleLocation: "selected-cell" | "selected-range",
     rows: number
 ): (() => void) | undefined {
-    if (selectedCell.current === undefined || !effectiveCols.some(c => c.sourceIndex === selectedCell.current?.cell[0]))
-        return undefined;
+    if (selectedCell.current === undefined) return undefined;
+
+    const range = selectedCell.current.range;
+    const currentItem = selectedCell.current.cell;
+    const fillHandleTarget =
+        fillHandleLocation === "selected-cell"
+            ? selectedCell.current.cell
+            : [range.x + range.width - 1, range.y + range.height - 1];
+    const mustDraw = effectiveCols.some(c => c.sourceIndex === currentItem[0] || c.sourceIndex === fillHandleTarget[0]);
+
+    if (!mustDraw) return undefined;
     const [targetCol, targetRow] = selectedCell.current.cell;
     const cell = getCellContent(selectedCell.current.cell);
     const targetColSpan = cell.span ?? [targetCol, targetCol];
@@ -1755,7 +1769,10 @@ function drawFocusRing(
     const isStickyRow = trailingRowType === "sticky" && targetRow === rows - 1;
     const stickRowHeight = trailingRowType === "sticky" && !isStickyRow ? getRowHeight(rows - 1) - 1 : 0;
 
+    const fillHandleRow = fillHandleTarget[1];
+
     let drawCb: (() => void) | undefined = undefined;
+    let drawHandleCb: (() => void) | undefined = undefined;
 
     walkColumns(
         effectiveCols,
@@ -1765,12 +1782,19 @@ function drawFocusRing(
         totalHeaderHeight,
         (col, drawX, colDrawY, clipX, startRow) => {
             if (col.sticky && targetCol > col.sourceIndex) return;
-            if (col.sourceIndex < targetColSpan[0] || col.sourceIndex > targetColSpan[1]) {
+
+            const isBeforeTarget = col.sourceIndex < targetColSpan[0];
+            const isAfterTarget = col.sourceIndex > targetColSpan[1];
+
+            const isFillHandleCol = col.sourceIndex === fillHandleTarget[0];
+
+            if (!isFillHandleCol && (isBeforeTarget || isAfterTarget)) {
+                // we dont need to do any drawing on this column but may yet need to draw
                 return;
             }
 
             walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, trailingRowType, (drawY, row, rh) => {
-                if (row !== targetRow) return;
+                if (row !== targetRow && row !== fillHandleRow) return;
 
                 let cellX = drawX;
                 let cellWidth = col.width;
@@ -1785,33 +1809,45 @@ function drawFocusRing(
                     }
                 }
 
-                drawCb = () => {
-                    if (clipX > cellX && !col.sticky) {
-                        ctx.beginPath();
-                        ctx.rect(clipX, 0, width - clipX, height);
-                        ctx.clip();
-                    }
-                    ctx.beginPath();
-                    ctx.rect(cellX + 0.5, drawY + 0.5, cellWidth, rh);
-                    ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
+                const doHandle = row === fillHandleRow && isFillHandleCol && fillHandle;
+                const doRing = row === targetRow && !isBeforeTarget && !isAfterTarget && drawCb === undefined;
 
-                    if (fillHandle) {
+                if (doHandle) {
+                    drawHandleCb = () => {
+                        if (clipX > cellX && !col.sticky && !doRing) {
+                            ctx.beginPath();
+                            ctx.rect(clipX, 0, width - clipX, height);
+                            ctx.clip();
+                        }
                         ctx.beginPath();
                         ctx.rect(cellX + cellWidth - 4, drawY + rh - 4, 4, 4);
                         ctx.fillStyle = col.themeOverride?.accentColor ?? theme.accentColor;
                         ctx.fill();
-                    }
-                };
-                return true;
+                    };
+                }
+
+                if (doRing) {
+                    drawCb = () => {
+                        if (clipX > cellX && !col.sticky) {
+                            ctx.beginPath();
+                            ctx.rect(clipX, 0, width - clipX, height);
+                            ctx.clip();
+                        }
+                        ctx.beginPath();
+                        ctx.rect(cellX + 0.5, drawY + 0.5, cellWidth, rh);
+                        ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    };
+                }
+                return drawCb !== undefined && (fillHandle ? drawHandleCb !== undefined : true);
             });
 
-            return true;
+            return drawCb !== undefined && (fillHandle ? drawHandleCb !== undefined : true);
         }
     );
 
-    if (drawCb === undefined) return undefined;
+    if (drawCb === undefined && drawHandleCb === undefined) return undefined;
 
     const result = () => {
         ctx.save();
@@ -1820,6 +1856,7 @@ function drawFocusRing(
         ctx.clip();
 
         drawCb?.();
+        drawHandleCb?.();
 
         ctx.restore();
     };
@@ -1887,6 +1924,7 @@ function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): bo
         current.dragAndDropState !== last.dragAndDropState ||
         current.prelightCells !== last.prelightCells ||
         current.touchMode !== last.touchMode ||
+        current.fillHandleLocation !== last.fillHandleLocation ||
         current.scrolling !== last.scrolling
     ) {
         return false;
@@ -1951,6 +1989,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         isResizing,
         selection,
         fillHandle,
+        fillHandleLocation,
         lastRowSticky: trailingRowType,
         rows,
         getCellContent,
@@ -2137,6 +2176,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 getCellContent,
                 trailingRowType,
                 fillHandle,
+                fillHandleLocation,
                 rows
             );
         }
@@ -2210,11 +2250,19 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 getCellRenderer
             );
 
+            const selectionCurrent = selection.current;
+
             if (
                 fillHandle &&
                 drawFocus &&
-                selection.current !== undefined &&
-                damage.some(x => x[0] === selection.current?.cell[0] && x[1] === selection.current?.cell[1])
+                selectionCurrent !== undefined &&
+                // this is why it sometimes fails to draw the handle on damage
+                damage.some(x => {
+                    if (itemsAreEqual(x, selectionCurrent.cell)) return true;
+                    if (fillHandleLocation === "selected-cell") return false;
+                    const loc = rectBottomRight(selectionCurrent.range);
+                    return itemsAreEqual(x, loc);
+                })
             ) {
                 drawFocusRing(
                     targetCtx,
@@ -2232,6 +2280,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                     getCellContent,
                     trailingRowType,
                     fillHandle,
+                    fillHandleLocation,
                     rows
                 );
             }
@@ -2346,6 +2395,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
               getCellContent,
               trailingRowType,
               fillHandle,
+              fillHandleLocation,
               rows
           )
         : undefined;
@@ -2456,8 +2506,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         theme
     );
 
-    focusRedraw?.();
     highlightRedraw?.();
+    focusRedraw?.();
 
     if (isResizing) {
         walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x) => {
@@ -2587,6 +2637,7 @@ function walkColumns(
     }
 }
 
+// this should not be item, it is [startInclusive, endInclusive]
 type WalkGroupsCallback = (colSpan: Item, group: string, x: number, y: number, width: number, height: number) => void;
 function walkGroups(
     effectiveCols: readonly MappedGridColumn[],

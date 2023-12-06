@@ -36,7 +36,11 @@ export default {
     ],
 };
 
-export const FillHandle: React.VFC = () => {
+interface FillHandleProps {
+    location: "selected-range" | "selected-cell";
+}
+
+export const FillHandle: React.VFC<FillHandleProps> = p => {
     const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
 
     const [numRows, setNumRows] = React.useState(50);
@@ -71,6 +75,7 @@ export const FillHandle: React.VFC = () => {
             getCellContent={getCellContentMangled}
             columns={cols}
             rowMarkers={"both"}
+            fillHandleLocation={p.location}
             onPaste={true}
             fillHandle={true}
             keybindings={{ downFill: true, rightFill: true }}
@@ -84,4 +89,12 @@ export const FillHandle: React.VFC = () => {
             onRowAppended={onRowAppended}
         />
     );
+};
+(FillHandle as any).args = {
+    location: "selected-cell",
+};
+(FillHandle as any).argTypes = {
+    location: {
+        control: { type: "select", options: ["selected-range", "selected-cell"] },
+    },
 };

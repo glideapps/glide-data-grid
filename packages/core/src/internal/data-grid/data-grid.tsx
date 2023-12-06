@@ -138,6 +138,13 @@ export interface DataGridProps {
      */
     readonly fillHandle: boolean | undefined;
 
+    /**
+     * Controls where the fill handle is drawn.
+     * @defaultValue "selected-range"
+     * @group Editing
+     */
+    readonly fillHandleLocation: "selected-cell" | "selected-range";
+
     readonly disabledRows: CompactSelection | undefined;
     /**
      * Allows passing a custom image window loader.
@@ -305,6 +312,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         cellYOffset,
         headerHeight,
         fillHandle = false,
+        fillHandleLocation,
         groupHeaderHeight,
         rowHeight,
         rows,
@@ -592,11 +600,25 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 const bounds = getBoundsForItem(canvas, col, row);
                 assert(bounds !== undefined);
                 const isEdge = bounds !== undefined && bounds.x + bounds.width - posX < edgeDetectionBuffer;
-                const isFillHandle =
+
+                const canBeFillHandle =
                     fillHandle &&
                     bounds !== undefined &&
                     bounds.x + bounds.width - posX < 6 &&
                     bounds.y + bounds.height - posY < 6;
+
+                let isFillHandle = false;
+                if (selection.current !== undefined && canBeFillHandle) {
+                    let targetCell = selection.current.cell;
+                    if (fillHandleLocation === "selected-range") {
+                        targetCell = [
+                            selection.current.range.x + selection.current.range.width - 1,
+                            selection.current.range.y + selection.current.range.height - 1,
+                        ];
+                    }
+                    isFillHandle = targetCell[0] === col && targetCell[1] === row;
+                }
+
                 result = {
                     kind: "cell",
                     location: [col, row],
@@ -616,9 +638,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             return result;
         },
         [
+            width,
             mappedColumns,
             cellXOffset,
-            width,
             translateX,
             height,
             enableGroups,
@@ -631,6 +653,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             trailingRowType,
             getBoundsForItem,
             fillHandle,
+            selection,
+            fillHandleLocation,
         ]
     );
 
@@ -716,6 +740,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             isFocused,
             selection,
             fillHandle,
+            fillHandleLocation,
             lastRowSticky: trailingRowType,
             rows,
             drawFocus: drawFocusRing,
@@ -777,6 +802,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         isFocused,
         selection,
         fillHandle,
+        fillHandleLocation,
         trailingRowType,
         rows,
         drawFocusRing,
@@ -1193,7 +1219,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             setHoveredOnEdge(args.kind === headerKind && args.isEdge && notRowMarkerCol && allowResize === true);
 
             if (fillHandle && selection.current !== undefined) {
-                const [col, row] = selection.current.cell;
+                const targetItem =
+                    fillHandleLocation === "selected-range"
+                        ? [
+                              selection.current.range.x + selection.current.range.width - 1,
+                              selection.current.range.y + selection.current.range.height - 1,
+                          ]
+                        : selection.current.cell;
+                const [col, row] = targetItem;
                 const sb = getBoundsForItem(canvas, col, row);
                 const x = ev.clientX;
                 const y = ev.clientY;
@@ -1224,6 +1257,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getCellContent,
             getCellRenderer,
             damageInternal,
+            fillHandleLocation,
             getBoundsForItem,
         ]
     );

@@ -22,19 +22,6 @@ export interface GridSelection {
     readonly rows: CompactSelection;
 }
 
-export function gridSelectionHasItem(sel: GridSelection, item: Item): boolean {
-    const [col, row] = item;
-    if (sel.columns.hasIndex(col) || sel.rows.hasIndex(row)) return true;
-    if (sel.current !== undefined) {
-        if (sel.current.cell[0] === col && sel.current.cell[1] === row) return true;
-        const toCheck = [sel.current.range, ...sel.current.rangeStack];
-        for (const r of toCheck) {
-            if (col >= r.x && col < r.x + r.width && row >= r.y && row < r.y + r.height) return true;
-        }
-    }
-    return false;
-}
-
 /** @category Types */
 export type ImageEditorType = React.ComponentType<OverlayImageEditorProps>;
 
@@ -56,6 +43,11 @@ export interface HeaderClickedEventArgs extends GridMouseHeaderEventArgs, Preven
 
 /** @category Types */
 export interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, PreventableEvent {}
+
+export interface FillPatternEventArgs extends PreventableEvent {
+    patternSource: Rectangle;
+    fillDestination: Rectangle;
+}
 
 /** @category Types */
 export interface ImageWindowLoader {
@@ -416,6 +408,12 @@ export interface Rectangle {
     y: number;
     width: number;
     height: number;
+}
+
+export function isRectangleEqual(a: Rectangle | undefined, b: Rectangle | undefined): boolean {
+    if (a === b) return true;
+    if (a === undefined || b === undefined) return false;
+    return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
 
 /** @category Cells */
