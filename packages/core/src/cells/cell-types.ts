@@ -1,3 +1,4 @@
+import type React from "react";
 import type { Theme } from "../index.js";
 import type { SpriteManager } from "../internal/data-grid/data-grid-sprites.js";
 import type {
@@ -26,12 +27,13 @@ export interface BaseDrawArgs {
     spriteManager: SpriteManager;
     hyperWrapping: boolean;
     cell: InnerGridCell;
-    requestAnimationFrame: () => void;
 }
 
 /** @category Drawing */
 export interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {
     cell: T;
+    requestAnimationFrame: () => void;
+    overrideCursor: ((cursor: React.CSSProperties["cursor"]) => void) | undefined;
 }
 
 // intentionally mutable

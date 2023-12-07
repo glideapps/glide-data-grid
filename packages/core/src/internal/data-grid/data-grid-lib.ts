@@ -269,8 +269,13 @@ async function clearCacheOnLoad() {
 
 void clearCacheOnLoad();
 
-function makeCacheKey(s: string, ctx: CanvasRenderingContext2D, baseline: "alphabetic" | "middle", font?: string) {
-    return `${s}_${font ?? ctx.font}_${baseline}`;
+function makeCacheKey(
+    s: string,
+    ctx: CanvasRenderingContext2D | undefined,
+    baseline: "alphabetic" | "middle",
+    font?: string
+) {
+    return `${s}_${font ?? ctx?.font}_${baseline}`;
 }
 
 /** @category Drawing */
@@ -289,6 +294,11 @@ export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font
     }
 
     return metrics;
+}
+
+export function getMeasuredTextCache(s: string, font: string): TextMetrics | undefined {
+    const key = makeCacheKey(s, undefined, "middle", font);
+    return metricsCache[key];
 }
 
 /** @category Drawing */
@@ -428,7 +438,7 @@ export function drawTextCell(
     contentAlign?: BaseGridCell["contentAlign"],
     allowWrapping?: boolean,
     hyperWrapping?: boolean
-) {
+): void {
     const { ctx, rect, theme } = args;
 
     const { x, y, width: w, height: h } = rect;

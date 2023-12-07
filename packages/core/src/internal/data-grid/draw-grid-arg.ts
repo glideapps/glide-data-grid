@@ -55,6 +55,7 @@ export interface DrawGridArg {
     readonly hyperWrapping: boolean;
     readonly rows: number;
     readonly getCellContent: (cell: Item) => InnerGridCell;
+    readonly overrideCursor: (cursor: React.CSSProperties["cursor"]) => void;
     readonly getGroupDetails: GroupDetailsCallback;
     readonly getRowThemeOverride: GetRowThemeCallback | undefined;
     readonly drawCustomCell: DrawCustomCellCallback | undefined;

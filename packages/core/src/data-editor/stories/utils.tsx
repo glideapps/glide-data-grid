@@ -384,8 +384,13 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
                     kind: GridCellKind.Uri,
                     displayData: url,
                     data: url,
+                    hoverEffect: true,
                     allowOverlay: true,
                     readonly: true,
+                    onClickUri: a => {
+                        window.open(url, "_blank");
+                        a.preventDefault();
+                    },
                 };
             },
         },

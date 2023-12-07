@@ -6,6 +6,7 @@ import {
     getEffectiveColumns,
     getRowIndexForY,
     getStickyWidth,
+    itemsAreEqual,
     useMappedColumns,
 } from "./data-grid-lib.js";
 import {
@@ -381,6 +382,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const [hoveredItemInfo, setHoveredItemInfo] = React.useState<[Item, readonly [number, number]] | undefined>();
     const [hoveredOnEdge, setHoveredOnEdge] = React.useState<boolean>();
     const overlayRef = React.useRef<HTMLCanvasElement | null>(null);
+    const [drawCursorOverride, setDrawCursorOverride] = React.useState<React.CSSProperties["cursor"] | undefined>();
 
     const [lastWasTouch, setLastWasTouch] = React.useState(false);
     const lastWasTouchRef = React.useRef(lastWasTouch);
@@ -713,6 +715,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         const overlay = overlayRef.current;
         if (canvas === null || overlay === null) return;
 
+        let didOverride = false;
+        const overrideCursor = (cursor: React.CSSProperties["cursor"]) => {
+            didOverride = true;
+            setDrawCursorOverride(cursor);
+        };
+
         const last = lastArgsRef.current;
         const current = {
             canvas,
@@ -741,6 +749,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             selection,
             fillHandle,
             fillHandleLocation,
+            overrideCursor,
             lastRowSticky: trailingRowType,
             rows,
             drawFocus: drawFocusRing,
@@ -777,6 +786,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             drawGrid(current, last);
         } else {
             drawGrid(current, undefined);
+        }
+
+        // don't reset on damage events
+        if (
+            !didOverride &&
+            (current.damage === undefined || current.damage.some(x => itemsAreEqual(x, hoverInfoRef.current?.[0])))
+        ) {
+            setDrawCursorOverride(undefined);
         }
     }, [
         bufferA,
@@ -863,8 +880,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const groupHeaderHovered = hCol !== undefined && hRow === -2;
     let clickableInnerCellHovered = false;
     let editableBoolHovered = false;
-    let cursorOverride: React.CSSProperties["cursor"] | undefined;
-    if (hCol !== undefined && hRow !== undefined && hRow > -1) {
+    let cursorOverride: React.CSSProperties["cursor"] | undefined = drawCursorOverride;
+    if (cursorOverride === undefined && hCol !== undefined && hRow !== undefined && hRow > -1) {
         const cell = getCellContent([hCol, hRow], true);
         clickableInnerCellHovered =
             cell.kind === InnerGridCellKind.NewRow ||
@@ -1439,7 +1456,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                     0,
                                     undefined,
                                     undefined,
-                                    getCellRenderer
+                                    getCellRenderer,
+                                    () => undefined
                                 );
                             }
                         }

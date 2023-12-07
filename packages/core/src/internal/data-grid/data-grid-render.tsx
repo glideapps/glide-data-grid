@@ -110,7 +110,8 @@ export function drawCell(
     frameTime: number,
     lastPrep: PrepResult | undefined,
     enqueue: ((item: Item) => void) | undefined,
-    getCellRenderer: GetCellRendererCallback
+    getCellRenderer: GetCellRendererCallback,
+    overrideCursor: (cursor: React.CSSProperties["cursor"]) => void
 ): PrepResult | undefined {
     let hoverX: number | undefined;
     let hoverY: number | undefined;
@@ -133,6 +134,7 @@ export function drawCell(
         imageLoader,
         spriteManager,
         hyperWrapping,
+        overrideCursor: hoverX !== undefined ? overrideCursor : undefined,
         requestAnimationFrame: () => {
             forceAnim = true;
         },
@@ -1117,7 +1119,8 @@ function drawCells(
     hyperWrapping: boolean,
     outerTheme: Theme,
     enqueue: (item: Item) => void,
-    getCellRenderer: GetCellRendererCallback
+    getCellRenderer: GetCellRendererCallback,
+    overrideCursor: (cursor: React.CSSProperties["cursor"]) => void
 ): Rectangle[] | undefined {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
@@ -1373,7 +1376,8 @@ function drawCells(
                             frameTime,
                             prepResult,
                             enqueue,
-                            getCellRenderer
+                            getCellRenderer,
+                            overrideCursor
                         );
                     }
 
@@ -1986,6 +1990,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         disabledRows,
         rowHeight,
         verticalBorder,
+        overrideCursor,
         isResizing,
         selection,
         fillHandle,
@@ -2247,7 +2252,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 hyperWrapping,
                 theme,
                 enqueue,
-                getCellRenderer
+                getCellRenderer,
+                overrideCursor
             );
 
             const selectionCurrent = selection.current;
@@ -2462,7 +2468,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         hyperWrapping,
         theme,
         enqueue,
-        getCellRenderer
+        getCellRenderer,
+        overrideCursor
     );
 
     drawBlanks(

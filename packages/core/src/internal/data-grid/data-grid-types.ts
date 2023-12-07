@@ -579,6 +579,8 @@ export interface UriCell extends BaseGridCell {
     readonly data: string;
     readonly displayData?: string;
     readonly readonly?: boolean;
+    readonly onClickUri?: (args: BaseGridMouseEventArgs & { readonly preventDefault: () => void }) => void;
+    readonly hoverEffect?: boolean;
 }
 
 /** @category Cells */
