@@ -1,7 +1,7 @@
 import { styled } from "@linaria/react";
 import * as React from "react";
 import { DataEditor, type DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
-import { DropdownCell as DropdownRenderer, useExtraCells } from "./index.js";
+import { DropdownCell as DropdownRenderer, allCells } from "./index.js";
 import type { StarCell } from "./cells/star-cell.js";
 import type { SparklineCell } from "./cells/sparkline-cell.js";
 import range from "lodash/range.js";
@@ -171,13 +171,11 @@ const possibleTags = [
 ];
 
 export const CustomCells: React.VFC = () => {
-    const cellProps = useExtraCells();
-
     return (
         <BeautifulWrapper title="Custom cells" description={<Description>Some of our extension cells.</Description>}>
             <DataEditor
                 {...defaultProps}
-                {...cellProps}
+                customRenderers={allCells}
                 onPaste={true}
                 // eslint-disable-next-line no-console
                 onCellEdited={(...args) => console.log("Edit Cell", ...args)}
@@ -498,8 +496,6 @@ export const CustomCells: React.VFC = () => {
 };
 
 export const CustomCellEditing: React.VFC = () => {
-    const cellProps = useExtraCells();
-
     const data = React.useRef<string[]>([]);
 
     return (
@@ -512,7 +508,7 @@ export const CustomCellEditing: React.VFC = () => {
             }>
             <DataEditor
                 {...defaultProps}
-                {...cellProps}
+                customRenderers={allCells}
                 onPaste={true}
                 onCellEdited={(cell, newVal) => {
                     if (newVal.kind !== GridCellKind.Custom) return;

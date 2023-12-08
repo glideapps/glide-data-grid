@@ -620,7 +620,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * An array of custom renderers which can be used to extend the data grid.
      * @group Advanced
      */
-    readonly customRenderers?: readonly CustomRenderer<CustomCell<any>>[];
+    readonly customRenderers?: readonly CustomRenderer<any>[];
 
     readonly scaleToRem?: boolean;
 

@@ -119,20 +119,23 @@ export function drawCell(
         hoverY = hoverInfo[1][1];
     }
     let result: PrepResult | undefined = undefined;
+    const item = [col, row] as const;
     const args: DrawArgs<typeof cell> = {
+        //alloc
         ctx,
         theme,
         col,
         row,
         cell,
-        rect: { x, y, width: w, height: h },
+        rect: { x, y, width: w, height: h }, // alloc
         highlighted,
         hoverAmount,
         frameTime,
         hoverX,
         drawState: [
-            renderStateProvider.getValue([col, row]),
-            (val: any) => renderStateProvider.setValue([col, row], val),
+            // alloc
+            renderStateProvider.getValue(item),
+            (val: any) => renderStateProvider.setValue(item, val), //alloc
         ],
         hoverY,
         imageLoader,
@@ -140,11 +143,13 @@ export function drawCell(
         hyperWrapping,
         overrideCursor: hoverX !== undefined ? overrideCursor : undefined,
         requestAnimationFrame: (): void => {
+            //alloc
             requestedAnimationFrame = true;
         },
     };
     let requestedAnimationFrame = false;
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
+        //alloc
         const r = getCellRenderer(cell);
         if (r !== undefined) {
             if (lastPrep?.renderer !== r) {
@@ -153,15 +158,19 @@ export function drawCell(
             }
             const partialPrepResult = r.drawPrep?.(args, lastPrep);
             r.draw(args, cell);
-            result = {
-                deprep: partialPrepResult?.deprep,
-                fillStyle: partialPrepResult?.fillStyle,
-                font: partialPrepResult?.font,
-                renderer: r,
-            };
+            result =
+                partialPrepResult === undefined
+                    ? undefined
+                    : {
+                          //alloc
+                          deprep: partialPrepResult?.deprep,
+                          fillStyle: partialPrepResult?.fillStyle,
+                          font: partialPrepResult?.font,
+                          renderer: r,
+                      };
         }
     });
-    if (needsAnim || requestedAnimationFrame) enqueue?.([col, row]);
+    if (needsAnim || requestedAnimationFrame) enqueue?.(item);
     return result;
 }
 
@@ -323,8 +332,6 @@ function blitLastFrame(
 }
 
 function blitResizedCol(
-    // ctx: CanvasRenderingContext2D,
-    // canvas: HTMLCanvasElement,
     last: BlitData,
     cellXOffset: number,
     cellYOffset: number,
@@ -333,7 +340,6 @@ function blitResizedCol(
     width: number,
     height: number,
     totalHeaderHeight: number,
-    // dpr: number,
     effectiveCols: readonly MappedGridColumn[],
     resizedIndex: number
 ) {
@@ -1227,7 +1233,8 @@ function drawCells(
                     const rowSelected = selection.rows.hasIndex(row);
                     const rowDisabled = disabledRows.hasIndex(row);
 
-                    const cell: InnerGridCell = row < rows ? getCellContent([c.sourceIndex, row]) : loadingCell;
+                    const cellIndex = [c.sourceIndex, row] as const; //alloc
+                    const cell: InnerGridCell = row < rows ? getCellContent(cellIndex) : loadingCell;
 
                     let cellX = drawX;
                     let cellWidth = c.width;
@@ -1235,7 +1242,7 @@ function drawCells(
                     let skipContents = false;
                     if (cell.span !== undefined) {
                         const [startCol, endCol] = cell.span;
-                        const spanKey = `${row},${startCol},${endCol},${c.sticky}`;
+                        const spanKey = `${row},${startCol},${endCol},${c.sticky}`; //alloc
                         if (!handledSpans.has(spanKey)) {
                             const areas = getSpanBounds(cell.span, drawX, drawY, c.width, rh, c, allColumns);
                             const area = c.sticky ? areas[0] : areas[1];
@@ -1278,17 +1285,16 @@ function drawCells(
                     const theme =
                         cell.themeOverride === undefined && rowTheme === undefined && trailingTheme === undefined
                             ? colTheme
-                            : { ...colTheme, ...rowTheme, ...trailingTheme, ...cell.themeOverride };
+                            : { ...colTheme, ...rowTheme, ...trailingTheme, ...cell.themeOverride }; //alloc
 
                     ctx.beginPath();
 
-                    const cellIndex = [c.sourceIndex, row] as const;
                     const isSelected = cellIsSelected(cellIndex, cell, selection);
                     let accentCount = cellIsInRange(cellIndex, cell, selection);
                     const spanIsHighlighted =
                         cell.span !== undefined &&
                         selection.columns.some(
-                            index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1]
+                            index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1] //alloc
                         );
                     if (isSelected && !isFocused && drawFocus) {
                         accentCount = 0;
@@ -1318,6 +1324,7 @@ function drawCells(
                         }
                     } else {
                         if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
+                            //alloc
                             fill = blend(theme.bgSearchResult, fill);
                         }
                     }
@@ -1349,10 +1356,10 @@ function drawCells(
                         ctx.globalAlpha = 0.6;
                     }
 
-                    const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row);
+                    const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row); //alloc
 
                     if (cellWidth > 10 && !skipContents) {
-                        const cellFont = `${theme.baseFontStyle} ${theme.fontFamily}`;
+                        const cellFont = `${theme.baseFontStyle} ${theme.fontFamily}`; //alloc
                         if (cellFont !== font) {
                             ctx.font = cellFont;
                             font = cellFont;
@@ -1388,7 +1395,7 @@ function drawCells(
                     toDraw--;
                     if (drawingSpan) {
                         ctx.restore();
-                        prepResult?.deprep?.({ ctx });
+                        prepResult?.deprep?.({ ctx }); //alloc
                         prepResult = undefined;
                         reclip();
                         font = colFont;
