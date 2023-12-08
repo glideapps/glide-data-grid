@@ -15,7 +15,6 @@ interface Props {
     readonly clientHeight: number;
     readonly scrollWidth: number;
     readonly scrollHeight: number;
-    readonly scrollToEnd?: boolean;
     readonly initialSize?: readonly [width: number, height: number];
     readonly rightElementProps?: {
         readonly sticky?: boolean;
@@ -23,7 +22,6 @@ interface Props {
     };
     readonly rightElement?: React.ReactNode;
     readonly kineticScrollPerfHack?: boolean;
-    readonly minimap?: React.ReactNode;
     readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
     readonly update: (region: Rectangle & { paddingRight: number }) => void;
 }
@@ -124,9 +122,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
         rightElementProps,
         kineticScrollPerfHack = false,
         scrollRef,
-        scrollToEnd,
         initialSize,
-        minimap,
     } = p;
     const padders: React.ReactNode[] = [];
 
@@ -138,13 +134,6 @@ export const InfiniteScroller: React.FC<Props> = p => {
     const scroller = React.useRef<HTMLDivElement | null>(null);
 
     const dpr = typeof window === "undefined" ? 1 : window.devicePixelRatio;
-
-    React.useEffect(() => {
-        const el = scroller.current;
-        if (el === null || scrollToEnd !== true) return;
-
-        el.scrollLeft = el.scrollWidth - el.clientWidth;
-    }, [scrollToEnd]);
 
     const lastScrollPosition = React.useRef({
         scrollLeft: 0,
@@ -276,7 +265,6 @@ export const InfiniteScroller: React.FC<Props> = p => {
     return (
         <div ref={ref}>
             <ScrollRegionStyle isSafari={browserIsSafari.value}>
-                {minimap}
                 <div className="dvn-underlay">{children}</div>
                 <div
                     ref={setRefs}

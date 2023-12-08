@@ -84,7 +84,7 @@ export function Simplenotest() {
             onMouseMove={() => undefined}
             rows={10_000}
             enableGroups={false}
-            clientSize={[1000, 1000]}
+            clientSize={[1000, 1000, 0]}
             cellXOffset={x}
             cellYOffset={y}
             drawHeader={undefined}
@@ -126,8 +126,6 @@ export function Simplenotest() {
             rightElement={undefined}
             rightElementProps={undefined}
             scrollRef={undefined}
-            showMinimap={undefined}
-            scrollToEnd={undefined}
             minColumnWidth={50}
             isFocused={true}
             theme={getDefaultTheme()}

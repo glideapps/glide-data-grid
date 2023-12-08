@@ -3,7 +3,6 @@ export type { MarkdownDivProps } from "./internal/markdown-div/markdown-div.js";
 export type { SpriteMap, HeaderIcon, Sprite } from "./internal/data-grid/data-grid-sprites.js";
 export type { SpriteProps } from "./common/utils.js";
 export type { Theme } from "./common/styles.js";
-export type { CustomCellRenderer } from "./data-editor/use-custom-cells.js";
 export type { CustomRenderer, BaseDrawArgs, DrawArgs } from "./cells/cell-types.js";
 export type { SelectionBlending } from "./internal/data-grid/use-selection-behavior.js";
 export type { GetRowThemeCallback } from "./internal/data-grid/data-grid-render.js";
@@ -21,7 +20,6 @@ export {
 } from "./internal/data-grid/data-grid-lib.js";
 export { getDataEditorTheme as getDefaultTheme, useTheme } from "./common/styles.js";
 export { useColumnSizer } from "./data-editor/use-column-sizer.js";
-export { useCustomCells } from "./data-editor/use-custom-cells.js";
 
 export type { DataEditorRef } from "./data-editor/data-editor.js";
 export { DataEditorAll as DataEditor } from "./data-editor-all.js";

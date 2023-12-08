@@ -543,7 +543,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 result = {
                     kind: outOfBoundsKind,
                     location: [col !== -1 ? col : x < 0 ? 0 : mappedColumns.length - 1, row ?? rows - 1],
-                    direction: [-horizontal as -1 | 0 | 1, vertical], // negative horizontal for backcompat
                     region: [innerHorizontal, innerVertical],
                     shiftKey,
                     ctrlKey,

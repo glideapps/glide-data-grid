@@ -1,4 +1,3 @@
-import { useCustomCells } from "@glideapps/glide-data-grid";
 import StarCellRenderer, { type StarCell } from "./cells/star-cell.js";
 import SparklineCellRenderer, { type SparklineCell } from "./cells/sparkline-cell.js";
 import TagsCellRenderer, { type TagsCell } from "./cells/tags-cell.js";
@@ -27,10 +26,6 @@ const cells = [
     ButtonCellRenderer,
     TreeViewCellRenderer,
 ];
-
-export function useExtraCells() {
-    return useCustomCells(cells);
-}
 
 export {
     StarCellRenderer as StarCell,

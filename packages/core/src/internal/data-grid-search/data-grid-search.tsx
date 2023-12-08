@@ -507,7 +507,6 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 rows={p.rows}
                 scrollRef={p.scrollRef}
                 selection={p.selection}
-                showMinimap={p.showMinimap}
                 theme={p.theme}
                 trailingRowType={p.trailingRowType}
                 translateX={p.translateX}
@@ -540,7 +539,6 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 onRowMoved={p.onRowMoved}
                 smoothScrollX={p.smoothScrollX}
                 smoothScrollY={p.smoothScrollY}
-                scrollToEnd={p.scrollToEnd}
             />
             {searchbox}
         </>

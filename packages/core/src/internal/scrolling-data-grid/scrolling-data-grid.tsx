@@ -1,9 +1,7 @@
 import * as React from "react";
-import { styled } from "@linaria/react";
 import DataGridDnd, { type DataGridDndProps } from "../data-grid-dnd/data-grid-dnd.js";
 import type { Rectangle } from "../data-grid/data-grid-types.js";
 import { InfiniteScroller } from "./infinite-scroller.js";
-import clamp from "lodash/clamp.js";
 
 type Props = Omit<DataGridDndProps, "width" | "height" | "eventTargetRef">;
 
@@ -19,12 +17,6 @@ export interface ScrollingDataGridProps extends Props {
               ty: number
           ) => void)
         | undefined;
-    /**
-     * Causes the grid to scroll to the end when flipped to true
-     * @deprecated Use {@link DataEditorRef.scrollTo} instead
-     * @group Deprecated
-     */
-    readonly scrollToEnd: boolean | undefined;
     readonly scrollRef: React.MutableRefObject<HTMLDivElement | null> | undefined;
 
     /**
@@ -73,46 +65,8 @@ export interface ScrollingDataGridProps extends Props {
      * @group Advanced
      */
     readonly rightElement: React.ReactNode | undefined;
-    /**
-     * Enables/disables the interactive minimap.
-     * @defaultValue false
-     * @group Advanced
-     */
-    readonly showMinimap: boolean | undefined;
-    readonly clientSize: readonly [number, number];
+    readonly clientSize: readonly [number, number, number]; // [width, height, rightElSize]
 }
-
-const MinimapStyle = styled.div`
-    position: absolute;
-    right: 44px;
-    bottom: 44px;
-    background-color: var(--gdg-bg-cell);
-    background: linear-gradient(var(--gdg-bg-cell), var(--gdg-bg-cell-medium));
-    border-radius: 4px;
-    z-index: 1;
-    box-shadow:
-        0 0 0 1px var(--gdg-border-color),
-        0 2px 5px rgba(0, 0, 0, 0.08);
-
-    overflow: hidden;
-
-    .gdg-header {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 4px;
-        background-color: var(--gdg-bg-header);
-        box-shadow: 0 0 0 1px var(--gdg-border-color);
-    }
-
-    .gdg-locationMarker {
-        position: absolute;
-
-        border: 1px solid var(--gdg-accent-color);
-        background-color: var(--gdg-accent-light);
-    }
-`;
 
 const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const {
@@ -127,14 +81,12 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         clientSize,
         className,
         onVisibleRegionChanged,
-        scrollToEnd,
         scrollRef,
         preventDiagonalScrolling,
         rightElement,
         rightElementProps,
         overscrollX,
         overscrollY,
-        showMinimap = false,
         initialSize,
         smoothScrollX = false,
         smoothScrollY = false,
@@ -298,65 +250,9 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         processArgs();
     }, [processArgs]);
 
-    const scroller = scrollRef?.current ?? undefined;
-    const aspect = clamp(width / height, 2 / 3, 1.5);
-    const maxSize = 200;
-    const w = aspect > 1 ? maxSize : Math.ceil(maxSize * aspect);
-    const h = aspect > 1 ? Math.ceil(maxSize / aspect) : maxSize;
-    const hRatio = w / width;
-    const vRatio = h / height;
-    const vWidth = Math.min(clientWidth * Math.max(hRatio, 0.01), w);
-    const vHeight = Math.min(clientHeight * Math.max(vRatio, 0.01), h);
-    const left = ((scroller?.scrollLeft ?? 0) / (width - clientWidth)) * (w - vWidth);
-    const top = ((scroller?.scrollTop ?? 0) / (height - clientHeight)) * (h - vHeight);
-
-    const minimap: React.ReactNode = React.useMemo(() => {
-        if (!showMinimap || vWidth === 0 || vHeight === 0) return undefined;
-
-        const handleMouse = (e: React.MouseEvent) => {
-            if (scroller === undefined) return;
-            const bounds = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - bounds.x - vWidth / 2;
-            const y = e.clientY - bounds.y - vHeight / 2;
-
-            const newScrollLeft = (width - scroller.clientWidth) * (x / (w - vWidth));
-            const newScrollTop = (height - scroller.clientHeight) * (y / (h - vHeight));
-
-            scroller.scrollTo({
-                left: newScrollLeft,
-                top: newScrollTop,
-                behavior: e.type === "mousemove" ? "auto" : "smooth",
-            });
-        };
-
-        return (
-            <MinimapStyle
-                style={{ width: w, height: h }}
-                data-testid="minimap-container"
-                onMouseMove={e => {
-                    if (e.buttons !== 1) return;
-                    handleMouse(e);
-                }}
-                onClick={handleMouse}>
-                <div className="gdg-header" />
-                <div
-                    className="gdg-locationMarker"
-                    onDragStart={e => e.preventDefault()}
-                    style={{
-                        left,
-                        top,
-                        width: vWidth,
-                        height: vHeight,
-                        borderRadius: Math.min(vWidth, vHeight * 0.2, 9),
-                    }}></div>
-            </MinimapStyle>
-        );
-    }, [h, height, left, scroller, showMinimap, top, vHeight, vWidth, w, width]);
-
     return (
         <InfiniteScroller
             scrollRef={scrollRef}
-            minimap={minimap}
             className={className}
             kineticScrollPerfHack={experimental?.kineticScrollPerfHack}
             preventDiagonalScrolling={preventDiagonalScrolling}
@@ -369,8 +265,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             paddingRight={paddingRight}
             rightElementProps={rightElementProps}
             update={onScrollUpdate}
-            initialSize={initialSize}
-            scrollToEnd={scrollToEnd}>
+            initialSize={initialSize}>
             <DataGridDnd
                 eventTargetRef={scrollRef}
                 width={clientWidth}

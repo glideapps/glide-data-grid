@@ -803,10 +803,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         preventDiagonalScrolling,
         rightElement,
         rightElementProps,
-        showMinimap,
         smoothScrollX,
         smoothScrollY,
-        scrollToEnd,
         scaleToRem = false,
         rowHeight: rowHeightIn = 34,
         headerHeight: headerHeightIn = 36,
@@ -3753,7 +3751,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     preventDiagonalScrolling={preventDiagonalScrolling}
                     rightElement={rightElement}
                     rightElementProps={rightElementProps}
-                    showMinimap={showMinimap}
                     smoothScrollX={smoothScrollX}
                     smoothScrollY={smoothScrollY}
                     className={className}
@@ -3806,7 +3803,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onDrop={onDrop}
                     onSearchResultsChanged={onSearchResultsChanged}
                     onVisibleRegionChanged={onVisibleRegionChangedImpl}
-                    clientSize={[clientSize[0], clientSize[1]]}
+                    clientSize={clientSize}
                     rowHeight={rowHeight}
                     searchResults={searchResults}
                     searchValue={searchValue}
@@ -3819,7 +3816,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     verticalBorder={mangledVerticalBorder}
                     gridRef={gridRef}
                     getCellRenderer={getCellRenderer}
-                    scrollToEnd={scrollToEnd}
                 />
                 {renameGroupNode}
                 {overlay !== undefined && (
