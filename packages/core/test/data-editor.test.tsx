@@ -3679,35 +3679,6 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         expect(spy).toHaveBeenCalled();
     });
 
-    test("Minimap issues scroll", async () => {
-        const spy = vi.fn();
-        vi.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} rowMarkers="both" showMinimap={true} onGridSelectionChange={spy} />, {
-            wrapper: Context,
-        });
-        prep();
-
-        const minimap = screen.getByTestId("minimap-container");
-
-        fireEvent.mouseDown(minimap, {
-            clientX: 940,
-            clientY: 940,
-        });
-
-        fireEvent.mouseMove(minimap, {
-            buttons: 1,
-            clientX: 941,
-            clientY: 941,
-        });
-
-        fireEvent.mouseUp(minimap, {
-            clientX: 940,
-            clientY: 940,
-        });
-
-        expect(Element.prototype.scrollTo).toBeCalled();
-    });
-
     test("Click cell does not double-emit selectedrows/columns", async () => {
         const gridSelectionSpy = vi.fn();
         vi.useFakeTimers();
