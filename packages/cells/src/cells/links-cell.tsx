@@ -104,6 +104,7 @@ const renderer: CustomRenderer<LinksCell> = {
             const isHovered = rectHoverX > drawX && rectHoverX < drawX + metrics.width;
 
             if (isHovered) {
+                args.overrideCursor?.("pointer");
                 ctx.moveTo(drawX, Math.floor(drawY + underlineOffset) + 0.5);
                 ctx.lineTo(drawX + metrics.width, Math.floor(drawY + underlineOffset) + 0.5);
 

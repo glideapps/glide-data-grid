@@ -5,20 +5,17 @@ import {
     type InnerGridCell,
     type Rectangle,
     CompactSelection,
-    type DrawCustomCellCallback,
     GridColumnIcon,
     type Item,
     type CellList,
     type GridMouseGroupHeaderEventArgs,
     headerCellCheckboxPrefix,
     GridCellKind,
-    isInnerOnlyCell,
     BooleanIndeterminate,
     headerCellCheckedMarker,
     headerCellUnheckedMarker,
     type TrailingRowType,
     type ImageWindowLoader,
-    type GridCell,
 } from "./data-grid-types.js";
 import groupBy from "lodash/groupBy.js";
 import type { HoverValues } from "./animation-manager.js";
@@ -44,6 +41,8 @@ import { assert, deepEqual } from "../../common/support.js";
 import { direction } from "../../common/utils.js";
 import { drawCheckbox } from "./draw-checkbox.js";
 import type { DragAndDropState, DrawGridArg, HoverInfo } from "./draw-grid-arg.js";
+import type { EnqueueCallback } from "./use-animation-queue.js";
+import type { RenderStateProvider } from "../../common/render-state-provider.js";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when
@@ -101,7 +100,6 @@ export function drawCell(
     h: number,
     highlighted: boolean,
     theme: Theme,
-    drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader,
     spriteManager: SpriteManager,
     hoverAmount: number,
@@ -109,7 +107,8 @@ export function drawCell(
     hyperWrapping: boolean,
     frameTime: number,
     lastPrep: PrepResult | undefined,
-    enqueue: ((item: Item) => void) | undefined,
+    enqueue: EnqueueCallback | undefined,
+    renderStateProvider: RenderStateProvider,
     getCellRenderer: GetCellRendererCallback,
     overrideCursor: (cursor: React.CSSProperties["cursor"]) => void
 ): PrepResult | undefined {
@@ -129,38 +128,40 @@ export function drawCell(
         rect: { x, y, width: w, height: h },
         highlighted,
         hoverAmount,
+        frameTime,
         hoverX,
+        drawState: [
+            renderStateProvider.getValue([col, row]),
+            (val: any) => renderStateProvider.setValue([col, row], val),
+        ],
         hoverY,
         imageLoader,
         spriteManager,
         hyperWrapping,
         overrideCursor: hoverX !== undefined ? overrideCursor : undefined,
-        requestAnimationFrame: () => {
-            forceAnim = true;
+        requestAnimationFrame: (): void => {
+            requestedAnimationFrame = true;
         },
     };
-    let forceAnim = false;
+    let requestedAnimationFrame = false;
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
-        const drawn = isInnerOnlyCell(cell) ? false : drawCustomCell?.(args as DrawArgs<GridCell>) === true;
-        if (!drawn) {
-            const r = getCellRenderer(cell);
-            if (r !== undefined) {
-                if (lastPrep?.renderer !== r) {
-                    lastPrep?.deprep?.(args);
-                    lastPrep = undefined;
-                }
-                const partialPrepResult = r.drawPrep?.(args, lastPrep);
-                r.draw(args, cell);
-                result = {
-                    deprep: partialPrepResult?.deprep,
-                    fillStyle: partialPrepResult?.fillStyle,
-                    font: partialPrepResult?.font,
-                    renderer: r,
-                };
+        const r = getCellRenderer(cell);
+        if (r !== undefined) {
+            if (lastPrep?.renderer !== r) {
+                lastPrep?.deprep?.(args);
+                lastPrep = undefined;
             }
+            const partialPrepResult = r.drawPrep?.(args, lastPrep);
+            r.draw(args, cell);
+            result = {
+                deprep: partialPrepResult?.deprep,
+                fillStyle: partialPrepResult?.fillStyle,
+                font: partialPrepResult?.font,
+                renderer: r,
+            };
         }
     });
-    if (needsAnim || forceAnim) enqueue?.([col, row]);
+    if (needsAnim || requestedAnimationFrame) enqueue?.([col, row]);
     return result;
 }
 
@@ -1111,14 +1112,14 @@ function drawCells(
     selection: GridSelection,
     prelightCells: CellList | undefined,
     highlightRegions: readonly Highlight[] | undefined,
-    drawCustomCell: DrawCustomCellCallback | undefined,
     imageLoader: ImageWindowLoader,
     spriteManager: SpriteManager,
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
     hyperWrapping: boolean,
     outerTheme: Theme,
-    enqueue: (item: Item) => void,
+    enqueue: EnqueueCallback,
+    renderStateProvider: RenderStateProvider,
     getCellRenderer: GetCellRendererCallback,
     overrideCursor: (cursor: React.CSSProperties["cursor"]) => void
 ): Rectangle[] | undefined {
@@ -1367,7 +1368,6 @@ function drawCells(
                             rh,
                             accentCount > 0,
                             theme,
-                            drawCustomCell,
                             imageLoader,
                             spriteManager,
                             hoverValue?.hoverAmount ?? 0,
@@ -1376,6 +1376,7 @@ function drawCells(
                             frameTime,
                             prepResult,
                             enqueue,
+                            renderStateProvider,
                             getCellRenderer,
                             overrideCursor
                         );
@@ -2001,7 +2002,6 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         getGroupDetails,
         getRowThemeOverride,
         isFocused,
-        drawCustomCell,
         drawHeaderCallback,
         prelightCells,
         highlightRegions,
@@ -2015,6 +2015,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         scrolling,
         touchMode,
         enqueue,
+        renderStateProvider,
         getCellRenderer,
         renderStrategy,
         bufferA,
@@ -2244,7 +2245,6 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 selection,
                 prelightCells,
                 highlightRegions,
-                drawCustomCell,
                 imageLoader,
                 spriteManager,
                 hoverValues,
@@ -2252,6 +2252,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 hyperWrapping,
                 theme,
                 enqueue,
+                renderStateProvider,
                 getCellRenderer,
                 overrideCursor
             );
@@ -2460,7 +2461,6 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         selection,
         prelightCells,
         highlightRegions,
-        drawCustomCell,
         imageLoader,
         spriteManager,
         hoverValues,
@@ -2468,6 +2468,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         hyperWrapping,
         theme,
         enqueue,
+        renderStateProvider,
         getCellRenderer,
         overrideCursor
     );

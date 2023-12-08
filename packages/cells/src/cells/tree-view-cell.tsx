@@ -46,6 +46,8 @@ const renderer: CustomRenderer<TreeViewCell> = {
             ctx.strokeStyle = overIcon ? theme.textMedium : theme.textLight;
             ctx.lineWidth = 2;
             ctx.stroke();
+
+            if (overIcon) args.overrideCursor?.("pointer");
         }
 
         ctx.fillStyle = theme.textDark;

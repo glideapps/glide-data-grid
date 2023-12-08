@@ -1,4 +1,5 @@
 import type { GetCellRendererCallback } from "../../cells/cell-types.js";
+import type { RenderStateProvider } from "../../common/render-state-provider.js";
 import type { Theme } from "../../index.js";
 import type { HoverValues } from "./animation-manager.js";
 import type { MappedGridColumn } from "./data-grid-lib.js";
@@ -10,11 +11,11 @@ import type {
     TrailingRowType,
     Item,
     InnerGridCell,
-    DrawCustomCellCallback,
     DrawHeaderCallback,
     CellList,
     ImageWindowLoader,
 } from "./data-grid-types.js";
+import type { EnqueueCallback } from "./use-animation-queue.js";
 
 export type HoverInfo = readonly [Item, Item];
 
@@ -58,7 +59,6 @@ export interface DrawGridArg {
     readonly overrideCursor: (cursor: React.CSSProperties["cursor"]) => void;
     readonly getGroupDetails: GroupDetailsCallback;
     readonly getRowThemeOverride: GetRowThemeCallback | undefined;
-    readonly drawCustomCell: DrawCustomCellCallback | undefined;
     readonly drawHeaderCallback: DrawHeaderCallback | undefined;
     readonly prelightCells: CellList | undefined;
     readonly highlightRegions: readonly Highlight[] | undefined;
@@ -71,6 +71,7 @@ export interface DrawGridArg {
     readonly scrolling: boolean;
     readonly touchMode: boolean;
     readonly renderStrategy: "single-buffer" | "double-buffer" | "direct";
-    readonly enqueue: (item: Item) => void;
+    readonly enqueue: EnqueueCallback;
+    readonly renderStateProvider: RenderStateProvider;
     readonly getCellRenderer: GetCellRendererCallback;
 }

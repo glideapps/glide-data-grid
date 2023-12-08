@@ -23,7 +23,6 @@ import {
     type Slice,
     isInnerOnlyCell,
     type ProvideEditorCallback,
-    type DrawCustomCellCallback,
     type GridMouseCellEventArgs,
     type GridColumn,
     isObjectEditorCallbackResult,
@@ -93,7 +92,6 @@ type Props = Partial<
         | "clientSize"
         | "columns"
         | "disabledRows"
-        | "drawCustomCell"
         | "enableGroups"
         | "firstColAccessible"
         | "firstColSticky"
@@ -476,12 +474,6 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
     readonly onSelectionCleared?: () => void;
 
     /**
-     * Callback used to override the rendering of any cell.
-     * @group Drawing
-     */
-    readonly drawCell?: DrawCustomCellCallback;
-
-    /**
      * The current selection of the data grid. Contains all selected cells, ranges, rows, and columns.
      * Used in conjunction with {@link onGridSelectionChange}
      * method to implement a controlled selection.
@@ -756,7 +748,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnMoved,
         validateCell: validateCellIn,
         highlightRegions: highlightRegionsIn,
-        drawCell,
         rangeSelect = "rect",
         columnSelect = "multi",
         rowSelect = "multi",
@@ -3777,7 +3768,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     accessibilityHeight={visibleRegion.height}
                     onDragEnd={onDragEnd}
                     columns={mangledCols}
-                    drawCustomCell={drawCell}
                     drawHeader={drawHeader}
                     disabledRows={disabledRows}
                     freezeColumns={mangledFreezeColumns}

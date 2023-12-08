@@ -164,22 +164,6 @@ export type GridDragEventArgs = GridMouseEventArgs & DragHandler;
 export type TrailingRowType = "sticky" | "appended" | "none";
 
 /** @category Types */
-export type DrawCustomCellCallback = (args: {
-    ctx: CanvasRenderingContext2D;
-    cell: GridCell;
-    theme: Theme;
-    rect: Rectangle;
-    col: number;
-    row: number;
-    hoverAmount: number;
-    hoverX: number | undefined;
-    hoverY: number | undefined;
-    highlighted: boolean;
-    imageLoader: ImageWindowLoader;
-    requestAnimationFrame: () => void;
-}) => boolean;
-
-/** @category Types */
 export type DrawHeaderCallback = (args: {
     ctx: CanvasRenderingContext2D;
     column: GridColumn;

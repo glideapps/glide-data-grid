@@ -30,9 +30,14 @@ export interface BaseDrawArgs {
 }
 
 /** @category Drawing */
+
+export type DrawStateTuple = [any, (state: any) => void];
+
 export interface DrawArgs<T extends InnerGridCell> extends BaseDrawArgs {
     cell: T;
-    requestAnimationFrame: () => void;
+    requestAnimationFrame: (state?: any) => void;
+    drawState: DrawStateTuple;
+    frameTime: number;
     overrideCursor: ((cursor: React.CSSProperties["cursor"]) => void) | undefined;
 }
 

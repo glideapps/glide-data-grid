@@ -1,15 +1,11 @@
 import * as React from "react";
 import type { Item } from "./data-grid-types.js";
+import { packColRowToNumber, unpackNumberToColRow } from "../../common/render-state-provider.js";
 
-function hasItem(arr: readonly Item[], item: Item) {
-    for (const element of arr) {
-        if (element[0] === item[0] && element[1] === item[1]) return true;
-    }
-    return false;
-}
+export type EnqueueCallback = (item: Item) => void;
 
-export function useAnimationQueue(draw: (items: readonly Item[]) => void) {
-    const queue = React.useRef<Item[]>([]);
+export function useAnimationQueue(draw: (items: readonly Item[]) => void): EnqueueCallback {
+    const queue = React.useRef<number[]>([]);
     const seq = React.useRef(0);
     const drawRef = React.useRef(draw);
     drawRef.current = draw;
@@ -18,7 +14,8 @@ export function useAnimationQueue(draw: (items: readonly Item[]) => void) {
         const requeue = () => window.requestAnimationFrame(fn);
 
         const fn = () => {
-            const toDraw = queue.current;
+            const toDraw = queue.current.map(unpackNumberToColRow);
+
             queue.current = [];
             drawRef.current(toDraw);
             if (queue.current.length > 0) {
@@ -33,11 +30,10 @@ export function useAnimationQueue(draw: (items: readonly Item[]) => void) {
 
     return React.useCallback(
         (item: Item) => {
-            if (hasItem(queue.current, item)) return;
-            if (queue.current.length === 0) {
-                loop();
-            }
-            queue.current.push(item);
+            if (queue.current.length === 0) loop();
+            const packed = packColRowToNumber(item[0], item[1]);
+            if (queue.current.includes(packed)) return;
+            queue.current.push(packed);
         },
         [loop]
     );

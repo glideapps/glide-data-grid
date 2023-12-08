@@ -46,7 +46,6 @@ const basicProps: DataGridProps = {
     translateX: undefined,
     translateY: undefined,
     dragAndDropState: undefined,
-    drawCustomCell: undefined,
     drawFocusRing: undefined,
     drawHeader: undefined,
     isFocused: true,

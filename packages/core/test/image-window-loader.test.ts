@@ -154,7 +154,7 @@ describe("ImageWindowLoaderImpl", () => {
             expect((loader as any).cache[key]).toBeDefined();
             expect((loader as any).cache[key].url).toBe(url);
             expect((loader as any).cache[key].img).toBeUndefined();
-            expect((loader as any).cache[key].cells).toEqual([row * (1 << 16) + col]);
+            expect((loader as any).cache[key].cells).toEqual([row * (1 << 21) + col]);
         });
 
         it("should handle image loading and decoding successfully", async () => {

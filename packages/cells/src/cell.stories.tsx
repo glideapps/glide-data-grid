@@ -389,7 +389,6 @@ export const CustomCells: React.VFC = () => {
                         rand();
                         const d: ButtonCell = {
                             kind: GridCellKind.Custom,
-                            cursor: "pointer",
                             allowOverlay: true,
                             copyData: "4",
                             readonly: true,

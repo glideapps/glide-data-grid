@@ -1,5 +1,6 @@
 import type { ImageWindowLoader, Item, Rectangle } from "../internal/data-grid/data-grid-types.js";
 import throttle from "lodash/throttle.js";
+import { unpackCol, unpackRow, packColRowToNumber, unpackNumberToColRow } from "./render-state-provider.js";
 
 interface LoadResult {
     img: HTMLImageElement | undefined;
@@ -8,27 +9,7 @@ interface LoadResult {
     cells: number[];
 }
 
-const rowShift = 1 << 16;
-
 const imgPool: HTMLImageElement[] = [];
-
-function packColRowToNumber(col: number, row: number) {
-    return row * rowShift + col;
-}
-
-function unpackCol(packed: number): number {
-    return packed % rowShift;
-}
-
-function unpackRow(packed: number, col: number): number {
-    return (packed - col) / rowShift;
-}
-
-function unpackNumberToColRow(packed: number): [number, number] {
-    const col = unpackCol(packed);
-    const row = unpackRow(packed, col);
-    return [col, row];
-}
 
 class ImageWindowLoaderImpl implements ImageWindowLoader {
     private imageLoaded: (locations: readonly Item[]) => void = () => undefined;

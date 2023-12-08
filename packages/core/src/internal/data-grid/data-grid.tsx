@@ -19,7 +19,6 @@ import {
     type InnerGridCell,
     InnerGridCellKind,
     CompactSelection,
-    type DrawCustomCellCallback,
     type CellList,
     type Item,
     type DrawHeaderCallback,
@@ -51,8 +50,9 @@ import {
     pointInRect,
 } from "./data-grid-render.js";
 import { AnimationManager, type StepCallback } from "./animation-manager.js";
+import { RenderStateProvider } from "../../common/render-state-provider.js";
 import { browserIsFirefox, browserIsSafari } from "../../common/browser-detect.js";
-import { useAnimationQueue } from "./use-animation-queue.js";
+import { type EnqueueCallback, useAnimationQueue } from "./use-animation-queue.js";
 import { assert } from "../../common/support.js";
 import type { CellRenderer, GetCellRendererCallback } from "../../cells/cell-types.js";
 import type { DrawGridArg } from "./draw-grid-arg.js";
@@ -207,7 +207,6 @@ export interface DataGridProps {
      */
     readonly onDrop: ((cell: Item, dataTransfer: DataTransfer | null) => void) | undefined;
 
-    readonly drawCustomCell: DrawCustomCellCallback | undefined;
     /**
      * Overrides the rendering of a header. The grid will call this for every header it needs to render. Header
      * rendering is not as well optimized because they do not redraw as often, but very heavy drawing methods can
@@ -358,7 +357,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         headerIcons,
         verticalBorder,
         drawHeader: drawHeaderCallback,
-        drawCustomCell,
         onCellFocused,
         onDragOverCell,
         onDrop,
@@ -682,7 +680,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const [hoveredItem] = hoveredItemInfo ?? [];
 
-    const enqueueRef = React.useRef((_item: Item) => {
+    const enqueueRef = React.useRef<EnqueueCallback>(() => {
         // do nothing
     });
     const hoverInfoRef = React.useRef(hoveredItemInfo);
@@ -708,6 +706,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             bufferB.remove();
         };
     }, [bufferA, bufferB]);
+
+    const renderStateProvider = React.useMemo(() => new RenderStateProvider(), []);
 
     const lastArgsRef = React.useRef<DrawGridArg>();
     const draw = React.useCallback(() => {
@@ -756,7 +756,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getCellContent,
             getGroupDetails: getGroupDetails ?? (name => ({ name })),
             getRowThemeOverride,
-            drawCustomCell,
             drawHeaderCallback,
             prelightCells,
             highlightRegions,
@@ -770,6 +769,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             hyperWrapping: experimental?.hyperWrapping ?? false,
             touchMode: lastWasTouch,
             enqueue: enqueueRef.current,
+            renderStateProvider,
             renderStrategy: experimental?.renderStrategy ?? (browserIsSafari.value ? "double-buffer" : "single-buffer"),
             getCellRenderer,
         };
@@ -826,7 +826,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         getCellContent,
         getGroupDetails,
         getRowThemeOverride,
-        drawCustomCell,
         drawHeaderCallback,
         prelightCells,
         highlightRegions,
@@ -836,6 +835,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         experimental?.hyperWrapping,
         experimental?.renderStrategy,
         lastWasTouch,
+        renderStateProvider,
         getCellRenderer,
     ]);
 
@@ -1447,7 +1447,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                     boundsForDragTarget.height,
                                     false,
                                     theme,
-                                    drawCustomCell,
                                     imageLoader,
                                     spriteManager,
                                     1,
@@ -1456,6 +1455,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                     0,
                                     undefined,
                                     undefined,
+                                    renderStateProvider,
                                     getCellRenderer,
                                     () => undefined
                                 );
@@ -1495,8 +1495,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             spriteManager,
             drawHeaderCallback,
             getCellContent,
-            drawCustomCell,
             imageLoader,
+            renderStateProvider,
             getCellRenderer,
         ]
     );

@@ -4,6 +4,8 @@ import {
     getMiddleCenterBias,
     GridCellKind,
     interpolateColors,
+    type Rectangle,
+    type Theme,
 } from "@glideapps/glide-data-grid";
 import { roundedRect } from "../draw-fns.js";
 
@@ -33,13 +35,31 @@ function unpackColor(color: PackedColor, theme: Record<string, any>, hoverAmount
     return interpolateColors(normal, hover, hoverAmount);
 }
 
+function getIsHovered(bounds: Rectangle, posX: number | undefined, posY: number | undefined, theme: Theme): boolean {
+    const x = Math.floor(bounds.x + theme.cellHorizontalPadding + 1);
+    const y = Math.floor(bounds.y + theme.cellVerticalPadding + 1);
+    const width = Math.ceil(bounds.width - theme.cellHorizontalPadding * 2 - 1);
+    const height = Math.ceil(bounds.height - theme.cellVerticalPadding * 2 - 1);
+
+    return (
+        posX !== undefined &&
+        posY !== undefined &&
+        posX + bounds.x >= x &&
+        posX + bounds.x < x + width &&
+        posY + bounds.y >= y &&
+        posY + bounds.y < y + height
+    );
+}
+
 const renderer: CustomRenderer<ButtonCell> = {
     kind: GridCellKind.Custom,
     isMatch: (c): c is ButtonCell => (c.data as any).kind === "button-cell",
+    needsHoverPosition: true,
     needsHover: true,
     onSelect: a => a.preventDefault(),
     onClick: a => {
-        a.cell.data.onClick?.();
+        const { cell, theme, bounds, posX, posY } = a;
+        if (getIsHovered(bounds, posX, posY, theme)) cell.data.onClick?.();
         return undefined;
     },
     drawPrep: args => {
@@ -54,7 +74,7 @@ const renderer: CustomRenderer<ButtonCell> = {
         };
     },
     draw: (args, cell) => {
-        const { ctx, theme, rect, hoverAmount } = args;
+        const { ctx, theme, rect, hoverX, hoverY, frameTime, drawState } = args;
         const { title, backgroundColor, color, borderColor, borderRadius } = cell.data;
 
         const x = Math.floor(rect.x + theme.cellHorizontalPadding + 1);
@@ -63,6 +83,31 @@ const renderer: CustomRenderer<ButtonCell> = {
         const height = Math.ceil(rect.height - theme.cellVerticalPadding * 2 - 1);
 
         if (width <= 0 || height <= 0) return true;
+
+        const isHovered = getIsHovered(rect, hoverX, hoverY, theme);
+
+        interface DrawState {
+            readonly hovered: boolean;
+            readonly animationStartTime: number;
+        }
+
+        // eslint-disable-next-line prefer-const
+        let [state, setState] = drawState as [DrawState | undefined, (state: DrawState) => void];
+
+        if (isHovered) args.overrideCursor?.("pointer");
+
+        state ??= { hovered: false, animationStartTime: 0 };
+
+        if (isHovered !== state.hovered) {
+            state = { ...state, hovered: isHovered, animationStartTime: frameTime };
+            setState(state);
+        }
+
+        const progress = Math.min(1, (frameTime - state.animationStartTime) / 200);
+
+        const hoverAmount = isHovered ? progress : 1 - progress;
+
+        if (progress < 1) args.requestAnimationFrame?.();
 
         if (backgroundColor !== undefined) {
             ctx.beginPath();
