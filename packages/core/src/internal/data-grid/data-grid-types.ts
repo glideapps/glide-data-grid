@@ -160,19 +160,40 @@ export type GridDragEventArgs = GridMouseEventArgs & DragHandler;
 export type TrailingRowType = "sticky" | "appended" | "none";
 
 /** @category Types */
-export type DrawHeaderCallback = (args: {
-    ctx: CanvasRenderingContext2D;
-    column: GridColumn;
-    columnIndex: number;
-    theme: Theme;
-    rect: Rectangle;
-    hoverAmount: number;
-    isSelected: boolean;
-    isHovered: boolean;
-    hasSelectedCell: boolean;
-    spriteManager: SpriteManager;
-    menuBounds: Rectangle;
-}) => boolean;
+export type DrawHeaderCallback = (
+    args: {
+        ctx: CanvasRenderingContext2D;
+        column: GridColumn;
+        columnIndex: number;
+        theme: Theme;
+        rect: Rectangle;
+        hoverAmount: number;
+        isSelected: boolean;
+        isHovered: boolean;
+        hasSelectedCell: boolean;
+        spriteManager: SpriteManager;
+        menuBounds: Rectangle;
+    },
+    drawContent: () => void
+) => void;
+
+/** @category Types */
+export type DrawCellCallback = (
+    args: {
+        ctx: CanvasRenderingContext2D;
+        cell: GridCell;
+        theme: Theme;
+        rect: Rectangle;
+        col: number;
+        row: number;
+        hoverAmount: number;
+        hoverX: number | undefined;
+        hoverY: number | undefined;
+        highlighted: boolean;
+        imageLoader: ImageWindowLoader;
+    },
+    drawContent: () => void
+) => void;
 
 /** @category Cells */
 export enum GridCellKind {

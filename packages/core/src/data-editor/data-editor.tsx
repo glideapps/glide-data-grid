@@ -726,6 +726,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onFinishedEditing,
         coercePasteValue,
         drawHeader: drawHeaderIn,
+        drawCell: drawCellIn,
         onHeaderClicked,
         spanRangeBehavior = "default",
         onGroupHeaderClicked,
@@ -949,10 +950,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const drawHeader = whenDefined(
         drawHeaderIn,
         React.useCallback<NonNullable<typeof drawHeaderIn>>(
-            args => {
-                return drawHeaderIn?.({ ...args, columnIndex: args.columnIndex - rowMarkerOffset }) ?? false;
+            (args, draw) => {
+                return drawHeaderIn?.({ ...args, columnIndex: args.columnIndex - rowMarkerOffset }, draw) ?? false;
             },
             [drawHeaderIn, rowMarkerOffset]
+        )
+    );
+
+    const drawCell = whenDefined(
+        drawCellIn,
+        React.useCallback<NonNullable<typeof drawCellIn>>(
+            (args, draw) => {
+                return drawCellIn?.({ ...args, col: args.col - rowMarkerOffset }, draw) ?? false;
+            },
+            [drawCellIn, rowMarkerOffset]
         )
     );
 
@@ -3766,6 +3777,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onDragEnd={onDragEnd}
                     columns={mangledCols}
                     drawHeader={drawHeader}
+                    drawCell={drawCell}
                     disabledRows={disabledRows}
                     freezeColumns={mangledFreezeColumns}
                     lockColumns={rowMarkerOffset}

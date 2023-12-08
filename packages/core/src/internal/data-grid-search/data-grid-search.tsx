@@ -513,6 +513,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 translateY={p.translateY}
                 verticalBorder={p.verticalBorder}
                 drawFocusRing={p.drawFocusRing}
+                drawCell={p.drawCell}
                 drawHeader={p.drawHeader}
                 experimental={p.experimental}
                 gridRef={p.gridRef}

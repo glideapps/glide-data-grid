@@ -14,6 +14,7 @@ import type {
     DrawHeaderCallback,
     CellList,
     ImageWindowLoader,
+    DrawCellCallback,
 } from "./data-grid-types.js";
 import type { EnqueueCallback } from "./use-animation-queue.js";
 
@@ -60,6 +61,7 @@ export interface DrawGridArg {
     readonly getGroupDetails: GroupDetailsCallback;
     readonly getRowThemeOverride: GetRowThemeCallback | undefined;
     readonly drawHeaderCallback: DrawHeaderCallback | undefined;
+    readonly drawCellCallback: DrawCellCallback | undefined;
     readonly prelightCells: CellList | undefined;
     readonly highlightRegions: readonly Highlight[] | undefined;
     readonly imageLoader: ImageWindowLoader;

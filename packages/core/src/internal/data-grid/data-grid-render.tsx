@@ -16,6 +16,9 @@ import {
     headerCellUnheckedMarker,
     type TrailingRowType,
     type ImageWindowLoader,
+    type DrawCellCallback,
+    isInnerOnlyCell,
+    type GridCell,
 } from "./data-grid-types.js";
 import groupBy from "lodash/groupBy.js";
 import type { HoverValues } from "./animation-manager.js";
@@ -106,6 +109,7 @@ export function drawCell(
     hoverInfo: HoverInfo | undefined,
     hyperWrapping: boolean,
     frameTime: number,
+    drawCellCallback: DrawCellCallback | undefined,
     lastPrep: PrepResult | undefined,
     enqueue: EnqueueCallback | undefined,
     renderStateProvider: RenderStateProvider,
@@ -157,7 +161,11 @@ export function drawCell(
                 lastPrep = undefined;
             }
             const partialPrepResult = r.drawPrep?.(args, lastPrep);
-            r.draw(args, cell);
+            if (drawCellCallback !== undefined && !isInnerOnlyCell(args.cell)) {
+                drawCellCallback(args as DrawArgs<GridCell>, () => r.draw(args, cell));
+            } else {
+                r.draw(args, cell);
+            }
             result =
                 partialPrepResult === undefined
                     ? undefined
@@ -653,7 +661,7 @@ export function getHeaderMenuBounds(x: number, y: number, width: number, height:
     };
 }
 
-export function drawHeader(
+function drawHeaderInner(
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
@@ -663,43 +671,13 @@ export function drawHeader(
     selected: boolean,
     theme: Theme,
     isHovered: boolean,
-    hasSelectedCell: boolean,
     hoverAmount: number,
     spriteManager: SpriteManager,
-    drawHeaderCallback: DrawHeaderCallback | undefined,
-    touchMode: boolean
+    touchMode: boolean,
+    isRtl: boolean,
+    isCheckboxHeader: boolean,
+    menuBounds: Rectangle
 ) {
-    const isCheckboxHeader = c.title.startsWith(headerCellCheckboxPrefix);
-    const isRtl = direction(c.title) === "rtl";
-    const menuBounds = getHeaderMenuBounds(x, y, width, height, isRtl);
-
-    if (drawHeaderCallback !== undefined) {
-        let passCol = c;
-        if (isCheckboxHeader) {
-            passCol = {
-                ...c,
-                title: "",
-            };
-        }
-        if (
-            drawHeaderCallback({
-                ctx,
-                theme,
-                rect: { x, y, width, height },
-                column: passCol,
-                columnIndex: passCol.sourceIndex,
-                isSelected: selected,
-                hoverAmount,
-                isHovered,
-                hasSelectedCell,
-                spriteManager,
-                menuBounds,
-            })
-        ) {
-            return;
-        }
-    }
-
     if (isCheckboxHeader) {
         let checked: boolean | BooleanIndeterminate = undefined;
         if (c.title === headerCellCheckedMarker) checked = true;
@@ -810,6 +788,88 @@ export function drawHeader(
 
         ctx.fillStyle = fillStyle;
         ctx.fill();
+    }
+}
+
+export function drawHeader(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    c: MappedGridColumn,
+    selected: boolean,
+    theme: Theme,
+    isHovered: boolean,
+    hasSelectedCell: boolean,
+    hoverAmount: number,
+    spriteManager: SpriteManager,
+    drawHeaderCallback: DrawHeaderCallback | undefined,
+    touchMode: boolean
+) {
+    const isCheckboxHeader = c.title.startsWith(headerCellCheckboxPrefix);
+    const isRtl = direction(c.title) === "rtl";
+    const menuBounds = getHeaderMenuBounds(x, y, width, height, isRtl);
+
+    if (drawHeaderCallback !== undefined) {
+        let passCol = c;
+        if (isCheckboxHeader) {
+            passCol = {
+                ...c,
+                title: "",
+            };
+        }
+        drawHeaderCallback(
+            {
+                ctx,
+                theme,
+                rect: { x, y, width, height },
+                column: passCol,
+                columnIndex: passCol.sourceIndex,
+                isSelected: selected,
+                hoverAmount,
+                isHovered,
+                hasSelectedCell,
+                spriteManager,
+                menuBounds,
+            },
+            () =>
+                drawHeaderInner(
+                    ctx,
+                    x,
+                    y,
+                    width,
+                    height,
+                    c,
+                    selected,
+                    theme,
+                    isHovered,
+                    hoverAmount,
+                    spriteManager,
+                    touchMode,
+                    isRtl,
+                    isCheckboxHeader,
+                    menuBounds
+                )
+        );
+    } else {
+        drawHeaderInner(
+            ctx,
+            x,
+            y,
+            width,
+            height,
+            c,
+            selected,
+            theme,
+            isHovered,
+            hoverAmount,
+            spriteManager,
+            touchMode,
+            isRtl,
+            isCheckboxHeader,
+            menuBounds
+        );
     }
 }
 
@@ -1122,6 +1182,7 @@ function drawCells(
     spriteManager: SpriteManager,
     hoverValues: HoverValues,
     hoverInfo: HoverInfo | undefined,
+    drawCellCallback: DrawCellCallback | undefined,
     hyperWrapping: boolean,
     outerTheme: Theme,
     enqueue: EnqueueCallback,
@@ -1381,6 +1442,7 @@ function drawCells(
                             hoverInfo,
                             hyperWrapping,
                             frameTime,
+                            drawCellCallback,
                             prepResult,
                             enqueue,
                             renderStateProvider,
@@ -2011,6 +2073,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         isFocused,
         drawHeaderCallback,
         prelightCells,
+        drawCellCallback,
         highlightRegions,
         resizeCol,
         imageLoader,
@@ -2256,6 +2319,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 spriteManager,
                 hoverValues,
                 hoverInfo,
+                drawCellCallback,
                 hyperWrapping,
                 theme,
                 enqueue,
@@ -2472,6 +2536,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         spriteManager,
         hoverValues,
         hoverInfo,
+        drawCellCallback,
         hyperWrapping,
         theme,
         enqueue,

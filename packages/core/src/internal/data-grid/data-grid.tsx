@@ -32,6 +32,7 @@ import {
     outOfBoundsKind,
     type ImageWindowLoader,
     OutOfBoundsRegionAxis,
+    type DrawCellCallback,
 } from "./data-grid-types.js";
 import { SpriteManager, type SpriteMap } from "./data-grid-sprites.js";
 import { direction, getScrollBarWidth, useDebouncedMemo, useEventListener } from "../../common/utils.js";
@@ -218,6 +219,9 @@ export interface DataGridProps {
      * @returns `false` if default header rendering should still happen, `true` to cancel rendering.
      */
     readonly drawHeader: DrawHeaderCallback | undefined;
+
+    readonly drawCell: DrawCellCallback | undefined;
+
     /**
      * Controls the drawing of the focus ring.
      * @defaultValue true
@@ -356,6 +360,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         prelightCells,
         headerIcons,
         verticalBorder,
+        drawCell: drawCellCallback,
         drawHeader: drawHeaderCallback,
         onCellFocused,
         onDragOverCell,
@@ -748,6 +753,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             selection,
             fillHandle,
             fillHandleLocation,
+            drawCellCallback,
             overrideCursor,
             lastRowSticky: trailingRowType,
             rows,
@@ -825,6 +831,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         getCellContent,
         getGroupDetails,
         getRowThemeOverride,
+        drawCellCallback,
         drawHeaderCallback,
         prelightCells,
         highlightRegions,
@@ -1452,6 +1459,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                     undefined,
                                     false,
                                     0,
+                                    undefined,
                                     undefined,
                                     undefined,
                                     renderStateProvider,
