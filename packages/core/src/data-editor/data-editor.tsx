@@ -3177,6 +3177,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
               if (!cellValue.allowOverlay && cellValue.kind !== GridCellKind.Boolean) continue;
               let newVal: InnerGridCell | undefined = undefined;
               if (cellValue.kind === GridCellKind.Custom) {
+                if (cellValue.readonly === true) continue;
                 const editor = provideEditor?.(cellValue);
                 if (isObjectEditorCallbackResult(editor)) {
                   newVal = editor?.deletedValue?.(cellValue);
