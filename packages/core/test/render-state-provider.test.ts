@@ -28,6 +28,15 @@ describe("Data Grid Utility Functions", () => {
             expect(unpackedCol).to.equal(col);
             expect(unpackedRow).to.equal(row);
         });
+
+        it("should support 2^21 columns with 2^32 rows", () => {
+            const col = 2 ** 21 - 1;
+            const row = 2 ** 32 - 1;
+            const packed = packColRowToNumber(col, row);
+            const [unpackedCol, unpackedRow] = unpackNumberToColRow(packed);
+            expect(unpackedCol).to.equal(col);
+            expect(unpackedRow).to.equal(row);
+        });
     });
 
     describe("RenderStateProvider", () => {

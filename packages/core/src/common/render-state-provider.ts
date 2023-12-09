@@ -1,8 +1,8 @@
 import type { Item, Rectangle } from "../internal/data-grid/data-grid-types.js";
 
-// max safe int 2^53 - 1
+// max safe int 2^53 - 1 (minus 1 omitted from here on)
 // max safe columns is 2^21 or 2,097,151
-// max safe rows is 2^32 - 1 or 4,294,967,295
+// max safe rows is 2^32 or 4,294,967,295
 // If 3 rows render as an inch, then the max safe height is 1,431,655,765 inches or 22,426,868 miles
 // the distance to the moon is 238,900 miles, so this would give you a data grid that goes to the moon and back 94 times
 // seems fine
