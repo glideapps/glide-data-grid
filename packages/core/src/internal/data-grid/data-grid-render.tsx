@@ -39,7 +39,7 @@ import {
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites.js";
 import type { Theme } from "../../common/styles.js";
 import { blend, withAlpha } from "./color-parser.js";
-import type { DrawArgs, GetCellRendererCallback, PrepResult } from "../../cells/cell-types.js";
+import type { DrawArgs, DrawStateTuple, GetCellRendererCallback, PrepResult } from "../../cells/cell-types.js";
 import { assert, deepEqual } from "../../common/support.js";
 import { direction } from "../../common/utils.js";
 import { drawCheckbox } from "./draw-checkbox.js";
@@ -92,6 +92,15 @@ export interface BlitData {
     readonly lastBuffer: "a" | "b" | undefined;
 }
 
+const allocatedItem: [number, number] = [0, 0];
+const reusableRect = { x: 0, y: 0, width: 0, height: 0 };
+const drawState: DrawStateTuple = [undefined, () => undefined];
+
+let animationFrameRequested = false;
+function animRequest(): void {
+    animationFrameRequested = true;
+}
+
 export function drawCell(
     ctx: CanvasRenderingContext2D,
     row: number,
@@ -123,7 +132,20 @@ export function drawCell(
         hoverY = hoverInfo[1][1];
     }
     let result: PrepResult | undefined = undefined;
-    const item = [col, row] as const;
+
+    allocatedItem[0] = col;
+    allocatedItem[1] = row;
+
+    reusableRect.x = x;
+    reusableRect.y = y;
+    reusableRect.width = w;
+    reusableRect.height = h;
+
+    drawState[0] = renderStateProvider.getValue(allocatedItem);
+    drawState[1] = (val: any) => renderStateProvider.setValue(allocatedItem, val); //alloc
+
+    animationFrameRequested = false;
+
     const args: DrawArgs<typeof cell> = {
         //alloc
         ctx,
@@ -131,27 +153,19 @@ export function drawCell(
         col,
         row,
         cell,
-        rect: { x, y, width: w, height: h }, // alloc
+        rect: reusableRect,
         highlighted,
         hoverAmount,
         frameTime,
         hoverX,
-        drawState: [
-            // alloc
-            renderStateProvider.getValue(item),
-            (val: any) => renderStateProvider.setValue(item, val), //alloc
-        ],
+        drawState,
         hoverY,
         imageLoader,
         spriteManager,
         hyperWrapping,
         overrideCursor: hoverX !== undefined ? overrideCursor : undefined,
-        requestAnimationFrame: (): void => {
-            //alloc
-            requestedAnimationFrame = true;
-        },
+        requestAnimationFrame: animRequest,
     };
-    let requestedAnimationFrame = false;
     const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
         //alloc
         const r = getCellRenderer(cell);
@@ -170,7 +184,6 @@ export function drawCell(
                 partialPrepResult === undefined
                     ? undefined
                     : {
-                          //alloc
                           deprep: partialPrepResult?.deprep,
                           fillStyle: partialPrepResult?.fillStyle,
                           font: partialPrepResult?.font,
@@ -178,7 +191,7 @@ export function drawCell(
                       };
         }
     });
-    if (needsAnim || requestedAnimationFrame) enqueue?.(item);
+    if (needsAnim || animationFrameRequested) enqueue?.(allocatedItem);
     return result;
 }
 
