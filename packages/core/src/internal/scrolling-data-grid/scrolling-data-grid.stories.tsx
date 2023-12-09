@@ -107,6 +107,7 @@ export function Simplenotest() {
             onMouseUp={() => undefined}
             canvasRef={undefined}
             className={undefined}
+            drawCell={undefined}
             disabledRows={undefined}
             fillHandle={undefined}
             fillHandleLocation="selected-cell"
