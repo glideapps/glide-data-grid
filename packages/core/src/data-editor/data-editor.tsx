@@ -1251,10 +1251,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         vr.extras.freezeRegion.y > row ||
                         row > vr.extras.freezeRegion.y + vr.extras.freezeRegion.height;
                     if (isOutsideMainArea && !isSelected && isOutsideFreezeArea) {
-                        return {
-                            kind: GridCellKind.Loading,
-                            allowOverlay: false,
-                        };
+                        return loadingCell;
                     }
                 }
                 let result = getCellContent([outerCol, row]);

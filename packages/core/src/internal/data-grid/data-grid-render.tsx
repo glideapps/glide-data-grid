@@ -924,9 +924,8 @@ function drawGridHeaders(
             ctx.fill();
         }
 
-        const f = `${theme.headerFontStyle} ${theme.fontFamily}`;
-        if (font !== f) {
-            ctx.font = f;
+        if (theme !== outerTheme) {
+            ctx.font = `${theme.headerFontStyle} ${theme.fontFamily}`;
         }
         const selected = selection.columns.hasIndex(c.sourceIndex);
         const noHover = dragAndDropState !== undefined || isResizing;
@@ -1194,6 +1193,8 @@ function drawCells(
     const frameTime = performance.now();
     let font = `${outerTheme.baseFontStyle} ${outerTheme.fontFamily}`;
     ctx.font = font;
+    const deprepArg = { ctx };
+    const cellIndex: [number, number] = [0, 0];
     let result: Rectangle[] | undefined;
     const handledSpans = new Set<string>();
     walkColumns(
@@ -1294,7 +1295,8 @@ function drawCells(
                     const rowSelected = selection.rows.hasIndex(row);
                     const rowDisabled = disabledRows.hasIndex(row);
 
-                    const cellIndex = [c.sourceIndex, row] as const; //alloc
+                    cellIndex[0] = c.sourceIndex;
+                    cellIndex[1] = row;
                     const cell: InnerGridCell = row < rows ? getCellContent(cellIndex) : loadingCell;
 
                     let cellX = drawX;
@@ -1383,10 +1385,12 @@ function drawCells(
                         for (let i = 0; i < accentCount; i++) {
                             fill = blend(theme.accentLight, fill);
                         }
-                    } else {
-                        if (prelightCells?.some(pre => pre[0] === c.sourceIndex && pre[1] === row) === true) {
-                            //alloc
-                            fill = blend(theme.bgSearchResult, fill);
+                    } else if (prelightCells !== undefined) {
+                        for (const pre of prelightCells) {
+                            if (pre[0] === c.sourceIndex && pre[1] === row) {
+                                fill = blend(theme.bgSearchResult, fill);
+                                break;
+                            }
                         }
                     }
 
@@ -1457,7 +1461,7 @@ function drawCells(
                     toDraw--;
                     if (drawingSpan) {
                         ctx.restore();
-                        prepResult?.deprep?.({ ctx }); //alloc
+                        prepResult?.deprep?.(deprepArg);
                         prepResult = undefined;
                         reclip();
                         font = colFont;

@@ -33,6 +33,7 @@ module.exports = {
         });
 
         config.optimization.minimize = false;
+        config.devtool = "source-map";
         config.resolve.plugins = [new ResolveTypeScriptPlugin()];
 
         return config;

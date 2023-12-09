@@ -51,17 +51,15 @@ export function isGroupEqual(left: string | undefined, right: string | undefined
 }
 
 export function cellIsSelected(location: Item, cell: InnerGridCell, selection: GridSelection): boolean {
-    if (selection?.current === undefined) return false;
+    if (selection.current === undefined) return false;
 
-    const [col, row] = selection.current.cell;
-    const [cellCol, cellRow] = location;
-    if (cellRow !== row) return false;
+    if (location[1] !== selection.current.cell[1]) return false;
 
     if (cell.span === undefined) {
-        return col === cellCol;
+        return selection.current.cell[0] === location[0];
     }
 
-    return col >= cell.span[0] && col <= cell.span[1];
+    return selection.current.cell[0] >= cell.span[0] && selection.current.cell[0] <= cell.span[1];
 }
 
 export function itemIsInRect(location: Item, rect: Rectangle): boolean {
