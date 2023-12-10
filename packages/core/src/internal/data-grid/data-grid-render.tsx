@@ -1405,10 +1405,11 @@ function drawCells(
                     }
 
                     if (highlightRegions !== undefined) {
-                        for (const region of highlightRegions) {
-                            if (region.style === "solid-outline") continue;
+                        for (let i = 0; i < highlightRegions.length; i++) {
+                            const region = highlightRegions[i];
                             const r = region.range;
                             if (
+                                region.style !== "solid-outline" &&
                                 r.x <= c.sourceIndex &&
                                 c.sourceIndex < r.x + r.width &&
                                 r.y <= row &&
