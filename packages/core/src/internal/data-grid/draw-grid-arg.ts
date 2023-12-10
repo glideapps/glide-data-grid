@@ -1,6 +1,6 @@
 import type { GetCellRendererCallback } from "../../cells/cell-types.js";
 import type { RenderStateProvider } from "../../common/render-state-provider.js";
-import type { Theme } from "../../index.js";
+import type { FullTheme } from "../../common/styles.js";
 import type { HoverValues } from "./animation-manager.js";
 import type { MappedGridColumn } from "./data-grid-lib.js";
 import type { GroupDetailsCallback, GetRowThemeCallback, Highlight, BlitData } from "./data-grid-render.js";
@@ -40,7 +40,7 @@ export interface DrawGridArg {
     readonly enableGroups: boolean;
     readonly freezeColumns: number;
     readonly dragAndDropState: DragAndDropState | undefined;
-    readonly theme: Theme;
+    readonly theme: FullTheme;
     readonly headerHeight: number;
     readonly groupHeaderHeight: number;
     readonly disabledRows: CompactSelection;

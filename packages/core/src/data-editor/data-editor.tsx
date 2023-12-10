@@ -47,7 +47,14 @@ import {
 } from "../internal/data-grid/data-grid-types.js";
 import DataGridSearch, { type DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
 import { browserIsOSX } from "../common/browser-detect.js";
-import { getDataEditorTheme, makeCSSStyle, type Theme, ThemeContext } from "../common/styles.js";
+import {
+    getDataEditorTheme,
+    makeCSSStyle,
+    type FullTheme,
+    type Theme,
+    ThemeContext,
+    mergeAndRealizeTheme,
+} from "../common/styles.js";
 import type { DataGridRef } from "../internal/data-grid/data-grid.js";
 import { getScrollBarWidth, useEventListener, useStateWithReactiveInput, whenDefined } from "../common/utils.js";
 import {
@@ -695,7 +702,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const [overlay, setOverlay] = React.useState<{
         target: Rectangle;
         content: GridCell;
-        theme: Theme;
+        theme: FullTheme;
         initialValue: string | undefined;
         cell: Item;
         highlight: boolean;
@@ -991,7 +998,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const mergedTheme = React.useMemo(() => {
-        return { ...getDataEditorTheme(), ...theme };
+        return mergeAndRealizeTheme(getDataEditorTheme(), theme);
     }, [theme]);
 
     const [clientSize, setClientSize] = React.useState<readonly [number, number, number]>([10, 10, 0]);
@@ -1318,7 +1325,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             setOverlay({
                 ...val,
-                theme: { ...mergedTheme, ...groupTheme, ...colTheme, ...rowTheme, ...val.content.themeOverride },
+                theme: mergeAndRealizeTheme(mergedTheme, groupTheme, colTheme, rowTheme, val.content.themeOverride),
             });
         },
         [getRowThemeOverride, mangledCols, mangledGetGroupDetails, mergedTheme]
@@ -1622,14 +1629,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const lastSelectedColRef = React.useRef<number>();
 
     const themeForCell = React.useCallback(
-        (cell: InnerGridCell, pos: Item): Theme => {
+        (cell: InnerGridCell, pos: Item): FullTheme => {
             const [col, row] = pos;
-            return {
-                ...mergedTheme,
-                ...mangledCols[col]?.themeOverride,
-                ...getRowThemeOverride?.(row),
-                ...cell.themeOverride,
-            };
+            return mergeAndRealizeTheme(
+                mergedTheme,
+                mangledCols[col]?.themeOverride,
+                getRowThemeOverride?.(row),
+                cell.themeOverride
+            );
         },
         [getRowThemeOverride, mangledCols, mergedTheme]
     );
@@ -2019,7 +2026,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const offscreen = document.createElement("canvas");
                 const ctx = offscreen.getContext("2d", { alpha: false });
                 if (ctx !== null) {
-                    ctx.font = `${mergedTheme.baseFontStyle} ${mergedTheme.fontFamily}`;
+                    ctx.font = mergedTheme.baseFontFull;
                     const newCol = measureColumn(
                         ctx,
                         mergedTheme,

@@ -6,6 +6,7 @@ import { getDefaultTheme } from "../src/index.js";
 import { AllCellRenderers } from "../src/cells/index.js";
 import { vi, expect, describe, test, beforeEach, afterEach } from "vitest";
 import ImageWindowLoaderImpl from "../src/common/image-window-loader.js";
+import { mergeAndRealizeTheme } from "../src/common/styles.js";
 
 const basicProps: DataGridProps = {
     cellXOffset: 0,
@@ -75,7 +76,7 @@ const basicProps: DataGridProps = {
     ],
     isFilling: false,
     enableGroups: false,
-    theme: getDefaultTheme(),
+    theme: mergeAndRealizeTheme(getDefaultTheme()),
     freezeColumns: 0,
     selection: {
         current: undefined,

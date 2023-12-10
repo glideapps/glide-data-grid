@@ -123,6 +123,12 @@ const dataEditorBaseTheme: Theme = {
     lineHeight: 1.4, //unitless scaler depends on your font
 };
 
+export interface FullTheme extends Theme {
+    headerFontFull: string;
+    baseFontFull: string;
+    markerFontFull: string;
+}
+
 /** @category Theme */
 export function getDataEditorTheme(): Theme {
     return dataEditorBaseTheme;
@@ -133,4 +139,12 @@ export const ThemeContext = React.createContext<Theme>(dataEditorBaseTheme);
 /** @category Hooks */
 export function useTheme(): Theme {
     return React.useContext(ThemeContext);
+}
+
+export function mergeAndRealizeTheme(theme: Theme, ...overlays: Partial<Theme | undefined>[]): FullTheme {
+    const merged = Object.assign({}, theme, ...overlays);
+    merged.headerFontFull = `${merged.headerFontStyle} ${merged.fontFamily}`;
+    merged.baseFontFull = `${merged.baseFontStyle} ${merged.fontFamily}`;
+    merged.markerFontFull = `${merged.markerFontStyle} ${merged.fontFamily}`;
+    return merged;
 }

@@ -31,7 +31,7 @@ export const markerCellRenderer: InternalCellRenderer<MarkerCell> = {
 
 function prepMarkerRowCell(args: BaseDrawArgs, lastPrep: PrepResult | undefined): Partial<PrepResult> {
     const { ctx, theme } = args;
-    const newFont = `9px ${theme.fontFamily}`;
+    const newFont = theme.markerFontFull;
     const result: Partial<PrepResult> = lastPrep ?? {};
     if (result?.font !== newFont) {
         ctx.font = newFont;
@@ -90,7 +90,7 @@ function drawMarkerRowCell(
     }
     if (markerKind === "number" || (markerKind === "both" && !checked)) {
         const text = index.toString();
-        const fontStyle = `${theme.markerFontStyle} ${theme.fontFamily}`;
+        const fontStyle = theme.markerFontFull;
 
         const start = x + width / 2;
         if (markerKind === "both" && hoverAmount !== 0) {

@@ -49,7 +49,7 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
         const { cell, theme, overrideCursor, hoverX, hoverY, rect, ctx, highlighted } = a;
         const txt = cell.displayData ?? cell.data;
         if (overrideCursor !== undefined && cell.hoverEffect === true && hoverX !== undefined && hoverY !== undefined) {
-            const m = measureTextCached(txt, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`);
+            const m = measureTextCached(txt, ctx, theme.baseFontFull);
             const textRect = getTextRect(m, rect, theme, cell.contentAlign);
 
             const { x, y, width: w, height: h } = textRect;
@@ -83,7 +83,7 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
         const txt = cell.displayData ?? cell.data;
         if (cell.hoverEffect !== true || cell.onClickUri === undefined) return;
 
-        const m = getMeasuredTextCache(txt, `${theme.baseFontStyle} ${theme.fontFamily}`);
+        const m = getMeasuredTextCache(txt, theme.baseFontFull);
         if (m === undefined) return;
         const textRect = getTextRect(m, bounds, theme, cell.contentAlign);
         const didClick = pointInRect(

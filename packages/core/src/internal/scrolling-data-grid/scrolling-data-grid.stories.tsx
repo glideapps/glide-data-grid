@@ -14,6 +14,7 @@ import { getDefaultTheme } from "../../index.js";
 import type { GetCellRendererCallback } from "../../cells/cell-types.js";
 import { AllCellRenderers } from "../../cells/index.js";
 import ImageWindowLoaderImpl from "../../common/image-window-loader.js";
+import { mergeAndRealizeTheme } from "../../common/styles.js";
 
 const InnerContainer = styled.div`
     width: 100%;
@@ -129,7 +130,7 @@ export function Simplenotest() {
             scrollRef={undefined}
             minColumnWidth={50}
             isFocused={true}
-            theme={getDefaultTheme()}
+            theme={mergeAndRealizeTheme(getDefaultTheme())}
             isFilling={false}
             maxColumnWidth={500}
             accessibilityHeight={50}

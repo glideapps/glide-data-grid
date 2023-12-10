@@ -1,5 +1,4 @@
 import type React from "react";
-import type { Theme } from "../index.js";
 import type { SpriteManager } from "../internal/data-grid/data-grid-sprites.js";
 import type {
     InnerGridCell,
@@ -12,10 +11,11 @@ import type {
     BooleanIndeterminate,
     Item,
 } from "../internal/data-grid/data-grid-types.js";
+import type { FullTheme } from "../common/styles.js";
 
 export interface BaseDrawArgs {
     ctx: CanvasRenderingContext2D;
-    theme: Theme;
+    theme: FullTheme;
     col: number;
     row: number;
     rect: Rectangle;
@@ -61,7 +61,7 @@ interface BaseCellRenderer<T extends InnerGridCell> {
     readonly drawPrep?: PrepCallback;
     readonly needsHover?: boolean;
     readonly needsHoverPosition?: boolean;
-    readonly measure?: (ctx: CanvasRenderingContext2D, cell: T, theme: Theme) => number;
+    readonly measure?: (ctx: CanvasRenderingContext2D, cell: T, theme: FullTheme) => number;
 
     // editing
     readonly provideEditor?: ProvideEditorCallback<T>;
@@ -74,7 +74,7 @@ interface BaseCellRenderer<T extends InnerGridCell> {
             readonly posY: number;
             readonly bounds: Rectangle;
             readonly location: Item;
-            readonly theme: Theme;
+            readonly theme: FullTheme;
             readonly preventDefault: () => void;
         } & BaseGridMouseEventArgs
     ) => T | undefined;
@@ -85,7 +85,7 @@ interface BaseCellRenderer<T extends InnerGridCell> {
             readonly posX: number;
             readonly posY: number;
             readonly bounds: Rectangle;
-            readonly theme: Theme;
+            readonly theme: FullTheme;
             readonly preventDefault: () => void;
         } & BaseGridMouseEventArgs
     ) => void;

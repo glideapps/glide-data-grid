@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { Theme } from "../common/styles.js";
+import type { FullTheme } from "../common/styles.js";
 import type { DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
 import type { GetCellRendererCallback } from "../cells/cell-types.js";
 
@@ -17,7 +17,7 @@ const defaultSize = 150;
 function measureCell(
     ctx: CanvasRenderingContext2D,
     cell: GridCell,
-    theme: Theme,
+    theme: FullTheme,
     getCellRenderer: GetCellRendererCallback
 ): number {
     const r = getCellRenderer(cell);
@@ -26,7 +26,7 @@ function measureCell(
 
 export function measureColumn(
     ctx: CanvasRenderingContext2D,
-    theme: Theme,
+    theme: FullTheme,
     c: GridColumn,
     colIndex: number,
     selectedData: CellArray,
@@ -64,7 +64,7 @@ export function useColumnSizer(
     clientWidth: number,
     minColumnWidth: number,
     maxColumnWidth: number,
-    theme: Theme,
+    theme: FullTheme,
     getCellRenderer: GetCellRendererCallback,
     abortController: AbortController
 ): readonly InnerGridColumn[] {
@@ -160,7 +160,7 @@ export function useColumnSizer(
                 });
             }
 
-            ctx.font = `${themeRef.current.baseFontStyle} ${themeRef.current.fontFamily}`;
+            ctx.font = themeRef.current.baseFontFull;
 
             return columns.map((c, colIndex) => {
                 if (isSizedGridColumn(c)) return c;

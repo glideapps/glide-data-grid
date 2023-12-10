@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { Theme } from "../../common/styles.js";
+import type { FullTheme } from "../../common/styles.js";
 import {
     computeBounds,
     getColumnIndexForX,
@@ -284,7 +284,7 @@ export interface DataGridProps {
      */
     readonly smoothScrollY: boolean | undefined;
 
-    readonly theme: Theme;
+    readonly theme: FullTheme;
 
     readonly getCellRenderer: <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;
 }
@@ -1419,7 +1419,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                             ctx.scale(dpr, dpr);
                             ctx.textBaseline = "middle";
                             if (row === -1) {
-                                ctx.font = `${theme.headerFontStyle} ${theme.fontFamily}`;
+                                ctx.font = theme.headerFontFull;
                                 ctx.fillStyle = theme.bgHeader;
                                 ctx.fillRect(0, 0, offscreen.width, offscreen.height);
                                 drawHeader(
@@ -1439,7 +1439,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                     false
                                 );
                             } else {
-                                ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+                                ctx.font = theme.baseFontFull;
                                 ctx.fillStyle = theme.bgCell;
                                 ctx.fillRect(0, 0, offscreen.width, offscreen.height);
                                 drawCell(

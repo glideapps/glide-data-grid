@@ -125,11 +125,7 @@ const renderer: CustomRenderer<ButtonCell> = {
         }
 
         ctx.fillStyle = unpackColor(color ?? theme.accentColor, theme, hoverAmount);
-        ctx.fillText(
-            title,
-            x + width / 2,
-            y + height / 2 + getMiddleCenterBias(ctx, `${theme.baseFontStyle} ${theme.fontFamily}`)
-        );
+        ctx.fillText(title, x + width / 2, y + height / 2 + getMiddleCenterBias(ctx, theme.baseFontFull));
         return true;
     },
     provideEditor: undefined,

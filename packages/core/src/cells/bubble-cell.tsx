@@ -35,7 +35,7 @@ function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
     const renderBoxes: { x: number; width: number }[] = [];
     for (const s of data) {
         if (renderX > x + w) break;
-        const textWidth = measureTextCached(s, ctx, `${theme.baseFontStyle} ${theme.fontFamily}`).width;
+        const textWidth = measureTextCached(s, ctx, theme.baseFontFull).width;
         renderBoxes.push({
             x: renderX,
             width: textWidth,

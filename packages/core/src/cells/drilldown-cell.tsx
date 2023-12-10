@@ -128,7 +128,7 @@ function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[
     const { rect, theme, ctx, imageLoader, col, row } = args;
     const { x, width: w } = rect;
 
-    const font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+    const font = theme.baseFontFull;
     const emHeight = getEmHeight(ctx, font);
     const h = Math.min(rect.height, Math.max(16, Math.ceil(emHeight * theme.lineHeight) * 2));
     const y = Math.floor(rect.y + (rect.height - h) / 2);

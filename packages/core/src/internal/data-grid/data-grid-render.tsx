@@ -37,7 +37,7 @@ import {
     itemsAreEqual,
 } from "./data-grid-lib.js";
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites.js";
-import type { Theme } from "../../common/styles.js";
+import { mergeAndRealizeTheme, type FullTheme, type Theme } from "../../common/styles.js";
 import { blend, withAlpha } from "./color-parser.js";
 import type { DrawArgs, DrawStateTuple, GetCellRendererCallback, PrepResult } from "../../cells/cell-types.js";
 import { assert, deepEqual } from "../../common/support.js";
@@ -111,7 +111,7 @@ export function drawCell(
     w: number,
     h: number,
     highlighted: boolean,
-    theme: Theme,
+    theme: FullTheme,
     imageLoader: ImageWindowLoader,
     spriteManager: SpriteManager,
     hoverAmount: number,
@@ -410,7 +410,7 @@ function drawGridLines(
     verticalBorder: (col: number) => boolean,
     trailingRowType: TrailingRowType,
     rows: number,
-    theme: Theme,
+    theme: FullTheme,
     verticalOnly: boolean = false
 ) {
     if (spans !== undefined) {
@@ -544,7 +544,7 @@ function drawGroups(
     translateX: number,
     groupHeaderHeight: number,
     hovered: HoverInfo | undefined,
-    theme: Theme,
+    theme: FullTheme,
     spriteManager: SpriteManager,
     _hoverValues: HoverValues,
     verticalBorder: (col: number) => boolean,
@@ -563,7 +563,8 @@ function drawGroups(
         ctx.clip();
 
         const group = getGroupDetails(groupName);
-        const groupTheme = group?.overrideTheme === undefined ? theme : { ...theme, ...group.overrideTheme };
+        const groupTheme =
+            group?.overrideTheme === undefined ? theme : mergeAndRealizeTheme(theme, group.overrideTheme);
         const isHovered = hRow === -2 && hCol !== undefined && hCol >= span[0] && hCol <= span[1];
 
         const fillColor = isHovered ? groupTheme.bgHeaderHovered : groupTheme.bgHeader;
@@ -590,7 +591,7 @@ function drawGroups(
             ctx.fillText(
                 group.name,
                 drawX + xPad,
-                groupHeaderHeight / 2 + getMiddleCenterBias(ctx, `${theme.headerFontStyle} ${theme.fontFamily}`)
+                groupHeaderHeight / 2 + getMiddleCenterBias(ctx, theme.headerFontFull)
             );
 
             if (group.actions !== undefined && isHovered) {
@@ -682,7 +683,7 @@ function drawHeaderInner(
     height: number,
     c: MappedGridColumn,
     selected: boolean,
-    theme: Theme,
+    theme: FullTheme,
     isHovered: boolean,
     hoverAmount: number,
     spriteManager: SpriteManager,
@@ -767,11 +768,7 @@ function drawHeaderInner(
     if (isRtl) {
         ctx.textAlign = "right";
     }
-    ctx.fillText(
-        c.title,
-        drawX,
-        y + height / 2 + getMiddleCenterBias(ctx, `${theme.headerFontStyle} ${theme.fontFamily}`)
-    );
+    ctx.fillText(c.title, drawX, y + height / 2 + getMiddleCenterBias(ctx, theme.headerFontFull));
     if (isRtl) {
         ctx.textAlign = "left";
     }
@@ -812,7 +809,7 @@ export function drawHeader(
     height: number,
     c: MappedGridColumn,
     selected: boolean,
-    theme: Theme,
+    theme: FullTheme,
     isHovered: boolean,
     hasSelectedCell: boolean,
     hoverAmount: number,
@@ -898,7 +895,7 @@ function drawGridHeaders(
     dragAndDropState: DragAndDropState | undefined,
     isResizing: boolean,
     selection: GridSelection,
-    outerTheme: Theme,
+    outerTheme: FullTheme,
     spriteManager: SpriteManager,
     hoverValues: HoverValues,
     verticalBorder: (col: number) => boolean,
@@ -915,7 +912,7 @@ function drawGridHeaders(
 
     const [hCol, hRow] = hovered?.[0] ?? [];
 
-    const font = `${outerTheme.headerFontStyle} ${outerTheme.fontFamily}`;
+    const font = outerTheme.headerFontFull;
     // Assinging the context font too much can be expensive, it can be worth it to minimze this
     ctx.font = font;
     walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x, _y, clipX) => {
@@ -930,7 +927,7 @@ function drawGridHeaders(
         const theme =
             c.themeOverride === undefined && groupTheme === undefined
                 ? outerTheme
-                : { ...outerTheme, ...groupTheme, ...c.themeOverride };
+                : mergeAndRealizeTheme(outerTheme, groupTheme, c.themeOverride);
 
         if (theme.bgHeader !== outerTheme.bgHeader) {
             ctx.fillStyle = theme.bgHeader;
@@ -938,7 +935,7 @@ function drawGridHeaders(
         }
 
         if (theme !== outerTheme) {
-            ctx.font = `${theme.headerFontStyle} ${theme.fontFamily}`;
+            ctx.font = theme.baseFontFull;
         }
         const selected = selection.columns.hasIndex(c.sourceIndex);
         const noHover = dragAndDropState !== undefined || isResizing;
@@ -1196,7 +1193,7 @@ function drawCells(
     hoverInfo: HoverInfo | undefined,
     drawCellCallback: DrawCellCallback | undefined,
     hyperWrapping: boolean,
-    outerTheme: Theme,
+    outerTheme: FullTheme,
     enqueue: EnqueueCallback,
     renderStateProvider: RenderStateProvider,
     getCellRenderer: GetCellRendererCallback,
@@ -1204,7 +1201,7 @@ function drawCells(
 ): Rectangle[] | undefined {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
-    let font = `${outerTheme.baseFontStyle} ${outerTheme.fontFamily}`;
+    let font = outerTheme.baseFontFull;
     ctx.font = font;
     const deprepArg = { ctx };
     const cellIndex: [number, number] = [0, 0];
@@ -1248,8 +1245,8 @@ function drawCells(
             const colTheme =
                 c.themeOverride === undefined && groupTheme === undefined
                     ? outerTheme
-                    : { ...outerTheme, ...groupTheme, ...c.themeOverride };
-            const colFont = `${colTheme.baseFontStyle} ${colTheme.fontFamily}`;
+                    : mergeAndRealizeTheme(outerTheme, groupTheme, c.themeOverride);
+            const colFont = colTheme.baseFontFull;
             if (colFont !== font) {
                 font = colFont;
                 ctx.font = colFont;
@@ -1361,7 +1358,7 @@ function drawCells(
                     const theme =
                         cell.themeOverride === undefined && rowTheme === undefined && trailingTheme === undefined
                             ? colTheme
-                            : { ...colTheme, ...rowTheme, ...trailingTheme, ...cell.themeOverride }; //alloc
+                            : mergeAndRealizeTheme(colTheme, rowTheme, trailingTheme, cell.themeOverride); //alloc
 
                     ctx.beginPath();
 
@@ -1434,10 +1431,17 @@ function drawCells(
                         ctx.globalAlpha = 0.6;
                     }
 
-                    const hoverValue = hoverValues.find(hv => hv.item[0] === c.sourceIndex && hv.item[1] === row); //alloc
+                    let hoverValue: HoverValues[number] | undefined;
+                    for (let i = 0; i < hoverValues.length; i++) {
+                        const hv = hoverValues[i];
+                        if (hv.item[0] === c.sourceIndex && hv.item[1] === row) {
+                            hoverValue = hv;
+                            break;
+                        }
+                    }
 
                     if (cellWidth > 10 && !skipContents) {
-                        const cellFont = `${theme.baseFontStyle} ${theme.fontFamily}`; //alloc
+                        const cellFont = theme.baseFontFull;
                         if (cellFont !== font) {
                             ctx.font = cellFont;
                             font = cellFont;
@@ -1509,7 +1513,7 @@ function drawBlanks(
     trailingRowType: TrailingRowType,
     drawRegions: readonly Rectangle[],
     damage: CellList | undefined,
-    theme: Theme
+    theme: FullTheme
 ): void {
     if (
         damage !== undefined ||
@@ -1557,7 +1561,7 @@ function drawBlanks(
 
                     const rowTheme = getRowTheme?.(row);
 
-                    const blankTheme = rowTheme === undefined ? theme : { ...theme, ...rowTheme };
+                    const blankTheme = rowTheme === undefined ? theme : mergeAndRealizeTheme(theme, rowTheme);
 
                     if (blankTheme.bgCell !== theme.bgCell) {
                         ctx.fillStyle = blankTheme.bgCell;
@@ -1588,7 +1592,7 @@ function overdrawStickyBoundaries(
     rows: number,
     verticalBorder: (col: number) => boolean,
     getRowHeight: (row: number) => number,
-    theme: Theme
+    theme: FullTheme
 ) {
     let drawFreezeBorder = false;
     for (const c of effectiveCols) {
@@ -1809,7 +1813,7 @@ function drawColumnResizeOutline(
     yOffset: number,
     xOffset: number,
     height: number,
-    theme: Theme
+    theme: FullTheme
 ) {
     ctx.beginPath();
     ctx.moveTo(yOffset, xOffset);
@@ -1832,7 +1836,7 @@ function drawFocusRing(
     translateY: number,
     effectiveCols: readonly MappedGridColumn[],
     allColumns: readonly MappedGridColumn[],
-    theme: Theme,
+    theme: FullTheme,
     totalHeaderHeight: number,
     selectedCell: GridSelection,
     getRowHeight: (row: number) => number,
