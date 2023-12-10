@@ -1,6 +1,6 @@
 import { renderHook, cleanup } from "@testing-library/react-hooks";
 import { type GridCell, GridCellKind, type GridColumn, type Rectangle } from "../src/index.js";
-import { getDataEditorTheme } from "../src/common/styles.js";
+import { getDataEditorTheme, mergeAndRealizeTheme } from "../src/common/styles.js";
 import type { DataGridSearchProps } from "../src/internal/data-grid-search/data-grid-search.js";
 import { AllCellRenderers } from "../src/cells/index.js";
 import type { GetCellRendererCallback } from "../src/cells/cell-types.js";
@@ -104,7 +104,7 @@ describe("use-column-sizer", () => {
                 400,
                 20,
                 500,
-                theme,
+                mergeAndRealizeTheme(theme),
                 getCellRenderer,
                 abortController
             )
@@ -149,7 +149,7 @@ describe("use-column-sizer", () => {
                 400,
                 20,
                 500,
-                theme,
+                mergeAndRealizeTheme(theme),
                 () => {
                     return {
                         draw: () => true,
@@ -175,7 +175,7 @@ describe("use-column-sizer", () => {
                 400,
                 20,
                 500,
-                theme,
+                mergeAndRealizeTheme(theme),
                 getCellRenderer,
                 abortController
             )
@@ -213,7 +213,7 @@ describe("use-column-sizer", () => {
                     400,
                     20,
                     500,
-                    theme,
+                    mergeAndRealizeTheme(theme),
                     getCellRenderer,
                     abortController
                 ),
@@ -259,7 +259,17 @@ describe("use-column-sizer", () => {
 
     it("Returns the default sizes if getCellsForSelection is not provided", async () => {
         const { result } = renderHook(() =>
-            useColumnSizer(COLUMNS, 1000, undefined, 400, 20, 500, theme, getCellRenderer, abortController)
+            useColumnSizer(
+                COLUMNS,
+                1000,
+                undefined,
+                400,
+                20,
+                500,
+                mergeAndRealizeTheme(theme),
+                getCellRenderer,
+                abortController
+            )
         );
 
         const columnA = result.current.find(col => col.title === "A");
@@ -282,7 +292,7 @@ describe("use-column-sizer", () => {
                 400,
                 50,
                 500,
-                theme,
+                mergeAndRealizeTheme(theme),
                 getCellRenderer,
                 abortController
             )
@@ -301,7 +311,7 @@ describe("use-column-sizer", () => {
                 400,
                 20,
                 500,
-                theme,
+                mergeAndRealizeTheme(theme),
                 getCellRenderer,
                 abortController
             )
@@ -342,7 +352,7 @@ describe("use-column-sizer", () => {
                 400,
                 20,
                 500,
-                theme,
+                mergeAndRealizeTheme(theme),
                 getCellRenderer,
                 abortController
             )

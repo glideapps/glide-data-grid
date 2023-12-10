@@ -6,6 +6,7 @@ import { GridCellKind, getDefaultTheme, isObjectEditorCallbackResult } from "../
 import { assert } from "../src/common/support.js";
 import { imageCellRenderer } from "../src/cells/image-cell.js";
 import { expect, describe, it, afterEach } from "vitest";
+import { mergeAndRealizeTheme } from "../src/common/styles.js";
 
 function getMockEditorTarget(): Rectangle {
     return {
@@ -52,7 +53,7 @@ describe("Image cell", () => {
     it("Measures a reasonable size", async () => {
         const cell = getImgCell();
         const ctx = get2dContext();
-        const autoSize = imageCellRenderer.measure?.(ctx, cell, getDefaultTheme());
+        const autoSize = imageCellRenderer.measure?.(ctx, cell, mergeAndRealizeTheme(getDefaultTheme()));
         expect(autoSize).toBe(100);
     });
 

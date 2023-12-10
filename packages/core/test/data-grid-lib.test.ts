@@ -1,6 +1,6 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import type { BaseDrawArgs } from "../src/index.js";
-import { getDataEditorTheme, type Theme } from "../src/common/styles.js";
+import { getDataEditorTheme, mergeAndRealizeTheme, type FullTheme } from "../src/common/styles.js";
 import {
     remapForDnDState,
     type MappedGridColumn,
@@ -58,7 +58,7 @@ describe("remapForDnDState", () => {
 describe("drawImage", () => {
     let mockCtx: Mocked<CanvasRenderingContext2D>;
     let mockImageLoader: Mocked<ImageWindowLoader>;
-    let mockTheme: Theme;
+    let mockTheme: FullTheme;
     let mockRect: Rectangle;
 
     beforeEach(() => {
@@ -78,7 +78,7 @@ describe("drawImage", () => {
             setWindow: vi.fn(),
         };
 
-        mockTheme = getDataEditorTheme();
+        mockTheme = mergeAndRealizeTheme(getDataEditorTheme());
 
         mockRect = {
             x: 0,
@@ -273,7 +273,7 @@ describe("drawImage", () => {
 
 describe("drawWithLastUpdate", () => {
     const mockCtx: Mocked<CanvasRenderingContext2D> = {} as any;
-    let mockTheme: Theme;
+    let mockTheme: FullTheme;
     let mockRect: Rectangle;
     let mockDraw: Mock;
 
@@ -282,10 +282,7 @@ describe("drawWithLastUpdate", () => {
         mockCtx.fillStyle = "";
         mockCtx.globalAlpha = 1;
 
-        mockTheme = {
-            ...getDataEditorTheme(),
-            bgSearchResult: "some-color",
-        };
+        mockTheme = mergeAndRealizeTheme(getDataEditorTheme(), { bgSearchResult: "some-color" });
 
         mockRect = {
             x: 10,
