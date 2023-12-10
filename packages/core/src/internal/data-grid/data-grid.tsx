@@ -243,6 +243,8 @@ export interface DataGridProps {
      */
     readonly experimental:
         | {
+              readonly disableAccessibilityTree?: boolean;
+              readonly disableMinimumCellWidth?: boolean;
               readonly paddingRight?: number;
               readonly paddingBottom?: number;
               readonly enableFirefoxRescaling?: boolean;
@@ -713,6 +715,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const renderStateProvider = React.useMemo(() => new RenderStateProvider(), []);
 
+    const minimumCellWidth = experimental?.disableMinimumCellWidth === true ? 1 : 10;
     const lastArgsRef = React.useRef<DrawGridArg>();
     const draw = React.useCallback(() => {
         const canvas = ref.current;
@@ -777,6 +780,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             renderStateProvider,
             renderStrategy: experimental?.renderStrategy ?? (browserIsSafari.value ? "double-buffer" : "single-buffer"),
             getCellRenderer,
+            minimumCellWidth,
         };
 
         // This confusing bit of code due to some poor design. Long story short, the damage property is only used
@@ -843,6 +847,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         lastWasTouch,
         renderStateProvider,
         getCellRenderer,
+        minimumCellWidth,
     ]);
 
     const lastDrawRef = React.useRef(draw);
@@ -1626,7 +1631,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const accessibilityTree = useDebouncedMemo(
         () => {
-            if (width < 50) return null;
+            if (width < 50 || experimental?.disableAccessibilityTree === true) return null;
             let effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
             const colOffset = firstColAccessible ? 0 : -1;
             if (!firstColAccessible && effectiveCols[0]?.sourceIndex === 0) {

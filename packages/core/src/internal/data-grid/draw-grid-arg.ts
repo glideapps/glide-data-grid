@@ -76,4 +76,5 @@ export interface DrawGridArg {
     readonly enqueue: EnqueueCallback;
     readonly renderStateProvider: RenderStateProvider;
     readonly getCellRenderer: GetCellRendererCallback;
+    readonly minimumCellWidth: number;
 }

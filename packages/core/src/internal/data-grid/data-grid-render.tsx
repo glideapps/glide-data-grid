@@ -1197,7 +1197,8 @@ function drawCells(
     enqueue: EnqueueCallback,
     renderStateProvider: RenderStateProvider,
     getCellRenderer: GetCellRendererCallback,
-    overrideCursor: (cursor: React.CSSProperties["cursor"]) => void
+    overrideCursor: (cursor: React.CSSProperties["cursor"]) => void,
+    minimumCellWidth: number
 ): Rectangle[] | undefined {
     let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
@@ -1441,7 +1442,7 @@ function drawCells(
                         }
                     }
 
-                    if (cellWidth > 10 && !skipContents) {
+                    if (cellWidth > minimumCellWidth && !skipContents) {
                         const cellFont = theme.baseFontFull;
                         if (cellFont !== font) {
                             ctx.font = cellFont;
@@ -2112,6 +2113,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         renderStrategy,
         bufferA,
         bufferB,
+        minimumCellWidth,
     } = arg;
     let { damage } = arg;
     if (width === 0 || height === 0) return;
@@ -2347,7 +2349,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 enqueue,
                 renderStateProvider,
                 getCellRenderer,
-                overrideCursor
+                overrideCursor,
+                minimumCellWidth
             );
 
             const selectionCurrent = selection.current;
@@ -2564,7 +2567,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         enqueue,
         renderStateProvider,
         getCellRenderer,
-        overrideCursor
+        overrideCursor,
+        minimumCellWidth
     );
 
     drawBlanks(
