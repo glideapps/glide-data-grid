@@ -1,5 +1,6 @@
 import ImageWindowLoaderImpl from "../src/common/image-window-loader.js";
 import { vi, expect, describe, it, beforeEach } from "vitest";
+import { packColRowToNumber } from "../src/common/render-state-provider.js";
 
 describe("ImageWindowLoaderImpl", () => {
     let loader: ImageWindowLoaderImpl;
@@ -154,7 +155,7 @@ describe("ImageWindowLoaderImpl", () => {
             expect((loader as any).cache[key]).toBeDefined();
             expect((loader as any).cache[key].url).toBe(url);
             expect((loader as any).cache[key].img).toBeUndefined();
-            expect((loader as any).cache[key].cells).toEqual([row * (1 << 21) + col]);
+            expect((loader as any).cache[key].cells).toEqual([packColRowToNumber(col, row)]);
         });
 
         it("should handle image loading and decoding successfully", async () => {

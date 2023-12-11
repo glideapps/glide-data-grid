@@ -3,7 +3,6 @@ import type { SpriteManager } from "../internal/data-grid/data-grid-sprites.js";
 import type {
     InnerGridCell,
     Rectangle,
-    ImageWindowLoader,
     CustomCell,
     ProvideEditorCallback,
     BaseGridMouseEventArgs,
@@ -12,6 +11,7 @@ import type {
     Item,
 } from "../internal/data-grid/data-grid-types.js";
 import type { FullTheme } from "../common/styles.js";
+import type { ImageWindowLoader } from "../internal/data-grid/image-window-loader-interface.js";
 
 export interface BaseDrawArgs {
     ctx: CanvasRenderingContext2D;

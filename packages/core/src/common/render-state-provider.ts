@@ -9,20 +9,20 @@ import type { Item, Rectangle } from "../internal/data-grid/data-grid-types.js";
 const rowShift = 1 << 21;
 
 export function packColRowToNumber(col: number, row: number) {
-    return row * rowShift + col;
+    return (row + 2) * rowShift + col;
 }
 
 export function unpackCol(packed: number): number {
     return packed % rowShift;
 }
 
-export function unpackRow(packed: number, col: number): number {
-    return (packed - col) / rowShift;
+export function unpackRow(packed: number): number {
+    return Math.floor(packed / rowShift) - 2;
 }
 
 export function unpackNumberToColRow(packed: number): [number, number] {
     const col = unpackCol(packed);
-    const row = unpackRow(packed, col);
+    const row = unpackRow(packed);
     return [col, row];
 }
 
@@ -38,7 +38,7 @@ export class RenderStateProvider {
 
     private isInWindow = (packed: number) => {
         const col = unpackCol(packed);
-        const row = unpackRow(packed, col);
+        const row = unpackRow(packed);
         const w = this.visibleWindow;
         if (col < this.freezeCols && row >= w.y && row <= w.y + w.height) return true;
         return col >= w.x && col <= w.x + w.width && row >= w.y && row <= w.y + w.height;

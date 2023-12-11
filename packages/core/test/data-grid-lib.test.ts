@@ -6,9 +6,10 @@ import {
     type MappedGridColumn,
     drawWithLastUpdate,
 } from "../src/internal/data-grid/data-grid-lib.js";
-import { GridCellKind, type ImageWindowLoader, type Rectangle } from "../src/internal/data-grid/data-grid-types.js";
+import { GridCellKind, type Rectangle } from "../src/internal/data-grid/data-grid-types.js";
 import { vi, type Mocked, type Mock, expect, describe, test, it, beforeEach } from "vitest";
 import { drawImage } from "../src/cells/image-cell.js";
+import type { ImageWindowLoader } from "../src/internal/data-grid/image-window-loader-interface.js";
 
 describe("remapForDnDState", () => {
     const sampleColumns: MappedGridColumn[] = [

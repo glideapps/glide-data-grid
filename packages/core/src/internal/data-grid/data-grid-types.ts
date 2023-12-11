@@ -5,6 +5,7 @@ import type React from "react";
 import type { CSSProperties } from "react";
 import type { SpriteManager } from "./data-grid-sprites.js";
 import type { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor.js";
+import type { ImageWindowLoader } from "./image-window-loader-interface.js";
 
 // Thoughts:
 // rows/columns are called out as selected, but when selected they must also be added
@@ -47,13 +48,6 @@ export interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventAr
 export interface FillPatternEventArgs extends PreventableEvent {
     patternSource: Rectangle;
     fillDestination: Rectangle;
-}
-
-/** @category Types */
-export interface ImageWindowLoader {
-    setWindow(newWindow: Rectangle, freezeCols: number): void;
-    loadOrGetImage(url: string, col: number, row: number): HTMLImageElement | ImageBitmap | undefined;
-    setCallback(imageLoaded: (locations: readonly Item[]) => void): void;
 }
 
 /** @category Types */

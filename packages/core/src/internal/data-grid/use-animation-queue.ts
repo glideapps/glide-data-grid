@@ -1,10 +1,11 @@
 import * as React from "react";
-import type { Item } from "./data-grid-types.js";
+import { type Item } from "./data-grid-types.js";
+import { CellSet } from "./cell-set.js";
 import { packColRowToNumber, unpackNumberToColRow } from "../../common/render-state-provider.js";
 
 export type EnqueueCallback = (item: Item) => void;
 
-export function useAnimationQueue(draw: (items: readonly Item[]) => void): EnqueueCallback {
+export function useAnimationQueue(draw: (items: CellSet) => void): EnqueueCallback {
     const queue = React.useRef<number[]>([]);
     const seq = React.useRef(0);
     const drawRef = React.useRef(draw);
@@ -17,7 +18,7 @@ export function useAnimationQueue(draw: (items: readonly Item[]) => void): Enque
             const toDraw = queue.current.map(unpackNumberToColRow);
 
             queue.current = [];
-            drawRef.current(toDraw);
+            drawRef.current(new CellSet(toDraw));
             if (queue.current.length > 0) {
                 seq.current++;
             } else {

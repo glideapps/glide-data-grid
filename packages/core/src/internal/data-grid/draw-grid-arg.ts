@@ -13,10 +13,11 @@ import type {
     InnerGridCell,
     DrawHeaderCallback,
     CellList,
-    ImageWindowLoader,
     DrawCellCallback,
 } from "./data-grid-types.js";
+import type { CellSet } from "./cell-set.js";
 import type { EnqueueCallback } from "./use-animation-queue.js";
+import type { ImageWindowLoader } from "./image-window-loader-interface.js";
 
 export type HoverInfo = readonly [Item, Item];
 
@@ -66,7 +67,7 @@ export interface DrawGridArg {
     readonly highlightRegions: readonly Highlight[] | undefined;
     readonly imageLoader: ImageWindowLoader;
     readonly lastBlitData: React.MutableRefObject<BlitData | undefined>;
-    readonly damage: CellList | undefined;
+    readonly damage: CellSet | undefined;
     readonly hoverValues: HoverValues;
     readonly hoverInfo: HoverInfo | undefined;
     readonly spriteManager: SpriteManager;

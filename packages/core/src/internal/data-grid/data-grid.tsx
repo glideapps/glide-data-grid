@@ -6,7 +6,6 @@ import {
     getEffectiveColumns,
     getRowIndexForY,
     getStickyWidth,
-    itemsAreEqual,
     useMappedColumns,
 } from "./data-grid-lib.js";
 import {
@@ -19,7 +18,6 @@ import {
     type InnerGridCell,
     InnerGridCellKind,
     CompactSelection,
-    type CellList,
     type Item,
     type DrawHeaderCallback,
     isReadWriteCell,
@@ -30,10 +28,10 @@ import {
     groupHeaderKind,
     headerKind,
     outOfBoundsKind,
-    type ImageWindowLoader,
     OutOfBoundsRegionAxis,
     type DrawCellCallback,
 } from "./data-grid-types.js";
+import { CellSet } from "./cell-set.js";
 import { SpriteManager, type SpriteMap } from "./data-grid-sprites.js";
 import { direction, getScrollBarWidth, useDebouncedMemo, useEventListener } from "../../common/utils.js";
 import clamp from "lodash/clamp.js";
@@ -57,6 +55,7 @@ import { type EnqueueCallback, useAnimationQueue } from "./use-animation-queue.j
 import { assert } from "../../common/support.js";
 import type { CellRenderer, GetCellRendererCallback } from "../../cells/cell-types.js";
 import type { DrawGridArg } from "./draw-grid-arg.js";
+import type { ImageWindowLoader } from "./image-window-loader-interface.js";
 
 export interface DataGridProps {
     readonly width: number;
@@ -380,7 +379,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const imageLoader = imageWindowLoader;
-    const damageRegion = React.useRef<readonly Item[] | undefined>();
+    const damageRegion = React.useRef<CellSet | undefined>();
     const [scrolling, setScrolling] = React.useState<boolean>(false);
     const hoverValues = React.useRef<readonly { item: Item; hoverAmount: number }[]>([]);
     const lastBlitData = React.useRef<BlitData | undefined>();
@@ -798,10 +797,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         }
 
         // don't reset on damage events
-        if (
-            !didOverride &&
-            (current.damage === undefined || current.damage.some(x => itemsAreEqual(x, hoverInfoRef.current?.[0])))
-        ) {
+        if (!didOverride && (current.damage === undefined || current.damage.has(hoverInfoRef?.current?.[0]))) {
             setDrawCursorOverride(undefined);
         }
     }, [
@@ -866,7 +862,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         void fn();
     }, []);
 
-    const damageInternal = React.useCallback((locations: CellList) => {
+    const damageInternal = React.useCallback((locations: CellSet) => {
         damageRegion.current = locations;
         lastDrawRef.current();
         damageRegion.current = undefined;
@@ -877,7 +873,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const damage = React.useCallback(
         (cells: DamageUpdateList) => {
-            damageInternal(cells.map(x => x.cell));
+            damageInternal(new CellSet(cells.map(x => x.cell)));
         },
         [damageInternal]
     );
@@ -1159,7 +1155,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     useEventListener("contextmenu", onContextMenuImpl, eventTargetRef?.current ?? null, false);
 
     const onAnimationFrame = React.useCallback<StepCallback>(values => {
-        damageRegion.current = values.map(x => x.item);
+        damageRegion.current = new CellSet(values.map(x => x.item));
         hoverValues.current = values;
         lastDrawRef.current();
         damageRegion.current = undefined;
@@ -1239,7 +1235,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 maybeSetHoveredInfo(newInfo, needsHoverPosition);
                 hoverInfoRef.current = newInfo;
                 if (needsDamageCell) {
-                    damageInternal([args.location]);
+                    damageInternal(new CellSet([args.location]));
                 }
             }
 

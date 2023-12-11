@@ -15,11 +15,11 @@ import {
     headerCellCheckedMarker,
     headerCellUnheckedMarker,
     type TrailingRowType,
-    type ImageWindowLoader,
     type DrawCellCallback,
     isInnerOnlyCell,
     type GridCell,
 } from "./data-grid-types.js";
+import { CellSet } from "./cell-set.js";
 import groupBy from "lodash/groupBy.js";
 import type { HoverValues } from "./animation-manager.js";
 import {
@@ -34,7 +34,6 @@ import {
     computeBounds,
     getMiddleCenterBias,
     rectBottomRight,
-    itemsAreEqual,
 } from "./data-grid-lib.js";
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites.js";
 import { mergeAndRealizeTheme, type FullTheme, type Theme } from "../../common/styles.js";
@@ -46,6 +45,7 @@ import { drawCheckbox } from "./draw-checkbox.js";
 import type { DragAndDropState, DrawGridArg, HoverInfo } from "./draw-grid-arg.js";
 import type { EnqueueCallback } from "./use-animation-queue.js";
 import type { RenderStateProvider } from "../../common/render-state-provider.js";
+import type { ImageWindowLoader } from "./image-window-loader-interface.js";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when
@@ -549,14 +549,23 @@ function drawGroups(
     _hoverValues: HoverValues,
     verticalBorder: (col: number) => boolean,
     getGroupDetails: GroupDetailsCallback,
-    damage: CellList | undefined
+    damage: CellSet | undefined
 ) {
     const xPad = 8;
     const [hCol, hRow] = hovered?.[0] ?? [];
 
     let finalX = 0;
     walkGroups(effectiveCols, width, translateX, groupHeaderHeight, (span, groupName, x, y, w, h) => {
-        if (damage !== undefined && !damage.some(d => d[1] === -2 && d[0] >= span[0] && d[0] <= span[1])) return;
+        if (
+            damage !== undefined &&
+            !damage.hasItemInRectangle({
+                x: span[0],
+                y: -2,
+                width: span[1] - span[0] + 1,
+                height: 1,
+            })
+        )
+            return;
         ctx.save();
         ctx.beginPath();
         ctx.rect(x, y, w, h);
@@ -900,7 +909,7 @@ function drawGridHeaders(
     hoverValues: HoverValues,
     verticalBorder: (col: number) => boolean,
     getGroupDetails: GroupDetailsCallback,
-    damage: CellList | undefined,
+    damage: CellSet | undefined,
     drawHeaderCallback: DrawHeaderCallback | undefined,
     touchMode: boolean
 ) {
@@ -916,7 +925,7 @@ function drawGridHeaders(
     // Assinging the context font too much can be expensive, it can be worth it to minimze this
     ctx.font = font;
     walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x, _y, clipX) => {
-        if (damage !== undefined && !damage.some(d => d[1] === -1 && d[0] === c.sourceIndex)) return;
+        if (damage !== undefined && !damage.has([c.sourceIndex, -1])) return;
         const diff = Math.max(0, clipX - x);
         ctx.save();
         ctx.beginPath();
@@ -1023,22 +1032,24 @@ function clipDamage(
     rows: number,
     getRowHeight: (row: number) => number,
     trailingRowType: TrailingRowType,
-    damage: CellList | undefined,
+    damage: CellSet | undefined,
     includeCells: boolean
 ): void {
-    if (damage === undefined || damage.length === 0) return;
+    if (damage === undefined || damage.size === 0) return;
 
     const stickyRowHeight = trailingRowType === "sticky" ? getRowHeight(rows - 1) : 0;
 
     ctx.beginPath();
 
     walkGroups(effectiveColumns, width, translateX, groupHeaderHeight, (span, _group, x, y, w, h) => {
-        for (let i = 0; i < damage.length; i++) {
-            const d = damage[i];
-            if (d[1] === -2 && d[0] >= span[0] && d[0] <= span[1]) {
-                ctx.rect(x, y, w, h);
-                break;
-            }
+        const hasItemInSpan = damage.hasItemInRectangle({
+            x: span[0],
+            y: -2,
+            width: span[1] - span[0] + 1,
+            height: 1,
+        });
+        if (hasItemInSpan) {
+            ctx.rect(x, y, w, h);
         }
     });
 
@@ -1053,12 +1064,8 @@ function clipDamage(
 
             const finalX = drawX + diff + 1;
             const finalWidth = c.width - diff - 1;
-            for (let i = 0; i < damage.length; i++) {
-                const d = damage[i];
-                if (d[0] === c.sourceIndex && (d[1] === -1 || d[1] === undefined)) {
-                    ctx.rect(finalX, groupHeaderHeight, finalWidth, totalHeaderHeight - groupHeaderHeight);
-                    break;
-                }
+            if (damage.has([c.sourceIndex, -1])) {
+                ctx.rect(finalX, groupHeaderHeight, finalWidth, totalHeaderHeight - groupHeaderHeight);
             }
 
             if (!includeCells) return;
@@ -1071,14 +1078,7 @@ function clipDamage(
                 getRowHeight,
                 trailingRowType,
                 (drawY, row, rh, isSticky) => {
-                    let isDamaged = false;
-                    for (let i = 0; i < damage.length; i++) {
-                        const d = damage[i];
-                        if (d[0] === c.sourceIndex && d[1] === row) {
-                            isDamaged = true;
-                            break;
-                        }
-                    }
+                    const isDamaged = damage.has([c.sourceIndex, row]);
                     if (isDamaged) {
                         const top = drawY + 1;
                         const bottom = isSticky ? top + rh - 1 : Math.min(top + rh - 1, height - stickyRowHeight);
@@ -1183,7 +1183,7 @@ function drawCells(
     drawFocus: boolean,
     trailingRowType: TrailingRowType,
     drawRegions: readonly Rectangle[],
-    damage: CellList | undefined,
+    damage: CellSet | undefined,
     selection: GridSelection,
     prelightCells: CellList | undefined,
     highlightRegions: readonly Highlight[] | undefined,
@@ -1200,7 +1200,7 @@ function drawCells(
     overrideCursor: (cursor: React.CSSProperties["cursor"]) => void,
     minimumCellWidth: number
 ): Rectangle[] | undefined {
-    let toDraw = damage?.length ?? Number.MAX_SAFE_INTEGER;
+    let toDraw = damage?.size ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
     let font = outerTheme.baseFontFull;
     ctx.font = font;
@@ -1264,6 +1264,9 @@ function drawCells(
                 trailingRowType,
                 (drawY, row, rh, isSticky, isTrailingRow) => {
                     if (row < 0) return;
+
+                    cellIndex[0] = c.sourceIndex;
+                    cellIndex[1] = row;
                     // if (damage !== undefined && !damage.some(d => d[0] === c.sourceIndex && d[1] === row)) {
                     //     return;
                     // }
@@ -1280,16 +1283,8 @@ function drawCells(
                     // As soon as this doesn't have any impact of note go back to the saner looking code. The smoke test
                     // here is to scroll to the bottom of a test case first, then scroll back up while profiling and see
                     // how many major GC collections you get. These allocate a lot of objects.
-                    if (damage !== undefined) {
-                        let found = false;
-                        for (let i = 0; i < damage.length; i++) {
-                            const d = damage[i];
-                            if (d[0] === c.sourceIndex && d[1] === row) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) return;
+                    if (damage !== undefined && !damage.has(cellIndex)) {
+                        return;
                     }
                     if (drawRegions.length > 0) {
                         let found = false;
@@ -1306,8 +1301,6 @@ function drawCells(
                     const rowSelected = selection.rows.hasIndex(row);
                     const rowDisabled = disabledRows.hasIndex(row);
 
-                    cellIndex[0] = c.sourceIndex;
-                    cellIndex[1] = row;
                     const cell: InnerGridCell = row < rows ? getCellContent(cellIndex) : loadingCell;
 
                     let cellX = drawX;
@@ -1514,7 +1507,7 @@ function drawBlanks(
     disabledRows: CompactSelection,
     trailingRowType: TrailingRowType,
     drawRegions: readonly Rectangle[],
-    damage: CellList | undefined,
+    damage: CellSet | undefined,
     theme: FullTheme
 ): void {
     if (
@@ -2113,9 +2106,9 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         renderStrategy,
         bufferA,
         bufferB,
+        damage,
         minimumCellWidth,
     } = arg;
-    let { damage } = arg;
     if (width === 0 || height === 0) return;
     const doubleBuffer = renderStrategy === "double-buffer";
     const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
@@ -2284,18 +2277,36 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
     // handle damage updates by directly drawing to the target to avoid large blits
     if (damage !== undefined) {
-        let doHeaders = false;
-        damage = damage.filter(x => {
-            doHeaders = doHeaders || x[1] < 0;
-            return (
-                x[1] < 0 ||
-                intersectRect(cellXOffset, cellYOffset, effectiveCols.length, 300, x[0], x[1], 1, 1) ||
-                intersectRect(0, cellYOffset, freezeColumns, 300, x[0], x[1], 1, 1) ||
-                (trailingRowType && intersectRect(cellXOffset, rows - 1, effectiveCols.length, 1, x[0], x[1], 1, 1))
-            );
-        });
+        const doHeaders = damage.hasHeader();
+        damage.filterToRegion([
+            {
+                x: 0,
+                y: -2,
+                width: Number.MAX_SAFE_INTEGER,
+                height: 2,
+            },
+            {
+                x: cellXOffset,
+                y: cellYOffset,
+                width: effectiveCols.length,
+                height: 300,
+            },
+            {
+                x: 0,
+                y: cellYOffset,
+                width: freezeColumns,
+                height: 300,
+            },
+            {
+                x: cellXOffset,
+                y: rows - 1,
+                width: effectiveCols.length,
+                height: 1,
+                when: trailingRowType !== "sticky",
+            },
+        ]);
 
-        if (damage.length > 0) {
+        if (damage.size > 0) {
             clipDamage(
                 targetCtx,
                 effectiveCols,
@@ -2360,12 +2371,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 drawFocus &&
                 selectionCurrent !== undefined &&
                 // this is why it sometimes fails to draw the handle on damage
-                damage.some(x => {
-                    if (itemsAreEqual(x, selectionCurrent.cell)) return true;
-                    if (fillHandleLocation === "selected-cell") return false;
-                    const loc = rectBottomRight(selectionCurrent.range);
-                    return itemsAreEqual(x, loc);
-                })
+                (damage.has(selectionCurrent.cell) ||
+                    (fillHandleLocation === "selected-cell" && damage.has(rectBottomRight(selectionCurrent.range))))
             ) {
                 drawFocusRing(
                     targetCtx,

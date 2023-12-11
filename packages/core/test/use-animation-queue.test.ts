@@ -1,6 +1,7 @@
 import { renderHook, cleanup } from "@testing-library/react-hooks";
 import { useAnimationQueue } from "../src/internal/data-grid/use-animation-queue.js";
 import { vi, expect, describe, it, beforeEach, afterEach } from "vitest";
+import { CellSet } from "../src/internal/data-grid/cell-set.js";
 
 // const OG_RAF = window.requestAnimationFrame;
 // const OG_CAF = window.cancelAnimationFrame;
@@ -41,10 +42,12 @@ describe("use-cell-sizer", () => {
 
         vi.runAllTimers();
 
-        expect(draw).toHaveBeenCalledWith([
-            [1, 2],
-            [2, 3],
-            [3, 4],
-        ]);
+        expect(draw).toHaveBeenCalledWith(
+            new CellSet([
+                [1, 2],
+                [2, 3],
+                [3, 4],
+            ])
+        );
     });
 });

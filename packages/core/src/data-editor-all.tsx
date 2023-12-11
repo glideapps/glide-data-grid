@@ -3,7 +3,7 @@ import { DataEditor, type DataEditorProps, type DataEditorRef } from "./data-edi
 import { AllCellRenderers } from "./cells/index.js";
 import { sprites } from "./internal/data-grid/sprites.js";
 import ImageWindowLoaderImpl from "./common/image-window-loader.js";
-import type { ImageWindowLoader } from "./internal/data-grid/data-grid-types.js";
+import type { ImageWindowLoader } from "./internal/data-grid/image-window-loader-interface.js";
 
 export type DataEditorAllProps = Omit<DataEditorProps, "renderers" | "imageWindowLoader"> & {
     imageWindowLoader?: ImageWindowLoader;
