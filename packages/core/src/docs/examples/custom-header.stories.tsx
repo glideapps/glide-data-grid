@@ -39,12 +39,12 @@ export const CustomDrawing: React.VFC = () => {
         draw(); // draw up front to draw over the cell
         const { ctx, rect } = args;
 
-        const size = 10;
+        const size = 7;
 
         ctx.beginPath();
-        ctx.moveTo(rect.x + rect.width - size, rect.y);
-        ctx.lineTo(rect.x + rect.width, rect.y + size);
-        ctx.lineTo(rect.x + rect.width, rect.y);
+        ctx.moveTo(rect.x + rect.width - size, rect.y + 1);
+        ctx.lineTo(rect.x + rect.width, rect.y + size + 1);
+        ctx.lineTo(rect.x + rect.width, rect.y + 1);
         ctx.closePath();
 
         ctx.save();
