@@ -493,9 +493,9 @@ export interface DataEditorProps extends Props {
      */
     readonly onVisibleRegionChanged?: (
         range: Rectangle,
-        tx?: number,
-        ty?: number,
-        extras?: {
+        tx: number,
+        ty: number,
+        extras: {
             /** The selected item if visible */
             selected?: Item;
             /** A selection of visible freeze columns */
@@ -2209,8 +2209,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             clientWidth: number,
             clientHeight: number,
             rightElWidth: number,
-            tx?: number,
-            ty?: number
+            tx: number,
+            ty: number
         ) => {
             hasJustScrolled.current = false;
             let selected = currentCell;
