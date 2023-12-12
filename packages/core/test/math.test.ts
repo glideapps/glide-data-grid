@@ -32,4 +32,19 @@ describe("getClosestRect", () => {
     it("should return a correct rectangle for a far-away point", () => {
         expect(getClosestRect(testRect, 100, 100)).to.deep.equal({ x: 10, y: 15, width: 5, height: 86 });
     });
+
+    it("should work with single cell starting rect", () => {
+        expect(
+            getClosestRect(
+                {
+                    x: 10,
+                    y: 10,
+                    width: 1,
+                    height: 1,
+                },
+                20,
+                10
+            )
+        ).to.deep.equal({ x: 11, y: 10, width: 10, height: 1 });
+    });
 });

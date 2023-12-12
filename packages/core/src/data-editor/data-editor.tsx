@@ -1174,7 +1174,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             ? gridSelection.current.range
             : undefined;
     const highlightRegions = React.useMemo(() => {
-        if ((highlightRegionsIn === undefined || highlightRegionsIn.length === 0) && highlightRange === undefined)
+        if (
+            (highlightRegionsIn === undefined || highlightRegionsIn.length === 0) &&
+            highlightRange === undefined &&
+            fillHighlightRegion === undefined
+        )
             return undefined;
 
         const regions: Highlight[] = [];
@@ -2460,7 +2464,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                 if (mouseState.fillHandle === true && mouseState.previousSelection?.current !== undefined) {
                     const prevRange = mouseState.previousSelection.current.range;
-                    setFillHighlightRegion(getClosestRect(prevRange, col, row));
+                    const rect = getClosestRect(prevRange, col, row);
+                    setFillHighlightRegion(rect);
                 } else {
                     const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
                     if (startedFromLastStickyRow) return;
