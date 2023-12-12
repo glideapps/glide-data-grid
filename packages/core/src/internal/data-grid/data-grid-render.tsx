@@ -2381,7 +2381,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 selectionCurrent !== undefined &&
                 // this is why it sometimes fails to draw the handle on damage
                 (damage.has(selectionCurrent.cell) ||
-                    (fillHandleLocation === "selected-cell" && damage.has(rectBottomRight(selectionCurrent.range))))
+                    (fillHandleLocation === "selected-range" && damage.has(rectBottomRight(selectionCurrent.range))))
             ) {
                 drawFocusRing(
                     targetCtx,
