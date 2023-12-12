@@ -1842,17 +1842,13 @@ function drawFocusRing(
     getCellContent: (cell: Item) => InnerGridCell,
     trailingRowType: TrailingRowType,
     fillHandle: boolean,
-    fillHandleLocation: "selected-cell" | "selected-range",
     rows: number
 ): (() => void) | undefined {
     if (selectedCell.current === undefined) return undefined;
 
     const range = selectedCell.current.range;
     const currentItem = selectedCell.current.cell;
-    const fillHandleTarget =
-        fillHandleLocation === "selected-cell"
-            ? selectedCell.current.cell
-            : [range.x + range.width - 1, range.y + range.height - 1];
+    const fillHandleTarget = [range.x + range.width - 1, range.y + range.height - 1];
     const mustDraw = effectiveCols.some(c => c.sourceIndex === currentItem[0] || c.sourceIndex === fillHandleTarget[0]);
 
     if (!mustDraw) return undefined;
@@ -2018,7 +2014,6 @@ function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): bo
         current.dragAndDropState !== last.dragAndDropState ||
         current.prelightCells !== last.prelightCells ||
         current.touchMode !== last.touchMode ||
-        current.fillHandleLocation !== last.fillHandleLocation ||
         current.scrolling !== last.scrolling
     ) {
         return false;
@@ -2084,7 +2079,6 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         isResizing,
         selection,
         fillHandle,
-        fillHandleLocation,
         lastRowSticky: trailingRowType,
         rows,
         getCellContent,
@@ -2273,7 +2267,6 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 getCellContent,
                 trailingRowType,
                 fillHandle,
-                fillHandleLocation,
                 rows
             );
         }
@@ -2380,8 +2373,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 drawFocus &&
                 selectionCurrent !== undefined &&
                 // this is why it sometimes fails to draw the handle on damage
-                (damage.has(selectionCurrent.cell) ||
-                    (fillHandleLocation === "selected-range" && damage.has(rectBottomRight(selectionCurrent.range))))
+                damage.has(rectBottomRight(selectionCurrent.range))
             ) {
                 drawFocusRing(
                     targetCtx,
@@ -2399,7 +2391,6 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                     getCellContent,
                     trailingRowType,
                     fillHandle,
-                    fillHandleLocation,
                     rows
                 );
             }
@@ -2514,7 +2505,6 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
               getCellContent,
               trailingRowType,
               fillHandle,
-              fillHandleLocation,
               rows
           )
         : undefined;

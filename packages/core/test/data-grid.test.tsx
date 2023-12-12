@@ -35,7 +35,6 @@ const basicProps: DataGridProps = {
     disabledRows: undefined,
     eventTargetRef: undefined,
     fillHandle: undefined,
-    fillHandleLocation: "selected-cell",
     fixedShadowX: undefined,
     fixedShadowY: undefined,
     getGroupDetails: undefined,

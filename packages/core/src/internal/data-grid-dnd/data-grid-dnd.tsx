@@ -361,7 +361,6 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             eventTargetRef={p.eventTargetRef}
             experimental={p.experimental}
             fillHandle={p.fillHandle}
-            fillHandleLocation={p.fillHandleLocation}
             firstColAccessible={p.firstColAccessible}
             fixedShadowX={p.fixedShadowX}
             fixedShadowY={p.fixedShadowY}

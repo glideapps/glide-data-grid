@@ -111,7 +111,6 @@ export function Simplenotest() {
             drawCell={undefined}
             disabledRows={undefined}
             fillHandle={undefined}
-            fillHandleLocation="selected-cell"
             fixedShadowX={undefined}
             fixedShadowY={undefined}
             getGroupDetails={undefined}

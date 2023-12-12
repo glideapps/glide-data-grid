@@ -139,13 +139,6 @@ export interface DataGridProps {
      */
     readonly fillHandle: boolean | undefined;
 
-    /**
-     * Controls where the fill handle is drawn.
-     * @defaultValue "selected-range"
-     * @group Editing
-     */
-    readonly fillHandleLocation: "selected-cell" | "selected-range";
-
     readonly disabledRows: CompactSelection | undefined;
     /**
      * Allows passing a custom image window loader.
@@ -317,7 +310,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         cellYOffset,
         headerHeight,
         fillHandle = false,
-        fillHandleLocation,
         groupHeaderHeight,
         rowHeight,
         rows,
@@ -614,13 +606,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
                 let isFillHandle = false;
                 if (selection.current !== undefined && canBeFillHandle) {
-                    let targetCell = selection.current.cell;
-                    if (fillHandleLocation === "selected-range") {
-                        targetCell = [
-                            selection.current.range.x + selection.current.range.width - 1,
-                            selection.current.range.y + selection.current.range.height - 1,
-                        ];
-                    }
+                    const targetCell = [
+                        selection.current.range.x + selection.current.range.width - 1,
+                        selection.current.range.y + selection.current.range.height - 1,
+                    ];
                     isFillHandle = targetCell[0] === col && targetCell[1] === row;
                 }
 
@@ -659,7 +648,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getBoundsForItem,
             fillHandle,
             selection,
-            fillHandleLocation,
         ]
     );
 
@@ -754,7 +742,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             isFocused,
             selection,
             fillHandle,
-            fillHandleLocation,
             drawCellCallback,
             overrideCursor,
             lastRowSticky: trailingRowType,
@@ -824,7 +811,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         isFocused,
         selection,
         fillHandle,
-        fillHandleLocation,
         trailingRowType,
         rows,
         drawFocusRing,
@@ -1243,13 +1229,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             setHoveredOnEdge(args.kind === headerKind && args.isEdge && notRowMarkerCol && allowResize === true);
 
             if (fillHandle && selection.current !== undefined) {
-                const targetItem =
-                    fillHandleLocation === "selected-range"
-                        ? [
-                              selection.current.range.x + selection.current.range.width - 1,
-                              selection.current.range.y + selection.current.range.height - 1,
-                          ]
-                        : selection.current.cell;
+                const targetItem = [
+                    selection.current.range.x + selection.current.range.width - 1,
+                    selection.current.range.y + selection.current.range.height - 1,
+                ];
                 const [col, row] = targetItem;
                 const sb = getBoundsForItem(canvas, col, row);
                 const x = ev.clientX;
@@ -1281,7 +1264,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getCellContent,
             getCellRenderer,
             damageInternal,
-            fillHandleLocation,
             getBoundsForItem,
         ]
     );

@@ -42,7 +42,6 @@ import {
     headerKind,
     BooleanEmpty,
     BooleanIndeterminate,
-    isRectangleEqual,
     type FillPatternEventArgs,
 } from "../internal/data-grid/data-grid-types.js";
 import DataGridSearch, { type DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
@@ -74,8 +73,9 @@ import { useAutoscroll } from "./use-autoscroll.js";
 import type { CustomRenderer, CellRenderer, InternalCellRenderer } from "../cells/cell-types.js";
 import { decodeHTML, type CopyBuffer } from "./copy-paste.js";
 import { useRemAdjuster } from "./use-rem-adjuster.js";
-import type { Highlight } from "../internal/data-grid/data-grid-render.js";
+import { type Highlight } from "../internal/data-grid/data-grid-render.js";
 import { withAlpha } from "../internal/data-grid/color-parser.js";
+import { combineRects, getClosestRect } from "../common/math.js";
 
 const DataGridOverlayEditor = React.lazy(
     async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
@@ -795,7 +795,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnResizeStart: onColumnResizeStartIn,
         customRenderers: additionalRenderers,
         fillHandle,
-        fillHandleLocation = "selected-range",
         drawFocusRing,
         experimental,
         fixedShadowX,
@@ -1166,6 +1165,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [onCellEdited, onCellsEdited, rowMarkerOffset]
     );
 
+    const [fillHighlightRegion, setFillHighlightRegion] = React.useState<Rectangle | undefined>();
+
     // this will generally be undefined triggering the memo less often
     const highlightRange =
         gridSelection.current !== undefined &&
@@ -1195,6 +1196,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
         }
 
+        if (fillHighlightRegion !== undefined) {
+            regions.push({
+                color: withAlpha(mergedTheme.accentColor, 0),
+                range: fillHighlightRegion,
+                style: "dashed",
+            });
+        }
+
         if (highlightRange !== undefined) {
             regions.push({
                 color: withAlpha(mergedTheme.accentColor, 0.5),
@@ -1204,7 +1213,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         }
 
         return regions.length > 0 ? regions : undefined;
-    }, [highlightRange, highlightRegionsIn, mangledCols.length, mergedTheme.accentColor, rowMarkerOffset]);
+    }, [
+        fillHighlightRegion,
+        highlightRange,
+        highlightRegionsIn,
+        mangledCols.length,
+        mergedTheme.accentColor,
+        rowMarkerOffset,
+    ]);
 
     const mangledColsRef = React.useRef(mangledCols);
     mangledColsRef.current = mangledCols;
@@ -2114,6 +2130,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (args: GridMouseEventArgs, isOutside: boolean) => {
             const mouse = mouseState;
             setMouseState(undefined);
+            setFillHighlightRegion(undefined);
             setScrollDir(undefined);
             isActivelyDraggingHeader.current = false;
 
@@ -2122,10 +2139,18 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (
                 mouse?.fillHandle === true &&
                 gridSelection.current !== undefined &&
-                mouse.previousSelection !== undefined &&
-                !isRectangleEqual(mouse.previousSelection?.current?.range, gridSelection.current.range)
+                mouse.previousSelection?.current !== undefined
             ) {
-                void fillPattern(mouse.previousSelection, gridSelection);
+                if (fillHighlightRegion === undefined) return;
+                const newRange = {
+                    ...gridSelection,
+                    current: {
+                        ...gridSelection.current,
+                        range: combineRects(mouse.previousSelection.current.range, fillHighlightRegion),
+                    },
+                };
+                void fillPattern(mouse.previousSelection, newRange);
+                setGridSelection(newRange, true);
                 return;
             }
 
@@ -2264,10 +2289,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         },
         [
             mouseState,
-            rowMarkerOffset,
             gridSelection,
-            onCellClicked,
+            rowMarkerOffset,
+            fillHighlightRegion,
             fillPattern,
+            setGridSelection,
+            onCellClicked,
             getMangledCellContent,
             getCellRenderer,
             themeForCell,
@@ -2279,8 +2306,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onGroupHeaderContextMenu,
             handleSelect,
             onGroupHeaderClicked,
-            normalSizeColumn,
             onHeaderClicked,
+            normalSizeColumn,
             handleGroupHeaderSelection,
         ]
     );
@@ -2431,36 +2458,41 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     row = visibleRegionRef.current.y;
                 }
 
-                const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
-                if (startedFromLastStickyRow) return;
+                if (mouseState.fillHandle === true && mouseState.previousSelection?.current !== undefined) {
+                    const prevRange = mouseState.previousSelection.current.range;
+                    setFillHighlightRegion(getClosestRect(prevRange, col, row));
+                } else {
+                    const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
+                    if (startedFromLastStickyRow) return;
 
-                const landedOnLastStickyRow = lastRowSticky && row === rows;
-                if (landedOnLastStickyRow) {
-                    if (args.kind === outOfBoundsKind) row--;
-                    else return;
+                    const landedOnLastStickyRow = lastRowSticky && row === rows;
+                    if (landedOnLastStickyRow) {
+                        if (args.kind === outOfBoundsKind) row--;
+                        else return;
+                    }
+
+                    col = Math.max(col, rowMarkerOffset);
+
+                    const deltaX = col - selectedCol;
+                    const deltaY = row - selectedRow;
+
+                    const newRange: Rectangle = {
+                        x: deltaX >= 0 ? selectedCol : col,
+                        y: deltaY >= 0 ? selectedRow : row,
+                        width: Math.abs(deltaX) + 1,
+                        height: Math.abs(deltaY) + 1,
+                    };
+
+                    setCurrent(
+                        {
+                            ...gridSelection.current,
+                            range: newRange,
+                        },
+                        true,
+                        false,
+                        "drag"
+                    );
                 }
-
-                col = Math.max(col, rowMarkerOffset);
-
-                const deltaX = col - selectedCol;
-                const deltaY = row - selectedRow;
-
-                const newRange: Rectangle = {
-                    x: deltaX >= 0 ? selectedCol : col,
-                    y: deltaY >= 0 ? selectedRow : row,
-                    width: Math.abs(deltaX) + 1,
-                    height: Math.abs(deltaY) + 1,
-                };
-
-                setCurrent(
-                    {
-                        ...gridSelection.current,
-                        range: newRange,
-                    },
-                    true,
-                    false,
-                    "drag"
-                );
             }
 
             onItemHovered?.({ ...args, location: [args.location[0] - rowMarkerOffset, args.location[1]] as any });
@@ -3749,7 +3781,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 inHeight={height ?? idealHeight}>
                 <DataGridSearch
                     fillHandle={fillHandle}
-                    fillHandleLocation={fillHandleLocation}
                     drawFocusRing={drawFocusRing}
                     experimental={experimental}
                     fixedShadowX={fixedShadowX}

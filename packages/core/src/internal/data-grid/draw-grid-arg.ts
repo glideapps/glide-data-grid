@@ -53,7 +53,6 @@ export interface DrawGridArg {
     readonly drawFocus: boolean;
     readonly selection: GridSelection;
     readonly fillHandle: boolean;
-    readonly fillHandleLocation: "selected-cell" | "selected-range";
     readonly lastRowSticky: TrailingRowType;
     readonly hyperWrapping: boolean;
     readonly rows: number;
