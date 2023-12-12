@@ -107,7 +107,7 @@ const renderer: CustomRenderer<SparklineCell> = {
             if (hoverX !== undefined && graphKind === "line" && displayValues !== undefined) {
                 ctx.beginPath();
                 const closest = Math.min(values.length - 1, Math.max(0, Math.round((hoverX - padX) / xStep)));
-                ctx.moveTo(drawX + closest * xStep, rect.y);
+                ctx.moveTo(drawX + closest * xStep, rect.y + 1);
                 ctx.lineTo(drawX + closest * xStep, rect.y + rect.height);
 
                 ctx.lineWidth = 1;

@@ -1419,7 +1419,11 @@ function drawCells(
                         if (prepResult !== undefined) {
                             prepResult.fillStyle = fill;
                         }
-                        ctx.fillRect(cellX, drawY, cellWidth, rh);
+                        if (damage !== undefined) {
+                            ctx.fillRect(cellX + 1, drawY + 1, cellWidth - 1, rh - 1);
+                        } else {
+                            ctx.fillRect(cellX, drawY, cellWidth, rh);
+                        }
                     }
 
                     if (cell.style === "faded") {
@@ -2307,6 +2311,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         ]);
 
         if (damage.size > 0) {
+            // the reason we unclip as soon as possible is because complex clip regions are hella expensive
+            targetCtx.save();
             clipDamage(
                 targetCtx,
                 effectiveCols,
@@ -2326,7 +2332,10 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
             targetCtx.fillStyle = theme.bgCell;
             targetCtx.fillRect(0, totalHeaderHeight + 1, width, height - totalHeaderHeight - 1);
+            targetCtx.restore();
 
+            // it is important to remember we are not clipped here. This means cells should be careful not to draw over
+            // their border when damaging
             drawCells(
                 targetCtx,
                 effectiveCols,
