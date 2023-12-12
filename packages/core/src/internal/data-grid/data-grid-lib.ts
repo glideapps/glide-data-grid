@@ -359,7 +359,7 @@ export function drawWithLastUpdate(
             const fade = 1 - progress / animTime;
             ctx.globalAlpha = fade;
             ctx.fillStyle = theme.bgSearchResult;
-            ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+            ctx.fillRect(rect.x + 1, rect.y + 1, rect.width - 1, rect.height - 1);
             ctx.globalAlpha = 1;
             if (lastPrep !== undefined) {
                 lastPrep.fillStyle = theme.bgSearchResult;
