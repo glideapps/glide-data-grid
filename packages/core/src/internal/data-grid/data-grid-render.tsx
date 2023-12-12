@@ -1704,7 +1704,7 @@ function drawHighlightRings(
             );
             const unfreezeSectionleftBounds = computeBounds(
                 freezeColumns,
-                r.y + r.height - 1,
+                r.y,
                 width,
                 height,
                 groupHeaderHeight,
