@@ -496,10 +496,15 @@ If `markdownDivCreateNode` is specified, then it will be used to render Markdown
 ## onVisibleRegionChanged
 
 ```ts
-onVisibleRegionChanged?: (range: Rectangle) => void;
+onVisibleRegionChanged?: (
+    range: Rectangle,
+    tx: number,
+    ty: number,
+    extras: { selected?: Item; freezeRegion?: Rectangle };
+) => void;
 ```
 
-`onVisibleRegionChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`.
+`onVisibleRegionChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`. The x and y transforms of the cell region are passed as `tx` and `ty`. The current selection and frozen region are passed in the `extras` object.
 
 ---
 
