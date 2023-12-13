@@ -1,18 +1,19 @@
-import { renderHook } from "@testing-library/react-hooks";
-import { useAutoscroll } from "../src/data-editor/use-autoscroll";
+import { renderHook, cleanup } from "@testing-library/react-hooks";
+import { useAutoscroll } from "../src/data-editor/use-autoscroll.js";
+import { vi, expect, describe, it, afterEach } from "vitest";
 
 describe("use-auto-scroll", () => {
     // beforeEach(() => {
-    //     jest.spyOn(window, "requestAnimationFrame").mockImplementation(cb => window.setTimeout(cb, 16));
+    //     vi.spyOn(window, "requestAnimationFrame").mockImplementation(cb => window.setTimeout(cb, 16));
     // });
 
-    // afterEach(() => {
-    //     (window.requestAnimationFrame as any).mockRestore();
-    // });
+    afterEach(async () => {
+        await cleanup();
+    });
 
     it("No scroll test", async () => {
-        const scrollBy = jest.fn();
-        jest.useFakeTimers();
+        const scrollBy = vi.fn();
+        vi.useFakeTimers();
         renderHook(() =>
             useAutoscroll([0, 0], {
                 current: {
@@ -21,13 +22,13 @@ describe("use-auto-scroll", () => {
             } as any)
         );
 
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
         expect(scrollBy).not.toBeCalled();
     });
 
     it("Scroll left", async () => {
-        const scrollBy = jest.fn();
-        jest.useFakeTimers();
+        const scrollBy = vi.fn();
+        vi.useFakeTimers();
         renderHook(() =>
             useAutoscroll([-1, 0], {
                 current: {
@@ -36,8 +37,8 @@ describe("use-auto-scroll", () => {
             } as any)
         );
 
-        jest.runOnlyPendingTimers(); // the first one primes the pump
-        jest.runOnlyPendingTimers(); // the second one runs it
+        vi.runOnlyPendingTimers(); // the first one primes the pump
+        vi.runOnlyPendingTimers(); // the second one runs it
         expect(scrollBy).toHaveBeenCalledTimes(1);
 
         const [xScroll, yScroll] = scrollBy.mock.calls[0];
@@ -46,8 +47,8 @@ describe("use-auto-scroll", () => {
     });
 
     it("Scroll right", async () => {
-        const scrollBy = jest.fn();
-        jest.useFakeTimers();
+        const scrollBy = vi.fn();
+        vi.useFakeTimers();
         renderHook(() =>
             useAutoscroll([1, 0], {
                 current: {
@@ -56,8 +57,8 @@ describe("use-auto-scroll", () => {
             } as any)
         );
 
-        jest.runOnlyPendingTimers(); // the first one primes the pump
-        jest.runOnlyPendingTimers(); // the second one runs it
+        vi.runOnlyPendingTimers(); // the first one primes the pump
+        vi.runOnlyPendingTimers(); // the second one runs it
         expect(scrollBy).toHaveBeenCalledTimes(1);
 
         const [xScroll, yScroll] = scrollBy.mock.calls[0];
@@ -66,8 +67,8 @@ describe("use-auto-scroll", () => {
     });
 
     it("Scroll down", async () => {
-        const scrollBy = jest.fn();
-        jest.useFakeTimers();
+        const scrollBy = vi.fn();
+        vi.useFakeTimers();
         renderHook(() =>
             useAutoscroll([0, 1], {
                 current: {
@@ -76,8 +77,8 @@ describe("use-auto-scroll", () => {
             } as any)
         );
 
-        jest.runOnlyPendingTimers(); // the first one primes the pump
-        jest.runOnlyPendingTimers(); // the second one runs it
+        vi.runOnlyPendingTimers(); // the first one primes the pump
+        vi.runOnlyPendingTimers(); // the second one runs it
         expect(scrollBy).toHaveBeenCalledTimes(1);
 
         const [xScroll, yScroll] = scrollBy.mock.calls[0];
@@ -86,8 +87,8 @@ describe("use-auto-scroll", () => {
     });
 
     it("Scroll up", async () => {
-        const scrollBy = jest.fn();
-        jest.useFakeTimers();
+        const scrollBy = vi.fn();
+        vi.useFakeTimers();
         renderHook(() =>
             useAutoscroll([0, -1], {
                 current: {
@@ -96,8 +97,8 @@ describe("use-auto-scroll", () => {
             } as any)
         );
 
-        jest.runOnlyPendingTimers(); // the first one primes the pump
-        jest.runOnlyPendingTimers(); // the second one runs it
+        vi.runOnlyPendingTimers(); // the first one primes the pump
+        vi.runOnlyPendingTimers(); // the second one runs it
         expect(scrollBy).toHaveBeenCalledTimes(1);
 
         const [xScroll, yScroll] = scrollBy.mock.calls[0];

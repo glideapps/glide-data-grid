@@ -123,6 +123,12 @@ const dataEditorBaseTheme: Theme = {
     lineHeight: 1.4, //unitless scaler depends on your font
 };
 
+export interface FullTheme extends Theme {
+    headerFontFull: string;
+    baseFontFull: string;
+    markerFontFull: string;
+}
+
 /** @category Theme */
 export function getDataEditorTheme(): Theme {
     return dataEditorBaseTheme;
@@ -133,4 +139,45 @@ export const ThemeContext = React.createContext<Theme>(dataEditorBaseTheme);
 /** @category Hooks */
 export function useTheme(): Theme {
     return React.useContext(ThemeContext);
+}
+
+export function mergeAndRealizeTheme(theme: Theme, ...overlays: Partial<Theme | undefined>[]): FullTheme {
+    const merged: any = { ...theme };
+
+    for (const overlay of overlays) {
+        if (overlay !== undefined) {
+            for (const key in overlay) {
+                // eslint-disable-next-line no-prototype-builtins
+                if (overlay.hasOwnProperty(key)) {
+                    merged[key] = (overlay as any)[key];
+                }
+            }
+        }
+    }
+
+    if (
+        merged.headerFontFull === undefined ||
+        theme.fontFamily !== merged.fontFamily ||
+        theme.headerFontStyle !== merged.headerFontStyle
+    ) {
+        merged.headerFontFull = `${merged.headerFontStyle} ${merged.fontFamily}`;
+    }
+
+    if (
+        merged.baseFontFull === undefined ||
+        theme.fontFamily !== merged.fontFamily ||
+        theme.baseFontStyle !== merged.baseFontStyle
+    ) {
+        merged.baseFontFull = `${merged.baseFontStyle} ${merged.fontFamily}`;
+    }
+
+    if (
+        merged.markerFontFull === undefined ||
+        theme.fontFamily !== merged.fontFamily ||
+        theme.markerFontStyle !== merged.markerFontStyle
+    ) {
+        merged.markerFontFull = `${merged.markerFontStyle} ${merged.fontFamily}`;
+    }
+
+    return merged;
 }

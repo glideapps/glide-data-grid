@@ -1,5 +1,8 @@
-import type { ImageWindowLoader, Item, Rectangle } from "../data-grid/data-grid-types";
+import { type Rectangle } from "../internal/data-grid/data-grid-types.js";
+import { CellSet } from "../internal/data-grid/cell-set.js";
 import throttle from "lodash/throttle.js";
+import { unpackCol, unpackRow, packColRowToNumber, unpackNumberToColRow } from "./render-state-provider.js";
+import type { ImageWindowLoader } from "../internal/data-grid/image-window-loader-interface.js";
 
 interface LoadResult {
     img: HTMLImageElement | undefined;
@@ -8,30 +11,10 @@ interface LoadResult {
     cells: number[];
 }
 
-const rowShift = 1 << 16;
-
 const imgPool: HTMLImageElement[] = [];
 
-function packColRowToNumber(col: number, row: number) {
-    return row * rowShift + col;
-}
-
-function unpackCol(packed: number): number {
-    return packed % rowShift;
-}
-
-function unpackRow(packed: number, col: number): number {
-    return (packed - col) / rowShift;
-}
-
-function unpackNumberToColRow(packed: number): [number, number] {
-    const col = unpackCol(packed);
-    const row = unpackRow(packed, col);
-    return [col, row];
-}
-
 class ImageWindowLoaderImpl implements ImageWindowLoader {
-    private imageLoaded: (locations: readonly Item[]) => void = () => undefined;
+    private imageLoaded: (locations: CellSet) => void = () => undefined;
     private loadedLocations: [number, number][] = [];
 
     public visibleWindow: Rectangle = {
@@ -45,7 +28,7 @@ class ImageWindowLoaderImpl implements ImageWindowLoader {
 
     private isInWindow = (packed: number) => {
         const col = unpackCol(packed);
-        const row = unpackRow(packed, col);
+        const row = unpackRow(packed);
         const w = this.visibleWindow;
         if (col < this.freezeCols && row >= w.y && row <= w.y + w.height) return true;
         return col >= w.x && col <= w.x + w.width && row >= w.y && row <= w.y + w.height;
@@ -53,13 +36,13 @@ class ImageWindowLoaderImpl implements ImageWindowLoader {
 
     private cache: Record<string, LoadResult> = {};
 
-    public setCallback(imageLoaded: (locations: readonly Item[]) => void) {
+    public setCallback(imageLoaded: (locations: CellSet) => void) {
         this.imageLoaded = imageLoaded;
     }
 
     // eslint-disable-next-line unicorn/consistent-function-scoping
     private sendLoaded = throttle(() => {
-        this.imageLoaded(this.loadedLocations);
+        this.imageLoaded(new CellSet(this.loadedLocations));
         this.loadedLocations = [];
     }, 20);
 

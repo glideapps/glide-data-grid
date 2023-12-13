@@ -10,9 +10,9 @@ import {
     type Theme,
 } from "@glideapps/glide-data-grid";
 import { faker } from "@faker-js/faker";
-import { useCollapsingGroups, useColumnSort, useMoveableColumns } from "..";
-import { useUndoRedo } from "../use-undo-redo";
-import { useMockDataGenerator } from "./utils";
+import { useCollapsingGroups, useColumnSort, useMoveableColumns } from "../index.js";
+import { useUndoRedo } from "../use-undo-redo.js";
+import { useMockDataGenerator } from "./utils.js";
 
 faker.seed(1337);
 

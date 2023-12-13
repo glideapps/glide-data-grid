@@ -1,13 +1,18 @@
 import * as React from "react";
-import { render } from "@testing-library/react";
-import BubblesOverlayEditor from "../src/data-grid-overlay-editor/private/bubbles-overlay-editor";
-import DrilldownOverlayEditor from "../src/data-grid-overlay-editor/private/drilldown-overlay-editor";
-import { GridCellKind, ImageOverlayEditor } from "../src";
-import { MarkdownOverlayEditor } from "../src/data-grid-overlay-editor/private/markdown-overlay-editor";
-import NumberOverlayEditor from "../src/data-grid-overlay-editor/private/number-overlay-editor";
-import UriOverlayEditor from "../src/data-grid-overlay-editor/private/uri-overlay-editor";
+import { render, cleanup } from "@testing-library/react";
+import BubblesOverlayEditor from "../src/internal/data-grid-overlay-editor/private/bubbles-overlay-editor.js";
+import DrilldownOverlayEditor from "../src/internal/data-grid-overlay-editor/private/drilldown-overlay-editor.js";
+import { GridCellKind, ImageOverlayEditor } from "../src/index.js";
+import { MarkdownOverlayEditor } from "../src/internal/data-grid-overlay-editor/private/markdown-overlay-editor.js";
+import NumberOverlayEditor from "../src/internal/data-grid-overlay-editor/private/number-overlay-editor.js";
+import UriOverlayEditor from "../src/internal/data-grid-overlay-editor/private/uri-overlay-editor.js";
+import { vi, describe, test, afterEach } from "vitest";
 
 describe("data-grid-overlay", () => {
+    afterEach(() => {
+        cleanup();
+    });
+
     test("Smoke test bubbles", async () => {
         render(<BubblesOverlayEditor bubbles={["A", "B"]} />);
     });
@@ -17,13 +22,13 @@ describe("data-grid-overlay", () => {
     });
 
     test("Smoke test image overlay", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
         render(<ImageOverlayEditor canWrite={false} onCancel={spy} onChange={spy} urls={["https://www.google.com"]} />);
     });
 
     test("Smoke test markdown overlay", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
         render(
             <MarkdownOverlayEditor
@@ -41,13 +46,13 @@ describe("data-grid-overlay", () => {
     });
 
     test("Smoke test number overlay", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
         render(<NumberOverlayEditor highlight={false} onChange={spy} value={35} />);
     });
 
     test("Smoke test uri overlay editor", async () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
         render(
             <UriOverlayEditor

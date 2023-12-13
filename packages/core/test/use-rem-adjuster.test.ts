@@ -1,7 +1,12 @@
-import { renderHook } from "@testing-library/react-hooks";
-import { useRemAdjuster } from "../src/data-editor/use-rem-adjuster";
+import { renderHook, cleanup } from "@testing-library/react-hooks";
+import { useRemAdjuster } from "../src/data-editor/use-rem-adjuster.js";
+import { expect, describe, it, afterEach } from "vitest";
 
 describe("useDataEditorDimensions", () => {
+    afterEach(async () => {
+        await cleanup();
+    });
+
     it("should return default dimensions when no props are passed", () => {
         const { result } = renderHook(() =>
             useRemAdjuster({

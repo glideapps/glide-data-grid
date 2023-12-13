@@ -49,7 +49,7 @@ const StarSVG = () => (
 );
 
 const EditorWrap = styled.div`
-    .active {
+    .gdg-active {
         color: var(--gdg-text-dark);
     }
 
@@ -101,7 +101,7 @@ const renderer: CustomRenderer<StarCell> = {
                 {[0, 1, 2, 3, 4].map(index => (
                     <div
                         key={index}
-                        className={p.value.data.rating < index + 1 ? "inactive" : "active"}
+                        className={p.value.data.rating < index + 1 ? "gdg-inactive" : "gdg-active"}
                         onClick={() => {
                             p.onChange({
                                 ...p.value,

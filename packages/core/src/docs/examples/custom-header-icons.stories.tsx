@@ -1,14 +1,14 @@
 import React from "react";
-import { DataEditor } from "../../data-editor/data-editor";
+import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
 import {
     BeautifulWrapper,
     Description,
     PropName,
     defaultProps,
     useAllMockedKinds,
-} from "../../data-editor/stories/utils";
-import type { SpriteMap } from "../../data-grid/data-grid-sprites";
-import { SimpleThemeWrapper } from "../../stories/story-utils";
+} from "../../data-editor/stories/utils.js";
+import type { SpriteMap } from "../../internal/data-grid/data-grid-sprites.js";
+import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",

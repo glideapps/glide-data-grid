@@ -1,8 +1,13 @@
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook, cleanup } from "@testing-library/react-hooks";
 import { act } from "react-dom/test-utils";
-import { useStateWithReactiveInput } from "../src/common/utils";
+import { useStateWithReactiveInput } from "../src/common/utils.js";
+import { expect, describe, test, afterEach } from "vitest";
 
 describe("useStateWithReactiveInput", () => {
+    afterEach(async () => {
+        await cleanup();
+    });
+
     test("initial state", () => {
         const { result } = renderHook(() => useStateWithReactiveInput(20));
         expect(result.current[0]).toBe(20);

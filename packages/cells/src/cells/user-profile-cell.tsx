@@ -62,7 +62,7 @@ const renderer: CustomRenderer<UserProfileCell> = {
         }
 
         if (name !== undefined) {
-            ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+            ctx.font = theme.baseFontFull;
             ctx.fillStyle = theme.textDark;
             ctx.fillText(name, drawX + radius * 2 + xPad, rect.y + rect.height / 2 + getMiddleCenterBias(ctx, theme));
         }

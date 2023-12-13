@@ -1,4 +1,5 @@
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const ResolveTypeScriptPlugin = require("resolve-typescript-plugin");
 
 module.exports = {
     stories: ["../**/src/**/*.stories.tsx"],
@@ -32,6 +33,8 @@ module.exports = {
         });
 
         config.optimization.minimize = false;
+        config.devtool = "source-map";
+        config.resolve.plugins = [new ResolveTypeScriptPlugin()];
 
         return config;
     },

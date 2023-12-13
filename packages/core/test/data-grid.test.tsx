@@ -1,9 +1,12 @@
 import * as React from "react";
-import { render, fireEvent, screen } from "@testing-library/react";
-import DataGrid, { type DataGridProps, type DataGridRef } from "../src/data-grid/data-grid";
-import { CompactSelection, GridCellKind } from "../src/data-grid/data-grid-types";
-import { getDefaultTheme } from "../src";
-import { CellRenderers } from "../src/data-grid/cells";
+import { render, fireEvent, screen, cleanup } from "@testing-library/react";
+import DataGrid, { type DataGridProps, type DataGridRef } from "../src/internal/data-grid/data-grid.js";
+import { CompactSelection, GridCellKind } from "../src/internal/data-grid/data-grid-types.js";
+import { getDefaultTheme } from "../src/index.js";
+import { AllCellRenderers } from "../src/cells/index.js";
+import { vi, expect, describe, test, beforeEach, afterEach } from "vitest";
+import ImageWindowLoaderImpl from "../src/common/image-window-loader.js";
+import { mergeAndRealizeTheme } from "../src/common/styles.js";
 
 const basicProps: DataGridProps = {
     cellXOffset: 0,
@@ -37,15 +40,15 @@ const basicProps: DataGridProps = {
     getGroupDetails: undefined,
     getRowThemeOverride: undefined,
     highlightRegions: undefined,
-    imageWindowLoader: undefined,
+    imageWindowLoader: new ImageWindowLoaderImpl(),
     onHeaderMenuClick: undefined,
     prelightCells: undefined,
     translateX: undefined,
     translateY: undefined,
     dragAndDropState: undefined,
-    drawCustomCell: undefined,
     drawFocusRing: undefined,
     drawHeader: undefined,
+    drawCell: undefined,
     isFocused: true,
     experimental: undefined,
     columns: [
@@ -72,7 +75,7 @@ const basicProps: DataGridProps = {
     ],
     isFilling: false,
     enableGroups: false,
-    theme: getDefaultTheme(),
+    theme: mergeAndRealizeTheme(getDefaultTheme()),
     freezeColumns: 0,
     selection: {
         current: undefined,
@@ -94,35 +97,40 @@ const basicProps: DataGridProps = {
     width: 1000,
     isDragging: false,
     isResizing: false,
+    resizeColumn: undefined,
     trailingRowType: "none",
     rowHeight: 32,
     rows: 1000,
     verticalBorder: () => true,
     getCellRenderer: cell => {
         if (cell.kind === GridCellKind.Custom) return undefined;
-        return CellRenderers[cell.kind] as any;
+        return AllCellRenderers.find(x => x.kind === cell.kind) as any;
     },
 };
 
-beforeEach(() => {
-    Element.prototype.getBoundingClientRect = () => ({
-        bottom: 1000,
-        height: 1000,
-        left: 0,
-        right: 1000,
-        top: 0,
-        width: 1000,
-        x: 0,
-        y: 0,
-        toJSON: () => "",
-    });
-    Image.prototype.decode = jest.fn();
-});
-
 const dataGridCanvasId = "data-grid-canvas";
 describe("data-grid", () => {
+    beforeEach(() => {
+        Element.prototype.getBoundingClientRect = () => ({
+            bottom: 1000,
+            height: 1000,
+            left: 0,
+            right: 1000,
+            top: 0,
+            width: 1000,
+            x: 0,
+            y: 0,
+            toJSON: () => "",
+        });
+        Image.prototype.decode = vi.fn();
+    });
+
+    afterEach(() => {
+        cleanup();
+    });
+
     test("Emits mouse down", () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
         render(<DataGrid {...basicProps} onMouseDown={spy} />);
 
         fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
@@ -150,7 +158,7 @@ describe("data-grid", () => {
     });
 
     test("OOB mouse down", () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
         render(<DataGrid {...basicProps} onMouseDown={spy} />);
 
         fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
@@ -167,7 +175,7 @@ describe("data-grid", () => {
     });
 
     test("Emits mouse up", () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
         render(<DataGrid {...basicProps} onMouseUp={spy} />);
 
         fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
@@ -197,8 +205,8 @@ describe("data-grid", () => {
     });
 
     test("Does not emit mousedown/up over header menu", () => {
-        const downSpy = jest.fn();
-        const upSpy = jest.fn();
+        const downSpy = vi.fn();
+        const upSpy = vi.fn();
 
         render(
             <DataGrid
@@ -225,7 +233,7 @@ describe("data-grid", () => {
     });
 
     test("Cell hovered", () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
         render(<DataGrid {...basicProps} onItemHovered={spy} />);
 
@@ -244,7 +252,7 @@ describe("data-grid", () => {
     });
 
     test("Cell is not hovered when target is not data grid", () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
         render(
             <>
@@ -270,7 +278,7 @@ describe("data-grid", () => {
     });
 
     test("Header hovered", () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
         render(<DataGrid {...basicProps} onItemHovered={spy} />);
 
@@ -289,7 +297,7 @@ describe("data-grid", () => {
     });
 
     test("Header hovered when scrolled", () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
         render(
             <DataGrid {...basicProps} groupHeaderHeight={32} enableGroups={true} cellYOffset={10} onItemHovered={spy} />
@@ -310,7 +318,7 @@ describe("data-grid", () => {
     });
 
     test("Group header hovered", () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
 
         render(<DataGrid {...basicProps} onItemHovered={spy} enableGroups={true} groupHeaderHeight={28} />);
 
@@ -329,7 +337,7 @@ describe("data-grid", () => {
     });
 
     test("Simple damage", () => {
-        const spy = jest.fn(basicProps.getCellContent);
+        const spy = vi.fn(basicProps.getCellContent);
         const ref = React.createRef<DataGridRef>();
 
         render(<DataGrid ref={ref} {...basicProps} getCellContent={spy} enableGroups={true} groupHeaderHeight={28} />);
@@ -341,7 +349,7 @@ describe("data-grid", () => {
     });
 
     test("Out of bounds damage", () => {
-        const spy = jest.fn(basicProps.getCellContent);
+        const spy = vi.fn(basicProps.getCellContent);
         const ref = React.createRef<DataGridRef>();
 
         render(<DataGrid ref={ref} {...basicProps} getCellContent={spy} enableGroups={true} groupHeaderHeight={28} />);
@@ -353,7 +361,7 @@ describe("data-grid", () => {
     });
 
     test("Freeze column simple check", () => {
-        const spy = jest.fn();
+        const spy = vi.fn();
         render(<DataGrid {...basicProps} freezeColumns={1} cellXOffset={3} onMouseUp={spy} />);
 
         fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
