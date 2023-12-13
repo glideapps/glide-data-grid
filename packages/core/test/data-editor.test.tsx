@@ -4441,6 +4441,43 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         expect(spy).toBeCalledTimes(2);
     });
 
+    test("Use fill handle diagonal", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onCellEdited={spy} fillHandle={true} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            clientX: 290, // Col A
+            clientY: 36 + 30, // Row 2
+        });
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 308, // Col A
+            clientY: 36 + 30, // Row 2
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 360,
+            clientY: 36 + 32 * 5 + 16, // Row 5
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 360,
+            clientY: 36 + 32 * 5 + 16, // Row 5
+        });
+
+        fireEvent.click(canvas, {
+            clientX: 360,
+            clientY: 36 + 32 * 5 + 16, // Row 5
+        });
+
+        expect(spy).toBeCalledTimes(5);
+    });
+
     test("Use fill handle into blank", async () => {
         const spy = vi.fn();
         vi.useFakeTimers();
