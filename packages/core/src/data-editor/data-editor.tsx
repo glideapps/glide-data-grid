@@ -2464,6 +2464,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                 if (mouseState.fillHandle === true && mouseState.previousSelection?.current !== undefined) {
                     const prevRange = mouseState.previousSelection.current.range;
+                    row = Math.min(row, lastRowSticky ? rows - 1 : rows);
                     const rect = getClosestRect(prevRange, col, row);
                     setFillHighlightRegion(rect);
                 } else {

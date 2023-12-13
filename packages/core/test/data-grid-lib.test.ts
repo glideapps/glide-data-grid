@@ -381,7 +381,12 @@ describe("drawWithLastUpdate", () => {
         );
 
         expect(mockCtx.fillStyle).toBe(mockTheme.bgSearchResult);
-        expect(mockCtx.fillRect).toHaveBeenCalledWith(mockRect.x, mockRect.y, mockRect.width, mockRect.height);
+        expect(mockCtx.fillRect).toHaveBeenCalledWith(
+            mockRect.x + 1,
+            mockRect.y + 1,
+            mockRect.width - 1,
+            mockRect.height - 1
+        );
         expect(mockDraw).toHaveBeenCalled();
         expect(result).toBe(true);
     });

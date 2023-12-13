@@ -2305,7 +2305,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
         if (damage.size > 0) {
             // the reason we unclip as soon as possible is because complex clip regions are hella expensive
-            targetCtx.save();
+            // targetCtx.save();
             clipDamage(
                 targetCtx,
                 effectiveCols,
@@ -2325,7 +2325,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
             targetCtx.fillStyle = theme.bgCell;
             targetCtx.fillRect(0, totalHeaderHeight + 1, width, height - totalHeaderHeight - 1);
-            targetCtx.restore();
+            // targetCtx.restore();
 
             // it is important to remember we are not clipped here. This means cells should be careful not to draw over
             // their border when damaging
