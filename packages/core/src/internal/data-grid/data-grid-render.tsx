@@ -1762,7 +1762,6 @@ function drawHighlightRings(
     const stickyWidth = getStickyWidth(mappedColumns);
 
     const drawCb = () => {
-        ctx.beginPath();
         ctx.save();
         let dashed = false;
         const setDashed = (dash: boolean) => {
@@ -1772,6 +1771,13 @@ function drawHighlightRings(
         };
 
         ctx.lineWidth = 1;
+        if (lastRowSticky) {
+            const lastRowHeight = typeof rowHeight === "function" ? rowHeight(rows - 1) : rowHeight;
+            ctx.beginPath();
+            ctx.rect(0, 0, width, height - lastRowHeight);
+            ctx.clip();
+        }
+        ctx.beginPath();
         for (const dr of drawRects) {
             const [s] = dr;
             if (
