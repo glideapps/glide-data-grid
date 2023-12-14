@@ -71,6 +71,7 @@ describe("drawImage", () => {
             save: vi.fn(),
             restore: vi.fn(),
             clip: vi.fn(),
+            beginPath: vi.fn(),
         } as any;
 
         mockImageLoader = {
