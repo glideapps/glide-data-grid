@@ -257,7 +257,7 @@ function createTextColumnInfo(index: number, group: boolean): GridColumnWithMock
 
 export class ContentCache {
     // column -> row -> value
-    private cachedContent: Map<number, Map<number, GridCell>> = new Map();
+    private cachedContent: Map<number, GridCell[]> = new Map();
 
     get(col: number, row: number) {
         const colCache = this.cachedContent.get(col);
@@ -266,16 +266,15 @@ export class ContentCache {
             return undefined;
         }
 
-        return colCache.get(row);
+        return colCache[row];
     }
 
     set(col: number, row: number, value: GridCell) {
-        if (this.cachedContent.get(col) === undefined) {
-            this.cachedContent.set(col, new Map());
+        let rowCache = this.cachedContent.get(col);
+        if (rowCache === undefined) {
+            this.cachedContent.set(col, (rowCache = []));
         }
-
-        const rowCache = this.cachedContent.get(col) as Map<number, GridCell>;
-        rowCache.set(row, value);
+        rowCache[row] = value;
     }
 }
 
