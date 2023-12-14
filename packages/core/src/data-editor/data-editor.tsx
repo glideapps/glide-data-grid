@@ -3616,7 +3616,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         height: scrollRef.current.scrollHeight * scale,
                     };
                 }
-                return gridRef.current?.getBounds(col ?? 0 + rowMarkerOffset, row);
+                return gridRef.current?.getBounds((col ?? 0) + rowMarkerOffset, row);
             },
             focus: () => gridRef.current?.focus(),
             emit: async e => {
