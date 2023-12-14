@@ -561,10 +561,10 @@ export function roundedRect(
 
     // restrict radius to a reasonable max
     radius = {
-        tl: Math.min(radius.tl, height / 2, width / 2),
-        tr: Math.min(radius.tr, height / 2, width / 2),
-        bl: Math.min(radius.bl, height / 2, width / 2),
-        br: Math.min(radius.br, height / 2, width / 2),
+        tl: Math.max(0, Math.min(radius.tl, height / 2, width / 2)),
+        tr: Math.max(0, Math.min(radius.tr, height / 2, width / 2)),
+        bl: Math.max(0, Math.min(radius.bl, height / 2, width / 2)),
+        br: Math.max(0, Math.min(radius.br, height / 2, width / 2)),
     };
 
     ctx.moveTo(x + radius.tl, y);
