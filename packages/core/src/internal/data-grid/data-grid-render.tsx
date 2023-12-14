@@ -1385,6 +1385,7 @@ function drawCells(
                         }
                     }
 
+                    let didDamageClip = false;
                     if (damage !== undefined) {
                         // we want to clip each cell individually rather than form a super clip region. The reason for
                         // this is passing too many clip regions to the GPU at once can cause a performance hit. This
@@ -1393,10 +1394,15 @@ function drawCells(
                         const bottom = isSticky ? top + rh - 1 : Math.min(top + rh - 1, height - stickyRowHeight);
                         const h = bottom - top;
 
-                        ctx.save();
-                        ctx.beginPath();
-                        ctx.rect(cellX + 1, top, cellWidth - 1, h);
-                        ctx.clip();
+                        // however, not clipping at all is even better. We want to clip if we are the left most col
+                        // or overlapping the bottom clip area.
+                        if (h !== rh - 1 || cellX + 1 <= clipX) {
+                            didDamageClip = true;
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.rect(cellX + 1, top, cellWidth - 1, h);
+                            ctx.clip();
+                        }
 
                         // we also need to make sure to wipe the contents. Since the fill can do that lets repurpose
                         // that call to avoid an extra draw call.
@@ -1408,7 +1414,11 @@ function drawCells(
                         if (prepResult !== undefined) {
                             prepResult.fillStyle = fill;
                         }
-                        ctx.fillRect(cellX, drawY, cellWidth, rh);
+                        if (damage !== undefined) {
+                            ctx.fillRect(cellX + 1, drawY + 1, cellWidth - 1, rh - 1);
+                        } else {
+                            ctx.fillRect(cellX, drawY, cellWidth, rh);
+                        }
                     }
 
                     if (cell.style === "faded") {
@@ -1456,7 +1466,7 @@ function drawCells(
                         );
                     }
 
-                    if (damage !== undefined) {
+                    if (didDamageClip) {
                         ctx.restore();
                     }
 
@@ -2108,6 +2118,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     const doubleBuffer = renderStrategy === "double-buffer";
     const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
 
+    // if we are double buffering we need to make sure we can blit. If we can't we need to redraw the whole thing
     const canBlit = renderStrategy !== "direct" && computeCanBlit(arg, lastArg);
 
     if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
@@ -2177,8 +2188,9 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     const getRowHeight = typeof rowHeight === "number" ? () => rowHeight : rowHeight;
 
     overlayCtx.save();
-    overlayCtx.beginPath();
     targetCtx.save();
+
+    overlayCtx.beginPath();
     targetCtx.beginPath();
 
     overlayCtx.textBaseline = "middle";
