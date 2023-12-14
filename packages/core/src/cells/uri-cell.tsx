@@ -4,6 +4,7 @@ import UriOverlayEditor from "../internal/data-grid-overlay-editor/private/uri-o
 import {
     drawTextCell,
     getMeasuredTextCache,
+    getMiddleCenterBias,
     measureTextCached,
     prepTextCell,
 } from "../internal/data-grid/data-grid-lib.js";
@@ -15,13 +16,13 @@ import {
 } from "../internal/data-grid/data-grid-types.js";
 import type { InternalCellRenderer } from "./cell-types.js";
 import { blend } from "../internal/data-grid/color-parser.js";
-import type { Theme } from "../common/styles.js";
+import type { FullTheme } from "../common/styles.js";
 import { pointInRect } from "../internal/data-grid/data-grid-render.js";
 
 function getTextRect(
     metrics: TextMetrics,
     rect: Rectangle,
-    theme: Theme,
+    theme: FullTheme,
     contentAlign: BaseGridCell["contentAlign"]
 ): Rectangle {
     let x = theme.cellHorizontalPadding;
@@ -56,12 +57,14 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
 
             // check if hoverX and hoverY inside the box
             if (hoverX >= x - 4 && hoverX <= x - 4 + w + 8 && hoverY >= y - 4 && hoverY <= y - 4 + h + 8) {
+                const middleCenterBias = getMiddleCenterBias(ctx, theme.baseFontFull);
                 overrideCursor("pointer");
-                const underlineOffset = 4;
+                const underlineOffset = 5;
+                const drawY = y - middleCenterBias;
 
                 ctx.beginPath();
-                ctx.moveTo(rect.x + x, Math.floor(rect.y + y + h + underlineOffset) + 0.5);
-                ctx.lineTo(rect.x + x + w, Math.floor(rect.y + y + h + underlineOffset) + 0.5);
+                ctx.moveTo(rect.x + x, Math.floor(rect.y + drawY + h + underlineOffset) + 0.5);
+                ctx.lineTo(rect.x + x + w, Math.floor(rect.y + drawY + h + underlineOffset) + 0.5);
 
                 ctx.strokeStyle = theme.textDark;
                 ctx.stroke();

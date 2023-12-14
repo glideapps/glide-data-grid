@@ -96,6 +96,7 @@ export const Tooltips: React.VFC = () => {
                 onItemHovered={onItemHovered}
                 getCellContent={getCellContent}
                 columns={cols}
+                rowMarkers="both"
                 rows={1000}
             />
             {isOpen &&

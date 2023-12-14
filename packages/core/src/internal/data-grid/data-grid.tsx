@@ -288,6 +288,8 @@ type DamageUpdateList = readonly {
     // newValue: GridCell,
 }[];
 
+const fillHandleClickSize = 8;
+
 export interface DataGridRef {
     focus: () => void;
     getBounds: (col?: number, row?: number) => Rectangle | undefined;
@@ -601,8 +603,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 const canBeFillHandle =
                     fillHandle &&
                     bounds !== undefined &&
-                    bounds.x + bounds.width - posX < 6 &&
-                    bounds.y + bounds.height - posY < 6;
+                    bounds.x + bounds.width - posX < fillHandleClickSize &&
+                    bounds.y + bounds.height - posY < fillHandleClickSize;
 
                 let isFillHandle = false;
                 if (selection.current !== undefined && canBeFillHandle) {
@@ -1239,9 +1241,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 const y = ev.clientY;
                 assert(sb !== undefined);
                 setOverFill(
-                    x >= sb.x + sb.width - 6 &&
+                    x >= sb.x + sb.width - fillHandleClickSize &&
                         x <= sb.x + sb.width &&
-                        y >= sb.y + sb.height - 6 &&
+                        y >= sb.y + sb.height - fillHandleClickSize &&
                         y <= sb.y + sb.height
                 );
             } else {
