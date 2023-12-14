@@ -1019,25 +1019,18 @@ function intersectRect(x1: number, y1: number, w1: number, h1: number, x2: numbe
     return x1 <= x2 + w2 && x2 <= x1 + w1 && y1 <= y2 + h2 && y2 <= y1 + h1;
 }
 
-function clipDamage(
+function clipHeaderDamage(
     ctx: CanvasRenderingContext2D,
     effectiveColumns: readonly MappedGridColumn[],
     width: number,
-    height: number,
     groupHeaderHeight: number,
     totalHeaderHeight: number,
     translateX: number,
     translateY: number,
     cellYOffset: number,
-    rows: number,
-    getRowHeight: (row: number) => number,
-    trailingRowType: TrailingRowType,
-    damage: CellSet | undefined,
-    includeCells: boolean
+    damage: CellSet | undefined
 ): void {
     if (damage === undefined || damage.size === 0) return;
-
-    const stickyRowHeight = trailingRowType === "sticky" ? getRowHeight(rows - 1) : 0;
 
     ctx.beginPath();
 
@@ -1059,7 +1052,7 @@ function clipDamage(
         translateX,
         translateY,
         totalHeaderHeight,
-        (c, drawX, colDrawY, clipX, startRow) => {
+        (c, drawX, _colDrawY, clipX) => {
             const diff = Math.max(0, clipX - drawX);
 
             const finalX = drawX + diff + 1;
@@ -1067,29 +1060,6 @@ function clipDamage(
             if (damage.has([c.sourceIndex, -1])) {
                 ctx.rect(finalX, groupHeaderHeight, finalWidth, totalHeaderHeight - groupHeaderHeight);
             }
-
-            if (!includeCells) return;
-
-            walkRowsInCol(
-                startRow,
-                colDrawY,
-                height,
-                rows,
-                getRowHeight,
-                trailingRowType,
-                (drawY, row, rh, isSticky) => {
-                    const isDamaged = damage.has([c.sourceIndex, row]);
-                    if (isDamaged) {
-                        const top = drawY + 1;
-                        const bottom = isSticky ? top + rh - 1 : Math.min(top + rh - 1, height - stickyRowHeight);
-                        const h = bottom - top;
-
-                        if (h > 0) {
-                            ctx.rect(finalX, top, finalWidth, h);
-                        }
-                    }
-                }
-            );
         }
     );
     ctx.clip();
@@ -1414,16 +1384,26 @@ function drawCells(
                         }
                     }
 
+                    if (damage !== undefined) {
+                        // we want to clip each cell individually rather than form a super clip region. The reason for
+                        // this is passing too many clip regions to the GPU at once can cause a performance hit. This
+                        // allows us to damage a large number of cells at once without issue.
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.rect(cellX + 1, drawY + 1, cellWidth - 1, rh - 1);
+                        ctx.clip();
+
+                        // we also need to make sure to wipe the contents. Since the fill can do that lets repurpose
+                        // that call to avoid an extra draw call.
+                        fill = fill === undefined ? theme.bgCell : blend(fill, theme.bgCell);
+                    }
+
                     if (fill !== undefined) {
                         ctx.fillStyle = fill;
                         if (prepResult !== undefined) {
                             prepResult.fillStyle = fill;
                         }
-                        if (damage !== undefined) {
-                            ctx.fillRect(cellX + 1, drawY + 1, cellWidth - 1, rh - 1);
-                        } else {
-                            ctx.fillRect(cellX, drawY, cellWidth, rh);
-                        }
+                        ctx.fillRect(cellX, drawY, cellWidth, rh);
                     }
 
                     if (cell.style === "faded") {
@@ -1471,9 +1451,14 @@ function drawCells(
                         );
                     }
 
+                    if (damage !== undefined) {
+                        ctx.restore();
+                    }
+
                     if (cell.style === "faded") {
                         ctx.globalAlpha = 1;
                     }
+
                     toDraw--;
                     if (drawingSpan) {
                         ctx.restore();
@@ -1483,6 +1468,7 @@ function drawCells(
                         font = colFont;
                         ctx.font = colFont;
                     }
+
                     return toDraw <= 0;
                 }
             );
@@ -2280,18 +2266,18 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
     // handle damage updates by directly drawing to the target to avoid large blits
     if (damage !== undefined) {
-        const doHeaders = damage.hasHeader();
-        damage.filterToRegion([
+        const viewRegionWidth = effectiveCols[effectiveCols.length - 1].sourceIndex + 1;
+        const damageInView = damage.hasItemInRegion([
             {
-                x: 0,
+                x: cellXOffset,
                 y: -2,
-                width: Number.MAX_SAFE_INTEGER,
+                width: viewRegionWidth,
                 height: 2,
             },
             {
                 x: cellXOffset,
                 y: cellYOffset,
-                width: effectiveCols.length,
+                width: viewRegionWidth,
                 height: 300,
             },
             {
@@ -2303,38 +2289,15 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             {
                 x: cellXOffset,
                 y: rows - 1,
-                width: effectiveCols.length,
+                width: viewRegionWidth,
                 height: 1,
                 when: trailingRowType !== "sticky",
             },
         ]);
 
-        if (damage.size > 0) {
-            // the reason we unclip as soon as possible is because complex clip regions are hella expensive
-            // targetCtx.save();
-            clipDamage(
-                targetCtx,
-                effectiveCols,
-                width,
-                height,
-                groupHeaderHeight,
-                totalHeaderHeight,
-                translateX,
-                translateY,
-                cellYOffset,
-                rows,
-                getRowHeight,
-                trailingRowType,
-                damage,
-                true
-            );
+        if (damageInView) {
+            const doHeaders = damage.hasHeader();
 
-            targetCtx.fillStyle = theme.bgCell;
-            targetCtx.fillRect(0, totalHeaderHeight + 1, width, height - totalHeaderHeight - 1);
-            // targetCtx.restore();
-
-            // it is important to remember we are not clipped here. This means cells should be careful not to draw over
-            // their border when damaging
             drawCells(
                 targetCtx,
                 effectiveCols,
@@ -2378,7 +2341,6 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 fillHandle &&
                 drawFocus &&
                 selectionCurrent !== undefined &&
-                // this is why it sometimes fails to draw the handle on damage
                 damage.has(rectBottomRight(selectionCurrent.range))
             ) {
                 drawFocusRing(
@@ -2400,27 +2362,23 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                     rows
                 );
             }
+
+            if (doHeaders) {
+                clipHeaderDamage(
+                    overlayCtx,
+                    effectiveCols,
+                    width,
+                    groupHeaderHeight,
+                    totalHeaderHeight,
+                    translateX,
+                    translateY,
+                    cellYOffset,
+                    damage
+                );
+                drawHeaderTexture();
+            }
         }
 
-        if (doHeaders) {
-            clipDamage(
-                overlayCtx,
-                effectiveCols,
-                width,
-                totalHeaderHeight,
-                groupHeaderHeight,
-                totalHeaderHeight,
-                translateX,
-                translateY,
-                cellYOffset,
-                rows,
-                getRowHeight,
-                trailingRowType,
-                damage,
-                false
-            );
-            drawHeaderTexture();
-        }
         targetCtx.restore();
         overlayCtx.restore();
 

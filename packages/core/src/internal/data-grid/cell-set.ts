@@ -1,5 +1,4 @@
 import { packColRowToNumber, unpackNumberToColRow, unpackRow } from "../../common/render-state-provider.js";
-import { itemIsInRect } from "./data-grid-lib.js";
 import type { Item, Rectangle } from "./data-grid-types.js";
 
 export class CellSet {
@@ -30,20 +29,6 @@ export class CellSet {
         return this.cells.size;
     }
 
-    public filterToRegion(rectangles: readonly (Rectangle & { when?: boolean })[]): void {
-        const filtered = rectangles.filter(x => x.when !== false);
-        if (filtered.length === 0) return;
-        for (const cellNumber of this.cells) {
-            const item = unpackNumberToColRow(cellNumber);
-
-            const isInsideAnyRectangle = filtered.some(rect => itemIsInRect(item, rect));
-
-            if (!isInsideAnyRectangle) {
-                this.cells.delete(cellNumber);
-            }
-        }
-    }
-
     public hasHeader(): boolean {
         for (const cellNumber of this.cells) {
             const row = unpackRow(cellNumber);
@@ -58,6 +43,15 @@ export class CellSet {
                 if (this.cells.has(packColRowToNumber(col, row))) {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    public hasItemInRegion(rect: readonly (Rectangle & { when?: boolean })[]): boolean {
+        for (const r of rect) {
+            if (this.hasItemInRectangle(r)) {
+                return true;
             }
         }
         return false;
