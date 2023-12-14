@@ -1885,6 +1885,28 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         expect(spy).not.toBeCalled();
     });
 
+    test("Ref getBounds", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<DataEditor {...basicProps} onCellEdited={spy} ref={ref} rowMarkers="both" />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        const bounds = ref.current?.getBounds(4, 4);
+        expect(bounds).toEqual({
+            height: 33,
+            width: 41,
+            x: 696,
+            y: 164,
+        });
+    });
+
     test("Arrow left", async () => {
         const spy = vi.fn();
         vi.useFakeTimers();
