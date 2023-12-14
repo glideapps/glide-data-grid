@@ -1176,6 +1176,7 @@ function drawCells(
     ctx.font = font;
     const deprepArg = { ctx };
     const cellIndex: [number, number] = [0, 0];
+    const stickyRowHeight = trailingRowType === "sticky" ? getRowHeight(rows - 1) : 0;
     let result: Rectangle[] | undefined;
     const handledSpans = new Set<string>();
     walkColumns(
@@ -1388,9 +1389,13 @@ function drawCells(
                         // we want to clip each cell individually rather than form a super clip region. The reason for
                         // this is passing too many clip regions to the GPU at once can cause a performance hit. This
                         // allows us to damage a large number of cells at once without issue.
+                        const top = drawY + 1;
+                        const bottom = isSticky ? top + rh - 1 : Math.min(top + rh - 1, height - stickyRowHeight);
+                        const h = bottom - top;
+
                         ctx.save();
                         ctx.beginPath();
-                        ctx.rect(cellX + 1, drawY + 1, cellWidth - 1, rh - 1);
+                        ctx.rect(cellX + 1, top, cellWidth - 1, h);
                         ctx.clip();
 
                         // we also need to make sure to wipe the contents. Since the fill can do that lets repurpose
@@ -2656,30 +2661,22 @@ function walkRowsInCol(
 ): void {
     let y = drawY;
     let row = startRow;
-    let doSticky = trailingRowType === "sticky";
-    while (y < height || doSticky) {
-        const doingSticky = doSticky && y >= height;
-        if (doingSticky) {
-            doSticky = false;
-            row = rows - 1;
-        }
+    const doSticky = trailingRowType === "sticky";
+    const rowEnd = doSticky ? rows - 1 : rows;
+    while (y < height && row < rowEnd) {
         const rh = getRowHeight(row);
-
-        if (doingSticky) {
-            y = height - rh;
-        }
-
-        const isMovedStickyRow = doSticky && row === rows - 1;
-
-        if (!isMovedStickyRow && cb(y, row, rh, doingSticky, trailingRowType !== "none" && row === rows - 1) === true) {
-            break;
-        }
-
-        if (doingSticky) {
+        if (cb(y, row, rh, false, trailingRowType !== "none" && row === rows - 1) === true) {
             break;
         }
         y += rh;
         row++;
+    }
+
+    if (doSticky) {
+        row = rows - 1;
+        const rh = getRowHeight(row);
+        y = height - rh;
+        cb(y, row, rh, true, true);
     }
 }
 

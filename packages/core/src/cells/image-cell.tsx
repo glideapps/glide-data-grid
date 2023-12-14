@@ -96,6 +96,7 @@ export function drawImage(
         if (img === undefined) continue; //array is sparse
         const imgWidth = img.width * (imgHeight / img.height);
         if (rounding > 0) {
+            ctx.beginPath();
             roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, rounding);
             ctx.save();
             ctx.clip();
