@@ -8,3 +8,4 @@ pubsub-debug.log
 storybook-build/
 coverage/
 *.tsbuildinfo
+gen-docs/
