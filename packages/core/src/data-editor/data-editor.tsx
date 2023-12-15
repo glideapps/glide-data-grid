@@ -176,7 +176,7 @@ function shiftSelection(input: GridSelection, offset: number): GridSelection {
     };
 }
 
-interface Keybinds {
+export interface Keybinds {
     readonly selectAll: boolean;
     readonly selectRow: boolean;
     readonly selectColumn: boolean;
@@ -629,6 +629,10 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      */
     readonly customRenderers?: readonly CustomRenderer<any>[];
 
+    /**
+     * Scales most elements in the theme to match rem scaling automatically
+     * @defaultValue false
+     */
     readonly scaleToRem?: boolean;
 
     /**
