@@ -33,7 +33,7 @@ export type GridMouseEventArgs =
     | GridMouseOutOfBoundsEventArgs
     | GridMouseGroupHeaderEventArgs;
 
-interface PreventableEvent {
+export interface PreventableEvent {
     preventDefault: () => void;
 }
 /** @category Types */
@@ -60,7 +60,7 @@ export type BooleanEmpty = null;
 /** @category Types */
 export type BooleanIndeterminate = undefined;
 
-interface PositionableMouseEventArgs {
+export interface PositionableMouseEventArgs {
     readonly localEventX: number;
     readonly localEventY: number;
 }
@@ -140,7 +140,7 @@ export interface GridKeyEventArgs {
     readonly location: Item | undefined;
 }
 
-interface DragHandler {
+export interface DragHandler {
     readonly setData: (mime: string, payload: string) => void;
     readonly setDragImage: (image: Element, x: number, y: number) => void;
     readonly preventDefault: () => void;
@@ -262,7 +262,7 @@ export const headerCellUnheckedMarker = headerCellCheckboxPrefix + "unchecked";
 /** @category Types */
 export const headerCellIndeterminateMarker = headerCellCheckboxPrefix + "indeterminate";
 
-interface BaseGridColumn {
+export interface BaseGridColumn {
     readonly title: string;
     readonly group?: string;
     readonly icon?: GridColumnIcon | string;
