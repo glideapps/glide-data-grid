@@ -6,6 +6,7 @@ import {
     getEffectiveColumns,
     getRowIndexForY,
     getStickyWidth,
+    rectBottomRight,
     useMappedColumns,
 } from "./data-grid-lib.js";
 import {
@@ -288,7 +289,7 @@ type DamageUpdateList = readonly {
     // newValue: GridCell,
 }[];
 
-const fillHandleClickSize = 8;
+const fillHandleClickSize = 6;
 
 export interface DataGridRef {
     focus: () => void;
@@ -600,19 +601,20 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 assert(bounds !== undefined);
                 const isEdge = bounds !== undefined && bounds.x + bounds.width - posX < edgeDetectionBuffer;
 
-                const canBeFillHandle =
-                    fillHandle &&
-                    bounds !== undefined &&
-                    bounds.x + bounds.width - posX < fillHandleClickSize &&
-                    bounds.y + bounds.height - posY < fillHandleClickSize;
-
                 let isFillHandle = false;
-                if (selection.current !== undefined && canBeFillHandle) {
-                    const targetCell = [
-                        selection.current.range.x + selection.current.range.width - 1,
-                        selection.current.range.y + selection.current.range.height - 1,
-                    ];
-                    isFillHandle = targetCell[0] === col && targetCell[1] === row;
+                if (fillHandle && selection.current !== undefined) {
+                    const fillHandleLocation = rectBottomRight(selection.current.range);
+                    const fillHandleCellBounds = getBoundsForItem(canvas, fillHandleLocation[0], fillHandleLocation[1]);
+
+                    if (fillHandleCellBounds !== undefined) {
+                        const handleLogicalCenterX = fillHandleCellBounds.x + fillHandleCellBounds.width - 2;
+                        const handleLogicalCenterY = fillHandleCellBounds.y + fillHandleCellBounds.height - 2;
+
+                        //check if posX and posY are within fillHandleClickSize from handleLogicalCenter
+                        isFillHandle =
+                            Math.abs(handleLogicalCenterX - posX) < fillHandleClickSize &&
+                            Math.abs(handleLogicalCenterY - posY) < fillHandleClickSize;
+                    }
                 }
 
                 result = {
@@ -1230,25 +1232,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const notRowMarkerCol = args.location[0] >= (firstColAccessible ? 0 : 1);
             setHoveredOnEdge(args.kind === headerKind && args.isEdge && notRowMarkerCol && allowResize === true);
 
-            if (fillHandle && selection.current !== undefined) {
-                const targetItem = [
-                    selection.current.range.x + selection.current.range.width - 1,
-                    selection.current.range.y + selection.current.range.height - 1,
-                ];
-                const [col, row] = targetItem;
-                const sb = getBoundsForItem(canvas, col, row);
-                const x = ev.clientX;
-                const y = ev.clientY;
-                assert(sb !== undefined);
-                setOverFill(
-                    x >= sb.x + sb.width - fillHandleClickSize &&
-                        x <= sb.x + sb.width &&
-                        y >= sb.y + sb.height - fillHandleClickSize &&
-                        y <= sb.y + sb.height
-                );
-            } else {
-                setOverFill(false);
-            }
+            setOverFill(args.kind === "cell" && args.isFillHandle);
 
             onMouseMoveRaw?.(ev);
             onMouseMove(args);
@@ -1258,15 +1242,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getMouseArgsForPosition,
             firstColAccessible,
             allowResize,
-            fillHandle,
-            selection,
             onMouseMoveRaw,
             onMouseMove,
             onItemHovered,
             getCellContent,
             getCellRenderer,
             damageInternal,
-            getBoundsForItem,
         ]
     );
     useEventListener("mousemove", onMouseMoveImpl, window, true);
