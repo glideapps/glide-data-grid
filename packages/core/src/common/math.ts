@@ -2,7 +2,14 @@
 import { itemIsInRect } from "../internal/data-grid/data-grid-lib.js";
 import type { Rectangle } from "../internal/data-grid/data-grid-types.js";
 
-export function getClosestRect(rect: Rectangle, px: number, py: number): Rectangle | undefined {
+export function getClosestRect(
+    rect: Rectangle,
+    px: number,
+    py: number,
+    allowedDirections: "both" | "horizontal" | "vertical"
+): Rectangle | undefined {
+    if (allowedDirections === "vertical") px = rect.x;
+    if (allowedDirections === "horizontal") py = rect.y;
     // Check if the point is inside the rectangle
     if (itemIsInRect([px, py], rect)) {
         return undefined;
@@ -15,7 +22,12 @@ export function getClosestRect(rect: Rectangle, px: number, py: number): Rectang
     const distanceToBottom = rect.y + rect.height - py;
 
     // Find the minimum distance
-    const minDistance = Math.min(distanceToLeft, distanceToRight, distanceToTop, distanceToBottom);
+    const minDistance = Math.min(
+        allowedDirections === "vertical" ? Number.MAX_SAFE_INTEGER : distanceToLeft,
+        allowedDirections === "vertical" ? Number.MAX_SAFE_INTEGER : distanceToRight,
+        allowedDirections === "horizontal" ? Number.MAX_SAFE_INTEGER : distanceToTop,
+        allowedDirections === "horizontal" ? Number.MAX_SAFE_INTEGER : distanceToBottom
+    );
 
     // eslint-disable-next-line unicorn/prefer-switch
     if (minDistance === distanceToBottom) {

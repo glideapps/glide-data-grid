@@ -642,6 +642,8 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * If this function is supplied and returns false, the click event is ignored
      */
     readonly isOutsideClick?: (e: MouseEvent | TouchEvent) => boolean;
+
+    readonly allowedFillDirections?: "both" | "horizontal" | "vertical";
 }
 
 type ScrollToFn = (
@@ -789,6 +791,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         maxColumnAutoWidth: maxColumnAutoWidthIn,
         provideEditor,
         trailingRowOptions,
+        allowedFillDirections = "both",
         scrollOffsetX,
         scrollOffsetY,
         verticalBorder,
@@ -2469,7 +2472,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (mouseState.fillHandle === true && mouseState.previousSelection?.current !== undefined) {
                     const prevRange = mouseState.previousSelection.current.range;
                     row = Math.min(row, lastRowSticky ? rows - 1 : rows);
-                    const rect = getClosestRect(prevRange, col, row);
+                    const rect = getClosestRect(prevRange, col, row, allowedFillDirections);
                     setFillHighlightRegion(rect);
                 } else {
                     const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
@@ -2508,6 +2511,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onItemHovered?.({ ...args, location: [args.location[0] - rowMarkerOffset, args.location[1]] as any });
         },
         [
+            allowedFillDirections,
             mouseState,
             rowMarkerOffset,
             rowSelect,
