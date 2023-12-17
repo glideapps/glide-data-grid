@@ -62,7 +62,7 @@ export const DropEvents: React.VFC = () => {
                     kind: GridCellKind.Image,
                     data: [imgUrl],
                     allowOverlay: true,
-                    allowAdd: false,
+                    readonly: true,
                 },
                 true,
                 true

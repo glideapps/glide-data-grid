@@ -100,7 +100,7 @@ describe("drawImage", () => {
             imageLoader: mockImageLoader,
             cell: {
                 kind: GridCellKind.Image as const,
-                allowAdd: false,
+                readonly: true,
                 allowOverlay: false,
                 data: ["sample-url"],
             },
@@ -138,7 +138,7 @@ describe("drawImage", () => {
             imageLoader: mockImageLoader,
             cell: {
                 kind: GridCellKind.Image as const,
-                allowAdd: false,
+                readonly: true,
                 allowOverlay: false,
                 data: ["sample-url"],
             },
@@ -174,7 +174,7 @@ describe("drawImage", () => {
             imageLoader: mockImageLoader,
             cell: {
                 kind: GridCellKind.Image as const,
-                allowAdd: false,
+                readonly: true,
                 allowOverlay: false,
                 data: ["sample-url"],
             },
@@ -214,7 +214,7 @@ describe("drawImage", () => {
             imageLoader: mockImageLoader,
             cell: {
                 kind: GridCellKind.Image as const,
-                allowAdd: false,
+                readonly: true,
                 allowOverlay: false,
                 data: ["sample-url"],
             },
@@ -254,7 +254,7 @@ describe("drawImage", () => {
             imageLoader: mockImageLoader,
             cell: {
                 kind: GridCellKind.Image as const,
-                allowAdd: false,
+                readonly: true,
                 allowOverlay: false,
                 data: ["sample-url"],
             },

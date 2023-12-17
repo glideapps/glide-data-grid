@@ -32,7 +32,7 @@ const getImgCell = (): ImageCell => {
     return {
         kind: GridCellKind.Image,
         data: ["img1.jpg", "img2.jpg"],
-        allowAdd: true,
+        readonly: false,
         allowOverlay: true,
     };
 };

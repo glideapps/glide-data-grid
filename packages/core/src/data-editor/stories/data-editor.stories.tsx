@@ -60,7 +60,7 @@ function getDummyData([col, row]: Item): GridCell {
                 "https://preview.redd.it/7jlqkp2cyap51.jpg?width=575&auto=webp&s=26fa9ed15b16fb450ee08ed1f2f0ccb5e0223581",
             ],
             allowOverlay: true,
-            allowAdd: true,
+            readonly: false,
         };
     }
     if (col === 3) {

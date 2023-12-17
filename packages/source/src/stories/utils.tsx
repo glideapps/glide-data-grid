@@ -163,7 +163,6 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
                     data: [`https://picsum.photos/id/${n}/900/900`],
                     displayData: [`https://picsum.photos/id/${n}/40/40`],
                     allowOverlay: true,
-                    allowAdd: false,
                     readonly: true,
                 };
             },

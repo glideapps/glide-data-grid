@@ -283,7 +283,7 @@ describe("copy-paste", () => {
                     kind: GridCellKind.Image,
                     data: ["image1.jpg", "image2.jpg"],
                     allowOverlay: true,
-                    allowAdd: true,
+                    readonly: false,
                 },
             ],
         ];

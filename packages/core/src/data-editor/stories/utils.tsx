@@ -333,7 +333,6 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
                     data: [`https://picsum.photos/id/${n}/900/900`],
                     displayData: [`https://picsum.photos/id/${n}/40/40`],
                     allowOverlay: true,
-                    allowAdd: false,
                     readonly: true,
                 };
             },
@@ -662,7 +661,6 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
                     kind: GridCellKind.Image,
                     data: [`${faker.image.animals(40, 40)}?random=${faker.datatype.number(100_000)}`],
                     allowOverlay: true,
-                    allowAdd: false,
                     readonly: true,
                 };
             },
