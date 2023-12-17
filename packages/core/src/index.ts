@@ -5,7 +5,7 @@ export type { SpriteProps } from "./common/utils.js";
 export type { Theme } from "./common/styles.js";
 export type { CustomRenderer, BaseDrawArgs, DrawArgs } from "./cells/cell-types.js";
 export type { SelectionBlending } from "./internal/data-grid/use-selection-behavior.js";
-export type { GetRowThemeCallback } from "./internal/data-grid/data-grid-render.js";
+export type { GetRowThemeCallback, Highlight } from "./internal/data-grid/data-grid-render.js";
 export * from "./internal/data-grid/data-grid-types.js";
 export { ImageOverlayEditor } from "./internal/data-grid-overlay-editor/private/image-overlay-editor.js";
 export { default as MarkdownDiv } from "./internal/markdown-div/markdown-div.js";
