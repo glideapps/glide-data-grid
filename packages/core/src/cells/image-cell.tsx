@@ -25,7 +25,7 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
         return (
             <ImageEditor
                 urls={value.data}
-                canWrite={value.allowAdd}
+                canWrite={value.readonly !== false}
                 onCancel={onFinishedEditing}
                 onChange={newImage => {
                     onFinishedEditing({

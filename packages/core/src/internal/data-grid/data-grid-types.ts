@@ -460,7 +460,7 @@ export interface ImageCell extends BaseGridCell {
     readonly data: string[];
     readonly rounding?: number;
     readonly displayData?: string[]; // used for small images for faster scrolling
-    readonly allowAdd: boolean;
+    readonly readonly?: boolean;
 }
 
 /** @category Cells */
@@ -606,6 +606,8 @@ export interface MarkerCell extends BaseGridCell {
 export type Slice = [start: number, end: number];
 /** @category Selection */
 export type CompactSelectionRanges = readonly Slice[];
+
+export type FillHandleDirection = "horizontal" | "vertical" | "orthogonal" | "any";
 
 function mergeRanges(input: CompactSelectionRanges) {
     if (input.length === 0) {

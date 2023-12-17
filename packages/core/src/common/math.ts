@@ -1,13 +1,14 @@
 /* eslint-disable unicorn/prefer-ternary */
 import { itemIsInRect } from "../internal/data-grid/data-grid-lib.js";
-import type { Rectangle } from "../internal/data-grid/data-grid-types.js";
+import type { FillHandleDirection, Rectangle } from "../internal/data-grid/data-grid-types.js";
 
 export function getClosestRect(
     rect: Rectangle,
     px: number,
     py: number,
-    allowedDirections: "both" | "horizontal" | "vertical"
+    allowedDirections: FillHandleDirection
 ): Rectangle | undefined {
+    if (allowedDirections === "any") return combineRects(rect, { x: px, y: py, width: 1, height: 1 });
     if (allowedDirections === "vertical") px = rect.x;
     if (allowedDirections === "horizontal") py = rect.y;
     // Check if the point is inside the rectangle

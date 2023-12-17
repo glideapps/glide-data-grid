@@ -43,6 +43,7 @@ import {
     BooleanEmpty,
     BooleanIndeterminate,
     type FillPatternEventArgs,
+    type FillHandleDirection,
 } from "../internal/data-grid/data-grid-types.js";
 import DataGridSearch, { type DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
 import { browserIsOSX } from "../common/browser-detect.js";
@@ -643,7 +644,10 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      */
     readonly isOutsideClick?: (e: MouseEvent | TouchEvent) => boolean;
 
-    readonly allowedFillDirections?: "both" | "horizontal" | "vertical";
+    /**
+     * Controls which directions fill is allowed in.
+     */
+    readonly allowedFillDirections?: FillHandleDirection;
 }
 
 type ScrollToFn = (
@@ -791,7 +795,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         maxColumnAutoWidth: maxColumnAutoWidthIn,
         provideEditor,
         trailingRowOptions,
-        allowedFillDirections = "both",
+        allowedFillDirections = "orthogonal",
         scrollOffsetX,
         scrollOffsetY,
         verticalBorder,
