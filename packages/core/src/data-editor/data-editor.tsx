@@ -44,6 +44,7 @@ import {
     BooleanIndeterminate,
     type FillPatternEventArgs,
     type FillHandleDirection,
+    type EditListItem,
 } from "../internal/data-grid/data-grid-types.js";
 import DataGridSearch, { type DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
 import { browserIsOSX } from "../common/browser-detect.js";
@@ -138,8 +139,6 @@ type Props = Partial<
         | "verticalBorder"
     >
 >;
-
-type EditListItem = { location: Item; value: EditableGridCell };
 
 type EmitEvents = "copy" | "paste" | "delete" | "fill-right" | "fill-down";
 

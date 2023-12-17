@@ -584,6 +584,8 @@ export enum InnerGridCellKind {
     Marker = "marker",
 }
 
+export type EditListItem = { location: Item; value: EditableGridCell };
+
 /** @category Cells */
 export interface NewRowCell extends BaseGridCell {
     readonly kind: InnerGridCellKind.NewRow;
