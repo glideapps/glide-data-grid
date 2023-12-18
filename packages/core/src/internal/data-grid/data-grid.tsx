@@ -1134,13 +1134,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const onContextMenuImpl = React.useCallback(
         (ev: MouseEvent) => {
             const canvas = ref.current;
-            if (canvas === null || onContextMenu === undefined) return;
+            const eventTarget = eventTargetRef?.current;
+            if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget) || onContextMenu === undefined)
+                return;
             const args = getMouseArgsForPosition(canvas, ev.clientX, ev.clientY, ev);
             onContextMenu(args, () => {
                 if (ev.cancelable) ev.preventDefault();
             });
         },
-        [getMouseArgsForPosition, onContextMenu]
+        [eventTargetRef, getMouseArgsForPosition, onContextMenu]
     );
     useEventListener("contextmenu", onContextMenuImpl, eventTargetRef?.current ?? null, false);
 
