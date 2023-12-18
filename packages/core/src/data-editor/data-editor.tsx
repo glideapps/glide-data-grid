@@ -3264,11 +3264,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 scrollRef.current?.contains(document.activeElement) === true ||
                 canvasRef.current?.contains(document.activeElement) === true;
 
-            let target = gridSelection.current?.cell;
-            if (target === undefined && selectedColumns.length === 1) {
+            let target: Item | undefined;
+
+            if (gridSelection.current !== undefined) {
+                target = [gridSelection.current.range.x, gridSelection.current.range.y];
+            } else if (selectedColumns.length === 1) {
                 target = [selectedColumns.first() ?? 0, 0];
-            }
-            if (target === undefined && selectedRows.length === 1) {
+            } else if (selectedRows.length === 1) {
                 target = [rowMarkerOffset, selectedRows.first() ?? 0];
             }
 
@@ -3311,7 +3313,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return; // I didn't want to read that paste value anyway
                 }
 
-                const [gridCol, gridRow] = target;
+                const [targetCol, targetRow] = target;
 
                 const editList: EditListItem[] = [];
                 do {
@@ -3342,9 +3344,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
 
                     for (const [row, dataRow] of data.entries()) {
-                        if (row + gridRow >= rows) break;
+                        if (row + targetRow >= rows) break;
                         for (const [col, dataItem] of dataRow.entries()) {
-                            const index = [col + gridCol, row + gridRow] as const;
+                            const index = [col + targetCol, row + targetRow] as const;
                             const [writeCol, writeRow] = index;
                             if (writeCol >= mangledCols.length) continue;
                             if (writeRow >= mangledRows) continue;
