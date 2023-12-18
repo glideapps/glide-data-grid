@@ -1896,6 +1896,9 @@ function drawFocusRing(
                 let cellX = drawX;
                 let cellWidth = col.width;
 
+                const isLastColumn = col.sourceIndex === allColumns.length - 1;
+                const isLastRow = row === rows - 1;
+
                 if (cell.span !== undefined) {
                     const areas = getSpanBounds(cell.span, drawX, drawY, col.width, rh, col, allColumns);
                     const area = col.sticky ? areas[0] : areas[1];
@@ -1931,7 +1934,12 @@ function drawFocusRing(
                             ctx.clip();
                         }
                         ctx.beginPath();
-                        ctx.rect(cellX + 0.5, drawY + 0.5, cellWidth, rh);
+                        ctx.rect(
+                            cellX + 0.5,
+                            drawY + 0.5,
+                            cellWidth - (isLastColumn ? 1 : 0),
+                            rh - (isLastRow ? 1 : 0)
+                        );
                         ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
                         ctx.lineWidth = 1;
                         ctx.stroke();
