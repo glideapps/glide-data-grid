@@ -25,8 +25,6 @@ const Wrapper = styled.div<{ innerWidth: string; innerHeight: string }>`
     overflow: hidden;
     overflow: clip;
 
-    contain: strict;
-
     direction: ltr;
 
     > :first-child {
