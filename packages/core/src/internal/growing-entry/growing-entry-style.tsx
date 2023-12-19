@@ -25,6 +25,7 @@ export const InputBox = styled.textarea`
     font-size: var(--gdg-editor-font-size);
     line-height: 16px;
     font-family: var(--gdg-font-family);
+    -webkit-text-fill-color: var(--gdg-text-dark);
     color: var(--gdg-text-dark);
     padding: 0;
     margin: 0;
