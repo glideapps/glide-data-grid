@@ -2019,6 +2019,7 @@ function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): bo
         current.headerHeight !== last.headerHeight ||
         current.rowHeight !== last.rowHeight ||
         current.rows !== last.rows ||
+        current.freezeColumns !== last.freezeColumns ||
         current.getRowThemeOverride !== last.getRowThemeOverride ||
         current.isFocused !== last.isFocused ||
         current.isResizing !== last.isResizing ||

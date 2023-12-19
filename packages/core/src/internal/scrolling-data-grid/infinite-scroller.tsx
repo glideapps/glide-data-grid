@@ -147,7 +147,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
     const [isIdle, setIsIdle] = React.useState(true);
     const idleTimer = React.useRef(0);
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         if (!isIdle || hasTouches || lastScrollPosition.current.lockDirection === undefined) return;
         const el = scroller.current;
         if (el === null) return;
@@ -229,7 +229,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
     const lastProps = React.useRef<{ width?: number; height?: number }>();
 
     const didFirstScroll = React.useRef(false);
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         if (didFirstScroll.current) onScroll();
         else didFirstScroll.current = true;
     }, [onScroll, paddingBottom, paddingRight]);
