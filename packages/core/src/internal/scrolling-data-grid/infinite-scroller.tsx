@@ -191,9 +191,14 @@ export const InfiniteScroller: React.FC<Props> = p => {
         lastScrollPosition.current.scrollLeft = scrollLeft;
         lastScrollPosition.current.scrollTop = scrollTop;
 
+        // el.clientWidth returns a rounded result, we want a floor'd result so as to not overrun the scroll area.
+        const clientBoundingRect = el.getBoundingClientRect();
+        const cWidth = Math.floor(clientBoundingRect.width);
+        const cHeight = Math.floor(clientBoundingRect.height);
+
         const newY = scrollTop;
         const delta = lastScrollY.current - newY;
-        const scrollableHeight = el.scrollHeight - el.clientHeight;
+        const scrollableHeight = el.scrollHeight - cHeight;
         lastScrollY.current = newY;
 
         if (
@@ -202,7 +207,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
             scrollHeight > el.scrollHeight + 5
         ) {
             const prog = newY / scrollableHeight;
-            const recomputed = (scrollHeight - el.clientHeight) * prog;
+            const recomputed = (scrollHeight - cHeight) * prog;
             offsetY.current = recomputed - newY;
         }
 
@@ -215,8 +220,8 @@ export const InfiniteScroller: React.FC<Props> = p => {
         update({
             x: scrollLeft,
             y: newY + offsetY.current,
-            width: el.clientWidth - paddingRight,
-            height: el.clientHeight - paddingBottom,
+            width: cWidth - paddingRight,
+            height: cHeight - paddingBottom,
             paddingRight: rightWrapRef.current?.clientWidth ?? 0,
         });
     }, [paddingBottom, paddingRight, scrollHeight, update, preventDiagonalScrolling, hasTouches]);
@@ -230,6 +235,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
 
     const didFirstScroll = React.useRef(false);
     // if this is not a layout effect there will be a flicker when changing the number of freezeColumns
+    // we need to document what this is needed at all.
     React.useLayoutEffect(() => {
         if (didFirstScroll.current) onScroll();
         else didFirstScroll.current = true;
