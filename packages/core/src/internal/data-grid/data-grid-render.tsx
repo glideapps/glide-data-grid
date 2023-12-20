@@ -1882,8 +1882,11 @@ function drawFocusRing(
     const range = selectedCell.current.range;
     const currentItem = selectedCell.current.cell;
     const fillHandleTarget = [range.x + range.width - 1, range.y + range.height - 1];
-    const mustDraw = effectiveCols.some(c => c.sourceIndex === currentItem[0] || c.sourceIndex === fillHandleTarget[0]);
 
+    // if the currentItem row greater than rows and the fill handle row is greater than rows, we dont need to draw
+    if (currentItem[1] >= rows && fillHandleTarget[1] >= rows) return undefined;
+
+    const mustDraw = effectiveCols.some(c => c.sourceIndex === currentItem[0] || c.sourceIndex === fillHandleTarget[0]);
     if (!mustDraw) return undefined;
     const [targetCol, targetRow] = selectedCell.current.cell;
     const cell = getCellContent(selectedCell.current.cell);
