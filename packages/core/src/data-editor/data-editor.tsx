@@ -2462,6 +2462,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 mouseState !== undefined &&
                 gridSelection.current !== undefined &&
                 !isActivelyDragging.current &&
+                !isActivelyDraggingHeader.current &&
                 (rangeSelect === "rect" || rangeSelect === "multi-rect")
             ) {
                 const [selectedCol, selectedRow] = gridSelection.current.cell;

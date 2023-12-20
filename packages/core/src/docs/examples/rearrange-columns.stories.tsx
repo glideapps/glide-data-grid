@@ -63,6 +63,8 @@ export const RearrangeColumns: React.VFC = () => {
             getCellContent={getCellContentMangled}
             columns={sortableCols}
             onColumnMoved={onColMoved}
+            columnSelectionBlending="mixed"
+            rangeSelectionBlending="mixed"
             rows={1000}
         />
     );
