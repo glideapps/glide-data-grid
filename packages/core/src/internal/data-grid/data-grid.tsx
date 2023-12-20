@@ -878,7 +878,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     let clickableInnerCellHovered = false;
     let editableBoolHovered = false;
     let cursorOverride: React.CSSProperties["cursor"] | undefined = drawCursorOverride;
-    if (cursorOverride === undefined && hCol !== undefined && hRow !== undefined && hRow > -1) {
+    if (cursorOverride === undefined && hCol !== undefined && hRow !== undefined && hRow > -1 && hRow < rows) {
         const cell = getCellContent([hCol, hRow], true);
         clickableInnerCellHovered =
             cell.kind === InnerGridCellKind.NewRow ||

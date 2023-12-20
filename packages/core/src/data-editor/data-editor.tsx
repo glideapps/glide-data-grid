@@ -1279,7 +1279,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (forceStrict || experimental?.strict === true) {
                     const vr = visibleRegionRef.current;
                     const isOutsideMainArea =
-                        vr.x > outerCol || outerCol > vr.x + vr.width || vr.y > row || row > vr.y + vr.height;
+                        vr.x > outerCol ||
+                        outerCol > vr.x + vr.width ||
+                        vr.y > row ||
+                        row > vr.y + vr.height ||
+                        row >= rowsRef.current;
                     const isSelected = outerCol === vr.extras?.selected?.[0] && row === vr.extras?.selected[1];
                     const isOutsideFreezeArea =
                         vr.extras?.freezeRegion === undefined ||
