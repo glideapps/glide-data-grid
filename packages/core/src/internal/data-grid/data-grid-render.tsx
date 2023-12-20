@@ -46,6 +46,7 @@ import type { DragAndDropState, DrawGridArg, HoverInfo } from "./draw-grid-arg.j
 import type { EnqueueCallback } from "./use-animation-queue.js";
 import type { RenderStateProvider } from "../../common/render-state-provider.js";
 import type { ImageWindowLoader } from "./image-window-loader-interface.js";
+import { hugRectToTarget } from "../../common/math.js";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when
@@ -1663,9 +1664,19 @@ function drawHighlightRings(
         );
         if (r.width === 1 && r.height === 1) {
             if (r.x < freezeColumns) {
-                return [{ color: h.color, style: h.style ?? "dashed", rect: topLeftBounds }, undefined];
+                return [
+                    {
+                        color: h.color,
+                        style: h.style ?? "dashed",
+                        rect: hugRectToTarget(topLeftBounds, width, height, 8),
+                    },
+                    undefined,
+                ];
             }
-            return [undefined, { color: h.color, style: h.style ?? "dashed", rect: topLeftBounds }];
+            return [
+                undefined,
+                { color: h.color, style: h.style ?? "dashed", rect: hugRectToTarget(topLeftBounds, width, height, 8) },
+            ];
         }
 
         const bottomRightBounds = computeBounds(
@@ -1725,22 +1736,32 @@ function drawHighlightRings(
                 {
                     color: h.color,
                     style: h.style ?? "dashed",
-                    rect: {
-                        x: topLeftBounds.x,
-                        y: topLeftBounds.y,
-                        width: freezeSectionRightBounds.x + freezeSectionRightBounds.width - topLeftBounds.x,
-                        height: freezeSectionRightBounds.y + freezeSectionRightBounds.height - topLeftBounds.y,
-                    } as Rectangle,
+                    rect: hugRectToTarget(
+                        {
+                            x: topLeftBounds.x,
+                            y: topLeftBounds.y,
+                            width: freezeSectionRightBounds.x + freezeSectionRightBounds.width - topLeftBounds.x,
+                            height: freezeSectionRightBounds.y + freezeSectionRightBounds.height - topLeftBounds.y,
+                        },
+                        width,
+                        height,
+                        8
+                    ),
                 },
                 {
                     color: h.color,
                     style: h.style ?? "dashed",
-                    rect: {
-                        x: unfreezeSectionleftBounds.x,
-                        y: unfreezeSectionleftBounds.y,
-                        width: bottomRightBounds.x + bottomRightBounds.width - unfreezeSectionleftBounds.x,
-                        height: bottomRightBounds.y + bottomRightBounds.height - unfreezeSectionleftBounds.y,
-                    } as Rectangle,
+                    rect: hugRectToTarget(
+                        {
+                            x: unfreezeSectionleftBounds.x,
+                            y: unfreezeSectionleftBounds.y,
+                            width: bottomRightBounds.x + bottomRightBounds.width - unfreezeSectionleftBounds.x,
+                            height: bottomRightBounds.y + bottomRightBounds.height - unfreezeSectionleftBounds.y,
+                        },
+                        width,
+                        height,
+                        8
+                    ),
                 },
             ];
         } else {
@@ -1749,12 +1770,17 @@ function drawHighlightRings(
                 {
                     color: h.color,
                     style: h.style ?? "dashed",
-                    rect: {
-                        x: topLeftBounds.x,
-                        y: topLeftBounds.y,
-                        width: bottomRightBounds.x + bottomRightBounds.width - topLeftBounds.x,
-                        height: bottomRightBounds.y + bottomRightBounds.height - topLeftBounds.y,
-                    } as Rectangle,
+                    rect: hugRectToTarget(
+                        {
+                            x: topLeftBounds.x,
+                            y: topLeftBounds.y,
+                            width: bottomRightBounds.x + bottomRightBounds.width - topLeftBounds.x,
+                            height: bottomRightBounds.y + bottomRightBounds.height - topLeftBounds.y,
+                        },
+                        width,
+                        height,
+                        8
+                    ),
                 },
             ];
         }
@@ -1782,7 +1808,7 @@ function drawHighlightRings(
         for (const dr of drawRects) {
             const [s] = dr;
             if (
-                s !== undefined &&
+                s?.rect !== undefined &&
                 intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
             ) {
                 setDashed(s.style === "dashed");
@@ -1794,7 +1820,7 @@ function drawHighlightRings(
         for (const dr of drawRects) {
             const [, s] = dr;
             if (
-                s !== undefined &&
+                s?.rect !== undefined &&
                 intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
             ) {
                 setDashed(s.style === "dashed");
