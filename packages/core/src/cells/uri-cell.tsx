@@ -15,7 +15,6 @@ import {
     type UriCell,
 } from "../internal/data-grid/data-grid-types.js";
 import type { InternalCellRenderer } from "./cell-types.js";
-import { blend } from "../internal/data-grid/color-parser.js";
 import type { FullTheme } from "../common/styles.js";
 import { pointInRect } from "../internal/data-grid/data-grid-render.js";
 
@@ -47,7 +46,7 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
     useLabel: true,
     drawPrep: prepTextCell,
     draw: a => {
-        const { cell, theme, overrideCursor, hoverX, hoverY, rect, ctx, highlighted } = a;
+        const { cell, theme, overrideCursor, hoverX, hoverY, rect, ctx } = a;
         const txt = cell.displayData ?? cell.data;
         if (overrideCursor !== undefined && cell.hoverEffect === true && hoverX !== undefined && hoverY !== undefined) {
             const m = measureTextCached(txt, ctx, theme.baseFontFull);
@@ -70,7 +69,7 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
                 ctx.stroke();
 
                 ctx.save();
-                ctx.fillStyle = highlighted ? blend(theme.accentLight, theme.bgCell) : theme.bgCell;
+                ctx.fillStyle = a.cellFillColor;
                 drawTextCell({ ...a, rect: { ...rect, x: rect.x - 1 } }, txt, cell.contentAlign);
                 drawTextCell({ ...a, rect: { ...rect, x: rect.x - 2 } }, txt, cell.contentAlign);
                 drawTextCell({ ...a, rect: { ...rect, x: rect.x + 1 } }, txt, cell.contentAlign);
