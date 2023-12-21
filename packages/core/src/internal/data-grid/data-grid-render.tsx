@@ -1416,7 +1416,10 @@ function drawCells(
                             prepResult.fillStyle = fill;
                         }
                         if (damage !== undefined) {
-                            ctx.fillRect(cellX + 1, drawY + 1, cellWidth - 1, rh - 1);
+                            // this accounts for the fill handle outline being drawn inset on these cells. We do this
+                            // because technically the bottom right corner of the outline are on other cells.
+                            const inset = row === rows - 1 || c.sourceIndex === allColumns.length - 1 ? 2 : 1;
+                            ctx.fillRect(cellX + 1, drawY + 1, cellWidth - inset, rh - inset);
                         } else {
                             ctx.fillRect(cellX, drawY, cellWidth, rh);
                         }
