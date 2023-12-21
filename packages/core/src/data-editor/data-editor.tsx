@@ -2091,6 +2091,59 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const [scrollDir, setScrollDir] = React.useState<GridMouseEventArgs["scrollEdge"]>();
 
+    // Adjust selection to include latest cell in visible region.
+    React.useEffect(() => {
+        if (scrollDir === undefined || scrollDir[0] === 0 && scrollDir[1] === 0) return;
+        if (gridSelection.current === undefined) return;
+        let requestId: number;
+        const [xDir, yDir] = scrollDir;
+        const [col, row] = gridSelection.current.cell;
+        const old = gridSelection.current.range;
+        function adjustSelectionToScrollDir() {
+            const visible = visibleRegionRef.current;
+
+            let left = old.x;
+            let right = old.x + old.width;
+            let top = old.y;
+            let bottom = old.y + old.height;
+
+            if (xDir === -1) {
+                left = Math.max(rowMarkerOffset, visible.x)
+                right = col + 1
+            } else if (xDir === 1) {
+                right = Math.min(mangledCols.length, visible.x + visible.width + 1)
+            }
+
+            if (yDir === -1) {
+                top = Math.max(0, visible.y)
+                bottom = row + 1
+            } else if (yDir === 1) {
+                bottom = Math.min(rows, visible.y + visible.height + 1)
+            }
+
+            setCurrent(
+                {
+                    cell: [col, row],
+                    range: {
+                        x: left,
+                        y: top,
+                        width: right - left,
+                        height: bottom - top,
+                    },
+                },
+                true,
+                false,
+                "drag"
+            );
+            requestId = requestAnimationFrame(adjustSelectionToScrollDir)
+        }
+        requestId = requestAnimationFrame(adjustSelectionToScrollDir)
+        return () => {
+            cancelAnimationFrame(requestId)
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [scrollDir])
+
     const fillPattern = React.useCallback(
         async (previousSelection: GridSelection, currentSelection: GridSelection) => {
             const patternRange = previousSelection.current?.range;
