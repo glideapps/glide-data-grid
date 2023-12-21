@@ -413,6 +413,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     }, [cellYOffset, cellXOffset, translateX, translateY, disableFirefoxRescaling]);
 
     const mappedColumns = useMappedColumns(columns, freezeColumns);
+    const stickyX = fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0;
 
     // row: -1 === columnHeader, -2 === groupHeader
     const getBoundsForItem = React.useCallback(
@@ -651,6 +652,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getBoundsForItem,
             fillHandle,
             selection,
+            stickyX,
+            totalHeaderHeight,
         ]
     );
 
@@ -1732,7 +1735,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         200
     );
 
-    const stickyX = fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0;
     const opacityX =
         freezeColumns === 0 || !fixedShadowX ? 0 : cellXOffset > freezeColumns ? 1 : clamp(-translateX / 100, 0, 1);
 
