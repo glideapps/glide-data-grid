@@ -510,10 +510,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const metaKey = ev?.metaKey === true;
             const isTouch = (ev !== undefined && !(ev instanceof MouseEvent)) || (ev as any)?.pointerType === "touch";
 
-            const edgeSize = 20;
             const scrollEdge: GridMouseEventArgs["scrollEdge"] = [
-                Math.abs(x) < edgeSize ? -1 : Math.abs(rect.width - x) < edgeSize ? 1 : 0,
-                Math.abs(y) < edgeSize ? -1 : Math.abs(rect.height - y) < edgeSize ? 1 : 0,
+                x < stickyX ? -1 : rect.width < x ? 1 : 0,
+                y < totalHeaderHeight ? -1 : rect.height < y ? 1 : 0,
             ];
 
             let result: GridMouseEventArgs;
