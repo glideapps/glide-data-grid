@@ -45,6 +45,7 @@ import {
     type FillPatternEventArgs,
     type FillHandleDirection,
     type EditListItem,
+    mouseEventArgsAreEqual,
 } from "../internal/data-grid/data-grid-types.js";
 import DataGridSearch, { type DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
 import { browserIsOSX } from "../common/browser-detect.js";
@@ -2348,8 +2349,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [mouseState, onMouseMove, rowMarkerOffset]
     );
 
-    useAutoscroll(scrollDir, scrollRef);
-
     const onHeaderMenuClickInner = React.useCallback(
         (col: number, screenPosition: Rectangle) => {
             onHeaderMenuClick?.(col - rowMarkerOffset, screenPosition);
@@ -2445,29 +2444,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         isActivelyDragging.current = false;
     }, []);
 
-    function isSameItem(item: GridMouseEventArgs | undefined, other: GridMouseEventArgs | undefined) {
-        if (item === other) return true;
-
-        if (item?.kind === "out-of-bounds") {
-            return (
-                item?.kind === other?.kind &&
-                item?.location[0] === other?.location[0] &&
-                item?.location[1] === other?.location[1] &&
-                item?.region[0] === other?.region[0] &&
-                item?.region[1] === other?.region[1]
-            );
-        }
-
-        return (
-            item?.kind === other?.kind &&
-            item?.location[0] === other?.location[0] &&
-            item?.location[1] === other?.location[1]
-        );
-    }
-
+    const hoveredRef = React.useRef<GridMouseEventArgs>();
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
-            if (isSameItem(args, hoveredRef.current)) return;
+            if (mouseEventArgsAreEqual(args, hoveredRef.current)) return;
             hoveredRef.current = args;
             if (mouseDownData?.current?.button !== undefined && mouseDownData.current.button >= 1) return;
             if (
@@ -2555,14 +2535,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
-    const hoveredRef = React.useRef<GridMouseEventArgs>();
-    React.useEffect(() => {
-        if (scrollDir === undefined || scrollDir[0] === 0 && scrollDir[1] === 0) return;
-        const [xDir, yDir] = scrollDir;
-        let requestId: number;
-        function hoverItem() {
+    const adjustSelectionOnScroll = React.useCallback(
+        () => {
             const args = hoveredRef.current;
             if (args === undefined) return;
+            const [xDir, yDir] = args.scrollEdge;
             let [col, row] = args.location;
             const visible = visibleRegionRef.current;
             if (xDir === -1) {
@@ -2579,17 +2556,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 ...args,
                 location: [col, row] as any,
             })
-            requestId = requestAnimationFrame(hoverItem)
-        }
-        requestId = requestAnimationFrame(hoverItem)
-        return () => {
-            cancelAnimationFrame(requestId);
-        }
-    }, [
-        scrollDir, 
-        onItemHoveredImpl, 
-        rows
-    ])
+        },
+        [onItemHoveredImpl, rows]
+    )
+
+    useAutoscroll(scrollDir, scrollRef, adjustSelectionOnScroll);
 
     // 1 === move one
     // 2 === move to end

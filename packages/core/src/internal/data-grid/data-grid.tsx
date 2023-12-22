@@ -31,6 +31,7 @@ import {
     outOfBoundsKind,
     OutOfBoundsRegionAxis,
     type DrawCellCallback,
+    mouseEventArgsAreEqual,
 } from "./data-grid-types.js";
 import { CellSet } from "./cell-set.js";
 import { SpriteManager, type SpriteMap } from "./data-grid-sprites.js";
@@ -657,26 +658,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         ]
     );
 
-    function isSameItem(item: GridMouseEventArgs | undefined, other: GridMouseEventArgs | undefined) {
-        if (item === other) return true;
-
-        if (item?.kind === "out-of-bounds") {
-            return (
-                item?.kind === other?.kind &&
-                item?.location[0] === other?.location[0] &&
-                item?.location[1] === other?.location[1] &&
-                item?.region[0] === other?.region[0] &&
-                item?.region[1] === other?.region[1]
-            );
-        }
-
-        return (
-            item?.kind === other?.kind &&
-            item?.location[0] === other?.location[0] &&
-            item?.location[1] === other?.location[1]
-        );
-    }
-
     const [hoveredItem] = hoveredItemInfo ?? [];
 
     const enqueueRef = React.useRef<EnqueueCallback>(() => {
@@ -1203,7 +1184,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 });
             };
 
-            if (!isSameItem(args, hoveredRef.current)) {
+            if (!mouseEventArgsAreEqual(args, hoveredRef.current)) {
                 onItemHovered?.(args);
                 maybeSetHoveredInfo(
                     args.kind === outOfBoundsKind ? undefined : [args.location, [args.localEventX, args.localEventY]],
