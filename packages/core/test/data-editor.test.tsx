@@ -2753,7 +2753,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         expect(document.body.contains(canvas)).toBe(true);
     });
 
-    test.only("New row", async () => {
+    test("New row", async () => {
         const spy = vi.fn();
         vi.useFakeTimers();
         render(
