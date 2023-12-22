@@ -110,8 +110,8 @@ describe("use-column-sizer", () => {
             )
         );
 
-        const columnA = result.current.find(col => col.title === "A");
-        const columnB = result.current.find(col => col.title === "B");
+        const columnA = result.current.sizedColumns.find(col => col.title === "A");
+        const columnB = result.current.sizedColumns.find(col => col.title === "B");
 
         expect(columnA).toBeDefined();
         expect(columnB).toBeDefined();
@@ -162,7 +162,7 @@ describe("use-column-sizer", () => {
             )
         );
 
-        expect(result.current[0].width).toBe(212);
+        expect(result.current.sizedColumns[0].width).toBe(212);
     });
 
     it("Measures the last row", async () => {
@@ -225,9 +225,9 @@ describe("use-column-sizer", () => {
             }
         );
 
-        const shortColumnA = result.current.find(col => col.title === "A");
-        const shortColumnB = result.current.find(col => col.title === "B");
-        const shortColumnC = result.current.find(col => col.title === "C");
+        const shortColumnA = result.current.sizedColumns.find(col => col.title === "A");
+        const shortColumnB = result.current.sizedColumns.find(col => col.title === "B");
+        const shortColumnC = result.current.sizedColumns.find(col => col.title === "C");
 
         expect(shortColumnA).toBeDefined();
         expect(shortColumnB).toBeDefined();
@@ -243,9 +243,9 @@ describe("use-column-sizer", () => {
             columns: A_COPY_OF_COLUMNS_THAT_ALSO_HAS_A_NEW_COLUMN_TITLED_C_THAT_WE_WILL_MEASURE_SOON_ENOUGH, // I told you!
         });
 
-        const longColumnA = result.current.find(col => col.title === "A");
-        const longColumnB = result.current.find(col => col.title === "B");
-        const longColumnC = result.current.find(col => col.title === "C");
+        const longColumnA = result.current.sizedColumns.find(col => col.title === "A");
+        const longColumnB = result.current.sizedColumns.find(col => col.title === "B");
+        const longColumnC = result.current.sizedColumns.find(col => col.title === "C");
 
         expect(longColumnA).toBeDefined();
         expect(longColumnB).toBeDefined();
@@ -272,8 +272,8 @@ describe("use-column-sizer", () => {
             )
         );
 
-        const columnA = result.current.find(col => col.title === "A");
-        const columnB = result.current.find(col => col.title === "B");
+        const columnA = result.current.sizedColumns.find(col => col.title === "A");
+        const columnB = result.current.sizedColumns.find(col => col.title === "B");
 
         expect(columnA).toBeDefined();
         expect(columnB).toBeDefined();
@@ -298,7 +298,9 @@ describe("use-column-sizer", () => {
             )
         );
 
-        expect(result.current).toBe(A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE);
+        expect(result.current.sizedColumns).toBe(
+            A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE
+        );
     });
 
     it("Removes the canvas from the DOM when unmounted", async () => {
@@ -358,9 +360,9 @@ describe("use-column-sizer", () => {
             )
         );
 
-        const columnA = result.current.find(col => col.title === "A");
-        const columnB = result.current.find(col => col.title === "B");
-        const columnC = result.current.find(col => col.title === "C");
+        const columnA = result.current.sizedColumns.find(col => col.title === "A");
+        const columnB = result.current.sizedColumns.find(col => col.title === "B");
+        const columnC = result.current.sizedColumns.find(col => col.title === "C");
 
         expect(columnA).toBeDefined();
         expect(columnB).toBeDefined();

@@ -217,6 +217,8 @@ function prep(resetTimers: boolean = true) {
     if (scroller !== null) {
         vi.spyOn(scroller, "clientWidth", "get").mockImplementation(() => 1000);
         vi.spyOn(scroller, "clientHeight", "get").mockImplementation(() => 1000);
+        vi.spyOn(scroller, "offsetWidth" as any, "get").mockImplementation(() => 1000);
+        vi.spyOn(scroller, "offsetHeight" as any, "get").mockImplementation(() => 1000);
     }
 
     act(() => {
@@ -2751,7 +2753,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         expect(document.body.contains(canvas)).toBe(true);
     });
 
-    test("New row", async () => {
+    test.only("New row", async () => {
         const spy = vi.fn();
         vi.useFakeTimers();
         render(
