@@ -25,6 +25,14 @@ export interface DataGridDndProps extends Props {
     readonly onColumnMoved?: (startIndex: number, endIndex: number) => void;
 
     /**
+     * Called when the user is dragging a column and proposes to move it to a new location. Return `false` to prevent
+     * @param startIndex
+     * @param endIndex
+     * @group Drag and Drop
+     */
+    readonly onColumnProposeMove?: (startIndex: number, endIndex: number) => boolean;
+
+    /**
      * Called when the user is resizing a column. `newSize` is the new size of the column. Note that you have change
      * the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
      * @group Drag and Drop
@@ -102,6 +110,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         minColumnWidth,
         onRowMoved,
         lockColumns,
+        onColumnProposeMove,
         onMouseDown,
         onMouseUp,
         onItemHovered,
@@ -264,11 +273,13 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
         if (dragCol === undefined || dropCol === undefined) return undefined;
         if (dragCol === dropCol) return undefined;
 
+        if (onColumnProposeMove?.(dragCol, dropCol) === false) return undefined;
+
         return {
             src: dragCol,
             dest: dropCol,
         };
-    }, [dragCol, dropCol]);
+    }, [dragCol, dropCol, onColumnProposeMove]);
 
     const onMouseMove = React.useCallback(
         (event: MouseEvent) => {

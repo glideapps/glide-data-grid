@@ -301,6 +301,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                 trailingRowType={p.trailingRowType}
                 translateX={p.translateX}
                 translateY={p.translateY}
+                onColumnProposeMove={p.onColumnProposeMove}
                 verticalBorder={p.verticalBorder}
                 drawFocusRing={p.drawFocusRing}
                 drawHeader={p.drawHeader}

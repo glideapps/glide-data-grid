@@ -47,6 +47,10 @@ export const RearrangeColumns: React.VFC = () => {
         });
     }, []);
 
+    const onColProposeMove = React.useCallback((_startIndex: number, endIndex: number): boolean => {
+        return endIndex !== 3;
+    }, []);
+
     const getCellContentMangled = React.useCallback(
         ([col, row]: Item): GridCell => {
             const remappedCol = cols.findIndex(c => c.title === sortableCols[col].title);
@@ -61,6 +65,7 @@ export const RearrangeColumns: React.VFC = () => {
             freezeColumns={1}
             rowMarkers="both"
             getCellContent={getCellContentMangled}
+            onColumnProposeMove={onColProposeMove}
             columns={sortableCols}
             onColumnMoved={onColMoved}
             columnSelectionBlending="mixed"

@@ -745,6 +745,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         drawHeader: drawHeaderIn,
         drawCell: drawCellIn,
         onHeaderClicked,
+        onColumnProposeMove,
         spanRangeBehavior = "default",
         onGroupHeaderClicked,
         onCellContextMenu,
@@ -3838,6 +3839,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     columns={mangledCols}
                     nonGrowWidth={nonGrowWidth}
                     drawHeader={drawHeader}
+                    onColumnProposeMove={onColumnProposeMove}
                     drawCell={drawCell}
                     disabledRows={disabledRows}
                     freezeColumns={mangledFreezeColumns}
