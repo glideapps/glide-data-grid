@@ -2091,59 +2091,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const [scrollDir, setScrollDir] = React.useState<GridMouseEventArgs["scrollEdge"]>();
 
-    // Adjust selection to include latest cell in visible region.
-    React.useEffect(() => {
-        if (scrollDir === undefined || scrollDir[0] === 0 && scrollDir[1] === 0) return;
-        if (gridSelection.current === undefined) return;
-        let requestId: number;
-        const [xDir, yDir] = scrollDir;
-        const [col, row] = gridSelection.current.cell;
-        const old = gridSelection.current.range;
-        function adjustSelectionToScrollDir() {
-            const visible = visibleRegionRef.current;
-
-            let left = old.x;
-            let right = old.x + old.width;
-            let top = old.y;
-            let bottom = old.y + old.height;
-
-            if (xDir === -1) {
-                left = Math.max(rowMarkerOffset, visible.x)
-                right = col + 1
-            } else if (xDir === 1) {
-                right = Math.min(mangledCols.length, visible.x + visible.width + 1)
-            }
-
-            if (yDir === -1) {
-                top = Math.max(0, visible.y)
-                bottom = row + 1
-            } else if (yDir === 1) {
-                bottom = Math.min(rows, visible.y + visible.height + 1)
-            }
-
-            setCurrent(
-                {
-                    cell: [col, row],
-                    range: {
-                        x: left,
-                        y: top,
-                        width: right - left,
-                        height: bottom - top,
-                    },
-                },
-                true,
-                false,
-                "drag"
-            );
-            requestId = requestAnimationFrame(adjustSelectionToScrollDir)
-        }
-        requestId = requestAnimationFrame(adjustSelectionToScrollDir)
-        return () => {
-            cancelAnimationFrame(requestId)
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [scrollDir])
-
     const fillPattern = React.useCallback(
         async (previousSelection: GridSelection, currentSelection: GridSelection) => {
             const patternRange = previousSelection.current?.range;
@@ -2498,8 +2445,30 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         isActivelyDragging.current = false;
     }, []);
 
+    function isSameItem(item: GridMouseEventArgs | undefined, other: GridMouseEventArgs | undefined) {
+        if (item === other) return true;
+
+        if (item?.kind === "out-of-bounds") {
+            return (
+                item?.kind === other?.kind &&
+                item?.location[0] === other?.location[0] &&
+                item?.location[1] === other?.location[1] &&
+                item?.region[0] === other?.region[0] &&
+                item?.region[1] === other?.region[1]
+            );
+        }
+
+        return (
+            item?.kind === other?.kind &&
+            item?.location[0] === other?.location[0] &&
+            item?.location[1] === other?.location[1]
+        );
+    }
+
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
+            if (isSameItem(args, hoveredRef.current)) return;
+            hoveredRef.current = args;
             if (mouseDownData?.current?.button !== undefined && mouseDownData.current.button >= 1) return;
             if (
                 mouseState !== undefined &&
@@ -2585,6 +2554,42 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             setCurrent,
         ]
     );
+
+    const hoveredRef = React.useRef<GridMouseEventArgs>();
+    React.useEffect(() => {
+        if (scrollDir === undefined || scrollDir[0] === 0 && scrollDir[1] === 0) return;
+        const [xDir, yDir] = scrollDir;
+        let requestId: number;
+        function hoverItem() {
+            const args = hoveredRef.current;
+            if (args === undefined) return;
+            let [col, row] = args.location;
+            const visible = visibleRegionRef.current;
+            if (xDir === -1) {
+                col = visible.x;
+            } else if (xDir === 1) {
+                col = visible.x + visible.width;
+            }
+            if (yDir === -1) {
+                row = Math.max(0, visible.y);
+            } else if (yDir === 1) {
+                row = Math.min(rows, visible.y + visible.height);
+            }
+            onItemHoveredImpl({
+                ...args,
+                location: [col, row] as any,
+            })
+            requestId = requestAnimationFrame(hoverItem)
+        }
+        requestId = requestAnimationFrame(hoverItem)
+        return () => {
+            cancelAnimationFrame(requestId);
+        }
+    }, [
+        scrollDir, 
+        onItemHoveredImpl, 
+        rows
+    ])
 
     // 1 === move one
     // 2 === move to end
