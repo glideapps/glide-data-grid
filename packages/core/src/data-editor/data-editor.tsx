@@ -117,6 +117,7 @@ type Props = Partial<
         | "lockColumns"
         | "maxColumnWidth"
         | "minColumnWidth"
+        | "nonGrowWidth"
         | "onCanvasBlur"
         | "onCanvasFocused"
         | "onCellFocused"
@@ -1031,7 +1032,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [additionalRenderers, rendererMap]
     );
 
-    const columns = useColumnSizer(
+    const { sizedColumns: columns, nonGrowWidth } = useColumnSizer(
         columnsIn,
         rows,
         getCellsForSeletionDirect,
@@ -3835,6 +3836,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     accessibilityHeight={visibleRegion.height}
                     onDragEnd={onDragEnd}
                     columns={mangledCols}
+                    nonGrowWidth={nonGrowWidth}
                     drawHeader={drawHeader}
                     drawCell={drawCell}
                     disabledRows={disabledRows}

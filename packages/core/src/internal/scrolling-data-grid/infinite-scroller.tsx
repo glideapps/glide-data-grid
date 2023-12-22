@@ -106,6 +106,22 @@ function useTouchUpDelayed(delay: number): boolean {
     return hasTouches;
 }
 
+// This function is still mildly incorrect. If the scrollbar is a non integrer size it will be off by up to 0.5px.
+function getExactDimensionsExcludingScrollbar(element: HTMLElement) {
+    // Get the precise total dimensions including the scrollbar
+    const rect = element.getBoundingClientRect();
+
+    // Calculate the width and height of the scrollbar
+    const scrollbarWidth = element.offsetWidth - element.clientWidth;
+    const scrollbarHeight = element.offsetHeight - element.clientHeight;
+
+    // Calculate the dimensions excluding the scrollbar
+    return {
+        width: rect.width - scrollbarWidth,
+        height: rect.height - scrollbarHeight,
+    };
+}
+
 export const InfiniteScroller: React.FC<Props> = p => {
     const {
         children,
@@ -192,9 +208,9 @@ export const InfiniteScroller: React.FC<Props> = p => {
         lastScrollPosition.current.scrollTop = scrollTop;
 
         // el.clientWidth returns a rounded result, we want a floor'd result so as to not overrun the scroll area.
-        const clientBoundingRect = el.getBoundingClientRect();
-        const cWidth = Math.floor(clientBoundingRect.width);
-        const cHeight = Math.floor(clientBoundingRect.height);
+        const dimensions = getExactDimensionsExcludingScrollbar(el);
+        const cWidth = Math.floor(dimensions.width);
+        const cHeight = Math.floor(dimensions.height);
 
         const newY = scrollTop;
         const delta = lastScrollY.current - newY;

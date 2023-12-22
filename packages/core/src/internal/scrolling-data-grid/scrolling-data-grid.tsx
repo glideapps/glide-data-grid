@@ -66,6 +66,7 @@ export interface ScrollingDataGridProps extends Props {
      */
     readonly rightElement: React.ReactNode | undefined;
     readonly clientSize: readonly [number, number, number]; // [width, height, rightElSize]
+    readonly nonGrowWidth: number;
 }
 
 const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
@@ -78,6 +79,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         enableGroups,
         freezeColumns,
         experimental,
+        nonGrowWidth,
         clientSize,
         className,
         onVisibleRegionChanged,
@@ -100,13 +102,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const lastY = React.useRef<number | undefined>();
     const lastSize = React.useRef<readonly [number, number] | undefined>();
 
-    const width = React.useMemo(() => {
-        let r = Math.max(0, overscrollX ?? 0);
-        for (const c of columns) {
-            r += c.width;
-        }
-        return r;
-    }, [columns, overscrollX]);
+    const width = nonGrowWidth + Math.max(0, overscrollX ?? 0);
 
     let height = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
     if (typeof rowHeight === "number") {
