@@ -19,6 +19,7 @@ export {
     roundedRect,
     drawTextCellExternal as drawTextCell,
 } from "./internal/data-grid/data-grid-lib.js";
+export { CellSet } from "./internal/data-grid/cell-set.js";
 export { getDataEditorTheme as getDefaultTheme, useTheme } from "./common/styles.js";
 export { useColumnSizer } from "./data-editor/use-column-sizer.js";
 
