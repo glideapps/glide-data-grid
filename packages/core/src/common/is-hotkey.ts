@@ -1,4 +1,4 @@
-import type { GridKeyEventArgs } from "../internal/data-grid/data-grid-types.js";
+import type { GridKeyEventArgs } from "../internal/data-grid/event-args.js";
 import { browserIsOSX } from "./browser-detect.js";
 
 // brain dead syntax, find your deps, and make buggy replacements with 5 times the effort

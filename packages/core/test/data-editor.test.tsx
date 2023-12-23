@@ -11,10 +11,11 @@ import {
     isSizedGridColumn,
     type Item,
 } from "../src/index.js";
-import type { CustomCell, GridKeyEventArgs, SizedGridColumn } from "../src/internal/data-grid/data-grid-types.js";
+import type { CustomCell, SizedGridColumn } from "../src/internal/data-grid/data-grid-types.js";
 import type { DataEditorRef } from "../src/data-editor/data-editor.js";
 import { assert } from "../src/common/support.js";
 import { vi, type Mock, expect, describe, test, beforeEach, afterEach } from "vitest";
+import type { GridKeyEventArgs } from "../src/internal/data-grid/event-args.js";
 
 const BOOLEAN_DATA_LOOKUP: (boolean | null | undefined)[] = [true, false, undefined, null];
 function getMockBooleanData(row: number): boolean | null | undefined {

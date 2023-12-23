@@ -8,9 +8,10 @@ import {
     useMockDataGenerator,
     defaultProps,
 } from "../../data-editor/stories/utils.js";
-import type { GridColumn, GroupHeaderClickedEventArgs } from "../../internal/data-grid/data-grid-types.js";
+import type { GridColumn } from "../../internal/data-grid/data-grid-types.js";
 import { CompactSelection } from "../../internal/data-grid/data-grid-types.js";
 import { SimpleThemeWrapper } from "../../stories/story-utils.js";
+import type { GroupHeaderClickedEventArgs } from "../../internal/data-grid/event-args.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",

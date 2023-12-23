@@ -10,9 +10,6 @@ import {
     type EditableGridCell,
     type GridCell,
     GridCellKind,
-    type GridDragEventArgs,
-    type GridKeyEventArgs,
-    type GridMouseEventArgs,
     type GridSelection,
     isEditableGridCell,
     type Rectangle,
@@ -23,29 +20,20 @@ import {
     type Slice,
     isInnerOnlyCell,
     type ProvideEditorCallback,
-    type GridMouseCellEventArgs,
     type GridColumn,
     isObjectEditorCallbackResult,
-    type GroupHeaderClickedEventArgs,
-    type HeaderClickedEventArgs,
-    type CellClickedEventArgs,
     type Item,
     type MarkerCell,
     headerCellUnheckedMarker,
     headerCellCheckedMarker,
     headerCellIndeterminateMarker,
-    groupHeaderKind,
-    outOfBoundsKind,
     type ValidatedGridCell,
     type ImageEditorType,
     type CustomCell,
-    headerKind,
     BooleanEmpty,
     BooleanIndeterminate,
-    type FillPatternEventArgs,
     type FillHandleDirection,
     type EditListItem,
-    mouseEventArgsAreEqual,
 } from "../internal/data-grid/data-grid-types.js";
 import DataGridSearch, { type DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
 import { browserIsOSX } from "../common/browser-detect.js";
@@ -79,6 +67,20 @@ import { useRemAdjuster } from "./use-rem-adjuster.js";
 import { type Highlight } from "../internal/data-grid/data-grid-render.js";
 import { withAlpha } from "../internal/data-grid/color-parser.js";
 import { combineRects, getClosestRect } from "../common/math.js";
+import {
+    type HeaderClickedEventArgs,
+    type GroupHeaderClickedEventArgs,
+    type CellClickedEventArgs,
+    type FillPatternEventArgs,
+    type GridMouseEventArgs,
+    groupHeaderKind,
+    outOfBoundsKind,
+    type GridMouseCellEventArgs,
+    headerKind,
+    type GridDragEventArgs,
+    mouseEventArgsAreEqual,
+    type GridKeyEventArgs,
+} from "../internal/data-grid/event-args.js";
 
 const DataGridOverlayEditor = React.lazy(
     async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
@@ -2537,30 +2539,27 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
-    const adjustSelectionOnScroll = React.useCallback(
-        () => {
-            const args = hoveredRef.current;
-            if (args === undefined) return;
-            const [xDir, yDir] = args.scrollEdge;
-            let [col, row] = args.location;
-            const visible = visibleRegionRef.current;
-            if (xDir === -1) {
-                col = visible.x;
-            } else if (xDir === 1) {
-                col = visible.x + visible.width;
-            }
-            if (yDir === -1) {
-                row = Math.max(0, visible.y);
-            } else if (yDir === 1) {
-                row = Math.min(rows, visible.y + visible.height);
-            }
-            onItemHoveredImpl({
-                ...args,
-                location: [col, row] as any,
-            })
-        },
-        [onItemHoveredImpl, rows]
-    )
+    const adjustSelectionOnScroll = React.useCallback(() => {
+        const args = hoveredRef.current;
+        if (args === undefined) return;
+        const [xDir, yDir] = args.scrollEdge;
+        let [col, row] = args.location;
+        const visible = visibleRegionRef.current;
+        if (xDir === -1) {
+            col = visible.x;
+        } else if (xDir === 1) {
+            col = visible.x + visible.width;
+        }
+        if (yDir === -1) {
+            row = Math.max(0, visible.y);
+        } else if (yDir === 1) {
+            row = Math.min(rows, visible.y + visible.height);
+        }
+        onItemHoveredImpl({
+            ...args,
+            location: [col, row] as any,
+        });
+    }, [onItemHoveredImpl, rows]);
 
     useAutoscroll(scrollDir, scrollRef, adjustSelectionOnScroll);
 

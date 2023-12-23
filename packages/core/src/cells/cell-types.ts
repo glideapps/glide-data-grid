@@ -5,13 +5,13 @@ import type {
     Rectangle,
     CustomCell,
     ProvideEditorCallback,
-    BaseGridMouseEventArgs,
     BooleanEmpty,
     BooleanIndeterminate,
     Item,
 } from "../internal/data-grid/data-grid-types.js";
 import type { FullTheme } from "../common/styles.js";
 import type { ImageWindowLoader } from "../internal/data-grid/image-window-loader-interface.js";
+import type { BaseGridMouseEventArgs } from "../internal/data-grid/event-args.js";
 
 export interface BaseDrawArgs {
     ctx: CanvasRenderingContext2D;

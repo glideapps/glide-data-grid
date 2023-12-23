@@ -1,5 +1,5 @@
 import React from "react";
-import type { GridMouseCellEventArgs } from "../internal/data-grid/data-grid-types.js";
+import type { GridMouseCellEventArgs } from "../internal/data-grid/event-args.js";
 
 const maxPxPerMs = 2;
 const msToFullSpeed = 1300;
@@ -7,7 +7,7 @@ const msToFullSpeed = 1300;
 export function useAutoscroll(
     scrollDirection: GridMouseCellEventArgs["scrollEdge"] | undefined,
     scrollRef: React.MutableRefObject<HTMLDivElement | null>,
-    onScroll?: () => void,
+    onScroll?: () => void
 ) {
     const speedScalar = React.useRef(0);
     const [xDir, yDir] = scrollDirection ?? [0, 0];

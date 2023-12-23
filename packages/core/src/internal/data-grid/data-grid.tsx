@@ -13,9 +13,6 @@ import {
     GridCellKind,
     type Rectangle,
     type GridSelection,
-    type GridMouseEventArgs,
-    type GridDragEventArgs,
-    type GridKeyEventArgs,
     type InnerGridCell,
     InnerGridCellKind,
     CompactSelection,
@@ -26,12 +23,7 @@ import {
     booleanCellIsEditable,
     type InnerGridColumn,
     type TrailingRowType,
-    groupHeaderKind,
-    headerKind,
-    outOfBoundsKind,
-    OutOfBoundsRegionAxis,
     type DrawCellCallback,
-    mouseEventArgsAreEqual,
 } from "./data-grid-types.js";
 import { CellSet } from "./cell-set.js";
 import { SpriteManager, type SpriteMap } from "./data-grid-sprites.js";
@@ -58,6 +50,16 @@ import { assert } from "../../common/support.js";
 import type { CellRenderer, GetCellRendererCallback } from "../../cells/cell-types.js";
 import type { DrawGridArg } from "./draw-grid-arg.js";
 import type { ImageWindowLoader } from "./image-window-loader-interface.js";
+import {
+    type GridMouseEventArgs,
+    type GridKeyEventArgs,
+    type GridDragEventArgs,
+    OutOfBoundsRegionAxis,
+    outOfBoundsKind,
+    groupHeaderKind,
+    headerKind,
+    mouseEventArgsAreEqual,
+} from "./event-args.js";
 
 export interface DataGridProps {
     readonly width: number;

@@ -2,7 +2,8 @@
 import clamp from "lodash/clamp.js";
 import * as React from "react";
 import DataGrid, { type DataGridProps, type DataGridRef } from "../data-grid/data-grid.js";
-import type { GridColumn, GridMouseEventArgs, InnerGridColumn, Rectangle } from "../data-grid/data-grid-types.js";
+import type { GridColumn, InnerGridColumn, Rectangle } from "../data-grid/data-grid-types.js";
+import type { GridMouseEventArgs } from "../data-grid/event-args.js";
 
 type Props = Omit<
     DataGridProps,

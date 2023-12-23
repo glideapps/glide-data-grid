@@ -8,7 +8,6 @@ import {
     GridColumnIcon,
     type Item,
     type CellList,
-    type GridMouseGroupHeaderEventArgs,
     headerCellCheckboxPrefix,
     GridCellKind,
     BooleanIndeterminate,
@@ -47,6 +46,7 @@ import type { EnqueueCallback } from "./use-animation-queue.js";
 import type { RenderStateProvider } from "../../common/render-state-provider.js";
 import type { ImageWindowLoader } from "./image-window-loader-interface.js";
 import { hugRectToTarget } from "../../common/math.js";
+import type { GridMouseGroupHeaderEventArgs } from "./event-args.js";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when

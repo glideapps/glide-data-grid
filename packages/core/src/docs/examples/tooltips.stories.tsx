@@ -9,8 +9,8 @@ import {
     useMockDataGenerator,
     defaultProps,
 } from "../../data-editor/stories/utils.js";
-import type { GridMouseEventArgs } from "../../internal/data-grid/data-grid-types.js";
 import { SimpleThemeWrapper } from "../../stories/story-utils.js";
+import type { GridMouseEventArgs } from "../../internal/data-grid/event-args.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
