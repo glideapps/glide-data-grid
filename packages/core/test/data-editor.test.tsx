@@ -22,9 +22,11 @@ function getMockBooleanData(row: number): boolean | null | undefined {
     return BOOLEAN_DATA_LOOKUP[row % BOOLEAN_DATA_LOOKUP.length];
 }
 
-function sendClick(el: Element | Node | Document | Window, options?: any): void {
+function sendClick(el: Element | Node | Document | Window, options?: any, runTimers?: boolean): void {
     fireEvent.mouseDown(el, options);
+    if (runTimers === true) vi.runAllTimers();
     fireEvent.mouseUp(el, options);
+    if (runTimers === true) vi.runAllTimers();
     fireEvent.click(el, options);
 }
 
@@ -740,6 +742,108 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1]);
+    });
+
+    describe("cellActivationBehavior", () => {
+        test("double-click in time", async () => {
+            const spy = vi.fn();
+
+            vi.useFakeTimers();
+            render(<DataEditor {...basicProps} onCellActivated={spy} cellActivationBehavior="double-click" />, {
+                wrapper: Context,
+            });
+            prep(false);
+
+            const canvas = screen.getByTestId("data-grid-canvas");
+            sendClick(canvas, {
+                clientX: 300, // Col B
+                clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+            });
+
+            vi.advanceTimersByTime(400);
+
+            sendClick(canvas, {
+                clientX: 300, // Col B
+                clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+            });
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy).toHaveBeenCalledWith([1, 1]);
+        });
+
+        test("double-click miss", async () => {
+            const spy = vi.fn();
+
+            vi.useFakeTimers();
+            render(<DataEditor {...basicProps} onCellActivated={spy} cellActivationBehavior="double-click" />, {
+                wrapper: Context,
+            });
+            prep(false);
+
+            const canvas = screen.getByTestId("data-grid-canvas");
+            sendClick(canvas, {
+                clientX: 300, // Col B
+                clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+            });
+
+            vi.advanceTimersByTime(600);
+
+            sendClick(canvas, {
+                clientX: 300, // Col B
+                clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+            });
+
+            expect(spy).not.toHaveBeenCalled();
+        });
+
+        test("second-click", async () => {
+            const spy = vi.fn();
+
+            vi.useFakeTimers();
+            render(<DataEditor {...basicProps} onCellActivated={spy} cellActivationBehavior="second-click" />, {
+                wrapper: Context,
+            });
+            prep(false);
+
+            const canvas = screen.getByTestId("data-grid-canvas");
+            sendClick(canvas, {
+                clientX: 300, // Col B
+                clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+            });
+
+            vi.advanceTimersByTime(1600);
+
+            sendClick(canvas, {
+                clientX: 300, // Col B
+                clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+            });
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy).toHaveBeenCalledWith([1, 1]);
+        });
+
+        test("single-click", async () => {
+            const spy = vi.fn();
+
+            vi.useFakeTimers();
+            render(<DataEditor {...basicProps} onCellActivated={spy} cellActivationBehavior="single-click" />, {
+                wrapper: Context,
+            });
+            prep(false);
+
+            const canvas = screen.getByTestId("data-grid-canvas");
+            sendClick(
+                canvas,
+                {
+                    clientX: 300, // Col B
+                    clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+                },
+                true
+            );
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy).toHaveBeenCalledWith([1, 1]);
+        });
     });
 
     test("Does not emit activated event on double click with different buttons", async () => {

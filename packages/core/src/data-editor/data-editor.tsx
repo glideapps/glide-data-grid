@@ -2223,11 +2223,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
                     if (
                         !isPrevented.current &&
-                        mouse?.previousSelection?.current?.cell !== undefined &&
+                        (cellActivationBehavior === "single-click" ||
+                            mouse?.previousSelection?.current?.cell !== undefined) &&
                         gridSelection.current !== undefined
                     ) {
                         const [selectedCol, selectedRow] = gridSelection.current.cell;
-                        const [prevCol, prevRow] = mouse.previousSelection.current.cell;
+                        const [prevCol, prevRow] = mouse?.previousSelection?.current?.cell ?? [-1, -1];
                         const isClickOnSelected =
                             col === selectedCol && col === prevCol && row === selectedRow && row === prevRow;
                         const canActivate =
