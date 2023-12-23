@@ -45,6 +45,7 @@ import {
     type FillPatternEventArgs,
     type FillHandleDirection,
     type EditListItem,
+    mouseEventArgsAreEqual,
 } from "../internal/data-grid/data-grid-types.js";
 import DataGridSearch, { type DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
 import { browserIsOSX } from "../common/browser-detect.js";
@@ -2350,8 +2351,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [mouseState, onMouseMove, rowMarkerOffset]
     );
 
-    useAutoscroll(scrollDir, scrollRef);
-
     const onHeaderMenuClickInner = React.useCallback(
         (col: number, screenPosition: Rectangle) => {
             onHeaderMenuClick?.(col - rowMarkerOffset, screenPosition);
@@ -2447,8 +2446,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         isActivelyDragging.current = false;
     }, []);
 
+    const hoveredRef = React.useRef<GridMouseEventArgs>();
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
+            if (mouseEventArgsAreEqual(args, hoveredRef.current)) return;
+            hoveredRef.current = args;
             if (mouseDownData?.current?.button !== undefined && mouseDownData.current.button >= 1) return;
             if (
                 mouseState !== undefined &&
@@ -2534,6 +2536,33 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             setCurrent,
         ]
     );
+
+    const adjustSelectionOnScroll = React.useCallback(
+        () => {
+            const args = hoveredRef.current;
+            if (args === undefined) return;
+            const [xDir, yDir] = args.scrollEdge;
+            let [col, row] = args.location;
+            const visible = visibleRegionRef.current;
+            if (xDir === -1) {
+                col = visible.x;
+            } else if (xDir === 1) {
+                col = visible.x + visible.width;
+            }
+            if (yDir === -1) {
+                row = Math.max(0, visible.y);
+            } else if (yDir === 1) {
+                row = Math.min(rows, visible.y + visible.height);
+            }
+            onItemHoveredImpl({
+                ...args,
+                location: [col, row] as any,
+            })
+        },
+        [onItemHoveredImpl, rows]
+    )
+
+    useAutoscroll(scrollDir, scrollRef, adjustSelectionOnScroll);
 
     // 1 === move one
     // 2 === move to end

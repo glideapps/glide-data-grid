@@ -767,3 +767,23 @@ export class CompactSelection {
         }
     }
 }
+
+export function mouseEventArgsAreEqual(args: GridMouseEventArgs | undefined, other: GridMouseEventArgs | undefined) {
+    if (args === other) return true;
+
+    if (args?.kind === "out-of-bounds") {
+        return (
+            args?.kind === other?.kind &&
+            args?.location[0] === other?.location[0] &&
+            args?.location[1] === other?.location[1] &&
+            args?.region[0] === other?.region[0] &&
+            args?.region[1] === other?.region[1]
+        );
+    }
+
+    return (
+        args?.kind === other?.kind &&
+        args?.location[0] === other?.location[0] &&
+        args?.location[1] === other?.location[1]
+    );
+}

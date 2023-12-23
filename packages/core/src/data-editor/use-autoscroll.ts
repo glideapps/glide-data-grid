@@ -6,7 +6,8 @@ const msToFullSpeed = 1300;
 
 export function useAutoscroll(
     scrollDirection: GridMouseCellEventArgs["scrollEdge"] | undefined,
-    scrollRef: React.MutableRefObject<HTMLDivElement | null>
+    scrollRef: React.MutableRefObject<HTMLDivElement | null>,
+    onScroll?: () => void,
 ) {
     const speedScalar = React.useRef(0);
     const [xDir, yDir] = scrollDirection ?? [0, 0];
@@ -26,10 +27,11 @@ export function useAutoscroll(
                 const motion = speedScalar.current ** 1.618 * step * maxPxPerMs;
                 scrollRef.current?.scrollBy(xDir * motion, yDir * motion);
                 lastTime = curTime;
+                onScroll?.();
             }
             t = window.requestAnimationFrame(scrollFn);
         };
         let t = window.requestAnimationFrame(scrollFn);
         return () => window.cancelAnimationFrame(t);
-    }, [scrollRef, xDir, yDir]);
+    }, [scrollRef, xDir, yDir, onScroll]);
 }

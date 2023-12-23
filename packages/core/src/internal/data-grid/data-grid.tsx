@@ -31,6 +31,7 @@ import {
     outOfBoundsKind,
     OutOfBoundsRegionAxis,
     type DrawCellCallback,
+    mouseEventArgsAreEqual,
 } from "./data-grid-types.js";
 import { CellSet } from "./cell-set.js";
 import { SpriteManager, type SpriteMap } from "./data-grid-sprites.js";
@@ -413,6 +414,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     }, [cellYOffset, cellXOffset, translateX, translateY, disableFirefoxRescaling]);
 
     const mappedColumns = useMappedColumns(columns, freezeColumns);
+    const stickyX = fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0;
 
     // row: -1 === columnHeader, -2 === groupHeader
     const getBoundsForItem = React.useCallback(
@@ -510,10 +512,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const metaKey = ev?.metaKey === true;
             const isTouch = (ev !== undefined && !(ev instanceof MouseEvent)) || (ev as any)?.pointerType === "touch";
 
-            const edgeSize = 20;
             const scrollEdge: GridMouseEventArgs["scrollEdge"] = [
-                Math.abs(x) < edgeSize ? -1 : Math.abs(rect.width - x) < edgeSize ? 1 : 0,
-                Math.abs(y) < edgeSize ? -1 : Math.abs(rect.height - y) < edgeSize ? 1 : 0,
+                x < stickyX ? -1 : rect.width < x ? 1 : 0,
+                y < totalHeaderHeight ? -1 : rect.height < y ? 1 : 0,
             ];
 
             let result: GridMouseEventArgs;
@@ -652,28 +653,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getBoundsForItem,
             fillHandle,
             selection,
+            stickyX,
+            totalHeaderHeight,
         ]
     );
-
-    function isSameItem(item: GridMouseEventArgs | undefined, other: GridMouseEventArgs | undefined) {
-        if (item === other) return true;
-
-        if (item?.kind === "out-of-bounds") {
-            return (
-                item?.kind === other?.kind &&
-                item?.location[0] === other?.location[0] &&
-                item?.location[1] === other?.location[1] &&
-                item?.region[0] === other?.region[0] &&
-                item?.region[1] === other?.region[1]
-            );
-        }
-
-        return (
-            item?.kind === other?.kind &&
-            item?.location[0] === other?.location[0] &&
-            item?.location[1] === other?.location[1]
-        );
-    }
 
     const [hoveredItem] = hoveredItemInfo ?? [];
 
@@ -1201,7 +1184,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 });
             };
 
-            if (!isSameItem(args, hoveredRef.current)) {
+            if (!mouseEventArgsAreEqual(args, hoveredRef.current)) {
                 onItemHovered?.(args);
                 maybeSetHoveredInfo(
                     args.kind === outOfBoundsKind ? undefined : [args.location, [args.localEventX, args.localEventY]],
@@ -1734,7 +1717,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         200
     );
 
-    const stickyX = fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0;
     const opacityX =
         freezeColumns === 0 || !fixedShadowX ? 0 : cellXOffset > freezeColumns ? 1 : clamp(-translateX / 100, 0, 1);
 
