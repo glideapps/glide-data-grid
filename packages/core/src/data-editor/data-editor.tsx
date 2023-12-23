@@ -2221,27 +2221,31 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             ]);
                         }
                     }
-                    if (
-                        !isPrevented.current &&
-                        (cellActivationBehavior === "single-click" ||
-                            mouse?.previousSelection?.current?.cell !== undefined) &&
-                        gridSelection.current !== undefined
-                    ) {
-                        const [selectedCol, selectedRow] = gridSelection.current.cell;
-                        const [prevCol, prevRow] = mouse?.previousSelection?.current?.cell ?? [-1, -1];
-                        const isClickOnSelected =
-                            col === selectedCol && col === prevCol && row === selectedRow && row === prevRow;
-                        const canActivate =
-                            cellActivationBehavior === "double-click"
-                                ? isClickOnSelected && a.isDoubleClick === true
-                                : cellActivationBehavior === "second-click"
-                                ? isClickOnSelected
-                                : true;
-                        if (canActivate) {
-                            onCellActivated?.([col - rowMarkerOffset, row]);
-                            reselect(a.bounds, false);
-                            return true;
+                    if (isPrevented.current || gridSelection.current === undefined) return false;
+
+                    let shouldActivate = false;
+                    switch (cellActivationBehavior) {
+                        case "double-click":
+                        case "second-click": {
+                            if (mouse?.previousSelection?.current?.cell === undefined) break;
+                            const [selectedCol, selectedRow] = gridSelection.current.cell;
+                            const [prevCol, prevRow] = mouse.previousSelection.current.cell;
+                            const isClickOnSelected =
+                                col === selectedCol && col === prevCol && row === selectedRow && row === prevRow;
+                            shouldActivate =
+                                isClickOnSelected &&
+                                (a.isDoubleClick === true || cellActivationBehavior === "second-click");
+                            break;
                         }
+                        case "single-click": {
+                            shouldActivate = true;
+                            break;
+                        }
+                    }
+                    if (shouldActivate) {
+                        onCellActivated?.([col - rowMarkerOffset, row]);
+                        reselect(a.bounds, false);
+                        return true;
                     }
                 }
                 return false;
@@ -2335,6 +2339,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onCellClicked,
             getMangledCellContent,
             getCellRenderer,
+            cellActivationBehavior,
             themeForCell,
             mangledOnCellsEdited,
             onCellActivated,
