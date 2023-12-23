@@ -651,6 +651,11 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * Controls which directions fill is allowed in.
      */
     readonly allowedFillDirections?: FillHandleDirection;
+
+    /**
+     * Determins when a cell is considered activated
+     */
+    readonly cellActivationBehavior?: "double-click" | "single-click" | "second-click";
 }
 
 type ScrollToFn = (
@@ -782,6 +787,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onPaste,
         copyHeaders = false,
         freezeColumns = 0,
+        cellActivationBehavior = "second-click",
         rowSelectionMode = "auto",
         rowMarkerStartIndex = 1,
         rowMarkerTheme,
@@ -2222,7 +2228,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     ) {
                         const [selectedCol, selectedRow] = gridSelection.current.cell;
                         const [prevCol, prevRow] = mouse.previousSelection.current.cell;
-                        if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
+                        const isClickOnSelected =
+                            col === selectedCol && col === prevCol && row === selectedRow && row === prevRow;
+                        const canActivate =
+                            cellActivationBehavior === "double-click"
+                                ? isClickOnSelected && a.isDoubleClick === true
+                                : cellActivationBehavior === "second-click"
+                                ? isClickOnSelected
+                                : true;
+                        if (canActivate) {
                             onCellActivated?.([col - rowMarkerOffset, row]);
                             reselect(a.bounds, false);
                             return true;

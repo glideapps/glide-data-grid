@@ -1003,8 +1003,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     useEventListener("touchstart", onMouseDownImpl, window, false);
     useEventListener("mousedown", onMouseDownImpl, window, false);
 
+    const lastUpTime = React.useRef(0);
+
     const onMouseUpImpl = React.useCallback(
         (ev: MouseEvent | TouchEvent) => {
+            const lastUpTimeValue = lastUpTime.current;
+            lastUpTime.current = Date.now();
             const canvas = ref.current;
             mouseDown.current = false;
             if (onMouseUp === undefined || canvas === null) return;
@@ -1033,6 +1037,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 args = {
                     ...args,
                     isLongTouch: true,
+                };
+            } else if (!args.isTouch && lastUpTimeValue !== 0 && Date.now() - lastUpTimeValue < 500) {
+                args = {
+                    ...args,
+                    isDoubleClick: true,
                 };
             }
 
