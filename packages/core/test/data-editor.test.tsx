@@ -217,6 +217,8 @@ function prep(resetTimers: boolean = true) {
     if (scroller !== null) {
         vi.spyOn(scroller, "clientWidth", "get").mockImplementation(() => 1000);
         vi.spyOn(scroller, "clientHeight", "get").mockImplementation(() => 1000);
+        vi.spyOn(scroller, "offsetWidth" as any, "get").mockImplementation(() => 1000);
+        vi.spyOn(scroller, "offsetHeight" as any, "get").mockImplementation(() => 1000);
     }
 
     act(() => {

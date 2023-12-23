@@ -94,6 +94,7 @@ describe("drawImage", () => {
         const baseDrawArgs: BaseDrawArgs = {
             ctx: mockCtx,
             theme: mockTheme,
+            cellFillColor: mockTheme.bgCell,
             col: 0,
             row: 0,
             rect: mockRect,
@@ -132,6 +133,7 @@ describe("drawImage", () => {
         const baseDrawArgs = {
             ctx: mockCtx,
             theme: mockTheme,
+            cellFillColor: mockTheme.bgCell,
             col: 0,
             row: 0,
             rect: mockRect,
@@ -168,6 +170,7 @@ describe("drawImage", () => {
         const baseDrawArgs = {
             ctx: mockCtx,
             theme: mockTheme,
+            cellFillColor: mockTheme.bgCell,
             col: 0,
             row: 0,
             rect: mockRect,
@@ -208,6 +211,7 @@ describe("drawImage", () => {
         const baseDrawArgs = {
             ctx: mockCtx,
             theme: mockTheme,
+            cellFillColor: mockTheme.bgCell,
             col: 0,
             row: 0,
             rect: mockRect,
@@ -248,6 +252,7 @@ describe("drawImage", () => {
         const baseDrawArgs = {
             ctx: mockCtx,
             theme: mockTheme,
+            cellFillColor: mockTheme.bgCell,
             col: 0,
             row: 0,
             rect: mockRect,
@@ -301,6 +306,7 @@ describe("drawWithLastUpdate", () => {
             {
                 ctx: mockCtx,
                 theme: mockTheme,
+                cellFillColor: mockTheme.bgCell,
                 rect: mockRect,
                 cell: { kind: GridCellKind.Text, allowOverlay: false, data: "Test", displayData: "Test" },
                 col: 0,
@@ -332,6 +338,7 @@ describe("drawWithLastUpdate", () => {
             {
                 ctx: mockCtx,
                 theme: mockTheme,
+                cellFillColor: mockTheme.bgCell,
                 rect: mockRect,
                 cell: { kind: GridCellKind.Text, allowOverlay: false, data: "Test", displayData: "Test" },
                 col: 0,
@@ -363,6 +370,7 @@ describe("drawWithLastUpdate", () => {
             {
                 ctx: mockCtx,
                 theme: mockTheme,
+                cellFillColor: mockTheme.bgCell,
                 rect: mockRect,
                 cell: { kind: GridCellKind.Text, allowOverlay: false, data: "Test", displayData: "Test" },
                 col: 0,
@@ -401,6 +409,7 @@ describe("drawWithLastUpdate", () => {
             {
                 ctx: mockCtx,
                 theme: mockTheme,
+                cellFillColor: mockTheme.bgCell,
                 rect: mockRect,
                 cell: { kind: GridCellKind.Text, allowOverlay: false, data: "Test", displayData: "Test" },
                 col: 0,

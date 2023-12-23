@@ -23,6 +23,7 @@ export interface BaseDrawArgs {
     hoverAmount: number;
     hoverX: number | undefined;
     hoverY: number | undefined;
+    cellFillColor: string;
     imageLoader: ImageWindowLoader;
     spriteManager: SpriteManager;
     hyperWrapping: boolean;

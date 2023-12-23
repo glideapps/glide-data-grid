@@ -6,6 +6,7 @@ export type { Theme } from "./common/styles.js";
 export type { CustomRenderer, BaseDrawArgs, DrawArgs } from "./cells/cell-types.js";
 export type { SelectionBlending } from "./internal/data-grid/use-selection-behavior.js";
 export type { GetRowThemeCallback, Highlight } from "./internal/data-grid/data-grid-render.js";
+export type { ImageWindowLoader } from "./internal/data-grid/image-window-loader-interface.js";
 export * from "./internal/data-grid/data-grid-types.js";
 export { ImageOverlayEditor } from "./internal/data-grid-overlay-editor/private/image-overlay-editor.js";
 export { default as MarkdownDiv } from "./internal/markdown-div/markdown-div.js";
@@ -18,6 +19,7 @@ export {
     roundedRect,
     drawTextCellExternal as drawTextCell,
 } from "./internal/data-grid/data-grid-lib.js";
+export { CellSet } from "./internal/data-grid/cell-set.js";
 export { getDataEditorTheme as getDefaultTheme, useTheme } from "./common/styles.js";
 export { useColumnSizer } from "./data-editor/use-column-sizer.js";
 

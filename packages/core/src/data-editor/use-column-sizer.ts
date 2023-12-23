@@ -67,7 +67,10 @@ export function useColumnSizer(
     theme: FullTheme,
     getCellRenderer: GetCellRendererCallback,
     abortController: AbortController
-): readonly InnerGridColumn[] {
+): {
+    readonly sizedColumns: readonly InnerGridColumn[];
+    readonly nonGrowWidth: number;
+} {
     const rowsRef = React.useRef(rows);
     const getCellsForSelectionRef = React.useRef(getCellsForSelection);
     const themeRef = React.useRef(theme);
@@ -224,6 +227,9 @@ export function useColumnSizer(
             }
             result = writeable;
         }
-        return result;
+        return {
+            sizedColumns: result,
+            nonGrowWidth: totalWidth,
+        };
     }, [clientWidth, columns, ctx, selectedData, theme, minColumnWidth, maxColumnWidth, getCellRenderer]);
 }
