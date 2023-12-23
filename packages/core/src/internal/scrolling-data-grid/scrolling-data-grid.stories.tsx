@@ -92,6 +92,7 @@ export function Simplenotest() {
             experimental={undefined}
             headerIcons={undefined}
             isDraggable={undefined}
+            nonGrowWidth={1000}
             onCanvasBlur={() => undefined}
             onCanvasFocused={() => undefined}
             onCellFocused={() => undefined}
