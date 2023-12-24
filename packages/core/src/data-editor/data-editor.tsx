@@ -653,7 +653,8 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
     readonly allowedFillDirections?: FillHandleDirection;
 
     /**
-     * Determins when a cell is considered activated
+     * Determines when a cell is considered activated and will emit the `onCellActivated` event. Generally an activated
+     * cell will open to edit mode.
      */
     readonly cellActivationBehavior?: "double-click" | "single-click" | "second-click";
 }
