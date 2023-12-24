@@ -1038,7 +1038,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     ...args,
                     isLongTouch: true,
                 };
-            } else if (!args.isTouch && lastUpTimeValue !== 0 && Date.now() - lastUpTimeValue < 500) {
+            }
+
+            if (lastUpTimeValue !== 0 && Date.now() - lastUpTimeValue < (args.isTouch ? 1000 : 500)) {
                 args = {
                     ...args,
                     isDoubleClick: true,

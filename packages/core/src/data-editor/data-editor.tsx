@@ -1922,7 +1922,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const lastMouseSelectLocation = React.useRef<readonly [number, number]>();
     const touchDownArgs = React.useRef(visibleRegion);
     const mouseDownData = React.useRef<{
-        wasDoubleClick: boolean;
         time: number;
         button: number;
         location: Item;
@@ -1937,9 +1936,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             const time = performance.now();
-            const wasDoubleClick = time - (mouseDownData.current?.time ?? -1000) < 250;
             mouseDownData.current = {
-                wasDoubleClick,
                 button: args.button,
                 time,
                 location: args.location,
@@ -2049,12 +2046,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const isPrevented = React.useRef(false);
 
     const normalSizeColumn = React.useCallback(
-        async (col: number, force: boolean = false): Promise<void> => {
-            if (
-                (mouseDownData.current?.wasDoubleClick === true || force) &&
-                getCellsForSelection !== undefined &&
-                onColumnResize !== undefined
-            ) {
+        async (col: number): Promise<void> => {
+            if (getCellsForSelection !== undefined && onColumnResize !== undefined) {
                 const start = visibleRegionRef.current.y;
                 const end = visibleRegionRef.current.height;
                 let cells = getCellsForSelection(
@@ -2306,7 +2299,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
 
                 if (args.isEdge) {
-                    void normalSizeColumn(col);
+                    if (args.isDoubleClick === true) {
+                        void normalSizeColumn(col);
+                    }
                 } else if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
                     onHeaderClicked?.(clickLocation, { ...args, preventDefault });
                 }
@@ -3750,7 +3745,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             scrollTo,
             remeasureColumns: cols => {
                 for (const col of cols) {
-                    void normalSizeColumn(col + rowMarkerOffset, true);
+                    void normalSizeColumn(col + rowMarkerOffset);
                 }
             },
         }),
