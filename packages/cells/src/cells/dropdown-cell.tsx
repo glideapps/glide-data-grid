@@ -19,10 +19,12 @@ const CustomMenu: React.FC<CustomMenuProps> = p => {
     return <Menu {...rest}>{children}</Menu>;
 };
 
+type DropdownOption = string | { value: string; label: string } | undefined | null;
+
 interface DropdownCellProps {
     readonly kind: "dropdown-cell";
     readonly value: string | undefined | null;
-    readonly allowedValues: readonly (string | undefined | null)[];
+    readonly allowedValues: readonly DropdownOption[];
 }
 
 export type DropdownCell = CustomCell<DropdownCellProps>;
@@ -66,14 +68,14 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
 
     const theme = useTheme();
 
-    const values = React.useMemo(
-        () =>
-            allowedValues.map(x => ({
-                value: x,
-                label: x,
-            })),
-        [allowedValues]
-    );
+    const values = React.useMemo(() => {
+        return allowedValues.map(option => {
+            if (typeof option === "string" || option === null || option === undefined) {
+                return { value: option, label: option?.toString() ?? "" };
+            }
+            return option;
+        });
+    }, [allowedValues]);
 
     if (cell.readonly) {
         return (
@@ -176,10 +178,18 @@ const renderer: CustomRenderer<DropdownCell> = {
     draw: (args, cell) => {
         const { ctx, theme, rect } = args;
         const { value } = cell.data;
-        if (value) {
+        const foundOption = cell.data.allowedValues.find(opt => {
+            if (typeof opt === "string" || opt === null || opt === undefined) {
+                return opt === value;
+            }
+            return opt.value === value;
+        });
+
+        const displayText = typeof foundOption === "string" ? foundOption : foundOption?.label ?? "";
+        if (displayText) {
             ctx.fillStyle = theme.textDark;
             ctx.fillText(
-                value,
+                displayText,
                 rect.x + theme.cellHorizontalPadding,
                 rect.y + rect.height / 2 + getMiddleCenterBias(ctx, theme)
             );
