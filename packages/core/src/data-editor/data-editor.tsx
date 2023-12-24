@@ -651,6 +651,12 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * Controls which directions fill is allowed in.
      */
     readonly allowedFillDirections?: FillHandleDirection;
+
+    /**
+     * Determines when a cell is considered activated and will emit the `onCellActivated` event. Generally an activated
+     * cell will open to edit mode.
+     */
+    readonly cellActivationBehavior?: "double-click" | "single-click" | "second-click";
 }
 
 type ScrollToFn = (
@@ -782,6 +788,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onPaste,
         copyHeaders = false,
         freezeColumns = 0,
+        cellActivationBehavior = "second-click",
         rowSelectionMode = "auto",
         rowMarkerStartIndex = 1,
         rowMarkerTheme,
@@ -1916,7 +1923,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const lastMouseSelectLocation = React.useRef<readonly [number, number]>();
     const touchDownArgs = React.useRef(visibleRegion);
     const mouseDownData = React.useRef<{
-        wasDoubleClick: boolean;
         time: number;
         button: number;
         location: Item;
@@ -1931,9 +1937,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             const time = performance.now();
-            const wasDoubleClick = time - (mouseDownData.current?.time ?? -1000) < 250;
             mouseDownData.current = {
-                wasDoubleClick,
                 button: args.button,
                 time,
                 location: args.location,
@@ -2043,12 +2047,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const isPrevented = React.useRef(false);
 
     const normalSizeColumn = React.useCallback(
-        async (col: number, force: boolean = false): Promise<void> => {
-            if (
-                (mouseDownData.current?.wasDoubleClick === true || force) &&
-                getCellsForSelection !== undefined &&
-                onColumnResize !== undefined
-            ) {
+        async (col: number): Promise<void> => {
+            if (getCellsForSelection !== undefined && onColumnResize !== undefined) {
                 const start = visibleRegionRef.current.y;
                 const end = visibleRegionRef.current.height;
                 let cells = getCellsForSelection(
@@ -2217,18 +2217,31 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             ]);
                         }
                     }
-                    if (
-                        !isPrevented.current &&
-                        mouse?.previousSelection?.current?.cell !== undefined &&
-                        gridSelection.current !== undefined
-                    ) {
-                        const [selectedCol, selectedRow] = gridSelection.current.cell;
-                        const [prevCol, prevRow] = mouse.previousSelection.current.cell;
-                        if (col === selectedCol && col === prevCol && row === selectedRow && row === prevRow) {
-                            onCellActivated?.([col - rowMarkerOffset, row]);
-                            reselect(a.bounds, false);
-                            return true;
+                    if (isPrevented.current || gridSelection.current === undefined) return false;
+
+                    let shouldActivate = false;
+                    switch (cellActivationBehavior) {
+                        case "double-click":
+                        case "second-click": {
+                            if (mouse?.previousSelection?.current?.cell === undefined) break;
+                            const [selectedCol, selectedRow] = gridSelection.current.cell;
+                            const [prevCol, prevRow] = mouse.previousSelection.current.cell;
+                            const isClickOnSelected =
+                                col === selectedCol && col === prevCol && row === selectedRow && row === prevRow;
+                            shouldActivate =
+                                isClickOnSelected &&
+                                (a.isDoubleClick === true || cellActivationBehavior === "second-click");
+                            break;
                         }
+                        case "single-click": {
+                            shouldActivate = true;
+                            break;
+                        }
+                    }
+                    if (shouldActivate) {
+                        onCellActivated?.([col - rowMarkerOffset, row]);
+                        reselect(a.bounds, false);
+                        return true;
                     }
                 }
                 return false;
@@ -2287,7 +2300,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
 
                 if (args.isEdge) {
-                    void normalSizeColumn(col);
+                    if (args.isDoubleClick === true) {
+                        void normalSizeColumn(col);
+                    }
                 } else if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
                     onHeaderClicked?.(clickLocation, { ...args, preventDefault });
                 }
@@ -2322,6 +2337,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onCellClicked,
             getMangledCellContent,
             getCellRenderer,
+            cellActivationBehavior,
             themeForCell,
             mangledOnCellsEdited,
             onCellActivated,
@@ -3730,7 +3746,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             scrollTo,
             remeasureColumns: cols => {
                 for (const col of cols) {
-                    void normalSizeColumn(col + rowMarkerOffset, true);
+                    void normalSizeColumn(col + rowMarkerOffset);
                 }
             },
         }),

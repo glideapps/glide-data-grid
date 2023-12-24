@@ -7,6 +7,7 @@ export interface BaseGridMouseEventArgs {
     readonly metaKey: boolean;
     readonly isTouch: boolean;
     readonly isLongTouch?: boolean;
+    readonly isDoubleClick?: boolean;
     readonly isEdge: boolean;
     readonly button: number;
     readonly scrollEdge: readonly [xDir: -1 | 0 | 1, yDir: -1 | 0 | 1];
