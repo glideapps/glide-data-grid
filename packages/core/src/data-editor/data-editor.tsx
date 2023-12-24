@@ -1036,7 +1036,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [additionalRenderers, rendererMap]
     );
 
-    const { sizedColumns: columns, nonGrowWidth } = useColumnSizer(
+    // eslint-disable-next-line prefer-const
+    let { sizedColumns: columns, nonGrowWidth } = useColumnSizer(
         columnsIn,
         rows,
         getCellsForSeletionDirect,
@@ -1047,6 +1048,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         getCellRenderer,
         abortControllerRef.current
     );
+    if (rowMarkers !== "none") nonGrowWidth += rowMarkerWidth;
 
     const enableGroups = React.useMemo(() => {
         return columns.some(c => c.group !== undefined);
