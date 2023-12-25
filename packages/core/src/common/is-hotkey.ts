@@ -21,15 +21,29 @@ function checkKey(key: string | undefined, args: GridKeyEventArgs): boolean {
     }
     return true;
 }
+
 export function isHotkey(hotkey: string, args: GridKeyEventArgs): boolean {
     if (hotkey.length === 0) return false;
+
+    if (hotkey.includes("|")) {
+        const parts = hotkey.split("|");
+        for (const part of parts) {
+            if (isHotkey(part, args)) return true;
+        }
+        return false;
+    }
+
     let wantCtrl = false;
     let wantShift = false;
     let wantAlt = false;
     let wantMeta = false;
+
     const split = hotkey.split("+");
     const key = split.pop();
+
     if (!checkKey(key, args)) return false;
+    if (split[0] === "any") return true;
+
     for (const accel of split) {
         switch (accel) {
             case "ctrl":
