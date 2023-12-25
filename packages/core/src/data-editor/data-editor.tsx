@@ -188,6 +188,13 @@ interface ForcedKeybinds {
     paste: boolean;
 }
 
+interface BackCompatKeybinds {
+    readonly pageUp: boolean;
+    readonly pageDown: boolean;
+    readonly first: boolean;
+    readonly last: boolean;
+}
+
 export interface ConfigurableKeybinds {
     readonly downFill: Keybind;
     readonly rightFill: Keybind;
@@ -239,7 +246,7 @@ export interface ConfigurableKeybinds {
     readonly selectColumn: Keybind;
 }
 
-type Keybinds = ConfigurableKeybinds & ForcedKeybinds;
+type Keybinds = ConfigurableKeybinds & ForcedKeybinds & Partial<BackCompatKeybinds>;
 
 export type RealizedKeybinds = Readonly<Record<keyof ConfigurableKeybinds, string>> & ForcedKeybinds;
 
@@ -297,6 +304,7 @@ function realizeKeybind(keybind: Keybind, defaultVal: string): string {
 
 function realizeKeybinds(keybinds: Keybinds): RealizedKeybinds {
     const isOSX = browserIsOSX.value;
+
     return {
         activateCell: realizeKeybind(keybinds.activateCell, " |Enter|shift+Enter"),
         clear: realizeKeybind(keybinds.clear, "any+Escape"),
@@ -678,23 +686,6 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
     /**
      * Determins which keybindings are enabled.
      * @group Editing
-     * @defaultValue is
-
-            {
-                selectAll: true,
-                selectRow: true,
-                selectColumn: true,
-                downFill: false,
-                rightFill: false,
-                pageUp: false,
-                pageDown: false,
-                clear: true,
-                copy: true,
-                paste: true,
-                search: false,
-                first: true,
-                last: true,
-            }
      */
     readonly keybindings?: Partial<Keybinds>;
 
@@ -998,12 +989,23 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     });
 
     const keybindings = React.useMemo(() => {
-        return keybindingsIn === undefined
-            ? keybindingDefaults
-            : {
-                  ...keybindingDefaults,
-                  ...keybindingsIn,
-              };
+        if (keybindingsIn === undefined) return keybindingDefaults;
+        const withBackCompatApplied = {
+            ...keybindingsIn,
+            goToNextPage: keybindingsIn?.goToNextPage ?? keybindingsIn?.pageDown ?? keybindingDefaults.goToNextPage,
+            goToPreviousPage:
+                keybindingsIn?.goToPreviousPage ?? keybindingsIn?.pageUp ?? keybindingDefaults.goToPreviousPage,
+            goToFirstCell: keybindingsIn?.goToFirstCell ?? keybindingsIn?.first ?? keybindingDefaults.goToFirstCell,
+            goToLastCell: keybindingsIn?.goToLastCell ?? keybindingsIn?.last ?? keybindingDefaults.goToLastCell,
+            selectToFirstCell:
+                keybindingsIn?.selectToFirstCell ?? keybindingsIn?.first ?? keybindingDefaults.selectToFirstCell,
+            selectToLastCell:
+                keybindingsIn?.selectToLastCell ?? keybindingsIn?.last ?? keybindingDefaults.selectToLastCell,
+        };
+        return {
+            ...keybindingDefaults,
+            ...withBackCompatApplied,
+        };
     }, [keybindingsIn]);
 
     const rowMarkerWidth = rowMarkerWidthRaw ?? (rows > 10_000 ? 48 : rows > 1000 ? 44 : rows > 100 ? 36 : 32);
