@@ -3127,33 +3127,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let [col, row] = gridSelection.current.cell;
                 let freeMove = false;
 
-                if (overlayOpen) {
-                    if (isHotkey(keys.closeOverlay, event)) {
-                        setOverlay(undefined);
-                        return;
-                    }
-
-                    if (isHotkey(keys.acceptOverlayDown, event)) {
-                        setOverlay(undefined);
-                        row++;
-                    }
-
-                    if (isHotkey(keys.acceptOverlayUp, event)) {
-                        setOverlay(undefined);
-                        row--;
-                    }
-
-                    if (isHotkey(keys.acceptOverlayLeft, event)) {
-                        setOverlay(undefined);
-                        col--;
-                    }
-
-                    if (isHotkey(keys.acceptOverlayRight, event)) {
-                        setOverlay(undefined);
-                        col++;
-                    }
-                }
-
                 if (columnSelect !== "none" && isHotkey(keys.selectColumn, event)) {
                     if (selectedColumns.hasIndex(col)) {
                         setSelectedColumns(selectedColumns.remove(col), undefined, true);
@@ -3219,91 +3192,93 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (isHotkey(keys.goDownCell, event)) {
                         setOverlay(undefined);
                         row += 1;
+                    } else if (isHotkey(keys.goUpCell, event)) {
+                        setOverlay(undefined);
+                        row -= 1;
+                    } else if (isHotkey(keys.goRightCell, event)) {
+                        setOverlay(undefined);
+                        col += 1;
+                    } else if (isHotkey(keys.goLeftCell, event)) {
+                        setOverlay(undefined);
+                        col -= 1;
                     } else if (isHotkey(keys.goDownCellRetainSelection, event)) {
                         setOverlay(undefined);
                         row += 1;
                         freeMove = true;
-                    } else if (
-                        (rangeSelect === "rect" || rangeSelect === "multi-rect") &&
-                        isHotkey(keys.selectGrowDown, event)
-                    ) {
-                        setOverlay(undefined);
-                        adjustSelection([0, 1]);
-                    } else if (
-                        (rangeSelect === "rect" || rangeSelect === "multi-rect") &&
-                        isHotkey(keys.selectToLastRow, event)
-                    ) {
-                        setOverlay(undefined);
-                        adjustSelection([0, 2]);
-                    } else if (isHotkey(keys.goToLastRow, event)) {
-                        setOverlay(undefined);
-                        row = rows - 1;
-                    } else if (isHotkey(keys.goUpCell, event)) {
-                        setOverlay(undefined);
-                        row -= 1;
                     } else if (isHotkey(keys.goUpCellRetainSelection, event)) {
                         setOverlay(undefined);
                         row -= 1;
                         freeMove = true;
-                    } else if (
-                        (rangeSelect === "rect" || rangeSelect === "multi-rect") &&
-                        isHotkey(keys.selectGrowUp, event)
-                    ) {
-                        setOverlay(undefined);
-                        adjustSelection([0, -1]);
-                    } else if (
-                        (rangeSelect === "rect" || rangeSelect === "multi-rect") &&
-                        isHotkey(keys.selectToFirstRow, event)
-                    ) {
-                        setOverlay(undefined);
-                        adjustSelection([0, -2]);
-                    } else if (isHotkey(keys.goToFirstRow, event)) {
-                        setOverlay(undefined);
-                        row = Number.MIN_SAFE_INTEGER;
-                    } else if (isHotkey(keys.goRightCell, event)) {
-                        setOverlay(undefined);
-                        col += 1;
                     } else if (isHotkey(keys.goRightCellRetainSelection, event)) {
                         setOverlay(undefined);
                         col += 1;
                         freeMove = true;
-                    } else if (
-                        (rangeSelect === "rect" || rangeSelect === "multi-rect") &&
-                        isHotkey(keys.selectGrowRight, event)
-                    ) {
-                        setOverlay(undefined);
-                        adjustSelection([1, 0]);
-                    } else if (
-                        (rangeSelect === "rect" || rangeSelect === "multi-rect") &&
-                        isHotkey(keys.selectToLastColumn, event)
-                    ) {
-                        setOverlay(undefined);
-                        adjustSelection([2, 0]);
-                    } else if (isHotkey(keys.goToLastColumn, event)) {
-                        setOverlay(undefined);
-                        col = Number.MAX_SAFE_INTEGER;
-                    } else if (isHotkey(keys.goLeftCell, event)) {
-                        setOverlay(undefined);
-                        col -= 1;
                     } else if (isHotkey(keys.goLeftCellRetainSelection, event)) {
                         setOverlay(undefined);
                         col -= 1;
                         freeMove = true;
-                    } else if (
-                        (rangeSelect === "rect" || rangeSelect === "multi-rect") &&
-                        isHotkey(keys.selectGrowLeft, event)
-                    ) {
+                    } else if (isHotkey(keys.goToLastRow, event)) {
                         setOverlay(undefined);
-                        adjustSelection([-1, 0]);
-                    } else if (
-                        (rangeSelect === "rect" || rangeSelect === "multi-rect") &&
-                        isHotkey(keys.selectToFirstColumn, event)
-                    ) {
+                        row = rows - 1;
+                    } else if (isHotkey(keys.goToFirstRow, event)) {
                         setOverlay(undefined);
-                        adjustSelection([-2, 0]);
+                        row = Number.MIN_SAFE_INTEGER;
+                    } else if (isHotkey(keys.goToLastColumn, event)) {
+                        setOverlay(undefined);
+                        col = Number.MAX_SAFE_INTEGER;
                     } else if (isHotkey(keys.goToFirstColumn, event)) {
                         setOverlay(undefined);
                         col = Number.MIN_SAFE_INTEGER;
+                    } else if (rangeSelect === "rect" || rangeSelect === "multi-rect") {
+                        if (isHotkey(keys.selectGrowDown, event)) {
+                            setOverlay(undefined);
+                            adjustSelection([0, 1]);
+                        } else if (isHotkey(keys.selectGrowUp, event)) {
+                            setOverlay(undefined);
+                            adjustSelection([0, -1]);
+                        } else if (isHotkey(keys.selectGrowRight, event)) {
+                            setOverlay(undefined);
+                            adjustSelection([1, 0]);
+                        } else if (isHotkey(keys.selectGrowLeft, event)) {
+                            setOverlay(undefined);
+                            adjustSelection([-1, 0]);
+                        } else if (isHotkey(keys.selectToLastRow, event)) {
+                            setOverlay(undefined);
+                            adjustSelection([0, 2]);
+                        } else if (isHotkey(keys.selectToFirstRow, event)) {
+                            setOverlay(undefined);
+                            adjustSelection([0, -2]);
+                        } else if (isHotkey(keys.selectToLastColumn, event)) {
+                            setOverlay(undefined);
+                            adjustSelection([2, 0]);
+                        } else if (isHotkey(keys.selectToFirstColumn, event)) {
+                            setOverlay(undefined);
+                            adjustSelection([-2, 0]);
+                        }
+                    }
+                } else {
+                    if (isHotkey(keys.closeOverlay, event)) {
+                        setOverlay(undefined);
+                    }
+
+                    if (isHotkey(keys.acceptOverlayDown, event)) {
+                        setOverlay(undefined);
+                        row++;
+                    }
+
+                    if (isHotkey(keys.acceptOverlayUp, event)) {
+                        setOverlay(undefined);
+                        row--;
+                    }
+
+                    if (isHotkey(keys.acceptOverlayLeft, event)) {
+                        setOverlay(undefined);
+                        col--;
+                    }
+
+                    if (isHotkey(keys.acceptOverlayRight, event)) {
+                        setOverlay(undefined);
+                        col++;
                     }
                 }
                 // #endregion
