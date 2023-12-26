@@ -17,7 +17,7 @@ function drawNewRowCell(args: BaseDrawArgs, data: string, icon?: string) {
     const { x, y, width: w, height: h } = rect;
     ctx.beginPath();
     ctx.globalAlpha = hoverAmount;
-    ctx.rect(x, y, w, h);
+    ctx.rect(x + 1, y + 1, w, h - 2);
     ctx.fillStyle = theme.bgHeaderHovered;
     ctx.fill();
     ctx.globalAlpha = 1;
