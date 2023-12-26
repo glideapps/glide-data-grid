@@ -15,7 +15,7 @@ function checkKey(key: string | undefined, args: GridKeyEventArgs): boolean {
     if (key === undefined) return false;
     if (key.length > 1 && key.startsWith("_")) {
         const keycode = Number.parseInt(key.slice(1));
-        if (keycode !== args.keyCode) return false;
+        return keycode === args.keyCode;
     }
     return key.toLowerCase() === args.key.toLowerCase();
 }
