@@ -2851,7 +2851,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const selectedColumns = gridSelection.columns;
                 const selectedRows = gridSelection.rows;
 
-                // fixme, this sucks
                 const keys = keybindings;
 
                 if (!overlayOpen && isHotkey(keys.clear, event, details)) {
@@ -2860,35 +2859,24 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return;
                 }
 
-                if (isHotkey(keys.selectAll, event, details)) {
-                    if (!overlayOpen) {
-                        setGridSelection(
-                            {
-                                columns: CompactSelection.empty(),
-                                rows: CompactSelection.empty(),
-                                current: {
-                                    cell: gridSelection.current?.cell ?? [rowMarkerOffset, 0],
-                                    range: {
-                                        x: rowMarkerOffset,
-                                        y: 0,
-                                        width: columnsIn.length,
-                                        height: rows,
-                                    },
-                                    rangeStack: [],
+                if (!overlayOpen && isHotkey(keys.selectAll, event, details)) {
+                    setGridSelection(
+                        {
+                            columns: CompactSelection.empty(),
+                            rows: CompactSelection.empty(),
+                            current: {
+                                cell: gridSelection.current?.cell ?? [rowMarkerOffset, 0],
+                                range: {
+                                    x: rowMarkerOffset,
+                                    y: 0,
+                                    width: columnsIn.length,
+                                    height: rows,
                                 },
+                                rangeStack: [],
                             },
-                            false
-                        );
-                    } else {
-                        const el = document.getElementById(overlayID);
-                        if (el !== null) {
-                            const s = window.getSelection();
-                            const r = document.createRange();
-                            r.selectNodeContents(el);
-                            s?.removeAllRanges();
-                            s?.addRange(r);
-                        }
-                    }
+                        },
+                        false
+                    );
                     cancel();
                     return;
                 }
@@ -2923,7 +2911,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             deleteRange({
                                 x: rowMarkerOffset,
                                 y: r,
-                                width: mangledCols.length - rowMarkerOffset,
+                                width: columnsIn.length,
                                 height: 1,
                             });
                         }
@@ -3142,10 +3130,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             setGridSelection,
             onSelectionCleared,
             columnsIn.length,
-            overlayID,
             onDelete,
             deleteRange,
-            mangledCols.length,
             setSelectedColumns,
             setSelectedRows,
             showTrailingBlankRow,
