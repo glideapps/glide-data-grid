@@ -271,6 +271,118 @@ describe('data-grid', () => {
       })
     );
   });
+  test('Header hovered with icons', () => {
+    const spy = jest.fn();
+
+    render(
+      <DataGrid
+        {...basicProps}
+        columns={[
+          {
+            title: 'A',
+            width: 150,
+            alertIcon: 'headerDate',
+          },
+          {
+            title: 'B',
+            width: 160,
+            infoIcon: 'headerDate',
+          },
+          {
+            title: 'C',
+            width: 170,
+            alertIcon: 'headerDate',
+            infoIcon: 'headerDate',
+          },
+          {
+            title: 'D',
+            width: 180,
+          },
+          {
+            title: 'E',
+            width: 190,
+          },
+        ]}
+        onItemHovered={spy}
+      />
+    );
+
+    const el = screen.getByTestId(dataGridCanvasId);
+    fireEvent.mouseMove(el, {
+      clientX: 350, // Col C
+      clientY: 16, // Header
+    });
+
+    expect(spy).toBeCalledWith(
+      expect.objectContaining({
+        kind: 'header',
+        location: [2, -1],
+      })
+    );
+
+    fireEvent.mouseMove(el, {
+      clientX: 450, // Col C
+      clientY: 16, // Header
+    });
+
+    expect(spy).toBeCalledTimes(2);
+
+    expect(spy).toBeCalledWith(
+      expect.objectContaining({
+        isInfoIconHovered: true,
+      })
+    );
+
+    fireEvent.mouseMove(el, {
+      clientX: 449, // Col C
+      clientY: 16, // Header
+    });
+
+    // Don't trigger if the same icon hovered
+    expect(spy).toBeCalledTimes(2);
+
+    fireEvent.mouseMove(el, {
+      clientX: 430, // Col C
+      clientY: 16, // Header
+    });
+
+    expect(spy).toBeCalledWith(
+      expect.objectContaining({
+        isAlertIconHovered: true,
+      })
+    );
+
+    fireEvent.mouseMove(el, {
+      clientX: 429, // Col C
+      clientY: 16, // Header
+    });
+    // Don't trigger if the same icon hovered
+    expect(spy).toBeCalledTimes(3);
+
+    fireEvent.mouseMove(el, {
+      clientX: 350, // Col C
+      clientY: 16, // Header
+    });
+
+    expect(spy).toBeCalledWith(
+      expect.objectContaining({
+        isAlertIconHovered: false,
+        isInfoIconHovered: false,
+      })
+    );
+
+    // Check first column and when only alert icon
+    fireEvent.mouseMove(el, {
+      clientX: 130, // Col A
+      clientY: 16, // Header
+    });
+
+    expect(spy).toBeCalledWith(
+      expect.objectContaining({
+        isAlertIconHovered: true,
+      })
+    );
+  });
 
   test('Header hovered when scrolled', () => {
     const spy = jest.fn();

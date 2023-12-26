@@ -8,15 +8,25 @@ type Sprite = HeaderIconMap['headerArray'];
 export type SpriteMap = Record<string | HeaderIcon, Sprite>;
 
 /** @category Columns */
-export type SpriteVariant = 'normal' | 'selected' | 'special';
+export type SpriteVariant = 'normal' | 'selected' | 'special' | 'error' | 'info';
 
 function getColors(variant: SpriteVariant, theme: Theme): readonly [string, string] {
-  if (variant === 'normal') {
-    return [theme.bgIconHeader, theme.fgIconHeader];
-  } else if (variant === 'selected') {
-    return [theme.bgSelectedColumnIcon, theme.accentColor];
-  } else {
-    return [theme.accentColor, theme.bgHeader];
+  switch (variant) {
+    case 'normal': {
+      return [theme.bgIconHeader, theme.fgIconHeader];
+    }
+    case 'selected': {
+      return [theme.bgSelectedColumnIcon, theme.accentColor];
+    }
+    case 'error': {
+      return [theme.bgErrorColumnIcon!, theme.bgErrorColumnIcon!];
+    }
+    case 'info': {
+      return [theme.bgInfoColumnIcon!, theme.bgInfoColumnIcon!];
+    }
+    default: {
+      return [theme.accentColor, theme.bgHeader];
+    }
   }
 }
 
