@@ -90,6 +90,7 @@ export interface BlitData {
     readonly translateX: number;
     readonly translateY: number;
     readonly mustDrawFocusOnHeader: boolean;
+    readonly mustDrawHighlightRingsOnHeader: boolean;
     readonly lastBuffer: "a" | "b" | undefined;
 }
 
@@ -1807,7 +1808,7 @@ function drawHighlightRings(
         if (lastRowSticky) {
             const lastRowHeight = typeof rowHeight === "function" ? rowHeight(rows - 1) : rowHeight;
             ctx.beginPath();
-            ctx.rect(0, 0, width, height - lastRowHeight);
+            ctx.rect(0, 0, width, height - lastRowHeight + 1);
             ctx.clip();
         }
         ctx.beginPath();
@@ -2250,6 +2251,15 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     let drawRegions: Rectangle[] = [];
 
     const mustDrawFocusOnHeader = drawFocus && selection.current?.cell[1] === cellYOffset && translateY === 0;
+    let mustDrawHighlightRingsOnHeader = false;
+    if (highlightRegions !== undefined) {
+        for (const r of highlightRegions) {
+            if (r.style !== "no-outline" && r.range.y === cellYOffset && translateY === 0) {
+                mustDrawHighlightRingsOnHeader = true;
+                break;
+            }
+        }
+    }
     const drawHeaderTexture = () => {
         drawGridHeaders(
             overlayCtx,
@@ -2302,6 +2312,26 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             theme.bgHeader
         );
         overlayCtx.stroke();
+
+        if (mustDrawHighlightRingsOnHeader) {
+            drawHighlightRings(
+                overlayCtx,
+                width,
+                height,
+                cellXOffset,
+                cellYOffset,
+                translateX,
+                translateY,
+                mappedColumns,
+                freezeColumns,
+                headerHeight,
+                groupHeaderHeight,
+                rowHeight,
+                trailingRowType === "sticky",
+                rows,
+                highlightRegions
+            );
+        }
 
         if (mustDrawFocusOnHeader) {
             drawFocusRing(
@@ -2456,7 +2486,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         canBlit !== true ||
         cellXOffset !== last?.cellXOffset ||
         translateX !== last?.translateX ||
-        mustDrawFocusOnHeader !== last?.mustDrawFocusOnHeader
+        mustDrawFocusOnHeader !== last?.mustDrawFocusOnHeader ||
+        mustDrawHighlightRingsOnHeader !== last?.mustDrawHighlightRingsOnHeader
     ) {
         drawHeaderTexture();
     }
@@ -2691,6 +2722,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         translateX,
         translateY,
         mustDrawFocusOnHeader,
+        mustDrawHighlightRingsOnHeader,
         lastBuffer: doubleBuffer ? (targetBuffer === bufferA ? "a" : "b") : undefined,
     };
 
