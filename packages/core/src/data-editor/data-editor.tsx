@@ -81,6 +81,7 @@ import {
     mouseEventArgsAreEqual,
     type GridKeyEventArgs,
 } from "../internal/data-grid/event-args.js";
+import { type Keybinds, useKeybindingsWithDefaults } from "./data-editor-keybindings.js";
 
 const DataGridOverlayEditor = React.lazy(
     async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
@@ -177,178 +178,6 @@ function shiftSelection(input: GridSelection, offset: number): GridSelection {
                   },
         rows: input.rows,
         columns: input.columns.offset(offset),
-    };
-}
-
-type Keybind = boolean | string;
-
-interface ForcedKeybinds {
-    copy: boolean;
-    cut: boolean;
-    paste: boolean;
-}
-
-interface BackCompatKeybinds {
-    readonly pageUp: boolean;
-    readonly pageDown: boolean;
-    readonly first: boolean;
-    readonly last: boolean;
-}
-
-export interface ConfigurableKeybinds {
-    readonly downFill: Keybind;
-    readonly rightFill: Keybind;
-    readonly clear: Keybind;
-    readonly closeOverlay: Keybind;
-    readonly acceptOverlayDown: Keybind;
-    readonly acceptOverlayUp: Keybind;
-    readonly acceptOverlayLeft: Keybind;
-    readonly acceptOverlayRight: Keybind;
-    readonly search: Keybind;
-    readonly delete: Keybind;
-    readonly activateCell: Keybind;
-
-    // Navigation Keybinds
-    readonly goToFirstColumn: Keybind;
-    readonly goToLastColumn: Keybind;
-    readonly goToFirstCell: Keybind;
-    readonly goToLastCell: Keybind;
-    readonly goToFirstRow: Keybind;
-    readonly goToLastRow: Keybind;
-    readonly goToNextPage: Keybind;
-    readonly goToPreviousPage: Keybind;
-
-    readonly goUpCell: Keybind;
-    readonly goDownCell: Keybind;
-    readonly goLeftCell: Keybind;
-    readonly goRightCell: Keybind;
-
-    readonly goUpCellRetainSelection: Keybind;
-    readonly goDownCellRetainSelection: Keybind;
-    readonly goLeftCellRetainSelection: Keybind;
-    readonly goRightCellRetainSelection: Keybind;
-
-    // Selection Keybinds
-    readonly selectToFirstColumn: Keybind;
-    readonly selectToLastColumn: Keybind;
-    readonly selectToFirstCell: Keybind;
-    readonly selectToLastCell: Keybind;
-    readonly selectToFirstRow: Keybind;
-    readonly selectToLastRow: Keybind;
-
-    readonly selectGrowUp: Keybind;
-    readonly selectGrowDown: Keybind;
-    readonly selectGrowLeft: Keybind;
-    readonly selectGrowRight: Keybind;
-
-    readonly selectAll: Keybind;
-    readonly selectRow: Keybind;
-    readonly selectColumn: Keybind;
-}
-
-type Keybinds = ConfigurableKeybinds & ForcedKeybinds & Partial<BackCompatKeybinds>;
-
-export type RealizedKeybinds = Readonly<Record<keyof ConfigurableKeybinds, string>> & ForcedKeybinds;
-
-const keybindingDefaults: Keybinds = {
-    downFill: false,
-    rightFill: false,
-    clear: true,
-    closeOverlay: true,
-    acceptOverlayDown: true,
-    acceptOverlayUp: true,
-    acceptOverlayLeft: true,
-    acceptOverlayRight: true,
-    copy: true,
-    paste: true,
-    cut: true,
-    search: false,
-    delete: true,
-    activateCell: true,
-    goToFirstCell: true,
-    goToFirstColumn: true,
-    goToFirstRow: true,
-    goToLastCell: true,
-    goToLastColumn: true,
-    goToLastRow: true,
-    goToNextPage: true,
-    goToPreviousPage: true,
-    selectToFirstCell: true,
-    selectToFirstColumn: true,
-    selectToFirstRow: true,
-    selectToLastCell: true,
-    selectToLastColumn: true,
-    selectToLastRow: true,
-    selectAll: true,
-    selectRow: true,
-    selectColumn: true,
-    goDownCell: true,
-    goDownCellRetainSelection: true,
-    goLeftCell: true,
-    goLeftCellRetainSelection: true,
-    goRightCell: true,
-    goRightCellRetainSelection: true,
-    goUpCell: true,
-    goUpCellRetainSelection: true,
-    selectGrowDown: true,
-    selectGrowLeft: true,
-    selectGrowRight: true,
-    selectGrowUp: true,
-};
-
-function realizeKeybind(keybind: Keybind, defaultVal: string): string {
-    if (keybind === true) return defaultVal;
-    if (keybind === false) return "";
-    return keybind;
-}
-
-function realizeKeybinds(keybinds: Keybinds): RealizedKeybinds {
-    const isOSX = browserIsOSX.value;
-
-    return {
-        activateCell: realizeKeybind(keybinds.activateCell, " |Enter|shift+Enter"),
-        clear: realizeKeybind(keybinds.clear, "any+Escape"),
-        closeOverlay: realizeKeybind(keybinds.closeOverlay, "any+Escape"),
-        acceptOverlayDown: realizeKeybind(keybinds.acceptOverlayDown, "Enter"),
-        acceptOverlayUp: realizeKeybind(keybinds.acceptOverlayUp, "shift+Enter"),
-        acceptOverlayLeft: realizeKeybind(keybinds.acceptOverlayLeft, "shift+Tab"),
-        acceptOverlayRight: realizeKeybind(keybinds.acceptOverlayRight, "Tab"),
-        copy: keybinds.copy,
-        cut: keybinds.cut,
-        delete: realizeKeybind(keybinds.delete, isOSX ? "Backspace|Delete" : "Delete"),
-        downFill: realizeKeybind(keybinds.downFill, "primary+_68"),
-        goDownCell: realizeKeybind(keybinds.goDownCell, "ArrowDown"),
-        goDownCellRetainSelection: realizeKeybind(keybinds.goDownCellRetainSelection, "alt+ArrowDown"),
-        goLeftCell: realizeKeybind(keybinds.goLeftCell, "ArrowLeft|shift+Tab"),
-        goLeftCellRetainSelection: realizeKeybind(keybinds.goLeftCellRetainSelection, "alt+ArrowLeft"),
-        goRightCell: realizeKeybind(keybinds.goRightCell, "ArrowRight|Tab"),
-        goRightCellRetainSelection: realizeKeybind(keybinds.goRightCellRetainSelection, "alt+ArrowRight"),
-        goUpCell: realizeKeybind(keybinds.goUpCell, "ArrowUp"),
-        goUpCellRetainSelection: realizeKeybind(keybinds.goUpCellRetainSelection, "alt+ArrowUp"),
-        goToFirstCell: realizeKeybind(keybinds.goToFirstCell, "primary+Home"),
-        goToFirstColumn: realizeKeybind(keybinds.goToFirstColumn, "Home|primary+ArrowLeft"),
-        goToFirstRow: realizeKeybind(keybinds.goToFirstRow, "primary+ArrowUp"),
-        goToLastCell: realizeKeybind(keybinds.goToLastCell, "primary+End"),
-        goToLastColumn: realizeKeybind(keybinds.goToLastColumn, "End|primary+ArrowRight"),
-        goToLastRow: realizeKeybind(keybinds.goToLastRow, "primary+ArrowDown"),
-        goToNextPage: realizeKeybind(keybinds.goToNextPage, "PageDown"),
-        goToPreviousPage: realizeKeybind(keybinds.goToPreviousPage, "PageUp"),
-        paste: keybinds.paste,
-        rightFill: realizeKeybind(keybinds.rightFill, "primary+_82"),
-        search: realizeKeybind(keybinds.search, "primary+f"),
-        selectAll: realizeKeybind(keybinds.selectAll, "primary+a"),
-        selectColumn: realizeKeybind(keybinds.selectColumn, "ctrl+ "),
-        selectGrowDown: realizeKeybind(keybinds.selectGrowDown, "shift+ArrowDown"),
-        selectGrowLeft: realizeKeybind(keybinds.selectGrowLeft, "shift+ArrowLeft"),
-        selectGrowRight: realizeKeybind(keybinds.selectGrowRight, "shift+ArrowRight"),
-        selectGrowUp: realizeKeybind(keybinds.selectGrowUp, "shift+ArrowUp"),
-        selectRow: realizeKeybind(keybinds.selectRow, "shift+ "),
-        selectToFirstCell: realizeKeybind(keybinds.selectToFirstCell, "primary+shift+Home"),
-        selectToFirstColumn: realizeKeybind(keybinds.selectToFirstColumn, "primary+shift+ArrowLeft"),
-        selectToFirstRow: realizeKeybind(keybinds.selectToFirstRow, "primary+shift+ArrowUp"),
-        selectToLastCell: realizeKeybind(keybinds.selectToLastCell, "primary+shift+End"),
-        selectToLastColumn: realizeKeybind(keybinds.selectToLastColumn, "primary+shift+ArrowRight"),
-        selectToLastRow: realizeKeybind(keybinds.selectToLastRow, "primary+shift+ArrowDown"),
     };
 }
 
@@ -988,25 +817,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         theme: themeIn,
     });
 
-    const keybindings = React.useMemo(() => {
-        if (keybindingsIn === undefined) return keybindingDefaults;
-        const withBackCompatApplied = {
-            ...keybindingsIn,
-            goToNextPage: keybindingsIn?.goToNextPage ?? keybindingsIn?.pageDown ?? keybindingDefaults.goToNextPage,
-            goToPreviousPage:
-                keybindingsIn?.goToPreviousPage ?? keybindingsIn?.pageUp ?? keybindingDefaults.goToPreviousPage,
-            goToFirstCell: keybindingsIn?.goToFirstCell ?? keybindingsIn?.first ?? keybindingDefaults.goToFirstCell,
-            goToLastCell: keybindingsIn?.goToLastCell ?? keybindingsIn?.last ?? keybindingDefaults.goToLastCell,
-            selectToFirstCell:
-                keybindingsIn?.selectToFirstCell ?? keybindingsIn?.first ?? keybindingDefaults.selectToFirstCell,
-            selectToLastCell:
-                keybindingsIn?.selectToLastCell ?? keybindingsIn?.last ?? keybindingDefaults.selectToLastCell,
-        };
-        return {
-            ...keybindingDefaults,
-            ...withBackCompatApplied,
-        };
-    }, [keybindingsIn]);
+    const keybindings = useKeybindingsWithDefaults(keybindingsIn);
 
     const rowMarkerWidth = rowMarkerWidthRaw ?? (rows > 10_000 ? 48 : rows > 1000 ? 44 : rows > 100 ? 36 : 32);
     const hasRowMarkers = rowMarkers !== "none";
@@ -3029,6 +2840,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     event.preventDefault();
                 };
 
+                const details = {
+                    didMatch: false,
+                };
+
                 const { bounds } = event;
                 // const isOSX = browserIsOSX.value;
                 // const isDeleteKey = key === "Delete" || (isOSX && key === "Backspace");
@@ -3037,15 +2852,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const selectedRows = gridSelection.rows;
 
                 // fixme, this sucks
-                const keys = realizeKeybinds(keybindings);
+                const keys = keybindings;
 
-                if (!overlayOpen && isHotkey(keys.clear, event)) {
+                if (!overlayOpen && isHotkey(keys.clear, event, details)) {
                     setGridSelection(emptyGridSelection, false);
                     onSelectionCleared?.();
                     return;
                 }
 
-                if (isHotkey(keys.selectAll, event)) {
+                if (isHotkey(keys.selectAll, event, details)) {
                     if (!overlayOpen) {
                         setGridSelection(
                             {
@@ -3078,14 +2893,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     return;
                 }
 
-                if (isHotkey(keys.search, event)) {
+                if (isHotkey(keys.search, event, details)) {
                     cancel();
                     searchInputRef?.current?.focus({ preventScroll: true });
                     setShowSearchInner(true);
                     return;
                 }
 
-                if (isHotkey(keys.delete, event)) {
+                if (isHotkey(keys.delete, event, details)) {
                     const callbackResult = onDelete?.(gridSelection) ?? true;
                     cancel();
                     if (callbackResult !== false) {
@@ -3129,7 +2944,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let [col, row] = gridSelection.current.cell;
                 let freeMove = false;
 
-                if (columnSelect !== "none" && isHotkey(keys.selectColumn, event)) {
+                if (columnSelect !== "none" && isHotkey(keys.selectColumn, event, details)) {
                     if (selectedColumns.hasIndex(col)) {
                         setSelectedColumns(selectedColumns.remove(col), undefined, true);
                     } else {
@@ -3139,7 +2954,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             setSelectedColumns(undefined, col, true);
                         }
                     }
-                } else if (rowSelect !== "none" && isHotkey(keys.selectRow, event)) {
+                } else if (rowSelect !== "none" && isHotkey(keys.selectRow, event, details)) {
                     if (selectedRows.hasIndex(row)) {
                         setSelectedRows(selectedRows.remove(row), undefined, true);
                     } else {
@@ -3149,7 +2964,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             setSelectedRows(undefined, row, true);
                         }
                     }
-                } else if (!overlayOpen && bounds !== undefined && isHotkey(keys.activateCell, event)) {
+                } else if (!overlayOpen && bounds !== undefined && isHotkey(keys.activateCell, event, details)) {
                     if (row === rows && showTrailingBlankRow) {
                         window.setTimeout(() => {
                             const customTargetColumn = getCustomNewRowTargetColumn(col);
@@ -3160,30 +2975,30 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         reselect(bounds, true);
                         cancel();
                     }
-                } else if (gridSelection.current.range.height > 1 && isHotkey(keys.downFill, event)) {
+                } else if (gridSelection.current.range.height > 1 && isHotkey(keys.downFill, event, details)) {
                     fillDown();
                     cancel();
-                } else if (gridSelection.current.range.width > 1 && isHotkey(keys.rightFill, event)) {
+                } else if (gridSelection.current.range.width > 1 && isHotkey(keys.rightFill, event, details)) {
                     fillRight();
                     cancel();
-                } else if (isHotkey(keys.goToNextPage, event)) {
+                } else if (isHotkey(keys.goToNextPage, event, details)) {
                     row += Math.max(1, visibleRegionRef.current.height - 4); // partial cell accounting
                     cancel();
-                } else if (isHotkey(keys.goToPreviousPage, event)) {
+                } else if (isHotkey(keys.goToPreviousPage, event, details)) {
                     row -= Math.max(1, visibleRegionRef.current.height - 4); // partial cell accounting
                     cancel();
-                } else if (isHotkey(keys.goToFirstCell, event)) {
+                } else if (isHotkey(keys.goToFirstCell, event, details)) {
                     setOverlay(undefined);
                     row = 0;
                     col = 0;
-                } else if (isHotkey(keys.goToLastCell, event)) {
+                } else if (isHotkey(keys.goToLastCell, event, details)) {
                     setOverlay(undefined);
                     row = Number.MAX_SAFE_INTEGER;
                     col = Number.MAX_SAFE_INTEGER;
-                } else if (isHotkey(keys.selectToFirstCell, event)) {
+                } else if (isHotkey(keys.selectToFirstCell, event, details)) {
                     setOverlay(undefined);
                     adjustSelection([-2, -2]);
-                } else if (isHotkey(keys.selectToLastCell, event)) {
+                } else if (isHotkey(keys.selectToLastCell, event, details)) {
                     setOverlay(undefined);
                     adjustSelection([2, 2]);
                     // eslint-disable-next-line unicorn/prefer-switch
@@ -3191,94 +3006,94 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                 // #region cell movement
                 if (!overlayOpen) {
-                    if (isHotkey(keys.goDownCell, event)) {
+                    if (isHotkey(keys.goDownCell, event, details)) {
                         setOverlay(undefined);
                         row += 1;
-                    } else if (isHotkey(keys.goUpCell, event)) {
+                    } else if (isHotkey(keys.goUpCell, event, details)) {
                         setOverlay(undefined);
                         row -= 1;
-                    } else if (isHotkey(keys.goRightCell, event)) {
+                    } else if (isHotkey(keys.goRightCell, event, details)) {
                         setOverlay(undefined);
                         col += 1;
-                    } else if (isHotkey(keys.goLeftCell, event)) {
+                    } else if (isHotkey(keys.goLeftCell, event, details)) {
                         setOverlay(undefined);
                         col -= 1;
-                    } else if (isHotkey(keys.goDownCellRetainSelection, event)) {
+                    } else if (isHotkey(keys.goDownCellRetainSelection, event, details)) {
                         setOverlay(undefined);
                         row += 1;
                         freeMove = true;
-                    } else if (isHotkey(keys.goUpCellRetainSelection, event)) {
+                    } else if (isHotkey(keys.goUpCellRetainSelection, event, details)) {
                         setOverlay(undefined);
                         row -= 1;
                         freeMove = true;
-                    } else if (isHotkey(keys.goRightCellRetainSelection, event)) {
+                    } else if (isHotkey(keys.goRightCellRetainSelection, event, details)) {
                         setOverlay(undefined);
                         col += 1;
                         freeMove = true;
-                    } else if (isHotkey(keys.goLeftCellRetainSelection, event)) {
+                    } else if (isHotkey(keys.goLeftCellRetainSelection, event, details)) {
                         setOverlay(undefined);
                         col -= 1;
                         freeMove = true;
-                    } else if (isHotkey(keys.goToLastRow, event)) {
+                    } else if (isHotkey(keys.goToLastRow, event, details)) {
                         setOverlay(undefined);
                         row = rows - 1;
-                    } else if (isHotkey(keys.goToFirstRow, event)) {
+                    } else if (isHotkey(keys.goToFirstRow, event, details)) {
                         setOverlay(undefined);
                         row = Number.MIN_SAFE_INTEGER;
-                    } else if (isHotkey(keys.goToLastColumn, event)) {
+                    } else if (isHotkey(keys.goToLastColumn, event, details)) {
                         setOverlay(undefined);
                         col = Number.MAX_SAFE_INTEGER;
-                    } else if (isHotkey(keys.goToFirstColumn, event)) {
+                    } else if (isHotkey(keys.goToFirstColumn, event, details)) {
                         setOverlay(undefined);
                         col = Number.MIN_SAFE_INTEGER;
                     } else if (rangeSelect === "rect" || rangeSelect === "multi-rect") {
-                        if (isHotkey(keys.selectGrowDown, event)) {
+                        if (isHotkey(keys.selectGrowDown, event, details)) {
                             setOverlay(undefined);
                             adjustSelection([0, 1]);
-                        } else if (isHotkey(keys.selectGrowUp, event)) {
+                        } else if (isHotkey(keys.selectGrowUp, event, details)) {
                             setOverlay(undefined);
                             adjustSelection([0, -1]);
-                        } else if (isHotkey(keys.selectGrowRight, event)) {
+                        } else if (isHotkey(keys.selectGrowRight, event, details)) {
                             setOverlay(undefined);
                             adjustSelection([1, 0]);
-                        } else if (isHotkey(keys.selectGrowLeft, event)) {
+                        } else if (isHotkey(keys.selectGrowLeft, event, details)) {
                             setOverlay(undefined);
                             adjustSelection([-1, 0]);
-                        } else if (isHotkey(keys.selectToLastRow, event)) {
+                        } else if (isHotkey(keys.selectToLastRow, event, details)) {
                             setOverlay(undefined);
                             adjustSelection([0, 2]);
-                        } else if (isHotkey(keys.selectToFirstRow, event)) {
+                        } else if (isHotkey(keys.selectToFirstRow, event, details)) {
                             setOverlay(undefined);
                             adjustSelection([0, -2]);
-                        } else if (isHotkey(keys.selectToLastColumn, event)) {
+                        } else if (isHotkey(keys.selectToLastColumn, event, details)) {
                             setOverlay(undefined);
                             adjustSelection([2, 0]);
-                        } else if (isHotkey(keys.selectToFirstColumn, event)) {
+                        } else if (isHotkey(keys.selectToFirstColumn, event, details)) {
                             setOverlay(undefined);
                             adjustSelection([-2, 0]);
                         }
                     }
                 } else {
-                    if (isHotkey(keys.closeOverlay, event)) {
+                    if (isHotkey(keys.closeOverlay, event, details)) {
                         setOverlay(undefined);
                     }
 
-                    if (isHotkey(keys.acceptOverlayDown, event)) {
+                    if (isHotkey(keys.acceptOverlayDown, event, details)) {
                         setOverlay(undefined);
                         row++;
                     }
 
-                    if (isHotkey(keys.acceptOverlayUp, event)) {
+                    if (isHotkey(keys.acceptOverlayUp, event, details)) {
                         setOverlay(undefined);
                         row--;
                     }
 
-                    if (isHotkey(keys.acceptOverlayLeft, event)) {
+                    if (isHotkey(keys.acceptOverlayLeft, event, details)) {
                         setOverlay(undefined);
                         col--;
                     }
 
-                    if (isHotkey(keys.acceptOverlayRight, event)) {
+                    if (isHotkey(keys.acceptOverlayRight, event, details)) {
                         setOverlay(undefined);
                         col++;
                     }
@@ -3286,6 +3101,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 // #endregion
 
                 if (
+                    !details.didMatch &&
                     !event.metaKey &&
                     !event.ctrlKey &&
                     gridSelection.current !== undefined &&

@@ -22,13 +22,23 @@ function checkKey(key: string | undefined, args: GridKeyEventArgs): boolean {
     return true;
 }
 
-export function isHotkey(hotkey: string, args: GridKeyEventArgs): boolean {
+interface HotkeyResultDetails {
+    didMatch: boolean;
+}
+
+export function isHotkey(hotkey: string, args: GridKeyEventArgs, details: HotkeyResultDetails): boolean {
+    const result = isHotkeyInner(hotkey, args);
+    if (result) details.didMatch = true;
+    return result;
+}
+
+function isHotkeyInner(hotkey: string, args: GridKeyEventArgs): boolean {
     if (hotkey.length === 0) return false;
 
     if (hotkey.includes("|")) {
         const parts = hotkey.split("|");
         for (const part of parts) {
-            if (isHotkey(part, args)) return true;
+            if (isHotkeyInner(part, args)) return true;
         }
         return false;
     }
