@@ -17,7 +17,11 @@ function checkKey(key: string | undefined, args: GridKeyEventArgs): boolean {
         const keycode = Number.parseInt(key.slice(1));
         return keycode === args.keyCode;
     }
-    return key.toLowerCase() === args.key.toLowerCase();
+    if (key.length === 1 && key >= "a" && key <= "z") {
+        return key.toUpperCase().codePointAt(0) === args.keyCode;
+    }
+
+    return key === args.key;
 }
 
 interface HotkeyResultDetails {
