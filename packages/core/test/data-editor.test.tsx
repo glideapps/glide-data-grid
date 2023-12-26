@@ -4257,6 +4257,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
 
         fireEvent.keyDown(canvas, {
             key: "a",
+            keyCode: 65,
             ctrlKey: true,
         });
 
