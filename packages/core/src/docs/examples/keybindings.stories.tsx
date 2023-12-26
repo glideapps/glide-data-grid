@@ -81,6 +81,7 @@ export const CustomKeybindings: React.VFC = () => {
                 onCellEdited={setCellValue}
                 keybindings={keybindings}
                 columns={cols}
+                rangeSelect="multi-rect"
                 rows={100}
                 rowMarkers="both"
             />
