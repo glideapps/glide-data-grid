@@ -2634,6 +2634,11 @@ export const HeaderSorting: React.VFC = () => {
   const realCols = React.useMemo(() => {
     return cols.map((c, index) => ({
       ...c,
+      icon: GridColumnIcon.HeaderCode,
+      hasMenu: true,
+      alertIcon: index % 3 === 1 ? undefined : 'alert',
+      infoIcon: index % 2 === 1 ? undefined : 'info',
+      width: 500,
       sorting:
         index % 2 === 1 ? { direction: SortingDirection.Ascending, order: index } : undefined,
     }));
@@ -2652,6 +2657,34 @@ export const HeaderSorting: React.VFC = () => {
         {...defaultProps}
         getCellContent={getCellContent}
         columns={realCols}
+        headerIcons={{
+          alert: () => {
+            return `<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18">
+            <defs>
+              <style>
+                .fill {
+                  fill: red;
+                }
+              </style>
+            </defs>
+            <title>S Alert 18 N</title>
+            <rect id="Canvas" fill="#ff13dc" opacity="0" width="18" height="18" /><path class="fill" d="M8.5635,1.2895.2,16.256A.5.5,0,0,0,.636,17H17.364a.5.5,0,0,0,.436-.744L9.4365,1.2895a.5.5,0,0,0-.873,0ZM10,14.75a.25.25,0,0,1-.25.25H8.25A.25.25,0,0,1,8,14.75v-1.5A.25.25,0,0,1,8.25,13h1.5a.25.25,0,0,1,.25.25Zm0-3a.25.25,0,0,1-.25.25H8.25A.25.25,0,0,1,8,11.75v-6a.25.25,0,0,1,.25-.25h1.5a.25.25,0,0,1,.25.25Z" />
+          </svg>`;
+          },
+          info: () => {
+            return `<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18">
+            <defs>
+              <style>
+                .fill {
+                  fill: blue;
+                }
+              </style>
+            </defs>
+            <title>S InfoOutline 18 N</title>
+            <rect id="Canvas" fill="#ff13dc" opacity="0" width="18" height="18" /><path class="fill" d="M10.075,6A1.075,1.075,0,1,1,9,4.925H9A1.075,1.075,0,0,1,10.075,6Zm.09173,6H10V8.2A.20005.20005,0,0,0,9.8,8H7.83324S7.25,8.01612,7.25,8.5c0,.48365.58325.5.58325.5H8v3H7.83325s-.58325.01612-.58325.5c0,.48365.58325.5.58325.5h2.3335s.58325-.01635.58325-.5C10.75,12.01612,10.16673,12,10.16673,12ZM9,.5A8.5,8.5,0,1,0,17.5,9,8.5,8.5,0,0,0,9,.5ZM9,15.6748A6.67481,6.67481,0,1,1,15.67484,9,6.67481,6.67481,0,0,1,9,15.6748Z" />
+          </svg>`;
+          },
+        }}
         onCellContextMenu={(_, e) => e.preventDefault()}
         onCellEdited={setCellValue}
         onColumnResize={onColumnResize}

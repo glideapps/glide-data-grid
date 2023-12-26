@@ -68,6 +68,8 @@ export interface Theme {
   bgSearchResult: string;
   bgSelectedSearchResult: string;
   bgSelectedColumnIcon: string;
+  bgErrorColumnIcon?: string;
+  bgInfoColumnIcon?: string;
   bgSelectedColumnHeader: string;
   bgSelectedCell: string;
   borderColor: string;

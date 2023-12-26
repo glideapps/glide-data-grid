@@ -112,6 +112,8 @@ export interface GridMouseHeaderEventArgs
   readonly location: readonly [number, -1];
   readonly bounds: Rectangle;
   readonly group: string;
+  readonly isAlertIconHovered?: boolean;
+  readonly isInfoIconHovered?: boolean;
 }
 
 /** @category Types */
@@ -268,6 +270,8 @@ interface BaseGridColumn {
   readonly overlayIcon?: GridColumnIcon | string;
   readonly hasMenu?: boolean;
   readonly sorting?: { order: number; direction: SortingDirection };
+  readonly alertIcon?: string;
+  readonly infoIcon?: string;
   readonly grow?: number;
   readonly style?: 'normal' | 'highlight';
   readonly themeOverride?: Partial<Theme>;

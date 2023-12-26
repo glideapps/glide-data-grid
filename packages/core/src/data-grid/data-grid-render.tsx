@@ -830,6 +830,43 @@ export function drawHeader(
     drawX += Math.ceil(headerSize * 1.3);
   }
 
+  // Constants
+  const VERTICAL_OFFSET = 10;
+  const HORIZONTAL_OFFSET = 26;
+  const INFO_ICON_OFFSET = 22;
+  const ALERT_ICON_WIDTH = 18;
+  const INFO_ICON_WIDTH = 20;
+  const verticalPosition = menuBounds.y + menuBounds.height / 2 - VERTICAL_OFFSET;
+  const defaultHorizontalPosition = menuBounds.x + menuBounds.width / 2 - HORIZONTAL_OFFSET;
+
+  if (c.infoIcon !== undefined) {
+    spriteManager.drawSprite(
+      c.infoIcon,
+      'info',
+      ctx,
+      defaultHorizontalPosition,
+      verticalPosition,
+      INFO_ICON_WIDTH,
+      theme
+    );
+  }
+
+  if (c.alertIcon !== undefined) {
+    const horizontalPosition =
+      c.infoIcon !== undefined
+        ? defaultHorizontalPosition - INFO_ICON_OFFSET
+        : defaultHorizontalPosition;
+    spriteManager.drawSprite(
+      c.alertIcon,
+      'error',
+      ctx,
+      horizontalPosition,
+      verticalPosition,
+      ALERT_ICON_WIDTH,
+      theme
+    );
+  }
+
   if (shouldDrawMenu && c.hasMenu === true && width > 35) {
     const fadeWidth = 35;
     const fadeStart = width - fadeWidth;
@@ -853,9 +890,17 @@ export function drawHeader(
   const font = `${theme.headerFontStyle} ${theme.fontFamily}`;
   const actualPadding = drawX - x;
 
-  const menuWidth = c.hasMenu === true ? menuBounds.width : 0;
-  const sortingAndMenuIconWidth = c.sorting !== undefined ? SORTING_SIZE.width + menuWidth : 0;
-  const textMaxWidth = Math.max(width - actualPadding - sortingAndMenuIconWidth, 0);
+  let textMaxWidth = Math.max(width - actualPadding, 0);
+
+  if (c.sorting !== undefined) {
+    textMaxWidth -= SORTING_SIZE.width;
+  }
+  if (c.alertIcon !== undefined) {
+    textMaxWidth -= ALERT_ICON_WIDTH;
+  }
+  if (c.infoIcon !== undefined) {
+    textMaxWidth -= INFO_ICON_WIDTH;
+  }
 
   const clippedText = clipCanvasString(
     c.title,

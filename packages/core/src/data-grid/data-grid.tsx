@@ -19,6 +19,7 @@ import {
   GridDragEventArgs,
   GridKeyEventArgs,
   GridMouseEventArgs,
+  GridMouseHeaderEventArgs,
   GridRow,
   GridRowKind,
   GridSelection,
@@ -36,7 +37,7 @@ import {
   TrailingRowType,
 } from './data-grid-types';
 import { SpriteManager, SpriteMap } from './data-grid-sprites';
-import { useDebouncedMemo, useEventListener } from '../common/utils';
+import { isColumnIconHovered, useDebouncedMemo, useEventListener } from '../common/utils';
 import clamp from 'lodash/clamp.js';
 import makeRange from 'lodash/range.js';
 import {
@@ -1143,6 +1144,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
   }, [getCellContent, getCellRenderer, hoveredItem]);
 
   const hoveredRef = React.useRef<GridMouseEventArgs>();
+  const isAlertIconHoveredRef = React.useRef<boolean>();
+  const isInfoIconHoveredRef = React.useRef<boolean>();
   const onMouseMoveImpl = React.useCallback(
     (ev: MouseEvent) => {
       const canvas = ref.current;
@@ -1167,6 +1170,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             : [args.location, [args.localEventX, args.localEventY]]
         );
         hoveredRef.current = args;
+        isAlertIconHoveredRef.current = undefined;
+        isInfoIconHoveredRef.current = undefined;
       } else if (
         args.kind === 'cell' ||
         args.kind === headerKind ||
@@ -1179,16 +1184,68 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         setHoveredItemInfo(newInfo);
         hoverInfoRef.current = newInfo;
 
-        if (args.kind === 'cell') {
-          const toCheck = getCellContent(args.location);
-          if (
-            toCheck.kind === GridCellKind.Custom ||
-            getCellRenderer(toCheck)?.needsHoverPosition === true
-          ) {
-            damageInternal([args.location]);
+        switch (args.kind) {
+          case 'cell': {
+            const toCheck = getCellContent(args.location);
+            if (
+              toCheck.kind === GridCellKind.Custom ||
+              getCellRenderer(toCheck)?.needsHoverPosition === true
+            ) {
+              damageInternal([args.location]);
+            }
+
+            break;
           }
-        } else if (args.kind === groupHeaderKind) {
-          damageInternal([args.location]);
+          case groupHeaderKind: {
+            damageInternal([args.location]);
+
+            break;
+          }
+          case 'header': {
+            const column = mappedColumns[args.location[0]];
+
+            const hasAlertIcon = Boolean(column.alertIcon);
+            const hasInfoIcon = Boolean(column.infoIcon);
+
+            if (!(hasAlertIcon || hasInfoIcon)) break;
+
+            const FIRST_ICON_LEFT_BOUND = 30;
+            const FIRST_ICON_RIGHT_BOUND = 50;
+            const SECOND_ICON_LEFT_BOUND = 50;
+            const SECOND_ICON_RIGHT_BOUND = 70;
+
+            const isAlertIconHovered = (columnArgs: GridMouseHeaderEventArgs): boolean => {
+              if (!hasAlertIcon) return false;
+              const hoverBounds = hasInfoIcon
+                ? [SECOND_ICON_LEFT_BOUND, SECOND_ICON_RIGHT_BOUND]
+                : [FIRST_ICON_LEFT_BOUND, FIRST_ICON_RIGHT_BOUND];
+              return isColumnIconHovered(columnArgs, hoverBounds[0], hoverBounds[1]);
+            };
+
+            const isInfoIconHovered = (columnArgs: GridMouseHeaderEventArgs): boolean => {
+              if (!hasInfoIcon) return false;
+              return isColumnIconHovered(columnArgs, FIRST_ICON_LEFT_BOUND, FIRST_ICON_RIGHT_BOUND);
+            };
+
+            const isAlertHovered = isAlertIconHovered(args);
+            const isInfoHovered = isInfoIconHovered(args);
+
+            if (
+              isAlertHovered !== isAlertIconHoveredRef.current ||
+              isInfoHovered !== isInfoIconHoveredRef.current
+            ) {
+              onItemHovered?.({
+                ...args,
+                isAlertIconHovered: isAlertHovered,
+                isInfoIconHovered: isInfoHovered,
+              });
+
+              // Update the previous hover states
+              isAlertIconHoveredRef.current = isAlertHovered;
+              isInfoIconHoveredRef.current = isInfoHovered;
+            }
+            break;
+          }
         }
       }
 
@@ -1226,6 +1283,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
       getCellRenderer,
       damageInternal,
       getBoundsForItem,
+      mappedColumns,
     ]
   );
   useEventListener('mousemove', onMouseMoveImpl, window, true);

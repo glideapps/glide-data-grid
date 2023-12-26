@@ -1,5 +1,6 @@
 import * as React from 'react';
 import debounce from 'lodash/debounce.js';
+import type { GridMouseHeaderEventArgs } from '../data-grid/data-grid-types';
 
 export function useEventListener<K extends keyof HTMLElementEventMap>(
   eventName: K,
@@ -270,3 +271,14 @@ export function useStateWithReactiveInput<T>(
     onEmpty,
   ];
 }
+
+export const isColumnIconHovered = (
+  args: GridMouseHeaderEventArgs,
+  hoverParameterStart: number,
+  hoverParameterEnd: number
+): boolean => {
+  const { width } = args.bounds;
+  const { localEventX } = args;
+  const hoverPosition = width - localEventX;
+  return hoverPosition > hoverParameterStart && hoverPosition < hoverParameterEnd;
+};
