@@ -2821,20 +2821,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const overlayOpen = overlay !== undefined;
-    const onKeyDown = React.useCallback(
-        (event: GridKeyEventArgs) => {
-            let cancelled = false;
-            if (onKeyDownIn !== undefined) {
-                onKeyDownIn({
-                    ...event,
-                    cancel: () => {
-                        cancelled = true;
-                    },
-                });
-            }
 
-            if (cancelled) return;
-
+    const handleFixedKeybindings = React.useCallback(
+        (event: GridKeyEventArgs): boolean => {
             const cancel = () => {
                 event.stopPropagation();
                 event.preventDefault();
@@ -2845,9 +2834,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             };
 
             const { bounds } = event;
-            // const isOSX = browserIsOSX.value;
-            // const isDeleteKey = key === "Delete" || (isOSX && key === "Backspace");
-            const vr = visibleRegionRef.current;
             const selectedColumns = gridSelection.columns;
             const selectedRows = gridSelection.rows;
 
@@ -2856,11 +2842,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (!overlayOpen && isHotkey(keys.clear, event, details)) {
                 setGridSelection(emptyGridSelection, false);
                 onSelectionCleared?.();
-                cancel();
-                return;
-            }
-
-            if (!overlayOpen && isHotkey(keys.selectAll, event, details)) {
+            } else if (!overlayOpen && isHotkey(keys.selectAll, event, details)) {
                 setGridSelection(
                     {
                         columns: CompactSelection.empty(),
@@ -2878,18 +2860,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     },
                     false
                 );
-                cancel();
-                return;
-            }
-
-            if (isHotkey(keys.search, event, details)) {
+            } else if (isHotkey(keys.search, event, details)) {
                 searchInputRef?.current?.focus({ preventScroll: true });
                 setShowSearchInner(true);
-                cancel();
-                return;
-            }
-
-            if (isHotkey(keys.delete, event, details)) {
+            } else if (isHotkey(keys.delete, event, details)) {
                 const callbackResult = onDelete?.(gridSelection) ?? true;
                 if (callbackResult !== false) {
                     const toDelete = callbackResult === true ? gridSelection : callbackResult;
@@ -2925,13 +2899,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         });
                     }
                 }
-                cancel();
-                return;
             }
 
-            if (gridSelection.current === undefined) return;
+            if (details.didMatch) {
+                cancel();
+                return true;
+            }
+
+            if (gridSelection.current === undefined) return false;
             let [col, row] = gridSelection.current.cell;
             let freeMove = false;
+            let cancelOnlyOnMove = false;
 
             if (columnSelect !== "none" && isHotkey(keys.selectColumn, event, details)) {
                 if (selectedColumns.hasIndex(col)) {
@@ -2962,20 +2940,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else {
                     onCellActivated?.([col - rowMarkerOffset, row]);
                     reselect(bounds, true);
-                    cancel();
                 }
             } else if (gridSelection.current.range.height > 1 && isHotkey(keys.downFill, event, details)) {
                 fillDown();
-                cancel();
             } else if (gridSelection.current.range.width > 1 && isHotkey(keys.rightFill, event, details)) {
                 fillRight();
-                cancel();
             } else if (isHotkey(keys.goToNextPage, event, details)) {
                 row += Math.max(1, visibleRegionRef.current.height - 4); // partial cell accounting
-                cancel();
             } else if (isHotkey(keys.goToPreviousPage, event, details)) {
                 row -= Math.max(1, visibleRegionRef.current.height - 4); // partial cell accounting
-                cancel();
             } else if (isHotkey(keys.goToFirstCell, event, details)) {
                 setOverlay(undefined);
                 row = 0;
@@ -2990,78 +2963,55 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             } else if (isHotkey(keys.selectToLastCell, event, details)) {
                 setOverlay(undefined);
                 adjustSelection([2, 2]);
-                // eslint-disable-next-line unicorn/prefer-switch
-            }
-
-            // #region cell movement
-            if (!overlayOpen) {
+            } else if (!overlayOpen) {
                 if (isHotkey(keys.goDownCell, event, details)) {
-                    setOverlay(undefined);
                     row += 1;
                 } else if (isHotkey(keys.goUpCell, event, details)) {
-                    setOverlay(undefined);
                     row -= 1;
                 } else if (isHotkey(keys.goRightCell, event, details)) {
-                    setOverlay(undefined);
                     col += 1;
                 } else if (isHotkey(keys.goLeftCell, event, details)) {
-                    setOverlay(undefined);
                     col -= 1;
                 } else if (isHotkey(keys.goDownCellRetainSelection, event, details)) {
-                    setOverlay(undefined);
                     row += 1;
                     freeMove = true;
                 } else if (isHotkey(keys.goUpCellRetainSelection, event, details)) {
-                    setOverlay(undefined);
                     row -= 1;
                     freeMove = true;
                 } else if (isHotkey(keys.goRightCellRetainSelection, event, details)) {
-                    setOverlay(undefined);
                     col += 1;
                     freeMove = true;
                 } else if (isHotkey(keys.goLeftCellRetainSelection, event, details)) {
-                    setOverlay(undefined);
                     col -= 1;
                     freeMove = true;
                 } else if (isHotkey(keys.goToLastRow, event, details)) {
-                    setOverlay(undefined);
                     row = rows - 1;
                 } else if (isHotkey(keys.goToFirstRow, event, details)) {
-                    setOverlay(undefined);
                     row = Number.MIN_SAFE_INTEGER;
                 } else if (isHotkey(keys.goToLastColumn, event, details)) {
-                    setOverlay(undefined);
                     col = Number.MAX_SAFE_INTEGER;
                 } else if (isHotkey(keys.goToFirstColumn, event, details)) {
-                    setOverlay(undefined);
                     col = Number.MIN_SAFE_INTEGER;
                 } else if (rangeSelect === "rect" || rangeSelect === "multi-rect") {
                     if (isHotkey(keys.selectGrowDown, event, details)) {
-                        setOverlay(undefined);
                         adjustSelection([0, 1]);
                     } else if (isHotkey(keys.selectGrowUp, event, details)) {
-                        setOverlay(undefined);
                         adjustSelection([0, -1]);
                     } else if (isHotkey(keys.selectGrowRight, event, details)) {
-                        setOverlay(undefined);
                         adjustSelection([1, 0]);
                     } else if (isHotkey(keys.selectGrowLeft, event, details)) {
-                        setOverlay(undefined);
                         adjustSelection([-1, 0]);
                     } else if (isHotkey(keys.selectToLastRow, event, details)) {
-                        setOverlay(undefined);
                         adjustSelection([0, 2]);
                     } else if (isHotkey(keys.selectToFirstRow, event, details)) {
-                        setOverlay(undefined);
                         adjustSelection([0, -2]);
                     } else if (isHotkey(keys.selectToLastColumn, event, details)) {
-                        setOverlay(undefined);
                         adjustSelection([2, 0]);
                     } else if (isHotkey(keys.selectToFirstColumn, event, details)) {
-                        setOverlay(undefined);
                         adjustSelection([-2, 0]);
                     }
                 }
+                cancelOnlyOnMove = details.didMatch;
             } else {
                 if (isHotkey(keys.closeOverlay, event, details)) {
                     setOverlay(undefined);
@@ -3089,40 +3039,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
             // #endregion
 
-            if (
-                !details.didMatch &&
-                !event.metaKey &&
-                !event.ctrlKey &&
-                gridSelection.current !== undefined &&
-                event.key.length === 1 &&
-                /[ -~]/g.test(event.key) &&
-                bounds !== undefined &&
-                isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, Math.min(row, rows - 1))]))
-            ) {
-                if (
-                    (!lastRowSticky || row !== rows) &&
-                    (vr.y > row || row > vr.y + vr.height || vr.x > col || col > vr.x + vr.width)
-                ) {
-                    return;
-                }
-                reselect(bounds, true, event.key);
+            const moved = updateSelectedCell(col, row, false, freeMove);
+            if (moved || !cancelOnlyOnMove) {
                 cancel();
             }
 
-            const moved = updateSelectedCell(col, row, false, freeMove);
-            if (moved) {
-                cancel();
-            }
+            return details.didMatch;
         },
         [
-            onKeyDownIn,
             overlayOpen,
             gridSelection,
             keybindings,
             columnSelect,
             rowSelect,
             rangeSelect,
-            getCellContent,
             rowMarkerOffset,
             rows,
             updateSelectedCell,
@@ -3141,7 +3071,58 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             fillDown,
             fillRight,
             adjustSelection,
+        ]
+    );
+
+    const onKeyDown = React.useCallback(
+        (event: GridKeyEventArgs) => {
+            let cancelled = false;
+            if (onKeyDownIn !== undefined) {
+                onKeyDownIn({
+                    ...event,
+                    cancel: () => {
+                        cancelled = true;
+                    },
+                });
+            }
+
+            if (cancelled) return;
+
+            if (handleFixedKeybindings(event)) return;
+
+            if (gridSelection.current === undefined) return;
+            const [col, row] = gridSelection.current.cell;
+            const vr = visibleRegionRef.current;
+
+            if (
+                !event.metaKey &&
+                !event.ctrlKey &&
+                gridSelection.current !== undefined &&
+                event.key.length === 1 &&
+                /[ -~]/g.test(event.key) &&
+                event.bounds !== undefined &&
+                isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, Math.min(row, rows - 1))]))
+            ) {
+                if (
+                    (!lastRowSticky || row !== rows) &&
+                    (vr.y > row || row > vr.y + vr.height || vr.x > col || col > vr.x + vr.width)
+                ) {
+                    return;
+                }
+                reselect(event.bounds, true, event.key);
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        },
+        [
+            onKeyDownIn,
+            handleFixedKeybindings,
+            gridSelection,
+            getCellContent,
+            rowMarkerOffset,
+            rows,
             lastRowSticky,
+            reselect,
         ]
     );
 
