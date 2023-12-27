@@ -1,4 +1,5 @@
-import { roundedRect, withAlpha } from "../index.js";
+import { withAlpha } from "../internal/data-grid/color-parser.js";
+import { roundedRect } from "../internal/data-grid/data-grid-lib.js";
 import { GridCellKind, type LoadingCell } from "../internal/data-grid/data-grid-types.js";
 import type { InternalCellRenderer } from "./cell-types.js";
 
