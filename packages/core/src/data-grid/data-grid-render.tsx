@@ -831,11 +831,11 @@ export function drawHeader(
   }
 
   // Constants
-  const VERTICAL_OFFSET = 10;
+  const VERTICAL_OFFSET = 8;
   const HORIZONTAL_OFFSET = 26;
   const INFO_ICON_OFFSET = 22;
-  const ALERT_ICON_WIDTH = 18;
-  const INFO_ICON_WIDTH = 20;
+  const ALERT_ICON_WIDTH = 16;
+  const INFO_ICON_WIDTH = 16;
   const verticalPosition = menuBounds.y + menuBounds.height / 2 - VERTICAL_OFFSET;
   const defaultHorizontalPosition = menuBounds.x + menuBounds.width / 2 - HORIZONTAL_OFFSET;
 
