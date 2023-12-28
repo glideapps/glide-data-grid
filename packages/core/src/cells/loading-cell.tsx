@@ -3,6 +3,7 @@ import { roundedRect } from "../internal/data-grid/data-grid-lib.js";
 import { GridCellKind, type LoadingCell } from "../internal/data-grid/data-grid-types.js";
 import type { InternalCellRenderer } from "./cell-types.js";
 
+// returns a "random" number between -1 and 1
 function getRandomNumber(x: number, y: number): number {
     let seed = x * 49_632 + y * 325_176;
 
