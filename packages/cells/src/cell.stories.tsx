@@ -265,7 +265,15 @@ export const CustomCells: React.VFC = () => {
                             copyData: "4",
                             data: {
                                 kind: "dropdown-cell",
-                                allowedValues: ["Good", "Better", "Best"],
+                                allowedValues: [
+                                    null,
+                                    "Good",
+                                    "Better",
+                                    {
+                                        value: "best",
+                                        label: "Best",
+                                    },
+                                ],
                                 value: "Good",
                             },
                         };
