@@ -36,7 +36,7 @@ export const FreezeColumns: React.VFC<any> = (p: { freezeColumns: number }) => {
     return (
         <DataEditor
             {...defaultProps}
-            // rowMarkers="both"
+            rowMarkers="both"
             freezeColumns={p.freezeColumns}
             getCellContent={getCellContent}
             columns={cols}
