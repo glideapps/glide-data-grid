@@ -8,6 +8,24 @@ export type { SelectionBlending } from "./internal/data-grid/use-selection-behav
 export type { GetRowThemeCallback, Highlight } from "./internal/data-grid/data-grid-render.js";
 export type { ImageWindowLoader } from "./internal/data-grid/image-window-loader-interface.js";
 export * from "./internal/data-grid/data-grid-types.js";
+export type {
+    BaseGridMouseEventArgs,
+    CellClickedEventArgs,
+    DragHandler,
+    FillPatternEventArgs,
+    GridDragEventArgs,
+    GridKeyEventArgs,
+    GridMouseCellEventArgs,
+    GridMouseEventArgs,
+    GridMouseGroupHeaderEventArgs,
+    GridMouseHeaderEventArgs,
+    GridMouseOutOfBoundsEventArgs,
+    GroupHeaderClickedEventArgs,
+    HeaderClickedEventArgs,
+    OutOfBoundsRegionAxis,
+    PositionableMouseEventArgs,
+    PreventableEvent,
+} from "./internal/data-grid/event-args.js";
 export { ImageOverlayEditor } from "./internal/data-grid-overlay-editor/private/image-overlay-editor.js";
 export { default as MarkdownDiv } from "./internal/markdown-div/markdown-div.js";
 export { GrowingEntry as TextCellEntry } from "./internal/growing-entry/growing-entry.js";
