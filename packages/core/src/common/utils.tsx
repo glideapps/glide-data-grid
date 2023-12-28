@@ -1,5 +1,6 @@
 import * as React from "react";
 import debounce from "lodash/debounce.js";
+import { deepEqual } from "./support.js";
 
 export function useEventListener<K extends keyof HTMLElementEventMap>(
     eventName: K,
@@ -271,4 +272,15 @@ export function makeAccessibilityStringForArray(arr: readonly string[]): string 
         index++;
     }
     return arr.slice(0, index).join(", ");
+}
+
+export function useDeepMemo<T>(value: T): T {
+    const ref = React.useRef<T>(value);
+
+    if (!deepEqual(value, ref.current)) {
+        ref.current = value;
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return React.useMemo(() => ref.current, [ref.current]);
 }
