@@ -30,12 +30,12 @@ export const loadingCellRenderer: InternalCellRenderer<LoadingCell> = {
         }
 
         let width = cell.skeletonWidth;
-        if (cell.skeletonVariability !== undefined && cell.skeletonVariability > 0) {
-            width += Math.round(getRandomNumber(col, row) * cell.skeletonVariability);
+        if (cell.skeletonWidthVariability !== undefined && cell.skeletonWidthVariability > 0) {
+            width += Math.round(getRandomNumber(col, row) * cell.skeletonWidthVariability);
         }
 
         const hpad = theme.cellHorizontalPadding;
-        const rectHeight = 18;
+        const rectHeight = cell.skeletonHeight ?? Math.min(18, rect.height - 2 * theme.cellVerticalPadding);
 
         roundedRect(ctx, rect.x + hpad, rect.y + (rect.height - rectHeight) / 2, width, rectHeight, 3);
         ctx.fillStyle = withAlpha(theme.textDark, 0.1);

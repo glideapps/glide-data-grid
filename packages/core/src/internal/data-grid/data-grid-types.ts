@@ -314,7 +314,8 @@ export interface BaseGridCell {
 export interface LoadingCell extends BaseGridCell {
     readonly kind: GridCellKind.Loading;
     readonly skeletonWidth?: number;
-    readonly skeletonVariability?: number;
+    readonly skeletonHeight?: number;
+    readonly skeletonWidthVariability?: number;
 }
 
 /** @category Cells */
