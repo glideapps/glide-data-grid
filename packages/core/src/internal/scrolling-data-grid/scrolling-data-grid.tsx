@@ -263,6 +263,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             update={onScrollUpdate}
             initialSize={initialSize}>
             <DataGridDnd
+                rowGrouping={p.rowGrouping}
                 eventTargetRef={scrollRef}
                 width={clientWidth}
                 height={clientHeight}

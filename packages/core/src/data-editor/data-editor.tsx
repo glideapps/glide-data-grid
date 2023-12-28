@@ -772,6 +772,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnResizeStart: onColumnResizeStartIn,
         customRenderers: additionalRenderers,
         fillHandle,
+        rowGrouping,
         drawFocusRing,
         experimental,
         fixedShadowX,
@@ -3770,6 +3771,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 inWidth={width ?? idealWidth}
                 inHeight={height ?? idealHeight}>
                 <DataGridSearch
+                    rowGrouping={rowGrouping}
                     fillHandle={fillHandle}
                     drawFocusRing={drawFocusRing}
                     experimental={experimental}

@@ -360,6 +360,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
 
     return (
         <DataGrid
+            rowGrouping={p.rowGrouping}
             accessibilityHeight={p.accessibilityHeight}
             canvasRef={p.canvasRef}
             cellXOffset={p.cellXOffset}

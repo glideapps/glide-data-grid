@@ -465,6 +465,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     return (
         <>
             <ScrollingDataGrid
+                rowGrouping={p.rowGrouping}
                 prelightCells={searchResults}
                 accessibilityHeight={p.accessibilityHeight}
                 canvasRef={p.canvasRef}

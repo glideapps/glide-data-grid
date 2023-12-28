@@ -57,6 +57,39 @@ export const AddData: React.VFC = () => {
             {...defaultProps}
             getCellContent={getCellContent}
             columns={cols}
+            rowGrouping={{
+                height: 32,
+                groups: [
+                    {
+                        headerIndex: 0,
+                        isCollapsed: false,
+                        subGroups: [
+                            {
+                                headerIndex: 1,
+                                isCollapsed: false,
+                                subGroups: [
+                                    {
+                                        headerIndex: 2,
+                                        isCollapsed: true,
+                                    },
+                                    {
+                                        headerIndex: 6,
+                                        isCollapsed: false,
+                                    },
+                                ],
+                            },
+                            {
+                                headerIndex: 10,
+                                isCollapsed: false,
+                            },
+                        ],
+                    },
+                    {
+                        headerIndex: 15,
+                        isCollapsed: false,
+                    },
+                ],
+            }}
             rowMarkers={"both"}
             onPaste={true} // we want to allow paste to just call onCellEdited
             onCellEdited={setCellValue} // Sets the mock cell content

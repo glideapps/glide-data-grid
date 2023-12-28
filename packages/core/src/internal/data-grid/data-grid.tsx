@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { FullTheme } from "../../common/styles.js";
+import type { FullTheme, Theme } from "../../common/styles.js";
 import {
     computeBounds,
     getColumnIndexForX,
@@ -48,7 +48,7 @@ import { browserIsFirefox, browserIsSafari } from "../../common/browser-detect.j
 import { type EnqueueCallback, useAnimationQueue } from "./use-animation-queue.js";
 import { assert } from "../../common/support.js";
 import type { CellRenderer, GetCellRendererCallback } from "../../cells/cell-types.js";
-import type { DrawGridArg } from "./draw-grid-arg.js";
+import type { DrawGridArg, ExpandedRowGroup } from "./draw-grid-arg.js";
 import type { ImageWindowLoader } from "./image-window-loader-interface.js";
 import {
     type GridMouseEventArgs,
@@ -60,6 +60,57 @@ import {
     headerKind,
     mouseEventArgsAreEqual,
 } from "./event-args.js";
+
+type RowGroup = {
+    readonly headerIndex: number;
+    readonly isCollapsed: boolean;
+    readonly subGroups?: readonly RowGroup[];
+};
+
+interface RowGroupingOptions {
+    /**
+     * The indexes of the rows of the grid which are group headers and their collapse state. If a number is provided
+     * instead of an object, the group header will not be collapsed.
+     */
+    readonly groups: readonly RowGroup[];
+
+    /**
+     * Causes the group headers to collect at the top of the grid. Each replacing the last.
+     */
+    readonly makeGroupHeadersSticky?: boolean;
+
+    /**
+     * The height of the group headers. All group headers must have the same height.
+     */
+    readonly height: number;
+
+    /**
+     * Enables or disables the drawing of borders inside of group headers.
+     * @defaultValue true
+     */
+    readonly verticalBorders?: boolean;
+
+    /**
+     * Overrides the default theme of the group headers.
+     */
+    readonly themeOverride?: Partial<Theme>;
+
+    /**
+     * Controls the navigation behavior of the grid. If `skip` is provided the grid will skip over the group headers
+     * when the user selects a new cell. If `skip-up` or `skip-down` is provided the grid will skip over the group
+     * headers when the user navigates up or down.
+     *
+     * If a group header is marked block, it will act like skip, but clicking on it will also not result in selection
+     *  a cell when clicked.
+     */
+    readonly navigationBehavior?: "normal" | "skip" | "skip-up" | "skip-down" | "block";
+
+    /**
+     * Controls the selection behavior of the grid. If spanning is allowed group headers act like any other cells. If
+     * spanning is not allowed selections will be unable to span group headers.
+     */
+    readonly selectionBehavior?: "allow-spanning" | "block-spanning";
+}
 
 export interface DataGridProps {
     readonly width: number;
@@ -285,6 +336,8 @@ export interface DataGridProps {
     readonly theme: FullTheme;
 
     readonly getCellRenderer: <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;
+
+    readonly rowGrouping?: RowGroupingOptions;
 }
 
 type DamageUpdateList = readonly {
@@ -370,6 +423,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         smoothScrollY = false,
         experimental,
         getCellRenderer,
+        rowGrouping,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -691,6 +745,37 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const renderStateProvider = React.useMemo(() => new RenderStateProvider(), []);
 
+    const flattenedRowGroups: ExpandedRowGroup[] = React.useMemo(() => {
+        if (rowGrouping === undefined) return [];
+
+        const flattened: ExpandedRowGroup[] = [];
+
+        function processGroup(group: RowGroup, nextHeaderIndex: number | null): void {
+            const rowsInGroup =
+                nextHeaderIndex !== null ? nextHeaderIndex - group.headerIndex : rows - group.headerIndex;
+            flattened.push({
+                headerIndex: group.headerIndex,
+                isCollapsed: group.isCollapsed,
+                rows: rowsInGroup,
+            });
+
+            if (!group.isCollapsed && group.subGroups) {
+                for (let i = 0; i < group.subGroups.length; i++) {
+                    const nextSubHeaderIndex =
+                        i < group.subGroups.length - 1 ? group.subGroups[i + 1].headerIndex : nextHeaderIndex;
+                    processGroup(group.subGroups[i], nextSubHeaderIndex);
+                }
+            }
+        }
+
+        for (let i = 0; i < rowGrouping.groups.length; i++) {
+            const nextHeaderIndex = i < rowGrouping.groups.length - 1 ? rowGrouping.groups[i + 1].headerIndex : null;
+            processGroup(rowGrouping.groups[i], nextHeaderIndex);
+        }
+
+        return flattened;
+    }, [rowGrouping, rows]);
+
     const minimumCellWidth = experimental?.disableMinimumCellWidth === true ? 1 : 10;
     const lastArgsRef = React.useRef<DrawGridArg>();
     const draw = React.useCallback(() => {
@@ -756,6 +841,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             renderStrategy: experimental?.renderStrategy ?? (browserIsSafari.value ? "double-buffer" : "single-buffer"),
             getCellRenderer,
             minimumCellWidth,
+            rowGrouping: flattenedRowGroups,
         };
 
         // This confusing bit of code due to some poor design. Long story short, the damage property is only used
@@ -804,6 +890,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         rows,
         drawFocusRing,
         getCellContent,
+        flattenedRowGroups,
         getGroupDetails,
         getRowThemeOverride,
         drawCellCallback,

@@ -26,6 +26,12 @@ export interface DragAndDropState {
     dest: number;
 }
 
+export type ExpandedRowGroup = {
+    readonly headerIndex: number;
+    readonly isCollapsed: boolean;
+    readonly rows: number;
+};
+
 export interface DrawGridArg {
     readonly canvas: HTMLCanvasElement;
     readonly headerCanvas: HTMLCanvasElement;
@@ -77,4 +83,5 @@ export interface DrawGridArg {
     readonly renderStateProvider: RenderStateProvider;
     readonly getCellRenderer: GetCellRendererCallback;
     readonly minimumCellWidth: number;
+    readonly rowGrouping: readonly ExpandedRowGroup[];
 }
