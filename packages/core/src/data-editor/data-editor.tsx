@@ -2518,14 +2518,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         let [col, row] = args.location;
         const visible = visibleRegionRef.current;
         if (xDir === -1) {
-            col = visible.x;
+            col = visible.extras?.freezeRegion?.x ?? visible.x;
         } else if (xDir === 1) {
             col = visible.x + visible.width;
         }
         if (yDir === -1) {
             row = Math.max(0, visible.y);
         } else if (yDir === 1) {
-            row = Math.min(rows, visible.y + visible.height);
+            row = Math.min(rows - 1, visible.y + visible.height);
         }
         onItemHoveredImpl({
             ...args,
