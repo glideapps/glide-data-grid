@@ -607,6 +607,11 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * cell will open to edit mode.
      */
     readonly cellActivationBehavior?: "double-click" | "single-click" | "second-click";
+
+    /**
+     * Controls if focus will trap inside the data grid when doing tab and caret navigation.
+     */
+    readonly trapFocus?: boolean;
 }
 
 type ScrollToFn = (
@@ -782,6 +787,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         preventDiagonalScrolling,
         rightElement,
         rightElementProps,
+        trapFocus = false,
         smoothScrollX,
         smoothScrollY,
         scaleToRem = false,
@@ -3040,11 +3046,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             // #endregion
 
             const moved = updateSelectedCell(col, row, false, freeMove);
-            if (moved || !cancelOnlyOnMove) {
+
+            const didMatch = details.didMatch;
+
+            if (didMatch && (moved || !cancelOnlyOnMove || trapFocus)) {
                 cancel();
             }
 
-            return details.didMatch;
+            return didMatch;
         },
         [
             overlayOpen,
@@ -3060,6 +3069,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onSelectionCleared,
             columnsIn.length,
             onDelete,
+            trapFocus,
             deleteRange,
             setSelectedColumns,
             setSelectedRows,
