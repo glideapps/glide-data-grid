@@ -53,11 +53,14 @@ export const ResizableColumns: React.VFC = () => {
             maxColumnWidth={2000}
             rows={50}
             scaleToRem={true}
-            theme={{
-                baseFontStyle: "0.8125rem",
-                headerFontStyle: "600 0.8125rem",
-                editorFontSize: "0.8125rem",
-            }}
+            theme={React.useMemo(
+                () => ({
+                    baseFontStyle: "0.8125rem",
+                    headerFontStyle: "600 0.8125rem",
+                    editorFontSize: "0.8125rem",
+                }),
+                []
+            )}
             onColumnResize={onColumnResize}
         />
     );
