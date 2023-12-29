@@ -1839,10 +1839,8 @@ function drawHighlightRings(
                 intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
             ) {
                 setDashed(s.style === "dashed");
-                // the +1 on the stickyWidth is to ensure any rects touching the freeze columns from the right dont
-                // draw their left most border. This prevents the border from being double drawn.
-                if (!clipped && s.rect.x < stickyWidth + 1) {
-                    ctx.rect(stickyWidth + 1, 0, width, height);
+                if (!clipped && s.rect.x < stickyWidth) {
+                    ctx.rect(stickyWidth, 0, width, height);
                     ctx.clip();
                     clipped = true;
                 }
