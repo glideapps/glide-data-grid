@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable unicorn/no-for-loop */
 import {
     type GridSelection,
@@ -1645,7 +1646,8 @@ function drawHighlightRings(
     rowHeight: number | ((index: number) => number),
     lastRowSticky: boolean,
     rows: number,
-    allHighlightRegions: readonly Highlight[] | undefined
+    allHighlightRegions: readonly Highlight[] | undefined,
+    theme: FullTheme
 ): (() => void) | undefined {
     const highlightRegions = allHighlightRegions?.filter(x => x.style !== "no-outline");
 
@@ -1703,6 +1705,9 @@ function drawHighlightRings(
             mappedColumns,
             rowHeight
         );
+        if (r.x + r.width === mappedColumns.length) {
+            bottomRightBounds.width -= 1;
+        }
         if (r.x < freezeColumns && r.x + r.width >= freezeColumns) {
             const freezeSectionRightBounds = computeBounds(
                 freezeColumns - 1,
@@ -1819,7 +1824,10 @@ function drawHighlightRings(
                 intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
             ) {
                 setDashed(s.style === "dashed");
-                ctx.strokeStyle = withAlpha(s.color, 1);
+                ctx.strokeStyle =
+                    s.style === "solid-outline"
+                        ? blend(blend(s.color, theme.borderColor), theme.bgCell)
+                        : withAlpha(s.color, 1);
                 ctx.strokeRect(s.rect.x + 0.5, s.rect.y + 0.5, s.rect.width - 1, s.rect.height - 1);
             }
         }
@@ -1831,12 +1839,17 @@ function drawHighlightRings(
                 intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
             ) {
                 setDashed(s.style === "dashed");
-                if (!clipped && s.rect.x < stickyWidth) {
-                    ctx.rect(stickyWidth, 0, width, height);
+                // the +1 on the stickyWidth is to ensure any rects touching the freeze columns from the right dont
+                // draw their left most border. This prevents the border from being double drawn.
+                if (!clipped && s.rect.x < stickyWidth + 1) {
+                    ctx.rect(stickyWidth + 1, 0, width, height);
                     ctx.clip();
                     clipped = true;
                 }
-                ctx.strokeStyle = s.style === "solid-outline" ? s.color : withAlpha(s.color, 1);
+                ctx.strokeStyle =
+                    s.style === "solid-outline"
+                        ? blend(blend(s.color, theme.borderColor), theme.bgCell)
+                        : withAlpha(s.color, 1);
                 ctx.strokeRect(s.rect.x + 0.5, s.rect.y + 0.5, s.rect.width - 1, s.rect.height - 1);
             }
         }
@@ -2329,7 +2342,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 rowHeight,
                 trailingRowType === "sticky",
                 rows,
-                highlightRegions
+                highlightRegions,
+                theme
             );
         }
 
@@ -2543,6 +2557,25 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         theme
     );
 
+    const highlightRedraw = drawHighlightRings(
+        targetCtx,
+        width,
+        height,
+        cellXOffset,
+        cellYOffset,
+        translateX,
+        translateY,
+        mappedColumns,
+        freezeColumns,
+        headerHeight,
+        groupHeaderHeight,
+        rowHeight,
+        trailingRowType === "sticky",
+        rows,
+        highlightRegions,
+        theme
+    );
+
     // the overdraw may have nuked out our focus ring right edge.
     const focusRedraw = drawFocus
         ? drawFocusRing(
@@ -2564,24 +2597,6 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
               rows
           )
         : undefined;
-
-    const highlightRedraw = drawHighlightRings(
-        targetCtx,
-        width,
-        height,
-        cellXOffset,
-        cellYOffset,
-        translateX,
-        translateY,
-        mappedColumns,
-        freezeColumns,
-        headerHeight,
-        groupHeaderHeight,
-        rowHeight,
-        trailingRowType === "sticky",
-        rows,
-        highlightRegions
-    );
 
     targetCtx.fillStyle = theme.bgCell;
     if (drawRegions.length > 0) {
