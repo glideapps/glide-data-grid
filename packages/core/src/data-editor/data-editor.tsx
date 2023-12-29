@@ -2917,7 +2917,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             let freeMove = false;
             let cancelOnlyOnMove = false;
 
-            if (columnSelect !== "none" && isHotkey(keys.selectColumn, event, details)) {
+            if (isHotkey(keys.scrollToSelectedCell, event, details)) {
+                scrollToRef.current(col - rowMarkerOffset, row);
+            } else if (columnSelect !== "none" && isHotkey(keys.selectColumn, event, details)) {
                 if (selectedColumns.hasIndex(col)) {
                     setSelectedColumns(selectedColumns.remove(col), undefined, true);
                 } else {

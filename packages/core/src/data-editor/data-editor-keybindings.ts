@@ -29,6 +29,7 @@ export interface ConfigurableKeybinds {
     readonly search: Keybind;
     readonly delete: Keybind;
     readonly activateCell: Keybind;
+    readonly scrollToSelectedCell: Keybind;
 
     // Navigation Keybinds
     readonly goToFirstColumn: Keybind;
@@ -87,6 +88,7 @@ export const keybindingDefaults: Keybinds = {
     search: false,
     delete: true,
     activateCell: true,
+    scrollToSelectedCell: true,
     goToFirstCell: true,
     goToFirstColumn: true,
     goToFirstRow: true,
@@ -139,6 +141,7 @@ export function realizeKeybinds(keybinds: Keybinds): RealizedKeybinds {
         cut: keybinds.cut,
         delete: realizeKeybind(keybinds.delete, isOSX ? "Backspace|Delete" : "Delete"),
         downFill: realizeKeybind(keybinds.downFill, "primary+_68"),
+        scrollToSelectedCell: realizeKeybind(keybinds.scrollToSelectedCell, "primary+Enter"),
         goDownCell: realizeKeybind(keybinds.goDownCell, "ArrowDown"),
         goDownCellRetainSelection: realizeKeybind(keybinds.goDownCellRetainSelection, "alt+ArrowDown"),
         goLeftCell: realizeKeybind(keybinds.goLeftCell, "ArrowLeft|shift+Tab"),
