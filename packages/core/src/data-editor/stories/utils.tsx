@@ -602,7 +602,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
                     kind: GridCellKind.Loading,
                     allowOverlay: false,
                     skeletonWidth: 70,
-                    skeletonVariability: 25,
+                    skeletonWidthVariability: 25,
                 };
             },
         },
