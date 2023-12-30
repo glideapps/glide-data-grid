@@ -3,6 +3,7 @@ import { CellSet } from "../internal/data-grid/cell-set.js";
 import throttle from "lodash/throttle.js";
 import { unpackCol, unpackRow, packColRowToNumber, unpackNumberToColRow } from "./render-state-provider.js";
 import type { ImageWindowLoader } from "../internal/data-grid/image-window-loader-interface.js";
+import { deepEqual } from "./support.js";
 
 interface LoadResult {
     img: HTMLImageElement | undefined;
@@ -78,7 +79,7 @@ class ImageWindowLoaderImpl implements ImageWindowLoader {
             this.visibleWindow.width === newWindow.width &&
             this.visibleWindow.height === newWindow.height &&
             this.freezeCols === freezeCols &&
-            this.freezeRows === freezeRows
+            deepEqual(this.freezeRows, freezeRows)
         )
             return;
         this.visibleWindow = newWindow;
