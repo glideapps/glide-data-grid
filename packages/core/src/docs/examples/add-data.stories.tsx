@@ -58,9 +58,6 @@ export const AddData: React.VFC = () => {
             getCellContent={getCellContent}
             columns={cols}
             rowMarkers={"both"}
-            experimental={{
-                renderStrategy: "direct",
-            }}
             freezeTrailingRows={2}
             onPaste={true} // we want to allow paste to just call onCellEdited
             onCellEdited={setCellValue} // Sets the mock cell content
