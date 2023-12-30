@@ -25,13 +25,15 @@ class ImageWindowLoaderImpl implements ImageWindowLoader {
     };
 
     public freezeCols: number = 0;
+    public freezeRows: number[] = [];
 
     private isInWindow = (packed: number) => {
         const col = unpackCol(packed);
         const row = unpackRow(packed);
         const w = this.visibleWindow;
-        if (col < this.freezeCols && row >= w.y && row <= w.y + w.height) return true;
-        return col >= w.x && col <= w.x + w.width && row >= w.y && row <= w.y + w.height;
+        const colInWindow = (col >= w.x && col <= w.x + w.width) || col < this.freezeCols;
+        const rowInWindow = (row >= w.y && row <= w.y + w.height) || this.freezeRows.includes(row);
+        return colInWindow && rowInWindow;
     };
 
     private cache: Record<string, LoadResult> = {};
@@ -69,17 +71,19 @@ class ImageWindowLoaderImpl implements ImageWindowLoader {
         }
     };
 
-    public setWindow(newWindow: Rectangle, freezeCols: number): void {
+    public setWindow(newWindow: Rectangle, freezeCols: number, freezeRows: number[]): void {
         if (
             this.visibleWindow.x === newWindow.x &&
             this.visibleWindow.y === newWindow.y &&
             this.visibleWindow.width === newWindow.width &&
             this.visibleWindow.height === newWindow.height &&
-            this.freezeCols === freezeCols
+            this.freezeCols === freezeCols &&
+            this.freezeRows === freezeRows
         )
             return;
         this.visibleWindow = newWindow;
         this.freezeCols = freezeCols;
+        this.freezeRows = freezeRows;
         this.clearOutOfWindow();
     }
 

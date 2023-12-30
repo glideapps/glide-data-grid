@@ -109,6 +109,7 @@ type Props = Partial<
         | "firstColAccessible"
         | "firstColSticky"
         | "freezeColumns"
+        | "hasAppendRow"
         | "getCellContent"
         | "getCellRenderer"
         | "getCellsForSelection"
@@ -138,7 +139,6 @@ type Props = Partial<
         | "selectedColumns"
         | "selection"
         | "theme"
-        | "trailingRowType"
         | "translateX"
         | "translateY"
         | "verticalBorder"
@@ -761,6 +761,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         maxColumnAutoWidth: maxColumnAutoWidthIn,
         provideEditor,
         trailingRowOptions,
+        freezeTrailingRows = 0,
         allowedFillDirections = "orthogonal",
         scrollOffsetX,
         scrollOffsetY,
@@ -3823,9 +3824,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     headerHeight={headerHeight}
                     isFocused={isFocused}
                     groupHeaderHeight={enableGroups ? groupHeaderHeight : 0}
-                    trailingRowType={
-                        !showTrailingBlankRow ? "none" : trailingRowOptions?.sticky === true ? "sticky" : "appended"
+                    freezeTrailingRows={
+                        freezeTrailingRows + (showTrailingBlankRow && trailingRowOptions?.sticky === true ? 1 : 0)
                     }
+                    hasAppendRow={showTrailingBlankRow}
                     onColumnResize={onColumnResize}
                     onColumnResizeEnd={onColumnResizeEnd}
                     onColumnResizeStart={onColumnResizeStart}

@@ -126,7 +126,8 @@ export function Simplenotest() {
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
-            trailingRowType={"none"}
+            freezeTrailingRows={0}
+            hasAppendRow={false}
             isResizing={false}
             isDragging={false}
             theme={mergeAndRealizeTheme(getDataEditorTheme())}
@@ -215,7 +216,8 @@ export function SelectedCellnotest() {
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
-            trailingRowType={"none"}
+            freezeTrailingRows={0}
+            hasAppendRow={false}
             isResizing={false}
             isDragging={false}
             theme={mergeAndRealizeTheme(getDataEditorTheme())}
@@ -300,7 +302,8 @@ export function SelectedRownotest() {
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
-            trailingRowType={"none"}
+            freezeTrailingRows={0}
+            hasAppendRow={false}
             isResizing={false}
             isDragging={false}
             theme={mergeAndRealizeTheme(getDataEditorTheme())}
@@ -385,7 +388,8 @@ export const SelectedColumnnotest = () => {
             freezeColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
-            trailingRowType={"none"}
+            freezeTrailingRows={0}
+            hasAppendRow={false}
             isResizing={false}
             isDragging={false}
             theme={mergeAndRealizeTheme(getDataEditorTheme())}

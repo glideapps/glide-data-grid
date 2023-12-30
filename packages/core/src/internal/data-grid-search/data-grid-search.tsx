@@ -508,7 +508,8 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 scrollRef={p.scrollRef}
                 selection={p.selection}
                 theme={p.theme}
-                trailingRowType={p.trailingRowType}
+                freezeTrailingRows={p.freezeTrailingRows}
+                hasAppendRow={p.hasAppendRow}
                 translateX={p.translateX}
                 translateY={p.translateY}
                 verticalBorder={p.verticalBorder}

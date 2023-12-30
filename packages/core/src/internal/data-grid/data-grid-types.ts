@@ -38,9 +38,6 @@ export type BooleanEmpty = null;
 export type BooleanIndeterminate = undefined;
 
 /** @category Types */
-export type TrailingRowType = "sticky" | "appended" | "none";
-
-/** @category Types */
 export type DrawHeaderCallback = (
     args: {
         ctx: CanvasRenderingContext2D;
