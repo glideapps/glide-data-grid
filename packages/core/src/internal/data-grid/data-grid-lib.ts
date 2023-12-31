@@ -358,13 +358,11 @@ function getMiddleCenterBiasInner(ctx: CanvasRenderingContext2D, font: string): 
     return bias;
 }
 
-/** @category Drawing */
-export function drawWithLastUpdate(
+export function drawLastUpdateUnderlay(
     args: BaseDrawArgs,
     lastUpdate: number | undefined,
     frameTime: number,
-    lastPrep: PrepResult | undefined,
-    draw: () => void
+    lastPrep: PrepResult | undefined
 ) {
     const { ctx, rect, theme } = args;
     let progress = Number.MAX_SAFE_INTEGER;
@@ -383,8 +381,6 @@ export function drawWithLastUpdate(
             }
         }
     }
-
-    draw();
 
     return progress < animTime;
 }
