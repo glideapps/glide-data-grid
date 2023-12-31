@@ -4,10 +4,10 @@ import { getDataEditorTheme, mergeAndRealizeTheme, type FullTheme } from "../src
 import {
     remapForDnDState,
     type MappedGridColumn,
-    drawWithLastUpdate,
+    drawLastUpdateUnderlay,
 } from "../src/internal/data-grid/data-grid-lib.js";
 import { GridCellKind, type Rectangle } from "../src/internal/data-grid/data-grid-types.js";
-import { vi, type Mocked, type Mock, expect, describe, test, it, beforeEach } from "vitest";
+import { vi, type Mocked, expect, describe, test, it, beforeEach } from "vitest";
 import { drawImage } from "../src/cells/image-cell.js";
 import type { ImageWindowLoader } from "../src/internal/data-grid/image-window-loader-interface.js";
 
@@ -282,7 +282,6 @@ describe("drawWithLastUpdate", () => {
     const mockCtx: Mocked<CanvasRenderingContext2D> = {} as any;
     let mockTheme: FullTheme;
     let mockRect: Rectangle;
-    let mockDraw: Mock;
 
     beforeEach(() => {
         mockCtx.fillRect = vi.fn();
@@ -297,12 +296,10 @@ describe("drawWithLastUpdate", () => {
             width: 50,
             height: 60,
         };
-
-        mockDraw = vi.fn();
     });
 
     it("should do nothing if lastUpdate is undefined", () => {
-        const result = drawWithLastUpdate(
+        const result = drawLastUpdateUnderlay(
             {
                 ctx: mockCtx,
                 theme: mockTheme,
@@ -321,12 +318,10 @@ describe("drawWithLastUpdate", () => {
             },
             undefined,
             1000,
-            undefined,
-            mockDraw
+            undefined
         );
 
         expect(mockCtx.fillStyle).toBe("");
-        expect(mockDraw).toHaveBeenCalled();
         expect(result).toBe(false);
     });
 
@@ -334,7 +329,7 @@ describe("drawWithLastUpdate", () => {
         const lastUpdate = 400;
         const frameTime = 1000;
 
-        const result = drawWithLastUpdate(
+        const result = drawLastUpdateUnderlay(
             {
                 ctx: mockCtx,
                 theme: mockTheme,
@@ -353,12 +348,10 @@ describe("drawWithLastUpdate", () => {
             },
             lastUpdate,
             frameTime,
-            undefined,
-            mockDraw
+            undefined
         );
 
         expect(mockCtx.fillStyle).toBe("");
-        expect(mockDraw).toHaveBeenCalled();
         expect(result).toBe(false);
     });
 
@@ -366,7 +359,7 @@ describe("drawWithLastUpdate", () => {
         const lastUpdate = 600;
         const frameTime = 1000;
 
-        const result = drawWithLastUpdate(
+        const result = drawLastUpdateUnderlay(
             {
                 ctx: mockCtx,
                 theme: mockTheme,
@@ -385,8 +378,7 @@ describe("drawWithLastUpdate", () => {
             },
             lastUpdate,
             frameTime,
-            undefined,
-            mockDraw
+            undefined
         );
 
         expect(mockCtx.fillStyle).toBe(mockTheme.bgSearchResult);
@@ -396,7 +388,6 @@ describe("drawWithLastUpdate", () => {
             mockRect.width - 1,
             mockRect.height - 1
         );
-        expect(mockDraw).toHaveBeenCalled();
         expect(result).toBe(true);
     });
 
@@ -405,7 +396,7 @@ describe("drawWithLastUpdate", () => {
         const frameTime = 1000;
         const mockLastPrep = { fillStyle: "", deprep: vi.fn(), font: "some-font", renderer: {} };
 
-        drawWithLastUpdate(
+        drawLastUpdateUnderlay(
             {
                 ctx: mockCtx,
                 theme: mockTheme,
@@ -424,8 +415,7 @@ describe("drawWithLastUpdate", () => {
             },
             lastUpdate,
             frameTime,
-            mockLastPrep,
-            mockDraw
+            mockLastPrep
         );
 
         expect(mockLastPrep.fillStyle).toBe(mockTheme.bgSearchResult);

@@ -27,13 +27,13 @@ import {
     getStickyWidth,
     type MappedGridColumn,
     roundedPoly,
-    drawWithLastUpdate,
     isGroupEqual,
     cellIsSelected,
     cellIsInRange,
     computeBounds,
     getMiddleCenterBias,
     rectBottomRight,
+    drawLastUpdateUnderlay,
 } from "./data-grid-lib.js";
 import type { SpriteManager, SpriteVariant } from "./data-grid-sprites.js";
 import { mergeAndRealizeTheme, type FullTheme, type Theme } from "../../common/styles.js";
@@ -171,31 +171,31 @@ export function drawCell(
         overrideCursor: hoverX !== undefined ? overrideCursor : undefined,
         requestAnimationFrame: animRequest,
     };
-    const needsAnim = drawWithLastUpdate(args, cell.lastUpdated, frameTime, lastPrep, () => {
-        //alloc
-        const r = getCellRenderer(cell);
-        if (r !== undefined) {
-            if (lastPrep?.renderer !== r) {
-                lastPrep?.deprep?.(args);
-                lastPrep = undefined;
-            }
-            const partialPrepResult = r.drawPrep?.(args, lastPrep);
-            if (drawCellCallback !== undefined && !isInnerOnlyCell(args.cell)) {
-                drawCellCallback(args as DrawArgs<GridCell>, () => r.draw(args, cell));
-            } else {
-                r.draw(args, cell);
-            }
-            result =
-                partialPrepResult === undefined
-                    ? undefined
-                    : {
-                          deprep: partialPrepResult?.deprep,
-                          fillStyle: partialPrepResult?.fillStyle,
-                          font: partialPrepResult?.font,
-                          renderer: r,
-                      };
+    const needsAnim = drawLastUpdateUnderlay(args, cell.lastUpdated, frameTime, lastPrep);
+
+    const r = getCellRenderer(cell);
+    if (r !== undefined) {
+        if (lastPrep?.renderer !== r) {
+            lastPrep?.deprep?.(args);
+            lastPrep = undefined;
         }
-    });
+        const partialPrepResult = r.drawPrep?.(args, lastPrep);
+        if (drawCellCallback !== undefined && !isInnerOnlyCell(args.cell)) {
+            drawCellCallback(args as DrawArgs<GridCell>, () => r.draw(args, cell));
+        } else {
+            r.draw(args, cell);
+        }
+        result =
+            partialPrepResult === undefined
+                ? undefined
+                : {
+                      deprep: partialPrepResult?.deprep,
+                      fillStyle: partialPrepResult?.fillStyle,
+                      font: partialPrepResult?.font,
+                      renderer: r,
+                  };
+    }
+
     if (needsAnim || animationFrameRequested) enqueue?.(allocatedItem);
     return result;
 }
