@@ -46,7 +46,7 @@ import type { DragAndDropState, DrawGridArg, HoverInfo } from "./draw-grid-arg.j
 import type { EnqueueCallback } from "./use-animation-queue.js";
 import type { RenderStateProvider } from "../../common/render-state-provider.js";
 import type { ImageWindowLoader } from "./image-window-loader-interface.js";
-import { hugRectToTarget } from "../../common/math.js";
+import { hugRectToTarget, splitRectIntoRegions } from "../../common/math.js";
 import type { GridMouseGroupHeaderEventArgs } from "./event-args.js";
 
 // Future optimization opportunities
@@ -1668,134 +1668,51 @@ function drawHighlightRings(
     if (highlightRegions === undefined || highlightRegions.length === 0) return undefined;
     const drawRects = highlightRegions.map(h => {
         const r = h.range;
-        const topLeftBounds = computeBounds(
-            r.x,
-            r.y,
-            width,
-            height,
-            groupHeaderHeight,
-            headerHeight + groupHeaderHeight,
-            cellXOffset,
-            cellYOffset,
-            translateX,
-            translateY,
-            rows,
-            freezeColumns,
-            freezeTrailingRows,
-            mappedColumns,
-            rowHeight
-        );
-        if (r.width === 1 && r.height === 1) {
-            if (r.x < freezeColumns) {
-                return [
-                    {
-                        color: h.color,
-                        style: h.style ?? "dashed",
-                        rect: hugRectToTarget(topLeftBounds, width, height, 8),
-                    },
-                    undefined,
-                ];
-            }
-            return [
-                undefined,
-                { color: h.color, style: h.style ?? "dashed", rect: hugRectToTarget(topLeftBounds, width, height, 8) },
-            ];
-        }
+        const style = h.style ?? "dashed";
 
-        const bottomRightBounds = computeBounds(
-            r.x + r.width - 1,
-            r.y + r.height - 1,
-            width,
-            height,
-            groupHeaderHeight,
-            headerHeight + groupHeaderHeight,
-            cellXOffset,
-            cellYOffset,
-            translateX,
-            translateY,
-            rows,
-            freezeColumns,
-            freezeTrailingRows,
-            mappedColumns,
-            rowHeight
-        );
-        if (r.x + r.width === mappedColumns.length) {
-            bottomRightBounds.width -= 1;
-        }
-        if (r.x < freezeColumns && r.x + r.width >= freezeColumns) {
-            const freezeSectionRightBounds = computeBounds(
-                freezeColumns - 1,
-                r.y + r.height - 1,
-                width,
-                height,
-                groupHeaderHeight,
-                headerHeight + groupHeaderHeight,
-                cellXOffset,
-                cellYOffset,
-                translateX,
-                translateY,
-                rows,
-                freezeColumns,
-                freezeTrailingRows,
-                mappedColumns,
-                rowHeight
-            );
-            const unfreezeSectionleftBounds = computeBounds(
-                freezeColumns,
-                r.y,
-                width,
-                height,
-                groupHeaderHeight,
-                headerHeight + groupHeaderHeight,
-                cellXOffset,
-                cellYOffset,
-                translateX,
-                translateY,
-                rows,
-                freezeColumns,
-                freezeTrailingRows,
-                mappedColumns,
-                rowHeight
-            );
-
-            return [
-                {
+        return splitRectIntoRegions(r, [freezeColumns, 0, mappedColumns.length, rows - freezeTrailingRows]).map(
+            splitRect => {
+                if (splitRect === undefined) return undefined;
+                const topLeftBounds = computeBounds(
+                    splitRect.x,
+                    splitRect.y,
+                    width,
+                    height,
+                    groupHeaderHeight,
+                    headerHeight + groupHeaderHeight,
+                    cellXOffset,
+                    cellYOffset,
+                    translateX,
+                    translateY,
+                    rows,
+                    freezeColumns,
+                    freezeTrailingRows,
+                    mappedColumns,
+                    rowHeight
+                );
+                const bottomRightBounds =
+                    splitRect.width === 1 && splitRect.height === 1
+                        ? topLeftBounds
+                        : computeBounds(
+                              splitRect.x + splitRect.width - 1,
+                              splitRect.y + splitRect.height - 1,
+                              width,
+                              height,
+                              groupHeaderHeight,
+                              headerHeight + groupHeaderHeight,
+                              cellXOffset,
+                              cellYOffset,
+                              translateX,
+                              translateY,
+                              rows,
+                              freezeColumns,
+                              freezeTrailingRows,
+                              mappedColumns,
+                              rowHeight
+                          );
+                return {
                     color: h.color,
-                    style: h.style ?? "dashed",
-                    rect: hugRectToTarget(
-                        {
-                            x: topLeftBounds.x,
-                            y: topLeftBounds.y,
-                            width: freezeSectionRightBounds.x + freezeSectionRightBounds.width - topLeftBounds.x,
-                            height: freezeSectionRightBounds.y + freezeSectionRightBounds.height - topLeftBounds.y,
-                        },
-                        width,
-                        height,
-                        8
-                    ),
-                },
-                {
-                    color: h.color,
-                    style: h.style ?? "dashed",
-                    rect: hugRectToTarget(
-                        {
-                            x: unfreezeSectionleftBounds.x,
-                            y: unfreezeSectionleftBounds.y,
-                            width: bottomRightBounds.x + bottomRightBounds.width - unfreezeSectionleftBounds.x,
-                            height: bottomRightBounds.y + bottomRightBounds.height - unfreezeSectionleftBounds.y,
-                        },
-                        width,
-                        height,
-                        8
-                    ),
-                },
-            ];
-        } else {
-            return [
-                undefined,
-                {
-                    color: h.color,
-                    style: h.style ?? "dashed",
+                    style,
                     rect: hugRectToTarget(
                         {
                             x: topLeftBounds.x,
@@ -1807,9 +1724,9 @@ function drawHighlightRings(
                         height,
                         8
                     ),
-                },
-            ];
-        }
+                };
+            }
+        );
     });
 
     const stickyWidth = getStickyWidth(mappedColumns);
@@ -1824,13 +1741,33 @@ function drawHighlightRings(
         };
 
         ctx.lineWidth = 1;
-        if (freezeTrailingRows) {
-            const lastRowHeight = typeof rowHeight === "function" ? rowHeight(rows - 1) : rowHeight;
+        if (freezeTrailingRows > 0) {
+            const freezeHeight = getFreezeTrailingHeight(rows, freezeTrailingRows, rowHeight);
             ctx.beginPath();
-            ctx.rect(0, 0, width, height - lastRowHeight + 1);
+            ctx.rect(0, 0, width, height - freezeHeight + 1);
             ctx.clip();
         }
         ctx.beginPath();
+
+        for (const dr of drawRects) {
+            const [, ...rest] = dr;
+            for (const s of rest) {
+                if (
+                    s?.rect !== undefined &&
+                    intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
+                ) {
+                    setDashed(s.style === "dashed");
+                    ctx.strokeStyle =
+                        s.style === "solid-outline"
+                            ? blend(blend(s.color, theme.borderColor), theme.bgCell)
+                            : withAlpha(s.color, 1);
+                    ctx.strokeRect(s.rect.x + 0.5, s.rect.y + 0.5, s.rect.width - 1, s.rect.height - 1);
+                }
+            }
+        }
+
+        // draw all the centers
+        let clipped = false;
         for (const dr of drawRects) {
             const [s] = dr;
             if (
@@ -1838,22 +1775,7 @@ function drawHighlightRings(
                 intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
             ) {
                 setDashed(s.style === "dashed");
-                ctx.strokeStyle =
-                    s.style === "solid-outline"
-                        ? blend(blend(s.color, theme.borderColor), theme.bgCell)
-                        : withAlpha(s.color, 1);
-                ctx.strokeRect(s.rect.x + 0.5, s.rect.y + 0.5, s.rect.width - 1, s.rect.height - 1);
-            }
-        }
-        let clipped = false;
-        for (const dr of drawRects) {
-            const [, s] = dr;
-            if (
-                s?.rect !== undefined &&
-                intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
-            ) {
-                setDashed(s.style === "dashed");
-                if (!clipped && s.rect.x < stickyWidth) {
+                if (!clipped && (s.rect.x < stickyWidth || s.rect.y + s.rect.height > height - freezeTrailingRows)) {
                     ctx.rect(stickyWidth, 0, width, height);
                     ctx.clip();
                     clipped = true;
