@@ -152,8 +152,8 @@ export function splitRectIntoRegions(
             clip: {
                 x: lClip,
                 y: tClip,
-                width: rClip - lClip,
-                height: bClip - tClip,
+                width: rClip - lClip + 1,
+                height: bClip - tClip + 1,
             },
         });
     }
@@ -174,8 +174,8 @@ export function splitRectIntoRegions(
             clip: {
                 x: 0,
                 y: 0,
-                width: lClip,
-                height: tClip,
+                width: lClip + 1,
+                height: tClip + 1,
             },
         });
     }
@@ -196,8 +196,8 @@ export function splitRectIntoRegions(
             clip: {
                 x: lClip,
                 y: 0,
-                width: rClip - lClip,
-                height: tClip,
+                width: rClip - lClip + 1,
+                height: tClip + 1,
             },
         });
     }
@@ -218,8 +218,8 @@ export function splitRectIntoRegions(
             clip: {
                 x: rClip,
                 y: 0,
-                width: width - rClip,
-                height: tClip,
+                width: width - rClip + 1,
+                height: tClip + 1,
             },
         });
     }
@@ -240,8 +240,8 @@ export function splitRectIntoRegions(
             clip: {
                 x: 0,
                 y: tClip,
-                width: lClip,
-                height: bClip - tClip,
+                width: lClip + 1,
+                height: bClip - tClip + 1,
             },
         });
     }
@@ -262,8 +262,8 @@ export function splitRectIntoRegions(
             clip: {
                 x: rClip,
                 y: tClip,
-                width: width - rClip,
-                height: bClip - tClip,
+                width: width - rClip + 1,
+                height: bClip - tClip + 1,
             },
         });
     }
@@ -284,8 +284,8 @@ export function splitRectIntoRegions(
             clip: {
                 x: 0,
                 y: bClip,
-                width: lClip,
-                height: height - bClip,
+                width: lClip + 1,
+                height: height - bClip + 1,
             },
         });
     }
@@ -306,8 +306,8 @@ export function splitRectIntoRegions(
             clip: {
                 x: lClip,
                 y: bClip,
-                width: rClip - lClip,
-                height: height - bClip,
+                width: rClip - lClip + 1,
+                height: height - bClip + 1,
             },
         });
     }
@@ -328,8 +328,8 @@ export function splitRectIntoRegions(
             clip: {
                 x: rClip,
                 y: bClip,
-                width: width - rClip,
-                height: height - bClip,
+                width: width - rClip + 1,
+                height: height - bClip + 1,
             },
         });
     }

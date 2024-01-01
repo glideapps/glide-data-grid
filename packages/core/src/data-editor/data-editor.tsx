@@ -1258,12 +1258,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const outerCol = col - rowMarkerOffset;
                 if (forceStrict || experimental?.strict === true) {
                     const vr = visibleRegionRef.current;
-                    const isOutsideMainArea = !pointInRect(vr, row, outerCol);
+                    const isOutsideMainArea =
+                        vr.x > outerCol ||
+                        outerCol > vr.x + vr.width ||
+                        vr.y > row ||
+                        row > vr.y + vr.height ||
+                        row >= rowsRef.current;
                     const isSelected = outerCol === vr.extras?.selected?.[0] && row === vr.extras?.selected[1];
                     let isInFreezeArea = false;
                     if (vr.extras?.freezeRegions !== undefined) {
                         for (const fr of vr.extras.freezeRegions) {
-                            if (pointInRect(fr, row, outerCol)) {
+                            if (pointInRect(fr, outerCol, row)) {
                                 isInFreezeArea = true;
                                 break;
                             }
@@ -2377,11 +2382,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (freezeRegion !== undefined) freezeRegions.push(freezeRegion);
             if (freezeTrailingRows > 0) {
                 freezeRegions.push({
-                    x: region.x,
+                    x: region.x - rowMarkerOffset,
                     y: rows - freezeTrailingRows,
                     width: region.width,
                     height: freezeTrailingRows,
                 });
+
+                if (freezeColumns > 0) {
+                    freezeRegions.push({
+                        x: 0,
+                        y: rows - freezeTrailingRows,
+                        width: freezeColumns,
+                        height: freezeTrailingRows,
+                    });
+                }
             }
 
             const newRegion = {
