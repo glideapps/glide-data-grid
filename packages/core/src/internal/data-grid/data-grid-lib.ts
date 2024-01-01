@@ -789,6 +789,7 @@ export function computeBounds(
             result.y -= result.height;
             dy--;
         }
+        result.height += 1;
     } else {
         const dir = cellYOffset > row ? -1 : 1;
         if (typeof rowHeight === "number") {
