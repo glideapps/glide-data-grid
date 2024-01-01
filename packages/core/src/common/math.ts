@@ -50,6 +50,10 @@ export function combineRects(a: Rectangle, b: Rectangle): Rectangle {
     return { x, y, width, height };
 }
 
+export function rectContains(a: Rectangle, b: Rectangle): boolean {
+    return a.x <= b.x && a.y <= b.y && a.x + a.width >= b.x + b.width && a.y + a.height >= b.y + b.height;
+}
+
 /**
  * This function is absolutely critical for the performance of the fill handle and highlight regions. If you don't
  * hug rectanges when they are dashed and they are huge you will get giant GPU stalls. The reason for the mod is
@@ -94,21 +98,28 @@ export function hugRectToTarget(rect: Rectangle, width: number, height: number, 
     return { x: left, y: top, width: right - left, height: bottom - top };
 }
 
+interface SplitRect {
+    rect: Rectangle;
+    clip: Rectangle;
+}
+
 export function splitRectIntoRegions(
     rect: Rectangle,
-    splitIndicies: [number, number, number, number]
-): [Rectangle | undefined, ...Rectangle[]] {
+    splitIndicies: readonly [number, number, number, number],
+    width: number,
+    height: number,
+    splitLocations: readonly [number, number, number, number]
+): SplitRect[] {
     const [lSplit, tSplit, rSplit, bSplit] = splitIndicies;
+    const [lClip, tClip, rClip, bClip] = splitLocations;
     const { x: inX, y: inY, width: inW, height: inH } = rect;
 
-    const result: [Rectangle | undefined, ...Rectangle[]] = [undefined];
+    const result: SplitRect[] = [];
 
     if (inW <= 0 || inH <= 0) return result;
 
     const inRight = inX + inW;
     const inBottom = inY + inH;
-
-    if (inRight <= lSplit || inBottom <= tSplit || inX >= rSplit || inY >= bSplit) return result;
 
     // The goal is to split the inbound rect into up to 9 regions based on the provided split indicies which are
     // more or less cut lines. The cut lines are whole numbers as is the rect. We are dividing cells on a table.
@@ -130,18 +141,21 @@ export function splitRectIntoRegions(
 
     const isOverCenter = isOverCenterVert && isOverCenterHoriz;
 
-    // We will do the center first since it is the special value we care about extra. This puts it in a known position
+    // center
     if (isOverCenter) {
         const x = Math.max(inX, lSplit);
         const y = Math.max(inY, tSplit);
         const right = Math.min(inRight, rSplit);
         const bottom = Math.min(inBottom, bSplit);
-        result[0] = {
-            x,
-            y,
-            width: right - x,
-            height: bottom - y,
-        };
+        result.push({
+            rect: { x, y, width: right - x, height: bottom - y },
+            clip: {
+                x: lClip,
+                y: tClip,
+                width: rClip - lClip,
+                height: bClip - tClip,
+            },
+        });
     }
 
     // top left
@@ -151,10 +165,18 @@ export function splitRectIntoRegions(
         const right = Math.min(inRight, lSplit);
         const bottom = Math.min(inBottom, tSplit);
         result.push({
-            x,
-            y,
-            width: right - x,
-            height: bottom - y,
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: 0,
+                y: 0,
+                width: lClip,
+                height: tClip,
+            },
         });
     }
 
@@ -165,10 +187,18 @@ export function splitRectIntoRegions(
         const right = Math.min(inRight, rSplit);
         const bottom = Math.min(inBottom, tSplit);
         result.push({
-            x,
-            y,
-            width: right - x,
-            height: bottom - y,
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: lClip,
+                y: 0,
+                width: rClip - lClip,
+                height: tClip,
+            },
         });
     }
 
@@ -179,10 +209,18 @@ export function splitRectIntoRegions(
         const right = inRight;
         const bottom = Math.min(inBottom, tSplit);
         result.push({
-            x,
-            y,
-            width: right - x,
-            height: bottom - y,
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: rClip,
+                y: 0,
+                width: width - rClip,
+                height: tClip,
+            },
         });
     }
 
@@ -193,10 +231,18 @@ export function splitRectIntoRegions(
         const right = Math.min(inRight, lSplit);
         const bottom = Math.min(inBottom, bSplit);
         result.push({
-            x,
-            y,
-            width: right - x,
-            height: bottom - y,
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: 0,
+                y: tClip,
+                width: lClip,
+                height: bClip - tClip,
+            },
         });
     }
 
@@ -207,10 +253,18 @@ export function splitRectIntoRegions(
         const right = inRight;
         const bottom = Math.min(inBottom, bSplit);
         result.push({
-            x,
-            y,
-            width: right - x,
-            height: bottom - y,
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: rClip,
+                y: tClip,
+                width: width - rClip,
+                height: bClip - tClip,
+            },
         });
     }
 
@@ -221,10 +275,18 @@ export function splitRectIntoRegions(
         const right = Math.min(inRight, lSplit);
         const bottom = inBottom;
         result.push({
-            x,
-            y,
-            width: right - x,
-            height: bottom - y,
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: 0,
+                y: bClip,
+                width: lClip,
+                height: height - bClip,
+            },
         });
     }
 
@@ -235,10 +297,18 @@ export function splitRectIntoRegions(
         const right = Math.min(inRight, rSplit);
         const bottom = inBottom;
         result.push({
-            x,
-            y,
-            width: right - x,
-            height: bottom - y,
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: lClip,
+                y: bClip,
+                width: rClip - lClip,
+                height: height - bClip,
+            },
         });
     }
 
@@ -249,10 +319,18 @@ export function splitRectIntoRegions(
         const right = inRight;
         const bottom = inBottom;
         result.push({
-            x,
-            y,
-            width: right - x,
-            height: bottom - y,
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: rClip,
+                y: bClip,
+                width: width - rClip,
+                height: height - bClip,
+            },
         });
     }
 

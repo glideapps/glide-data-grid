@@ -46,7 +46,7 @@ import type { DragAndDropState, DrawGridArg, HoverInfo } from "./draw-grid-arg.j
 import type { EnqueueCallback } from "./use-animation-queue.js";
 import type { RenderStateProvider } from "../../common/render-state-provider.js";
 import type { ImageWindowLoader } from "./image-window-loader-interface.js";
-import { hugRectToTarget, splitRectIntoRegions } from "../../common/math.js";
+import { hugRectToTarget, rectContains, splitRectIntoRegions } from "../../common/math.js";
 import type { GridMouseGroupHeaderEventArgs } from "./event-args.js";
 
 // Future optimization opportunities
@@ -1666,128 +1666,99 @@ function drawHighlightRings(
     const highlightRegions = allHighlightRegions?.filter(x => x.style !== "no-outline");
 
     if (highlightRegions === undefined || highlightRegions.length === 0) return undefined;
+
+    const freezeLeft = getStickyWidth(mappedColumns);
+    const freezeBottom = getFreezeTrailingHeight(rows, freezeTrailingRows, rowHeight);
+    const splitIndicies = [freezeColumns, 0, mappedColumns.length, rows - freezeTrailingRows] as const;
+    const splitLocations = [freezeLeft, 0, width, height - freezeBottom] as const;
+
     const drawRects = highlightRegions.map(h => {
         const r = h.range;
         const style = h.style ?? "dashed";
 
-        return splitRectIntoRegions(r, [freezeColumns, 0, mappedColumns.length, rows - freezeTrailingRows]).map(
-            splitRect => {
-                if (splitRect === undefined) return undefined;
-                const topLeftBounds = computeBounds(
-                    splitRect.x,
-                    splitRect.y,
+        return splitRectIntoRegions(r, splitIndicies, width, height, splitLocations).map(arg => {
+            const rect = arg.rect;
+            const topLeftBounds = computeBounds(
+                rect.x,
+                rect.y,
+                width,
+                height,
+                groupHeaderHeight,
+                headerHeight + groupHeaderHeight,
+                cellXOffset,
+                cellYOffset,
+                translateX,
+                translateY,
+                rows,
+                freezeColumns,
+                freezeTrailingRows,
+                mappedColumns,
+                rowHeight
+            );
+            const bottomRightBounds =
+                rect.width === 1 && rect.height === 1
+                    ? topLeftBounds
+                    : computeBounds(
+                          rect.x + rect.width - 1,
+                          rect.y + rect.height - 1,
+                          width,
+                          height,
+                          groupHeaderHeight,
+                          headerHeight + groupHeaderHeight,
+                          cellXOffset,
+                          cellYOffset,
+                          translateX,
+                          translateY,
+                          rows,
+                          freezeColumns,
+                          freezeTrailingRows,
+                          mappedColumns,
+                          rowHeight
+                      );
+            return {
+                color: h.color,
+                style,
+                clip: arg.clip,
+                rect: hugRectToTarget(
+                    {
+                        x: topLeftBounds.x,
+                        y: topLeftBounds.y,
+                        width: bottomRightBounds.x + bottomRightBounds.width - topLeftBounds.x,
+                        height: bottomRightBounds.y + bottomRightBounds.height - topLeftBounds.y,
+                    },
                     width,
                     height,
-                    groupHeaderHeight,
-                    headerHeight + groupHeaderHeight,
-                    cellXOffset,
-                    cellYOffset,
-                    translateX,
-                    translateY,
-                    rows,
-                    freezeColumns,
-                    freezeTrailingRows,
-                    mappedColumns,
-                    rowHeight
-                );
-                const bottomRightBounds =
-                    splitRect.width === 1 && splitRect.height === 1
-                        ? topLeftBounds
-                        : computeBounds(
-                              splitRect.x + splitRect.width - 1,
-                              splitRect.y + splitRect.height - 1,
-                              width,
-                              height,
-                              groupHeaderHeight,
-                              headerHeight + groupHeaderHeight,
-                              cellXOffset,
-                              cellYOffset,
-                              translateX,
-                              translateY,
-                              rows,
-                              freezeColumns,
-                              freezeTrailingRows,
-                              mappedColumns,
-                              rowHeight
-                          );
-                return {
-                    color: h.color,
-                    style,
-                    rect: hugRectToTarget(
-                        {
-                            x: topLeftBounds.x,
-                            y: topLeftBounds.y,
-                            width: bottomRightBounds.x + bottomRightBounds.width - topLeftBounds.x,
-                            height: bottomRightBounds.y + bottomRightBounds.height - topLeftBounds.y,
-                        },
-                        width,
-                        height,
-                        8
-                    ),
-                };
-            }
-        );
+                    8
+                ),
+            };
+        });
     });
 
-    const stickyWidth = getStickyWidth(mappedColumns);
-
     const drawCb = () => {
-        ctx.save();
-        let dashed = false;
-        const setDashed = (dash: boolean) => {
-            if (dashed === dash) return;
-            ctx.setLineDash(dash ? [5, 3] : []);
-            dashed = dash;
-        };
-
         ctx.lineWidth = 1;
-        if (freezeTrailingRows > 0) {
-            const freezeHeight = getFreezeTrailingHeight(rows, freezeTrailingRows, rowHeight);
-            ctx.beginPath();
-            ctx.rect(0, 0, width, height - freezeHeight + 1);
-            ctx.clip();
-        }
-        ctx.beginPath();
 
         for (const dr of drawRects) {
-            const [, ...rest] = dr;
-            for (const s of rest) {
+            for (const s of dr) {
                 if (
                     s?.rect !== undefined &&
                     intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
                 ) {
-                    setDashed(s.style === "dashed");
+                    const needsClip = !rectContains(s.clip, s.rect);
+                    if (needsClip) {
+                        ctx.save();
+                        ctx.rect(s.clip.x, s.clip.y, s.clip.width, s.clip.height);
+                        ctx.clip();
+                    }
+                    if (s.style === "dashed") ctx.setLineDash([5, 3]);
                     ctx.strokeStyle =
                         s.style === "solid-outline"
                             ? blend(blend(s.color, theme.borderColor), theme.bgCell)
                             : withAlpha(s.color, 1);
                     ctx.strokeRect(s.rect.x + 0.5, s.rect.y + 0.5, s.rect.width - 1, s.rect.height - 1);
+                    if (needsClip) ctx.restore();
                 }
             }
         }
-
-        // draw all the centers
-        let clipped = false;
-        for (const dr of drawRects) {
-            const [s] = dr;
-            if (
-                s?.rect !== undefined &&
-                intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
-            ) {
-                setDashed(s.style === "dashed");
-                if (!clipped && (s.rect.x < stickyWidth || s.rect.y + s.rect.height > height - freezeTrailingRows)) {
-                    ctx.rect(stickyWidth, 0, width, height);
-                    ctx.clip();
-                    clipped = true;
-                }
-                ctx.strokeStyle =
-                    s.style === "solid-outline"
-                        ? blend(blend(s.color, theme.borderColor), theme.bgCell)
-                        : withAlpha(s.color, 1);
-                ctx.strokeRect(s.rect.x + 0.5, s.rect.y + 0.5, s.rect.width - 1, s.rect.height - 1);
-            }
-        }
-        ctx.restore();
     };
 
     drawCb();
