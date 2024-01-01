@@ -64,7 +64,7 @@ import { useAutoscroll } from "./use-autoscroll.js";
 import type { CustomRenderer, CellRenderer, InternalCellRenderer } from "../cells/cell-types.js";
 import { decodeHTML, type CopyBuffer } from "./copy-paste.js";
 import { useRemAdjuster } from "./use-rem-adjuster.js";
-import { type Highlight } from "../internal/data-grid/data-grid-render.js";
+import { pointInRect, type Highlight } from "../internal/data-grid/data-grid-render.js";
 import { withAlpha } from "../internal/data-grid/color-parser.js";
 import { combineRects, getClosestRect } from "../common/math.js";
 import {
@@ -485,8 +485,15 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
         extras: {
             /** The selected item if visible */
             selected?: Item;
-            /** A selection of visible freeze columns */
+            /** A selection of visible freeze columns
+             * @deprecated
+             */
             freezeRegion?: Rectangle;
+
+            /**
+             * All visible freeze regions
+             */
+            freezeRegions?: readonly Rectangle[];
         }
     ) => void;
 
@@ -1052,7 +1059,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ty?: number;
         extras?: {
             selected?: Item;
+            /**
+             * @deprecated
+             */
             freezeRegion?: Rectangle;
+
+            /**
+             * All visible freeze regions
+             */
+            freezeRegions?: readonly Rectangle[];
         };
     };
 
@@ -1243,20 +1258,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const outerCol = col - rowMarkerOffset;
                 if (forceStrict || experimental?.strict === true) {
                     const vr = visibleRegionRef.current;
-                    const isOutsideMainArea =
-                        vr.x > outerCol ||
-                        outerCol > vr.x + vr.width ||
-                        vr.y > row ||
-                        row > vr.y + vr.height ||
-                        row >= rowsRef.current;
+                    const isOutsideMainArea = !pointInRect(vr, row, outerCol);
                     const isSelected = outerCol === vr.extras?.selected?.[0] && row === vr.extras?.selected[1];
-                    const isOutsideFreezeArea =
-                        vr.extras?.freezeRegion === undefined ||
-                        vr.extras.freezeRegion.x > outerCol ||
-                        outerCol > vr.extras.freezeRegion.x + vr.extras.freezeRegion.width ||
-                        vr.extras.freezeRegion.y > row ||
-                        row > vr.extras.freezeRegion.y + vr.extras.freezeRegion.height;
-                    if (isOutsideMainArea && !isSelected && isOutsideFreezeArea) {
+                    let isInFreezeArea = false;
+                    if (vr.extras?.freezeRegions !== undefined) {
+                        for (const fr of vr.extras.freezeRegions) {
+                            if (pointInRect(fr, row, outerCol)) {
+                                isInFreezeArea = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (isOutsideMainArea && !isSelected && !isInFreezeArea) {
                         return loadingCell;
                     }
                 }
@@ -2348,6 +2362,28 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (selected !== undefined) {
                 selected = [selected[0] - rowMarkerOffset, selected[1]];
             }
+
+            const freezeRegion =
+                freezeColumns === 0
+                    ? undefined
+                    : {
+                          x: 0,
+                          y: region.y,
+                          width: freezeColumns,
+                          height: region.height,
+                      };
+
+            const freezeRegions: Rectangle[] = [];
+            if (freezeRegion !== undefined) freezeRegions.push(freezeRegion);
+            if (freezeTrailingRows > 0) {
+                freezeRegions.push({
+                    x: region.x,
+                    y: rows - freezeTrailingRows,
+                    width: region.width,
+                    height: freezeTrailingRows,
+                });
+            }
+
             const newRegion = {
                 x: region.x - rowMarkerOffset,
                 y: region.y,
@@ -2357,15 +2393,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 ty,
                 extras: {
                     selected,
-                    freezeRegion:
-                        freezeColumns === 0
-                            ? undefined
-                            : {
-                                  x: 0,
-                                  y: region.y,
-                                  width: freezeColumns,
-                                  height: region.height,
-                              },
+                    freezeRegion,
+                    freezeRegions,
                 },
             };
             visibleRegionRef.current = newRegion;
@@ -2379,6 +2408,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             showTrailingBlankRow,
             rows,
             freezeColumns,
+            freezeTrailingRows,
             setVisibleRegion,
             onVisibleRegionChanged,
         ]
