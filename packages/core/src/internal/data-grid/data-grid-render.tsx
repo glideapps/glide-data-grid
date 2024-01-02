@@ -468,13 +468,6 @@ function drawGridLines(
         }
     }
 
-    // here we need to push all the relevant lines for the sticky row
-    // const stickyHeight = getRowHeight(rows - 1);
-    // const stickyRowY = height - stickyHeight + 0.5;
-    // const lastRowSticky = freezeTrailingRows > 0;
-    // if (lastRowSticky) {
-    //     toDraw.push({ x1: minX, y1: stickyRowY, x2: maxX, y2: stickyRowY, color: hColor });
-    // }
     let freezeY = height + 0.5;
     for (let i = rows - freezeTrailingRows; i < rows; i++) {
         const rh = getRowHeight(i);
@@ -487,14 +480,9 @@ function drawGridLines(
         let y = totalHeaderHeight + 0.5;
         let row = cellYOffset;
         const target = freezeY;
-        while (y + translateY <= target) {
+        while (y + translateY < target) {
             const ty = y + translateY;
-            // This shouldn't be needed it seems like... yet it is. We're not sure why.
-            if (
-                ty >= minY &&
-                ty <= maxY - 1 &&
-                (freezeTrailingRows === 0 || row !== rows - 1 || Math.abs(ty - freezeY) > 1)
-            ) {
+            if (ty >= minY && ty <= maxY - 1) {
                 const rowTheme = getRowThemeOverride?.(row);
                 toDraw.push({
                     x1: minX,
