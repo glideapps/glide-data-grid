@@ -28,15 +28,15 @@ export function unpackNumberToColRow(packed: number): [number, number] {
 }
 
 export abstract class WindowingTrackerBase {
-    protected visibleWindow: Rectangle = {
+    public visibleWindow: Rectangle = {
         x: 0,
         y: 0,
         width: 0,
         height: 0,
     };
 
-    protected freezeCols: number = 0;
-    protected freezeRows: number[] = [];
+    public freezeCols: number = 0;
+    public freezeRows: number[] = [];
 
     protected isInWindow = (packed: number) => {
         const col = unpackCol(packed);
