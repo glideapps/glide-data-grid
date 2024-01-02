@@ -1,9 +1,7 @@
-import { type Rectangle } from "../internal/data-grid/data-grid-types.js";
 import { CellSet } from "../internal/data-grid/cell-set.js";
 import throttle from "lodash/throttle.js";
-import { unpackCol, unpackRow, packColRowToNumber, unpackNumberToColRow } from "./render-state-provider.js";
+import { packColRowToNumber, unpackNumberToColRow, WindowingTrackerBase } from "./render-state-provider.js";
 import type { ImageWindowLoader } from "../internal/data-grid/image-window-loader-interface.js";
-import { deepEqual } from "./support.js";
 
 interface LoadResult {
     img: HTMLImageElement | undefined;
@@ -14,28 +12,9 @@ interface LoadResult {
 
 const imgPool: HTMLImageElement[] = [];
 
-class ImageWindowLoaderImpl implements ImageWindowLoader {
+class ImageWindowLoaderImpl extends WindowingTrackerBase implements ImageWindowLoader {
     private imageLoaded: (locations: CellSet) => void = () => undefined;
     private loadedLocations: [number, number][] = [];
-
-    public visibleWindow: Rectangle = {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-    };
-
-    public freezeCols: number = 0;
-    public freezeRows: number[] = [];
-
-    private isInWindow = (packed: number) => {
-        const col = unpackCol(packed);
-        const row = unpackRow(packed);
-        const w = this.visibleWindow;
-        const colInWindow = (col >= w.x && col <= w.x + w.width) || col < this.freezeCols;
-        const rowInWindow = (row >= w.y && row <= w.y + w.height) || this.freezeRows.includes(row);
-        return colInWindow && rowInWindow;
-    };
 
     private cache: Record<string, LoadResult> = {};
 
@@ -49,7 +28,7 @@ class ImageWindowLoaderImpl implements ImageWindowLoader {
         this.loadedLocations = [];
     }, 20);
 
-    private clearOutOfWindow = () => {
+    protected clearOutOfWindow = () => {
         const keys = Object.keys(this.cache);
         for (const key of keys) {
             const obj = this.cache[key];
@@ -71,22 +50,6 @@ class ImageWindowLoaderImpl implements ImageWindowLoader {
             }
         }
     };
-
-    public setWindow(newWindow: Rectangle, freezeCols: number, freezeRows: number[]): void {
-        if (
-            this.visibleWindow.x === newWindow.x &&
-            this.visibleWindow.y === newWindow.y &&
-            this.visibleWindow.width === newWindow.width &&
-            this.visibleWindow.height === newWindow.height &&
-            this.freezeCols === freezeCols &&
-            deepEqual(this.freezeRows, freezeRows)
-        )
-            return;
-        this.visibleWindow = newWindow;
-        this.freezeCols = freezeCols;
-        this.freezeRows = freezeRows;
-        this.clearOutOfWindow();
-    }
 
     private loadImage(url: string, col: number, row: number, key: string) {
         let loaded = false;

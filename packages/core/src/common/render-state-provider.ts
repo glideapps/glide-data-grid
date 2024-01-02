@@ -1,4 +1,5 @@
 import type { Item, Rectangle } from "../internal/data-grid/data-grid-types.js";
+import { deepEqual } from "./support.js";
 
 // max safe int 2^53 - 1 (minus 1 omitted from here on)
 // max safe columns is 2^21 or 2,097,151
@@ -26,24 +27,46 @@ export function unpackNumberToColRow(packed: number): [number, number] {
     return [col, row];
 }
 
-export class RenderStateProvider {
-    private visibleWindow: Rectangle = {
+export abstract class WindowingTrackerBase {
+    protected visibleWindow: Rectangle = {
         x: 0,
         y: 0,
         width: 0,
         height: 0,
     };
 
-    private freezeCols: number = 0;
+    protected freezeCols: number = 0;
+    protected freezeRows: number[] = [];
 
-    private isInWindow = (packed: number) => {
+    protected isInWindow = (packed: number) => {
         const col = unpackCol(packed);
         const row = unpackRow(packed);
         const w = this.visibleWindow;
-        if (col < this.freezeCols && row >= w.y && row <= w.y + w.height) return true;
-        return col >= w.x && col <= w.x + w.width && row >= w.y && row <= w.y + w.height;
+        const colInWindow = (col >= w.x && col <= w.x + w.width) || col < this.freezeCols;
+        const rowInWindow = (row >= w.y && row <= w.y + w.height) || this.freezeRows.includes(row);
+        return colInWindow && rowInWindow;
     };
 
+    protected abstract clearOutOfWindow: () => void;
+
+    public setWindow(newWindow: Rectangle, freezeCols: number, freezeRows: number[]): void {
+        if (
+            this.visibleWindow.x === newWindow.x &&
+            this.visibleWindow.y === newWindow.y &&
+            this.visibleWindow.width === newWindow.width &&
+            this.visibleWindow.height === newWindow.height &&
+            this.freezeCols === freezeCols &&
+            deepEqual(this.freezeRows, freezeRows)
+        )
+            return;
+        this.visibleWindow = newWindow;
+        this.freezeCols = freezeCols;
+        this.freezeRows = freezeRows;
+        this.clearOutOfWindow();
+    }
+}
+
+export class RenderStateProvider extends WindowingTrackerBase {
     private cache: Map<number, any> = new Map();
 
     public setValue = (location: Item, state: any): void => {
@@ -54,25 +77,11 @@ export class RenderStateProvider {
         return this.cache.get(packColRowToNumber(location[0], location[1]));
     };
 
-    private clearOutOfWindow = () => {
+    protected clearOutOfWindow = () => {
         for (const [key] of this.cache.entries()) {
             if (!this.isInWindow(key)) {
                 this.cache.delete(key);
             }
         }
     };
-
-    public setWindow(newWindow: Rectangle, freezeCols: number): void {
-        if (
-            this.visibleWindow.x === newWindow.x &&
-            this.visibleWindow.y === newWindow.y &&
-            this.visibleWindow.width === newWindow.width &&
-            this.visibleWindow.height === newWindow.height &&
-            this.freezeCols === freezeCols
-        )
-            return;
-        this.visibleWindow = newWindow;
-        this.freezeCols = freezeCols;
-        this.clearOutOfWindow();
-    }
 }
