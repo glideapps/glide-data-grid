@@ -3,9 +3,7 @@ import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
 import {
     BeautifulWrapper,
     Description,
-    MoreInfo,
     useMockDataGenerator,
-    KeyName,
     defaultProps,
     clearCell,
 } from "../../data-editor/stories/utils.js";
@@ -18,14 +16,10 @@ export default {
         (Story: React.ComponentType) => (
             <SimpleThemeWrapper>
                 <BeautifulWrapper
-                    title="Add data"
+                    title="Freeze rows"
                     description={
                         <>
-                            <Description>Data can be added by clicking on the trailing row.</Description>
-                            <MoreInfo>
-                                Keyboard is also supported, just navigate past the last row and press{" "}
-                                <KeyName>Enter</KeyName>
-                            </MoreInfo>
+                            <Description>Rows can be frozen to make sure the user always sees them.</Description>
                         </>
                     }>
                     <Story />
@@ -35,7 +29,7 @@ export default {
     ],
 };
 
-export const AddData: React.VFC = () => {
+export const FreezeRows: React.VFC = () => {
     const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
 
     const [numRows, setNumRows] = React.useState(50);
@@ -58,6 +52,7 @@ export const AddData: React.VFC = () => {
             getCellContent={getCellContent}
             columns={cols}
             rowMarkers={"both"}
+            freezeTrailingRows={2}
             onPaste={true} // we want to allow paste to just call onCellEdited
             onCellEdited={setCellValue} // Sets the mock cell content
             trailingRowOptions={{
