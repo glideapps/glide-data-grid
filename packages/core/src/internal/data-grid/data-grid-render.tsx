@@ -260,11 +260,11 @@ function blitLastFrame(
     }
 
     // this usage just needs to get the freezeHeight correctly
-    const stickyRowHeight =
+    const freezeTrailingRowsHeight =
         freezeTrailingRows > 0 ? getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) : 0;
 
     const blitWidth = width - stickyWidth - Math.abs(deltaX);
-    const blitHeight = height - totalHeaderHeight - stickyRowHeight - Math.abs(deltaY) - 1;
+    const blitHeight = height - totalHeaderHeight - freezeTrailingRowsHeight - Math.abs(deltaY) - 1;
 
     if (blitWidth > 150 && blitHeight > 150) {
         blittedYOnly = deltaX === 0;
@@ -303,9 +303,9 @@ function blitLastFrame(
 
             drawRegions.push({
                 x: 0,
-                y: height + deltaY - stickyRowHeight,
+                y: height + deltaY - freezeTrailingRowsHeight,
                 width: width,
-                height: -deltaY + stickyRowHeight,
+                height: -deltaY + freezeTrailingRowsHeight,
             });
         }
 
@@ -1179,7 +1179,7 @@ function drawCells(
     ctx.font = font;
     const deprepArg = { ctx };
     const cellIndex: [number, number] = [0, 0];
-    const stickyRowHeight =
+    const freezeTrailingRowsHeight =
         freezeTrailingRows > 0 ? getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) : 0;
     let result: Rectangle[] | undefined;
     const handledSpans = new Set<string>();
@@ -1396,7 +1396,9 @@ function drawCells(
                         // this is passing too many clip regions to the GPU at once can cause a performance hit. This
                         // allows us to damage a large number of cells at once without issue.
                         const top = drawY + 1;
-                        const bottom = isSticky ? top + rh - 1 : Math.min(top + rh - 1, height - stickyRowHeight);
+                        const bottom = isSticky
+                            ? top + rh - 1
+                            : Math.min(top + rh - 1, height - freezeTrailingRowsHeight);
                         const h = bottom - top;
 
                         // however, not clipping at all is even better. We want to clip if we are the left most col
