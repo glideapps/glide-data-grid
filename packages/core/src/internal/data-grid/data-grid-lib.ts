@@ -160,11 +160,15 @@ export function getFreezeTrailingHeight(
     freezeTrailingRows: number,
     getRowHeight: number | ((row: number) => number)
 ): number {
-    let result = 0;
-    for (let i = rows - freezeTrailingRows; i < rows; i++) {
-        result += typeof getRowHeight === "number" ? getRowHeight : getRowHeight(i);
+    if (typeof getRowHeight === "number") {
+        return freezeTrailingRows * getRowHeight;
+    } else {
+        let result = 0;
+        for (let i = rows - freezeTrailingRows; i < rows; i++) {
+            result += getRowHeight(i);
+        }
+        return result;
     }
-    return result;
 }
 
 export function getEffectiveColumns(
