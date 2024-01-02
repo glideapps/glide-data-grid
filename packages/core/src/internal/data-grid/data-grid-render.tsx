@@ -2648,9 +2648,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             height: lastRowDrawn - cellYOffset,
         },
         freezeColumns,
-        Array.from({ length: freezeTrailingRows })
-            .fill(0)
-            .map((_, i) => rows - 1 - i)
+        Array.from({ length: freezeTrailingRows }, (_, i) => rows - 1 - i)
     );
 
     lastBlitData.current = {
