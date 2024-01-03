@@ -1727,6 +1727,8 @@ function drawHighlightRings(
     const drawCb = () => {
         ctx.lineWidth = 1;
 
+        let dashed = false;
+
         for (const dr of drawRects) {
             for (const s of dr) {
                 if (
@@ -1739,7 +1741,13 @@ function drawHighlightRings(
                         ctx.rect(s.clip.x, s.clip.y, s.clip.width, s.clip.height);
                         ctx.clip();
                     }
-                    if (s.style === "dashed") ctx.setLineDash([5, 3]);
+                    if (s.style === "dashed" && !dashed) {
+                        ctx.setLineDash([5, 3]);
+                        dashed = true;
+                    } else if ((s.style === "solid" || s.style === "solid-outline") && dashed) {
+                        ctx.setLineDash([]);
+                        dashed = false;
+                    }
                     ctx.strokeStyle =
                         s.style === "solid-outline"
                             ? blend(blend(s.color, theme.borderColor), theme.bgCell)
@@ -1748,6 +1756,10 @@ function drawHighlightRings(
                     if (needsClip) ctx.restore();
                 }
             }
+        }
+
+        if (dashed) {
+            ctx.setLineDash([]);
         }
     };
 
