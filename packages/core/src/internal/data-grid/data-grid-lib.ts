@@ -446,7 +446,7 @@ export function getEmHeight(ctx: CanvasRenderingContext2D, fontStyle: string): n
     return textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
 }
 
-function truncateString(data: string, w: number) {
+function truncateString(data: string, w: number): string {
     if (data.includes("\n")) {
         // new lines are rare and split is relatively expensive compared to the search
         // it pays off to not do the split contantly.
@@ -456,6 +456,7 @@ function truncateString(data: string, w: number) {
     if (data.length > max) {
         data = data.slice(0, max);
     }
+    return data;
 }
 
 function drawMultiLineText(
@@ -513,7 +514,7 @@ export function drawTextCell(
     allowWrapping = allowWrapping ?? false;
 
     if (!allowWrapping) {
-        truncateString(data, w);
+        data = truncateString(data, w);
     }
 
     const bias = getMiddleCenterBias(ctx, theme);
