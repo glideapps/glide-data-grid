@@ -229,10 +229,10 @@ export const CustomCells: React.VFC = () => {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "tags-cell",
                                 possibleTags: possibleTags,
-                                readonly: row % 2 === 0,
                                 tags: uniq([
                                     possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
                                     possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
@@ -248,6 +248,7 @@ export const CustomCells: React.VFC = () => {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "user-profile-cell",
                                 image: row % 2 ? undefined : "https://i.redd.it/aqc1hwhalsz71.jpg",
@@ -263,6 +264,7 @@ export const CustomCells: React.VFC = () => {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "dropdown-cell",
                                 allowedValues: [
@@ -286,6 +288,7 @@ export const CustomCells: React.VFC = () => {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "range-cell",
                                 min: 10,
@@ -304,6 +307,7 @@ export const CustomCells: React.VFC = () => {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "article-cell",
                                 markdown: "## This is a test",
@@ -329,6 +333,7 @@ export const CustomCells: React.VFC = () => {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "date-picker-cell",
                                 date: new Date(),
@@ -344,6 +349,7 @@ export const CustomCells: React.VFC = () => {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "date-picker-cell",
                                 date: new Date(),
@@ -359,6 +365,7 @@ export const CustomCells: React.VFC = () => {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "date-picker-cell",
                                 date: new Date(),

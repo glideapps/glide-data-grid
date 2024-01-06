@@ -13,7 +13,6 @@ import { roundedRect } from "../draw-fns.js";
 interface TagsCellProps {
     readonly kind: "tags-cell";
     readonly tags: readonly string[];
-    readonly readonly?: boolean;
     readonly possibleTags: readonly {
         tag: string;
         color: string;
@@ -132,7 +131,8 @@ const renderer: CustomRenderer<TagsCell> = {
         // eslint-disable-next-line react/display-name
         return p => {
             const { onChange, value } = p;
-            const { possibleTags, tags, readonly = false } = value.data;
+            const { readonly = false } = value;
+            const { possibleTags, tags } = value.data;
             return (
                 <EditorWrap tagHeight={tagHeight} innerPad={innerPad} className={readonly ? "gdg-readonly" : ""}>
                     {possibleTags.map(t => {

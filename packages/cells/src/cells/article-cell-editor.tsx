@@ -1,6 +1,6 @@
 import type { ProvideEditorComponent } from "@glideapps/glide-data-grid";
 import * as React from "react";
-import { Editor } from "@toast-ui/react-editor";
+import { Editor, Viewer } from "@toast-ui/react-editor";
 import { styled } from "@linaria/react";
 import type { ArticleCell } from "./article-cell-types.js";
 
@@ -53,8 +53,16 @@ const ArticleCellEditor: ProvideEditorComponent<ArticleCell> = p => {
         p.onFinishedEditing(undefined);
     }, [p]);
 
+    if (p.value.readonly) {
+        return (
+            <Wrapper id="gdg-markdown-readonly" onKeyDown={onKeyDown} style={{ height: "75vh", padding: "35px" }}>
+                <Viewer initialValue={p.value.data.markdown} usageStatistics={false} />
+            </Wrapper>
+        );
+    }
+
     return (
-        <Wrapper id="markdown-wysiwyg" onKeyDown={onKeyDown}>
+        <Wrapper id="gdg-markdown-wysiwyg" onKeyDown={onKeyDown}>
             <Editor
                 initialEditType="wysiwyg"
                 autofocus={true}
