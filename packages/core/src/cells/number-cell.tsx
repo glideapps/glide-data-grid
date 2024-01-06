@@ -23,13 +23,15 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
     }),
     provideEditor: () => p => {
         const { isHighlighted, onChange, value, validatedSelection } = p;
+        const isBigInt = typeof value.data === "bigint";
+
         return (
             <React.Suspense fallback={null}>
                 <NumberOverlayEditor
                     highlight={isHighlighted}
                     disabled={value.readonly === true}
                     value={value.data}
-                    fixedDecimals={value.fixedDecimals}
+                    fixedDecimals={isBigInt ? 0 : value.fixedDecimals}
                     allowNegative={value.allowNegative}
                     thousandSeparator={value.thousandSeparator}
                     decimalSeparator={value.decimalSeparator}
@@ -37,7 +39,7 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
                     onChange={x =>
                         onChange({
                             ...value,
-                            data: Number.isNaN(x.floatValue ?? 0) ? 0 : x.floatValue,
+                            data: isBigInt ? BigInt(x.value ?? 0) : Number.isNaN(x.floatValue ?? 0) ? 0 : x.floatValue,
                         })
                     }
                 />
@@ -45,11 +47,18 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
         );
     },
     onPaste: (toPaste, cell, details) => {
-        const newNumber =
-            typeof details.rawValue === "number"
+        const isBigInt = typeof cell.data === "bigint";
+
+        try {
+            const newNumber = isBigInt
+                ? BigInt(typeof details.rawValue === "string" ? details.rawValue : toPaste)
+                : typeof details.rawValue === "number"
                 ? details.rawValue
                 : Number.parseFloat(typeof details.rawValue === "string" ? details.rawValue : toPaste);
-        if (Number.isNaN(newNumber) || cell.data === newNumber) return undefined;
-        return { ...cell, data: newNumber, displayData: details.formattedString ?? cell.displayData };
+            if (Number.isNaN(newNumber) || cell.data === newNumber) return undefined;
+            return { ...cell, data: newNumber, displayData: details.formattedString ?? cell.displayData };
+        } catch {
+            return undefined;
+        }
     },
 };
