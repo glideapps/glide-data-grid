@@ -78,6 +78,7 @@ const renderer: CustomRenderer<UserProfileCell> = {
                 highlight={isHighlighted}
                 autoFocus={true}
                 value={value.data.name ?? ""}
+                disabled={value.readonly ?? false}
                 onChange={e =>
                     onChange({
                         ...value,

@@ -248,6 +248,7 @@ export const CustomCells: React.VFC = () => {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "user-profile-cell",
                                 image: row % 2 ? undefined : "https://i.redd.it/aqc1hwhalsz71.jpg",
