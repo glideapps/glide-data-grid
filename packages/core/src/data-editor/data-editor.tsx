@@ -52,6 +52,7 @@ import {
     itemsAreEqual,
     itemIsInRect,
     gridSelectionHasItem,
+    getFreezeTrailingHeight,
 } from "../internal/data-grid/data-grid-lib.js";
 import { GroupRename } from "./group-rename.js";
 import { measureColumn, useColumnSizer } from "./use-column-sizer.js";
@@ -1483,8 +1484,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             frozenWidth += columns[i].width;
                         }
                         let trailingRowHeight = 0;
-                        if (lastRowSticky) {
-                            trailingRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows);
+                        if (freezeTrailingRows > 0) {
+                            trailingRowHeight = getFreezeTrailingHeight(
+                                mangledRows,
+                                freezeTrailingRows + (lastRowSticky ? 1 : 0),
+                                rowHeight
+                            );
                         }
 
                         // scrollBounds is already scaled
@@ -1554,7 +1559,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
         },
-        [rowMarkerOffset, rowMarkerWidth, totalHeaderHeight, lastRowSticky, freezeColumns, columns, rowHeight, rows]
+        [
+            rowMarkerOffset,
+            freezeTrailingRows,
+            rowMarkerWidth,
+            totalHeaderHeight,
+            freezeColumns,
+            columns,
+            mangledRows,
+            lastRowSticky,
+            rowHeight,
+        ]
     );
 
     const focusCallback = React.useRef(focusOnRowFromTrailingBlankRow);
