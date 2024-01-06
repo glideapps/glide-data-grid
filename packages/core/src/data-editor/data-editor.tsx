@@ -1541,7 +1541,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                         if (dir === "vertical" || (typeof col === "number" && col < freezeColumns)) {
                             scrollX = 0;
-                        } else if (dir === "horizontal") {
+                        } else if (
+                            dir === "horizontal" ||
+                            (typeof row === "number" && row >= mangledRows - freezeTrailingRowsEffective)
+                        ) {
                             scrollY = 0;
                         }
 
