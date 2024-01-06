@@ -726,6 +726,8 @@ export function computeBounds(
         height: 0,
     };
 
+    if (col >= mappedColumns.length || row >= rows || row < 0 || col < 0) return result;
+
     const headerHeight = totalHeaderHeight - groupHeaderHeight;
 
     if (col >= freezeColumns) {
