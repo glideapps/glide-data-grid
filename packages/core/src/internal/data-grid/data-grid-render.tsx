@@ -259,7 +259,6 @@ function blitLastFrame(
         };
     }
 
-    // this usage just needs to get the freezeHeight correctly
     const freezeTrailingRowsHeight =
         freezeTrailingRows > 0 ? getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) : 0;
 
@@ -1820,7 +1819,6 @@ function drawFocusRing(
     const cell = getCellContent(selectedCell.current.cell);
     const targetColSpan = cell.span ?? [targetCol, targetCol];
 
-    // these should just deal with the height and rows corretly
     const isStickyRow = targetRow >= rows - freezeTrailingRows;
     const stickRowHeight =
         freezeTrailingRows > 0 && !isStickyRow
