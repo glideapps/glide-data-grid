@@ -790,20 +790,18 @@ function drawHeaderInner(
     }
 
     if (shouldDrawMenu && c.hasMenu === true) {
+        // Do I need to adapt something here to RTL?
         if (
             c.menuIcon !== undefined &&
             c.menuIcon !== GridColumnMenuIcon.Dots &&
             c.menuIcon !== GridColumnMenuIcon.Triangle
         ) {
-            // TODO: Check hwo this looks
-            // const menuX = isRtl ? x + (x + width - menuBounds.x - menuBounds.width) : menuBounds.x;
             const iconX = menuBounds.x + (menuBounds.width - theme.headerIconSize) / 2;
             const iconY = menuBounds.y + (menuBounds.height - theme.headerIconSize) / 2;
             spriteManager.drawSprite(c.menuIcon, "normal", ctx, iconX, iconY, theme.headerIconSize, theme);
         } else if (c.menuIcon === GridColumnMenuIcon.Dots) {
             ctx.beginPath();
-            const menuX = isRtl ? x + (x + width - menuBounds.x - menuBounds.width) : menuBounds.x;
-            const dotsX = menuX + menuBounds.width / 2;
+            const dotsX = menuBounds.x + menuBounds.width / 2;
             const dotsY = menuBounds.y + menuBounds.height / 2;
             drawMenuDots(ctx, dotsX, dotsY);
             ctx.fillStyle = fillStyle;
