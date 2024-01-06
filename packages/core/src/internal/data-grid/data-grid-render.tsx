@@ -1349,7 +1349,7 @@ function drawCells(
                     }
                     if (!isSelected) {
                         if (rowSelected) accentCount++;
-                        if (colSelected && !isSticky) accentCount++;
+                        if (colSelected && !isTrailingRow) accentCount++;
                     }
 
                     const bgCell = cell.kind === GridCellKind.Protected ? theme.bgCellMedium : theme.bgCell;
@@ -2712,7 +2712,7 @@ function walkRowsInCol(
         row = rows - 1 - fr;
         const rh = getRowHeight(row);
         y -= rh;
-        cb(y, row, rh, true, false);
+        cb(y, row, rh, true, hasAppendRow && row === rows - 1);
     }
 }
 
