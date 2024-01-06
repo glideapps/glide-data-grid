@@ -18,6 +18,7 @@ import {
     type DrawCellCallback,
     isInnerOnlyCell,
     type GridCell,
+    GridColumnMenuIcon,
 } from "./data-grid-types.js";
 import { CellSet } from "./cell-set.js";
 import groupBy from "lodash/groupBy.js";
@@ -27,6 +28,7 @@ import {
     getStickyWidth,
     type MappedGridColumn,
     roundedPoly,
+    drawMenuDots,
     isGroupEqual,
     cellIsSelected,
     cellIsInRange,
@@ -788,30 +790,49 @@ function drawHeaderInner(
     }
 
     if (shouldDrawMenu && c.hasMenu === true) {
-        ctx.beginPath();
-        const triangleX = menuBounds.x + menuBounds.width / 2 - 5.5;
-        const triangleY = menuBounds.y + menuBounds.height / 2 - 3;
-        roundedPoly(
-            ctx,
-            [
-                {
-                    x: triangleX,
-                    y: triangleY,
-                },
-                {
-                    x: triangleX + 11,
-                    y: triangleY,
-                },
-                {
-                    x: triangleX + 5.5,
-                    y: triangleY + 6,
-                },
-            ],
-            1
-        );
-
-        ctx.fillStyle = fillStyle;
-        ctx.fill();
+        if (
+            c.menuIcon !== undefined &&
+            c.menuIcon !== GridColumnMenuIcon.Dots &&
+            c.menuIcon !== GridColumnMenuIcon.Triangle
+        ) {
+            // TODO: Check hwo this looks
+            // const menuX = isRtl ? x + (x + width - menuBounds.x - menuBounds.width) : menuBounds.x;
+            const iconX = menuBounds.x + (menuBounds.width - theme.headerIconSize) / 2;
+            const iconY = menuBounds.y + (menuBounds.height - theme.headerIconSize) / 2;
+            spriteManager.drawSprite(c.menuIcon, "normal", ctx, iconX, iconY, theme.headerIconSize, theme);
+        } else if (c.menuIcon === GridColumnMenuIcon.Dots) {
+            ctx.beginPath();
+            const menuX = isRtl ? x + (x + width - menuBounds.x - menuBounds.width) : menuBounds.x;
+            const dotsX = menuX + menuBounds.width / 2;
+            const dotsY = menuBounds.y + menuBounds.height / 2;
+            drawMenuDots(ctx, dotsX, dotsY);
+            ctx.fillStyle = fillStyle;
+            ctx.fill();
+        } else {
+            ctx.beginPath();
+            const triangleX = menuBounds.x + menuBounds.width / 2 - 5.5;
+            const triangleY = menuBounds.y + menuBounds.height / 2 - 3;
+            roundedPoly(
+                ctx,
+                [
+                    {
+                        x: triangleX,
+                        y: triangleY,
+                    },
+                    {
+                        x: triangleX + 11,
+                        y: triangleY,
+                    },
+                    {
+                        x: triangleX + 5.5,
+                        y: triangleY + 6,
+                    },
+                ],
+                1
+            );
+            ctx.fillStyle = fillStyle;
+            ctx.fill();
+        }
     }
 }
 

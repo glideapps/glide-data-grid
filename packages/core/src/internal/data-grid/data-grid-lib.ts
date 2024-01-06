@@ -586,6 +586,13 @@ interface Vector {
     ang: number;
 }
 
+export function drawMenuDots(ctx: CanvasRenderingContext2D, dotsX: number, dotsY: number) {
+    const radius = 1.25;
+    ctx.arc(dotsX, dotsY - radius * 3.5, radius, 0, 2 * Math.PI, false);
+    ctx.arc(dotsX, dotsY, radius, 0, 2 * Math.PI, false);
+    ctx.arc(dotsX, dotsY + radius * 3.5, radius, 0, 2 * Math.PI, false);
+}
+
 export function roundedPoly(ctx: CanvasRenderingContext2D, points: Point[], radiusAll: number) {
     // convert 2 points into vector form, polar form, and normalised
     const asVec = function (p: Point, pp: Point): Vector {
