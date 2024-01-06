@@ -1609,7 +1609,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
 
                 const row = typeof r === "number" ? r : bottom ? rows : 0;
-                scrollTo(col - rowMarkerOffset, row);
+                scrollToRef.current(col - rowMarkerOffset, row);
                 setCurrent(
                     {
                         cell: [col, row],
@@ -1636,7 +1636,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             // Queue up to allow the consumer to react to the event and let us check if they did
             doFocus();
         },
-        [mangledCols, onRowAppended, rowMarkerOffset, rows, scrollTo, setCurrent]
+        [mangledCols, onRowAppended, rowMarkerOffset, rows, setCurrent]
     );
 
     const getCustomNewRowTargetColumn = React.useCallback(
