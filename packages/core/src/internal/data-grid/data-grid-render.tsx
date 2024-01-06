@@ -790,7 +790,7 @@ function drawHeaderInner(
     }
 
     if (shouldDrawMenu && c.hasMenu === true) {
-        // Do I need to adapt something here to RTL?
+        // TODO: Do I need to adapt something here to RTL?
         if (
             c.menuIcon !== undefined &&
             c.menuIcon !== GridColumnMenuIcon.Dots &&
