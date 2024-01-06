@@ -1484,10 +1484,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             frozenWidth += columns[i].width;
                         }
                         let trailingRowHeight = 0;
-                        if (freezeTrailingRows > 0) {
+                        const freezeTrailingRowsEffective = freezeTrailingRows + (lastRowSticky ? 1 : 0);
+                        if (freezeTrailingRowsEffective > 0) {
                             trailingRowHeight = getFreezeTrailingHeight(
                                 mangledRows,
-                                freezeTrailingRows + (lastRowSticky ? 1 : 0),
+                                freezeTrailingRowsEffective,
                                 rowHeight
                             );
                         }
