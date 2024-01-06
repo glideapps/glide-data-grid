@@ -1704,6 +1704,13 @@ function drawHighlightRings(
                           mappedColumns,
                           rowHeight
                       );
+
+            if (rect.x + rect.width >= mappedColumns.length) {
+                bottomRightBounds.width -= 1;
+            }
+            if (rect.y + rect.height >= rows) {
+                bottomRightBounds.height -= 1;
+            }
             return {
                 color: h.color,
                 style,
