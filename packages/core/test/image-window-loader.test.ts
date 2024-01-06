@@ -19,7 +19,7 @@ describe("ImageWindowLoaderImpl", () => {
             };
             const freezeCols = 5;
 
-            loader.setWindow(newWindow, freezeCols);
+            loader.setWindow(newWindow, freezeCols, []);
 
             // Assuming you modify your class to expose `visibleWindow` and `freezeCols` for testing
             expect(loader.visibleWindow).toEqual(newWindow);
@@ -44,13 +44,13 @@ describe("ImageWindowLoaderImpl", () => {
             const freezeCols1 = 5;
             const freezeCols2 = 10;
 
-            loader.setWindow(window1, freezeCols1);
+            loader.setWindow(window1, freezeCols1, []);
             expect(spyClearOutOfWindow).toHaveBeenCalledTimes(1);
 
-            loader.setWindow(window2, freezeCols1);
+            loader.setWindow(window2, freezeCols1, []);
             expect(spyClearOutOfWindow).toHaveBeenCalledTimes(2);
 
-            loader.setWindow(window2, freezeCols2);
+            loader.setWindow(window2, freezeCols2, []);
             expect(spyClearOutOfWindow).toHaveBeenCalledTimes(3);
 
             // Cleanup
@@ -68,8 +68,8 @@ describe("ImageWindowLoaderImpl", () => {
             };
             const freezeCols = 5;
 
-            loader.setWindow(newWindow, freezeCols);
-            loader.setWindow(newWindow, freezeCols);
+            loader.setWindow(newWindow, freezeCols, []);
+            loader.setWindow(newWindow, freezeCols, []);
 
             expect(spyClearOutOfWindow).toHaveBeenCalledTimes(1);
 

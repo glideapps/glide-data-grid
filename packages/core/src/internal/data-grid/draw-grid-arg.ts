@@ -8,7 +8,6 @@ import type { SpriteManager } from "./data-grid-sprites.js";
 import type {
     CompactSelection,
     GridSelection,
-    TrailingRowType,
     Item,
     InnerGridCell,
     DrawHeaderCallback,
@@ -53,7 +52,8 @@ export interface DrawGridArg {
     readonly drawFocus: boolean;
     readonly selection: GridSelection;
     readonly fillHandle: boolean;
-    readonly lastRowSticky: TrailingRowType;
+    readonly freezeTrailingRows: number;
+    readonly hasAppendRow: boolean;
     readonly hyperWrapping: boolean;
     readonly rows: number;
     readonly getCellContent: (cell: Item) => InnerGridCell;

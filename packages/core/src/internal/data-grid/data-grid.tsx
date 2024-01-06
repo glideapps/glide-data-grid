@@ -22,7 +22,6 @@ import {
     isInnerOnlyCell,
     booleanCellIsEditable,
     type InnerGridColumn,
-    type TrailingRowType,
     type DrawCellCallback,
 } from "./data-grid-types.js";
 import { CellSet } from "./cell-set.js";
@@ -74,7 +73,8 @@ export interface DataGridProps {
     readonly accessibilityHeight: number;
 
     readonly freezeColumns: number;
-    readonly trailingRowType: TrailingRowType;
+    readonly freezeTrailingRows: number;
+    readonly hasAppendRow: boolean;
     readonly firstColAccessible: boolean;
 
     /**
@@ -330,7 +330,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         selection,
         freezeColumns,
         onContextMenu,
-        trailingRowType: trailingRowType,
+        freezeTrailingRows,
         fixedShadowX = true,
         fixedShadowY = true,
         drawFocusRing = true,
@@ -354,6 +354,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         isDraggable = false,
         allowResize,
         disabledRows,
+        hasAppendRow,
         getGroupDetails,
         theme,
         prelightCells,
@@ -442,7 +443,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 translateY,
                 rows,
                 freezeColumns,
-                trailingRowType === "sticky",
+                freezeTrailingRows,
                 mappedColumns,
                 rowHeight
             );
@@ -470,7 +471,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             translateY,
             rows,
             freezeColumns,
-            trailingRowType,
+            freezeTrailingRows,
             mappedColumns,
             rowHeight,
         ]
@@ -506,7 +507,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 rowHeight,
                 cellYOffset,
                 translateY,
-                trailingRowType === "sticky"
+                freezeTrailingRows
             );
 
             const shiftKey = ev?.shiftKey === true;
@@ -651,7 +652,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             rowHeight,
             cellYOffset,
             translateY,
-            trailingRowType,
+            freezeTrailingRows,
             getBoundsForItem,
             fillHandle,
             selection,
@@ -731,8 +732,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             selection,
             fillHandle,
             drawCellCallback,
+            hasAppendRow,
             overrideCursor,
-            lastRowSticky: trailingRowType,
+            freezeTrailingRows,
             rows,
             drawFocus: drawFocusRing,
             getCellContent,
@@ -795,11 +797,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         rowHeight,
         verticalBorder,
         isResizing,
+        hasAppendRow,
         resizeCol,
         isFocused,
         selection,
         fillHandle,
-        trailingRowType,
+        freezeTrailingRows,
         rows,
         drawFocusRing,
         getCellContent,

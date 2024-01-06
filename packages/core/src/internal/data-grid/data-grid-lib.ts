@@ -155,6 +155,22 @@ export function getStickyWidth(
     return result;
 }
 
+export function getFreezeTrailingHeight(
+    rows: number,
+    freezeTrailingRows: number,
+    getRowHeight: number | ((row: number) => number)
+): number {
+    if (typeof getRowHeight === "number") {
+        return freezeTrailingRows * getRowHeight;
+    } else {
+        let result = 0;
+        for (let i = rows - freezeTrailingRows; i < rows; i++) {
+            result += getRowHeight(i);
+        }
+        return result;
+    }
+}
+
 export function getEffectiveColumns(
     columns: readonly MappedGridColumn[],
     cellXOffset: number,
@@ -224,18 +240,23 @@ export function getRowIndexForY(
     rowHeight: number | ((index: number) => number),
     cellYOffset: number,
     translateY: number,
-    lastRowSticky: boolean
+    freezeTrailingRows: number
 ): number | undefined {
     const totalHeaderHeight = headerHeight + groupHeaderHeight;
     if (hasGroups && targetY <= groupHeaderHeight) return -2;
     if (targetY <= totalHeaderHeight) return -1;
 
-    const lastRowHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(rows - 1);
-    if (lastRowSticky && targetY > height - lastRowHeight) {
-        return rows - 1;
+    let y = height;
+    for (let fr = 0; fr < freezeTrailingRows; fr++) {
+        const row = rows - 1 - fr;
+        const rh = typeof rowHeight === "number" ? rowHeight : rowHeight(row);
+        y -= rh;
+        if (targetY >= y) {
+            return row;
+        }
     }
 
-    const effectiveRows = rows - (lastRowSticky ? 1 : 0);
+    const effectiveRows = rows - freezeTrailingRows;
 
     const ty = targetY - (translateY ?? 0);
     if (typeof rowHeight === "number") {
@@ -694,7 +715,7 @@ export function computeBounds(
     translateY: number,
     rows: number,
     freezeColumns: number,
-    lastRowSticky: boolean,
+    freezeTrailingRows: number,
     mappedColumns: readonly MappedGridColumn[],
     rowHeight: number | ((index: number) => number)
 ): Rectangle {
@@ -764,10 +785,16 @@ export function computeBounds(
                 result.width = width - result.x;
             }
         }
-    } else if (lastRowSticky && row === rows - 1) {
-        const stickyHeight = typeof rowHeight === "number" ? rowHeight : rowHeight(row);
-        result.y = height - stickyHeight;
-        result.height = stickyHeight;
+    } else if (row >= rows - freezeTrailingRows) {
+        let dy = rows - row;
+        result.y = height;
+        while (dy > 0) {
+            const r = row + dy - 1;
+            result.height = typeof rowHeight === "number" ? rowHeight : rowHeight(r);
+            result.y -= result.height;
+            dy--;
+        }
+        result.height += 1;
     } else {
         const dir = cellYOffset > row ? -1 : 1;
         if (typeof rowHeight === "number") {
