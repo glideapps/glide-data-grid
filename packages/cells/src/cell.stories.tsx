@@ -210,6 +210,23 @@ export const CustomCells: React.VFC = () => {
                         } as SparklineCell;
                     } else if (col === 2) {
                         num = row + 1;
+                        const values = range(0, 15).map(() => rand() * 100 - 50);
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: false,
+                            copyData: "4",
+                            data: {
+                                kind: "sparkline-cell",
+                                values,
+                                displayValues: values.map(x => Math.round(x).toString()),
+                                color: row % 2 === 0 ? "#77c4c4" : "#D98466",
+                                graphKind: "line",
+                                hideAxis: true,
+                                yAxis: [-50, 50],
+                            },
+                        } as SparklineCell;
+                    } else if (col === 3) {
+                        num = row + 1;
                         return {
                             kind: GridCellKind.Custom,
                             allowOverlay: false,
@@ -222,7 +239,7 @@ export const CustomCells: React.VFC = () => {
                                 yAxis: [-50, 50],
                             },
                         } as SparklineCell;
-                    } else if (col === 3) {
+                    } else if (col === 4) {
                         num = row + 1;
                         rand();
                         return {
@@ -241,7 +258,7 @@ export const CustomCells: React.VFC = () => {
                                 ]),
                             },
                         } as TagsCell;
-                    } else if (col === 4) {
+                    } else if (col === 5) {
                         num = row + 1;
                         rand();
                         return {
@@ -256,7 +273,7 @@ export const CustomCells: React.VFC = () => {
                                 name: row % 5 ? undefined : "Bee bb",
                             },
                         } as UserProfileCell;
-                    } else if (col === 5) {
+                    } else if (col === 6) {
                         num = row + 1;
                         rand();
                         const d: DropdownCell = {
@@ -278,7 +295,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 6) {
+                    } else if (col === 7) {
                         num = row + 1;
                         rand();
                         const v = rand();
@@ -297,7 +314,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 7) {
+                    } else if (col === 8) {
                         num = row + 1;
                         rand();
                         const d: ArticleCell = {
@@ -310,7 +327,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 8) {
+                    } else if (col === 9) {
                         num = row + 1;
                         rand();
                         const d: SpinnerCell = {
@@ -322,7 +339,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 9) {
+                    } else if (col === 10) {
                         num = row + 1;
                         rand();
                         const d: DatePickerCell = {
@@ -337,7 +354,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 10) {
+                    } else if (col === 11) {
                         num = row + 1;
                         rand();
                         const d: DatePickerCell = {
@@ -352,7 +369,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 11) {
+                    } else if (col === 12) {
                         num = row + 1;
                         rand();
                         const d: DatePickerCell = {
@@ -367,7 +384,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 12) {
+                    } else if (col === 13) {
                         num = row + 1;
                         rand();
                         const d: LinksCell = {
@@ -390,7 +407,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 13) {
+                    } else if (col === 14) {
                         num = row + 1;
                         rand();
                         const d: ButtonCell = {
@@ -412,7 +429,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 14) {
+                    } else if (col === 15) {
                         const t: TreeViewCell = {
                             kind: GridCellKind.Custom,
                             allowOverlay: false,
@@ -436,7 +453,11 @@ export const CustomCells: React.VFC = () => {
                         width: 200,
                     },
                     {
-                        title: "Sparkline",
+                        title: "Sparkline (area)",
+                        width: 150,
+                    },
+                    {
+                        title: "Sparkline (line)",
                         width: 150,
                     },
                     {
