@@ -84,7 +84,7 @@ describe("hugRectToTarget", () => {
     });
 });
 
-describe.only("splitRectIntoRegions", () => {
+describe("splitRectIntoRegions", () => {
     const splitIndices = [2, 2, 8, 8] as const;
     const width = 100;
     const height = 100;
