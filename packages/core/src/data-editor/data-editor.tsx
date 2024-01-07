@@ -1164,6 +1164,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         gridSelection.current.range.width * gridSelection.current.range.height > 1
             ? gridSelection.current.range
             : undefined;
+
     const highlightRegions = React.useMemo(() => {
         if (
             (highlightRegionsIn === undefined || highlightRegionsIn.length === 0) &&
@@ -2591,11 +2592,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         } else if (yDir === 1) {
             row = Math.min(rows - 1, visible.y + visible.height);
         }
+        col = clamp(col, 0, mangledCols.length - 1);
+        row = clamp(row, 0, rows - 1);
         onItemHoveredImpl({
             ...args,
             location: [col, row] as any,
         });
-    }, [onItemHoveredImpl, rows]);
+    }, [mangledCols.length, onItemHoveredImpl, rows]);
 
     useAutoscroll(scrollDir, scrollRef, adjustSelectionOnScroll);
 
