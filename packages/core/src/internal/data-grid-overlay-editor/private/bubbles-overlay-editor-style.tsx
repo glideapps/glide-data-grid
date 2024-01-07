@@ -3,6 +3,7 @@ import { styled } from "@linaria/react";
 export const BubblesOverlayEditorStyle = styled.div`
     display: flex;
     flex-wrap: wrap;
+    margin: auto;
 
     .boe-bubble {
         display: flex;
