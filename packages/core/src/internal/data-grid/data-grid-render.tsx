@@ -1741,6 +1741,7 @@ function drawHighlightRings(
                     s?.rect !== undefined &&
                     intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)
                 ) {
+                    const wasDashed: boolean = dashed;
                     const needsClip = !rectContains(s.clip, s.rect);
                     if (needsClip) {
                         ctx.save();
@@ -1759,7 +1760,10 @@ function drawHighlightRings(
                             ? blend(blend(s.color, theme.borderColor), theme.bgCell)
                             : withAlpha(s.color, 1);
                     ctx.strokeRect(s.rect.x + 0.5, s.rect.y + 0.5, s.rect.width - 1, s.rect.height - 1);
-                    if (needsClip) ctx.restore();
+                    if (needsClip) {
+                        ctx.restore();
+                        dashed = wasDashed;
+                    }
                 }
             }
         }
