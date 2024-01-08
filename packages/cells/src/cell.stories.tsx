@@ -20,6 +20,7 @@ import type { DatePickerCell } from "./cells/date-picker-cell.js";
 import type { LinksCell } from "./cells/links-cell.js";
 import type { ButtonCell } from "./cells/button-cell.js";
 import type { TreeViewCell } from "./cells/tree-view-cell.js";
+import type { MultiSelectCell } from "./cells/multi-select-cell.js";
 
 const SimpleWrapper = styled.div`
     text-rendering: optimizeLegibility;
@@ -183,16 +184,38 @@ export const CustomCells: React.VFC = () => {
                 getCellContent={cell => {
                     const [col, row] = cell;
                     if (col === 0) {
-                        return {
+                        const t: MultiSelectCell = {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
-                                kind: "star-cell",
-                                label: "Test",
-                                rating: 4,
+                                // color: "#FF4B4B",
+                                borderRadius: 4,
+                                kind: "multi-select-cell",
+                                value: ["glide", "data"],
+                                options: [
+                                    // "glide",
+                                    // "data",
+                                    // "grid",
+                                    { value: "glide", color: "#ffc38a" },
+                                    { value: "data", color: "#ebfdea" },
+                                    { value: "grid", color: "teal" },
+                                ],
+                                creatable: true,
                             },
-                        } as StarCell;
+                        };
+                        return t;
+                        // return {
+                        //     kind: GridCellKind.Custom,
+                        //     allowOverlay: true,
+                        //     copyData: "4",
+                        //     data: {
+                        //         kind: "star-cell",
+                        //         label: "Test",
+                        //         rating: 4,
+                        //     },
+                        // } as StarCell;
                     } else if (col === 1) {
                         num = row + 1;
                         const values = range(0, 15).map(() => rand() * 100 - 50);
@@ -451,6 +474,31 @@ export const CustomCells: React.VFC = () => {
                             readonly: true,
                         };
                         return t;
+                    } else if (col === 16) {
+                        const t: MultiSelectCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            readonly: row % 2 === 0,
+                            data: {
+                                kind: "multi-select-cell",
+                                value: ["A", "B", "C"],
+                                options: [
+                                    { value: "A", label: "blub", color: "red" },
+                                    "B",
+                                    "C",
+                                    "D",
+                                    "E",
+                                    "F",
+                                    "G",
+                                    "H",
+                                    "I",
+                                    "J",
+                                ],
+                                creatable: false,
+                            },
+                        };
+                        return t;
                     }
                     throw new Error("Fail");
                 }}
@@ -518,6 +566,10 @@ export const CustomCells: React.VFC = () => {
                     {
                         title: "TreeView",
                         width: 200,
+                    },
+                    {
+                        title: "MultiSelect",
+                        width: 150,
                     },
                 ]}
                 rows={500}
