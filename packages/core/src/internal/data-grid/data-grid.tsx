@@ -488,8 +488,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, undefined, translateX);
 
             let button = 0;
+            let buttons = 0;
             if (ev instanceof MouseEvent) {
                 button = ev.button;
+                buttons = ev.buttons;
             }
 
             // -1 === off right edge
@@ -555,6 +557,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isEdge,
                     isTouch,
                     button,
+                    buttons,
                     scrollEdge,
                     isMaybeScrollbar,
                 };
@@ -581,6 +584,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         localEventX: posX - bounds.x,
                         localEventY: posY - bounds.y,
                         button,
+                        buttons,
                         scrollEdge,
                     };
                 } else {
@@ -597,6 +601,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         localEventX: posX - bounds.x,
                         localEventY: posY - bounds.y,
                         button,
+                        buttons,
                         scrollEdge,
                     };
                 }
@@ -634,6 +639,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     localEventX: posX - bounds.x,
                     localEventY: posY - bounds.y,
                     button,
+                    buttons,
                     scrollEdge,
                 };
             }
