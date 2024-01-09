@@ -244,6 +244,7 @@ export interface DataGridProps {
               readonly paddingRight?: number;
               readonly paddingBottom?: number;
               readonly enableFirefoxRescaling?: boolean;
+              readonly enableSafariRescaling?: boolean;
               readonly kineticScrollPerfHack?: boolean;
               readonly isSubGrid?: boolean;
               readonly strict?: boolean;
@@ -402,9 +403,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
     const scrollingStopRef = React.useRef(-1);
-    const disableFirefoxRescaling = experimental?.enableFirefoxRescaling !== true;
+    const enableFirefoxRescaling = (experimental?.enableFirefoxRescaling ?? false) && browserIsFirefox.value;
+    const enableSafariRescaling = (experimental?.enableSafariRescaling ?? false) && browserIsSafari.value;
     React.useLayoutEffect(() => {
-        if (!browserIsFirefox.value || window.devicePixelRatio === 1 || disableFirefoxRescaling) return;
+        if (window.devicePixelRatio === 1 || (!enableFirefoxRescaling && !enableSafariRescaling)) return;
         // We don't want to go into scroll mode for a single repaint
         if (scrollingStopRef.current !== -1) {
             setScrolling(true);
@@ -414,7 +416,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             setScrolling(false);
             scrollingStopRef.current = -1;
         }, 200);
-    }, [cellYOffset, cellXOffset, translateX, translateY, disableFirefoxRescaling]);
+    }, [cellYOffset, cellXOffset, translateX, translateY, enableFirefoxRescaling, enableSafariRescaling]);
 
     const mappedColumns = useMappedColumns(columns, freezeColumns);
     const stickyX = fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0;
@@ -697,6 +699,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const renderStateProvider = React.useMemo(() => new RenderStateProvider(), []);
 
+    const maxDPR = enableFirefoxRescaling && scrolling ? 1 : enableSafariRescaling && scrolling ? 2 : 5;
     const minimumCellWidth = experimental?.disableMinimumCellWidth === true ? 1 : 10;
     const lastArgsRef = React.useRef<DrawGridArg>();
     const draw = React.useCallback(() => {
@@ -740,6 +743,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             drawCellCallback,
             hasAppendRow,
             overrideCursor,
+            maxScaleFactor: maxDPR,
             freezeTrailingRows,
             rows,
             drawFocus: drawFocusRing,
@@ -811,6 +815,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         freezeTrailingRows,
         rows,
         drawFocusRing,
+        maxDPR,
         getCellContent,
         getGroupDetails,
         getRowThemeOverride,

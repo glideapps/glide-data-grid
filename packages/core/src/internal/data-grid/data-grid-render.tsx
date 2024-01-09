@@ -2019,7 +2019,7 @@ function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): bo
         current.dragAndDropState !== last.dragAndDropState ||
         current.prelightCells !== last.prelightCells ||
         current.touchMode !== last.touchMode ||
-        current.scrolling !== last.scrolling
+        current.maxScaleFactor !== last.maxScaleFactor
     ) {
         return false;
     }
@@ -2101,7 +2101,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         hyperWrapping,
         hoverInfo,
         spriteManager,
-        scrolling,
+        maxScaleFactor,
         hasAppendRow,
         touchMode,
         enqueue,
@@ -2115,7 +2115,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     } = arg;
     if (width === 0 || height === 0) return;
     const doubleBuffer = renderStrategy === "double-buffer";
-    const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
+    const dpr = Math.min(maxScaleFactor, Math.ceil(window.devicePixelRatio ?? 1));
 
     // if we are double buffering we need to make sure we can blit. If we can't we need to redraw the whole thing
     const canBlit = renderStrategy !== "direct" && computeCanBlit(arg, lastArg);
@@ -2435,6 +2435,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         if (mainCtx !== null) {
             mainCtx.save();
             mainCtx.scale(dpr, dpr);
+            mainCtx.textBaseline = "middle";
             doDamage(mainCtx);
             mainCtx.restore();
         }

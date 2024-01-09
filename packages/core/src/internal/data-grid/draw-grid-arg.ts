@@ -70,7 +70,7 @@ export interface DrawGridArg {
     readonly hoverValues: HoverValues;
     readonly hoverInfo: HoverInfo | undefined;
     readonly spriteManager: SpriteManager;
-    readonly scrolling: boolean;
+    readonly maxScaleFactor: number;
     readonly touchMode: boolean;
     readonly renderStrategy: "single-buffer" | "double-buffer" | "direct";
     readonly enqueue: EnqueueCallback;
