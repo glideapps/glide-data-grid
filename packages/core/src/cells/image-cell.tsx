@@ -11,7 +11,13 @@ export const imageCellRenderer: InternalCellRenderer<ImageCell> = {
     needsHover: false,
     useLabel: false,
     needsHoverPosition: false,
-    draw: a => drawImage(a, a.cell.displayData ?? a.cell.data, a.cell.rounding, a.cell.contentAlign),
+    draw: a =>
+        drawImage(
+            a,
+            a.cell.displayData ?? a.cell.data,
+            a.cell.rounding ?? a.theme.roundingRadius ?? 4,
+            a.cell.contentAlign
+        ),
     measure: (_ctx, cell) => cell.data.length * 50,
     onDelete: c => ({
         ...c,
@@ -63,7 +69,7 @@ const itemMargin = 4;
 export function drawImage(
     args: BaseDrawArgs,
     data: readonly string[],
-    rounding: number = 4,
+    rounding: number,
     contentAlign?: BaseGridCell["contentAlign"]
 ) {
     const { rect, col, row, theme, ctx, imageLoader } = args;

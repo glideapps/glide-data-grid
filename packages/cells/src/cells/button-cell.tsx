@@ -111,7 +111,7 @@ const renderer: CustomRenderer<ButtonCell> = {
 
         if (backgroundColor !== undefined) {
             ctx.beginPath();
-            roundedRect(ctx, x, y, width, height, borderRadius ?? 0);
+            roundedRect(ctx, x, y, width, height, borderRadius ?? theme.roundingRadius ?? 0);
             ctx.fillStyle = unpackColor(backgroundColor, theme, hoverAmount);
             ctx.fill();
         }

@@ -115,7 +115,7 @@ const renderer: CustomRenderer<TagsCell> = {
 
             ctx.fillStyle = color;
             ctx.beginPath();
-            roundedRect(ctx, x, y, width, tagHeight, tagHeight / 2);
+            roundedRect(ctx, x, y, width, tagHeight, theme.roundingRadius ?? tagHeight / 2);
             ctx.fill();
 
             ctx.fillStyle = theme.textDark;
