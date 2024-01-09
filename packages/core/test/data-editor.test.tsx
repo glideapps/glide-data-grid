@@ -2783,6 +2783,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 300,
             clientY: 36 + 32 * 2 + 16,
+            buttons: 1,
         });
 
         // mouse up
@@ -2845,6 +2846,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 300,
             clientY: 36 + 32 * 3 + 16,
+            buttons: 1,
         });
 
         // mouse up
@@ -3244,6 +3246,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             shiftKey: true,
             clientX: 10, // Row marker
             clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3636,21 +3639,25 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 250,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseMove(canvas, {
             clientX: 200,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseMove(canvas, {
             clientX: 150,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseMove(canvas, {
             clientX: 100,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3683,6 +3690,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3766,6 +3774,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3810,6 +3819,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3854,6 +3864,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3894,6 +3905,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3926,6 +3938,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 10,
             clientY: 400,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3959,6 +3972,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
+            buttons: 1,
         });
 
         expect(spy).toBeCalledWith(
@@ -3998,6 +4012,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
+            buttons: 1,
         });
 
         expect(spy).not.toBeCalled();
@@ -4511,6 +4526,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
+            buttons: 1,
         });
 
         expect(spy).toBeCalledWith(
@@ -4717,6 +4733,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -4774,6 +4791,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 300, // Col B
             clientY: 16, // Header
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -4803,6 +4821,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 300, // Col B
             clientY: 0,
+            buttons: 1,
         });
 
         await new Promise(r => window.setTimeout(r, 100));
@@ -4837,6 +4856,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 308, // Col A
             clientY: 36 + 32 * 2 + 16, // Row 2
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -4874,6 +4894,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 360,
             clientY: 36 + 32 * 5 + 16, // Row 5
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -4911,6 +4932,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 360,
             clientY: 36 + 32 * 5 + 16, // Row 5
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -4948,6 +4970,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 308,
             clientY: 36 + 32 * 5 + 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -4997,11 +5020,13 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 308,
             clientY: 800,
+            buttons: 1,
         });
 
         fireEvent.mouseMove(canvas, {
             clientX: 308,
             clientY: 995,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {

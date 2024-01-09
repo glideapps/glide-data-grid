@@ -67,7 +67,8 @@ export const CellActivatedEvent: React.VFC<Pick<DataEditorCoreProps, "cellActiva
 };
 (CellActivatedEvent as any).argTypes = {
     cellActivationBehavior: {
-        control: { type: "select", options: ["double-click", "single-click", "second-click"] },
+        control: { type: "select" },
+        options: ["double-click", "single-click", "second-click"],
     },
 };
 (CellActivatedEvent as any).args = {

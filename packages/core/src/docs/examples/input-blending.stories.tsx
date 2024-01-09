@@ -76,21 +76,27 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
 };
 (InputBlending as any).argTypes = {
     rangeBlending: {
-        control: { type: "select", options: ["mixed", "exclusive"] },
+        control: { type: "select" },
+        options: ["mixed", "exclusive"],
     },
     columnBlending: {
-        control: { type: "select", options: ["mixed", "exclusive"] },
+        control: { type: "select" },
+        options: ["mixed", "exclusive"],
     },
     rowBlending: {
-        control: { type: "select", options: ["mixed", "exclusive"] },
+        control: { type: "select" },
+        options: ["mixed", "exclusive"],
     },
     rangeMultiSelect: {
-        control: { type: "select", options: ["none", "cell", "rect", "multi-cell", "multi-rect"] },
+        control: { type: "select" },
+        options: ["none", "cell", "rect", "multi-cell", "multi-rect"],
     },
     columnMultiSelect: {
-        control: { type: "select", options: ["none", "single", "multi"] },
+        control: { type: "select" },
+        options: ["none", "single", "multi"],
     },
     rowMultiSelect: {
-        control: { type: "select", options: ["none", "single", "multi"] },
+        control: { type: "select" },
+        options: ["none", "single", "multi"],
     },
 };

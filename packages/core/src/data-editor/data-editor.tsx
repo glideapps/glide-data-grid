@@ -2354,6 +2354,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
             };
             onMouseMove?.(a);
+
+            if (mouseState !== undefined && args.buttons === 0) {
+                setMouseState(undefined);
+                setFillHighlightRegion(undefined);
+                setScrollDir(undefined);
+                isActivelyDraggingHeader.current = false;
+            }
+
             setScrollDir(cv => {
                 if (isActivelyDraggingHeader.current) return [args.scrollEdge[0], 0];
                 if (args.scrollEdge[0] === cv?.[0] && args.scrollEdge[1] === cv[1]) return cv;
@@ -2488,10 +2496,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const hoveredRef = React.useRef<GridMouseEventArgs>();
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
+            // make sure we still have a button down
             if (mouseEventArgsAreEqual(args, hoveredRef.current)) return;
             hoveredRef.current = args;
             if (mouseDownData?.current?.button !== undefined && mouseDownData.current.button >= 1) return;
             if (
+                args.buttons !== 0 &&
                 mouseState !== undefined &&
                 mouseDownData.current?.location[0] === 0 &&
                 args.location[0] === 0 &&
@@ -2506,6 +2516,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 setSelectedRows(CompactSelection.fromSingleSelection([start, end]), undefined, false);
             }
             if (
+                args.buttons !== 0 &&
                 mouseState !== undefined &&
                 gridSelection.current !== undefined &&
                 !isActivelyDragging.current &&

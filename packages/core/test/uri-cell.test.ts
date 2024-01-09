@@ -88,6 +88,7 @@ describe("uriCellRenderer", () => {
             posY: 60,
             theme,
             button: 0,
+            buttons: 0,
             ctrlKey: false,
             isEdge: false,
             isTouch: false,

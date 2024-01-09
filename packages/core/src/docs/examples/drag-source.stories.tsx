@@ -54,7 +54,8 @@ export const DragSource: React.VFC<{ isDraggable: boolean | "header" | "cell" }>
 };
 (DragSource as any).argTypes = {
     isDraggable: {
-        control: { type: "select", options: [true, false, "cell", "header"] },
+        control: { type: "select" },
+        options: [true, false, "cell", "header"],
     },
 };
 (DragSource as any).args = {

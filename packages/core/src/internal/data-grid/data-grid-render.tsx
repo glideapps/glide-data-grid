@@ -202,7 +202,7 @@ export function drawCell(
 
 function blitLastFrame(
     ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement,
+    blitSource: HTMLCanvasElement,
     last: BlitData,
     cellXOffset: number,
     cellYOffset: number,
@@ -341,9 +341,17 @@ function blitLastFrame(
         if (stickyWidth > 0 && deltaX !== 0 && deltaY === 0 && doubleBuffer) {
             // When double buffering the freeze columns can be offset by a couple pixels vertically between the two
             // buffers. We don't want to redraw them so we need to make sure to copy them.
-            ctx.drawImage(canvas, 0, 0, stickyWidth * dpr, height * dpr, 0, 0, stickyWidth * dpr, height * dpr);
+            const w = stickyWidth * dpr;
+            const h = height * dpr;
+            ctx.drawImage(blitSource, 0, 0, w, h, 0, 0, w, h);
         }
-        ctx.drawImage(canvas, args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
+        if (freezeTrailingRowsHeight > 0 && deltaX === 0 && deltaY !== 0 && doubleBuffer) {
+            const y = (height - freezeTrailingRowsHeight) * dpr;
+            const w = width * dpr;
+            const h = freezeTrailingRowsHeight * dpr;
+            ctx.drawImage(blitSource, 0, y, w, h, 0, y, w, h);
+        }
+        ctx.drawImage(blitSource, args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
         ctx.scale(dpr, dpr);
     }
     ctx.imageSmoothingEnabled = true;
@@ -2011,7 +2019,7 @@ function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): bo
         current.dragAndDropState !== last.dragAndDropState ||
         current.prelightCells !== last.prelightCells ||
         current.touchMode !== last.touchMode ||
-        current.scrolling !== last.scrolling
+        current.maxScaleFactor !== last.maxScaleFactor
     ) {
         return false;
     }
@@ -2093,7 +2101,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         hyperWrapping,
         hoverInfo,
         spriteManager,
-        scrolling,
+        maxScaleFactor,
         hasAppendRow,
         touchMode,
         enqueue,
@@ -2107,7 +2115,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     } = arg;
     if (width === 0 || height === 0) return;
     const doubleBuffer = renderStrategy === "double-buffer";
-    const dpr = scrolling ? 1 : Math.ceil(window.devicePixelRatio ?? 1);
+    const dpr = Math.min(maxScaleFactor, Math.ceil(window.devicePixelRatio ?? 1));
 
     // if we are double buffering we need to make sure we can blit. If we can't we need to redraw the whole thing
     const canBlit = renderStrategy !== "direct" && computeCanBlit(arg, lastArg);
@@ -2334,100 +2342,106 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             },
         ]);
 
-        if (damageInView) {
-            const doHeaders = damage.hasHeader();
+        const doDamage = (ctx: CanvasRenderingContext2D) => {
+            if (damageInView) {
+                const doHeaders = damage.hasHeader();
 
-            drawCells(
-                targetCtx,
-                effectiveCols,
-                mappedColumns,
-                height,
-                totalHeaderHeight,
-                translateX,
-                translateY,
-                cellYOffset,
-                rows,
-                getRowHeight,
-                getCellContent,
-                getGroupDetails,
-                getRowThemeOverride,
-                disabledRows,
-                isFocused,
-                drawFocus,
-                freezeTrailingRows,
-                hasAppendRow,
-                drawRegions,
-                damage,
-                selection,
-                prelightCells,
-                highlightRegions,
-                imageLoader,
-                spriteManager,
-                hoverValues,
-                hoverInfo,
-                drawCellCallback,
-                hyperWrapping,
-                theme,
-                enqueue,
-                renderStateProvider,
-                getCellRenderer,
-                overrideCursor,
-                minimumCellWidth
-            );
-
-            const selectionCurrent = selection.current;
-
-            if (
-                fillHandle &&
-                drawFocus &&
-                selectionCurrent !== undefined &&
-                damage.has(rectBottomRight(selectionCurrent.range))
-            ) {
-                drawFocusRing(
-                    targetCtx,
-                    width,
-                    height,
-                    cellYOffset,
-                    translateX,
-                    translateY,
+                drawCells(
+                    ctx,
                     effectiveCols,
                     mappedColumns,
-                    theme,
-                    totalHeaderHeight,
-                    selection,
-                    getRowHeight,
-                    getCellContent,
-                    freezeTrailingRows,
-                    hasAppendRow,
-                    fillHandle,
-                    rows
-                );
-            }
-
-            if (doHeaders) {
-                clipHeaderDamage(
-                    overlayCtx,
-                    effectiveCols,
-                    width,
-                    groupHeaderHeight,
+                    height,
                     totalHeaderHeight,
                     translateX,
                     translateY,
                     cellYOffset,
-                    damage
+                    rows,
+                    getRowHeight,
+                    getCellContent,
+                    getGroupDetails,
+                    getRowThemeOverride,
+                    disabledRows,
+                    isFocused,
+                    drawFocus,
+                    freezeTrailingRows,
+                    hasAppendRow,
+                    drawRegions,
+                    damage,
+                    selection,
+                    prelightCells,
+                    highlightRegions,
+                    imageLoader,
+                    spriteManager,
+                    hoverValues,
+                    hoverInfo,
+                    drawCellCallback,
+                    hyperWrapping,
+                    theme,
+                    enqueue,
+                    renderStateProvider,
+                    getCellRenderer,
+                    overrideCursor,
+                    minimumCellWidth
                 );
-                drawHeaderTexture();
+
+                const selectionCurrent = selection.current;
+
+                if (
+                    fillHandle &&
+                    drawFocus &&
+                    selectionCurrent !== undefined &&
+                    damage.has(rectBottomRight(selectionCurrent.range))
+                ) {
+                    drawFocusRing(
+                        ctx,
+                        width,
+                        height,
+                        cellYOffset,
+                        translateX,
+                        translateY,
+                        effectiveCols,
+                        mappedColumns,
+                        theme,
+                        totalHeaderHeight,
+                        selection,
+                        getRowHeight,
+                        getCellContent,
+                        freezeTrailingRows,
+                        hasAppendRow,
+                        fillHandle,
+                        rows
+                    );
+                }
+
+                // we dont need to redo the headers when dealing with the mainCtx redraw
+                if (doHeaders && ctx !== mainCtx) {
+                    clipHeaderDamage(
+                        overlayCtx,
+                        effectiveCols,
+                        width,
+                        groupHeaderHeight,
+                        totalHeaderHeight,
+                        translateX,
+                        translateY,
+                        cellYOffset,
+                        damage
+                    );
+                    drawHeaderTexture();
+                }
             }
+        };
+
+        doDamage(targetCtx);
+        if (mainCtx !== null) {
+            mainCtx.save();
+            mainCtx.scale(dpr, dpr);
+            mainCtx.textBaseline = "middle";
+            doDamage(mainCtx);
+            mainCtx.restore();
         }
 
         targetCtx.restore();
         overlayCtx.restore();
-
-        if (mainCtx !== null) {
-            mainCtx.fillStyle = theme.bgCell;
-            mainCtx.fillRect(0, 0, width, height);
-            mainCtx.drawImage(targetCtx.canvas, 0, 0);
-        }
 
         return;
     }

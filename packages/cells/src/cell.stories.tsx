@@ -23,9 +23,6 @@ import type { TreeViewCell } from "./cells/tree-view-cell.js";
 import type { MultiSelectCell } from "./cells/multi-select-cell.js";
 
 const SimpleWrapper = styled.div`
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-
     box-sizing: border-box;
 
     *,
