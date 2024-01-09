@@ -53,6 +53,9 @@ export const FreezeRows: React.VFC = () => {
             columns={cols}
             rowMarkers={"both"}
             freezeTrailingRows={2}
+            experimental={{
+                kineticScrollPerfHack: true,
+            }}
             onPaste={true} // we want to allow paste to just call onCellEdited
             onCellEdited={setCellValue} // Sets the mock cell content
             trailingRowOptions={{
