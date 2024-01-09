@@ -17,14 +17,6 @@ import Select, { type MenuProps, components, type StylesConfig } from "react-sel
 import CreatableSelect from "react-select/creatable";
 import { roundedRect } from "../draw-fns.js";
 
-interface CustomMenuProps extends MenuProps<any> {}
-
-const CustomMenu: React.FC<CustomMenuProps> = p => {
-    const { Menu } = components;
-    const { children, ...rest } = p;
-    return <Menu {...rest}>{children}</Menu>;
-};
-
 type SelectOption = { value: string; label?: string; color?: string };
 
 interface MultiSelectCellProps {
@@ -40,8 +32,7 @@ const TAG_HEIGHT = 20;
 const INNER_PAD = 6;
 const TAG_MARGIN = 4;
 const CREATED_VALUE_PREFIX = "__created";
-
-export type MultiSelectCell = CustomCell<MultiSelectCellProps>;
+const CREATED_VALUE_PREFIX_REGEX = new RegExp(`^${CREATED_VALUE_PREFIX}\\d+__`);
 
 const Wrap = styled.div`
     display: flex;
@@ -81,6 +72,36 @@ const prepareOptions = (
     });
 };
 
+const resolveValues = (
+    values: string[] | null | undefined,
+    options: readonly SelectOption[]
+): { value: string; label?: string; color?: string }[] => {
+    if (values === undefined || values === null) {
+        return [];
+    }
+
+    return values.map((value, index) => {
+        const valuePrefix = `${CREATED_VALUE_PREFIX}${index}__`;
+        const matchedOption = options.find(option => {
+            return option.value === value;
+        });
+        if (matchedOption) {
+            return { ...matchedOption, value: `${valuePrefix}${matchedOption.value}` };
+        }
+        return { value: `${valuePrefix}${value}`, label: value };
+    });
+};
+
+interface CustomMenuProps extends MenuProps<any> {}
+
+const CustomMenu: React.FC<CustomMenuProps> = p => {
+    const { Menu } = components;
+    const { children, ...rest } = p;
+    return <Menu {...rest}>{children}</Menu>;
+};
+
+export type MultiSelectCell = CustomCell<MultiSelectCellProps>;
+
 const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
     const { value: cell, initialValue, onChange } = p;
     const { options: optionsIn, value: valueIn, creatable, color: colorIn, borderRadius } = cell.data;
@@ -103,7 +124,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
         return prepareOptions(optionsIn);
     }, [optionsIn]);
 
-    const colourStyles: StylesConfig<SelectOption, true> = {
+    const colorStyles: StylesConfig<SelectOption, true> = {
         control: base => ({
             ...base,
             border: 0,
@@ -149,7 +170,9 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
             return {
                 ...styles,
                 color: color.luminance() > 0.5 ? "black" : "white",
-                ":hover": {},
+                ":hover": {
+                    cursor: "pointer",
+                },
             };
         },
     };
@@ -180,12 +203,9 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 placeholder={cell.readonly ? "" : undefined}
                 onMenuOpen={() => setMenuOpen(true)}
                 onMenuClose={() => setMenuOpen(false)}
-                value={value?.map(
-                    (v, index) =>
-                        options.find(x => x.value === v) ?? { value: `${CREATED_VALUE_PREFIX}${index}${v}`, label: v }
-                )}
-                styles={colourStyles}
-                onKeyDown={handleKeyDown}
+                value={resolveValues(value, options)}
+                styles={colorStyles}
+                onKeyDown={creatable ? handleKeyDown : undefined}
                 theme={t => {
                     return {
                         ...t,
@@ -230,11 +250,11 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                         return;
                     }
                     const mappedValues = e.map(x =>
-                        x.value.startsWith(CREATED_VALUE_PREFIX) && x.label ? x.label : x.value
+                        x.value.startsWith(CREATED_VALUE_PREFIX)
+                            ? x.value.replace(new RegExp(CREATED_VALUE_PREFIX_REGEX), "")
+                            : x.value
                     );
                     setValue(mappedValues);
-                    // TODO: do we need this?
-                    await new Promise(r => window.requestAnimationFrame(r));
                     onChange({
                         ...cell,
                         data: {
