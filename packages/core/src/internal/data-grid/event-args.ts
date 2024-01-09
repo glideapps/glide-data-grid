@@ -10,6 +10,7 @@ export interface BaseGridMouseEventArgs {
     readonly isDoubleClick?: boolean;
     readonly isEdge: boolean;
     readonly button: number;
+    readonly buttons: number;
     readonly scrollEdge: readonly [xDir: -1 | 0 | 1, yDir: -1 | 0 | 1];
 }
 

@@ -22,7 +22,6 @@ import {
     isInnerOnlyCell,
     booleanCellIsEditable,
     type InnerGridColumn,
-    type TrailingRowType,
     type DrawCellCallback,
 } from "./data-grid-types.js";
 import { CellSet } from "./cell-set.js";
@@ -74,7 +73,8 @@ export interface DataGridProps {
     readonly accessibilityHeight: number;
 
     readonly freezeColumns: number;
-    readonly trailingRowType: TrailingRowType;
+    readonly freezeTrailingRows: number;
+    readonly hasAppendRow: boolean;
     readonly firstColAccessible: boolean;
 
     /**
@@ -244,6 +244,7 @@ export interface DataGridProps {
               readonly paddingRight?: number;
               readonly paddingBottom?: number;
               readonly enableFirefoxRescaling?: boolean;
+              readonly enableSafariRescaling?: boolean;
               readonly kineticScrollPerfHack?: boolean;
               readonly isSubGrid?: boolean;
               readonly strict?: boolean;
@@ -330,7 +331,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         selection,
         freezeColumns,
         onContextMenu,
-        trailingRowType: trailingRowType,
+        freezeTrailingRows,
         fixedShadowX = true,
         fixedShadowY = true,
         drawFocusRing = true,
@@ -354,6 +355,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         isDraggable = false,
         allowResize,
         disabledRows,
+        hasAppendRow,
         getGroupDetails,
         theme,
         prelightCells,
@@ -401,9 +403,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
     const scrollingStopRef = React.useRef(-1);
-    const disableFirefoxRescaling = experimental?.enableFirefoxRescaling !== true;
+    const enableFirefoxRescaling = (experimental?.enableFirefoxRescaling ?? false) && browserIsFirefox.value;
+    const enableSafariRescaling = (experimental?.enableSafariRescaling ?? false) && browserIsSafari.value;
     React.useLayoutEffect(() => {
-        if (!browserIsFirefox.value || window.devicePixelRatio === 1 || disableFirefoxRescaling) return;
+        if (window.devicePixelRatio === 1 || (!enableFirefoxRescaling && !enableSafariRescaling)) return;
         // We don't want to go into scroll mode for a single repaint
         if (scrollingStopRef.current !== -1) {
             setScrolling(true);
@@ -413,7 +416,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             setScrolling(false);
             scrollingStopRef.current = -1;
         }, 200);
-    }, [cellYOffset, cellXOffset, translateX, translateY, disableFirefoxRescaling]);
+    }, [cellYOffset, cellXOffset, translateX, translateY, enableFirefoxRescaling, enableSafariRescaling]);
 
     const mappedColumns = useMappedColumns(columns, freezeColumns);
     const stickyX = fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0;
@@ -442,7 +445,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 translateY,
                 rows,
                 freezeColumns,
-                trailingRowType === "sticky",
+                freezeTrailingRows,
                 mappedColumns,
                 rowHeight
             );
@@ -470,7 +473,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             translateY,
             rows,
             freezeColumns,
-            trailingRowType,
+            freezeTrailingRows,
             mappedColumns,
             rowHeight,
         ]
@@ -487,8 +490,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, undefined, translateX);
 
             let button = 0;
+            let buttons = 0;
             if (ev instanceof MouseEvent) {
                 button = ev.button;
+                buttons = ev.buttons;
             }
 
             // -1 === off right edge
@@ -506,7 +511,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 rowHeight,
                 cellYOffset,
                 translateY,
-                trailingRowType === "sticky"
+                freezeTrailingRows
             );
 
             const shiftKey = ev?.shiftKey === true;
@@ -554,6 +559,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     isEdge,
                     isTouch,
                     button,
+                    buttons,
                     scrollEdge,
                     isMaybeScrollbar,
                 };
@@ -580,6 +586,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         localEventX: posX - bounds.x,
                         localEventY: posY - bounds.y,
                         button,
+                        buttons,
                         scrollEdge,
                     };
                 } else {
@@ -596,6 +603,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         localEventX: posX - bounds.x,
                         localEventY: posY - bounds.y,
                         button,
+                        buttons,
                         scrollEdge,
                     };
                 }
@@ -633,6 +641,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     localEventX: posX - bounds.x,
                     localEventY: posY - bounds.y,
                     button,
+                    buttons,
                     scrollEdge,
                 };
             }
@@ -651,7 +660,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             rowHeight,
             cellYOffset,
             translateY,
-            trailingRowType,
+            freezeTrailingRows,
             getBoundsForItem,
             fillHandle,
             selection,
@@ -690,6 +699,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const renderStateProvider = React.useMemo(() => new RenderStateProvider(), []);
 
+    const maxDPR = enableFirefoxRescaling && scrolling ? 1 : enableSafariRescaling && scrolling ? 2 : 5;
     const minimumCellWidth = experimental?.disableMinimumCellWidth === true ? 1 : 10;
     const lastArgsRef = React.useRef<DrawGridArg>();
     const draw = React.useCallback(() => {
@@ -731,8 +741,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             selection,
             fillHandle,
             drawCellCallback,
+            hasAppendRow,
             overrideCursor,
-            lastRowSticky: trailingRowType,
+            maxScaleFactor: maxDPR,
+            freezeTrailingRows,
             rows,
             drawFocus: drawFocusRing,
             getCellContent,
@@ -795,13 +807,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         rowHeight,
         verticalBorder,
         isResizing,
+        hasAppendRow,
         resizeCol,
         isFocused,
         selection,
         fillHandle,
-        trailingRowType,
+        freezeTrailingRows,
         rows,
         drawFocusRing,
+        maxDPR,
         getCellContent,
         getGroupDetails,
         getRowThemeOverride,

@@ -50,6 +50,10 @@ export function combineRects(a: Rectangle, b: Rectangle): Rectangle {
     return { x, y, width, height };
 }
 
+export function rectContains(a: Rectangle, b: Rectangle): boolean {
+    return a.x <= b.x && a.y <= b.y && a.x + a.width >= b.x + b.width && a.y + a.height >= b.y + b.height;
+}
+
 /**
  * This function is absolutely critical for the performance of the fill handle and highlight regions. If you don't
  * hug rectanges when they are dashed and they are huge you will get giant GPU stalls. The reason for the mod is
@@ -92,4 +96,243 @@ export function hugRectToTarget(rect: Rectangle, width: number, height: number, 
         bottomOverflow > 0 ? rect.y + rect.height - Math.floor(bottomOverflow / mod) * mod : rect.y + rect.height;
 
     return { x: left, y: top, width: right - left, height: bottom - top };
+}
+
+interface SplitRect {
+    rect: Rectangle;
+    clip: Rectangle;
+}
+
+export function splitRectIntoRegions(
+    rect: Rectangle,
+    splitIndicies: readonly [number, number, number, number],
+    width: number,
+    height: number,
+    splitLocations: readonly [number, number, number, number]
+): SplitRect[] {
+    const [lSplit, tSplit, rSplit, bSplit] = splitIndicies;
+    const [lClip, tClip, rClip, bClip] = splitLocations;
+    const { x: inX, y: inY, width: inW, height: inH } = rect;
+
+    const result: SplitRect[] = [];
+
+    if (inW <= 0 || inH <= 0) return result;
+
+    const inRight = inX + inW;
+    const inBottom = inY + inH;
+
+    // The goal is to split the inbound rect into up to 9 regions based on the provided split indicies which are
+    // more or less cut lines. The cut lines are whole numbers as is the rect. We are dividing cells on a table.
+    // In theory there can be up to 9 regions returned, so we need to be careful to make sure we get them all and
+    // not return any empty regions.
+
+    // compute some handy values
+    const isOverLeft = inX < lSplit;
+    const isOverTop = inY < tSplit;
+    const isOverRight = inX + inW > rSplit;
+    const isOverBottom = inY + inH > bSplit;
+
+    const isOverCenterVert =
+        (inX > lSplit && inX < rSplit) || (inRight > lSplit && inRight < rSplit) || (inX < lSplit && inRight > rSplit);
+    const isOverCenterHoriz =
+        (inY > tSplit && inY < bSplit) ||
+        (inBottom > tSplit && inBottom < bSplit) ||
+        (inY < tSplit && inBottom > bSplit);
+
+    const isOverCenter = isOverCenterVert && isOverCenterHoriz;
+
+    // center
+    if (isOverCenter) {
+        const x = Math.max(inX, lSplit);
+        const y = Math.max(inY, tSplit);
+        const right = Math.min(inRight, rSplit);
+        const bottom = Math.min(inBottom, bSplit);
+        result.push({
+            rect: { x, y, width: right - x, height: bottom - y },
+            clip: {
+                x: lClip,
+                y: tClip,
+                width: rClip - lClip + 1,
+                height: bClip - tClip + 1,
+            },
+        });
+    }
+
+    // top left
+    if (isOverLeft && isOverTop) {
+        const x = inX;
+        const y = inY;
+        const right = Math.min(inRight, lSplit);
+        const bottom = Math.min(inBottom, tSplit);
+        result.push({
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: 0,
+                y: 0,
+                width: lClip + 1,
+                height: tClip + 1,
+            },
+        });
+    }
+
+    // top center
+    if (isOverTop && isOverCenterVert) {
+        const x = Math.max(inX, lSplit);
+        const y = inY;
+        const right = Math.min(inRight, rSplit);
+        const bottom = Math.min(inBottom, tSplit);
+        result.push({
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: lClip,
+                y: 0,
+                width: rClip - lClip + 1,
+                height: tClip + 1,
+            },
+        });
+    }
+
+    // top right
+    if (isOverTop && isOverRight) {
+        const x = Math.max(inX, rSplit);
+        const y = inY;
+        const right = inRight;
+        const bottom = Math.min(inBottom, tSplit);
+        result.push({
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: rClip,
+                y: 0,
+                width: width - rClip + 1,
+                height: tClip + 1,
+            },
+        });
+    }
+
+    // center left
+    if (isOverLeft && isOverCenterHoriz) {
+        const x = inX;
+        const y = Math.max(inY, tSplit);
+        const right = Math.min(inRight, lSplit);
+        const bottom = Math.min(inBottom, bSplit);
+        result.push({
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: 0,
+                y: tClip,
+                width: lClip + 1,
+                height: bClip - tClip + 1,
+            },
+        });
+    }
+
+    // center right
+    if (isOverRight && isOverCenterHoriz) {
+        const x = Math.max(inX, rSplit);
+        const y = Math.max(inY, tSplit);
+        const right = inRight;
+        const bottom = Math.min(inBottom, bSplit);
+        result.push({
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: rClip,
+                y: tClip,
+                width: width - rClip + 1,
+                height: bClip - tClip + 1,
+            },
+        });
+    }
+
+    // bottom left
+    if (isOverLeft && isOverBottom) {
+        const x = inX;
+        const y = Math.max(inY, bSplit);
+        const right = Math.min(inRight, lSplit);
+        const bottom = inBottom;
+        result.push({
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: 0,
+                y: bClip,
+                width: lClip + 1,
+                height: height - bClip + 1,
+            },
+        });
+    }
+
+    // bottom center
+    if (isOverBottom && isOverCenterVert) {
+        const x = Math.max(inX, lSplit);
+        const y = Math.max(inY, bSplit);
+        const right = Math.min(inRight, rSplit);
+        const bottom = inBottom;
+        result.push({
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: lClip,
+                y: bClip,
+                width: rClip - lClip + 1,
+                height: height - bClip + 1,
+            },
+        });
+    }
+
+    // bottom right
+    if (isOverRight && isOverBottom) {
+        const x = Math.max(inX, rSplit);
+        const y = Math.max(inY, bSplit);
+        const right = inRight;
+        const bottom = inBottom;
+        result.push({
+            rect: {
+                x,
+                y,
+                width: right - x,
+                height: bottom - y,
+            },
+            clip: {
+                x: rClip,
+                y: bClip,
+                width: width - rClip + 1,
+                height: height - bClip + 1,
+            },
+        });
+    }
+
+    return result;
 }

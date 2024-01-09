@@ -2,12 +2,12 @@ import { useEffect, useRef } from "react";
 
 const useKineticScroll = (
     isEnabled: boolean,
-    callback: () => void,
+    callback: (scrollLeft: number, scrollTop: number) => void,
     targetScroller: React.MutableRefObject<HTMLDivElement | null>
 ) => {
     const rafId = useRef<number | null>(null);
     const isTouching = useRef<boolean | null>(null);
-    const lastScrollPosition = useRef<number | null>(null);
+    const lastScrollPosition = useRef<readonly [number, number] | null>(null);
     const sameCount = useRef(0);
 
     const callbackRef = useRef(callback);
@@ -17,10 +17,13 @@ const useKineticScroll = (
 
     useEffect(() => {
         const handleScroll = () => {
-            if (isTouching.current === false) {
-                const currentScrollPosition = scrollEl?.scrollTop ?? 0;
-                if (lastScrollPosition.current === currentScrollPosition) {
-                    if (sameCount.current > 3) {
+            if (isTouching.current === false && scrollEl !== null) {
+                const currentScrollPosition = [scrollEl.scrollLeft, scrollEl.scrollTop] as const;
+                if (
+                    lastScrollPosition.current?.[0] === currentScrollPosition[0] &&
+                    lastScrollPosition.current?.[1] === currentScrollPosition[1]
+                ) {
+                    if (sameCount.current > 10) {
                         // Scroll position hasn't changed, stop the animation frame
                         lastScrollPosition.current = null;
                         isTouching.current = null;
@@ -30,10 +33,10 @@ const useKineticScroll = (
                     }
                 } else {
                     sameCount.current = 0;
+                    callbackRef.current(currentScrollPosition[0], currentScrollPosition[1]);
+                    lastScrollPosition.current = currentScrollPosition;
                 }
 
-                lastScrollPosition.current = currentScrollPosition;
-                callbackRef.current();
                 rafId.current = window.setTimeout(handleScroll, 1000 / 120);
             }
         };

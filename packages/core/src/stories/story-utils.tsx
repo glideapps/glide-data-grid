@@ -1,6 +1,5 @@
 import * as React from "react";
 import { styled } from "@linaria/react";
-import type { StoryContext } from "@storybook/addons";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 interface Props {
@@ -8,7 +7,7 @@ interface Props {
     height: number;
     useMoreTopPadding?: boolean;
     figmaDoc?: string;
-    context?: StoryContext;
+    context?: any;
 }
 
 const BuilderWrapper = styled.div<Pick<Props, "width" | "height">>`
@@ -26,9 +25,6 @@ const BuilderWrapper = styled.div<Pick<Props, "width" | "height">>`
 
         position: relative;
 
-        text-rendering: optimizeLegibility;
-        -webkit-font-smoothing: antialiased;
-
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
         user-select: none;
@@ -44,9 +40,6 @@ const BuilderWrapper = styled.div<Pick<Props, "width" | "height">>`
 `;
 
 const SimpleWrapper = styled.div`
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-
     box-sizing: border-box;
 
     *,

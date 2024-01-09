@@ -22,9 +22,6 @@ import type { ButtonCell } from "./cells/button-cell.js";
 import type { TreeViewCell } from "./cells/tree-view-cell.js";
 
 const SimpleWrapper = styled.div`
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-
     box-sizing: border-box;
 
     *,
@@ -210,6 +207,23 @@ export const CustomCells: React.VFC = () => {
                         } as SparklineCell;
                     } else if (col === 2) {
                         num = row + 1;
+                        const values = range(0, 15).map(() => rand() * 100 - 50);
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: false,
+                            copyData: "4",
+                            data: {
+                                kind: "sparkline-cell",
+                                values,
+                                displayValues: values.map(x => Math.round(x).toString()),
+                                color: row % 2 === 0 ? "#77c4c4" : "#D98466",
+                                graphKind: "line",
+                                hideAxis: true,
+                                yAxis: [-50, 50],
+                            },
+                        } as SparklineCell;
+                    } else if (col === 3) {
+                        num = row + 1;
                         return {
                             kind: GridCellKind.Custom,
                             allowOverlay: false,
@@ -222,17 +236,17 @@ export const CustomCells: React.VFC = () => {
                                 yAxis: [-50, 50],
                             },
                         } as SparklineCell;
-                    } else if (col === 3) {
+                    } else if (col === 4) {
                         num = row + 1;
                         rand();
                         return {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "tags-cell",
                                 possibleTags: possibleTags,
-                                readonly: row % 2 === 0,
                                 tags: uniq([
                                     possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
                                     possibleTags[Math.round(rand() * 1000) % possibleTags.length].tag,
@@ -241,13 +255,14 @@ export const CustomCells: React.VFC = () => {
                                 ]),
                             },
                         } as TagsCell;
-                    } else if (col === 4) {
+                    } else if (col === 5) {
                         num = row + 1;
                         rand();
                         return {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "user-profile-cell",
                                 image: row % 2 ? undefined : "https://i.redd.it/aqc1hwhalsz71.jpg",
@@ -256,13 +271,14 @@ export const CustomCells: React.VFC = () => {
                                 name: row % 5 ? undefined : "Bee bb",
                             },
                         } as UserProfileCell;
-                    } else if (col === 5) {
+                    } else if (col === 6) {
                         num = row + 1;
                         rand();
                         const d: DropdownCell = {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "dropdown-cell",
                                 allowedValues: [
@@ -278,7 +294,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 6) {
+                    } else if (col === 7) {
                         num = row + 1;
                         rand();
                         const v = rand();
@@ -286,6 +302,7 @@ export const CustomCells: React.VFC = () => {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "range-cell",
                                 min: 10,
@@ -297,20 +314,21 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 7) {
+                    } else if (col === 8) {
                         num = row + 1;
                         rand();
                         const d: ArticleCell = {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "article-cell",
                                 markdown: "## This is a test",
                             },
                         };
                         return d;
-                    } else if (col === 8) {
+                    } else if (col === 9) {
                         num = row + 1;
                         rand();
                         const d: SpinnerCell = {
@@ -322,21 +340,6 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 9) {
-                        num = row + 1;
-                        rand();
-                        const d: DatePickerCell = {
-                            kind: GridCellKind.Custom,
-                            allowOverlay: true,
-                            copyData: "4",
-                            data: {
-                                kind: "date-picker-cell",
-                                date: new Date(),
-                                displayDate: new Date().toISOString(),
-                                format: "datetime-local",
-                            },
-                        };
-                        return d;
                     } else if (col === 10) {
                         num = row + 1;
                         rand();
@@ -344,11 +347,12 @@ export const CustomCells: React.VFC = () => {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "date-picker-cell",
                                 date: new Date(),
-                                displayDate: new Date().toISOString().split("T")[0],
-                                format: "date",
+                                displayDate: new Date().toISOString(),
+                                format: "datetime-local",
                             },
                         };
                         return d;
@@ -359,6 +363,23 @@ export const CustomCells: React.VFC = () => {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
+                            readonly: row % 2 === 0,
+                            data: {
+                                kind: "date-picker-cell",
+                                date: new Date(),
+                                displayDate: new Date().toISOString().split("T")[0],
+                                format: "date",
+                            },
+                        };
+                        return d;
+                    } else if (col === 12) {
+                        num = row + 1;
+                        rand();
+                        const d: DatePickerCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            readonly: row % 2 === 0,
                             data: {
                                 kind: "date-picker-cell",
                                 date: new Date(),
@@ -367,7 +388,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 12) {
+                    } else if (col === 13) {
                         num = row + 1;
                         rand();
                         const d: LinksCell = {
@@ -390,7 +411,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 13) {
+                    } else if (col === 14) {
                         num = row + 1;
                         rand();
                         const d: ButtonCell = {
@@ -412,7 +433,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 14) {
+                    } else if (col === 15) {
                         const t: TreeViewCell = {
                             kind: GridCellKind.Custom,
                             allowOverlay: false,
@@ -436,7 +457,11 @@ export const CustomCells: React.VFC = () => {
                         width: 200,
                     },
                     {
-                        title: "Sparkline",
+                        title: "Sparkline (area)",
+                        width: 150,
+                    },
+                    {
+                        title: "Sparkline (line)",
                         width: 150,
                     },
                     {

@@ -160,69 +160,72 @@ export const InfiniteScroller: React.FC<Props> = p => {
         lastScrollPosition.current.lockDirection = undefined;
     }, [hasTouches, isIdle]);
 
-    const onScroll = React.useCallback(() => {
-        const el = scroller.current;
-        if (el === null) return;
+    const onScroll = React.useCallback(
+        (scrollLeft?: number, scrollTop?: number) => {
+            const el = scroller.current;
+            if (el === null) return;
 
-        let scrollTop = el.scrollTop;
-        let scrollLeft = el.scrollLeft;
-        const lastScrollTop = lastScrollPosition.current.scrollTop;
-        const lastScrollLeft = lastScrollPosition.current.scrollLeft;
+            scrollTop = scrollTop ?? el.scrollTop;
+            scrollLeft = scrollLeft ?? el.scrollLeft;
+            const lastScrollTop = lastScrollPosition.current.scrollTop;
+            const lastScrollLeft = lastScrollPosition.current.scrollLeft;
 
-        const dx = scrollLeft - lastScrollLeft;
-        const dy = scrollTop - lastScrollTop;
+            const dx = scrollLeft - lastScrollLeft;
+            const dy = scrollTop - lastScrollTop;
 
-        if (
-            hasTouches &&
-            dx !== 0 &&
-            dy !== 0 &&
-            (Math.abs(dx) > 3 || Math.abs(dy) > 3) &&
-            preventDiagonalScrolling &&
-            lastScrollPosition.current.lockDirection === undefined
-        ) {
-            lastScrollPosition.current.lockDirection =
-                Math.abs(dx) < Math.abs(dy) ? [lastScrollLeft, undefined] : [undefined, lastScrollTop];
-        }
+            if (
+                hasTouches &&
+                dx !== 0 &&
+                dy !== 0 &&
+                (Math.abs(dx) > 3 || Math.abs(dy) > 3) &&
+                preventDiagonalScrolling &&
+                lastScrollPosition.current.lockDirection === undefined
+            ) {
+                lastScrollPosition.current.lockDirection =
+                    Math.abs(dx) < Math.abs(dy) ? [lastScrollLeft, undefined] : [undefined, lastScrollTop];
+            }
 
-        const lock = lastScrollPosition.current.lockDirection;
+            const lock = lastScrollPosition.current.lockDirection;
 
-        scrollLeft = lock?.[0] ?? scrollLeft;
-        scrollTop = lock?.[1] ?? scrollTop;
-        lastScrollPosition.current.scrollLeft = scrollLeft;
-        lastScrollPosition.current.scrollTop = scrollTop;
+            scrollLeft = lock?.[0] ?? scrollLeft;
+            scrollTop = lock?.[1] ?? scrollTop;
+            lastScrollPosition.current.scrollLeft = scrollLeft;
+            lastScrollPosition.current.scrollTop = scrollTop;
 
-        const cWidth = el.clientWidth;
-        const cHeight = el.clientHeight;
+            const cWidth = el.clientWidth;
+            const cHeight = el.clientHeight;
 
-        const newY = scrollTop;
-        const delta = lastScrollY.current - newY;
-        const scrollableHeight = el.scrollHeight - cHeight;
-        lastScrollY.current = newY;
+            const newY = scrollTop;
+            const delta = lastScrollY.current - newY;
+            const scrollableHeight = el.scrollHeight - cHeight;
+            lastScrollY.current = newY;
 
-        if (
-            scrollableHeight > 0 &&
-            (Math.abs(delta) > 2000 || newY === 0 || newY === scrollableHeight) &&
-            scrollHeight > el.scrollHeight + 5
-        ) {
-            const prog = newY / scrollableHeight;
-            const recomputed = (scrollHeight - cHeight) * prog;
-            offsetY.current = recomputed - newY;
-        }
+            if (
+                scrollableHeight > 0 &&
+                (Math.abs(delta) > 2000 || newY === 0 || newY === scrollableHeight) &&
+                scrollHeight > el.scrollHeight + 5
+            ) {
+                const prog = newY / scrollableHeight;
+                const recomputed = (scrollHeight - cHeight) * prog;
+                offsetY.current = recomputed - newY;
+            }
 
-        if (lock !== undefined) {
-            window.clearTimeout(idleTimer.current);
-            setIsIdle(false);
-            idleTimer.current = window.setTimeout(() => setIsIdle(true), 200);
-        }
+            if (lock !== undefined) {
+                window.clearTimeout(idleTimer.current);
+                setIsIdle(false);
+                idleTimer.current = window.setTimeout(() => setIsIdle(true), 200);
+            }
 
-        update({
-            x: scrollLeft,
-            y: newY + offsetY.current,
-            width: cWidth - paddingRight,
-            height: cHeight - paddingBottom,
-            paddingRight: rightWrapRef.current?.clientWidth ?? 0,
-        });
-    }, [paddingBottom, paddingRight, scrollHeight, update, preventDiagonalScrolling, hasTouches]);
+            update({
+                x: scrollLeft,
+                y: newY + offsetY.current,
+                width: cWidth - paddingRight,
+                height: cHeight - paddingBottom,
+                paddingRight: rightWrapRef.current?.clientWidth ?? 0,
+            });
+        },
+        [paddingBottom, paddingRight, scrollHeight, update, preventDiagonalScrolling, hasTouches]
+    );
 
     useKineticScroll(kineticScrollPerfHack && browserIsSafari.value, onScroll, scroller);
 
@@ -282,7 +285,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                         }
                     }}
                     className={"dvn-scroller " + (className ?? "")}
-                    onScroll={onScroll}>
+                    onScroll={() => onScroll()}>
                     <div className={"dvn-scroll-inner" + (rightElement === undefined ? " dvn-hidden" : "")}>
                         <div className="dvn-stack">{padders}</div>
                         {rightElement !== undefined && (

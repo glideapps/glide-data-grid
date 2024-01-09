@@ -896,6 +896,38 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         expect(spy).toHaveBeenCalledWith([1, 1]);
     });
 
+    test("Toggle boolean with Enter key", async () => {
+        const spy = vi.fn();
+        const editSpy = vi.fn();
+
+        vi.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellActivated={spy} onCellEdited={editSpy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 850, // Col Boolean
+            clientY: 36 * 2 + 32 + 16, // Row 2 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "Enter",
+        });
+
+        vi.runAllTimers();
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith([7, 2]);
+        expect(editSpy).toHaveBeenCalledWith([7, 2], {
+            allowOverlay: false,
+            data: true,
+            kind: "boolean",
+            readonly: false,
+        });
+    });
+
     test("Emits activated event on Space key", async () => {
         const spy = vi.fn();
 
@@ -2016,6 +2048,201 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         });
     });
 
+    test("Ref getBounds entire grid", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        const ref = React.createRef<DataEditorRef>();
+        render(<DataEditor {...basicProps} onCellEdited={spy} ref={ref} rowMarkers="both" />, {
+            wrapper: Context,
+        });
+        const scroller = prep(false);
+
+        assert(scroller !== null);
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() => 1000);
+        vi.spyOn(scroller, "scrollHeight", "get").mockImplementation(() => 1000);
+
+        const bounds = ref.current?.getBounds();
+        expect(bounds).toEqual({
+            height: 1000,
+            width: 1000,
+            x: 0,
+            y: 0,
+        });
+    });
+
+    test("Ctrl+Home", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "Home",
+            ctrlKey: true,
+        });
+
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [0, 0] }) }));
+    });
+
+    test("Ctrl+End", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "End",
+            ctrlKey: true,
+        });
+
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [10, 1000] }) }));
+    });
+
+    test("Ctrl+Shift+Home", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "Home",
+            ctrlKey: true,
+            shiftKey: true,
+        });
+
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                columns: CompactSelection.empty(),
+                current: {
+                    cell: [1, 1],
+                    range: {
+                        height: 2,
+                        width: 2,
+                        x: 0,
+                        y: 0,
+                    },
+                    rangeStack: [],
+                },
+                rows: CompactSelection.empty(),
+            })
+        );
+    });
+
+    test("Ctrl+Shift+End", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "End",
+            ctrlKey: true,
+            shiftKey: true,
+        });
+
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                columns: CompactSelection.empty(),
+                current: {
+                    cell: [1, 1],
+                    range: {
+                        height: 999,
+                        width: 10,
+                        x: 1,
+                        y: 1,
+                    },
+                    rangeStack: [],
+                },
+                rows: CompactSelection.empty(),
+            })
+        );
+    });
+
+    test("Page down", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "PageDown",
+        });
+
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 29] }) }));
+    });
+
+    test("Page up", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onGridSelectionChange={spy} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        spy.mockClear();
+        fireEvent.keyDown(canvas, {
+            key: "PageUp",
+        });
+
+        expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 0] }) }));
+    });
+
     test("Arrow left", async () => {
         const spy = vi.fn();
         vi.useFakeTimers();
@@ -2186,6 +2413,58 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         });
 
         expect(spy).toBeCalledWith(expect.objectContaining({ current: expect.objectContaining({ cell: [1, 1] }) }));
+    });
+
+    test("Freeze area reported", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor {...basicProps} freezeTrailingRows={2} freezeColumns={3} onVisibleRegionChanged={spy} />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                height: 32,
+                width: 8,
+                x: 3,
+                y: 0,
+            }),
+            0,
+            0,
+            expect.objectContaining({
+                freezeRegion: {
+                    height: 32,
+                    width: 3,
+                    x: 0,
+                    y: 0,
+                },
+                freezeRegions: [
+                    {
+                        height: 32,
+                        width: 3,
+                        x: 0,
+                        y: 0,
+                    },
+                    {
+                        height: 2,
+                        width: 8,
+                        x: 3,
+                        y: 998,
+                    },
+                    {
+                        height: 2,
+                        width: 3,
+                        x: 0,
+                        y: 998,
+                    },
+                ],
+                selected: undefined,
+            })
+        );
     });
 
     test("Search close", async () => {
@@ -2504,6 +2783,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 300,
             clientY: 36 + 32 * 2 + 16,
+            buttons: 1,
         });
 
         // mouse up
@@ -2566,6 +2846,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 300,
             clientY: 36 + 32 * 3 + 16,
+            buttons: 1,
         });
 
         // mouse up
@@ -2965,6 +3246,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             shiftKey: true,
             clientX: 10, // Row marker
             clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3357,21 +3639,25 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 250,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseMove(canvas, {
             clientX: 200,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseMove(canvas, {
             clientX: 150,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseMove(canvas, {
             clientX: 100,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3404,6 +3690,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3487,6 +3774,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3531,6 +3819,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3575,6 +3864,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3615,6 +3905,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3647,6 +3938,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 10,
             clientY: 400,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -3680,6 +3972,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
+            buttons: 1,
         });
 
         expect(spy).toBeCalledWith(
@@ -3719,6 +4012,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
+            buttons: 1,
         });
 
         expect(spy).not.toBeCalled();
@@ -4232,6 +4526,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
+            buttons: 1,
         });
 
         expect(spy).toBeCalledWith(
@@ -4438,6 +4733,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -4495,6 +4791,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 300, // Col B
             clientY: 16, // Header
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -4524,6 +4821,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 300, // Col B
             clientY: 0,
+            buttons: 1,
         });
 
         await new Promise(r => window.setTimeout(r, 100));
@@ -4558,6 +4856,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 308, // Col A
             clientY: 36 + 32 * 2 + 16, // Row 2
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -4595,6 +4894,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 360,
             clientY: 36 + 32 * 5 + 16, // Row 5
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -4608,6 +4908,44 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         });
 
         expect(spy).toBeCalledTimes(5);
+    });
+
+    test("onFillPattern", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onFillPattern={spy} fillHandle={true} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            clientX: 290, // Col A
+            clientY: 36 + 30, // Row 2
+        });
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 308, // Col A
+            clientY: 36 + 30, // Row 2
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 360,
+            clientY: 36 + 32 * 5 + 16, // Row 5
+            buttons: 1,
+        });
+
+        fireEvent.mouseUp(canvas, {
+            clientX: 360,
+            clientY: 36 + 32 * 5 + 16, // Row 5
+        });
+
+        fireEvent.click(canvas, {
+            clientX: 360,
+            clientY: 36 + 32 * 5 + 16, // Row 5
+        });
+
+        expect(spy).toBeCalledTimes(1);
     });
 
     test("Use fill handle into blank", async () => {
@@ -4632,6 +4970,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 308,
             clientY: 36 + 32 * 5 + 16,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {
@@ -4681,11 +5020,13 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         fireEvent.mouseMove(canvas, {
             clientX: 308,
             clientY: 800,
+            buttons: 1,
         });
 
         fireEvent.mouseMove(canvas, {
             clientX: 308,
             clientY: 995,
+            buttons: 1,
         });
 
         fireEvent.mouseUp(canvas, {

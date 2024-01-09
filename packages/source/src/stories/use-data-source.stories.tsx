@@ -17,9 +17,6 @@ import { useMockDataGenerator } from "./utils.js";
 faker.seed(1337);
 
 const SimpleWrapper = styled.div`
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-
     box-sizing: border-box;
 
     *,
