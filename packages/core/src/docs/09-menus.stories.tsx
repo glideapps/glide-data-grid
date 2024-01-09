@@ -155,13 +155,11 @@ export const Menus: React.VFC = () => {
                 title: "Name",
                 id: "name",
                 hasMenu: true,
-                menuIcon: "dots",
             },
             {
                 title: "Company",
                 id: "company",
                 hasMenu: true,
-                menuIcon: "headerDate",
             },
             {
                 title: "Email",
