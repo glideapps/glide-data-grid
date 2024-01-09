@@ -25,7 +25,7 @@ export default {
                             <Description>
                                 Headers on the data grid can be configured to support menus. We provide the events and
                                 the menu icon, you provide the menu. The menu icon can be modified via the{" "}
-                                <PropName>menuIcon</PropName> column prop.
+                                <PropName>menuIcon</PropName> prop.
                             </Description>
                         </>
                     }>
