@@ -2,7 +2,13 @@ import { styled } from "@linaria/react";
 import React from "react";
 import { useLayer } from "react-laag";
 import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
-import { BeautifulWrapper, Description, defaultProps, useAllMockedKinds } from "../../data-editor/stories/utils.js";
+import {
+    BeautifulWrapper,
+    Description,
+    PropName,
+    defaultProps,
+    useAllMockedKinds,
+} from "../../data-editor/stories/utils.js";
 import type { Rectangle } from "../../internal/data-grid/data-grid-types.js";
 import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 
@@ -18,7 +24,8 @@ export default {
                         <>
                             <Description>
                                 Headers on the data grid can be configured to support menus. We provide the events and
-                                the triangle, you provide the menu.
+                                the menu icon, you provide the menu. The menu icon can be modified via the{" "}
+                                <PropName>menuIcon</PropName> column prop.
                             </Description>
                         </>
                     }>
@@ -69,10 +76,26 @@ export const HeaderMenus: React.VFC = () => {
     const { cols, getCellContent, onColumnResize, setCellValue } = useAllMockedKinds();
 
     const realCols = React.useMemo(() => {
-        return cols.map(c => ({
-            ...c,
-            hasMenu: true,
-        }));
+        return cols.map((c, index) => {
+            if (index === 2) {
+                return {
+                    ...c,
+                    hasMenu: true,
+                    menuIcon: "dots",
+                };
+            } else if (index === 3) {
+                return {
+                    ...c,
+                    hasMenu: true,
+                    menuIcon: "headerUri",
+                };
+            }
+
+            return {
+                ...c,
+                hasMenu: true,
+            };
+        });
     }, [cols]);
 
     const [menu, setMenu] = React.useState<{
