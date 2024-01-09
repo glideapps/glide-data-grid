@@ -30,10 +30,10 @@ interface MultiSelectCellProps {
 }
 
 const TAG_HEIGHT = 20;
-const INNER_PAD = 6;
+const TAG_PADDING = 6;
 const TAG_MARGIN = 4;
-const CREATED_VALUE_PREFIX = "__created";
-const CREATED_VALUE_PREFIX_REGEX = new RegExp(`^${CREATED_VALUE_PREFIX}\\d+__`);
+const VALUE_PREFIX = "__created";
+const VALUE_PREFIX_REGEX = new RegExp(`^${VALUE_PREFIX}\\d+__`);
 
 const Wrap = styled.div`
     display: flex;
@@ -75,14 +75,15 @@ const prepareOptions = (
 
 const resolveValues = (
     values: string[] | null | undefined,
-    options: readonly SelectOption[]
+    options: readonly SelectOption[],
+    allowDuplicates?: boolean
 ): { value: string; label?: string; color?: string }[] => {
     if (values === undefined || values === null) {
         return [];
     }
 
     return values.map((value, index) => {
-        const valuePrefix = `${CREATED_VALUE_PREFIX}${index}__`;
+        const valuePrefix = allowDuplicates ? `${VALUE_PREFIX}${index}__` : "";
         const matchedOption = options.find(option => {
             return option.value === value;
         });
@@ -105,7 +106,7 @@ export type MultiSelectCell = CustomCell<MultiSelectCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
     const { value: cell, initialValue, onChange } = p;
-    const { options: optionsIn, value: valueIn, creatable, color: colorIn, borderRadius } = cell.data;
+    const { options: optionsIn, value: valueIn, creatable, color: colorIn, borderRadius, allowDuplicates } = cell.data;
 
     const theme = useTheme();
     const [value, setValue] = React.useState(valueIn);
@@ -154,8 +155,8 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
             const color = chroma(data.color ?? colorIn ?? theme.bgBubble);
             return {
                 ...styles,
-                paddingRight: isDisabled ? INNER_PAD : undefined,
-                paddingLeft: INNER_PAD,
+                paddingRight: isDisabled ? TAG_PADDING : undefined,
+                paddingLeft: TAG_PADDING,
                 color: color.luminance() > 0.5 ? "black" : "white",
                 fontSize: theme.editorFontSize,
                 fontFamily: theme.fontFamily,
@@ -179,11 +180,13 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
     };
 
     const handleKeyDown: React.KeyboardEventHandler = event => {
-        if (!inputValue) return;
+        if (!inputValue) {
+            return;
+        }
         switch (event.key) {
             case "Enter":
             case "Tab":
-                setValue(prev => [...prev, inputValue]);
+                setValue(prev => [...(prev ?? []), inputValue]);
                 setInputValue("");
                 event.preventDefault();
         }
@@ -204,9 +207,9 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 placeholder={cell.readonly ? "" : undefined}
                 onMenuOpen={() => setMenuOpen(true)}
                 onMenuClose={() => setMenuOpen(false)}
-                value={resolveValues(value, options)}
+                value={resolveValues(value, options, allowDuplicates)}
                 styles={colorStyles}
-                onKeyDown={creatable ? handleKeyDown : undefined}
+                onKeyDown={allowDuplicates && creatable ? handleKeyDown : undefined}
                 theme={t => {
                     return {
                         ...t,
@@ -236,7 +239,6 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 menuPortalTarget={document.getElementById("portal")}
                 autoFocus={true}
                 openMenuOnFocus={true}
-                // closeMenuOnSelect={false}
                 components={{
                     DropdownIndicator: () => null,
                     IndicatorSeparator: () => null,
@@ -250,11 +252,11 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                     if (e === null) {
                         return;
                     }
-                    const mappedValues = e.map(x =>
-                        x.value.startsWith(CREATED_VALUE_PREFIX)
-                            ? x.value.replace(new RegExp(CREATED_VALUE_PREFIX_REGEX), "")
-                            : x.value
-                    );
+                    const mappedValues = e.map(x => {
+                        return allowDuplicates && x.value.startsWith(VALUE_PREFIX)
+                            ? x.value.replace(new RegExp(VALUE_PREFIX_REGEX), "")
+                            : x.value;
+                    });
                     setValue(mappedValues);
                     onChange({
                         ...cell,
@@ -288,7 +290,7 @@ const renderer: CustomRenderer<MultiSelectCell> = {
             width: rect.width - 2 * theme.cellHorizontalPadding,
             height: rect.height - 2 * theme.cellVerticalPadding,
         };
-        const rows = Math.max(1, Math.floor(drawArea.height / (TAG_HEIGHT + INNER_PAD)));
+        const rows = Math.max(1, Math.floor(drawArea.height / (TAG_HEIGHT + TAG_PADDING)));
 
         let { x } = drawArea;
         let row = 1;
@@ -300,12 +302,12 @@ const renderer: CustomRenderer<MultiSelectCell> = {
             );
             const displayText = matchedOption?.label ?? tag;
             const metrics = measureTextCached(displayText, ctx);
-            const width = metrics.width + INNER_PAD * 2;
+            const width = metrics.width + TAG_PADDING * 2;
             const textY = TAG_HEIGHT / 2;
 
             if (x !== drawArea.x && x + width > drawArea.x + drawArea.width && row < rows) {
                 row++;
-                y += TAG_HEIGHT + INNER_PAD;
+                y += TAG_HEIGHT + TAG_PADDING;
                 x = drawArea.x;
             }
 
@@ -315,10 +317,12 @@ const renderer: CustomRenderer<MultiSelectCell> = {
             ctx.fill();
 
             ctx.fillStyle = color.luminance() > 0.5 ? "#000000" : "#ffffff";
-            ctx.fillText(displayText, x + INNER_PAD, y + textY + getMiddleCenterBias(ctx, theme));
+            ctx.fillText(displayText, x + TAG_PADDING, y + textY + getMiddleCenterBias(ctx, theme));
 
             x += width + TAG_MARGIN;
-            if (x > drawArea.x + drawArea.width && row >= rows) break;
+            if (x > drawArea.x + drawArea.width && row >= rows) {
+                break;
+            }
         }
 
         return true;
@@ -327,7 +331,9 @@ const renderer: CustomRenderer<MultiSelectCell> = {
         const { value } = cell.data;
         if (value) {
             return (
-                value.reduce((acc, data) => ctx.measureText(data).width + acc + 20, 0) + 2 * t.cellHorizontalPadding - 4
+                value.reduce((acc, data) => ctx.measureText(data).width + acc + TAG_PADDING * 2 + TAG_MARGIN, 0) +
+                2 * t.cellHorizontalPadding -
+                4
             );
         } else {
             return t.cellHorizontalPadding * 2;
@@ -345,8 +351,13 @@ const renderer: CustomRenderer<MultiSelectCell> = {
             },
         }),
     }),
-    onPaste: (v, d) => {
-        const values = v.split(",").map(s => s.trim());
+    onPaste: (val, d) => {
+        let values = val.split(",").map(s => s.trim());
+
+        if (!d.allowDuplicates) {
+            values = values.filter((v, index) => values.indexOf(v) === index);
+        }
+
         return {
             ...d,
             value: d.creatable
