@@ -1,5 +1,7 @@
 import { styled } from "@linaria/react";
 
+const BUBBLE_HEIGHT = 20;
+
 export const BubblesOverlayEditorStyle = styled.div`
     display: flex;
     flex-wrap: wrap;
@@ -11,11 +13,10 @@ export const BubblesOverlayEditorStyle = styled.div`
         justify-content: center;
         align-items: center;
 
-        border-radius: 100px;
+        border-radius: var(--gdg-rounding-radius, ${BUBBLE_HEIGHT / 2}px);
 
         padding: 0 8px;
-        height: 20px;
-
+        height: ${BUBBLE_HEIGHT}px;
         background-color: var(--gdg-bg-bubble);
         color: var(--gdg-text-dark);
         margin: 2px;

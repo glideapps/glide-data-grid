@@ -372,6 +372,7 @@ export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComp
     readonly target: Rectangle;
     readonly forceEditMode: boolean;
     readonly isValid?: boolean;
+    readonly theme: Theme;
 }>;
 
 type ObjectEditorCallbackResult<T extends InnerGridCell> = {

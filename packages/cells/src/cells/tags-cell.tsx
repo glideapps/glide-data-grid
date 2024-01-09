@@ -51,7 +51,7 @@ const EditorWrap = styled.div<{ tagHeight: number; innerPad: number }>`
             margin-right: 6px;
             margin-bottom: 6px;
 
-            border-radius: ${p => p.tagHeight / 2}px;
+            border-radius: var(--gdg-rounding-radius, ${p => p.tagHeight / 2}px);
             min-height: ${p => p.tagHeight}px;
             padding: 2px ${p => p.innerPad}px;
             display: flex;
@@ -130,7 +130,7 @@ const renderer: CustomRenderer<TagsCell> = {
     provideEditor: () => {
         // eslint-disable-next-line react/display-name
         return p => {
-            const { onChange, value } = p;
+            const { onChange, value, theme } = p;
             const { readonly = false } = value;
             const { possibleTags, tags } = value.data;
             return (
