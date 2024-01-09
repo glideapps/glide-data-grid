@@ -84,7 +84,8 @@ export const WrappingText: React.VFC<{
 };
 (WrappingText as any).argTypes = {
     alignment: {
-        control: { type: "select", options: ["left", "center", "right"] },
+        control: { type: "select" },
+        options: ["left", "center", "right"],
     },
     length: {
         control: {

@@ -79,9 +79,11 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
     paddingY: 0,
     paddingX: 0,
     vAlign: {
-        control: { type: "select", options: ["start", "center", "end", undefined] },
+        control: { type: "select" },
+        options: ["start", "center", "end", undefined],
     },
     hAlign: {
-        control: { type: "select", options: ["start", "center", "end", undefined] },
+        control: { type: "select" },
+        options: ["start", "center", "end", undefined],
     },
 };
