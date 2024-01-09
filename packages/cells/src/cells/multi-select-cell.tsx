@@ -25,6 +25,7 @@ interface MultiSelectCellProps {
     readonly options: readonly (SelectOption | string)[];
     readonly color?: string;
     readonly creatable?: boolean;
+    readonly allowDuplicates?: boolean;
     readonly borderRadius?: number;
 }
 
