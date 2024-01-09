@@ -25,9 +25,6 @@ const BuilderWrapper = styled.div<Pick<Props, "width" | "height">>`
 
         position: relative;
 
-        text-rendering: optimizeLegibility;
-        -webkit-font-smoothing: antialiased;
-
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
         user-select: none;
@@ -43,9 +40,6 @@ const BuilderWrapper = styled.div<Pick<Props, "width" | "height">>`
 `;
 
 const SimpleWrapper = styled.div`
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-
     box-sizing: border-box;
 
     *,
