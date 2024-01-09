@@ -794,23 +794,8 @@ function drawHeaderInner(
     }
 
     if (shouldDrawMenu && c.hasMenu === true) {
-        // TODO: Do I need to adapt something here to RTL?
-        if (
-            c.menuIcon !== undefined &&
-            c.menuIcon !== GridColumnMenuIcon.Dots &&
-            c.menuIcon !== GridColumnMenuIcon.Triangle
-        ) {
-            const iconX = menuBounds.x + (menuBounds.width - theme.headerIconSize) / 2;
-            const iconY = menuBounds.y + (menuBounds.height - theme.headerIconSize) / 2;
-            spriteManager.drawSprite(c.menuIcon, "normal", ctx, iconX, iconY, theme.headerIconSize, theme);
-        } else if (c.menuIcon === GridColumnMenuIcon.Dots) {
-            ctx.beginPath();
-            const dotsX = menuBounds.x + menuBounds.width / 2;
-            const dotsY = menuBounds.y + menuBounds.height / 2;
-            drawMenuDots(ctx, dotsX, dotsY);
-            ctx.fillStyle = fillStyle;
-            ctx.fill();
-        } else {
+        if (c.menuIcon === undefined || c.menuIcon === GridColumnMenuIcon.Triangle) {
+            // Draw the default triangle menu icon:
             ctx.beginPath();
             const triangleX = menuBounds.x + menuBounds.width / 2 - 5.5;
             const triangleY = menuBounds.y + menuBounds.height / 2 - 3;
@@ -834,6 +819,19 @@ function drawHeaderInner(
             );
             ctx.fillStyle = fillStyle;
             ctx.fill();
+        } else if (c.menuIcon === GridColumnMenuIcon.Dots) {
+            // Draw the three dots menu icon:
+            ctx.beginPath();
+            const dotsX = menuBounds.x + menuBounds.width / 2;
+            const dotsY = menuBounds.y + menuBounds.height / 2;
+            drawMenuDots(ctx, dotsX, dotsY);
+            ctx.fillStyle = fillStyle;
+            ctx.fill();
+        } else {
+            // Assume that the user has specified a valid sprite image as header icon:
+            const iconX = menuBounds.x + (menuBounds.width - theme.headerIconSize) / 2;
+            const iconY = menuBounds.y + (menuBounds.height - theme.headerIconSize) / 2;
+            spriteManager.drawSprite(c.menuIcon, "normal", ctx, iconX, iconY, theme.headerIconSize, theme);
         }
     }
 }
