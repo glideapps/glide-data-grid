@@ -11,10 +11,11 @@ import {
 } from "../../internal/data-grid/data-grid-types.js";
 import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 import { DataEditorAll as DataEditor, type DataEditorAllProps as DataEditorProps } from "../../data-editor-all.js";
-import { BeautifulWrapper, Description } from "./utils.js";
 import range from "lodash/range.js";
 import chunk from "lodash/chunk.js";
-import type { DataEditorRef } from "../data-editor.js";
+import type { DataEditorRef } from "../../data-editor/data-editor.js";
+import { BeautifulWrapper } from "../../data-editor/stories/utils.js";
+import { Description } from "../doc-wrapper.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
