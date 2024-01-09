@@ -1,6 +1,5 @@
 import * as React from "react";
 import { styled } from "@linaria/react";
-import type { StoryContext } from "@storybook/addons";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 interface Props {
@@ -8,7 +7,7 @@ interface Props {
     height: number;
     useMoreTopPadding?: boolean;
     figmaDoc?: string;
-    context?: StoryContext;
+    context?: any;
 }
 
 const BuilderWrapper = styled.div<Pick<Props, "width" | "height">>`
