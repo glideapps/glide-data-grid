@@ -93,6 +93,8 @@ export interface BlitData {
     readonly mustDrawFocusOnHeader: boolean;
     readonly mustDrawHighlightRingsOnHeader: boolean;
     readonly lastBuffer: "a" | "b" | undefined;
+    aBufferScroll: [boolean, boolean] | undefined;
+    bBufferScroll: [boolean, boolean] | undefined;
 }
 
 const allocatedItem: [number, number] = [0, 0];
@@ -203,6 +205,8 @@ export function drawCell(
 function blitLastFrame(
     ctx: CanvasRenderingContext2D,
     blitSource: HTMLCanvasElement,
+    blitSourceScroll: [boolean, boolean] | undefined,
+    targetScroll: [boolean, boolean] | undefined,
     last: BlitData,
     cellXOffset: number,
     cellYOffset: number,
@@ -337,14 +341,24 @@ function blitLastFrame(
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (doubleBuffer) {
-            if (stickyWidth > 0 && deltaX !== 0 && deltaY === 0) {
+            if (
+                stickyWidth > 0 &&
+                deltaX !== 0 &&
+                deltaY === 0 &&
+                (targetScroll === undefined || blitSourceScroll?.[1] !== false)
+            ) {
                 // When double buffering the freeze columns can be offset by a couple pixels vertically between the two
                 // buffers. We don't want to redraw them so we need to make sure to copy them between the buffers.
                 const w = stickyWidth * dpr;
                 const h = height * dpr;
                 ctx.drawImage(blitSource, 0, 0, w, h, 0, 0, w, h);
             }
-            if (freezeTrailingRowsHeight > 0 && deltaX === 0 && deltaY !== 0) {
+            if (
+                freezeTrailingRowsHeight > 0 &&
+                deltaX === 0 &&
+                deltaY !== 0 &&
+                (targetScroll === undefined || blitSourceScroll?.[0] !== false)
+            ) {
                 const y = (height - freezeTrailingRowsHeight) * dpr;
                 const w = width * dpr;
                 const h = freezeTrailingRowsHeight * dpr;
@@ -2142,11 +2156,13 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     if (doubleBuffer && (bufferA.width !== width * dpr || bufferA.height !== height * dpr)) {
         bufferA.width = width * dpr;
         bufferA.height = height * dpr;
+        if (lastBlitData.current !== undefined) lastBlitData.current.aBufferScroll = undefined;
     }
 
     if (doubleBuffer && (bufferB.width !== width * dpr || bufferB.height !== height * dpr)) {
         bufferB.width = width * dpr;
         bufferB.height = height * dpr;
+        if (lastBlitData.current !== undefined) lastBlitData.current.bBufferScroll = undefined;
     }
 
     const last = lastBlitData.current;
@@ -2458,6 +2474,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         const { regions } = blitLastFrame(
             targetCtx,
             blitSource,
+            blitSource === bufferA ? last.aBufferScroll : last.bBufferScroll,
+            blitSource === bufferA ? last.bBufferScroll : last.aBufferScroll,
             last,
             cellXOffset,
             cellYOffset,
@@ -2683,6 +2701,9 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         Array.from({ length: freezeTrailingRows }, (_, i) => rows - 1 - i)
     );
 
+    const scrollX = last !== undefined && (cellXOffset !== last.cellXOffset || translateX !== last.translateX);
+    const scrollY = last !== undefined && (cellYOffset !== last.cellYOffset || translateY !== last.translateY);
+
     lastBlitData.current = {
         cellXOffset,
         cellYOffset,
@@ -2691,6 +2712,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         mustDrawFocusOnHeader,
         mustDrawHighlightRingsOnHeader,
         lastBuffer: doubleBuffer ? (targetBuffer === bufferA ? "a" : "b") : undefined,
+        aBufferScroll: targetBuffer === bufferA ? [scrollX, scrollY] : last?.aBufferScroll,
+        bBufferScroll: targetBuffer === bufferB ? [scrollX, scrollY] : last?.bBufferScroll,
     };
 
     targetCtx.restore();
