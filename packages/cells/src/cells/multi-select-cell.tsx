@@ -134,20 +134,62 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
         return prepareOptions(optionsIn);
     }, [optionsIn]);
 
+    // Apply styles to the react-select component:
     const colorStyles: StylesConfig<SelectOption, true> = {
         control: base => ({
             ...base,
             border: 0,
             boxShadow: "none",
+            backgroundColor: theme.bgCell,
         }),
-        option: styles => {
+        menu: styles => ({
+            ...styles,
+            backgroundColor: theme.bgCell,
+        }),
+        option: (styles, state) => {
             return {
                 ...styles,
                 fontSize: theme.editorFontSize,
                 fontFamily: theme.fontFamily,
+                color: theme.textDark,
+                ...(state.isFocused ? { backgroundColor: theme.accentLight, cursor: "pointer" } : {}),
                 ":active": {
                     ...styles[":active"],
                     color: theme.accentFg,
+                    backgroundColor: theme.accentColor,
+                },
+            };
+        },
+        input: styles => {
+            return {
+                ...styles,
+                fontSize: theme.editorFontSize,
+                fontFamily: theme.fontFamily,
+                color: theme.textDark,
+            };
+        },
+        placeholder: styles => {
+            return {
+                ...styles,
+                fontSize: theme.editorFontSize,
+                fontFamily: theme.fontFamily,
+                color: theme.textLight,
+            };
+        },
+        noOptionsMessage: styles => {
+            return {
+                ...styles,
+                fontSize: theme.editorFontSize,
+                fontFamily: theme.fontFamily,
+                color: theme.textLight,
+            };
+        },
+        clearIndicator: styles => {
+            return {
+                ...styles,
+                color: theme.textLight,
+                ":hover": {
+                    color: theme.textDark,
                 },
             };
         },
@@ -218,31 +260,6 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 value={resolveValues(value, options, allowDuplicates)}
                 styles={colorStyles}
                 onKeyDown={allowDuplicates && creatable ? handleKeyDown : undefined}
-                theme={t => {
-                    return {
-                        ...t,
-                        colors: {
-                            ...t.colors,
-                            neutral0: theme.bgCell, // this is both the background color AND the fg color of
-                            // the selected item because of course it is.
-                            neutral5: theme.bgCell,
-                            neutral10: theme.accentColor,
-                            neutral20: theme.bgCellMedium,
-                            neutral30: theme.bgCellMedium,
-                            neutral40: theme.bgCellMedium,
-                            neutral50: theme.textLight,
-                            neutral60: theme.textMedium,
-                            neutral70: theme.textMedium,
-                            neutral80: theme.textDark,
-                            neutral90: theme.textDark,
-                            neutral100: theme.textDark,
-                            primary: theme.accentColor,
-                            primary75: theme.accentColor,
-                            primary50: theme.accentColor,
-                            primary25: theme.accentLight, // prelight color
-                        },
-                    };
-                }}
                 menuPlacement={"auto"}
                 menuPortalTarget={document.getElementById("portal")}
                 autoFocus={true}
