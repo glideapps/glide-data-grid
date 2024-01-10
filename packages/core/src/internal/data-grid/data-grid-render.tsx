@@ -218,9 +218,10 @@ function blitLastFrame(
     effectiveCols: readonly MappedGridColumn[],
     getRowHeight: number | ((r: number) => number),
     doubleBuffer: boolean
-) {
+): {
+    regions: Rectangle[];
+} {
     const drawRegions: Rectangle[] = [];
-    let blittedYOnly = false;
 
     ctx.imageSmoothingEnabled = false;
     const minY = Math.min(last.cellYOffset, cellYOffset);
@@ -255,7 +256,6 @@ function blitLastFrame(
     if (deltaX !== 0 && deltaY !== 0) {
         return {
             regions: [],
-            yOnly: false,
         };
     }
 
@@ -266,8 +266,6 @@ function blitLastFrame(
     const blitHeight = height - totalHeaderHeight - freezeTrailingRowsHeight - Math.abs(deltaY) - 1;
 
     if (blitWidth > 150 && blitHeight > 150) {
-        blittedYOnly = deltaX === 0;
-
         const args = {
             sx: 0,
             sy: 0,
@@ -338,18 +336,20 @@ function blitLastFrame(
         }
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        if (stickyWidth > 0 && deltaX !== 0 && deltaY === 0 && doubleBuffer) {
-            // When double buffering the freeze columns can be offset by a couple pixels vertically between the two
-            // buffers. We don't want to redraw them so we need to make sure to copy them.
-            const w = stickyWidth * dpr;
-            const h = height * dpr;
-            ctx.drawImage(blitSource, 0, 0, w, h, 0, 0, w, h);
-        }
-        if (freezeTrailingRowsHeight > 0 && deltaX === 0 && deltaY !== 0 && doubleBuffer) {
-            const y = (height - freezeTrailingRowsHeight) * dpr;
-            const w = width * dpr;
-            const h = freezeTrailingRowsHeight * dpr;
-            ctx.drawImage(blitSource, 0, y, w, h, 0, y, w, h);
+        if (doubleBuffer) {
+            if (stickyWidth > 0 && deltaX !== 0 && deltaY === 0) {
+                // When double buffering the freeze columns can be offset by a couple pixels vertically between the two
+                // buffers. We don't want to redraw them so we need to make sure to copy them between the buffers.
+                const w = stickyWidth * dpr;
+                const h = height * dpr;
+                ctx.drawImage(blitSource, 0, 0, w, h, 0, 0, w, h);
+            }
+            if (freezeTrailingRowsHeight > 0 && deltaX === 0 && deltaY !== 0) {
+                const y = (height - freezeTrailingRowsHeight) * dpr;
+                const w = width * dpr;
+                const h = freezeTrailingRowsHeight * dpr;
+                ctx.drawImage(blitSource, 0, y, w, h, 0, y, w, h);
+            }
         }
         ctx.drawImage(blitSource, args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
         ctx.scale(dpr, dpr);
@@ -358,7 +358,6 @@ function blitLastFrame(
 
     return {
         regions: drawRegions,
-        yOnly: blittedYOnly,
     };
 }
 
@@ -2343,101 +2342,99 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         ]);
 
         const doDamage = (ctx: CanvasRenderingContext2D) => {
-            if (damageInView) {
-                const doHeaders = damage.hasHeader();
+            drawCells(
+                ctx,
+                effectiveCols,
+                mappedColumns,
+                height,
+                totalHeaderHeight,
+                translateX,
+                translateY,
+                cellYOffset,
+                rows,
+                getRowHeight,
+                getCellContent,
+                getGroupDetails,
+                getRowThemeOverride,
+                disabledRows,
+                isFocused,
+                drawFocus,
+                freezeTrailingRows,
+                hasAppendRow,
+                drawRegions,
+                damage,
+                selection,
+                prelightCells,
+                highlightRegions,
+                imageLoader,
+                spriteManager,
+                hoverValues,
+                hoverInfo,
+                drawCellCallback,
+                hyperWrapping,
+                theme,
+                enqueue,
+                renderStateProvider,
+                getCellRenderer,
+                overrideCursor,
+                minimumCellWidth
+            );
 
-                drawCells(
+            const selectionCurrent = selection.current;
+
+            if (
+                fillHandle &&
+                drawFocus &&
+                selectionCurrent !== undefined &&
+                damage.has(rectBottomRight(selectionCurrent.range))
+            ) {
+                drawFocusRing(
                     ctx,
+                    width,
+                    height,
+                    cellYOffset,
+                    translateX,
+                    translateY,
                     effectiveCols,
                     mappedColumns,
-                    height,
+                    theme,
+                    totalHeaderHeight,
+                    selection,
+                    getRowHeight,
+                    getCellContent,
+                    freezeTrailingRows,
+                    hasAppendRow,
+                    fillHandle,
+                    rows
+                );
+            }
+        };
+
+        if (damageInView) {
+            doDamage(targetCtx);
+            if (mainCtx !== null) {
+                mainCtx.save();
+                mainCtx.scale(dpr, dpr);
+                mainCtx.textBaseline = "middle";
+                doDamage(mainCtx);
+                mainCtx.restore();
+            }
+
+            const doHeaders = damage.hasHeader();
+            if (doHeaders) {
+                clipHeaderDamage(
+                    overlayCtx,
+                    effectiveCols,
+                    width,
+                    groupHeaderHeight,
                     totalHeaderHeight,
                     translateX,
                     translateY,
                     cellYOffset,
-                    rows,
-                    getRowHeight,
-                    getCellContent,
-                    getGroupDetails,
-                    getRowThemeOverride,
-                    disabledRows,
-                    isFocused,
-                    drawFocus,
-                    freezeTrailingRows,
-                    hasAppendRow,
-                    drawRegions,
-                    damage,
-                    selection,
-                    prelightCells,
-                    highlightRegions,
-                    imageLoader,
-                    spriteManager,
-                    hoverValues,
-                    hoverInfo,
-                    drawCellCallback,
-                    hyperWrapping,
-                    theme,
-                    enqueue,
-                    renderStateProvider,
-                    getCellRenderer,
-                    overrideCursor,
-                    minimumCellWidth
+                    damage
                 );
-
-                const selectionCurrent = selection.current;
-
-                if (
-                    fillHandle &&
-                    drawFocus &&
-                    selectionCurrent !== undefined &&
-                    damage.has(rectBottomRight(selectionCurrent.range))
-                ) {
-                    drawFocusRing(
-                        ctx,
-                        width,
-                        height,
-                        cellYOffset,
-                        translateX,
-                        translateY,
-                        effectiveCols,
-                        mappedColumns,
-                        theme,
-                        totalHeaderHeight,
-                        selection,
-                        getRowHeight,
-                        getCellContent,
-                        freezeTrailingRows,
-                        hasAppendRow,
-                        fillHandle,
-                        rows
-                    );
-                }
-
-                // we dont need to redo the headers when dealing with the mainCtx redraw
-                if (doHeaders && ctx !== mainCtx) {
-                    clipHeaderDamage(
-                        overlayCtx,
-                        effectiveCols,
-                        width,
-                        groupHeaderHeight,
-                        totalHeaderHeight,
-                        translateX,
-                        translateY,
-                        cellYOffset,
-                        damage
-                    );
-                    drawHeaderTexture();
-                }
+                drawHeaderTexture();
             }
-        };
-
-        doDamage(targetCtx);
-        if (mainCtx !== null) {
-            mainCtx.save();
-            mainCtx.scale(dpr, dpr);
-            mainCtx.textBaseline = "middle";
-            doDamage(mainCtx);
-            mainCtx.restore();
         }
 
         targetCtx.restore();
