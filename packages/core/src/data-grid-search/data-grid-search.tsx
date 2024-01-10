@@ -346,6 +346,24 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
           onNext();
         }
       }
+      // Check for Shift + F3 and Cmd/Ctrl + Shift + G for previous result
+      else if (
+        (event.shiftKey && event.key === 'F3') ||
+        ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'g')
+      ) {
+        event.stopPropagation();
+        event.preventDefault();
+        onPrev();
+      }
+      // Check for F3 and Cmd/Ctrl + G for next result
+      else if (
+        event.key === 'F3' ||
+        ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === 'g')
+      ) {
+        event.stopPropagation();
+        event.preventDefault();
+        onNext();
+      }
     },
     [onClose, onNext, onPrev]
   );
