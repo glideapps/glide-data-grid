@@ -21,7 +21,7 @@ type SelectOption = { value: string; label?: string; color?: string };
 
 interface MultiSelectCellProps {
     readonly kind: "multi-select-cell";
-    readonly value: string[] | undefined | null;
+    readonly values: string[] | undefined | null;
     readonly options: readonly (SelectOption | string)[];
     readonly color?: string;
     readonly creatable?: boolean;
@@ -39,7 +39,8 @@ const Wrap = styled.div`
     display: flex;
     flex-direction: column;
     align-items: stretch;
-
+    margin-top: auto;
+    margin-bottom: auto;
     .gdg-multi-select {
         font-family: var(--gdg-font-family);
         font-size: var(--gdg-editor-font-size);
@@ -106,10 +107,17 @@ export type MultiSelectCell = CustomCell<MultiSelectCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
     const { value: cell, initialValue, onChange } = p;
-    const { options: optionsIn, value: valueIn, creatable, color: colorIn, borderRadius, allowDuplicates } = cell.data;
+    const {
+        options: optionsIn,
+        values: valuesIn,
+        creatable,
+        color: colorIn,
+        borderRadius,
+        allowDuplicates,
+    } = cell.data;
 
     const theme = useTheme();
-    const [value, setValue] = React.useState(valueIn);
+    const [value, setValue] = React.useState(valuesIn);
     const [menuOpen, setMenuOpen] = React.useState(true);
     const [inputValue, setInputValue] = React.useState(initialValue ?? "");
 
@@ -262,7 +270,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                         ...cell,
                         data: {
                             ...cell.data,
-                            value: mappedValues,
+                            values: mappedValues,
                         },
                     });
                 }}
@@ -276,9 +284,9 @@ const renderer: CustomRenderer<MultiSelectCell> = {
     isMatch: (c): c is MultiSelectCell => (c.data as any).kind === "multi-select-cell",
     draw: (args, cell) => {
         const { ctx, theme, rect, highlighted } = args;
-        const { value, options: optionsIn, borderRadius, color: colorIn } = cell.data;
+        const { values, options: optionsIn, borderRadius, color: colorIn } = cell.data;
 
-        if (value === undefined || value === null) {
+        if (values === undefined || values === null) {
             return true;
         }
 
@@ -294,13 +302,17 @@ const renderer: CustomRenderer<MultiSelectCell> = {
 
         let { x } = drawArea;
         let row = 1;
-        let y = drawArea.y + (drawArea.height - rows * TAG_HEIGHT - (rows - 1) * TAG_HEIGHT) / 2;
-        for (const tag of value) {
-            const matchedOption = options.find(t => t.value === tag);
+
+        let y =
+            rows === 1
+                ? drawArea.y + (drawArea.height - TAG_HEIGHT) / 2
+                : drawArea.y + (drawArea.height - rows * TAG_HEIGHT - (rows - 1) * TAG_PADDING) / 2;
+        for (const value of values) {
+            const matchedOption = options.find(t => t.value === value);
             const color = chroma(
                 matchedOption?.color ?? colorIn ?? (highlighted ? theme.bgBubbleSelected : theme.bgBubble)
             );
-            const displayText = matchedOption?.label ?? tag;
+            const displayText = matchedOption?.label ?? value;
             const metrics = measureTextCached(displayText, ctx);
             const width = metrics.width + TAG_PADDING * 2;
             const textY = TAG_HEIGHT / 2;
@@ -328,16 +340,22 @@ const renderer: CustomRenderer<MultiSelectCell> = {
         return true;
     },
     measure: (ctx, cell, t) => {
-        const { value } = cell.data;
-        if (value) {
-            return (
-                value.reduce((acc, data) => ctx.measureText(data).width + acc + TAG_PADDING * 2 + TAG_MARGIN, 0) +
-                2 * t.cellHorizontalPadding -
-                4
-            );
-        } else {
+        const { values, options } = cell.data;
+
+        if (!values) {
             return t.cellHorizontalPadding * 2;
         }
+
+        // Resolve the values to the actual display labels:
+        const labels = resolveValues(values, prepareOptions(options), cell.data.allowDuplicates).map(
+            x => x.label ?? x.value
+        );
+
+        return (
+            labels.reduce((acc, data) => ctx.measureText(data).width + acc + TAG_PADDING * 2 + TAG_MARGIN, 0) +
+            2 * t.cellHorizontalPadding -
+            4
+        );
     },
     provideEditor: () => ({
         editor: Editor,
@@ -347,7 +365,7 @@ const renderer: CustomRenderer<MultiSelectCell> = {
             copyData: "",
             data: {
                 ...v.data,
-                value: [],
+                values: [],
             },
         }),
     }),
@@ -360,7 +378,7 @@ const renderer: CustomRenderer<MultiSelectCell> = {
 
         return {
             ...d,
-            value: d.creatable
+            values: d.creatable
                 ? values
                 : prepareOptions(d.options)
                       .map(x => x.value)
