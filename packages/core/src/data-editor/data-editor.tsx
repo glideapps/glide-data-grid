@@ -76,6 +76,7 @@ import type { CellRenderer, CustomRenderer } from '../data-grid/cells/cell-types
 import { CellRenderers } from '../data-grid/cells';
 import type { RowGroup } from './use-groups';
 import { useGroups } from './use-groups';
+import { isNull } from 'lodash';
 
 let idCounter = 0;
 
@@ -4116,7 +4117,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
   const [isFocused, setIsFocused] = React.useState(false);
   const setIsFocusedDebounced = React.useRef(
-    debounce((val: boolean) => {
+    debounce((val: boolean, layoutOverlay = null) => {
+      const isDoubleClick = mouseDownData.current ? mouseDownData.current?.wasDoubleClick : false;
+
+      if (!val && isNull(layoutOverlay) && !document.hidden && !isDoubleClick) {
+        setGridSelection(emptyGridSelection, false);
+      }
       setIsFocused(val);
     }, 5)
   );
@@ -4149,8 +4155,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
   }, [cellYOffset, gridSelection, mouseState, rowMarkerOffset, setCurrent]);
 
   const onFocusOut = React.useCallback(() => {
-    setIsFocusedDebounced.current(false);
-  }, []);
+    setIsFocusedDebounced.current(false, overlay);
+  }, [overlay]);
 
   const [idealWidth, idealHeight] = React.useMemo(() => {
     let h: number;
