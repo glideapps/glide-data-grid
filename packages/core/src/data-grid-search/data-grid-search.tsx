@@ -332,37 +332,31 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
 
   const onSearchKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (
-        ((event.ctrlKey || event.metaKey) && event.nativeEvent.code === 'KeyF') ||
-        event.key === 'Escape'
-      ) {
+      const isPressedCtrlOrCommand = event.ctrlKey || event.metaKey;
+      const isPressedEnter = event.key === 'Enter';
+      const isPressedF3 = event.key === 'F3';
+      const isPressedEscape = event.key === 'Escape';
+      const isPressedF = event.nativeEvent.code === 'KeyF';
+      const isPressedG = event.nativeEvent.code === 'KeyG';
+      const isPressedCtrlOrCommandF = isPressedCtrlOrCommand && isPressedF;
+      const isPressedCtrlOrCommandG = isPressedCtrlOrCommand && isPressedG;
+
+      const shouldClose = isPressedCtrlOrCommandF || isPressedEscape;
+      const shouldJumpToNextResult = isPressedEnter || isPressedF3 || isPressedCtrlOrCommandG;
+      const shouldJumpToPrevResult = event.shiftKey && shouldJumpToNextResult;
+
+      if (shouldClose) {
         onClose();
         event.stopPropagation();
         event.preventDefault();
-      } else if (event.key === 'Enter') {
-        if (event.shiftKey) {
-          onPrev();
-        } else {
-          onNext();
-        }
-      }
-      // Check for Shift + F3 and Cmd/Ctrl + Shift + G for previous result
-      else if (
-        (event.shiftKey && event.key === 'F3') ||
-        ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'g')
-      ) {
-        event.stopPropagation();
-        event.preventDefault();
+      } else if (shouldJumpToPrevResult) {
         onPrev();
-      }
-      // Check for F3 and Cmd/Ctrl + G for next result
-      else if (
-        event.key === 'F3' ||
-        ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === 'g')
-      ) {
         event.stopPropagation();
         event.preventDefault();
+      } else if (shouldJumpToNextResult) {
         onNext();
+        event.stopPropagation();
+        event.preventDefault();
       }
     },
     [onClose, onNext, onPrev]
