@@ -1828,7 +1828,7 @@ function drawColumnResizeOutline(
     ctx.lineTo(yOffset, height);
 
     ctx.lineWidth = 2;
-    ctx.strokeStyle = theme.accentLight;
+    ctx.strokeStyle = blend(theme.accentLight, theme.bgCell);
 
     ctx.stroke();
 
