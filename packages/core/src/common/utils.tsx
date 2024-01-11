@@ -169,11 +169,10 @@ const ltrRange =
 
 /* eslint-disable no-misleading-character-class */
 const rtl = new RegExp("^[^" + ltrRange + "]*[" + rtlRange + "]");
-const ltr = new RegExp("^[^" + rtlRange + "]*[" + ltrRange + "]");
 /* eslint-enable no-misleading-character-class */
 
-export function direction(value: string): "rtl" | "ltr" | "neutral" {
-    return rtl.test(value) ? "rtl" : ltr.test(value) ? "ltr" : "neutral";
+export function direction(value: string): "rtl" | "not-rtl" {
+    return rtl.test(value) ? "rtl" : "not-rtl";
 }
 
 let scrollbarWidthCache: number | undefined = undefined;

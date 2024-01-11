@@ -450,7 +450,7 @@ function truncateString(data: string, w: number): string {
     if (data.includes("\n")) {
         // new lines are rare and split is relatively expensive compared to the search
         // it pays off to not do the split contantly.
-        data = data.split(/\r?\n/)[0];
+        data = data.split(/\r?\n/, 1)[0];
     }
     const max = w / 4; // no need to round, slice will just truncate this
     if (data.length > max) {

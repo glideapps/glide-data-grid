@@ -1219,7 +1219,7 @@ function drawCells(
     const freezeTrailingRowsHeight =
         freezeTrailingRows > 0 ? getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) : 0;
     let result: Rectangle[] | undefined;
-    const handledSpans = new Set<string>();
+    let handledSpans: Set<string> | undefined = undefined;
     walkColumns(
         effectiveColumns,
         cellYOffset,
@@ -1323,6 +1323,7 @@ function drawCells(
                     if (cell.span !== undefined) {
                         const [startCol, endCol] = cell.span;
                         const spanKey = `${row},${startCol},${endCol},${c.sticky}`; //alloc
+                        if (handledSpans === undefined) handledSpans = new Set();
                         if (!handledSpans.has(spanKey)) {
                             const areas = getSpanBounds(cell.span, drawX, drawY, c.width, rh, c, allColumns);
                             const area = c.sticky ? areas[0] : areas[1];
