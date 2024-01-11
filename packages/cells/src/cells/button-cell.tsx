@@ -111,14 +111,14 @@ const renderer: CustomRenderer<ButtonCell> = {
 
         if (backgroundColor !== undefined) {
             ctx.beginPath();
-            roundedRect(ctx, x, y, width, height, borderRadius ?? 0);
+            roundedRect(ctx, x, y, width, height, borderRadius ?? theme.roundingRadius ?? 0);
             ctx.fillStyle = unpackColor(backgroundColor, theme, hoverAmount);
             ctx.fill();
         }
 
         if (borderColor !== undefined) {
             ctx.beginPath();
-            roundedRect(ctx, x + 0.5, y + 0.5, width - 1, height - 1, borderRadius ?? 0);
+            roundedRect(ctx, x + 0.5, y + 0.5, width - 1, height - 1, borderRadius ?? theme.roundingRadius ?? 0);
             ctx.strokeStyle = unpackColor(borderColor, theme, hoverAmount);
             ctx.lineWidth = 1;
             ctx.stroke();

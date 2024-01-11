@@ -37,7 +37,14 @@ export const loadingCellRenderer: InternalCellRenderer<LoadingCell> = {
         const hpad = theme.cellHorizontalPadding;
         const rectHeight = cell.skeletonHeight ?? Math.min(18, rect.height - 2 * theme.cellVerticalPadding);
 
-        roundedRect(ctx, rect.x + hpad, rect.y + (rect.height - rectHeight) / 2, width, rectHeight, 3);
+        roundedRect(
+            ctx,
+            rect.x + hpad,
+            rect.y + (rect.height - rectHeight) / 2,
+            width,
+            rectHeight,
+            theme.roundingRadius ?? 3
+        );
         ctx.fillStyle = withAlpha(theme.textDark, 0.1);
         ctx.fill();
     },

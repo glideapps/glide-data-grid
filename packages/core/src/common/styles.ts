@@ -36,6 +36,7 @@ export function makeCSSStyle(theme: Theme): Record<string, string> {
         "--gdg-marker-font-style": theme.markerFontStyle,
         "--gdg-font-family": theme.fontFamily,
         "--gdg-editor-font-size": theme.editorFontSize,
+        ...(theme.roundingRadius === undefined ? {} : { "--gdg-rounding-radius": `${theme.roundingRadius}px` }),
     };
 }
 
@@ -75,6 +76,7 @@ export interface Theme {
     fontFamily: string;
     editorFontSize: string;
     lineHeight: number;
+    roundingRadius?: number;
 }
 
 const dataEditorBaseTheme: Theme = {

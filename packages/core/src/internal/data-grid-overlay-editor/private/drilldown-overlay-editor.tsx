@@ -11,8 +11,6 @@ const DrilldownOverlayEditorStyle = styled.div`
         justify-content: center;
         align-items: center;
 
-        border-radius: 100px;
-
         padding: 0 8px;
         height: 24px;
 
@@ -20,7 +18,7 @@ const DrilldownOverlayEditorStyle = styled.div`
         color: var(--gdg-text-dark);
         margin: 2px;
 
-        border-radius: 6px;
+        border-radius: var(--gdg-rounding-radius, 6px);
 
         box-shadow:
             0 0 1px rgba(62, 65, 86, 0.4),
