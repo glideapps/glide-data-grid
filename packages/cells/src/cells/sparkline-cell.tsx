@@ -68,7 +68,7 @@ const renderer: CustomRenderer<SparklineCell> = {
         } else {
             if (values.length === 1) {
                 values = [values[0], values[0]];
-                if (displayValues !== undefined) {
+                if (displayValues) {
                     displayValues = [displayValues[0], displayValues[0]];
                 }
             }
