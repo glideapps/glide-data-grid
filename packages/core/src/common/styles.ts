@@ -63,8 +63,6 @@ export interface Theme {
     bgBubbleSelected: string;
     bgSearchResult: string;
     borderColor: string;
-    horizontalBorderColor?: string;
-    headerBottomBorderColor?: string;
     drilldownBorder: string;
     linkColor: string;
     cellHorizontalPadding: number;
@@ -76,6 +74,10 @@ export interface Theme {
     fontFamily: string;
     editorFontSize: string;
     lineHeight: number;
+
+    resizeIndicatorColor?: string;
+    horizontalBorderColor?: string;
+    headerBottomBorderColor?: string;
     roundingRadius?: number;
 }
 

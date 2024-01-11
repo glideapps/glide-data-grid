@@ -1821,14 +1821,14 @@ function drawColumnResizeOutline(
     yOffset: number,
     xOffset: number,
     height: number,
-    theme: FullTheme
+    style: string
 ) {
     ctx.beginPath();
     ctx.moveTo(yOffset, xOffset);
     ctx.lineTo(yOffset, height);
 
     ctx.lineWidth = 2;
-    ctx.strokeStyle = blend(theme.accentLight, theme.bgCell);
+    ctx.strokeStyle = style;
 
     ctx.stroke();
 
@@ -2681,8 +2681,20 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     if (isResizing) {
         walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x) => {
             if (c.sourceIndex === resizeCol) {
-                drawColumnResizeOutline(overlayCtx, x + c.width, 0, totalHeaderHeight + 1, theme);
-                drawColumnResizeOutline(targetCtx, x + c.width, totalHeaderHeight, height, theme);
+                drawColumnResizeOutline(
+                    overlayCtx,
+                    x + c.width,
+                    0,
+                    totalHeaderHeight + 1,
+                    blend(theme.resizeIndicatorColor ?? theme.accentLight, theme.bgHeader)
+                );
+                drawColumnResizeOutline(
+                    targetCtx,
+                    x + c.width,
+                    totalHeaderHeight,
+                    height,
+                    blend(theme.resizeIndicatorColor ?? theme.accentLight, theme.bgCell)
+                );
                 return true;
             }
             return false;
