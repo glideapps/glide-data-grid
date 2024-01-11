@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.16.0](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.15.9...v5.16.0) (2024-01-11)
+
+
+### Features
+
+* add missing search  hotkeys ([ae0aeec](https://gitlab.workfront.tech/maestro/glide-data-grid/commit/ae0aeecda31dbb1415546159489e044d3aca4cee))
+
 ### [5.15.9](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.15.8...v5.15.9) (2023-12-27)
 
 ### [5.15.8](https://gitlab.workfront.tech/maestro/glide-data-grid/compare/v5.15.7...v5.15.8) (2023-12-26)
