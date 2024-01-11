@@ -1,6 +1,6 @@
 import { styled } from "@linaria/react";
 import * as React from "react";
-import { DataEditor, type DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
+import { DataEditor, type DataEditorProps, GridCellKind, type BubbleCell } from "@glideapps/glide-data-grid";
 import { DropdownCell as DropdownRenderer, allCells } from "./index.js";
 import type { StarCell } from "./cells/star-cell.js";
 import type { SparklineCell } from "./cells/sparkline-cell.js";
@@ -175,6 +175,42 @@ export const CustomCells: React.VFC = () => {
                 {...defaultProps}
                 customRenderers={allCells}
                 onPaste={true}
+                // theme={{
+                //     accentColor: "#8c96ff",
+                //     accentLight: "rgba(202, 206, 255, 0.253)",
+
+                //     textDark: "#ffffff",
+                //     textMedium: "#b8b8b8",
+                //     textLight: "#a0a0a0",
+                //     textBubble: "#ffffff",
+
+                //     bgIconHeader: "#b8b8b8",
+                //     fgIconHeader: "#000000",
+                //     textHeader: "#a1a1a1",
+                //     textHeaderSelected: "#000000",
+
+                //     bgCell: "#16161b",
+                //     bgCellMedium: "#202027",
+                //     bgHeader: "#212121",
+                //     bgHeaderHasFocus: "#474747",
+                //     bgHeaderHovered: "#404040",
+
+                //     bgBubble: "#212121",
+                //     bgBubbleSelected: "#000000",
+
+                //     bgSearchResult: "#423c24",
+
+                //     borderColor: "rgba(225,225,225,0.2)",
+                //     drilldownBorder: "rgba(225,225,225,0.4)",
+
+                //     linkColor: "#4F5DFF",
+
+                //     headerFontStyle: "bold 14px",
+                //     baseFontStyle: "13px",
+                //     fontFamily:
+                //         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
+                // }}
+                // rowHeight={50}
                 // eslint-disable-next-line no-console
                 onCellEdited={(...args) => console.log("Edit Cell", ...args)}
                 getCellsForSelection={true}
@@ -190,7 +226,8 @@ export const CustomCells: React.VFC = () => {
                                 // color: "#FF4B4B",
                                 borderRadius: 4,
                                 kind: "multi-select-cell",
-                                value: ["glide", "data"],
+                                values: ["glide", "data", "grid", "foo", "bar"],
+                                allowDuplicates: false,
                                 options: [
                                     // "glide",
                                     // "data",
@@ -198,6 +235,8 @@ export const CustomCells: React.VFC = () => {
                                     { value: "glide", color: "#ffc38a" },
                                     { value: "data", color: "#ebfdea" },
                                     { value: "grid", color: "teal" },
+                                    "foo",
+                                    "bar",
                                 ],
                                 creatable: true,
                             },
@@ -215,19 +254,26 @@ export const CustomCells: React.VFC = () => {
                         // } as StarCell;
                     } else if (col === 1) {
                         num = row + 1;
-                        const values = range(0, 15).map(() => rand() * 100 - 50);
                         return {
-                            kind: GridCellKind.Custom,
-                            allowOverlay: false,
+                            kind: GridCellKind.Bubble,
+                            // allowOverlay: false,
                             copyData: "4",
-                            data: {
-                                kind: "sparkline-cell",
-                                values,
-                                displayValues: values.map(x => Math.round(x).toString()),
-                                color: row % 2 === 0 ? "#77c4c4" : "#D98466",
-                                yAxis: [-50, 50],
-                            },
-                        } as SparklineCell;
+                            data: ["foo", "bar", "baz", "qux", "quux", "corge", "grault", "garply", "waldo", "fred"],
+                        } as BubbleCell;
+
+                        // const values = range(0, 15).map(() => rand() * 100 - 50);
+                        // return {
+                        //     kind: GridCellKind.Custom,
+                        //     allowOverlay: false,
+                        //     copyData: "4",
+                        //     data: {
+                        //         kind: "sparkline-cell",
+                        //         values,
+                        //         displayValues: values.map(x => Math.round(x).toString()),
+                        //         color: row % 2 === 0 ? "#77c4c4" : "#D98466",
+                        //         yAxis: [-50, 50],
+                        //     },
+                        // } as SparklineCell;
                     } else if (col === 2) {
                         num = row + 1;
                         const values = range(0, 15).map(() => rand() * 100 - 50);
@@ -479,10 +525,10 @@ export const CustomCells: React.VFC = () => {
                             readonly: row % 2 === 0,
                             data: {
                                 kind: "multi-select-cell",
-                                value: ["A", "B", "C"],
+                                values: ["A", "B", "C"],
                                 options: [
-                                    { value: "A", label: "blub", color: "red" },
-                                    "B",
+                                    { value: "A", label: "whooooop", color: "red" },
+                                    { value: "B", color: "blue" },
                                     "C",
                                     "D",
                                     "E",
@@ -501,8 +547,8 @@ export const CustomCells: React.VFC = () => {
                 }}
                 columns={[
                     {
+                        id: "stars",
                         title: "Stars",
-                        width: 200,
                     },
                     {
                         title: "Sparkline (area)",
@@ -565,8 +611,8 @@ export const CustomCells: React.VFC = () => {
                         width: 200,
                     },
                     {
-                        title: "MultiSelect",
-                        width: 150,
+                        id: "multiselect",
+                        title: "Multiselect",
                     },
                 ]}
                 rows={500}
