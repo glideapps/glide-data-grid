@@ -16,9 +16,11 @@ export function useAutoscroll(
             speedScalar.current = 0;
             return;
         }
+        let cancelled = false;
 
         let lastTime = 0;
         const scrollFn = (curTime: number) => {
+            if (cancelled) return;
             if (lastTime === 0) {
                 lastTime = curTime;
             } else {
@@ -29,9 +31,11 @@ export function useAutoscroll(
                 lastTime = curTime;
                 onScroll?.();
             }
-            t = window.requestAnimationFrame(scrollFn);
+            window.requestAnimationFrame(scrollFn);
         };
-        let t = window.requestAnimationFrame(scrollFn);
-        return () => window.cancelAnimationFrame(t);
+        window.requestAnimationFrame(scrollFn);
+        return () => {
+            cancelled = true;
+        };
     }, [scrollRef, xDir, yDir, onScroll]);
 }
