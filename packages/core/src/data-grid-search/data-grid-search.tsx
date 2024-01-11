@@ -332,19 +332,31 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
 
   const onSearchKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (
-        ((event.ctrlKey || event.metaKey) && event.nativeEvent.code === 'KeyF') ||
-        event.key === 'Escape'
-      ) {
+      const isPressedCtrlOrCommand = event.ctrlKey || event.metaKey;
+      const isPressedEnter = event.key === 'Enter';
+      const isPressedF3 = event.key === 'F3';
+      const isPressedEscape = event.key === 'Escape';
+      const isPressedF = event.nativeEvent.code === 'KeyF';
+      const isPressedG = event.nativeEvent.code === 'KeyG';
+      const isPressedCtrlOrCommandF = isPressedCtrlOrCommand && isPressedF;
+      const isPressedCtrlOrCommandG = isPressedCtrlOrCommand && isPressedG;
+
+      const shouldClose = isPressedCtrlOrCommandF || isPressedEscape;
+      const shouldJumpToNextResult = isPressedEnter || isPressedF3 || isPressedCtrlOrCommandG;
+      const shouldJumpToPrevResult = event.shiftKey && shouldJumpToNextResult;
+
+      if (shouldClose) {
         onClose();
         event.stopPropagation();
         event.preventDefault();
-      } else if (event.key === 'Enter') {
-        if (event.shiftKey) {
-          onPrev();
-        } else {
-          onNext();
-        }
+      } else if (shouldJumpToPrevResult) {
+        onPrev();
+        event.stopPropagation();
+        event.preventDefault();
+      } else if (shouldJumpToNextResult) {
+        onNext();
+        event.stopPropagation();
+        event.preventDefault();
       }
     },
     [onClose, onNext, onPrev]
