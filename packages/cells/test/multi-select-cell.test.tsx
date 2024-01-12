@@ -127,9 +127,9 @@ describe("resolveValues", () => {
             values: ["option1", "option1", "nonExistingOption"],
             allowDuplicates: true,
             expected: [
+                { value: "__value0__option1", label: "Option 1", color: "red" },
                 { value: "__value1__option1", label: "Option 1", color: "red" },
-                { value: "__value2__option1", label: "Option 1", color: "red" },
-                { value: "__value3__nonExistingOption", label: "nonExistingOption" },
+                { value: "__value2__nonExistingOption", label: "nonExistingOption" },
             ],
         },
     ];
