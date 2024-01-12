@@ -40,15 +40,8 @@ const renderer: CustomRenderer<TreeViewCell> = {
 
         if (!canOpen || onClickOpener === undefined) return;
 
-        const inset = depth * depthShift;
-
-        const overIcon = isOverIcon(posX, posY, inset, theme, h);
-
-        if (overIcon) {
-            return onClickOpener();
-        }
-
-        return undefined;
+        const overIcon = isOverIcon(posX, posY, depth * depthShift, theme, h);
+        return overIcon ? onClickOpener() : undefined;
     },
     draw: (args, cell) => {
         const { ctx, theme, rect, hoverX = 0, hoverY = 0 } = args;
