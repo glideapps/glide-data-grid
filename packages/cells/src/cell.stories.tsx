@@ -474,7 +474,7 @@ export const CustomCells: React.VFC = () => {
                 columns={[
                     {
                         title: "Stars",
-                        width: 200,
+                        width: 100,
                     },
                     {
                         title: "Sparkline (area)",
@@ -534,7 +534,7 @@ export const CustomCells: React.VFC = () => {
                     },
                     {
                         title: "TreeView",
-                        width: 200,
+                        width: 150,
                     },
                     {
                         id: "multiselect",
@@ -616,7 +616,7 @@ export const CustomCellEditing: React.VFC = () => {
                             },
                         } as MultiSelectCell;
                     } else if (col === 2) {
-                        const val = data.current?.[col]?.[row] ?? ["glide"];
+                        const val = data.current?.[col]?.[row] ?? ["glide data grid"];
                         return {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
@@ -639,6 +639,9 @@ export const CustomCellEditing: React.VFC = () => {
                     {
                         title: "Multi Select",
                         width: 200,
+                        themeOverride: {
+                            roundingRadius: 4,
+                        },
                     },
                     {
                         title: "Multi Select (no options)",
