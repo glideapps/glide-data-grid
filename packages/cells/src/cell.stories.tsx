@@ -478,7 +478,7 @@ export const CustomCells: React.VFC = () => {
                     },
                     {
                         id: "dropdown",
-                        title: "Dropdown",
+                        title: "Dropdowndorpads",
                     },
                     {
                         title: "Range",
@@ -513,8 +513,8 @@ export const CustomCells: React.VFC = () => {
                         width: 120,
                     },
                     {
+                        id: "treeview",
                         title: "TreeView",
-                        width: 200,
                     },
                 ]}
                 rows={500}

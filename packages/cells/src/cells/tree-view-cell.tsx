@@ -15,6 +15,11 @@ const renderer: CustomRenderer<TreeViewCell> = {
     isMatch: (c): c is TreeViewCell => (c.data as any).kind === "tree-view-cell",
     needsHover: true,
     needsHoverPosition: true,
+    measure: (ctx, cell, theme) => {
+        const { text, depth } = cell.data;
+        // We add 2 to the depth to give it a bit more space, otherwise it looks cramped.
+        return ctx.measureText(text).width + theme.cellHorizontalPadding * 2 + (depth + 2) * 16;
+    },
     draw: (args, cell) => {
         const { ctx, theme, rect, hoverX = 0, hoverY = 0 } = args;
         const { x, y, height: h } = rect;
