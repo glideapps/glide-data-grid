@@ -253,6 +253,22 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
         },
     };
 
+    // This is used to handle the enter key when allowDuplicates and
+    // allowCreation are enabled to allow the user to enter newly created values
+    // multiple times.
+    const handleKeyDown: React.KeyboardEventHandler = event => {
+        if (!inputValue) {
+            return;
+        }
+        switch (event.key) {
+            case "Enter":
+            case "Tab":
+                setValue(prev => [...(prev ?? []), inputValue]);
+                setInputValue("");
+                event.preventDefault();
+        }
+    };
+
     const SelectComponent = allowCreation ? CreatableSelect : Select;
     return (
         <Wrap onKeyDown={onKeyDown}>
@@ -269,6 +285,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 onMenuOpen={() => setMenuOpen(true)}
                 onMenuClose={() => setMenuOpen(false)}
                 value={resolveValues(value, options, allowDuplicates)}
+                onKeyDown={allowDuplicates && allowCreation ? handleKeyDown : undefined}
                 menuPlacement={"auto"}
                 menuPortalTarget={document.getElementById("portal")}
                 autoFocus={true}
