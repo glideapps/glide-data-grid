@@ -21,18 +21,29 @@ type SelectOption = { value: string; label?: string; color?: string };
 
 interface MultiSelectCellProps {
     readonly kind: "multi-select-cell";
+    /* The list of values of this cell. */
     readonly values: string[] | undefined | null;
+    /* The list of possible options that can be selected.
+    The options can be provided as a list of strings 
+    or as a list of objects with the following properties:
+    - value: The value of this option.
+    - label: The label of this option. If not provided, the value will be used as the label.
+    - color: The color of this option. If not provided, the default color will be used. */
     readonly options: readonly (SelectOption | string)[];
-    readonly color?: string;
-    readonly creatable?: boolean;
+    /* If true, users can create new values that are not part of the configured options. */
+    readonly allowCreation?: boolean;
+    /* If true, users can select the same value multiple times. */
     readonly allowDuplicates?: boolean;
-    readonly borderRadius?: number;
+    /* The default color of the tags. */
+    readonly color?: string;
 }
 
 const TAG_HEIGHT = 20;
 const TAG_PADDING = 6;
 const TAG_MARGIN = 4;
-const VALUE_PREFIX = "__created";
+/* This prefix is used when allowDuplicates is enabled to make sure that
+all underlying values are unique.*/
+const VALUE_PREFIX = "__value";
 const VALUE_PREFIX_REGEX = new RegExp(`^${VALUE_PREFIX}\\d+__`);
 
 const Wrap = styled.div`
@@ -58,22 +69,38 @@ const PortalWrap = styled.div`
     }
 `;
 
+/**
+ * Prepares the options for usage with the react-select component.
+ *
+ * @param options The options to prepare.
+ * @returns The prepared options in the format required by react-select.
+ */
 const prepareOptions = (
     options: readonly (string | SelectOption)[]
 ): { value: string; label?: string; color?: string }[] => {
     return options.map(option => {
         if (typeof option === "string" || option === null || option === undefined) {
-            return { value: option, label: option?.toString() ?? "", color: undefined };
+            return { value: option, label: option ?? "", color: undefined };
         }
 
         return {
             value: option.value,
-            label: option.label ?? option.value?.toString() ?? "",
+            label: option.label ?? option.value ?? "",
             color: option.color ?? undefined,
         };
     });
 };
 
+/**
+ * Resolve a list values to values compatible with react-select.
+ * If allowDuplicates is true, the values will be prefixed with a numbered prefix to
+ * make sure that all values are unique.
+ *
+ * @param values The values to resolve.
+ * @param options The options to use for the resolution.
+ * @param allowDuplicates If true, the values can contain duplicates.
+ * @returns The list of values compatible with react-select.
+ */
 const resolveValues = (
     values: string[] | null | undefined,
     options: readonly SelectOption[],
@@ -107,20 +134,15 @@ export type MultiSelectCell = CustomCell<MultiSelectCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
     const { value: cell, initialValue, onChange } = p;
-    const {
-        options: optionsIn,
-        values: valuesIn,
-        creatable,
-        color: colorIn,
-        borderRadius,
-        allowDuplicates,
-    } = cell.data;
+    const { options: optionsIn, values: valuesIn, color: colorIn, allowCreation, allowDuplicates } = cell.data;
 
     const theme = useTheme();
     const [value, setValue] = React.useState(valuesIn);
     const [menuOpen, setMenuOpen] = React.useState(true);
     const [inputValue, setInputValue] = React.useState(initialValue ?? "");
 
+    // Prevent the grid from handling the keydown as long as the menu is open:
+    // This allows usage of enter without triggering the grid to finish editing.
     const onKeyDown = React.useCallback(
         (e: React.KeyboardEvent) => {
             if (menuOpen) {
@@ -134,7 +156,8 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
         return prepareOptions(optionsIn);
     }, [optionsIn]);
 
-    // Apply styles to the react-select component:
+    // Apply styles to the react-select component.
+    // All components: https://react-select.com/components
     const colorStyles: StylesConfig<SelectOption, true> = {
         control: base => ({
             ...base,
@@ -190,6 +213,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 color: theme.textLight,
                 ":hover": {
                     color: theme.textDark,
+                    cursor: "pointer",
                 },
             };
         },
@@ -198,7 +222,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
             return {
                 ...styles,
                 backgroundColor: color.css(),
-                borderRadius: `${borderRadius ?? TAG_HEIGHT / 2}px`,
+                borderRadius: `${theme.roundingRadius ?? TAG_HEIGHT / 2}px`,
             };
         },
         multiValueLabel: (styles, { data, isDisabled }) => {
@@ -229,20 +253,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
         },
     };
 
-    const handleKeyDown: React.KeyboardEventHandler = event => {
-        if (!inputValue) {
-            return;
-        }
-        switch (event.key) {
-            case "Enter":
-            case "Tab":
-                setValue(prev => [...(prev ?? []), inputValue]);
-                setInputValue("");
-                event.preventDefault();
-        }
-    };
-
-    const SelectComponent = creatable ? CreatableSelect : Select;
+    const SelectComponent = allowCreation ? CreatableSelect : Select;
     return (
         <Wrap onKeyDown={onKeyDown}>
             <SelectComponent
@@ -258,12 +269,11 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 onMenuOpen={() => setMenuOpen(true)}
                 onMenuClose={() => setMenuOpen(false)}
                 value={resolveValues(value, options, allowDuplicates)}
-                styles={colorStyles}
-                onKeyDown={allowDuplicates && creatable ? handleKeyDown : undefined}
                 menuPlacement={"auto"}
                 menuPortalTarget={document.getElementById("portal")}
                 autoFocus={true}
                 openMenuOnFocus={true}
+                styles={colorStyles}
                 components={{
                     DropdownIndicator: () => null,
                     IndicatorSeparator: () => null,
@@ -277,6 +287,9 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                     if (e === null) {
                         return;
                     }
+
+                    // Change the list of values to the actual values by removing the prefix.
+                    // This is only relevant in the case of allowDuplicates being true.
                     const mappedValues = e.map(x => {
                         return allowDuplicates && x.value.startsWith(VALUE_PREFIX)
                             ? x.value.replace(new RegExp(VALUE_PREFIX_REGEX), "")
@@ -301,7 +314,7 @@ const renderer: CustomRenderer<MultiSelectCell> = {
     isMatch: (c): c is MultiSelectCell => (c.data as any).kind === "multi-select-cell",
     draw: (args, cell) => {
         const { ctx, theme, rect, highlighted } = args;
-        const { values, options: optionsIn, borderRadius, color: colorIn } = cell.data;
+        const { values, options: optionsIn, color: colorIn } = cell.data;
 
         if (values === undefined || values === null) {
             return true;
@@ -342,7 +355,7 @@ const renderer: CustomRenderer<MultiSelectCell> = {
 
             ctx.fillStyle = color.hex();
             ctx.beginPath();
-            roundedRect(ctx, x, y, width, TAG_HEIGHT, borderRadius ?? TAG_HEIGHT / 2);
+            roundedRect(ctx, x, y, width, TAG_HEIGHT, theme.roundingRadius ?? TAG_HEIGHT / 2);
             ctx.fill();
 
             ctx.fillStyle = color.luminance() > 0.5 ? "#000000" : "#ffffff";
@@ -390,14 +403,16 @@ const renderer: CustomRenderer<MultiSelectCell> = {
         let values = val.split(",").map(s => s.trim());
 
         if (!d.allowDuplicates) {
+            // Remove all duplicates
             values = values.filter((v, index) => values.indexOf(v) === index);
         }
 
         return {
             ...d,
-            values: d.creatable
+            values: d.allowCreation
                 ? values
-                : prepareOptions(d.options)
+                : // Only allow values that are part of the options:
+                  prepareOptions(d.options)
                       .map(x => x.value)
                       .filter(x => values.includes(x)),
         };
