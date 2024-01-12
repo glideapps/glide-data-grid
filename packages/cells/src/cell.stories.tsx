@@ -473,8 +473,8 @@ export const CustomCells: React.VFC = () => {
                 }}
                 columns={[
                     {
-                        id: "stars",
                         title: "Stars",
+                        width: 200,
                     },
                     {
                         title: "Sparkline (area)",
