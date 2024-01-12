@@ -107,10 +107,17 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                         border: 0,
                         boxShadow: "none",
                     }),
-                    option: base => ({
+                    option: (base, { isFocused }) => ({
                         ...base,
                         fontSize: theme.editorFontSize,
                         fontFamily: theme.fontFamily,
+                        cursor: isFocused ? "pointer" : undefined,
+                        paddingLeft: theme.cellHorizontalPadding,
+                        paddingRight: theme.cellHorizontalPadding,
+                        ":active": {
+                            ...base[":active"],
+                            color: theme.accentFg,
+                        },
                         // Add some content in case the option is empty
                         // so that the option height can be calculated correctly
                         ":empty::after": {
