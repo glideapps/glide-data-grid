@@ -139,3 +139,77 @@ describe("resolveValues", () => {
         expect(result).toEqual(expected);
     });
 });
+
+describe("onPaste", () => {
+    const options = [{ value: "option1", label: "Option 1" }, { value: "option2", color: "blue" }, "option3"];
+
+    const testCases = [
+        // Test case: Empty input string
+        {
+            input: "",
+            cellProps: { kind: "multi-select-cell", values: [], options },
+            expected: { kind: "multi-select-cell", options, values: [] },
+        },
+        // Test case: Input string with duplicates, allowDuplicates is false
+        {
+            input: "option1,option1,option2",
+            cellProps: { kind: "multi-select-cell", values: [], options, allowDuplicates: false },
+            expected: { kind: "multi-select-cell", options, values: ["option1", "option2"], allowDuplicates: false },
+        },
+        // Test case: Input string with values not in options, allowCreation is false
+        {
+            input: "option1,unknownOption",
+            cellProps: { kind: "multi-select-cell", values: [], options, allowCreation: false },
+            expected: { kind: "multi-select-cell", options, values: ["option1"], allowCreation: false },
+        },
+        // Test case: Input string with all values not in options, allowCreation is false
+        {
+            input: "unknownOption1,unknownOption2",
+            cellProps: { kind: "multi-select-cell", values: [], options, allowCreation: false },
+            expected: undefined,
+        },
+        // Test case: Input with spaces around values
+        {
+            input: " option1 , option2 ",
+            cellProps: { kind: "multi-select-cell", values: [], options },
+            expected: { kind: "multi-select-cell", options, values: ["option1", "option2"] },
+        },
+        // Test case: Input with special characters
+        {
+            input: "special@char,option2",
+            cellProps: { kind: "multi-select-cell", values: [], options, allowCreation: true },
+            expected: { kind: "multi-select-cell", options, values: ["special@char", "option2"], allowCreation: true },
+        },
+        // Test case: Input string with duplicates, allowDuplicates is true
+        {
+            input: "option1,option1,option2",
+            cellProps: { kind: "multi-select-cell", values: [], options, allowDuplicates: true },
+            expected: {
+                kind: "multi-select-cell",
+                options,
+                values: ["option1", "option1", "option2"],
+                allowDuplicates: true,
+            },
+        },
+        // Test case: Input string with values not in options, allowCreation is true
+        {
+            input: "option1,unknownOption",
+            cellProps: { kind: "multi-select-cell", values: [], options, allowCreation: true },
+            expected: { kind: "multi-select-cell", options, values: ["option1", "unknownOption"], allowCreation: true },
+        },
+        // Test case: All values filtered out
+        {
+            input: "unknownOption1,unknownOption2",
+            cellProps: { kind: "multi-select-cell", values: [], options, allowCreation: false },
+            expected: undefined,
+        },
+    ];
+
+    testCases.forEach(({ input, cellProps, expected }) => {
+        it(`should correctly handle pasting "${input}"`, () => {
+            // @ts-ignore
+            const result = renderer.onPaste(input, cellProps);
+            expect(result).toEqual(expected);
+        });
+    });
+});

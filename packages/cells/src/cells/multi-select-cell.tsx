@@ -452,7 +452,7 @@ const renderer: CustomRenderer<MultiSelectCell> = {
             },
         }),
     }),
-    onPaste: (val, cell) => {
+    onPaste: (val: string, cell: MultiSelectCellProps) => {
         if (!val || !val.trim()) {
             // Empty values should result in empty strings
             return {
