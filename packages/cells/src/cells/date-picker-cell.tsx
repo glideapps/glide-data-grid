@@ -140,9 +140,9 @@ const renderer: CustomRenderer<DatePickerCell> = {
         drawTextCell(args, displayDate, cell.contentAlign);
         return true;
     },
-    measure: (ctx, cell) => {
+    measure: (ctx, cell, theme) => {
         const { displayDate } = cell.data;
-        return ctx.measureText(displayDate).width + 16;
+        return ctx.measureText(displayDate).width + theme.cellHorizontalPadding * 2;
     },
     provideEditor: () => ({
         editor: Editor,
