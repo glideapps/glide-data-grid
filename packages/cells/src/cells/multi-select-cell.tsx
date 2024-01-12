@@ -42,7 +42,7 @@ const TAG_HEIGHT = 20;
 const TAG_PADDING = 6;
 const TAG_MARGIN = 4;
 /* This prefix is used when allowDuplicates is enabled to make sure that
-all underlying values are unique.*/
+all underlying values are unique. */
 const VALUE_PREFIX = "__value";
 const VALUE_PREFIX_REGEX = new RegExp(`^${VALUE_PREFIX}\\d+__`);
 
@@ -256,6 +256,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
     // This is used to handle the enter key when allowDuplicates and
     // allowCreation are enabled to allow the user to enter newly created values
     // multiple times.
+    // TODO: This doesn't work corretly when editing
     const handleKeyDown: React.KeyboardEventHandler = event => {
         if (!inputValue) {
             return;
@@ -433,9 +434,8 @@ const renderer: CustomRenderer<MultiSelectCell> = {
 
         if (!cell.allowCreation) {
             // Only allow values that are part of the options:
-            values = prepareOptions(cell.options)
-                .map(x => x.value)
-                .filter(x => values.includes(x));
+            const options = prepareOptions(cell.options);
+            values = values.filter(v => options.find(o => o.value === v));
         }
 
         if (values.length === 0) {
