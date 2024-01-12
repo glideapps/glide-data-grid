@@ -75,7 +75,7 @@ const PortalWrap = styled.div`
  * @param options The options to prepare.
  * @returns The prepared options in the format required by react-select.
  */
-const prepareOptions = (
+export const prepareOptions = (
     options: readonly (string | SelectOption)[]
 ): { value: string; label?: string; color?: string }[] => {
     return options.map(option => {
@@ -101,7 +101,7 @@ const prepareOptions = (
  * @param allowDuplicates If true, the values can contain duplicates.
  * @returns The list of values compatible with react-select.
  */
-const resolveValues = (
+export const resolveValues = (
     values: string[] | null | undefined,
     options: readonly SelectOption[],
     allowDuplicates?: boolean
