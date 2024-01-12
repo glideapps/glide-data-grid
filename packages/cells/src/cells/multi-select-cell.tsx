@@ -9,13 +9,13 @@ import {
     getMiddleCenterBias,
     useTheme,
     GridCellKind,
+    roundedRect,
 } from "@glideapps/glide-data-grid";
 
 import { styled } from "@linaria/react";
 import chroma from "chroma-js";
 import Select, { type MenuProps, components, type StylesConfig } from "react-select";
 import CreatableSelect from "react-select/creatable";
-import { roundedRect } from "../draw-fns.js";
 
 type SelectOption = { value: string; label?: string; color?: string };
 
