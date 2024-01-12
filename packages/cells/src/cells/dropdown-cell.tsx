@@ -1,3 +1,8 @@
+import * as React from "react";
+
+import { styled } from "@linaria/react";
+import Select, { type MenuProps, components } from "react-select";
+
 import {
     type CustomCell,
     type ProvideEditorCallback,
@@ -7,9 +12,6 @@ import {
     GridCellKind,
     TextCellEntry,
 } from "@glideapps/glide-data-grid";
-import { styled } from "@linaria/react";
-import * as React from "react";
-import Select, { type MenuProps, components } from "react-select";
 
 interface CustomMenuProps extends MenuProps<any> {}
 
@@ -115,6 +117,10 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                             content: '"&nbsp;"',
                             visibility: "hidden",
                         },
+                        ":active": {
+                            ...base[":active"],
+                            color: theme.accentFg,
+                        },
                     }),
                 }}
                 theme={t => {
@@ -196,13 +202,9 @@ const renderer: CustomRenderer<DropdownCell> = {
         }
         return true;
     },
-    measure: (ctx, cell) => {
+    measure: (ctx, cell, theme) => {
         const { value } = cell.data;
-        if (value) {
-            return ctx.measureText(value).width + 16;
-        } else {
-            return 16;
-        }
+        return (value ? ctx.measureText(value).width : 0) + theme.cellHorizontalPadding * 2;
     },
     provideEditor: () => ({
         editor: Editor,
