@@ -12,7 +12,7 @@ interface TreeViewCellProps {
     readonly isOpen: boolean;
     readonly canOpen: boolean;
     readonly depth: number;
-    readonly onClickOpener?: () => TreeViewCell | undefined;
+    readonly onClickOpener?: (cell: TreeViewCell) => TreeViewCell | undefined;
 }
 
 export type TreeViewCell = CustomCell<TreeViewCellProps> & { readonly: true };
@@ -41,7 +41,7 @@ const renderer: CustomRenderer<TreeViewCell> = {
         if (!canOpen || onClickOpener === undefined) return;
 
         const overIcon = isOverIcon(posX, posY, depth * depthShift, theme, h);
-        return overIcon ? onClickOpener() : undefined;
+        return overIcon ? onClickOpener(cell) : undefined;
     },
     draw: (args, cell) => {
         const { ctx, theme, rect, hoverX = 0, hoverY = 0 } = args;
