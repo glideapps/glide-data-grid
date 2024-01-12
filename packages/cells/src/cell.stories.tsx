@@ -175,109 +175,37 @@ export const CustomCells: React.VFC = () => {
                 {...defaultProps}
                 customRenderers={allCells}
                 onPaste={true}
-                theme={{
-                    roundingRadius: 100,
-                }}
-                //     accentColor: "#8c96ff",
-                //     accentLight: "rgba(202, 206, 255, 0.253)",
-
-                //     textDark: "#ffffff",
-                //     textMedium: "#b8b8b8",
-                //     textLight: "#a0a0a0",
-                //     textBubble: "#ffffff",
-
-                //     bgIconHeader: "#b8b8b8",
-                //     fgIconHeader: "#000000",
-                //     textHeader: "#a1a1a1",
-                //     textHeaderSelected: "#000000",
-
-                //     bgCell: "#16161b",
-                //     bgCellMedium: "#202027",
-                //     bgHeader: "#212121",
-                //     bgHeaderHasFocus: "#474747",
-                //     bgHeaderHovered: "#404040",
-
-                //     bgBubble: "#212121",
-                //     bgBubbleSelected: "#000000",
-
-                //     bgSearchResult: "#423c24",
-
-                //     borderColor: "rgba(225,225,225,0.2)",
-                //     drilldownBorder: "rgba(225,225,225,0.4)",
-
-                //     linkColor: "#4F5DFF",
-
-                //     headerFontStyle: "bold 14px",
-                //     baseFontStyle: "13px",
-                //     fontFamily:
-                //         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
-                // }}
-                // rowHeight={50}
                 // eslint-disable-next-line no-console
                 onCellEdited={(...args) => console.log("Edit Cell", ...args)}
                 getCellsForSelection={true}
                 getCellContent={cell => {
                     const [col, row] = cell;
                     if (col === 0) {
-                        const t: MultiSelectCell = {
+                        return {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
                             copyData: "4",
-                            readonly: row % 2 === 0,
-                            themeOverride: {
-                                roundingRadius: 4,
-                            },
                             data: {
-                                // color: "#FF4B4B",
-                                kind: "multi-select-cell",
-                                values: ["glide", "data", "grid", "foo", "bar"],
-                                allowDuplicates: true,
-                                options: [
-                                    // "glide",
-                                    // "data",
-                                    // "grid",
-                                    { value: "glide", color: "#ffc38a" },
-                                    { value: "data", color: "#ebfdea" },
-                                    { value: "grid", color: "teal" },
-                                    "foo",
-                                    "bar",
-                                ],
-                                allowCreation: true,
+                                kind: "star-cell",
+                                label: "Test",
+                                rating: 4,
                             },
-                        };
-                        return t;
-                        // return {
-                        //     kind: GridCellKind.Custom,
-                        //     allowOverlay: true,
-                        //     copyData: "4",
-                        //     data: {
-                        //         kind: "star-cell",
-                        //         label: "Test",
-                        //         rating: 4,
-                        //     },
-                        // } as StarCell;
+                        } as StarCell;
                     } else if (col === 1) {
                         num = row + 1;
+                        const values = range(0, 15).map(() => rand() * 100 - 50);
                         return {
-                            kind: GridCellKind.Bubble,
-                            // allowOverlay: false,
+                            kind: GridCellKind.Custom,
+                            allowOverlay: false,
                             copyData: "4",
-                            data: ["foo", "bar", "baz", "qux", "quux", "corge", "grault", "garply", "waldo", "fred"],
-                        } as BubbleCell;
-
-                        // const values = range(0, 15).map(() => rand() * 100 - 50);
-                        // return {
-                        //     kind: GridCellKind.Custom,
-                        //     allowOverlay: false,
-                        //     copyData: "4",
-                        //     data: {
-                        //         kind: "sparkline-cell",
-                        //         values,
-                        //         displayValues: values.map(x => Math.round(x).toString()),
-                        //         color: row % 2 === 0 ? "#77c4c4" : "#D98466",
-                        //         yAxis: [-50, 50],
-                        //     },
-                        // } as SparklineCell;
+                            data: {
+                                kind: "sparkline-cell",
+                                values,
+                                displayValues: values.map(x => Math.round(x).toString()),
+                                color: row % 2 === 0 ? "#77c4c4" : "#D98466",
+                                yAxis: [-50, 50],
+                            },
+                        } as SparklineCell;
                     } else if (col === 2) {
                         num = row + 1;
                         const values = range(0, 15).map(() => rand() * 100 - 50);
@@ -525,24 +453,18 @@ export const CustomCells: React.VFC = () => {
                         const t: MultiSelectCell = {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
-                            copyData: "4",
+                            copyData: ["glide", "data", "grid"].join(","),
                             readonly: row % 2 === 0,
                             data: {
                                 kind: "multi-select-cell",
-                                values: ["A", "B", "C"],
+                                values: ["glide", "data", "grid"],
                                 options: [
-                                    { value: "A", label: "whooooop", color: "red" },
-                                    { value: "B", color: "blue" },
-                                    "C",
-                                    "D",
-                                    "E",
-                                    "F",
-                                    "G",
-                                    "H",
-                                    "I",
-                                    "J",
+                                    { value: "glide", color: "#ffc38a" },
+                                    { value: "data", color: "#ebfdea" },
+                                    { value: "grid", color: "teal" },
                                 ],
-                                allowCreation: false,
+                                allowDuplicates: false,
+                                allowCreation: true,
                             },
                         };
                         return t;
