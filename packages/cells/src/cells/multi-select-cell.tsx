@@ -29,7 +29,7 @@ interface MultiSelectCellProps {
     - value: The value of this option.
     - label: The label of this option. If not provided, the value will be used as the label.
     - color: The color of this option. If not provided, the default color will be used. */
-    readonly options: readonly (SelectOption | string)[];
+    readonly options?: readonly (SelectOption | string)[];
     /* If true, users can create new values that are not part of the configured options. */
     readonly allowCreation?: boolean;
     /* If true, users can select the same value multiple times. */
@@ -133,13 +133,19 @@ const CustomMenu: React.FC<CustomMenuProps> = p => {
 export type MultiSelectCell = CustomCell<MultiSelectCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
-    const { value: cell, initialValue, onChange } = p;
+    const { value: cell, initialValue, onChange, onFinishedEditing } = p;
     const { options: optionsIn, values: valuesIn, color: colorIn, allowCreation, allowDuplicates } = cell.data;
 
     const theme = useTheme();
     const [value, setValue] = React.useState(valuesIn);
     const [menuOpen, setMenuOpen] = React.useState(true);
     const [inputValue, setInputValue] = React.useState(initialValue ?? "");
+
+    const options = React.useMemo(() => {
+        return prepareOptions(optionsIn ?? []);
+    }, [optionsIn]);
+
+    const menuDisabled = allowCreation && allowDuplicates && options.length === 0;
 
     // Prevent the grid from handling the keydown as long as the menu is open:
     // This allows usage of enter without triggering the grid to finish editing.
@@ -151,10 +157,6 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
         },
         [menuOpen]
     );
-
-    const options = React.useMemo(() => {
-        return prepareOptions(optionsIn);
-    }, [optionsIn]);
 
     // Apply styles to the react-select component.
     // All components: https://react-select.com/components
@@ -253,19 +255,42 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
         },
     };
 
+    const submitValues = React.useCallback(
+        (values: string[]) => {
+            // Change the list of values to the actual values by removing the prefix.
+            // This is only relevant in the case of allowDuplicates being true.
+            const mappedValues = values.map(v => {
+                return allowDuplicates && v.startsWith(VALUE_PREFIX)
+                    ? v.replace(new RegExp(VALUE_PREFIX_REGEX), "")
+                    : v;
+            });
+            setValue(mappedValues);
+            onChange({
+                ...cell,
+                data: {
+                    ...cell.data,
+                    values: mappedValues,
+                },
+            });
+        },
+        [cell, onChange, allowDuplicates]
+    );
+
     // This is used to handle the enter key when allowDuplicates and
     // allowCreation are enabled to allow the user to enter newly created values
     // multiple times.
-    // TODO: This doesn't work corretly when editing
     const handleKeyDown: React.KeyboardEventHandler = event => {
-        if (!inputValue) {
-            return;
-        }
         switch (event.key) {
             case "Enter":
             case "Tab":
-                setValue(prev => [...(prev ?? []), inputValue]);
+                if (!inputValue) {
+                    onFinishedEditing(cell, [0, 1]);
+                    return;
+                }
+
                 setInputValue("");
+                submitValues([...(value ?? []), inputValue]);
+                setMenuOpen(false);
                 event.preventDefault();
         }
     };
@@ -283,6 +308,12 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 onInputChange={setInputValue}
                 options={options}
                 placeholder={cell.readonly ? "" : undefined}
+                noOptionsMessage={input => {
+                    return allowCreation && allowDuplicates && input.inputValue
+                        ? `Create "${input.inputValue}"`
+                        : undefined;
+                }}
+                menuIsOpen={menuOpen}
                 onMenuOpen={() => setMenuOpen(true)}
                 onMenuClose={() => setMenuOpen(false)}
                 value={resolveValues(value, options, allowDuplicates)}
@@ -295,32 +326,22 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 components={{
                     DropdownIndicator: () => null,
                     IndicatorSeparator: () => null,
-                    Menu: props => (
-                        <PortalWrap>
-                            <CustomMenu className={"click-outside-ignore"} {...props} />
-                        </PortalWrap>
-                    ),
+                    Menu: props => {
+                        if (menuDisabled) {
+                            return null;
+                        }
+                        return (
+                            <PortalWrap>
+                                <CustomMenu className={"click-outside-ignore"} {...props} />
+                            </PortalWrap>
+                        );
+                    },
                 }}
                 onChange={async e => {
                     if (e === null) {
                         return;
                     }
-
-                    // Change the list of values to the actual values by removing the prefix.
-                    // This is only relevant in the case of allowDuplicates being true.
-                    const mappedValues = e.map(x => {
-                        return allowDuplicates && x.value.startsWith(VALUE_PREFIX)
-                            ? x.value.replace(new RegExp(VALUE_PREFIX_REGEX), "")
-                            : x.value;
-                    });
-                    setValue(mappedValues);
-                    onChange({
-                        ...cell,
-                        data: {
-                            ...cell.data,
-                            values: mappedValues,
-                        },
-                    });
+                    submitValues(e.map(x => x.value));
                 }}
             />
         </Wrap>
@@ -338,7 +359,7 @@ const renderer: CustomRenderer<MultiSelectCell> = {
             return true;
         }
 
-        const options = prepareOptions(optionsIn);
+        const options = prepareOptions(optionsIn ?? []);
 
         const drawArea: Rectangle = {
             x: rect.x + theme.cellHorizontalPadding,
@@ -395,7 +416,7 @@ const renderer: CustomRenderer<MultiSelectCell> = {
         }
 
         // Resolve the values to the actual display labels:
-        const labels = resolveValues(values, prepareOptions(options), cell.data.allowDuplicates).map(
+        const labels = resolveValues(values, prepareOptions(options ?? []), cell.data.allowDuplicates).map(
             x => x.label ?? x.value
         );
 
@@ -434,7 +455,7 @@ const renderer: CustomRenderer<MultiSelectCell> = {
 
         if (!cell.allowCreation) {
             // Only allow values that are part of the options:
-            const options = prepareOptions(cell.options);
+            const options = prepareOptions(cell.options ?? []);
             values = values.filter(v => options.find(o => o.value === v));
         }
 
