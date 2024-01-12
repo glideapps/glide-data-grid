@@ -444,6 +444,7 @@ export const CustomCells: React.VFC = () => {
                                 isOpen: row % 7 === 0,
                                 kind: "tree-view-cell",
                                 text: "Row " + row,
+                                onClickOpener: () => alert("Open"),
                             },
                             readonly: true,
                         };
