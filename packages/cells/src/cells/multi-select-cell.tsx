@@ -238,7 +238,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 fontFamily: theme.fontFamily,
             };
         },
-        multiValueRemove: (styles, { data, isDisabled }) => {
+        multiValueRemove: (styles, { data, isDisabled, isFocused }) => {
             if (isDisabled) {
                 return {
                     display: "none",
@@ -248,6 +248,12 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
             return {
                 ...styles,
                 color: color.luminance() > 0.5 ? "black" : "white",
+                backgroundColor: isFocused
+                    ? color.luminance() > 0.5
+                        ? color.darken(0.5).css()
+                        : color.brighten(0.5).css()
+                    : undefined,
+                borderRadius: isFocused ? `${theme.roundingRadius ?? TAG_HEIGHT / 2}px` : undefined,
                 ":hover": {
                     cursor: "pointer",
                 },
@@ -277,22 +283,25 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
         [cell, onChange, allowDuplicates]
     );
 
-    // This is used to handle the enter key when allowDuplicates and
-    // allowCreation are enabled to allow the user to enter newly created values
-    // multiple times.
     const handleKeyDown: React.KeyboardEventHandler = event => {
         switch (event.key) {
             case "Enter":
             case "Tab":
                 if (!inputValue) {
+                    // If the user pressed enter or tab without entering anything,
+                    // we finish editing based on the current state.
                     onFinishedEditing(cell, [0, 1]);
                     return;
                 }
 
-                setInputValue("");
-                submitValues([...(value ?? []), inputValue]);
-                setMenuOpen(false);
-                event.preventDefault();
+                if (allowDuplicates && allowCreation) {
+                    // This is a workaround to allow the user to enter new values
+                    // multiple times.
+                    setInputValue("");
+                    submitValues([...(value ?? []), inputValue]);
+                    setMenuOpen(false);
+                    event.preventDefault();
+                }
         }
     };
 
@@ -318,11 +327,15 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 onMenuOpen={() => setMenuOpen(true)}
                 onMenuClose={() => setMenuOpen(false)}
                 value={resolveValues(value, options, allowDuplicates)}
-                onKeyDown={allowDuplicates && allowCreation ? handleKeyDown : undefined}
+                onKeyDown={handleKeyDown}
                 menuPlacement={"auto"}
                 menuPortalTarget={document.getElementById("portal")}
                 autoFocus={true}
                 openMenuOnFocus={true}
+                openMenuOnClick={true}
+                closeMenuOnSelect={true}
+                backspaceRemovesValue={true}
+                escapeClearsValue={false}
                 styles={colorStyles}
                 components={{
                     DropdownIndicator: () => null,
