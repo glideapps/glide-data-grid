@@ -112,6 +112,8 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                         fontSize: theme.editorFontSize,
                         fontFamily: theme.fontFamily,
                         cursor: isFocused ? "pointer" : undefined,
+                        paddingLeft: theme.cellHorizontalPadding,
+                        paddingRight: theme.cellHorizontalPadding,
                         ":active": {
                             ...base[":active"],
                             color: theme.accentFg,

@@ -11,7 +11,7 @@ export const rowIDCellRenderer: InternalCellRenderer<RowIDCell> = {
     needsHoverPosition: false,
     drawPrep: (a, b) => prepTextCell(a, b, a.theme.textLight),
     draw: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
-    measure: (ctx, cell) => ctx.measureText(cell.data).width + 16,
+    measure: (ctx, cell, theme) => ctx.measureText(cell.data).width + theme.cellHorizontalPadding * 2,
     // eslint-disable-next-line react/display-name
     provideEditor: () => p => {
         const { isHighlighted, onChange, value, validatedSelection } = p;
