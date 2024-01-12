@@ -19,7 +19,7 @@ export function drawCheckbox(
     alignment: BaseGridCell["contentAlign"] = "center"
 ) {
     const centerY = Math.floor(y + height / 2);
-    const rectBordRadius = 4;
+    const rectBordRadius = theme.roundingRadius ?? 4;
     const checkBoxWidth = getSquareWidth(maxSize, height, theme.cellVerticalPadding);
     const checkBoxHalfWidth = checkBoxWidth / 2;
     const posX = getSquareXPosFromAlign(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);

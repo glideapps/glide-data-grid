@@ -121,6 +121,12 @@ export enum GridColumnIcon {
     ProtectedColumnOverlay = "protectedColumnOverlay",
 }
 
+/** @category Columns */
+export enum GridColumnMenuIcon {
+    Triangle = "triangle",
+    Dots = "dots",
+}
+
 /** @category Types */
 export type CellArray = readonly (readonly GridCell[])[];
 
@@ -151,6 +157,7 @@ export interface BaseGridColumn {
     readonly group?: string;
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
+    readonly menuIcon?: GridColumnMenuIcon | string;
     readonly hasMenu?: boolean;
     readonly grow?: number;
     readonly style?: "normal" | "highlight";
@@ -372,6 +379,7 @@ export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComp
     readonly target: Rectangle;
     readonly forceEditMode: boolean;
     readonly isValid?: boolean;
+    readonly theme: Theme;
 }>;
 
 type ObjectEditorCallbackResult<T extends InnerGridCell> = {

@@ -17,6 +17,7 @@ import {
     type DrawCellCallback,
     isInnerOnlyCell,
     type GridCell,
+    GridColumnMenuIcon,
 } from "./data-grid-types.js";
 import { CellSet } from "./cell-set.js";
 import groupBy from "lodash/groupBy.js";
@@ -26,6 +27,7 @@ import {
     getStickyWidth,
     type MappedGridColumn,
     roundedPoly,
+    drawMenuDots,
     isGroupEqual,
     cellIsSelected,
     cellIsInRange,
@@ -93,6 +95,8 @@ export interface BlitData {
     readonly mustDrawFocusOnHeader: boolean;
     readonly mustDrawHighlightRingsOnHeader: boolean;
     readonly lastBuffer: "a" | "b" | undefined;
+    aBufferScroll: [boolean, boolean] | undefined;
+    bBufferScroll: [boolean, boolean] | undefined;
 }
 
 const allocatedItem: [number, number] = [0, 0];
@@ -203,6 +207,8 @@ export function drawCell(
 function blitLastFrame(
     ctx: CanvasRenderingContext2D,
     blitSource: HTMLCanvasElement,
+    blitSourceScroll: [boolean, boolean] | undefined,
+    targetScroll: [boolean, boolean] | undefined,
     last: BlitData,
     cellXOffset: number,
     cellYOffset: number,
@@ -218,9 +224,10 @@ function blitLastFrame(
     effectiveCols: readonly MappedGridColumn[],
     getRowHeight: number | ((r: number) => number),
     doubleBuffer: boolean
-) {
+): {
+    regions: Rectangle[];
+} {
     const drawRegions: Rectangle[] = [];
-    let blittedYOnly = false;
 
     ctx.imageSmoothingEnabled = false;
     const minY = Math.min(last.cellYOffset, cellYOffset);
@@ -255,7 +262,6 @@ function blitLastFrame(
     if (deltaX !== 0 && deltaY !== 0) {
         return {
             regions: [],
-            yOnly: false,
         };
     }
 
@@ -266,8 +272,6 @@ function blitLastFrame(
     const blitHeight = height - totalHeaderHeight - freezeTrailingRowsHeight - Math.abs(deltaY) - 1;
 
     if (blitWidth > 150 && blitHeight > 150) {
-        blittedYOnly = deltaX === 0;
-
         const args = {
             sx: 0,
             sy: 0,
@@ -338,18 +342,30 @@ function blitLastFrame(
         }
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        if (stickyWidth > 0 && deltaX !== 0 && deltaY === 0 && doubleBuffer) {
-            // When double buffering the freeze columns can be offset by a couple pixels vertically between the two
-            // buffers. We don't want to redraw them so we need to make sure to copy them.
-            const w = stickyWidth * dpr;
-            const h = height * dpr;
-            ctx.drawImage(blitSource, 0, 0, w, h, 0, 0, w, h);
-        }
-        if (freezeTrailingRowsHeight > 0 && deltaX === 0 && deltaY !== 0 && doubleBuffer) {
-            const y = (height - freezeTrailingRowsHeight) * dpr;
-            const w = width * dpr;
-            const h = freezeTrailingRowsHeight * dpr;
-            ctx.drawImage(blitSource, 0, y, w, h, 0, y, w, h);
+        if (doubleBuffer) {
+            if (
+                stickyWidth > 0 &&
+                deltaX !== 0 &&
+                deltaY === 0 &&
+                (targetScroll === undefined || blitSourceScroll?.[1] !== false)
+            ) {
+                // When double buffering the freeze columns can be offset by a couple pixels vertically between the two
+                // buffers. We don't want to redraw them so we need to make sure to copy them between the buffers.
+                const w = stickyWidth * dpr;
+                const h = height * dpr;
+                ctx.drawImage(blitSource, 0, 0, w, h, 0, 0, w, h);
+            }
+            if (
+                freezeTrailingRowsHeight > 0 &&
+                deltaX === 0 &&
+                deltaY !== 0 &&
+                (targetScroll === undefined || blitSourceScroll?.[0] !== false)
+            ) {
+                const y = (height - freezeTrailingRowsHeight) * dpr;
+                const w = width * dpr;
+                const h = freezeTrailingRowsHeight * dpr;
+                ctx.drawImage(blitSource, 0, y, w, h, 0, y, w, h);
+            }
         }
         ctx.drawImage(blitSource, args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
         ctx.scale(dpr, dpr);
@@ -358,7 +374,6 @@ function blitLastFrame(
 
     return {
         regions: drawRegions,
-        yOnly: blittedYOnly,
     };
 }
 
@@ -792,30 +807,45 @@ function drawHeaderInner(
     }
 
     if (shouldDrawMenu && c.hasMenu === true) {
-        ctx.beginPath();
-        const triangleX = menuBounds.x + menuBounds.width / 2 - 5.5;
-        const triangleY = menuBounds.y + menuBounds.height / 2 - 3;
-        roundedPoly(
-            ctx,
-            [
-                {
-                    x: triangleX,
-                    y: triangleY,
-                },
-                {
-                    x: triangleX + 11,
-                    y: triangleY,
-                },
-                {
-                    x: triangleX + 5.5,
-                    y: triangleY + 6,
-                },
-            ],
-            1
-        );
-
-        ctx.fillStyle = fillStyle;
-        ctx.fill();
+        if (c.menuIcon === undefined || c.menuIcon === GridColumnMenuIcon.Triangle) {
+            // Draw the default triangle menu icon:
+            ctx.beginPath();
+            const triangleX = menuBounds.x + menuBounds.width / 2 - 5.5;
+            const triangleY = menuBounds.y + menuBounds.height / 2 - 3;
+            roundedPoly(
+                ctx,
+                [
+                    {
+                        x: triangleX,
+                        y: triangleY,
+                    },
+                    {
+                        x: triangleX + 11,
+                        y: triangleY,
+                    },
+                    {
+                        x: triangleX + 5.5,
+                        y: triangleY + 6,
+                    },
+                ],
+                1
+            );
+            ctx.fillStyle = fillStyle;
+            ctx.fill();
+        } else if (c.menuIcon === GridColumnMenuIcon.Dots) {
+            // Draw the three dots menu icon:
+            ctx.beginPath();
+            const dotsX = menuBounds.x + menuBounds.width / 2;
+            const dotsY = menuBounds.y + menuBounds.height / 2;
+            drawMenuDots(ctx, dotsX, dotsY);
+            ctx.fillStyle = fillStyle;
+            ctx.fill();
+        } else {
+            // Assume that the user has specified a valid sprite image as header icon:
+            const iconX = menuBounds.x + (menuBounds.width - theme.headerIconSize) / 2;
+            const iconY = menuBounds.y + (menuBounds.height - theme.headerIconSize) / 2;
+            spriteManager.drawSprite(c.menuIcon, "normal", ctx, iconX, iconY, theme.headerIconSize, theme);
+        }
     }
 }
 
@@ -1189,7 +1219,7 @@ function drawCells(
     const freezeTrailingRowsHeight =
         freezeTrailingRows > 0 ? getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) : 0;
     let result: Rectangle[] | undefined;
-    const handledSpans = new Set<string>();
+    let handledSpans: Set<string> | undefined = undefined;
     walkColumns(
         effectiveColumns,
         cellYOffset,
@@ -1293,6 +1323,7 @@ function drawCells(
                     if (cell.span !== undefined) {
                         const [startCol, endCol] = cell.span;
                         const spanKey = `${row},${startCol},${endCol},${c.sticky}`; //alloc
+                        if (handledSpans === undefined) handledSpans = new Set();
                         if (!handledSpans.has(spanKey)) {
                             const areas = getSpanBounds(cell.span, drawX, drawY, c.width, rh, c, allColumns);
                             const area = c.sticky ? areas[0] : areas[1];
@@ -1790,14 +1821,14 @@ function drawColumnResizeOutline(
     yOffset: number,
     xOffset: number,
     height: number,
-    theme: FullTheme
+    style: string
 ) {
     ctx.beginPath();
     ctx.moveTo(yOffset, xOffset);
     ctx.lineTo(yOffset, height);
 
     ctx.lineWidth = 2;
-    ctx.strokeStyle = theme.accentColor;
+    ctx.strokeStyle = style;
 
     ctx.stroke();
 
@@ -2143,11 +2174,13 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     if (doubleBuffer && (bufferA.width !== width * dpr || bufferA.height !== height * dpr)) {
         bufferA.width = width * dpr;
         bufferA.height = height * dpr;
+        if (lastBlitData.current !== undefined) lastBlitData.current.aBufferScroll = undefined;
     }
 
     if (doubleBuffer && (bufferB.width !== width * dpr || bufferB.height !== height * dpr)) {
         bufferB.width = width * dpr;
         bufferB.height = height * dpr;
+        if (lastBlitData.current !== undefined) lastBlitData.current.bBufferScroll = undefined;
     }
 
     const last = lastBlitData.current;
@@ -2343,101 +2376,99 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         ]);
 
         const doDamage = (ctx: CanvasRenderingContext2D) => {
-            if (damageInView) {
-                const doHeaders = damage.hasHeader();
+            drawCells(
+                ctx,
+                effectiveCols,
+                mappedColumns,
+                height,
+                totalHeaderHeight,
+                translateX,
+                translateY,
+                cellYOffset,
+                rows,
+                getRowHeight,
+                getCellContent,
+                getGroupDetails,
+                getRowThemeOverride,
+                disabledRows,
+                isFocused,
+                drawFocus,
+                freezeTrailingRows,
+                hasAppendRow,
+                drawRegions,
+                damage,
+                selection,
+                prelightCells,
+                highlightRegions,
+                imageLoader,
+                spriteManager,
+                hoverValues,
+                hoverInfo,
+                drawCellCallback,
+                hyperWrapping,
+                theme,
+                enqueue,
+                renderStateProvider,
+                getCellRenderer,
+                overrideCursor,
+                minimumCellWidth
+            );
 
-                drawCells(
+            const selectionCurrent = selection.current;
+
+            if (
+                fillHandle &&
+                drawFocus &&
+                selectionCurrent !== undefined &&
+                damage.has(rectBottomRight(selectionCurrent.range))
+            ) {
+                drawFocusRing(
                     ctx,
+                    width,
+                    height,
+                    cellYOffset,
+                    translateX,
+                    translateY,
                     effectiveCols,
                     mappedColumns,
-                    height,
+                    theme,
+                    totalHeaderHeight,
+                    selection,
+                    getRowHeight,
+                    getCellContent,
+                    freezeTrailingRows,
+                    hasAppendRow,
+                    fillHandle,
+                    rows
+                );
+            }
+        };
+
+        if (damageInView) {
+            doDamage(targetCtx);
+            if (mainCtx !== null) {
+                mainCtx.save();
+                mainCtx.scale(dpr, dpr);
+                mainCtx.textBaseline = "middle";
+                doDamage(mainCtx);
+                mainCtx.restore();
+            }
+
+            const doHeaders = damage.hasHeader();
+            if (doHeaders) {
+                clipHeaderDamage(
+                    overlayCtx,
+                    effectiveCols,
+                    width,
+                    groupHeaderHeight,
                     totalHeaderHeight,
                     translateX,
                     translateY,
                     cellYOffset,
-                    rows,
-                    getRowHeight,
-                    getCellContent,
-                    getGroupDetails,
-                    getRowThemeOverride,
-                    disabledRows,
-                    isFocused,
-                    drawFocus,
-                    freezeTrailingRows,
-                    hasAppendRow,
-                    drawRegions,
-                    damage,
-                    selection,
-                    prelightCells,
-                    highlightRegions,
-                    imageLoader,
-                    spriteManager,
-                    hoverValues,
-                    hoverInfo,
-                    drawCellCallback,
-                    hyperWrapping,
-                    theme,
-                    enqueue,
-                    renderStateProvider,
-                    getCellRenderer,
-                    overrideCursor,
-                    minimumCellWidth
+                    damage
                 );
-
-                const selectionCurrent = selection.current;
-
-                if (
-                    fillHandle &&
-                    drawFocus &&
-                    selectionCurrent !== undefined &&
-                    damage.has(rectBottomRight(selectionCurrent.range))
-                ) {
-                    drawFocusRing(
-                        ctx,
-                        width,
-                        height,
-                        cellYOffset,
-                        translateX,
-                        translateY,
-                        effectiveCols,
-                        mappedColumns,
-                        theme,
-                        totalHeaderHeight,
-                        selection,
-                        getRowHeight,
-                        getCellContent,
-                        freezeTrailingRows,
-                        hasAppendRow,
-                        fillHandle,
-                        rows
-                    );
-                }
-
-                // we dont need to redo the headers when dealing with the mainCtx redraw
-                if (doHeaders && ctx !== mainCtx) {
-                    clipHeaderDamage(
-                        overlayCtx,
-                        effectiveCols,
-                        width,
-                        groupHeaderHeight,
-                        totalHeaderHeight,
-                        translateX,
-                        translateY,
-                        cellYOffset,
-                        damage
-                    );
-                    drawHeaderTexture();
-                }
+                drawHeaderTexture();
             }
-        };
-
-        doDamage(targetCtx);
-        if (mainCtx !== null) {
-            mainCtx.save();
-            mainCtx.scale(dpr, dpr);
-            mainCtx.textBaseline = "middle";
-            doDamage(mainCtx);
-            mainCtx.restore();
         }
 
         targetCtx.restore();
@@ -2461,6 +2492,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         const { regions } = blitLastFrame(
             targetCtx,
             blitSource,
+            blitSource === bufferA ? last.aBufferScroll : last.bBufferScroll,
+            blitSource === bufferA ? last.bBufferScroll : last.aBufferScroll,
             last,
             cellXOffset,
             cellYOffset,
@@ -2648,8 +2681,20 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     if (isResizing) {
         walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x) => {
             if (c.sourceIndex === resizeCol) {
-                drawColumnResizeOutline(overlayCtx, x + c.width, 0, totalHeaderHeight + 1, theme);
-                drawColumnResizeOutline(targetCtx, x + c.width, totalHeaderHeight, height, theme);
+                drawColumnResizeOutline(
+                    overlayCtx,
+                    x + c.width,
+                    0,
+                    totalHeaderHeight + 1,
+                    blend(theme.resizeIndicatorColor ?? theme.accentLight, theme.bgHeader)
+                );
+                drawColumnResizeOutline(
+                    targetCtx,
+                    x + c.width,
+                    totalHeaderHeight,
+                    height,
+                    blend(theme.resizeIndicatorColor ?? theme.accentLight, theme.bgCell)
+                );
                 return true;
             }
             return false;
@@ -2686,6 +2731,9 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         Array.from({ length: freezeTrailingRows }, (_, i) => rows - 1 - i)
     );
 
+    const scrollX = last !== undefined && (cellXOffset !== last.cellXOffset || translateX !== last.translateX);
+    const scrollY = last !== undefined && (cellYOffset !== last.cellYOffset || translateY !== last.translateY);
+
     lastBlitData.current = {
         cellXOffset,
         cellYOffset,
@@ -2694,6 +2742,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         mustDrawFocusOnHeader,
         mustDrawHighlightRingsOnHeader,
         lastBuffer: doubleBuffer ? (targetBuffer === bufferA ? "a" : "b") : undefined,
+        aBufferScroll: targetBuffer === bufferA ? [scrollX, scrollY] : last?.aBufferScroll,
+        bBufferScroll: targetBuffer === bufferB ? [scrollX, scrollY] : last?.bBufferScroll,
     };
 
     targetCtx.restore();

@@ -14,10 +14,10 @@ const Wrapper = styled.div`
             border: none;
             padding: 8px 16px;
             font-size: 14px;
-            border-radius: 9px;
             font-weight: 500;
             font-family: var(--gdg-font-family);
             cursor: pointer;
+            border-radius: var(--gdg-rounding-radius, 9px);
         }
     }
     .gdg-save-button {

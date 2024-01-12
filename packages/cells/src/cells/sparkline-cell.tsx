@@ -66,7 +66,12 @@ const renderer: CustomRenderer<SparklineCell> = {
             ctx.fillStyle = cell.data.color ?? theme.accentColor;
             ctx.fill();
         } else {
-            if (values.length === 1) values = [values[0], values[0]];
+            if (values.length === 1) {
+                values = [values[0], values[0]];
+                if (displayValues) {
+                    displayValues = [displayValues[0], displayValues[0]];
+                }
+            }
             // draw line
             ctx.beginPath();
 
@@ -79,11 +84,13 @@ const renderer: CustomRenderer<SparklineCell> = {
             });
             ctx.moveTo(points[0].x, points[0].y);
 
-            let i: number;
-            for (i = 1; i < points.length - 2; i++) {
-                const xControl = (points[i].x + points[i + 1].x) / 2;
-                const yControl = (points[i].y + points[i + 1].y) / 2;
-                ctx.quadraticCurveTo(points[i].x, points[i].y, xControl, yControl);
+            let i = 0;
+            if (points.length > 2) {
+                for (i = 1; i < points.length - 2; i++) {
+                    const xControl = (points[i].x + points[i + 1].x) / 2;
+                    const yControl = (points[i].y + points[i + 1].y) / 2;
+                    ctx.quadraticCurveTo(points[i].x, points[i].y, xControl, yControl);
+                }
             }
             ctx.quadraticCurveTo(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
 

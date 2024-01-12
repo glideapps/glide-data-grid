@@ -52,7 +52,7 @@ function drawBubbles(args: BaseDrawArgs, data: readonly string[]) {
             y + (h - bubbleHeight) / 2,
             rectInfo.width + bubblePad * 2,
             bubbleHeight,
-            bubbleHeight / 2
+            theme.roundingRadius ?? bubbleHeight / 2
         );
     }
     ctx.fillStyle = highlighted ? theme.bgBubbleSelected : theme.bgBubble;

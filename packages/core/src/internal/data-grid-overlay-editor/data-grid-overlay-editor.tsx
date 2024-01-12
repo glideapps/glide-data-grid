@@ -181,6 +181,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 imageEditorOverride={imageEditorOverride}
                 markdownDivCreateNode={markdownDivCreateNode}
                 isValid={isValid}
+                theme={theme}
             />
         );
     }

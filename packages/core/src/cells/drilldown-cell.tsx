@@ -41,7 +41,8 @@ const drilldownCache: {
 function getAndCacheDrilldownBorder(
     bgCell: string,
     border: string,
-    height: number
+    height: number,
+    rounding: number
 ): {
     el: HTMLCanvasElement;
     height: number;
@@ -55,7 +56,6 @@ function getAndCacheDrilldownBorder(
     const shadowBlur = 5;
     const targetHeight = height - shadowBlur * 2;
     const middleWidth = 4;
-    const rounding = 6;
 
     const innerHeight = height * dpr;
     const sideWidth = rounding + shadowBlur;
@@ -87,9 +87,8 @@ function getAndCacheDrilldownBorder(
 
     drilldownCache[key] = canvas;
 
-    const trueRounding = Math.min(rounding, targetWidth / 2, targetHeight / 2);
     ctx.beginPath();
-    roundedRect(ctx, shadowBlur, shadowBlur, targetWidth, targetHeight, trueRounding);
+    roundedRect(ctx, shadowBlur, shadowBlur, targetWidth, targetHeight, rounding);
 
     ctx.shadowColor = "rgba(24, 25, 34, 0.4)";
     ctx.shadowBlur = 1;
@@ -107,7 +106,7 @@ function getAndCacheDrilldownBorder(
     ctx.shadowBlur = 0;
 
     ctx.beginPath();
-    roundedRect(ctx, shadowBlur + 0.5, shadowBlur + 0.5, targetWidth, targetHeight, trueRounding);
+    roundedRect(ctx, shadowBlur + 0.5, shadowBlur + 0.5, targetWidth, targetHeight, rounding);
 
     ctx.strokeStyle = border;
     ctx.lineWidth = 1;
@@ -137,8 +136,9 @@ function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[
     const bubblePad = 8;
     const bubbleMargin = itemMargin;
     let renderX = x + theme.cellHorizontalPadding;
+    const rounding = theme.roundingRadius ?? 6;
 
-    const tileMap = getAndCacheDrilldownBorder(theme.bgCell, theme.drilldownBorder, h);
+    const tileMap = getAndCacheDrilldownBorder(theme.bgCell, theme.drilldownBorder, h, rounding);
 
     const renderBoxes: { x: number; width: number }[] = [];
     for (const el of data) {
@@ -224,7 +224,7 @@ function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[
                     srcHeight = srcWidth;
                 }
                 ctx.beginPath();
-                roundedRect(ctx, drawX, y + h / 2 - imgSize / 2, imgSize, imgSize, 3);
+                roundedRect(ctx, drawX, y + h / 2 - imgSize / 2, imgSize, imgSize, theme.roundingRadius ?? 3);
                 ctx.save();
                 ctx.clip();
                 ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, drawX, y + h / 2 - imgSize / 2, imgSize, imgSize);
