@@ -416,22 +416,36 @@ const renderer: CustomRenderer<MultiSelectCell> = {
             },
         }),
     }),
-    onPaste: (val, d) => {
+    onPaste: (val, cell) => {
+        if (!val || !val.trim()) {
+            // Empty values should result in empty strings
+            return {
+                ...cell,
+                values: [],
+            };
+        }
         let values = val.split(",").map(s => s.trim());
 
-        if (!d.allowDuplicates) {
+        if (!cell.allowDuplicates) {
             // Remove all duplicates
             values = values.filter((v, index) => values.indexOf(v) === index);
         }
 
+        if (!cell.allowCreation) {
+            // Only allow values that are part of the options:
+            values = prepareOptions(cell.options)
+                .map(x => x.value)
+                .filter(x => values.includes(x));
+        }
+
+        if (values.length === 0) {
+            // We were not able to parse any values, return undefined to
+            // not change the cell value.
+            return undefined;
+        }
         return {
-            ...d,
-            values: d.allowCreation
-                ? values
-                : // Only allow values that are part of the options:
-                  prepareOptions(d.options)
-                      .map(x => x.value)
-                      .filter(x => values.includes(x)),
+            ...cell,
+            values,
         };
     },
 };

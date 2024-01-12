@@ -1,7 +1,7 @@
 import { styled } from "@linaria/react";
 import * as React from "react";
 import { DataEditor, type DataEditorProps, GridCellKind, type BubbleCell } from "@glideapps/glide-data-grid";
-import { DropdownCell as DropdownRenderer, allCells } from "./index.js";
+import { DropdownCell as DropdownRenderer, MultiSelectCell as MultiSelectRenderer, allCells } from "./index.js";
 import type { StarCell } from "./cells/star-cell.js";
 import type { SparklineCell } from "./cells/sparkline-cell.js";
 import range from "lodash/range.js";
@@ -175,7 +175,9 @@ export const CustomCells: React.VFC = () => {
                 {...defaultProps}
                 customRenderers={allCells}
                 onPaste={true}
-                // theme={{
+                theme={{
+                    roundingRadius: 100,
+                }}
                 //     accentColor: "#8c96ff",
                 //     accentLight: "rgba(202, 206, 255, 0.253)",
 
@@ -222,12 +224,14 @@ export const CustomCells: React.VFC = () => {
                             allowOverlay: true,
                             copyData: "4",
                             readonly: row % 2 === 0,
+                            themeOverride: {
+                                roundingRadius: 4,
+                            },
                             data: {
                                 // color: "#FF4B4B",
-                                borderRadius: 4,
                                 kind: "multi-select-cell",
                                 values: ["glide", "data", "grid", "foo", "bar"],
-                                allowDuplicates: false,
+                                allowDuplicates: true,
                                 options: [
                                     // "glide",
                                     // "data",
@@ -238,7 +242,7 @@ export const CustomCells: React.VFC = () => {
                                     "foo",
                                     "bar",
                                 ],
-                                creatable: true,
+                                allowCreation: true,
                             },
                         };
                         return t;
@@ -538,7 +542,7 @@ export const CustomCells: React.VFC = () => {
                                     "I",
                                     "J",
                                 ],
-                                creatable: false,
+                                allowCreation: false,
                             },
                         };
                         return t;
@@ -627,7 +631,7 @@ export const CustomCells: React.VFC = () => {
 };
 
 export const CustomCellEditing: React.VFC = () => {
-    const data = React.useRef<string[]>([]);
+    const data = React.useRef<any[][]>([[]]);
 
     return (
         <BeautifulWrapper
@@ -641,31 +645,64 @@ export const CustomCellEditing: React.VFC = () => {
                 {...defaultProps}
                 customRenderers={allCells}
                 onPaste={true}
+                fillHandle={true}
                 onCellEdited={(cell, newVal) => {
+                    const [col, row] = cell;
                     if (newVal.kind !== GridCellKind.Custom) return;
-                    if (DropdownRenderer.isMatch(newVal)) {
-                        data.current[cell[1]] = newVal.data.value ?? "";
+                    if (data.current?.[col] == null) {
+                        data.current[col] = [];
                     }
+                    if (DropdownRenderer.isMatch(newVal) && col === 0) {
+                        data.current[col][row] = newVal.data.value ?? "";
+                    } else if (MultiSelectRenderer.isMatch(newVal) && col === 1) {
+                        data.current[col][row] = newVal.data.values ?? [];
+                    }
+                    return;
                 }}
                 getCellsForSelection={true}
                 getCellContent={cell => {
-                    const [, row] = cell;
-                    const val = data.current[row] ?? "A";
-                    return {
-                        kind: GridCellKind.Custom,
-                        allowOverlay: true,
-                        copyData: val,
-                        data: {
-                            kind: "dropdown-cell",
-                            allowedValues: ["A", "B", "C"],
-                            value: val,
-                        },
-                    } as DropdownCell;
+                    const [col, row] = cell;
+                    if (col === 0) {
+                        const val = data.current?.[col]?.[row] ?? "A";
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: val,
+                            data: {
+                                kind: "dropdown-cell",
+                                allowedValues: ["A", "B", "C"],
+                                value: val,
+                            },
+                        } as DropdownCell;
+                    } else if (col === 1) {
+                        const val = data.current?.[col]?.[row] ?? ["glide"];
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: val?.join(","),
+                            data: {
+                                kind: "multi-select-cell",
+                                values: val,
+                                options: [
+                                    { value: "glide", color: "#ffc38a", label: "Glide" },
+                                    { value: "data", color: "#ebfdea", label: "Data" },
+                                    { value: "grid", color: "teal", label: "Grid" },
+                                ],
+                                allowDuplicates: false,
+                                allowCreation: false,
+                            },
+                        } as MultiSelectCell;
+                    }
+                    throw new Error("Fail");
                 }}
                 columns={[
                     {
                         title: "Dropdown",
-                        width: 200,
+                        width: 150,
+                    },
+                    {
+                        title: "Multi Select",
+                        width: 150,
                     },
                 ]}
                 rows={500}
