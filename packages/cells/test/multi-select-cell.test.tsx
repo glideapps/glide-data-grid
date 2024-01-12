@@ -1,9 +1,10 @@
 import * as React from "react";
-import { fireEvent, render, cleanup } from "@testing-library/react";
+
+import { render, cleanup } from "@testing-library/react";
+import { expect, describe, it, afterEach } from "vitest";
 
 import { GridCellKind } from "@glideapps/glide-data-grid";
 import renderer, { type MultiSelectCell, prepareOptions, resolveValues } from "../src/cells/multi-select-cell.js";
-import { vi, expect, describe, it, afterEach } from "vitest";
 
 describe("prepareOptions", () => {
     const testCases = [
@@ -244,10 +245,10 @@ describe("Multi Select Editor", () => {
 
         const result = render(<Editor isHighlighted={false} value={getMockCell()} />);
         // Check if the element is actually there
-        const input = result.getByTestId("multi-select-cell");
-        expect(input).not.toBeUndefined();
+        const cellEditor = result.getByTestId("multi-select-cell");
+        expect(cellEditor).not.toBeUndefined();
 
-        // @ts-ignore
-        expect(result.values === ["option1"]);
+        const input = cellEditor.getElementsByClassName("gdg-multi-select");
+        expect(input).not.toBeUndefined();
     });
 });
