@@ -255,6 +255,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
         },
     };
 
+    // This is used to submit the values to the grid.
     const submitValues = React.useCallback(
         (values: string[]) => {
             // Change the list of values to the actual values by removing the prefix.
