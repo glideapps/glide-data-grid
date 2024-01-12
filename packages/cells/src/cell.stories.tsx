@@ -570,16 +570,17 @@ export const CustomCellEditing: React.VFC = () => {
                 fillHandle={true}
                 onCellEdited={(cell, newVal) => {
                     const [col, row] = cell;
-                    if (newVal.kind !== GridCellKind.Custom) return;
+                    if (newVal.kind !== GridCellKind.Custom) {
+                        return;
+                    }
                     if (data.current?.[col] == null) {
                         data.current[col] = [];
                     }
                     if (DropdownRenderer.isMatch(newVal) && col === 0) {
                         data.current[col][row] = newVal.data.value ?? "";
-                    } else if (MultiSelectRenderer.isMatch(newVal) && col === 1) {
+                    } else if (MultiSelectRenderer.isMatch(newVal) && (col === 1 || col === 2)) {
                         data.current[col][row] = newVal.data.values ?? [];
                     }
-                    return;
                 }}
                 getCellsForSelection={true}
                 getCellContent={cell => {
@@ -611,7 +612,20 @@ export const CustomCellEditing: React.VFC = () => {
                                     { value: "grid", color: "teal", label: "Grid" },
                                 ],
                                 allowDuplicates: false,
-                                allowCreation: false,
+                                allowCreation: true,
+                            },
+                        } as MultiSelectCell;
+                    } else if (col === 2) {
+                        const val = data.current?.[col]?.[row] ?? ["glide"];
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: val?.join(","),
+                            data: {
+                                kind: "multi-select-cell",
+                                values: val,
+                                allowDuplicates: true,
+                                allowCreation: true,
                             },
                         } as MultiSelectCell;
                     }
@@ -624,7 +638,11 @@ export const CustomCellEditing: React.VFC = () => {
                     },
                     {
                         title: "Multi Select",
-                        width: 150,
+                        width: 200,
+                    },
+                    {
+                        title: "Multi Select (no options)",
+                        width: 200,
                     },
                 ]}
                 rows={500}
