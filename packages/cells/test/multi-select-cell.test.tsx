@@ -213,3 +213,41 @@ describe("onPaste", () => {
         });
     });
 });
+
+describe("Multi Select Editor", () => {
+    afterEach(cleanup);
+
+    function getMockCell(props: Partial<MultiSelectCell> = {}): MultiSelectCell {
+        return {
+            ...props,
+            kind: GridCellKind.Custom,
+            allowOverlay: true,
+            copyData: "option1",
+            readonly: false,
+            data: {
+                kind: "multi-select-cell",
+                options: [
+                    { value: "option1", label: "Option 1", color: "red" },
+                    { value: "option2", label: "Option 2", color: "blue" },
+                ],
+                values: ["option1"],
+            },
+        };
+    }
+
+    it("renders into the dom with correct value", () => {
+        // @ts-ignore
+        const Editor = renderer.provideEditor?.(getMockCell()).editor;
+        if (Editor === undefined) {
+            throw new Error("Editor is invalid");
+        }
+
+        const result = render(<Editor isHighlighted={false} value={getMockCell()} />);
+        // Check if the element is actually there
+        const input = result.getByTestId("multi-select-cell");
+        expect(input).not.toBeUndefined();
+
+        // @ts-ignore
+        expect(result.values === ["option1"]);
+    });
+});

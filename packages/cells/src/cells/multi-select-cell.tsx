@@ -307,7 +307,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
 
     const SelectComponent = allowCreation ? CreatableSelect : Select;
     return (
-        <Wrap onKeyDown={onKeyDown}>
+        <Wrap onKeyDown={onKeyDown} data-testid={"multi-select-cell"}>
             <SelectComponent
                 className="gdg-multi-select"
                 isMulti={true}
