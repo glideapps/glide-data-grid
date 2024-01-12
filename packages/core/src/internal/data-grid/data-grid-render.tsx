@@ -110,9 +110,11 @@ function animRequest(): void {
 
 export function drawCell(
     ctx: CanvasRenderingContext2D,
-    row: number,
     cell: InnerGridCell,
     col: number,
+    row: number,
+    isLastCol: boolean,
+    isLastRow: boolean,
     x: number,
     y: number,
     w: number,
@@ -175,7 +177,7 @@ export function drawCell(
         overrideCursor: hoverX !== undefined ? overrideCursor : undefined,
         requestAnimationFrame: animRequest,
     };
-    const needsAnim = drawLastUpdateUnderlay(args, cell.lastUpdated, frameTime, lastPrep);
+    const needsAnim = drawLastUpdateUnderlay(args, cell.lastUpdated, frameTime, lastPrep, isLastCol, isLastRow);
 
     const r = getCellRenderer(cell);
     if (r !== undefined) {
@@ -1454,6 +1456,8 @@ function drawCells(
                         fill = fill === undefined ? theme.bgCell : blend(fill, theme.bgCell);
                     }
 
+                    const isLastColumn = c.sourceIndex === allColumns.length - 1;
+                    const isLastRow = row === rows - 1;
                     if (fill !== undefined) {
                         ctx.fillStyle = fill;
                         if (prepResult !== undefined) {
@@ -1462,8 +1466,12 @@ function drawCells(
                         if (damage !== undefined) {
                             // this accounts for the fill handle outline being drawn inset on these cells. We do this
                             // because technically the bottom right corner of the outline are on other cells.
-                            const inset = row === rows - 1 || c.sourceIndex === allColumns.length - 1 ? 2 : 1;
-                            ctx.fillRect(cellX + 1, drawY + 1, cellWidth - inset, rh - inset);
+                            ctx.fillRect(
+                                cellX + 1,
+                                drawY + 1,
+                                cellWidth - (isLastColumn ? 2 : 1),
+                                rh - (isLastRow ? 2 : 1)
+                            );
                         } else {
                             ctx.fillRect(cellX, drawY, cellWidth, rh);
                         }
@@ -1490,9 +1498,11 @@ function drawCells(
                         }
                         prepResult = drawCell(
                             ctx,
-                            row,
                             cell,
                             c.sourceIndex,
+                            row,
+                            isLastColumn,
+                            isLastRow,
                             cellX,
                             drawY,
                             cellWidth,

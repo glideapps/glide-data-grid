@@ -366,7 +366,9 @@ export function drawLastUpdateUnderlay(
     args: BaseDrawArgs,
     lastUpdate: number | undefined,
     frameTime: number,
-    lastPrep: PrepResult | undefined
+    lastPrep: PrepResult | undefined,
+    isLastCol: boolean,
+    isLastRow: boolean
 ) {
     const { ctx, rect, theme } = args;
     let progress = Number.MAX_SAFE_INTEGER;
@@ -378,7 +380,7 @@ export function drawLastUpdateUnderlay(
             const fade = 1 - progress / animTime;
             ctx.globalAlpha = fade;
             ctx.fillStyle = theme.bgSearchResult;
-            ctx.fillRect(rect.x + 1, rect.y + 1, rect.width - 1, rect.height - 1);
+            ctx.fillRect(rect.x + 1, rect.y + 1, rect.width - (isLastCol ? 2 : 1), rect.height - (isLastRow ? 2 : 1));
             ctx.globalAlpha = 1;
             if (lastPrep !== undefined) {
                 lastPrep.fillStyle = theme.bgSearchResult;

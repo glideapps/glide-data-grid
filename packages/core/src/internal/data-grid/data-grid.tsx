@@ -42,7 +42,7 @@ import {
     pointInRect,
 } from "./data-grid-render.js";
 import { AnimationManager, type StepCallback } from "./animation-manager.js";
-import { RenderStateProvider } from "../../common/render-state-provider.js";
+import { RenderStateProvider, packColRowToNumber } from "../../common/render-state-provider.js";
 import { browserIsFirefox, browserIsSafari } from "../../common/browser-detect.js";
 import { type EnqueueCallback, useAnimationQueue } from "./use-animation-queue.js";
 import { assert } from "../../common/support.js";
@@ -1427,9 +1427,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                 ctx.fillRect(0, 0, offscreen.width, offscreen.height);
                                 drawCell(
                                     ctx,
-                                    row,
                                     getCellContent([col, row]),
                                     0,
+                                    row,
+                                    false,
+                                    false,
                                     0,
                                     0,
                                     boundsForDragTarget.width,
@@ -1667,7 +1669,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                 aria-rowindex={row + 2}>
                                 {effectiveCols.map(c => {
                                     const col = c.sourceIndex;
-                                    const key = `${col},${row}`;
+                                    const key = packColRowToNumber(col, row);
                                     const focused = fCol === col && fRow === row;
                                     const selected =
                                         range !== undefined &&

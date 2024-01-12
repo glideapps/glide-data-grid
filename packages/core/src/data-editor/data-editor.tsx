@@ -980,7 +980,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return mergeAndRealizeTheme(getDataEditorTheme(), theme);
     }, [theme]);
 
-    const [clientSize, setClientSize] = React.useState<readonly [number, number, number]>([10, 10, 0]);
+    const [clientSize, setClientSize] = React.useState<readonly [number, number, number]>([0, 0, 0]);
 
     const rendererMap = React.useMemo(() => {
         if (renderers === undefined) return {};
