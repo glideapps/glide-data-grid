@@ -1427,9 +1427,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                 ctx.fillRect(0, 0, offscreen.width, offscreen.height);
                                 drawCell(
                                     ctx,
-                                    row,
                                     getCellContent([col, row]),
                                     0,
+                                    row,
+                                    false,
+                                    false,
                                     0,
                                     0,
                                     boundsForDragTarget.width,
