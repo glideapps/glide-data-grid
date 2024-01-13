@@ -2,11 +2,12 @@ import { type CustomCell, parseToRgba, type Item, type CustomRenderer, GridCellK
 
 interface SparklineCellProps {
     readonly kind: "sparkline-cell";
-    readonly graphKind?: "line" | "bar";
+    readonly graphKind?: "line" | "bar" | "area";
     readonly values: readonly number[];
     readonly displayValues?: readonly string[];
     readonly yAxis: Item;
     readonly color?: string;
+    readonly hideAxis?: boolean;
 }
 
 export type SparklineCell = CustomCell<SparklineCellProps>;
@@ -19,7 +20,7 @@ const renderer: CustomRenderer<SparklineCell> = {
     draw: (args, cell) => {
         const { ctx, theme, rect, hoverAmount, hoverX } = args;
         // eslint-disable-next-line prefer-const
-        let { values, yAxis, color, graphKind = "line", displayValues } = cell.data;
+        let { values, yAxis, color, graphKind = "area", displayValues, hideAxis } = cell.data;
         const [minY, maxY] = yAxis;
         if (values.length === 0) return true;
 
@@ -34,7 +35,7 @@ const renderer: CustomRenderer<SparklineCell> = {
         const delta = maxY - minY;
         const zeroY = maxY <= 0 ? y : minY >= 0 ? y + height : y + height * (maxY / delta);
         // draw zero
-        if (minY <= 0 && maxY >= 0) {
+        if (!hideAxis && minY <= 0 && maxY >= 0) {
             ctx.beginPath();
             ctx.moveTo(drawX, zeroY);
             ctx.lineTo(drawX + width, zeroY);
@@ -65,7 +66,12 @@ const renderer: CustomRenderer<SparklineCell> = {
             ctx.fillStyle = cell.data.color ?? theme.accentColor;
             ctx.fill();
         } else {
-            if (values.length === 1) values = [values[0], values[0]];
+            if (values.length === 1) {
+                values = [values[0], values[0]];
+                if (displayValues) {
+                    displayValues = [displayValues[0], displayValues[0]];
+                }
+            }
             // draw line
             ctx.beginPath();
 
@@ -78,11 +84,13 @@ const renderer: CustomRenderer<SparklineCell> = {
             });
             ctx.moveTo(points[0].x, points[0].y);
 
-            let i: number;
-            for (i = 1; i < points.length - 2; i++) {
-                const xControl = (points[i].x + points[i + 1].x) / 2;
-                const yControl = (points[i].y + points[i + 1].y) / 2;
-                ctx.quadraticCurveTo(points[i].x, points[i].y, xControl, yControl);
+            let i = 0;
+            if (points.length > 2) {
+                for (i = 1; i < points.length - 2; i++) {
+                    const xControl = (points[i].x + points[i + 1].x) / 2;
+                    const yControl = (points[i].y + points[i + 1].y) / 2;
+                    ctx.quadraticCurveTo(points[i].x, points[i].y, xControl, yControl);
+                }
             }
             ctx.quadraticCurveTo(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
 
@@ -94,20 +102,22 @@ const renderer: CustomRenderer<SparklineCell> = {
             ctx.lineTo(rect.x + padX, zeroY);
             ctx.closePath();
 
-            ctx.globalAlpha = 0.2 + 0.2 * hoverAmount;
-            const grad = ctx.createLinearGradient(0, y, 0, y + height * 1.4);
-            grad.addColorStop(0, color ?? theme.accentColor);
+            if (graphKind === "area") {
+                ctx.globalAlpha = 0.2 + 0.2 * hoverAmount;
+                const grad = ctx.createLinearGradient(0, y, 0, y + height * 1.4);
+                grad.addColorStop(0, color ?? theme.accentColor);
 
-            const [r, g, b] = parseToRgba(color ?? theme.accentColor);
-            grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
-            ctx.fillStyle = grad;
-            ctx.fill();
-            ctx.globalAlpha = 1;
+                const [r, g, b] = parseToRgba(color ?? theme.accentColor);
+                grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+                ctx.fillStyle = grad;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
 
-            if (hoverX !== undefined && graphKind === "line" && displayValues !== undefined) {
+            if (hoverX !== undefined && (graphKind === "line" || graphKind === "area") && displayValues !== undefined) {
                 ctx.beginPath();
                 const closest = Math.min(values.length - 1, Math.max(0, Math.round((hoverX - padX) / xStep)));
-                ctx.moveTo(drawX + closest * xStep, rect.y);
+                ctx.moveTo(drawX + closest * xStep, rect.y + 1);
                 ctx.lineTo(drawX + closest * xStep, rect.y + rect.height);
 
                 ctx.lineWidth = 1;

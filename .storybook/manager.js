@@ -1,5 +1,5 @@
 import { addons } from "@storybook/addons";
-import { themes, create } from "@storybook/theming";
+import { create } from "@storybook/theming";
 
 const glideTheme = create({
     base: "dark",

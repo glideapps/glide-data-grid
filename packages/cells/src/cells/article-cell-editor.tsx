@@ -1,11 +1,11 @@
 import type { ProvideEditorComponent } from "@glideapps/glide-data-grid";
 import * as React from "react";
-import { Editor } from "@toast-ui/react-editor";
+import { Editor, Viewer } from "@toast-ui/react-editor";
 import { styled } from "@linaria/react";
-import type { ArticleCell } from "./article-cell-types";
+import type { ArticleCell } from "./article-cell-types.js";
 
 const Wrapper = styled.div`
-    .footer {
+    .gdg-footer {
         display: flex;
         justify-content: flex-end;
         padding: 20px;
@@ -14,18 +14,18 @@ const Wrapper = styled.div`
             border: none;
             padding: 8px 16px;
             font-size: 14px;
-            border-radius: 9px;
             font-weight: 500;
             font-family: var(--gdg-font-family);
             cursor: pointer;
+            border-radius: var(--gdg-rounding-radius, 9px);
         }
     }
-    .save-button {
+    .gdg-save-button {
         background-color: var(--gdg-accent-color);
         color: var(--gdg-accent-fg);
     }
 
-    .close-button {
+    .gdg-close-button {
         background-color: var(--gdg-bg-header);
         color: var(--gdg-text-medium);
         margin-right: 8px;
@@ -53,8 +53,16 @@ const ArticleCellEditor: ProvideEditorComponent<ArticleCell> = p => {
         p.onFinishedEditing(undefined);
     }, [p]);
 
+    if (p.value.readonly) {
+        return (
+            <Wrapper id="gdg-markdown-readonly" onKeyDown={onKeyDown} style={{ height: "75vh", padding: "35px" }}>
+                <Viewer initialValue={p.value.data.markdown} usageStatistics={false} />
+            </Wrapper>
+        );
+    }
+
     return (
-        <Wrapper id="markdown-wysiwyg" onKeyDown={onKeyDown}>
+        <Wrapper id="gdg-markdown-wysiwyg" onKeyDown={onKeyDown}>
             <Editor
                 initialEditType="wysiwyg"
                 autofocus={true}
@@ -71,11 +79,11 @@ const ArticleCellEditor: ProvideEditorComponent<ArticleCell> = p => {
                     ["code", "codeblock"],
                 ]}
             />
-            <div className="footer">
-                <button className="close-button" onClick={onClose}>
+            <div className="gdg-footer">
+                <button className="gdg-close-button" onClick={onClose}>
                     Close
                 </button>
-                <button className="save-button" onClick={onSave}>
+                <button className="gdg-save-button" onClick={onSave}>
                     Save
                 </button>
             </div>

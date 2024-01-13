@@ -1,5 +1,7 @@
-import type { ImageWindowLoader, Item, Rectangle } from "../data-grid/data-grid-types";
+import { CellSet } from "../internal/data-grid/cell-set.js";
 import throttle from "lodash/throttle.js";
+import { packColRowToNumber, unpackNumberToColRow, WindowingTrackerBase } from "./render-state-provider.js";
+import type { ImageWindowLoader } from "../internal/data-grid/image-window-loader-interface.js";
 
 interface LoadResult {
     img: HTMLImageElement | undefined;
@@ -8,62 +10,25 @@ interface LoadResult {
     cells: number[];
 }
 
-const rowShift = 1 << 16;
-
 const imgPool: HTMLImageElement[] = [];
 
-function packColRowToNumber(col: number, row: number) {
-    return row * rowShift + col;
-}
-
-function unpackCol(packed: number): number {
-    return packed % rowShift;
-}
-
-function unpackRow(packed: number, col: number): number {
-    return (packed - col) / rowShift;
-}
-
-function unpackNumberToColRow(packed: number): [number, number] {
-    const col = unpackCol(packed);
-    const row = unpackRow(packed, col);
-    return [col, row];
-}
-
-class ImageWindowLoaderImpl implements ImageWindowLoader {
-    private imageLoaded: (locations: readonly Item[]) => void = () => undefined;
+class ImageWindowLoaderImpl extends WindowingTrackerBase implements ImageWindowLoader {
+    private imageLoaded: (locations: CellSet) => void = () => undefined;
     private loadedLocations: [number, number][] = [];
-
-    public visibleWindow: Rectangle = {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-    };
-
-    public freezeCols: number = 0;
-
-    private isInWindow = (packed: number) => {
-        const col = unpackCol(packed);
-        const row = unpackRow(packed, col);
-        const w = this.visibleWindow;
-        if (col < this.freezeCols && row >= w.y && row <= w.y + w.height) return true;
-        return col >= w.x && col <= w.x + w.width && row >= w.y && row <= w.y + w.height;
-    };
 
     private cache: Record<string, LoadResult> = {};
 
-    public setCallback(imageLoaded: (locations: readonly Item[]) => void) {
+    public setCallback(imageLoaded: (locations: CellSet) => void) {
         this.imageLoaded = imageLoaded;
     }
 
     // eslint-disable-next-line unicorn/consistent-function-scoping
     private sendLoaded = throttle(() => {
-        this.imageLoaded(this.loadedLocations);
+        this.imageLoaded(new CellSet(this.loadedLocations));
         this.loadedLocations = [];
     }, 20);
 
-    private clearOutOfWindow = () => {
+    protected clearOutOfWindow = () => {
         const keys = Object.keys(this.cache);
         for (const key of keys) {
             const obj = this.cache[key];
@@ -85,20 +50,6 @@ class ImageWindowLoaderImpl implements ImageWindowLoader {
             }
         }
     };
-
-    public setWindow(newWindow: Rectangle, freezeCols: number): void {
-        if (
-            this.visibleWindow.x === newWindow.x &&
-            this.visibleWindow.y === newWindow.y &&
-            this.visibleWindow.width === newWindow.width &&
-            this.visibleWindow.height === newWindow.height &&
-            this.freezeCols === freezeCols
-        )
-            return;
-        this.visibleWindow = newWindow;
-        this.freezeCols = freezeCols;
-        this.clearOutOfWindow();
-    }
 
     private loadImage(url: string, col: number, row: number, key: string) {
         let loaded = false;

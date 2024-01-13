@@ -1,10 +1,11 @@
 import { range } from "lodash";
 import React from "react";
-import { DataEditor, type DataEditorProps } from "../../data-editor/data-editor";
-import { BeautifulWrapper, Description, PropName, defaultProps } from "../../data-editor/stories/utils";
-import type { GridColumn } from "../../data-grid/data-grid-types";
-import { GridCellKind } from "../../data-grid/data-grid-types";
-import { SimpleThemeWrapper } from "../../stories/story-utils";
+import { type DataEditorProps } from "../../data-editor/data-editor.js";
+import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
+import { BeautifulWrapper, Description, PropName, defaultProps } from "../../data-editor/stories/utils.js";
+import type { GridColumn } from "../../internal/data-grid/data-grid-types.js";
+import { GridCellKind } from "../../internal/data-grid/data-grid-types.js";
+import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",

@@ -45,14 +45,15 @@ Details of each property can be found by clicking on it.
 
 ## Ref Methods
 
-| Name                        | Description                                                   |
-| --------------------------- | ------------------------------------------------------------- |
-| [updateCells](#updatecells) | Invalidates the rendering of a list of passed cells.          |
-| [getBounds](#getbounds)     | Gets the current screen-space bounds of a desired cell.       |
-| [scrollTo](#scrollto)       | Tells the data-grid to scroll to a particular location.       |
-| [appendRow](#appendrow)     | Append a row to the data grid.                                |
-| [focus](#focus)             | Focuses the data grid.                                        |
-| [emit](#emit)               | Used to emit commands normally emitted by keyboard shortcuts. |
+| Name                                  | Description                                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [appendRow](#appendrow)               | Append a row to the data grid.                                                                               |
+| [emit](#emit)                         | Used to emit commands normally emitted by keyboard shortcuts.                                                |
+| [focus](#focus)                       | Focuses the data grid.                                                                                       |
+| [getBounds](#getbounds)               | Gets the current screen-space bounds of a desired cell.                                                      |
+| [remeasureColumns](#remeasureColumns) | Causes the columns in the selection to have their natural sizes recomputed and re-emitted as a resize event. |
+| [scrollTo](#scrollto)                 | Tells the data-grid to scroll to a particular location.                                                      |
+| [updateCells](#updatecells)           | Invalidates the rendering of a list of passed cells.                                                         |
 
 ## Required Props
 
@@ -61,8 +62,8 @@ All data grids must set these props. These props are the bare minimum required t
 | Name                              | Description                                             |
 | --------------------------------- | ------------------------------------------------------- |
 | [columns](#columns)               | All columns in the data grid.                           |
-| [rows](#rows)                     | The number of rows in the data-grid.                    |
 | [getCellContent](#getcellcontent) | A callback to get the content of a given cell location. |
+| [rows](#rows)                     | The number of rows in the data-grid.                    |
 
 ## Important Props
 
@@ -70,6 +71,8 @@ Most data grids will want to set the majority of these props one way or another.
 
 | Name                                              | Description                                                                                                                                                                                                                                                         |
 | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [fixedShadowX](#fixedshadow)                      | Enable/disable a shadow behind fixed columns on the X axis.                                                                                                                                                                                                         |
+| [fixedShadowY](#fixedshadow)                      | Enable/disable a shadow behind the header(s) on the Y axis.                                                                                                                                                                                                         |
 | [freezeColumns](#freezecolumns)                   | The number of columns which should remain in place when scrolling horizontally. The row marker column, if enabled is always frozen and is not included in this count.                                                                                               |
 | [getCellsForSelection](#getcellsforselection)     | Used to fetch large amounts of cells at once. Used for copy/paste, if unset copy will not work.                                                                                                                                                                     |
 | [markdownDivCreateNode](#markdowndivcreatenode)   | If specified, it will be used to render Markdown, instead of the default Markdown renderer used by the Grid. You'll want to use this if you need to process your Markdown for security purposes, or if you want to use a renderer with different Markdown features. |
@@ -79,22 +82,22 @@ Most data grids will want to set the majority of these props one way or another.
 | [rowMarkers](#rowmarkers)                         | Enable/disable row marker column on the left. Can show row numbers, selection boxes, or both.                                                                                                                                                                       |
 | [smoothScrollX](#smoothscroll)                    | Enable/disable smooth scrolling on the X axis.                                                                                                                                                                                                                      |
 | [smoothScrollY](#smoothscroll)                    | Enable/disable smooth scrolling on the Y axis.                                                                                                                                                                                                                      |
-| [fixedShadowX](#fixedshadow)                      | Enable/disable a shadow behind fixed columns on the X axis.                                                                                                                                                                                                         |
-| [fixedShadowY](#fixedshadow)                      | Enable/disable a shadow behind the header(s) on the Y axis.                                                                                                                                                                                                         |
 
 ## Search
 
-| Name                            | Description                                                |
-| ------------------------------- | ---------------------------------------------------------- |
-| [showSearch](#showsearch)       | Show/hide the search interface.                            |
-| [onSearchClose](#onsearchclose) | Emitted when the search interface close button is clicked. |
+| Name                                              | Description                                                                           |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [onSearchClose](#onsearchclose)                   | Emitted when the search interface close button is clicked.                            |
+| [onSearchResultsChanged](#onsearchresultschanged) | Emitted when the search results change.                                               |
+| [onSearchValueChange](#onsearchvaluechange)       | Emitted when the user types a new value into the search box.                          |
+| [searchResults](#searchresults)                   | Overrides the search results and highlights all items for the user to enumerate over. |
+| [searchValue](#searchvalue)                       | Sets the search value for the search box.                                             |
+| [showSearch](#showsearch)                         | Show/hide the search interface.                                                       |
 
 ## Styling
 
 | Name                                        | Description                                                             |
 | ------------------------------------------- | ----------------------------------------------------------------------- |
-| [drawCell](#drawcell)                       | Callback used to override the rendering of any cell.                    |
-| [drawHeader](#drawheader)                   | Callback used to override the rendering of any header.                  |
 | [getGroupDetails](#getgroupdetails)         | Callback to provide additional details for group headers such as icons. |
 | [getRowThemeOverride](#getrowthemeoverride) | Callback to provide theme override for any row.                         |
 | [groupHeaderHeight](#groupheaderheight)     | The height in pixels of the column group headers.                       |
@@ -104,35 +107,40 @@ Most data grids will want to set the majority of these props one way or another.
 | [overscrollY](#overscroll)                  | Allows overscrolling the data grid vertically by a set amount.          |
 | [rightElement](#rightelement)               | A node which will be placed at the right edge of the data grid.         |
 | [rightElementProps](#rightelement)          | Changes how the right element renders.                                  |
-| [rowMarkerWidth](#rowmarkerwidth)           | The width of the row markers.                                           |
 | [rowMarkerStartIndex](#rowmarkerstartindex) | The index of the first element in the grid                              |
+| [rowMarkerTheme](#rowmarkertheme)           | Overrides the theme for row markers                                     |
+| [rowMarkerWidth](#rowmarkerwidth)           | The width of the row markers.                                           |
+| [scaleToRem](#scaletorem)                   | Scales most elements in the theme to match rem scaling automatically    |
 | [verticalBorder](#verticalborder)           | Enable/disable vertical borders for any `GridColumn`                    |
 
 ## Selection Handling
 
 | Name                                               | Description                                                                                             |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| [columnSelect](#rangeselect)                       | Controls if multiple columns can be selected at once.                                                   |
+| [columnSelectionBlending](#rangeselectionblending) | Controls how column selections may be mixed with other selection types.                                 |
+| [drawFocusRing](#drawfocusring)                    | Determins if the focus ring should be drawn by the grid.                                                |
+| [fillHandle](#fillhandle)                          | Controls the presence of the fill indicator                                                             |
 | [gridSelection](#gridselection)                    | The current selection active in the data grid. Includes both the selection cell and the selected range. |
-| [spanRangeBehavior](#spanrangebehavior)            | Determines if the `gridSelection` should allow partial spans or not.                                    |
+| [highlightRegions](#highlightregions)              | Adds additional highlights to the data grid for showing contextually important cells.                   |
 | [onGridSelectionChange](#gridselection)            | Emitted whenever the `gridSelection` should change.                                                     |
 | [onSelectionCleared](#onselectioncleared)          | Emitted when the selection is explicitly cleared.                                                       |
 | [rangeSelect](#rangeselect)                        | Controls if multiple ranges can be selected at once.                                                    |
-| [columnSelect](#rangeselect)                       | Controls if multiple columns can be selected at once.                                                   |
-| [rowSelect](#rangeselect)                          | Controls if multiple rows can be selected at aonce.                                                     |
 | [rangeSelectionBlending](#rangeselectionblending)  | Controls how range selections may be mixed with other selection types.                                  |
-| [columnSelectionBlending](#rangeselectionblending) | Controls how column selections may be mixed with other selection types.                                 |
+| [rowSelect](#rangeselect)                          | Controls if multiple rows can be selected at aonce.                                                     |
 | [rowSelectionBlending](#rangeselectionblending)    | Controls how row selections may be mixed with other selection types.                                    |
-| [highlightRegions](#highlightregions)              | Adds additional highlights to the data grid for showing contextually important cells.                   |
-| [fillHandle](#fillhandle)                          | Controls the presence of the fill indicator                                                             |
+| [spanRangeBehavior](#spanrangebehavior)            | Determines if the `gridSelection` should allow partial spans or not.                                    |
 
 ## Editing
 
 | Name                                          | Description                                                                                                                        |
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| [coercePasteValue](#coercepastevalue)         | Allows coercion of pasted values.                                                                                                  |
 | [imageEditorOverride](#imageeditoroverride)   | Used to provide an override to the default image editor for the data grid. `provideEditor` may be a better choice for most people. |
 | [onCellEdited](#oncelledited)                 | Emitted whenever a cell edit is completed.                                                                                         |
 | [onCellsEdited](#oncelledited)                | Emitted whenever a cell edit is completed and provides all edits inbound as a single batch.                                        |
 | [onDelete](#ondelete)                         | Emitted whenever the user has requested the deletion of the selection.                                                             |
+| [onFillPattern](#onfillpattern)               | Emitted when the fill handle is used to replace the contents of a region of the grid.                                              |
 | [onFinishedEditing](#onfinishedediting)       | Emitted when editing has finished, regardless of data changing or not.                                                             |
 | [onGroupHeaderRenamed](#ongroupheaderrenamed) | Emitted whe the user wishes to rename a group.                                                                                     |
 | [onPaste](#onpaste)                           | Emitted any time data is pasted to the grid. Allows controlling paste behavior.                                                    |
@@ -143,34 +151,60 @@ Most data grids will want to set the majority of these props one way or another.
 
 | Name                                                  | Description                                                                                                                                                                         |
 | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [keybindings](#keybindings)                           | Controls which keybindings are enabled while the grid is selected.                                                                                                                  |
+| [maxColumnAutoWidth](#maxcolumnwidth)                 | Sets the maximum width a column can be auto-sized to.                                                                                                                               |
 | [maxColumnWidth](#maxcolumnwidth)                     | Sets the maximum width the user can resize a column to.                                                                                                                             |
 | [minColumnWidth](#maxcolumnwidth)                     | Sets the minimum width the user can resize a column to.                                                                                                                             |
-| [onCellClicked](#oncellclicked)                       | Emitted when a cell is clicked.                                                                                                                                                     |
 | [onCellActivated](#oncellactivated)                   | Emitted when a cell is activated, by pressing Enter, Space or double clicking it.                                                                                                   |
+| [onCellClicked](#oncellclicked)                       | Emitted when a cell is clicked.                                                                                                                                                     |
 | [onCellContextMenu](#oncellcontextmenu)               | Emitted when a cell should show a context menu. Usually right click.                                                                                                                |
 | [onColumnMoved](#oncolumnmoved)                       | Emitted when a column has been dragged to a new location.                                                                                                                           |
 | [onColumnResize](#oncolumnresize)                     | Emitted when a column has been resized to a new size.                                                                                                                               |
+| [onColumnResizeEnd](#oncolumnresize)                  | Emitted when a column has been resized to a new size and the user has stopped interacting wtih the resize handle.                                                                   |
 | [onGroupHeaderClicked](#ongroupheaderclicked)         | Emitted when a group header is clicked.                                                                                                                                             |
 | [onGroupHeaderContextMenu](#ongroupheadercontextmenu) | Emitted when a group header should show a context menu. Usually right click.                                                                                                        |
 | [onHeaderClicked](#onheaderclicked)                   | Emitted when a column header is clicked.                                                                                                                                            |
 | [onHeaderContextMenu](#onheadercontextmenu)           | Emitted when a column header should show a context menu. Usually right click.                                                                                                       |
 | [onHeaderMenuClick](#onheadermenuclick)               | Emitted when the menu dropdown arrow on a column header is clicked.                                                                                                                 |
 | [onItemHovered](#onitemhovered)                       | Emitted when the hovered item changes.                                                                                                                                              |
+| [onKeyDown](#onkey)                                   | Emitted when a key is pressed.                                                                                                                                                      |
+| [onKeyUp](#onkey)                                     | Emitted when a key is released.                                                                                                                                                     |
 | [onMouseMove](#onmousemove)                           | Emitted whenever the mouse moves. Be careful, can cause performance issues.                                                                                                         |
 | [onRowMoved](#onrowmoved)                             | Emitted when a row has been dragged to a new location.                                                                                                                              |
 | [preventDiagonalScrolling](#preventdiagonalscrolling) | Prevents diagonal scrolling                                                                                                                                                         |
 | [rowSelectionMode](#rowselectionmode)                 | Determines if row selection requires a modifier key to enable multi-selection or not.                                                                                               |
-| [showMinimap](#showminimap)                           | Shows the interactive minimap of the grid.                                                                                                                                          |
 | [scrollToEnd](#scrolltoend)                           | When set to true, the grid will scroll to the end. The ref has a better method to do this and this prop should not be used but it will remain supported for the foreseeable future. |
+| [showMinimap](#showminimap)                           | Shows the interactive minimap of the grid.                                                                                                                                          |
 | [validateCell](#validatecell)                         | When returns false indicates to the user the value will not be accepted. When returns a new GridCell the value is coerced to match.                                                 |
+
+## Drag and Drop
+
+| Name                      | Description                                                   |
+| ------------------------- | ------------------------------------------------------------- |
+| [onDragLeave](#ondrop)    | Emitted when an external drag event exits the drop region.    |
+| [onDragOverCell](#ondrop) | Emitted when an external drag event is started over a cell.   |
+| [onDrop](#ondrop)         | Emitted when an external drag event is completed on the grid. |
+
+## Custom Cells
+
+| Name                               | Description                                            |
+| ---------------------------------- | ------------------------------------------------------ |
+| [customRenderers](#customRenderer) | FIXME                                                  |
+| [drawCell](#drawcell)              | Callback used to override the rendering of any cell.   |
+| [drawHeader](#drawheader)          | Callback used to override the rendering of any header. |
 
 ## Rarely Used
 
-| Name                          | Description                                                                                                                     |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| [isDraggable](#isdraggable)   | Makes the grid as a whole draggable. Disables many interactions.                                                                |
-| [onDragStart](#isdraggable)   | Emitted when a drag starts and `isDraggable` is true.                                                                           |
-| [experimental](#experimental) | Contains experimental flags. Nothing in here is considered stable API and is mostly used for features that are not yet settled. |
+| Name                                    | Description                                                                                                                                         |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [experimental](#experimental)           | Contains experimental flags. Nothing in here is considered stable API and is mostly used for features that are not yet settled.                     |
+| [imageWindowLoader](#imagewindowloader) | Replaces the default image window loader with an externally provided one. Useful for cases where images need to be loaded in a non-standard method. |
+| [initialSize](#initialsize)             | Passing this enables the grid to optimize its first paint and avoid a flicker. Only useful if the grid size is known ahead of time.                 |
+| [isDraggable](#isdraggable)             | Makes the grid as a whole draggable. Disables many interactions.                                                                                    |
+| [isOutsideClick](#isoutsideclick)       | Allows bypassing the default outside click handler for overlay editors.                                                                             |
+| [onDragStart](#isdraggable)             | Emitted when a drag starts and `isDraggable` is true.                                                                                               |
+| [scrollOffsetX](#scrolloffset)          | Sets the initial scroll offset in the x direction.                                                                                                  |
+| [scrollOffsetY](#scrolloffset)          | Sets the initial scroll offset in the y direction.                                                                                                  |
 
 # Keybindings
 
@@ -185,7 +219,7 @@ Most data grids will want to set the majority of these props one way or another.
 | Ctrl/Cmd + A                 | ✔️      | `selectAll`         | Selects all cells.                                                                       |
 | Shift + Space                | ✔️      | `selectRow`         | Selecs the current row.                                                                  |
 | Ctrl + Space                 | ✔️      | `selectCol`         | Selects the current col.                                                                 |
-| PageUp/PageDown              | ❌      | `pageUp`/`pageDown` | Moves the current selection up/down by one page.                                         |
+| PageUp/PageDown              | ✔️      | `pageUp`/`pageDown` | Moves the current selection up/down by one page.                                         |
 | Escape                       | ✔️      | `clear`             | Clear the current selection.                                                             |
 | Ctrl/Cmd + D                 | ❌      | `downFill`          | Data from the first row of the range will be down filled into the rows below it          |
 | Ctrl/Cmd + R                 | ❌      | `rightFill`         | Data from the first column of the range will be right filled into the columns next to it |
@@ -263,7 +297,7 @@ export type GridColumn = SizedGridColumn | AutoGridColumn;
 | Markdown  | Displays markdown when opened.                                                                                 |
 | Drilldown | Similar to a bubble cell, but allows embedding text and images with each cell.                                 |
 | Protected | Displays stars instead of data. Useful for indicating that hidden data is present but unavailable to the user. |
-| Custom    | Has no rendering by default and must be provided via `drawCell`. Used to implement 3rd party cells.            |
+| Custom    | Has no rendering by default and must be provided via a custom renderer                                         |
 
 All grid cells support the following properties
 
@@ -496,10 +530,15 @@ If `markdownDivCreateNode` is specified, then it will be used to render Markdown
 ## onVisibleRegionChanged
 
 ```ts
-onVisibleRegionChanged?: (range: Rectangle) => void;
+onVisibleRegionChanged?: (
+    range: Rectangle,
+    tx: number,
+    ty: number,
+    extras: { selected?: Item; freezeRegion?: Rectangle };
+) => void;
 ```
 
-`onVisibleRegionChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`.
+`onVisibleRegionChanged` is called whenever the visible region changed. The new visible region is passed as a `Rectangle`. The x and y transforms of the cell region are passed as `tx` and `ty`. The current selection and frozen region are passed in the `extras` object.
 
 ---
 
@@ -599,23 +638,70 @@ If `onSearchClose` is not provided and `showSearch` is set to true, the search b
 
 ---
 
+## searchValue
+
+```ts
+readonly searchValue?: string;
+```
+
+This property is used to set the current search value in the data grid. It accepts a string that represents the term or phrase to be used for searching within the grid. By setting `searchValue`, you can programmatically control the search value.
+
+---
+
+## onSearchResultsChanged
+
+```ts
+readonly onSearchResultsChanged?: (results: readonly Item[], navIndex: number) => void;
+```
+
+This event handler is called when there is a change in the search results of the data grid's search field. It provides two parameters: `results` and `navIndex`. The `results` parameter is an array of `Item` objects, each representing a cell or row that matches the current search query. The `navIndex` parameter is the index of the currently selected or highlighted search result within the `results` array.
+
+---
+
+## onSearchValueChange
+
+```ts
+readonly onSearchValueChange?: (newVal: string) => void;
+```
+
+This event is emitted whenever the search value in the data grid changes. The handler `onSearchValueChange` is provided with a single argument `newVal`, which is the updated string value entered in the search field. Implementing this event allows you to execute custom actions in response to changes in the search input. This can include triggering search operations based on the new value, updating the user interface elements to reflect the change, or any other related functionality that needs to respond to updates in the search term within your data grid.
+
+---
+
+## searchResults
+
+```ts
+readonly searchResults?: readonly Item[];
+```
+
+This property allows you to specify the search results to be displayed in the data grid. If `searchResults` is not provided, the grid will use its internal search provider to determine and display search results. By setting the `searchResults` property, you can override the default search behavior and supply a custom array of `Item` objects as the search results. These `Item` objects typically refer to the cells or rows in the grid that match a custom search criterion. This is particularly useful if you need to implement a specialized search functionality that differs from the built-in search capabilities of the grid.
+
+---
+
 ## drawCell
 
 ```ts
-drawCell?: (args: {
-    ctx: CanvasRenderingContext2D;
-    cell: GridCell;
-    theme: Theme;
-    rect: Rectangle;
-    hoverAmount: number;
-    hoverX: number | undefined;
-    hoverY: number | undefined;
-    highlighted: boolean;
-    imageLoader: ImageWindowLoader;
-}) => boolean;
+drawCell?: (
+    args: {
+        ctx: CanvasRenderingContext2D;
+        cell: GridCell;
+        theme: Theme;
+        rect: Rectangle;
+        col: number;
+        row: number;
+        hoverAmount: number;
+        hoverX: number | undefined;
+        hoverY: number | undefined;
+        highlighted: boolean;
+        imageLoader: ImageWindowLoader;
+    },
+    drawContent: () => void
+) => void;
 ```
 
-You can specify `drawCell` to enable rendering your own cells. The Grid will call this for every cell it needs to render. It should either render the cell and return `true`, or not render anything and return `false`, in which case the Grid will render the cell.
+The `drawCell` property enables custom rendering of cells in the Grid. This function is called for each cell during the rendering process and is provided with a comprehensive set of parameters. These parameters include the drawing context (`ctx`), cell data (`cell`), theming details (`theme`), the cell's rectangle (`rect`), column and row indices (`col`, `row`), hover state information (`hoverAmount`, `hoverX`, `hoverY`), a highlight flag (`highlighted`), and an image loader (`imageLoader`).
+
+Additionally, `drawCell` provides a `drawContent` method, which, when called, immediately draws the default content of the cell onto the canvas. This design offers flexibility in how you render each cell. For instance, you can first draw a custom background, then call `drawContent` to render the cell's standard contents, and finally add an overlay or additional embellishments. This approach allows for layered rendering, where you can seamlessly integrate custom graphics or styles with the grid's inherent rendering logic.
 
 ---
 
@@ -730,6 +816,16 @@ If `rightElementProps.fill` is set, the right elements container will fill to co
 
 ---
 
+## rowMarkerStartIndex
+
+```ts
+readonly rowMarkerStartIndex?: number;
+```
+
+This property is used to set the starting index for row markers in a React component. The `rowMarkerStartIndex` accepts a numerical value that specifies the initial index from which the row markers in the data grid will begin counting. By default, this value is set to `1`. This property is particularly useful when you need the row numbering to start from a specific value other than the default, such as when displaying paginated data or aligning with an external data set's indexing.
+
+---
+
 ## rowMarkerWidth
 
 ```ts
@@ -737,6 +833,16 @@ rowMarkerWidth?: number;
 ```
 
 `rowMarkerWidth` is the width of the marker column on the very left. By default, it adapts based on the number of rows in your data set.
+
+---
+
+## scaleToRem
+
+```ts
+readonly scaleToRem?: boolean;
+```
+
+This property is a boolean flag that enables automatic scaling of most elements in the data grid's theme to match the REM (Root EM) scaling. When set to `true`, it adjusts the sizing of various elements like fonts, paddings, and other dimensions to align with the REM units defined in your application's styles. This ensures that the data grid's appearance is consistent with the overall scaling and typography of your application, especially in responsive designs or when dealing with accessibility requirements. The default value of this property is `false`, meaning that without explicit activation, the grid's elements will not automatically scale based on REM units.
 
 ---
 
@@ -919,6 +1025,16 @@ The grid will not attempt to add additional rows if more data is pasted then can
 
 ---
 
+## coercePasteValue
+
+```ts
+coercePasteValue?: (val: string, cell: GridCell) => GridCell | undefined;
+```
+
+This callback allows coercion of pasted values before they are passed to edit functions. `val` contains the pasted value and `cell` is the target of the paste. Returning `undefined` will accept the default behavior of the grid, or a `GridCell` may be returned which will be used for paste instead.
+
+---
+
 ## trailingRowOptions
 
 ```ts
@@ -988,9 +1104,11 @@ onColumnMoved?: (startIndex: number, endIndex: number) => void;
 
 ```ts
 onColumnResize?: (column: GridColumn, newSize: number, columnIndex: number) => void;
+onColumnResizeEnd?: (column: GridColumn, newSize: number, columnIndex: number) => void;
 ```
 
 `onColumnResize` is called when the user is resizing a column. `newSize` is the new size of the column. Note that you have change the size of the column in the `GridColumn` and pass it back to the grid in the `columns` property.
+`onColumnReizeEnd` is called with the same arguments, but only once the user ceases interaction with the resize handle.
 
 ## onColumnResizeStart
 
@@ -1184,9 +1302,10 @@ type CustomCellRenderer<T extends CustomCell> = {
 };
 
 // the hook itself
-declare function useCustomCells(
-    cells: readonly CustomCellRenderer<any>[]
-): { drawCell: DrawCustomCellCallback; provideEditor: ProvideEditorCallback<GridCell> };
+declare function useCustomCells(cells: readonly CustomCellRenderer<any>[]): {
+    drawCell: DrawCustomCellCallback;
+    provideEditor: ProvideEditorCallback<GridCell>;
+};
 ```
 
 The useCustomCells hook provides a standardized method of integrating custom cells into the Glide Data Grid. All cells in the `@glideapps/glide-data-grid-source` package are already in this format and can be used individually by passing them to this hook as so. The result of the hook is an object which can be spread on the DataEditor to implement the cells.

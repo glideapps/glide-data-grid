@@ -1,5 +1,6 @@
 import * as React from "react";
 import debounce from "lodash/debounce.js";
+import { deepEqual } from "./support.js";
 
 export function useEventListener<K extends keyof HTMLElementEventMap>(
     eventName: K,
@@ -168,15 +169,15 @@ const ltrRange =
 
 /* eslint-disable no-misleading-character-class */
 const rtl = new RegExp("^[^" + ltrRange + "]*[" + rtlRange + "]");
-const ltr = new RegExp("^[^" + rtlRange + "]*[" + ltrRange + "]");
 /* eslint-enable no-misleading-character-class */
 
-export function direction(value: string): "rtl" | "ltr" | "neutral" {
-    return rtl.test(value) ? "rtl" : ltr.test(value) ? "ltr" : "neutral";
+export function direction(value: string): "rtl" | "not-rtl" {
+    return rtl.test(value) ? "rtl" : "not-rtl";
 }
 
 let scrollbarWidthCache: number | undefined = undefined;
 export function getScrollBarWidth(): number {
+    if (typeof document === "undefined") return 0;
     if (scrollbarWidthCache !== undefined) return scrollbarWidthCache;
     const inner = document.createElement("p");
     inner.style.width = "100%";
@@ -270,4 +271,15 @@ export function makeAccessibilityStringForArray(arr: readonly string[]): string 
         index++;
     }
     return arr.slice(0, index).join(", ");
+}
+
+export function useDeepMemo<T>(value: T): T {
+    const ref = React.useRef<T>(value);
+
+    if (!deepEqual(value, ref.current)) {
+        ref.current = value;
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return React.useMemo(() => ref.current, [ref.current]);
 }

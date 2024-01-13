@@ -1,14 +1,14 @@
 import React from "react";
-import { DataEditor } from "../../data-editor/data-editor";
+import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
 import {
     BeautifulWrapper,
     Description,
     PropName,
     useMockDataGenerator,
     defaultProps,
-} from "../../data-editor/stories/utils";
-import type { Item, GridCell } from "../../data-grid/data-grid-types";
-import { SimpleThemeWrapper } from "../../stories/story-utils";
+} from "../../data-editor/stories/utils.js";
+import type { Item, GridCell } from "../../internal/data-grid/data-grid-types.js";
+import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -47,6 +47,10 @@ export const RearrangeColumns: React.VFC = () => {
         });
     }, []);
 
+    const onColProposeMove = React.useCallback((_startIndex: number, endIndex: number): boolean => {
+        return endIndex !== 3;
+    }, []);
+
     const getCellContentMangled = React.useCallback(
         ([col, row]: Item): GridCell => {
             const remappedCol = cols.findIndex(c => c.title === sortableCols[col].title);
@@ -61,8 +65,11 @@ export const RearrangeColumns: React.VFC = () => {
             freezeColumns={1}
             rowMarkers="both"
             getCellContent={getCellContentMangled}
+            onColumnProposeMove={onColProposeMove}
             columns={sortableCols}
             onColumnMoved={onColMoved}
+            columnSelectionBlending="mixed"
+            rangeSelectionBlending="mixed"
             rows={1000}
         />
     );

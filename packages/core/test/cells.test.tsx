@@ -1,10 +1,12 @@
-import { render } from "@testing-library/react";
+import { cleanup, render } from "@testing-library/react";
 import * as React from "react";
 import noop from "lodash/noop.js";
-import type { Rectangle, ImageCell, ImageEditorType } from "../src";
-import { GridCellKind, getDefaultTheme, isObjectEditorCallbackResult } from "../src";
-import { assert } from "../src/common/support";
-import { imageCellRenderer } from "../src/data-grid/cells/image-cell";
+import type { Rectangle, ImageCell, ImageEditorType } from "../src/index.js";
+import { GridCellKind, getDefaultTheme, isObjectEditorCallbackResult } from "../src/index.js";
+import { assert } from "../src/common/support.js";
+import { imageCellRenderer } from "../src/cells/image-cell.js";
+import { expect, describe, it, afterEach } from "vitest";
+import { mergeAndRealizeTheme } from "../src/common/styles.js";
 
 function getMockEditorTarget(): Rectangle {
     return {
@@ -30,7 +32,7 @@ const getImgCell = (): ImageCell => {
     return {
         kind: GridCellKind.Image,
         data: ["img1.jpg", "img2.jpg"],
-        allowAdd: true,
+        readonly: false,
         allowOverlay: true,
     };
 };
@@ -38,6 +40,10 @@ const getImgCell = (): ImageCell => {
 // TODO: We can test the editor _much_ more.
 // Let's do that.
 describe("Image cell", () => {
+    afterEach(() => {
+        cleanup();
+    });
+
     it("Renders the right accessibilty string", async () => {
         const cell = getImgCell();
         const accessibilityString = imageCellRenderer.getAccessibilityString(cell);
@@ -47,7 +53,7 @@ describe("Image cell", () => {
     it("Measures a reasonable size", async () => {
         const cell = getImgCell();
         const ctx = get2dContext();
-        const autoSize = imageCellRenderer.measure?.(ctx, cell, getDefaultTheme());
+        const autoSize = imageCellRenderer.measure?.(ctx, cell, mergeAndRealizeTheme(getDefaultTheme()));
         expect(autoSize).toBe(100);
     });
 
@@ -62,6 +68,7 @@ describe("Image cell", () => {
         const result = render(
             <Editor
                 onChange={noop}
+                theme={getDefaultTheme()}
                 onFinishedEditing={noop}
                 isHighlighted={false}
                 value={cell}
@@ -93,6 +100,7 @@ describe("Image cell", () => {
         const result = render(
             <Editor
                 imageEditorOverride={CustomEditor}
+                theme={getDefaultTheme()}
                 onChange={noop}
                 onFinishedEditing={noop}
                 isHighlighted={false}

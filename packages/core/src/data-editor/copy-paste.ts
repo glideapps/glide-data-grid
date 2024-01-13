@@ -1,6 +1,11 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import { assertNever } from "../common/support";
-import { GridCellKind, type GridCell, BooleanEmpty, BooleanIndeterminate } from "../data-grid/data-grid-types";
+import { assertNever } from "../common/support.js";
+import {
+    GridCellKind,
+    type GridCell,
+    BooleanEmpty,
+    BooleanIndeterminate,
+} from "../internal/data-grid/data-grid-types.js";
 
 type StringArrayCellBuffer = {
     formatted: string[];

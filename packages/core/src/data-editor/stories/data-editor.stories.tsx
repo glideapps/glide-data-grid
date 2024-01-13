@@ -2,8 +2,7 @@
 import * as React from "react";
 
 import { useState, useCallback, useMemo } from "@storybook/addons";
-import { BuilderThemeWrapper } from "../../stories/story-utils";
-
+import { BuilderThemeWrapper } from "../../stories/story-utils.js";
 import {
     CompactSelection,
     type EditableGridCell,
@@ -12,8 +11,8 @@ import {
     type GridColumn,
     type GridSelection,
     type Item,
-} from "../../data-grid/data-grid-types";
-import { DataEditor } from "../data-editor";
+} from "../../internal/data-grid/data-grid-types.js";
+import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
 
 export default {
     title: "Tests/TestCases",
@@ -61,7 +60,7 @@ function getDummyData([col, row]: Item): GridCell {
                 "https://preview.redd.it/7jlqkp2cyap51.jpg?width=575&auto=webp&s=26fa9ed15b16fb450ee08ed1f2f0ccb5e0223581",
             ],
             allowOverlay: true,
-            allowAdd: true,
+            readonly: false,
         };
     }
     if (col === 3) {

@@ -6,7 +6,7 @@ import {
     GridCellKind,
 } from "@glideapps/glide-data-grid";
 import * as React from "react";
-import { roundedRect } from "../draw-fns";
+import { roundedRect } from "../draw-fns.js";
 
 interface RangeCellProps {
     readonly kind: "range-cell";
@@ -16,7 +16,6 @@ interface RangeCellProps {
     readonly step: number;
     readonly label?: string;
     readonly measureLabel?: string;
-    readonly readonly?: boolean;
 }
 
 export type RangeCell = CustomCell<RangeCellProps>;
@@ -101,7 +100,7 @@ const renderer: CustomRenderer<RangeCell> = {
     provideEditor: () => {
         // eslint-disable-next-line react/display-name
         return p => {
-            const { data } = p.value;
+            const { data, readonly } = p.value;
 
             const strValue = data.value.toString();
             const strMin = data.min.toString();
@@ -128,6 +127,7 @@ const renderer: CustomRenderer<RangeCell> = {
                         max={strMax}
                         step={strStep}
                         onChange={onChange}
+                        disabled={readonly}
                     />
                     {strValue}
                 </label>

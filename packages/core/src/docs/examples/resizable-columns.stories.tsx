@@ -1,5 +1,5 @@
 import React from "react";
-import { DataEditor } from "../../data-editor/data-editor";
+import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
 import {
     BeautifulWrapper,
     Description,
@@ -7,8 +7,8 @@ import {
     PropName,
     useMockDataGenerator,
     defaultProps,
-} from "../../data-editor/stories/utils";
-import { SimpleThemeWrapper } from "../../stories/story-utils";
+} from "../../data-editor/stories/utils.js";
+import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -53,11 +53,14 @@ export const ResizableColumns: React.VFC = () => {
             maxColumnWidth={2000}
             rows={50}
             scaleToRem={true}
-            theme={{
-                baseFontStyle: "0.8125rem",
-                headerFontStyle: "600 0.8125rem",
-                editorFontSize: "0.8125rem",
-            }}
+            theme={React.useMemo(
+                () => ({
+                    baseFontStyle: "0.8125rem",
+                    headerFontStyle: "600 0.8125rem",
+                    editorFontSize: "0.8125rem",
+                }),
+                []
+            )}
             onColumnResize={onColumnResize}
         />
     );

@@ -1,13 +1,13 @@
 import React from "react";
-import { DataEditor } from "../../data-editor/data-editor";
+import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
 import {
     BeautifulWrapper,
     Description,
     PropName,
     useMockDataGenerator,
     defaultProps,
-} from "../../data-editor/stories/utils";
-import { SimpleThemeWrapper } from "../../stories/story-utils";
+} from "../../data-editor/stories/utils.js";
+import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -54,7 +54,8 @@ export const DragSource: React.VFC<{ isDraggable: boolean | "header" | "cell" }>
 };
 (DragSource as any).argTypes = {
     isDraggable: {
-        control: { type: "select", options: [true, false, "cell", "header"] },
+        control: { type: "select" },
+        options: [true, false, "cell", "header"],
     },
 };
 (DragSource as any).args = {

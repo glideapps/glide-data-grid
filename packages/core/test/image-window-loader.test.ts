@@ -1,4 +1,6 @@
-import ImageWindowLoaderImpl from "../src/common/image-window-loader";
+import ImageWindowLoaderImpl from "../src/common/image-window-loader.js";
+import { vi, expect, describe, it, beforeEach } from "vitest";
+import { packColRowToNumber } from "../src/common/render-state-provider.js";
 
 describe("ImageWindowLoaderImpl", () => {
     let loader: ImageWindowLoaderImpl;
@@ -17,7 +19,7 @@ describe("ImageWindowLoaderImpl", () => {
             };
             const freezeCols = 5;
 
-            loader.setWindow(newWindow, freezeCols);
+            loader.setWindow(newWindow, freezeCols, []);
 
             // Assuming you modify your class to expose `visibleWindow` and `freezeCols` for testing
             expect(loader.visibleWindow).toEqual(newWindow);
@@ -25,7 +27,7 @@ describe("ImageWindowLoaderImpl", () => {
         });
 
         it("should call clearOutOfWindow() if the window or freezeCols changes", () => {
-            const spyClearOutOfWindow = jest.spyOn(loader, "clearOutOfWindow" as any); // Private method, so using 'as any'
+            const spyClearOutOfWindow = vi.spyOn(loader, "clearOutOfWindow" as any); // Private method, so using 'as any'
 
             const window1 = {
                 x: 10,
@@ -42,13 +44,13 @@ describe("ImageWindowLoaderImpl", () => {
             const freezeCols1 = 5;
             const freezeCols2 = 10;
 
-            loader.setWindow(window1, freezeCols1);
+            loader.setWindow(window1, freezeCols1, []);
             expect(spyClearOutOfWindow).toHaveBeenCalledTimes(1);
 
-            loader.setWindow(window2, freezeCols1);
+            loader.setWindow(window2, freezeCols1, []);
             expect(spyClearOutOfWindow).toHaveBeenCalledTimes(2);
 
-            loader.setWindow(window2, freezeCols2);
+            loader.setWindow(window2, freezeCols2, []);
             expect(spyClearOutOfWindow).toHaveBeenCalledTimes(3);
 
             // Cleanup
@@ -56,7 +58,7 @@ describe("ImageWindowLoaderImpl", () => {
         });
 
         it("should not call clearOutOfWindow() if the window and freezeCols stay the same", () => {
-            const spyClearOutOfWindow = jest.spyOn(loader, "clearOutOfWindow" as any);
+            const spyClearOutOfWindow = vi.spyOn(loader, "clearOutOfWindow" as any);
 
             const newWindow = {
                 x: 10,
@@ -66,8 +68,8 @@ describe("ImageWindowLoaderImpl", () => {
             };
             const freezeCols = 5;
 
-            loader.setWindow(newWindow, freezeCols);
-            loader.setWindow(newWindow, freezeCols);
+            loader.setWindow(newWindow, freezeCols, []);
+            loader.setWindow(newWindow, freezeCols, []);
 
             expect(spyClearOutOfWindow).toHaveBeenCalledTimes(1);
 
@@ -90,7 +92,7 @@ describe("ImageWindowLoaderImpl", () => {
                 img,
                 url,
                 cells: [],
-                cancel: jest.fn(),
+                cancel: vi.fn(),
             };
 
             // Act: Retrieve the image
@@ -102,7 +104,7 @@ describe("ImageWindowLoaderImpl", () => {
 
         it("should trigger image loading if the image is not in the cache", () => {
             // Setup: Spy on `loadImage` method and clear the cache
-            const spyLoadImage = jest.spyOn(loader, "loadImage" as any);
+            const spyLoadImage = vi.spyOn(loader, "loadImage" as any);
             (loader as any).cache = {};
 
             // Act: Try to retrieve an image that's not in the cache
@@ -122,9 +124,9 @@ describe("ImageWindowLoaderImpl", () => {
                 img: undefined,
                 url,
                 cells: [],
-                cancel: jest.fn(),
+                cancel: vi.fn(),
             };
-            const spyLoadImage = jest.spyOn(loader, "loadImage" as any);
+            const spyLoadImage = vi.spyOn(loader, "loadImage" as any);
 
             // Act: Try to retrieve an image that's in the cache but not loaded
             const result = loader.loadOrGetImage(url, col, row);
@@ -153,24 +155,24 @@ describe("ImageWindowLoaderImpl", () => {
             expect((loader as any).cache[key]).toBeDefined();
             expect((loader as any).cache[key].url).toBe(url);
             expect((loader as any).cache[key].img).toBeUndefined();
-            expect((loader as any).cache[key].cells).toEqual([row * (1 << 16) + col]);
+            expect((loader as any).cache[key].cells).toEqual([packColRowToNumber(col, row)]);
         });
 
         it("should handle image loading and decoding successfully", async () => {
             // Setup: Spy on `Image` constructor and `decode` method
             const img = new Image();
-            img.addEventListener = jest.fn((_kind: string, cb: any) => cb());
-            jest.useFakeTimers();
+            img.addEventListener = vi.fn((_kind: string, cb: any) => cb());
+            vi.useFakeTimers();
 
-            const spyConstructor = jest.spyOn(window, "Image").mockImplementation(() => img);
-            img.decode = jest.fn().mockResolvedValue(undefined);
+            const spyConstructor = vi.spyOn(window, "Image").mockImplementation(() => img);
+            img.decode = vi.fn().mockResolvedValue(undefined);
 
             // Act: Load an image and simulate its successful loading
             (loader as any).loadImage(url, col, row, key);
 
-            jest.runAllTimers();
+            vi.runAllTimers();
 
-            jest.useRealTimers();
+            vi.useRealTimers();
             await new Promise(r => setTimeout(r, 100));
 
             // Assert: Ensure `decode` was called and the image data is updated in the cache
@@ -184,18 +186,18 @@ describe("ImageWindowLoaderImpl", () => {
         it("should handle image loading failure gracefully", async () => {
             // Setup: Spy on `Image` constructor and `decode` method
             const img = new Image();
-            img.addEventListener = jest.fn((_kind: string, cb: any) => cb());
-            jest.useFakeTimers();
+            img.addEventListener = vi.fn((_kind: string, cb: any) => cb());
+            vi.useFakeTimers();
 
-            const spyConstructor = jest.spyOn(window, "Image").mockImplementation(() => img);
-            img.decode = jest.fn().mockRejectedValue(new Error("Decoding failed"));
+            const spyConstructor = vi.spyOn(window, "Image").mockImplementation(() => img);
+            img.decode = vi.fn().mockRejectedValue(new Error("Decoding failed"));
 
             // Act: Load an image and simulate its successful loading but decoding failure
             (loader as any).loadImage(url, col, row, key);
 
-            jest.runAllTimers();
+            vi.runAllTimers();
 
-            jest.useRealTimers();
+            vi.useRealTimers();
             await new Promise(r => setTimeout(r, 100));
 
             // Assert: Ensure `decode` was called and the image data remains undefined in the cache

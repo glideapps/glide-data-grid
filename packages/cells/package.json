@@ -1,19 +1,19 @@
 {
     "name": "@glideapps/glide-data-grid-cells",
-    "version": "5.3.2",
+    "version": "5.99.9-rc2",
     "description": "Extra cells for glide-data-grid",
     "sideEffects": [
         "**/*.css"
     ],
     "type": "module",
-    "browser": "dist/js/index.js",
+    "browser": "dist/esm/index.js",
     "main": "dist/cjs/index.js",
-    "module": "dist/js/index.js",
-    "types": "dist/ts/index.d.ts",
+    "module": "dist/esm/index.js",
+    "types": "dist/dts/index.d.ts",
     "exports": {
         ".": {
-            "types": "./dist/ts/index.d.ts",
-            "import": "./dist/js/index.js",
+            "types": "./dist/dts/index.d.ts",
+            "import": "./dist/esm/index.js",
             "require": "./dist/cjs/index.js"
         },
         "./dist/index.css": {
@@ -25,11 +25,9 @@
         "dist"
     ],
     "scripts": {
-        "build": "npm run build-js && npm run build-types",
-        "build-js": "node build.cjs && tsc-esm-fix --target='dist/js'",
-        "build-types": "tsc -p tsconfig.types.json",
+        "build": "./build.sh",
         "lint": "eslint src --ext .ts,.tsx",
-        "test": "jest"
+        "test": "vitest"
     },
     "repository": {
         "type": "git",
@@ -52,7 +50,8 @@
         "canvas"
     ],
     "dependencies": {
-        "@glideapps/glide-data-grid": "5.3.2",
+        "@glideapps/glide-data-grid": "5.99.9-rc2",
+        "@linaria/react": "^4.5.3",
         "@toast-ui/editor": "3.1.10",
         "@toast-ui/react-editor": "3.1.10",
         "react-select": "^5.2.2"

@@ -1,15 +1,15 @@
 import React from "react";
-import { DataEditor } from "../../data-editor/data-editor";
+import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
 import {
     BeautifulWrapper,
     Description,
     PropName,
     defaultProps,
     useAllMockedKinds,
-} from "../../data-editor/stories/utils";
-import type { GetRowThemeCallback } from "../../data-grid/data-grid-render";
-import type { GridMouseEventArgs } from "../../data-grid/data-grid-types";
-import { SimpleThemeWrapper } from "../../stories/story-utils";
+} from "../../data-editor/stories/utils.js";
+import type { GetRowThemeCallback } from "../../internal/data-grid/data-grid-render.js";
+import { SimpleThemeWrapper } from "../../stories/story-utils.js";
+import type { GridMouseEventArgs } from "../../internal/data-grid/event-args.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",

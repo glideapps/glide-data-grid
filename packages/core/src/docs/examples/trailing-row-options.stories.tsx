@@ -1,6 +1,6 @@
 import React from "react";
-import type { Theme } from "../../common/styles";
-import { DataEditor } from "../../data-editor/data-editor";
+import type { Theme } from "../../common/styles.js";
+import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
 import {
     BeautifulWrapper,
     Description,
@@ -8,9 +8,9 @@ import {
     useMockDataGenerator,
     defaultProps,
     clearCell,
-} from "../../data-editor/stories/utils";
-import { GridColumnIcon, type GridColumn } from "../../data-grid/data-grid-types";
-import { SimpleThemeWrapper } from "../../stories/story-utils";
+} from "../../data-editor/stories/utils.js";
+import { GridColumnIcon, type GridColumn } from "../../internal/data-grid/data-grid-types.js";
+import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -19,16 +19,15 @@ export default {
         (Story: React.ComponentType) => (
             <SimpleThemeWrapper>
                 <BeautifulWrapper
-            title="Trailing row options"
-            description={
-                <Description>
-                    You can customize the trailing row in each column by setting a{" "}
-                    <PropName>trailingRowOptions</PropName> in your columns.
-                </Description>
-            }>
-
-                <Story />
-            </BeautifulWrapper>
+                    title="Trailing row options"
+                    description={
+                        <Description>
+                            You can customize the trailing row in each column by setting a{" "}
+                            <PropName>trailingRowOptions</PropName> in your columns.
+                        </Description>
+                    }>
+                    <Story />
+                </BeautifulWrapper>
             </SimpleThemeWrapper>
         ),
     ],
@@ -90,18 +89,18 @@ export const TrailingRowOptions: React.VFC = () => {
     }, [cols]);
 
     return (
-            <DataEditor
-                {...defaultProps}
-                getCellContent={getCellContent}
-                columns={columnsWithRowOptions}
-                rowMarkers={"both"}
-                onCellEdited={setCellValue}
-                trailingRowOptions={{
-                    tint: true,
-                    sticky: true,
-                }}
-                rows={numRows}
-                onRowAppended={onRowAppended}
-            />
+        <DataEditor
+            {...defaultProps}
+            getCellContent={getCellContent}
+            columns={columnsWithRowOptions}
+            rowMarkers={"both"}
+            onCellEdited={setCellValue}
+            trailingRowOptions={{
+                tint: true,
+                sticky: true,
+            }}
+            rows={numRows}
+            onRowAppended={onRowAppended}
+        />
     );
 };

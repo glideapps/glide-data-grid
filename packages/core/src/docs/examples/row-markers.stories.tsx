@@ -1,13 +1,14 @@
 import React from "react";
-import { DataEditor, type DataEditorProps } from "../../data-editor/data-editor";
+import { type DataEditorProps } from "../../data-editor/data-editor.js";
+import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
 import {
     BeautifulWrapper,
     Description,
     PropName,
     useMockDataGenerator,
     defaultProps,
-} from "../../data-editor/stories/utils";
-import { SimpleThemeWrapper } from "../../stories/story-utils";
+} from "../../data-editor/stories/utils.js";
+import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -53,6 +54,7 @@ export const RowMarkers: React.VFC<RowMarkersProps> = p => {
 };
 (RowMarkers as any).argTypes = {
     markers: {
-        control: { type: "select", options: ["both", "checkbox", "number", "none", "clickable-number"] },
+        control: { type: "select" },
+        options: ["both", "checkbox", "number", "none", "clickable-number"],
     },
 };

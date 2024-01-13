@@ -1,7 +1,8 @@
 import * as React from "react";
-import type { Theme } from "../common/styles";
-import type { DataGridSearchProps } from "../data-grid-search/data-grid-search";
-import type { GetCellRendererCallback } from "../data-grid/cells/cell-types";
+import type { FullTheme } from "../common/styles.js";
+import type { DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
+import type { GetCellRendererCallback } from "../cells/cell-types.js";
+
 import {
     type CellArray,
     type GridCell,
@@ -10,14 +11,13 @@ import {
     isSizedGridColumn,
     resolveCellsThunk,
     type SizedGridColumn,
-} from "../data-grid/data-grid-types";
-
+} from "../internal/data-grid/data-grid-types.js";
 const defaultSize = 150;
 
 function measureCell(
     ctx: CanvasRenderingContext2D,
     cell: GridCell,
-    theme: Theme,
+    theme: FullTheme,
     getCellRenderer: GetCellRendererCallback
 ): number {
     const r = getCellRenderer(cell);
@@ -26,7 +26,7 @@ function measureCell(
 
 export function measureColumn(
     ctx: CanvasRenderingContext2D,
-    theme: Theme,
+    theme: FullTheme,
     c: GridColumn,
     colIndex: number,
     selectedData: CellArray,
@@ -35,20 +35,35 @@ export function measureColumn(
     removeOutliers: boolean,
     getCellRenderer: GetCellRendererCallback
 ): SizedGridColumn {
-    let sizes: number[] = [];
-    if (selectedData !== undefined) {
-        sizes.push(
-            ...selectedData.map(row => row[colIndex]).map(cell => measureCell(ctx, cell, theme, getCellRenderer))
-        );
-    }
+    let max = 0;
+    const sizes: number[] =
+        selectedData === undefined
+            ? []
+            : selectedData.map(row => {
+                  const r = measureCell(ctx, row[colIndex], theme, getCellRenderer);
+                  max = Math.max(max, r);
+                  return r;
+              });
+
     if (sizes.length > 5 && removeOutliers) {
+        max = 0;
         // Filter out outliers
-        const average = sizes.reduce((a, b) => a + b) / sizes.length;
-        sizes = sizes.filter(a => a < average * 2);
+        let sum = 0;
+        for (const size of sizes) {
+            sum += size;
+        }
+        const average = sum / sizes.length;
+        // Set sizes that are considered outliers to zero
+        for (let i = 0; i < sizes.length; i++) {
+            if (sizes[i] >= average * 2) {
+                sizes[i] = 0;
+            } else {
+                max = Math.max(max, sizes[i]);
+            }
+        }
     }
-    sizes.push(ctx.measureText(c.title).width + 16 + (c.icon === undefined ? 0 : 28));
-    const biggest = Math.max(...sizes);
-    const final = Math.max(Math.ceil(minColumnWidth), Math.min(Math.floor(maxColumnWidth), Math.ceil(biggest)));
+    max = Math.max(max, ctx.measureText(c.title).width + 16 + (c.icon === undefined ? 0 : 28));
+    const final = Math.max(Math.ceil(minColumnWidth), Math.min(Math.floor(maxColumnWidth), Math.ceil(max)));
 
     return {
         ...c,
@@ -64,10 +79,13 @@ export function useColumnSizer(
     clientWidth: number,
     minColumnWidth: number,
     maxColumnWidth: number,
-    theme: Theme,
+    theme: FullTheme,
     getCellRenderer: GetCellRendererCallback,
     abortController: AbortController
-): readonly InnerGridColumn[] {
+): {
+    readonly sizedColumns: readonly InnerGridColumn[];
+    readonly nonGrowWidth: number;
+} {
     const rowsRef = React.useRef(rows);
     const getCellsForSelectionRef = React.useRef(getCellsForSelection);
     const themeRef = React.useRef(theme);
@@ -160,7 +178,7 @@ export function useColumnSizer(
                 });
             }
 
-            ctx.font = `${themeRef.current.baseFontStyle} ${themeRef.current.fontFamily}`;
+            ctx.font = themeRef.current.baseFontFull;
 
             return columns.map((c, colIndex) => {
                 if (isSizedGridColumn(c)) return c;
@@ -224,6 +242,9 @@ export function useColumnSizer(
             }
             result = writeable;
         }
-        return result;
+        return {
+            sizedColumns: result,
+            nonGrowWidth: totalWidth,
+        };
     }, [clientWidth, columns, ctx, selectedData, theme, minColumnWidth, maxColumnWidth, getCellRenderer]);
 }

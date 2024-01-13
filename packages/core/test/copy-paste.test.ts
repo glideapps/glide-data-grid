@@ -1,6 +1,7 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import { GridCellKind, type GridCell, BooleanIndeterminate } from "../src";
-import { decodeHTML, getCopyBufferContents, type CellBuffer } from "../src/data-editor/copy-paste";
+import { GridCellKind, type GridCell, BooleanIndeterminate } from "../src/index.js";
+import { decodeHTML, getCopyBufferContents, type CellBuffer } from "../src/data-editor/copy-paste.js";
+import { expect, describe, test } from "vitest";
 
 function makeCellBuffer(
     rawValue: string | string[],
@@ -282,7 +283,7 @@ describe("copy-paste", () => {
                     kind: GridCellKind.Image,
                     data: ["image1.jpg", "image2.jpg"],
                     allowOverlay: true,
-                    allowAdd: true,
+                    readonly: false,
                 },
             ],
         ];

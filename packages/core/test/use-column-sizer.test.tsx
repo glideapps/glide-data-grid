@@ -1,11 +1,12 @@
-import { renderHook } from "@testing-library/react-hooks";
-import { type GridCell, GridCellKind, type GridColumn, type Rectangle } from "../src";
-import { getDataEditorTheme } from "../src/common/styles";
-import type { DataGridSearchProps } from "../src/data-grid-search/data-grid-search";
-import { CellRenderers } from "../src/data-grid/cells";
-import type { GetCellRendererCallback } from "../src/data-grid/cells/cell-types";
-import type { CellArray, CustomCell } from "../src/data-grid/data-grid-types";
-import { useColumnSizer } from "../src/data-editor/use-column-sizer";
+import { renderHook, cleanup } from "@testing-library/react-hooks";
+import { type GridCell, GridCellKind, type GridColumn, type Rectangle } from "../src/index.js";
+import { getDataEditorTheme, mergeAndRealizeTheme } from "../src/common/styles.js";
+import type { DataGridSearchProps } from "../src/internal/data-grid-search/data-grid-search.js";
+import { AllCellRenderers } from "../src/cells/index.js";
+import type { GetCellRendererCallback } from "../src/cells/cell-types.js";
+import type { CellArray, CustomCell } from "../src/internal/data-grid/data-grid-types.js";
+import { useColumnSizer } from "../src/data-editor/use-column-sizer.js";
+import { vi, expect, describe, it, beforeEach, afterEach } from "vitest";
 
 const COLUMNS: GridColumn[] = [
     {
@@ -63,15 +64,10 @@ function buildCellsForSelectionGetter(dataBuilder: DataBuilder): DataGridSearchP
     };
 }
 
-const getShortCellsForSelection = jest.fn(buildCellsForSelectionGetter((x, y) => `column ${x} row ${y}`));
-const getLongCellsForSelection = jest.fn(
-    buildCellsForSelectionGetter((x, y) => `This cell is in column number ${x} and row number ${y}`)
+const getShortCellsForSelection = vi.fn(buildCellsForSelectionGetter((x, y) => `column ${x} row ${y}`) as any);
+const getLongCellsForSelection = vi.fn(
+    buildCellsForSelectionGetter((x, y) => `This cell is in column number ${x} and row number ${y}`) as any
 );
-
-beforeEach(() => {
-    getShortCellsForSelection.mockClear();
-    getLongCellsForSelection.mockClear();
-});
 
 const theme = getDataEditorTheme();
 
@@ -86,10 +82,19 @@ const SINGLE_COLUMN = [
 
 const getCellRenderer: GetCellRendererCallback = cell => {
     if (cell.kind === GridCellKind.Custom) return undefined;
-    return CellRenderers[cell.kind] as any;
+    return AllCellRenderers.find(x => x.kind === cell.kind) as any;
 };
 
 describe("use-column-sizer", () => {
+    beforeEach(() => {
+        getShortCellsForSelection.mockClear();
+        getLongCellsForSelection.mockClear();
+    });
+
+    afterEach(async () => {
+        await cleanup();
+    });
+
     it("Measures a simple cell", async () => {
         const { result } = renderHook(() =>
             useColumnSizer(
@@ -99,14 +104,14 @@ describe("use-column-sizer", () => {
                 400,
                 20,
                 500,
-                theme,
+                mergeAndRealizeTheme(theme),
                 getCellRenderer,
                 abortController
             )
         );
 
-        const columnA = result.current.find(col => col.title === "A");
-        const columnB = result.current.find(col => col.title === "B");
+        const columnA = result.current.sizedColumns.find(col => col.title === "A");
+        const columnB = result.current.sizedColumns.find(col => col.title === "B");
 
         expect(columnA).toBeDefined();
         expect(columnB).toBeDefined();
@@ -144,7 +149,7 @@ describe("use-column-sizer", () => {
                 400,
                 20,
                 500,
-                theme,
+                mergeAndRealizeTheme(theme),
                 () => {
                     return {
                         draw: () => true,
@@ -157,7 +162,7 @@ describe("use-column-sizer", () => {
             )
         );
 
-        expect(result.current[0].width).toBe(212);
+        expect(result.current.sizedColumns[0].width).toBe(212);
     });
 
     it("Measures the last row", async () => {
@@ -170,7 +175,7 @@ describe("use-column-sizer", () => {
                 400,
                 20,
                 500,
-                theme,
+                mergeAndRealizeTheme(theme),
                 getCellRenderer,
                 abortController
             )
@@ -208,7 +213,7 @@ describe("use-column-sizer", () => {
                     400,
                     20,
                     500,
-                    theme,
+                    mergeAndRealizeTheme(theme),
                     getCellRenderer,
                     abortController
                 ),
@@ -220,9 +225,9 @@ describe("use-column-sizer", () => {
             }
         );
 
-        const shortColumnA = result.current.find(col => col.title === "A");
-        const shortColumnB = result.current.find(col => col.title === "B");
-        const shortColumnC = result.current.find(col => col.title === "C");
+        const shortColumnA = result.current.sizedColumns.find(col => col.title === "A");
+        const shortColumnB = result.current.sizedColumns.find(col => col.title === "B");
+        const shortColumnC = result.current.sizedColumns.find(col => col.title === "C");
 
         expect(shortColumnA).toBeDefined();
         expect(shortColumnB).toBeDefined();
@@ -238,9 +243,9 @@ describe("use-column-sizer", () => {
             columns: A_COPY_OF_COLUMNS_THAT_ALSO_HAS_A_NEW_COLUMN_TITLED_C_THAT_WE_WILL_MEASURE_SOON_ENOUGH, // I told you!
         });
 
-        const longColumnA = result.current.find(col => col.title === "A");
-        const longColumnB = result.current.find(col => col.title === "B");
-        const longColumnC = result.current.find(col => col.title === "C");
+        const longColumnA = result.current.sizedColumns.find(col => col.title === "A");
+        const longColumnB = result.current.sizedColumns.find(col => col.title === "B");
+        const longColumnC = result.current.sizedColumns.find(col => col.title === "C");
 
         expect(longColumnA).toBeDefined();
         expect(longColumnB).toBeDefined();
@@ -254,11 +259,21 @@ describe("use-column-sizer", () => {
 
     it("Returns the default sizes if getCellsForSelection is not provided", async () => {
         const { result } = renderHook(() =>
-            useColumnSizer(COLUMNS, 1000, undefined, 400, 20, 500, theme, getCellRenderer, abortController)
+            useColumnSizer(
+                COLUMNS,
+                1000,
+                undefined,
+                400,
+                20,
+                500,
+                mergeAndRealizeTheme(theme),
+                getCellRenderer,
+                abortController
+            )
         );
 
-        const columnA = result.current.find(col => col.title === "A");
-        const columnB = result.current.find(col => col.title === "B");
+        const columnA = result.current.sizedColumns.find(col => col.title === "A");
+        const columnB = result.current.sizedColumns.find(col => col.title === "B");
 
         expect(columnA).toBeDefined();
         expect(columnB).toBeDefined();
@@ -277,13 +292,15 @@ describe("use-column-sizer", () => {
                 400,
                 50,
                 500,
-                theme,
+                mergeAndRealizeTheme(theme),
                 getCellRenderer,
                 abortController
             )
         );
 
-        expect(result.current).toBe(A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE);
+        expect(result.current.sizedColumns).toBe(
+            A_BUNCH_OF_COLUMNS_THAT_ALREADY_HAVE_SIZES_WE_DONT_WANT_TO_MEASURE_THESE
+        );
     });
 
     it("Removes the canvas from the DOM when unmounted", async () => {
@@ -296,7 +313,7 @@ describe("use-column-sizer", () => {
                 400,
                 20,
                 500,
-                theme,
+                mergeAndRealizeTheme(theme),
                 getCellRenderer,
                 abortController
             )
@@ -337,15 +354,15 @@ describe("use-column-sizer", () => {
                 400,
                 20,
                 500,
-                theme,
+                mergeAndRealizeTheme(theme),
                 getCellRenderer,
                 abortController
             )
         );
 
-        const columnA = result.current.find(col => col.title === "A");
-        const columnB = result.current.find(col => col.title === "B");
-        const columnC = result.current.find(col => col.title === "C");
+        const columnA = result.current.sizedColumns.find(col => col.title === "A");
+        const columnB = result.current.sizedColumns.find(col => col.title === "B");
+        const columnC = result.current.sizedColumns.find(col => col.title === "C");
 
         expect(columnA).toBeDefined();
         expect(columnB).toBeDefined();

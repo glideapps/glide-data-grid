@@ -1,3 +1,8 @@
+import * as React from "react";
+
+import { styled } from "@linaria/react";
+import Select, { type MenuProps, components } from "react-select";
+
 import {
     type CustomCell,
     type ProvideEditorCallback,
@@ -7,9 +12,6 @@ import {
     GridCellKind,
     TextCellEntry,
 } from "@glideapps/glide-data-grid";
-import { styled } from "@linaria/react";
-import * as React from "react";
-import Select, { type MenuProps, components } from "react-select";
 
 interface CustomMenuProps extends MenuProps<any> {}
 
@@ -19,10 +21,12 @@ const CustomMenu: React.FC<CustomMenuProps> = p => {
     return <Menu {...rest}>{children}</Menu>;
 };
 
+type DropdownOption = string | { value: string; label: string } | undefined | null;
+
 interface DropdownCellProps {
     readonly kind: "dropdown-cell";
     readonly value: string | undefined | null;
-    readonly allowedValues: readonly (string | undefined | null)[];
+    readonly allowedValues: readonly DropdownOption[];
 }
 
 export type DropdownCell = CustomCell<DropdownCellProps>;
@@ -66,14 +70,14 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
 
     const theme = useTheme();
 
-    const values = React.useMemo(
-        () =>
-            allowedValues.map(x => ({
-                value: x,
-                label: x,
-            })),
-        [allowedValues]
-    );
+    const values = React.useMemo(() => {
+        return allowedValues.map(option => {
+            if (typeof option === "string" || option === null || option === undefined) {
+                return { value: option, label: option?.toString() ?? "" };
+            }
+            return option;
+        });
+    }, [allowedValues]);
 
     if (cell.readonly) {
         return (
@@ -103,10 +107,17 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                         border: 0,
                         boxShadow: "none",
                     }),
-                    option: base => ({
+                    option: (base, { isFocused }) => ({
                         ...base,
                         fontSize: theme.editorFontSize,
                         fontFamily: theme.fontFamily,
+                        cursor: isFocused ? "pointer" : undefined,
+                        paddingLeft: theme.cellHorizontalPadding,
+                        paddingRight: theme.cellHorizontalPadding,
+                        ":active": {
+                            ...base[":active"],
+                            color: theme.accentFg,
+                        },
                         // Add some content in case the option is empty
                         // so that the option height can be calculated correctly
                         ":empty::after": {
@@ -176,23 +187,27 @@ const renderer: CustomRenderer<DropdownCell> = {
     draw: (args, cell) => {
         const { ctx, theme, rect } = args;
         const { value } = cell.data;
-        if (value) {
+        const foundOption = cell.data.allowedValues.find(opt => {
+            if (typeof opt === "string" || opt === null || opt === undefined) {
+                return opt === value;
+            }
+            return opt.value === value;
+        });
+
+        const displayText = typeof foundOption === "string" ? foundOption : foundOption?.label ?? "";
+        if (displayText) {
             ctx.fillStyle = theme.textDark;
             ctx.fillText(
-                value,
+                displayText,
                 rect.x + theme.cellHorizontalPadding,
                 rect.y + rect.height / 2 + getMiddleCenterBias(ctx, theme)
             );
         }
         return true;
     },
-    measure: (ctx, cell) => {
+    measure: (ctx, cell, theme) => {
         const { value } = cell.data;
-        if (value) {
-            return ctx.measureText(value).width + 16;
-        } else {
-            return 16;
-        }
+        return (value ? ctx.measureText(value).width : 0) + theme.cellHorizontalPadding * 2;
     },
     provideEditor: () => ({
         editor: Editor,

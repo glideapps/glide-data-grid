@@ -1,14 +1,15 @@
+const { dirname, join } = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const ResolveTypeScriptPlugin = require("resolve-typescript-plugin");
 
 module.exports = {
     stories: ["../**/src/**/*.stories.tsx"],
-    addons: ["@storybook/addon-storysource", "@storybook/addon-controls"],
-    core: {
-        builder: "webpack5",
-    },
+    addons: ["@storybook/addon-storysource", getAbsolutePath("@storybook/addon-controls")],
+
     typescript: {
         reactDocgen: false,
     },
+
     webpackFinal: async (config, { configType }) => {
         // `configType` has a value of 'DEVELOPMENT' or 'PRODUCTION'
         // You can change the configuration based on that.
@@ -32,7 +33,22 @@ module.exports = {
         });
 
         config.optimization.minimize = false;
+        config.devtool = "source-map";
+        config.resolve.plugins = [new ResolveTypeScriptPlugin()];
 
         return config;
     },
+
+    framework: {
+        name: getAbsolutePath("@storybook/react-webpack5"),
+        options: {},
+    },
+
+    docs: {
+        autodocs: false,
+    },
 };
+
+function getAbsolutePath(value) {
+    return dirname(require.resolve(join(value, "package.json")));
+}

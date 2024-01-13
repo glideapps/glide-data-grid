@@ -18,7 +18,7 @@
         ],
         "@babel/preset-react",
         "@babel/preset-typescript",
-        "@linaria/babel-preset"
+        "@linaria"
     ],
     "plugins": ["@babel/plugin-proposal-class-properties"]
 }

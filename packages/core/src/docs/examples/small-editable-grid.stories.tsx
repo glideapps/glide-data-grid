@@ -1,7 +1,7 @@
 import React from "react";
-import { DataEditor } from "../../data-editor/data-editor";
-import { BeautifulWrapper, Description, useMockDataGenerator, defaultProps } from "../../data-editor/stories/utils";
-import { SimpleThemeWrapper } from "../../stories/story-utils";
+import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
+import { BeautifulWrapper, Description, useMockDataGenerator, defaultProps } from "../../data-editor/stories/utils.js";
+import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -31,7 +31,6 @@ export const SmallEditableGrid = () => {
         <DataEditor
             {...defaultProps}
             getCellContent={getCellContent}
-            rowMarkers="both"
             columns={cols}
             rows={20}
             onCellEdited={setCellValue}

@@ -35,7 +35,7 @@ function onClickSelect(e: Parameters<NonNullable<CustomRenderer<LinksCell>["onSe
     if (ctx === null) return;
 
     const { posX: hoverX, bounds: rect, cell, theme } = e;
-    const font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+    const font = theme.baseFontFull;
     ctx.font = font;
 
     const { links } = cell.data;
@@ -91,7 +91,7 @@ const renderer: CustomRenderer<LinksCell> = {
 
         const rectHoverX = rect.x + hoverX;
 
-        const font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+        const font = theme.baseFontFull;
 
         const middleCenterBias = getMiddleCenterBias(ctx, font);
         const drawY = rect.y + rect.height / 2 + middleCenterBias;
@@ -104,6 +104,7 @@ const renderer: CustomRenderer<LinksCell> = {
             const isHovered = rectHoverX > drawX && rectHoverX < drawX + metrics.width;
 
             if (isHovered) {
+                args.overrideCursor?.("pointer");
                 ctx.moveTo(drawX, Math.floor(drawY + underlineOffset) + 0.5);
                 ctx.lineTo(drawX + metrics.width, Math.floor(drawY + underlineOffset) + 0.5);
 

@@ -1,5 +1,5 @@
-import type { GridKeyEventArgs } from "../data-grid/data-grid-types";
-import { browserIsOSX } from "./browser-detect";
+import type { GridKeyEventArgs } from "../internal/data-grid/event-args.js";
+import { browserIsOSX } from "./browser-detect.js";
 
 // brain dead syntax, find your deps, and make buggy replacements with 5 times the effort
 // all lower case
@@ -15,21 +15,47 @@ function checkKey(key: string | undefined, args: GridKeyEventArgs): boolean {
     if (key === undefined) return false;
     if (key.length > 1 && key.startsWith("_")) {
         const keycode = Number.parseInt(key.slice(1));
-        if (keycode !== args.keyCode) return false;
-    } else {
-        if (key !== args.key) return false;
+        return keycode === args.keyCode;
     }
-    return true;
+    if (key.length === 1 && key >= "a" && key <= "z") {
+        return key.toUpperCase().codePointAt(0) === args.keyCode;
+    }
+
+    return key === args.key;
 }
-export function isHotkey(hotkey: string, args: GridKeyEventArgs): boolean {
+
+interface HotkeyResultDetails {
+    didMatch: boolean;
+}
+
+export function isHotkey(hotkey: string, args: GridKeyEventArgs, details: HotkeyResultDetails): boolean {
+    const result = isHotkeyInner(hotkey, args);
+    if (result) details.didMatch = true;
+    return result;
+}
+
+function isHotkeyInner(hotkey: string, args: GridKeyEventArgs): boolean {
     if (hotkey.length === 0) return false;
+
+    if (hotkey.includes("|")) {
+        const parts = hotkey.split("|");
+        for (const part of parts) {
+            if (isHotkeyInner(part, args)) return true;
+        }
+        return false;
+    }
+
     let wantCtrl = false;
     let wantShift = false;
     let wantAlt = false;
     let wantMeta = false;
+
     const split = hotkey.split("+");
     const key = split.pop();
+
     if (!checkKey(key, args)) return false;
+    if (split[0] === "any") return true;
+
     for (const accel of split) {
         switch (accel) {
             case "ctrl":

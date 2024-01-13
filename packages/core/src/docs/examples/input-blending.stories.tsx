@@ -1,7 +1,7 @@
 import React from "react";
-import { DataEditor } from "../../data-editor/data-editor";
-import { BeautifulWrapper, Description, useMockDataGenerator, defaultProps } from "../../data-editor/stories/utils";
-import { SimpleThemeWrapper } from "../../stories/story-utils";
+import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
+import { BeautifulWrapper, Description, useMockDataGenerator, defaultProps } from "../../data-editor/stories/utils.js";
+import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -76,21 +76,27 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
 };
 (InputBlending as any).argTypes = {
     rangeBlending: {
-        control: { type: "select", options: ["mixed", "exclusive"] },
+        control: { type: "select" },
+        options: ["mixed", "exclusive"],
     },
     columnBlending: {
-        control: { type: "select", options: ["mixed", "exclusive"] },
+        control: { type: "select" },
+        options: ["mixed", "exclusive"],
     },
     rowBlending: {
-        control: { type: "select", options: ["mixed", "exclusive"] },
+        control: { type: "select" },
+        options: ["mixed", "exclusive"],
     },
     rangeMultiSelect: {
-        control: { type: "select", options: ["none", "cell", "rect", "multi-cell", "multi-rect"] },
+        control: { type: "select" },
+        options: ["none", "cell", "rect", "multi-cell", "multi-rect"],
     },
     columnMultiSelect: {
-        control: { type: "select", options: ["none", "single", "multi"] },
+        control: { type: "select" },
+        options: ["none", "single", "multi"],
     },
     rowMultiSelect: {
-        control: { type: "select", options: ["none", "single", "multi"] },
+        control: { type: "select" },
+        options: ["none", "single", "multi"],
     },
 };

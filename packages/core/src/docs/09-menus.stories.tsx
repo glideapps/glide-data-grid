@@ -1,10 +1,15 @@
 import * as React from "react";
 
-import { type GridCell, GridCellKind, type GridColumn, type Item, type Rectangle } from "../data-grid/data-grid-types";
-import { DataEditor } from "../data-editor/data-editor";
-
-import { SimpleThemeWrapper } from "../stories/story-utils";
-import { DocWrapper, Highlight, Marked, Wrapper } from "./doc-wrapper";
+import {
+    type GridCell,
+    GridCellKind,
+    type GridColumn,
+    type Item,
+    type Rectangle,
+} from "../internal/data-grid/data-grid-types.js";
+import { DataEditorAll as DataEditor } from "../data-editor-all.js";
+import { SimpleThemeWrapper } from "../stories/story-utils.js";
+import { DocWrapper, Highlight, Marked, Wrapper } from "./doc-wrapper.js";
 import { useLayer } from "react-laag";
 
 export default {

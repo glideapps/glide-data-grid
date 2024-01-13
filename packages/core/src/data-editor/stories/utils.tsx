@@ -10,15 +10,14 @@ import {
     isEditableGridCell,
     isTextEditableGridCell,
     type Item,
-} from "../../data-grid/data-grid-types";
-
+} from "../../internal/data-grid/data-grid-types.js";
 import { faker } from "@faker-js/faker";
 import { styled } from "@linaria/react";
 import isArray from "lodash/isArray.js";
-import { assertNever } from "../../common/support";
-import { browserIsFirefox } from "../../common/browser-detect";
+import { assertNever } from "../../common/support.js";
+import { browserIsFirefox } from "../../common/browser-detect.js";
 import { useResizeDetector } from "react-resize-detector";
-import type { DataEditorProps } from "../data-editor";
+import type { DataEditorProps } from "../data-editor.js";
 import noop from "lodash/noop.js";
 
 faker.seed(1337);
@@ -334,7 +333,6 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
                     data: [`https://picsum.photos/id/${n}/900/900`],
                     displayData: [`https://picsum.photos/id/${n}/40/40`],
                     allowOverlay: true,
-                    allowAdd: false,
                     readonly: true,
                 };
             },
@@ -385,8 +383,13 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
                     kind: GridCellKind.Uri,
                     displayData: url,
                     data: url,
+                    hoverEffect: true,
                     allowOverlay: true,
                     readonly: true,
+                    onClickUri: a => {
+                        window.open(url, "_blank");
+                        a.preventDefault();
+                    },
                 };
             },
         },
@@ -408,7 +411,7 @@ function getResizableColumns(amount: number, group: boolean): GridColumnWithMock
 
 export class ContentCache {
     // column -> row -> value
-    private cachedContent: Map<number, Map<number, GridCell>> = new Map();
+    private cachedContent: Map<number, GridCell[]> = new Map();
 
     get(col: number, row: number) {
         const colCache = this.cachedContent.get(col);
@@ -417,16 +420,15 @@ export class ContentCache {
             return undefined;
         }
 
-        return colCache.get(row);
+        return colCache[row];
     }
 
     set(col: number, row: number, value: GridCell) {
-        if (this.cachedContent.get(col) === undefined) {
-            this.cachedContent.set(col, new Map());
+        let rowCache = this.cachedContent.get(col);
+        if (rowCache === undefined) {
+            this.cachedContent.set(col, (rowCache = []));
         }
-
-        const rowCache = this.cachedContent.get(col) as Map<number, GridCell>;
-        rowCache.set(row, value);
+        rowCache[row] = value;
     }
 }
 
@@ -599,6 +601,8 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
                 return {
                     kind: GridCellKind.Loading,
                     allowOverlay: false,
+                    skeletonWidth: 70,
+                    skeletonWidthVariability: 25,
                 };
             },
         },
@@ -659,7 +663,6 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
                     kind: GridCellKind.Image,
                     data: [`${faker.image.animals(40, 40)}?random=${faker.datatype.number(100_000)}`],
                     allowOverlay: true,
-                    allowAdd: false,
                     readonly: true,
                 };
             },

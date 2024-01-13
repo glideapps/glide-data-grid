@@ -1,15 +1,17 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
-import { render, fireEvent, screen, act } from "@testing-library/react";
-import { DataEditor, type DataEditorProps, type GridCell, GridCellKind, type GridSelection, type Item } from "../src";
-import type { DataEditorRef } from "../src/data-editor/data-editor";
-import { CompactSelection } from "../src/data-grid/data-grid-types";
-
-jest.mock("../src/common/resize-detector", () => {
-    return {
-        useResizeDetector: () => ({ ref: undefined, width: 1000, height: 1000 }),
-    };
-});
+import { render, fireEvent, screen, act, cleanup } from "@testing-library/react";
+import {
+    DataEditor,
+    type DataEditorProps,
+    type GridCell,
+    GridCellKind,
+    type GridSelection,
+    type Item,
+} from "../src/index.js";
+import type { DataEditorRef } from "../src/data-editor/data-editor.js";
+import { CompactSelection } from "../src/internal/data-grid/data-grid-types.js";
+import { vi, expect, describe, test, beforeEach, afterEach } from "vitest";
 
 const makeCell = (cell: Item): GridCell => {
     const [col, row] = cell;
@@ -155,50 +157,20 @@ const basicProps: DataEditorProps = {
     rows: 1000,
 };
 
-beforeEach(() => {
-    Element.prototype.scrollTo = jest.fn();
-    Element.prototype.scrollBy = jest.fn();
-    Object.assign(navigator, {
-        clipboard: {
-            writeText: jest.fn(() => Promise.resolve()),
-            readText: jest.fn(() =>
-                Promise.resolve(`Sunday	Dogs	https://google.com
-Monday	Cats	https://google.com
-Tuesday	Turtles	https://google.com
-Wednesday	Bears	https://google.com
-Thursday	"L  ions"	https://google.com
-Friday	Pigs	https://google.com
-Saturday	"Turkeys and some ""quotes"" and
-a new line char ""more quotes"" plus a tab  ."	https://google.com`)
-            ),
-        },
-    });
-    Element.prototype.getBoundingClientRect = () => ({
-        bottom: 1000,
-        height: 1000,
-        left: 0,
-        right: 1000,
-        top: 0,
-        width: 1000,
-        x: 0,
-        y: 0,
-        toJSON: () => "",
-    });
-    Image.prototype.decode = jest.fn();
-});
-
 function prep(resetTimers: boolean = true) {
     const scroller = document.getElementsByClassName("dvn-scroller").item(0);
     if (scroller !== null) {
-        jest.spyOn(scroller, "clientWidth", "get").mockImplementation(() => 1000);
-        jest.spyOn(scroller, "clientHeight", "get").mockImplementation(() => 1000);
+        vi.spyOn(scroller, "clientWidth", "get").mockImplementation(() => 1000);
+        vi.spyOn(scroller, "offsetWidth" as any, "get").mockImplementation(() => 1000);
+        vi.spyOn(scroller, "clientHeight", "get").mockImplementation(() => 1000);
+        vi.spyOn(scroller, "offsetHeight" as any, "get").mockImplementation(() => 1000);
     }
 
     act(() => {
-        jest.runAllTimers();
+        vi.runAllTimers();
     });
     if (resetTimers) {
-        jest.useRealTimers();
+        vi.useRealTimers();
     }
 
     return scroller;
@@ -244,9 +216,51 @@ const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, r
 });
 
 describe("data-editor-input", () => {
+    vi.mock("../src/common/resize-detector", () => {
+        return {
+            useResizeDetector: () => ({ ref: undefined, width: 1000, height: 1000 }),
+        };
+    });
+
+    beforeEach(() => {
+        Element.prototype.scrollTo = vi.fn() as any;
+        Element.prototype.scrollBy = vi.fn() as any;
+        Object.assign(navigator, {
+            clipboard: {
+                writeText: vi.fn(() => Promise.resolve()),
+                readText: vi.fn(() =>
+                    Promise.resolve(`Sunday	Dogs	https://google.com
+Monday	Cats	https://google.com
+Tuesday	Turtles	https://google.com
+Wednesday	Bears	https://google.com
+Thursday	"L  ions"	https://google.com
+Friday	Pigs	https://google.com
+Saturday	"Turkeys and some ""quotes"" and
+a new line char ""more quotes"" plus a tab  ."	https://google.com`)
+                ),
+            },
+        });
+        Element.prototype.getBoundingClientRect = () => ({
+            bottom: 1000,
+            height: 1000,
+            left: 0,
+            right: 1000,
+            top: 0,
+            width: 1000,
+            x: 0,
+            y: 0,
+            toJSON: () => "",
+        });
+        Image.prototype.decode = vi.fn();
+    });
+
+    afterEach(() => {
+        cleanup();
+    });
+
     test("Select range - single-cell", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(<EventedDataEditor {...basicProps} rangeSelect="cell" onGridSelectionChange={spy} />, {
             wrapper: Context,
         });
@@ -280,8 +294,8 @@ describe("data-editor-input", () => {
     });
 
     test("Select range - single-cell with row/column blending", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -332,8 +346,8 @@ describe("data-editor-input", () => {
     });
 
     test("Select row - single-cell with row blending", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -388,8 +402,8 @@ describe("data-editor-input", () => {
     });
 
     test("Select row - single-cell/single-row with row blending", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -445,8 +459,8 @@ describe("data-editor-input", () => {
     });
 
     test("Select col - single-cell with col blending", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
@@ -501,8 +515,8 @@ describe("data-editor-input", () => {
     });
 
     test("Select col - single-cell/single-col with col blending", async () => {
-        const spy = jest.fn();
-        jest.useFakeTimers();
+        const spy = vi.fn();
+        vi.useFakeTimers();
         render(
             <EventedDataEditor
                 {...basicProps}
