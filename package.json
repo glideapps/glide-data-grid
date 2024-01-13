@@ -7,7 +7,7 @@
         "build": "npm run build --workspaces && npm run lint --workspaces",
         "typedoc": "typedoc --readme none --disableSources --tsconfig packages/core/tsconfig.json",
         "serve-docs": "http-server packages/core/gen-docs",
-        "storybook": "storybook dev -p 9009",
+        "storybook": "storybook dev -p 9009 --no-open",
         "build-storybook": "npm run build --workspaces && storybook build -o storybook-build/",
         "prod-storybook": "npm run build-storybook && npx http-server storybook-build -p 9009",
         "test": "cd packages/core && npm run test --",
