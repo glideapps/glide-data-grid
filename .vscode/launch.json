@@ -4,7 +4,7 @@
         {
             "type": "msedge",
             "request": "launch",
-            "name": "Launch Edge against localhost",
+            "name": "Launch Glide Data Grid",
             "url": "http://localhost:9009",
             "webRoot": "${workspaceRoot}/",
             "preLaunchTask": "npm: start",
