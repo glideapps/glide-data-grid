@@ -20,6 +20,7 @@ import type { DatePickerCell } from "./cells/date-picker-cell.js";
 import type { LinksCell } from "./cells/links-cell.js";
 import type { ButtonCell } from "./cells/button-cell.js";
 import type { TreeViewCell } from "./cells/tree-view-cell.js";
+import type { JSONCell } from "./cells/json-cell.js";
 
 const SimpleWrapper = styled.div`
     box-sizing: border-box;
@@ -180,6 +181,41 @@ export const CustomCells: React.VFC = () => {
                 getCellContent={cell => {
                     const [col, row] = cell;
                     if (col === 0) {
+                        const t: TreeViewCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: false,
+                            copyData: "4",
+                            data: {
+                                canOpen: true,
+                                depth: row % 3,
+                                isOpen: row % 7 === 0,
+                                kind: "tree-view-cell",
+                                text: "Row " + row,
+                                onClickOpener: () => {
+                                    alert("Open");
+                                    return undefined;
+                                },
+                            },
+                            readonly: true,
+                        };
+                        return t;
+                    } else if (col === 1) {
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "4",
+                            data: {
+                                kind: "json-cell",
+                                json: JSON.stringify({
+                                    hello: "world",
+                                    test: 1,
+                                    bool: true,
+                                    arr: [1, 2, 3],
+                                    nested: { a: 1, b: 2 },
+                                }),
+                            },
+                        } as JSONCell;
+                    } else if (col === 2) {
                         return {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
@@ -190,7 +226,7 @@ export const CustomCells: React.VFC = () => {
                                 rating: 4,
                             },
                         } as StarCell;
-                    } else if (col === 1) {
+                    } else if (col === 3) {
                         num = row + 1;
                         const values = range(0, 15).map(() => rand() * 100 - 50);
                         return {
@@ -205,7 +241,7 @@ export const CustomCells: React.VFC = () => {
                                 yAxis: [-50, 50],
                             },
                         } as SparklineCell;
-                    } else if (col === 2) {
+                    } else if (col === 4) {
                         num = row + 1;
                         const values = range(0, 15).map(() => rand() * 100 - 50);
                         return {
@@ -222,7 +258,7 @@ export const CustomCells: React.VFC = () => {
                                 yAxis: [-50, 50],
                             },
                         } as SparklineCell;
-                    } else if (col === 3) {
+                    } else if (col === 5) {
                         num = row + 1;
                         return {
                             kind: GridCellKind.Custom,
@@ -236,7 +272,7 @@ export const CustomCells: React.VFC = () => {
                                 yAxis: [-50, 50],
                             },
                         } as SparklineCell;
-                    } else if (col === 4) {
+                    } else if (col === 6) {
                         num = row + 1;
                         rand();
                         return {
@@ -255,7 +291,7 @@ export const CustomCells: React.VFC = () => {
                                 ]),
                             },
                         } as TagsCell;
-                    } else if (col === 5) {
+                    } else if (col === 7) {
                         num = row + 1;
                         rand();
                         return {
@@ -271,7 +307,7 @@ export const CustomCells: React.VFC = () => {
                                 name: row % 5 ? undefined : "Bee bb",
                             },
                         } as UserProfileCell;
-                    } else if (col === 6) {
+                    } else if (col === 8) {
                         num = row + 1;
                         rand();
                         const d: DropdownCell = {
@@ -294,7 +330,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 7) {
+                    } else if (col === 9) {
                         num = row + 1;
                         rand();
                         const v = rand();
@@ -314,7 +350,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 8) {
+                    } else if (col === 10) {
                         num = row + 1;
                         rand();
                         const d: ArticleCell = {
@@ -328,7 +364,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 9) {
+                    } else if (col === 11) {
                         num = row + 1;
                         rand();
                         const d: SpinnerCell = {
@@ -340,7 +376,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 10) {
+                    } else if (col === 12) {
                         num = row + 1;
                         rand();
                         const d: DatePickerCell = {
@@ -356,7 +392,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 11) {
+                    } else if (col === 13) {
                         num = row + 1;
                         rand();
                         const d: DatePickerCell = {
@@ -372,7 +408,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 12) {
+                    } else if (col === 14) {
                         num = row + 1;
                         rand();
                         const d: DatePickerCell = {
@@ -388,7 +424,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 13) {
+                    } else if (col === 15) {
                         num = row + 1;
                         rand();
                         const d: LinksCell = {
@@ -411,7 +447,7 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 14) {
+                    } else if (col === 16) {
                         num = row + 1;
                         rand();
                         const d: ButtonCell = {
@@ -433,29 +469,18 @@ export const CustomCells: React.VFC = () => {
                             },
                         };
                         return d;
-                    } else if (col === 15) {
-                        const t: TreeViewCell = {
-                            kind: GridCellKind.Custom,
-                            allowOverlay: false,
-                            copyData: "4",
-                            data: {
-                                canOpen: true,
-                                depth: row % 3,
-                                isOpen: row % 7 === 0,
-                                kind: "tree-view-cell",
-                                text: "Row " + row,
-                                onClickOpener: () => {
-                                    alert("Open");
-                                    return undefined;
-                                },
-                            },
-                            readonly: true,
-                        };
-                        return t;
                     }
                     throw new Error("Fail");
                 }}
                 columns={[
+                    {
+                        title: "TreeView",
+                        width: 150,
+                    },
+                    {
+                        title: "JSON",
+                        width: 150,
+                    },
                     {
                         title: "Stars",
                         width: 200,
@@ -515,10 +540,6 @@ export const CustomCells: React.VFC = () => {
                     {
                         title: "Button",
                         width: 120,
-                    },
-                    {
-                        title: "TreeView",
-                        width: 200,
                     },
                 ]}
                 rows={500}
