@@ -118,7 +118,7 @@ describe("drawImage", () => {
         mockImage.height = 50;
         mockImageLoader.loadOrGetImage.mockReturnValueOnce(mockImage);
 
-        drawImage(baseDrawArgs, ["sample-url"]);
+        drawImage(baseDrawArgs, ["sample-url"], 5);
 
         expect(mockCtx.drawImage).toHaveBeenCalledWith(
             mockImage,
@@ -272,7 +272,7 @@ describe("drawImage", () => {
             spriteManager: {} as any,
         };
 
-        drawImage(baseDrawArgs, [""]);
+        drawImage(baseDrawArgs, [""], 5);
 
         expect(mockCtx.drawImage).not.toHaveBeenCalled();
     });
@@ -318,7 +318,9 @@ describe("drawWithLastUpdate", () => {
             },
             undefined,
             1000,
-            undefined
+            undefined,
+            false,
+            false
         );
 
         expect(mockCtx.fillStyle).toBe("");
@@ -348,7 +350,9 @@ describe("drawWithLastUpdate", () => {
             },
             lastUpdate,
             frameTime,
-            undefined
+            undefined,
+            false,
+            false
         );
 
         expect(mockCtx.fillStyle).toBe("");
@@ -378,7 +382,9 @@ describe("drawWithLastUpdate", () => {
             },
             lastUpdate,
             frameTime,
-            undefined
+            undefined,
+            false,
+            false
         );
 
         expect(mockCtx.fillStyle).toBe(mockTheme.bgSearchResult);
@@ -415,7 +421,9 @@ describe("drawWithLastUpdate", () => {
             },
             lastUpdate,
             frameTime,
-            mockLastPrep
+            mockLastPrep,
+            false,
+            false
         );
 
         expect(mockLastPrep.fillStyle).toBe(mockTheme.bgSearchResult);

@@ -68,6 +68,7 @@ describe("Image cell", () => {
         const result = render(
             <Editor
                 onChange={noop}
+                theme={getDefaultTheme()}
                 onFinishedEditing={noop}
                 isHighlighted={false}
                 value={cell}
@@ -99,6 +100,7 @@ describe("Image cell", () => {
         const result = render(
             <Editor
                 imageEditorOverride={CustomEditor}
+                theme={getDefaultTheme()}
                 onChange={noop}
                 onFinishedEditing={noop}
                 isHighlighted={false}

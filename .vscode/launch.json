@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Launch Glide Data Grid",
+            "url": "http://localhost:9009",
+            "webRoot": "${workspaceRoot}/",
+            "preLaunchTask": "npm: start",
+            "sourceMaps": true
+        }
+    ]
+}
