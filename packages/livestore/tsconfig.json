@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "lib": ["dom", "ES6", "ES2017"]
+    },
+    "extends": "../../tsconfig.json",
+    "include": ["./src/**/*.ts", "./src/**/*.tsx", "test/use-data-source.test.tsx", "test/use-column-sort.test.tsx"],
+    "references": [{ "path": "../core" }]
+}

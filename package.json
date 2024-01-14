@@ -21,7 +21,8 @@
     "workspaces": [
         "./packages/core",
         "./packages/cells",
-        "./packages/source"
+        "./packages/source",
+        "./packages/livestore"
     ],
     "devDependencies": {
         "@babel/cli": "^7.16.0",

@@ -1,0 +1,57 @@
+{
+    "name": "@glideapps/glide-data-grid-livestore",
+    "version": "6.0.0",
+    "description": "FIXME",
+    "sideEffects": false,
+    "type": "module",
+    "browser": "dist/esm/index.js",
+    "main": "dist/cjs/index.js",
+    "module": "dist/esm/index.js",
+    "types": "dist/dts/index.d.ts",
+    "exports": {
+        "types": "./dist/dts/index.d.ts",
+        "import": "./dist/esm/index.js",
+        "require": "./dist/cjs/index.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "./build.sh",
+        "lint": "eslint src --ext .ts,.tsx",
+        "test": "vitest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/glideapps/glide-data-grid.git",
+        "directory": "packages/livestore"
+    },
+    "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/livestore",
+    "author": "Glide",
+    "license": "MIT",
+    "keywords": [
+        "react",
+        "datagrid",
+        "data-grid",
+        "editor",
+        "reactjs",
+        "scrolling",
+        "data",
+        "table",
+        "cell",
+        "canvas"
+    ],
+    "dependencies": {
+        "@glideapps/glide-data-grid": "6.0.0",
+        "@livestore/livestore": "^0.0.38"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.16.0",
+        "eslint": "^8.19.0",
+        "eslint-plugin-import": "^2.22.0",
+        "eslint-plugin-react": "^7.21.5",
+        "eslint-plugin-react-hooks": "^4.2.0",
+        "react-resize-detector": "^7.1.2",
+        "tsc-esm-fix": "^2.7.8"
+    }
+}
