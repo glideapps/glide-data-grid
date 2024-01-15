@@ -1,7 +1,16 @@
 import * as React from "react";
 
-import { render, cleanup } from "@testing-library/react";
-import { expect, describe, it, afterEach } from "vitest";
+import {
+    getByText,
+    queryByText,
+    getByRole,
+    findByText,
+    fireEvent,
+    render,
+    cleanup,
+    queryByRole,
+} from "@testing-library/react";
+import { vi, expect, describe, it, afterEach } from "vitest";
 
 import { GridCellKind } from "@glideapps/glide-data-grid";
 import renderer, { type MultiSelectCell, prepareOptions, resolveValues } from "../src/cells/multi-select-cell.js";
@@ -215,42 +224,145 @@ describe("onPaste", () => {
     });
 });
 
+const keyDownEvent = {
+    key: "ArrowDown",
+};
+
+export async function selectOption(container: HTMLElement, optionText: string) {
+    const inputElement = getByRole(container, "combobox");
+    fireEvent.keyDown(inputElement, keyDownEvent);
+    const listBox = getByRole(container, "listbox");
+    await findByText(listBox, optionText);
+    fireEvent.click(getByText(listBox, optionText));
+}
+
+export function hasOption(container: HTMLElement, optionText: string): boolean {
+    const inputElement = getByRole(container, "combobox");
+    fireEvent.keyDown(inputElement, keyDownEvent);
+    const listBox = getByRole(container, "listbox");
+    return queryByText(listBox, optionText) !== null;
+}
+
 describe("Multi Select Editor", () => {
     afterEach(cleanup);
 
     function getMockCell(props: Partial<MultiSelectCell> = {}): MultiSelectCell {
         return {
-            ...props,
             kind: GridCellKind.Custom,
             allowOverlay: true,
             copyData: "option1",
             readonly: false,
+            ...props,
             data: {
                 kind: "multi-select-cell",
                 options: [
                     { value: "option1", label: "Option 1", color: "red" },
                     { value: "option2", label: "Option 2", color: "blue" },
                 ],
-                values: ["option1"],
+                values: [],
+                ...(props?.data ?? {}),
             },
         };
     }
 
-    it("renders into the dom with correct value", () => {
+    it("renders into the dom with correct value", async () => {
         // @ts-ignore
         const Editor = renderer.provideEditor?.(getMockCell()).editor;
         if (Editor === undefined) {
             throw new Error("Editor is invalid");
         }
 
-        const result = render(<Editor isHighlighted={false} value={getMockCell()} />);
+        const mockCellOnChange = vi.fn();
+        const result = render(<Editor isHighlighted={false} value={getMockCell()} onChange={mockCellOnChange} />);
         // Check if the element is actually there
         const cellEditor = result.getByTestId("multi-select-cell");
-        expect(cellEditor).not.toBeUndefined();
+        expect(cellEditor).toBeDefined();
 
-        const input = cellEditor.getElementsByClassName("gdg-multi-select");
-        expect(input).not.toBeUndefined();
+        const input = cellEditor.getElementsByClassName("gdg-multi-select")[0];
+        expect(input).toBeDefined();
     });
 
-    // TODO: Add additional tests for the editor
+    it("allows to select values", async () => {
+        const mockCell = getMockCell();
+        // @ts-ignore
+        const Editor = renderer.provideEditor?.(mockCell).editor;
+        if (Editor === undefined) {
+            throw new Error("Editor is invalid");
+        }
+
+        const mockCellOnChange = vi.fn();
+        const result = render(<Editor isHighlighted={false} value={mockCell} onChange={mockCellOnChange} />);
+        // Check if the element is actually there
+        const cellEditor = result.getByTestId("multi-select-cell");
+        expect(cellEditor).toBeDefined();
+
+        await selectOption(cellEditor, "Option 1");
+        expect(mockCellOnChange).toHaveBeenCalledTimes(1);
+        expect(mockCellOnChange).toBeCalledWith({ ...mockCell, data: { ...mockCell.data, values: ["option1"] } });
+
+        expect(hasOption(cellEditor, "Option 2")).toBeTruthy();
+
+        await selectOption(cellEditor, "Option 2");
+        expect(mockCellOnChange).toHaveBeenCalledTimes(2);
+        expect(mockCellOnChange).toBeCalledWith({
+            ...mockCell,
+            data: { ...mockCell.data, values: ["option1", "option2"] },
+        });
+
+        // Option 1 and 2 should not be available anymore
+        expect(hasOption(cellEditor, "Option 1")).toBeFalsy();
+        expect(hasOption(cellEditor, "Option 2")).toBeFalsy();
+    });
+
+    it("is disabled if readonly", async () => {
+        const mockCell = getMockCell({ readonly: true });
+        // @ts-ignore
+        const Editor = renderer.provideEditor?.(mockCell).editor;
+        if (Editor === undefined) {
+            throw new Error("Editor is invalid");
+        }
+
+        const mockCellOnChange = vi.fn();
+        const result = render(<Editor isHighlighted={false} value={mockCell} onChange={mockCellOnChange} />);
+        // Check if the element is actually there
+        const cellEditor = result.getByTestId("multi-select-cell");
+        expect(cellEditor).toBeDefined();
+        // Combo box should not be accessible:
+        expect(queryByRole(cellEditor, "combobox")).toBeNull();
+    });
+
+    it("allowDuplicates allows to select values multiple times", async () => {
+        const mockCell = getMockCell({ data: { allowDuplicates: true } } as any);
+        // @ts-ignore
+        const Editor = renderer.provideEditor?.(mockCell).editor;
+        if (Editor === undefined) {
+            throw new Error("Editor is invalid");
+        }
+
+        const mockCellOnChange = vi.fn();
+        const result = render(<Editor isHighlighted={false} value={mockCell} onChange={mockCellOnChange} />);
+        // Check if the element is actually there
+        const cellEditor = result.getByTestId("multi-select-cell");
+        expect(cellEditor).toBeDefined();
+
+        await selectOption(cellEditor, "Option 1");
+        expect(mockCellOnChange).toHaveBeenCalledTimes(1);
+        expect(mockCellOnChange).toBeCalledWith({ ...mockCell, data: { ...mockCell.data, values: ["option1"] } });
+
+        await selectOption(cellEditor, "Option 2");
+        expect(mockCellOnChange).toHaveBeenCalledTimes(2);
+        expect(mockCellOnChange).toBeCalledWith({
+            ...mockCell,
+            data: { ...mockCell.data, values: ["option1", "option2"] },
+        });
+
+        await selectOption(cellEditor, "Option 1");
+        expect(mockCellOnChange).toHaveBeenCalledTimes(3);
+        expect(mockCellOnChange).toBeCalledWith({
+            ...mockCell,
+            data: { ...mockCell.data, values: ["option1", "option2", "option1"] },
+        });
+    });
+
+    // TODO: Add test for creating new options
 });
