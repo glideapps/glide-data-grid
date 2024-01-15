@@ -104,3 +104,39 @@ export function interpolateColors(leftColor: string, rightColor: string, val: nu
     const b = Math.floor((left[2] * nScaler + right[2] * hScaler) / a);
     return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
+
+/**
+ * Returns a number (float) representing the luminance of a color.
+ *
+ * @category Drawing
+ */
+export function getLuminance(color: string): number {
+    if (color === "transparent") return 0;
+
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    function f(x: number) {
+        const channel = x / 255;
+        return channel <= 0.040_45 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+    }
+
+    const [r, g, b] = parseToRgba(color);
+    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+}
+
+/**
+ * Takes in any color and returns it as a hex code.
+ * @category Drawing
+ */
+export function toHex(color: string): string {
+    const [r, g, b, a] = parseToRgba(color);
+
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    const hex = (x: number) => {
+        const h = Math.min(Math.max(0, x), 255).toString(16);
+        // NOTE: padStart could be used here but it breaks Node 6 compat
+        // https://github.com/ricokahler/color2k/issues/351
+        return h.length === 1 ? `0${h}` : h;
+    };
+
+    return `#${hex(r)}${hex(g)}${hex(b)}${a < 1 ? hex(Math.round(a * 255)) : ""}`;
+}
