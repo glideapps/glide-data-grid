@@ -1020,8 +1020,8 @@ function useRemAdjuster(_ref) {
     overscrollY
   };
 }
-// EXTERNAL MODULE: ./packages/core/src/internal/data-grid/data-grid-render.tsx
-var data_grid_render = __webpack_require__("./packages/core/src/internal/data-grid/data-grid-render.tsx");
+// EXTERNAL MODULE: ./packages/core/src/internal/data-grid/data-grid-render.ts
+var data_grid_render = __webpack_require__("./packages/core/src/internal/data-grid/data-grid-render.ts");
 // EXTERNAL MODULE: ./packages/core/src/internal/data-grid/color-parser.ts
 var color_parser = __webpack_require__("./packages/core/src/internal/data-grid/color-parser.ts");
 // EXTERNAL MODULE: ./packages/core/src/common/math.ts
@@ -4296,4 +4296,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7413.66fd6c61.iframe.bundle.js.map
+//# sourceMappingURL=7413.9c54853d.iframe.bundle.js.map

@@ -1346,8 +1346,8 @@ const UriOverlayEditor = p => {
 };
 UriOverlayEditor.displayName = "UriOverlayEditor";
 /* harmony default export */ const uri_overlay_editor = (UriOverlayEditor);
-// EXTERNAL MODULE: ./packages/core/src/internal/data-grid/data-grid-render.tsx
-var data_grid_render = __webpack_require__("./packages/core/src/internal/data-grid/data-grid-render.tsx");
+// EXTERNAL MODULE: ./packages/core/src/internal/data-grid/data-grid-render.ts
+var data_grid_render = __webpack_require__("./packages/core/src/internal/data-grid/data-grid-render.ts");
 ;// CONCATENATED MODULE: ./packages/core/src/cells/uri-cell.tsx
 
 
@@ -3074,9 +3074,20 @@ function interpolateColors(leftColor, rightColor, val) {
 
 function useMappedColumns(columns, freezeColumns) {
   return react__WEBPACK_IMPORTED_MODULE_0__.useMemo(() => columns.map((c, i) => ({
-    ...c,
+    group: c.group,
+    grow: c.grow,
+    hasMenu: c.hasMenu,
+    icon: c.icon,
+    id: c.id,
+    menuIcon: c.menuIcon,
+    overlayIcon: c.overlayIcon,
     sourceIndex: i,
-    sticky: i < freezeColumns
+    sticky: i < freezeColumns,
+    style: c.style,
+    themeOverride: c.themeOverride,
+    title: c.title,
+    trailingRowOptions: c.trailingRowOptions,
+    width: c.width
   })), [columns, freezeColumns]);
 }
 function gridSelectionHasItem(sel, item) {
@@ -3621,7 +3632,7 @@ function computeBounds(col, row, width, height, groupHeaderHeight, totalHeaderHe
 
 /***/ }),
 
-/***/ "./packages/core/src/internal/data-grid/data-grid-render.tsx":
+/***/ "./packages/core/src/internal/data-grid/data-grid-render.ts":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -5521,8 +5532,8 @@ var clamp_default = /*#__PURE__*/__webpack_require__.n(clamp);
 // EXTERNAL MODULE: ./node_modules/lodash/range.js
 var lodash_range = __webpack_require__("./node_modules/lodash/range.js");
 var range_default = /*#__PURE__*/__webpack_require__.n(lodash_range);
-// EXTERNAL MODULE: ./packages/core/src/internal/data-grid/data-grid-render.tsx
-var data_grid_render = __webpack_require__("./packages/core/src/internal/data-grid/data-grid-render.tsx");
+// EXTERNAL MODULE: ./packages/core/src/internal/data-grid/data-grid-render.ts
+var data_grid_render = __webpack_require__("./packages/core/src/internal/data-grid/data-grid-render.ts");
 ;// CONCATENATED MODULE: ./packages/core/src/internal/data-grid/animation-manager.ts
 
 
@@ -7462,4 +7473,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=2432.4fe232d4.iframe.bundle.js.map
+//# sourceMappingURL=2432.5a013fca.iframe.bundle.js.map

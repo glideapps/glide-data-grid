@@ -10467,9 +10467,20 @@ function interpolateColors(leftColor, rightColor, val) {
 
 function useMappedColumns(columns, freezeColumns) {
   return react__WEBPACK_IMPORTED_MODULE_0__.useMemo(() => columns.map((c, i) => ({
-    ...c,
+    group: c.group,
+    grow: c.grow,
+    hasMenu: c.hasMenu,
+    icon: c.icon,
+    id: c.id,
+    menuIcon: c.menuIcon,
+    overlayIcon: c.overlayIcon,
     sourceIndex: i,
-    sticky: i < freezeColumns
+    sticky: i < freezeColumns,
+    style: c.style,
+    themeOverride: c.themeOverride,
+    title: c.title,
+    trailingRowOptions: c.trailingRowOptions,
+    width: c.width
   })), [columns, freezeColumns]);
 }
 function gridSelectionHasItem(sel, item) {
@@ -11374,4 +11385,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=236.28772253.iframe.bundle.js.map
+//# sourceMappingURL=236.6ce38bbe.iframe.bundle.js.map
