@@ -12,8 +12,9 @@ import { direction } from "../../common/utils.js";
 import React from "react";
 import type { BaseDrawArgs, PrepResult } from "../../cells/cell-types.js";
 import { split as splitText, clearCache } from "canvas-hypertxt";
+import type { FullyDefined } from "../../common/support.js";
 
-export interface MappedGridColumn extends SizedGridColumn {
+export interface MappedGridColumn extends FullyDefined<SizedGridColumn> {
     sourceIndex: number;
     sticky: boolean;
 }
@@ -24,11 +25,24 @@ export function useMappedColumns(
 ): readonly MappedGridColumn[] {
     return React.useMemo(
         () =>
-            columns.map((c, i) => ({
-                ...c,
-                sourceIndex: i,
-                sticky: i < freezeColumns,
-            })),
+            columns.map(
+                (c, i): MappedGridColumn => ({
+                    group: c.group,
+                    grow: c.grow,
+                    hasMenu: c.hasMenu,
+                    icon: c.icon,
+                    id: c.id,
+                    menuIcon: c.menuIcon,
+                    overlayIcon: c.overlayIcon,
+                    sourceIndex: i,
+                    sticky: i < freezeColumns,
+                    style: c.style,
+                    themeOverride: c.themeOverride,
+                    title: c.title,
+                    trailingRowOptions: c.trailingRowOptions,
+                    width: c.width,
+                })
+            ),
         [columns, freezeColumns]
     );
 }
