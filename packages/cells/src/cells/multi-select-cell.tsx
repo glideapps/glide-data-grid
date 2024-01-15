@@ -432,7 +432,7 @@ const renderer: CustomRenderer<MultiSelectCell> = {
             roundedRect(ctx, x, y, width, BUBBLE_HEIGHT, theme.roundingRadius ?? BUBBLE_HEIGHT / 2);
             ctx.fill();
 
-            // If a color is set for this option, we use it to determine the text color.
+            // If a color is set for this option, we use either black or white as the text color depending on the background.
             // Otherwise, use the configured textBubble color.
             ctx.fillStyle = matchedOption?.color ? (color.luminance() > 0.5 ? "#000000" : "#ffffff") : theme.textBubble;
             ctx.fillText(displayText, x + BUBBLE_PADDING, y + textY + getMiddleCenterBias(ctx, theme));
