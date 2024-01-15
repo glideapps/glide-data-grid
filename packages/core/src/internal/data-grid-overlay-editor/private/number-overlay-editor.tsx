@@ -5,7 +5,7 @@ import type { SelectionRange } from "../../data-grid/data-grid-types.js";
 import type { NumberFormatValues } from "react-number-format/types/types.js";
 
 interface Props {
-    readonly value: number | undefined;
+    readonly value: number | BigInt | undefined;
     readonly disabled?: boolean;
     readonly onChange: (values: NumberFormatValues) => void;
     readonly highlight: boolean;
@@ -25,7 +25,7 @@ function getDecimalSeparator() {
     return result ?? ".";
 }
 
-function getThousandSeprator() {
+function getThousandSeparator() {
     return getDecimalSeparator() === "." ? "," : ".";
 }
 
@@ -63,10 +63,10 @@ const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
                 disabled={disabled === true}
                 decimalScale={fixedDecimals}
                 allowNegative={allowNegative}
-                thousandSeparator={thousandSeparator ?? getThousandSeprator()}
+                thousandSeparator={thousandSeparator ?? getThousandSeparator()}
                 decimalSeparator={decimalSeparator ?? getDecimalSeparator()}
-                value={Object.is(value, -0) ? "-" : value ?? ""}
-                // decimalScale={3}
+                value={Object.is(value, -0) ? "-" : value?.toString() ?? ""}
+                valueIsNumericString={true}
                 // prefix={"$"}
                 onValueChange={onChange}
             />

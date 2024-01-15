@@ -340,7 +340,7 @@ export interface TextCell extends BaseGridCell {
 export interface NumberCell extends BaseGridCell {
     readonly kind: GridCellKind.Number;
     readonly displayData: string;
-    readonly data: number | undefined;
+    readonly data: number | BigInt | undefined;
     readonly readonly?: boolean;
     readonly fixedDecimals?: number;
     readonly allowNegative?: boolean;
