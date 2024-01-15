@@ -1942,19 +1942,22 @@ function overdrawStickyBoundaries(ctx, effectiveCols, width, height, freezeTrail
   const hColor = (_theme$horizontalBord2 = theme.horizontalBorderColor) !== null && _theme$horizontalBord2 !== void 0 ? _theme$horizontalBord2 : theme.borderColor;
   const vColor = theme.borderColor;
   const drawX = drawFreezeBorder ? (0,data_grid_lib/* getStickyWidth */.G6)(effectiveCols) : 0;
+  let vStroke;
   if (drawX !== 0) {
+    vStroke = (0,color_parser/* blend */.NH)(vColor, theme.bgCell);
     ctx.beginPath();
     ctx.moveTo(drawX + 0.5, 0);
     ctx.lineTo(drawX + 0.5, height);
-    ctx.strokeStyle = (0,color_parser/* blend */.NH)(vColor, theme.bgCell);
+    ctx.strokeStyle = vStroke;
     ctx.stroke();
   }
   if (freezeTrailingRows > 0) {
+    const hStroke = vColor === hColor && vStroke !== undefined ? vStroke : (0,color_parser/* blend */.NH)(hColor, theme.bgCell);
     const h = (0,data_grid_lib/* getFreezeTrailingHeight */.YN)(rows, freezeTrailingRows, getRowHeight);
     ctx.beginPath();
     ctx.moveTo(0, height - h + 0.5);
     ctx.lineTo(width, height - h + 0.5);
-    ctx.strokeStyle = (0,color_parser/* blend */.NH)(hColor, theme.bgCell);
+    ctx.strokeStyle = hStroke;
     ctx.stroke();
   }
 }
@@ -11371,4 +11374,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=236.645d0d00.iframe.bundle.js.map
+//# sourceMappingURL=236.28772253.iframe.bundle.js.map

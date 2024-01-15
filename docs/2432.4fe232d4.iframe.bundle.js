@@ -4606,19 +4606,22 @@ function overdrawStickyBoundaries(ctx, effectiveCols, width, height, freezeTrail
   const hColor = (_theme$horizontalBord2 = theme.horizontalBorderColor) !== null && _theme$horizontalBord2 !== void 0 ? _theme$horizontalBord2 : theme.borderColor;
   const vColor = theme.borderColor;
   const drawX = drawFreezeBorder ? (0,_data_grid_lib_js__WEBPACK_IMPORTED_MODULE_2__/* .getStickyWidth */ .G6)(effectiveCols) : 0;
+  let vStroke;
   if (drawX !== 0) {
+    vStroke = (0,_color_parser_js__WEBPACK_IMPORTED_MODULE_4__/* .blend */ .NH)(vColor, theme.bgCell);
     ctx.beginPath();
     ctx.moveTo(drawX + 0.5, 0);
     ctx.lineTo(drawX + 0.5, height);
-    ctx.strokeStyle = (0,_color_parser_js__WEBPACK_IMPORTED_MODULE_4__/* .blend */ .NH)(vColor, theme.bgCell);
+    ctx.strokeStyle = vStroke;
     ctx.stroke();
   }
   if (freezeTrailingRows > 0) {
+    const hStroke = vColor === hColor && vStroke !== undefined ? vStroke : (0,_color_parser_js__WEBPACK_IMPORTED_MODULE_4__/* .blend */ .NH)(hColor, theme.bgCell);
     const h = (0,_data_grid_lib_js__WEBPACK_IMPORTED_MODULE_2__/* .getFreezeTrailingHeight */ .YN)(rows, freezeTrailingRows, getRowHeight);
     ctx.beginPath();
     ctx.moveTo(0, height - h + 0.5);
     ctx.lineTo(width, height - h + 0.5);
-    ctx.strokeStyle = (0,_color_parser_js__WEBPACK_IMPORTED_MODULE_4__/* .blend */ .NH)(hColor, theme.bgCell);
+    ctx.strokeStyle = hStroke;
     ctx.stroke();
   }
 }
@@ -7459,4 +7462,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=2432.45171447.iframe.bundle.js.map
+//# sourceMappingURL=2432.4fe232d4.iframe.bundle.js.map
