@@ -57,3 +57,11 @@ export function deepEqual(foo: any, bar: any): boolean {
 
     return foo !== foo && bar !== bar;
 }
+
+/**
+ * This is a type that takes a type and makes all of its properties required.
+ * This is useful for forcing a an object to have all properties defined from the get go, which helps V8 optimize it.
+ */
+export type FullyDefined<T> = {
+    [K in keyof Required<T>]: T[K];
+};
