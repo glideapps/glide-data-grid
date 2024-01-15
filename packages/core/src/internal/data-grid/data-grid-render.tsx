@@ -1665,20 +1665,23 @@ function overdrawStickyBoundaries(
     const vColor = theme.borderColor;
     const drawX = drawFreezeBorder ? getStickyWidth(effectiveCols) : 0;
 
+    let vStroke: string | undefined;
     if (drawX !== 0) {
+        vStroke = blend(vColor, theme.bgCell);
         ctx.beginPath();
         ctx.moveTo(drawX + 0.5, 0);
         ctx.lineTo(drawX + 0.5, height);
-        ctx.strokeStyle = blend(vColor, theme.bgCell);
+        ctx.strokeStyle = vStroke;
         ctx.stroke();
     }
 
     if (freezeTrailingRows > 0) {
+        const hStroke = vColor === hColor && vStroke !== undefined ? vStroke : blend(hColor, theme.bgCell);
         const h = getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight);
         ctx.beginPath();
         ctx.moveTo(0, height - h + 0.5);
         ctx.lineTo(width, height - h + 0.5);
-        ctx.strokeStyle = blend(hColor, theme.bgCell);
+        ctx.strokeStyle = hStroke;
         ctx.stroke();
     }
 }
