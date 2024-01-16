@@ -85,6 +85,7 @@ export function interpolateColors(leftColor: string, rightColor: string, val: nu
     if (val >= 1) return rightColor;
 
     // Parse to rgba returns straight alpha colors, for interpolation we want pre-multiplied alpha
+    // FIXME: This can be faster if instead of makign an array we just use variables. No memory allocation.
     const left = [...parseToRgba(leftColor)];
     left[0] = left[0] * left[3];
     left[1] = left[1] * left[3];

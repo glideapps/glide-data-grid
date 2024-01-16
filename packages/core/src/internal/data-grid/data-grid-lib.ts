@@ -52,8 +52,9 @@ export function gridSelectionHasItem(sel: GridSelection, item: Item): boolean {
     if (sel.columns.hasIndex(col) || sel.rows.hasIndex(row)) return true;
     if (sel.current !== undefined) {
         if (itemsAreEqual(sel.current.cell, item)) return true;
-        const toCheck = [sel.current.range, ...sel.current.rangeStack];
+        const toCheck = [sel.current.range, ...sel.current.rangeStack]; // FIXME: pointless alloc
         for (const r of toCheck) {
+            // dont we have a function for this?
             if (col >= r.x && col < r.x + r.width && row >= r.y && row < r.y + r.height) return true;
         }
     }
@@ -465,7 +466,7 @@ export function getEmHeight(ctx: CanvasRenderingContext2D, fontStyle: string): n
 function truncateString(data: string, w: number): string {
     if (data.includes("\n")) {
         // new lines are rare and split is relatively expensive compared to the search
-        // it pays off to not do the split contantly.
+        // it pays off to not do the split contantly. More accurately... it pays off not to run the regex.
         data = data.split(/\r?\n/, 1)[0];
     }
     const max = w / 4; // no need to round, slice will just truncate this

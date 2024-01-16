@@ -55,6 +55,9 @@ export class AnimationManager {
     };
 
     private getAnimatingItems = (): StateItem[] => {
+        // this is horrible. We shoudl be mutating the array in place. The reason we don't right now is because the
+        // hoveramount is used as both the tweened value and the raw value. We should separate these two things.
+        // Then we can stop doing the allocation insanity dance.
         if (this.currentHoveredItem !== undefined) {
             return [...this.leavingItems, this.currentHoveredItem];
         }
