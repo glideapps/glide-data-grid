@@ -467,6 +467,7 @@ function truncateString(data: string, w: number): string {
     if (data.includes("\n")) {
         // new lines are rare and split is relatively expensive compared to the search
         // it pays off to not do the split contantly. More accurately... it pays off not to run the regex.
+        // what even is the point of this? So what if there is a /r at the end of a line? It wont be drawn anyway.
         data = data.split(/\r?\n/, 1)[0];
     }
     const max = w / 4; // no need to round, slice will just truncate this
