@@ -158,7 +158,12 @@ export interface DataGridProps {
   readonly onItemHovered: (args: GridMouseEventArgs) => void;
   readonly onMouseMove: (args: GridMouseEventArgs) => void;
   readonly onMouseDown: (args: GridMouseEventArgs) => void;
-  readonly onMouseUp: (args: GridMouseEventArgs, isOutside: boolean) => void;
+  readonly onMouseUp: (
+    args: GridMouseEventArgs,
+    isOutside: boolean,
+    isContextMenuClick: boolean,
+    shouldIgnoreOutsideClick: boolean
+  ) => void;
   readonly onContextMenu: (args: GridMouseEventArgs, preventDefault: () => void) => void;
 
   readonly onCanvasFocused: () => void;
@@ -672,6 +677,21 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     );
   }
 
+  const isSpectrumDialogClick = React.useCallback((event: MouseEvent | TouchEvent): boolean => {
+    let node = event.target as HTMLElement | null;
+    while (node !== null) {
+      if (
+        node.classList.value.includes('spectrum-Dialog') ||
+        node.classList.value.includes('spectrum-Underlay')
+      ) {
+        return true;
+      }
+
+      node = node.parentElement;
+    }
+    return false;
+  }, []);
+
   const [hoveredItem] = hoveredItemInfo ?? [];
 
   const enqueueRef = React.useRef((_item: Item) => {
@@ -1038,7 +1058,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
       }
 
       let args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
-
       if (args.isTouch && downTime.current !== 0 && Date.now() - downTime.current > 500) {
         args = {
           ...args,
@@ -1069,7 +1088,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             onHeaderMenuClick?.(col, headerBounds);
           } else {
             // force outside so that click will not process
-            onMouseUp(args, true);
+            onMouseUp(args, true, false, false);
           }
           return;
         }
@@ -1088,7 +1107,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         }
       }
 
-      onMouseUp(args, isOutside);
+      const evTarget = ev.target as HTMLElement;
+      const shouldIgnoreOutsideClick =
+        evTarget.closest('.click-outside-ignore') !== null || isSpectrumDialogClick(ev);
+
+      onMouseUp(args, isOutside, args.button === 2, shouldIgnoreOutsideClick);
     },
     [
       onMouseUp,

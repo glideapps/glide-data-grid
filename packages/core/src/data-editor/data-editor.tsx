@@ -76,7 +76,6 @@ import type { CellRenderer, CustomRenderer } from '../data-grid/cells/cell-types
 import { CellRenderers } from '../data-grid/cells';
 import type { RowGroup } from './use-groups';
 import { useGroups } from './use-groups';
-import { isNull } from 'lodash';
 
 let idCounter = 0;
 
@@ -1817,9 +1816,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
   const enterCellEditMode: EnterCellEditModeFn = React.useCallback(
     ([col, row], initialValue): void => {
+      console.log('aystex?');
       const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
       const bounds = gridRef.current?.getBounds(col, row);
 
+      console.log('AAAA');
       if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true && bounds) {
         setOverlaySimple({
           target: bounds,
@@ -2322,12 +2323,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
   const [scrollDir, setScrollDir] = React.useState<GridMouseEventArgs['scrollEdge']>();
 
   const onMouseUp = React.useCallback(
-    (args: GridMouseEventArgs, isOutside: boolean) => {
+    (
+      args: GridMouseEventArgs,
+      isOutside: boolean,
+      isContextMenuClick: boolean = false,
+      shouldIgnoreOutsideClick: boolean
+    ) => {
       const mouse = mouseState;
       setMouseState(undefined);
       setScrollDir(undefined);
 
-      if (isOutside) return;
+      if (isOutside && !isContextMenuClick && !shouldIgnoreOutsideClick) {
+        setGridSelection(emptyGridSelection, false);
+      }
 
       if (mouse?.fillHandle === true && gridSelection.current !== undefined) {
         fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
@@ -4117,12 +4125,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
   const [isFocused, setIsFocused] = React.useState(false);
   const setIsFocusedDebounced = React.useRef(
-    debounce((val: boolean, layoutOverlay = null) => {
-      const isDoubleClick = mouseDownData.current ? mouseDownData.current?.wasDoubleClick : false;
-
-      if (!val && isNull(layoutOverlay) && !document.hidden && !isDoubleClick) {
-        setGridSelection(emptyGridSelection, false);
-      }
+    debounce((val: boolean) => {
       setIsFocused(val);
     }, 5)
   );
@@ -4155,8 +4158,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
   }, [cellYOffset, gridSelection, mouseState, rowMarkerOffset, setCurrent]);
 
   const onFocusOut = React.useCallback(() => {
-    setIsFocusedDebounced.current(false, overlay);
-  }, [overlay]);
+    setIsFocusedDebounced.current(false);
+  }, []);
 
   const [idealWidth, idealHeight] = React.useMemo(() => {
     let h: number;
