@@ -1284,7 +1284,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let result = getCellContent([outerCol, row]);
                 if (rowMarkerOffset !== 0 && result.span !== undefined) {
                     result = {
-                        ...result,
+                        ...result, // FIXME: Mutate
                         span: [result.span[0] + rowMarkerOffset, result.span[1] + rowMarkerOffset],
                     };
                 }
@@ -1312,6 +1312,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             let result = getGroupDetails?.(group) ?? { name: group };
             if (onGroupHeaderRenamed !== undefined && group !== "") {
                 result = {
+                    // FIXME: Mutate
                     icon: result.icon,
                     name: result.name,
                     overrideTheme: result.overrideTheme,
@@ -2350,7 +2351,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onMouseMoveImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
             const a: GridMouseEventArgs = {
-                ...args,
+                ...args, // FIXME: Mutate
                 location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
             };
             onMouseMove?.(a);
