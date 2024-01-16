@@ -1816,11 +1816,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
   const enterCellEditMode: EnterCellEditModeFn = React.useCallback(
     ([col, row], initialValue): void => {
-      console.log('aystex?');
       const cell = getCellContentRef.current([col - rowMarkerOffset, row]);
       const bounds = gridRef.current?.getBounds(col, row);
 
-      console.log('AAAA');
       if (cell.allowOverlay && isReadWriteCell(cell) && cell.readonly !== true && bounds) {
         setOverlaySimple({
           target: bounds,
