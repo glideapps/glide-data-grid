@@ -132,7 +132,8 @@ const DataGridSearch = p => {
       setSearchStatus(undefined);
     }
   }, [rows, searchResultsIn]);
-  const abortControllerRef = react.useRef(new AbortController());
+  const abortControllerRef = react.useRef();
+  if (abortControllerRef.current === undefined) abortControllerRef.current = new AbortController();
   const searchHandle = react.useRef();
   const [searchResultsInner, setSearchResultsInner] = react.useState([]);
   const searchResults = searchResultsIn !== null && searchResultsIn !== void 0 ? searchResultsIn : searchResultsInner;
@@ -1224,8 +1225,7 @@ const DataEditorImpl = (p, forwardedRef) => {
     };
     return window.getComputedStyle(document.documentElement);
   }, []);
-  const fontSizeStr = docStyle.fontSize;
-  const remSize = react.useMemo(() => Number.parseFloat(fontSizeStr), [fontSizeStr]);
+  const remSize = react.useMemo(() => Number.parseFloat(docStyle.fontSize), [docStyle]);
   const {
     rowHeight,
     headerHeight,
@@ -1262,12 +1262,9 @@ const DataEditorImpl = (p, forwardedRef) => {
     return gridSelectionOuter === undefined ? undefined : shiftSelection(gridSelectionOuter, rowMarkerOffset);
   }, [gridSelectionOuter, rowMarkerOffset]);
   const gridSelection = gridSelectionOuterMangled !== null && gridSelectionOuterMangled !== void 0 ? gridSelectionOuterMangled : gridSelectionInner;
-  const abortControllerRef = react.useRef(new AbortController());
-  react.useEffect(() => {
-    return () => {
-      abortControllerRef === null || abortControllerRef === void 0 || abortControllerRef.current.abort();
-    };
-  }, []);
+  const abortControllerRef = react.useRef();
+  if (abortControllerRef.current === undefined) abortControllerRef.current = new AbortController();
+  react.useEffect(() => () => abortControllerRef === null || abortControllerRef === void 0 ? void 0 : abortControllerRef.current.abort(), []);
   const [getCellsForSelection, getCellsForSeletionDirect] = useCellsForSelection(getCellsForSelectionIn, getCellContent, rowMarkerOffset, abortControllerRef.current, rows);
   const validateCell = react.useCallback((cell, newValue, prevValue) => {
     if (validateCellIn === undefined) return true;
@@ -4296,4 +4293,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7413.9c54853d.iframe.bundle.js.map
+//# sourceMappingURL=7413.bd0e8212.iframe.bundle.js.map
