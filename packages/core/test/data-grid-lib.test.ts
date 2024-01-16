@@ -11,11 +11,30 @@ import { vi, type Mocked, expect, describe, test, it, beforeEach } from "vitest"
 import { drawImage } from "../src/cells/image-cell.js";
 import type { ImageWindowLoader } from "../src/internal/data-grid/image-window-loader-interface.js";
 
+function makeCol(title: string, sourceIndex: number, sticky: boolean, width: number): MappedGridColumn {
+    return {
+        title,
+        sourceIndex,
+        sticky,
+        width,
+        group: undefined,
+        grow: undefined,
+        hasMenu: undefined,
+        icon: undefined,
+        id: undefined,
+        menuIcon: undefined,
+        overlayIcon: undefined,
+        style: undefined,
+        themeOverride: undefined,
+        trailingRowOptions: undefined,
+    };
+}
+
 describe("remapForDnDState", () => {
     const sampleColumns: MappedGridColumn[] = [
-        { title: "Column 1", sourceIndex: 0, sticky: true, width: 50 },
-        { title: "Column 2", sourceIndex: 1, sticky: false, width: 60 },
-        { title: "Column 3", sourceIndex: 2, sticky: true, width: 70 },
+        makeCol("Column 1", 0, true, 50),
+        makeCol("Column 2", 1, false, 60),
+        makeCol("Column 3", 2, true, 70),
     ];
 
     it("should return the same array if dndState is undefined", () => {
