@@ -2327,13 +2327,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
       args: GridMouseEventArgs,
       isOutside: boolean,
       isContextMenuClick: boolean = false,
-      shouldIgnoreOutsideClick: boolean
+      ignoreOutsideClick: boolean
     ) => {
       const mouse = mouseState;
       setMouseState(undefined);
       setScrollDir(undefined);
 
-      if (isOutside && !isContextMenuClick && !shouldIgnoreOutsideClick) {
+      if (isOutside && !isContextMenuClick && !ignoreOutsideClick) {
         setGridSelection(emptyGridSelection, false);
       }
 

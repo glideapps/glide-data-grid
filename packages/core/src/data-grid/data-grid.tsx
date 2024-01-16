@@ -162,7 +162,7 @@ export interface DataGridProps {
     args: GridMouseEventArgs,
     isOutside: boolean,
     isContextMenuClick: boolean,
-    shouldIgnoreOutsideClick: boolean
+    ignoreOutsideClick: boolean
   ) => void;
   readonly onContextMenu: (args: GridMouseEventArgs, preventDefault: () => void) => void;
 
@@ -1108,10 +1108,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
       }
 
       const evTarget = ev.target as HTMLElement;
-      const shouldIgnoreOutsideClick =
+      const ignoreOutsideClick =
         evTarget.closest('.click-outside-ignore') !== null || isSpectrumDialogClick(ev);
 
-      onMouseUp(args, isOutside, args.button === 2, shouldIgnoreOutsideClick);
+      onMouseUp(args, isOutside, args.button === 2, ignoreOutsideClick);
     },
     [
       onMouseUp,
@@ -1120,6 +1120,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
       isOverHeaderMenu,
       onHeaderMenuClick,
       groupHeaderActionForEvent,
+      isSpectrumDialogClick,
     ]
   );
   useEventListener('mouseup', onMouseUpImpl, window, false);

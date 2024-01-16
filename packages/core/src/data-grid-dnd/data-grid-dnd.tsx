@@ -208,7 +208,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
       args: GridMouseEventArgs,
       isOutside: boolean,
       isContextMenuClick: boolean,
-      shouldIgnoreOutsideClick: boolean
+      ignoreOutsideClick: boolean
     ) => {
       if (args.button === 0) {
         if (resizeCol !== undefined) {
@@ -256,7 +256,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
         clearAll();
       }
 
-      onMouseUp?.(args, isOutside, isContextMenuClick, shouldIgnoreOutsideClick);
+      onMouseUp?.(args, isOutside, isContextMenuClick, ignoreOutsideClick);
     },
     [
       clearAll,
