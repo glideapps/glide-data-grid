@@ -817,9 +817,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return window.getComputedStyle(document.documentElement);
     }, []);
 
-    const fontSizeStr = docStyle.fontSize;
-
-    const remSize = React.useMemo(() => Number.parseFloat(fontSizeStr), [fontSizeStr]);
+    const remSize = React.useMemo(() => Number.parseFloat(docStyle.fontSize), [docStyle]);
 
     const { rowHeight, headerHeight, groupHeaderHeight, theme, overscrollX, overscrollY } = useRemAdjuster({
         groupHeaderHeight: groupHeaderHeightIn,
@@ -856,13 +854,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     }, [gridSelectionOuter, rowMarkerOffset]);
     const gridSelection = gridSelectionOuterMangled ?? gridSelectionInner;
 
-    const abortControllerRef = React.useRef(new AbortController());
-    React.useEffect(() => {
-        return () => {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            abortControllerRef?.current.abort();
-        };
-    }, []);
+    const abortControllerRef = React.useRef() as React.MutableRefObject<AbortController>;
+    if (abortControllerRef.current === undefined) abortControllerRef.current = new AbortController();
+
+    React.useEffect(() => () => abortControllerRef?.current.abort(), []);
 
     const [getCellsForSelection, getCellsForSeletionDirect] = useCellsForSelection(
         getCellsForSelectionIn,

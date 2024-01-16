@@ -141,7 +141,9 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         }
     }, [rows, searchResultsIn]);
 
-    const abortControllerRef = React.useRef(new AbortController());
+    const abortControllerRef = React.useRef() as React.MutableRefObject<AbortController>;
+    if (abortControllerRef.current === undefined) abortControllerRef.current = new AbortController();
+
     const searchHandle = React.useRef<number>();
     const [searchResultsInner, setSearchResultsInner] = React.useState<readonly Item[]>([]);
     const searchResults = searchResultsIn ?? searchResultsInner;
