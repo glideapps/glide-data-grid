@@ -33,12 +33,6 @@ describe("blend", () => {
     });
 });
 
-describe("toHex", () => {
-    test("Smoke test", () => {
-        expect(toHex("rgba(255, 255, 255, 1)")).toEqual("#ffffff");
-    });
-});
-
 describe("getLuminance", () => {
     test("Smoke test", () => {
         expect(getLuminance("rgba(255, 255, 255, 1)")).toEqual(1);

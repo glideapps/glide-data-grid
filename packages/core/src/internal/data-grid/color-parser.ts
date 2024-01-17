@@ -122,21 +122,3 @@ export function getLuminance(color: string): number {
     const [r, g, b] = parseToRgba(color);
     return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
 }
-
-/**
- * Takes in any color and returns it as a hex code.
- * @category Drawing
- */
-export function toHex(color: string): string {
-    const [r, g, b, a] = parseToRgba(color);
-
-    // eslint-disable-next-line unicorn/consistent-function-scoping
-    const hex = (x: number) => {
-        const h = Math.min(Math.max(0, x), 255).toString(16);
-        // NOTE: padStart could be used here but it breaks Node 6 compat
-        // https://github.com/ricokahler/color2k/issues/351
-        return h.length === 1 ? `0${h}` : h;
-    };
-
-    return `#${hex(r)}${hex(g)}${hex(b)}${a < 1 ? hex(Math.round(a * 255)) : ""}`;
-}
