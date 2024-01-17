@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/prefer-ternary */
-import { itemIsInRect } from "../internal/data-grid/data-grid-lib.js";
+import { itemIsInRect } from "../internal/data-grid/render/data-grid-lib.js";
 import type { FillHandleDirection, Rectangle } from "../internal/data-grid/data-grid-types.js";
 
 export function getClosestRect(
@@ -40,6 +40,23 @@ export function getClosestRect(
     } else {
         return { x: px, y: rect.y, width: rect.x - px, height: rect.height };
     }
+}
+
+export function intersectRect(
+    x1: number,
+    y1: number,
+    w1: number,
+    h1: number,
+    x2: number,
+    y2: number,
+    w2: number,
+    h2: number
+) {
+    return x1 <= x2 + w2 && x2 <= x1 + w1 && y1 <= y2 + h2 && y2 <= y1 + h1;
+}
+
+export function pointInRect(rect: Rectangle, x: number, y: number): boolean {
+    return x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
 }
 
 export function combineRects(a: Rectangle, b: Rectangle): Rectangle {

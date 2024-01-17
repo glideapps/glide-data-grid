@@ -8,7 +8,7 @@ import {
     getStickyWidth,
     rectBottomRight,
     useMappedColumns,
-} from "./data-grid-lib.js";
+} from "./render/data-grid-lib.js";
 import {
     GridCellKind,
     type Rectangle,
@@ -29,25 +29,15 @@ import { SpriteManager, type SpriteMap } from "./data-grid-sprites.js";
 import { direction, getScrollBarWidth, useDebouncedMemo, useEventListener } from "../../common/utils.js";
 import clamp from "lodash/clamp.js";
 import makeRange from "lodash/range.js";
-import {
-    type BlitData,
-    drawCell,
-    drawGrid,
-    drawHeader,
-    getActionBoundsForGroup,
-    getHeaderMenuBounds,
-    type GetRowThemeCallback,
-    type GroupDetailsCallback,
-    type Highlight,
-    pointInRect,
-} from "./data-grid-render.js";
+import { drawGrid } from "./render/data-grid-render.js";
+import { type BlitData } from "./render/data-grid-render.blit.js";
 import { AnimationManager, type StepCallback } from "./animation-manager.js";
 import { RenderStateProvider, packColRowToNumber } from "../../common/render-state-provider.js";
 import { browserIsFirefox, browserIsSafari } from "../../common/browser-detect.js";
 import { type EnqueueCallback, useAnimationQueue } from "./use-animation-queue.js";
 import { assert } from "../../common/support.js";
 import type { CellRenderer, GetCellRendererCallback } from "../../cells/cell-types.js";
-import type { DrawGridArg } from "./draw-grid-arg.js";
+import type { DrawGridArg } from "./render/draw-grid-arg.js";
 import type { ImageWindowLoader } from "./image-window-loader-interface.js";
 import {
     type GridMouseEventArgs,
@@ -59,6 +49,14 @@ import {
     headerKind,
     mouseEventArgsAreEqual,
 } from "./event-args.js";
+import { pointInRect } from "../../common/math.js";
+import {
+    type GroupDetailsCallback,
+    type GetRowThemeCallback,
+    type Highlight,
+    drawCell,
+} from "./render/data-grid-render.cells.js";
+import { getActionBoundsForGroup, getHeaderMenuBounds, drawHeader } from "./render/data-grid-render.header.js";
 
 export interface DataGridProps {
     readonly width: number;

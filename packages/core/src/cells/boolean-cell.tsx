@@ -7,7 +7,7 @@ import {
     BooleanEmpty,
     BooleanIndeterminate,
 } from "../internal/data-grid/data-grid-types.js";
-import { drawCheckbox } from "../internal/data-grid/draw-checkbox.js";
+import { drawCheckbox } from "../internal/data-grid/render/draw-checkbox.js";
 import type { BaseDrawArgs, InternalCellRenderer } from "./cell-types.js";
 
 const defaultCellMaxSize = 20;

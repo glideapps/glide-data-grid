@@ -1,4 +1,4 @@
-import { getMiddleCenterBias } from "../internal/data-grid/data-grid-lib.js";
+import { getMiddleCenterBias } from "../internal/data-grid/render/data-grid-lib.js";
 import { InnerGridCellKind, type NewRowCell } from "../internal/data-grid/data-grid-types.js";
 import type { BaseDrawArgs, InternalCellRenderer } from "./cell-types.js";
 
