@@ -235,7 +235,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
         multiValueLabel: (styles, { data, isDisabled }) => {
             return {
                 ...styles,
-                paddingRight: isDisabled ? BUBBLE_PADDING : undefined,
+                paddingRight: isDisabled ? BUBBLE_PADDING : 0,
                 paddingLeft: BUBBLE_PADDING,
                 paddingTop: 0,
                 paddingBottom: 0,
