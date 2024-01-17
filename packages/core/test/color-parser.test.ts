@@ -4,7 +4,6 @@ import {
     interpolateColors,
     parseToRgba,
     withAlpha,
-    toHex,
     getLuminance,
 } from "../src/internal/data-grid/color-parser.js";
 import { expect, describe, test } from "vitest";
