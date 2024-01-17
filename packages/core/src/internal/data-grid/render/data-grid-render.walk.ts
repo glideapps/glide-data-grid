@@ -17,19 +17,24 @@ export function walkRowsInCol(
     getRowHeight: (row: number) => number,
     freezeTrailingRows: number,
     hasAppendRow: boolean,
-    cb: WalkRowsCallback
+    cb: WalkRowsCallback,
+    skipToY: number = drawY
 ): void {
     let y = drawY;
     let row = startRow;
     const rowEnd = rows - freezeTrailingRows;
+    let didBreak = false;
     while (y < height && row < rowEnd) {
         const rh = getRowHeight(row);
-        if (cb(y, row, rh, false, hasAppendRow && row === rows - 1) === true) {
+        if (y + rh > skipToY && cb(y, row, rh, false, hasAppendRow && row === rows - 1) === true) {
+            didBreak = true;
             break;
         }
         y += rh;
         row++;
     }
+
+    if (didBreak) return;
 
     y = height;
     for (let fr = 0; fr < freezeTrailingRows; fr++) {
@@ -79,6 +84,7 @@ export type WalkGroupsCallback = (
     width: number,
     height: number
 ) => void;
+
 export function walkGroups(
     effectiveCols: readonly MappedGridColumn[],
     width: number,
