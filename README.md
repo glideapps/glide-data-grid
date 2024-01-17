@@ -106,7 +106,7 @@ You can [edit this example live](https://codesandbox.io/s/glide-data-grid-templa
 
 ## Full API documentation
 
-The full [API documentation is on the main site](https://grid.glideapps.com/docs/index.html).
+The full [API documentation is on the main site](https://docs.grid.glideapps.com/)
 
 # 📒 FAQ
 
