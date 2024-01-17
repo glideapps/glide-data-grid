@@ -17,9 +17,10 @@ export function walkRowsInCol(
     getRowHeight: (row: number) => number,
     freezeTrailingRows: number,
     hasAppendRow: boolean,
-    cb: WalkRowsCallback,
-    skipToY: number = drawY
+    skipToY: number | undefined,
+    cb: WalkRowsCallback
 ): void {
+    skipToY = skipToY ?? drawY;
     let y = drawY;
     let row = startRow;
     const rowEnd = rows - freezeTrailingRows;

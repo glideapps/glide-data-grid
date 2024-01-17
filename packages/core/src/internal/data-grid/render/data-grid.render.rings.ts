@@ -242,6 +242,7 @@ export function drawFocusRing(
                 getRowHeight,
                 freezeTrailingRows,
                 hasAppendRow,
+                undefined,
                 (drawY, row, rh) => {
                     if (row !== targetRow && row !== fillHandleRow) return;
 

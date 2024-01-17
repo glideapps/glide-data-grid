@@ -98,6 +98,7 @@ function getLastRow(
                 getRowHeight,
                 freezeTrailingRows,
                 hasAppendRow,
+                undefined,
                 (_drawY, row, _rh, isSticky) => {
                     if (!isSticky) {
                         result = Math.max(row, result);

@@ -60,6 +60,7 @@ export function drawBlanks(
                 getRowHeight,
                 freezeTrailingRows,
                 hasAppendRow,
+                undefined,
                 (drawY, row, rh, isSticky) => {
                     if (
                         !isSticky &&

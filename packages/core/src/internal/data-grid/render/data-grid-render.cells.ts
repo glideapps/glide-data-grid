@@ -121,10 +121,10 @@ export function drawCells(
     let handledSpans: Set<string> | undefined = undefined;
 
     // don't use reduce
-    let drawRegionsLowestY = drawRegions.length > 0 ? Number.MAX_SAFE_INTEGER : 0;
+    let drawRegionsLowestY: number | undefined;
     for (let i = 0; i < drawRegions.length; i++) {
         const dr = drawRegions[i];
-        drawRegionsLowestY = Math.min(drawRegionsLowestY, dr.y);
+        drawRegionsLowestY = Math.min(drawRegionsLowestY ?? dr.y, dr.y);
     }
 
     walkColumns(
@@ -182,6 +182,7 @@ export function drawCells(
                 getRowHeight,
                 freezeTrailingRows,
                 hasAppendRow,
+                drawRegionsLowestY,
                 (drawY, row, rh, isSticky, isTrailingRow) => {
                     if (row < 0) return;
 
@@ -449,8 +450,7 @@ export function drawCells(
                     }
 
                     return toDraw <= 0;
-                },
-                drawRegionsLowestY
+                }
             );
 
             ctx.restore();
