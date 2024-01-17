@@ -32,7 +32,7 @@ import type { RenderStateProvider } from "../../../common/render-state-provider.
 import type { ImageWindowLoader } from "../image-window-loader-interface.js";
 import { intersectRect } from "../../../common/math.js";
 import type { GridMouseGroupHeaderEventArgs } from "../event-args.js";
-import { getSpanBounds, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
+import { getSkipPoint, getSpanBounds, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
 
 const loadingCell: InnerGridCell = {
     kind: GridCellKind.Loading,
@@ -120,11 +120,7 @@ export function drawCells(
     let result: Rectangle[] | undefined;
     let handledSpans: Set<string> | undefined = undefined;
 
-    let drawRegionsLowestY: number | undefined;
-    for (let i = 0; i < drawRegions.length; i++) {
-        const dr = drawRegions[i];
-        drawRegionsLowestY = Math.min(drawRegionsLowestY ?? dr.y, dr.y);
-    }
+    const skipPoint = getSkipPoint(drawRegions);
 
     walkColumns(
         effectiveColumns,
@@ -181,7 +177,7 @@ export function drawCells(
                 getRowHeight,
                 freezeTrailingRows,
                 hasAppendRow,
-                drawRegionsLowestY,
+                skipPoint,
                 (drawY, row, rh, isSticky, isTrailingRow) => {
                     if (row < 0) return;
 

@@ -7,7 +7,7 @@ import { getStickyWidth, type MappedGridColumn, getFreezeTrailingHeight } from "
 import { mergeAndRealizeTheme, type FullTheme } from "../../../common/styles.js";
 import { blend } from "../color-parser.js";
 import { intersectRect } from "../../../common/math.js";
-import { walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
+import { getSkipPoint, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
 import { type GetRowThemeCallback } from "./data-grid-render.cells.js";
 
 export function drawBlanks(
@@ -36,6 +36,9 @@ export function drawBlanks(
         effectiveColumns[effectiveColumns.length - 1] !== allColumns[effectiveColumns.length - 1]
     )
         return;
+
+    const skipPoint = getSkipPoint(drawRegions);
+
     walkColumns(
         effectiveColumns,
         cellYOffset,
@@ -60,7 +63,7 @@ export function drawBlanks(
                 getRowHeight,
                 freezeTrailingRows,
                 hasAppendRow,
-                undefined,
+                skipPoint,
                 (drawY, row, rh, isSticky) => {
                     if (
                         !isSticky &&

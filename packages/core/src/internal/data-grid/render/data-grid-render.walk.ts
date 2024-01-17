@@ -1,6 +1,14 @@
 import { type Item, type Rectangle } from "../data-grid-types.js";
 import { type MappedGridColumn, isGroupEqual } from "./data-grid-lib.js";
 
+export function getSkipPoint(drawRegions: readonly Rectangle[]): number | undefined {
+    if (drawRegions.length === 0) return undefined;
+    let drawRegionsLowestY: number | undefined;
+    for (const dr of drawRegions) {
+        drawRegionsLowestY = Math.min(drawRegionsLowestY ?? dr.y, dr.y);
+    }
+}
+
 export type WalkRowsCallback = (
     drawY: number,
     row: number,
