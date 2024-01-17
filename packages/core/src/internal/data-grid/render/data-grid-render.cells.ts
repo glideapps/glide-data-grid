@@ -120,7 +120,6 @@ export function drawCells(
     let result: Rectangle[] | undefined;
     let handledSpans: Set<string> | undefined = undefined;
 
-    // don't use reduce
     let drawRegionsLowestY: number | undefined;
     for (let i = 0; i < drawRegions.length; i++) {
         const dr = drawRegions[i];
