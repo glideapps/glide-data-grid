@@ -150,6 +150,13 @@ export interface DataGridProps {
    * @group Advanced
    */
   readonly imageWindowLoader: ImageWindowLoader | undefined;
+
+  /**
+   * Custom predicate function to decide whether the click event occurred outside the grid
+   * Especially used when custom editor is opened with the portal and is outside the grid, but there is no possibility
+   * to add a class "click-outside-ignore"
+   * If this function is supplied and returns false, the click event is ignored
+   */
   readonly isOutsideClick?: (e: MouseEvent) => boolean;
 
   /**
