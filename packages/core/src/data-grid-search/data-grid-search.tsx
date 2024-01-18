@@ -508,6 +508,7 @@ const DataGridSearch: React.ForwardRefRenderFunction<DataGridSearchRef, DataGrid
         className={p.className}
         clientSize={p.clientSize}
         columns={p.columns}
+        isOutsideClick={p.isOutsideClick}
         disabledRows={p.disabledRows}
         enableGroups={p.enableGroups}
         fillHandle={p.fillHandle}

@@ -178,7 +178,7 @@ describe('data-grid', () => {
       }),
       false,
       false,
-      false
+      true
     );
   });
 
@@ -492,7 +492,7 @@ describe('data-grid', () => {
       }),
       false,
       false,
-      false
+      true
     );
   });
 });

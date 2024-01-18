@@ -150,6 +150,7 @@ export interface DataGridProps {
    * @group Advanced
    */
   readonly imageWindowLoader: ImageWindowLoader | undefined;
+  readonly isOutsideClick?: (e: MouseEvent) => boolean;
 
   /**
    * Emitted when an item is hovered.
@@ -382,6 +383,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     theme,
     prelightCells,
     headerIcons,
+    isOutsideClick,
     verticalBorder,
     drawHeader: drawHeaderCallback,
     drawCustomCell,
@@ -676,21 +678,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
       item?.location[1] === other?.location[1]
     );
   }
-
-  const isSpectrumDialogClick = React.useCallback((event: MouseEvent | TouchEvent): boolean => {
-    let node = event.target as HTMLElement | null;
-    while (node !== null) {
-      if (
-        node.classList.value.includes('spectrum-Dialog') ||
-        node.classList.value.includes('spectrum-Underlay')
-      ) {
-        return true;
-      }
-
-      node = node.parentElement;
-    }
-    return false;
-  }, []);
 
   const [hoveredItem] = hoveredItemInfo ?? [];
 
@@ -1058,6 +1045,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
       }
 
       let args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
+
       if (args.isTouch && downTime.current !== 0 && Date.now() - downTime.current > 500) {
         args = {
           ...args,
@@ -1108,8 +1096,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
       }
 
       const evTarget = ev.target as HTMLElement;
+      let isGridContainerOutsideClick = false;
+
+      if (isOutsideClick) {
+        isGridContainerOutsideClick = isOutsideClick(ev as MouseEvent);
+      }
+
       const ignoreOutsideClick =
-        evTarget.closest('.click-outside-ignore') !== null || isSpectrumDialogClick(ev);
+        evTarget.closest('.click-outside-ignore') !== null || !isGridContainerOutsideClick;
 
       onMouseUp(args, isOutside, args.button === 2, ignoreOutsideClick);
     },
@@ -1120,7 +1114,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
       isOverHeaderMenu,
       onHeaderMenuClick,
       groupHeaderActionForEvent,
-      isSpectrumDialogClick,
+      isOutsideClick,
     ]
   );
   useEventListener('mouseup', onMouseUpImpl, window, false);

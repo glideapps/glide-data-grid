@@ -404,6 +404,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = (p) => {
         headerHeight={p.headerHeight}
         highlightRegions={p.highlightRegions}
         imageWindowLoader={p.imageWindowLoader}
+        isOutsideClick={p.isOutsideClick}
         isFilling={p.isFilling}
         isFocused={p.isFocused}
         lockColumns={p.lockColumns}

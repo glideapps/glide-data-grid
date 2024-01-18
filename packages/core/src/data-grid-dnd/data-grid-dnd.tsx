@@ -426,6 +426,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = (p) => {
       isDraggable={p.isDraggable}
       isFilling={p.isFilling}
       isFocused={p.isFocused}
+      isOutsideClick={p.isOutsideClick}
       onCanvasBlur={p.onCanvasBlur}
       onCanvasFocused={p.onCanvasFocused}
       onCellFocused={p.onCellFocused}

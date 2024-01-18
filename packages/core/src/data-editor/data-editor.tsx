@@ -4211,6 +4211,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
           imageWindowLoader={imageWindowLoader}
           initialSize={initialSize}
           isDraggable={isDraggable}
+          isOutsideClick={isOutsideClick}
           onDragLeave={onDragLeave}
           onRowMoved={onRowMovedImpl}
           overscrollX={overscrollX}
