@@ -1,11 +1,11 @@
-import type { InternalCellRenderer } from './cell-types';
-import { GridRowKind, GroupCell } from '../data-grid-types';
+import type { InternalCellRenderer } from "./cell-types";
+import { GridRowKind, GroupCell } from "../data-grid-types";
 import {
   getMiddleCenterBias,
   measureTextCached,
   roundedRect,
   clipCanvasString,
-} from '../data-grid-lib';
+} from "../data-grid-lib";
 
 const GROUP_ICON_SIZE = 18;
 const GROUP_ICON_CLICK_PADDING = 6;
@@ -19,11 +19,11 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
     const { ctx, rect, theme, cell, spriteManager } = args;
     const drawX = rect.x - 4 + cell.level * theme.nestedGroupIndent;
 
-    const icon = cell.expanded ? 'expandIcon' : 'collapseIcon';
-    const iconDrawY = rect.y + rect.height / 2 - 9;
-    spriteManager.drawSprite(icon, 'normal', ctx, drawX, iconDrawY, GROUP_ICON_SIZE, theme, 1);
+        const icon = cell.expanded ? "expandIcon" : "collapseIcon";
+        const iconDrawY = rect.y + rect.height / 2 - 9;
+        spriteManager.drawSprite(icon, "normal", ctx, drawX, iconDrawY, GROUP_ICON_SIZE, theme, 1);
 
-    const font = `${theme.rowGroupTitleFontStyle} ${theme.fontFamily}`;
+        const font = `${theme.rowGroupTitleFontStyle} ${theme.fontFamily}`;
     ctx.fillStyle = theme.textDark;
     ctx.font = font;
 
@@ -31,14 +31,14 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
       `${cell.rowsCount}`,
       ctx,
       `${theme.headerFontStyle} ${theme.fontFamily}`
-    );
+        );
     const groupCountWidth = countWidth.width > 13 ? countWidth.width + 8 : 16;
 
     const clippedText = clipCanvasString(
       cell.name,
       rect.width - drawX * 2 - groupCountWidth - GROUP_ELLIPSIS_TITLE_PADDING,
       ctx,
-      `${cell.name}_${rect.width}`,
+            `${cell.name}_${rect.width}`,
       font
     );
 
@@ -81,7 +81,7 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
 
     return true;
   },
-  onClick: (e) => {
+  onClick: e => {
     if (e.onRowDetailsUpdated) {
       let posX = e.posX;
       const iconXPosition = e.cell.level * e.theme.nestedGroupIndent + 4;
@@ -107,9 +107,9 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
       }
     }
 
-    return undefined;
-  },
-  onKeyDown: (e) => {
+        return undefined;
+    },
+    onKeyDown: e => {
     if (e.onRowDetailsUpdated) {
       // https://www.w3.org/WAI/ARIA/apg/patterns/treegrid/
       // In this document, you can read about TreeGrid accessibility techniques. It states that we should open by using the arrow keys or by pressing enter.
@@ -118,16 +118,16 @@ export const groupRenderer: InternalCellRenderer<GroupCell> = {
         e.cancel();
       }
 
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        if (e.cell.expanded && e.key === 'ArrowLeft') {
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        if (e.cell.expanded && e.key === "ArrowLeft") {
           e.onRowDetailsUpdated({ ...e.cell, expanded: false });
         }
-        if (!e.cell.expanded && e.key === 'ArrowRight') {
+        if (!e.cell.expanded && e.key === "ArrowRight") {
           e.onRowDetailsUpdated({ ...e.cell, expanded: true });
         }
         e.cancel();
       }
-    }
-  },
-  onPaste: () => undefined,
+        }
+    },
+    onPaste: () => undefined,
 };

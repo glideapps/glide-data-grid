@@ -1,37 +1,31 @@
-import {
-  BeautifulWrapper,
-  Description,
-  findGroup,
-  useGroupMockDataGenerator,
-  useMockDataGenerator,
-} from './utils';
-import React, { useState } from 'react';
-import { DataEditor, DataEditorProps } from '../data-editor';
-import { SimpleThemeWrapper } from '../../stories/story-utils';
-import { clearCell } from './data-editor-beautiful.stories';
+import { BeautifulWrapper, Description, findGroup, useGroupMockDataGenerator, useMockDataGenerator } from "./utils";
+import React, { useState } from "react";
+import { DataEditor, DataEditorProps } from "../data-editor";
+import { SimpleThemeWrapper } from "../../stories/story-utils";
+import { clearCell } from "./data-editor-beautiful.stories";
 import type { GridSelection, GroupContentRow } from '../../data-grid/data-grid-types';
 import { deleteGroupByGroupRowId, findGroupById } from '../../common/groupUtils';
 import { range } from 'lodash';
 
 const defaultProps: Partial<DataEditorProps> = {
-  smoothScrollX: true,
-  smoothScrollY: true,
-  isDraggable: false,
-  getCellsForSelection: true,
-  rowMarkers: 'none',
-  width: '100%',
+    smoothScrollX: true,
+    smoothScrollY: true,
+    isDraggable: false,
+    getCellsForSelection: true,
+    rowMarkers: "none",
+    width: "100%",
 };
 
 export default {
-  title: 'Glide-Data-Grid/DataEditor Demos',
+    title: "Glide-Data-Grid/DataEditor Demos",
 
-  decorators: [
-    (Story: React.ComponentType) => (
-      <SimpleThemeWrapper>
-        <Story />
-      </SimpleThemeWrapper>
-    ),
-  ],
+    decorators: [
+        (Story: React.ComponentType) => (
+            <SimpleThemeWrapper>
+                <Story />
+            </SimpleThemeWrapper>
+        ),
+    ],
 };
 
 interface RowGroupsProps {
@@ -40,8 +34,8 @@ interface RowGroupsProps {
 
 export const RowGroups: React.VFC<RowGroupsProps> = ({ enableGroups }) => {
   const [rowsCount, setRowsCount] = useState(100);
-  const { setCellValue, cols, setCellValueRaw, colsMap } = useMockDataGenerator(20, false, false);
-  const { groups, toggleGroup, setGroups } = useGroupMockDataGenerator(20, 2);
+    const { setCellValue, cols, setCellValueRaw, colsMap } = useMockDataGenerator(20, false, false);
+    const { groups, toggleGroup, setGroups } = useGroupMockDataGenerator(20, 2);
 
   const [rowData, setRowData] = React.useState(() => {
     return range(0, 300).map((_, rowIndex) =>
@@ -56,14 +50,14 @@ export const RowGroups: React.VFC<RowGroupsProps> = ({ enableGroups }) => {
     [rowData]
   );
 
-  const colsWithWidths = React.useMemo(() => {
-    const c = [...cols];
-    c[0] = {
-      ...c[0],
-      width: 250,
-    };
-    return c;
-  }, [cols]);
+    const colsWithWidths = React.useMemo(() => {
+        const c = [...cols];
+        c[0] = {
+            ...c[0],
+            width: 250,
+        };
+        return c;
+    }, [cols]);
 
   const onDelete = React.useCallback(
     (rowIds: GridSelection, deleteGroups: GroupContentRow[]) => {
@@ -91,41 +85,41 @@ export const RowGroups: React.VFC<RowGroupsProps> = ({ enableGroups }) => {
     [setCellValue]
   );
 
-  const onRowAppended = React.useCallback(
-    (row, groupId) => {
-      setGroups((oldGroups) => {
-        const copyGroups = [...oldGroups];
-        const group = findGroup(copyGroups, groupId);
-        if (group) {
-          group.rowsCount++;
+    const onRowAppended = React.useCallback((row, groupId) => {
+        setGroups((oldGroups) => {
+            const copyGroups = [...oldGroups];
+            const group = findGroup(copyGroups, groupId)
+            if(group){
+                group.rowsCount++;
+            }
+
+            return copyGroups
+        })
+
+
+        for (let c = 0; c < 6; c++) {
+            const cell = getCellContent([c, row]);
+            setCellValueRaw([c, row], clearCell(cell));
         }
 
-        return copyGroups;
-      });
 
-      for (let c = 0; c < 6; c++) {
-        const cell = getCellContent([c, row]);
-        setCellValueRaw([c, row], clearCell(cell));
-      }
-    },
-    [getCellContent, setCellValueRaw, setGroups]
-  );
 
-  const groups1 = enableGroups ? groups : [];
+    }, [getCellContent, setCellValueRaw, setGroups]);
+
+    const groups1 = enableGroups ? groups : [];
 
   return (
     <BeautifulWrapper
       title="Row Grouping"
-      description={<Description>Row grouping description goes here</Description>}
-    >
-      <DataEditor
-        {...defaultProps}
-        getCellContent={getCellContent}
-        columns={colsWithWidths}
-        rows={rowsCount}
-        rowMarkers="both"
-        onCellEdited={mangledEditCell}
-        groups={groups1}
+      description={<Description>Row grouping description goes here</Description>}>
+            <DataEditor
+                {...defaultProps}
+                getCellContent={getCellContent}
+                columns={colsWithWidths}
+                rows={rowsCount}
+                rowMarkers="both"
+                onCellEdited={mangledEditCell}
+                groups={groups1}
         onGroupToggle={toggleGroup}
         freezeColumns={1}
         onRowAppended={onRowAppended}
@@ -134,20 +128,20 @@ export const RowGroups: React.VFC<RowGroupsProps> = ({ enableGroups }) => {
         keybindings={{
           search: true,
         }}
-        trailingRowOptions={{
-          sticky: true,
-          tint: true,
-          hint: 'New row...',
-          inEachGroup: true,
-        }}
-      />
-    </BeautifulWrapper>
-  );
+                trailingRowOptions={{
+                    sticky: true,
+                    tint: true,
+                    hint: "New row...",
+                    inEachGroup: true,
+                }}
+            />
+        </BeautifulWrapper>
+    );
 };
 (RowGroups as any).parameters = {
-  options: {
-    showPanel: false,
-  },
+    options: {
+        showPanel: false,
+    },
 };
 
 (RowGroups as any).args = {

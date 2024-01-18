@@ -1,5 +1,5 @@
-import type { RowGroup } from '../data-editor/use-groups';
-import { deleteGroupByGroupRowId, flattenGroups } from './groupUtils';
+import type { RowGroup } from "../data-editor/use-groups";
+import { deleteGroupByGroupRowId, flattenGroups } from "./groupUtils";
 
 const getGroups = (): RowGroup[] => {
   return [
@@ -111,25 +111,26 @@ const getGroups = (): RowGroup[] => {
   ];
 };
 
-describe('flattenGroups', () => {
-  it('matches snapshot', () => {
-    const groups = getGroups();
-    expect(flattenGroups(groups, true)).toMatchSnapshot();
-  });
+describe("flattenGroups", () => {
 
-  it('collapses first group', () => {
-    const groups = getGroups();
-    groups[0].expanded = false;
-    expect(flattenGroups(groups, true)).toMatchSnapshot();
-  });
+    it("matches snapshot", () => {
+        const groups = getGroups();
+        expect(flattenGroups(groups, true)).toMatchSnapshot();
+    });
 
-  it('has single level group', () => {
-    const groups = [
-      {
-        name: `Group 1`,
-        rowsCount: 3,
-        expanded: true,
-        id: '1',
+    it("collapses first group", () => {
+        const groups = getGroups();
+        groups[0].expanded = false;
+        expect(flattenGroups(groups, true)).toMatchSnapshot();
+    });
+
+    it("has single level group", () => {
+        const groups = [
+            {
+                name: `Group 1`,
+                rowsCount: 3,
+                expanded: true,
+                id: "1",
         groups: [],
         parentId: '',
       },
@@ -137,7 +138,7 @@ describe('flattenGroups', () => {
         name: `Group 2`,
         rowsCount: 3,
         expanded: true,
-        id: '2',
+        id: "2",
         groups: [],
         parentId: '',
       },
@@ -145,15 +146,15 @@ describe('flattenGroups', () => {
         name: `Group 2`,
         rowsCount: 3,
         expanded: true,
-        id: '3',
+        id: "3",
         groups: [],
         parentId: '',
-      },
-    ];
+            },
+        ];
 
-    groups[1].expanded = false;
-    expect(flattenGroups(groups, true)).toMatchSnapshot();
-  });
+        groups[1].expanded = false;
+        expect(flattenGroups(groups, true)).toMatchSnapshot();
+    });
 
   it('should delete a group by groupRowId and return true', () => {
     const targetGroupRowId = '1-1-1';

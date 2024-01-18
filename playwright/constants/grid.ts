@@ -1,4 +1,4 @@
-export const SCROLLBAR_WIDTH = 15;
+export const SCROLLBAR_WIDTH = 15
 
 // clicking on left corner of column header does not work, so we need to have some offset
 export const COLUMN_CORNER_SAFE_OFFSET = 10;
