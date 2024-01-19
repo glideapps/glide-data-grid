@@ -5,7 +5,7 @@ import { CellSet } from "../cell-set.js";
 import groupBy from "lodash/groupBy.js";
 import { getStickyWidth, type MappedGridColumn, getFreezeTrailingHeight } from "./data-grid-lib.js";
 import { mergeAndRealizeTheme, type FullTheme } from "../../../common/styles.js";
-import { blend } from "../color-parser.js";
+import { blendCache } from "../color-parser.js";
 import { intersectRect } from "../../../common/math.js";
 import { getSkipPoint, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
 import { type GetRowThemeCallback } from "./data-grid-render.cells.js";
@@ -127,7 +127,7 @@ export function overdrawStickyBoundaries(
 
     let vStroke: string | undefined;
     if (drawX !== 0) {
-        vStroke = blend(vColor, theme.bgCell);
+        vStroke = blendCache(vColor, theme.bgCell);
         ctx.beginPath();
         ctx.moveTo(drawX + 0.5, 0);
         ctx.lineTo(drawX + 0.5, height);
@@ -136,7 +136,7 @@ export function overdrawStickyBoundaries(
     }
 
     if (freezeTrailingRows > 0) {
-        const hStroke = vColor === hColor && vStroke !== undefined ? vStroke : blend(hColor, theme.bgCell);
+        const hStroke = vColor === hColor && vStroke !== undefined ? vStroke : blendCache(hColor, theme.bgCell);
         const h = getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight);
         ctx.beginPath();
         ctx.moveTo(0, height - h + 0.5);
