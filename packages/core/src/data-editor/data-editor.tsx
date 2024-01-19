@@ -3838,10 +3838,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return [`${Math.min(100_000, w)}px`, `${Math.min(100_000, h)}px`];
     }, [mangledCols, experimental?.scrollbarWidthOverride, rowHeight, rows, showTrailingBlankRow, totalHeaderHeight]);
 
+    const cssStyle = React.useMemo(() => {
+        return makeCSSStyle(mergedTheme);
+    }, [mergedTheme]);
+
     return (
         <ThemeContext.Provider value={mergedTheme}>
             <DataEditorContainer
-                style={makeCSSStyle(mergedTheme)}
+                style={cssStyle}
                 className={className}
                 inWidth={width ?? idealWidth}
                 inHeight={height ?? idealHeight}>
