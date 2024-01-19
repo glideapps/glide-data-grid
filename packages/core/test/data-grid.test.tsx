@@ -176,7 +176,9 @@ describe('data-grid', () => {
         localEventX: 150,
         localEventY: 16,
       }),
-      false
+      false,
+      false,
+      true
     );
   });
 
@@ -488,7 +490,9 @@ describe('data-grid', () => {
         localEventX: 50,
         localEventY: 16,
       }),
-      false
+      false,
+      false,
+      true
     );
   });
 });

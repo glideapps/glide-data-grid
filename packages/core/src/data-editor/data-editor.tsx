@@ -2321,12 +2321,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
   const [scrollDir, setScrollDir] = React.useState<GridMouseEventArgs['scrollEdge']>();
 
   const onMouseUp = React.useCallback(
-    (args: GridMouseEventArgs, isOutside: boolean) => {
+    (
+      args: GridMouseEventArgs,
+      isOutside: boolean,
+      isContextMenuClick: boolean = false,
+      ignoreOutsideClick: boolean
+    ) => {
       const mouse = mouseState;
       setMouseState(undefined);
       setScrollDir(undefined);
 
-      if (isOutside) return;
+      if (isOutside && !isContextMenuClick && !ignoreOutsideClick) {
+        setGridSelection(emptyGridSelection, false);
+      }
 
       if (mouse?.fillHandle === true && gridSelection.current !== undefined) {
         fillDown(gridSelection.current.cell[1] !== gridSelection.current.range.y);
@@ -4204,6 +4211,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
           imageWindowLoader={imageWindowLoader}
           initialSize={initialSize}
           isDraggable={isDraggable}
+          isOutsideClick={isOutsideClick}
           onDragLeave={onDragLeave}
           onRowMoved={onRowMovedImpl}
           overscrollX={overscrollX}

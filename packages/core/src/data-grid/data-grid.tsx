@@ -152,13 +152,26 @@ export interface DataGridProps {
   readonly imageWindowLoader: ImageWindowLoader | undefined;
 
   /**
+   * Custom predicate function to decide whether the click event occurred outside the grid
+   * Especially used when custom editor is opened with the portal and is outside the grid, but there is no possibility
+   * to add a class "click-outside-ignore"
+   * If this function is supplied and returns false, the click event is ignored
+   */
+  readonly isOutsideClick?: (e: MouseEvent) => boolean;
+
+  /**
    * Emitted when an item is hovered.
    * @group Events
    */
   readonly onItemHovered: (args: GridMouseEventArgs) => void;
   readonly onMouseMove: (args: GridMouseEventArgs) => void;
   readonly onMouseDown: (args: GridMouseEventArgs) => void;
-  readonly onMouseUp: (args: GridMouseEventArgs, isOutside: boolean) => void;
+  readonly onMouseUp: (
+    args: GridMouseEventArgs,
+    isOutside: boolean,
+    isContextMenuClick: boolean,
+    ignoreOutsideClick: boolean
+  ) => void;
   readonly onContextMenu: (args: GridMouseEventArgs, preventDefault: () => void) => void;
 
   readonly onCanvasFocused: () => void;
@@ -377,6 +390,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     theme,
     prelightCells,
     headerIcons,
+    isOutsideClick,
     verticalBorder,
     drawHeader: drawHeaderCallback,
     drawCustomCell,
@@ -1069,7 +1083,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             onHeaderMenuClick?.(col, headerBounds);
           } else {
             // force outside so that click will not process
-            onMouseUp(args, true);
+            onMouseUp(args, true, false, false);
           }
           return;
         }
@@ -1088,7 +1102,17 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         }
       }
 
-      onMouseUp(args, isOutside);
+      const evTarget = ev.target as HTMLElement;
+      let isGridContainerOutsideClick = false;
+
+      if (isOutsideClick) {
+        isGridContainerOutsideClick = isOutsideClick(ev as MouseEvent);
+      }
+
+      const ignoreOutsideClick =
+        evTarget.closest('.click-outside-ignore') !== null || !isGridContainerOutsideClick;
+
+      onMouseUp(args, isOutside, args.button === 2, ignoreOutsideClick);
     },
     [
       onMouseUp,
@@ -1097,6 +1121,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
       isOverHeaderMenu,
       onHeaderMenuClick,
       groupHeaderActionForEvent,
+      isOutsideClick,
     ]
   );
   useEventListener('mouseup', onMouseUpImpl, window, false);
