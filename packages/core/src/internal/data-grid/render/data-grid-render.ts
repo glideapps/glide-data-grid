@@ -114,8 +114,8 @@ function getLastRow(
 
 export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     const {
-        canvas,
-        headerCanvas,
+        canvasCtx,
+        headerCanvasCtx,
         width,
         height,
         cellXOffset,
@@ -161,8 +161,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         renderStateProvider,
         getCellRenderer,
         renderStrategy,
-        bufferA,
-        bufferB,
+        bufferACtx,
+        bufferBCtx,
         damage,
         minimumCellWidth,
     } = arg;
@@ -173,6 +173,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     // if we are double buffering we need to make sure we can blit. If we can't we need to redraw the whole thing
     const canBlit = renderStrategy !== "direct" && computeCanBlit(arg, lastArg);
 
+    const canvas = canvasCtx.canvas;
+
     if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
         canvas.width = width * dpr;
         canvas.height = height * dpr;
@@ -181,7 +183,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         canvas.style.height = height + "px";
     }
 
-    const overlayCanvas = headerCanvas;
+    const overlayCanvas = headerCanvasCtx.canvas;
     const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
 
     const overlayHeight = totalHeaderHeight + 1; // border
@@ -192,6 +194,9 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         overlayCanvas.style.width = width + "px";
         overlayCanvas.style.height = overlayHeight + "px";
     }
+
+    const bufferA = bufferACtx.canvas;
+    const bufferB = bufferBCtx.canvas;
 
     if (doubleBuffer && (bufferA.width !== width * dpr || bufferA.height !== height * dpr)) {
         bufferA.width = width * dpr;
@@ -217,27 +222,19 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
     let mainCtx: CanvasRenderingContext2D | null = null;
     if (doubleBuffer) {
-        mainCtx = canvas.getContext("2d", {
-            alpha: false,
-        });
+        mainCtx = canvasCtx;
     }
-    const overlayCtx = overlayCanvas.getContext("2d", {
-        alpha: false,
-    });
-    let targetBuffer: HTMLCanvasElement;
+    const overlayCtx = headerCanvasCtx;
+    let targetCtx: CanvasRenderingContext2D;
     if (!doubleBuffer) {
-        targetBuffer = canvas;
+        targetCtx = canvasCtx;
     } else if (damage !== undefined) {
-        targetBuffer = last?.lastBuffer === "b" ? bufferB : bufferA;
+        targetCtx = last?.lastBuffer === "b" ? bufferBCtx : bufferACtx;
     } else {
-        targetBuffer = last?.lastBuffer === "b" ? bufferA : bufferB;
+        targetCtx = last?.lastBuffer === "b" ? bufferACtx : bufferBCtx;
     }
-    const targetCtx = targetBuffer.getContext("2d", {
-        alpha: false,
-    });
+    const targetBuffer = targetCtx.canvas;
     const blitSource = doubleBuffer ? (targetBuffer === bufferA ? bufferB : bufferA) : canvas;
-
-    if (overlayCtx === null || targetCtx === null) return;
 
     const getRowHeight = typeof rowHeight === "number" ? () => rowHeight : rowHeight;
 

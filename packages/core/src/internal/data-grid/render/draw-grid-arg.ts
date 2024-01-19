@@ -27,10 +27,10 @@ export interface DragAndDropState {
 }
 
 export interface DrawGridArg {
-    readonly canvas: HTMLCanvasElement;
-    readonly headerCanvas: HTMLCanvasElement;
-    readonly bufferA: HTMLCanvasElement;
-    readonly bufferB: HTMLCanvasElement;
+    readonly canvasCtx: CanvasRenderingContext2D;
+    readonly headerCanvasCtx: CanvasRenderingContext2D;
+    readonly bufferACtx: CanvasRenderingContext2D;
+    readonly bufferBCtx: CanvasRenderingContext2D;
     readonly width: number;
     readonly height: number;
     readonly cellXOffset: number;
