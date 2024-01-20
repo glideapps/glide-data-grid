@@ -1,5 +1,5 @@
 "use strict";
-(self["webpackChunkroot"] = self["webpackChunkroot"] || []).push([[236],{
+(self["webpackChunkroot"] = self["webpackChunkroot"] || []).push([[4981],{
 
 /***/ "./packages/core/dist/esm/common/styles.js":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
@@ -430,8 +430,8 @@ var debounce = __webpack_require__("./node_modules/lodash/debounce.js");
 var debounce_default = /*#__PURE__*/__webpack_require__.n(debounce);
 // EXTERNAL MODULE: ./packages/core/dist/esm/internal/data-grid/data-grid-types.js
 var data_grid_types = __webpack_require__("./packages/core/dist/esm/internal/data-grid/data-grid-types.js");
-// EXTERNAL MODULE: ./packages/core/dist/esm/internal/data-grid/data-grid-lib.js
-var data_grid_lib = __webpack_require__("./packages/core/dist/esm/internal/data-grid/data-grid-lib.js");
+// EXTERNAL MODULE: ./packages/core/dist/esm/internal/data-grid/render/data-grid-lib.js
+var data_grid_lib = __webpack_require__("./packages/core/dist/esm/internal/data-grid/render/data-grid-lib.js");
 ;// CONCATENATED MODULE: ./packages/core/dist/esm/common/render-state-provider.js
 
 const rowShift = 1 << 21;
@@ -612,78 +612,131 @@ class SpriteManager {
 }
 // EXTERNAL MODULE: ./packages/core/dist/esm/common/utils.js
 var utils = __webpack_require__("./packages/core/dist/esm/common/utils.js");
-// EXTERNAL MODULE: ./node_modules/lodash/groupBy.js
-var groupBy = __webpack_require__("./node_modules/lodash/groupBy.js");
-var groupBy_default = /*#__PURE__*/__webpack_require__.n(groupBy);
-// EXTERNAL MODULE: ./packages/core/dist/esm/common/styles.js
-var styles = __webpack_require__("./packages/core/dist/esm/common/styles.js");
 // EXTERNAL MODULE: ./packages/core/dist/esm/internal/data-grid/color-parser.js
 var color_parser = __webpack_require__("./packages/core/dist/esm/internal/data-grid/color-parser.js");
-;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid/draw-checkbox.js
+;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid/render/data-grid-render.walk.js
 
 
-
-
-function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
-  var _theme$roundingRadius;
-  let hoverX = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : -20;
-  let hoverY = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : -20;
-  let maxSize = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : 32;
-  let alignment = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : "center";
-  const centerY = Math.floor(y + height / 2);
-  const rectBordRadius = (_theme$roundingRadius = theme.roundingRadius) !== null && _theme$roundingRadius !== void 0 ? _theme$roundingRadius : 4;
-  const checkBoxWidth = (0,utils/* getSquareWidth */.Qo)(maxSize, height, theme.cellVerticalPadding);
-  const checkBoxHalfWidth = checkBoxWidth / 2;
-  const posX = (0,utils/* getSquareXPosFromAlign */.XC)(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);
-  const bb = (0,utils/* getSquareBB */.kq)(posX, centerY, checkBoxWidth);
-  const hovered = (0,utils/* pointIsWithinBB */.qq)(x + hoverX, y + hoverY, bb);
-  switch (checked) {
-    case true:
-      {
-        ctx.beginPath();
-        (0,data_grid_lib/* roundedRect */.NK)(ctx, posX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
-        ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(posX - checkBoxHalfWidth + checkBoxWidth / 4.23, centerY - checkBoxHalfWidth + checkBoxWidth / 1.97);
-        ctx.lineTo(posX - checkBoxHalfWidth + checkBoxWidth / 2.42, centerY - checkBoxHalfWidth + checkBoxWidth / 1.44);
-        ctx.lineTo(posX - checkBoxHalfWidth + checkBoxWidth / 1.29, centerY - checkBoxHalfWidth + checkBoxWidth / 3.25);
-        ctx.strokeStyle = theme.bgCell;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-        ctx.lineWidth = 1.9;
-        ctx.stroke();
-        break;
-      }
-    case data_grid_types/* BooleanEmpty */.qF:
-    case false:
-      {
-        ctx.beginPath();
-        (0,data_grid_lib/* roundedRect */.NK)(ctx, posX - checkBoxWidth / 2 + 0.5, centerY - checkBoxWidth / 2 + 0.5, checkBoxWidth - 1, checkBoxWidth - 1, rectBordRadius);
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = hovered ? theme.textDark : theme.textMedium;
-        ctx.stroke();
-        break;
-      }
-    case data_grid_types/* BooleanIndeterminate */.sd:
-      {
-        ctx.beginPath();
-        (0,data_grid_lib/* roundedRect */.NK)(ctx, posX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
-        ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(posX - checkBoxWidth / 3, centerY);
-        ctx.lineTo(posX + checkBoxWidth / 3, centerY);
-        ctx.strokeStyle = theme.bgCell;
-        ctx.lineCap = "round";
-        ctx.lineWidth = 1.9;
-        ctx.stroke();
-        break;
-      }
-    default:
-      (0,support/* assertNever */.vE)(checked);
+function getSkipPoint(drawRegions) {
+  if (drawRegions.length === 0) return undefined;
+  let drawRegionsLowestY;
+  for (const dr of drawRegions) {
+    var _drawRegionsLowestY;
+    drawRegionsLowestY = Math.min((_drawRegionsLowestY = drawRegionsLowestY) !== null && _drawRegionsLowestY !== void 0 ? _drawRegionsLowestY : dr.y, dr.y);
   }
 }
+function walkRowsInCol(startRow, drawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, skipToY, cb) {
+  var _skipToY;
+  skipToY = (_skipToY = skipToY) !== null && _skipToY !== void 0 ? _skipToY : drawY;
+  let y = drawY;
+  let row = startRow;
+  const rowEnd = rows - freezeTrailingRows;
+  let didBreak = false;
+  while (y < height && row < rowEnd) {
+    const rh = getRowHeight(row);
+    if (y + rh > skipToY && cb(y, row, rh, false, hasAppendRow && row === rows - 1) === true) {
+      didBreak = true;
+      break;
+    }
+    y += rh;
+    row++;
+  }
+  if (didBreak) return;
+  y = height;
+  for (let fr = 0; fr < freezeTrailingRows; fr++) {
+    row = rows - 1 - fr;
+    const rh = getRowHeight(row);
+    y -= rh;
+    cb(y, row, rh, true, hasAppendRow && row === rows - 1);
+  }
+}
+function walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, cb) {
+  let x = 0;
+  let clipX = 0;
+  const drawY = totalHeaderHeight + translateY;
+  for (const c of effectiveCols) {
+    const drawX = c.sticky ? clipX : x + translateX;
+    if (cb(c, drawX, drawY, clipX, cellYOffset) === true) {
+      break;
+    }
+    x += c.width;
+    clipX += c.sticky ? c.width : 0;
+  }
+}
+function walkGroups(effectiveCols, width, translateX, groupHeaderHeight, cb) {
+  let x = 0;
+  let clipX = 0;
+  for (let index = 0; index < effectiveCols.length; index++) {
+    var _startCol$group;
+    const startCol = effectiveCols[index];
+    let end = index + 1;
+    let boxWidth = startCol.width;
+    if (startCol.sticky) {
+      clipX += boxWidth;
+    }
+    while (end < effectiveCols.length && (0,data_grid_lib/* isGroupEqual */.PU)(effectiveCols[end].group, startCol.group) && effectiveCols[end].sticky === effectiveCols[index].sticky) {
+      const endCol = effectiveCols[end];
+      boxWidth += endCol.width;
+      end++;
+      index++;
+      if (endCol.sticky) {
+        clipX += endCol.width;
+      }
+    }
+    const t = startCol.sticky ? 0 : translateX;
+    const localX = x + t;
+    const delta = startCol.sticky ? 0 : Math.max(0, clipX - localX);
+    const w = Math.min(boxWidth - delta, width - (localX + delta));
+    cb([startCol.sourceIndex, effectiveCols[end - 1].sourceIndex], (_startCol$group = startCol.group) !== null && _startCol$group !== void 0 ? _startCol$group : "", localX + delta, 0, w, groupHeaderHeight);
+    x += boxWidth;
+  }
+}
+function getSpanBounds(span, cellX, cellY, cellW, cellH, column, allColumns) {
+  var _allColumns$find$sour, _allColumns$find;
+  const [startCol, endCol] = span;
+  let frozenRect;
+  let contentRect;
+  const firstNonSticky = (_allColumns$find$sour = (_allColumns$find = allColumns.find(x => !x.sticky)) === null || _allColumns$find === void 0 ? void 0 : _allColumns$find.sourceIndex) !== null && _allColumns$find$sour !== void 0 ? _allColumns$find$sour : 0;
+  if (endCol > firstNonSticky) {
+    const renderFromCol = Math.max(startCol, firstNonSticky);
+    let tempX = cellX;
+    let tempW = cellW;
+    for (let x = column.sourceIndex - 1; x >= renderFromCol; x--) {
+      tempX -= allColumns[x].width;
+      tempW += allColumns[x].width;
+    }
+    for (let x = column.sourceIndex + 1; x <= endCol; x++) {
+      tempW += allColumns[x].width;
+    }
+    contentRect = {
+      x: tempX,
+      y: cellY,
+      width: tempW,
+      height: cellH
+    };
+  }
+  if (firstNonSticky > startCol) {
+    const renderToCol = Math.min(endCol, firstNonSticky - 1);
+    let tempX = cellX;
+    let tempW = cellW;
+    for (let x = column.sourceIndex - 1; x >= startCol; x--) {
+      tempX -= allColumns[x].width;
+      tempW += allColumns[x].width;
+    }
+    for (let x = column.sourceIndex + 1; x <= renderToCol; x++) {
+      tempW += allColumns[x].width;
+    }
+    frozenRect = {
+      x: tempX,
+      y: cellY,
+      width: tempW,
+      height: cellH
+    };
+  }
+  return [frozenRect, contentRect];
+}
+// EXTERNAL MODULE: ./packages/core/dist/esm/common/styles.js
+var styles = __webpack_require__("./packages/core/dist/esm/common/styles.js");
 ;// CONCATENATED MODULE: ./packages/core/dist/esm/common/math.js
 
 function getClosestRect(rect, px, py, allowedDirections) {
@@ -732,6 +785,12 @@ function getClosestRect(rect, px, py, allowedDirections) {
       height: rect.height
     };
   }
+}
+function intersectRect(x1, y1, w1, h1, x2, y2, w2, h2) {
+  return x1 <= x2 + w2 && x2 <= x1 + w1 && y1 <= y2 + h2 && y2 <= y1 + h1;
+}
+function pointInRect(rect, x, y) {
+  return x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
 }
 function combineRects(a, b) {
   const x = Math.min(a.x, b.x);
@@ -976,10 +1035,7 @@ function splitRectIntoRegions(rect, splitIndicies, width, height, splitLocations
   }
   return result;
 }
-;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid/data-grid-render.js
-
-
-
+;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid/render/data-grid-render.cells.js
 
 
 
@@ -991,682 +1047,6 @@ const loadingCell = {
   kind: data_grid_types/* GridCellKind.Loading */.p6.Loading,
   allowOverlay: false
 };
-const allocatedItem = [0, 0];
-const reusableRect = {
-  x: 0,
-  y: 0,
-  width: 0,
-  height: 0
-};
-const drawState = [undefined, () => undefined];
-let animationFrameRequested = false;
-function animRequest() {
-  animationFrameRequested = true;
-}
-function drawCell(ctx, cell, col, row, isLastCol, isLastRow, x, y, w, h, highlighted, theme, finalCellFillColor, imageLoader, spriteManager, hoverAmount, hoverInfo, hyperWrapping, frameTime, drawCellCallback, lastPrep, enqueue, renderStateProvider, getCellRenderer, overrideCursor) {
-  let hoverX;
-  let hoverY;
-  if (hoverInfo !== undefined && hoverInfo[0][0] === col && hoverInfo[0][1] === row) {
-    hoverX = hoverInfo[1][0];
-    hoverY = hoverInfo[1][1];
-  }
-  let result = undefined;
-  allocatedItem[0] = col;
-  allocatedItem[1] = row;
-  reusableRect.x = x;
-  reusableRect.y = y;
-  reusableRect.width = w;
-  reusableRect.height = h;
-  drawState[0] = renderStateProvider.getValue(allocatedItem);
-  drawState[1] = val => renderStateProvider.setValue(allocatedItem, val);
-  animationFrameRequested = false;
-  const args = {
-    ctx,
-    theme,
-    col,
-    row,
-    cell,
-    rect: reusableRect,
-    highlighted,
-    cellFillColor: finalCellFillColor,
-    hoverAmount,
-    frameTime,
-    hoverX,
-    drawState,
-    hoverY,
-    imageLoader,
-    spriteManager,
-    hyperWrapping,
-    overrideCursor: hoverX !== undefined ? overrideCursor : undefined,
-    requestAnimationFrame: animRequest
-  };
-  const needsAnim = (0,data_grid_lib/* drawLastUpdateUnderlay */.vr)(args, cell.lastUpdated, frameTime, lastPrep, isLastCol, isLastRow);
-  const r = getCellRenderer(cell);
-  if (r !== undefined) {
-    var _lastPrep, _r$drawPrep;
-    if (((_lastPrep = lastPrep) === null || _lastPrep === void 0 ? void 0 : _lastPrep.renderer) !== r) {
-      var _lastPrep2, _lastPrep2$deprep;
-      (_lastPrep2 = lastPrep) === null || _lastPrep2 === void 0 || (_lastPrep2$deprep = _lastPrep2.deprep) === null || _lastPrep2$deprep === void 0 || _lastPrep2$deprep.call(_lastPrep2, args);
-      lastPrep = undefined;
-    }
-    const partialPrepResult = (_r$drawPrep = r.drawPrep) === null || _r$drawPrep === void 0 ? void 0 : _r$drawPrep.call(r, args, lastPrep);
-    if (drawCellCallback !== undefined && !(0,data_grid_types/* isInnerOnlyCell */.rs)(args.cell)) {
-      drawCellCallback(args, () => r.draw(args, cell));
-    } else {
-      r.draw(args, cell);
-    }
-    result = partialPrepResult === undefined ? undefined : {
-      deprep: partialPrepResult === null || partialPrepResult === void 0 ? void 0 : partialPrepResult.deprep,
-      fillStyle: partialPrepResult === null || partialPrepResult === void 0 ? void 0 : partialPrepResult.fillStyle,
-      font: partialPrepResult === null || partialPrepResult === void 0 ? void 0 : partialPrepResult.font,
-      renderer: r
-    };
-  }
-  if (needsAnim || animationFrameRequested) enqueue === null || enqueue === void 0 || enqueue(allocatedItem);
-  return result;
-}
-function blitLastFrame(ctx, blitSource, blitSourceScroll, targetScroll, last, cellXOffset, cellYOffset, translateX, translateY, freezeTrailingRows, width, height, rows, totalHeaderHeight, dpr, mappedColumns, effectiveCols, getRowHeight, doubleBuffer) {
-  const drawRegions = [];
-  ctx.imageSmoothingEnabled = false;
-  const minY = Math.min(last.cellYOffset, cellYOffset);
-  const maxY = Math.max(last.cellYOffset, cellYOffset);
-  let deltaY = 0;
-  if (typeof getRowHeight === "number") {
-    deltaY += (maxY - minY) * getRowHeight;
-  } else {
-    for (let i = minY; i < maxY; i++) {
-      deltaY += getRowHeight(i);
-    }
-  }
-  if (cellYOffset > last.cellYOffset) {
-    deltaY = -deltaY;
-  }
-  deltaY += translateY - last.translateY;
-  const minX = Math.min(last.cellXOffset, cellXOffset);
-  const maxX = Math.max(last.cellXOffset, cellXOffset);
-  let deltaX = 0;
-  for (let i = minX; i < maxX; i++) {
-    deltaX += mappedColumns[i].width;
-  }
-  if (cellXOffset > last.cellXOffset) {
-    deltaX = -deltaX;
-  }
-  deltaX += translateX - last.translateX;
-  let stickyWidth = (0,data_grid_lib/* getStickyWidth */.G6)(effectiveCols);
-  if (stickyWidth > 0) stickyWidth++;
-  if (deltaX !== 0 && deltaY !== 0) {
-    return {
-      regions: []
-    };
-  }
-  const freezeTrailingRowsHeight = freezeTrailingRows > 0 ? (0,data_grid_lib/* getFreezeTrailingHeight */.YN)(rows, freezeTrailingRows, getRowHeight) : 0;
-  const blitWidth = width - stickyWidth - Math.abs(deltaX);
-  const blitHeight = height - totalHeaderHeight - freezeTrailingRowsHeight - Math.abs(deltaY) - 1;
-  if (blitWidth > 150 && blitHeight > 150) {
-    const args = {
-      sx: 0,
-      sy: 0,
-      sw: width * dpr,
-      sh: height * dpr,
-      dx: 0,
-      dy: 0,
-      dw: width * dpr,
-      dh: height * dpr
-    };
-    if (deltaY > 0) {
-      args.sy = (totalHeaderHeight + 1) * dpr;
-      args.sh = blitHeight * dpr;
-      args.dy = (deltaY + totalHeaderHeight + 1) * dpr;
-      args.dh = blitHeight * dpr;
-      drawRegions.push({
-        x: 0,
-        y: totalHeaderHeight,
-        width: width,
-        height: deltaY + 1
-      });
-    } else if (deltaY < 0) {
-      args.sy = (-deltaY + totalHeaderHeight + 1) * dpr;
-      args.sh = blitHeight * dpr;
-      args.dy = (totalHeaderHeight + 1) * dpr;
-      args.dh = blitHeight * dpr;
-      drawRegions.push({
-        x: 0,
-        y: height + deltaY - freezeTrailingRowsHeight,
-        width: width,
-        height: -deltaY + freezeTrailingRowsHeight
-      });
-    }
-    if (deltaX > 0) {
-      args.sx = stickyWidth * dpr;
-      args.sw = blitWidth * dpr;
-      args.dx = (deltaX + stickyWidth) * dpr;
-      args.dw = blitWidth * dpr;
-      drawRegions.push({
-        x: stickyWidth - 1,
-        y: 0,
-        width: deltaX + 2,
-        height: height
-      });
-    } else if (deltaX < 0) {
-      args.sx = (stickyWidth - deltaX) * dpr;
-      args.sw = blitWidth * dpr;
-      args.dx = stickyWidth * dpr;
-      args.dw = blitWidth * dpr;
-      drawRegions.push({
-        x: width + deltaX,
-        y: 0,
-        width: -deltaX,
-        height: height
-      });
-    }
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    if (doubleBuffer) {
-      if (stickyWidth > 0 && deltaX !== 0 && deltaY === 0 && (targetScroll === undefined || (blitSourceScroll === null || blitSourceScroll === void 0 ? void 0 : blitSourceScroll[1]) !== false)) {
-        const w = stickyWidth * dpr;
-        const h = height * dpr;
-        ctx.drawImage(blitSource, 0, 0, w, h, 0, 0, w, h);
-      }
-      if (freezeTrailingRowsHeight > 0 && deltaX === 0 && deltaY !== 0 && (targetScroll === undefined || (blitSourceScroll === null || blitSourceScroll === void 0 ? void 0 : blitSourceScroll[0]) !== false)) {
-        const y = (height - freezeTrailingRowsHeight) * dpr;
-        const w = width * dpr;
-        const h = freezeTrailingRowsHeight * dpr;
-        ctx.drawImage(blitSource, 0, y, w, h, 0, y, w, h);
-      }
-    }
-    ctx.drawImage(blitSource, args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
-    ctx.scale(dpr, dpr);
-  }
-  ctx.imageSmoothingEnabled = true;
-  return {
-    regions: drawRegions
-  };
-}
-function blitResizedCol(last, cellXOffset, cellYOffset, translateX, translateY, width, height, totalHeaderHeight, effectiveCols, resizedIndex) {
-  const drawRegions = [];
-  if (cellXOffset !== last.cellXOffset || cellYOffset !== last.cellYOffset || translateX !== last.translateX || translateY !== last.translateY) {
-    return drawRegions;
-  }
-  walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, _drawY, clipX) => {
-    if (c.sourceIndex === resizedIndex) {
-      const x = Math.max(drawX, clipX) + 1;
-      drawRegions.push({
-        x,
-        y: 0,
-        width: width - x,
-        height
-      });
-      return true;
-    }
-  });
-  return drawRegions;
-}
-function drawGridLines(ctx, effectiveCols, cellYOffset, translateX, translateY, width, height, drawRegions, spans, groupHeaderHeight, totalHeaderHeight, getRowHeight, getRowThemeOverride, verticalBorder, freezeTrailingRows, rows, theme) {
-  var _theme$horizontalBord;
-  let verticalOnly = arguments.length > 17 && arguments[17] !== undefined ? arguments[17] : false;
-  if (spans !== undefined) {
-    ctx.beginPath();
-    ctx.save();
-    ctx.rect(0, 0, width, height);
-    for (const span of spans) {
-      ctx.rect(span.x + 1, span.y + 1, span.width - 1, span.height - 1);
-    }
-    ctx.clip("evenodd");
-  }
-  const hColor = (_theme$horizontalBord = theme.horizontalBorderColor) !== null && _theme$horizontalBord !== void 0 ? _theme$horizontalBord : theme.borderColor;
-  const vColor = theme.borderColor;
-  let minX = 0;
-  let maxX = width;
-  let minY = 0;
-  let maxY = height;
-  if (drawRegions !== undefined && drawRegions.length > 0) {
-    minX = Number.MAX_SAFE_INTEGER;
-    minY = Number.MAX_SAFE_INTEGER;
-    maxX = Number.MIN_SAFE_INTEGER;
-    maxY = Number.MIN_SAFE_INTEGER;
-    for (const r of drawRegions) {
-      minX = Math.min(minX, r.x - 1);
-      maxX = Math.max(maxX, r.x + r.width + 1);
-      minY = Math.min(minY, r.y - 1);
-      maxY = Math.max(maxY, r.y + r.height + 1);
-    }
-  }
-  const toDraw = [];
-  ctx.beginPath();
-  let x = 0.5;
-  for (let index = 0; index < effectiveCols.length; index++) {
-    const c = effectiveCols[index];
-    if (c.width === 0) continue;
-    x += c.width;
-    const tx = c.sticky ? x : x + translateX;
-    if (tx >= minX && tx <= maxX && verticalBorder(index + 1)) {
-      toDraw.push({
-        x1: tx,
-        y1: Math.max(groupHeaderHeight, minY),
-        x2: tx,
-        y2: Math.min(height, maxY),
-        color: vColor
-      });
-    }
-  }
-  let freezeY = height + 0.5;
-  for (let i = rows - freezeTrailingRows; i < rows; i++) {
-    const rh = getRowHeight(i);
-    freezeY -= rh;
-    toDraw.push({
-      x1: minX,
-      y1: freezeY,
-      x2: maxX,
-      y2: freezeY,
-      color: hColor
-    });
-  }
-  if (verticalOnly !== true) {
-    let y = totalHeaderHeight + 0.5;
-    let row = cellYOffset;
-    const target = freezeY;
-    while (y + translateY < target) {
-      const ty = y + translateY;
-      if (ty >= minY && ty <= maxY - 1) {
-        var _ref, _rowTheme$horizontalB;
-        const rowTheme = getRowThemeOverride === null || getRowThemeOverride === void 0 ? void 0 : getRowThemeOverride(row);
-        toDraw.push({
-          x1: minX,
-          y1: ty,
-          x2: maxX,
-          y2: ty,
-          color: (_ref = (_rowTheme$horizontalB = rowTheme === null || rowTheme === void 0 ? void 0 : rowTheme.horizontalBorderColor) !== null && _rowTheme$horizontalB !== void 0 ? _rowTheme$horizontalB : rowTheme === null || rowTheme === void 0 ? void 0 : rowTheme.borderColor) !== null && _ref !== void 0 ? _ref : hColor
-        });
-      }
-      y += getRowHeight(row);
-      row++;
-    }
-  }
-  const groups = groupBy_default()(toDraw, line => line.color);
-  for (const g of Object.keys(groups)) {
-    ctx.strokeStyle = g;
-    for (const line of groups[g]) {
-      ctx.moveTo(line.x1, line.y1);
-      ctx.lineTo(line.x2, line.y2);
-    }
-    ctx.stroke();
-    ctx.beginPath();
-  }
-  if (spans !== undefined) {
-    ctx.restore();
-  }
-}
-function getActionBoundsForGroup(box, actions) {
-  const result = [];
-  let x = box.x + box.width - 26 * actions.length;
-  const y = box.y + box.height / 2 - 13;
-  const height = 26;
-  const width = 26;
-  for (let i = 0; i < actions.length; i++) {
-    result.push({
-      x,
-      y,
-      width,
-      height
-    });
-    x += 26;
-  }
-  return result;
-}
-function pointInRect(rect, x, y) {
-  return x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
-}
-function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, hovered, theme, spriteManager, _hoverValues, verticalBorder, getGroupDetails, damage) {
-  var _hovered$;
-  const xPad = 8;
-  const [hCol, hRow] = (_hovered$ = hovered === null || hovered === void 0 ? void 0 : hovered[0]) !== null && _hovered$ !== void 0 ? _hovered$ : [];
-  let finalX = 0;
-  walkGroups(effectiveCols, width, translateX, groupHeaderHeight, (span, groupName, x, y, w, h) => {
-    var _groupTheme$textGroup;
-    if (damage !== undefined && !damage.hasItemInRectangle({
-      x: span[0],
-      y: -2,
-      width: span[1] - span[0] + 1,
-      height: 1
-    })) return;
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x, y, w, h);
-    ctx.clip();
-    const group = getGroupDetails(groupName);
-    const groupTheme = (group === null || group === void 0 ? void 0 : group.overrideTheme) === undefined ? theme : (0,styles/* mergeAndRealizeTheme */.yR)(theme, group.overrideTheme);
-    const isHovered = hRow === -2 && hCol !== undefined && hCol >= span[0] && hCol <= span[1];
-    const fillColor = isHovered ? groupTheme.bgHeaderHovered : groupTheme.bgHeader;
-    if (fillColor !== theme.bgHeader) {
-      ctx.fillStyle = fillColor;
-      ctx.fill();
-    }
-    ctx.fillStyle = (_groupTheme$textGroup = groupTheme.textGroupHeader) !== null && _groupTheme$textGroup !== void 0 ? _groupTheme$textGroup : groupTheme.textHeader;
-    if (group !== undefined) {
-      let drawX = x;
-      if (group.icon !== undefined) {
-        spriteManager.drawSprite(group.icon, "normal", ctx, drawX + xPad, (groupHeaderHeight - 20) / 2, 20, groupTheme);
-        drawX += 26;
-      }
-      ctx.fillText(group.name, drawX + xPad, groupHeaderHeight / 2 + (0,data_grid_lib/* getMiddleCenterBias */.aX)(ctx, theme.headerFontFull));
-      if (group.actions !== undefined && isHovered) {
-        var _hovered$2;
-        const actionBoxes = getActionBoundsForGroup({
-          x,
-          y,
-          width: w,
-          height: h
-        }, group.actions);
-        ctx.beginPath();
-        const fadeStartX = actionBoxes[0].x - 10;
-        const fadeWidth = x + w - fadeStartX;
-        ctx.rect(fadeStartX, 0, fadeWidth, groupHeaderHeight);
-        const grad = ctx.createLinearGradient(fadeStartX, 0, fadeStartX + fadeWidth, 0);
-        const trans = (0,color_parser/* withAlpha */.fG)(fillColor, 0);
-        grad.addColorStop(0, trans);
-        grad.addColorStop(10 / fadeWidth, fillColor);
-        grad.addColorStop(1, fillColor);
-        ctx.fillStyle = grad;
-        ctx.fill();
-        ctx.globalAlpha = 0.6;
-        const [mouseX, mouseY] = (_hovered$2 = hovered === null || hovered === void 0 ? void 0 : hovered[1]) !== null && _hovered$2 !== void 0 ? _hovered$2 : [-1, -1];
-        for (let i = 0; i < group.actions.length; i++) {
-          const action = group.actions[i];
-          const box = actionBoxes[i];
-          const actionHovered = pointInRect(box, mouseX + x, mouseY);
-          if (actionHovered) {
-            ctx.globalAlpha = 1;
-          }
-          spriteManager.drawSprite(action.icon, "normal", ctx, box.x + box.width / 2 - 10, box.y + box.height / 2 - 10, 20, groupTheme);
-          if (actionHovered) {
-            ctx.globalAlpha = 0.6;
-          }
-        }
-        ctx.globalAlpha = 1;
-      }
-    }
-    if (x !== 0 && verticalBorder(span[0])) {
-      ctx.beginPath();
-      ctx.moveTo(x + 0.5, 0);
-      ctx.lineTo(x + 0.5, groupHeaderHeight);
-      ctx.strokeStyle = theme.borderColor;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
-    ctx.restore();
-    finalX = x + w;
-  });
-  ctx.beginPath();
-  ctx.moveTo(finalX + 0.5, 0);
-  ctx.lineTo(finalX + 0.5, groupHeaderHeight);
-  ctx.moveTo(0, groupHeaderHeight + 0.5);
-  ctx.lineTo(width, groupHeaderHeight + 0.5);
-  ctx.strokeStyle = theme.borderColor;
-  ctx.lineWidth = 1;
-  ctx.stroke();
-}
-const menuButtonSize = 30;
-function getHeaderMenuBounds(x, y, width, height, isRtl) {
-  if (isRtl) return {
-    x,
-    y,
-    width: menuButtonSize,
-    height: Math.min(menuButtonSize, height)
-  };
-  return {
-    x: x + width - menuButtonSize,
-    y: Math.max(y, y + height / 2 - menuButtonSize / 2),
-    width: menuButtonSize,
-    height: Math.min(menuButtonSize, height)
-  };
-}
-function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, isCheckboxHeader, menuBounds) {
-  if (isCheckboxHeader) {
-    let checked = undefined;
-    if (c.title === data_grid_types/* headerCellCheckedMarker */.qT) checked = true;
-    if (c.title === data_grid_types/* headerCellUnheckedMarker */.YK) checked = false;
-    if (checked !== true) {
-      ctx.globalAlpha = hoverAmount;
-    }
-    drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined, 18);
-    if (checked !== true) {
-      ctx.globalAlpha = 1;
-    }
-    return;
-  }
-  const xPad = theme.cellHorizontalPadding;
-  const fillStyle = selected ? theme.textHeaderSelected : theme.textHeader;
-  const shouldDrawMenu = c.hasMenu === true && (isHovered || touchMode && selected);
-  const dirScalar = isRtl ? -1 : 1;
-  let drawX = isRtl ? x + width - xPad : x + xPad;
-  if (c.icon !== undefined) {
-    let variant = selected ? "selected" : "normal";
-    if (c.style === "highlight") {
-      variant = selected ? "selected" : "special";
-    }
-    const headerSize = theme.headerIconSize;
-    spriteManager.drawSprite(c.icon, variant, ctx, isRtl ? drawX - headerSize : drawX, y + (height - headerSize) / 2, headerSize, theme);
-    if (c.overlayIcon !== undefined) {
-      spriteManager.drawSprite(c.overlayIcon, selected ? "selected" : "special", ctx, isRtl ? drawX - headerSize + 9 : drawX + 9, y + ((height - 18) / 2 + 6), 18, theme);
-    }
-    drawX += Math.ceil(headerSize * 1.3) * dirScalar;
-  }
-  if (shouldDrawMenu && c.hasMenu === true && width > 35) {
-    const fadeWidth = 35;
-    const fadeStart = isRtl ? fadeWidth : width - fadeWidth;
-    const fadeEnd = isRtl ? fadeWidth * 0.7 : width - fadeWidth * 0.7;
-    const fadeStartPercent = fadeStart / width;
-    const fadeEndPercent = fadeEnd / width;
-    const grad = ctx.createLinearGradient(x, 0, x + width, 0);
-    const trans = (0,color_parser/* withAlpha */.fG)(fillStyle, 0);
-    grad.addColorStop(isRtl ? 1 : 0, fillStyle);
-    grad.addColorStop(fadeStartPercent, fillStyle);
-    grad.addColorStop(fadeEndPercent, trans);
-    grad.addColorStop(isRtl ? 0 : 1, trans);
-    ctx.fillStyle = grad;
-  } else {
-    ctx.fillStyle = fillStyle;
-  }
-  if (isRtl) {
-    ctx.textAlign = "right";
-  }
-  ctx.fillText(c.title, drawX, y + height / 2 + (0,data_grid_lib/* getMiddleCenterBias */.aX)(ctx, theme.headerFontFull));
-  if (isRtl) {
-    ctx.textAlign = "left";
-  }
-  if (shouldDrawMenu && c.hasMenu === true) {
-    if (c.menuIcon === undefined || c.menuIcon === data_grid_types/* GridColumnMenuIcon.Triangle */.pN.Triangle) {
-      ctx.beginPath();
-      const triangleX = menuBounds.x + menuBounds.width / 2 - 5.5;
-      const triangleY = menuBounds.y + menuBounds.height / 2 - 3;
-      (0,data_grid_lib/* roundedPoly */.zu)(ctx, [{
-        x: triangleX,
-        y: triangleY
-      }, {
-        x: triangleX + 11,
-        y: triangleY
-      }, {
-        x: triangleX + 5.5,
-        y: triangleY + 6
-      }], 1);
-      ctx.fillStyle = fillStyle;
-      ctx.fill();
-    } else if (c.menuIcon === data_grid_types/* GridColumnMenuIcon.Dots */.pN.Dots) {
-      ctx.beginPath();
-      const dotsX = menuBounds.x + menuBounds.width / 2;
-      const dotsY = menuBounds.y + menuBounds.height / 2;
-      (0,data_grid_lib/* drawMenuDots */.Ld)(ctx, dotsX, dotsY);
-      ctx.fillStyle = fillStyle;
-      ctx.fill();
-    } else {
-      const iconX = menuBounds.x + (menuBounds.width - theme.headerIconSize) / 2;
-      const iconY = menuBounds.y + (menuBounds.height - theme.headerIconSize) / 2;
-      spriteManager.drawSprite(c.menuIcon, "normal", ctx, iconX, iconY, theme.headerIconSize, theme);
-    }
-  }
-}
-function drawHeader(ctx, x, y, width, height, c, selected, theme, isHovered, hasSelectedCell, hoverAmount, spriteManager, drawHeaderCallback, touchMode) {
-  const isCheckboxHeader = c.title.startsWith(data_grid_types/* headerCellCheckboxPrefix */.Gf);
-  const isRtl = (0,utils/* direction */.o7)(c.title) === "rtl";
-  const menuBounds = getHeaderMenuBounds(x, y, width, height, isRtl);
-  if (drawHeaderCallback !== undefined) {
-    let passCol = c;
-    if (isCheckboxHeader) {
-      passCol = {
-        ...c,
-        title: ""
-      };
-    }
-    drawHeaderCallback({
-      ctx,
-      theme,
-      rect: {
-        x,
-        y,
-        width,
-        height
-      },
-      column: passCol,
-      columnIndex: passCol.sourceIndex,
-      isSelected: selected,
-      hoverAmount,
-      isHovered,
-      hasSelectedCell,
-      spriteManager,
-      menuBounds
-    }, () => drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, isCheckboxHeader, menuBounds));
-  } else {
-    drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, isCheckboxHeader, menuBounds);
-  }
-}
-function drawGridHeaders(ctx, effectiveCols, enableGroups, hovered, width, translateX, headerHeight, groupHeaderHeight, dragAndDropState, isResizing, selection, outerTheme, spriteManager, hoverValues, verticalBorder, getGroupDetails, damage, drawHeaderCallback, touchMode) {
-  var _hovered$3;
-  const totalHeaderHeight = headerHeight + groupHeaderHeight;
-  if (totalHeaderHeight <= 0) return;
-  ctx.fillStyle = outerTheme.bgHeader;
-  ctx.fillRect(0, 0, width, totalHeaderHeight);
-  const [hCol, hRow] = (_hovered$3 = hovered === null || hovered === void 0 ? void 0 : hovered[0]) !== null && _hovered$3 !== void 0 ? _hovered$3 : [];
-  const font = outerTheme.headerFontFull;
-  ctx.font = font;
-  walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x, _y, clipX) => {
-    var _c$group, _hoverValues$find$hov, _hoverValues$find;
-    if (damage !== undefined && !damage.has([c.sourceIndex, -1])) return;
-    const diff = Math.max(0, clipX - x);
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x + diff, groupHeaderHeight, c.width - diff, headerHeight);
-    ctx.clip();
-    const groupTheme = getGroupDetails((_c$group = c.group) !== null && _c$group !== void 0 ? _c$group : "").overrideTheme;
-    const theme = c.themeOverride === undefined && groupTheme === undefined ? outerTheme : (0,styles/* mergeAndRealizeTheme */.yR)(outerTheme, groupTheme, c.themeOverride);
-    if (theme.bgHeader !== outerTheme.bgHeader) {
-      ctx.fillStyle = theme.bgHeader;
-      ctx.fill();
-    }
-    if (theme !== outerTheme) {
-      ctx.font = theme.baseFontFull;
-    }
-    const selected = selection.columns.hasIndex(c.sourceIndex);
-    const noHover = dragAndDropState !== undefined || isResizing;
-    const hoveredBoolean = !noHover && hRow === -1 && hCol === c.sourceIndex;
-    const hover = noHover ? 0 : (_hoverValues$find$hov = (_hoverValues$find = hoverValues.find(s => s.item[0] === c.sourceIndex && s.item[1] === -1)) === null || _hoverValues$find === void 0 ? void 0 : _hoverValues$find.hoverAmount) !== null && _hoverValues$find$hov !== void 0 ? _hoverValues$find$hov : 0;
-    const hasSelectedCell = (selection === null || selection === void 0 ? void 0 : selection.current) !== undefined && selection.current.cell[0] === c.sourceIndex;
-    const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
-    const y = enableGroups ? groupHeaderHeight : 0;
-    const xOffset = c.sourceIndex === 0 ? 0 : 1;
-    if (selected) {
-      ctx.fillStyle = bgFillStyle;
-      ctx.fillRect(x + xOffset, y, c.width - xOffset, headerHeight);
-    } else if (hasSelectedCell || hover > 0) {
-      ctx.beginPath();
-      ctx.rect(x + xOffset, y, c.width - xOffset, headerHeight);
-      if (hasSelectedCell) {
-        ctx.fillStyle = theme.bgHeaderHasFocus;
-        ctx.fill();
-      }
-      if (hover > 0) {
-        ctx.globalAlpha = hover;
-        ctx.fillStyle = theme.bgHeaderHovered;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      }
-    }
-    drawHeader(ctx, x, y, c.width, headerHeight, c, selected, theme, hoveredBoolean, hasSelectedCell, hover, spriteManager, drawHeaderCallback, touchMode);
-    ctx.restore();
-  });
-  if (enableGroups) {
-    drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, hovered, outerTheme, spriteManager, hoverValues, verticalBorder, getGroupDetails, damage);
-  }
-}
-function intersectRect(x1, y1, w1, h1, x2, y2, w2, h2) {
-  return x1 <= x2 + w2 && x2 <= x1 + w1 && y1 <= y2 + h2 && y2 <= y1 + h1;
-}
-function clipHeaderDamage(ctx, effectiveColumns, width, groupHeaderHeight, totalHeaderHeight, translateX, translateY, cellYOffset, damage) {
-  if (damage === undefined || damage.size === 0) return;
-  ctx.beginPath();
-  walkGroups(effectiveColumns, width, translateX, groupHeaderHeight, (span, _group, x, y, w, h) => {
-    const hasItemInSpan = damage.hasItemInRectangle({
-      x: span[0],
-      y: -2,
-      width: span[1] - span[0] + 1,
-      height: 1
-    });
-    if (hasItemInSpan) {
-      ctx.rect(x, y, w, h);
-    }
-  });
-  walkColumns(effectiveColumns, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, _colDrawY, clipX) => {
-    const diff = Math.max(0, clipX - drawX);
-    const finalX = drawX + diff + 1;
-    const finalWidth = c.width - diff - 1;
-    if (damage.has([c.sourceIndex, -1])) {
-      ctx.rect(finalX, groupHeaderHeight, finalWidth, totalHeaderHeight - groupHeaderHeight);
-    }
-  });
-  ctx.clip();
-}
-function getSpanBounds(span, cellX, cellY, cellW, cellH, column, allColumns) {
-  var _allColumns$find$sour, _allColumns$find;
-  const [startCol, endCol] = span;
-  let frozenRect;
-  let contentRect;
-  const firstNonSticky = (_allColumns$find$sour = (_allColumns$find = allColumns.find(x => !x.sticky)) === null || _allColumns$find === void 0 ? void 0 : _allColumns$find.sourceIndex) !== null && _allColumns$find$sour !== void 0 ? _allColumns$find$sour : 0;
-  if (endCol > firstNonSticky) {
-    const renderFromCol = Math.max(startCol, firstNonSticky);
-    let tempX = cellX;
-    let tempW = cellW;
-    for (let x = column.sourceIndex - 1; x >= renderFromCol; x--) {
-      tempX -= allColumns[x].width;
-      tempW += allColumns[x].width;
-    }
-    for (let x = column.sourceIndex + 1; x <= endCol; x++) {
-      tempW += allColumns[x].width;
-    }
-    contentRect = {
-      x: tempX,
-      y: cellY,
-      width: tempW,
-      height: cellH
-    };
-  }
-  if (firstNonSticky > startCol) {
-    const renderToCol = Math.min(endCol, firstNonSticky - 1);
-    let tempX = cellX;
-    let tempW = cellW;
-    for (let x = column.sourceIndex - 1; x >= startCol; x--) {
-      tempX -= allColumns[x].width;
-      tempW += allColumns[x].width;
-    }
-    for (let x = column.sourceIndex + 1; x <= renderToCol; x++) {
-      tempW += allColumns[x].width;
-    }
-    frozenRect = {
-      x: tempX,
-      y: cellY,
-      width: tempW,
-      height: cellH
-    };
-  }
-  return [frozenRect, contentRect];
-}
 function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight, translateX, translateY, cellYOffset, rows, getRowHeight, getCellContent, getGroupDetails, getRowThemeOverride, disabledRows, isFocused, drawFocus, freezeTrailingRows, hasAppendRow, drawRegions, damage, selection, prelightCells, highlightRegions, imageLoader, spriteManager, hoverValues, hoverInfo, drawCellCallback, hyperWrapping, outerTheme, enqueue, renderStateProvider, getCellRenderer, overrideCursor, minimumCellWidth) {
   var _damage$size;
   let toDraw = (_damage$size = damage === null || damage === void 0 ? void 0 : damage.size) !== null && _damage$size !== void 0 ? _damage$size : Number.MAX_SAFE_INTEGER;
@@ -1680,8 +1060,9 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
   const freezeTrailingRowsHeight = freezeTrailingRows > 0 ? (0,data_grid_lib/* getFreezeTrailingHeight */.YN)(rows, freezeTrailingRows, getRowHeight) : 0;
   let result;
   let handledSpans = undefined;
+  const skipPoint = getSkipPoint(drawRegions);
   walkColumns(effectiveColumns, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, colDrawStartY, clipX, startRow) => {
-    var _c$group2;
+    var _c$group;
     const diff = Math.max(0, clipX - drawX);
     const colDrawX = drawX + diff;
     const colDrawY = totalHeaderHeight + 1;
@@ -1705,7 +1086,7 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
       ctx.clip();
     };
     const colSelected = selection.columns.hasIndex(c.sourceIndex);
-    const groupTheme = getGroupDetails((_c$group2 = c.group) !== null && _c$group2 !== void 0 ? _c$group2 : "").overrideTheme;
+    const groupTheme = getGroupDetails((_c$group = c.group) !== null && _c$group !== void 0 ? _c$group : "").overrideTheme;
     const colTheme = c.themeOverride === undefined && groupTheme === undefined ? outerTheme : (0,styles/* mergeAndRealizeTheme */.yR)(outerTheme, groupTheme, c.themeOverride);
     const colFont = colTheme.baseFontFull;
     if (colFont !== font) {
@@ -1714,7 +1095,7 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
     }
     reclip();
     let prepResult = undefined;
-    walkRowsInCol(startRow, colDrawStartY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, (drawY, row, rh, isSticky, isTrailingRow) => {
+    walkRowsInCol(startRow, colDrawStartY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, skipPoint, (drawY, row, rh, isSticky, isTrailingRow) => {
       var _c$trailingRowOptions, _c$trailingRowOptions2;
       if (row < 0) return;
       cellIndex[0] = c.sourceIndex;
@@ -1895,8 +1276,468 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
   });
   return result;
 }
+const allocatedItem = [0, 0];
+const reusableRect = {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0
+};
+const drawState = [undefined, () => undefined];
+let animationFrameRequested = false;
+function animRequest() {
+  animationFrameRequested = true;
+}
+function drawCell(ctx, cell, col, row, isLastCol, isLastRow, x, y, w, h, highlighted, theme, finalCellFillColor, imageLoader, spriteManager, hoverAmount, hoverInfo, hyperWrapping, frameTime, drawCellCallback, lastPrep, enqueue, renderStateProvider, getCellRenderer, overrideCursor) {
+  let hoverX;
+  let hoverY;
+  if (hoverInfo !== undefined && hoverInfo[0][0] === col && hoverInfo[0][1] === row) {
+    hoverX = hoverInfo[1][0];
+    hoverY = hoverInfo[1][1];
+  }
+  let result = undefined;
+  allocatedItem[0] = col;
+  allocatedItem[1] = row;
+  reusableRect.x = x;
+  reusableRect.y = y;
+  reusableRect.width = w;
+  reusableRect.height = h;
+  drawState[0] = renderStateProvider.getValue(allocatedItem);
+  drawState[1] = val => renderStateProvider.setValue(allocatedItem, val);
+  animationFrameRequested = false;
+  const args = {
+    ctx,
+    theme,
+    col,
+    row,
+    cell,
+    rect: reusableRect,
+    highlighted,
+    cellFillColor: finalCellFillColor,
+    hoverAmount,
+    frameTime,
+    hoverX,
+    drawState,
+    hoverY,
+    imageLoader,
+    spriteManager,
+    hyperWrapping,
+    overrideCursor: hoverX !== undefined ? overrideCursor : undefined,
+    requestAnimationFrame: animRequest
+  };
+  const needsAnim = (0,data_grid_lib/* drawLastUpdateUnderlay */.vr)(args, cell.lastUpdated, frameTime, lastPrep, isLastCol, isLastRow);
+  const r = getCellRenderer(cell);
+  if (r !== undefined) {
+    var _lastPrep, _r$drawPrep;
+    if (((_lastPrep = lastPrep) === null || _lastPrep === void 0 ? void 0 : _lastPrep.renderer) !== r) {
+      var _lastPrep2, _lastPrep2$deprep;
+      (_lastPrep2 = lastPrep) === null || _lastPrep2 === void 0 || (_lastPrep2$deprep = _lastPrep2.deprep) === null || _lastPrep2$deprep === void 0 || _lastPrep2$deprep.call(_lastPrep2, args);
+      lastPrep = undefined;
+    }
+    const partialPrepResult = (_r$drawPrep = r.drawPrep) === null || _r$drawPrep === void 0 ? void 0 : _r$drawPrep.call(r, args, lastPrep);
+    if (drawCellCallback !== undefined && !(0,data_grid_types/* isInnerOnlyCell */.rs)(args.cell)) {
+      drawCellCallback(args, () => r.draw(args, cell));
+    } else {
+      r.draw(args, cell);
+    }
+    result = partialPrepResult === undefined ? undefined : {
+      deprep: partialPrepResult === null || partialPrepResult === void 0 ? void 0 : partialPrepResult.deprep,
+      fillStyle: partialPrepResult === null || partialPrepResult === void 0 ? void 0 : partialPrepResult.fillStyle,
+      font: partialPrepResult === null || partialPrepResult === void 0 ? void 0 : partialPrepResult.font,
+      renderer: r
+    };
+  }
+  if (needsAnim || animationFrameRequested) enqueue === null || enqueue === void 0 || enqueue(allocatedItem);
+  return result;
+}
+;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid/render/draw-checkbox.js
+
+
+
+
+function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
+  var _theme$roundingRadius;
+  let hoverX = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : -20;
+  let hoverY = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : -20;
+  let maxSize = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : 32;
+  let alignment = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : "center";
+  const centerY = Math.floor(y + height / 2);
+  const rectBordRadius = (_theme$roundingRadius = theme.roundingRadius) !== null && _theme$roundingRadius !== void 0 ? _theme$roundingRadius : 4;
+  const checkBoxWidth = (0,utils/* getSquareWidth */.Qo)(maxSize, height, theme.cellVerticalPadding);
+  const checkBoxHalfWidth = checkBoxWidth / 2;
+  const posX = (0,utils/* getSquareXPosFromAlign */.XC)(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);
+  const bb = (0,utils/* getSquareBB */.kq)(posX, centerY, checkBoxWidth);
+  const hovered = (0,utils/* pointIsWithinBB */.qq)(x + hoverX, y + hoverY, bb);
+  switch (checked) {
+    case true:
+      {
+        ctx.beginPath();
+        (0,data_grid_lib/* roundedRect */.NK)(ctx, posX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
+        ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(posX - checkBoxHalfWidth + checkBoxWidth / 4.23, centerY - checkBoxHalfWidth + checkBoxWidth / 1.97);
+        ctx.lineTo(posX - checkBoxHalfWidth + checkBoxWidth / 2.42, centerY - checkBoxHalfWidth + checkBoxWidth / 1.44);
+        ctx.lineTo(posX - checkBoxHalfWidth + checkBoxWidth / 1.29, centerY - checkBoxHalfWidth + checkBoxWidth / 3.25);
+        ctx.strokeStyle = theme.bgCell;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.lineWidth = 1.9;
+        ctx.stroke();
+        break;
+      }
+    case data_grid_types/* BooleanEmpty */.qF:
+    case false:
+      {
+        ctx.beginPath();
+        (0,data_grid_lib/* roundedRect */.NK)(ctx, posX - checkBoxWidth / 2 + 0.5, centerY - checkBoxWidth / 2 + 0.5, checkBoxWidth - 1, checkBoxWidth - 1, rectBordRadius);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = hovered ? theme.textDark : theme.textMedium;
+        ctx.stroke();
+        break;
+      }
+    case data_grid_types/* BooleanIndeterminate */.sd:
+      {
+        ctx.beginPath();
+        (0,data_grid_lib/* roundedRect */.NK)(ctx, posX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
+        ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(posX - checkBoxWidth / 3, centerY);
+        ctx.lineTo(posX + checkBoxWidth / 3, centerY);
+        ctx.strokeStyle = theme.bgCell;
+        ctx.lineCap = "round";
+        ctx.lineWidth = 1.9;
+        ctx.stroke();
+        break;
+      }
+    default:
+      (0,support/* assertNever */.vE)(checked);
+  }
+}
+;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid/render/data-grid-render.header.js
+
+
+
+
+
+
+
+
+function drawGridHeaders(ctx, effectiveCols, enableGroups, hovered, width, translateX, headerHeight, groupHeaderHeight, dragAndDropState, isResizing, selection, outerTheme, spriteManager, hoverValues, verticalBorder, getGroupDetails, damage, drawHeaderCallback, touchMode) {
+  var _hovered$;
+  const totalHeaderHeight = headerHeight + groupHeaderHeight;
+  if (totalHeaderHeight <= 0) return;
+  ctx.fillStyle = outerTheme.bgHeader;
+  ctx.fillRect(0, 0, width, totalHeaderHeight);
+  const [hCol, hRow] = (_hovered$ = hovered === null || hovered === void 0 ? void 0 : hovered[0]) !== null && _hovered$ !== void 0 ? _hovered$ : [];
+  const font = outerTheme.headerFontFull;
+  ctx.font = font;
+  walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x, _y, clipX) => {
+    var _c$group, _hoverValues$find$hov, _hoverValues$find;
+    if (damage !== undefined && !damage.has([c.sourceIndex, -1])) return;
+    const diff = Math.max(0, clipX - x);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x + diff, groupHeaderHeight, c.width - diff, headerHeight);
+    ctx.clip();
+    const groupTheme = getGroupDetails((_c$group = c.group) !== null && _c$group !== void 0 ? _c$group : "").overrideTheme;
+    const theme = c.themeOverride === undefined && groupTheme === undefined ? outerTheme : (0,styles/* mergeAndRealizeTheme */.yR)(outerTheme, groupTheme, c.themeOverride);
+    if (theme.bgHeader !== outerTheme.bgHeader) {
+      ctx.fillStyle = theme.bgHeader;
+      ctx.fill();
+    }
+    if (theme !== outerTheme) {
+      ctx.font = theme.baseFontFull;
+    }
+    const selected = selection.columns.hasIndex(c.sourceIndex);
+    const noHover = dragAndDropState !== undefined || isResizing;
+    const hoveredBoolean = !noHover && hRow === -1 && hCol === c.sourceIndex;
+    const hover = noHover ? 0 : (_hoverValues$find$hov = (_hoverValues$find = hoverValues.find(s => s.item[0] === c.sourceIndex && s.item[1] === -1)) === null || _hoverValues$find === void 0 ? void 0 : _hoverValues$find.hoverAmount) !== null && _hoverValues$find$hov !== void 0 ? _hoverValues$find$hov : 0;
+    const hasSelectedCell = (selection === null || selection === void 0 ? void 0 : selection.current) !== undefined && selection.current.cell[0] === c.sourceIndex;
+    const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
+    const y = enableGroups ? groupHeaderHeight : 0;
+    const xOffset = c.sourceIndex === 0 ? 0 : 1;
+    if (selected) {
+      ctx.fillStyle = bgFillStyle;
+      ctx.fillRect(x + xOffset, y, c.width - xOffset, headerHeight);
+    } else if (hasSelectedCell || hover > 0) {
+      ctx.beginPath();
+      ctx.rect(x + xOffset, y, c.width - xOffset, headerHeight);
+      if (hasSelectedCell) {
+        ctx.fillStyle = theme.bgHeaderHasFocus;
+        ctx.fill();
+      }
+      if (hover > 0) {
+        ctx.globalAlpha = hover;
+        ctx.fillStyle = theme.bgHeaderHovered;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+    drawHeader(ctx, x, y, c.width, headerHeight, c, selected, theme, hoveredBoolean, hasSelectedCell, hover, spriteManager, drawHeaderCallback, touchMode);
+    ctx.restore();
+  });
+  if (enableGroups) {
+    drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, hovered, outerTheme, spriteManager, hoverValues, verticalBorder, getGroupDetails, damage);
+  }
+}
+function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, hovered, theme, spriteManager, _hoverValues, verticalBorder, getGroupDetails, damage) {
+  var _hovered$2;
+  const xPad = 8;
+  const [hCol, hRow] = (_hovered$2 = hovered === null || hovered === void 0 ? void 0 : hovered[0]) !== null && _hovered$2 !== void 0 ? _hovered$2 : [];
+  let finalX = 0;
+  walkGroups(effectiveCols, width, translateX, groupHeaderHeight, (span, groupName, x, y, w, h) => {
+    var _groupTheme$textGroup;
+    if (damage !== undefined && !damage.hasItemInRectangle({
+      x: span[0],
+      y: -2,
+      width: span[1] - span[0] + 1,
+      height: 1
+    })) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.clip();
+    const group = getGroupDetails(groupName);
+    const groupTheme = (group === null || group === void 0 ? void 0 : group.overrideTheme) === undefined ? theme : (0,styles/* mergeAndRealizeTheme */.yR)(theme, group.overrideTheme);
+    const isHovered = hRow === -2 && hCol !== undefined && hCol >= span[0] && hCol <= span[1];
+    const fillColor = isHovered ? groupTheme.bgHeaderHovered : groupTheme.bgHeader;
+    if (fillColor !== theme.bgHeader) {
+      ctx.fillStyle = fillColor;
+      ctx.fill();
+    }
+    ctx.fillStyle = (_groupTheme$textGroup = groupTheme.textGroupHeader) !== null && _groupTheme$textGroup !== void 0 ? _groupTheme$textGroup : groupTheme.textHeader;
+    if (group !== undefined) {
+      let drawX = x;
+      if (group.icon !== undefined) {
+        spriteManager.drawSprite(group.icon, "normal", ctx, drawX + xPad, (groupHeaderHeight - 20) / 2, 20, groupTheme);
+        drawX += 26;
+      }
+      ctx.fillText(group.name, drawX + xPad, groupHeaderHeight / 2 + (0,data_grid_lib/* getMiddleCenterBias */.aX)(ctx, theme.headerFontFull));
+      if (group.actions !== undefined && isHovered) {
+        var _hovered$3;
+        const actionBoxes = getActionBoundsForGroup({
+          x,
+          y,
+          width: w,
+          height: h
+        }, group.actions);
+        ctx.beginPath();
+        const fadeStartX = actionBoxes[0].x - 10;
+        const fadeWidth = x + w - fadeStartX;
+        ctx.rect(fadeStartX, 0, fadeWidth, groupHeaderHeight);
+        const grad = ctx.createLinearGradient(fadeStartX, 0, fadeStartX + fadeWidth, 0);
+        const trans = (0,color_parser/* withAlpha */.fG)(fillColor, 0);
+        grad.addColorStop(0, trans);
+        grad.addColorStop(10 / fadeWidth, fillColor);
+        grad.addColorStop(1, fillColor);
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.globalAlpha = 0.6;
+        const [mouseX, mouseY] = (_hovered$3 = hovered === null || hovered === void 0 ? void 0 : hovered[1]) !== null && _hovered$3 !== void 0 ? _hovered$3 : [-1, -1];
+        for (let i = 0; i < group.actions.length; i++) {
+          const action = group.actions[i];
+          const box = actionBoxes[i];
+          const actionHovered = pointInRect(box, mouseX + x, mouseY);
+          if (actionHovered) {
+            ctx.globalAlpha = 1;
+          }
+          spriteManager.drawSprite(action.icon, "normal", ctx, box.x + box.width / 2 - 10, box.y + box.height / 2 - 10, 20, groupTheme);
+          if (actionHovered) {
+            ctx.globalAlpha = 0.6;
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+    if (x !== 0 && verticalBorder(span[0])) {
+      ctx.beginPath();
+      ctx.moveTo(x + 0.5, 0);
+      ctx.lineTo(x + 0.5, groupHeaderHeight);
+      ctx.strokeStyle = theme.borderColor;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    ctx.restore();
+    finalX = x + w;
+  });
+  ctx.beginPath();
+  ctx.moveTo(finalX + 0.5, 0);
+  ctx.lineTo(finalX + 0.5, groupHeaderHeight);
+  ctx.moveTo(0, groupHeaderHeight + 0.5);
+  ctx.lineTo(width, groupHeaderHeight + 0.5);
+  ctx.strokeStyle = theme.borderColor;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+const menuButtonSize = 30;
+function getHeaderMenuBounds(x, y, width, height, isRtl) {
+  if (isRtl) return {
+    x,
+    y,
+    width: menuButtonSize,
+    height: Math.min(menuButtonSize, height)
+  };
+  return {
+    x: x + width - menuButtonSize,
+    y: Math.max(y, y + height / 2 - menuButtonSize / 2),
+    width: menuButtonSize,
+    height: Math.min(menuButtonSize, height)
+  };
+}
+function getActionBoundsForGroup(box, actions) {
+  const result = [];
+  let x = box.x + box.width - 26 * actions.length;
+  const y = box.y + box.height / 2 - 13;
+  const height = 26;
+  const width = 26;
+  for (let i = 0; i < actions.length; i++) {
+    result.push({
+      x,
+      y,
+      width,
+      height
+    });
+    x += 26;
+  }
+  return result;
+}
+function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, isCheckboxHeader, menuBounds) {
+  if (isCheckboxHeader) {
+    let checked = undefined;
+    if (c.title === data_grid_types/* headerCellCheckedMarker */.qT) checked = true;
+    if (c.title === data_grid_types/* headerCellUnheckedMarker */.YK) checked = false;
+    if (checked !== true) {
+      ctx.globalAlpha = hoverAmount;
+    }
+    drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined, 18);
+    if (checked !== true) {
+      ctx.globalAlpha = 1;
+    }
+    return;
+  }
+  const xPad = theme.cellHorizontalPadding;
+  const fillStyle = selected ? theme.textHeaderSelected : theme.textHeader;
+  const shouldDrawMenu = c.hasMenu === true && (isHovered || touchMode && selected);
+  const dirScalar = isRtl ? -1 : 1;
+  let drawX = isRtl ? x + width - xPad : x + xPad;
+  if (c.icon !== undefined) {
+    let variant = selected ? "selected" : "normal";
+    if (c.style === "highlight") {
+      variant = selected ? "selected" : "special";
+    }
+    const headerSize = theme.headerIconSize;
+    spriteManager.drawSprite(c.icon, variant, ctx, isRtl ? drawX - headerSize : drawX, y + (height - headerSize) / 2, headerSize, theme);
+    if (c.overlayIcon !== undefined) {
+      spriteManager.drawSprite(c.overlayIcon, selected ? "selected" : "special", ctx, isRtl ? drawX - headerSize + 9 : drawX + 9, y + ((height - 18) / 2 + 6), 18, theme);
+    }
+    drawX += Math.ceil(headerSize * 1.3) * dirScalar;
+  }
+  if (shouldDrawMenu && c.hasMenu === true && width > 35) {
+    const fadeWidth = 35;
+    const fadeStart = isRtl ? fadeWidth : width - fadeWidth;
+    const fadeEnd = isRtl ? fadeWidth * 0.7 : width - fadeWidth * 0.7;
+    const fadeStartPercent = fadeStart / width;
+    const fadeEndPercent = fadeEnd / width;
+    const grad = ctx.createLinearGradient(x, 0, x + width, 0);
+    const trans = (0,color_parser/* withAlpha */.fG)(fillStyle, 0);
+    grad.addColorStop(isRtl ? 1 : 0, fillStyle);
+    grad.addColorStop(fadeStartPercent, fillStyle);
+    grad.addColorStop(fadeEndPercent, trans);
+    grad.addColorStop(isRtl ? 0 : 1, trans);
+    ctx.fillStyle = grad;
+  } else {
+    ctx.fillStyle = fillStyle;
+  }
+  if (isRtl) {
+    ctx.textAlign = "right";
+  }
+  ctx.fillText(c.title, drawX, y + height / 2 + (0,data_grid_lib/* getMiddleCenterBias */.aX)(ctx, theme.headerFontFull));
+  if (isRtl) {
+    ctx.textAlign = "left";
+  }
+  if (shouldDrawMenu && c.hasMenu === true) {
+    if (c.menuIcon === undefined || c.menuIcon === data_grid_types/* GridColumnMenuIcon.Triangle */.pN.Triangle) {
+      ctx.beginPath();
+      const triangleX = menuBounds.x + menuBounds.width / 2 - 5.5;
+      const triangleY = menuBounds.y + menuBounds.height / 2 - 3;
+      (0,data_grid_lib/* roundedPoly */.zu)(ctx, [{
+        x: triangleX,
+        y: triangleY
+      }, {
+        x: triangleX + 11,
+        y: triangleY
+      }, {
+        x: triangleX + 5.5,
+        y: triangleY + 6
+      }], 1);
+      ctx.fillStyle = fillStyle;
+      ctx.fill();
+    } else if (c.menuIcon === data_grid_types/* GridColumnMenuIcon.Dots */.pN.Dots) {
+      ctx.beginPath();
+      const dotsX = menuBounds.x + menuBounds.width / 2;
+      const dotsY = menuBounds.y + menuBounds.height / 2;
+      (0,data_grid_lib/* drawMenuDots */.Ld)(ctx, dotsX, dotsY);
+      ctx.fillStyle = fillStyle;
+      ctx.fill();
+    } else {
+      const iconX = menuBounds.x + (menuBounds.width - theme.headerIconSize) / 2;
+      const iconY = menuBounds.y + (menuBounds.height - theme.headerIconSize) / 2;
+      spriteManager.drawSprite(c.menuIcon, "normal", ctx, iconX, iconY, theme.headerIconSize, theme);
+    }
+  }
+}
+function drawHeader(ctx, x, y, width, height, c, selected, theme, isHovered, hasSelectedCell, hoverAmount, spriteManager, drawHeaderCallback, touchMode) {
+  const isCheckboxHeader = c.title.startsWith(data_grid_types/* headerCellCheckboxPrefix */.Gf);
+  const isRtl = (0,utils/* direction */.o7)(c.title) === "rtl";
+  const menuBounds = getHeaderMenuBounds(x, y, width, height, isRtl);
+  if (drawHeaderCallback !== undefined) {
+    let passCol = c;
+    if (isCheckboxHeader) {
+      passCol = {
+        ...c,
+        title: ""
+      };
+    }
+    drawHeaderCallback({
+      ctx,
+      theme,
+      rect: {
+        x,
+        y,
+        width,
+        height
+      },
+      column: passCol,
+      columnIndex: passCol.sourceIndex,
+      isSelected: selected,
+      hoverAmount,
+      isHovered,
+      hasSelectedCell,
+      spriteManager,
+      menuBounds
+    }, () => drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, isCheckboxHeader, menuBounds));
+  } else {
+    drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, isCheckboxHeader, menuBounds);
+  }
+}
+// EXTERNAL MODULE: ./node_modules/lodash/groupBy.js
+var groupBy = __webpack_require__("./node_modules/lodash/groupBy.js");
+var groupBy_default = /*#__PURE__*/__webpack_require__.n(groupBy);
+;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid/render/data-grid-render.lines.js
+
+
+
+
+
+
+
+
+
 function drawBlanks(ctx, effectiveColumns, allColumns, width, height, totalHeaderHeight, translateX, translateY, cellYOffset, rows, getRowHeight, getRowTheme, selectedRows, disabledRows, freezeTrailingRows, hasAppendRow, drawRegions, damage, theme) {
   if (damage !== undefined || effectiveColumns[effectiveColumns.length - 1] !== allColumns[effectiveColumns.length - 1]) return;
+  const skipPoint = getSkipPoint(drawRegions);
   walkColumns(effectiveColumns, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, colDrawY, clipX, startRow) => {
     if (c !== effectiveColumns[effectiveColumns.length - 1]) return;
     drawX += c.width;
@@ -1906,7 +1747,7 @@ function drawBlanks(ctx, effectiveColumns, allColumns, width, height, totalHeade
     ctx.beginPath();
     ctx.rect(x, totalHeaderHeight + 1, 10000, height - totalHeaderHeight - 1);
     ctx.clip();
-    walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, (drawY, row, rh, isSticky) => {
+    walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, skipPoint, (drawY, row, rh, isSticky) => {
       if (!isSticky && drawRegions.length > 0 && !drawRegions.some(dr => intersectRect(drawX, drawY, 10000, rh, dr.x, dr.y, dr.width, dr.height))) {
         return;
       }
@@ -1932,19 +1773,19 @@ function drawBlanks(ctx, effectiveColumns, allColumns, width, height, totalHeade
   });
 }
 function overdrawStickyBoundaries(ctx, effectiveCols, width, height, freezeTrailingRows, rows, verticalBorder, getRowHeight, theme) {
-  var _theme$horizontalBord2;
+  var _theme$horizontalBord;
   let drawFreezeBorder = false;
   for (const c of effectiveCols) {
     if (c.sticky) continue;
     drawFreezeBorder = verticalBorder(c.sourceIndex);
     break;
   }
-  const hColor = (_theme$horizontalBord2 = theme.horizontalBorderColor) !== null && _theme$horizontalBord2 !== void 0 ? _theme$horizontalBord2 : theme.borderColor;
+  const hColor = (_theme$horizontalBord = theme.horizontalBorderColor) !== null && _theme$horizontalBord !== void 0 ? _theme$horizontalBord : theme.borderColor;
   const vColor = theme.borderColor;
   const drawX = drawFreezeBorder ? (0,data_grid_lib/* getStickyWidth */.G6)(effectiveCols) : 0;
   let vStroke;
   if (drawX !== 0) {
-    vStroke = (0,color_parser/* blend */.NH)(vColor, theme.bgCell);
+    vStroke = (0,color_parser/* blendCache */.mv)(vColor, theme.bgCell);
     ctx.beginPath();
     ctx.moveTo(drawX + 0.5, 0);
     ctx.lineTo(drawX + 0.5, height);
@@ -1952,7 +1793,7 @@ function overdrawStickyBoundaries(ctx, effectiveCols, width, height, freezeTrail
     ctx.stroke();
   }
   if (freezeTrailingRows > 0) {
-    const hStroke = vColor === hColor && vStroke !== undefined ? vStroke : (0,color_parser/* blend */.NH)(hColor, theme.bgCell);
+    const hStroke = vColor === hColor && vStroke !== undefined ? vStroke : (0,color_parser/* blendCache */.mv)(hColor, theme.bgCell);
     const h = (0,data_grid_lib/* getFreezeTrailingHeight */.YN)(rows, freezeTrailingRows, getRowHeight);
     ctx.beginPath();
     ctx.moveTo(0, height - h + 0.5);
@@ -1961,6 +1802,283 @@ function overdrawStickyBoundaries(ctx, effectiveCols, width, height, freezeTrail
     ctx.stroke();
   }
 }
+function drawGridLines(ctx, effectiveCols, cellYOffset, translateX, translateY, width, height, drawRegions, spans, groupHeaderHeight, totalHeaderHeight, getRowHeight, getRowThemeOverride, verticalBorder, freezeTrailingRows, rows, theme) {
+  var _theme$horizontalBord2;
+  let verticalOnly = arguments.length > 17 && arguments[17] !== undefined ? arguments[17] : false;
+  if (spans !== undefined) {
+    ctx.beginPath();
+    ctx.save();
+    ctx.rect(0, 0, width, height);
+    for (const span of spans) {
+      ctx.rect(span.x + 1, span.y + 1, span.width - 1, span.height - 1);
+    }
+    ctx.clip("evenodd");
+  }
+  const hColor = (_theme$horizontalBord2 = theme.horizontalBorderColor) !== null && _theme$horizontalBord2 !== void 0 ? _theme$horizontalBord2 : theme.borderColor;
+  const vColor = theme.borderColor;
+  let minX = 0;
+  let maxX = width;
+  let minY = 0;
+  let maxY = height;
+  if (drawRegions !== undefined && drawRegions.length > 0) {
+    minX = Number.MAX_SAFE_INTEGER;
+    minY = Number.MAX_SAFE_INTEGER;
+    maxX = Number.MIN_SAFE_INTEGER;
+    maxY = Number.MIN_SAFE_INTEGER;
+    for (const r of drawRegions) {
+      minX = Math.min(minX, r.x - 1);
+      maxX = Math.max(maxX, r.x + r.width + 1);
+      minY = Math.min(minY, r.y - 1);
+      maxY = Math.max(maxY, r.y + r.height + 1);
+    }
+  }
+  const toDraw = [];
+  ctx.beginPath();
+  let x = 0.5;
+  for (let index = 0; index < effectiveCols.length; index++) {
+    const c = effectiveCols[index];
+    if (c.width === 0) continue;
+    x += c.width;
+    const tx = c.sticky ? x : x + translateX;
+    if (tx >= minX && tx <= maxX && verticalBorder(index + 1)) {
+      toDraw.push({
+        x1: tx,
+        y1: Math.max(groupHeaderHeight, minY),
+        x2: tx,
+        y2: Math.min(height, maxY),
+        color: vColor
+      });
+    }
+  }
+  let freezeY = height + 0.5;
+  for (let i = rows - freezeTrailingRows; i < rows; i++) {
+    const rh = getRowHeight(i);
+    freezeY -= rh;
+    toDraw.push({
+      x1: minX,
+      y1: freezeY,
+      x2: maxX,
+      y2: freezeY,
+      color: hColor
+    });
+  }
+  if (verticalOnly !== true) {
+    let y = totalHeaderHeight + 0.5;
+    let row = cellYOffset;
+    const target = freezeY;
+    while (y + translateY < target) {
+      const ty = y + translateY;
+      if (ty >= minY && ty <= maxY - 1) {
+        var _ref, _rowTheme$horizontalB;
+        const rowTheme = getRowThemeOverride === null || getRowThemeOverride === void 0 ? void 0 : getRowThemeOverride(row);
+        toDraw.push({
+          x1: minX,
+          y1: ty,
+          x2: maxX,
+          y2: ty,
+          color: (_ref = (_rowTheme$horizontalB = rowTheme === null || rowTheme === void 0 ? void 0 : rowTheme.horizontalBorderColor) !== null && _rowTheme$horizontalB !== void 0 ? _rowTheme$horizontalB : rowTheme === null || rowTheme === void 0 ? void 0 : rowTheme.borderColor) !== null && _ref !== void 0 ? _ref : hColor
+        });
+      }
+      y += getRowHeight(row);
+      row++;
+    }
+  }
+  const groups = groupBy_default()(toDraw, line => line.color);
+  for (const g of Object.keys(groups)) {
+    ctx.strokeStyle = g;
+    for (const line of groups[g]) {
+      ctx.moveTo(line.x1, line.y1);
+      ctx.lineTo(line.x2, line.y2);
+    }
+    ctx.stroke();
+    ctx.beginPath();
+  }
+  if (spans !== undefined) {
+    ctx.restore();
+  }
+}
+;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid/render/data-grid-render.blit.js
+
+
+
+
+function blitLastFrame(ctx, blitSource, blitSourceScroll, targetScroll, last, cellXOffset, cellYOffset, translateX, translateY, freezeTrailingRows, width, height, rows, totalHeaderHeight, dpr, mappedColumns, effectiveCols, getRowHeight, doubleBuffer) {
+  const drawRegions = [];
+  ctx.imageSmoothingEnabled = false;
+  const minY = Math.min(last.cellYOffset, cellYOffset);
+  const maxY = Math.max(last.cellYOffset, cellYOffset);
+  let deltaY = 0;
+  if (typeof getRowHeight === "number") {
+    deltaY += (maxY - minY) * getRowHeight;
+  } else {
+    for (let i = minY; i < maxY; i++) {
+      deltaY += getRowHeight(i);
+    }
+  }
+  if (cellYOffset > last.cellYOffset) {
+    deltaY = -deltaY;
+  }
+  deltaY += translateY - last.translateY;
+  const minX = Math.min(last.cellXOffset, cellXOffset);
+  const maxX = Math.max(last.cellXOffset, cellXOffset);
+  let deltaX = 0;
+  for (let i = minX; i < maxX; i++) {
+    deltaX += mappedColumns[i].width;
+  }
+  if (cellXOffset > last.cellXOffset) {
+    deltaX = -deltaX;
+  }
+  deltaX += translateX - last.translateX;
+  let stickyWidth = (0,data_grid_lib/* getStickyWidth */.G6)(effectiveCols);
+  if (stickyWidth > 0) stickyWidth++;
+  if (deltaX !== 0 && deltaY !== 0) {
+    return {
+      regions: []
+    };
+  }
+  const freezeTrailingRowsHeight = freezeTrailingRows > 0 ? (0,data_grid_lib/* getFreezeTrailingHeight */.YN)(rows, freezeTrailingRows, getRowHeight) : 0;
+  const blitWidth = width - stickyWidth - Math.abs(deltaX);
+  const blitHeight = height - totalHeaderHeight - freezeTrailingRowsHeight - Math.abs(deltaY) - 1;
+  if (blitWidth > 150 && blitHeight > 150) {
+    const args = {
+      sx: 0,
+      sy: 0,
+      sw: width * dpr,
+      sh: height * dpr,
+      dx: 0,
+      dy: 0,
+      dw: width * dpr,
+      dh: height * dpr
+    };
+    if (deltaY > 0) {
+      args.sy = (totalHeaderHeight + 1) * dpr;
+      args.sh = blitHeight * dpr;
+      args.dy = (deltaY + totalHeaderHeight + 1) * dpr;
+      args.dh = blitHeight * dpr;
+      drawRegions.push({
+        x: 0,
+        y: totalHeaderHeight,
+        width: width,
+        height: deltaY + 1
+      });
+    } else if (deltaY < 0) {
+      args.sy = (-deltaY + totalHeaderHeight + 1) * dpr;
+      args.sh = blitHeight * dpr;
+      args.dy = (totalHeaderHeight + 1) * dpr;
+      args.dh = blitHeight * dpr;
+      drawRegions.push({
+        x: 0,
+        y: height + deltaY - freezeTrailingRowsHeight,
+        width: width,
+        height: -deltaY + freezeTrailingRowsHeight
+      });
+    }
+    if (deltaX > 0) {
+      args.sx = stickyWidth * dpr;
+      args.sw = blitWidth * dpr;
+      args.dx = (deltaX + stickyWidth) * dpr;
+      args.dw = blitWidth * dpr;
+      drawRegions.push({
+        x: stickyWidth - 1,
+        y: 0,
+        width: deltaX + 2,
+        height: height
+      });
+    } else if (deltaX < 0) {
+      args.sx = (stickyWidth - deltaX) * dpr;
+      args.sw = blitWidth * dpr;
+      args.dx = stickyWidth * dpr;
+      args.dw = blitWidth * dpr;
+      drawRegions.push({
+        x: width + deltaX,
+        y: 0,
+        width: -deltaX,
+        height: height
+      });
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (doubleBuffer) {
+      if (stickyWidth > 0 && deltaX !== 0 && deltaY === 0 && (targetScroll === undefined || (blitSourceScroll === null || blitSourceScroll === void 0 ? void 0 : blitSourceScroll[1]) !== false)) {
+        const w = stickyWidth * dpr;
+        const h = height * dpr;
+        ctx.drawImage(blitSource, 0, 0, w, h, 0, 0, w, h);
+      }
+      if (freezeTrailingRowsHeight > 0 && deltaX === 0 && deltaY !== 0 && (targetScroll === undefined || (blitSourceScroll === null || blitSourceScroll === void 0 ? void 0 : blitSourceScroll[0]) !== false)) {
+        const y = (height - freezeTrailingRowsHeight) * dpr;
+        const w = width * dpr;
+        const h = freezeTrailingRowsHeight * dpr;
+        ctx.drawImage(blitSource, 0, y, w, h, 0, y, w, h);
+      }
+    }
+    ctx.drawImage(blitSource, args.sx, args.sy, args.sw, args.sh, args.dx, args.dy, args.dw, args.dh);
+    ctx.scale(dpr, dpr);
+  }
+  ctx.imageSmoothingEnabled = true;
+  return {
+    regions: drawRegions
+  };
+}
+function blitResizedCol(last, cellXOffset, cellYOffset, translateX, translateY, width, height, totalHeaderHeight, effectiveCols, resizedIndex) {
+  const drawRegions = [];
+  if (cellXOffset !== last.cellXOffset || cellYOffset !== last.cellYOffset || translateX !== last.translateX || translateY !== last.translateY) {
+    return drawRegions;
+  }
+  walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, _drawY, clipX) => {
+    if (c.sourceIndex === resizedIndex) {
+      const x = Math.max(drawX, clipX) + 1;
+      drawRegions.push({
+        x,
+        y: 0,
+        width: width - x,
+        height
+      });
+      return true;
+    }
+  });
+  return drawRegions;
+}
+function computeCanBlit(current, last) {
+  if (last === undefined) return false;
+  if (current.width !== last.width || current.height !== last.height || current.theme !== last.theme || current.headerHeight !== last.headerHeight || current.rowHeight !== last.rowHeight || current.rows !== last.rows || current.freezeColumns !== last.freezeColumns || current.getRowThemeOverride !== last.getRowThemeOverride || current.isFocused !== last.isFocused || current.isResizing !== last.isResizing || current.verticalBorder !== last.verticalBorder || current.getCellContent !== last.getCellContent || current.highlightRegions !== last.highlightRegions || current.selection !== last.selection || current.dragAndDropState !== last.dragAndDropState || current.prelightCells !== last.prelightCells || current.touchMode !== last.touchMode || current.maxScaleFactor !== last.maxScaleFactor) {
+    return false;
+  }
+  if (current.mappedColumns !== last.mappedColumns) {
+    if (current.mappedColumns.length > 100 || current.mappedColumns.length !== last.mappedColumns.length) {
+      return false;
+    }
+    let resized;
+    for (let i = 0; i < current.mappedColumns.length; i++) {
+      const curCol = current.mappedColumns[i];
+      const lastCol = last.mappedColumns[i];
+      if ((0,support/* deepEqual */.vZ)(curCol, lastCol)) continue;
+      if (resized !== undefined) return false;
+      if (curCol.width === lastCol.width) return false;
+      const {
+        width,
+        ...curRest
+      } = curCol;
+      const {
+        width: lastWidth,
+        ...lastRest
+      } = lastCol;
+      if (!(0,support/* deepEqual */.vZ)(curRest, lastRest)) return false;
+      resized = i;
+    }
+    if (resized === undefined) {
+      return true;
+    }
+    return resized;
+  }
+  return true;
+}
+;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid/render/data-grid.render.rings.js
+
+
+
+
+
+
+
 function drawHighlightRings(ctx, width, height, cellXOffset, cellYOffset, translateX, translateY, mappedColumns, freezeColumns, headerHeight, groupHeaderHeight, rowHeight, freezeTrailingRows, rows, allHighlightRegions, theme) {
   const highlightRegions = allHighlightRegions === null || allHighlightRegions === void 0 ? void 0 : allHighlightRegions.filter(x => x.style !== "no-outline");
   if (highlightRegions === undefined || highlightRegions.length === 0) return undefined;
@@ -2065,7 +2183,7 @@ function drawFocusRing(ctx, width, height, cellYOffset, translateX, translateY, 
     if (!isFillHandleCol && (isBeforeTarget || isAfterTarget)) {
       return;
     }
-    walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, (drawY, row, rh) => {
+    walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, undefined, (drawY, row, rh) => {
       if (row !== targetRow && row !== fillHandleRow) return;
       let cellX = drawX;
       let cellWidth = col.width;
@@ -2128,10 +2246,46 @@ function drawFocusRing(ctx, width, height, cellYOffset, translateX, translateY, 
   result();
   return result;
 }
+;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid/render/data-grid-render.js
+
+
+
+
+
+
+
+
+
+
+
+function clipHeaderDamage(ctx, effectiveColumns, width, groupHeaderHeight, totalHeaderHeight, translateX, translateY, cellYOffset, damage) {
+  if (damage === undefined || damage.size === 0) return;
+  ctx.beginPath();
+  walkGroups(effectiveColumns, width, translateX, groupHeaderHeight, (span, _group, x, y, w, h) => {
+    const hasItemInSpan = damage.hasItemInRectangle({
+      x: span[0],
+      y: -2,
+      width: span[1] - span[0] + 1,
+      height: 1
+    });
+    if (hasItemInSpan) {
+      ctx.rect(x, y, w, h);
+    }
+  });
+  walkColumns(effectiveColumns, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, _colDrawY, clipX) => {
+    const diff = Math.max(0, clipX - drawX);
+    const finalX = drawX + diff + 1;
+    const finalWidth = c.width - diff - 1;
+    if (damage.has([c.sourceIndex, -1])) {
+      ctx.rect(finalX, groupHeaderHeight, finalWidth, totalHeaderHeight - groupHeaderHeight);
+    }
+  });
+  ctx.clip();
+}
 function getLastRow(effectiveColumns, height, totalHeaderHeight, translateX, translateY, cellYOffset, rows, getRowHeight, freezeTrailingRows, hasAppendRow) {
   let result = 0;
   walkColumns(effectiveColumns, cellYOffset, translateX, translateY, totalHeaderHeight, (_c, __drawX, colDrawY, _clipX, startRow) => {
-    walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, (_drawY, row, _rh, isSticky) => {
+    walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, undefined, (_drawY, row, _rh, isSticky) => {
       if (!isSticky) {
         result = Math.max(row, result);
       }
@@ -2140,45 +2294,11 @@ function getLastRow(effectiveColumns, height, totalHeaderHeight, translateX, tra
   });
   return result;
 }
-function computeCanBlit(current, last) {
-  if (last === undefined) return false;
-  if (current.width !== last.width || current.height !== last.height || current.theme !== last.theme || current.headerHeight !== last.headerHeight || current.rowHeight !== last.rowHeight || current.rows !== last.rows || current.freezeColumns !== last.freezeColumns || current.getRowThemeOverride !== last.getRowThemeOverride || current.isFocused !== last.isFocused || current.isResizing !== last.isResizing || current.verticalBorder !== last.verticalBorder || current.getCellContent !== last.getCellContent || current.highlightRegions !== last.highlightRegions || current.selection !== last.selection || current.dragAndDropState !== last.dragAndDropState || current.prelightCells !== last.prelightCells || current.touchMode !== last.touchMode || current.maxScaleFactor !== last.maxScaleFactor) {
-    return false;
-  }
-  if (current.mappedColumns !== last.mappedColumns) {
-    if (current.mappedColumns.length > 100 || current.mappedColumns.length !== last.mappedColumns.length) {
-      return false;
-    }
-    let resized;
-    for (let i = 0; i < current.mappedColumns.length; i++) {
-      const curCol = current.mappedColumns[i];
-      const lastCol = last.mappedColumns[i];
-      if ((0,support/* deepEqual */.vZ)(curCol, lastCol)) continue;
-      if (resized !== undefined) return false;
-      if (curCol.width === lastCol.width) return false;
-      const {
-        width,
-        ...curRest
-      } = curCol;
-      const {
-        width: lastWidth,
-        ...lastRest
-      } = lastCol;
-      if (!(0,support/* deepEqual */.vZ)(curRest, lastRest)) return false;
-      resized = i;
-    }
-    if (resized === undefined) {
-      return true;
-    }
-    return resized;
-  }
-  return true;
-}
 function drawGrid(arg, lastArg) {
   var _window$devicePixelRa, _selection$current;
   const {
-    canvas,
-    headerCanvas,
+    canvasCtx,
+    headerCanvasCtx,
     width,
     height,
     cellXOffset,
@@ -2224,8 +2344,8 @@ function drawGrid(arg, lastArg) {
     renderStateProvider,
     getCellRenderer,
     renderStrategy,
-    bufferA,
-    bufferB,
+    bufferACtx,
+    bufferBCtx,
     damage,
     minimumCellWidth
   } = arg;
@@ -2233,13 +2353,14 @@ function drawGrid(arg, lastArg) {
   const doubleBuffer = renderStrategy === "double-buffer";
   const dpr = Math.min(maxScaleFactor, Math.ceil((_window$devicePixelRa = window.devicePixelRatio) !== null && _window$devicePixelRa !== void 0 ? _window$devicePixelRa : 1));
   const canBlit = renderStrategy !== "direct" && computeCanBlit(arg, lastArg);
+  const canvas = canvasCtx.canvas;
   if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
   }
-  const overlayCanvas = headerCanvas;
+  const overlayCanvas = headerCanvasCtx.canvas;
   const totalHeaderHeight = enableGroups ? groupHeaderHeight + headerHeight : headerHeight;
   const overlayHeight = totalHeaderHeight + 1;
   if (overlayCanvas.width !== width * dpr || overlayCanvas.height !== overlayHeight * dpr) {
@@ -2248,6 +2369,8 @@ function drawGrid(arg, lastArg) {
     overlayCanvas.style.width = width + "px";
     overlayCanvas.style.height = overlayHeight + "px";
   }
+  const bufferA = bufferACtx.canvas;
+  const bufferB = bufferBCtx.canvas;
   if (doubleBuffer && (bufferA.width !== width * dpr || bufferA.height !== height * dpr)) {
     bufferA.width = width * dpr;
     bufferA.height = height * dpr;
@@ -2262,26 +2385,19 @@ function drawGrid(arg, lastArg) {
   if (canBlit === true && cellXOffset === (last === null || last === void 0 ? void 0 : last.cellXOffset) && cellYOffset === (last === null || last === void 0 ? void 0 : last.cellYOffset) && translateX === (last === null || last === void 0 ? void 0 : last.translateX) && translateY === (last === null || last === void 0 ? void 0 : last.translateY)) return;
   let mainCtx = null;
   if (doubleBuffer) {
-    mainCtx = canvas.getContext("2d", {
-      alpha: false
-    });
+    mainCtx = canvasCtx;
   }
-  const overlayCtx = overlayCanvas.getContext("2d", {
-    alpha: false
-  });
-  let targetBuffer;
+  const overlayCtx = headerCanvasCtx;
+  let targetCtx;
   if (!doubleBuffer) {
-    targetBuffer = canvas;
+    targetCtx = canvasCtx;
   } else if (damage !== undefined) {
-    targetBuffer = (last === null || last === void 0 ? void 0 : last.lastBuffer) === "b" ? bufferB : bufferA;
+    targetCtx = (last === null || last === void 0 ? void 0 : last.lastBuffer) === "b" ? bufferBCtx : bufferACtx;
   } else {
-    targetBuffer = (last === null || last === void 0 ? void 0 : last.lastBuffer) === "b" ? bufferA : bufferB;
+    targetCtx = (last === null || last === void 0 ? void 0 : last.lastBuffer) === "b" ? bufferACtx : bufferBCtx;
   }
-  const targetCtx = targetBuffer.getContext("2d", {
-    alpha: false
-  });
+  const targetBuffer = targetCtx.canvas;
   const blitSource = doubleBuffer ? targetBuffer === bufferA ? bufferB : bufferA : canvas;
-  if (overlayCtx === null || targetCtx === null) return;
   const getRowHeight = typeof rowHeight === "number" ? () => rowHeight : rowHeight;
   overlayCtx.save();
   targetCtx.save();
@@ -2306,13 +2422,13 @@ function drawGrid(arg, lastArg) {
     }
   }
   const drawHeaderTexture = () => {
-    var _ref2, _theme$headerBottomBo;
+    var _ref, _theme$headerBottomBo;
     drawGridHeaders(overlayCtx, effectiveCols, enableGroups, hoverInfo, width, translateX, headerHeight, groupHeaderHeight, dragAndDropState, isResizing, selection, theme, spriteManager, hoverValues, verticalBorder, getGroupDetails, damage, drawHeaderCallback, touchMode);
     drawGridLines(overlayCtx, effectiveCols, cellYOffset, translateX, translateY, width, height, undefined, undefined, groupHeaderHeight, totalHeaderHeight, getRowHeight, getRowThemeOverride, verticalBorder, freezeTrailingRows, rows, theme, true);
     overlayCtx.beginPath();
     overlayCtx.moveTo(0, overlayHeight - 0.5);
     overlayCtx.lineTo(width, overlayHeight - 0.5);
-    overlayCtx.strokeStyle = (0,color_parser/* blend */.NH)((_ref2 = (_theme$headerBottomBo = theme.headerBottomBorderColor) !== null && _theme$headerBottomBo !== void 0 ? _theme$headerBottomBo : theme.horizontalBorderColor) !== null && _ref2 !== void 0 ? _ref2 : theme.borderColor, theme.bgHeader);
+    overlayCtx.strokeStyle = (0,color_parser/* blend */.NH)((_ref = (_theme$headerBottomBo = theme.headerBottomBorderColor) !== null && _theme$headerBottomBo !== void 0 ? _theme$headerBottomBo : theme.horizontalBorderColor) !== null && _ref !== void 0 ? _ref : theme.borderColor, theme.bgHeader);
     overlayCtx.stroke();
     if (mustDrawHighlightRingsOnHeader) {
       drawHighlightRings(overlayCtx, width, height, cellXOffset, cellYOffset, translateX, translateY, mappedColumns, freezeColumns, headerHeight, groupHeaderHeight, rowHeight, freezeTrailingRows, rows, highlightRegions, theme);
@@ -2445,67 +2561,6 @@ function drawGrid(arg, lastArg) {
   };
   targetCtx.restore();
   overlayCtx.restore();
-}
-function walkRowsInCol(startRow, drawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, cb) {
-  let y = drawY;
-  let row = startRow;
-  const rowEnd = rows - freezeTrailingRows;
-  while (y < height && row < rowEnd) {
-    const rh = getRowHeight(row);
-    if (cb(y, row, rh, false, hasAppendRow && row === rows - 1) === true) {
-      break;
-    }
-    y += rh;
-    row++;
-  }
-  y = height;
-  for (let fr = 0; fr < freezeTrailingRows; fr++) {
-    row = rows - 1 - fr;
-    const rh = getRowHeight(row);
-    y -= rh;
-    cb(y, row, rh, true, hasAppendRow && row === rows - 1);
-  }
-}
-function walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, cb) {
-  let x = 0;
-  let clipX = 0;
-  const drawY = totalHeaderHeight + translateY;
-  for (const c of effectiveCols) {
-    const drawX = c.sticky ? clipX : x + translateX;
-    if (cb(c, drawX, drawY, clipX, cellYOffset) === true) {
-      break;
-    }
-    x += c.width;
-    clipX += c.sticky ? c.width : 0;
-  }
-}
-function walkGroups(effectiveCols, width, translateX, groupHeaderHeight, cb) {
-  let x = 0;
-  let clipX = 0;
-  for (let index = 0; index < effectiveCols.length; index++) {
-    var _startCol$group;
-    const startCol = effectiveCols[index];
-    let end = index + 1;
-    let boxWidth = startCol.width;
-    if (startCol.sticky) {
-      clipX += boxWidth;
-    }
-    while (end < effectiveCols.length && (0,data_grid_lib/* isGroupEqual */.PU)(effectiveCols[end].group, startCol.group) && effectiveCols[end].sticky === effectiveCols[index].sticky) {
-      const endCol = effectiveCols[end];
-      boxWidth += endCol.width;
-      end++;
-      index++;
-      if (endCol.sticky) {
-        clipX += endCol.width;
-      }
-    }
-    const t = startCol.sticky ? 0 : translateX;
-    const localX = x + t;
-    const delta = startCol.sticky ? 0 : Math.max(0, clipX - localX);
-    const w = Math.min(boxWidth - delta, width - (localX + delta));
-    cb([startCol.sourceIndex, effectiveCols[end - 1].sourceIndex], (_startCol$group = startCol.group) !== null && _startCol$group !== void 0 ? _startCol$group : "", localX + delta, 0, w, groupHeaderHeight);
-    x += boxWidth;
-  }
 }
 ;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid/animation-manager.js
 
@@ -2667,6 +2722,10 @@ function mouseEventArgsAreEqual(args, other) {
   return (args === null || args === void 0 ? void 0 : args.kind) === (other === null || other === void 0 ? void 0 : other.kind) && (args === null || args === void 0 ? void 0 : args.location[0]) === (other === null || other === void 0 ? void 0 : other.location[0]) && (args === null || args === void 0 ? void 0 : args.location[1]) === (other === null || other === void 0 ? void 0 : other.location[1]);
 }
 ;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid/data-grid.js
+
+
+
+
 
 
 
@@ -2941,7 +3000,7 @@ const DataGrid = (p, forwardedRef) => {
   const enqueueRef = react.useRef(() => {});
   const hoverInfoRef = react.useRef(hoveredItemInfo);
   hoverInfoRef.current = hoveredItemInfo;
-  const [bufferA, bufferB] = react.useMemo(() => {
+  const [bufferACtx, bufferBCtx] = react.useMemo(() => {
     const a = document.createElement("canvas");
     const b = document.createElement("canvas");
     a.style["display"] = "none";
@@ -2950,25 +3009,49 @@ const DataGrid = (p, forwardedRef) => {
     b.style["display"] = "none";
     b.style["opacity"] = "0";
     b.style["position"] = "fixed";
-    return [a, b];
+    return [a.getContext("2d", {
+      alpha: false
+    }), b.getContext("2d", {
+      alpha: false
+    })];
   }, []);
   react.useLayoutEffect(() => {
-    document.documentElement.append(bufferA);
-    document.documentElement.append(bufferB);
+    if (bufferACtx === null || bufferBCtx === null) return;
+    document.documentElement.append(bufferACtx.canvas);
+    document.documentElement.append(bufferBCtx.canvas);
     return () => {
-      bufferA.remove();
-      bufferB.remove();
+      bufferACtx.canvas.remove();
+      bufferBCtx.canvas.remove();
     };
-  }, [bufferA, bufferB]);
+  }, [bufferACtx, bufferBCtx]);
   const renderStateProvider = react.useMemo(() => new RenderStateProvider(), []);
   const maxDPR = enableFirefoxRescaling && scrolling ? 1 : enableSafariRescaling && scrolling ? 2 : 5;
   const minimumCellWidth = (experimental === null || experimental === void 0 ? void 0 : experimental.disableMinimumCellWidth) === true ? 1 : 10;
   const lastArgsRef = react.useRef();
+  const canvasCtx = react.useRef(null);
+  const overlayCtx = react.useRef(null);
   const draw = react.useCallback(() => {
     var _experimental$hyperWr, _experimental$renderS, _hoverInfoRef$current;
     const canvas = ref.current;
     const overlay = overlayRef.current;
     if (canvas === null || overlay === null) return;
+    if (canvasCtx.current === null) {
+      canvasCtx.current = canvas.getContext("2d", {
+        alpha: false
+      });
+      canvas.width = 0;
+      canvas.height = 0;
+    }
+    if (overlayCtx.current === null) {
+      overlayCtx.current = overlay.getContext("2d", {
+        alpha: false
+      });
+      overlay.width = 0;
+      overlay.height = 0;
+    }
+    if (canvasCtx.current === null || overlayCtx.current === null || bufferACtx === null || bufferBCtx === null) {
+      return;
+    }
     let didOverride = false;
     const overrideCursor = cursor => {
       didOverride = true;
@@ -2976,10 +3059,10 @@ const DataGrid = (p, forwardedRef) => {
     };
     const last = lastArgsRef.current;
     const current = {
-      canvas,
-      bufferA,
-      bufferB,
-      headerCanvas: overlay,
+      headerCanvasCtx: overlayCtx.current,
+      canvasCtx: canvasCtx.current,
+      bufferACtx,
+      bufferBCtx,
       width,
       height,
       cellXOffset,
@@ -3040,7 +3123,7 @@ const DataGrid = (p, forwardedRef) => {
     if (!didOverride && (current.damage === undefined || current.damage.has(hoverInfoRef === null || hoverInfoRef === void 0 || (_hoverInfoRef$current = hoverInfoRef.current) === null || _hoverInfoRef$current === void 0 ? void 0 : _hoverInfoRef$current[0]))) {
       setDrawCursorOverride(undefined);
     }
-  }, [bufferA, bufferB, width, height, cellXOffset, cellYOffset, translateX, translateY, mappedColumns, enableGroups, freezeColumns, dragAndDropState, theme, headerHeight, groupHeaderHeight, disabledRows, rowHeight, verticalBorder, isResizing, hasAppendRow, resizeCol, isFocused, selection, fillHandle, freezeTrailingRows, rows, drawFocusRing, maxDPR, getCellContent, getGroupDetails, getRowThemeOverride, drawCellCallback, drawHeaderCallback, prelightCells, highlightRegions, imageLoader, spriteManager, scrolling, experimental === null || experimental === void 0 ? void 0 : experimental.hyperWrapping, experimental === null || experimental === void 0 ? void 0 : experimental.renderStrategy, lastWasTouch, renderStateProvider, getCellRenderer, minimumCellWidth]);
+  }, [bufferACtx, bufferBCtx, width, height, cellXOffset, cellYOffset, translateX, translateY, mappedColumns, enableGroups, freezeColumns, dragAndDropState, theme, headerHeight, groupHeaderHeight, disabledRows, rowHeight, verticalBorder, isResizing, hasAppendRow, resizeCol, isFocused, selection, fillHandle, freezeTrailingRows, rows, drawFocusRing, maxDPR, getCellContent, getGroupDetails, getRowThemeOverride, drawCellCallback, drawHeaderCallback, prelightCells, highlightRegions, imageLoader, spriteManager, scrolling, experimental === null || experimental === void 0 ? void 0 : experimental.hyperWrapping, experimental === null || experimental === void 0 ? void 0 : experimental.renderStrategy, lastWasTouch, renderStateProvider, getCellRenderer, minimumCellWidth]);
   const lastDrawRef = react.useRef(draw);
   react.useLayoutEffect(() => {
     draw();
@@ -6029,7 +6112,6 @@ function useKeybindingsWithDefaults(keybindingsIn) {
 
 
 
-
 const DataGridOverlayEditor = react.lazy(async () => await __webpack_require__.e(/* import() */ 912).then(__webpack_require__.bind(__webpack_require__, "./packages/core/dist/esm/internal/data-grid-overlay-editor/data-grid-overlay-editor.js")));
 let idCounter = 0;
 function getSpanStops(cells) {
@@ -8412,10 +8494,13 @@ const DataEditorImpl = (p, forwardedRef) => {
     const w = mangledCols.reduce((acc, x) => x.width + acc, 0) + scrollbarWidth;
     return [`${Math.min(100000, w)}px`, `${Math.min(100000, h)}px`];
   }, [mangledCols, experimental === null || experimental === void 0 ? void 0 : experimental.scrollbarWidthOverride, rowHeight, rows, showTrailingBlankRow, totalHeaderHeight]);
+  const cssStyle = react.useMemo(() => {
+    return (0,styles/* makeCSSStyle */.be)(mergedTheme);
+  }, [mergedTheme]);
   return react.createElement(styles/* ThemeContext.Provider */.Ni.Provider, {
     value: mergedTheme
   }, react.createElement(DataEditorContainer, {
-    style: (0,styles/* makeCSSStyle */.be)(mergedTheme),
+    style: cssStyle,
     className: className,
     inWidth: width !== null && width !== void 0 ? width : idealWidth,
     inHeight: height !== null && height !== void 0 ? height : idealHeight
@@ -10356,7 +10441,8 @@ ClickOutsideContainer.displayName = "ClickOutsideContainer";
 /* harmony export */   "NH": () => (/* binding */ blend),
 /* harmony export */   "Nz": () => (/* binding */ interpolateColors),
 /* harmony export */   "dF": () => (/* binding */ parseToRgba),
-/* harmony export */   "fG": () => (/* binding */ withAlpha)
+/* harmony export */   "fG": () => (/* binding */ withAlpha),
+/* harmony export */   "mv": () => (/* binding */ blendCache)
 /* harmony export */ });
 const cache = {};
 let div = null;
@@ -10395,6 +10481,15 @@ function withAlpha(color, alpha) {
   const [r, g, b] = parseToRgba(color);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+const blendResultCache = new Map();
+function blendCache(color, background) {
+  const cacheKey = `${color}-${background}`;
+  const maybe = blendResultCache.get(cacheKey);
+  if (maybe !== undefined) return maybe;
+  const result = blend(color, background);
+  blendResultCache.set(cacheKey, result);
+  return result;
+}
 function blend(color, background) {
   if (background === undefined) return color;
   const [r, g, b, a] = parseToRgba(color);
@@ -10428,7 +10523,272 @@ function interpolateColors(leftColor, rightColor, val) {
 
 /***/ }),
 
-/***/ "./packages/core/dist/esm/internal/data-grid/data-grid-lib.js":
+/***/ "./packages/core/dist/esm/internal/data-grid/data-grid-types.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "$o": () => (/* binding */ InnerGridCellKind),
+/* harmony export */   "DP": () => (/* binding */ isObjectEditorCallbackResult),
+/* harmony export */   "EV": () => (/* binding */ CompactSelection),
+/* harmony export */   "Gf": () => (/* binding */ headerCellCheckboxPrefix),
+/* harmony export */   "PE": () => (/* binding */ GridColumnIcon),
+/* harmony export */   "Qo": () => (/* binding */ isReadWriteCell),
+/* harmony export */   "Sq": () => (/* binding */ isSizedGridColumn),
+/* harmony export */   "T9": () => (/* binding */ isEditableGridCell),
+/* harmony export */   "YK": () => (/* binding */ headerCellUnheckedMarker),
+/* harmony export */   "f": () => (/* binding */ isTextEditableGridCell),
+/* harmony export */   "iJ": () => (/* binding */ headerCellIndeterminateMarker),
+/* harmony export */   "kf": () => (/* binding */ booleanCellIsEditable),
+/* harmony export */   "p6": () => (/* binding */ GridCellKind),
+/* harmony export */   "pN": () => (/* binding */ GridColumnMenuIcon),
+/* harmony export */   "qF": () => (/* binding */ BooleanEmpty),
+/* harmony export */   "qT": () => (/* binding */ headerCellCheckedMarker),
+/* harmony export */   "rL": () => (/* binding */ resolveCellsThunk),
+/* harmony export */   "rs": () => (/* binding */ isInnerOnlyCell),
+/* harmony export */   "sd": () => (/* binding */ BooleanIndeterminate)
+/* harmony export */ });
+/* unused harmony export isRectangleEqual */
+/* harmony import */ var _common_support_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/dist/esm/common/support.js");
+/* harmony import */ var lodash_has_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/lodash/has.js");
+/* harmony import */ var lodash_has_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash_has_js__WEBPACK_IMPORTED_MODULE_0__);
+var _class;
+let _Symbol$iterator;
+
+
+const BooleanEmpty = null;
+const BooleanIndeterminate = undefined;
+var GridCellKind;
+(function (GridCellKind) {
+  GridCellKind["Uri"] = "uri";
+  GridCellKind["Text"] = "text";
+  GridCellKind["Image"] = "image";
+  GridCellKind["RowID"] = "row-id";
+  GridCellKind["Number"] = "number";
+  GridCellKind["Bubble"] = "bubble";
+  GridCellKind["Boolean"] = "boolean";
+  GridCellKind["Loading"] = "loading";
+  GridCellKind["Markdown"] = "markdown";
+  GridCellKind["Drilldown"] = "drilldown";
+  GridCellKind["Protected"] = "protected";
+  GridCellKind["Custom"] = "custom";
+})(GridCellKind || (GridCellKind = {}));
+var GridColumnIcon;
+(function (GridColumnIcon) {
+  GridColumnIcon["HeaderRowID"] = "headerRowID";
+  GridColumnIcon["HeaderCode"] = "headerCode";
+  GridColumnIcon["HeaderNumber"] = "headerNumber";
+  GridColumnIcon["HeaderString"] = "headerString";
+  GridColumnIcon["HeaderBoolean"] = "headerBoolean";
+  GridColumnIcon["HeaderAudioUri"] = "headerAudioUri";
+  GridColumnIcon["HeaderVideoUri"] = "headerVideoUri";
+  GridColumnIcon["HeaderEmoji"] = "headerEmoji";
+  GridColumnIcon["HeaderImage"] = "headerImage";
+  GridColumnIcon["HeaderUri"] = "headerUri";
+  GridColumnIcon["HeaderPhone"] = "headerPhone";
+  GridColumnIcon["HeaderMarkdown"] = "headerMarkdown";
+  GridColumnIcon["HeaderDate"] = "headerDate";
+  GridColumnIcon["HeaderTime"] = "headerTime";
+  GridColumnIcon["HeaderEmail"] = "headerEmail";
+  GridColumnIcon["HeaderReference"] = "headerReference";
+  GridColumnIcon["HeaderIfThenElse"] = "headerIfThenElse";
+  GridColumnIcon["HeaderSingleValue"] = "headerSingleValue";
+  GridColumnIcon["HeaderLookup"] = "headerLookup";
+  GridColumnIcon["HeaderTextTemplate"] = "headerTextTemplate";
+  GridColumnIcon["HeaderMath"] = "headerMath";
+  GridColumnIcon["HeaderRollup"] = "headerRollup";
+  GridColumnIcon["HeaderJoinStrings"] = "headerJoinStrings";
+  GridColumnIcon["HeaderSplitString"] = "headerSplitString";
+  GridColumnIcon["HeaderGeoDistance"] = "headerGeoDistance";
+  GridColumnIcon["HeaderArray"] = "headerArray";
+  GridColumnIcon["RowOwnerOverlay"] = "rowOwnerOverlay";
+  GridColumnIcon["ProtectedColumnOverlay"] = "protectedColumnOverlay";
+})(GridColumnIcon || (GridColumnIcon = {}));
+var GridColumnMenuIcon;
+(function (GridColumnMenuIcon) {
+  GridColumnMenuIcon["Triangle"] = "triangle";
+  GridColumnMenuIcon["Dots"] = "dots";
+})(GridColumnMenuIcon || (GridColumnMenuIcon = {}));
+const headerCellCheckboxPrefix = "___gdg_header_cell_";
+const headerCellCheckedMarker = headerCellCheckboxPrefix + "checked";
+const headerCellUnheckedMarker = headerCellCheckboxPrefix + "unchecked";
+const headerCellIndeterminateMarker = headerCellCheckboxPrefix + "indeterminate";
+function isSizedGridColumn(c) {
+  return "width" in c && typeof c.width === "number";
+}
+async function resolveCellsThunk(thunk) {
+  if (typeof thunk === "object") return thunk;
+  return await thunk();
+}
+function isEditableGridCell(cell) {
+  if (cell.kind === GridCellKind.Loading || cell.kind === GridCellKind.Bubble || cell.kind === GridCellKind.RowID || cell.kind === GridCellKind.Protected || cell.kind === GridCellKind.Drilldown) {
+    return false;
+  }
+  (0,_common_support_js__WEBPACK_IMPORTED_MODULE_1__/* .proveType */ .NG)(cell);
+  return true;
+}
+function isTextEditableGridCell(cell) {
+  if (cell.kind === GridCellKind.Loading || cell.kind === GridCellKind.Bubble || cell.kind === GridCellKind.RowID || cell.kind === GridCellKind.Protected || cell.kind === GridCellKind.Drilldown || cell.kind === GridCellKind.Boolean || cell.kind === GridCellKind.Image || cell.kind === GridCellKind.Custom) {
+    return false;
+  }
+  (0,_common_support_js__WEBPACK_IMPORTED_MODULE_1__/* .proveType */ .NG)(cell);
+  return true;
+}
+function isInnerOnlyCell(cell) {
+  return cell.kind === InnerGridCellKind.Marker || cell.kind === InnerGridCellKind.NewRow;
+}
+function isReadWriteCell(cell) {
+  if (!isEditableGridCell(cell) || cell.kind === GridCellKind.Image) return false;
+  if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number || cell.kind === GridCellKind.Markdown || cell.kind === GridCellKind.Uri || cell.kind === GridCellKind.Custom || cell.kind === GridCellKind.Boolean) {
+    return cell.readonly !== true;
+  }
+  (0,_common_support_js__WEBPACK_IMPORTED_MODULE_1__/* .assertNever */ .vE)(cell, "A cell was passed with an invalid kind");
+}
+function isRectangleEqual(a, b) {
+  if (a === b) return true;
+  if (a === undefined || b === undefined) return false;
+  return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+}
+function isObjectEditorCallbackResult(obj) {
+  return lodash_has_js__WEBPACK_IMPORTED_MODULE_0___default()(obj, "editor");
+}
+function booleanCellIsEditable(cell) {
+  var _cell$readonly;
+  return !((_cell$readonly = cell.readonly) !== null && _cell$readonly !== void 0 ? _cell$readonly : false);
+}
+var InnerGridCellKind;
+(function (InnerGridCellKind) {
+  InnerGridCellKind["NewRow"] = "new-row";
+  InnerGridCellKind["Marker"] = "marker";
+})(InnerGridCellKind || (InnerGridCellKind = {}));
+function mergeRanges(input) {
+  if (input.length === 0) {
+    return [];
+  }
+  const ranges = [...input];
+  const stack = [];
+  ranges.sort(function (a, b) {
+    return a[0] - b[0];
+  });
+  stack.push([...ranges[0]]);
+  for (const range of ranges.slice(1)) {
+    const top = stack[stack.length - 1];
+    if (top[1] < range[0]) {
+      stack.push([...range]);
+    } else if (top[1] < range[1]) {
+      top[1] = range[1];
+    }
+  }
+  return stack;
+}
+let emptyCompactSelection;
+_Symbol$iterator = Symbol.iterator;
+class CompactSelection {
+  constructor(items) {
+    this.items = void 0;
+    this.items = items;
+  }
+  offset(amount) {
+    if (amount === 0) return this;
+    const newItems = this.items.map(x => [x[0] + amount, x[1] + amount]);
+    return new CompactSelection(newItems);
+  }
+  add(selection) {
+    const slice = typeof selection === "number" ? [selection, selection + 1] : selection;
+    const newItems = mergeRanges([...this.items, slice]);
+    return new CompactSelection(newItems);
+  }
+  remove(selection) {
+    const items = [...this.items];
+    const selMin = typeof selection === "number" ? selection : selection[0];
+    const selMax = typeof selection === "number" ? selection + 1 : selection[1];
+    for (const [i, slice] of items.entries()) {
+      const [start, end] = slice;
+      if (start <= selMax && selMin <= end) {
+        const toAdd = [];
+        if (start < selMin) {
+          toAdd.push([start, selMin]);
+        }
+        if (selMax < end) {
+          toAdd.push([selMax, end]);
+        }
+        items.splice(i, 1, ...toAdd);
+      }
+    }
+    return new CompactSelection(items);
+  }
+  first() {
+    if (this.items.length === 0) return undefined;
+    return this.items[0][0];
+  }
+  last() {
+    if (this.items.length === 0) return undefined;
+    return this.items.slice(-1)[0][1] - 1;
+  }
+  hasIndex(index) {
+    for (let i = 0; i < this.items.length; i++) {
+      const [start, end] = this.items[i];
+      if (index >= start && index < end) return true;
+    }
+    return false;
+  }
+  hasAll(index) {
+    for (let x = index[0]; x < index[1]; x++) {
+      if (!this.hasIndex(x)) return false;
+    }
+    return true;
+  }
+  some(predicate) {
+    for (const i of this) {
+      if (predicate(i)) return true;
+    }
+    return false;
+  }
+  equals(other) {
+    if (other === this) return true;
+    if (other.items.length !== this.items.length) return false;
+    for (let i = 0; i < this.items.length; i++) {
+      const left = other.items[i];
+      const right = this.items[i];
+      if (left[0] !== right[0] || left[1] !== right[1]) return false;
+    }
+    return true;
+  }
+  toArray() {
+    const result = [];
+    for (const [start, end] of this.items) {
+      for (let x = start; x < end; x++) {
+        result.push(x);
+      }
+    }
+    return result;
+  }
+  get length() {
+    let len = 0;
+    for (const [start, end] of this.items) {
+      len += end - start;
+    }
+    return len;
+  }
+  *[_Symbol$iterator]() {
+    for (const [start, end] of this.items) {
+      for (let x = start; x < end; x++) {
+        yield x;
+      }
+    }
+  }
+}
+_class = CompactSelection;
+CompactSelection.empty = () => {
+  var _emptyCompactSelectio;
+  return (_emptyCompactSelectio = emptyCompactSelection) !== null && _emptyCompactSelectio !== void 0 ? _emptyCompactSelectio : emptyCompactSelection = new _class([]);
+};
+CompactSelection.fromSingleSelection = selection => {
+  return _class.empty().add(selection);
+};
+
+/***/ }),
+
+/***/ "./packages/core/dist/esm/internal/data-grid/render/data-grid-lib.js":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -11026,271 +11386,6 @@ function computeBounds(col, row, width, height, groupHeaderHeight, totalHeaderHe
 
 /***/ }),
 
-/***/ "./packages/core/dist/esm/internal/data-grid/data-grid-types.js":
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "$o": () => (/* binding */ InnerGridCellKind),
-/* harmony export */   "DP": () => (/* binding */ isObjectEditorCallbackResult),
-/* harmony export */   "EV": () => (/* binding */ CompactSelection),
-/* harmony export */   "Gf": () => (/* binding */ headerCellCheckboxPrefix),
-/* harmony export */   "PE": () => (/* binding */ GridColumnIcon),
-/* harmony export */   "Qo": () => (/* binding */ isReadWriteCell),
-/* harmony export */   "Sq": () => (/* binding */ isSizedGridColumn),
-/* harmony export */   "T9": () => (/* binding */ isEditableGridCell),
-/* harmony export */   "YK": () => (/* binding */ headerCellUnheckedMarker),
-/* harmony export */   "f": () => (/* binding */ isTextEditableGridCell),
-/* harmony export */   "iJ": () => (/* binding */ headerCellIndeterminateMarker),
-/* harmony export */   "kf": () => (/* binding */ booleanCellIsEditable),
-/* harmony export */   "p6": () => (/* binding */ GridCellKind),
-/* harmony export */   "pN": () => (/* binding */ GridColumnMenuIcon),
-/* harmony export */   "qF": () => (/* binding */ BooleanEmpty),
-/* harmony export */   "qT": () => (/* binding */ headerCellCheckedMarker),
-/* harmony export */   "rL": () => (/* binding */ resolveCellsThunk),
-/* harmony export */   "rs": () => (/* binding */ isInnerOnlyCell),
-/* harmony export */   "sd": () => (/* binding */ BooleanIndeterminate)
-/* harmony export */ });
-/* unused harmony export isRectangleEqual */
-/* harmony import */ var _common_support_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/dist/esm/common/support.js");
-/* harmony import */ var lodash_has_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/lodash/has.js");
-/* harmony import */ var lodash_has_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash_has_js__WEBPACK_IMPORTED_MODULE_0__);
-var _class;
-let _Symbol$iterator;
-
-
-const BooleanEmpty = null;
-const BooleanIndeterminate = undefined;
-var GridCellKind;
-(function (GridCellKind) {
-  GridCellKind["Uri"] = "uri";
-  GridCellKind["Text"] = "text";
-  GridCellKind["Image"] = "image";
-  GridCellKind["RowID"] = "row-id";
-  GridCellKind["Number"] = "number";
-  GridCellKind["Bubble"] = "bubble";
-  GridCellKind["Boolean"] = "boolean";
-  GridCellKind["Loading"] = "loading";
-  GridCellKind["Markdown"] = "markdown";
-  GridCellKind["Drilldown"] = "drilldown";
-  GridCellKind["Protected"] = "protected";
-  GridCellKind["Custom"] = "custom";
-})(GridCellKind || (GridCellKind = {}));
-var GridColumnIcon;
-(function (GridColumnIcon) {
-  GridColumnIcon["HeaderRowID"] = "headerRowID";
-  GridColumnIcon["HeaderCode"] = "headerCode";
-  GridColumnIcon["HeaderNumber"] = "headerNumber";
-  GridColumnIcon["HeaderString"] = "headerString";
-  GridColumnIcon["HeaderBoolean"] = "headerBoolean";
-  GridColumnIcon["HeaderAudioUri"] = "headerAudioUri";
-  GridColumnIcon["HeaderVideoUri"] = "headerVideoUri";
-  GridColumnIcon["HeaderEmoji"] = "headerEmoji";
-  GridColumnIcon["HeaderImage"] = "headerImage";
-  GridColumnIcon["HeaderUri"] = "headerUri";
-  GridColumnIcon["HeaderPhone"] = "headerPhone";
-  GridColumnIcon["HeaderMarkdown"] = "headerMarkdown";
-  GridColumnIcon["HeaderDate"] = "headerDate";
-  GridColumnIcon["HeaderTime"] = "headerTime";
-  GridColumnIcon["HeaderEmail"] = "headerEmail";
-  GridColumnIcon["HeaderReference"] = "headerReference";
-  GridColumnIcon["HeaderIfThenElse"] = "headerIfThenElse";
-  GridColumnIcon["HeaderSingleValue"] = "headerSingleValue";
-  GridColumnIcon["HeaderLookup"] = "headerLookup";
-  GridColumnIcon["HeaderTextTemplate"] = "headerTextTemplate";
-  GridColumnIcon["HeaderMath"] = "headerMath";
-  GridColumnIcon["HeaderRollup"] = "headerRollup";
-  GridColumnIcon["HeaderJoinStrings"] = "headerJoinStrings";
-  GridColumnIcon["HeaderSplitString"] = "headerSplitString";
-  GridColumnIcon["HeaderGeoDistance"] = "headerGeoDistance";
-  GridColumnIcon["HeaderArray"] = "headerArray";
-  GridColumnIcon["RowOwnerOverlay"] = "rowOwnerOverlay";
-  GridColumnIcon["ProtectedColumnOverlay"] = "protectedColumnOverlay";
-})(GridColumnIcon || (GridColumnIcon = {}));
-var GridColumnMenuIcon;
-(function (GridColumnMenuIcon) {
-  GridColumnMenuIcon["Triangle"] = "triangle";
-  GridColumnMenuIcon["Dots"] = "dots";
-})(GridColumnMenuIcon || (GridColumnMenuIcon = {}));
-const headerCellCheckboxPrefix = "___gdg_header_cell_";
-const headerCellCheckedMarker = headerCellCheckboxPrefix + "checked";
-const headerCellUnheckedMarker = headerCellCheckboxPrefix + "unchecked";
-const headerCellIndeterminateMarker = headerCellCheckboxPrefix + "indeterminate";
-function isSizedGridColumn(c) {
-  return "width" in c && typeof c.width === "number";
-}
-async function resolveCellsThunk(thunk) {
-  if (typeof thunk === "object") return thunk;
-  return await thunk();
-}
-function isEditableGridCell(cell) {
-  if (cell.kind === GridCellKind.Loading || cell.kind === GridCellKind.Bubble || cell.kind === GridCellKind.RowID || cell.kind === GridCellKind.Protected || cell.kind === GridCellKind.Drilldown) {
-    return false;
-  }
-  (0,_common_support_js__WEBPACK_IMPORTED_MODULE_1__/* .proveType */ .NG)(cell);
-  return true;
-}
-function isTextEditableGridCell(cell) {
-  if (cell.kind === GridCellKind.Loading || cell.kind === GridCellKind.Bubble || cell.kind === GridCellKind.RowID || cell.kind === GridCellKind.Protected || cell.kind === GridCellKind.Drilldown || cell.kind === GridCellKind.Boolean || cell.kind === GridCellKind.Image || cell.kind === GridCellKind.Custom) {
-    return false;
-  }
-  (0,_common_support_js__WEBPACK_IMPORTED_MODULE_1__/* .proveType */ .NG)(cell);
-  return true;
-}
-function isInnerOnlyCell(cell) {
-  return cell.kind === InnerGridCellKind.Marker || cell.kind === InnerGridCellKind.NewRow;
-}
-function isReadWriteCell(cell) {
-  if (!isEditableGridCell(cell) || cell.kind === GridCellKind.Image) return false;
-  if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number || cell.kind === GridCellKind.Markdown || cell.kind === GridCellKind.Uri || cell.kind === GridCellKind.Custom || cell.kind === GridCellKind.Boolean) {
-    return cell.readonly !== true;
-  }
-  (0,_common_support_js__WEBPACK_IMPORTED_MODULE_1__/* .assertNever */ .vE)(cell, "A cell was passed with an invalid kind");
-}
-function isRectangleEqual(a, b) {
-  if (a === b) return true;
-  if (a === undefined || b === undefined) return false;
-  return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
-}
-function isObjectEditorCallbackResult(obj) {
-  return lodash_has_js__WEBPACK_IMPORTED_MODULE_0___default()(obj, "editor");
-}
-function booleanCellIsEditable(cell) {
-  var _cell$readonly;
-  return !((_cell$readonly = cell.readonly) !== null && _cell$readonly !== void 0 ? _cell$readonly : false);
-}
-var InnerGridCellKind;
-(function (InnerGridCellKind) {
-  InnerGridCellKind["NewRow"] = "new-row";
-  InnerGridCellKind["Marker"] = "marker";
-})(InnerGridCellKind || (InnerGridCellKind = {}));
-function mergeRanges(input) {
-  if (input.length === 0) {
-    return [];
-  }
-  const ranges = [...input];
-  const stack = [];
-  ranges.sort(function (a, b) {
-    return a[0] - b[0];
-  });
-  stack.push([...ranges[0]]);
-  for (const range of ranges.slice(1)) {
-    const top = stack[stack.length - 1];
-    if (top[1] < range[0]) {
-      stack.push([...range]);
-    } else if (top[1] < range[1]) {
-      top[1] = range[1];
-    }
-  }
-  return stack;
-}
-let emptyCompactSelection;
-_Symbol$iterator = Symbol.iterator;
-class CompactSelection {
-  constructor(items) {
-    this.items = void 0;
-    this.items = items;
-  }
-  offset(amount) {
-    if (amount === 0) return this;
-    const newItems = this.items.map(x => [x[0] + amount, x[1] + amount]);
-    return new CompactSelection(newItems);
-  }
-  add(selection) {
-    const slice = typeof selection === "number" ? [selection, selection + 1] : selection;
-    const newItems = mergeRanges([...this.items, slice]);
-    return new CompactSelection(newItems);
-  }
-  remove(selection) {
-    const items = [...this.items];
-    const selMin = typeof selection === "number" ? selection : selection[0];
-    const selMax = typeof selection === "number" ? selection + 1 : selection[1];
-    for (const [i, slice] of items.entries()) {
-      const [start, end] = slice;
-      if (start <= selMax && selMin <= end) {
-        const toAdd = [];
-        if (start < selMin) {
-          toAdd.push([start, selMin]);
-        }
-        if (selMax < end) {
-          toAdd.push([selMax, end]);
-        }
-        items.splice(i, 1, ...toAdd);
-      }
-    }
-    return new CompactSelection(items);
-  }
-  first() {
-    if (this.items.length === 0) return undefined;
-    return this.items[0][0];
-  }
-  last() {
-    if (this.items.length === 0) return undefined;
-    return this.items.slice(-1)[0][1] - 1;
-  }
-  hasIndex(index) {
-    for (let i = 0; i < this.items.length; i++) {
-      const [start, end] = this.items[i];
-      if (index >= start && index < end) return true;
-    }
-    return false;
-  }
-  hasAll(index) {
-    for (let x = index[0]; x < index[1]; x++) {
-      if (!this.hasIndex(x)) return false;
-    }
-    return true;
-  }
-  some(predicate) {
-    for (const i of this) {
-      if (predicate(i)) return true;
-    }
-    return false;
-  }
-  equals(other) {
-    if (other === this) return true;
-    if (other.items.length !== this.items.length) return false;
-    for (let i = 0; i < this.items.length; i++) {
-      const left = other.items[i];
-      const right = this.items[i];
-      if (left[0] !== right[0] || left[1] !== right[1]) return false;
-    }
-    return true;
-  }
-  toArray() {
-    const result = [];
-    for (const [start, end] of this.items) {
-      for (let x = start; x < end; x++) {
-        result.push(x);
-      }
-    }
-    return result;
-  }
-  get length() {
-    let len = 0;
-    for (const [start, end] of this.items) {
-      len += end - start;
-    }
-    return len;
-  }
-  *[_Symbol$iterator]() {
-    for (const [start, end] of this.items) {
-      for (let x = start; x < end; x++) {
-        yield x;
-      }
-    }
-  }
-}
-_class = CompactSelection;
-CompactSelection.empty = () => {
-  var _emptyCompactSelectio;
-  return (_emptyCompactSelectio = emptyCompactSelection) !== null && _emptyCompactSelectio !== void 0 ? _emptyCompactSelectio : emptyCompactSelection = new _class([]);
-};
-CompactSelection.fromSingleSelection = selection => {
-  return _class.empty().add(selection);
-};
-
-/***/ }),
-
 /***/ "./packages/core/dist/esm/internal/growing-entry/growing-entry.js":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -11386,4 +11481,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=236.03c0e9e4.iframe.bundle.js.map
+//# sourceMappingURL=4981.5ae4655d.iframe.bundle.js.map

@@ -24,7 +24,7 @@ var react = __webpack_require__("./node_modules/react/index.js");
 var index_esm = __webpack_require__("./node_modules/react-resize-detector/build/index.esm.js");
 // EXTERNAL MODULE: ./packages/core/dist/esm/internal/data-grid/data-grid-types.js
 var data_grid_types = __webpack_require__("./packages/core/dist/esm/internal/data-grid/data-grid-types.js");
-// EXTERNAL MODULE: ./packages/core/dist/esm/data-editor-all.js + 57 modules
+// EXTERNAL MODULE: ./packages/core/dist/esm/data-editor-all.js + 63 modules
 var data_editor_all = __webpack_require__("./packages/core/dist/esm/data-editor-all.js");
 // EXTERNAL MODULE: ./node_modules/@faker-js/faker/dist/esm/index.mjs + 57 modules
 var esm = __webpack_require__("./node_modules/@faker-js/faker/dist/esm/index.mjs");
@@ -1940,4 +1940,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=packages-source-src-stories-use-data-source-stories.68528e25.iframe.bundle.js.map
+//# sourceMappingURL=packages-source-src-stories-use-data-source-stories.96ad7608.iframe.bundle.js.map

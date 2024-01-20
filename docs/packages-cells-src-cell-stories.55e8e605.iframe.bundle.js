@@ -19,7 +19,7 @@ __webpack_require__.d(__webpack_exports__, {
 var dist = __webpack_require__("./node_modules/@linaria/react/dist/index.mjs");
 // EXTERNAL MODULE: ./node_modules/react/index.js
 var react = __webpack_require__("./node_modules/react/index.js");
-// EXTERNAL MODULE: ./packages/core/dist/esm/data-editor-all.js + 57 modules
+// EXTERNAL MODULE: ./packages/core/dist/esm/data-editor-all.js + 63 modules
 var data_editor_all = __webpack_require__("./packages/core/dist/esm/data-editor-all.js");
 // EXTERNAL MODULE: ./packages/core/dist/esm/internal/data-grid/data-grid-types.js
 var data_grid_types = __webpack_require__("./packages/core/dist/esm/internal/data-grid/data-grid-types.js");
@@ -244,8 +244,8 @@ const sparkline_cell_renderer = {
   onPaste: (_v, d) => d
 };
 /* harmony default export */ const sparkline_cell = (sparkline_cell_renderer);
-// EXTERNAL MODULE: ./packages/core/dist/esm/internal/data-grid/data-grid-lib.js
-var data_grid_lib = __webpack_require__("./packages/core/dist/esm/internal/data-grid/data-grid-lib.js");
+// EXTERNAL MODULE: ./packages/core/dist/esm/internal/data-grid/render/data-grid-lib.js
+var data_grid_lib = __webpack_require__("./packages/core/dist/esm/internal/data-grid/render/data-grid-lib.js");
 ;// CONCATENATED MODULE: ./packages/cells/src/draw-fns.ts
 function roundedRect(ctx, x, y, width, height, radius) {
   if (width <= 0 || height <= 0) return;
@@ -2939,4 +2939,4 @@ module.exports = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5v
 /***/ })
 
 }]);
-//# sourceMappingURL=packages-cells-src-cell-stories.1a2d9116.iframe.bundle.js.map
+//# sourceMappingURL=packages-cells-src-cell-stories.55e8e605.iframe.bundle.js.map

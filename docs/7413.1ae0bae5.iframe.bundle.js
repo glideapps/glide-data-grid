@@ -472,8 +472,8 @@ var browser_detect = __webpack_require__("./packages/core/src/common/browser-det
 var styles = __webpack_require__("./packages/core/src/common/styles.ts");
 // EXTERNAL MODULE: ./packages/core/src/common/utils.tsx
 var utils = __webpack_require__("./packages/core/src/common/utils.tsx");
-// EXTERNAL MODULE: ./packages/core/src/internal/data-grid/data-grid-lib.ts
-var data_grid_lib = __webpack_require__("./packages/core/src/internal/data-grid/data-grid-lib.ts");
+// EXTERNAL MODULE: ./packages/core/src/internal/data-grid/render/data-grid-lib.ts
+var data_grid_lib = __webpack_require__("./packages/core/src/internal/data-grid/render/data-grid-lib.ts");
 // EXTERNAL MODULE: ./packages/core/src/internal/click-outside-container/click-outside-container.tsx
 var click_outside_container = __webpack_require__("./packages/core/src/internal/click-outside-container/click-outside-container.tsx");
 ;// CONCATENATED MODULE: ./packages/core/src/data-editor/group-rename.tsx
@@ -1021,8 +1021,6 @@ function useRemAdjuster(_ref) {
     overscrollY
   };
 }
-// EXTERNAL MODULE: ./packages/core/src/internal/data-grid/data-grid-render.ts
-var data_grid_render = __webpack_require__("./packages/core/src/internal/data-grid/data-grid-render.ts");
 // EXTERNAL MODULE: ./packages/core/src/internal/data-grid/color-parser.ts
 var color_parser = __webpack_require__("./packages/core/src/internal/data-grid/color-parser.ts");
 // EXTERNAL MODULE: ./packages/core/src/common/math.ts
@@ -1032,7 +1030,6 @@ var event_args = __webpack_require__("./packages/core/src/internal/data-grid/eve
 // EXTERNAL MODULE: ./packages/core/src/data-editor/data-editor-keybindings.ts
 var data_editor_keybindings = __webpack_require__("./packages/core/src/data-editor/data-editor-keybindings.ts");
 ;// CONCATENATED MODULE: ./packages/core/src/data-editor/data-editor.tsx
-
 
 
 
@@ -1512,7 +1509,7 @@ const DataEditorImpl = (p, forwardedRef) => {
         let isInFreezeArea = false;
         if (((_vr$extras3 = vr.extras) === null || _vr$extras3 === void 0 ? void 0 : _vr$extras3.freezeRegions) !== undefined) {
           for (const fr of vr.extras.freezeRegions) {
-            if ((0,data_grid_render/* pointInRect */.qr)(fr, outerCol, row)) {
+            if ((0,math/* pointInRect */.qr)(fr, outerCol, row)) {
               isInFreezeArea = true;
               break;
             }
@@ -3444,10 +3441,13 @@ const DataEditorImpl = (p, forwardedRef) => {
     const w = mangledCols.reduce((acc, x) => x.width + acc, 0) + scrollbarWidth;
     return [`${Math.min(100000, w)}px`, `${Math.min(100000, h)}px`];
   }, [mangledCols, experimental === null || experimental === void 0 ? void 0 : experimental.scrollbarWidthOverride, rowHeight, rows, showTrailingBlankRow, totalHeaderHeight]);
+  const cssStyle = react.useMemo(() => {
+    return (0,styles/* makeCSSStyle */.be)(mergedTheme);
+  }, [mergedTheme]);
   return (0,jsx_runtime.jsx)(styles/* ThemeContext.Provider */.Ni.Provider, {
     value: mergedTheme,
     children: (0,jsx_runtime.jsxs)(DataEditorContainer, {
-      style: (0,styles/* makeCSSStyle */.be)(mergedTheme),
+      style: cssStyle,
       className: className,
       inWidth: width !== null && width !== void 0 ? width : idealWidth,
       inHeight: height !== null && height !== void 0 ? height : idealHeight,
@@ -4293,4 +4293,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7413.bd0e8212.iframe.bundle.js.map
+//# sourceMappingURL=7413.1ae0bae5.iframe.bundle.js.map
