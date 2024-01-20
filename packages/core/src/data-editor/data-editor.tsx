@@ -53,7 +53,7 @@ import {
     itemIsInRect,
     gridSelectionHasItem,
     getFreezeTrailingHeight,
-} from "../internal/data-grid/data-grid-lib.js";
+} from "../internal/data-grid/render/data-grid-lib.js";
 import { GroupRename } from "./group-rename.js";
 import { measureColumn, useColumnSizer } from "./use-column-sizer.js";
 import { isHotkey } from "../common/is-hotkey.js";
@@ -65,9 +65,8 @@ import { useAutoscroll } from "./use-autoscroll.js";
 import type { CustomRenderer, CellRenderer, InternalCellRenderer } from "../cells/cell-types.js";
 import { decodeHTML, type CopyBuffer } from "./copy-paste.js";
 import { useRemAdjuster } from "./use-rem-adjuster.js";
-import { pointInRect, type Highlight } from "../internal/data-grid/data-grid-render.js";
 import { withAlpha } from "../internal/data-grid/color-parser.js";
-import { combineRects, getClosestRect } from "../common/math.js";
+import { combineRects, getClosestRect, pointInRect } from "../common/math.js";
 import {
     type HeaderClickedEventArgs,
     type GroupHeaderClickedEventArgs,
@@ -83,6 +82,7 @@ import {
     type GridKeyEventArgs,
 } from "../internal/data-grid/event-args.js";
 import { type Keybinds, useKeybindingsWithDefaults } from "./data-editor-keybindings.js";
+import type { Highlight } from "../internal/data-grid/render/data-grid-render.cells.js";
 
 const DataGridOverlayEditor = React.lazy(
     async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
@@ -3838,10 +3838,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return [`${Math.min(100_000, w)}px`, `${Math.min(100_000, h)}px`];
     }, [mangledCols, experimental?.scrollbarWidthOverride, rowHeight, rows, showTrailingBlankRow, totalHeaderHeight]);
 
+    const cssStyle = React.useMemo(() => {
+        return makeCSSStyle(mergedTheme);
+    }, [mergedTheme]);
+
     return (
         <ThemeContext.Provider value={mergedTheme}>
             <DataEditorContainer
-                style={makeCSSStyle(mergedTheme)}
+                style={cssStyle}
                 className={className}
                 inWidth={width ?? idealWidth}
                 inHeight={height ?? idealHeight}>

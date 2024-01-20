@@ -5,7 +5,7 @@ import {
     remapForDnDState,
     type MappedGridColumn,
     drawLastUpdateUnderlay,
-} from "../src/internal/data-grid/data-grid-lib.js";
+} from "../src/internal/data-grid/render/data-grid-lib.js";
 import { GridCellKind, type Rectangle } from "../src/internal/data-grid/data-grid-types.js";
 import { vi, type Mocked, expect, describe, test, it, beforeEach } from "vitest";
 import { drawImage } from "../src/cells/image-cell.js";

@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-for-loop */
-import type { FullTheme } from "../../common/styles.js";
+import type { FullTheme } from "../../../common/styles.js";
 import {
     type Item,
     type GridSelection,
@@ -7,12 +7,12 @@ import {
     type SizedGridColumn,
     type Rectangle,
     type BaseGridCell,
-} from "./data-grid-types.js";
-import { direction } from "../../common/utils.js";
+} from "../data-grid-types.js";
+import { direction } from "../../../common/utils.js";
 import React from "react";
-import type { BaseDrawArgs, PrepResult } from "../../cells/cell-types.js";
+import type { BaseDrawArgs, PrepResult } from "../../../cells/cell-types.js";
 import { split as splitText, clearCache } from "canvas-hypertxt";
-import type { FullyDefined } from "../../common/support.js";
+import type { FullyDefined } from "../../../common/support.js";
 
 export interface MappedGridColumn extends FullyDefined<SizedGridColumn> {
     sourceIndex: number;

@@ -6,7 +6,7 @@ import {
     getMiddleCenterBias,
     measureTextCached,
     roundedRect,
-} from "../internal/data-grid/data-grid-lib.js";
+} from "../internal/data-grid/render/data-grid-lib.js";
 import { GridCellKind, type DrilldownCell, type DrilldownCellData } from "../internal/data-grid/data-grid-types.js";
 import type { BaseDrawArgs, InternalCellRenderer } from "./cell-types.js";
 import { makeAccessibilityStringForArray } from "../common/utils.js";

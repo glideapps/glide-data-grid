@@ -8,7 +8,7 @@ import {
     getStickyWidth,
     rectBottomRight,
     useMappedColumns,
-} from "./data-grid-lib.js";
+} from "./render/data-grid-lib.js";
 import {
     GridCellKind,
     type Rectangle,
@@ -29,25 +29,15 @@ import { SpriteManager, type SpriteMap } from "./data-grid-sprites.js";
 import { direction, getScrollBarWidth, useDebouncedMemo, useEventListener } from "../../common/utils.js";
 import clamp from "lodash/clamp.js";
 import makeRange from "lodash/range.js";
-import {
-    type BlitData,
-    drawCell,
-    drawGrid,
-    drawHeader,
-    getActionBoundsForGroup,
-    getHeaderMenuBounds,
-    type GetRowThemeCallback,
-    type GroupDetailsCallback,
-    type Highlight,
-    pointInRect,
-} from "./data-grid-render.js";
+import { drawGrid } from "./render/data-grid-render.js";
+import { type BlitData } from "./render/data-grid-render.blit.js";
 import { AnimationManager, type StepCallback } from "./animation-manager.js";
 import { RenderStateProvider, packColRowToNumber } from "../../common/render-state-provider.js";
 import { browserIsFirefox, browserIsSafari } from "../../common/browser-detect.js";
 import { type EnqueueCallback, useAnimationQueue } from "./use-animation-queue.js";
 import { assert } from "../../common/support.js";
 import type { CellRenderer, GetCellRendererCallback } from "../../cells/cell-types.js";
-import type { DrawGridArg } from "./draw-grid-arg.js";
+import type { DrawGridArg } from "./render/draw-grid-arg.js";
 import type { ImageWindowLoader } from "./image-window-loader-interface.js";
 import {
     type GridMouseEventArgs,
@@ -59,6 +49,14 @@ import {
     headerKind,
     mouseEventArgsAreEqual,
 } from "./event-args.js";
+import { pointInRect } from "../../common/math.js";
+import {
+    type GroupDetailsCallback,
+    type GetRowThemeCallback,
+    type Highlight,
+    drawCell,
+} from "./render/data-grid-render.cells.js";
+import { getActionBoundsForGroup, getHeaderMenuBounds, drawHeader } from "./render/data-grid-render.header.js";
 
 export interface DataGridProps {
     readonly width: number;
@@ -676,7 +674,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const hoverInfoRef = React.useRef(hoveredItemInfo);
     hoverInfoRef.current = hoveredItemInfo;
 
-    const [bufferA, bufferB] = React.useMemo(() => {
+    const [bufferACtx, bufferBCtx] = React.useMemo(() => {
         const a = document.createElement("canvas");
         const b = document.createElement("canvas");
         a.style["display"] = "none";
@@ -685,27 +683,48 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         b.style["display"] = "none";
         b.style["opacity"] = "0";
         b.style["position"] = "fixed";
-        return [a, b];
+        return [a.getContext("2d", { alpha: false }), b.getContext("2d", { alpha: false })];
     }, []);
 
     React.useLayoutEffect(() => {
-        document.documentElement.append(bufferA);
-        document.documentElement.append(bufferB);
+        if (bufferACtx === null || bufferBCtx === null) return;
+        document.documentElement.append(bufferACtx.canvas);
+        document.documentElement.append(bufferBCtx.canvas);
         return () => {
-            bufferA.remove();
-            bufferB.remove();
+            bufferACtx.canvas.remove();
+            bufferBCtx.canvas.remove();
         };
-    }, [bufferA, bufferB]);
+    }, [bufferACtx, bufferBCtx]);
 
     const renderStateProvider = React.useMemo(() => new RenderStateProvider(), []);
 
     const maxDPR = enableFirefoxRescaling && scrolling ? 1 : enableSafariRescaling && scrolling ? 2 : 5;
     const minimumCellWidth = experimental?.disableMinimumCellWidth === true ? 1 : 10;
     const lastArgsRef = React.useRef<DrawGridArg>();
+
+    const canvasCtx = React.useRef<CanvasRenderingContext2D | null>(null);
+    const overlayCtx = React.useRef<CanvasRenderingContext2D | null>(null);
+
     const draw = React.useCallback(() => {
         const canvas = ref.current;
         const overlay = overlayRef.current;
         if (canvas === null || overlay === null) return;
+
+        if (canvasCtx.current === null) {
+            canvasCtx.current = canvas.getContext("2d", { alpha: false });
+            canvas.width = 0;
+            canvas.height = 0;
+        }
+
+        if (overlayCtx.current === null) {
+            overlayCtx.current = overlay.getContext("2d", { alpha: false });
+            overlay.width = 0;
+            overlay.height = 0;
+        }
+
+        if (canvasCtx.current === null || overlayCtx.current === null || bufferACtx === null || bufferBCtx === null) {
+            return;
+        }
 
         let didOverride = false;
         const overrideCursor = (cursor: React.CSSProperties["cursor"]) => {
@@ -715,10 +734,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
         const last = lastArgsRef.current;
         const current = {
-            canvas,
-            bufferA,
-            bufferB,
-            headerCanvas: overlay,
+            headerCanvasCtx: overlayCtx.current,
+            canvasCtx: canvasCtx.current,
+            bufferACtx,
+            bufferBCtx,
             width,
             height,
             cellXOffset,
@@ -788,8 +807,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             setDrawCursorOverride(undefined);
         }
     }, [
-        bufferA,
-        bufferB,
+        bufferACtx,
+        bufferBCtx,
         width,
         height,
         cellXOffset,

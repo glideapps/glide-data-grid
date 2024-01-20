@@ -64,6 +64,19 @@ export function withAlpha(color: string, alpha: number): string {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+const blendResultCache = new Map<string, string>();
+
+export function blendCache(color: string, background: string | undefined): string {
+    const cacheKey = `${color}-${background}`;
+
+    const maybe = blendResultCache.get(cacheKey);
+    if (maybe !== undefined) return maybe;
+
+    const result = blend(color, background);
+    blendResultCache.set(cacheKey, result);
+    return result;
+}
+
 /** @category Drawing */
 export function blend(color: string, background: string | undefined): string {
     if (background === undefined) return color;

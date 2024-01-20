@@ -1,10 +1,10 @@
-import type { GetCellRendererCallback } from "../../cells/cell-types.js";
-import type { RenderStateProvider } from "../../common/render-state-provider.js";
-import type { FullTheme } from "../../common/styles.js";
-import type { HoverValues } from "./animation-manager.js";
+import type { GetCellRendererCallback } from "../../../cells/cell-types.js";
+import type { RenderStateProvider } from "../../../common/render-state-provider.js";
+import type { FullTheme } from "../../../common/styles.js";
+import type { HoverValues } from "../animation-manager.js";
 import type { MappedGridColumn } from "./data-grid-lib.js";
-import type { GroupDetailsCallback, GetRowThemeCallback, Highlight, BlitData } from "./data-grid-render.js";
-import type { SpriteManager } from "./data-grid-sprites.js";
+import type { BlitData } from "./data-grid-render.blit.js";
+import type { SpriteManager } from "../data-grid-sprites.js";
 import type {
     CompactSelection,
     GridSelection,
@@ -13,10 +13,11 @@ import type {
     DrawHeaderCallback,
     CellList,
     DrawCellCallback,
-} from "./data-grid-types.js";
-import type { CellSet } from "./cell-set.js";
-import type { EnqueueCallback } from "./use-animation-queue.js";
-import type { ImageWindowLoader } from "./image-window-loader-interface.js";
+} from "../data-grid-types.js";
+import type { CellSet } from "../cell-set.js";
+import type { EnqueueCallback } from "../use-animation-queue.js";
+import type { ImageWindowLoader } from "../image-window-loader-interface.js";
+import type { GroupDetailsCallback, GetRowThemeCallback, Highlight } from "./data-grid-render.cells.js";
 
 export type HoverInfo = readonly [Item, Item];
 
@@ -26,10 +27,10 @@ export interface DragAndDropState {
 }
 
 export interface DrawGridArg {
-    readonly canvas: HTMLCanvasElement;
-    readonly headerCanvas: HTMLCanvasElement;
-    readonly bufferA: HTMLCanvasElement;
-    readonly bufferB: HTMLCanvasElement;
+    readonly canvasCtx: CanvasRenderingContext2D;
+    readonly headerCanvasCtx: CanvasRenderingContext2D;
+    readonly bufferACtx: CanvasRenderingContext2D;
+    readonly bufferBCtx: CanvasRenderingContext2D;
     readonly width: number;
     readonly height: number;
     readonly cellXOffset: number;

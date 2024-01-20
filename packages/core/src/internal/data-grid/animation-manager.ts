@@ -1,6 +1,6 @@
 import clamp from "lodash/clamp.js";
 import type { Item } from "./data-grid-types.js";
-import { itemsAreEqual } from "./data-grid-lib.js";
+import { itemsAreEqual } from "./render/data-grid-lib.js";
 
 type StateItem = { item: Item; hoverAmount: number };
 export type HoverValues = readonly Readonly<StateItem>[];

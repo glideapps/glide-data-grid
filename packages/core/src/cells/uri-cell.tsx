@@ -7,7 +7,7 @@ import {
     getMiddleCenterBias,
     measureTextCached,
     prepTextCell,
-} from "../internal/data-grid/data-grid-lib.js";
+} from "../internal/data-grid/render/data-grid-lib.js";
 import {
     GridCellKind,
     type BaseGridCell,
@@ -16,7 +16,7 @@ import {
 } from "../internal/data-grid/data-grid-types.js";
 import type { InternalCellRenderer } from "./cell-types.js";
 import type { FullTheme } from "../common/styles.js";
-import { pointInRect } from "../internal/data-grid/data-grid-render.js";
+import { pointInRect } from "../common/math.js";
 
 function getTextRect(
     metrics: TextMetrics,
