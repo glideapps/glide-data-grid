@@ -2455,6 +2455,11 @@ function drawGrid(arg, lastArg) {
       width: freezeColumns,
       height: 300
     }, {
+      x: 0,
+      y: -2,
+      width: freezeColumns,
+      height: 2
+    }, {
       x: cellXOffset,
       y: rows - freezeTrailingRows,
       width: viewRegionWidth,
@@ -11481,4 +11486,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.5ae4655d.iframe.bundle.js.map
+//# sourceMappingURL=4981.9c4077b7.iframe.bundle.js.map

@@ -4880,6 +4880,11 @@ function drawGrid(arg, lastArg) {
       width: freezeColumns,
       height: 300
     }, {
+      x: 0,
+      y: -2,
+      width: freezeColumns,
+      height: 2
+    }, {
       x: cellXOffset,
       y: rows - freezeTrailingRows,
       width: viewRegionWidth,
@@ -7547,4 +7552,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7671.739c9e4d.iframe.bundle.js.map
+//# sourceMappingURL=7671.f8ade198.iframe.bundle.js.map
