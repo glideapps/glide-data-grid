@@ -124,6 +124,7 @@ export function Simplenotest() {
                 owned: true,
             })}
             freezeColumns={0}
+            freezeTrailingColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
             freezeTrailingRows={0}
@@ -214,6 +215,7 @@ export function SelectedCellnotest() {
                 rows: CompactSelection.empty(),
             }}
             freezeColumns={0}
+            freezeTrailingColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
             freezeTrailingRows={0}
@@ -300,6 +302,7 @@ export function SelectedRownotest() {
                 columns: CompactSelection.empty(),
             }}
             freezeColumns={0}
+            freezeTrailingColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
             freezeTrailingRows={0}
@@ -386,6 +389,7 @@ export const SelectedColumnnotest = () => {
                 columns: CompactSelection.fromSingleSelection([2, 4]),
             }}
             freezeColumns={0}
+            freezeTrailingColumns={0}
             firstColAccessible={true}
             verticalBorder={() => true}
             freezeTrailingRows={0}

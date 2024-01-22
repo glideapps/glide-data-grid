@@ -77,6 +77,7 @@ const basicProps: DataGridProps = {
     enableGroups: false,
     theme: mergeAndRealizeTheme(getDefaultTheme()),
     freezeColumns: 0,
+    freezeTrailingColumns: 0,
     selection: {
         current: undefined,
         rows: CompactSelection.empty(),

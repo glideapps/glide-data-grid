@@ -108,7 +108,6 @@ type Props = Partial<
         | "disabledRows"
         | "enableGroups"
         | "firstColAccessible"
-        | "firstColSticky"
         | "freezeColumns"
         | "hasAppendRow"
         | "getCellContent"
@@ -751,6 +750,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onPaste,
         copyHeaders = false,
         freezeColumns = 0,
+        freezeTrailingColumns = 0,
         cellActivationBehavior = "second-click",
         rowSelectionMode = "auto",
         rowMarkerStartIndex = 1,
@@ -3887,6 +3887,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     drawCell={drawCell}
                     disabledRows={disabledRows}
                     freezeColumns={mangledFreezeColumns}
+                    freezeTrailingColumns={freezeTrailingColumns}
                     lockColumns={rowMarkerOffset}
                     firstColAccessible={rowMarkerOffset === 0}
                     getCellContent={getMangledCellContent}

@@ -152,6 +152,7 @@ export function Simplenotest() {
             columns={columns}
             getCellContent={getCellContent}
             freezeColumns={0}
+            freezeTrailingColumns={0}
             verticalBorder={() => true}
             smoothScrollX={true}
             smoothScrollY={true}

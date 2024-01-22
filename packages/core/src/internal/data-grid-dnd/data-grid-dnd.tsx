@@ -377,6 +377,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             fixedShadowX={p.fixedShadowX}
             fixedShadowY={p.fixedShadowY}
             freezeColumns={p.freezeColumns}
+            freezeTrailingColumns={p.freezeTrailingColumns}
             getCellRenderer={p.getCellRenderer}
             getGroupDetails={p.getGroupDetails}
             getRowThemeOverride={p.getRowThemeOverride}

@@ -17,6 +17,7 @@ import type { FullyDefined } from "../../../common/support.js";
 export interface MappedGridColumn extends FullyDefined<SizedGridColumn> {
     sourceIndex: number;
     sticky: boolean;
+    stickyEnd: boolean;
 }
 
 export function useMappedColumns(
@@ -36,6 +37,7 @@ export function useMappedColumns(
                     overlayIcon: c.overlayIcon,
                     sourceIndex: i,
                     sticky: i < freezeColumns,
+                    stickyEnd: i >= columns.length - freezeColumns,
                     style: c.style,
                     themeOverride: c.themeOverride,
                     title: c.title,
