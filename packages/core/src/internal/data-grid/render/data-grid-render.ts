@@ -386,6 +386,12 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 height: 300,
             },
             {
+                x: 0,
+                y: -2,
+                width: freezeColumns,
+                height: 2,
+            },
+            {
                 x: cellXOffset,
                 y: rows - freezeTrailingRows,
                 width: viewRegionWidth,
