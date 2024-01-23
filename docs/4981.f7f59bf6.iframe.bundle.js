@@ -7498,13 +7498,13 @@ const DataEditorImpl = (p, forwardedRef) => {
       }
       if (mouseState.fillHandle === true && ((_mouseState$previousS = mouseState.previousSelection) === null || _mouseState$previousS === void 0 ? void 0 : _mouseState$previousS.current) !== undefined) {
         const prevRange = mouseState.previousSelection.current.range;
-        row = Math.min(row, lastRowSticky ? rows - 1 : rows);
+        row = Math.min(row, showTrailingBlankRow ? rows - 1 : rows);
         const rect = getClosestRect(prevRange, col, row, allowedFillDirections);
         setFillHighlightRegion(rect);
       } else {
-        const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
+        const startedFromLastStickyRow = showTrailingBlankRow && selectedRow === rows;
         if (startedFromLastStickyRow) return;
-        const landedOnLastStickyRow = lastRowSticky && row === rows;
+        const landedOnLastStickyRow = showTrailingBlankRow && row === rows;
         if (landedOnLastStickyRow) {
           if (args.kind === outOfBoundsKind) row--;else return;
         }
@@ -7527,7 +7527,7 @@ const DataEditorImpl = (p, forwardedRef) => {
       ...args,
       location: [args.location[0] - rowMarkerOffset, args.location[1]]
     });
-  }, [allowedFillDirections, mouseState, rowMarkerOffset, rowSelect, gridSelection, rangeSelect, onItemHovered, setSelectedRows, lastRowSticky, rows, setCurrent]);
+  }, [allowedFillDirections, mouseState, rowMarkerOffset, rowSelect, gridSelection, rangeSelect, onItemHovered, setSelectedRows, showTrailingBlankRow, rows, setCurrent]);
   const adjustSelectionOnScroll = react.useCallback(() => {
     const args = hoveredRef.current;
     if (args === undefined) return;
@@ -8007,14 +8007,14 @@ const DataEditorImpl = (p, forwardedRef) => {
     const [col, row] = gridSelection.current.cell;
     const vr = visibleRegionRef.current;
     if (!event.metaKey && !event.ctrlKey && gridSelection.current !== undefined && event.key.length === 1 && /[ -~]/g.test(event.key) && event.bounds !== undefined && (0,data_grid_types/* isReadWriteCell */.Qo)(getCellContent([col - rowMarkerOffset, Math.max(0, Math.min(row, rows - 1))]))) {
-      if ((!lastRowSticky || row !== rows) && (vr.y > row || row > vr.y + vr.height || vr.x > col || col > vr.x + vr.width)) {
+      if ((!showTrailingBlankRow || row !== rows) && (vr.y > row || row > vr.y + vr.height || vr.x > col || col > vr.x + vr.width)) {
         return;
       }
       reselect(event.bounds, true, event.key);
       event.stopPropagation();
       event.preventDefault();
     }
-  }, [onKeyDownIn, handleFixedKeybindings, gridSelection, getCellContent, rowMarkerOffset, rows, lastRowSticky, reselect]);
+  }, [onKeyDownIn, handleFixedKeybindings, gridSelection, getCellContent, rowMarkerOffset, rows, showTrailingBlankRow, reselect]);
   const onContextMenu = react.useCallback((args, preventDefault) => {
     const adjustedCol = args.location[0] - rowMarkerOffset;
     if (args.kind === "header") {
@@ -11486,4 +11486,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.d4f46934.iframe.bundle.js.map
+//# sourceMappingURL=4981.f7f59bf6.iframe.bundle.js.map
