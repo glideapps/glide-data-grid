@@ -48,7 +48,8 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
     draw: a => {
         const { cell, theme, overrideCursor, hoverX, hoverY, rect, ctx } = a;
         const txt = cell.displayData ?? cell.data;
-        if (overrideCursor !== undefined && cell.hoverEffect === true && hoverX !== undefined && hoverY !== undefined) {
+        const isLinky = cell.hoverEffect === true;
+        if (overrideCursor !== undefined && isLinky && hoverX !== undefined && hoverY !== undefined) {
             const m = measureTextCached(txt, ctx, theme.baseFontFull);
             const textRect = getTextRect(m, rect, theme, cell.contentAlign);
 
@@ -65,7 +66,7 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
                 ctx.moveTo(rect.x + x, Math.floor(rect.y + drawY + h + underlineOffset) + 0.5);
                 ctx.lineTo(rect.x + x + w, Math.floor(rect.y + drawY + h + underlineOffset) + 0.5);
 
-                ctx.strokeStyle = theme.textDark;
+                ctx.strokeStyle = theme.linkColor;
                 ctx.stroke();
 
                 ctx.save();
@@ -78,6 +79,7 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
             }
         }
 
+        ctx.fillStyle = isLinky ? theme.linkColor : theme.textDark;
         drawTextCell(a, txt, cell.contentAlign);
     },
     onClick: a => {

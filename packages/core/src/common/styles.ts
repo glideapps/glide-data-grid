@@ -111,7 +111,7 @@ const dataEditorBaseTheme: Theme = {
     borderColor: "rgba(115, 116, 131, 0.16)",
     drilldownBorder: "rgba(0, 0, 0, 0)",
 
-    linkColor: "#4F5DFF",
+    linkColor: "#353fb5",
 
     cellHorizontalPadding: 8,
     cellVerticalPadding: 3,
