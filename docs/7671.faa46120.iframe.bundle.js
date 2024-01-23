@@ -1792,8 +1792,8 @@ function splitRectIntoRegions(rect, splitIndicies, width, height, splitLocations
   const isOverTop = inY < tSplit;
   const isOverRight = inX + inW > rSplit;
   const isOverBottom = inY + inH > bSplit;
-  const isOverCenterVert = inX > lSplit && inX < rSplit || inRight > lSplit && inRight < rSplit || inX < lSplit && inRight > rSplit;
-  const isOverCenterHoriz = inY > tSplit && inY < bSplit || inBottom > tSplit && inBottom < bSplit || inY < tSplit && inBottom > bSplit;
+  const isOverCenterVert = inX >= lSplit && inX < rSplit || inRight > lSplit && inRight <= rSplit || inX < lSplit && inRight > rSplit;
+  const isOverCenterHoriz = inY >= tSplit && inY < bSplit || inBottom > tSplit && inBottom <= bSplit || inY < tSplit && inBottom > bSplit;
   const isOverCenter = isOverCenterVert && isOverCenterHoriz;
   if (isOverCenter) {
     const x = Math.max(inX, lSplit);
@@ -7552,4 +7552,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7671.f8ade198.iframe.bundle.js.map
+//# sourceMappingURL=7671.faa46120.iframe.bundle.js.map

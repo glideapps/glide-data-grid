@@ -850,8 +850,8 @@ function splitRectIntoRegions(rect, splitIndicies, width, height, splitLocations
   const isOverTop = inY < tSplit;
   const isOverRight = inX + inW > rSplit;
   const isOverBottom = inY + inH > bSplit;
-  const isOverCenterVert = inX > lSplit && inX < rSplit || inRight > lSplit && inRight < rSplit || inX < lSplit && inRight > rSplit;
-  const isOverCenterHoriz = inY > tSplit && inY < bSplit || inBottom > tSplit && inBottom < bSplit || inY < tSplit && inBottom > bSplit;
+  const isOverCenterVert = inX >= lSplit && inX < rSplit || inRight > lSplit && inRight <= rSplit || inX < lSplit && inRight > rSplit;
+  const isOverCenterHoriz = inY >= tSplit && inY < bSplit || inBottom > tSplit && inBottom <= bSplit || inY < tSplit && inBottom > bSplit;
   const isOverCenter = isOverCenterVert && isOverCenterHoriz;
   if (isOverCenter) {
     const x = Math.max(inX, lSplit);
@@ -11486,4 +11486,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.9c4077b7.iframe.bundle.js.map
+//# sourceMappingURL=4981.d4f46934.iframe.bundle.js.map
