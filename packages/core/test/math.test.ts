@@ -96,6 +96,27 @@ describe("splitRectIntoRegions", () => {
         expect(result).toEqual([]);
     });
 
+    it("works with a single column", () => {
+        const rect = { x: 1, y: 1, width: 1, height: 1 };
+        const result = splitRectIntoRegions(rect, [1, 0, 2, 100], 2, 100, splitLocations);
+        expect(result).toEqual([
+            {
+                clip: {
+                    height: 61,
+                    width: 61,
+                    x: 20,
+                    y: 20,
+                },
+                rect: {
+                    height: 1,
+                    width: 1,
+                    x: 1,
+                    y: 1,
+                },
+            },
+        ]);
+    });
+
     it("returns no regions for a rectangle not overlapping the split indices", () => {
         const rect = { x: 30, y: 30, width: 10, height: 10 };
         const result = splitRectIntoRegions(rect, splitIndices, width, height, splitLocations);

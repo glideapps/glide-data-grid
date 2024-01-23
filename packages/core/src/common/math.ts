@@ -150,10 +150,12 @@ export function splitRectIntoRegions(
     const isOverBottom = inY + inH > bSplit;
 
     const isOverCenterVert =
-        (inX > lSplit && inX < rSplit) || (inRight > lSplit && inRight < rSplit) || (inX < lSplit && inRight > rSplit);
+        (inX >= lSplit && inX < rSplit) ||
+        (inRight > lSplit && inRight <= rSplit) ||
+        (inX < lSplit && inRight > rSplit);
     const isOverCenterHoriz =
-        (inY > tSplit && inY < bSplit) ||
-        (inBottom > tSplit && inBottom < bSplit) ||
+        (inY >= tSplit && inY < bSplit) ||
+        (inBottom > tSplit && inBottom <= bSplit) ||
         (inY < tSplit && inBottom > bSplit);
 
     const isOverCenter = isOverCenterVert && isOverCenterHoriz;
