@@ -2106,6 +2106,12 @@ function makeCSSStyle(theme) {
     "--gdg-marker-font-style": theme.markerFontStyle,
     "--gdg-font-family": theme.fontFamily,
     "--gdg-editor-font-size": theme.editorFontSize,
+    ...(theme.resizeIndicatorColor === undefined ? {} : {
+      "--gdg-resize-indicator-color": theme.resizeIndicatorColor
+    }),
+    ...(theme.headerBottomBorderColor === undefined ? {} : {
+      "--gdg-header-bottom-border-color": theme.headerBottomBorderColor
+    }),
     ...(theme.roundingRadius === undefined ? {} : {
       "--gdg-rounding-radius": `${theme.roundingRadius}px`
     })
@@ -7554,4 +7560,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7671.f787f6aa.iframe.bundle.js.map
+//# sourceMappingURL=7671.f05a278c.iframe.bundle.js.map

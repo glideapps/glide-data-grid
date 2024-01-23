@@ -47,6 +47,12 @@ function makeCSSStyle(theme) {
     "--gdg-marker-font-style": theme.markerFontStyle,
     "--gdg-font-family": theme.fontFamily,
     "--gdg-editor-font-size": theme.editorFontSize,
+    ...(theme.resizeIndicatorColor === undefined ? {} : {
+      "--gdg-resize-indicator-color": theme.resizeIndicatorColor
+    }),
+    ...(theme.headerBottomBorderColor === undefined ? {} : {
+      "--gdg-header-bottom-border-color": theme.headerBottomBorderColor
+    }),
     ...(theme.roundingRadius === undefined ? {} : {
       "--gdg-rounding-radius": `${theme.roundingRadius}px`
     })
@@ -11488,4 +11494,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.b77f31f3.iframe.bundle.js.map
+//# sourceMappingURL=4981.295f673c.iframe.bundle.js.map
