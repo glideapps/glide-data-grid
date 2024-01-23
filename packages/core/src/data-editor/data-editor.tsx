@@ -2529,14 +2529,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                 if (mouseState.fillHandle === true && mouseState.previousSelection?.current !== undefined) {
                     const prevRange = mouseState.previousSelection.current.range;
-                    row = Math.min(row, lastRowSticky ? rows - 1 : rows);
+                    row = Math.min(row, showTrailingBlankRow ? rows - 1 : rows);
                     const rect = getClosestRect(prevRange, col, row, allowedFillDirections);
                     setFillHighlightRegion(rect);
                 } else {
-                    const startedFromLastStickyRow = lastRowSticky && selectedRow === rows;
+                    const startedFromLastStickyRow = showTrailingBlankRow && selectedRow === rows;
                     if (startedFromLastStickyRow) return;
 
-                    const landedOnLastStickyRow = lastRowSticky && row === rows;
+                    const landedOnLastStickyRow = showTrailingBlankRow && row === rows;
                     if (landedOnLastStickyRow) {
                         if (args.kind === outOfBoundsKind) row--;
                         else return;
@@ -2577,7 +2577,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rangeSelect,
             onItemHovered,
             setSelectedRows,
-            lastRowSticky,
+            showTrailingBlankRow,
             rows,
             setCurrent,
         ]
@@ -3190,7 +3190,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, Math.min(row, rows - 1))]))
             ) {
                 if (
-                    (!lastRowSticky || row !== rows) &&
+                    (!showTrailingBlankRow || row !== rows) &&
                     (vr.y > row || row > vr.y + vr.height || vr.x > col || col > vr.x + vr.width)
                 ) {
                     return;
@@ -3207,7 +3207,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             getCellContent,
             rowMarkerOffset,
             rows,
-            lastRowSticky,
+            showTrailingBlankRow,
             reselect,
         ]
     );

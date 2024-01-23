@@ -62,7 +62,7 @@ export const AddData: React.VFC = () => {
             onCellEdited={setCellValue} // Sets the mock cell content
             trailingRowOptions={{
                 // How to get the trailing row to look right
-                sticky: true,
+                sticky: false,
                 tint: true,
                 hint: "New row...",
             }}
