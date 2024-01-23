@@ -37,7 +37,7 @@ export default {
 };
 
 export const FillHandle: React.VFC = () => {
-    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(1, false);
+    const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
 
     const [numRows, setNumRows] = React.useState(50);
 
