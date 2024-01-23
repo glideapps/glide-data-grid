@@ -75,7 +75,7 @@ const dataEditorBaseTheme = {
   bgSearchResult: "#fff9e3",
   borderColor: "rgba(115, 116, 131, 0.16)",
   drilldownBorder: "rgba(0, 0, 0, 0)",
-  linkColor: "#4F5DFF",
+  linkColor: "#353fb5",
   cellHorizontalPadding: 8,
   cellVerticalPadding: 3,
   headerIconSize: 18,
@@ -9838,7 +9838,8 @@ const uriCellRenderer = {
       ctx
     } = a;
     const txt = (_cell$displayData = cell.displayData) !== null && _cell$displayData !== void 0 ? _cell$displayData : cell.data;
-    if (overrideCursor !== undefined && cell.hoverEffect === true && hoverX !== undefined && hoverY !== undefined) {
+    const isLinky = cell.hoverEffect === true;
+    if (overrideCursor !== undefined && isLinky && hoverX !== undefined && hoverY !== undefined) {
       const m = (0,data_grid_lib/* measureTextCached */.P7)(txt, ctx, theme.baseFontFull);
       const textRect = getTextRect(m, rect, theme, cell.contentAlign);
       const {
@@ -9855,7 +9856,7 @@ const uriCellRenderer = {
         ctx.beginPath();
         ctx.moveTo(rect.x + x, Math.floor(rect.y + drawY + h + underlineOffset) + 0.5);
         ctx.lineTo(rect.x + x + w, Math.floor(rect.y + drawY + h + underlineOffset) + 0.5);
-        ctx.strokeStyle = theme.textDark;
+        ctx.strokeStyle = theme.linkColor;
         ctx.stroke();
         ctx.save();
         ctx.fillStyle = a.cellFillColor;
@@ -9890,6 +9891,7 @@ const uriCellRenderer = {
         ctx.restore();
       }
     }
+    ctx.fillStyle = isLinky ? theme.linkColor : theme.textDark;
     (0,data_grid_lib/* drawTextCell */.uN)(a, txt, cell.contentAlign);
   },
   onClick: a => {
@@ -11486,4 +11488,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.f7f59bf6.iframe.bundle.js.map
+//# sourceMappingURL=4981.b77f31f3.iframe.bundle.js.map
