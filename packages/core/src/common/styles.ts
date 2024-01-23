@@ -36,6 +36,12 @@ export function makeCSSStyle(theme: Theme): Record<string, string> {
         "--gdg-marker-font-style": theme.markerFontStyle,
         "--gdg-font-family": theme.fontFamily,
         "--gdg-editor-font-size": theme.editorFontSize,
+        ...(theme.resizeIndicatorColor === undefined
+            ? {}
+            : { "--gdg-resize-indicator-color": theme.resizeIndicatorColor }),
+        ...(theme.headerBottomBorderColor === undefined
+            ? {}
+            : { "--gdg-header-bottom-border-color": theme.headerBottomBorderColor }),
         ...(theme.roundingRadius === undefined ? {} : { "--gdg-rounding-radius": `${theme.roundingRadius}px` }),
     };
 }
