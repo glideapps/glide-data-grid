@@ -836,6 +836,8 @@ export function drawHeader(
   const INFO_ICON_OFFSET = 22;
   const ALERT_ICON_WIDTH = 16;
   const INFO_ICON_WIDTH = 16;
+  const ALERT_ICON_PADDING = 32;
+  const INFO_ICON_PADDING = 32;
   const verticalPosition = menuBounds.y + menuBounds.height / 2 - VERTICAL_OFFSET;
   const defaultHorizontalPosition = menuBounds.x + menuBounds.width / 2 - HORIZONTAL_OFFSET;
 
@@ -896,10 +898,10 @@ export function drawHeader(
     textMaxWidth -= SORTING_SIZE.width;
   }
   if (c.alertIcon !== undefined) {
-    textMaxWidth -= ALERT_ICON_WIDTH;
+    textMaxWidth -= ALERT_ICON_PADDING;
   }
   if (c.infoIcon !== undefined) {
-    textMaxWidth -= INFO_ICON_WIDTH;
+    textMaxWidth -= INFO_ICON_PADDING;
   }
 
   const clippedText = clipCanvasString(
