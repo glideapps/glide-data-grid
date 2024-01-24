@@ -35,27 +35,39 @@ export default {
 export const ThemePerRow: React.VFC = () => {
     const { cols, getCellContent, onColumnResize, setCellValue } = useMockDataGenerator(5);
 
+    const realCols = React.useMemo(() => {
+        const c = [...cols];
+        c[3] = {
+            ...c[3],
+            themeOverride: {
+                bgCell: "#d6fafd",
+            },
+        };
+        return c;
+    }, [cols]);
+
     return (
         <DataEditor
             {...defaultProps}
             getCellContent={getCellContent}
-            columns={cols}
-            trailingRowOptions={{
-                sticky: true,
-                tint: true,
-            }}
-            onRowAppended={() => undefined}
+            columns={realCols}
+            height="100%"
+            // trailingRowOptions={{
+            //     sticky: true,
+            //     tint: true,
+            // }}
+            // onRowAppended={() => undefined}
             getRowThemeOverride={i =>
                 i % 2 === 0
                     ? undefined
                     : {
-                          bgCell: "#f0f8ff",
-                          borderColor: "#3f90e0",
+                          bgCell: "#e0f0ff88",
+                          //   borderColor: "#3f90e0",
                       }
             }
             onCellEdited={setCellValue}
             onColumnResize={onColumnResize}
-            rows={1_000_000}
+            rows={10}
         />
     );
 };

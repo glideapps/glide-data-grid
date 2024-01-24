@@ -146,6 +146,135 @@ export function overdrawStickyBoundaries(
     }
 }
 
+const getMinMaxXY = (drawRegions: Rectangle[] | undefined, width: number, height: number) => {
+    let minX = 0;
+    let maxX = width;
+    let minY = 0;
+    let maxY = height;
+
+    if (drawRegions !== undefined && drawRegions.length > 0) {
+        minX = Number.MAX_SAFE_INTEGER;
+        minY = Number.MAX_SAFE_INTEGER;
+        maxX = Number.MIN_SAFE_INTEGER;
+        maxY = Number.MIN_SAFE_INTEGER;
+        for (const r of drawRegions) {
+            minX = Math.min(minX, r.x - 1);
+            maxX = Math.max(maxX, r.x + r.width + 1);
+            minY = Math.min(minY, r.y - 1);
+            maxY = Math.max(maxY, r.y + r.height + 1);
+        }
+    }
+
+    return { minX, maxX, minY, maxY };
+};
+
+export function drawExtraRowThemes(
+    ctx: CanvasRenderingContext2D,
+    effectiveCols: readonly MappedGridColumn[],
+    cellYOffset: number,
+    translateX: number,
+    translateY: number,
+    width: number,
+    height: number,
+    drawRegions: Rectangle[] | undefined,
+    totalHeaderHeight: number,
+    getRowHeight: (row: number) => number,
+    getRowThemeOverride: GetRowThemeCallback | undefined,
+    verticalBorder: (col: number) => boolean,
+    freezeTrailingRows: number,
+    rows: number,
+    theme: FullTheme
+) {
+    const bgCell = theme.bgCell;
+
+    const { minX, maxX, minY, maxY } = getMinMaxXY(drawRegions, width, height);
+
+    const toDraw: { x: number; y: number; w: number; h: number; color: string }[] = [];
+
+    const freezeY = height - getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight);
+
+    // row overflow
+    let y = totalHeaderHeight;
+    let row = cellYOffset;
+    let extraRowsStartY = 0;
+    while (y + translateY < freezeY) {
+        const ty = y + translateY;
+        const rh = getRowHeight(row);
+        if (ty >= minY && ty <= maxY - 1) {
+            const rowTheme = getRowThemeOverride?.(row);
+            const rowThemeBgCell = rowTheme?.bgCell;
+            const needDraw =
+                rowThemeBgCell !== undefined && rowThemeBgCell !== bgCell && row >= rows - freezeTrailingRows;
+            if (needDraw) {
+                toDraw.push({
+                    x: minX,
+                    y: ty,
+                    w: maxX - minX,
+                    h: rh,
+                    color: rowThemeBgCell,
+                });
+            }
+        }
+
+        y += rh;
+        if (row < rows - freezeTrailingRows) extraRowsStartY = y;
+        row++;
+    }
+
+    // column overflow
+    let x = 0;
+    const h = Math.min(freezeY, maxY) - extraRowsStartY;
+    if (h > 0) {
+        for (let index = 0; index < effectiveCols.length; index++) {
+            const c = effectiveCols[index];
+            if (c.width === 0) continue;
+            const tx = c.sticky ? x : x + translateX;
+            const colThemeBgCell = c.themeOverride?.bgCell;
+            if (
+                colThemeBgCell !== undefined &&
+                colThemeBgCell !== bgCell &&
+                tx >= minX &&
+                tx <= maxX &&
+                verticalBorder(index + 1)
+            ) {
+                toDraw.push({
+                    x: tx,
+                    y: extraRowsStartY,
+                    w: c.width,
+                    h,
+                    color: colThemeBgCell,
+                });
+            }
+
+            x += c.width;
+        }
+    }
+
+    if (toDraw.length === 0) return;
+
+    let color: string | undefined;
+    ctx.beginPath();
+    // render in reverse order because we computed and added the columns last, but they should actually be lower
+    // priority than the rows.
+    for (let i = toDraw.length - 1; i >= 0; i--) {
+        const r = toDraw[i];
+        if (color === undefined) {
+            color = r.color;
+        } else if (r.color !== color) {
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.beginPath();
+            color = r.color;
+        }
+        ctx.rect(r.x, r.y, r.w, r.h);
+    }
+    if (color !== undefined) {
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+    ctx.beginPath();
+}
+
 // lines are effectively drawn on the top left edge of a cell.
 export function drawGridLines(
     ctx: CanvasRenderingContext2D,
@@ -179,23 +308,7 @@ export function drawGridLines(
     const hColor = theme.horizontalBorderColor ?? theme.borderColor;
     const vColor = theme.borderColor;
 
-    let minX = 0;
-    let maxX = width;
-    let minY = 0;
-    let maxY = height;
-
-    if (drawRegions !== undefined && drawRegions.length > 0) {
-        minX = Number.MAX_SAFE_INTEGER;
-        minY = Number.MAX_SAFE_INTEGER;
-        maxX = Number.MIN_SAFE_INTEGER;
-        maxY = Number.MIN_SAFE_INTEGER;
-        for (const r of drawRegions) {
-            minX = Math.min(minX, r.x - 1);
-            maxX = Math.max(maxX, r.x + r.width + 1);
-            minY = Math.min(minY, r.y - 1);
-            maxY = Math.max(maxY, r.y + r.height + 1);
-        }
-    }
+    const { minX, maxX, minY, maxY } = getMinMaxXY(drawRegions, width, height);
 
     const toDraw: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
 
