@@ -2071,6 +2071,8 @@ class RenderStateProvider extends WindowingTrackerBase {
 /* harmony export */ });
 /* unused harmony export useTheme */
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
+/* harmony import */ var _internal_data_grid_color_parser_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./packages/core/src/internal/data-grid/color-parser.ts");
+
 
 function makeCSSStyle(theme) {
   var _theme$textGroupHeade, _theme$horizontalBord;
@@ -2169,7 +2171,11 @@ function mergeAndRealizeTheme(theme) {
     if (overlay !== undefined) {
       for (const key in overlay) {
         if (overlay.hasOwnProperty(key)) {
-          merged[key] = overlay[key];
+          if (key === "bgCell") {
+            merged[key] = (0,_internal_data_grid_color_parser_js__WEBPACK_IMPORTED_MODULE_1__/* .blend */ .NH)(overlay[key], merged[key]);
+          } else {
+            merged[key] = overlay[key];
+          }
         }
       }
     }
@@ -4241,20 +4247,7 @@ function overdrawStickyBoundaries(ctx, effectiveCols, width, height, freezeTrail
     ctx.stroke();
   }
 }
-function drawGridLines(ctx, effectiveCols, cellYOffset, translateX, translateY, width, height, drawRegions, spans, groupHeaderHeight, totalHeaderHeight, getRowHeight, getRowThemeOverride, verticalBorder, freezeTrailingRows, rows, theme) {
-  var _theme$horizontalBord2;
-  let verticalOnly = arguments.length > 17 && arguments[17] !== undefined ? arguments[17] : false;
-  if (spans !== undefined) {
-    ctx.beginPath();
-    ctx.save();
-    ctx.rect(0, 0, width, height);
-    for (const span of spans) {
-      ctx.rect(span.x + 1, span.y + 1, span.width - 1, span.height - 1);
-    }
-    ctx.clip("evenodd");
-  }
-  const hColor = (_theme$horizontalBord2 = theme.horizontalBorderColor) !== null && _theme$horizontalBord2 !== void 0 ? _theme$horizontalBord2 : theme.borderColor;
-  const vColor = theme.borderColor;
+const getMinMaxXY = (drawRegions, width, height) => {
   let minX = 0;
   let maxX = width;
   let minY = 0;
@@ -4271,6 +4264,109 @@ function drawGridLines(ctx, effectiveCols, cellYOffset, translateX, translateY, 
       maxY = Math.max(maxY, r.y + r.height + 1);
     }
   }
+  return {
+    minX,
+    maxX,
+    minY,
+    maxY
+  };
+};
+function drawExtraRowThemes(ctx, effectiveCols, cellYOffset, translateX, translateY, width, height, drawRegions, totalHeaderHeight, getRowHeight, getRowThemeOverride, verticalBorder, freezeTrailingRows, rows, theme) {
+  const bgCell = theme.bgCell;
+  const {
+    minX,
+    maxX,
+    minY,
+    maxY
+  } = getMinMaxXY(drawRegions, width, height);
+  const toDraw = [];
+  const freezeY = height - (0,data_grid_lib/* getFreezeTrailingHeight */.YN)(rows, freezeTrailingRows, getRowHeight);
+  let y = totalHeaderHeight;
+  let row = cellYOffset;
+  let extraRowsStartY = 0;
+  while (y + translateY < freezeY) {
+    const ty = y + translateY;
+    const rh = getRowHeight(row);
+    if (ty >= minY && ty <= maxY - 1) {
+      const rowTheme = getRowThemeOverride === null || getRowThemeOverride === void 0 ? void 0 : getRowThemeOverride(row);
+      const rowThemeBgCell = rowTheme === null || rowTheme === void 0 ? void 0 : rowTheme.bgCell;
+      const needDraw = rowThemeBgCell !== undefined && rowThemeBgCell !== bgCell && row >= rows - freezeTrailingRows;
+      if (needDraw) {
+        toDraw.push({
+          x: minX,
+          y: ty,
+          w: maxX - minX,
+          h: rh,
+          color: rowThemeBgCell
+        });
+      }
+    }
+    y += rh;
+    if (row < rows - freezeTrailingRows) extraRowsStartY = y;
+    row++;
+  }
+  let x = 0;
+  const h = Math.min(freezeY, maxY) - extraRowsStartY;
+  if (h > 0) {
+    for (let index = 0; index < effectiveCols.length; index++) {
+      var _c$themeOverride;
+      const c = effectiveCols[index];
+      if (c.width === 0) continue;
+      const tx = c.sticky ? x : x + translateX;
+      const colThemeBgCell = (_c$themeOverride = c.themeOverride) === null || _c$themeOverride === void 0 ? void 0 : _c$themeOverride.bgCell;
+      if (colThemeBgCell !== undefined && colThemeBgCell !== bgCell && tx >= minX && tx <= maxX && verticalBorder(index + 1)) {
+        toDraw.push({
+          x: tx,
+          y: extraRowsStartY,
+          w: c.width,
+          h,
+          color: colThemeBgCell
+        });
+      }
+      x += c.width;
+    }
+  }
+  if (toDraw.length === 0) return;
+  let color;
+  ctx.beginPath();
+  for (let i = toDraw.length - 1; i >= 0; i--) {
+    const r = toDraw[i];
+    if (color === undefined) {
+      color = r.color;
+    } else if (r.color !== color) {
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.beginPath();
+      color = r.color;
+    }
+    ctx.rect(r.x, r.y, r.w, r.h);
+  }
+  if (color !== undefined) {
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+  ctx.beginPath();
+}
+function drawGridLines(ctx, effectiveCols, cellYOffset, translateX, translateY, width, height, drawRegions, spans, groupHeaderHeight, totalHeaderHeight, getRowHeight, getRowThemeOverride, verticalBorder, freezeTrailingRows, rows, theme) {
+  var _theme$horizontalBord2;
+  let verticalOnly = arguments.length > 17 && arguments[17] !== undefined ? arguments[17] : false;
+  if (spans !== undefined) {
+    ctx.beginPath();
+    ctx.save();
+    ctx.rect(0, 0, width, height);
+    for (const span of spans) {
+      ctx.rect(span.x + 1, span.y + 1, span.width - 1, span.height - 1);
+    }
+    ctx.clip("evenodd");
+  }
+  const hColor = (_theme$horizontalBord2 = theme.horizontalBorderColor) !== null && _theme$horizontalBord2 !== void 0 ? _theme$horizontalBord2 : theme.borderColor;
+  const vColor = theme.borderColor;
+  const {
+    minX,
+    maxX,
+    minY,
+    maxY
+  } = getMinMaxXY(drawRegions, width, height);
   const toDraw = [];
   ctx.beginPath();
   let x = 0.5;
@@ -4956,6 +5052,7 @@ function drawGrid(arg, lastArg) {
   }
   const spans = drawCells(targetCtx, effectiveCols, mappedColumns, height, totalHeaderHeight, translateX, translateY, cellYOffset, rows, getRowHeight, getCellContent, getGroupDetails, getRowThemeOverride, disabledRows, isFocused, drawFocus, freezeTrailingRows, hasAppendRow, drawRegions, damage, selection, prelightCells, highlightRegions, imageLoader, spriteManager, hoverValues, hoverInfo, drawCellCallback, hyperWrapping, theme, enqueue, renderStateProvider, getCellRenderer, overrideCursor, minimumCellWidth);
   drawBlanks(targetCtx, effectiveCols, mappedColumns, width, height, totalHeaderHeight, translateX, translateY, cellYOffset, rows, getRowHeight, getRowThemeOverride, selection.rows, disabledRows, freezeTrailingRows, hasAppendRow, drawRegions, damage, theme);
+  drawExtraRowThemes(targetCtx, effectiveCols, cellYOffset, translateX, translateY, width, height, drawRegions, totalHeaderHeight, getRowHeight, getRowThemeOverride, verticalBorder, freezeTrailingRows, rows, theme);
   drawGridLines(targetCtx, effectiveCols, cellYOffset, translateX, translateY, width, height, drawRegions, spans, groupHeaderHeight, totalHeaderHeight, getRowHeight, getRowThemeOverride, verticalBorder, freezeTrailingRows, rows, theme);
   highlightRedraw === null || highlightRedraw === void 0 || highlightRedraw();
   focusRedraw === null || focusRedraw === void 0 || focusRedraw();
@@ -7560,4 +7657,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7671.f05a278c.iframe.bundle.js.map
+//# sourceMappingURL=7671.3004cd5b.iframe.bundle.js.map
