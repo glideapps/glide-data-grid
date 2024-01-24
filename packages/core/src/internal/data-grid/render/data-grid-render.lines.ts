@@ -196,14 +196,15 @@ export function drawExtraRowThemes(
     // row overflow
     let y = totalHeaderHeight;
     let row = cellYOffset;
-    let y2 = 0;
+    let extraRowsStartY = 0;
     while (y + translateY < freezeY) {
         const ty = y + translateY;
         const rh = getRowHeight(row);
         if (ty >= minY && ty <= maxY - 1) {
             const rowTheme = getRowThemeOverride?.(row);
             const rowThemeBgCell = rowTheme?.bgCell;
-            const needDraw = rowThemeBgCell !== undefined && rowThemeBgCell !== bgCell && row >= rows;
+            const needDraw =
+                rowThemeBgCell !== undefined && rowThemeBgCell !== bgCell && row >= rows - freezeTrailingRows;
             if (needDraw) {
                 toDraw.push({
                     x: minX,
@@ -216,13 +217,13 @@ export function drawExtraRowThemes(
         }
 
         y += rh;
-        if (row < rows) y2 = y;
+        if (row < rows - freezeTrailingRows) extraRowsStartY = y;
         row++;
     }
 
     // column overflow
     let x = 0;
-    const h = Math.min(freezeY, maxY) - y2;
+    const h = Math.min(freezeY, maxY) - extraRowsStartY;
     if (h > 0) {
         for (let index = 0; index < effectiveCols.length; index++) {
             const c = effectiveCols[index];
@@ -238,7 +239,7 @@ export function drawExtraRowThemes(
             ) {
                 toDraw.push({
                     x: tx,
-                    y: y2,
+                    y: extraRowsStartY,
                     w: c.width,
                     h,
                     color: colThemeBgCell,
