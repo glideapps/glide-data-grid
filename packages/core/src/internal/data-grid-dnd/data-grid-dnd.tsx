@@ -133,11 +133,12 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             } else if (dragRow !== undefined && row !== undefined) {
                 setDragRowActive(true);
                 setDropRow(Math.max(0, row));
-            } else {
+            // Don't emit onItemHovered if resizing or reordering a column or row.
+            } else if (resizeCol === undefined && !dragColActive && !dragRowActive) {
                 onItemHovered?.(args);
             }
         },
-        [dragCol, dragRow, dropCol, onItemHovered, lockColumns]
+        [dragCol, dragRow, dropCol, onItemHovered, lockColumns, resizeCol, dragColActive, dragRowActive]
     );
 
     const canDragCol = onColumnMoved !== undefined;
