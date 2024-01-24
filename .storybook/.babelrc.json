@@ -1,24 +1,24 @@
 {
-  "assumptions": {
-    "setPublicClassFields": true,
-    "setSpreadProperties": true
-  },
-  "sourceType": "unambiguous",
-  "presets": [
-    [
-      "@babel/preset-env",
-      {
-        "targets": {
-          "firefox": "60",
-          "chrome": "67",
-          "safari": "12.1"
-        },
-        "exclude": ["@babel/plugin-transform-template-literals"]
-      }
+    "assumptions": {
+        "setPublicClassFields": true,
+        "setSpreadProperties": true
+    },
+    "sourceType": "unambiguous",
+    "presets": [
+        [
+            "@babel/preset-env",
+            {
+                "targets": {
+                    "firefox": "60",
+                    "chrome": "67",
+                    "safari": "12.1"
+                },
+                "exclude": ["@babel/plugin-transform-template-literals"]
+            }
+        ],
+        "@babel/preset-react",
+        "@babel/preset-typescript",
+        "@linaria/babel-preset"
     ],
-    "@babel/preset-react",
-    "@babel/preset-typescript",
-    "@linaria/babel-preset"
-  ],
-  "plugins": ["@babel/plugin-proposal-class-properties"]
+    "plugins": ["@babel/plugin-proposal-class-properties"]
 }

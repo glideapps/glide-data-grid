@@ -1,31 +1,31 @@
-import { styled } from '@linaria/react';
+import { styled } from "@linaria/react";
 
 export const BubblesOverlayEditorStyle = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-
-  .boe-bubble {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-wrap: wrap;
 
-    border-radius: 100px;
+    .boe-bubble {
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
-    padding: 0 8px;
-    height: 20px;
+        border-radius: 100px;
 
-    background-color: var(--gdg-bg-bubble);
-    color: var(--gdg-text-dark);
-    margin: 2px;
-  }
+        padding: 0 8px;
+        height: 20px;
 
-  textarea {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 0px;
-    height: 0px;
+        background-color: var(--gdg-bg-bubble);
+        color: var(--gdg-text-dark);
+        margin: 2px;
+    }
 
-    opacity: 0;
-  }
+    textarea {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 0px;
+        height: 0px;
+
+        opacity: 0;
+    }
 `;

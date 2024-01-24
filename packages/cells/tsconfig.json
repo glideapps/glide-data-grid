@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
-  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
-  "references": [{ "path": "../core" }]
+    "extends": "../../tsconfig.json",
+    "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+    "references": [{ "path": "../core" }]
 }

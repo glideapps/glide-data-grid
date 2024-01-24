@@ -1,11 +1,11 @@
 {
-  "extends": "../../tsconfig.json",
-  "include": ["./src/**/*.ts", "./src/**/*.tsx", "./test/**/*.ts", "./test/**/*.tsx"],
-  "typedocOptions": {
-    "entryPoints": ["src/index.ts"],
-    "out": "docs",
-    "categorizeByGroup": false,
-    "name": "Glide Data Grid",
-    "categoryOrder": ["DataEditor", "*"]
-  }
+    "extends": "../../tsconfig.json",
+    "include": ["./src/**/*.ts", "./src/**/*.tsx", "./test/**/*.ts", "./test/**/*.tsx"],
+    "typedocOptions": {
+        "entryPoints": ["src/index.ts"],
+        "out": "docs",
+        "categorizeByGroup": false,
+        "name": "Glide Data Grid",
+        "categoryOrder": ["DataEditor", "*"]
+    }
 }

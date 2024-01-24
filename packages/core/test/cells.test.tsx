@@ -1,118 +1,118 @@
-import { render } from '@testing-library/react';
-import * as React from 'react';
-import noop from 'lodash/noop.js';
+import { render } from "@testing-library/react";
+import * as React from "react";
+import noop from "lodash/noop.js";
 import {
-  Rectangle,
-  ImageCell,
-  GridCellKind,
-  getDefaultTheme,
-  isObjectEditorCallbackResult,
-  ImageEditorType,
-} from '../src';
-import { assert } from '../src/common/support';
-import { imageCellRenderer } from '../src/data-grid/cells/image-cell';
+    Rectangle,
+    ImageCell,
+    GridCellKind,
+    getDefaultTheme,
+    isObjectEditorCallbackResult,
+    ImageEditorType,
+} from "../src";
+import { assert } from "../src/common/support";
+import { imageCellRenderer } from "../src/data-grid/cells/image-cell";
 
 function getMockEditorTarget(): Rectangle {
-  return {
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 32,
-  };
+    return {
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 32,
+    };
 }
 
 function get2dContext(): CanvasRenderingContext2D {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
 
-  if (ctx === null) {
-    throw new Error('Cannot get a 2d context');
-  }
+    if (ctx === null) {
+        throw new Error("Cannot get a 2d context");
+    }
 
-  return ctx;
+    return ctx;
 }
 
 const getImgCell = (): ImageCell => {
-  return {
-    kind: GridCellKind.Image,
-    data: ['img1.jpg', 'img2.jpg'],
-    allowAdd: true,
-    allowOverlay: true,
-  };
+    return {
+        kind: GridCellKind.Image,
+        data: ["img1.jpg", "img2.jpg"],
+        allowAdd: true,
+        allowOverlay: true,
+    };
 };
 
 // TODO: We can test the editor _much_ more.
 // Let's do that.
-describe('Image cell', () => {
-  it('Renders the right accessibilty string', async () => {
-    const cell = getImgCell();
-    const accessibilityString = imageCellRenderer.getAccessibilityString(cell);
-    expect(accessibilityString).toBe('img1.jpg, img2.jpg');
-  });
+describe("Image cell", () => {
+    it("Renders the right accessibilty string", async () => {
+        const cell = getImgCell();
+        const accessibilityString = imageCellRenderer.getAccessibilityString(cell);
+        expect(accessibilityString).toBe("img1.jpg, img2.jpg");
+    });
 
-  it('Measures a reasonable size', async () => {
-    const cell = getImgCell();
-    const ctx = get2dContext();
-    const autoSize = imageCellRenderer.measure?.(ctx, cell, getDefaultTheme());
-    expect(autoSize).toBe(100);
-  });
+    it("Measures a reasonable size", async () => {
+        const cell = getImgCell();
+        const ctx = get2dContext();
+        const autoSize = imageCellRenderer.measure?.(ctx, cell, getDefaultTheme());
+        expect(autoSize).toBe(100);
+    });
 
-  it('Renders its editor (smoke test)', async () => {
-    const cell = getImgCell();
-    const Editor = imageCellRenderer.provideEditor?.(cell);
-    const target = getMockEditorTarget();
+    it("Renders its editor (smoke test)", async () => {
+        const cell = getImgCell();
+        const Editor = imageCellRenderer.provideEditor?.(cell);
+        const target = getMockEditorTarget();
 
-    assert(!isObjectEditorCallbackResult(Editor));
+        assert(!isObjectEditorCallbackResult(Editor));
 
-    assert(Editor !== undefined);
-    const result = render(
-      <Editor
-        onChange={noop}
-        onFinishedEditing={noop}
-        isHighlighted={false}
-        value={cell}
-        target={target}
-        forceEditMode={false}
-        location={{ row: 0, col: 0 }}
-        setKeyboardEventHandlingMode={noop}
-      />
-    );
+        assert(Editor !== undefined);
+        const result = render(
+            <Editor
+                onChange={noop}
+                onFinishedEditing={noop}
+                isHighlighted={false}
+                value={cell}
+                target={target}
+                forceEditMode={false}
+                location={{ row: 0, col: 0 }}
+                setKeyboardEventHandlingMode={noop}
+            />
+        );
 
-    // Check if the element is actually there
-    await result.findByTestId('GDG-default-image-overlay-editor');
-  });
+        // Check if the element is actually there
+        await result.findByTestId("GDG-default-image-overlay-editor");
+    });
 
-  it('Renders a custom editor (smoke test)', async () => {
-    const cell = getImgCell();
-    const Editor = imageCellRenderer.provideEditor?.(cell);
-    assert(Editor !== undefined);
-    const target = getMockEditorTarget();
+    it("Renders a custom editor (smoke test)", async () => {
+        const cell = getImgCell();
+        const Editor = imageCellRenderer.provideEditor?.(cell);
+        assert(Editor !== undefined);
+        const target = getMockEditorTarget();
 
-    assert(!isObjectEditorCallbackResult(Editor));
+        assert(!isObjectEditorCallbackResult(Editor));
 
-    const CustomEditor: ImageEditorType = () => {
-      return (
-        <div data-testid="GDG-custom-image-overlay-editor">
-          <p>I am an editor, trust me</p>
-        </div>
-      );
-    };
+        const CustomEditor: ImageEditorType = () => {
+            return (
+                <div data-testid="GDG-custom-image-overlay-editor">
+                    <p>I am an editor, trust me</p>
+                </div>
+            );
+        };
 
-    const result = render(
-      <Editor
-        imageEditorOverride={CustomEditor}
-        onChange={noop}
-        onFinishedEditing={noop}
-        isHighlighted={false}
-        value={cell}
-        target={target}
-        forceEditMode={false}
-        location={{ row: 0, col: 0 }}
-        setKeyboardEventHandlingMode={noop}
-      />
-    );
+        const result = render(
+            <Editor
+                imageEditorOverride={CustomEditor}
+                onChange={noop}
+                onFinishedEditing={noop}
+                isHighlighted={false}
+                value={cell}
+                target={target}
+                forceEditMode={false}
+                location={{ row: 0, col: 0 }}
+                setKeyboardEventHandlingMode={noop}
+            />
+        );
 
-    // Check if the element is actually there
-    await result.findByTestId('GDG-custom-image-overlay-editor');
-  });
+        // Check if the element is actually there
+        await result.findByTestId("GDG-custom-image-overlay-editor");
+    });
 });

@@ -1,9 +1,9 @@
-import { decodeHTML } from '../src/data-editor/data-editor-fns';
+import { decodeHTML } from "../src/data-editor/data-editor-fns";
 
-describe('data-editor-fns', () => {
-  test('decode html', () => {
-    const root = document.createElement('table');
-    root.innerHTML = `
+describe("data-editor-fns", () => {
+    test("decode html", () => {
+        const root = document.createElement("table");
+        root.innerHTML = `
             <tbody>
                 <tr>
                     <td>1</td>
@@ -16,11 +16,11 @@ describe('data-editor-fns', () => {
             </tbody>
         `;
 
-    const decoded = decodeHTML(root);
+        const decoded = decodeHTML(root);
 
-    expect(decoded).toEqual([
-      ['1', '2'],
-      ['3', '4'],
-    ]);
-  });
+        expect(decoded).toEqual([
+            ["1", "2"],
+            ["3", "4"],
+        ]);
+    });
 });

@@ -1,64 +1,64 @@
 {
-  "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:import/recommended",
-    "plugin:import/typescript",
-    "plugin:react-hooks/recommended",
-    "plugin:sonarjs/recommended",
-    "plugin:unicorn/recommended"
-  ],
-  "plugins": ["react", "@typescript-eslint", "import", "sonarjs"],
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "project": ["./tsconfig.json"]
-  },
-  "rules": {
-    "no-console": "warn",
-    "guard-for-in": "error",
-    "no-empty": "error",
-    "eqeqeq": ["error", "always"],
-    "no-shadow": "off",
-    "import/no-cycle": "off",
-    "import/namespace": "off",
-    "import/named": "off",
-    "import/no-unresolved": "off", // FIXME: Figure out how to make this enabled
-    "@typescript-eslint/no-unused-vars": "off",
-    "sonarjs/cognitive-complexity": "off",
-    "sonarjs/no-inverted-boolean-check": "error",
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/no-empty-interface": "off",
-    "@typescript-eslint/no-inferrable-types": "off",
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/ban-ts-ignore": "off",
-    "@typescript-eslint/camelcase": "off",
-    "@typescript-eslint/interface-name-prefix": "off",
-    "@typescript-eslint/no-floating-promises": "error",
-    "@typescript-eslint/no-shadow": "error",
-    "unicorn/no-nested-ternary": "off",
-    "unicorn/prevent-abbreviations": "off",
-    "unicorn/no-useless-undefined": "off",
-    "unicorn/prefer-query-selector": "off",
-    "unicorn/filename-case": "off",
-    "unicorn/prefer-top-level-await": "off",
-    "unicorn/no-array-callback-reference": "off",
-    "unicorn/no-array-for-each": "off",
-    "unicorn/no-null": "off",
-    "unicorn/prefer-dom-node-text-content": "off",
-    "unicorn/consistent-destructuring": "off",
-    "unicorn/no-array-reduce": "off",
-    "@typescript-eslint/no-misused-promises": [
-      "error",
-      {
-        "checksVoidReturn": false
-      }
+    "extends": [
+        "eslint:recommended",
+        "plugin:react/recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:import/recommended",
+        "plugin:import/typescript",
+        "plugin:react-hooks/recommended",
+        "plugin:sonarjs/recommended",
+        "plugin:unicorn/recommended"
     ],
-    "@typescript-eslint/strict-boolean-expressions": "error",
-    "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/ban-types": "off",
-    "unicorn/expiring-todo-comments": "off" // TODO: enable this within unicorn version upgrade. this version has an error on this.
-  },
-  "ignorePatterns": ["**/node_modules/*", "**/dist/*"]
+    "plugins": ["react", "@typescript-eslint", "import", "sonarjs"],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": ["./tsconfig.json"]
+    },
+    "rules": {
+        "no-console": "warn",
+        "guard-for-in": "error",
+        "no-empty": "error",
+        "eqeqeq": ["error", "always"],
+        "no-shadow": "off",
+        "import/no-cycle": "off",
+        "import/namespace": "off",
+        "import/named": "off",
+        "import/no-unresolved": "off", // FIXME: Figure out how to make this enabled
+        "@typescript-eslint/no-unused-vars": "off",
+        "sonarjs/cognitive-complexity": "off",
+        "sonarjs/no-inverted-boolean-check": "error",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/no-empty-interface": "off",
+        "@typescript-eslint/no-inferrable-types": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/ban-ts-ignore": "off",
+        "@typescript-eslint/camelcase": "off",
+        "@typescript-eslint/interface-name-prefix": "off",
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-shadow": "error",
+        "unicorn/no-nested-ternary": "off",
+        "unicorn/prevent-abbreviations": "off",
+        "unicorn/no-useless-undefined": "off",
+        "unicorn/prefer-query-selector": "off",
+        "unicorn/filename-case": "off",
+        "unicorn/prefer-top-level-await": "off",
+        "unicorn/no-array-callback-reference": "off",
+        "unicorn/no-array-for-each": "off",
+        "unicorn/no-null": "off",
+        "unicorn/prefer-dom-node-text-content": "off",
+        "unicorn/consistent-destructuring": "off",
+        "unicorn/no-array-reduce": "off",
+        "@typescript-eslint/no-misused-promises": [
+            "error",
+            {
+                "checksVoidReturn": false
+            }
+        ],
+        "@typescript-eslint/strict-boolean-expressions": "error",
+        "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "@typescript-eslint/ban-types": "off",
+        "unicorn/expiring-todo-comments": "off" // TODO: enable this within unicorn version upgrade. this version has an error on this.
+    },
+    "ignorePatterns": ["**/node_modules/*", "**/dist/*"]
 }
