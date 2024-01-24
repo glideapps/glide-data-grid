@@ -9,7 +9,7 @@ import type { DrawGridArg } from "./draw-grid-arg.js";
 import { walkColumns, walkGroups, walkRowsInCol } from "./data-grid-render.walk.js";
 import { drawCells } from "./data-grid-render.cells.js";
 import { drawGridHeaders } from "./data-grid-render.header.js";
-import { drawGridLines, overdrawStickyBoundaries, drawBlanks } from "./data-grid-render.lines.js";
+import { drawGridLines, overdrawStickyBoundaries, drawBlanks, drawExtraRowThemes } from "./data-grid-render.lines.js";
 import { blitLastFrame, blitResizedCol, computeCanBlit } from "./data-grid-render.blit.js";
 import { drawHighlightRings, drawFocusRing, drawColumnResizeOutline } from "./data-grid.render.rings.js";
 
@@ -677,6 +677,24 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         hasAppendRow,
         drawRegions,
         damage,
+        theme
+    );
+
+    drawExtraRowThemes(
+        targetCtx,
+        effectiveCols,
+        cellYOffset,
+        translateX,
+        translateY,
+        width,
+        height,
+        drawRegions,
+        totalHeaderHeight,
+        getRowHeight,
+        getRowThemeOverride,
+        verticalBorder,
+        freezeTrailingRows,
+        rows,
         theme
     );
 
