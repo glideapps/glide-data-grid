@@ -1,5 +1,11 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import { blend, interpolateColors, parseToRgba, withAlpha } from "../src/internal/data-grid/color-parser.js";
+import {
+    blend,
+    interpolateColors,
+    parseToRgba,
+    withAlpha,
+    getLuminance,
+} from "../src/internal/data-grid/color-parser.js";
 import { expect, describe, test } from "vitest";
 
 describe("interpolateColors", () => {
@@ -23,5 +29,11 @@ describe("withAlpha", () => {
 describe("blend", () => {
     test("Smoke test", () => {
         expect(blend("rgba(255, 255, 255, 0.2)", "rgba(123, 123, 123, 1)")).toEqual("rgba(149.4, 149.4, 149.4, 1)");
+    });
+});
+
+describe("getLuminance", () => {
+    test("Smoke test", () => {
+        expect(getLuminance("rgba(255, 255, 255, 1)")).toEqual(1);
     });
 });

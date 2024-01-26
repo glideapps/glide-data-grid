@@ -1,7 +1,7 @@
 import { styled } from "@linaria/react";
 import * as React from "react";
 import { DataEditor, type DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
-import { DropdownCell as DropdownRenderer, allCells } from "./index.js";
+import { DropdownCell as DropdownRenderer, MultiSelectCell as MultiSelectRenderer, allCells } from "./index.js";
 import type { StarCell } from "./cells/star-cell.js";
 import type { SparklineCell } from "./cells/sparkline-cell.js";
 import range from "lodash/range.js";
@@ -20,6 +20,7 @@ import type { DatePickerCell } from "./cells/date-picker-cell.js";
 import type { LinksCell } from "./cells/links-cell.js";
 import type { ButtonCell } from "./cells/button-cell.js";
 import type { TreeViewCell } from "./cells/tree-view-cell.js";
+import type { MultiSelectCell } from "./cells/multi-select-cell.js";
 
 const SimpleWrapper = styled.div`
     box-sizing: border-box;
@@ -452,13 +453,32 @@ export const CustomCells: React.VFC = () => {
                             readonly: true,
                         };
                         return t;
+                    } else if (col === 16) {
+                        const t: MultiSelectCell = {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: ["glide", "data", "grid"].join(","),
+                            readonly: row % 2 === 0,
+                            data: {
+                                kind: "multi-select-cell",
+                                values: ["glide", "data", "grid"],
+                                options: [
+                                    { value: "glide", color: "#ffc38a" },
+                                    { value: "data", color: "#ebfdea" },
+                                    { value: "grid", color: "teal" },
+                                ],
+                                allowDuplicates: false,
+                                allowCreation: true,
+                            },
+                        };
+                        return t;
                     }
                     throw new Error("Fail");
                 }}
                 columns={[
                     {
                         title: "Stars",
-                        width: 200,
+                        width: 100,
                     },
                     {
                         title: "Sparkline (area)",
@@ -518,7 +538,11 @@ export const CustomCells: React.VFC = () => {
                     },
                     {
                         title: "TreeView",
-                        width: 200,
+                        width: 150,
+                    },
+                    {
+                        id: "multiselect",
+                        title: "Multiselect",
                     },
                 ]}
                 rows={500}
@@ -533,7 +557,7 @@ export const CustomCells: React.VFC = () => {
 };
 
 export const CustomCellEditing: React.VFC = () => {
-    const data = React.useRef<string[]>([]);
+    const data = React.useRef<any[][]>([[]]);
 
     return (
         <BeautifulWrapper
@@ -547,30 +571,84 @@ export const CustomCellEditing: React.VFC = () => {
                 {...defaultProps}
                 customRenderers={allCells}
                 onPaste={true}
+                fillHandle={true}
                 onCellEdited={(cell, newVal) => {
-                    if (newVal.kind !== GridCellKind.Custom) return;
-                    if (DropdownRenderer.isMatch(newVal)) {
-                        data.current[cell[1]] = newVal.data.value ?? "";
+                    const [col, row] = cell;
+                    if (newVal.kind !== GridCellKind.Custom) {
+                        return;
+                    }
+                    if (data.current?.[col] == null) {
+                        data.current[col] = [];
+                    }
+                    if (DropdownRenderer.isMatch(newVal) && col === 0) {
+                        data.current[col][row] = newVal.data.value ?? "";
+                    } else if (MultiSelectRenderer.isMatch(newVal) && (col === 1 || col === 2)) {
+                        data.current[col][row] = newVal.data.values ?? [];
                     }
                 }}
                 getCellsForSelection={true}
                 getCellContent={cell => {
-                    const [, row] = cell;
-                    const val = data.current[row] ?? "A";
-                    return {
-                        kind: GridCellKind.Custom,
-                        allowOverlay: true,
-                        copyData: val,
-                        data: {
-                            kind: "dropdown-cell",
-                            allowedValues: ["A", "B", "C"],
-                            value: val,
-                        },
-                    } as DropdownCell;
+                    const [col, row] = cell;
+                    if (col === 0) {
+                        const val = data.current?.[col]?.[row] ?? "A";
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: val,
+                            data: {
+                                kind: "dropdown-cell",
+                                allowedValues: ["A", "B", "C"],
+                                value: val,
+                            },
+                        } as DropdownCell;
+                    } else if (col === 1) {
+                        const val = data.current?.[col]?.[row] ?? ["glide"];
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: val?.join(","),
+                            data: {
+                                kind: "multi-select-cell",
+                                values: val,
+                                options: [
+                                    { value: "glide", color: "#ffc38a", label: "Glide" },
+                                    { value: "data", color: "#ebfdea", label: "Data" },
+                                    { value: "grid", color: "teal", label: "Grid" },
+                                ],
+                                allowDuplicates: false,
+                                allowCreation: true,
+                            },
+                        } as MultiSelectCell;
+                    } else if (col === 2) {
+                        const val = data.current?.[col]?.[row] ?? ["glide data grid"];
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: val?.join(","),
+                            data: {
+                                kind: "multi-select-cell",
+                                values: val,
+                                allowDuplicates: true,
+                                allowCreation: true,
+                            },
+                        } as MultiSelectCell;
+                    }
+                    throw new Error("Fail");
                 }}
                 columns={[
                     {
                         title: "Dropdown",
+                        width: 150,
+                    },
+                    {
+                        title: "Multi Select",
+                        width: 200,
+                        themeOverride: {
+                            roundingRadius: 4,
+                        },
+                    },
+                    {
+                        title: "Multi Select (no options)",
                         width: 200,
                     },
                 ]}
