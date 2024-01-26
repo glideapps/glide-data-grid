@@ -280,6 +280,5 @@ export function useDeepMemo<T>(value: T): T {
         ref.current = value;
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    return React.useMemo(() => ref.current, [ref.current]);
+    return ref.current;
 }
