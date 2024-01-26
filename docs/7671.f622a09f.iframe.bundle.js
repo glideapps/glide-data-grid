@@ -2992,7 +2992,7 @@ class CellSet {
 /* harmony export */   "fG": () => (/* binding */ withAlpha),
 /* harmony export */   "mv": () => (/* binding */ blendCache)
 /* harmony export */ });
-/* unused harmony exports parseToRgba, interpolateColors */
+/* unused harmony exports parseToRgba, interpolateColors, getLuminance */
 const cache = {};
 let div = null;
 function createDiv() {
@@ -3068,6 +3068,15 @@ function interpolateColors(leftColor, rightColor, val) {
   const g = Math.floor((left[1] * nScaler + right[1] * hScaler) / a);
   const b = Math.floor((left[2] * nScaler + right[2] * hScaler) / a);
   return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+function getLuminance(color) {
+  if (color === "transparent") return 0;
+  function f(x) {
+    const channel = x / 255;
+    return channel <= 0.04045 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+  }
+  const [r, g, b] = parseToRgba(color);
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
 }
 
 /***/ }),
@@ -7657,4 +7666,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7671.3004cd5b.iframe.bundle.js.map
+//# sourceMappingURL=7671.f622a09f.iframe.bundle.js.map

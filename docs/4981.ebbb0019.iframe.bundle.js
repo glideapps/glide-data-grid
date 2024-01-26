@@ -10548,6 +10548,7 @@ ClickOutsideContainer.displayName = "ClickOutsideContainer";
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "H3": () => (/* binding */ getLuminance),
 /* harmony export */   "NH": () => (/* binding */ blend),
 /* harmony export */   "Nz": () => (/* binding */ interpolateColors),
 /* harmony export */   "dF": () => (/* binding */ parseToRgba),
@@ -10629,6 +10630,15 @@ function interpolateColors(leftColor, rightColor, val) {
   const g = Math.floor((left[1] * nScaler + right[1] * hScaler) / a);
   const b = Math.floor((left[2] * nScaler + right[2] * hScaler) / a);
   return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+function getLuminance(color) {
+  if (color === "transparent") return 0;
+  function f(x) {
+    const channel = x / 255;
+    return channel <= 0.04045 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+  }
+  const [r, g, b] = parseToRgba(color);
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
 }
 
 /***/ }),
@@ -11591,4 +11601,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.757fc56b.iframe.bundle.js.map
+//# sourceMappingURL=4981.ebbb0019.iframe.bundle.js.map
