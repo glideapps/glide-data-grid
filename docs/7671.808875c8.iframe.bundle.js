@@ -2473,7 +2473,7 @@ function useDeepMemo(value) {
   if (!(0,_support_js__WEBPACK_IMPORTED_MODULE_3__/* .deepEqual */ .vZ)(value, ref.current)) {
     ref.current = value;
   }
-  return react__WEBPACK_IMPORTED_MODULE_0__.useMemo(() => ref.current, [ref.current]);
+  return ref.current;
 }
 
 /***/ }),
@@ -7666,4 +7666,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7671.f622a09f.iframe.bundle.js.map
+//# sourceMappingURL=7671.808875c8.iframe.bundle.js.map

@@ -407,7 +407,7 @@ function useDeepMemo(value) {
   if (!(0,_support_js__WEBPACK_IMPORTED_MODULE_2__/* .deepEqual */ .vZ)(value, ref.current)) {
     ref.current = value;
   }
-  return react__WEBPACK_IMPORTED_MODULE_0__.useMemo(() => ref.current, [ref.current]);
+  return ref.current;
 }
 
 /***/ }),
@@ -11601,4 +11601,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.ebbb0019.iframe.bundle.js.map
+//# sourceMappingURL=4981.a26b4965.iframe.bundle.js.map
