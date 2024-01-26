@@ -73,10 +73,10 @@ const DataGridDnd = p => {
     } else if (dragRow !== undefined && row !== undefined) {
       setDragRowActive(true);
       setDropRow(Math.max(0, row));
-    } else {
+    } else if (resizeCol === undefined && !dragColActive && !dragRowActive) {
       onItemHovered === null || onItemHovered === void 0 || onItemHovered(args);
     }
-  }, [dragCol, dragRow, dropCol, onItemHovered, lockColumns]);
+  }, [dragCol, dragRow, dropCol, onItemHovered, lockColumns, resizeCol, dragColActive, dragRowActive]);
   const canDragCol = onColumnMoved !== undefined;
   const onMouseDownImpl = react.useCallback(args => {
     if (args.button === 0) {
@@ -934,4 +934,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=990.5c12f8e2.iframe.bundle.js.map
+//# sourceMappingURL=990.807d1083.iframe.bundle.js.map
