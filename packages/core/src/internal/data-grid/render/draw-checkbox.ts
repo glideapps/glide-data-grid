@@ -101,6 +101,11 @@ export function drawCheckbox(
             ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
             ctx.fill();
 
+            if (style === "circle") {
+                checkBoxHalfWidth *= 0.8;
+                checkBoxWidth *= 0.8;
+            }
+
             ctx.beginPath();
             ctx.moveTo(posX - checkBoxWidth / 3, centerY);
             ctx.lineTo(posX + checkBoxWidth / 3, centerY);

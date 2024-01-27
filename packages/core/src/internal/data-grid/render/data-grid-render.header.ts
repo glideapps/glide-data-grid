@@ -5,16 +5,7 @@ import type { HoverValues } from "../animation-manager.js";
 import type { CellSet } from "../cell-set.js";
 import { withAlpha } from "../color-parser.js";
 import type { SpriteManager, SpriteVariant } from "../data-grid-sprites.js";
-import {
-    headerCellCheckboxPrefix,
-    type DrawHeaderCallback,
-    type Rectangle,
-    GridColumnMenuIcon,
-    BooleanIndeterminate,
-    headerCellCheckedMarker,
-    headerCellUnheckedMarker,
-    type GridSelection,
-} from "../data-grid-types.js";
+import { type DrawHeaderCallback, type Rectangle, GridColumnMenuIcon, type GridSelection } from "../data-grid-types.js";
 import { drawMenuDots, getMiddleCenterBias, roundedPoly, type MappedGridColumn } from "./data-grid-lib.js";
 import type { GroupDetails, GroupDetailsCallback } from "./data-grid-render.cells.js";
 import { walkColumns, walkGroups } from "./data-grid-render.walk.js";
@@ -326,17 +317,14 @@ function drawHeaderInner(
     spriteManager: SpriteManager,
     touchMode: boolean,
     isRtl: boolean,
-    isCheckboxHeader: boolean,
     menuBounds: Rectangle
 ) {
-    if (isCheckboxHeader) {
-        let checked: boolean | BooleanIndeterminate = undefined;
-        if (c.title === headerCellCheckedMarker) checked = true;
-        if (c.title === headerCellUnheckedMarker) checked = false;
+    if (c.rowMarker !== undefined) {
+        const checked = c.rowMarkerChecked;
         if (checked !== true) {
             ctx.globalAlpha = hoverAmount;
         }
-        drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined, 18);
+        drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined, 18, "center", c.rowMarker);
         if (checked !== true) {
             ctx.globalAlpha = 1;
         }
@@ -469,25 +457,17 @@ export function drawHeader(
     drawHeaderCallback: DrawHeaderCallback | undefined,
     touchMode: boolean
 ) {
-    const isCheckboxHeader = c.title.startsWith(headerCellCheckboxPrefix);
     const isRtl = direction(c.title) === "rtl";
     const menuBounds = getHeaderMenuBounds(x, y, width, height, isRtl);
 
     if (drawHeaderCallback !== undefined) {
-        let passCol = c;
-        if (isCheckboxHeader) {
-            passCol = {
-                ...c,
-                title: "",
-            };
-        }
         drawHeaderCallback(
             {
                 ctx,
                 theme,
                 rect: { x, y, width, height },
-                column: passCol,
-                columnIndex: passCol.sourceIndex,
+                column: c,
+                columnIndex: c.sourceIndex,
                 isSelected: selected,
                 hoverAmount,
                 isHovered,
@@ -510,7 +490,6 @@ export function drawHeader(
                     spriteManager,
                     touchMode,
                     isRtl,
-                    isCheckboxHeader,
                     menuBounds
                 )
         );
@@ -529,7 +508,6 @@ export function drawHeader(
             spriteManager,
             touchMode,
             isRtl,
-            isCheckboxHeader,
             menuBounds
         );
     }

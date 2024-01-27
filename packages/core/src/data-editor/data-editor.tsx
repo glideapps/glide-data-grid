@@ -24,9 +24,6 @@ import {
     isObjectEditorCallbackResult,
     type Item,
     type MarkerCell,
-    headerCellUnheckedMarker,
-    headerCellCheckedMarker,
-    headerCellIndeterminateMarker,
     type ValidatedGridCell,
     type ImageEditorType,
     type CustomCell,
@@ -1032,29 +1029,25 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const totalHeaderHeight = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
 
     const numSelectedRows = gridSelection.rows.length;
-    const rowMarkerHeader =
-        rowMarkers === "none"
-            ? ""
-            : numSelectedRows === 0
-            ? headerCellUnheckedMarker
-            : numSelectedRows === rows
-            ? headerCellCheckedMarker
-            : headerCellIndeterminateMarker;
+    const rowMarkerChecked =
+        rowMarkers === "none" ? undefined : numSelectedRows === 0 ? false : numSelectedRows === rows ? true : undefined;
 
     const mangledCols = React.useMemo(() => {
         if (rowMarkers === "none") return columns;
         return [
             {
-                title: rowMarkerHeader,
+                title: "",
                 width: rowMarkerWidth,
                 icon: undefined,
                 hasMenu: false,
                 style: "normal" as const,
                 themeOverride: rowMarkerTheme,
+                rowMarker: rowMarkerCheckboxStyle,
+                rowMarkerChecked,
             },
             ...columns,
         ];
-    }, [columns, rowMarkerWidth, rowMarkers, rowMarkerHeader, rowMarkerTheme]);
+    }, [rowMarkers, columns, rowMarkerWidth, rowMarkerTheme, rowMarkerCheckboxStyle, rowMarkerChecked]);
 
     const [visibleRegionY, visibleRegionTy] = React.useMemo(() => {
         return [
