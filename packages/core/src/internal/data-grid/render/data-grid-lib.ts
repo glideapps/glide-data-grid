@@ -112,11 +112,20 @@ function cellIsInRect(location: Item, cell: InnerGridCell, rect: Rectangle): boo
     );
 }
 
-export function cellIsInRange(location: Item, cell: InnerGridCell, selection: GridSelection): number {
+export function cellIsInRange(
+    location: Item,
+    cell: InnerGridCell,
+    selection: GridSelection,
+    includeSingleSelection: boolean
+): number {
     let result = 0;
     if (selection.current === undefined) return result;
 
-    if (cellIsInRect(location, cell, selection.current.range)) result++;
+    const range = selection.current.range;
+
+    if ((includeSingleSelection || range.height * range.width > 1) && cellIsInRect(location, cell, range)) {
+        result++;
+    }
     for (const r of selection.current.rangeStack) {
         if (cellIsInRect(location, cell, r)) {
             result++;

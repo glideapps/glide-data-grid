@@ -274,7 +274,7 @@ export function drawCells(
                     ctx.beginPath();
 
                     const isSelected = cellIsSelected(cellIndex, cell, selection);
-                    let accentCount = cellIsInRange(cellIndex, cell, selection);
+                    let accentCount = cellIsInRange(cellIndex, cell, selection, drawFocus);
                     const spanIsHighlighted =
                         cell.span !== undefined &&
                         selection.columns.some(
@@ -282,7 +282,7 @@ export function drawCells(
                         );
                     if (isSelected && !isFocused && drawFocus) {
                         accentCount = 0;
-                    } else if (isSelected) {
+                    } else if (isSelected && drawFocus) {
                         accentCount = Math.max(accentCount, 1);
                     }
                     if (spanIsHighlighted) {
