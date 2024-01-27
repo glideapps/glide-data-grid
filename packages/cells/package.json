@@ -54,7 +54,7 @@
         "@linaria/react": "^4.5.3",
         "@toast-ui/editor": "3.1.10",
         "@toast-ui/react-editor": "3.1.10",
-        "react-select": "^5.2.2"
+        "react-select": "^5.8.0"
     },
     "devDependencies": {
         "@babel/cli": "^7.16.0",
