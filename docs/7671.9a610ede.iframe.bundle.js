@@ -3675,11 +3675,11 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
       const theme = cell.themeOverride === undefined && rowTheme === undefined && trailingTheme === undefined ? colTheme : (0,styles/* mergeAndRealizeTheme */.yR)(colTheme, rowTheme, trailingTheme, cell.themeOverride);
       ctx.beginPath();
       const isSelected = (0,data_grid_lib/* cellIsSelected */.Sb)(cellIndex, cell, selection);
-      let accentCount = (0,data_grid_lib/* cellIsInRange */.H1)(cellIndex, cell, selection);
+      let accentCount = (0,data_grid_lib/* cellIsInRange */.H1)(cellIndex, cell, selection, drawFocus);
       const spanIsHighlighted = cell.span !== undefined && selection.columns.some(index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1]);
       if (isSelected && !isFocused && drawFocus) {
         accentCount = 0;
-      } else if (isSelected) {
+      } else if (isSelected && drawFocus) {
         accentCount = Math.max(accentCount, 1);
       }
       if (spanIsHighlighted) {
@@ -6425,10 +6425,13 @@ function cellIsInRect(location, cell, rect) {
   const [spanStart, spanEnd] = cell.span;
   return spanStart >= startX && spanStart <= endX || spanEnd >= startX && spanStart <= endX || spanStart < startX && spanEnd > endX;
 }
-function cellIsInRange(location, cell, selection) {
+function cellIsInRange(location, cell, selection, includeSingleSelection) {
   let result = 0;
   if (selection.current === undefined) return result;
-  if (cellIsInRect(location, cell, selection.current.range)) result++;
+  const range = selection.current.range;
+  if ((includeSingleSelection || range.height * range.width > 1) && cellIsInRect(location, cell, range)) {
+    result++;
+  }
   for (const r of selection.current.rangeStack) {
     if (cellIsInRect(location, cell, r)) {
       result++;
@@ -7660,4 +7663,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7671.fde73d0c.iframe.bundle.js.map
+//# sourceMappingURL=7671.9a610ede.iframe.bundle.js.map
