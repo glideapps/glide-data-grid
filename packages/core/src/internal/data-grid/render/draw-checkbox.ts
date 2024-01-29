@@ -16,12 +16,13 @@ export function drawCheckbox(
     hoverX: number = -20,
     hoverY: number = -20,
     maxSize: number = 32,
-    alignment: BaseGridCell["contentAlign"] = "center"
+    alignment: BaseGridCell["contentAlign"] = "center",
+    style: "circle" | "square" = "square"
 ) {
     const centerY = Math.floor(y + height / 2);
-    const rectBordRadius = theme.roundingRadius ?? 4;
-    const checkBoxWidth = getSquareWidth(maxSize, height, theme.cellVerticalPadding);
-    const checkBoxHalfWidth = checkBoxWidth / 2;
+    const rectBordRadius = style === "circle" ? 10_000 : theme.roundingRadius ?? 4;
+    let checkBoxWidth = getSquareWidth(maxSize, height, theme.cellVerticalPadding);
+    let checkBoxHalfWidth = checkBoxWidth / 2;
     const posX = getSquareXPosFromAlign(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);
     const bb = getSquareBB(posX, centerY, checkBoxWidth);
     const hovered = pointIsWithinBB(x + hoverX, y + hoverY, bb);
@@ -37,6 +38,11 @@ export function drawCheckbox(
                 checkBoxWidth,
                 rectBordRadius
             );
+
+            if (style === "circle") {
+                checkBoxHalfWidth *= 0.8;
+                checkBoxWidth *= 0.8;
+            }
 
             ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
             ctx.fill();
@@ -94,6 +100,11 @@ export function drawCheckbox(
 
             ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
             ctx.fill();
+
+            if (style === "circle") {
+                checkBoxHalfWidth *= 0.8;
+                checkBoxWidth *= 0.8;
+            }
 
             ctx.beginPath();
             ctx.moveTo(posX - checkBoxWidth / 3, centerY);

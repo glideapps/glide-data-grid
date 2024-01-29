@@ -143,15 +143,6 @@ export type CellArray = readonly (readonly GridCell[])[];
  */
 export type Item = readonly [col: number, row: number];
 
-/** @category Types */
-export const headerCellCheckboxPrefix = "___gdg_header_cell_";
-/** @category Types */
-export const headerCellCheckedMarker = headerCellCheckboxPrefix + "checked";
-/** @category Types */
-export const headerCellUnheckedMarker = headerCellCheckboxPrefix + "unchecked";
-/** @category Types */
-export const headerCellIndeterminateMarker = headerCellCheckboxPrefix + "indeterminate";
-
 export interface BaseGridColumn {
     readonly title: string;
     readonly group?: string;
@@ -199,8 +190,14 @@ export type GetCellsThunk = () => Promise<CellArray>;
 /** @category Columns */
 export type GridColumn = SizedGridColumn | AutoGridColumn;
 
+export type InnerColumnExtension = {
+    growOffset?: number;
+    rowMarker?: "square" | "circle";
+    rowMarkerChecked?: BooleanIndeterminate | boolean;
+};
+
 /** @category Columns */
-export type InnerGridColumn = SizedGridColumn & { growOffset?: number };
+export type InnerGridColumn = SizedGridColumn & InnerColumnExtension;
 
 // export type SizedGridColumn = Omit<GridColumn, "width"> & { readonly width: number };
 
@@ -496,6 +493,7 @@ export interface MarkerCell extends BaseGridCell {
     readonly row: number;
     readonly drawHandle: boolean;
     readonly checked: boolean;
+    readonly checkboxStyle: "square" | "circle";
     readonly markerKind: "checkbox" | "number" | "both" | "checkbox-visible";
 }
 

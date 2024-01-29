@@ -24,9 +24,6 @@ import {
     isObjectEditorCallbackResult,
     type Item,
     type MarkerCell,
-    headerCellUnheckedMarker,
-    headerCellCheckedMarker,
-    headerCellIndeterminateMarker,
     type ValidatedGridCell,
     type ImageEditorType,
     type CustomCell,
@@ -89,6 +86,14 @@ const DataGridOverlayEditor = React.lazy(
 );
 
 let idCounter = 0;
+
+export interface RowMarkerOptions {
+    kind: "checkbox" | "number" | "clickable-number" | "checkbox-visible" | "both" | "none";
+    checkboxStyle?: "circle" | "square";
+    startIndex?: number;
+    width?: number;
+    theme?: Partial<Theme>;
+}
 
 interface MouseState {
     readonly previousSelection?: GridSelection;
@@ -307,20 +312,23 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * @defaultValue `none`
      * @group Style
      */
-    readonly rowMarkers?: "checkbox" | "number" | "clickable-number" | "checkbox-visible" | "both" | "none";
+    readonly rowMarkers?: RowMarkerOptions["kind"] | RowMarkerOptions;
     /**
      * Sets the width of row markers in pixels, if unset row markers will automatically size.
      * @group Style
+     * @deprecated Use `rowMarkers` instead.
      */
     readonly rowMarkerWidth?: number;
     /** Changes the starting index for row markers.
      * @defaultValue 1
      * @group Style
+     * @deprecated Use `rowMarkers` instead.
      */
     readonly rowMarkerStartIndex?: number;
 
     /** Changes the theme of the row marker column
      * @group Style
+     * @deprecated Use `rowMarkers` instead.
      */
     readonly rowMarkerTheme?: Partial<Theme>;
 
@@ -699,8 +707,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const safeWindow = typeof window === "undefined" ? null : window;
 
     const {
-        rowMarkers = "none",
-        rowMarkerWidth: rowMarkerWidthRaw,
         imageEditorOverride,
         getRowThemeOverride,
         markdownDivCreateNode,
@@ -753,8 +759,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         freezeColumns = 0,
         cellActivationBehavior = "second-click",
         rowSelectionMode = "auto",
-        rowMarkerStartIndex = 1,
-        rowMarkerTheme,
         onHeaderMenuClick,
         getGroupDetails,
         onSearchClose: onSearchCloseIn,
@@ -807,6 +811,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         isOutsideClick,
         renderers,
     } = p;
+
+    const rowMarkersObj = typeof p.rowMarkers === "string" ? undefined : p.rowMarkers;
+
+    const rowMarkers = rowMarkersObj?.kind ?? (p.rowMarkers as RowMarkerOptions["kind"]) ?? "none";
+    const rowMarkerWidthRaw = rowMarkersObj?.width ?? p.rowMarkerWidth;
+    const rowMarkerStartIndex = rowMarkersObj?.startIndex ?? p.rowMarkerStartIndex ?? 1;
+    const rowMarkerTheme = rowMarkersObj?.theme ?? p.rowMarkerTheme;
+    const rowMarkerCheckboxStyle = rowMarkersObj?.checkboxStyle ?? "square";
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
     const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
@@ -1017,29 +1029,25 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const totalHeaderHeight = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
 
     const numSelectedRows = gridSelection.rows.length;
-    const rowMarkerHeader =
-        rowMarkers === "none"
-            ? ""
-            : numSelectedRows === 0
-            ? headerCellUnheckedMarker
-            : numSelectedRows === rows
-            ? headerCellCheckedMarker
-            : headerCellIndeterminateMarker;
+    const rowMarkerChecked =
+        rowMarkers === "none" ? undefined : numSelectedRows === 0 ? false : numSelectedRows === rows ? true : undefined;
 
     const mangledCols = React.useMemo(() => {
         if (rowMarkers === "none") return columns;
         return [
             {
-                title: rowMarkerHeader,
+                title: "",
                 width: rowMarkerWidth,
                 icon: undefined,
                 hasMenu: false,
                 style: "normal" as const,
                 themeOverride: rowMarkerTheme,
+                rowMarker: rowMarkerCheckboxStyle,
+                rowMarkerChecked,
             },
             ...columns,
         ];
-    }, [columns, rowMarkerWidth, rowMarkers, rowMarkerHeader, rowMarkerTheme]);
+    }, [rowMarkers, columns, rowMarkerWidth, rowMarkerTheme, rowMarkerCheckboxStyle, rowMarkerChecked]);
 
     const [visibleRegionY, visibleRegionTy] = React.useMemo(() => {
         return [
@@ -1226,6 +1234,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return {
                     kind: InnerGridCellKind.Marker,
                     allowOverlay: false,
+                    checkboxStyle: rowMarkerCheckboxStyle,
                     checked: gridSelection?.rows.hasIndex(row) === true,
                     markerKind: rowMarkers === "clickable-number" ? "number" : rowMarkers,
                     row: rowMarkerStartIndex + row,
@@ -1290,15 +1299,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             showTrailingBlankRow,
             mangledRows,
             hasRowMarkers,
+            rowMarkerCheckboxStyle,
             gridSelection?.rows,
-            onRowMoved,
             rowMarkers,
+            rowMarkerStartIndex,
+            onRowMoved,
             rowMarkerOffset,
             trailingRowOptions?.hint,
             trailingRowOptions?.addIcon,
             experimental?.strict,
             getCellContent,
-            rowMarkerStartIndex,
         ]
     );
 

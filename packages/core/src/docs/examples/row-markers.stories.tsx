@@ -1,5 +1,5 @@
 import React from "react";
-import { type DataEditorProps } from "../../data-editor/data-editor.js";
+import { type RowMarkerOptions } from "../../data-editor/data-editor.js";
 import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
 import {
     BeautifulWrapper,
@@ -33,7 +33,7 @@ export default {
 };
 
 interface RowMarkersProps {
-    markers: DataEditorProps["rowMarkers"];
+    markers: RowMarkerOptions["kind"];
 }
 
 export const RowMarkers: React.VFC<RowMarkersProps> = p => {
@@ -43,7 +43,11 @@ export const RowMarkers: React.VFC<RowMarkersProps> = p => {
         <DataEditor
             {...defaultProps}
             getCellContent={getCellContent}
-            rowMarkers={p.markers}
+            verticalBorder={false}
+            rowMarkers={{
+                kind: p.markers,
+                checkboxStyle: "circle",
+            }}
             columns={cols}
             rows={400}
         />
@@ -55,6 +59,6 @@ export const RowMarkers: React.VFC<RowMarkersProps> = p => {
 (RowMarkers as any).argTypes = {
     markers: {
         control: { type: "select" },
-        options: ["both", "checkbox", "number", "none", "clickable-number"],
+        options: ["both", "checkbox", "number", "none", "clickable-number", "checkbox-visible"],
     },
 };

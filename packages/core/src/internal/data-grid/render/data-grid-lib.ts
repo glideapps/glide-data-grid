@@ -4,7 +4,7 @@ import {
     type Item,
     type GridSelection,
     type InnerGridCell,
-    type SizedGridColumn,
+    type InnerGridColumn,
     type Rectangle,
     type BaseGridCell,
 } from "../data-grid-types.js";
@@ -14,13 +14,13 @@ import type { BaseDrawArgs, PrepResult } from "../../../cells/cell-types.js";
 import { split as splitText, clearCache } from "canvas-hypertxt";
 import type { FullyDefined } from "../../../common/support.js";
 
-export interface MappedGridColumn extends FullyDefined<SizedGridColumn> {
+export interface MappedGridColumn extends FullyDefined<InnerGridColumn> {
     sourceIndex: number;
     sticky: boolean;
 }
 
 export function useMappedColumns(
-    columns: readonly SizedGridColumn[],
+    columns: readonly InnerGridColumn[],
     freezeColumns: number
 ): readonly MappedGridColumn[] {
     return React.useMemo(
@@ -41,6 +41,9 @@ export function useMappedColumns(
                     title: c.title,
                     trailingRowOptions: c.trailingRowOptions,
                     width: c.width,
+                    growOffset: c.growOffset,
+                    rowMarker: c.rowMarker,
+                    rowMarkerChecked: c.rowMarkerChecked,
                 })
             ),
         [columns, freezeColumns]
