@@ -1095,7 +1095,7 @@ const emptyGridSelection = {
   current: undefined
 };
 const DataEditorImpl = (p, forwardedRef) => {
-  var _visibleRegion$height, _visibleRegion$width, _gridSelection$curren5, _gridSelectionOuter$c, _gridSelectionOuter$c2;
+  var _ref, _rowMarkersObj$kind, _rowMarkersObj$width, _ref2, _rowMarkersObj$startI, _rowMarkersObj$theme, _rowMarkersObj$checkb, _visibleRegion$height, _visibleRegion$width, _gridSelection$curren5, _gridSelectionOuter$c, _gridSelectionOuter$c2;
   const [gridSelectionInner, setGridSelectionInner] = react.useState(emptyGridSelection);
   const [overlay, setOverlay] = react.useState();
   const searchInputRef = react.useRef(null);
@@ -1105,8 +1105,6 @@ const DataEditorImpl = (p, forwardedRef) => {
   const lastSent = react.useRef();
   const safeWindow = typeof window === "undefined" ? null : window;
   const {
-    rowMarkers = "none",
-    rowMarkerWidth: rowMarkerWidthRaw,
     imageEditorOverride,
     getRowThemeOverride,
     markdownDivCreateNode,
@@ -1159,8 +1157,6 @@ const DataEditorImpl = (p, forwardedRef) => {
     freezeColumns = 0,
     cellActivationBehavior = "second-click",
     rowSelectionMode = "auto",
-    rowMarkerStartIndex = 1,
-    rowMarkerTheme,
     onHeaderMenuClick,
     getGroupDetails,
     onSearchClose: onSearchCloseIn,
@@ -1213,6 +1209,12 @@ const DataEditorImpl = (p, forwardedRef) => {
     isOutsideClick,
     renderers
   } = p;
+  const rowMarkersObj = typeof p.rowMarkers === "string" ? undefined : p.rowMarkers;
+  const rowMarkers = (_ref = (_rowMarkersObj$kind = rowMarkersObj === null || rowMarkersObj === void 0 ? void 0 : rowMarkersObj.kind) !== null && _rowMarkersObj$kind !== void 0 ? _rowMarkersObj$kind : p.rowMarkers) !== null && _ref !== void 0 ? _ref : "none";
+  const rowMarkerWidthRaw = (_rowMarkersObj$width = rowMarkersObj === null || rowMarkersObj === void 0 ? void 0 : rowMarkersObj.width) !== null && _rowMarkersObj$width !== void 0 ? _rowMarkersObj$width : p.rowMarkerWidth;
+  const rowMarkerStartIndex = (_ref2 = (_rowMarkersObj$startI = rowMarkersObj === null || rowMarkersObj === void 0 ? void 0 : rowMarkersObj.startIndex) !== null && _rowMarkersObj$startI !== void 0 ? _rowMarkersObj$startI : p.rowMarkerStartIndex) !== null && _ref2 !== void 0 ? _ref2 : 1;
+  const rowMarkerTheme = (_rowMarkersObj$theme = rowMarkersObj === null || rowMarkersObj === void 0 ? void 0 : rowMarkersObj.theme) !== null && _rowMarkersObj$theme !== void 0 ? _rowMarkersObj$theme : p.rowMarkerTheme;
+  const rowMarkerCheckboxStyle = (_rowMarkersObj$checkb = rowMarkersObj === null || rowMarkersObj === void 0 ? void 0 : rowMarkersObj.checkboxStyle) !== null && _rowMarkersObj$checkb !== void 0 ? _rowMarkersObj$checkb : "square";
   const minColumnWidth = Math.max(minColumnWidthIn, 20);
   const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
   const maxColumnAutoWidth = Math.max(maxColumnAutoWidthIn !== null && maxColumnAutoWidthIn !== void 0 ? maxColumnAutoWidthIn : maxColumnWidth, minColumnWidth);
@@ -1342,18 +1344,20 @@ const DataEditorImpl = (p, forwardedRef) => {
   }, [columns]);
   const totalHeaderHeight = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
   const numSelectedRows = gridSelection.rows.length;
-  const rowMarkerHeader = rowMarkers === "none" ? "" : numSelectedRows === 0 ? data_grid_types/* headerCellUnheckedMarker */.YK : numSelectedRows === rows ? data_grid_types/* headerCellCheckedMarker */.qT : data_grid_types/* headerCellIndeterminateMarker */.iJ;
+  const rowMarkerChecked = rowMarkers === "none" ? undefined : numSelectedRows === 0 ? false : numSelectedRows === rows ? true : undefined;
   const mangledCols = react.useMemo(() => {
     if (rowMarkers === "none") return columns;
     return [{
-      title: rowMarkerHeader,
+      title: "",
       width: rowMarkerWidth,
       icon: undefined,
       hasMenu: false,
       style: "normal",
-      themeOverride: rowMarkerTheme
+      themeOverride: rowMarkerTheme,
+      rowMarker: rowMarkerCheckboxStyle,
+      rowMarkerChecked
     }, ...columns];
-  }, [columns, rowMarkerWidth, rowMarkers, rowMarkerHeader, rowMarkerTheme]);
+  }, [rowMarkers, columns, rowMarkerWidth, rowMarkerTheme, rowMarkerCheckboxStyle, rowMarkerChecked]);
   const [visibleRegionY, visibleRegionTy] = react.useMemo(() => {
     return [scrollOffsetY !== undefined && typeof rowHeight === "number" ? Math.floor(scrollOffsetY / rowHeight) : 0, scrollOffsetY !== undefined && typeof rowHeight === "number" ? -(scrollOffsetY % rowHeight) : 0];
   }, [scrollOffsetY, rowHeight]);
@@ -1463,8 +1467,8 @@ const DataEditorImpl = (p, forwardedRef) => {
   }, [fillHighlightRegion, highlightRange, highlightRegionsIn, mangledCols.length, mergedTheme.accentColor, rowMarkerOffset]);
   const mangledColsRef = react.useRef(mangledCols);
   mangledColsRef.current = mangledCols;
-  const getMangledCellContent = react.useCallback(function (_ref) {
-    let [col, row] = _ref;
+  const getMangledCellContent = react.useCallback(function (_ref3) {
+    let [col, row] = _ref3;
     let forceStrict = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
     const isRowMarkerCol = col === 0 && hasRowMarkers;
@@ -1475,6 +1479,7 @@ const DataEditorImpl = (p, forwardedRef) => {
       return {
         kind: data_grid_types/* InnerGridCellKind.Marker */.$o.Marker,
         allowOverlay: false,
+        checkboxStyle: rowMarkerCheckboxStyle,
         checked: (gridSelection === null || gridSelection === void 0 ? void 0 : gridSelection.rows.hasIndex(row)) === true,
         markerKind: rowMarkers === "clickable-number" ? "number" : rowMarkers,
         row: rowMarkerStartIndex + row,
@@ -1528,7 +1533,7 @@ const DataEditorImpl = (p, forwardedRef) => {
       }
       return result;
     }
-  }, [showTrailingBlankRow, mangledRows, hasRowMarkers, gridSelection === null || gridSelection === void 0 ? void 0 : gridSelection.rows, onRowMoved, rowMarkers, rowMarkerOffset, trailingRowOptions === null || trailingRowOptions === void 0 ? void 0 : trailingRowOptions.hint, trailingRowOptions === null || trailingRowOptions === void 0 ? void 0 : trailingRowOptions.addIcon, experimental === null || experimental === void 0 ? void 0 : experimental.strict, getCellContent, rowMarkerStartIndex]);
+  }, [showTrailingBlankRow, mangledRows, hasRowMarkers, rowMarkerCheckboxStyle, gridSelection === null || gridSelection === void 0 ? void 0 : gridSelection.rows, rowMarkers, rowMarkerStartIndex, onRowMoved, rowMarkerOffset, trailingRowOptions === null || trailingRowOptions === void 0 ? void 0 : trailingRowOptions.hint, trailingRowOptions === null || trailingRowOptions === void 0 ? void 0 : trailingRowOptions.addIcon, experimental === null || experimental === void 0 ? void 0 : experimental.strict, getCellContent]);
   const mangledGetGroupDetails = react.useCallback(group => {
     var _getGroupDetails;
     let result = (_getGroupDetails = getGroupDetails === null || getGroupDetails === void 0 ? void 0 : getGroupDetails(group)) !== null && _getGroupDetails !== void 0 ? _getGroupDetails : {
@@ -3003,9 +3008,9 @@ const DataEditorImpl = (p, forwardedRef) => {
         const r = getCellRenderer(inner);
         if (r === undefined) return undefined;
         if (r.kind === data_grid_types/* GridCellKind.Custom */.p6.Custom) {
-          var _onPaste, _ref2;
+          var _onPaste, _ref4;
           (0,support/* assert */.hu)(inner.kind === data_grid_types/* GridCellKind.Custom */.p6.Custom);
-          const newVal = (_onPaste = (_ref2 = r).onPaste) === null || _onPaste === void 0 ? void 0 : _onPaste.call(_ref2, stringifiedRawValue, inner.data);
+          const newVal = (_onPaste = (_ref4 = r).onPaste) === null || _onPaste === void 0 ? void 0 : _onPaste.call(_ref4, stringifiedRawValue, inner.data);
           if (newVal === undefined) return undefined;
           return {
             location: target,
@@ -3083,9 +3088,9 @@ const DataEditorImpl = (p, forwardedRef) => {
       const editList = [];
       do {
         if (onPaste === undefined) {
-          var _ref3, _text, _data;
+          var _ref5, _text, _data;
           const cellData = getMangledCellContent(target);
-          const rawValue = (_ref3 = (_text = text) !== null && _text !== void 0 ? _text : (_data = data) === null || _data === void 0 ? void 0 : _data.map(r => r.map(cb => cb.rawValue).join("\t")).join("\t")) !== null && _ref3 !== void 0 ? _ref3 : "";
+          const rawValue = (_ref5 = (_text = text) !== null && _text !== void 0 ? _text : (_data = data) === null || _data === void 0 ? void 0 : _data.map(r => r.map(cb => cb.rawValue).join("\t")).join("\t")) !== null && _ref5 !== void 0 ? _ref5 : "";
           const newVal = pasteToCell(cellData, target, rawValue, undefined);
           if (newVal !== undefined) {
             editList.push(newVal);
@@ -4293,4 +4298,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7413.e9f36022.iframe.bundle.js.map
+//# sourceMappingURL=7413.51cc96a9.iframe.bundle.js.map

@@ -932,7 +932,7 @@ const markerCellRenderer = {
   needsHoverPosition: false,
   drawPrep: prepMarkerRowCell,
   measure: () => 44,
-  draw: a => drawMarkerRowCell(a, a.cell.row, a.cell.checked, a.cell.markerKind, a.cell.drawHandle),
+  draw: a => drawMarkerRowCell(a, a.cell.row, a.cell.checked, a.cell.markerKind, a.cell.drawHandle, a.cell.checkboxStyle),
   onClick: e => {
     const {
       bounds,
@@ -977,7 +977,7 @@ function deprepMarkerRowCell(args) {
   } = args;
   ctx.textAlign = "start";
 }
-function drawMarkerRowCell(args, index, checked, markerKind, drawHandle) {
+function drawMarkerRowCell(args, index, checked, markerKind, drawHandle, style) {
   const {
     ctx,
     rect,
@@ -994,7 +994,7 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle) {
   if (markerKind !== "number" && checkedboxAlpha > 0) {
     ctx.globalAlpha = checkedboxAlpha;
     const offsetAmount = 7 * (checked ? hoverAmount : 1);
-    (0,draw_checkbox/* drawCheckbox */._)(ctx, theme, checked, drawHandle ? x + offsetAmount : x, y, drawHandle ? width - offsetAmount : width, height, true, undefined, undefined, 18);
+    (0,draw_checkbox/* drawCheckbox */._)(ctx, theme, checked, drawHandle ? x + offsetAmount : x, y, drawHandle ? width - offsetAmount : width, height, true, undefined, undefined, 18, "center", style);
     if (drawHandle) {
       ctx.globalAlpha = hoverAmount;
       ctx.beginPath();
@@ -3088,19 +3088,15 @@ function getLuminance(color) {
 /* harmony export */   "$o": () => (/* binding */ InnerGridCellKind),
 /* harmony export */   "DP": () => (/* binding */ isObjectEditorCallbackResult),
 /* harmony export */   "EV": () => (/* binding */ CompactSelection),
-/* harmony export */   "Gf": () => (/* binding */ headerCellCheckboxPrefix),
 /* harmony export */   "PE": () => (/* binding */ GridColumnIcon),
 /* harmony export */   "Qo": () => (/* binding */ isReadWriteCell),
 /* harmony export */   "Sq": () => (/* binding */ isSizedGridColumn),
 /* harmony export */   "T9": () => (/* binding */ isEditableGridCell),
-/* harmony export */   "YK": () => (/* binding */ headerCellUnheckedMarker),
 /* harmony export */   "f": () => (/* binding */ isTextEditableGridCell),
-/* harmony export */   "iJ": () => (/* binding */ headerCellIndeterminateMarker),
 /* harmony export */   "kf": () => (/* binding */ booleanCellIsEditable),
 /* harmony export */   "p6": () => (/* binding */ GridCellKind),
 /* harmony export */   "pN": () => (/* binding */ GridColumnMenuIcon),
 /* harmony export */   "qF": () => (/* binding */ BooleanEmpty),
-/* harmony export */   "qT": () => (/* binding */ headerCellCheckedMarker),
 /* harmony export */   "rL": () => (/* binding */ resolveCellsThunk),
 /* harmony export */   "rs": () => (/* binding */ isInnerOnlyCell),
 /* harmony export */   "sd": () => (/* binding */ BooleanIndeterminate)
@@ -3166,10 +3162,6 @@ let GridColumnMenuIcon = function (GridColumnMenuIcon) {
   GridColumnMenuIcon["Dots"] = "dots";
   return GridColumnMenuIcon;
 }({});
-const headerCellCheckboxPrefix = "___gdg_header_cell_";
-const headerCellCheckedMarker = headerCellCheckboxPrefix + "checked";
-const headerCellUnheckedMarker = headerCellCheckboxPrefix + "unchecked";
-const headerCellIndeterminateMarker = headerCellCheckboxPrefix + "indeterminate";
 function isSizedGridColumn(c) {
   return "width" in c && typeof c.width === "number";
 }
@@ -4060,15 +4052,13 @@ function getActionBoundsForGroup(box, actions) {
   }
   return result;
 }
-function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, isCheckboxHeader, menuBounds) {
-  if (isCheckboxHeader) {
-    let checked = undefined;
-    if (c.title === data_grid_types/* headerCellCheckedMarker */.qT) checked = true;
-    if (c.title === data_grid_types/* headerCellUnheckedMarker */.YK) checked = false;
+function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, menuBounds) {
+  if (c.rowMarker !== undefined) {
+    const checked = c.rowMarkerChecked;
     if (checked !== true) {
       ctx.globalAlpha = hoverAmount;
     }
-    (0,draw_checkbox/* drawCheckbox */._)(ctx, theme, checked, x, y, width, height, false, undefined, undefined, 18);
+    (0,draw_checkbox/* drawCheckbox */._)(ctx, theme, checked, x, y, width, height, false, undefined, undefined, 18, "center", c.rowMarker);
     if (checked !== true) {
       ctx.globalAlpha = 1;
     }
@@ -4146,17 +4136,9 @@ function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered
   }
 }
 function drawHeader(ctx, x, y, width, height, c, selected, theme, isHovered, hasSelectedCell, hoverAmount, spriteManager, drawHeaderCallback, touchMode) {
-  const isCheckboxHeader = c.title.startsWith(data_grid_types/* headerCellCheckboxPrefix */.Gf);
   const isRtl = (0,utils/* direction */.o7)(c.title) === "rtl";
   const menuBounds = getHeaderMenuBounds(x, y, width, height, isRtl);
   if (drawHeaderCallback !== undefined) {
-    let passCol = c;
-    if (isCheckboxHeader) {
-      passCol = {
-        ...c,
-        title: ""
-      };
-    }
     drawHeaderCallback({
       ctx,
       theme,
@@ -4166,17 +4148,17 @@ function drawHeader(ctx, x, y, width, height, c, selected, theme, isHovered, has
         width,
         height
       },
-      column: passCol,
-      columnIndex: passCol.sourceIndex,
+      column: c,
+      columnIndex: c.sourceIndex,
       isSelected: selected,
       hoverAmount,
       isHovered,
       hasSelectedCell,
       spriteManager,
       menuBounds
-    }, () => drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, isCheckboxHeader, menuBounds));
+    }, () => drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, menuBounds));
   } else {
-    drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, isCheckboxHeader, menuBounds);
+    drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, menuBounds);
   }
 }
 // EXTERNAL MODULE: ./node_modules/lodash/groupBy.js
@@ -6391,7 +6373,10 @@ function useMappedColumns(columns, freezeColumns) {
     themeOverride: c.themeOverride,
     title: c.title,
     trailingRowOptions: c.trailingRowOptions,
-    width: c.width
+    width: c.width,
+    growOffset: c.growOffset,
+    rowMarker: c.rowMarker,
+    rowMarkerChecked: c.rowMarkerChecked
   })), [columns, freezeColumns]);
 }
 function gridSelectionHasItem(sel, item) {
@@ -6956,10 +6941,11 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
   let hoverY = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : -20;
   let maxSize = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : 32;
   let alignment = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : "center";
+  let style = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : "square";
   const centerY = Math.floor(y + height / 2);
-  const rectBordRadius = (_theme$roundingRadius = theme.roundingRadius) !== null && _theme$roundingRadius !== void 0 ? _theme$roundingRadius : 4;
-  const checkBoxWidth = (0,_common_utils_js__WEBPACK_IMPORTED_MODULE_0__/* .getSquareWidth */ .Qo)(maxSize, height, theme.cellVerticalPadding);
-  const checkBoxHalfWidth = checkBoxWidth / 2;
+  const rectBordRadius = style === "circle" ? 10000 : (_theme$roundingRadius = theme.roundingRadius) !== null && _theme$roundingRadius !== void 0 ? _theme$roundingRadius : 4;
+  let checkBoxWidth = (0,_common_utils_js__WEBPACK_IMPORTED_MODULE_0__/* .getSquareWidth */ .Qo)(maxSize, height, theme.cellVerticalPadding);
+  let checkBoxHalfWidth = checkBoxWidth / 2;
   const posX = (0,_common_utils_js__WEBPACK_IMPORTED_MODULE_0__/* .getSquareXPosFromAlign */ .XC)(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);
   const bb = (0,_common_utils_js__WEBPACK_IMPORTED_MODULE_0__/* .getSquareBB */ .kq)(posX, centerY, checkBoxWidth);
   const hovered = (0,_common_utils_js__WEBPACK_IMPORTED_MODULE_0__/* .pointIsWithinBB */ .qq)(x + hoverX, y + hoverY, bb);
@@ -6968,6 +6954,10 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
       {
         ctx.beginPath();
         (0,_data_grid_lib_js__WEBPACK_IMPORTED_MODULE_1__/* .roundedRect */ .NK)(ctx, posX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
+        if (style === "circle") {
+          checkBoxHalfWidth *= 0.8;
+          checkBoxWidth *= 0.8;
+        }
         ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
         ctx.fill();
         ctx.beginPath();
@@ -6997,6 +6987,10 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
         (0,_data_grid_lib_js__WEBPACK_IMPORTED_MODULE_1__/* .roundedRect */ .NK)(ctx, posX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
         ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
         ctx.fill();
+        if (style === "circle") {
+          checkBoxHalfWidth *= 0.8;
+          checkBoxWidth *= 0.8;
+        }
         ctx.beginPath();
         ctx.moveTo(posX - checkBoxWidth / 3, centerY);
         ctx.lineTo(posX + checkBoxWidth / 3, centerY);
@@ -7666,4 +7660,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7671.808875c8.iframe.bundle.js.map
+//# sourceMappingURL=7671.d6d0c568.iframe.bundle.js.map

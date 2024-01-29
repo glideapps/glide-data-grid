@@ -1373,10 +1373,11 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
   let hoverY = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : -20;
   let maxSize = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : 32;
   let alignment = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : "center";
+  let style = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : "square";
   const centerY = Math.floor(y + height / 2);
-  const rectBordRadius = (_theme$roundingRadius = theme.roundingRadius) !== null && _theme$roundingRadius !== void 0 ? _theme$roundingRadius : 4;
-  const checkBoxWidth = (0,utils/* getSquareWidth */.Qo)(maxSize, height, theme.cellVerticalPadding);
-  const checkBoxHalfWidth = checkBoxWidth / 2;
+  const rectBordRadius = style === "circle" ? 10000 : (_theme$roundingRadius = theme.roundingRadius) !== null && _theme$roundingRadius !== void 0 ? _theme$roundingRadius : 4;
+  let checkBoxWidth = (0,utils/* getSquareWidth */.Qo)(maxSize, height, theme.cellVerticalPadding);
+  let checkBoxHalfWidth = checkBoxWidth / 2;
   const posX = (0,utils/* getSquareXPosFromAlign */.XC)(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);
   const bb = (0,utils/* getSquareBB */.kq)(posX, centerY, checkBoxWidth);
   const hovered = (0,utils/* pointIsWithinBB */.qq)(x + hoverX, y + hoverY, bb);
@@ -1385,6 +1386,10 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
       {
         ctx.beginPath();
         (0,data_grid_lib/* roundedRect */.NK)(ctx, posX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
+        if (style === "circle") {
+          checkBoxHalfWidth *= 0.8;
+          checkBoxWidth *= 0.8;
+        }
         ctx.fillStyle = highlighted ? theme.accentColor : theme.textMedium;
         ctx.fill();
         ctx.beginPath();
@@ -1414,6 +1419,10 @@ function drawCheckbox(ctx, theme, checked, x, y, width, height, highlighted) {
         (0,data_grid_lib/* roundedRect */.NK)(ctx, posX - checkBoxWidth / 2, centerY - checkBoxWidth / 2, checkBoxWidth, checkBoxWidth, rectBordRadius);
         ctx.fillStyle = hovered ? theme.textMedium : theme.textLight;
         ctx.fill();
+        if (style === "circle") {
+          checkBoxHalfWidth *= 0.8;
+          checkBoxWidth *= 0.8;
+        }
         ctx.beginPath();
         ctx.moveTo(posX - checkBoxWidth / 3, centerY);
         ctx.lineTo(posX + checkBoxWidth / 3, centerY);
@@ -1615,15 +1624,13 @@ function getActionBoundsForGroup(box, actions) {
   }
   return result;
 }
-function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, isCheckboxHeader, menuBounds) {
-  if (isCheckboxHeader) {
-    let checked = undefined;
-    if (c.title === data_grid_types/* headerCellCheckedMarker */.qT) checked = true;
-    if (c.title === data_grid_types/* headerCellUnheckedMarker */.YK) checked = false;
+function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, menuBounds) {
+  if (c.rowMarker !== undefined) {
+    const checked = c.rowMarkerChecked;
     if (checked !== true) {
       ctx.globalAlpha = hoverAmount;
     }
-    drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined, 18);
+    drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined, 18, "center", c.rowMarker);
     if (checked !== true) {
       ctx.globalAlpha = 1;
     }
@@ -1701,17 +1708,9 @@ function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered
   }
 }
 function drawHeader(ctx, x, y, width, height, c, selected, theme, isHovered, hasSelectedCell, hoverAmount, spriteManager, drawHeaderCallback, touchMode) {
-  const isCheckboxHeader = c.title.startsWith(data_grid_types/* headerCellCheckboxPrefix */.Gf);
   const isRtl = (0,utils/* direction */.o7)(c.title) === "rtl";
   const menuBounds = getHeaderMenuBounds(x, y, width, height, isRtl);
   if (drawHeaderCallback !== undefined) {
-    let passCol = c;
-    if (isCheckboxHeader) {
-      passCol = {
-        ...c,
-        title: ""
-      };
-    }
     drawHeaderCallback({
       ctx,
       theme,
@@ -1721,17 +1720,17 @@ function drawHeader(ctx, x, y, width, height, c, selected, theme, isHovered, has
         width,
         height
       },
-      column: passCol,
-      columnIndex: passCol.sourceIndex,
+      column: c,
+      columnIndex: c.sourceIndex,
       isSelected: selected,
       hoverAmount,
       isHovered,
       hasSelectedCell,
       spriteManager,
       menuBounds
-    }, () => drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, isCheckboxHeader, menuBounds));
+    }, () => drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, menuBounds));
   } else {
-    drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, isCheckboxHeader, menuBounds);
+    drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, hoverAmount, spriteManager, touchMode, isRtl, menuBounds);
   }
 }
 // EXTERNAL MODULE: ./node_modules/lodash/groupBy.js
@@ -6256,7 +6255,7 @@ const emptyGridSelection = {
   current: undefined
 };
 const DataEditorImpl = (p, forwardedRef) => {
-  var _visibleRegion$height, _visibleRegion$width, _gridSelection$curren5, _gridSelectionOuter$c, _gridSelectionOuter$c2;
+  var _ref, _rowMarkersObj$kind, _rowMarkersObj$width, _ref2, _rowMarkersObj$startI, _rowMarkersObj$theme, _rowMarkersObj$checkb, _visibleRegion$height, _visibleRegion$width, _gridSelection$curren5, _gridSelectionOuter$c, _gridSelectionOuter$c2;
   const [gridSelectionInner, setGridSelectionInner] = react.useState(emptyGridSelection);
   const [overlay, setOverlay] = react.useState();
   const searchInputRef = react.useRef(null);
@@ -6266,8 +6265,6 @@ const DataEditorImpl = (p, forwardedRef) => {
   const lastSent = react.useRef();
   const safeWindow = typeof window === "undefined" ? null : window;
   const {
-    rowMarkers = "none",
-    rowMarkerWidth: rowMarkerWidthRaw,
     imageEditorOverride,
     getRowThemeOverride,
     markdownDivCreateNode,
@@ -6320,8 +6317,6 @@ const DataEditorImpl = (p, forwardedRef) => {
     freezeColumns = 0,
     cellActivationBehavior = "second-click",
     rowSelectionMode = "auto",
-    rowMarkerStartIndex = 1,
-    rowMarkerTheme,
     onHeaderMenuClick,
     getGroupDetails,
     onSearchClose: onSearchCloseIn,
@@ -6374,6 +6369,12 @@ const DataEditorImpl = (p, forwardedRef) => {
     isOutsideClick,
     renderers
   } = p;
+  const rowMarkersObj = typeof p.rowMarkers === "string" ? undefined : p.rowMarkers;
+  const rowMarkers = (_ref = (_rowMarkersObj$kind = rowMarkersObj === null || rowMarkersObj === void 0 ? void 0 : rowMarkersObj.kind) !== null && _rowMarkersObj$kind !== void 0 ? _rowMarkersObj$kind : p.rowMarkers) !== null && _ref !== void 0 ? _ref : "none";
+  const rowMarkerWidthRaw = (_rowMarkersObj$width = rowMarkersObj === null || rowMarkersObj === void 0 ? void 0 : rowMarkersObj.width) !== null && _rowMarkersObj$width !== void 0 ? _rowMarkersObj$width : p.rowMarkerWidth;
+  const rowMarkerStartIndex = (_ref2 = (_rowMarkersObj$startI = rowMarkersObj === null || rowMarkersObj === void 0 ? void 0 : rowMarkersObj.startIndex) !== null && _rowMarkersObj$startI !== void 0 ? _rowMarkersObj$startI : p.rowMarkerStartIndex) !== null && _ref2 !== void 0 ? _ref2 : 1;
+  const rowMarkerTheme = (_rowMarkersObj$theme = rowMarkersObj === null || rowMarkersObj === void 0 ? void 0 : rowMarkersObj.theme) !== null && _rowMarkersObj$theme !== void 0 ? _rowMarkersObj$theme : p.rowMarkerTheme;
+  const rowMarkerCheckboxStyle = (_rowMarkersObj$checkb = rowMarkersObj === null || rowMarkersObj === void 0 ? void 0 : rowMarkersObj.checkboxStyle) !== null && _rowMarkersObj$checkb !== void 0 ? _rowMarkersObj$checkb : "square";
   const minColumnWidth = Math.max(minColumnWidthIn, 20);
   const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
   const maxColumnAutoWidth = Math.max(maxColumnAutoWidthIn !== null && maxColumnAutoWidthIn !== void 0 ? maxColumnAutoWidthIn : maxColumnWidth, minColumnWidth);
@@ -6503,18 +6504,20 @@ const DataEditorImpl = (p, forwardedRef) => {
   }, [columns]);
   const totalHeaderHeight = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
   const numSelectedRows = gridSelection.rows.length;
-  const rowMarkerHeader = rowMarkers === "none" ? "" : numSelectedRows === 0 ? data_grid_types/* headerCellUnheckedMarker */.YK : numSelectedRows === rows ? data_grid_types/* headerCellCheckedMarker */.qT : data_grid_types/* headerCellIndeterminateMarker */.iJ;
+  const rowMarkerChecked = rowMarkers === "none" ? undefined : numSelectedRows === 0 ? false : numSelectedRows === rows ? true : undefined;
   const mangledCols = react.useMemo(() => {
     if (rowMarkers === "none") return columns;
     return [{
-      title: rowMarkerHeader,
+      title: "",
       width: rowMarkerWidth,
       icon: undefined,
       hasMenu: false,
       style: "normal",
-      themeOverride: rowMarkerTheme
+      themeOverride: rowMarkerTheme,
+      rowMarker: rowMarkerCheckboxStyle,
+      rowMarkerChecked
     }, ...columns];
-  }, [columns, rowMarkerWidth, rowMarkers, rowMarkerHeader, rowMarkerTheme]);
+  }, [rowMarkers, columns, rowMarkerWidth, rowMarkerTheme, rowMarkerCheckboxStyle, rowMarkerChecked]);
   const [visibleRegionY, visibleRegionTy] = react.useMemo(() => {
     return [scrollOffsetY !== undefined && typeof rowHeight === "number" ? Math.floor(scrollOffsetY / rowHeight) : 0, scrollOffsetY !== undefined && typeof rowHeight === "number" ? -(scrollOffsetY % rowHeight) : 0];
   }, [scrollOffsetY, rowHeight]);
@@ -6624,8 +6627,8 @@ const DataEditorImpl = (p, forwardedRef) => {
   }, [fillHighlightRegion, highlightRange, highlightRegionsIn, mangledCols.length, mergedTheme.accentColor, rowMarkerOffset]);
   const mangledColsRef = react.useRef(mangledCols);
   mangledColsRef.current = mangledCols;
-  const getMangledCellContent = react.useCallback(function (_ref) {
-    let [col, row] = _ref;
+  const getMangledCellContent = react.useCallback(function (_ref3) {
+    let [col, row] = _ref3;
     let forceStrict = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     const isTrailing = showTrailingBlankRow && row === mangledRows - 1;
     const isRowMarkerCol = col === 0 && hasRowMarkers;
@@ -6636,6 +6639,7 @@ const DataEditorImpl = (p, forwardedRef) => {
       return {
         kind: data_grid_types/* InnerGridCellKind.Marker */.$o.Marker,
         allowOverlay: false,
+        checkboxStyle: rowMarkerCheckboxStyle,
         checked: (gridSelection === null || gridSelection === void 0 ? void 0 : gridSelection.rows.hasIndex(row)) === true,
         markerKind: rowMarkers === "clickable-number" ? "number" : rowMarkers,
         row: rowMarkerStartIndex + row,
@@ -6689,7 +6693,7 @@ const DataEditorImpl = (p, forwardedRef) => {
       }
       return result;
     }
-  }, [showTrailingBlankRow, mangledRows, hasRowMarkers, gridSelection === null || gridSelection === void 0 ? void 0 : gridSelection.rows, onRowMoved, rowMarkers, rowMarkerOffset, trailingRowOptions === null || trailingRowOptions === void 0 ? void 0 : trailingRowOptions.hint, trailingRowOptions === null || trailingRowOptions === void 0 ? void 0 : trailingRowOptions.addIcon, experimental === null || experimental === void 0 ? void 0 : experimental.strict, getCellContent, rowMarkerStartIndex]);
+  }, [showTrailingBlankRow, mangledRows, hasRowMarkers, rowMarkerCheckboxStyle, gridSelection === null || gridSelection === void 0 ? void 0 : gridSelection.rows, rowMarkers, rowMarkerStartIndex, onRowMoved, rowMarkerOffset, trailingRowOptions === null || trailingRowOptions === void 0 ? void 0 : trailingRowOptions.hint, trailingRowOptions === null || trailingRowOptions === void 0 ? void 0 : trailingRowOptions.addIcon, experimental === null || experimental === void 0 ? void 0 : experimental.strict, getCellContent]);
   const mangledGetGroupDetails = react.useCallback(group => {
     var _getGroupDetails;
     let result = (_getGroupDetails = getGroupDetails === null || getGroupDetails === void 0 ? void 0 : getGroupDetails(group)) !== null && _getGroupDetails !== void 0 ? _getGroupDetails : {
@@ -8244,9 +8248,9 @@ const DataEditorImpl = (p, forwardedRef) => {
       const editList = [];
       do {
         if (onPaste === undefined) {
-          var _ref2, _text, _data;
+          var _ref4, _text, _data;
           const cellData = getMangledCellContent(target);
-          const rawValue = (_ref2 = (_text = text) !== null && _text !== void 0 ? _text : (_data = data) === null || _data === void 0 ? void 0 : _data.map(r => r.map(cb => cb.rawValue).join("\t")).join("\t")) !== null && _ref2 !== void 0 ? _ref2 : "";
+          const rawValue = (_ref4 = (_text = text) !== null && _text !== void 0 ? _text : (_data = data) === null || _data === void 0 ? void 0 : _data.map(r => r.map(cb => cb.rawValue).join("\t")).join("\t")) !== null && _ref4 !== void 0 ? _ref4 : "";
           const newVal = pasteToCell(cellData, target, rawValue, undefined);
           if (newVal !== undefined) {
             editList.push(newVal);
@@ -9491,7 +9495,7 @@ const markerCellRenderer = {
   needsHoverPosition: false,
   drawPrep: prepMarkerRowCell,
   measure: () => 44,
-  draw: a => drawMarkerRowCell(a, a.cell.row, a.cell.checked, a.cell.markerKind, a.cell.drawHandle),
+  draw: a => drawMarkerRowCell(a, a.cell.row, a.cell.checked, a.cell.markerKind, a.cell.drawHandle, a.cell.checkboxStyle),
   onClick: e => {
     const {
       bounds,
@@ -9536,7 +9540,7 @@ function deprepMarkerRowCell(args) {
   } = args;
   ctx.textAlign = "start";
 }
-function drawMarkerRowCell(args, index, checked, markerKind, drawHandle) {
+function drawMarkerRowCell(args, index, checked, markerKind, drawHandle, style) {
   const {
     ctx,
     rect,
@@ -9553,7 +9557,7 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle) {
   if (markerKind !== "number" && checkedboxAlpha > 0) {
     ctx.globalAlpha = checkedboxAlpha;
     const offsetAmount = 7 * (checked ? hoverAmount : 1);
-    drawCheckbox(ctx, theme, checked, drawHandle ? x + offsetAmount : x, y, drawHandle ? width - offsetAmount : width, height, true, undefined, undefined, 18);
+    drawCheckbox(ctx, theme, checked, drawHandle ? x + offsetAmount : x, y, drawHandle ? width - offsetAmount : width, height, true, undefined, undefined, 18, "center", style);
     if (drawHandle) {
       ctx.globalAlpha = hoverAmount;
       ctx.beginPath();
@@ -10650,19 +10654,15 @@ function getLuminance(color) {
 /* harmony export */   "$o": () => (/* binding */ InnerGridCellKind),
 /* harmony export */   "DP": () => (/* binding */ isObjectEditorCallbackResult),
 /* harmony export */   "EV": () => (/* binding */ CompactSelection),
-/* harmony export */   "Gf": () => (/* binding */ headerCellCheckboxPrefix),
 /* harmony export */   "PE": () => (/* binding */ GridColumnIcon),
 /* harmony export */   "Qo": () => (/* binding */ isReadWriteCell),
 /* harmony export */   "Sq": () => (/* binding */ isSizedGridColumn),
 /* harmony export */   "T9": () => (/* binding */ isEditableGridCell),
-/* harmony export */   "YK": () => (/* binding */ headerCellUnheckedMarker),
 /* harmony export */   "f": () => (/* binding */ isTextEditableGridCell),
-/* harmony export */   "iJ": () => (/* binding */ headerCellIndeterminateMarker),
 /* harmony export */   "kf": () => (/* binding */ booleanCellIsEditable),
 /* harmony export */   "p6": () => (/* binding */ GridCellKind),
 /* harmony export */   "pN": () => (/* binding */ GridColumnMenuIcon),
 /* harmony export */   "qF": () => (/* binding */ BooleanEmpty),
-/* harmony export */   "qT": () => (/* binding */ headerCellCheckedMarker),
 /* harmony export */   "rL": () => (/* binding */ resolveCellsThunk),
 /* harmony export */   "rs": () => (/* binding */ isInnerOnlyCell),
 /* harmony export */   "sd": () => (/* binding */ BooleanIndeterminate)
@@ -10728,10 +10728,6 @@ var GridColumnMenuIcon;
   GridColumnMenuIcon["Triangle"] = "triangle";
   GridColumnMenuIcon["Dots"] = "dots";
 })(GridColumnMenuIcon || (GridColumnMenuIcon = {}));
-const headerCellCheckboxPrefix = "___gdg_header_cell_";
-const headerCellCheckedMarker = headerCellCheckboxPrefix + "checked";
-const headerCellUnheckedMarker = headerCellCheckboxPrefix + "unchecked";
-const headerCellIndeterminateMarker = headerCellCheckboxPrefix + "indeterminate";
 function isSizedGridColumn(c) {
   return "width" in c && typeof c.width === "number";
 }
@@ -10961,7 +10957,10 @@ function useMappedColumns(columns, freezeColumns) {
     themeOverride: c.themeOverride,
     title: c.title,
     trailingRowOptions: c.trailingRowOptions,
-    width: c.width
+    width: c.width,
+    growOffset: c.growOffset,
+    rowMarker: c.rowMarker,
+    rowMarkerChecked: c.rowMarkerChecked
   })), [columns, freezeColumns]);
 }
 function gridSelectionHasItem(sel, item) {
@@ -11601,4 +11600,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.a26b4965.iframe.bundle.js.map
+//# sourceMappingURL=4981.e14ef621.iframe.bundle.js.map
