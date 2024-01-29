@@ -31,6 +31,7 @@ import {
     BooleanIndeterminate,
     type FillHandleDirection,
     type EditListItem,
+    type CellActiviationBehavior,
 } from "../internal/data-grid/data-grid-types.js";
 import DataGridSearch, { type DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
 import { browserIsOSX } from "../common/browser-detect.js";
@@ -622,7 +623,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * Determines when a cell is considered activated and will emit the `onCellActivated` event. Generally an activated
      * cell will open to edit mode.
      */
-    readonly cellActivationBehavior?: "double-click" | "single-click" | "second-click";
+    readonly cellActivationBehavior?: CellActiviationBehavior;
 
     /**
      * Controls if focus will trap inside the data grid when doing tab and caret navigation.
@@ -2223,7 +2224,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     if (isPrevented.current || gridSelection.current === undefined) return false;
 
                     let shouldActivate = false;
-                    switch (cellActivationBehavior) {
+                    switch (c.activationBehaviorOverride ?? cellActivationBehavior) {
                         case "double-click":
                         case "second-click": {
                             if (mouse?.previousSelection?.current?.cell === undefined) break;

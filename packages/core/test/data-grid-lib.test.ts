@@ -27,6 +27,9 @@ function makeCol(title: string, sourceIndex: number, sticky: boolean, width: num
         style: undefined,
         themeOverride: undefined,
         trailingRowOptions: undefined,
+        growOffset: undefined,
+        rowMarker: undefined,
+        rowMarkerChecked: undefined,
     };
 }
 

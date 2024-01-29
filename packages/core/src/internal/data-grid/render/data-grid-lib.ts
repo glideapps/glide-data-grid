@@ -325,8 +325,13 @@ function makeCacheKey(
 }
 
 /** @category Drawing */
-export function measureTextCached(s: string, ctx: CanvasRenderingContext2D, font?: string): TextMetrics {
-    const key = makeCacheKey(s, ctx, "middle", font);
+export function measureTextCached(
+    s: string,
+    ctx: CanvasRenderingContext2D,
+    font?: string,
+    baseline: "middle" | "alphabetic" = "middle"
+): TextMetrics {
+    const key = makeCacheKey(s, ctx, baseline, font);
     let metrics = metricsCache[key];
     if (metrics === undefined) {
         metrics = ctx.measureText(s);
