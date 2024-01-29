@@ -3465,7 +3465,7 @@ function walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHe
   const drawY = totalHeaderHeight + translateY;
   for (const c of effectiveCols) {
     const drawX = c.sticky ? clipX : x + translateX;
-    if (cb(c, drawX, drawY, clipX, cellYOffset) === true) {
+    if (cb(c, drawX, drawY, c.sticky ? 0 : clipX + 1, cellYOffset) === true) {
       break;
     }
     x += c.width;
@@ -7660,4 +7660,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7671.d6d0c568.iframe.bundle.js.map
+//# sourceMappingURL=7671.fde73d0c.iframe.bundle.js.map

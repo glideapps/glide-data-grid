@@ -668,7 +668,7 @@ function walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHe
   const drawY = totalHeaderHeight + translateY;
   for (const c of effectiveCols) {
     const drawX = c.sticky ? clipX : x + translateX;
-    if (cb(c, drawX, drawY, clipX, cellYOffset) === true) {
+    if (cb(c, drawX, drawY, c.sticky ? 0 : clipX + 1, cellYOffset) === true) {
       break;
     }
     x += c.width;
@@ -11600,4 +11600,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.e14ef621.iframe.bundle.js.map
+//# sourceMappingURL=4981.e636edbc.iframe.bundle.js.map
