@@ -6280,6 +6280,7 @@ const DataEditorImpl = (p, forwardedRef) => {
     coercePasteValue,
     drawHeader: drawHeaderIn,
     drawCell: drawCellIn,
+    editorBloom,
     onHeaderClicked,
     onColumnProposeMove,
     spanRangeBehavior = "default",
@@ -8706,6 +8707,7 @@ const DataEditorImpl = (p, forwardedRef) => {
   }, react.createElement(DataGridOverlayEditor, {
     ...overlay,
     validateCell: validateCell,
+    bloom: editorBloom,
     id: overlayID,
     getCellRenderer: getCellRenderer,
     className: (experimental === null || experimental === void 0 ? void 0 : experimental.isSubGrid) === true ? "click-outside-ignore" : undefined,
@@ -11600,4 +11602,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.e636edbc.iframe.bundle.js.map
+//# sourceMappingURL=4981.171acd33.iframe.bundle.js.map

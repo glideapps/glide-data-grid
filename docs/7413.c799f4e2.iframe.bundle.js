@@ -1120,6 +1120,7 @@ const DataEditorImpl = (p, forwardedRef) => {
     coercePasteValue,
     drawHeader: drawHeaderIn,
     drawCell: drawCellIn,
+    editorBloom,
     onHeaderClicked,
     onColumnProposeMove,
     spanRangeBehavior = "default",
@@ -3546,6 +3547,7 @@ const DataEditorImpl = (p, forwardedRef) => {
         children: (0,jsx_runtime.jsx)(DataGridOverlayEditor, {
           ...overlay,
           validateCell: validateCell,
+          bloom: editorBloom,
           id: overlayID,
           getCellRenderer: getCellRenderer,
           className: (experimental === null || experimental === void 0 ? void 0 : experimental.isSubGrid) === true ? "click-outside-ignore" : undefined,
@@ -4298,4 +4300,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7413.51cc96a9.iframe.bundle.js.map
+//# sourceMappingURL=7413.c799f4e2.iframe.bundle.js.map

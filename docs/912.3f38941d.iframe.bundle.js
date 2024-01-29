@@ -26,11 +26,10 @@ var data_grid_types = __webpack_require__("./packages/core/dist/esm/internal/dat
 var dist = __webpack_require__("./node_modules/@linaria/react/dist/index.mjs");
 ;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid-overlay-editor/data-grid-overlay-editor-style.js
 
-const _exp = () => p => p.targetY;
-const _exp2 = () => p => p.targetX - 1;
-const _exp3 = () => p => p.targetY - 1;
-const _exp4 = () => p => p.targetWidth + 2;
-const _exp5 = () => p => p.targetHeight + 2;
+const _exp2 = () => p => p.targetX;
+const _exp3 = () => p => p.targetY;
+const _exp4 = () => p => p.targetWidth;
+const _exp5 = () => p => p.targetHeight;
 const _exp6 = () => p => p.targetY + 10;
 const _exp7 = () => p => Math.max(0, (p.targetHeight - 28) / 2);
 const DataGridOverlayEditorStyle = (0,dist/* styled */.z)('div')({
@@ -38,13 +37,12 @@ const DataGridOverlayEditorStyle = (0,dist/* styled */.z)('div')({
   class: "gdg-d19meir1",
   propsAsIs: false,
   vars: {
-    "d19meir1-0": [_exp(), "px"],
+    "d19meir1-0": [_exp3(), "px"],
     "d19meir1-1": [_exp2(), "px"],
-    "d19meir1-2": [_exp3(), "px"],
-    "d19meir1-3": [_exp4(), "px"],
-    "d19meir1-4": [_exp5(), "px"],
-    "d19meir1-5": [_exp6(), "px"],
-    "d19meir1-6": [_exp7(), "px"]
+    "d19meir1-2": [_exp4(), "px"],
+    "d19meir1-3": [_exp5(), "px"],
+    "d19meir1-4": [_exp6(), "px"],
+    "d19meir1-5": [_exp7(), "px"]
   }
 });
 ;// CONCATENATED MODULE: ./packages/core/dist/esm/internal/data-grid-overlay-editor/use-stay-on-screen.js
@@ -105,6 +103,7 @@ function useStayOnScreen() {
 
 
 const DataGridOverlayEditor = p => {
+  var _bloom$, _bloom$2;
   const {
     target,
     content,
@@ -118,6 +117,7 @@ const DataGridOverlayEditor = p => {
     theme,
     id,
     cell,
+    bloom,
     validateCell,
     getCellRenderer,
     provideEditor,
@@ -237,6 +237,8 @@ const DataGridOverlayEditor = p => {
   if (pad) {
     classWrap += " gdg-pad";
   }
+  const bloomX = (_bloom$ = bloom === null || bloom === void 0 ? void 0 : bloom[0]) !== null && _bloom$ !== void 0 ? _bloom$ : 1;
+  const bloomY = (_bloom$2 = bloom === null || bloom === void 0 ? void 0 : bloom[1]) !== null && _bloom$2 !== void 0 ? _bloom$2 : 1;
   return (0,react_dom.createPortal)(react.createElement(styles/* ThemeContext.Provider */.Ni.Provider, {
     value: theme
   }, react.createElement(click_outside_container/* default */.Z, {
@@ -250,10 +252,10 @@ const DataGridOverlayEditor = p => {
     className: classWrap,
     style: styleOverride,
     as: useLabel === true ? "label" : undefined,
-    targetX: target.x,
-    targetY: target.y,
-    targetWidth: target.width,
-    targetHeight: target.height
+    targetX: target.x - bloomX,
+    targetY: target.y - bloomY,
+    targetWidth: target.width + bloomX * 2,
+    targetHeight: target.height + bloomY * 2
   }, react.createElement("div", {
     className: "gdg-clip-region",
     onKeyDown: onKeyDown
@@ -264,4 +266,4 @@ const DataGridOverlayEditor = p => {
 /***/ })
 
 }]);
-//# sourceMappingURL=912.d21e690d.iframe.bundle.js.map
+//# sourceMappingURL=912.3f38941d.iframe.bundle.js.map
