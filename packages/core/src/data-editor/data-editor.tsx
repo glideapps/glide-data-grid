@@ -628,6 +628,8 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * Controls if focus will trap inside the data grid when doing tab and caret navigation.
      */
     readonly trapFocus?: boolean;
+
+    readonly editorBloom?: readonly [number, number];
 }
 
 type ScrollToFn = (
@@ -722,6 +724,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         coercePasteValue,
         drawHeader: drawHeaderIn,
         drawCell: drawCellIn,
+        editorBloom,
         onHeaderClicked,
         onColumnProposeMove,
         spanRangeBehavior = "default",
@@ -3953,6 +3956,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         <DataGridOverlayEditor
                             {...overlay}
                             validateCell={validateCell}
+                            bloom={editorBloom}
                             id={overlayID}
                             getCellRenderer={getCellRenderer}
                             className={experimental?.isSubGrid === true ? "click-outside-ignore" : undefined}

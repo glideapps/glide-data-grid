@@ -29,6 +29,7 @@ interface DataGridOverlayEditorProps {
     readonly className?: string;
     readonly id: string;
     readonly initialValue?: string;
+    readonly bloom?: readonly [number, number];
     readonly theme: Theme;
     readonly onFinishEditing: (newCell: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly forceEditMode: boolean;
@@ -59,6 +60,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         theme,
         id,
         cell,
+        bloom,
         validateCell,
         getCellRenderer,
         provideEditor,
@@ -207,6 +209,9 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         classWrap += " gdg-pad";
     }
 
+    const bloomX = bloom?.[0] ?? 1;
+    const bloomY = bloom?.[1] ?? 1;
+
     return createPortal(
         <ThemeContext.Provider value={theme}>
             <ClickOutsideContainer
@@ -220,10 +225,10 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                     className={classWrap}
                     style={styleOverride}
                     as={useLabel === true ? "label" : undefined}
-                    targetX={target.x}
-                    targetY={target.y}
-                    targetWidth={target.width}
-                    targetHeight={target.height}>
+                    targetX={target.x - bloomX}
+                    targetY={target.y - bloomY}
+                    targetWidth={target.width + bloomX * 2}
+                    targetHeight={target.height + bloomY * 2}>
                     <div className="gdg-clip-region" onKeyDown={onKeyDown}>
                         {editor}
                     </div>
