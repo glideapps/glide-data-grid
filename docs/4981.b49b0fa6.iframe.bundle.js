@@ -3479,7 +3479,8 @@ const DataGrid = (p, forwardedRef) => {
     }
     const cell = getCellContent(hoveredItem, true);
     const r = getCellRenderer(cell);
-    am.setHovered(r === undefined && cell.kind === data_grid_types/* GridCellKind.Custom */.p6.Custom || (r === null || r === void 0 ? void 0 : r.needsHover) === true ? hoveredItem : undefined);
+    const cellNeedsHover = r === undefined && cell.kind === data_grid_types/* GridCellKind.Custom */.p6.Custom || (r === null || r === void 0 ? void 0 : r.needsHover) !== undefined && (typeof r.needsHover === "boolean" ? r.needsHover : r.needsHover(cell));
+    am.setHovered(cellNeedsHover ? hoveredItem : undefined);
   }, [getCellContent, getCellRenderer, hoveredItem]);
   const hoveredRef = react.useRef();
   const onMouseMoveImpl = react.useCallback(ev => {
@@ -3501,6 +3502,7 @@ const DataGrid = (p, forwardedRef) => {
       });
     };
     if (!mouseEventArgsAreEqual(args, hoveredRef.current)) {
+      setDrawCursorOverride(undefined);
       onItemHovered === null || onItemHovered === void 0 || onItemHovered(args);
       maybeSetHoveredInfo(args.kind === outOfBoundsKind ? undefined : [args.location, [args.localEventX, args.localEventY]], true);
       hoveredRef.current = args;
@@ -7354,6 +7356,7 @@ const DataEditorImpl = (p, forwardedRef) => {
       }
       if (a.button === 1) return !isPrevented.current;
       if (!isPrevented.current) {
+        var _c$activationBehavior;
         const c = getMangledCellContent(args.location);
         const r = getCellRenderer(c);
         if (r !== undefined && r.onClick !== undefined && isValidClick) {
@@ -7379,7 +7382,7 @@ const DataEditorImpl = (p, forwardedRef) => {
         }
         if (isPrevented.current || gridSelection.current === undefined) return false;
         let shouldActivate = false;
-        switch (cellActivationBehavior) {
+        switch ((_c$activationBehavior = c.activationBehaviorOverride) !== null && _c$activationBehavior !== void 0 ? _c$activationBehavior : cellActivationBehavior) {
           case "double-click":
           case "second-click":
             {
@@ -9796,17 +9799,53 @@ const rowIDCellRenderer = {
 
 
 
+
 const textCellRenderer = {
   getAccessibilityString: c => {
     var _c$data$toString, _c$data;
     return (_c$data$toString = (_c$data = c.data) === null || _c$data === void 0 ? void 0 : _c$data.toString()) !== null && _c$data$toString !== void 0 ? _c$data$toString : "";
   },
   kind: data_grid_types/* GridCellKind.Text */.p6.Text,
-  needsHover: false,
+  needsHover: textCell => textCell.hoverEffect === true,
   needsHoverPosition: false,
   drawPrep: data_grid_lib/* prepTextCell */.k0,
   useLabel: true,
-  draw: a => ((0,data_grid_lib/* drawTextCell */.uN)(a, a.cell.displayData, a.cell.contentAlign, a.cell.allowWrapping, a.hyperWrapping), true),
+  draw: a => {
+    const {
+      cell,
+      hoverAmount,
+      hyperWrapping,
+      ctx,
+      rect,
+      theme,
+      overrideCursor
+    } = a;
+    const {
+      displayData,
+      contentAlign,
+      hoverEffect,
+      allowWrapping
+    } = cell;
+    if (hoverEffect === true && hoverAmount > 0) {
+      var _theme$roundingRadius;
+      ctx.textBaseline = "alphabetic";
+      const padX = theme.cellHorizontalPadding;
+      const padY = theme.cellVerticalPadding;
+      const m = (0,data_grid_lib/* measureTextCached */.P7)(displayData, ctx, theme.baseFontFull, "alphabetic");
+      const maxH = rect.height - padY;
+      const h = Math.min(maxH, m.actualBoundingBoxAscent * 2.5);
+      ctx.beginPath();
+      (0,data_grid_lib/* roundedRect */.NK)(ctx, rect.x + padX / 2, rect.y + (rect.height - h) / 2 + 1, m.width + padX * 3, h - 1, (_theme$roundingRadius = theme.roundingRadius) !== null && _theme$roundingRadius !== void 0 ? _theme$roundingRadius : 4);
+      ctx.globalAlpha = hoverAmount;
+      ctx.fillStyle = (0,color_parser/* withAlpha */.fG)(theme.textDark, 0.1);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = theme.textDark;
+      ctx.textBaseline = "middle";
+      overrideCursor === null || overrideCursor === void 0 || overrideCursor("text");
+    }
+    (0,data_grid_lib/* drawTextCell */.uN)(a, displayData, contentAlign, allowWrapping, hyperWrapping);
+  },
   measure: (ctx, cell, t) => {
     const lines = cell.displayData.split("\n", cell.allowWrapping === true ? undefined : 1);
     let maxLineWidth = 0;
@@ -9931,7 +9970,7 @@ const uriCellRenderer = {
     return (_c$data$toString = (_c$data = c.data) === null || _c$data === void 0 ? void 0 : _c$data.toString()) !== null && _c$data$toString !== void 0 ? _c$data$toString : "";
   },
   kind: data_grid_types/* GridCellKind.Uri */.p6.Uri,
-  needsHover: true,
+  needsHover: uriCell => uriCell.hoverEffect === true,
   needsHoverPosition: true,
   useLabel: true,
   drawPrep: data_grid_lib/* prepTextCell */.k0,
@@ -11150,7 +11189,8 @@ function makeCacheKey(s, ctx, baseline, font) {
   return `${s}_${font !== null && font !== void 0 ? font : ctx === null || ctx === void 0 ? void 0 : ctx.font}_${baseline}`;
 }
 function measureTextCached(s, ctx, font) {
-  const key = makeCacheKey(s, ctx, "middle", font);
+  let baseline = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "middle";
+  const key = makeCacheKey(s, ctx, baseline, font);
   let metrics = metricsCache[key];
   if (metrics === undefined) {
     metrics = ctx.measureText(s);
@@ -11605,4 +11645,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.d9d09078.iframe.bundle.js.map
+//# sourceMappingURL=4981.b49b0fa6.iframe.bundle.js.map

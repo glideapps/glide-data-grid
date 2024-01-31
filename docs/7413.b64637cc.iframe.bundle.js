@@ -2194,6 +2194,7 @@ const DataEditorImpl = (p, forwardedRef) => {
       }
       if (a.button === 1) return !isPrevented.current;
       if (!isPrevented.current) {
+        var _c$activationBehavior;
         const c = getMangledCellContent(args.location);
         const r = getCellRenderer(c);
         if (r !== undefined && r.onClick !== undefined && isValidClick) {
@@ -2219,7 +2220,7 @@ const DataEditorImpl = (p, forwardedRef) => {
         }
         if (isPrevented.current || gridSelection.current === undefined) return false;
         let shouldActivate = false;
-        switch (cellActivationBehavior) {
+        switch ((_c$activationBehavior = c.activationBehaviorOverride) !== null && _c$activationBehavior !== void 0 ? _c$activationBehavior : cellActivationBehavior) {
           case "double-click":
           case "second-click":
             {
@@ -4300,4 +4301,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7413.c799f4e2.iframe.bundle.js.map
+//# sourceMappingURL=7413.b64637cc.iframe.bundle.js.map
