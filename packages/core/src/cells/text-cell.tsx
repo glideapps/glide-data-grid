@@ -9,7 +9,7 @@ import {
 } from "../internal/data-grid/render/data-grid-lib.js";
 import { GridCellKind, type TextCell } from "../internal/data-grid/data-grid-types.js";
 import type { InternalCellRenderer } from "./cell-types.js";
-import { withAlpha } from "../index.js";
+import { withAlpha } from "../internal/data-grid/color-parser.js";
 
 export const textCellRenderer: InternalCellRenderer<TextCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",
