@@ -41,7 +41,7 @@ function getTextRect(
 export const uriCellRenderer: InternalCellRenderer<UriCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",
     kind: GridCellKind.Uri,
-    needsHover: true,
+    needsHover: uriCell => uriCell.hoverEffect === true,
     needsHoverPosition: true,
     useLabel: true,
     drawPrep: prepTextCell,

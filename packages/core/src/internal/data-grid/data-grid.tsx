@@ -1198,9 +1198,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         }
         const cell = getCellContent(hoveredItem as [number, number], true);
         const r = getCellRenderer(cell);
-        am.setHovered(
-            (r === undefined && cell.kind === GridCellKind.Custom) || r?.needsHover === true ? hoveredItem : undefined
-        );
+        const cellNeedsHover =
+            (r === undefined && cell.kind === GridCellKind.Custom) ||
+            (r?.needsHover !== undefined && (typeof r.needsHover === "boolean" ? r.needsHover : r.needsHover(cell)));
+        am.setHovered(cellNeedsHover ? hoveredItem : undefined);
     }, [getCellContent, getCellRenderer, hoveredItem]);
 
     const hoveredRef = React.useRef<GridMouseEventArgs>();
@@ -1236,6 +1237,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             };
 
             if (!mouseEventArgsAreEqual(args, hoveredRef.current)) {
+                setDrawCursorOverride(undefined);
                 onItemHovered?.(args);
                 maybeSetHoveredInfo(
                     args.kind === outOfBoundsKind ? undefined : [args.location, [args.localEventX, args.localEventY]],

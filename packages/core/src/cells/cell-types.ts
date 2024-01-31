@@ -60,7 +60,7 @@ interface BaseCellRenderer<T extends InnerGridCell> {
     readonly kind: T["kind"];
     readonly draw: DrawCallback<T>;
     readonly drawPrep?: PrepCallback;
-    readonly needsHover?: boolean;
+    readonly needsHover?: boolean | ((cell: T) => boolean);
     readonly needsHoverPosition?: boolean;
     readonly measure?: (ctx: CanvasRenderingContext2D, cell: T, theme: FullTheme) => number;
 
