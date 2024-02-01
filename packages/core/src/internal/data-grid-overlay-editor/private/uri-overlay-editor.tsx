@@ -16,7 +16,7 @@ interface Props {
 const UriOverlayEditor: React.FunctionComponent<Props> = p => {
     const { uri, onChange, forceEditMode, readonly, validatedSelection, preview } = p;
 
-    const [editMode, setEditMode] = React.useState<boolean>(uri === "" || forceEditMode);
+    const [editMode, setEditMode] = React.useState<boolean>(!readonly && (uri === "" || forceEditMode));
 
     const onEditClick = React.useCallback(() => {
         setEditMode(true);
