@@ -18,6 +18,8 @@ jobs:
               run: |
                   npm install
                   npm run build-storybook
+            - name: "Add .nojekyll 📄"
+            run: cd storybook-build && touch .nojekyll
             - name: Deploy 🚀
               uses: JamesIves/github-pages-deploy-action@3.6.2
               with:

@@ -86,6 +86,7 @@ const DataGridOverlayEditor = React.lazy(
     async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
 );
 
+// There must be a better way
 let idCounter = 0;
 
 export interface RowMarkerOptions {
