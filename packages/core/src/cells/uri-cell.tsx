@@ -115,7 +115,10 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
         const { onChange, value, forceEditMode, validatedSelection } = p;
         return (
             <UriOverlayEditor
-                forceEditMode={forceEditMode || (cell.hoverEffect === true && cell.onClickUri !== undefined)}
+                forceEditMode={
+                    value.readonly !== true &&
+                    (forceEditMode || (cell.hoverEffect === true && cell.onClickUri !== undefined))
+                }
                 uri={value.data}
                 preview={value.displayData ?? value.data}
                 validatedSelection={validatedSelection}
