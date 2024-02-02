@@ -1140,6 +1140,7 @@ const DataEditorImpl = (p, forwardedRef) => {
     onKeyDown: onKeyDownIn,
     onKeyUp: onKeyUpIn,
     keybindings: keybindingsIn,
+    editOnType = true,
     onRowAppended,
     onColumnMoved,
     validateCell: validateCellIn,
@@ -2955,7 +2956,7 @@ const DataEditorImpl = (p, forwardedRef) => {
     if (gridSelection.current === undefined) return;
     const [col, row] = gridSelection.current.cell;
     const vr = visibleRegionRef.current;
-    if (!event.metaKey && !event.ctrlKey && gridSelection.current !== undefined && event.key.length === 1 && /[ -~]/g.test(event.key) && event.bounds !== undefined && (0,data_grid_types/* isReadWriteCell */.Qo)(getCellContent([col - rowMarkerOffset, Math.max(0, Math.min(row, rows - 1))]))) {
+    if (editOnType && !event.metaKey && !event.ctrlKey && gridSelection.current !== undefined && event.key.length === 1 && /[ -~]/g.test(event.key) && event.bounds !== undefined && (0,data_grid_types/* isReadWriteCell */.Qo)(getCellContent([col - rowMarkerOffset, Math.max(0, Math.min(row, rows - 1))]))) {
       if ((!showTrailingBlankRow || row !== rows) && (vr.y > row || row > vr.y + vr.height || vr.x > col || col > vr.x + vr.width)) {
         return;
       }
@@ -2963,7 +2964,7 @@ const DataEditorImpl = (p, forwardedRef) => {
       event.stopPropagation();
       event.preventDefault();
     }
-  }, [onKeyDownIn, handleFixedKeybindings, gridSelection, getCellContent, rowMarkerOffset, rows, showTrailingBlankRow, reselect]);
+  }, [editOnType, onKeyDownIn, handleFixedKeybindings, gridSelection, getCellContent, rowMarkerOffset, rows, showTrailingBlankRow, reselect]);
   const onContextMenu = react.useCallback((args, preventDefault) => {
     const adjustedCol = args.location[0] - rowMarkerOffset;
     if (args.kind === "header") {
@@ -4301,4 +4302,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7413.b64637cc.iframe.bundle.js.map
+//# sourceMappingURL=7413.9b8c7574.iframe.bundle.js.map
