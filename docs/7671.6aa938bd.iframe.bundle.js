@@ -4734,6 +4734,7 @@ function drawFocusRing(ctx, width, height, cellYOffset, translateX, translateY, 
   let drawCb = undefined;
   let drawHandleCb = undefined;
   walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, (col, drawX, colDrawY, clipX, startRow) => {
+    clipX -= 1;
     if (col.sticky && targetCol > col.sourceIndex) return;
     const isBeforeTarget = col.sourceIndex < targetColSpan[0];
     const isAfterTarget = col.sourceIndex > targetColSpan[1];
@@ -7702,4 +7703,4 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 /***/ })
 
 }]);
-//# sourceMappingURL=7671.6cbb3cc7.iframe.bundle.js.map
+//# sourceMappingURL=7671.6aa938bd.iframe.bundle.js.map

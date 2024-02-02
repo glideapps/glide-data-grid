@@ -2277,6 +2277,7 @@ function drawFocusRing(ctx, width, height, cellYOffset, translateX, translateY, 
   let drawCb = undefined;
   let drawHandleCb = undefined;
   walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, (col, drawX, colDrawY, clipX, startRow) => {
+    clipX -= 1;
     if (col.sticky && targetCol > col.sourceIndex) return;
     const isBeforeTarget = col.sourceIndex < targetColSpan[0];
     const isAfterTarget = col.sourceIndex > targetColSpan[1];
@@ -11645,4 +11646,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.2d196232.iframe.bundle.js.map
+//# sourceMappingURL=4981.142790b6.iframe.bundle.js.map
