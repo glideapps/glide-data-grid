@@ -222,6 +222,7 @@ export function drawFocusRing(
         translateY,
         totalHeaderHeight,
         (col, drawX, colDrawY, clipX, startRow) => {
+            clipX -= 1; // we need to be allowed to draw onto this border
             if (col.sticky && targetCol > col.sourceIndex) return;
 
             const isBeforeTarget = col.sourceIndex < targetColSpan[0];
