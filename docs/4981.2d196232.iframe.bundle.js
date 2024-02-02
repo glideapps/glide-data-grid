@@ -9914,7 +9914,7 @@ const UriOverlayEditor = p => {
     validatedSelection,
     preview
   } = p;
-  const [editMode, setEditMode] = react.useState(uri === "" || forceEditMode);
+  const [editMode, setEditMode] = react.useState(!readonly && (uri === "" || forceEditMode));
   const onEditClick = react.useCallback(() => {
     setEditMode(true);
   }, []);
@@ -10084,7 +10084,7 @@ const uriCellRenderer = {
       validatedSelection
     } = p;
     return react.createElement(uri_overlay_editor, {
-      forceEditMode: forceEditMode || cell.hoverEffect === true && cell.onClickUri !== undefined,
+      forceEditMode: value.readonly !== true && (forceEditMode || cell.hoverEffect === true && cell.onClickUri !== undefined),
       uri: value.data,
       preview: (_value$displayData = value.displayData) !== null && _value$displayData !== void 0 ? _value$displayData : value.data,
       validatedSelection: validatedSelection,
@@ -11645,4 +11645,4 @@ const GrowingEntry = props => {
 /***/ })
 
 }]);
-//# sourceMappingURL=4981.b49b0fa6.iframe.bundle.js.map
+//# sourceMappingURL=4981.2d196232.iframe.bundle.js.map
