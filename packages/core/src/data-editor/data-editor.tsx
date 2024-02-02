@@ -536,6 +536,12 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
     readonly keybindings?: Partial<Keybinds>;
 
     /**
+     * Determines if the data editor should immediately begin editing when the user types on a selected cell
+     * @group Editing
+     */
+    readonly editOnType?: boolean;
+
+    /**
      * Used to fetch large amounts of cells at once. Used for copy/paste, if unset copy will not work.
      *
      * `getCellsForSelection` is called when the user copies a selection to the clipboard or the data editor needs to
@@ -745,6 +751,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onKeyDown: onKeyDownIn,
         onKeyUp: onKeyUpIn,
         keybindings: keybindingsIn,
+        editOnType = true,
         onRowAppended,
         onColumnMoved,
         validateCell: validateCellIn,
@@ -3195,6 +3202,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             const vr = visibleRegionRef.current;
 
             if (
+                editOnType &&
                 !event.metaKey &&
                 !event.ctrlKey &&
                 gridSelection.current !== undefined &&
@@ -3215,6 +3223,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
         },
         [
+            editOnType,
             onKeyDownIn,
             handleFixedKeybindings,
             gridSelection,
