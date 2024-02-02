@@ -636,6 +636,9 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      */
     readonly trapFocus?: boolean;
 
+    /**
+     * Allows overriding the default amount of bloom (the size growth of the overlay editor)
+     */
     readonly editorBloom?: readonly [number, number];
 }
 
