@@ -702,6 +702,7 @@ const emptyGridSelection: GridSelection = {
 
 const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorProps> = (p, forwardedRef) => {
     const [gridSelectionInner, setGridSelectionInner] = React.useState<GridSelection>(emptyGridSelection);
+
     const [overlay, setOverlay] = React.useState<{
         target: Rectangle;
         content: GridCell;
