@@ -82,6 +82,7 @@ export const HeaderMenus: React.VFC = () => {
                     ...c,
                     hasMenu: true,
                     menuIcon: "dots",
+                    overlayIcon: "rowOwnerOverlay",
                 };
             } else if (index === 3) {
                 return {

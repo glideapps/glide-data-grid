@@ -23,6 +23,7 @@ function makeCol(title: string, sourceIndex: number, sticky: boolean, width: num
         icon: undefined,
         id: undefined,
         menuIcon: undefined,
+        indicatorIcon: undefined,
         overlayIcon: undefined,
         style: undefined,
         themeOverride: undefined,
