@@ -149,6 +149,7 @@ export interface BaseGridColumn {
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
     readonly menuIcon?: GridColumnMenuIcon | string;
+    readonly indicatorIcon?: GridColumnIcon | string;
     readonly hasMenu?: boolean;
     readonly grow?: number;
     readonly style?: "normal" | "highlight";

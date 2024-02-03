@@ -1,4 +1,4 @@
-import { pointInRect } from "../../../common/math.js";
+import { intersectRect, pointInRect } from "../../../common/math.js";
 import { mergeAndRealizeTheme, type FullTheme } from "../../../common/styles.js";
 import { direction } from "../../../common/utils.js";
 import type { HoverValues } from "../animation-manager.js";
@@ -6,7 +6,13 @@ import type { CellSet } from "../cell-set.js";
 import { withAlpha } from "../color-parser.js";
 import type { SpriteManager, SpriteVariant } from "../data-grid-sprites.js";
 import { type DrawHeaderCallback, type Rectangle, GridColumnMenuIcon, type GridSelection } from "../data-grid-types.js";
-import { drawMenuDots, getMiddleCenterBias, roundedPoly, type MappedGridColumn } from "./data-grid-lib.js";
+import {
+    drawMenuDots,
+    getMiddleCenterBias,
+    roundedPoly,
+    type MappedGridColumn,
+    measureTextCached,
+} from "./data-grid-lib.js";
 import type { GroupDetails, GroupDetailsCallback } from "./data-grid-render.cells.js";
 import { walkColumns, walkGroups } from "./data-grid-render.walk.js";
 import { drawCheckbox } from "./draw-checkbox.js";
@@ -303,6 +309,98 @@ export function getActionBoundsForGroup(
     return result;
 }
 
+type Mutable<T> = {
+    -readonly [P in keyof T]: T[P];
+};
+
+interface HeaderLayout {
+    readonly textBounds: Rectangle | undefined;
+    readonly iconBounds: Rectangle | undefined;
+    readonly iconOverlayBounds: Rectangle | undefined;
+    readonly indicatorIconBounds: Rectangle | undefined;
+    readonly menuBounds: Rectangle | undefined;
+}
+
+function flipHorizontal(
+    toFlip: Mutable<Rectangle> | undefined,
+    mirrorX: number,
+    isRTL: boolean
+): Mutable<Rectangle> | undefined {
+    if (!isRTL || toFlip === undefined) return toFlip;
+    toFlip.x = mirrorX - (toFlip.x - mirrorX) - toFlip.width;
+    return toFlip;
+}
+
+function computeHeaderLayout(
+    ctx: CanvasRenderingContext2D,
+    c: MappedGridColumn,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    theme: FullTheme,
+    isRTL: boolean
+): HeaderLayout {
+    const xPad = theme.cellHorizontalPadding;
+    const headerIconSize = theme.headerIconSize;
+    const menuBounds = getHeaderMenuBounds(x, y, width, height, false);
+
+    let drawX = x + xPad;
+    const iconBounds =
+        c.icon === undefined
+            ? undefined
+            : {
+                  x: drawX,
+                  y: y + (height - headerIconSize) / 2,
+                  width: headerIconSize,
+                  height: headerIconSize,
+              };
+
+    const iconOverlayBounds =
+        iconBounds === undefined || c.overlayIcon === undefined
+            ? undefined
+            : {
+                  x: iconBounds.x + 9,
+                  y: iconBounds.y + 6,
+                  width: 18,
+                  height: 18,
+              };
+
+    if (iconBounds !== undefined) {
+        drawX += Math.ceil(headerIconSize * 1.3);
+    }
+
+    const textBounds = {
+        x: drawX,
+        y: y,
+        width: width - drawX,
+        height: height,
+    };
+
+    let indicatorIconBounds: Rectangle | undefined = undefined;
+    if (c.indicatorIcon !== undefined) {
+        const textWidth = measureTextCached(c.title, ctx, theme.headerFontFull).width;
+        textBounds.width = textWidth;
+        drawX += textWidth + xPad;
+        indicatorIconBounds = {
+            x: drawX,
+            y: y + (height - headerIconSize) / 2,
+            width: headerIconSize,
+            height: headerIconSize,
+        };
+    }
+
+    const mirrorPoint = x + width / 2;
+
+    return {
+        menuBounds: flipHorizontal(menuBounds, mirrorPoint, isRTL),
+        iconBounds: flipHorizontal(iconBounds, mirrorPoint, isRTL),
+        iconOverlayBounds: flipHorizontal(iconOverlayBounds, mirrorPoint, isRTL),
+        textBounds: flipHorizontal(textBounds, mirrorPoint, isRTL),
+        indicatorIconBounds: flipHorizontal(indicatorIconBounds, mirrorPoint, isRTL),
+    };
+}
+
 function drawHeaderInner(
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -317,7 +415,7 @@ function drawHeaderInner(
     spriteManager: SpriteManager,
     touchMode: boolean,
     isRtl: boolean,
-    menuBounds: Rectangle
+    headerLayout: HeaderLayout
 ) {
     if (c.rowMarker !== undefined) {
         const checked = c.rowMarkerChecked;
@@ -331,46 +429,40 @@ function drawHeaderInner(
         return;
     }
 
-    const xPad = theme.cellHorizontalPadding;
     const fillStyle = selected ? theme.textHeaderSelected : theme.textHeader;
 
-    const shouldDrawMenu = c.hasMenu === true && (isHovered || (touchMode && selected));
+    const shouldDrawMenu =
+        c.hasMenu === true && (isHovered || (touchMode && selected)) && headerLayout.menuBounds !== undefined;
 
-    const dirScalar = isRtl ? -1 : 1;
-
-    let drawX = isRtl ? x + width - xPad : x + xPad;
-    if (c.icon !== undefined) {
+    if (c.icon !== undefined && headerLayout.iconBounds !== undefined) {
         let variant: SpriteVariant = selected ? "selected" : "normal";
         if (c.style === "highlight") {
             variant = selected ? "selected" : "special";
         }
-        const headerSize = theme.headerIconSize;
         spriteManager.drawSprite(
             c.icon,
             variant,
             ctx,
-            isRtl ? drawX - headerSize : drawX,
-            y + (height - headerSize) / 2,
-            headerSize,
+            headerLayout.iconBounds.x,
+            headerLayout.iconBounds.y,
+            headerLayout.iconBounds.width,
             theme
         );
 
-        if (c.overlayIcon !== undefined) {
+        if (c.overlayIcon !== undefined && headerLayout.iconOverlayBounds !== undefined) {
             spriteManager.drawSprite(
                 c.overlayIcon,
                 selected ? "selected" : "special",
                 ctx,
-                isRtl ? drawX - headerSize + 9 : drawX + 9,
-                y + ((height - 18) / 2 + 6),
-                18,
+                headerLayout.iconOverlayBounds.x,
+                headerLayout.iconOverlayBounds.y,
+                headerLayout.iconOverlayBounds.width,
                 theme
             );
         }
-
-        drawX += Math.ceil(headerSize * 1.3) * dirScalar;
     }
 
-    if (shouldDrawMenu && c.hasMenu === true && width > 35) {
+    if (shouldDrawMenu && width > 35) {
         const fadeWidth = 35;
         const fadeStart = isRtl ? fadeWidth : width - fadeWidth;
         const fadeEnd = isRtl ? fadeWidth * 0.7 : width - fadeWidth * 0.7;
@@ -393,12 +485,50 @@ function drawHeaderInner(
     if (isRtl) {
         ctx.textAlign = "right";
     }
-    ctx.fillText(c.title, drawX, y + height / 2 + getMiddleCenterBias(ctx, theme.headerFontFull));
+    if (headerLayout.textBounds !== undefined) {
+        ctx.fillText(
+            c.title,
+            isRtl ? headerLayout.textBounds.x + headerLayout.textBounds.width : headerLayout.textBounds.x,
+            y + height / 2 + getMiddleCenterBias(ctx, theme.headerFontFull)
+        );
+    }
     if (isRtl) {
         ctx.textAlign = "left";
     }
 
-    if (shouldDrawMenu && c.hasMenu === true) {
+    if (
+        c.indicatorIcon !== undefined &&
+        headerLayout.indicatorIconBounds !== undefined &&
+        (!shouldDrawMenu ||
+            !intersectRect(
+                headerLayout.menuBounds.x,
+                headerLayout.menuBounds.y,
+                headerLayout.menuBounds.width,
+                headerLayout.menuBounds.height,
+                headerLayout.indicatorIconBounds.x,
+                headerLayout.indicatorIconBounds.y,
+                headerLayout.indicatorIconBounds.width,
+                headerLayout.indicatorIconBounds.height
+            ))
+    ) {
+        let variant: SpriteVariant = selected ? "selected" : "normal";
+        if (c.style === "highlight") {
+            variant = selected ? "selected" : "special";
+        }
+        spriteManager.drawSprite(
+            c.indicatorIcon,
+            variant,
+            ctx,
+            headerLayout.indicatorIconBounds.x,
+            headerLayout.indicatorIconBounds.y,
+            headerLayout.indicatorIconBounds.width,
+            theme
+        );
+    }
+
+    if (shouldDrawMenu && headerLayout.menuBounds !== undefined) {
+        const menuBounds = headerLayout.menuBounds;
+
         if (c.menuIcon === undefined || c.menuIcon === GridColumnMenuIcon.Triangle) {
             // Draw the default triangle menu icon:
             ctx.beginPath();
@@ -458,7 +588,7 @@ export function drawHeader(
     touchMode: boolean
 ) {
     const isRtl = direction(c.title) === "rtl";
-    const menuBounds = getHeaderMenuBounds(x, y, width, height, isRtl);
+    const headerLayout = computeHeaderLayout(ctx, c, x, y, width, height, theme, isRtl);
 
     if (drawHeaderCallback !== undefined) {
         drawHeaderCallback(
@@ -473,7 +603,7 @@ export function drawHeader(
                 isHovered,
                 hasSelectedCell,
                 spriteManager,
-                menuBounds,
+                menuBounds: headerLayout?.menuBounds ?? { x: 0, y: 0, height: 0, width: 0 },
             },
             () =>
                 drawHeaderInner(
@@ -490,7 +620,7 @@ export function drawHeader(
                     spriteManager,
                     touchMode,
                     isRtl,
-                    menuBounds
+                    headerLayout
                 )
         );
     } else {
@@ -508,7 +638,7 @@ export function drawHeader(
             spriteManager,
             touchMode,
             isRtl,
-            menuBounds
+            headerLayout
         );
     }
 }

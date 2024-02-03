@@ -36,6 +36,7 @@ export function useMappedColumns(
                     overlayIcon: c.overlayIcon,
                     sourceIndex: i,
                     sticky: i < freezeColumns,
+                    indicatorIcon: c.indicatorIcon,
                     style: c.style,
                     themeOverride: c.themeOverride,
                     title: c.title,
