@@ -170,7 +170,7 @@ export function drawColumnResizeOutline(
     ctx.globalAlpha = 1;
 }
 
-export function drawFocusRing(
+export function drawFillHandle(
     ctx: CanvasRenderingContext2D,
     width: number,
     height: number,
@@ -212,7 +212,6 @@ export function drawFocusRing(
 
     const fillHandleRow = fillHandleTarget[1];
 
-    let drawCb: (() => void) | undefined = undefined;
     let drawHandleCb: (() => void) | undefined = undefined;
 
     walkColumns(
@@ -222,7 +221,7 @@ export function drawFocusRing(
         translateY,
         totalHeaderHeight,
         (col, drawX, colDrawY, clipX, startRow) => {
-            clipX -= 1; // we need to be allowed to draw onto this border
+            clipX;
             if (col.sticky && targetCol > col.sourceIndex) return;
 
             const isBeforeTarget = col.sourceIndex < targetColSpan[0];
@@ -250,9 +249,6 @@ export function drawFocusRing(
                     let cellX = drawX;
                     let cellWidth = col.width;
 
-                    const isLastColumn = col.sourceIndex === allColumns.length - 1;
-                    const isLastRow = row === rows - 1;
-
                     if (cell.span !== undefined) {
                         const areas = getSpanBounds(cell.span, drawX, drawY, col.width, rh, col, allColumns);
                         const area = col.sticky ? areas[0] : areas[1];
@@ -264,11 +260,10 @@ export function drawFocusRing(
                     }
 
                     const doHandle = row === fillHandleRow && isFillHandleCol && fillHandle;
-                    const doRing = row === targetRow && !isBeforeTarget && !isAfterTarget && drawCb === undefined;
 
                     if (doHandle) {
                         drawHandleCb = () => {
-                            if (clipX > cellX && !col.sticky && !doRing) {
+                            if (clipX > cellX && !col.sticky) {
                                 ctx.beginPath();
                                 ctx.rect(clipX, 0, width - clipX, height);
                                 ctx.clip();
@@ -279,35 +274,15 @@ export function drawFocusRing(
                             ctx.fill();
                         };
                     }
-
-                    if (doRing) {
-                        drawCb = () => {
-                            if (clipX > cellX && !col.sticky) {
-                                ctx.beginPath();
-                                ctx.rect(clipX, 0, width - clipX, height);
-                                ctx.clip();
-                            }
-                            ctx.beginPath();
-                            ctx.rect(
-                                cellX + 0.5,
-                                drawY + 0.5,
-                                cellWidth - (isLastColumn ? 1 : 0),
-                                rh - (isLastRow ? 1 : 0)
-                            );
-                            ctx.strokeStyle = col.themeOverride?.accentColor ?? theme.accentColor;
-                            ctx.lineWidth = 1;
-                            ctx.stroke();
-                        };
-                    }
-                    return drawCb !== undefined && (fillHandle ? drawHandleCb !== undefined : true);
+                    return drawHandleCb !== undefined;
                 }
             );
 
-            return drawCb !== undefined && (fillHandle ? drawHandleCb !== undefined : true);
+            return drawHandleCb !== undefined;
         }
     );
 
-    if (drawCb === undefined && drawHandleCb === undefined) return undefined;
+    if (drawHandleCb === undefined) return undefined;
 
     const result = () => {
         ctx.save();
@@ -315,7 +290,6 @@ export function drawFocusRing(
         ctx.rect(0, totalHeaderHeight, width, height - totalHeaderHeight - stickRowHeight);
         ctx.clip();
 
-        drawCb?.();
         drawHandleCb?.();
 
         ctx.restore();

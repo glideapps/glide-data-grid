@@ -800,7 +800,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnResizeStart: onColumnResizeStartIn,
         customRenderers: additionalRenderers,
         fillHandle,
-        drawFocusRing,
+        drawFocusRing = true,
         experimental,
         fixedShadowX,
         fixedShadowY,
@@ -1183,11 +1183,14 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             ? gridSelection.current.range
             : undefined;
 
+    const highlightFocus = drawFocusRing ? gridSelection.current?.cell : undefined;
+    const highlightFocusCol = highlightFocus?.[0];
+    const highlightFocusRow = highlightFocus?.[1];
+
     const highlightRegions = React.useMemo(() => {
         if (
             (highlightRegionsIn === undefined || highlightRegionsIn.length === 0) &&
-            highlightRange === undefined &&
-            fillHighlightRegion === undefined
+            (highlightRange ?? highlightFocusCol ?? highlightFocusRow ?? fillHighlightRegion) === undefined
         )
             return undefined;
 
@@ -1226,10 +1229,25 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             });
         }
 
+        if (highlightFocusCol !== undefined && highlightFocusRow !== undefined) {
+            regions.push({
+                color: mergedTheme.accentColor,
+                range: {
+                    x: highlightFocusCol,
+                    y: highlightFocusRow,
+                    width: 1,
+                    height: 1,
+                },
+                style: "solid-outline",
+            });
+        }
+
         return regions.length > 0 ? regions : undefined;
     }, [
         fillHighlightRegion,
         highlightRange,
+        highlightFocusCol,
+        highlightFocusRow,
         highlightRegionsIn,
         mangledCols.length,
         mergedTheme.accentColor,

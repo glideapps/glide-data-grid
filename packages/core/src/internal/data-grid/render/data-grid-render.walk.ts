@@ -75,7 +75,7 @@ export function walkColumns(
     const drawY = totalHeaderHeight + translateY;
     for (const c of effectiveCols) {
         const drawX = c.sticky ? clipX : x + translateX;
-        if (cb(c, drawX, drawY, c.sticky ? 0 : clipX + 1, cellYOffset) === true) {
+        if (cb(c, drawX, drawY, c.sticky ? 0 : clipX, cellYOffset) === true) {
             break;
         }
 

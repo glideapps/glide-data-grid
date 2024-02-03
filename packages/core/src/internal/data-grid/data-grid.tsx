@@ -221,7 +221,7 @@ export interface DataGridProps {
      * @defaultValue true
      * @group Style
      */
-    readonly drawFocusRing: boolean | undefined;
+    readonly drawFocusRing: boolean;
 
     readonly dragAndDropState:
         | {
@@ -332,7 +332,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         freezeTrailingRows,
         fixedShadowX = true,
         fixedShadowY = true,
-        drawFocusRing = true,
+        drawFocusRing,
         onMouseDown,
         onMouseUp,
         onMouseMoveRaw,

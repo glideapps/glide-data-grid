@@ -120,7 +120,7 @@ export function Simplenotest() {
             imageWindowLoader={new ImageWindowLoaderImpl()}
             onHeaderMenuClick={undefined}
             prelightCells={undefined}
-            drawFocusRing={undefined}
+            drawFocusRing={true}
             initialSize={undefined}
             overscrollX={undefined}
             overscrollY={undefined}

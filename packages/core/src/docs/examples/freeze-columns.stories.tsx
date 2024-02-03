@@ -40,7 +40,7 @@ export const FreezeColumns: React.VFC<any> = (p: { freezeColumns: number }) => {
             freezeColumns={p.freezeColumns}
             getCellContent={getCellContent}
             columns={cols}
-            verticalBorder={c => c > 0}
+            verticalBorder={false}
             rows={1000}
         />
     );

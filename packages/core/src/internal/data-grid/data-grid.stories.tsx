@@ -98,7 +98,7 @@ export function Simplenotest() {
             translateX={undefined}
             translateY={undefined}
             dragAndDropState={undefined}
-            drawFocusRing={undefined}
+            drawFocusRing={true}
             isFocused={true}
             cellYOffset={y}
             isFilling={false}
@@ -183,7 +183,7 @@ export function SelectedCellnotest() {
             translateX={undefined}
             translateY={undefined}
             dragAndDropState={undefined}
-            drawFocusRing={undefined}
+            drawFocusRing={true}
             onMouseMove={() => undefined}
             accessibilityHeight={50}
             isFilling={false}
@@ -275,7 +275,7 @@ export function SelectedRownotest() {
             translateX={undefined}
             translateY={undefined}
             dragAndDropState={undefined}
-            drawFocusRing={undefined}
+            drawFocusRing={true}
             groupHeaderHeight={34}
             accessibilityHeight={50}
             isFilling={false}
@@ -361,7 +361,7 @@ export const SelectedColumnnotest = () => {
             translateY={undefined}
             dragAndDropState={undefined}
             drawCell={undefined}
-            drawFocusRing={undefined}
+            drawFocusRing={true}
             accessibilityHeight={50}
             isFilling={false}
             groupHeaderHeight={34}

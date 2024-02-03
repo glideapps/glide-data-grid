@@ -11,7 +11,7 @@ import { drawCells } from "./data-grid-render.cells.js";
 import { drawGridHeaders } from "./data-grid-render.header.js";
 import { drawGridLines, overdrawStickyBoundaries, drawBlanks, drawExtraRowThemes } from "./data-grid-render.lines.js";
 import { blitLastFrame, blitResizedCol, computeCanBlit } from "./data-grid-render.blit.js";
-import { drawHighlightRings, drawFocusRing, drawColumnResizeOutline } from "./data-grid.render.rings.js";
+import { drawHighlightRings, drawFillHandle, drawColumnResizeOutline } from "./data-grid.render.rings.js";
 
 // Future optimization opportunities
 // - Create a cache of a buffer used to render the full view of a partially displayed column so that when
@@ -341,7 +341,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         }
 
         if (mustDrawFocusOnHeader) {
-            drawFocusRing(
+            drawFillHandle(
                 overlayCtx,
                 width,
                 height,
@@ -447,7 +447,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 selectionCurrent !== undefined &&
                 damage.has(rectBottomRight(selectionCurrent.range))
             ) {
-                drawFocusRing(
+                drawFillHandle(
                     ctx,
                     width,
                     height,
@@ -586,7 +586,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
 
     // the overdraw may have nuked out our focus ring right edge.
     const focusRedraw = drawFocus
-        ? drawFocusRing(
+        ? drawFillHandle(
               targetCtx,
               width,
               height,

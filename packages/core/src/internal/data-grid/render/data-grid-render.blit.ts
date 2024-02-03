@@ -70,8 +70,7 @@ export function blitLastFrame(
     }
     deltaX += translateX - last.translateX;
 
-    let stickyWidth = getStickyWidth(effectiveCols);
-    if (stickyWidth > 0) stickyWidth++;
+    const stickyWidth = getStickyWidth(effectiveCols);
 
     if (deltaX !== 0 && deltaY !== 0) {
         return {
