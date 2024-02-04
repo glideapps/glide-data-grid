@@ -984,12 +984,17 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     theme,
                     direction(header.title) === "rtl"
                 );
-                if (headerLayout.menuBounds !== undefined && pointInRect(headerLayout.menuBounds, clientX, clientY)) {
+                if (
+                    header.hasMenu === true &&
+                    headerLayout.menuBounds !== undefined &&
+                    pointInRect(headerLayout.menuBounds, clientX, clientY)
+                ) {
                     return {
                         area: "menu",
                         bounds: headerLayout.menuBounds,
                     };
                 } else if (
+                    header.indicatorIcon !== undefined &&
                     headerLayout.indicatorIconBounds !== undefined &&
                     pointInRect(headerLayout.indicatorIconBounds, clientX, clientY)
                 ) {
