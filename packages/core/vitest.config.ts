@@ -13,6 +13,7 @@ export default defineConfig({
         clearMocks: true,
         maxConcurrency: 5,
         coverage: {
+            provider: "v8",
             reporter: ["text", "lcov"],
         },
         fakeTimers: {

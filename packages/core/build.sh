@@ -27,4 +27,4 @@ run_in_parallel compile_esm compile_cjs
 
 generate_index_css
 
-echo -e "\033[0;36m🎉 Build Complete 🎉\033[0m"
+echo -e "\033[0;36m🎉 Core Build Complete 🎉\033[0m"

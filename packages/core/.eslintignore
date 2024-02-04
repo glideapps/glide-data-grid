@@ -1,4 +1,4 @@
 jest.config.js
 node_modules/
 build.cjs
-vitest.*.js
+vitest.*.ts
