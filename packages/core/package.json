@@ -26,7 +26,8 @@
         "lint": "npm run cycle-check && eslint src --ext .ts,.tsx",
         "cycle-check": "ts-helper -p ./tsconfig.json -r ./src/index.ts -c",
         "test": "vitest",
-        "check-package": "package-check"
+        "check-package": "package-check",
+        "watch": "chokidar 'src/**/*.ts*' -c './build.sh'"
     },
     "repository": {
         "type": "git",
