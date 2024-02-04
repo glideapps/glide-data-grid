@@ -58,5 +58,10 @@
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "@typescript-eslint/ban-types": "off"
     },
-    "ignorePatterns": ["**/node_modules/*", "**/dist/*"]
+    "ignorePatterns": ["**/node_modules/*", "**/dist/*"],
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    }
 }

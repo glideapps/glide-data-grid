@@ -292,6 +292,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                 maxColumnWidth={p.maxColumnWidth}
                 minColumnWidth={p.minColumnWidth}
                 onHeaderMenuClick={p.onHeaderMenuClick}
+                onHeaderIndicatorClick={p.onHeaderIndicatorClick}
                 onMouseMove={p.onMouseMove}
                 prelightCells={p.prelightCells}
                 rowHeight={p.rowHeight}

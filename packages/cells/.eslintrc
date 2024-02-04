@@ -48,5 +48,10 @@
                 "@typescript-eslint/strict-boolean-expressions": "error"
             }
         }
-    ]
+    ],
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    }
 }

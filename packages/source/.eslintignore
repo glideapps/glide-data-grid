@@ -1,2 +1,3 @@
 jest.config.js
 node_modules/
+vitest.*.ts

@@ -1,3 +1,4 @@
 build.cjs
 node_modules/
 dist/
+vitest.*.ts

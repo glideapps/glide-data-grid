@@ -6,15 +6,12 @@ export default defineConfig({
     test: {
         include: ["test/**/*.test.tsx", "test/**/*.test.ts"],
         environment: "jsdom",
-        setupFiles: "vitest.setup.js",
+        setupFiles: "vitest.setup.ts",
         threads: false,
         singleThread: true,
         watch: false,
         clearMocks: true,
         maxConcurrency: 5,
-        coverage: {
-            reporter: ["text", "lcov"],
-        },
         fakeTimers: {
             toFake: [
                 ...(configDefaults.fakeTimers.toFake ?? []),
