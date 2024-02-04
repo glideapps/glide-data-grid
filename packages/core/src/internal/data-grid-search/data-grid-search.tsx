@@ -498,6 +498,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 maxColumnWidth={p.maxColumnWidth}
                 minColumnWidth={p.minColumnWidth}
                 onHeaderMenuClick={p.onHeaderMenuClick}
+                onHeaderIndicatorClick={p.onHeaderIndicatorClick}
                 onMouseMove={p.onMouseMove}
                 onVisibleRegionChanged={p.onVisibleRegionChanged}
                 overscrollX={p.overscrollX}

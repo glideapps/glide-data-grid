@@ -12,6 +12,7 @@ import {
     roundedPoly,
     type MappedGridColumn,
     measureTextCached,
+    getMeasuredTextCache,
 } from "./data-grid-lib.js";
 import type { GroupDetails, GroupDetailsCallback } from "./data-grid-render.cells.js";
 import { walkColumns, walkGroups } from "./data-grid-render.walk.js";
@@ -278,7 +279,7 @@ export function drawGroups(
 }
 
 const menuButtonSize = 30;
-export function getHeaderMenuBounds(x: number, y: number, width: number, height: number, isRtl: boolean): Rectangle {
+function getHeaderMenuBounds(x: number, y: number, width: number, height: number, isRtl: boolean): Rectangle {
     if (isRtl) return { x, y, width: menuButtonSize, height: Math.min(menuButtonSize, height) };
     return {
         x: x + width - menuButtonSize, // right align
@@ -331,8 +332,8 @@ function flipHorizontal(
     return toFlip;
 }
 
-function computeHeaderLayout(
-    ctx: CanvasRenderingContext2D,
+export function computeHeaderLayout(
+    ctx: CanvasRenderingContext2D | undefined,
     c: MappedGridColumn,
     x: number,
     y: number,
@@ -379,7 +380,10 @@ function computeHeaderLayout(
 
     let indicatorIconBounds: Rectangle | undefined = undefined;
     if (c.indicatorIcon !== undefined) {
-        const textWidth = measureTextCached(c.title, ctx, theme.headerFontFull).width;
+        const textWidth =
+            ctx === undefined
+                ? getMeasuredTextCache(c.title, theme.headerFontFull)?.width ?? 0
+                : measureTextCached(c.title, ctx, theme.headerFontFull).width;
         textBounds.width = textWidth;
         drawX += textWidth + xPad;
         indicatorIconBounds = {

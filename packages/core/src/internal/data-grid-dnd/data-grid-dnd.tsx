@@ -101,6 +101,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
 
     const {
         onHeaderMenuClick,
+        onHeaderIndicatorClick,
         getCellContent,
         onColumnMoved,
         onColumnResize,
@@ -133,7 +134,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             } else if (dragRow !== undefined && row !== undefined) {
                 setDragRowActive(true);
                 setDropRow(Math.max(0, row));
-            // Don't emit onItemHovered if resizing or reordering a column or row.
+                // Don't emit onItemHovered if resizing or reordering a column or row.
             } else if (resizeCol === undefined && !dragColActive && !dragRowActive) {
                 onItemHovered?.(args);
             }
@@ -187,6 +188,14 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             onHeaderMenuClick?.(col, screenPosition);
         },
         [dragColActive, dragRowActive, onHeaderMenuClick]
+    );
+
+    const onHeaderIndicatorClickMangled = React.useCallback(
+        (col: number, screenPosition: Rectangle) => {
+            if (dragColActive || dragRowActive) return;
+            onHeaderIndicatorClick?.(col, screenPosition);
+        },
+        [dragColActive, dragRowActive, onHeaderIndicatorClick]
     );
 
     const lastResizeWidthRef = React.useRef(-1);
@@ -418,6 +427,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             getCellContent={getMangledCellContent}
             isResizing={resizeCol !== undefined}
             onHeaderMenuClick={onHeaderMenuClickMangled}
+            onHeaderIndicatorClick={onHeaderIndicatorClickMangled}
             isDragging={dragColActive}
             onItemHovered={onItemHoveredImpl}
             onDragStart={onDragStartImpl}

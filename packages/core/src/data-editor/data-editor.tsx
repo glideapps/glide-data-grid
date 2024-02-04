@@ -776,6 +776,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         cellActivationBehavior = "second-click",
         rowSelectionMode = "auto",
         onHeaderMenuClick,
+        onHeaderIndicatorClick,
         getGroupDetails,
         onSearchClose: onSearchCloseIn,
         onItemHovered,
@@ -2420,6 +2421,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [onHeaderMenuClick, rowMarkerOffset]
     );
 
+    const onHeaderIndicatorClickInner = React.useCallback(
+        (col: number, screenPosition: Rectangle) => {
+            onHeaderIndicatorClick?.(col - rowMarkerOffset, screenPosition);
+        },
+        [onHeaderIndicatorClick, rowMarkerOffset]
+    );
+
     const currentCell = gridSelection?.current?.cell;
     const onVisibleRegionChangedImpl = React.useCallback(
         (
@@ -3958,6 +3966,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onColumnMoved={onColumnMovedImpl}
                     onDragStart={onDragStartImpl}
                     onHeaderMenuClick={onHeaderMenuClickInner}
+                    onHeaderIndicatorClick={onHeaderIndicatorClickInner}
                     onItemHovered={onItemHoveredImpl}
                     isFilling={mouseState?.fillHandle === true}
                     onMouseMove={onMouseMoveImpl}
