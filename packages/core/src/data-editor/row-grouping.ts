@@ -144,17 +144,17 @@ function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number): Flatte
     return flattened;
 }
 
-export interface UseRowGroupingResult {
+export interface UseRowGroupingInnerResult {
     readonly effectiveRows: number;
     readonly getCellContent: (cell: Item) => GridCell;
     readonly rowNumberMapper: (row: number) => number | undefined;
 }
 
-export function useRowGrouping(
+export function useRowGroupingInner(
     options: RowGroupingOptions | undefined,
     rows: number,
     getCellContent: DataEditorCoreProps["getCellContent"]
-): UseRowGroupingResult {
+): UseRowGroupingInnerResult {
     const flattenedRowGroups = React.useMemo(
         () => (options === undefined ? undefined : flattenRowGroups(options, rows)),
         [options, rows]
@@ -231,48 +231,93 @@ export function useRowGrouping(
     };
 }
 
-type PathMapper = (row: number) => { path: readonly number[]; sourceRow: number };
+type RowGroupingMapper = (itemOrRow: Item | number) => {
+    path: readonly number[];
+    sourceRow: number;
+    isGroupHeader: boolean;
+};
 
-export function usePathMapper(options: RowGroupingOptions | undefined, rows: number): PathMapper {
+interface UseRowGroupingResult {
+    readonly mapper: RowGroupingMapper;
+    readonly updateRowGroupingByPath: (
+        rowGrouping: readonly RowGroup[],
+        path: readonly number[],
+        update: Partial<RowGroup>
+    ) => readonly RowGroup[];
+    readonly getRowGroupingForPath: (rowGrouping: readonly RowGroup[], path: readonly number[]) => RowGroup;
+}
+
+export function useRowGrouping(options: RowGroupingOptions | undefined, rows: number): UseRowGroupingResult {
     const flattenedRowGroups = React.useMemo(
         () => (options === undefined ? undefined : flattenRowGroups(options, rows)),
         [options, rows]
     );
 
-    return React.useCallback(
-        (row: number) => {
-            if (flattenedRowGroups === undefined)
-                return {
-                    path: [row],
-                    sourceRow: row,
-                };
-
-            let toGo = row;
-            let sourceRow = 0;
-            for (const group of flattenedRowGroups) {
-                if (toGo === 0)
+    return {
+        getRowGroupingForPath,
+        updateRowGroupingByPath,
+        mapper: React.useCallback(
+            (itemOrRow: Item | number) => {
+                itemOrRow = typeof itemOrRow === "number" ? itemOrRow : itemOrRow[1];
+                if (flattenedRowGroups === undefined)
                     return {
-                        path: [...group.path, -1],
-                        sourceRow,
+                        path: [itemOrRow],
+                        sourceRow: itemOrRow,
+                        isGroupHeader: false,
                     };
-                toGo--;
-                sourceRow++;
-                if (!group.isCollapsed) {
-                    if (toGo < group.rows)
+
+                let toGo = itemOrRow;
+                let sourceRow = 0;
+                for (const group of flattenedRowGroups) {
+                    if (toGo === 0)
                         return {
-                            path: [...group.path, toGo],
-                            sourceRow: sourceRow + toGo,
+                            path: [...group.path, -1],
+                            sourceRow,
+                            isGroupHeader: true,
                         };
-                    toGo -= group.rows;
+                    toGo--;
+                    sourceRow++;
+                    if (!group.isCollapsed) {
+                        if (toGo < group.rows)
+                            return {
+                                path: [...group.path, toGo],
+                                sourceRow: sourceRow + toGo,
+                                isGroupHeader: false,
+                            };
+                        toGo -= group.rows;
+                    }
+                    sourceRow += group.rows;
                 }
-                sourceRow += group.rows;
-            }
-            // this shouldn't happen
-            return {
-                path: [row],
-                sourceRow: row,
-            };
-        },
-        [flattenedRowGroups]
+                // this shouldn't happen
+                return {
+                    path: [itemOrRow],
+                    sourceRow: itemOrRow,
+                    isGroupHeader: false,
+                };
+            },
+            [flattenedRowGroups]
+        ),
+    };
+}
+
+function updateRowGroupingByPath(
+    rowGrouping: readonly RowGroup[],
+    path: readonly number[],
+    update: Partial<RowGroup>
+): readonly RowGroup[] {
+    const [index, ...rest] = path;
+    if (rest[0] === -1) {
+        return rowGrouping.map((group, i) => (i === index ? { ...group, ...update } : group));
+    }
+    return rowGrouping.map((group, i) =>
+        i === index ? { ...group, subGroups: updateRowGroupingByPath(group.subGroups ?? [], rest, update) } : group
     );
+}
+
+function getRowGroupingForPath(rowGrouping: readonly RowGroup[], path: readonly number[]): RowGroup {
+    const [index, ...rest] = path;
+    if (rest[0] === -1) {
+        return rowGrouping[index];
+    }
+    return getRowGroupingForPath(rowGrouping[index].subGroups ?? [], rest);
 }

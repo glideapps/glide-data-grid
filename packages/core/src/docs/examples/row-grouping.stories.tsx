@@ -9,8 +9,7 @@ import {
 } from "../../data-editor/stories/utils.js";
 import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 import { GridCellKind, type Item } from "../../internal/data-grid/data-grid-types.js";
-import { usePathMapper } from "../../index.js";
-import { type RowGroupingOptions, type RowGroup } from "../../data-editor/row-grouping.js";
+import { type RowGroupingOptions, useRowGrouping } from "../../data-editor/row-grouping.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -32,28 +31,6 @@ export default {
         ),
     ],
 };
-
-function updateRowGrouping(
-    rowGrouping: readonly RowGroup[],
-    path: readonly number[],
-    update: Partial<RowGroup>
-): readonly RowGroup[] {
-    const [index, ...rest] = path;
-    if (rest[0] === -1) {
-        return rowGrouping.map((group, i) => (i === index ? { ...group, ...update } : group));
-    }
-    return rowGrouping.map((group, i) =>
-        i === index ? { ...group, subGroups: updateRowGrouping(group.subGroups ?? [], rest, update) } : group
-    );
-}
-
-function getRowGroupForPath(rowGrouping: readonly RowGroup[], path: readonly number[]): RowGroup {
-    const [index, ...rest] = path;
-    if (rest[0] === -1) {
-        return rowGrouping[index];
-    }
-    return getRowGroupForPath(rowGrouping[index].subGroups ?? [], rest);
-}
 
 export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
     const { cols, getCellContent } = useMockDataGenerator(100);
@@ -87,31 +64,31 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
         height: 32,
     }));
 
-    const pathMapper = usePathMapper(rowGrouping, rows);
+    const { mapper, getRowGroupingForPath, updateRowGroupingByPath } = useRowGrouping(rowGrouping, rows);
 
     const onCellClicked = React.useCallback(
         (item: Item) => {
-            const { path } = pathMapper(item[1]);
+            const { path, isGroupHeader } = mapper(item);
 
-            if (path.slice(-1)[0] === -1) {
-                const group = getRowGroupForPath(rowGrouping.groups, path);
+            if (isGroupHeader) {
+                const group = getRowGroupingForPath(rowGrouping.groups, path);
 
                 setRowGrouping(prev => {
                     const result: RowGroupingOptions = {
                         ...prev,
-                        groups: updateRowGrouping(prev.groups, path, { isCollapsed: !group.isCollapsed }),
+                        groups: updateRowGroupingByPath(prev.groups, path, { isCollapsed: !group.isCollapsed }),
                     };
 
                     return result;
                 });
             }
         },
-        [pathMapper, rowGrouping.groups]
+        [getRowGroupingForPath, mapper, rowGrouping.groups, updateRowGroupingByPath]
     );
 
     const getCellContentMangled = React.useCallback<DataEditorAllProps["getCellContent"]>(
         item => {
-            const { path, sourceRow } = pathMapper(item[1]);
+            const { path, sourceRow, isGroupHeader } = mapper(item);
             if (item[0] === 0) {
                 return {
                     kind: GridCellKind.Text,
@@ -119,7 +96,7 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
                     displayData: `Row ${JSON.stringify(path)}`,
                     allowOverlay: false,
                 };
-            } else if (path.slice(-1)[0] === -1) {
+            } else if (isGroupHeader) {
                 return {
                     kind: GridCellKind.Loading,
                     allowOverlay: false,
@@ -129,7 +106,7 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
 
             return getCellContent([item[0], sourceRow]);
         },
-        [cols.length, getCellContent, pathMapper]
+        [cols.length, getCellContent, mapper]
     );
 
     return (

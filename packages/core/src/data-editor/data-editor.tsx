@@ -81,7 +81,7 @@ import {
 } from "../internal/data-grid/event-args.js";
 import { type Keybinds, useKeybindingsWithDefaults } from "./data-editor-keybindings.js";
 import type { Highlight } from "../internal/data-grid/render/data-grid-render.cells.js";
-import { useRowGrouping, type RowGroupingOptions } from "./row-grouping.js";
+import { useRowGroupingInner, type RowGroupingOptions } from "./row-grouping.js";
 
 const DataGridOverlayEditor = React.lazy(
     async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
@@ -872,7 +872,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         effectiveRows: rows,
         getCellContent,
         rowNumberMapper,
-    } = useRowGrouping(rowGrouping, rowsIn, getCellContentIn);
+    } = useRowGroupingInner(rowGrouping, rowsIn, getCellContentIn);
 
     const rowMarkerWidth = rowMarkerWidthRaw ?? (rowsIn > 10_000 ? 48 : rowsIn > 1000 ? 44 : rowsIn > 100 ? 36 : 32);
     const hasRowMarkers = rowMarkers !== "none";
