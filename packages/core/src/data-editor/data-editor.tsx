@@ -827,6 +827,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         theme: themeIn,
         isOutsideClick,
         renderers,
+        resizeIndicator,
     } = p;
 
     const rowMarkersObj = typeof p.rowMarkers === "string" ? undefined : p.rowMarkers;
@@ -3991,6 +3992,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     verticalBorder={mangledVerticalBorder}
                     gridRef={gridRef}
                     getCellRenderer={getCellRenderer}
+                    resizeIndicator={resizeIndicator}
                 />
                 {renameGroupNode}
                 {overlay !== undefined && (

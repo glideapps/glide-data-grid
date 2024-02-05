@@ -333,6 +333,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                 onRowMoved={p.onRowMoved}
                 smoothScrollX={p.smoothScrollX}
                 smoothScrollY={p.smoothScrollY}
+                resizeIndicator={p.resizeIndicator}
             />
         </InfiniteScroller>
     );

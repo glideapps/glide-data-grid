@@ -290,6 +290,18 @@ export interface DataGridProps {
     readonly theme: FullTheme;
 
     readonly getCellRenderer: <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;
+
+    /**
+     * Controls the resize indicator behavior.
+     *
+     * - `full` will show the resize indicator on the full height.
+     * - `header` will show the resize indicator only on the header.
+     * - `none` will not show the resize indicator.
+     *
+     * @defaultValue "full"
+     * @group Style
+     */
+    readonly resizeIndicator: "full" | "header" | "none" | undefined;
 }
 
 type DamageUpdateList = readonly {
@@ -377,6 +389,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         smoothScrollY = false,
         experimental,
         getCellRenderer,
+        resizeIndicator = "full",
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -793,6 +806,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             renderStrategy: experimental?.renderStrategy ?? (browserIsSafari.value ? "double-buffer" : "single-buffer"),
             getCellRenderer,
             minimumCellWidth,
+            resizeIndicator,
         };
 
         // This confusing bit of code due to some poor design. Long story short, the damage property is only used

@@ -78,4 +78,5 @@ export interface DrawGridArg {
     readonly renderStateProvider: RenderStateProvider;
     readonly getCellRenderer: GetCellRendererCallback;
     readonly minimumCellWidth: number;
+    readonly resizeIndicator: "full" | "header" | "none";
 }
