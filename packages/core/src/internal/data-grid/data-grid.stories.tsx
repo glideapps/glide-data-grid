@@ -62,6 +62,7 @@ export function Simplenotest() {
             drawHeader={undefined}
             drawCell={undefined}
             experimental={undefined}
+            onHeaderIndicatorClick={() => undefined}
             headerIcons={undefined}
             isDraggable={undefined}
             onCanvasBlur={() => undefined}
@@ -151,6 +152,7 @@ export function SelectedCellnotest() {
             isDraggable={undefined}
             onCanvasBlur={() => undefined}
             onCanvasFocused={() => undefined}
+            onHeaderIndicatorClick={() => undefined}
             onCellFocused={() => undefined}
             onContextMenu={() => undefined}
             onDragEnd={() => undefined}
@@ -247,6 +249,7 @@ export function SelectedRownotest() {
             onCellFocused={() => undefined}
             onContextMenu={() => undefined}
             onDragEnd={() => undefined}
+            onHeaderIndicatorClick={() => undefined}
             onDragLeave={() => undefined}
             onDragOverCell={() => undefined}
             onDragStart={() => undefined}
@@ -329,6 +332,7 @@ export const SelectedColumnnotest = () => {
             isDraggable={undefined}
             onCanvasBlur={() => undefined}
             onCanvasFocused={() => undefined}
+            onHeaderIndicatorClick={() => undefined}
             onCellFocused={() => undefined}
             onContextMenu={() => undefined}
             onDragEnd={() => undefined}

@@ -102,6 +102,7 @@ export function Simplenotest() {
             onDragOverCell={() => undefined}
             onDragStart={() => undefined}
             onDrop={() => undefined}
+            onHeaderIndicatorClick={() => undefined}
             onItemHovered={() => undefined}
             onKeyDown={() => undefined}
             onKeyUp={() => undefined}
