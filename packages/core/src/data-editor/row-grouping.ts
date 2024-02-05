@@ -226,3 +226,29 @@ export function useRowGrouping(
         effectiveRows: fullMap?.length ?? rows,
     };
 }
+
+type PathMapper = (row: number) => readonly number[];
+
+export function usePathMapper(options: RowGroupingOptions | undefined): PathMapper {
+    const flattenedRowGroups = React.useMemo(
+        () => (options === undefined ? undefined : flattenRowGroups(options, 0)),
+        [options]
+    );
+
+    return React.useCallback(
+        (row: number) => {
+            if (flattenedRowGroups === undefined) return [row];
+
+            let toGo = row;
+            for (const group of flattenedRowGroups) {
+                if (toGo === 0) return group.path;
+                toGo--;
+                if (!group.isCollapsed && toGo < group.rows) return [...group.path, toGo];
+                toGo -= group.rows;
+            }
+            // this shouldn't happen
+            return [row];
+        },
+        [flattenedRowGroups]
+    );
+}
