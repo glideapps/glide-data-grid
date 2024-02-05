@@ -81,6 +81,7 @@ import {
 } from "../internal/data-grid/event-args.js";
 import { type Keybinds, useKeybindingsWithDefaults } from "./data-editor-keybindings.js";
 import type { Highlight } from "../internal/data-grid/render/data-grid-render.cells.js";
+import type { RowGroupingOptions } from "./row-grouping.js";
 
 const DataGridOverlayEditor = React.lazy(
     async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
@@ -579,6 +580,11 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * @group Style
      */
     readonly verticalBorder?: DataGridSearchProps["verticalBorder"] | boolean;
+
+    /**
+     * Controls the grouping of rows to be drawn in the grid.
+     */
+    readonly rowGrouping?: RowGroupingOptions;
 
     /**
      * Called when data is pasted into the grid. If left undefined, the `DataEditor` will operate in a
