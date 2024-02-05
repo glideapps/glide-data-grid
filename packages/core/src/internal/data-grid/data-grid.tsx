@@ -872,6 +872,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         renderStateProvider,
         getCellRenderer,
         minimumCellWidth,
+        resizeIndicator,
     ]);
 
     const lastDrawRef = React.useRef(draw);
