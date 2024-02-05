@@ -142,44 +142,8 @@ function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number): Flatte
     return flattened;
 }
 
-interface MappedRow {
-    displayNumber: number | undefined;
-    rowIndex: number;
-    sourceIndex: number;
-    path: readonly number[];
-}
-
-// this is obviously a bad idea and should be replaced with something that doesn't need to preallocate the entire array
-function fullyMap(rowGroups: FlattenedRowGroup[]): MappedRow[] {
-    const result: MappedRow[] = [];
-    let sourceIndex = 0;
-    for (const group of rowGroups) {
-        result.push({
-            displayNumber: undefined,
-            rowIndex: group.headerIndex,
-            sourceIndex: sourceIndex++,
-            path: group.path,
-        });
-        if (!group.isCollapsed) {
-            for (let i = 0; i < group.rows; i++) {
-                result.push({
-                    displayNumber: i,
-                    rowIndex: group.headerIndex + i,
-                    sourceIndex: sourceIndex++,
-                    path: [...group.path, i],
-                });
-            }
-        }
-    }
-    return result;
-}
-
 export interface UseRowGroupingResult {
     readonly effectiveRows: number;
-    readonly rowNumberMapper: (row: number) => {
-        readonly displayNumber: number | undefined;
-        readonly rowIndex: number;
-    };
     readonly getCellContent: (cell: Item) => GridCell;
 }
 
@@ -192,62 +156,96 @@ export function useRowGrouping(
         () => (options === undefined ? undefined : flattenRowGroups(options, rows)),
         [options, rows]
     );
-    const fullMap = React.useMemo(
-        () => (flattenedRowGroups === undefined ? undefined : fullyMap(flattenedRowGroups)),
-        [flattenedRowGroups]
-    );
+
+    const effectiveRows = React.useMemo(() => {
+        if (flattenedRowGroups === undefined) return rows;
+        return flattenedRowGroups.reduce((acc, group) => acc + (group.isCollapsed ? 1 : group.rows + 1), 0);
+    }, [flattenedRowGroups, rows]);
 
     const rowNumberMapper = React.useCallback(
-        (row: number) => {
-            return fullMap?.[row] ?? { displayNumber: row, rowIndex: row, sourceIndex: row, path: [row] };
+        (row: number): number => {
+            if (flattenedRowGroups === undefined) return row;
+            let resultRow = 0;
+            let toGo = row;
+
+            for (const group of flattenedRowGroups) {
+                if (toGo === 0) resultRow;
+                toGo--;
+                resultRow++;
+                if (!group.isCollapsed) {
+                    if (toGo < group.rows) return resultRow + toGo;
+                    toGo -= group.rows;
+                    resultRow += group.rows;
+                }
+            }
+
+            return row;
         },
-        [fullMap]
+        [flattenedRowGroups]
     );
 
     const getCellContentOut = React.useCallback(
         (cell: Item) => {
             if (options === undefined) return getCellContent(cell);
             const mapped = rowNumberMapper(cell[1]);
-            return getCellContent([cell[0], mapped.sourceIndex], [cell[0], mapped.path]);
+            return getCellContent([cell[0], mapped]);
         },
         [getCellContent, options, rowNumberMapper]
     );
 
     if (options === undefined)
         return {
-            rowNumberMapper,
             getCellContent: getCellContent,
             effectiveRows: rows,
         };
 
     return {
-        rowNumberMapper,
         getCellContent: getCellContentOut,
-        effectiveRows: fullMap?.length ?? rows,
+        effectiveRows,
     };
 }
 
-type PathMapper = (row: number) => readonly number[];
+type PathMapper = (row: number) => { path: readonly number[]; sourceRow: number };
 
-export function usePathMapper(options: RowGroupingOptions | undefined): PathMapper {
+export function usePathMapper(options: RowGroupingOptions | undefined, rows: number): PathMapper {
     const flattenedRowGroups = React.useMemo(
-        () => (options === undefined ? undefined : flattenRowGroups(options, 0)),
-        [options]
+        () => (options === undefined ? undefined : flattenRowGroups(options, rows)),
+        [options, rows]
     );
 
     return React.useCallback(
         (row: number) => {
-            if (flattenedRowGroups === undefined) return [row];
+            if (flattenedRowGroups === undefined)
+                return {
+                    path: [row],
+                    sourceRow: row,
+                };
 
             let toGo = row;
+            let sourceRow = 0;
             for (const group of flattenedRowGroups) {
-                if (toGo === 0) return group.path;
+                if (toGo === 0)
+                    return {
+                        path: [...group.path, -1],
+                        sourceRow,
+                    };
                 toGo--;
-                if (!group.isCollapsed && toGo < group.rows) return [...group.path, toGo];
-                toGo -= group.rows;
+                sourceRow++;
+                if (!group.isCollapsed) {
+                    if (toGo < group.rows)
+                        return {
+                            path: [...group.path, toGo],
+                            sourceRow: sourceRow + toGo,
+                        };
+                    toGo -= group.rows;
+                }
+                sourceRow += group.rows;
             }
             // this shouldn't happen
-            return [row];
+            return {
+                path: [row],
+                sourceRow: row,
+            };
         },
         [flattenedRowGroups]
     );

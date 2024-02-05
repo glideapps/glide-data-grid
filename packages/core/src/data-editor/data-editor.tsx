@@ -515,7 +515,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * @param cell The location of the cell being requested.
      * @returns A valid GridCell to be rendered by the Grid.
      */
-    readonly getCellContent: (cell: Item, grouping?: readonly [number, readonly number[]]) => GridCell;
+    readonly getCellContent: (cell: Item) => GridCell;
     /**
      * Determines if row selection requires a modifier key to enable multi-selection or not. In auto mode it adapts to
      * touch or mouse environments automatically, in multi-mode it always acts as if the multi key (Ctrl) is pressed.
