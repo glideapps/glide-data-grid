@@ -853,26 +853,26 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         return window.getComputedStyle(document.documentElement);
     }, []);
 
-    const remSize = React.useMemo(() => Number.parseFloat(docStyle.fontSize), [docStyle]);
+    const {
+        rows,
+        getCellContent,
+        rowNumberMapper,
+        rowHeight: rowHeightPostGrouping,
+    } = useRowGroupingInner(rowGrouping, rowsIn, getCellContentIn, rowHeightIn);
 
+    const remSize = React.useMemo(() => Number.parseFloat(docStyle.fontSize), [docStyle]);
     const { rowHeight, headerHeight, groupHeaderHeight, theme, overscrollX, overscrollY } = useRemAdjuster({
         groupHeaderHeight: groupHeaderHeightIn,
         headerHeight: headerHeightIn,
         overscrollX: overscrollXIn,
         overscrollY: overscrollYIn,
         remSize,
-        rowHeight: rowHeightIn,
+        rowHeight: rowHeightPostGrouping,
         scaleToRem,
         theme: themeIn,
     });
 
     const keybindings = useKeybindingsWithDefaults(keybindingsIn);
-
-    const {
-        effectiveRows: rows,
-        getCellContent,
-        rowNumberMapper,
-    } = useRowGroupingInner(rowGrouping, rowsIn, getCellContentIn);
 
     const rowMarkerWidth = rowMarkerWidthRaw ?? (rowsIn > 10_000 ? 48 : rowsIn > 1000 ? 44 : rowsIn > 100 ? 36 : 32);
     const hasRowMarkers = rowMarkers !== "none";

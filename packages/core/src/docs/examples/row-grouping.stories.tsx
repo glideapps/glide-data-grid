@@ -62,7 +62,7 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
                 isCollapsed: false,
             },
         ],
-        height: 32,
+        height: 55,
     }));
 
     const { mapper, getRowGroupingForPath, updateRowGroupingByPath } = useRowGrouping(rowGrouping, rows);

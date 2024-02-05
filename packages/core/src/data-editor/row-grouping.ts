@@ -1,7 +1,7 @@
 import React from "react";
 import type { Theme } from "../common/styles.js";
 import type { GridCell, Item } from "../internal/data-grid/data-grid-types.js";
-import type { DataEditorCoreProps } from "../index.js";
+import type { DataEditorProps } from "./data-editor.js";
 
 export type RowGroup = {
     readonly headerIndex: number;
@@ -144,16 +144,56 @@ export function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number):
     return flattened;
 }
 
+export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly FlattenedRowGroup[]) {
+    if (flattenedRowGroups === undefined)
+        return {
+            path: [row],
+            sourceRow: row,
+            isGroupHeader: false,
+        };
+
+    let toGo = row;
+    let sourceRow = 0;
+    for (const group of flattenedRowGroups) {
+        if (toGo === 0)
+            return {
+                path: [...group.path, -1],
+                sourceRow,
+                isGroupHeader: true,
+            };
+        toGo--;
+        sourceRow++;
+        if (!group.isCollapsed) {
+            if (toGo < group.rows)
+                return {
+                    path: [...group.path, toGo],
+                    sourceRow: sourceRow + toGo,
+                    isGroupHeader: false,
+                };
+            toGo -= group.rows;
+        }
+        sourceRow += group.rows;
+    }
+    // this shouldn't happen
+    return {
+        path: [row],
+        sourceRow: row,
+        isGroupHeader: false,
+    };
+}
+
 export interface UseRowGroupingInnerResult {
-    readonly effectiveRows: number;
+    readonly rows: number;
     readonly getCellContent: (cell: Item) => GridCell;
     readonly rowNumberMapper: (row: number) => number | undefined;
+    readonly rowHeight: NonNullable<DataEditorProps["rowHeight"]>;
 }
 
 export function useRowGroupingInner(
     options: RowGroupingOptions | undefined,
     rows: number,
-    getCellContent: DataEditorCoreProps["getCellContent"]
+    getCellContentIn: DataEditorProps["getCellContent"],
+    rowHeightIn: NonNullable<DataEditorProps["rowHeight"]>
 ): UseRowGroupingInnerResult {
     const flattenedRowGroups = React.useMemo(
         () => (options === undefined ? undefined : flattenRowGroups(options, rows)),
@@ -164,6 +204,16 @@ export function useRowGroupingInner(
         if (flattenedRowGroups === undefined) return rows;
         return flattenedRowGroups.reduce((acc, group) => acc + (group.isCollapsed ? 1 : group.rows + 1), 0);
     }, [flattenedRowGroups, rows]);
+
+    const rowHeight = React.useMemo(() => {
+        if (options === undefined) return rowHeightIn;
+        if (typeof rowHeightIn === "number" && options.height === rowHeightIn) return rowHeightIn;
+        return (rowIndex: number) => {
+            const { isGroupHeader } = mapRowIndexToPath(rowIndex, flattenedRowGroups);
+            if (isGroupHeader) return options.height;
+            return typeof rowHeightIn === "number" ? rowHeightIn : rowHeightIn(rowIndex);
+        };
+    }, [flattenedRowGroups, options, rowHeightIn]);
 
     const rowNumberMapper = React.useCallback(
         (row: number): number => {
@@ -210,23 +260,25 @@ export function useRowGroupingInner(
 
     const getCellContentOut = React.useCallback(
         (cell: Item) => {
-            if (options === undefined) return getCellContent(cell);
+            if (options === undefined) return getCellContentIn(cell);
             const mapped = rowNumberMapper(cell[1]);
-            return getCellContent([cell[0], mapped]);
+            return getCellContentIn([cell[0], mapped]);
         },
-        [getCellContent, options, rowNumberMapper]
+        [getCellContentIn, options, rowNumberMapper]
     );
 
     if (options === undefined)
         return {
-            getCellContent: getCellContent,
-            effectiveRows: rows,
+            rowHeight,
+            getCellContent: getCellContentIn,
+            rows: rows,
             rowNumberMapper: rowNumberMapperOut,
         };
 
     return {
+        rowHeight,
         getCellContent: getCellContentOut,
-        effectiveRows,
+        rows: effectiveRows,
         rowNumberMapper: rowNumberMapperOut,
     };
 }

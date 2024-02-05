@@ -1,6 +1,6 @@
 import React from "react";
 import type { Item } from "../internal/data-grid/data-grid-types.js";
-import { flattenRowGroups, type RowGroup, type RowGroupingOptions } from "./row-grouping.js";
+import { flattenRowGroups, mapRowIndexToPath, type RowGroup, type RowGroupingOptions } from "./row-grouping.js";
 
 type RowGroupingMapper = (itemOrRow: Item | number) => {
     path: readonly number[];
@@ -30,41 +30,7 @@ export function useRowGrouping(options: RowGroupingOptions | undefined, rows: nu
         mapper: React.useCallback(
             (itemOrRow: Item | number) => {
                 itemOrRow = typeof itemOrRow === "number" ? itemOrRow : itemOrRow[1];
-                if (flattenedRowGroups === undefined)
-                    return {
-                        path: [itemOrRow],
-                        sourceRow: itemOrRow,
-                        isGroupHeader: false,
-                    };
-
-                let toGo = itemOrRow;
-                let sourceRow = 0;
-                for (const group of flattenedRowGroups) {
-                    if (toGo === 0)
-                        return {
-                            path: [...group.path, -1],
-                            sourceRow,
-                            isGroupHeader: true,
-                        };
-                    toGo--;
-                    sourceRow++;
-                    if (!group.isCollapsed) {
-                        if (toGo < group.rows)
-                            return {
-                                path: [...group.path, toGo],
-                                sourceRow: sourceRow + toGo,
-                                isGroupHeader: false,
-                            };
-                        toGo -= group.rows;
-                    }
-                    sourceRow += group.rows;
-                }
-                // this shouldn't happen
-                return {
-                    path: [itemOrRow],
-                    sourceRow: itemOrRow,
-                    isGroupHeader: false,
-                };
+                return mapRowIndexToPath(itemOrRow, flattenedRowGroups);
             },
             [flattenedRowGroups]
         ),
