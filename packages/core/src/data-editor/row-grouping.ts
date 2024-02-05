@@ -148,36 +148,36 @@ export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly Fla
     if (flattenedRowGroups === undefined)
         return {
             path: [row],
-            sourceRow: row,
+            originalIndex: row,
             isGroupHeader: false,
         };
 
     let toGo = row;
-    let sourceRow = 0;
+    let originalIndex = 0;
     for (const group of flattenedRowGroups) {
         if (toGo === 0)
             return {
                 path: [...group.path, -1],
-                sourceRow,
+                originalIndex,
                 isGroupHeader: true,
             };
         toGo--;
-        sourceRow++;
+        originalIndex++;
         if (!group.isCollapsed) {
             if (toGo < group.rows)
                 return {
                     path: [...group.path, toGo],
-                    sourceRow: sourceRow + toGo,
+                    originalIndex: originalIndex + toGo,
                     isGroupHeader: false,
                 };
             toGo -= group.rows;
         }
-        sourceRow += group.rows;
+        originalIndex += group.rows;
     }
     // this shouldn't happen
     return {
         path: [row],
-        sourceRow: row,
+        originalIndex: row,
         isGroupHeader: false,
     };
 }

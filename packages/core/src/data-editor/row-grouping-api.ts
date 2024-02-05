@@ -4,7 +4,7 @@ import { flattenRowGroups, mapRowIndexToPath, type RowGroup, type RowGroupingOpt
 
 type RowGroupingMapper = (itemOrRow: Item | number) => {
     path: readonly number[];
-    sourceRow: number;
+    originalIndex: number;
     isGroupHeader: boolean;
 };
 
