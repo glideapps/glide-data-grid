@@ -81,7 +81,7 @@ import {
 } from "../internal/data-grid/event-args.js";
 import { type Keybinds, useKeybindingsWithDefaults } from "./data-editor-keybindings.js";
 import type { Highlight } from "../internal/data-grid/render/data-grid-render.cells.js";
-import type { RowGroupingOptions } from "./row-grouping.js";
+import { useRowGrouping, type RowGroupingOptions } from "./row-grouping.js";
 
 const DataGridOverlayEditor = React.lazy(
     async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
@@ -515,7 +515,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * @param cell The location of the cell being requested.
      * @returns A valid GridCell to be rendered by the Grid.
      */
-    readonly getCellContent: (cell: Item) => GridCell;
+    readonly getCellContent: (cell: Item, grouping?: readonly [number, readonly number[]]) => GridCell;
     /**
      * Determines if row selection requires a modifier key to enable multi-selection or not. In auto mode it adapts to
      * touch or mouse environments automatically, in multi-mode it always acts as if the multi key (Ctrl) is pressed.
@@ -733,8 +733,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         width,
         height,
         columns: columnsIn,
-        rows,
-        getCellContent,
+        rows: rowsIn,
+        getCellContent: getCellContentIn,
         onCellClicked,
         onCellActivated,
         onFillPattern,
@@ -784,6 +784,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onHeaderMenuClick,
         onHeaderIndicatorClick,
         getGroupDetails,
+        rowGrouping,
         onSearchClose: onSearchCloseIn,
         onItemHovered,
         onSelectionCleared,
@@ -867,7 +868,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const keybindings = useKeybindingsWithDefaults(keybindingsIn);
 
-    const rowMarkerWidth = rowMarkerWidthRaw ?? (rows > 10_000 ? 48 : rows > 1000 ? 44 : rows > 100 ? 36 : 32);
+    const { effectiveRows: rows, getCellContent } = useRowGrouping(rowGrouping, rowsIn, getCellContentIn);
+
+    const rowMarkerWidth = rowMarkerWidthRaw ?? (rowsIn > 10_000 ? 48 : rowsIn > 1000 ? 44 : rowsIn > 100 ? 36 : 32);
     const hasRowMarkers = rowMarkers !== "none";
     const rowMarkerOffset = hasRowMarkers ? 1 : 0;
     const showTrailingBlankRow = onRowAppended !== undefined;

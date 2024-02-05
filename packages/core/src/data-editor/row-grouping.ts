@@ -60,18 +60,20 @@ export type ExpandedRowGroup = {
     readonly headerIndex: number;
     readonly isCollapsed: boolean;
     readonly depth: number;
+    readonly path: readonly number[];
     subGroups?: readonly ExpandedRowGroup[];
 };
 
 function expandRowGroups(groups: readonly RowGroup[]): ExpandedRowGroup[] {
     const expanded: ExpandedRowGroup[] = [];
 
-    function processGroup(group: RowGroup, depth: number): ExpandedRowGroup {
+    function processGroup(group: RowGroup, depth: number, path: readonly number[]): ExpandedRowGroup {
         if (typeof group === "number") {
             return {
                 headerIndex: group,
                 isCollapsed: false,
                 depth,
+                path,
             };
         }
 
@@ -79,17 +81,20 @@ function expandRowGroups(groups: readonly RowGroup[]): ExpandedRowGroup[] {
             headerIndex: group.headerIndex,
             isCollapsed: group.isCollapsed,
             depth,
+            path,
         };
 
         if (group.subGroups !== undefined) {
-            expandedGroup.subGroups = group.subGroups.map(x => processGroup(x, depth + 1));
+            expandedGroup.subGroups = group.subGroups.map((x, ind) => processGroup(x, depth + 1, [...path, ind]));
         }
 
         return expandedGroup;
     }
 
-    for (const group of groups) {
-        expanded.push(processGroup(group, 0));
+    // eslint-disable-next-line unicorn/no-for-loop
+    for (let i = 0; i < groups.length; i++) {
+        const group = groups[i];
+        expanded.push(processGroup(group, 0, [i]));
     }
 
     return expanded;
@@ -100,6 +105,7 @@ export type FlattenedRowGroup = {
     readonly isCollapsed: boolean;
     readonly depth: number;
     readonly rows: number;
+    readonly path: readonly number[];
 };
 
 function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number): FlattenedRowGroup[] {
@@ -113,6 +119,7 @@ function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number): Flatte
             headerIndex: group.headerIndex,
             isCollapsed: group.isCollapsed,
             depth: group.depth,
+            path: group.path,
             rows: rowsInGroup,
         });
 
@@ -135,6 +142,38 @@ function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number): Flatte
     return flattened;
 }
 
+interface MappedRow {
+    displayNumber: number | undefined;
+    rowIndex: number;
+    sourceIndex: number;
+    path: readonly number[];
+}
+
+// this is obviously a bad idea and should be replaced with something that doesn't need to preallocate the entire array
+function fullyMap(rowGroups: FlattenedRowGroup[]): MappedRow[] {
+    const result: MappedRow[] = [];
+    let sourceIndex = 0;
+    for (const group of rowGroups) {
+        result.push({
+            displayNumber: undefined,
+            rowIndex: group.headerIndex,
+            sourceIndex: sourceIndex++,
+            path: group.path,
+        });
+        if (!group.isCollapsed) {
+            for (let i = 0; i < group.rows; i++) {
+                result.push({
+                    displayNumber: i,
+                    rowIndex: group.headerIndex + i,
+                    sourceIndex: sourceIndex++,
+                    path: [...group.path, i],
+                });
+            }
+        }
+    }
+    return result;
+}
+
 export interface UseRowGroupingResult {
     readonly effectiveRows: number;
     readonly rowNumberMapper: (row: number) => {
@@ -144,53 +183,46 @@ export interface UseRowGroupingResult {
     readonly getCellContent: (cell: Item) => GridCell;
 }
 
-interface MappedRow {
-    displayNumber: number | undefined;
-    rowIndex: number;
-    sourceIndex: number;
-}
-
-// this is obviously a bad idea and should be replaced with something that doesn't need to preallocate the entire array
-function fullyMap(rowGroups: FlattenedRowGroup[]): MappedRow[] {
-    const result: MappedRow[] = [];
-    let sourceIndex = 0;
-    for (const group of rowGroups) {
-        result.push({ displayNumber: undefined, rowIndex: group.headerIndex, sourceIndex: sourceIndex++ });
-        if (group.isCollapsed === true) {
-            for (let i = 0; i < group.rows; i++) {
-                result.push({ displayNumber: i, rowIndex: group.headerIndex + i, sourceIndex: sourceIndex++ });
-            }
-        }
-    }
-    return result;
-}
-
 export function useRowGrouping(
-    options: RowGroupingOptions,
+    options: RowGroupingOptions | undefined,
     rows: number,
     getCellContent: DataEditorCoreProps["getCellContent"]
 ): UseRowGroupingResult {
-    const flattenedRowGroups = React.useMemo(() => flattenRowGroups(options, rows), [options, rows]);
-    const fullMap = React.useMemo(() => fullyMap(flattenedRowGroups), [flattenedRowGroups]);
+    const flattenedRowGroups = React.useMemo(
+        () => (options === undefined ? undefined : flattenRowGroups(options, rows)),
+        [options, rows]
+    );
+    const fullMap = React.useMemo(
+        () => (flattenedRowGroups === undefined ? undefined : fullyMap(flattenedRowGroups)),
+        [flattenedRowGroups]
+    );
 
     const rowNumberMapper = React.useCallback(
         (row: number) => {
-            return fullMap[row];
+            return fullMap?.[row] ?? { displayNumber: row, rowIndex: row, sourceIndex: row, path: [row] };
         },
         [fullMap]
     );
 
     const getCellContentOut = React.useCallback(
         (cell: Item) => {
+            if (options === undefined) return getCellContent(cell);
             const mapped = rowNumberMapper(cell[1]);
-            return getCellContent([cell[0], mapped.sourceIndex]);
+            return getCellContent([cell[0], mapped.sourceIndex], [cell[0], mapped.path]);
         },
-        [getCellContent, rowNumberMapper]
+        [getCellContent, options, rowNumberMapper]
     );
+
+    if (options === undefined)
+        return {
+            rowNumberMapper,
+            getCellContent: getCellContent,
+            effectiveRows: rows,
+        };
 
     return {
         rowNumberMapper,
         getCellContent: getCellContentOut,
-        effectiveRows: fullMap.length,
+        effectiveRows: fullMap?.length ?? rows,
     };
 }
