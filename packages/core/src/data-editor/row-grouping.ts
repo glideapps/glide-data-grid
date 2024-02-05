@@ -63,8 +63,6 @@ export type ExpandedRowGroup = {
 };
 
 function expandRowGroups(groups: readonly RowGroup[]): ExpandedRowGroup[] {
-    const expanded: ExpandedRowGroup[] = [];
-
     function processGroup(group: RowGroup, depth: number, path: readonly number[]): ExpandedRowGroup {
         if (typeof group === "number") {
             return {
@@ -83,19 +81,18 @@ function expandRowGroups(groups: readonly RowGroup[]): ExpandedRowGroup[] {
         };
 
         if (group.subGroups !== undefined) {
-            expandedGroup.subGroups = group.subGroups.map((x, ind) => processGroup(x, depth + 1, [...path, ind]));
+            expandedGroup.subGroups = group.subGroups
+                .map((x, ind) => processGroup(x, depth + 1, [...path, ind]))
+                .sort((a, b) => a.headerIndex - b.headerIndex);
         }
 
         return expandedGroup;
     }
 
-    // eslint-disable-next-line unicorn/no-for-loop
-    for (let i = 0; i < groups.length; i++) {
-        const group = groups[i];
-        expanded.push(processGroup(group, 0, [i]));
-    }
+    const expanded: ExpandedRowGroup[] = groups.map((group, i) => processGroup(group, 0, [i]));
 
-    return expanded;
+    // Sort the top-level expanded groups
+    return expanded.sort((a, b) => a.headerIndex - b.headerIndex);
 }
 
 export type FlattenedRowGroup = {
