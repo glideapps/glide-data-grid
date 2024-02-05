@@ -3,13 +3,11 @@ import type { Theme } from "../common/styles.js";
 import type { GridCell, Item } from "../internal/data-grid/data-grid-types.js";
 import type { DataEditorCoreProps } from "../index.js";
 
-export type RowGroup =
-    | {
-          readonly headerIndex: number;
-          readonly isCollapsed: boolean;
-          readonly subGroups?: readonly RowGroup[];
-      }
-    | number;
+export type RowGroup = {
+    readonly headerIndex: number;
+    readonly isCollapsed: boolean;
+    readonly subGroups?: readonly RowGroup[];
+};
 
 export interface RowGroupingOptions {
     /**
@@ -114,7 +112,11 @@ function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number): Flatte
     const flattened: FlattenedRowGroup[] = [];
 
     function processGroup(group: ExpandedRowGroup, nextHeaderIndex: number | null): void {
-        const rowsInGroup = nextHeaderIndex !== null ? nextHeaderIndex - group.headerIndex : rows - group.headerIndex;
+        let rowsInGroup = nextHeaderIndex !== null ? nextHeaderIndex - group.headerIndex : rows - group.headerIndex;
+        if (!group.isCollapsed && group.subGroups !== undefined) {
+            rowsInGroup = group.subGroups[0].headerIndex - group.headerIndex;
+        }
+
         flattened.push({
             headerIndex: group.headerIndex,
             isCollapsed: group.isCollapsed,

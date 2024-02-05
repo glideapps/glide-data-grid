@@ -10,6 +10,7 @@ import {
 import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 import { GridCellKind, type Item } from "../../internal/data-grid/data-grid-types.js";
 import { usePathMapper } from "../../index.js";
+import { type RowGroupingOptions, type RowGroup } from "../../data-editor/row-grouping.js";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -32,11 +33,33 @@ export default {
     ],
 };
 
+function updateRowGrouping(
+    rowGrouping: readonly RowGroup[],
+    path: readonly number[],
+    update: Partial<RowGroup>
+): readonly RowGroup[] {
+    const [index, ...rest] = path;
+    if (rest[0] === -1) {
+        return rowGrouping.map((group, i) => (i === index ? { ...group, ...update } : group));
+    }
+    return rowGrouping.map((group, i) =>
+        i === index ? { ...group, subGroups: updateRowGrouping(group.subGroups ?? [], rest, update) } : group
+    );
+}
+
+function getRowGroupForPath(rowGrouping: readonly RowGroup[], path: readonly number[]): RowGroup {
+    const [index, ...rest] = path;
+    if (rest[0] === -1) {
+        return rowGrouping[index];
+    }
+    return getRowGroupForPath(rowGrouping[index].subGroups ?? [], rest);
+}
+
 export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
     const { cols, getCellContent } = useMockDataGenerator(100);
     const rows = 1000;
 
-    const [rowGrouping, setRowGrouping] = React.useState(() => ({
+    const [rowGrouping, setRowGrouping] = React.useState<RowGroupingOptions>(() => ({
         groups: [
             {
                 headerIndex: 0,
@@ -45,9 +68,19 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
             {
                 headerIndex: 10,
                 isCollapsed: true,
+                subGroups: [
+                    {
+                        headerIndex: 15,
+                        isCollapsed: false,
+                    },
+                    {
+                        headerIndex: 20,
+                        isCollapsed: false,
+                    },
+                ],
             },
             {
-                headerIndex: 20,
+                headerIndex: 30,
                 isCollapsed: false,
             },
         ],
@@ -60,22 +93,20 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
         (item: Item) => {
             const { path } = pathMapper(item[1]);
 
-            if (item[0] === 0 && path[1] === -1) {
-                const groupIndex = path[0];
+            if (path.slice(-1)[0] === -1) {
+                const group = getRowGroupForPath(rowGrouping.groups, path);
+
                 setRowGrouping(prev => {
-                    const groups = [...prev.groups];
-                    groups[groupIndex] = {
-                        ...groups[groupIndex],
-                        isCollapsed: !groups[groupIndex].isCollapsed,
-                    };
-                    return {
+                    const result: RowGroupingOptions = {
                         ...prev,
-                        groups,
+                        groups: updateRowGrouping(prev.groups, path, { isCollapsed: !group.isCollapsed }),
                     };
+
+                    return result;
                 });
             }
         },
-        [pathMapper]
+        [pathMapper, rowGrouping.groups]
     );
 
     const getCellContentMangled = React.useCallback<DataEditorAllProps["getCellContent"]>(
@@ -88,7 +119,7 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
                     displayData: `Row ${JSON.stringify(path)}`,
                     allowOverlay: false,
                 };
-            } else if (path[1] === -1) {
+            } else if (path.slice(-1)[0] === -1) {
                 return {
                     kind: GridCellKind.Loading,
                     allowOverlay: false,
@@ -105,6 +136,7 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
         <DataEditor
             {...defaultProps}
             rowGrouping={rowGrouping}
+            height="100%"
             rowMarkers="both"
             freezeColumns={p.freezeColumns}
             onCellClicked={onCellClicked}
