@@ -868,7 +868,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const keybindings = useKeybindingsWithDefaults(keybindingsIn);
 
-    const { effectiveRows: rows, getCellContent } = useRowGrouping(rowGrouping, rowsIn, getCellContentIn);
+    const {
+        effectiveRows: rows,
+        getCellContent,
+        rowNumberMapper,
+    } = useRowGrouping(rowGrouping, rowsIn, getCellContentIn);
 
     const rowMarkerWidth = rowMarkerWidthRaw ?? (rowsIn > 10_000 ? 48 : rowsIn > 1000 ? 44 : rowsIn > 100 ? 36 : 32);
     const hasRowMarkers = rowMarkers !== "none";
@@ -1275,13 +1279,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (isTrailing) {
                     return loadingCell;
                 }
+                const mappedRow = rowNumberMapper(row);
+                if (mappedRow === undefined) return loadingCell;
                 return {
                     kind: InnerGridCellKind.Marker,
                     allowOverlay: false,
                     checkboxStyle: rowMarkerCheckboxStyle,
                     checked: gridSelection?.rows.hasIndex(row) === true,
                     markerKind: rowMarkers === "clickable-number" ? "number" : rowMarkers,
-                    row: rowMarkerStartIndex + row,
+                    row: rowMarkerStartIndex + mappedRow,
                     drawHandle: onRowMoved !== undefined,
                     cursor: rowMarkers === "clickable-number" ? "pointer" : undefined,
                 };
@@ -1343,6 +1349,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             showTrailingBlankRow,
             mangledRows,
             hasRowMarkers,
+            rowNumberMapper,
             rowMarkerCheckboxStyle,
             gridSelection?.rows,
             rowMarkers,

@@ -145,6 +145,7 @@ function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number): Flatte
 export interface UseRowGroupingResult {
     readonly effectiveRows: number;
     readonly getCellContent: (cell: Item) => GridCell;
+    readonly rowNumberMapper: (row: number) => number | undefined;
 }
 
 export function useRowGrouping(
@@ -184,6 +185,27 @@ export function useRowGrouping(
         [flattenedRowGroups]
     );
 
+    const rowNumberMapperOut = React.useCallback(
+        (row: number): number | undefined => {
+            if (flattenedRowGroups === undefined) return row;
+            let resultRow = 0;
+            let toGo = row;
+
+            for (const group of flattenedRowGroups) {
+                if (toGo === 0) return undefined;
+                toGo--;
+                if (!group.isCollapsed) {
+                    if (toGo < group.rows) return resultRow + toGo;
+                    toGo -= group.rows;
+                }
+                resultRow += group.rows;
+            }
+
+            return row;
+        },
+        [flattenedRowGroups]
+    );
+
     const getCellContentOut = React.useCallback(
         (cell: Item) => {
             if (options === undefined) return getCellContent(cell);
@@ -197,11 +219,13 @@ export function useRowGrouping(
         return {
             getCellContent: getCellContent,
             effectiveRows: rows,
+            rowNumberMapper: rowNumberMapperOut,
         };
 
     return {
         getCellContent: getCellContentOut,
         effectiveRows,
+        rowNumberMapper: rowNumberMapperOut,
     };
 }
 
