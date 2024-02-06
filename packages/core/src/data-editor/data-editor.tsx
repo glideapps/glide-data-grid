@@ -82,6 +82,7 @@ import {
 import { type Keybinds, useKeybindingsWithDefaults } from "./data-editor-keybindings.js";
 import type { Highlight } from "../internal/data-grid/render/data-grid-render.cells.js";
 import { useRowGroupingInner, type RowGroupingOptions } from "./row-grouping.js";
+import { useRowGrouping } from "./row-grouping-api.js";
 
 const DataGridOverlayEditor = React.lazy(
     async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
@@ -2851,7 +2852,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             col = clamp(col, rowMarkerOffset, columns.length - 1 + rowMarkerOffset);
             row = clamp(row, 0, rowMax);
 
-            if (col === currentCell?.[0] && row === currentCell?.[1]) return false;
+            const curCol = currentCell?.[0];
+            const curRow = currentCell?.[1];
+
+            if (col === curCol && row === curRow) return false;
             if (freeMove && gridSelection.current !== undefined) {
                 const newStack = [...gridSelection.current.rangeStack];
                 if (gridSelection.current.range.width > 1 || gridSelection.current.range.height > 1) {
@@ -2980,6 +2984,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const overlayOpen = overlay !== undefined;
+
+    const { mapper, reverseMapper } = useRowGrouping(rowGrouping, rowsIn);
+
+    const curRow = currentCell?.[1];
+    const {} = React.useMemo(() => {
+        if (curRow === undefined) return undefined;
+        const { path, isGroupHeader } = mapper(curRow);
+        if (isGroupHeader) return {};
+        const prevGroupHeader = reverseMapper(path);
+    }, [rowGrouping, curRow]);
 
     const handleFixedKeybindings = React.useCallback(
         (event: GridKeyEventArgs): boolean => {
