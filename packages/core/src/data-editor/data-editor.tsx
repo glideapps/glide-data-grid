@@ -122,6 +122,7 @@ type Props = Partial<
         | "getCellContent"
         | "getCellRenderer"
         | "getCellsForSelection"
+        | "getRowThemeOverride"
         | "gridRef"
         | "groupHeaderHeight"
         | "headerHeight"
@@ -444,6 +445,15 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      */
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
 
+    /**
+     * Allows overriding the theme of any row
+     * @param row represents the row index of the row, increasing by 1 for every represented row. Collapsed rows are not included.
+     * @param groupRow represents the row index of the group row. Only distinct when row grouping enabled.
+     * @param contentRow represents the index of the row excluding group headers. Only distinct when row grouping enabled.
+     * @returns
+     */
+    readonly getRowThemeOverride?: (row: number, groupRow: number, contentRow: number) => Partial<Theme> | undefined;
+
     /** Callback for providing a custom editor for a cell.
      * @group Editing
      */
@@ -728,7 +738,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const {
         imageEditorOverride,
-        getRowThemeOverride,
+        getRowThemeOverride: getRowThemeOverrideIn,
         markdownDivCreateNode,
         width,
         height,
@@ -858,7 +868,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         getCellContent,
         rowNumberMapper,
         rowHeight: rowHeightPostGrouping,
-    } = useRowGroupingInner(rowGrouping, rowsIn, getCellContentIn, rowHeightIn);
+        getRowThemeOverride,
+    } = useRowGroupingInner(rowGrouping, rowsIn, getCellContentIn, rowHeightIn, getRowThemeOverrideIn);
 
     const remSize = React.useMemo(() => Number.parseFloat(docStyle.fontSize), [docStyle]);
     const { rowHeight, headerHeight, groupHeaderHeight, theme, overscrollX, overscrollY } = useRemAdjuster({

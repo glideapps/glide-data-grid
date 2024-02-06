@@ -2,6 +2,8 @@ import React from "react";
 import type { Theme } from "../common/styles.js";
 import type { GridCell, Item } from "../internal/data-grid/data-grid-types.js";
 import type { DataEditorProps } from "./data-editor.js";
+import type { DataGridProps } from "../internal/data-grid/data-grid.js";
+import { whenDefined } from "../common/utils.js";
 
 export type RowGroup = {
     readonly headerIndex: number;
@@ -141,22 +143,35 @@ export function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number):
     return flattened;
 }
 
-export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly FlattenedRowGroup[]) {
+interface MapResult {
+    readonly path: readonly number[];
+    readonly isGroupHeader: boolean;
+    readonly originalIndex: number;
+    readonly groupIndex: number;
+    readonly contentIndex: number;
+}
+
+export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly FlattenedRowGroup[]): MapResult {
     if (flattenedRowGroups === undefined)
         return {
             path: [row],
             originalIndex: row,
             isGroupHeader: false,
+            groupIndex: row,
+            contentIndex: row,
         };
 
     let toGo = row;
     let originalIndex = 0;
+    let contentIndex = 0;
     for (const group of flattenedRowGroups) {
         if (toGo === 0)
             return {
                 path: [...group.path, -1],
                 originalIndex,
                 isGroupHeader: true,
+                groupIndex: -1,
+                contentIndex: -1,
             };
         toGo--;
         originalIndex++;
@@ -166,8 +181,11 @@ export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly Fla
                     path: [...group.path, toGo],
                     originalIndex: originalIndex + toGo,
                     isGroupHeader: false,
+                    groupIndex: toGo,
+                    contentIndex: contentIndex + toGo,
                 };
             toGo -= group.rows;
+            contentIndex += group.rows;
         }
         originalIndex += group.rows;
     }
@@ -176,6 +194,8 @@ export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly Fla
         path: [row],
         originalIndex: row,
         isGroupHeader: false,
+        groupIndex: row,
+        contentIndex: row,
     };
 }
 
@@ -184,13 +204,15 @@ export interface UseRowGroupingInnerResult {
     readonly getCellContent: (cell: Item) => GridCell;
     readonly rowNumberMapper: (row: number) => number | undefined;
     readonly rowHeight: NonNullable<DataEditorProps["rowHeight"]>;
+    readonly getRowThemeOverride: DataGridProps["getRowThemeOverride"];
 }
 
 export function useRowGroupingInner(
     options: RowGroupingOptions | undefined,
     rows: number,
     getCellContentIn: DataEditorProps["getCellContent"],
-    rowHeightIn: NonNullable<DataEditorProps["rowHeight"]>
+    rowHeightIn: NonNullable<DataEditorProps["rowHeight"]>,
+    getRowThemeOverrideIn: DataEditorProps["getRowThemeOverride"]
 ): UseRowGroupingInnerResult {
     const flattenedRowGroups = React.useMemo(
         () => (options === undefined ? undefined : flattenRowGroups(options, rows)),
@@ -264,12 +286,27 @@ export function useRowGroupingInner(
         [getCellContentIn, options, rowNumberMapper]
     );
 
+    const getRowThemeOverride = whenDefined(
+        getRowThemeOverrideIn,
+        React.useCallback(
+            (row: number): Partial<Theme> | undefined => {
+                if (getRowThemeOverrideIn === undefined) return undefined;
+                if (options === undefined) return getRowThemeOverrideIn(row, row, row);
+                const { isGroupHeader, contentIndex, groupIndex } = mapRowIndexToPath(row, flattenedRowGroups);
+                if (isGroupHeader) return options.themeOverride;
+                return getRowThemeOverrideIn(row, groupIndex, contentIndex);
+            },
+            [flattenedRowGroups, getRowThemeOverrideIn, options]
+        )
+    );
+
     if (options === undefined)
         return {
             rowHeight,
             getCellContent: getCellContentIn,
             rows: rows,
             rowNumberMapper: rowNumberMapperOut,
+            getRowThemeOverride,
         };
 
     return {
@@ -277,5 +314,6 @@ export function useRowGroupingInner(
         getCellContent: getCellContentOut,
         rows: effectiveRows,
         rowNumberMapper: rowNumberMapperOut,
+        getRowThemeOverride,
     };
 }

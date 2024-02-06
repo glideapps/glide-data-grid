@@ -11,6 +11,7 @@ import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 import { GridCellKind, type Item } from "../../internal/data-grid/data-grid-types.js";
 import { type RowGroupingOptions } from "../../data-editor/row-grouping.js";
 import { useRowGrouping } from "../../data-editor/row-grouping-api.js";
+import _ from "lodash";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -117,6 +118,14 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
             height="100%"
             rowMarkers="both"
             freezeColumns={p.freezeColumns}
+            getRowThemeOverride={(_row, groupRow, _contentRow) => {
+                if (groupRow % 2 === 0) {
+                    return {
+                        bgCell: "rgba(0, 0, 0, 0.1)",
+                    };
+                }
+                return undefined;
+            }}
             onCellClicked={onCellClicked}
             getCellContent={getCellContentMangled}
             columns={cols}
