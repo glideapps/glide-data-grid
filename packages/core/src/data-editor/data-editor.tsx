@@ -1748,6 +1748,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [getRowThemeOverride, mangledCols, mergedTheme]
     );
 
+    const { mapper } = useRowGrouping(rowGrouping, rowsIn);
+
+    const rowGroupingNavBehavior = rowGrouping?.navigationBehavior;
+
     const handleSelect = React.useCallback(
         (args: GridMouseEventArgs) => {
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
@@ -1845,6 +1849,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                                 return;
                             }
                         }
+
+                        if (rowGroupingNavBehavior === "block" && mapper(row).isGroupHeader) {
+                            return;
+                        }
+
                         const isLastStickyRow = lastRowSticky && row === rows;
 
                         const startedFromLastSticky =
@@ -1954,28 +1963,30 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
         },
         [
-            appendRow,
+            rowSelect,
             columnSelect,
-            focus,
-            getCellRenderer,
-            getCustomNewRowTargetColumn,
-            getMangledCellContent,
             gridSelection,
             hasRowMarkers,
-            lastRowSticky,
-            onSelectionCleared,
-            onRowMoved,
             rowMarkerOffset,
-            rowMarkers,
-            rowSelect,
-            rowSelectionMode,
-            rows,
-            setCurrent,
-            setGridSelection,
-            setSelectedColumns,
-            setSelectedRows,
             showTrailingBlankRow,
+            rows,
+            rowMarkers,
+            getMangledCellContent,
+            onRowMoved,
+            focus,
+            rowSelectionMode,
+            getCellRenderer,
             themeForCell,
+            setSelectedRows,
+            getCustomNewRowTargetColumn,
+            appendRow,
+            rowGroupingNavBehavior,
+            mapper,
+            lastRowSticky,
+            setCurrent,
+            setSelectedColumns,
+            setGridSelection,
+            onSelectionCleared,
         ]
     );
     const isActivelyDraggingHeader = React.useRef(false);
@@ -2624,6 +2635,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                     col = Math.max(col, rowMarkerOffset);
 
+                    // FIXME: Restrict col/row based on rowGrouping.selectionBehavior here
+
                     const deltaX = col - selectedCol;
                     const deltaY = row - selectedRow;
 
@@ -2985,16 +2998,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const overlayOpen = overlay !== undefined;
 
-    const { mapper, reverseMapper } = useRowGrouping(rowGrouping, rowsIn);
-
-    const curRow = currentCell?.[1];
-    const {} = React.useMemo(() => {
-        if (curRow === undefined) return undefined;
-        const { path, isGroupHeader } = mapper(curRow);
-        if (isGroupHeader) return {};
-        const prevGroupHeader = reverseMapper(path);
-    }, [rowGrouping, curRow]);
-
     const handleFixedKeybindings = React.useCallback(
         (event: GridKeyEventArgs): boolean => {
             const cancel = () => {
@@ -3081,6 +3084,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             if (gridSelection.current === undefined) return false;
             let [col, row] = gridSelection.current.cell;
+            const [, startRow] = gridSelection.current.cell;
             let freeMove = false;
             let cancelOnlyOnMove = false;
 
@@ -3214,6 +3218,37 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
             // #endregion
 
+            const mustRestrictRow = rowGroupingNavBehavior !== undefined && rowGroupingNavBehavior !== "normal";
+
+            if (mustRestrictRow && row !== startRow) {
+                const skipUp =
+                    rowGroupingNavBehavior === "skip-up" ||
+                    rowGroupingNavBehavior === "skip" ||
+                    rowGroupingNavBehavior === "block";
+                const skipDown =
+                    rowGroupingNavBehavior === "skip-down" ||
+                    rowGroupingNavBehavior === "skip" ||
+                    rowGroupingNavBehavior === "block";
+                const didMoveUp = row < startRow;
+                if (didMoveUp && skipUp) {
+                    while (row >= 0 && mapper(row).isGroupHeader) {
+                        row--;
+                    }
+
+                    if (row < 0) {
+                        row = startRow;
+                    }
+                } else if (!didMoveUp && skipDown) {
+                    while (row < rows && mapper(row).isGroupHeader) {
+                        row++;
+                    }
+
+                    if (row >= rows) {
+                        row = startRow;
+                    }
+                }
+            }
+
             const moved = updateSelectedCell(col, row, false, freeMove);
 
             const didMatch = details.didMatch;
@@ -3225,6 +3260,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             return didMatch;
         },
         [
+            rowGroupingNavBehavior,
             overlayOpen,
             gridSelection,
             keybindings,
@@ -3232,6 +3268,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowSelect,
             rangeSelect,
             rowMarkerOffset,
+            mapper,
             rows,
             updateSelectedCell,
             setGridSelection,

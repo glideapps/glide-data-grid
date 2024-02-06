@@ -64,6 +64,10 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
             },
         ],
         height: 55,
+        navigationBehavior: "block",
+        themeOverride: {
+            bgCell: "rgba(0, 100, 255, 0.1)",
+        },
     }));
 
     const { mapper, getRowGroupingForPath, updateRowGroupingByPath } = useRowGrouping(rowGrouping, rows);
@@ -72,7 +76,7 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
         (item: Item) => {
             const { path, isGroupHeader } = mapper(item);
 
-            if (isGroupHeader) {
+            if (isGroupHeader && item[0] === 0) {
                 const group = getRowGroupingForPath(rowGrouping.groups, path);
 
                 setRowGrouping(prev => {
@@ -102,13 +106,13 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
                 return {
                     kind: GridCellKind.Loading,
                     allowOverlay: false,
-                    span: [1, cols.length - 1],
+                    // span: [1, cols.length - 1],
                 };
             }
 
             return getCellContent([item[0], originalIndex]);
         },
-        [cols.length, getCellContent, mapper]
+        [getCellContent, mapper]
     );
 
     return (
@@ -129,7 +133,7 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
             onCellClicked={onCellClicked}
             getCellContent={getCellContentMangled}
             columns={cols}
-            verticalBorder={false}
+            // verticalBorder={false}
             rows={rows}
         />
     );

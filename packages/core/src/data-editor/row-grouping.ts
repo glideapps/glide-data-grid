@@ -7,6 +7,9 @@ import { whenDefined } from "../common/utils.js";
 import { deepEqual } from "../common/support.js";
 
 export type RowGroup = {
+    /**
+     * The index of the header if the groups are all flattened and expanded
+     */
     readonly headerIndex: number;
     readonly isCollapsed: boolean;
     readonly subGroups?: readonly RowGroup[];
@@ -152,8 +155,9 @@ interface MapResult {
     readonly contentIndex: number;
 }
 
+// grid relative index to path and other details
 export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly FlattenedRowGroup[]): MapResult {
-    if (flattenedRowGroups === undefined)
+    if (flattenedRowGroups === undefined || flattenRowGroups.length === 0)
         return {
             path: [row],
             originalIndex: row,
@@ -191,6 +195,8 @@ export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly Fla
         originalIndex += group.rows;
     }
     // this shouldn't happen
+    // this is a fucking awful code smell. Probably means the algorithm above is trash and can be done better.
+    // I suppose to eliminate this, you can treat this case as part of the overflow of the last group.
     return {
         path: [row],
         originalIndex: row,
