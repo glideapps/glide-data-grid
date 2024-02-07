@@ -5,7 +5,7 @@ import { deepEqual } from "./support.js";
 export function useEventListener<K extends keyof HTMLElementEventMap>(
     eventName: K,
     handler: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
-    element: HTMLElement | Window | null,
+    element: HTMLElement | Window | Document | null,
     passive: boolean,
     capture = false
 ) {
