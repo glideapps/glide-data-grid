@@ -24,7 +24,7 @@ export interface RowGroupingOptions {
     /**
      * Causes the group headers to collect at the top of the grid. Each replacing the last.
      */
-    readonly makeGroupHeadersSticky?: boolean;
+    //readonly makeGroupHeadersSticky?: boolean;
 
     /**
      * The height of the group headers. All group headers must have the same height.
@@ -35,7 +35,7 @@ export interface RowGroupingOptions {
      * Enables or disables the drawing of borders inside of group headers.
      * @defaultValue true
      */
-    readonly verticalBorders?: boolean;
+    //readonly verticalBorders?: boolean;
 
     /**
      * Overrides the default theme of the group headers.
