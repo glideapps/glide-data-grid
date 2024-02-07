@@ -24,9 +24,15 @@ function getMockBooleanData(row: number): boolean | null | undefined {
 
 function sendClick(el: Element | Node | Document | Window, options?: any, runTimers?: boolean): void {
     fireEvent.mouseDown(el, options);
-    if (runTimers === true) vi.runAllTimers();
+    if (runTimers === true)
+        act(() => {
+            vi.runAllTimers();
+        });
     fireEvent.mouseUp(el, options);
-    if (runTimers === true) vi.runAllTimers();
+    if (runTimers === true)
+        act(() => {
+            vi.runAllTimers();
+        });
     fireEvent.click(el, options);
 }
 
@@ -284,16 +290,6 @@ describe("data-editor", () => {
         };
     });
 
-    // beforeAll(() => {
-    //     vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation((callback: FrameRequestCallback) => {
-    //         return setTimeout(callback, 10);
-    //     });
-    // });
-
-    // afterAll(() => {
-    //     vi.restoreAllMocks();
-    // });
-
     beforeEach(() => {
         // delete (window as any).ResizeObserver;
         // window.ResizeObserver = vi.fn().mockImplementation(() => ({
@@ -338,6 +334,18 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             },
         });
         Image.prototype.decode = vi.fn();
+
+        beforeEach(() => {
+            vi.spyOn(console, "error").mockImplementation((...args: any) => {
+                const [message] = args;
+                if (/Warning: An update to .* inside a test was not wrapped in act\(...\)/.test(message)) {
+                    throw new Error("An update was made outside of act() function: " + message);
+                }
+
+                // If you still want to see the error messages in the console, you can uncomment the next line:
+                // console.warn(...args);
+            });
+        });
     });
 
     afterEach(() => {
@@ -760,7 +768,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
                 clientY: 36 + 32 + 16, // Row 1 (0 indexed)
             });
 
-            vi.advanceTimersByTime(400);
+            act(() => {
+                vi.advanceTimersByTime(400);
+            });
 
             sendClick(canvas, {
                 clientX: 300, // Col B
@@ -786,7 +796,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
                 clientY: 36 + 32 + 16, // Row 1 (0 indexed)
             });
 
-            vi.advanceTimersByTime(600);
+            act(() => {
+                vi.advanceTimersByTime(600);
+            });
 
             sendClick(canvas, {
                 clientX: 300, // Col B
@@ -811,7 +823,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
                 clientY: 36 + 32 + 16, // Row 1 (0 indexed)
             });
 
-            vi.advanceTimersByTime(1600);
+            act(() => {
+                vi.advanceTimersByTime(1600);
+            });
 
             sendClick(canvas, {
                 clientX: 300, // Col B
@@ -890,7 +904,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "Enter",
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1]);
@@ -916,7 +932,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "Enter",
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([7, 2]);
@@ -947,7 +965,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: " ",
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1]);
@@ -983,7 +1003,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: " ",
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
 
         expect(keyDownEvent?.location).toEqual([1, 1]);
         expect(keyUpEvent?.location).toEqual([1, 1]);
@@ -1072,7 +1094,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "j",
         });
 
-        await new Promise(r => window.setTimeout(r, 1000));
+        await act(() => new Promise(r => window.setTimeout(r, 1000)));
 
         const overlay = screen.getByDisplayValue("j");
 
@@ -1109,7 +1131,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "j",
         });
 
-        await new Promise(r => window.setTimeout(r, 1000));
+        await act(() => new Promise(r => window.setTimeout(r, 1000)));
 
         const overlay = screen.getByDisplayValue("j");
 
@@ -1269,7 +1291,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 16, // Group Header
         });
 
-        await new Promise(r => window.setTimeout(r, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         sendClick(canvas, {
             clientX: 300, // Col B
@@ -1315,7 +1337,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 16, // Header
         });
 
-        await new Promise(r => window.setTimeout(r, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         sendClick(canvas, {
             clientX: 300, // Col B
@@ -1625,7 +1647,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
 
-        await new Promise(r => window.setTimeout(r, 1000));
+        await act(() => new Promise(r => window.setTimeout(r, 1000)));
 
         const overlay = screen.getByDisplayValue("Data: 1, 1");
         expect(document.body.contains(overlay)).toBe(true);
@@ -2582,7 +2604,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             vi.runAllTimers();
         });
         vi.useRealTimers();
-        await new Promise(r => window.setTimeout(r, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
         expect(pasteSpy).toBeCalledWith(
             [1, 3],
             [
@@ -2633,7 +2655,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             vi.runAllTimers();
         });
         vi.useRealTimers();
-        await new Promise(r => window.setTimeout(r, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
     });
 
     test("Cut cell", async () => {
@@ -2667,7 +2689,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
 
         fireEvent.cut(window);
         vi.useRealTimers();
-        await new Promise(r => window.setTimeout(r, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
         expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
         expect(editSpy).toHaveBeenCalledWith([
             {
@@ -2731,7 +2753,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             vi.runAllTimers();
         });
         vi.useRealTimers();
-        await new Promise(r => window.setTimeout(r, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
 
         expect(spy).toBeCalledWith(expect.anything(), "custom-cell-data");
     });
@@ -2886,7 +2908,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             vi.runAllTimers();
         });
         vi.useRealTimers();
-        await new Promise(r => window.setTimeout(r, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
         expect(spy).not.toBeCalled();
     });
 
@@ -2948,7 +2970,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             vi.runAllTimers();
         });
         vi.useRealTimers();
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
         expect(pasteSpy).toBeCalledWith(
             [1, 3],
             [
@@ -2989,7 +3011,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
 
         fireEvent.copy(window);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
         expect(navigator.clipboard.writeText).toBeCalledWith(
             "Data: 0, 3\t1, 3\t2, 3\t3\tFoobar\t************\tFoobar\t\tשלום 8, 3\t# Header: 9, 3\thttps://example.com/10/3"
         );
@@ -3016,7 +3038,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
 
         fireEvent.copy(window);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
         expect(navigator.clipboard.writeText).toBeCalled();
     });
 
@@ -3054,7 +3076,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 16, // Header
         });
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         if (scroller !== null) {
             vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
@@ -3066,7 +3088,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             fireEvent.scroll(scroller);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         if (scroller !== null) {
             vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
@@ -3078,7 +3100,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             fireEvent.scroll(scroller);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         expect(document.body.contains(canvas)).toBe(true);
     });
@@ -3112,7 +3134,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 16, // Header
         });
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         if (scroller !== null) {
             vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
@@ -3124,7 +3146,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             fireEvent.scroll(scroller);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         if (scroller !== null) {
             vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
@@ -3136,7 +3158,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             fireEvent.scroll(scroller);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         expect(document.body.contains(canvas)).toBe(true);
     });
@@ -4781,7 +4803,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 16 + 200, // Not Header
         });
 
-        await new Promise(r => window.setTimeout(r, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
 
         fireEvent.mouseDown(canvas, {
             clientX: 300, // Col B
@@ -4824,7 +4846,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             buttons: 1,
         });
 
-        await new Promise(r => window.setTimeout(r, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         fireEvent.mouseUp(canvas, {
             clientX: 300, // Col B
@@ -5069,7 +5091,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "Enter",
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -5106,12 +5130,16 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 36 + 32 * 5 + 16,
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
         spy.mockClear();
 
         rerender(<EventedDataEditor {...basicProps} rows={1} onGridSelectionChange={spy} />);
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
         expect(spy).toBeCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
@@ -5154,7 +5182,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "Enter",
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
         expect(spy.mock.calls.findIndex(x => x[0][1] > 1)).toBe(-1);
     });
 });

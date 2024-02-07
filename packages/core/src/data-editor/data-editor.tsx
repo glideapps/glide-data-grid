@@ -2740,7 +2740,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             let top = old.y;
             let bottom = old.y + old.height;
 
-            const [minRow, maxRowRaw] = getSelectionRowLimits(row) ?? [0, rows];
+            const [minRow, maxRowRaw] = getSelectionRowLimits(row) ?? [0, rows - 1];
             const maxRow = maxRowRaw + 1; // we need an inclusive value
 
             // take care of vertical first in case new spans come in
