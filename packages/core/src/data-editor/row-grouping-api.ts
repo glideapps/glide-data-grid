@@ -49,7 +49,7 @@ export function useRowGrouping(options: RowGroupingOptions | undefined, rows: nu
     };
 }
 
-function updateRowGroupingByPath(
+export function updateRowGroupingByPath(
     rowGrouping: readonly RowGroup[],
     path: readonly number[],
     update: Partial<RowGroup>
@@ -63,7 +63,7 @@ function updateRowGroupingByPath(
     );
 }
 
-function getRowGroupingForPath(rowGrouping: readonly RowGroup[], path: readonly number[]): RowGroup {
+export function getRowGroupingForPath(rowGrouping: readonly RowGroup[], path: readonly number[]): RowGroup {
     const [index, ...rest] = path;
     if (rest[0] === -1) {
         return rowGrouping[index];

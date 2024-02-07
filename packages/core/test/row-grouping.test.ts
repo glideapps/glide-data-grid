@@ -6,6 +6,7 @@ import {
     useRowGroupingInner,
     type RowGroupingOptions,
 } from "../src/data-editor/row-grouping.js";
+import { getRowGroupingForPath, updateRowGroupingByPath } from "../src/data-editor/row-grouping-api.js";
 
 describe("expandRowGroups", () => {
     it("expands an empty array of groups", () => {
@@ -387,5 +388,80 @@ describe("useRowGroupingInner - rowNumberMapper", () => {
         // Assuming row 5 in the UI might correspond to a different data row depending on the grouping logic
         // This assertion needs to be adjusted based on your specific logic for handling subgroups and collapsed states
         expect(result.current.rowNumberMapper(5)).toBe(5); // Adjust this based on expected logic
+    });
+});
+
+describe("updateRowGroupingByPath", () => {
+    it("updates a top-level group correctly", () => {
+        const rowGrouping = [
+            { headerIndex: 0, isCollapsed: false },
+            { headerIndex: 1, isCollapsed: false },
+        ];
+        const path = [1, -1];
+        const update = { isCollapsed: true };
+        const updatedGrouping = updateRowGroupingByPath(rowGrouping, path, update);
+
+        expect(updatedGrouping[1].isCollapsed).toBe(true);
+        expect(updatedGrouping[0].isCollapsed).toBe(false); // Ensure other groups are unchanged
+    });
+
+    it("updates a nested subgroup correctly", () => {
+        const rowGrouping = [
+            {
+                headerIndex: 0,
+                isCollapsed: false,
+                subGroups: [{ headerIndex: 1, isCollapsed: false }],
+            },
+        ];
+        const path = [0, 0, -1];
+        const update = { isCollapsed: true };
+        const updatedGrouping = updateRowGroupingByPath(rowGrouping, path, update);
+
+        expect(updatedGrouping[0].subGroups?.[0].isCollapsed).toBe(true);
+    });
+
+    it("does not alter groups when given a non-existent path", () => {
+        const rowGrouping = [{ headerIndex: 0, isCollapsed: false }];
+        const path = [1, -1]; // Non-existent path
+        const update = { isCollapsed: true };
+        const updatedGrouping = updateRowGroupingByPath(rowGrouping, path, update);
+
+        expect(updatedGrouping).toEqual(rowGrouping);
+    });
+});
+
+describe("getRowGroupingForPath", () => {
+    it("retrieves a top-level group correctly", () => {
+        const rowGrouping = [
+            { headerIndex: 0, isCollapsed: false },
+            { headerIndex: 1, isCollapsed: true },
+        ];
+        const path = [1, -1];
+        const group = getRowGroupingForPath(rowGrouping, path);
+
+        expect(group).toEqual({ headerIndex: 1, isCollapsed: true });
+    });
+
+    it("retrieves a nested subgroup correctly", () => {
+        const rowGrouping = [
+            {
+                headerIndex: 0,
+                isCollapsed: false,
+                subGroups: [{ headerIndex: 1, isCollapsed: true }],
+            },
+        ];
+        const path = [0, 0, -1];
+        const group = getRowGroupingForPath(rowGrouping, path);
+
+        expect(group).toEqual({ headerIndex: 1, isCollapsed: true });
+    });
+
+    it("handles non-existent paths appropriately", () => {
+        const rowGrouping = [{ headerIndex: 0, isCollapsed: false }];
+        const path = [1, -1]; // Non-existent path
+
+        const group = getRowGroupingForPath(rowGrouping, path);
+
+        expect(group).toBeUndefined();
     });
 });
