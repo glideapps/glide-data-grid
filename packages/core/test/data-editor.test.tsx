@@ -1094,7 +1094,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "j",
         });
 
-        await act(() => new Promise(r => window.setTimeout(r, 1000)));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         const overlay = screen.getByDisplayValue("j");
 
@@ -1131,7 +1131,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "j",
         });
 
-        await act(() => new Promise(r => window.setTimeout(r, 1000)));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         const overlay = screen.getByDisplayValue("j");
 
@@ -1647,7 +1647,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
 
-        await act(() => new Promise(r => window.setTimeout(r, 1000)));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         const overlay = screen.getByDisplayValue("Data: 1, 1");
         expect(document.body.contains(overlay)).toBe(true);
