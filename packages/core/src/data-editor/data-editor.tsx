@@ -2581,6 +2581,26 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     }, []);
 
     const rowGroupingSelectionBehavior = rowGrouping?.selectionBehavior;
+
+    const getSelectionRowLimits = React.useCallback(
+        (selectedRow: number): readonly [number, number] | undefined => {
+            if (rowGroupingSelectionBehavior !== "block-spanning") return undefined;
+
+            const { isGroupHeader, path, groupRows } = mapper(selectedRow);
+
+            if (isGroupHeader) {
+                return [selectedRow, selectedRow];
+            }
+
+            const groupRowIndex = path[path.length - 1];
+            const lowerBounds = selectedRow - groupRowIndex;
+            const upperBounds = selectedRow + groupRows - groupRowIndex - 1;
+
+            return [lowerBounds, upperBounds];
+        },
+        [mapper, rowGroupingSelectionBehavior]
+    );
+
     const hoveredRef = React.useRef<GridMouseEventArgs>();
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
@@ -2635,20 +2655,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
 
                     col = Math.max(col, rowMarkerOffset);
-
-                    if (rowGroupingSelectionBehavior === "block-spanning") {
-                        const { isGroupHeader, path, groupRows } = mapper(selectedRow);
-
-                        if (isGroupHeader) {
-                            row = selectedRow;
-                        } else {
-                            const groupRowIndex = path[path.length - 1];
-                            const lowerBounds = selectedRow - groupRowIndex;
-                            const upperBounds = selectedRow + groupRows - groupRowIndex - 1;
-
-                            row = clamp(row, lowerBounds, upperBounds);
-                        }
-                    }
+                    const clampLimits = getSelectionRowLimits(selectedRow);
+                    row = clampLimits === undefined ? row : clamp(row, clampLimits[0], clampLimits[1]);
 
                     // FIXME: Restrict row based on rowGrouping.selectionBehavior here
 
@@ -2687,9 +2695,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             showTrailingBlankRow,
             rows,
             allowedFillDirections,
-            rowGroupingSelectionBehavior,
+            getSelectionRowLimits,
             setCurrent,
-            mapper,
         ]
     );
 
@@ -2733,12 +2740,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             let top = old.y;
             let bottom = old.y + old.height;
 
+            const [minRow, maxRowRaw] = getSelectionRowLimits(row) ?? [0, rows];
+            const maxRow = maxRowRaw + 1; // we need an inclusive value
+
             // take care of vertical first in case new spans come in
             if (y !== 0) {
                 switch (y) {
                     case 2: {
                         // go to end
-                        bottom = rows;
+                        bottom = maxRow;
                         top = row;
                         scrollTo(0, bottom, "vertical");
 
@@ -2746,7 +2756,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
                     case -2: {
                         // go to start
-                        top = 0;
+                        top = minRow;
                         bottom = row + 1;
                         scrollTo(0, top, "vertical");
 
@@ -2758,7 +2768,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             top++;
                             scrollTo(0, top, "vertical");
                         } else {
-                            bottom = Math.min(rows, bottom + 1);
+                            bottom = Math.min(maxRow, bottom + 1);
                             scrollTo(0, bottom, "vertical");
                         }
 
@@ -2770,7 +2780,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             bottom--;
                             scrollTo(0, bottom, "vertical");
                         } else {
-                            top = Math.max(0, top - 1);
+                            top = Math.max(minRow, top - 1);
                             scrollTo(0, top, "vertical");
                         }
 
@@ -2873,7 +2883,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 "keyboard-select"
             );
         },
-        [getCellsForSelection, gridSelection, mangledCols.length, rowMarkerOffset, rows, scrollTo, setCurrent]
+        [
+            getCellsForSelection,
+            getSelectionRowLimits,
+            gridSelection,
+            mangledCols.length,
+            rowMarkerOffset,
+            rows,
+            scrollTo,
+            setCurrent,
+        ]
     );
 
     const updateSelectedCell = React.useCallback(
