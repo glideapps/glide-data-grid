@@ -92,7 +92,6 @@ const ShadowDOMWrapper: React.FC<{
         const reactRootContainer = document.createElement("div");
         reactRootContainer.style.height = "100%";
         shadowRoot.append(reactRootContainer);
-        shadowRoot.pare;
 
         // Create a React root and render the children inside it
         ReactDOM.render(<>{render()}</>, reactRootContainer);
