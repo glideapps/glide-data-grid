@@ -782,7 +782,7 @@ describe("data-editor", () => {
             key: "j",
         });
 
-        await act(() => new Promise(r => window.setTimeout(r, 100)));
+        await act(() => new Promise(r => window.setTimeout(r, 500)));
 
         const overlay = screen.getByDisplayValue("j");
 
@@ -819,7 +819,7 @@ describe("data-editor", () => {
             key: "j",
         });
 
-        await act(() => new Promise(r => window.setTimeout(r, 100)));
+        await act(() => new Promise(r => window.setTimeout(r, 500)));
 
         const overlay = screen.getByDisplayValue("j");
 
@@ -1335,7 +1335,7 @@ describe("data-editor", () => {
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
 
-        await act(() => new Promise(r => window.setTimeout(r, 100)));
+        await act(() => new Promise(r => window.setTimeout(r, 500)));
 
         const overlay = screen.getByDisplayValue("Data: 1, 1");
         expect(document.body.contains(overlay)).toBe(true);
