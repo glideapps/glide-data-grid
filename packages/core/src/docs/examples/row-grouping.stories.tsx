@@ -65,6 +65,7 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
         ],
         height: 55,
         navigationBehavior: "block",
+        selectionBehavior: "block-spanning",
         themeOverride: {
             bgCell: "rgba(0, 100, 255, 0.1)",
         },

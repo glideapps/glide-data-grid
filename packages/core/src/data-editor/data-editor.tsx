@@ -2580,6 +2580,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         isActivelyDragging.current = false;
     }, []);
 
+    const rowGroupingSelectionBehavior = rowGrouping?.selectionBehavior;
     const hoveredRef = React.useRef<GridMouseEventArgs>();
     const onItemHoveredImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
@@ -2635,7 +2636,21 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
                     col = Math.max(col, rowMarkerOffset);
 
-                    // FIXME: Restrict col/row based on rowGrouping.selectionBehavior here
+                    if (rowGroupingSelectionBehavior === "block-spanning") {
+                        const { isGroupHeader, path, groupRows } = mapper(selectedRow);
+
+                        if (isGroupHeader) {
+                            row = selectedRow;
+                        } else {
+                            const groupRowIndex = path[path.length - 1];
+                            const lowerBounds = selectedRow - groupRowIndex;
+                            const upperBounds = selectedRow + groupRows - groupRowIndex - 1;
+
+                            row = clamp(row, lowerBounds, upperBounds);
+                        }
+                    }
+
+                    // FIXME: Restrict row based on rowGrouping.selectionBehavior here
 
                     const deltaX = col - selectedCol;
                     const deltaY = row - selectedRow;
@@ -2662,7 +2677,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onItemHovered?.({ ...args, location: [args.location[0] - rowMarkerOffset, args.location[1]] as any });
         },
         [
-            allowedFillDirections,
             mouseState,
             rowMarkerOffset,
             rowSelect,
@@ -2672,7 +2686,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             setSelectedRows,
             showTrailingBlankRow,
             rows,
+            allowedFillDirections,
+            rowGroupingSelectionBehavior,
             setCurrent,
+            mapper,
         ]
     );
 

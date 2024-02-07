@@ -4,7 +4,6 @@ import type { GridCell, Item } from "../internal/data-grid/data-grid-types.js";
 import type { DataEditorProps } from "./data-editor.js";
 import type { DataGridProps } from "../internal/data-grid/data-grid.js";
 import { whenDefined } from "../common/utils.js";
-import { deepEqual } from "../common/support.js";
 
 export type RowGroup = {
     /**
@@ -152,6 +151,7 @@ interface MapResult {
     readonly isGroupHeader: boolean;
     readonly originalIndex: number;
     readonly groupIndex: number;
+    readonly groupRows: number;
     readonly contentIndex: number;
 }
 
@@ -164,6 +164,7 @@ export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly Fla
             isGroupHeader: false,
             groupIndex: row,
             contentIndex: row,
+            groupRows: -1,
         };
 
     let toGo = row;
@@ -177,6 +178,7 @@ export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly Fla
                 isGroupHeader: true,
                 groupIndex: -1,
                 contentIndex: -1,
+                groupRows: group.rows,
             };
         toGo--;
         originalIndex++;
@@ -188,6 +190,7 @@ export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly Fla
                     isGroupHeader: false,
                     groupIndex: toGo,
                     contentIndex: contentIndex + toGo,
+                    groupRows: group.rows,
                 };
             toGo -= group.rows;
             contentIndex += group.rows;
@@ -203,24 +206,8 @@ export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly Fla
         isGroupHeader: false,
         groupIndex: row,
         contentIndex: row,
+        groupRows: -1,
     };
-}
-
-export function mapPathToRowIndex(path: readonly number[], flattenedRowGroups: readonly FlattenedRowGroup[]): number {
-    const groupPath = path[path.length - 1] === -1 ? path : [...path.slice(0, -1), -1];
-    const groupRow = path[path.length - 1];
-
-    let resultRow = 0;
-
-    for (const g of flattenedRowGroups) {
-        if (deepEqual(g.path, groupPath)) {
-            if (groupRow === -1) return resultRow;
-            return resultRow + groupRow + 1;
-        }
-        resultRow += g.isCollapsed ? 1 : g.rows + 1;
-    }
-
-    return resultRow;
 }
 
 export interface UseRowGroupingInnerResult {

@@ -1,24 +1,16 @@
 import React from "react";
 import type { Item } from "../internal/data-grid/data-grid-types.js";
-import {
-    flattenRowGroups,
-    mapPathToRowIndex,
-    mapRowIndexToPath,
-    type RowGroup,
-    type RowGroupingOptions,
-} from "./row-grouping.js";
+import { flattenRowGroups, mapRowIndexToPath, type RowGroup, type RowGroupingOptions } from "./row-grouping.js";
 
 type RowGroupingMapper = (itemOrRow: Item | number) => {
     path: readonly number[];
     originalIndex: number;
     isGroupHeader: boolean;
+    groupRows: number;
 };
-
-type ReverseRowGroupingMapper = (path: readonly number[]) => number;
 
 interface UseRowGroupingResult {
     readonly mapper: RowGroupingMapper;
-    readonly reverseMapper: ReverseRowGroupingMapper;
     readonly updateRowGroupingByPath: (
         rowGrouping: readonly RowGroup[],
         path: readonly number[],
@@ -40,13 +32,6 @@ export function useRowGrouping(options: RowGroupingOptions | undefined, rows: nu
             (itemOrRow: Item | number) => {
                 itemOrRow = typeof itemOrRow === "number" ? itemOrRow : itemOrRow[1];
                 return mapRowIndexToPath(itemOrRow, flattenedRowGroups);
-            },
-            [flattenedRowGroups]
-        ),
-        reverseMapper: React.useCallback(
-            (path: readonly number[]) => {
-                if (flattenedRowGroups === undefined) return path[0];
-                return mapPathToRowIndex(path, flattenedRowGroups);
             },
             [flattenedRowGroups]
         ),
