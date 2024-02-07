@@ -2,11 +2,16 @@ import React from "react";
 import type { Item } from "../internal/data-grid/data-grid-types.js";
 import { flattenRowGroups, mapRowIndexToPath, type RowGroup, type RowGroupingOptions } from "./row-grouping.js";
 
-type RowGroupingMapper = (itemOrRow: Item | number) => {
+type RowGroupingMapperResult<T> = {
     path: readonly number[];
-    originalIndex: number;
+    originalIndex: T;
     isGroupHeader: boolean;
     groupRows: number;
+};
+
+type RowGroupingMapper = {
+    (itemOrRow: number): RowGroupingMapperResult<number>;
+    (itemOrRow: Item): RowGroupingMapperResult<Item>;
 };
 
 interface UseRowGroupingResult {
@@ -28,10 +33,16 @@ export function useRowGrouping(options: RowGroupingOptions | undefined, rows: nu
     return {
         getRowGroupingForPath,
         updateRowGroupingByPath,
-        mapper: React.useCallback(
-            (itemOrRow: Item | number) => {
-                itemOrRow = typeof itemOrRow === "number" ? itemOrRow : itemOrRow[1];
-                return mapRowIndexToPath(itemOrRow, flattenedRowGroups);
+        mapper: React.useCallback<UseRowGroupingResult["mapper"]>(
+            (itemOrRow: number | Item) => {
+                if (typeof itemOrRow === "number") {
+                    return mapRowIndexToPath(itemOrRow, flattenedRowGroups);
+                }
+                const r = mapRowIndexToPath(itemOrRow[1], flattenedRowGroups);
+                return {
+                    ...r,
+                    originalIndex: [itemOrRow[0], r.originalIndex],
+                } as any; // FIXME
             },
             [flattenedRowGroups]
         ),

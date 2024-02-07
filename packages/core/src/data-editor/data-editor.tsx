@@ -745,7 +745,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         height,
         columns: columnsIn,
         rows: rowsIn,
-        getCellContent: getCellContentIn,
+        getCellContent,
         onCellClicked,
         onCellActivated,
         onFillPattern,
@@ -866,11 +866,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const {
         rows,
-        getCellContent,
         rowNumberMapper,
         rowHeight: rowHeightPostGrouping,
         getRowThemeOverride,
-    } = useRowGroupingInner(rowGrouping, rowsIn, getCellContentIn, rowHeightIn, getRowThemeOverrideIn);
+    } = useRowGroupingInner(rowGrouping, rowsIn, rowHeightIn, getRowThemeOverrideIn);
 
     const remSize = React.useMemo(() => Number.parseFloat(docStyle.fontSize), [docStyle]);
     const { rowHeight, headerHeight, groupHeaderHeight, theme, overscrollX, overscrollY } = useRemAdjuster({

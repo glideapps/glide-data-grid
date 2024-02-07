@@ -95,7 +95,7 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
 
     const getCellContentMangled = React.useCallback<DataEditorAllProps["getCellContent"]>(
         item => {
-            const { path, originalIndex, isGroupHeader } = mapper(item);
+            const { path, isGroupHeader, originalIndex } = mapper(item);
             if (item[0] === 0) {
                 return {
                     kind: GridCellKind.Text,
@@ -111,7 +111,7 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
                 };
             }
 
-            return getCellContent([item[0], originalIndex]);
+            return getCellContent(originalIndex);
         },
         [getCellContent, mapper]
     );
