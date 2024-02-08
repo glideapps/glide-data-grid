@@ -1,281 +1,30 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import * as React from "react";
-import { render, fireEvent, screen, act, createEvent, cleanup } from "@testing-library/react";
+import { render, fireEvent, screen, act, createEvent } from "@testing-library/react";
 import {
     CompactSelection,
     DataEditor,
-    type DataEditorProps,
     type GridCell,
     GridCellKind,
-    type GridSelection,
     isSizedGridColumn,
     type Item,
 } from "../src/index.js";
-import type { CustomCell, SizedGridColumn } from "../src/internal/data-grid/data-grid-types.js";
+import type { CustomCell } from "../src/internal/data-grid/data-grid-types.js";
 import type { DataEditorRef } from "../src/data-editor/data-editor.js";
 import { assert } from "../src/common/support.js";
 import { vi, type Mock, expect, describe, test, beforeEach, afterEach } from "vitest";
 import type { GridKeyEventArgs } from "../src/internal/data-grid/event-args.js";
-
-const BOOLEAN_DATA_LOOKUP: (boolean | null | undefined)[] = [true, false, undefined, null];
-function getMockBooleanData(row: number): boolean | null | undefined {
-    return BOOLEAN_DATA_LOOKUP[row % BOOLEAN_DATA_LOOKUP.length];
-}
-
-function sendClick(el: Element | Node | Document | Window, options?: any, runTimers?: boolean): void {
-    fireEvent.mouseDown(el, options);
-    if (runTimers === true) vi.runAllTimers();
-    fireEvent.mouseUp(el, options);
-    if (runTimers === true) vi.runAllTimers();
-    fireEvent.click(el, options);
-}
-
-function sendTouchClick(el: Element | Node | Document | Window, options?: any): void {
-    fireEvent.touchStart(el, options);
-    fireEvent.touchEnd(el, {
-        ...options,
-        changedTouches: options.touches,
-    });
-    fireEvent.click(el, {
-        clientX: options?.touches?.[0]?.clientX,
-        clientY: options?.touches?.[0]?.clientY,
-        pointerType: "touch",
-        ...options,
-    });
-}
-
-const makeCell = (cell: Item): GridCell => {
-    const [col, row] = cell;
-    switch (col) {
-        case 0: {
-            return {
-                kind: GridCellKind.RowID,
-                allowOverlay: false,
-                data: `Data: ${col}, ${row}`,
-            };
-        }
-        case 3: {
-            return {
-                kind: GridCellKind.Number,
-                allowOverlay: true,
-                data: 10,
-                displayData: `${row}`,
-            };
-        }
-        case 4: {
-            return {
-                kind: GridCellKind.Drilldown,
-                allowOverlay: false,
-                data: [
-                    {
-                        img: "https://cdn.pixabay.com/photo/2017/02/20/18/03/cat-2083492_1280.jpg",
-                        text: "Foobar",
-                    },
-                ],
-            };
-        }
-        case 5: {
-            return {
-                kind: GridCellKind.Protected,
-                allowOverlay: false,
-            };
-        }
-        case 6: {
-            return {
-                kind: GridCellKind.Bubble,
-                allowOverlay: false,
-                data: ["Foobar"],
-            };
-        }
-        case 7: {
-            return {
-                kind: GridCellKind.Boolean,
-                allowOverlay: false,
-                data: getMockBooleanData(row),
-                readonly: row === 5,
-            };
-        }
-        case 8: {
-            return {
-                kind: GridCellKind.Text,
-                allowOverlay: true,
-                data: `Data: ${col}, ${row}`,
-                displayData: `שלום ${col}, ${row}`,
-            };
-        }
-        case 9: {
-            return {
-                kind: GridCellKind.Markdown,
-                allowOverlay: true,
-                data: `# Header: ${col}, ${row}`,
-            };
-        }
-        case 10: {
-            return {
-                kind: GridCellKind.Uri,
-                allowOverlay: true,
-                data: `https://example.com/${col}/${row}`,
-            };
-        }
-        // No default
-    }
-    if (col > 10) {
-        throw new Error(`Unexpected column: ${col}`);
-    }
-    return {
-        kind: GridCellKind.Text,
-        allowOverlay: true,
-        data: `Data: ${col}, ${row}`,
-        displayData: `${col}, ${row}`,
-        allowWrapping: true,
-    };
-};
-
-const basicProps: DataEditorProps = {
-    columns: [
-        {
-            title: "A",
-            width: 150,
-            icon: "headerRowID",
-        },
-        {
-            title: "B",
-            width: 160,
-            icon: "headerCode",
-        },
-        {
-            title: "C",
-            width: 170,
-            icon: "headerNumber",
-        },
-        {
-            title: "D",
-            width: 180,
-            icon: "headerString",
-        },
-        {
-            title: "E",
-            width: 40,
-            icon: "headerBoolean",
-        },
-        {
-            title: "F",
-            width: 50,
-            icon: "headerUri",
-        },
-        {
-            title: "G",
-            width: 60,
-            icon: "headerVideoUri",
-        },
-        {
-            title: "H",
-            width: 70,
-            icon: "headerEmoji",
-        },
-        {
-            title: "I",
-            width: 80,
-            icon: "headerImage",
-        },
-        {
-            title: "J",
-            width: 90,
-            icon: "headerPhone",
-        },
-        {
-            title: "K",
-            width: 90,
-            icon: "headerPhone",
-        },
-    ],
-    getCellContent: makeCell,
-    getCellsForSelection: true,
-    groupHeaderHeight: 32,
-    headerHeight: 36,
-    rowHeight: 32,
-    onRowAppended: () => undefined,
-    trailingRowOptions: {
-        hint: "New row",
-        sticky: true,
-        tint: true,
-    },
-    rows: 1000,
-};
-
-function getCellCenterPositionForDefaultGrid(cell: Item): [number, number] {
-    const [col, row] = cell;
-
-    const xStart = basicProps.columns.slice(0, col).reduce((acc, curr) => acc + (curr as SizedGridColumn).width, 0);
-    const xOffset = (basicProps.columns[col] as SizedGridColumn).width / 2;
-
-    const yStart = (basicProps.headerHeight as number) + row * (basicProps.rowHeight as number);
-    const yOffset = (basicProps.rowHeight as number) / 2;
-
-    return [xStart + xOffset, yStart + yOffset];
-}
-
-function prep(resetTimers: boolean = true) {
-    const scroller = document.getElementsByClassName("dvn-scroller").item(0);
-    if (scroller !== null) {
-        vi.spyOn(scroller, "clientWidth", "get").mockImplementation(() => 1000);
-        vi.spyOn(scroller, "clientHeight", "get").mockImplementation(() => 1000);
-        vi.spyOn(scroller, "offsetWidth" as any, "get").mockImplementation(() => 1000);
-        vi.spyOn(scroller, "offsetHeight" as any, "get").mockImplementation(() => 1000);
-    }
-
-    act(() => {
-        vi.runAllTimers();
-    });
-    if (resetTimers) {
-        vi.useRealTimers();
-    } else {
-        act(() => {
-            vi.runAllTimers();
-        });
-    }
-
-    return scroller;
-}
-
-const Context: React.FC = p => {
-    return (
-        <>
-            {p.children}
-            <div id="portal"></div>
-        </>
-    );
-};
-
-// eslint-disable-next-line react/display-name
-const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, ref) => {
-    const [sel, setSel] = React.useState<GridSelection | undefined>(p.gridSelection);
-    const [extraRows, setExtraRows] = React.useState(0);
-
-    const onGridSelectionChange = React.useCallback(
-        (s: GridSelection) => {
-            setSel(s);
-            p.onGridSelectionChange?.(s);
-        },
-        [p]
-    );
-
-    const onRowAppened = React.useCallback(() => {
-        setExtraRows(cv => cv + 1);
-        void p.onRowAppended?.();
-    }, [p]);
-
-    return (
-        <DataEditor
-            {...p}
-            ref={ref}
-            gridSelection={sel}
-            onGridSelectionChange={onGridSelectionChange}
-            rows={p.rows + extraRows}
-            onRowAppended={p.onRowAppended === undefined ? undefined : onRowAppened}
-        />
-    );
-});
+import {
+    EventedDataEditor,
+    basicProps,
+    prep,
+    sendClick,
+    sendTouchClick,
+    getCellCenterPositionForDefaultGrid,
+    Context,
+    standardBeforeEach,
+    standardAfterEach,
+} from "./test-utils.js";
 
 describe("data-editor", () => {
     vi.mock("../src/common/resize-detector", () => {
@@ -284,65 +33,12 @@ describe("data-editor", () => {
         };
     });
 
-    // beforeAll(() => {
-    //     vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation((callback: FrameRequestCallback) => {
-    //         return setTimeout(callback, 10);
-    //     });
-    // });
-
-    // afterAll(() => {
-    //     vi.restoreAllMocks();
-    // });
-
     beforeEach(() => {
-        // delete (window as any).ResizeObserver;
-        // window.ResizeObserver = vi.fn().mockImplementation(() => ({
-        //     observe: vi.fn(),
-        //     unobserve: vi.fn(),
-        //     disconnect: vi.fn(),
-        // }));
-
-        Element.prototype.scrollTo = vi.fn() as any;
-        Element.prototype.scrollBy = vi.fn() as any;
-        Object.assign(navigator, {
-            clipboard: {
-                writeText: vi.fn(() => Promise.resolve()),
-                readText: vi.fn(() =>
-                    Promise.resolve(`Sunday	Dogs	https://google.com
-Monday	Cats	https://google.com
-Tuesday	Turtles	https://google.com
-Wednesday	Bears	https://google.com
-Thursday	"L  ions"	https://google.com
-Friday	Pigs	https://google.com
-Saturday	"Turkeys and some ""quotes"" and
-a new line char ""more quotes"" plus a tab  ."	https://google.com`)
-                ),
-            },
-        });
-        Element.prototype.getBoundingClientRect = () => ({
-            bottom: 1000,
-            height: 1000,
-            left: 0,
-            right: 1000,
-            top: 0,
-            width: 1000,
-            x: 0,
-            y: 0,
-            toJSON: () => "",
-        });
-        Object.defineProperties(HTMLElement.prototype, {
-            offsetWidth: {
-                get() {
-                    return 1000;
-                },
-            },
-        });
-        Image.prototype.decode = vi.fn();
+        standardBeforeEach();
     });
 
     afterEach(() => {
-        vi.clearAllTimers();
-        cleanup();
+        standardAfterEach();
     });
 
     test("Focus a11y cell", async () => {
@@ -760,7 +456,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
                 clientY: 36 + 32 + 16, // Row 1 (0 indexed)
             });
 
-            vi.advanceTimersByTime(400);
+            act(() => {
+                vi.advanceTimersByTime(400);
+            });
 
             sendClick(canvas, {
                 clientX: 300, // Col B
@@ -786,7 +484,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
                 clientY: 36 + 32 + 16, // Row 1 (0 indexed)
             });
 
-            vi.advanceTimersByTime(600);
+            act(() => {
+                vi.advanceTimersByTime(600);
+            });
 
             sendClick(canvas, {
                 clientX: 300, // Col B
@@ -811,7 +511,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
                 clientY: 36 + 32 + 16, // Row 1 (0 indexed)
             });
 
-            vi.advanceTimersByTime(1600);
+            act(() => {
+                vi.advanceTimersByTime(1600);
+            });
 
             sendClick(canvas, {
                 clientX: 300, // Col B
@@ -890,7 +592,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "Enter",
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1]);
@@ -916,7 +620,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "Enter",
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([7, 2]);
@@ -947,7 +653,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: " ",
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
 
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalledWith([1, 1]);
@@ -983,7 +691,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: " ",
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
 
         expect(keyDownEvent?.location).toEqual([1, 1]);
         expect(keyUpEvent?.location).toEqual([1, 1]);
@@ -1072,7 +782,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "j",
         });
 
-        await new Promise(r => window.setTimeout(r, 1000));
+        await act(() => new Promise(r => window.setTimeout(r, 500)));
 
         const overlay = screen.getByDisplayValue("j");
 
@@ -1109,7 +819,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "j",
         });
 
-        await new Promise(r => window.setTimeout(r, 1000));
+        await act(() => new Promise(r => window.setTimeout(r, 500)));
 
         const overlay = screen.getByDisplayValue("j");
 
@@ -1269,7 +979,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 16, // Group Header
         });
 
-        await new Promise(r => window.setTimeout(r, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         sendClick(canvas, {
             clientX: 300, // Col B
@@ -1315,7 +1025,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 16, // Header
         });
 
-        await new Promise(r => window.setTimeout(r, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         sendClick(canvas, {
             clientX: 300, // Col B
@@ -1625,7 +1335,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
 
-        await new Promise(r => window.setTimeout(r, 1000));
+        await act(() => new Promise(r => window.setTimeout(r, 500)));
 
         const overlay = screen.getByDisplayValue("Data: 1, 1");
         expect(document.body.contains(overlay)).toBe(true);
@@ -2582,7 +2292,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             vi.runAllTimers();
         });
         vi.useRealTimers();
-        await new Promise(r => window.setTimeout(r, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
         expect(pasteSpy).toBeCalledWith(
             [1, 3],
             [
@@ -2633,7 +2343,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             vi.runAllTimers();
         });
         vi.useRealTimers();
-        await new Promise(r => window.setTimeout(r, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
     });
 
     test("Cut cell", async () => {
@@ -2667,7 +2377,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
 
         fireEvent.cut(window);
         vi.useRealTimers();
-        await new Promise(r => window.setTimeout(r, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
         expect(navigator.clipboard.writeText).toBeCalledWith("1, 2\t2, 2");
         expect(editSpy).toHaveBeenCalledWith([
             {
@@ -2731,7 +2441,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             vi.runAllTimers();
         });
         vi.useRealTimers();
-        await new Promise(r => window.setTimeout(r, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
 
         expect(spy).toBeCalledWith(expect.anything(), "custom-cell-data");
     });
@@ -2886,7 +2596,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             vi.runAllTimers();
         });
         vi.useRealTimers();
-        await new Promise(r => window.setTimeout(r, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
         expect(spy).not.toBeCalled();
     });
 
@@ -2948,7 +2658,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             vi.runAllTimers();
         });
         vi.useRealTimers();
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
         expect(pasteSpy).toBeCalledWith(
             [1, 3],
             [
@@ -2989,7 +2699,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
 
         fireEvent.copy(window);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
         expect(navigator.clipboard.writeText).toBeCalledWith(
             "Data: 0, 3\t1, 3\t2, 3\t3\tFoobar\t************\tFoobar\t\tשלום 8, 3\t# Header: 9, 3\thttps://example.com/10/3"
         );
@@ -3016,7 +2726,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
 
         fireEvent.copy(window);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
         expect(navigator.clipboard.writeText).toBeCalled();
     });
 
@@ -3054,7 +2764,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 16, // Header
         });
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         if (scroller !== null) {
             vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
@@ -3066,7 +2776,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             fireEvent.scroll(scroller);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         if (scroller !== null) {
             vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
@@ -3078,7 +2788,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             fireEvent.scroll(scroller);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         expect(document.body.contains(canvas)).toBe(true);
     });
@@ -3112,7 +2822,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 16, // Header
         });
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         if (scroller !== null) {
             vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
@@ -3124,7 +2834,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             fireEvent.scroll(scroller);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         if (scroller !== null) {
             vi.spyOn(scroller, "scrollWidth", "get").mockImplementation(() =>
@@ -3136,7 +2846,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             fireEvent.scroll(scroller);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         expect(document.body.contains(canvas)).toBe(true);
     });
@@ -3671,254 +3381,6 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         });
 
         expect(spy).toBeCalledWith(1, 0);
-    });
-
-    test("Resize Column", async () => {
-        const spy = vi.fn();
-        vi.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onColumnMoved={spy} onColumnResize={spy} />, {
-            wrapper: Context,
-        });
-        prep();
-        const canvas = screen.getByTestId("data-grid-canvas");
-
-        fireEvent.mouseDown(canvas, {
-            clientX: 310, // Col B Right Edge
-            clientY: 16, // Header
-        });
-
-        fireEvent.mouseMove(canvas, {
-            clientX: 350,
-            clientY: 16,
-            buttons: 1,
-        });
-
-        fireEvent.mouseUp(canvas, {
-            clientX: 350,
-            clientY: 16,
-        });
-
-        fireEvent.click(canvas, {
-            clientX: 350,
-            clientY: 16,
-        });
-
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1, 200);
-    });
-
-    test("Auto Resize Column", async () => {
-        const spy = vi.fn();
-        vi.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onColumnResize={spy} />, {
-            wrapper: Context,
-        });
-        prep();
-        const canvas = screen.getByTestId("data-grid-canvas");
-
-        fireEvent.mouseDown(canvas, {
-            clientX: 310, // Col B Right Edge
-            clientY: 16, // Header
-        });
-
-        fireEvent.mouseUp(canvas, {
-            clientX: 310,
-            clientY: 16,
-        });
-
-        fireEvent.mouseDown(canvas, {
-            clientX: 310, // Col B Right Edge
-            clientY: 16, // Header
-        });
-
-        fireEvent.mouseUp(canvas, {
-            clientX: 310,
-            clientY: 16,
-        });
-
-        fireEvent.click(canvas, {
-            clientX: 310,
-            clientY: 16,
-        });
-
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 50, 1, 50);
-    });
-
-    test("Auto Resize Column Ref", async () => {
-        const spy = vi.fn();
-        vi.useFakeTimers();
-        const ref = React.createRef<DataEditorRef>();
-        render(<EventedDataEditor {...basicProps} ref={ref} onColumnResize={spy} />, {
-            wrapper: Context,
-        });
-        prep();
-
-        ref.current?.remeasureColumns(CompactSelection.fromSingleSelection(1));
-
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 50, 1, 50);
-    });
-
-    test("Resize Column End Called", async () => {
-        const spy = vi.fn();
-        vi.useFakeTimers();
-        render(<EventedDataEditor {...basicProps} onColumnResize={vi.fn()} onColumnResizeEnd={spy} />, {
-            wrapper: Context,
-        });
-        prep();
-        const canvas = screen.getByTestId("data-grid-canvas");
-
-        fireEvent.mouseDown(canvas, {
-            clientX: 310, // Col B Right Edge
-            clientY: 16, // Header
-        });
-
-        fireEvent.mouseMove(canvas, {
-            clientX: 350,
-            clientY: 16,
-            buttons: 1,
-        });
-
-        fireEvent.mouseUp(canvas, {
-            clientX: 350,
-            clientY: 16,
-        });
-
-        fireEvent.click(canvas, {
-            clientX: 350,
-            clientY: 16,
-        });
-
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1, 200);
-    });
-
-    test("Resize column end called correct number of times", async () => {
-        const spy = vi.fn();
-        vi.useFakeTimers();
-        render(
-            <EventedDataEditor
-                {...basicProps}
-                onColumnResize={vi.fn()}
-                onColumnResizeEnd={spy}
-                gridSelection={{
-                    columns: CompactSelection.fromSingleSelection(3),
-                    rows: CompactSelection.empty(),
-                }}
-            />,
-            {
-                wrapper: Context,
-            }
-        );
-        prep();
-        const canvas = screen.getByTestId("data-grid-canvas");
-
-        fireEvent.mouseDown(canvas, {
-            clientX: 310, // Col B Right Edge
-            clientY: 16, // Header
-        });
-
-        fireEvent.mouseMove(canvas, {
-            clientX: 350,
-            clientY: 16,
-            buttons: 1,
-        });
-
-        fireEvent.mouseUp(canvas, {
-            clientX: 350,
-            clientY: 16,
-        });
-
-        fireEvent.click(canvas, {
-            clientX: 350,
-            clientY: 16,
-        });
-
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1, 200);
-    });
-
-    test("Resize Multiple Column", async () => {
-        const spy = vi.fn();
-        vi.useFakeTimers();
-        render(
-            <EventedDataEditor
-                {...basicProps}
-                gridSelection={{
-                    columns: CompactSelection.fromSingleSelection([0, 5]),
-                    rows: CompactSelection.empty(),
-                    current: undefined,
-                }}
-                onColumnResize={spy}
-            />,
-            {
-                wrapper: Context,
-            }
-        );
-        prep();
-        const canvas = screen.getByTestId("data-grid-canvas");
-
-        fireEvent.mouseDown(canvas, {
-            clientX: 310, // Col B Right Edge
-            clientY: 16, // Header
-        });
-
-        fireEvent.mouseMove(canvas, {
-            clientX: 350,
-            clientY: 16,
-            buttons: 1,
-        });
-
-        fireEvent.mouseUp(canvas, {
-            clientX: 350,
-            clientY: 16,
-        });
-
-        fireEvent.click(canvas, {
-            clientX: 350,
-            clientY: 16,
-        });
-
-        expect(spy).toBeCalledTimes(5);
-    });
-
-    test("Resize Last Column", async () => {
-        const spy = vi.fn();
-        vi.useFakeTimers();
-        render(
-            <EventedDataEditor
-                {...basicProps}
-                columns={basicProps.columns.slice(0, 2)}
-                onColumnMoved={spy}
-                onColumnResize={spy}
-            />,
-            {
-                wrapper: Context,
-            }
-        );
-        prep();
-        const canvas = screen.getByTestId("data-grid-canvas");
-
-        fireEvent.mouseDown(canvas, {
-            clientX: 314, // Col B Right Edge
-            clientY: 16, // Header
-        });
-
-        fireEvent.mouseMove(canvas, {
-            clientX: 350,
-            clientY: 16,
-            buttons: 1,
-        });
-
-        fireEvent.mouseUp(canvas, {
-            clientX: 350,
-            clientY: 16,
-        });
-
-        fireEvent.click(canvas, {
-            clientX: 350,
-            clientY: 16,
-        });
-
-        expect(spy).toBeCalledWith({ icon: "headerCode", title: "B", width: 160 }, 200, 1, 200);
     });
 
     test("Drag reorder row", async () => {
@@ -4781,7 +4243,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 16 + 200, // Not Header
         });
 
-        await new Promise(r => window.setTimeout(r, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 10)));
 
         fireEvent.mouseDown(canvas, {
             clientX: 300, // Col B
@@ -4824,7 +4286,7 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             buttons: 1,
         });
 
-        await new Promise(r => window.setTimeout(r, 100));
+        await act(() => new Promise(r => window.setTimeout(r, 100)));
 
         fireEvent.mouseUp(canvas, {
             clientX: 300, // Col B
@@ -5069,7 +4531,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "Enter",
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
 
         spy.mockClear();
         fireEvent.keyDown(canvas, {
@@ -5106,12 +4570,16 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             clientY: 36 + 32 * 5 + 16,
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
         spy.mockClear();
 
         rerender(<EventedDataEditor {...basicProps} rows={1} onGridSelectionChange={spy} />);
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
         expect(spy).toBeCalledWith({
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
@@ -5154,7 +4622,9 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             key: "Enter",
         });
 
-        vi.runAllTimers();
+        act(() => {
+            vi.runAllTimers();
+        });
         expect(spy.mock.calls.findIndex(x => x[0][1] > 1)).toBe(-1);
     });
 });

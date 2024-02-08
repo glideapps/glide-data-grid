@@ -65,6 +65,7 @@ export { AllCellRenderers } from "./cells/index.js";
 export { sprites } from "./internal/data-grid/sprites.js";
 export { default as ImageWindowLoaderImpl } from "./common/image-window-loader.js";
 export * from "./data-editor/copy-paste.js";
+export { useRowGrouping } from "./data-editor/row-grouping-api.js";
 
 /**
  * @category DataEditor
