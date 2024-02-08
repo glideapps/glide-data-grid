@@ -126,6 +126,7 @@ type Props = Partial<
         | "getRowThemeOverride"
         | "gridRef"
         | "groupHeaderHeight"
+        | "setScrollRef"
         | "headerHeight"
         | "isFilling"
         | "isFocused"
@@ -1140,17 +1141,29 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const [visibleRegion, setVisibleRegion, empty] = useStateWithReactiveInput<VisibleRegion>(visibleRegionInput);
     visibleRegionRef.current = visibleRegion;
 
-    const vScrollReady = (visibleRegion.height ?? 1) > 1;
-    React.useLayoutEffect(() => {
-        if (scrollOffsetY !== undefined && scrollRef.current !== null && vScrollReady) {
-            if (scrollRef.current.scrollTop === scrollOffsetY) return;
-            scrollRef.current.scrollTop = scrollOffsetY;
-            if (scrollRef.current.scrollTop !== scrollOffsetY) {
-                empty();
+    const setScrollRef = React.useCallback(
+        (scrollEl: HTMLDivElement | null) => {
+            if (scrollEl !== null && scrollRef.current !== scrollEl && scrollOffsetY !== undefined) {
+                scrollEl.scrollTop = scrollOffsetY;
+                hasJustScrolled.current = true;
             }
-            hasJustScrolled.current = true;
-        }
-    }, [scrollOffsetY, vScrollReady, empty]);
+
+            scrollRef.current = scrollEl;
+        },
+        [scrollOffsetY]
+    );
+
+    // const vScrollReady = (visibleRegion.height ?? 1) > 1;
+    // React.useLayoutEffect(() => {
+    //     if (scrollOffsetY !== undefined && scrollRef.current !== null && vScrollReady) {
+    //         if (scrollRef.current.scrollTop === scrollOffsetY) return;
+    //         scrollRef.current.scrollTop = scrollOffsetY;
+    //         if (scrollRef.current.scrollTop !== scrollOffsetY) {
+    //             empty();
+    //         }
+    //         hasJustScrolled.current = true;
+    //     }
+    // }, [scrollOffsetY, vScrollReady, empty]);
 
     const hScrollReady = (visibleRegion.width ?? 1) > 1;
     React.useLayoutEffect(() => {
@@ -4099,6 +4112,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onSearchValueChange={onSearchValueChange}
                     rows={mangledRows}
                     scrollRef={scrollRef}
+                    setScrollRef={setScrollRef}
                     selection={gridSelection}
                     translateX={visibleRegion.tx}
                     translateY={visibleRegion.ty}

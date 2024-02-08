@@ -22,7 +22,7 @@ interface Props {
     };
     readonly rightElement?: React.ReactNode;
     readonly kineticScrollPerfHack?: boolean;
-    readonly scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
+    readonly scrollRef?: (el: HTMLDivElement | null) => void;
     readonly update: (region: Rectangle & { paddingRight: number }) => void;
 }
 
@@ -246,7 +246,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
         (instance: HTMLDivElement | null) => {
             scroller.current = instance;
             if (scrollRef !== undefined) {
-                scrollRef.current = instance;
+                scrollRef(instance);
             }
         },
         [scrollRef]
@@ -263,6 +263,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
 
     const { ref, width, height } = useResizeDetector<HTMLDivElement>(initialSize);
 
+    // this is done so that the visible region gets updated in the DataEditor any time the size changes
     if (typeof window !== "undefined" && (lastProps.current?.height !== height || lastProps.current?.width !== width)) {
         window.setTimeout(() => onScrollRef.current(), 0);
         lastProps.current = { width, height };
