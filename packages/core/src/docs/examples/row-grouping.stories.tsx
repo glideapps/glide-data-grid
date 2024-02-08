@@ -23,8 +23,7 @@ export default {
                     title="Row Grouping"
                     description={
                         <Description>
-                            Columns at the start of your grid can be frozen in place by settings{" "}
-                            <PropName>freezeColumns</PropName> to a number greater than 0.
+                            The <PropName>rowGrouping</PropName> prop can be used to group and even fold rows.
                         </Description>
                     }>
                     <Story />
