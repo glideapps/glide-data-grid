@@ -422,6 +422,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             hasAppendRow={p.hasAppendRow}
             translateX={p.translateX}
             translateY={p.translateY}
+            resizeIndicator={p.resizeIndicator}
             verticalBorder={p.verticalBorder}
             width={p.width}
             getCellContent={getMangledCellContent}

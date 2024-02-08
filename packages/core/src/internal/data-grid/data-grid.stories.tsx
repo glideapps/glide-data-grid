@@ -132,6 +132,7 @@ export function Simplenotest() {
             isResizing={false}
             isDragging={false}
             theme={mergeAndRealizeTheme(getDataEditorTheme())}
+            resizeIndicator={"full"}
         />
     );
 }
