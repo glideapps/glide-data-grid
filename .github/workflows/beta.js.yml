@@ -15,7 +15,7 @@ jobs:
                 working-directory: ./packages/core
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: actions/setup-node@v4
               with:
                   node-version: 20.10.0
@@ -34,7 +34,7 @@ jobs:
                 working-directory: ./packages/cells
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: actions/setup-node@v4
               with:
                   node-version: 20.10.0
@@ -53,8 +53,8 @@ jobs:
                 working-directory: ./packages/source
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v1
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
               with:
                   node-version: 20.10.0
             - name: Bootstrap
