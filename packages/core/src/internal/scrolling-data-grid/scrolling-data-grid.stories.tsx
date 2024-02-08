@@ -86,6 +86,7 @@ export function Simplenotest() {
             rows={10_000}
             enableGroups={false}
             clientSize={[1000, 1000, 0]}
+            resizeIndicator="full"
             cellXOffset={x}
             cellYOffset={y}
             drawHeader={undefined}

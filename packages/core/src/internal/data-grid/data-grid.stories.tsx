@@ -146,6 +146,7 @@ export function SelectedCellnotest() {
             height={1000}
             cellXOffset={0}
             isFocused={true}
+            resizeIndicator="full"
             drawHeader={undefined}
             drawCell={undefined}
             experimental={undefined}
@@ -239,6 +240,7 @@ export function SelectedRownotest() {
             cellXOffset={0}
             cellYOffset={0}
             isFocused={true}
+            resizeIndicator="full"
             resizeColumn={undefined}
             drawHeader={undefined}
             drawCell={undefined}
@@ -326,6 +328,7 @@ export const SelectedColumnnotest = () => {
             cellXOffset={0}
             cellYOffset={0}
             isFocused={true}
+            resizeIndicator="full"
             resizeColumn={undefined}
             drawHeader={undefined}
             experimental={undefined}
