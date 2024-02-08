@@ -15,6 +15,7 @@
         "declarationDir": "./dist/dts",
         "module": "CommonJS",
         "verbatimModuleSyntax": false,
-        "sourceMap": true
+        "sourceMap": true,
+        "types": ["node"]
     }
 }
