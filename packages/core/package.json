@@ -19,6 +19,10 @@
         "./dist/index.css": {
             "import": "./dist/index.css",
             "require": "./dist/index.css"
+        },
+        "./index.css": {
+            "import": "./dist/index.css",
+            "require": "./dist/index.css"
         }
     },
     "scripts": {
