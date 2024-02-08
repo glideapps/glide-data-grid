@@ -2,19 +2,19 @@ import React from "react";
 import type { Item } from "../internal/data-grid/data-grid-types.js";
 import { flattenRowGroups, mapRowIndexToPath, type RowGroup, type RowGroupingOptions } from "./row-grouping.js";
 
-type RowGroupingMapperResult<T> = {
+export type RowGroupingMapperResult<T> = {
     path: readonly number[];
     originalIndex: T;
     isGroupHeader: boolean;
     groupRows: number;
 };
 
-type RowGroupingMapper = {
+export type RowGroupingMapper = {
     (itemOrRow: number): RowGroupingMapperResult<number>;
     (itemOrRow: Item): RowGroupingMapperResult<Item>;
 };
 
-interface UseRowGroupingResult {
+export interface UseRowGroupingResult {
     readonly mapper: RowGroupingMapper;
     readonly updateRowGroupingByPath: (
         rowGrouping: readonly RowGroup[],
