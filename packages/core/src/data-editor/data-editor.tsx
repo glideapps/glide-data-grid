@@ -83,7 +83,7 @@ import { type Keybinds, useKeybindingsWithDefaults } from "./data-editor-keybind
 import type { Highlight } from "../internal/data-grid/render/data-grid-render.cells.js";
 import { useRowGroupingInner, type RowGroupingOptions } from "./row-grouping.js";
 import { useRowGrouping } from "./row-grouping-api.js";
-import { useInitialScrollOffset } from "./use-scroll-offset-tracker.js";
+import { useInitialScrollOffset } from "./use-initial-scroll-offset.js";
 import type { VisibleRegion } from "./visible-region.js";
 
 const DataGridOverlayEditor = React.lazy(
