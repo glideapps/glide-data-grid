@@ -83,7 +83,7 @@ import { type Keybinds, useKeybindingsWithDefaults } from "./data-editor-keybind
 import type { Highlight } from "../internal/data-grid/render/data-grid-render.cells.js";
 import { useRowGroupingInner, type RowGroupingOptions } from "./row-grouping.js";
 import { useRowGrouping } from "./row-grouping-api.js";
-import { useFixName } from "./use-fix-name.js";
+import { useInitialScrollOffset } from "./use-scroll-offset-tracker.js";
 import type { VisibleRegion } from "./visible-region.js";
 
 const DataGridOverlayEditor = React.lazy(
@@ -1101,7 +1101,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const hasJustScrolled = React.useRef(false);
 
-    const { setVisibleRegion, visibleRegion, scrollRef } = useFixName(
+    const { setVisibleRegion, visibleRegion, scrollRef } = useInitialScrollOffset(
         scrollOffsetX,
         scrollOffsetY,
         rowHeight,

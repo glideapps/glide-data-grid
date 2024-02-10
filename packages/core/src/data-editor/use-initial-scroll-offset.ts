@@ -24,7 +24,7 @@ function useCallbackRef<T>(initialValue: T, callback: (newVal: T) => void) {
     );
 }
 
-export function useFixName(
+export function useInitialScrollOffset(
     scrollOffsetX: number | undefined,
     scrollOffsetY: number | undefined,
     rowHeight: NonNullable<DataEditorCoreProps["rowHeight"]>,
@@ -55,7 +55,13 @@ export function useFixName(
     const onDidScrollRef = React.useRef(onDidScroll);
     onDidScrollRef.current = onDidScroll;
 
-    const scrollRef = useCallbackRef<HTMLDivElement | null>(null, newVal => console.log("scrollRef changed", newVal));
+    const scrollRef = useCallbackRef<HTMLDivElement | null>(null, newVal => {
+        if (newVal !== null && scrollOffsetY !== undefined) {
+            newVal.scrollTop = scrollOffsetY;
+        } else if (newVal !== null && scrollOffsetX !== undefined) {
+            newVal.scrollLeft = scrollOffsetX;
+        }
+    });
 
     const vScrollReady = (visibleRegion.height ?? 1) > 1;
     React.useLayoutEffect(() => {
