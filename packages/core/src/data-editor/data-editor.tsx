@@ -44,7 +44,7 @@ import {
     mergeAndRealizeTheme,
 } from "../common/styles.js";
 import type { DataGridRef } from "../internal/data-grid/data-grid.js";
-import { getScrollBarWidth, useEventListener, useStateWithReactiveInput, whenDefined } from "../common/utils.js";
+import { getScrollBarWidth, useEventListener, whenDefined } from "../common/utils.js";
 import {
     isGroupEqual,
     itemsAreEqual,
@@ -83,6 +83,8 @@ import { type Keybinds, useKeybindingsWithDefaults } from "./data-editor-keybind
 import type { Highlight } from "../internal/data-grid/render/data-grid-render.cells.js";
 import { useRowGroupingInner, type RowGroupingOptions } from "./row-grouping.js";
 import { useRowGrouping } from "./row-grouping-api.js";
+import { useFixName } from "./use-fix-name.js";
+import type { VisibleRegion } from "./visible-region.js";
 
 const DataGridOverlayEditor = React.lazy(
     async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
@@ -732,7 +734,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const searchInputRef = React.useRef<HTMLInputElement | null>(null);
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
     const [mouseState, setMouseState] = React.useState<MouseState>();
-    const scrollRef = React.useRef<HTMLDivElement | null>(null);
     const lastSent = React.useRef<[number, number]>();
 
     const safeWindow = typeof window === "undefined" ? null : window;
@@ -1091,78 +1092,24 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ];
     }, [rowMarkers, columns, rowMarkerWidth, rowMarkerTheme, rowMarkerCheckboxStyle, rowMarkerChecked]);
 
-    const [visibleRegionY, visibleRegionTy] = React.useMemo(() => {
-        return [
-            scrollOffsetY !== undefined && typeof rowHeight === "number" ? Math.floor(scrollOffsetY / rowHeight) : 0,
-            scrollOffsetY !== undefined && typeof rowHeight === "number" ? -(scrollOffsetY % rowHeight) : 0,
-        ];
-    }, [scrollOffsetY, rowHeight]);
-
-    type VisibleRegion = Rectangle & {
-        /** value in px */
-        tx?: number;
-        /** value in px */
-        ty?: number;
-        extras?: {
-            selected?: Item;
-            /**
-             * @deprecated
-             */
-            freezeRegion?: Rectangle;
-
-            /**
-             * All visible freeze regions
-             */
-            freezeRegions?: readonly Rectangle[];
-        };
-    };
-
     const visibleRegionRef = React.useRef<VisibleRegion>({
         height: 1,
         width: 1,
         x: 0,
         y: 0,
     });
-    const visibleRegionInput = React.useMemo<VisibleRegion>(
-        () => ({
-            x: visibleRegionRef.current.x,
-            y: visibleRegionY,
-            width: visibleRegionRef.current.width ?? 1,
-            height: visibleRegionRef.current.height ?? 1,
-            // tx: 'TODO',
-            ty: visibleRegionTy,
-        }),
-        [visibleRegionTy, visibleRegionY]
-    );
 
     const hasJustScrolled = React.useRef(false);
 
-    const [visibleRegion, setVisibleRegion, empty] = useStateWithReactiveInput<VisibleRegion>(visibleRegionInput);
+    const { setVisibleRegion, visibleRegion, scrollRef } = useFixName(
+        scrollOffsetX,
+        scrollOffsetY,
+        rowHeight,
+        visibleRegionRef,
+        () => (hasJustScrolled.current = true)
+    );
+
     visibleRegionRef.current = visibleRegion;
-
-    const vScrollReady = (visibleRegion.height ?? 1) > 1;
-    React.useLayoutEffect(() => {
-        if (scrollOffsetY !== undefined && scrollRef.current !== null && vScrollReady) {
-            if (scrollRef.current.scrollTop === scrollOffsetY) return;
-            scrollRef.current.scrollTop = scrollOffsetY;
-            if (scrollRef.current.scrollTop !== scrollOffsetY) {
-                empty();
-            }
-            hasJustScrolled.current = true;
-        }
-    }, [scrollOffsetY, vScrollReady, empty]);
-
-    const hScrollReady = (visibleRegion.width ?? 1) > 1;
-    React.useLayoutEffect(() => {
-        if (scrollOffsetX !== undefined && scrollRef.current !== null && hScrollReady) {
-            if (scrollRef.current.scrollLeft === scrollOffsetX) return;
-            scrollRef.current.scrollLeft = scrollOffsetX;
-            if (scrollRef.current.scrollLeft !== scrollOffsetX) {
-                empty();
-            }
-            hasJustScrolled.current = true;
-        }
-    }, [scrollOffsetX, hScrollReady, empty]);
 
     const cellXOffset = visibleRegion.x + rowMarkerOffset;
     const cellYOffset = visibleRegion.y;
@@ -1494,7 +1441,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 forceEditMode: true,
             });
         },
-        [getMangledCellContent, setOverlaySimple]
+        [getMangledCellContent, scrollRef, setOverlaySimple]
     );
 
     const scrollTo = React.useCallback<ScrollToFn>(
@@ -1637,6 +1584,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowMarkerOffset,
             freezeTrailingRows,
             rowMarkerWidth,
+            scrollRef,
             totalHeaderHeight,
             freezeColumns,
             columns,
@@ -3590,6 +3538,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             getMangledCellContent,
             gridSelection,
             keybindings.paste,
+            scrollRef,
             mangledCols.length,
             mangledOnCellsEdited,
             mangledRows,
@@ -3697,7 +3646,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
         },
-        [columnsIn, getCellsForSelection, gridSelection, keybindings.copy, rowMarkerOffset, rows, copyHeaders]
+        [
+            columnsIn,
+            getCellsForSelection,
+            gridSelection,
+            keybindings.copy,
+            rowMarkerOffset,
+            scrollRef,
+            rows,
+            copyHeaders,
+        ]
     );
 
     useEventListener("copy", onCopy, safeWindow, false, false);
@@ -3728,7 +3686,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 deleteRange(effectiveSelection.current.range);
             }
         },
-        [deleteRange, gridSelection, keybindings.cut, onCopy, onDelete]
+        [deleteRange, gridSelection, keybindings.cut, onCopy, scrollRef, onDelete]
     );
 
     useEventListener("cut", onCut, safeWindow, false, false);
@@ -3912,7 +3870,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             },
         }),
-        [appendRow, normalSizeColumn, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
+        [appendRow, normalSizeColumn, scrollRef, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
     );
 
     const [selCol, selRow] = currentCell ?? [];
