@@ -660,6 +660,11 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * Allows overriding the default amount of bloom (the size growth of the overlay editor)
      */
     readonly editorBloom?: readonly [number, number];
+
+    /**
+     * If set to true, the data grid will attempt to scroll to keep the selction in view
+     */
+    readonly scrollToActiveCell?: boolean;
 }
 
 type ScrollToFn = (
@@ -847,6 +852,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         isOutsideClick,
         renderers,
         resizeIndicator,
+        scrollToActiveCell = true,
     } = p;
 
     const rowMarkersObj = typeof p.rowMarkers === "string" ? undefined : p.rowMarkers;
@@ -2843,6 +2849,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
+    const scrollToActiveCellRef = React.useRef(scrollToActiveCell);
+    scrollToActiveCellRef.current = scrollToActiveCell;
+
     const updateSelectedCell = React.useCallback(
         (col: number, row: number, fromEditingTrailingRow: boolean, freeMove: boolean): boolean => {
             const rowMax = mangledRows - (fromEditingTrailingRow ? 0 : 1);
@@ -2885,7 +2894,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 lastSent.current = undefined;
             }
 
-            scrollTo(col - rowMarkerOffset, row);
+            if (scrollToActiveCellRef.current) {
+                scrollTo(col - rowMarkerOffset, row);
+            }
 
             return true;
         },
@@ -3720,6 +3731,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     scrollToRef.current = scrollTo;
     React.useLayoutEffect(() => {
         if (
+            scrollToActiveCellRef.current &&
             !hasJustScrolled.current &&
             outCol !== undefined &&
             outRow !== undefined &&
