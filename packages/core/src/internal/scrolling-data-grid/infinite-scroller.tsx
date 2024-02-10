@@ -77,6 +77,7 @@ function useTouchUpDelayed(delay: number): boolean {
     const safeWindow = typeof window === "undefined" ? null : window;
 
     const cbTimer = React.useRef(0);
+
     useEventListener(
         "touchstart",
         React.useCallback(() => {
