@@ -3,25 +3,32 @@ import type { VisibleRegion } from "./visible-region.js";
 import type { DataEditorCoreProps } from "../index.js";
 import { useStateWithReactiveInput } from "../common/utils.js";
 
-function useCallbackRef<T>(initialValue: T, callback: (newVal: T) => void) {
-    const realRef = React.useRef<T>(initialValue);
-    const cbRef = React.useRef(callback);
-    cbRef.current = callback;
-
-    return React.useMemo(
-        () => ({
+// shamelessly stolen and modified from: https://github.com/theKashey/use-callback-ref
+// MIT License https://github.com/theKashey/use-callback-ref/tree/master?tab=MIT-1-ov-file#readme
+function useCallbackRef<T>(
+    initialValue: T | null,
+    callback: (newValue: T | null, lastValue: T | null) => void
+): React.MutableRefObject<T | null> {
+    const [ref] = React.useState(() => ({
+        value: initialValue,
+        callback,
+        facade: {
             get current() {
-                return realRef.current;
+                return ref.value;
             },
-            set current(value: T) {
-                if (realRef.current !== value) {
-                    realRef.current = value;
-                    cbRef.current(value);
+            set current(value) {
+                const last = ref.value;
+
+                if (last !== value) {
+                    ref.value = value;
+                    ref.callback(value, last);
                 }
             },
-        }),
-        []
-    );
+        },
+    }));
+    ref.callback = callback;
+
+    return ref.facade;
 }
 
 export function useInitialScrollOffset(
