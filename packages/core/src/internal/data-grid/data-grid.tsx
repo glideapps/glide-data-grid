@@ -1327,7 +1327,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     // else we will assume doesn't need it.
                     needsHoverPosition = rendererNeeds ?? toCheck.kind === GridCellKind.Custom;
                     needsDamageCell = needsHoverPosition;
-                } else if (args.kind === groupHeaderKind) {
+                } else {
                     needsDamageCell = true;
                 }
 
@@ -1517,6 +1517,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                     false,
                                     theme,
                                     false,
+                                    undefined,
+                                    undefined,
                                     false,
                                     0,
                                     spriteManager,
