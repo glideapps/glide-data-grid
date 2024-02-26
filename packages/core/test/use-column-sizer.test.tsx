@@ -165,6 +165,44 @@ describe("use-column-sizer", () => {
         expect(result.current.sizedColumns[0].width).toBe(212);
     });
 
+    it("Measures column width based on title if longer than data", async () => {
+        const columns: GridColumn[] = [
+            {
+                title: "Some very very long title that exceeds displayData width",
+                id: "ColumnA",
+            },
+            {
+                title: "Short title",
+                id: "ColumnB",
+            },
+        ];
+
+        const { result } = renderHook(() =>
+            useColumnSizer(
+                columns,
+                500,
+                getShortCellsForSelection,
+                400,
+                20,
+                500,
+                mergeAndRealizeTheme(theme, {cellHorizontalPadding: 12}),
+                getCellRenderer,
+                abortController
+            )
+        );
+
+        const columnA = result.current.sizedColumns.find(col => col.title === "Some very very long title that exceeds displayData width");
+        const columnB = result.current.sizedColumns.find(col => col.title === "Short title");
+
+        expect(columnA).toBeDefined();
+        expect(columnB).toBeDefined();
+
+        // Width of column title plus twice the cellHorizontalPadding
+        expect(columnA?.width).toBe(80);
+        // Maximum width of cell data
+        expect(columnB?.width).toBe(40);
+    });
+
     it("Measures the last row", async () => {
         // eslint-disable-next-line sonarjs/no-identical-functions
         renderHook(() =>
