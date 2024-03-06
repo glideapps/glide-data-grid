@@ -19,7 +19,14 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     useLabel: false,
     needsHoverPosition: true,
     measure: () => 50,
-    draw: a => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell), a.cell.maxSize ?? defaultCellMaxSize),
+    draw: a =>
+        drawBoolean(
+            a,
+            a.cell.data,
+            booleanCellIsEditable(a.cell),
+            a.cell.maxSize ?? defaultCellMaxSize,
+            a.cell.hoverEffectIntensity ?? 0.35
+        ),
     onDelete: c => ({
         ...c,
         data: false,
@@ -70,7 +77,8 @@ function drawBoolean(
     args: BaseDrawArgs,
     data: boolean | BooleanEmpty | BooleanIndeterminate,
     canEdit: boolean,
-    maxSize?: number
+    maxSize: number,
+    hoverEffectIntensity: number
 ) {
     if (!canEdit && data === BooleanEmpty) {
         return;
@@ -87,18 +95,26 @@ function drawBoolean(
     } = args;
     const { x, y, width: w, height: h } = rect;
 
-    const hoverEffect = 0.35;
+    // Don't set the global alpha unnecessarily
+    let shouldRestoreAlpha = false;
+    if (hoverEffectIntensity > 0) {
+        let alpha = canEdit ? 1 - hoverEffectIntensity + hoverEffectIntensity * hoverAmount : 0.4;
+        if (data === BooleanEmpty) {
+            alpha *= hoverAmount;
+        }
+        if (alpha === 0) {
+            return;
+        }
 
-    let alpha = canEdit ? 1 - hoverEffect + hoverEffect * hoverAmount : 0.4;
-    if (data === BooleanEmpty) {
-        alpha *= hoverAmount;
+        if (alpha < 1) {
+            shouldRestoreAlpha = true;
+            ctx.globalAlpha = alpha;
+        }
     }
-    if (alpha === 0) {
-        return;
-    }
-    ctx.globalAlpha = alpha;
 
     drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY, maxSize, contentAlign);
 
-    ctx.globalAlpha = 1;
+    if (shouldRestoreAlpha) {
+        ctx.globalAlpha = 1;
+    }
 }

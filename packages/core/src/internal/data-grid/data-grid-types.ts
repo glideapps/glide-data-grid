@@ -443,6 +443,7 @@ export interface BooleanCell extends BaseGridCell {
     readonly readonly?: boolean;
     readonly allowOverlay: false;
     readonly maxSize?: number;
+    readonly hoverEffectIntensity?: number;
 }
 
 // Can be written more concisely, not easier to read if more concise.
