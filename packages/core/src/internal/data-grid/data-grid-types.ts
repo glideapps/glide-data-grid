@@ -195,6 +195,8 @@ export type InnerColumnExtension = {
     growOffset?: number;
     rowMarker?: "square" | "circle";
     rowMarkerChecked?: BooleanIndeterminate | boolean;
+    headerRowMarkerTheme?: Partial<Theme>;
+    headerRowMarkerAlwaysVisible?: boolean;
 };
 
 /** @category Columns */

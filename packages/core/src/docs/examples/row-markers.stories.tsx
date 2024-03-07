@@ -46,7 +46,11 @@ export const RowMarkers: React.VFC<RowMarkersProps> = p => {
             verticalBorder={false}
             rowMarkers={{
                 kind: p.markers,
-                checkboxStyle: "circle",
+                checkboxStyle: "square",
+                headerAlwaysVisible: true,
+                headerTheme: {
+                    textMedium: "rgba(51, 51, 51, 0.50)",
+                },
             }}
             columns={cols}
             rows={400}
