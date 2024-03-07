@@ -99,6 +99,8 @@ export interface RowMarkerOptions {
     startIndex?: number;
     width?: number;
     theme?: Partial<Theme>;
+    headerTheme?: Partial<Theme>;
+    headerAlwaysVisible?: boolean;
 }
 
 interface MouseState {
@@ -861,6 +863,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const rowMarkerWidthRaw = rowMarkersObj?.width ?? p.rowMarkerWidth;
     const rowMarkerStartIndex = rowMarkersObj?.startIndex ?? p.rowMarkerStartIndex ?? 1;
     const rowMarkerTheme = rowMarkersObj?.theme ?? p.rowMarkerTheme;
+    const headerRowMarkerTheme = rowMarkersObj?.headerTheme;
+    const headerRowMarkerAlwaysVisible = rowMarkersObj?.headerAlwaysVisible;
     const rowMarkerCheckboxStyle = rowMarkersObj?.checkboxStyle ?? "square";
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
@@ -1093,10 +1097,21 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 themeOverride: rowMarkerTheme,
                 rowMarker: rowMarkerCheckboxStyle,
                 rowMarkerChecked,
+                headerRowMarkerTheme,
+                headerRowMarkerAlwaysVisible,
             },
             ...columns,
         ];
-    }, [rowMarkers, columns, rowMarkerWidth, rowMarkerTheme, rowMarkerCheckboxStyle, rowMarkerChecked]);
+    }, [
+        rowMarkers,
+        columns,
+        rowMarkerWidth,
+        rowMarkerTheme,
+        rowMarkerCheckboxStyle,
+        rowMarkerChecked,
+        headerRowMarkerTheme,
+        headerRowMarkerAlwaysVisible,
+    ]);
 
     const visibleRegionRef = React.useRef<VisibleRegion>({
         height: 1,

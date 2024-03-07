@@ -430,11 +430,27 @@ function drawHeaderInner(
 ) {
     if (c.rowMarker !== undefined) {
         const checked = c.rowMarkerChecked;
-        if (checked !== true) {
+        if (checked !== true && c.headerRowMarkerAlwaysVisible !== true) {
             ctx.globalAlpha = hoverAmount;
         }
-        drawCheckbox(ctx, theme, checked, x, y, width, height, false, undefined, undefined, 18, "center", c.rowMarker);
-        if (checked !== true) {
+        const markerTheme =
+            c.headerRowMarkerTheme !== undefined ? mergeAndRealizeTheme(theme, c.headerRowMarkerTheme) : theme;
+        drawCheckbox(
+            ctx,
+            markerTheme,
+            checked,
+            x,
+            y,
+            width,
+            height,
+            false,
+            undefined,
+            undefined,
+            18,
+            "center",
+            c.rowMarker
+        );
+        if (checked !== true && c.headerRowMarkerAlwaysVisible !== true) {
             ctx.globalAlpha = 1;
         }
         return;
