@@ -19,7 +19,7 @@ export const rowIDCellRenderer: InternalCellRenderer<RowIDCell> = {
             <GrowingEntry
                 highlight={isHighlighted}
                 autoFocus={value.readonly !== true}
-                disabled={value.readonly !== false}
+                readOnly={value.readonly === true}
                 value={value.data}
                 validatedSelection={validatedSelection}
                 onChange={e =>

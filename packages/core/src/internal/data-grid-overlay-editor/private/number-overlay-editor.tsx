@@ -7,6 +7,7 @@ import type { NumberFormatValues } from "react-number-format/types/types.js";
 interface Props {
     readonly value: number | undefined;
     readonly disabled?: boolean;
+    readonly readOnly?: boolean;
     readonly onChange: (values: NumberFormatValues) => void;
     readonly highlight: boolean;
     readonly validatedSelection?: SelectionRange;
@@ -34,6 +35,7 @@ const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
         value,
         onChange,
         disabled,
+        readOnly,
         highlight,
         validatedSelection,
         fixedDecimals,
@@ -61,6 +63,7 @@ const NumberOverlayEditor: React.FunctionComponent<Props> = p => {
                     e.target.setSelectionRange(highlight ? 0 : e.target.value.length, e.target.value.length)
                 }
                 disabled={disabled === true}
+                readOnly={readOnly === true}
                 decimalScale={fixedDecimals}
                 allowNegative={allowNegative}
                 thousandSeparator={thousandSeparator ?? getThousandSeprator()}
