@@ -395,6 +395,12 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      */
     readonly rowSelect?: "none" | "single" | "multi";
 
+    /** Controls if range selection is allowed to span columns.
+     * @group Selection
+     * @defaultValue `true`
+     */
+    readonly rangeSelectionColumnSpanning?: boolean;
+
     /** Sets the initial scroll Y offset.
      * @see {@link scrollOffsetX}
      * @group Advanced
@@ -764,6 +770,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         editorBloom,
         onHeaderClicked,
         onColumnProposeMove,
+        rangeSelectionColumnSpanning = true,
         spanRangeBehavior = "default",
         onGroupHeaderClicked,
         onCellContextMenu,
@@ -1033,7 +1040,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         rangeSelectionBlending,
         columnSelectionBlending,
         rowSelectionBlending,
-        rangeSelect
+        rangeSelect,
+        rangeSelectionColumnSpanning
     );
 
     const mergedTheme = React.useMemo(() => {
