@@ -119,6 +119,7 @@ type Props = Partial<
         | "clientSize"
         | "columns"
         | "disabledRows"
+        | "drawFocusRing"
         | "enableGroups"
         | "firstColAccessible"
         | "firstColSticky"
@@ -673,6 +674,8 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * If set to true, the data grid will attempt to scroll to keep the selction in view
      */
     readonly scrollToActiveCell?: boolean;
+
+    readonly drawFocusRing?: boolean | "no-overlay";
 }
 
 type ScrollToFn = (
@@ -835,7 +838,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnResizeStart: onColumnResizeStartIn,
         customRenderers: additionalRenderers,
         fillHandle,
-        drawFocusRing = true,
         experimental,
         fixedShadowX,
         fixedShadowY,
@@ -862,7 +864,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         renderers,
         resizeIndicator,
         scrollToActiveCell = true,
+        drawFocusRing: drawFocusRingIn = true,
     } = p;
+
+    const drawFocusRing = drawFocusRingIn === "no-overlay" ? overlay === undefined : drawFocusRingIn;
 
     const rowMarkersObj = typeof p.rowMarkers === "string" ? undefined : p.rowMarkers;
 
