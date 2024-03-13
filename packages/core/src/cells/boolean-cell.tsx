@@ -1,3 +1,4 @@
+import type { FullTheme } from "../common/styles.js";
 import { getSquareWidth, getSquareXPosFromAlign, getSquareBB, pointIsWithinBB } from "../common/utils.js";
 import { toggleBoolean } from "../data-editor/data-editor-fns.js";
 import {
@@ -6,11 +7,37 @@ import {
     booleanCellIsEditable,
     BooleanEmpty,
     BooleanIndeterminate,
+    type Rectangle,
 } from "../internal/data-grid/data-grid-types.js";
 import { drawCheckbox } from "../internal/data-grid/render/draw-checkbox.js";
 import type { BaseDrawArgs, InternalCellRenderer } from "./cell-types.js";
 
 const defaultCellMaxSize = 20;
+
+function isOverEditableRegion(e: {
+    readonly cell: BooleanCell;
+    readonly posX: number;
+    readonly posY: number;
+    readonly bounds: Rectangle;
+    readonly theme: FullTheme;
+}): boolean {
+    const { cell, posX: pointerX, posY: pointerY, bounds, theme } = e;
+    const { width, height, x: cellX, y: cellY } = bounds;
+    const maxWidth = cell.maxSize ?? defaultCellMaxSize;
+    const cellCenterY = Math.floor(bounds.y + height / 2);
+    const checkBoxWidth = getSquareWidth(maxWidth, height, theme.cellVerticalPadding);
+    const posX = getSquareXPosFromAlign(
+        cell.contentAlign ?? "center",
+        cellX,
+        width,
+        theme.cellHorizontalPadding,
+        checkBoxWidth
+    );
+    const bb = getSquareBB(posX, cellCenterY, checkBoxWidth);
+    const checkBoxClicked = pointIsWithinBB(cellX + pointerX, cellY + pointerY, bb);
+
+    return booleanCellIsEditable(cell) && checkBoxClicked;
+}
 
 export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "false",
@@ -31,26 +58,16 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
         ...c,
         data: false,
     }),
+    onSelect: e => {
+        if (isOverEditableRegion(e)) {
+            e.preventDefault();
+        }
+    },
     onClick: e => {
-        const { cell, posX: pointerX, posY: pointerY, bounds, theme } = e;
-        const { width, height, x: cellX, y: cellY } = bounds;
-        const maxWidth = cell.maxSize ?? defaultCellMaxSize;
-        const cellCenterY = Math.floor(bounds.y + height / 2);
-        const checkBoxWidth = getSquareWidth(maxWidth, height, theme.cellVerticalPadding);
-        const posX = getSquareXPosFromAlign(
-            cell.contentAlign ?? "center",
-            cellX,
-            width,
-            theme.cellHorizontalPadding,
-            checkBoxWidth
-        );
-        const bb = getSquareBB(posX, cellCenterY, checkBoxWidth);
-        const checkBoxClicked = pointIsWithinBB(cellX + pointerX, cellY + pointerY, bb);
-
-        if (booleanCellIsEditable(cell) && checkBoxClicked) {
+        if (isOverEditableRegion(e)) {
             return {
-                ...cell,
-                data: toggleBoolean(cell.data),
+                ...e.cell,
+                data: toggleBoolean(e.cell.data),
             };
         }
         return undefined;
