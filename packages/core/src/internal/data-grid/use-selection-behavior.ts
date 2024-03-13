@@ -13,7 +13,8 @@ export function useSelectionBehavior(
     rangeBehavior: SelectionBlending,
     columnBehavior: SelectionBlending,
     rowBehavior: SelectionBlending,
-    rangeSelect: "none" | "cell" | "rect" | "multi-cell" | "multi-rect"
+    rangeSelect: "none" | "cell" | "rect" | "multi-cell" | "multi-rect",
+    rangeSelectionColumnSpanning: boolean
 ) {
     // if append is true, the current range will be added to the rangeStack
     const setCurrent = React.useCallback(
@@ -34,6 +35,18 @@ export function useSelectionBehavior(
                     },
                 };
             }
+
+            if (!rangeSelectionColumnSpanning && value !== undefined && value.range.width > 1) {
+                value = {
+                    ...value,
+                    range: {
+                        ...value.range,
+                        width: 1,
+                        x: value.cell[0],
+                    },
+                };
+            }
+
             const rangeMixable = rangeBehavior === "mixed" && (append || trigger === "drag");
             const allowColumnCoSelect = columnBehavior === "mixed" && rangeMixable;
             const allowRowCoSelect = rowBehavior === "mixed" && rangeMixable;
@@ -61,7 +74,15 @@ export function useSelectionBehavior(
             }
             setGridSelection(newVal, expand);
         },
-        [columnBehavior, gridSelection, rangeBehavior, rangeSelect, rowBehavior, setGridSelection]
+        [
+            columnBehavior,
+            gridSelection,
+            rangeBehavior,
+            rangeSelect,
+            rangeSelectionColumnSpanning,
+            rowBehavior,
+            setGridSelection,
+        ]
     );
 
     const setSelectedRows = React.useCallback(

@@ -612,7 +612,7 @@ describe("data-editor", () => {
 
         const canvas = screen.getByTestId("data-grid-canvas");
         sendClick(canvas, {
-            clientX: 850, // Col Boolean
+            clientX: 830, // Col Boolean
             clientY: 36 * 2 + 32 + 16, // Row 2 (0 indexed)
         });
 

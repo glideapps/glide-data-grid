@@ -35,6 +35,10 @@ export const loadingCellRenderer: InternalCellRenderer<LoadingCell> = {
         }
 
         const hpad = theme.cellHorizontalPadding;
+        if (width + hpad * 2 >= rect.width) {
+            width = rect.width - hpad * 2 - 1;
+        }
+
         const rectHeight = cell.skeletonHeight ?? Math.min(18, rect.height - 2 * theme.cellVerticalPadding);
 
         roundedRect(

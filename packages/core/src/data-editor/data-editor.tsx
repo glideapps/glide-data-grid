@@ -119,6 +119,7 @@ type Props = Partial<
         | "clientSize"
         | "columns"
         | "disabledRows"
+        | "drawFocusRing"
         | "enableGroups"
         | "firstColAccessible"
         | "firstColSticky"
@@ -395,6 +396,12 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      */
     readonly rowSelect?: "none" | "single" | "multi";
 
+    /** Controls if range selection is allowed to span columns.
+     * @group Selection
+     * @defaultValue `true`
+     */
+    readonly rangeSelectionColumnSpanning?: boolean;
+
     /** Sets the initial scroll Y offset.
      * @see {@link scrollOffsetX}
      * @group Advanced
@@ -667,6 +674,8 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * If set to true, the data grid will attempt to scroll to keep the selction in view
      */
     readonly scrollToActiveCell?: boolean;
+
+    readonly drawFocusRing?: boolean | "no-editor";
 }
 
 type ScrollToFn = (
@@ -764,6 +773,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         editorBloom,
         onHeaderClicked,
         onColumnProposeMove,
+        rangeSelectionColumnSpanning = true,
         spanRangeBehavior = "default",
         onGroupHeaderClicked,
         onCellContextMenu,
@@ -828,7 +838,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnResizeStart: onColumnResizeStartIn,
         customRenderers: additionalRenderers,
         fillHandle,
-        drawFocusRing = true,
         experimental,
         fixedShadowX,
         fixedShadowY,
@@ -855,7 +864,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         renderers,
         resizeIndicator,
         scrollToActiveCell = true,
+        drawFocusRing: drawFocusRingIn = true,
     } = p;
+
+    const drawFocusRing = drawFocusRingIn === "no-editor" ? overlay === undefined : drawFocusRingIn;
 
     const rowMarkersObj = typeof p.rowMarkers === "string" ? undefined : p.rowMarkers;
 
@@ -1033,7 +1045,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         rangeSelectionBlending,
         columnSelectionBlending,
         rowSelectionBlending,
-        rangeSelect
+        rangeSelect,
+        rangeSelectionColumnSpanning
     );
 
     const mergedTheme = React.useMemo(() => {
