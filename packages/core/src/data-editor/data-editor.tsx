@@ -675,7 +675,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      */
     readonly scrollToActiveCell?: boolean;
 
-    readonly drawFocusRing?: boolean | "no-overlay";
+    readonly drawFocusRing?: boolean | "no-editor";
 }
 
 type ScrollToFn = (
@@ -867,7 +867,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         drawFocusRing: drawFocusRingIn = true,
     } = p;
 
-    const drawFocusRing = drawFocusRingIn === "no-overlay" ? overlay === undefined : drawFocusRingIn;
+    const drawFocusRing = drawFocusRingIn === "no-editor" ? overlay === undefined : drawFocusRingIn;
 
     const rowMarkersObj = typeof p.rowMarkers === "string" ? undefined : p.rowMarkers;
 
