@@ -38,6 +38,32 @@ function getTextRect(
     return { x, y, width, height };
 }
 
+function isOverLinkText(e: {
+    readonly cell: UriCell;
+    readonly posX: number;
+    readonly posY: number;
+    readonly bounds: Rectangle;
+    readonly theme: FullTheme;
+}): boolean {
+    const { cell, bounds, posX, posY, theme } = e;
+    const txt = cell.displayData ?? cell.data;
+    if (cell.hoverEffect !== true || cell.onClickUri === undefined) return false;
+
+    const m = getMeasuredTextCache(txt, theme.baseFontFull);
+    if (m === undefined) return false;
+    const textRect = getTextRect(m, bounds, theme, cell.contentAlign);
+    return pointInRect(
+        {
+            x: textRect.x - 4,
+            y: textRect.y - 4,
+            width: textRect.width + 8,
+            height: textRect.height + 8,
+        },
+        posX,
+        posY
+    );
+}
+
 export const uriCellRenderer: InternalCellRenderer<UriCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",
     kind: GridCellKind.Uri,
@@ -82,26 +108,16 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
         ctx.fillStyle = isLinky ? theme.linkColor : theme.textDark;
         drawTextCell(a, txt, cell.contentAlign);
     },
+    onSelect: e => {
+        if (isOverLinkText(e)) {
+            e.preventDefault();
+        }
+    },
     onClick: a => {
-        const { cell, bounds, posX, posY, theme } = a;
-        const txt = cell.displayData ?? cell.data;
-        if (cell.hoverEffect !== true || cell.onClickUri === undefined) return;
-
-        const m = getMeasuredTextCache(txt, theme.baseFontFull);
-        if (m === undefined) return;
-        const textRect = getTextRect(m, bounds, theme, cell.contentAlign);
-        const didClick = pointInRect(
-            {
-                x: textRect.x - 4,
-                y: textRect.y - 4,
-                width: textRect.width + 8,
-                height: textRect.height + 8,
-            },
-            posX,
-            posY
-        );
+        const { cell } = a;
+        const didClick = isOverLinkText(a);
         if (didClick) {
-            cell.onClickUri(a);
+            cell.onClickUri?.(a);
         }
         return undefined;
     },

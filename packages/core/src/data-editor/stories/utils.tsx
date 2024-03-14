@@ -678,6 +678,10 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
                     kind: GridCellKind.Uri,
                     data: url,
                     allowOverlay: true,
+                    hoverEffect: true,
+                    onClickUri: () => {
+                        window.open(url, "_blank");
+                    },
                 };
             },
         },
