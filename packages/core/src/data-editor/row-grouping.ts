@@ -4,6 +4,10 @@ import type { DataEditorProps } from "./data-editor.js";
 import type { DataGridProps } from "../internal/data-grid/data-grid.js";
 import { whenDefined } from "../common/utils.js";
 
+type Mutable<T> = {
+    -readonly [K in keyof T]: T[K];
+};
+
 export type RowGroup = {
     /**
      * The index of the header if the groups are all flattened and expanded
@@ -100,6 +104,7 @@ export function expandRowGroups(groups: readonly RowGroup[]): ExpandedRowGroup[]
 }
 
 export interface FlattenedRowGroup {
+    readonly rowIndex: number;
     readonly headerIndex: number;
     readonly contentIndex: number; // the content index of the first row in the group
     readonly isCollapsed: boolean;
@@ -128,6 +133,7 @@ export function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number):
         rowsInGroup--; // the header isn't in the group
 
         flattened.push({
+            rowIndex: -1, // we will fill this in later
             headerIndex: group.headerIndex,
             contentIndex: -1, // we will fill this in later
             skip: skipChildren,
@@ -153,10 +159,14 @@ export function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number):
         processGroup(expandedGroups[i], nextHeaderIndex);
     }
 
+    let rowIndex = 0;
     let contentIndex = 0;
-    for (const g of flattened) {
-        (g as any).contentIndex = contentIndex;
+    for (const g of flattened as Mutable<(typeof flattened)[number]>[]) {
+        g.contentIndex = contentIndex;
         contentIndex += g.rows;
+
+        g.rowIndex = rowIndex;
+        rowIndex += g.isCollapsed ? 1 : g.rows + 1;
     }
 
     return flattened
@@ -244,6 +254,13 @@ export function useRowGroupingInner(
         [options, rows]
     );
 
+    const flattenedRowGroupsMap = React.useMemo(() => {
+        return flattenedRowGroups?.reduce<{ [rowIndex: number]: FlattenedRowGroup | undefined }>((acc, group) => {
+            acc[group.rowIndex] = group;
+            return acc;
+        }, {});
+    }, [flattenedRowGroups]);
+
     const effectiveRows = React.useMemo(() => {
         if (flattenedRowGroups === undefined) return rows;
         return flattenedRowGroups.reduce((acc, group) => acc + (group.isCollapsed ? 1 : group.rows + 1), 0);
@@ -253,11 +270,10 @@ export function useRowGroupingInner(
         if (options === undefined) return rowHeightIn;
         if (typeof rowHeightIn === "number" && options.height === rowHeightIn) return rowHeightIn;
         return (rowIndex: number) => {
-            const { isGroupHeader } = mapRowIndexToPath(rowIndex, flattenedRowGroups);
-            if (isGroupHeader) return options.height;
+            if (flattenedRowGroupsMap?.[rowIndex]) return options.height;
             return typeof rowHeightIn === "number" ? rowHeightIn : rowHeightIn(rowIndex);
         };
-    }, [flattenedRowGroups, options, rowHeightIn]);
+    }, [flattenedRowGroupsMap, options, rowHeightIn]);
 
     const rowNumberMapperOut = React.useCallback(
         (row: number): number | undefined => {
