@@ -53,6 +53,10 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
                     },
                 ],
             },
+            {
+                headerIndex: 30,
+                isCollapsed: false,
+            },
             ...Array.from({ length: 100 }, (_value, i): RowGroupingOptions["groups"][number] => {
                 return {
                     headerIndex: (rows / 100) * i,
