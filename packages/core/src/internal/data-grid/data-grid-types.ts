@@ -330,6 +330,11 @@ export interface ProtectedCell extends BaseGridCell {
     readonly kind: GridCellKind.Protected;
 }
 
+export interface HoverEffectTheme {
+    bgColor: string;
+    fullSize: boolean;
+}
+
 /** @category Cells */
 export interface TextCell extends BaseGridCell {
     readonly kind: GridCellKind.Text;
@@ -338,6 +343,7 @@ export interface TextCell extends BaseGridCell {
     readonly readonly?: boolean;
     readonly allowWrapping?: boolean;
     readonly hoverEffect?: boolean;
+    readonly hoverEffectTheme?: HoverEffectTheme;
 }
 
 /** @category Cells */
@@ -350,6 +356,8 @@ export interface NumberCell extends BaseGridCell {
     readonly allowNegative?: boolean;
     readonly thousandSeparator?: boolean | string;
     readonly decimalSeparator?: string;
+    readonly hoverEffect?: boolean;
+    readonly hoverEffectTheme?: HoverEffectTheme;
 }
 
 /** @category Cells */
