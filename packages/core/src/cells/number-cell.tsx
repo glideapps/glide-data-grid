@@ -12,7 +12,7 @@ const NumberOverlayEditor = React.lazy(
 export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",
     kind: GridCellKind.Number,
-    needsHover: textCell => textCell.hoverEffect === true,
+    needsHover: cell => cell.hoverEffect === true,
     needsHoverPosition: false,
     useLabel: true,
     drawPrep: prepTextCell,
