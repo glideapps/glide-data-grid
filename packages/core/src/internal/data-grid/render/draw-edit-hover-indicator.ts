@@ -1,5 +1,7 @@
 import type { FullTheme } from "../../../common/styles.js";
-import { measureTextCached, roundedRect, type Rectangle, withAlpha, type HoverEffectTheme } from "../../../index.js";
+import type { Rectangle, HoverEffectTheme } from "../../../index.js";
+import { roundedRect, measureTextCached } from "./data-grid-lib.js";
+import { withAlpha } from "../color-parser.js";
 
 export function drawEditHoverIndicator(
     ctx: CanvasRenderingContext2D,
