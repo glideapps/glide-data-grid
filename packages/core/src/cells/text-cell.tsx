@@ -1,15 +1,10 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
 import { GrowingEntry } from "../internal/growing-entry/growing-entry.js";
-import {
-    drawTextCell,
-    measureTextCached,
-    prepTextCell,
-    roundedRect,
-} from "../internal/data-grid/render/data-grid-lib.js";
+import { drawTextCell, prepTextCell } from "../internal/data-grid/render/data-grid-lib.js";
 import { GridCellKind, type TextCell } from "../internal/data-grid/data-grid-types.js";
 import type { InternalCellRenderer } from "./cell-types.js";
-import { withAlpha } from "../internal/data-grid/color-parser.js";
+import { drawEditHoverIndicator } from "../internal/data-grid/render/draw-edit-hover-indicator.js";
 
 export const textCellRenderer: InternalCellRenderer<TextCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",
@@ -20,33 +15,9 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
     useLabel: true,
     draw: a => {
         const { cell, hoverAmount, hyperWrapping, ctx, rect, theme, overrideCursor } = a;
-        const { displayData, contentAlign, hoverEffect, allowWrapping } = cell;
+        const { displayData, contentAlign, hoverEffect, allowWrapping, hoverEffectTheme } = cell;
         if (hoverEffect === true && hoverAmount > 0) {
-            ctx.textBaseline = "alphabetic";
-            const padX = theme.cellHorizontalPadding;
-            const padY = theme.cellVerticalPadding;
-            const m = measureTextCached(displayData, ctx, theme.baseFontFull, "alphabetic");
-            const maxH = rect.height - padY;
-            const h = Math.min(maxH, m.actualBoundingBoxAscent * 2.5);
-            ctx.beginPath();
-            roundedRect(
-                ctx,
-                rect.x + padX / 2,
-                rect.y + (rect.height - h) / 2 + 1,
-                m.width + padX * 3,
-                h - 1,
-                theme.roundingRadius ?? 4
-            );
-            ctx.globalAlpha = hoverAmount;
-            ctx.fillStyle = withAlpha(theme.textDark, 0.1);
-            ctx.fill();
-
-            // restore
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = theme.textDark;
-            ctx.textBaseline = "middle";
-
-            overrideCursor?.("text");
+            drawEditHoverIndicator(ctx, theme, hoverEffectTheme, displayData, rect, hoverAmount, overrideCursor);
         }
         drawTextCell(a, displayData, contentAlign, allowWrapping, hyperWrapping);
     },

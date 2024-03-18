@@ -39,7 +39,7 @@ export const AllCellKinds: React.VFC = () => {
             columns={cols}
             onCellEdited={setCellValue}
             onPaste={true}
-            // rowHeight={55}
+            rowHeight={44}
             onColumnResize={onColumnResize}
             highlightRegions={[
                 {
@@ -52,6 +52,9 @@ export const AllCellKinds: React.VFC = () => {
                     },
                 },
             ]}
+            cellActivationBehavior="single-click"
+            editorBloom={[-4, -4]}
+            drawFocusRing={false}
             rows={1000}
         />
     );

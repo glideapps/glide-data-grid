@@ -3,6 +3,7 @@ import * as React from "react";
 import { drawTextCell, prepTextCell } from "../internal/data-grid/render/data-grid-lib.js";
 import { GridCellKind, type NumberCell } from "../internal/data-grid/data-grid-types.js";
 import type { InternalCellRenderer } from "./cell-types.js";
+import { drawEditHoverIndicator } from "../internal/data-grid/render/draw-edit-hover-indicator.js";
 
 const NumberOverlayEditor = React.lazy(
     async () => await import("../internal/data-grid-overlay-editor/private/number-overlay-editor.js")
@@ -11,11 +12,19 @@ const NumberOverlayEditor = React.lazy(
 export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",
     kind: GridCellKind.Number,
-    needsHover: false,
+    needsHover: cell => cell.hoverEffect === true,
     needsHoverPosition: false,
     useLabel: true,
     drawPrep: prepTextCell,
-    draw: a => drawTextCell(a, a.cell.displayData, a.cell.contentAlign),
+    draw: a => {
+        const { hoverAmount, cell, ctx, theme, rect, overrideCursor } = a;
+        const { hoverEffect, displayData, hoverEffectTheme } = cell;
+
+        if (hoverEffect === true && hoverAmount > 0) {
+            drawEditHoverIndicator(ctx, theme, hoverEffectTheme, displayData, rect, hoverAmount, overrideCursor);
+        }
+        drawTextCell(a, a.cell.displayData, a.cell.contentAlign);
+    },
     measure: (ctx, cell, theme) => ctx.measureText(cell.displayData).width + theme.cellHorizontalPadding * 2,
     onDelete: c => ({
         ...c,
