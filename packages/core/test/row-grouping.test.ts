@@ -131,8 +131,8 @@ describe("flattenRowGroups", () => {
         };
         const totalRows = 10;
         const expected = [
-            { headerIndex: 0, isCollapsed: false, depth: 0, path: [0], rows: 4, contentIndex: 0 },
-            { headerIndex: 5, isCollapsed: true, depth: 0, path: [1], rows: 4, contentIndex: 4 },
+            { rowIndex: 0, headerIndex: 0, isCollapsed: false, depth: 0, path: [0], rows: 4, contentIndex: 0 },
+            { rowIndex: 5, headerIndex: 5, isCollapsed: true, depth: 0, path: [1], rows: 4, contentIndex: 4 },
         ];
         const output = flattenRowGroups(rowGroupingOptions, totalRows);
         expect(output).toEqual(expected);
@@ -158,9 +158,9 @@ describe("flattenRowGroups", () => {
         };
         const totalRows = 10;
         const expected = [
-            { headerIndex: 0, isCollapsed: false, depth: 0, path: [0], rows: 1, contentIndex: 0 },
-            { headerIndex: 2, isCollapsed: false, depth: 1, path: [0, 0], rows: 1, contentIndex: 1 },
-            { headerIndex: 4, isCollapsed: true, depth: 1, path: [0, 1], rows: 1, contentIndex: 2 },
+            { rowIndex: 0, headerIndex: 0, isCollapsed: false, depth: 0, path: [0], rows: 1, contentIndex: 0 },
+            { rowIndex: 2, headerIndex: 2, isCollapsed: false, depth: 1, path: [0, 0], rows: 1, contentIndex: 1 },
+            { rowIndex: 4, headerIndex: 4, isCollapsed: true, depth: 1, path: [0, 1], rows: 1, contentIndex: 2 },
         ];
         const output = flattenRowGroups(rowGroupingOptions, totalRows);
         expect(output).toEqual(expected);
@@ -183,10 +183,10 @@ describe("flattenRowGroups", () => {
         };
         const totalRows = 7;
         const expected = [
-            { headerIndex: 0, isCollapsed: false, depth: 0, path: [0], rows: 0, contentIndex: 0 },
-            { headerIndex: 1, isCollapsed: true, depth: 1, path: [0, 0], rows: 1, contentIndex: 0 },
-            { headerIndex: 3, isCollapsed: false, depth: 1, path: [0, 1], rows: 1, contentIndex: 1 },
-            { headerIndex: 5, isCollapsed: true, depth: 0, path: [1], rows: 1, contentIndex: 2 },
+            { rowIndex: 0, headerIndex: 0, isCollapsed: false, depth: 0, path: [0], rows: 0, contentIndex: 0 },
+            { rowIndex: 1, headerIndex: 1, isCollapsed: true, depth: 1, path: [0, 0], rows: 1, contentIndex: 0 },
+            { rowIndex: 2, headerIndex: 3, isCollapsed: false, depth: 1, path: [0, 1], rows: 1, contentIndex: 1 },
+            { rowIndex: 4, headerIndex: 5, isCollapsed: true, depth: 0, path: [1], rows: 1, contentIndex: 2 },
         ];
         const output = flattenRowGroups(rowGroupingOptions, totalRows);
         expect(output).toEqual(expected);
@@ -232,6 +232,125 @@ describe("useRowGroupingInner - getRowThemeOverride", () => {
         // Assuming row 1 is not a group header
         const themeOverride = result.current.getRowThemeOverride?.(1);
         expect(themeOverride).toEqual({ bgCell: "green" });
+    });
+
+    it("returns correct theme for non-group-header rows when some groups collapsed according to getRowThemeOverrideIn", () => {
+        const rowGroupingOptions = {
+            groups: [
+                { headerIndex: 0, isCollapsed: false },
+                { headerIndex: 3, isCollapsed: true },
+                { headerIndex: 5, isCollapsed: false },
+            ],
+            height: 30,
+        };
+
+        // eslint-disable-next-line unicorn/consistent-function-scoping
+        const getRowThemeOverrideIn = (row: number) => ({ bgCell: row % 2 === 0 ? "blue" : "green" });
+
+        const { result } = renderHook(() => useRowGroupingInner(rowGroupingOptions, 10, 20, getRowThemeOverrideIn));
+
+        const getRowThemeOverride = result.current.getRowThemeOverride;
+
+        // Assuming row 1 is not a group header
+        expect(getRowThemeOverride?.(1)).toEqual({ bgCell: "green" });
+        expect(getRowThemeOverride?.(2)).toEqual({ bgCell: "blue" });
+        expect(getRowThemeOverride?.(5)).toEqual({ bgCell: "green" });
+    });
+});
+
+describe("useRowGroupingInner - rowHeight", () => {
+    afterEach(async () => {
+        await cleanup();
+    });
+
+    it("applies provided group row height for group headers", () => {
+        const rowGroupingOptions: RowGroupingOptions = {
+            groups: [
+                { headerIndex: 0, isCollapsed: false },
+                { headerIndex: 3, isCollapsed: false },
+                { headerIndex: 5, isCollapsed: false },
+            ],
+            height: 30,
+        };
+
+        const { result } = renderHook(() => useRowGroupingInner(rowGroupingOptions, 5, 20, undefined));
+
+        expect(typeof result.current.rowHeight).toBe("function");
+
+        // Assuming row 1 is not a group header
+        const rowHeightFn = result.current.rowHeight as (row: number) => number;
+        expect(rowHeightFn(0)).toEqual(rowGroupingOptions.height);
+        expect(rowHeightFn(3)).toEqual(rowGroupingOptions.height);
+        expect(rowHeightFn(5)).toEqual(rowGroupingOptions.height);
+    });
+
+    it("applies provided group row height for group headers when some are collapsed", () => {
+        const rowGroupingOptions: RowGroupingOptions = {
+            groups: [
+                { headerIndex: 0, isCollapsed: false },
+                { headerIndex: 3, isCollapsed: true },
+                { headerIndex: 5, isCollapsed: false },
+            ],
+            height: 30,
+        };
+
+        const { result } = renderHook(() => useRowGroupingInner(rowGroupingOptions, 5, 20, undefined));
+
+        expect(typeof result.current.rowHeight).toBe("function");
+
+        // Assuming row 1 is not a group header
+        const rowHeightFn = result.current.rowHeight as (row: number) => number;
+        expect(rowHeightFn(0)).toEqual(rowGroupingOptions.height);
+        expect(rowHeightFn(3)).toEqual(rowGroupingOptions.height);
+        expect(rowHeightFn(4)).toEqual(rowGroupingOptions.height);
+    });
+
+    it("returns correct height for non-group-header rows", () => {
+        const rowGroupingOptions = {
+            groups: [
+                { headerIndex: 0, isCollapsed: false },
+                { headerIndex: 3, isCollapsed: false },
+                { headerIndex: 5, isCollapsed: false },
+            ],
+            height: 30,
+        };
+
+        // eslint-disable-next-line unicorn/consistent-function-scoping
+        const getRowHeightIn = (row: number) => (row % 2 === 0 ? 20 : 40);
+
+        const { result } = renderHook(() => useRowGroupingInner(rowGroupingOptions, 10, getRowHeightIn, undefined));
+
+        expect(typeof result.current.rowHeight).toBe("function");
+        const rowHeightFn = result.current.rowHeight as (row: number) => number;
+
+        // Assuming row 1 is not a group header
+        expect(rowHeightFn(1)).toEqual(40);
+        expect(rowHeightFn(2)).toEqual(20);
+        expect(rowHeightFn(5)).toEqual(rowGroupingOptions.height);
+    });
+
+    it("returns correct height for non-group-header rows when some groups collapsed", () => {
+        const rowGroupingOptions = {
+            groups: [
+                { headerIndex: 0, isCollapsed: false },
+                { headerIndex: 3, isCollapsed: true },
+                { headerIndex: 5, isCollapsed: false },
+            ],
+            height: 30,
+        };
+
+        // eslint-disable-next-line unicorn/consistent-function-scoping
+        const getRowHeightIn = (row: number) => (row % 2 === 0 ? 20 : 40);
+
+        const { result } = renderHook(() => useRowGroupingInner(rowGroupingOptions, 10, getRowHeightIn, undefined));
+
+        expect(typeof result.current.rowHeight).toBe("function");
+        const rowHeightFn = result.current.rowHeight as (row: number) => number;
+
+        // Assuming row 1 is not a group header
+        expect(rowHeightFn(1)).toEqual(40);
+        expect(rowHeightFn(2)).toEqual(20);
+        expect(rowHeightFn(5)).toEqual(40); // this will be the first row of the third group
     });
 });
 
