@@ -36,7 +36,7 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
             <React.Suspense fallback={null}>
                 <NumberOverlayEditor
                     highlight={isHighlighted}
-                    disabled={value.readonly === true}
+                    readOnly={value.readonly === true}
                     value={value.data}
                     fixedDecimals={value.fixedDecimals}
                     allowNegative={value.allowNegative}
