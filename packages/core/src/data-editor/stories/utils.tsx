@@ -268,9 +268,6 @@ function createTextColumnInfo(index: number, group: boolean): GridColumnWithMock
         title: `Column ${index}`,
         id: `Column ${index}`,
         group: group ? `Group ${Math.round(index / 3)}` : undefined,
-        themeOverride: {
-            bgGroupHeader: "red",
-        },
         icon: GridColumnIcon.HeaderString,
         hasMenu: false,
         getContent: () => {
