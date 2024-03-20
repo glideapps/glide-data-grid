@@ -185,8 +185,7 @@ export function drawGroups(
         const groupTheme =
             group?.overrideTheme === undefined ? theme : mergeAndRealizeTheme(theme, group.overrideTheme);
         const isHovered = hRow === -2 && hCol !== undefined && hCol >= span[0] && hCol <= span[1];
-
-        const fillColor = isHovered ? groupTheme.bgHeaderHovered : groupTheme.bgHeader;
+        const fillColor = isHovered ? groupTheme.bgGroupHeaderHovered : groupTheme.bgGroupHeader ?? groupTheme.bgHeader;
         if (fillColor !== theme.bgHeader) {
             ctx.fillStyle = fillColor;
             ctx.fill();

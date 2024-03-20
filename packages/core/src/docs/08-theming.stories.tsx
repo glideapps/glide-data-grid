@@ -254,6 +254,7 @@ The global theme is provided by the DataEditor by default and can be overriden b
 | bgIconHeader | --gdg-bg-icon-header | string | The background color for header icons |
 | fgIconHeader | --gdg-fg-icon-header | string | The foreground color for header icons |
 | textHeader | --gdg-text-header | string | The header text color |
+| bgGroupHeader | --gdg-bg-group-header | string \\| undefined | The group header background color, if none provided the \`bgHeader\` is used instead. |
 | textGroupHeader | --gdg-text-group-header | string \\| undefined | The group header text color, if none provided the \`textHeader\` is used instead. |
 | textHeaderSelected | --gdg-text-header-selected | string | The text color used for selected headers |
 | bgCell | --gdg-bg-cell | string | The primary background color of the data grid. |
