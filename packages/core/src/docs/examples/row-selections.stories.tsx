@@ -22,7 +22,7 @@ export default {
                         <Description>
                             You can enable row selections by setting <PropName>rowSelect</PropName> prop to{" "}
                             <PropName>multi</PropName> for multi-selection or <PropName>single</PropName> for
-                            single-selection. The row marker behavior and appearance can be controlled by setting the{" "}
+                            single-selection. The row marker behavior and appearance can be controlled via the{" "}
                             <PropName>rowMarkers</PropName> prop.
                         </Description>
                     }>
