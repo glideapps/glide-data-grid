@@ -20,8 +20,10 @@ export default {
                     title="Row selections"
                     description={
                         <Description>
-                            You can enable row selections by setting <PropName>rowSelect</PropName> prop to multi for
-                            multi-selection or single for single-selection.
+                            You can enable row selections by setting <PropName>rowSelect</PropName> prop to{" "}
+                            <PropName>multi</PropName> for multi-selection or <PropName>single</PropName> for
+                            single-selection. The row marker behavior and appearance can be controlled by setting the{" "}
+                            <PropName>rowMarkers</PropName> prop.
                         </Description>
                     }>
                     <Story />
