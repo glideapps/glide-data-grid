@@ -21,6 +21,7 @@ function makeCol(title: string, sourceIndex: number, sticky: boolean, width: num
         grow: undefined,
         headerRowMarkerAlwaysVisible: undefined,
         headerRowMarkerTheme: undefined,
+        headerRowMarkerDisabled: undefined,
         hasMenu: undefined,
         icon: undefined,
         id: undefined,

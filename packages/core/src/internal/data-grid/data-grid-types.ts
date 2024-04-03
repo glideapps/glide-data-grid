@@ -197,6 +197,7 @@ export type InnerColumnExtension = {
     rowMarkerChecked?: BooleanIndeterminate | boolean;
     headerRowMarkerTheme?: Partial<Theme>;
     headerRowMarkerAlwaysVisible?: boolean;
+    headerRowMarkerDisabled?: boolean;
 };
 
 /** @category Columns */
