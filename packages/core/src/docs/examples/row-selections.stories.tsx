@@ -59,8 +59,8 @@ export const RowSelections: React.FC<RowSelectionsProps> = p => {
 (RowSelections as any).args = {
     rowSelect: "single",
     rowSelectionMode: "auto",
-    rowMarkersKind: "checkbox",
-    rowMarkersCheckboxStyle: "square",
+    rowMarkersKind: "checkbox-visible",
+    rowMarkersCheckboxStyle: "circle",
 };
 (RowSelections as any).argTypes = {
     rowSelect: {
