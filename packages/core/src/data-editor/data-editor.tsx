@@ -182,15 +182,15 @@ function shiftSelection(input: GridSelection, offset: number): GridSelection {
             input.current === undefined
                 ? undefined
                 : {
-                    cell: [input.current.cell[0] + offset, input.current.cell[1]],
-                    range: {
-                        ...input.current.range,
-                        x: input.current.range.x + offset,
-                    },
-                    rangeStack: input.current.rangeStack.map(r => ({
-                        ...r,
-                        x: r.x + offset,
-                    })),
+                      cell: [input.current.cell[0] + offset, input.current.cell[1]],
+                      range: {
+                          ...input.current.range,
+                          x: input.current.range.x + offset,
+                      },
+                      rangeStack: input.current.rangeStack.map(r => ({
+                          ...r,
+                          x: r.x + offset,
+                      })),
                 },
         rows: input.rows,
         columns: input.columns.offset(offset),
@@ -1169,9 +1169,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 rowMarkerOffset === 0
                     ? items
                     : items.map(x => ({
-                        ...x,
-                        location: [x.location[0] - rowMarkerOffset, x.location[1]] as const,
-                    }));
+                          ...x,
+                          location: [x.location[0] - rowMarkerOffset, x.location[1]] as const,
+                      }));
             const r = onCellsEdited?.(mangledItems);
 
             if (r !== true) {
