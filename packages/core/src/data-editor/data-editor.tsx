@@ -191,7 +191,7 @@ function shiftSelection(input: GridSelection, offset: number): GridSelection {
                           ...r,
                           x: r.x + offset,
                       })),
-                },
+                  },
         rows: input.rows,
         columns: input.columns.offset(offset),
     };
@@ -1188,7 +1188,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     // this will generally be undefined triggering the memo less often
     const highlightRange =
         gridSelection.current !== undefined &&
-            gridSelection.current.range.width * gridSelection.current.range.height > 1
+        gridSelection.current.range.width * gridSelection.current.range.height > 1
             ? gridSelection.current.range
             : undefined;
 
@@ -2470,11 +2470,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 freezeColumns === 0
                     ? undefined
                     : {
-                        x: 0,
-                        y: region.y,
-                        width: freezeColumns,
-                        height: region.height,
-                    };
+                          x: 0,
+                          y: region.y,
+                          width: freezeColumns,
+                          height: region.height,
+                      };
 
             const freezeRegions: Rectangle[] = [];
             if (freezeRegion !== undefined) freezeRegions.push(freezeRegion);

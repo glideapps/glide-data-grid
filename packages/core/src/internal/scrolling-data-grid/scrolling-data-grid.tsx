@@ -9,13 +9,13 @@ export interface ScrollingDataGridProps extends Props {
     readonly className: string | undefined;
     readonly onVisibleRegionChanged:
         | ((
-            range: Rectangle,
-            clientWidth: number,
-            clientHeight: number,
-            rightElWidth: number,
-            tx: number,
-            ty: number
-        ) => void)
+              range: Rectangle,
+              clientWidth: number,
+              clientHeight: number,
+              rightElWidth: number,
+              tx: number,
+              ty: number
+          ) => void)
         | undefined;
     readonly scrollRef: React.MutableRefObject<HTMLDivElement | null> | undefined;
 
@@ -55,9 +55,9 @@ export interface ScrollingDataGridProps extends Props {
      */
     readonly rightElementProps:
         | {
-            readonly sticky?: boolean;
-            readonly fill?: boolean;
-        }
+              readonly sticky?: boolean;
+              readonly fill?: boolean;
+          }
         | undefined;
     /**
      * The right element is a DOM node which can be inserted at the end of the horizontal scroll region. This can be

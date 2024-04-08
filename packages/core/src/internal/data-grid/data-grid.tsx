@@ -238,9 +238,9 @@ export interface DataGridProps {
 
     readonly dragAndDropState:
         | {
-            src: number;
-            dest: number;
-        }
+              src: number;
+              dest: number;
+          }
         | undefined;
 
     /**
@@ -250,19 +250,19 @@ export interface DataGridProps {
      */
     readonly experimental:
         | {
-            readonly disableAccessibilityTree?: boolean;
-            readonly disableMinimumCellWidth?: boolean;
-            readonly paddingRight?: number;
-            readonly paddingBottom?: number;
-            readonly enableFirefoxRescaling?: boolean;
-            readonly enableSafariRescaling?: boolean;
-            readonly kineticScrollPerfHack?: boolean;
-            readonly isSubGrid?: boolean;
-            readonly strict?: boolean;
-            readonly scrollbarWidthOverride?: number;
-            readonly hyperWrapping?: boolean;
-            readonly renderStrategy?: "single-buffer" | "double-buffer" | "direct";
-        }
+              readonly disableAccessibilityTree?: boolean;
+              readonly disableMinimumCellWidth?: boolean;
+              readonly paddingRight?: number;
+              readonly paddingBottom?: number;
+              readonly enableFirefoxRescaling?: boolean;
+              readonly enableSafariRescaling?: boolean;
+              readonly kineticScrollPerfHack?: boolean;
+              readonly isSubGrid?: boolean;
+              readonly strict?: boolean;
+              readonly scrollbarWidthOverride?: number;
+              readonly hyperWrapping?: boolean;
+              readonly renderStrategy?: "single-buffer" | "double-buffer" | "direct";
+          }
         | undefined;
 
     /**
