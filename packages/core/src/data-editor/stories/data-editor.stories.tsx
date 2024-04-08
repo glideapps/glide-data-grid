@@ -359,7 +359,7 @@ export function DraggableWithEventAnchor() {
             onDragStart={args => {
                 args.setData("text", "testing");
             }}
-            dragImageAnchor={'clickevent'}
+            dragImageAnchor={'click'}
             getCellContent={getData}
             columns={columns}
             rows={1000}
