@@ -189,6 +189,13 @@ export interface DataGridProps {
      * @group Drag and Drop
      */
     readonly isDraggable: boolean | "cell" | "header" | undefined;
+
+    /**
+    * Determines, when dragging, where the cursor is anchored to the drag image. 
+    * @defaultValue 'center'
+    * @group Drag and Drop
+    */
+    readonly dragImageAnchor: 'center' | 'click' | 'click-x' | 'click-y' | undefined;
     /**
      * If `isDraggable` is set, the grid becomes HTML draggable, and `onDragStart` will be called when dragging starts.
      * You can use this to build a UI where the user can drag the Grid around.
@@ -230,11 +237,11 @@ export interface DataGridProps {
     readonly drawFocusRing: boolean;
 
     readonly dragAndDropState:
-        | {
-              src: number;
-              dest: number;
-          }
-        | undefined;
+    | {
+        src: number;
+        dest: number;
+    }
+    | undefined;
 
     /**
      * Experimental features
@@ -242,21 +249,21 @@ export interface DataGridProps {
      * @experimental
      */
     readonly experimental:
-        | {
-              readonly disableAccessibilityTree?: boolean;
-              readonly disableMinimumCellWidth?: boolean;
-              readonly paddingRight?: number;
-              readonly paddingBottom?: number;
-              readonly enableFirefoxRescaling?: boolean;
-              readonly enableSafariRescaling?: boolean;
-              readonly kineticScrollPerfHack?: boolean;
-              readonly isSubGrid?: boolean;
-              readonly strict?: boolean;
-              readonly scrollbarWidthOverride?: number;
-              readonly hyperWrapping?: boolean;
-              readonly renderStrategy?: "single-buffer" | "double-buffer" | "direct";
-          }
-        | undefined;
+    | {
+        readonly disableAccessibilityTree?: boolean;
+        readonly disableMinimumCellWidth?: boolean;
+        readonly paddingRight?: number;
+        readonly paddingBottom?: number;
+        readonly enableFirefoxRescaling?: boolean;
+        readonly enableSafariRescaling?: boolean;
+        readonly kineticScrollPerfHack?: boolean;
+        readonly isSubGrid?: boolean;
+        readonly strict?: boolean;
+        readonly scrollbarWidthOverride?: number;
+        readonly hyperWrapping?: boolean;
+        readonly renderStrategy?: "single-buffer" | "double-buffer" | "direct";
+    }
+    | undefined;
 
     /**
      * Additional header icons for use by `GridColumn`.
@@ -390,6 +397,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         experimental,
         getCellRenderer,
         resizeIndicator = "full",
+        dragImageAnchor = "center"
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -932,14 +940,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const cursor = isDragging
         ? "grabbing"
         : canDrag || isResizing
-        ? "col-resize"
-        : overFill || isFilling
-        ? "crosshair"
-        : cursorOverride !== undefined
-        ? cursorOverride
-        : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
-        ? "pointer"
-        : "default";
+            ? "col-resize"
+            : overFill || isFilling
+                ? "crosshair"
+                : cursorOverride !== undefined
+                    ? cursorOverride
+                    : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
+                        ? "pointer"
+                        : "default";
     const style = React.useMemo(
         () => ({
             // width,
@@ -983,9 +991,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             clientY: number
         ):
             | {
-                  area: "menu" | "indicator";
-                  bounds: Rectangle;
-              }
+                area: "menu" | "indicator";
+                bounds: Rectangle;
+            }
             | undefined => {
             const header = mappedColumns[col];
 
@@ -1566,10 +1574,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
                         document.body.append(offscreen);
 
+                        const dragAnchorX = ['click', 'click-x'].includes(dragImageAnchor) ? event.clientX - boundsForDragTarget.x : boundsForDragTarget.width / 2
+                        const dragAnchorY = ['click', 'click-y'].includes(dragImageAnchor) ? event.clientY - boundsForDragTarget.y : boundsForDragTarget.height / 2
+
                         event.dataTransfer.setDragImage(
                             offscreen,
-                            boundsForDragTarget.width / 2,
-                            boundsForDragTarget.height / 2
+                            dragAnchorX,
+                            dragAnchorY
                         );
 
                         window.setTimeout(() => {

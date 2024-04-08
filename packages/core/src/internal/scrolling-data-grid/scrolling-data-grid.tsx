@@ -8,15 +8,15 @@ type Props = Omit<DataGridDndProps, "width" | "height" | "eventTargetRef">;
 export interface ScrollingDataGridProps extends Props {
     readonly className: string | undefined;
     readonly onVisibleRegionChanged:
-        | ((
-              range: Rectangle,
-              clientWidth: number,
-              clientHeight: number,
-              rightElWidth: number,
-              tx: number,
-              ty: number
-          ) => void)
-        | undefined;
+    | ((
+        range: Rectangle,
+        clientWidth: number,
+        clientHeight: number,
+        rightElWidth: number,
+        tx: number,
+        ty: number
+    ) => void)
+    | undefined;
     readonly scrollRef: React.MutableRefObject<HTMLDivElement | null> | undefined;
 
     /**
@@ -54,11 +54,11 @@ export interface ScrollingDataGridProps extends Props {
      * @group Advanced
      */
     readonly rightElementProps:
-        | {
-              readonly sticky?: boolean;
-              readonly fill?: boolean;
-          }
-        | undefined;
+    | {
+        readonly sticky?: boolean;
+        readonly fill?: boolean;
+    }
+    | undefined;
     /**
      * The right element is a DOM node which can be inserted at the end of the horizontal scroll region. This can be
      * used to create a right handle panel, make a big add button, or display messages.
@@ -312,6 +312,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                 gridRef={p.gridRef}
                 headerIcons={p.headerIcons}
                 isDraggable={p.isDraggable}
+                dragImageAnchor={p.dragImageAnchor}
                 onCanvasBlur={p.onCanvasBlur}
                 onCanvasFocused={p.onCanvasFocused}
                 onCellFocused={p.onCellFocused}
