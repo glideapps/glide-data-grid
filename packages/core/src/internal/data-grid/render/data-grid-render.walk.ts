@@ -142,6 +142,37 @@ export function walkGroups(
     }
 }
 
+export function getRowSpanBounds(
+    rowSpan: Item,
+    cellX: number,
+    cellY: number,
+    cellW: number,
+    row: number,
+    getRowHeight: (row: number) => number
+): Rectangle | undefined {
+    const [startRow, endRow] = rowSpan;
+    const totalSpannedRows = endRow - startRow;
+    let tempY = cellY;
+    let tempH = totalSpannedRows * 34;
+    if (getRowHeight !== undefined) {
+        tempH = getRowHeight(row);
+        for (let x = row - 1; x >= startRow; x--) {
+            tempY -= getRowHeight(x);
+            tempH += getRowHeight(x);
+        }
+        for (let x = row + 1; x <= endRow; x++) {
+            tempH += getRowHeight(x);
+        }
+    }
+    const contentRect: Rectangle | undefined = {
+        x: cellX,
+        y: tempY,
+        width: cellW,
+        height: tempH,
+    };
+    return contentRect;
+}
+
 export function getSpanBounds(
     span: Item,
     cellX: number,

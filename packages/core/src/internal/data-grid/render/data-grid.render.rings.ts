@@ -5,7 +5,7 @@ import { getStickyWidth, type MappedGridColumn, computeBounds, getFreezeTrailing
 import { type FullTheme } from "../../../common/styles.js";
 import { blend, withAlpha } from "../color-parser.js";
 import { hugRectToTarget, intersectRect, rectContains, splitRectIntoRegions } from "../../../common/math.js";
-import { getSpanBounds, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
+import { getRowSpanBounds, getSpanBounds, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
 import { type Highlight } from "./data-grid-render.cells.js";
 
 export function drawHighlightRings(
@@ -247,7 +247,18 @@ export function drawFillHandle(
                     if (row !== targetRow && row !== fillHandleRow) return;
 
                     let cellX = drawX;
+                    let cellY = drawY;
                     let cellWidth = col.width;
+                    let cellHeight = getRowHeight(row);
+
+                    if (cell.rowSpan !== undefined) {
+                        const area = getRowSpanBounds(cell.rowSpan, drawX, drawY, col.width, row, getRowHeight);
+
+                        if (area !== undefined) {
+                            cellHeight = area.height;
+                            cellY = area.y;
+                        }
+                    }
 
                     if (cell.span !== undefined) {
                         const areas = getSpanBounds(cell.span, drawX, drawY, col.width, rh, col, allColumns);
@@ -269,7 +280,7 @@ export function drawFillHandle(
                                 ctx.clip();
                             }
                             ctx.beginPath();
-                            ctx.rect(cellX + cellWidth - 4, drawY + rh - 4, 4, 4);
+                            ctx.rect(cellX + cellWidth - 4, cellY + cellHeight - 4, 4, 4);
                             ctx.fillStyle = col.themeOverride?.accentColor ?? theme.accentColor;
                             ctx.fill();
                         };

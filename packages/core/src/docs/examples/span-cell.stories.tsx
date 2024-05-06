@@ -45,21 +45,21 @@ export const SpanCell: React.VFC = () => {
     const mangledGetCellContent = React.useCallback<typeof getCellContent>(
         cell => {
             const [col, row] = cell;
-            if (row === 6 && col >= 3 && col <= 4) {
+            if (col === 0 && row >= 2 && row <= 4) {
                 return {
                     kind: GridCellKind.Text,
                     allowOverlay: false,
-                    data: "Span Cell that is very long and will go past the cell limits",
-                    span: [3, 4],
-                    displayData: "Span Cell that is very long and will go past the cell limits",
+                    data: "Row Span span",
+                    rowSpan: [2, 4],
+                    displayData: "we want to clip each cell individually rather than form a super clip region",
                 };
             }
-            if (row === 5) {
+            if (row === 1 && col >= 3 && col <= 5) {
                 return {
                     kind: GridCellKind.Text,
                     allowOverlay: false,
                     data: "Span Cell that is very long and will go past the cell limits",
-                    span: [0, 99],
+                    span: [3, 5],
                     displayData: "Span Cell that is very long and will go past the cell limits",
                 };
             }
@@ -71,7 +71,6 @@ export const SpanCell: React.VFC = () => {
     const getCellsForSelection = React.useCallback(
         (selection: Rectangle): CellArray => {
             const result: GridCell[][] = [];
-
             for (let y = selection.y; y < selection.y + selection.height; y++) {
                 const row: GridCell[] = [];
                 for (let x = selection.x; x < selection.x + selection.width; x++) {

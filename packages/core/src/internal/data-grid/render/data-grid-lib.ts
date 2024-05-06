@@ -76,11 +76,18 @@ export function cellIsSelected(location: Item, cell: InnerGridCell, selection: G
 
     if (location[1] !== selection.current.cell[1]) return false;
 
-    if (cell.span === undefined) {
-        return selection.current.cell[0] === location[0];
+    if (cell.span !== undefined) {
+        return selection.current.cell[0] >= cell.span[0] && selection.current.cell[0] <= cell.span[1];
+    }
+    if (cell.rowSpan !== undefined) {
+        return (
+            selection.current.cell[0] === location[0] &&
+            selection.current.cell[1] >= cell.rowSpan[0] &&
+            selection.current.cell[1] <= cell.rowSpan[1]
+        );
     }
 
-    return selection.current.cell[0] >= cell.span[0] && selection.current.cell[0] <= cell.span[1];
+    return selection.current.cell[0] === location[0];
 }
 
 export function itemIsInRect(location: Item, rect: Rectangle): boolean {
