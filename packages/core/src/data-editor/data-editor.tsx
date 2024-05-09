@@ -1496,8 +1496,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         height: 0,
                     };
 
-                    let scrollX = 0;
-                    let scrollY = 0;
+                    let scrollX = desiredX ?? 0;
+                    let scrollY = desiredY ?? 0;
 
                     if (trueCol !== undefined || trueRow !== undefined) {
                         targetRect = grid.getBounds((trueCol ?? 0) + rowMarkerOffset, trueRow ?? 0) ?? targetRect;

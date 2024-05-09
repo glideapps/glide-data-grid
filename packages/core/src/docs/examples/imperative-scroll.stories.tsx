@@ -42,6 +42,16 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
         });
     };
 
+    const pixels = 1_000_000_000;
+    const onClickEnd = () => {
+        ref.current?.scrollTo({
+            amount: pixels,
+            unit: "px",
+        },
+        0,
+        "horizontal");
+    };
+
     return (
         <BeautifulWrapper
             title="Imperative scrolling"
@@ -53,6 +63,9 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
                     </Description>
                     <MoreInfo>
                         Click <button onClick={onClick}>Here</button> to scroll to column 4 row 100
+                    </MoreInfo>
+                    <MoreInfo>
+                        Click <button onClick={onClickEnd}>Here</button> to scroll by {pixels} pixels
                     </MoreInfo>
                 </>
             }>
