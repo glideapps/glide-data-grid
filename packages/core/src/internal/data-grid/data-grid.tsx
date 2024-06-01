@@ -1260,7 +1260,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     }, [getCellContent, getCellRenderer, hoveredItem]);
 
     const hoveredRef = React.useRef<GridMouseEventArgs>();
-    const onMouseMoveImpl = React.useCallback(
+    const onPointerMove = React.useCallback(
         (ev: MouseEvent) => {
             const canvas = ref.current;
             if (canvas === null) return;
@@ -1343,7 +1343,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             damageInternal,
         ]
     );
-    useEventListener("mousemove", onMouseMoveImpl, windowEventTarget, true);
+    useEventListener("pointermove", onPointerMove, windowEventTarget, true);
 
     const onKeyDownImpl = React.useCallback(
         (event: React.KeyboardEvent<HTMLCanvasElement>) => {
