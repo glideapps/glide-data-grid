@@ -3342,7 +3342,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 !event.ctrlKey &&
                 gridSelection.current !== undefined &&
                 event.key.length === 1 &&
-                /[\p{L}\p{M}\p{N}]/ug.test(event.key) &&
+                /[\p{L}\p{M}\p{N}\p{S}\p{P}]/gu.test(event.key) &&
                 event.bounds !== undefined &&
                 isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, Math.min(row, rows - 1))]))
             ) {
