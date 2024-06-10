@@ -725,7 +725,7 @@ export interface DataEditorRef {
     /**
      * Gets the mouse args from pointer event position.
      */
-    getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => GridMouseEventArgs
+    getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => GridMouseEventArgs | undefined
 }
 
 const loadingCell: GridCell = {
@@ -3916,7 +3916,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     void normalSizeColumn(col + rowMarkerOffset);
                 }
             },
-            getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent): GridMouseEventArgs => {
+            getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent): GridMouseEventArgs | undefined => {
                 if (gridRef?.current === null) {
                     return undefined;
                 }
