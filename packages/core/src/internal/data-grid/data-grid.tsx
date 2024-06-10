@@ -1708,6 +1708,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 return getBoundsForItem(canvasRef.current, col ?? 0, row ?? -1);
             },
             damage,
+            getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => {
+                if (canvasRef === undefined || canvasRef.current === null) {
+                    return undefined;
+                }
+
+                return getMouseArgsForPosition(canvasRef.current, posX, posY, ev);
+            }
         }),
         [canvasRef, damage, getBoundsForItem]
     );

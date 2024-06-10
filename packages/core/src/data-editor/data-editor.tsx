@@ -722,6 +722,10 @@ export interface DataEditorRef {
      * Causes the columns in the selection to have their natural size recomputed and re-emitted as a resize event.
      */
     remeasureColumns: (cols: CompactSelection) => void;
+    /**
+     * Gets the mouse args from pointer event position.
+     */
+    getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => GridMouseEventArgs
 }
 
 const loadingCell: GridCell = {
@@ -3912,6 +3916,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     void normalSizeColumn(col + rowMarkerOffset);
                 }
             },
+            getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent): GridMouseEventArgs => {
+                if (gridRef?.current === null) {
+                    return undefined;
+                }
+
+                const args = gridRef.current.getMouseArgsForPosition(posX, posY, ev);
+                return {
+                    ...args, // FIXME: Mutate
+                    location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
+                };
+            }
         }),
         [appendRow, normalSizeColumn, scrollRef, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
     );
