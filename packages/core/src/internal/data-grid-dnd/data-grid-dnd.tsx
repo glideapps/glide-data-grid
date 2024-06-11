@@ -252,7 +252,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
                 }
 
                 clearAll();
-                if (dragCol !== undefined && dropCol !== undefined) {
+                if (dragCol !== undefined && dropCol !== undefined && !(onColumnProposeMove?.(dragCol, dropCol) === false)) {
                     onColumnMoved?.(dragCol, dropCol);
                 }
                 if (dragRow !== undefined && dropRow !== undefined) {
@@ -277,6 +277,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             onColumnMoved,
             onRowMoved,
             clearAll,
+            onColumnProposeMove,
         ]
     );
 
