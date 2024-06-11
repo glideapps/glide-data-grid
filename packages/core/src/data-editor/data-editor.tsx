@@ -2528,6 +2528,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         ]
     );
 
+    const onColumnProposeMoveImpl = whenDefined(
+        onColumnProposeMove,
+        React.useCallback(
+            (startIndex: number, endIndex: number) => {
+                return onColumnProposeMove?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset);
+            },
+            [onColumnProposeMove, rowMarkerOffset]
+        )
+    )
+
+
     const onColumnMovedImpl = whenDefined(
         onColumnMoved,
         React.useCallback(
@@ -4052,7 +4063,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     columns={mangledCols}
                     nonGrowWidth={nonGrowWidth}
                     drawHeader={drawHeader}
-                    onColumnProposeMove={onColumnProposeMove}
+                    onColumnProposeMove={onColumnProposeMoveImpl}
                     drawCell={drawCell}
                     disabledRows={disabledRows}
                     freezeColumns={mangledFreezeColumns}
