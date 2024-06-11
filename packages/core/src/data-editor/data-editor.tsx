@@ -3922,6 +3922,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
 
                 const args = gridRef.current.getMouseArgsForPosition(posX, posY, ev);
+                if (args === undefined) {
+                    return undefined;
+                }
+                
                 return {
                     ...args, // FIXME: Mutate
                     location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
