@@ -3321,7 +3321,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             let cancelled = false;
             if (onKeyDownIn !== undefined) {
                 onKeyDownIn({
-                    ...event,
+                    ...event, // FIXME: Mutate
+                    ...event.location && {
+                        location: [event.location[0] - rowMarkerOffset, event.location[1]] as any,
+                    },
                     cancel: () => {
                         cancelled = true;
                     },
