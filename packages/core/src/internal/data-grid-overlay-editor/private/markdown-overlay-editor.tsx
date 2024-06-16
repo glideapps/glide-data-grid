@@ -62,3 +62,5 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
         </MarkdownOverlayEditorStyle>
     );
 };
+
+export default MarkdownOverlayEditor;

@@ -225,6 +225,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                         if (elem) elem.focus();
                     }}
                     id={id}
+                    data-testid="data-grid-overlay-editor"
                     className={classWrap}
                     style={styleOverride}
                     as={useLabel === true ? "label" : undefined}
