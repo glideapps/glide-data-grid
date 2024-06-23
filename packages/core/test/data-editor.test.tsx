@@ -8,6 +8,10 @@ import {
     GridCellKind,
     isSizedGridColumn,
     type Item,
+    markerCellRenderer,
+    type InnerGridCell,
+    type InternalCellRenderer,
+    AllCellRenderers,
 } from "../src/index.js";
 import type { CustomCell } from "../src/internal/data-grid/data-grid-types.js";
 import type { DataEditorRef } from "../src/data-editor/data-editor.js";
@@ -2570,6 +2574,30 @@ describe("data-editor", () => {
         });
 
         expect(onClickSpy).not.toBeCalled();
+    });
+
+    test("renderers can override internal cells", async () => {    
+        const spy = vi.fn();
+
+        vi.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                renderers={[
+                    ...AllCellRenderers,
+                    {
+                        ...markerCellRenderer,
+                        draw: spy
+                    } as InternalCellRenderer<InnerGridCell>,
+                ]}
+                rowMarkers="both"
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        expect(spy).toHaveBeenCalledTimes(31); // Math.ceil((height - headerHeight) / rowHeight)
     });
 
     test("onCellsEdited blocks onCellEdited", async () => {

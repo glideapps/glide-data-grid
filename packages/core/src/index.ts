@@ -61,6 +61,7 @@ export { markerCellRenderer } from "./cells/marker-cell.js";
 export { bubbleCellRenderer } from "./cells/bubble-cell.js";
 export { protectedCellRenderer } from "./cells/protected-cell.js";
 export { rowIDCellRenderer } from "./cells/row-id-cell.js";
+export type { InternalCellRenderer } from "./cells/cell-types.js"
 export { AllCellRenderers } from "./cells/index.js";
 export { sprites } from "./internal/data-grid/sprites.js";
 export { default as ImageWindowLoaderImpl } from "./common/image-window-loader.js";
