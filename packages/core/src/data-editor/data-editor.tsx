@@ -884,6 +884,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
     const maxColumnAutoWidth = Math.max(maxColumnAutoWidthIn ?? maxColumnWidth, minColumnWidth);
 
+    const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns: freezeColumns[0];
+    const freezeRightColumns = typeof freezeColumns === "number" ? 0 : freezeColumns[1];
+
     const docStyle = React.useMemo(() => {
         if (typeof window === "undefined") return { fontSize: "16px" };
         return window.getComputedStyle(document.documentElement);
@@ -1533,9 +1536,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             height: targetRect.height + 2 * paddingY,
                         };
 
-                        let frozenWidth = 0;
-                        for (let i = 0; i < freezeColumns; i++) {
-                            frozenWidth += columns[i].width;
+                        let frozenLeftWidth = 0;
+                        for (let i = 0; i < freezeLeftColumns; i++) {
+                            frozenLeftWidth += columns[i].width;
+                        }
+                        let frozenRightWidth = 0;
+                        for (let i = mangledCols.length - 1; i >= mangledCols.length - freezeRightColumns; i--) {
+                            frozenRightWidth += columns[i].width;
                         }
                         let trailingRowHeight = 0;
                         const freezeTrailingRowsEffective = freezeTrailingRows + (lastRowSticky ? 1 : 0);
@@ -1548,8 +1555,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }
 
                         // scrollBounds is already scaled
-                        let sLeft = frozenWidth * scale + scrollBounds.left + rowMarkerOffset * rowMarkerWidth * scale;
-                        let sRight = scrollBounds.right;
+                        let sLeft = frozenLeftWidth * scale + scrollBounds.left + rowMarkerOffset * rowMarkerWidth * scale;
+                        let sRight = scrollBounds.right - frozenRightWidth * scale;
                         let sTop = scrollBounds.top + totalHeaderHeight * scale;
                         let sBottom = scrollBounds.bottom - trailingRowHeight * scale;
 
@@ -1593,7 +1600,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             scrollY = bounds.y + bounds.height - sBottom;
                         }
 
-                        if (dir === "vertical" || (typeof col === "number" && col < freezeColumns)) {
+                        if (
+                            dir === "vertical" ||
+                            (typeof col === "number" &&
+                                (col < freezeLeftColumns || col >= mangledCols.length - freezeRightColumns))
+                        ) {
                             scrollX = 0;
                         } else if (
                             dir === "horizontal" ||
@@ -1623,7 +1634,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowMarkerWidth,
             scrollRef,
             totalHeaderHeight,
-            freezeColumns,
+            freezeLeftColumns,
+            freezeRightColumns,
+            mangledCols.length,
             columns,
             mangledRows,
             lastRowSticky,
@@ -2468,18 +2481,29 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 selected = [selected[0] - rowMarkerOffset, selected[1]];
             }
 
-            const freezeRegion =
-                freezeColumns === 0
+            const freezeLeftRegion =
+                freezeLeftColumns === 0
                     ? undefined
                     : {
                           x: 0,
                           y: region.y,
-                          width: freezeColumns,
+                          width: freezeLeftColumns,
+                          height: region.height,
+                      };
+
+            const freezeRightRegion =
+                freezeRightColumns === 0
+                    ? undefined
+                    : {
+                          x: columns.length - freezeRightColumns,
+                          y: region.y,
+                          width: freezeRightColumns,
                           height: region.height,
                       };
 
             const freezeRegions: Rectangle[] = [];
-            if (freezeRegion !== undefined) freezeRegions.push(freezeRegion);
+            if (freezeLeftRegion !== undefined) freezeRegions.push(freezeLeftRegion);
+            if (freezeRightRegion !== undefined) freezeRegions.push(freezeRightRegion);
             if (freezeTrailingRows > 0) {
                 freezeRegions.push({
                     x: region.x - rowMarkerOffset,
@@ -2488,11 +2512,20 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     height: freezeTrailingRows,
                 });
 
-                if (freezeColumns > 0) {
+                if (freezeLeftColumns > 0) {
                     freezeRegions.push({
                         x: 0,
                         y: rows - freezeTrailingRows,
-                        width: freezeColumns,
+                        width: freezeLeftColumns,
+                        height: freezeTrailingRows,
+                    });
+                }
+
+                if (freezeRightColumns > 0) {
+                    freezeRegions.push({
+                        x: columns.length - freezeRightColumns,
+                        y: rows - freezeTrailingRows,
+                        width: freezeRightColumns,
                         height: freezeTrailingRows,
                     });
                 }
@@ -2507,7 +2540,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 ty,
                 extras: {
                     selected,
-                    freezeRegion,
+                    freezeRegion: freezeLeftRegion,
                     freezeRegions,
                 },
             };
@@ -2521,7 +2554,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowMarkerOffset,
             showTrailingBlankRow,
             rows,
-            freezeColumns,
+            freezeLeftColumns,
+            freezeRightColumns,
+            columns.length,
             freezeTrailingRows,
             setVisibleRegion,
             onVisibleRegionChanged,
@@ -3817,7 +3852,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         );
     }, [onGroupHeaderRenamed, renameGroup]);
 
-    const mangledFreezeColumns = Math.min(mangledCols.length, freezeColumns + (hasRowMarkers ? 1 : 0));
+    const mangledFreezeColumns = Math.min(mangledCols.length, freezeLeftColumns + (hasRowMarkers ? 1 : 0));
 
     React.useImperativeHandle(
         forwardedRef,
@@ -4055,7 +4090,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onColumnProposeMove={onColumnProposeMove}
                     drawCell={drawCell}
                     disabledRows={disabledRows}
-                    freezeColumns={mangledFreezeColumns}
+                    freezeColumns={[mangledFreezeColumns, freezeRightColumns]}
                     lockColumns={rowMarkerOffset}
                     firstColAccessible={rowMarkerOffset === 0}
                     getCellContent={getMangledCellContent}
