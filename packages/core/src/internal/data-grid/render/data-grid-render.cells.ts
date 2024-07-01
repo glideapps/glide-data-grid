@@ -77,6 +77,7 @@ export function drawCells(
     effectiveColumns: readonly MappedGridColumn[],
     allColumns: readonly MappedGridColumn[],
     height: number,
+    width: number,
     totalHeaderHeight: number,
     translateX: number,
     translateY: number,
@@ -90,6 +91,7 @@ export function drawCells(
     isFocused: boolean,
     drawFocus: boolean,
     freezeTrailingRows: number,
+    freezeTrailingColumns: number,
     hasAppendRow: boolean,
     drawRegions: readonly Rectangle[],
     damage: CellSet | undefined,
@@ -124,10 +126,12 @@ export function drawCells(
 
     walkColumns(
         effectiveColumns,
+        width,
         cellYOffset,
         translateX,
         translateY,
         totalHeaderHeight,
+        freezeTrailingColumns,
         (c, drawX, colDrawStartY, clipX, startRow) => {
             const diff = Math.max(0, clipX - drawX);
 
