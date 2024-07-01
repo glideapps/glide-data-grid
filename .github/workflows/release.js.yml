@@ -28,39 +28,39 @@ jobs:
                   token: ${{ secrets.NPM_TOKEN }}
                   access: public
                   package: ./packages/core/package.json
-    publish-cells:
-        defaults:
-            run:
-                working-directory: ./packages/cells
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: 20.10.0
-            - name: Bootstrap
-              run: npm install && npm run build
-              working-directory: .
-            - uses: JS-DevTools/npm-publish@v1
-              with:
-                  token: ${{ secrets.NPM_TOKEN }}
-                  access: public
-                  package: ./packages/cells/package.json
-    publish-source:
-        defaults:
-            run:
-                working-directory: ./packages/source
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: 20.10.0
-            - name: Bootstrap
-              run: npm install && npm run build
-              working-directory: .
-            - uses: JS-DevTools/npm-publish@v1
-              with:
-                  token: ${{ secrets.NPM_TOKEN }}
-                  access: public
-                  package: ./packages/source/package.json
+    # publish-cells:
+    #     defaults:
+    #         run:
+    #             working-directory: ./packages/cells
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - uses: actions/checkout@v4
+    #         - uses: actions/setup-node@v4
+    #           with:
+    #               node-version: 20.10.0
+    #         - name: Bootstrap
+    #           run: npm install && npm run build
+    #           working-directory: .
+    #         - uses: JS-DevTools/npm-publish@v1
+    #           with:
+    #               token: ${{ secrets.NPM_TOKEN }}
+    #               access: public
+    #               package: ./packages/cells/package.json
+    # publish-source:
+    #     defaults:
+    #         run:
+    #             working-directory: ./packages/source
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - uses: actions/checkout@v4
+    #         - uses: actions/setup-node@v4
+    #           with:
+    #               node-version: 20.10.0
+    #         - name: Bootstrap
+    #           run: npm install && npm run build
+    #           working-directory: .
+    #         - uses: JS-DevTools/npm-publish@v1
+    #           with:
+    #               token: ${{ secrets.NPM_TOKEN }}
+    #               access: public
+    #               package: ./packages/source/package.json
