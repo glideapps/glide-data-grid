@@ -4,10 +4,8 @@
 name: Release CI
 
 on:
-    push:
-        tags:
-            - "v*"
-            - "!v*-*"
+    release:
+        types: [published]
 
 jobs:
     publish-core:
