@@ -1,6 +1,6 @@
 {
     "name": "root",
-    "version": "6.0.4-alpha8",
+    "version": "1.0.0",
     "scripts": {
         "start": "npm run storybook",
         "version": "./update-version.sh",
@@ -22,9 +22,7 @@
     "author": "Glide",
     "license": "MIT",
     "workspaces": [
-        "./packages/core",
-        "./packages/cells",
-        "./packages/source"
+        "./packages/core"
     ],
     "devDependencies": {
         "@babel/cli": "^7.16.0",
