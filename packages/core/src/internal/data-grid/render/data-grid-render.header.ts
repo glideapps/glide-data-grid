@@ -38,7 +38,8 @@ export function drawGridHeaders(
     getGroupDetails: GroupDetailsCallback,
     damage: CellSet | undefined,
     drawHeaderCallback: DrawHeaderCallback | undefined,
-    touchMode: boolean
+    touchMode: boolean,
+    freezeTrailingColumns: number
 ) {
     const totalHeaderHeight = headerHeight + groupHeaderHeight;
     if (totalHeaderHeight <= 0) return;
@@ -54,7 +55,7 @@ export function drawGridHeaders(
     const font = outerTheme.headerFontFull;
     // Assinging the context font too much can be expensive, it can be worth it to minimze this
     ctx.font = font;
-    walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x, _y, clipX) => {
+    walkColumns(effectiveCols, width, 0, translateX, 0, totalHeaderHeight, freezeTrailingColumns, (c, x, _y, clipX) => {
         if (damage !== undefined && !damage.has([c.sourceIndex, -1])) return;
         const diff = Math.max(0, clipX - x);
         ctx.save();
