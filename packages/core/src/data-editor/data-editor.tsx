@@ -101,6 +101,7 @@ export interface RowMarkerOptions {
     theme?: Partial<Theme>;
     headerTheme?: Partial<Theme>;
     headerAlwaysVisible?: boolean;
+    canSelect?: (row: number) => boolean;
 }
 
 interface MouseState {
@@ -1277,6 +1278,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
                 const mappedRow = rowNumberMapper(row);
                 if (mappedRow === undefined) return loadingCell;
+                if (rowMarkersObj?.canSelect?.(row) === false) return loadingCell;
                 return {
                     kind: InnerGridCellKind.Marker,
                     allowOverlay: false,
@@ -1356,6 +1358,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             trailingRowOptions?.addIcon,
             experimental?.strict,
             getCellContent,
+            rowMarkersObj,
         ]
     );
 
