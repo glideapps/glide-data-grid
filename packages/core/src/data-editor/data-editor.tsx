@@ -884,7 +884,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
     const maxColumnAutoWidth = Math.max(maxColumnAutoWidthIn ?? maxColumnWidth, minColumnWidth);
 
-    const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns: freezeColumns[0];
+    const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
     const freezeRightColumns = typeof freezeColumns === "number" ? 0 : freezeColumns[1];
 
     const docStyle = React.useMemo(() => {
@@ -1555,7 +1555,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }
 
                         // scrollBounds is already scaled
-                        let sLeft = frozenLeftWidth * scale + scrollBounds.left + rowMarkerOffset * rowMarkerWidth * scale;
+                        let sLeft =
+                            frozenLeftWidth * scale + scrollBounds.left + rowMarkerOffset * rowMarkerWidth * scale;
                         let sRight = scrollBounds.right - frozenRightWidth * scale;
                         let sTop = scrollBounds.top + totalHeaderHeight * scale;
                         let sBottom = scrollBounds.bottom - trailingRowHeight * scale;

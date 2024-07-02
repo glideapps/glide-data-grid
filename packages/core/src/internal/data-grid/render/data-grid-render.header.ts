@@ -69,6 +69,11 @@ export function drawGridHeaders(
                 ? outerTheme
                 : mergeAndRealizeTheme(outerTheme, groupTheme, c.themeOverride);
 
+        if (c.sticky) {
+            ctx.fillStyle = theme.bgHeader;
+            ctx.fill();
+        }
+
         if (theme.bgHeader !== outerTheme.bgHeader) {
             ctx.fillStyle = theme.bgHeader;
             ctx.fill();
