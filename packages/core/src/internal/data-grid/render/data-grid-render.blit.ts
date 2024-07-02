@@ -147,9 +147,9 @@ export function blitLastFrame(
             args.dw = blitWidth * dpr;
 
             drawRegions.push({
-                x: width + deltaX,
+                x: width + deltaX - stickyRightWidth,
                 y: 0,
-                width: -deltaX,
+                width: -deltaX + stickyRightWidth,
                 height: height,
             });
         }
@@ -167,6 +167,17 @@ export function blitLastFrame(
                 const w = stickyLeftWidth * dpr;
                 const h = height * dpr;
                 ctx.drawImage(blitSource, 0, 0, w, h, 0, 0, w, h);
+            }
+            if (
+                stickyRightWidth > 0 &&
+                deltaX !== 0 &&
+                deltaY === 0 &&
+                (targetScroll === undefined || blitSourceScroll?.[1] !== false)
+            ) {
+                const x = (width - stickyRightWidth) * dpr;
+                const w = stickyRightWidth * dpr;
+                const h = height * dpr;
+                ctx.drawImage(blitSource, x, 0, w, h, x, 0, w, h);
             }
             if (
                 freezeTrailingRowsHeight > 0 &&

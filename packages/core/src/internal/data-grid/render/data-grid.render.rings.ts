@@ -34,8 +34,13 @@ export function drawHighlightRings(
 
     const [freezeLeft, freezeRight] = getStickyWidth(mappedColumns);
     const freezeBottom = getFreezeTrailingHeight(rows, freezeTrailingRows, rowHeight);
-    const splitIndices = [freezeLeftColumns, 0, mappedColumns.length, rows - freezeTrailingRows] as const;
-    const splitLocations = [freezeLeft, 0, width, height - freezeBottom] as const;
+    const splitIndices = [
+        freezeLeftColumns,
+        0,
+        mappedColumns.length - freezeRightColumns,
+        rows - freezeTrailingRows,
+    ] as const;
+    const splitLocations = [freezeLeft, 0, width - freezeRight, height - freezeBottom] as const;
 
     const drawRects = highlightRegions.map(h => {
         const r = h.range;

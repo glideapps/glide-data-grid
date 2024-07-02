@@ -625,7 +625,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 let isEdge = bounds !== undefined && bounds.x + bounds.width - posX <= edgeDetectionBuffer;
 
                 const previousCol = col - 1;
-                if (posX - bounds.x <= edgeDetectionBuffer && previousCol >= 0) {
+                if (
+                    posX - bounds.x <= edgeDetectionBuffer &&
+                    previousCol >= 0 &&
+                    col < mappedColumns.length - freezeRightColumns
+                ) {
                     isEdge = true;
                     bounds = getBoundsForItem(canvas, previousCol, row);
                     assert(bounds !== undefined);
@@ -733,6 +737,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             selection,
             totalHeaderHeight,
             freezeColumns,
+            freezeRightColumns,
         ]
     );
 
