@@ -331,6 +331,7 @@ export function drawGridLines(
     for (let index = 0; index < effectiveCols.length; index++) {
         const c = effectiveCols[index];
         if (c.width === 0) continue;
+        if (c.sticky && c.stickyPosition !== "left") break;
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
         if (tx >= minX && tx <= maxX && verticalBorder(index + 1)) {
@@ -344,23 +345,23 @@ export function drawGridLines(
         }
     }
 
-    // let rightX = 0.5;
-    // for (let index = effectiveCols.length - 1; index >= 0; index--) {
-    //     const c = effectiveCols[index];
-    //     if (c.width === 0) continue;
-    //     if (!c.sticky) break;
-    //     rightX += c.width;
-    //     const tx = c.sticky ? rightX : rightX + translateX;
-    //     if (tx >= minX && tx <= maxX && verticalBorder(index + 1)) {
-    //         toDraw.push({
-    //             x1: tx,
-    //             y1: Math.max(groupHeaderHeight, minY),
-    //             x2: tx,
-    //             y2: Math.min(height, maxY),
-    //             color: vColor,
-    //         });
-    //     }
-    // }
+    let rightX = width + 0.5;
+    for (let index = effectiveCols.length - 1; index >= 0; index--) {
+        const c = effectiveCols[index];
+        if (c.width === 0) continue;
+        if (!c.sticky) break;
+        rightX -= c.width;
+        const tx = rightX;
+        if (tx >= minX && tx <= maxX && verticalBorder(index + 1)) {
+            toDraw.push({
+                x1: tx,
+                y1: Math.max(groupHeaderHeight, minY),
+                x2: tx,
+                y2: Math.min(height, maxY),
+                color: vColor,
+            });
+        }
+    }
 
     let freezeY = height + 0.5;
     for (let i = rows - freezeTrailingRows; i < rows; i++) {

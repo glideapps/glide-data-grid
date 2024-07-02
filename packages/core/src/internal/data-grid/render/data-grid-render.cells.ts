@@ -299,7 +299,7 @@ export function drawCells(
 
                     const bgCell = cell.kind === GridCellKind.Protected ? theme.bgCellMedium : theme.bgCell;
                     let fill: string | undefined;
-                    if (isSticky || bgCell !== outerTheme.bgCell) {
+                    if (isSticky || bgCell !== outerTheme.bgCell || c.sticky) {
                         fill = blend(bgCell, fill);
                     }
 
