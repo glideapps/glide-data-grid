@@ -103,7 +103,6 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const lastSize = React.useRef<readonly [number, number] | undefined>();
 
     const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
-    const freezeRightColumns = typeof freezeColumns === "number"? 0 : freezeColumns[1];
 
     const width = nonGrowWidth + Math.max(0, overscrollX ?? 0);
 

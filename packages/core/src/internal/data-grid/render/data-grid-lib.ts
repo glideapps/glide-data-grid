@@ -279,7 +279,7 @@ export function getColumnIndexForX(
         const colIdx = effectiveColumns.length - 1 - fc;
         const col = effectiveColumns[colIdx];
         y -= col.width;
-        if (targetX <= y) {
+        if (targetX >= y) {
             return col.sourceIndex;
         }
     }
@@ -810,6 +810,7 @@ export function computeBounds(
 
     const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
     const freezeRightColumns = typeof freezeColumns === "number" ? 0 : freezeColumns[1];
+    const column = mappedColumns[col];
 
     if (col >= mappedColumns.length || row >= rows || row < -2 || col < 0) {
         return result;
@@ -817,16 +818,21 @@ export function computeBounds(
 
     const headerHeight = totalHeaderHeight - groupHeaderHeight;
 
-    if (col >= freezeLeftColumns) {
+    if (col >= freezeLeftColumns && col < mappedColumns.length - freezeRightColumns) {
         const dir = cellXOffset > col ? -1 : 1;
-        const [freezeLeftWidth, freezeRightWidth] = getStickyWidth(mappedColumns);
+        const [freezeLeftWidth] = getStickyWidth(mappedColumns);
         result.x += freezeLeftWidth + translateX;
         for (let i = cellXOffset; i !== col; i += dir) {
             result.x += mappedColumns[dir === 1 ? i : i - 1].width * dir;
         }
-    } else {
+    } else if (column.stickyPosition === "left") {
         for (let i = 0; i < col; i++) {
             result.x += mappedColumns[i].width;
+        }
+    } else if (column.stickyPosition === "right") {
+        result.x = width;
+        for (let i = col; i < mappedColumns.length; i++) {
+            result.x -= mappedColumns[i].width;
         }
     }
     result.width = mappedColumns[col].width + 1;
@@ -863,7 +869,7 @@ export function computeBounds(
             end++;
         }
         if (!sticky) {
-            const [freezeLeftWidth, freezeRightWidth] = getStickyWidth(mappedColumns);
+            const [freezeLeftWidth] = getStickyWidth(mappedColumns);
             const clip = result.x - freezeLeftWidth;
             if (clip < 0) {
                 result.x -= clip;
