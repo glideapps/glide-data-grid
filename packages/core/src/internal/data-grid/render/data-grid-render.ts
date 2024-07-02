@@ -418,6 +418,18 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
                 height: freezeTrailingRows,
                 when: freezeTrailingRows > 0,
             },
+            {
+                x: viewRegionWidth - freezeRightColumns,
+                y: cellYOffset,
+                width: freezeRightColumns,
+                height: 300,
+            },
+            {
+                x: viewRegionWidth - freezeRightColumns,
+                y: -2,
+                width: freezeRightColumns,
+                height: 2,
+            },
         ]);
 
         const doDamage = (ctx: CanvasRenderingContext2D) => {
