@@ -26,6 +26,7 @@ export function drawBlanks(
     selectedRows: CompactSelection,
     disabledRows: CompactSelection,
     freezeTrailingRows: number,
+    freezeTrailingColumns: number,
     hasAppendRow: boolean,
     drawRegions: readonly Rectangle[],
     damage: CellSet | undefined,
@@ -41,10 +42,12 @@ export function drawBlanks(
 
     walkColumns(
         effectiveColumns,
+        width,
         cellYOffset,
         translateX,
         translateY,
         totalHeaderHeight,
+        freezeTrailingColumns,
         (c, drawX, colDrawY, clipX, startRow) => {
             if (c !== effectiveColumns[effectiveColumns.length - 1]) return;
             drawX += c.width;
@@ -123,15 +126,24 @@ export function overdrawStickyBoundaries(
     }
     const hColor = theme.horizontalBorderColor ?? theme.borderColor;
     const vColor = theme.borderColor;
-    const drawX = drawFreezeBorder ? getStickyWidth(effectiveCols) : 0;
+    const [drawXLeft, drawXRight] = drawFreezeBorder ? getStickyWidth(effectiveCols) : [0, 0];
 
     let vStroke: string | undefined;
-    if (drawX !== 0) {
+    if (drawXLeft !== 0) {
         vStroke = blendCache(vColor, theme.bgCell);
         ctx.beginPath();
-        ctx.moveTo(drawX + 0.5, 0);
-        ctx.lineTo(drawX + 0.5, height);
+        ctx.moveTo(drawXLeft + 0.5, 0);
+        ctx.lineTo(drawXLeft + 0.5, height);
         ctx.strokeStyle = vStroke;
+        ctx.stroke();
+    }
+
+    if (drawXRight !== 0) {
+        const hStroke = vColor === hColor && vStroke !== undefined ? vStroke : blendCache(hColor, theme.bgCell);
+        ctx.beginPath();
+        ctx.moveTo(width - drawXRight + 0.5, 0);
+        ctx.lineTo(width - drawXRight + 0.5, height);
+        ctx.strokeStyle = hStroke;
         ctx.stroke();
     }
 
@@ -319,8 +331,27 @@ export function drawGridLines(
     for (let index = 0; index < effectiveCols.length; index++) {
         const c = effectiveCols[index];
         if (c.width === 0) continue;
+        if (c.sticky && c.stickyPosition !== "left") break;
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
+        if (tx >= minX && tx <= maxX && verticalBorder(index + 1)) {
+            toDraw.push({
+                x1: tx,
+                y1: Math.max(groupHeaderHeight, minY),
+                x2: tx,
+                y2: Math.min(height, maxY),
+                color: vColor,
+            });
+        }
+    }
+
+    let rightX = width + 0.5;
+    for (let index = effectiveCols.length - 1; index >= 0; index--) {
+        const c = effectiveCols[index];
+        if (c.width === 0) continue;
+        if (!c.sticky) break;
+        rightX -= c.width;
+        const tx = rightX;
         if (tx >= minX && tx <= maxX && verticalBorder(index + 1)) {
             toDraw.push({
                 x1: tx,

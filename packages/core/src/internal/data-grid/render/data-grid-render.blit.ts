@@ -70,7 +70,7 @@ export function blitLastFrame(
     }
     deltaX += translateX - last.translateX;
 
-    const stickyWidth = getStickyWidth(effectiveCols);
+    const [stickyLeftWidth, stickyRightWidth] = getStickyWidth(effectiveCols);
 
     if (deltaX !== 0 && deltaY !== 0) {
         return {
@@ -81,7 +81,7 @@ export function blitLastFrame(
     const freezeTrailingRowsHeight =
         freezeTrailingRows > 0 ? getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) : 0;
 
-    const blitWidth = width - stickyWidth - Math.abs(deltaX);
+    const blitWidth = width - stickyLeftWidth - Math.abs(deltaX) - stickyRightWidth;
     const blitHeight = height - totalHeaderHeight - freezeTrailingRowsHeight - Math.abs(deltaY) - 1;
 
     if (blitWidth > 150 && blitHeight > 150) {
@@ -128,22 +128,22 @@ export function blitLastFrame(
         // blit X
         if (deltaX > 0) {
             // pixels moving right
-            args.sx = stickyWidth * dpr;
+            args.sx = stickyLeftWidth * dpr;
             args.sw = blitWidth * dpr;
-            args.dx = (deltaX + stickyWidth) * dpr;
+            args.dx = (deltaX + stickyLeftWidth) * dpr;
             args.dw = blitWidth * dpr;
 
             drawRegions.push({
-                x: stickyWidth - 1,
+                x: stickyLeftWidth - 1,
                 y: 0,
                 width: deltaX + 2, // extra width to account for first col not drawing a left side border
                 height: height,
             });
         } else if (deltaX < 0) {
             // pixels moving left
-            args.sx = (stickyWidth - deltaX) * dpr;
+            args.sx = (stickyLeftWidth - deltaX) * dpr;
             args.sw = blitWidth * dpr;
-            args.dx = stickyWidth * dpr;
+            args.dx = stickyLeftWidth * dpr;
             args.dw = blitWidth * dpr;
 
             drawRegions.push({
@@ -157,14 +157,14 @@ export function blitLastFrame(
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (doubleBuffer) {
             if (
-                stickyWidth > 0 &&
+                stickyLeftWidth > 0 &&
                 deltaX !== 0 &&
                 deltaY === 0 &&
                 (targetScroll === undefined || blitSourceScroll?.[1] !== false)
             ) {
                 // When double buffering the freeze columns can be offset by a couple pixels vertically between the two
                 // buffers. We don't want to redraw them so we need to make sure to copy them between the buffers.
-                const w = stickyWidth * dpr;
+                const w = stickyLeftWidth * dpr;
                 const h = height * dpr;
                 ctx.drawImage(blitSource, 0, 0, w, h, 0, 0, w, h);
             }
@@ -200,7 +200,8 @@ export function blitResizedCol(
     height: number,
     totalHeaderHeight: number,
     effectiveCols: readonly MappedGridColumn[],
-    resizedIndex: number
+    resizedIndex: number,
+    freezeTrailingColumns: number
 ) {
     const drawRegions: Rectangle[] = [];
 
@@ -215,18 +216,27 @@ export function blitResizedCol(
         return drawRegions;
     }
 
-    walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, _drawY, clipX) => {
-        if (c.sourceIndex === resizedIndex) {
-            const x = Math.max(drawX, clipX) + 1;
-            drawRegions.push({
-                x,
-                y: 0,
-                width: width - x,
-                height,
-            });
-            return true;
+    walkColumns(
+        effectiveCols,
+        width,
+        cellYOffset,
+        translateX,
+        translateY,
+        totalHeaderHeight,
+        freezeTrailingColumns,
+        (c, drawX, _drawY, clipX) => {
+            if (c.sourceIndex === resizedIndex) {
+                const x = Math.max(drawX, clipX) + 1;
+                drawRegions.push({
+                    x,
+                    y: 0,
+                    width: width - x,
+                    height,
+                });
+                return true;
+            }
         }
-    });
+    );
     return drawRegions;
 }
 
