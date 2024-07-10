@@ -892,7 +892,7 @@ describe("data-editor", () => {
             clientY: 16, // Header
         });
 
-        expect(spy).not.toHaveBeenCalled();
+        expect(spy).toHaveBeenCalled();
     });
 
     test("Group header sections", async () => {

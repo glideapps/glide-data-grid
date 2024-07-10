@@ -53,6 +53,9 @@ export const RowSelections: React.FC<RowSelectionsProps> = p => {
                 kind: p.rowMarkersKind,
                 checkboxStyle: p.rowMarkersCheckboxStyle,
             }}
+            onHeaderClicked={(col, event) => {
+                console.log("onHeaderClicked", col, event);
+            }}
             columns={cols}
             rows={400}
         />
