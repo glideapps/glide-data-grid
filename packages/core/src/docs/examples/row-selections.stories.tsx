@@ -56,6 +56,9 @@ export const RowSelections: React.FC<RowSelectionsProps> = p => {
             onHeaderClicked={(col, event) => {
                 console.log("onHeaderClicked", col, event);
             }}
+            theme={{
+                rowMarkerIcon: "#ddd",
+            }}
             columns={cols}
             rows={400}
         />

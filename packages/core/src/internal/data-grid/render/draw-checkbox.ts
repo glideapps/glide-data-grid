@@ -61,7 +61,7 @@ export function drawCheckbox(
                 centerY - checkBoxHalfWidth + checkBoxWidth / 3.25
             );
 
-            ctx.strokeStyle = theme.bgCell;
+            ctx.strokeStyle = theme.rowMarkerIcon ?? theme.bgCell;
             ctx.lineJoin = "round";
             ctx.lineCap = "round";
             ctx.lineWidth = 1.9;
