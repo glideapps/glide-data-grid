@@ -106,5 +106,12 @@
         "@linaria/react": "^4.5.3",
         "canvas-hypertxt": "^1.0.3",
         "react-number-format": "^5.0.0"
+    },
+    "peerDependencies": {
+        "lodash": "^4.17.19",
+        "marked": "^4.0.10",
+        "react": "^16.12.0 || 17.x || 18.x",
+        "react-dom": "^16.12.0 || 17.x || 18.x",
+        "react-responsive-carousel": "^3.2.7"
     }
 }
