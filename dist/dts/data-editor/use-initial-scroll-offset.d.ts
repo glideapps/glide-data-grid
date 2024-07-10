@@ -6,3 +6,4 @@ export declare function useInitialScrollOffset(scrollOffsetX: number | undefined
     setVisibleRegion: React.Dispatch<React.SetStateAction<VisibleRegion>>;
     scrollRef: React.MutableRefObject<HTMLDivElement | null>;
 };
+//# sourceMappingURL=use-initial-scroll-offset.d.ts.map

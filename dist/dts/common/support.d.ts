@@ -10,3 +10,4 @@ export declare function deepEqual(foo: any, bar: any): boolean;
 export type FullyDefined<T> = {
     [K in keyof Required<T>]: T[K];
 };
+//# sourceMappingURL=support.d.ts.map

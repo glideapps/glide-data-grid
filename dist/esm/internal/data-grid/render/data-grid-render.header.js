@@ -224,8 +224,8 @@ export function computeHeaderLayout(ctx, c, x, y, width, height, theme, isRTL) {
     let indicatorIconBounds = undefined;
     if (c.indicatorIcon !== undefined) {
         const textWidth = ctx === undefined
-            ? getMeasuredTextCache(c.title ?? "#", theme.headerFontFull)?.width ?? 0
-            : measureTextCached(c.title ?? "#", ctx, theme.headerFontFull).width;
+            ? getMeasuredTextCache(c.title, theme.headerFontFull)?.width ?? 0
+            : measureTextCached(c.title, ctx, theme.headerFontFull).width;
         textBounds.width = textWidth;
         drawX += textWidth + xPad;
         indicatorIconBounds = {

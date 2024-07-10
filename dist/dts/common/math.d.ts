@@ -17,3 +17,4 @@ interface SplitRect {
 }
 export declare function splitRectIntoRegions(rect: Rectangle, splitIndicies: readonly [number, number, number, number], width: number, height: number, splitLocations: readonly [number, number, number, number]): SplitRect[];
 export {};
+//# sourceMappingURL=math.d.ts.map

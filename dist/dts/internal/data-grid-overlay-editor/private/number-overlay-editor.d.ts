@@ -14,3 +14,4 @@ interface Props {
 }
 declare const NumberOverlayEditor: React.FunctionComponent<Props>;
 export default NumberOverlayEditor;
+//# sourceMappingURL=number-overlay-editor.d.ts.map

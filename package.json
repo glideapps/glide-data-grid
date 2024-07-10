@@ -8,7 +8,7 @@
     "scripts": {
         "start": "npm run storybook",
         "version": "./update-version.sh",
-        "build": "npm run build --workspaces && npm run lint --workspaces",
+        "build": "rm -rf dist && npm run build --workspaces && npm run lint --workspaces && cp -r packages/core/dist dist",
         "typedoc": "typedoc --readme none --disableSources --tsconfig packages/core/tsconfig.json",
         "serve-docs": "http-server packages/core/gen-docs",
         "storybook:run": "storybook dev -p 9009 --no-open",
