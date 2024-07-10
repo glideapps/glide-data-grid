@@ -1,0 +1,1 @@
+{"version":3,"file":"use-stay-on-screen.d.ts","sourceRoot":"","sources":["../../../../src/internal/data-grid-overlay-editor/use-stay-on-screen.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,KAAK,MAAM,OAAO,CAAC;AAO/B,UAAU,YAAY;IAClB,GAAG,EAAE,KAAK,CAAC,WAAW,CAAC,WAAW,GAAG,IAAI,CAAC,CAAC;IAC3C,KAAK,EAAE,KAAK,CAAC,aAAa,CAAC;CAC9B;AAED,wBAAgB,eAAe,IAAI,YAAY,CAgD9C"}
