@@ -1,0 +1,1 @@
+{"version":3,"file":"browser-detect.d.ts","sourceRoot":"","sources":["../../../src/common/browser-detect.ts"],"names":[],"mappings":"AAAA,cAAM,IAAI,CAAC,CAAC;IACR,OAAO,CAAC,EAAE,CAAU;IACpB,OAAO,CAAC,GAAG,CAAgB;gBACf,EAAE,EAAE,MAAM,CAAC;IAIvB,IAAW,KAAK,MAEf;CACJ;AAOD,eAAO,MAAM,gBAAgB,eAA6D,CAAC;AAC3F,eAAO,MAAM,eAAe,eAK3B,CAAC;AACF,eAAO,MAAM,YAAY,eAAwE,CAAC"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"spinner-cell.d.ts","sourceRoot":"","sources":["../../../src/cells/spinner-cell.tsx"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,UAAU,EAAE,KAAK,cAAc,EAAgB,MAAM,4BAA4B,CAAC;AAEhG,UAAU,gBAAgB;IACtB,QAAQ,CAAC,IAAI,EAAE,cAAc,CAAC;CACjC;AAED,MAAM,MAAM,WAAW,GAAG,UAAU,CAAC,gBAAgB,CAAC,CAAC;AAEvD,QAAA,MAAM,QAAQ,EAAE,cAAc,CAAC,WAAW,CAwBzC,CAAC;AAEF,eAAe,QAAQ,CAAC"}

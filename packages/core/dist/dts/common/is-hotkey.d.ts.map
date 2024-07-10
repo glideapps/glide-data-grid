@@ -1,0 +1,1 @@
+{"version":3,"file":"is-hotkey.d.ts","sourceRoot":"","sources":["../../../src/common/is-hotkey.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,gBAAgB,EAAE,MAAM,qCAAqC,CAAC;AA0B5E,UAAU,mBAAmB;IACzB,QAAQ,EAAE,OAAO,CAAC;CACrB;AAED,wBAAgB,QAAQ,CAAC,MAAM,EAAE,MAAM,EAAE,IAAI,EAAE,gBAAgB,EAAE,OAAO,EAAE,mBAAmB,GAAG,OAAO,CAItG"}
