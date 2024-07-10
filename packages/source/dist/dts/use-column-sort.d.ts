@@ -13,4 +13,3 @@ type Result = Pick<DataEditorProps, "getCellContent"> & {
 };
 export declare function useColumnSort(p: Props): Result;
 export {};
-//# sourceMappingURL=use-column-sort.d.ts.map

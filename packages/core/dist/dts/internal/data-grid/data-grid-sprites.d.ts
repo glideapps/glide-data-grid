@@ -32,3 +32,4 @@ export declare class SpriteManager {
     constructor(headerIcons: SpriteMap | undefined, onSettled: () => void);
     drawSprite(sprite: HeaderIcon | string, variant: SpriteVariant, ctx: CanvasRenderingContext2D, x: number, y: number, size: number, theme: Theme, alpha?: number): void;
 }
+//# sourceMappingURL=data-grid-sprites.d.ts.map

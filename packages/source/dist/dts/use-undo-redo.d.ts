@@ -9,4 +9,3 @@ export declare function useUndoRedo(gridRef: React.RefObject<DataEditorRef>, get
     onGridSelectionChange: (newVal: GridSelection) => void;
     gridSelection: GridSelection | null;
 };
-//# sourceMappingURL=use-undo-redo.d.ts.map

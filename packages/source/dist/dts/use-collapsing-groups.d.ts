@@ -5,4 +5,3 @@ type Props = Pick<DataEditorProps, "columns" | "onGroupHeaderClicked" | "onGridS
 type Result = Pick<DataEditorProps, "columns" | "onGroupHeaderClicked" | "onGridSelectionChange" | "getGroupDetails" | "gridSelection">;
 export declare function useCollapsingGroups(props: Props): Result;
 export {};
-//# sourceMappingURL=use-collapsing-groups.d.ts.map
