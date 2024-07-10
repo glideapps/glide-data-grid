@@ -2482,10 +2482,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             }
 
             if (args.kind === "header") {
-                if (clickLocation < 0) {
-                    return;
-                }
-
                 if (args.isEdge) {
                     if (args.isDoubleClick === true) {
                         void normalSizeColumn(col);
@@ -2495,16 +2491,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
             }
 
-            if (args.kind === groupHeaderKind) {
-                if (clickLocation < 0) {
-                    return;
-                }
-
-                if (args.button === 0 && col === lastMouseDownCol && row === lastMouseDownRow) {
-                    onGroupHeaderClicked?.(clickLocation, { ...args, preventDefault });
-                    if (!isPrevented.current) {
-                        handleGroupHeaderSelection(args);
-                    }
+            if (
+                args.kind === groupHeaderKind &&
+                args.button === 0 &&
+                col === lastMouseDownCol &&
+                row === lastMouseDownRow
+            ) {
+                onGroupHeaderClicked?.(clickLocation, { ...args, preventDefault });
+                if (!isPrevented.current) {
+                    handleGroupHeaderSelection(args);
                 }
             }
 
