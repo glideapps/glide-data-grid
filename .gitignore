@@ -1,5 +1,4 @@
-source/dist
-cells/dist
+packages/*/dist
 node_modules*
 .DS_Store
 .tool-versions

@@ -1,5 +1,0 @@
-/// <reference types="react" resolution-mode="require"/>
-export declare const InputBox: import("@linaria/react").StyledComponent<import("react").ClassAttributes<HTMLTextAreaElement> & import("react").TextareaHTMLAttributes<HTMLTextAreaElement> & Record<never, unknown>>;
-export declare const ShadowBox: import("@linaria/react").StyledComponent<import("react").ClassAttributes<HTMLDivElement> & import("react").HTMLAttributes<HTMLDivElement> & Record<never, unknown>>;
-export declare const GrowingEntryStyle: import("@linaria/react").StyledComponent<import("react").ClassAttributes<HTMLDivElement> & import("react").HTMLAttributes<HTMLDivElement> & Record<never, unknown>>;
-//# sourceMappingURL=growing-entry-style.d.ts.map
