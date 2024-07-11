@@ -13,6 +13,7 @@ jobs:
             run:
                 working-directory: ./packages/core
         runs-on: ubuntu-latest
+        environment: Publish
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-node@v4
