@@ -1,6 +1,6 @@
 {
     "name": "@rahulyadav5524/glide-data-grid",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "React data grid for beautifully displaying and editing large amounts of data with amazing performance.",
     "sideEffects": [
         "**/*.css"
