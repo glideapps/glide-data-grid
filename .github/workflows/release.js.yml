@@ -4,8 +4,8 @@
 name: Release CI
 
 on:
-    release:
-        types: [published]
+  release:
+    types: [published] 
 
 jobs:
     publish-core:
