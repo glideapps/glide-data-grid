@@ -243,6 +243,14 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * @group Events
      */
     readonly onCellActivated?: (cell: Item, event: CellActivatedEventArgs) => void;
+    /** Emitted when the grid is focused.
+     * @group Events
+     */
+    readonly onGridFocused?: () => void;
+    /** Emitted when the grid is blurred.
+     * @group Events
+     */
+    readonly onGridBlurred?: () => void;
 
     /**
      * Emitted whenever the user initiats a pattern fill using the fill handle. This event provides both
@@ -801,6 +809,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         getCellContent,
         onCellClicked,
         onCellActivated,
+        onGridFocused,
+        onGridBlurred,
         onFillPattern,
         onFinishedEditing,
         coercePasteValue,
@@ -1330,7 +1340,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 //If the grid is empty, we will return text
                 const isFirst = col === rowMarkerOffset;
 
-                const maybeFirstColumnHint = isFirst ? (trailingRowOptions?.hint ?? "") : "";
+                const maybeFirstColumnHint = isFirst ? trailingRowOptions?.hint ?? "" : "";
                 const c = mangledColsRef.current[col];
 
                 if (c?.trailingRowOptions?.disabled === true) {
@@ -2420,7 +2430,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         const act =
                             a.isDoubleClick === true
                                 ? "double-click"
-                                : (c.activationBehaviorOverride ?? cellActivationBehavior);
+                                : c.activationBehaviorOverride ?? cellActivationBehavior;
                         const activationEvent: CellActivatedEventArgs = {
                             inputType: "pointer",
                             pointerActivation: act,
@@ -3585,7 +3595,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 formatted?: string | string[]
             ): EditListItem | undefined {
                 const stringifiedRawValue =
-                    typeof rawValue === "object" ? (rawValue?.join("\n") ?? "") : (rawValue?.toString() ?? "");
+                    typeof rawValue === "object" ? rawValue?.join("\n") ?? "" : rawValue?.toString() ?? "";
 
                 if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
                     const coerced = coercePasteValue?.(stringifiedRawValue, inner);
@@ -3963,7 +3973,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (col: number) => {
             return typeof verticalBorder === "boolean"
                 ? verticalBorder
-                : (verticalBorder?.(col - rowMarkerOffset) ?? true);
+                : verticalBorder?.(col - rowMarkerOffset) ?? true;
         },
         [rowMarkerOffset, verticalBorder]
     );
@@ -4152,6 +4162,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onCanvasFocused = React.useCallback(() => {
         setIsFocusedDebounced.current(true);
+        onGridFocused?.();
 
         // check for mouse state, don't do anything if the user is clicked to focus.
         if (
@@ -4179,7 +4190,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onFocusOut = React.useCallback(() => {
         setIsFocusedDebounced.current(false);
-    }, []);
+        onGridBlurred?.();
+    }, [onGridBlurred]);
 
     const [idealWidth, idealHeight] = React.useMemo(() => {
         let h: number;

@@ -59,6 +59,14 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * @group Events
      */
     readonly onCellActivated?: (cell: Item) => void;
+    /** Emitted when the grid is focused.
+     * @group Events
+     */
+    readonly onGridFocused?: () => void;
+    /** Emitted when the grid is blurred.
+     * @group Events
+     */
+    readonly onGridBlurred?: () => void;
     /**
      * Emitted whenever the user initiats a pattern fill using the fill handle. This event provides both
      * a patternSource region and a fillDestination region, and can be prevented.
@@ -501,4 +509,3 @@ export interface DataEditorRef {
  */
 export declare const DataEditor: React.ForwardRefExoticComponent<DataEditorProps & React.RefAttributes<DataEditorRef>>;
 export {};
-//# sourceMappingURL=data-editor.d.ts.map
