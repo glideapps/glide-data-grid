@@ -46,6 +46,14 @@ export function sendTouchClick(el: Element | Node | Document | Window, options?:
     });
 }
 
+export function sendPointerClick(el: Element | Node | Document | Window, options?: any): void {
+    fireEvent.pointerDown(el, options);
+
+    fireEvent.pointerUp(el, options);
+
+    fireEvent.click(el, options);
+}
+
 export const makeCell = (cell: Item): GridCell => {
     const [col, row] = cell;
     switch (col) {

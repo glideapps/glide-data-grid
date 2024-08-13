@@ -24,6 +24,7 @@ import {
     prep,
     sendClick,
     sendTouchClick,
+    sendPointerClick,
     getCellCenterPositionForDefaultGrid,
     Context,
     standardBeforeEach,
@@ -1585,7 +1586,7 @@ describe("data-editor", () => {
         const overlay = screen.getByDisplayValue("j");
         expect(document.body.contains(overlay)).toBe(true);
 
-        sendClick(canvas, {
+        sendPointerClick(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 * 5 + 16, // Row 1 (0 indexed)
         });
