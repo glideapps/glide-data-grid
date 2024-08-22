@@ -161,7 +161,7 @@ export function drawGroups(
     getGroupDetails: GroupDetailsCallback,
     damage: CellSet | undefined
 ) {
-    const xPad = 8;
+    const xPad = theme.cellHorizontalPadding;
     const [hCol, hRow] = hovered?.[0] ?? [];
 
     let finalX = 0;

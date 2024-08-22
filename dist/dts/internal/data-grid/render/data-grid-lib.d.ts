@@ -57,4 +57,3 @@ export declare function drawMenuDots(ctx: CanvasRenderingContext2D, dotsX: numbe
 export declare function roundedPoly(ctx: CanvasRenderingContext2D, points: Point[], radiusAll: number): void;
 export declare function computeBounds(col: number, row: number, width: number, height: number, groupHeaderHeight: number, totalHeaderHeight: number, cellXOffset: number, cellYOffset: number, translateX: number, translateY: number, rows: number, freezeColumns: number, freezeTrailingRows: number, mappedColumns: readonly MappedGridColumn[], rowHeight: number | ((index: number) => number)): Rectangle;
 export {};
-//# sourceMappingURL=data-grid-lib.d.ts.map

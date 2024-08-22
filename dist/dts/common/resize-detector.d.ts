@@ -8,3 +8,4 @@ export interface UseResizeDetectorReturn<T> extends ReactResizeDetectorDimension
     ref: MutableRefObject<T | null>;
 }
 export {};
+//# sourceMappingURL=resize-detector.d.ts.map

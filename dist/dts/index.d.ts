@@ -47,3 +47,4 @@ export type { RowGroup, RowGroupingOptions } from "./data-editor/row-grouping.js
  * @hidden
  */
 export { DataEditorAll as default } from "./data-editor-all.js";
+//# sourceMappingURL=index.d.ts.map

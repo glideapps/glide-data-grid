@@ -14,4 +14,3 @@ export declare class CellSet {
     })[]): boolean;
     values(): IterableIterator<Item>;
 }
-//# sourceMappingURL=cell-set.d.ts.map

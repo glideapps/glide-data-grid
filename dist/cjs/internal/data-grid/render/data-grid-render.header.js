@@ -78,7 +78,7 @@ function drawGridHeaders(ctx, effectiveCols, enableGroups, hovered, width, trans
 }
 exports.drawGridHeaders = drawGridHeaders;
 function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, hovered, theme, spriteManager, _hoverValues, verticalBorder, getGroupDetails, damage) {
-    const xPad = 8;
+    const xPad = theme.cellHorizontalPadding;
     const [hCol, hRow] = hovered?.[0] ?? [];
     let finalX = 0;
     (0, data_grid_render_walk_js_1.walkGroups)(effectiveCols, width, translateX, groupHeaderHeight, (span, groupName, x, y, w, h) => {

@@ -396,4 +396,3 @@ export declare class CompactSelection {
     [Symbol.iterator](): Generator<number, void, unknown>;
 }
 export {};
-//# sourceMappingURL=data-grid-types.d.ts.map
