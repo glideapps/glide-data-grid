@@ -421,7 +421,7 @@ scrollTo: (
         options?: {
             hAlign?: "start" | "center" | "end";
             vAlign?: "start" | "center" | "end";
-            behavior?: "smooth" | "instant" | "auto";
+            behavior?: ScrollBehavior; // "auto" | "smooth" | "instant"
         }
     ) => void;
 ```
@@ -436,7 +436,11 @@ Requests the data grid to scroll to a particular location. If only one direction
 ## appendRow
 
 ```ts
-appendRow: (col: number, openOverlay: boolean = true) => Promise<void>;
+appendRow: (
+         col: number,
+         openOverlay: boolean = true,
+         behavior?: ScrollBehavior; // "auto" | "smooth" | "instant"
+) => Promise<void>;
 ```
 
 Appends a row to the data grid.

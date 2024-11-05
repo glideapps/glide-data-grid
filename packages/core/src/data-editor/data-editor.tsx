@@ -687,7 +687,7 @@ type ScrollToFn = (
     options?: {
         hAlign?: "start" | "center" | "end";
         vAlign?: "start" | "center" | "end";
-        behavior?: "smooth" | "instant" | "auto";
+        behavior?: ScrollBehavior;
     }
 ) => void;
 
@@ -698,7 +698,7 @@ export interface DataEditorRef {
      * @param col The column index to focus in the new row.
      * @returns A promise which waits for the append to complete.
      */
-    appendRow: (col: number, openOverlay?: boolean) => Promise<void>;
+    appendRow: (col: number, openOverlay?: boolean, behavior?: ScrollBehavior) => Promise<void>;
     /**
      * Triggers cells to redraw.
      */
@@ -1640,7 +1640,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     getCellContentRef.current = getCellContent;
     rowsRef.current = rows;
     const appendRow = React.useCallback(
-        async (col: number, openOverlay: boolean = true): Promise<void> => {
+        async (col: number, openOverlay: boolean = true, behavior?:  ScrollBehavior): Promise<void> => {
             const c = mangledCols[col];
             if (c?.trailingRowOptions?.disabled === true) {
                 return;
@@ -1666,7 +1666,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
 
                 const row = typeof r === "number" ? r : bottom ? rows : 0;
-                scrollToRef.current(col - rowMarkerOffset, row);
+                scrollToRef.current(col - rowMarkerOffset, row, "both", 0, 0, behavior ? { behavior } : undefined);
                 setCurrent(
                     {
                         cell: [col, row],
