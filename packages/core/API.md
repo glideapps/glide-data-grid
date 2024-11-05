@@ -417,7 +417,12 @@ scrollTo: (
         row: number,
         dir?: "horizontal" | "vertical" | "both",
         paddingX?: number,
-        paddingY?: number
+        paddingY?: number,
+        options?: {
+            hAlign?: "start" | "center" | "end";
+            vAlign?: "start" | "center" | "end";
+            behavior?: "smooth" | "instant" | "auto";
+        }
     ) => void;
 ```
 

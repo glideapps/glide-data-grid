@@ -687,6 +687,7 @@ type ScrollToFn = (
     options?: {
         hAlign?: "start" | "center" | "end";
         vAlign?: "start" | "center" | "end";
+        behavior?: "smooth" | "instant" | "auto";
     }
 ) => void;
 
@@ -1608,10 +1609,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                                 scrollX /= scale;
                                 scrollY /= scale;
                             }
-                            scrollRef.current.scrollTo(
-                                scrollX + scrollRef.current.scrollLeft,
-                                scrollY + scrollRef.current.scrollTop
-                            );
+                            scrollRef.current.scrollTo({
+                                left: scrollX + scrollRef.current.scrollLeft,
+                                top: scrollY + scrollRef.current.scrollTop,
+                                behavior: options?.behavior ?? "auto",
+                            });
                         }
                     }
                 }
