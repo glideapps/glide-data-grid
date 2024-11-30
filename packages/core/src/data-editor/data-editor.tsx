@@ -3848,6 +3848,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 return gridRef.current?.getBounds((col ?? 0) + rowMarkerOffset, row);
             },
             focus: () => gridRef.current?.focus(),
+            clearSelection: () => setGridSelection(emptyGridSelection, false),
             emit: async e => {
                 switch (e) {
                     case "delete":
