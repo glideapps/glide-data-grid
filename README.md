@@ -1,3 +1,4 @@
+## This fork has additional features that aren't possible with the existing APIs of `glideapps/glide-data-grid`
 <h1 align="center">
   <img src="https://raw.githubusercontent.com/glideapps/glide-data-grid/master/media/icon.png" width="224px"/><br/>
   <b>Glide Data Grid</b>
