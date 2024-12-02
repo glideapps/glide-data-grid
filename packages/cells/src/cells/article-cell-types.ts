@@ -1,4 +1,4 @@
-import type { CustomCell } from "@glideapps/glide-data-grid";
+import type { CustomCell } from "glide-data-grid-fork";
 
 interface ArticleCellProps {
     readonly kind: "article-cell";

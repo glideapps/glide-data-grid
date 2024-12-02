@@ -3,6 +3,7 @@ import SparklineCellRenderer, { type SparklineCell } from "./cells/sparkline-cel
 import TagsCellRenderer, { type TagsCell } from "./cells/tags-cell.js";
 import UserProfileCellRenderer, { type UserProfileCell } from "./cells/user-profile-cell.js";
 import DropdownCellRenderer, { type DropdownCell } from "./cells/dropdown-cell.js";
+import InputDropdownCellRenderer from "./cells/input-dropdown-cell.js";
 import ArticleCellRenderer from "./cells/article-cell.js";
 import type { ArticleCell } from "./cells/article-cell-types.js";
 import RangeCellRenderer, { type RangeCell } from "./cells/range-cell.js";
@@ -19,6 +20,7 @@ const cells = [
     TagsCellRenderer,
     UserProfileCellRenderer,
     DropdownCellRenderer,
+    InputDropdownCellRenderer,
     ArticleCellRenderer,
     SpinnerCellRenderer,
     RangeCellRenderer,
@@ -35,6 +37,7 @@ export {
     TagsCellRenderer as TagsCell,
     UserProfileCellRenderer as UserProfileCell,
     DropdownCellRenderer as DropdownCell,
+    InputDropdownCellRenderer as InputDropdownCellRenderer,
     ArticleCellRenderer as ArticleCell,
     RangeCellRenderer as RangeCell,
     SpinnerCellRenderer as SpinnerCell,

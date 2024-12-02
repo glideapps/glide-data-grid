@@ -1,6 +1,6 @@
 import { styled } from "@linaria/react";
 import * as React from "react";
-import { DataEditor, type DataEditorProps, GridCellKind } from "@glideapps/glide-data-grid";
+import { DataEditor, type DataEditorProps, GridCellKind } from "glide-data-grid-fork";
 import { DropdownCell as DropdownRenderer, MultiSelectCell as MultiSelectRenderer, allCells } from "./index.js";
 import type { StarCell } from "./cells/star-cell.js";
 import type { SparklineCell } from "./cells/sparkline-cell.js";
@@ -15,7 +15,7 @@ import type { SpinnerCell } from "./cells/spinner-cell.js";
 import { useResizeDetector } from "react-resize-detector";
 
 import "@toast-ui/editor/dist/toastui-editor.css";
-import "@glideapps/glide-data-grid/dist/index.css";
+import "glide-data-grid-fork/dist/index.css";
 import type { DatePickerCell } from "./cells/date-picker-cell.js";
 import type { LinksCell } from "./cells/links-cell.js";
 import type { ButtonCell } from "./cells/button-cell.js";

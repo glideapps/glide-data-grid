@@ -12,7 +12,7 @@ import {
 } from "@testing-library/react";
 import { vi, expect, describe, it, afterEach } from "vitest";
 
-import { GridCellKind } from "@glideapps/glide-data-grid";
+import { GridCellKind } from "glide-data-grid-fork";
 import renderer, { type MultiSelectCell, prepareOptions, resolveValues } from "../src/cells/multi-select-cell.js";
 
 describe("prepareOptions", () => {

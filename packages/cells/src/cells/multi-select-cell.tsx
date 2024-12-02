@@ -11,7 +11,7 @@ import {
     GridCellKind,
     roundedRect,
     getLuminance,
-} from "@glideapps/glide-data-grid";
+} from "glide-data-grid-fork";
 
 import { styled } from "@linaria/react";
 import Select, { type MenuProps, components, type StylesConfig } from "react-select";

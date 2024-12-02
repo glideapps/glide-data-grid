@@ -1,7 +1,7 @@
 import * as React from "react";
 import { fireEvent, render, cleanup } from "@testing-library/react";
 
-import { GridCellKind } from "@glideapps/glide-data-grid";
+import { GridCellKind } from "glide-data-grid-fork";
 import renderer, {
     type DateKind,
     type DatePickerCell,

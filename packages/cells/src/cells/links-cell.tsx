@@ -5,7 +5,7 @@ import {
     getMiddleCenterBias,
     GridCellKind,
     blend,
-} from "@glideapps/glide-data-grid";
+} from "glide-data-grid-fork";
 import { styled } from "@linaria/react";
 import * as React from "react";
 

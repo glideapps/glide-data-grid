@@ -1,5 +1,5 @@
 {
-    "name": "root",
+    "name": "glide-data-grid",
     "version": "6.0.4-alpha8",
     "scripts": {
         "start": "npm run storybook",
