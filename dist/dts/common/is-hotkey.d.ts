@@ -4,4 +4,3 @@ interface HotkeyResultDetails {
 }
 export declare function isHotkey(hotkey: string, args: GridKeyEventArgs, details: HotkeyResultDetails): boolean;
 export {};
-//# sourceMappingURL=is-hotkey.d.ts.map

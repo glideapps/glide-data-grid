@@ -7,4 +7,3 @@ interface Props extends WrapperProps, React.HTMLAttributes<HTMLDivElement> {
 }
 export declare const DataEditorContainer: React.FunctionComponent<React.PropsWithChildren<Props>>;
 export {};
-//# sourceMappingURL=data-grid-container.d.ts.map

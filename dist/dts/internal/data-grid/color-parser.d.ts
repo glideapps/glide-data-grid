@@ -13,3 +13,4 @@ export declare function interpolateColors(leftColor: string, rightColor: string,
  * @category Drawing
  */
 export declare function getLuminance(color: string): number;
+//# sourceMappingURL=color-parser.d.ts.map

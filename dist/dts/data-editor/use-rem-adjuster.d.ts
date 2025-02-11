@@ -19,4 +19,3 @@ interface DataEditorProps {
 }
 export declare function useRemAdjuster({ rowHeight: rowHeightIn, headerHeight: headerHeightIn, groupHeaderHeight: groupHeaderHeightIn, theme: themeIn, overscrollX: overscrollXIn, overscrollY: overscrollYIn, scaleToRem, remSize, }: DataEditorProps): DataEditorDimensions;
 export {};
-//# sourceMappingURL=use-rem-adjuster.d.ts.map

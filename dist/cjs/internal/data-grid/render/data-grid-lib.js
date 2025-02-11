@@ -21,6 +21,7 @@ function useMappedColumns(columns, freezeColumns) {
         indicatorIcon: c.indicatorIcon,
         style: c.style,
         themeOverride: c.themeOverride,
+        contentAlign: c.contentAlign,
         title: c.title,
         trailingRowOptions: c.trailingRowOptions,
         width: c.width,

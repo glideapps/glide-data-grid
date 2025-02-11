@@ -195,41 +195,52 @@ export function computeHeaderLayout(ctx, c, x, y, width, height, theme, isRTL) {
     const xPad = theme.cellHorizontalPadding;
     const headerIconSize = theme.headerIconSize;
     const menuBounds = getHeaderMenuBounds(x, y, width, height, false);
+    const isRightAligned = isRTL || c.contentAlign === "right";
+    const isCenterAligned = c.contentAlign === "center";
     let drawX = x + xPad;
-    const iconBounds = c.icon === undefined
-        ? undefined
-        : {
-            x: drawX,
+    let iconBounds;
+    let iconOverlayBounds;
+    const hasIcon = c.icon !== undefined && c.icon !== null;
+    if (hasIcon) {
+        iconBounds = {
+            x: isRightAligned ? x + width - xPad - headerIconSize : drawX,
             y: y + (height - headerIconSize) / 2,
             width: headerIconSize,
             height: headerIconSize,
         };
-    const iconOverlayBounds = iconBounds === undefined || c.overlayIcon === undefined
-        ? undefined
-        : {
-            x: iconBounds.x + 9,
-            y: iconBounds.y + 6,
-            width: 18,
-            height: 18,
-        };
-    if (iconBounds !== undefined) {
-        drawX += Math.ceil(headerIconSize * 1.3);
+        if (!isRightAligned) {
+            drawX += Math.ceil(headerIconSize * 1.3);
+        }
+        if (c.overlayIcon !== undefined) {
+            iconOverlayBounds = {
+                x: iconBounds.x + 9,
+                y: iconBounds.y + 6,
+                width: 18,
+                height: 18,
+            };
+        }
     }
+    const textWidth = ctx === undefined
+        ? getMeasuredTextCache(c.title, theme.headerFontFull)?.width ?? 0
+        : measureTextCached(c.title, ctx, theme.headerFontFull).width;
     const textBounds = {
-        x: drawX,
-        y: y,
-        width: width - drawX,
-        height: height,
+        x: isCenterAligned ? x + (width - textWidth) / 2 : isRightAligned ? x : drawX,
+        y,
+        width: isCenterAligned
+            ? textWidth
+            : isRightAligned
+                ? width - (hasIcon ? headerIconSize + xPad : xPad)
+                : width - (drawX - x) - xPad,
+        height,
     };
-    let indicatorIconBounds = undefined;
+    let indicatorIconBounds;
     if (c.indicatorIcon !== undefined) {
-        const textWidth = ctx === undefined
-            ? getMeasuredTextCache(c.title, theme.headerFontFull)?.width ?? 0
-            : measureTextCached(c.title, ctx, theme.headerFontFull).width;
-        textBounds.width = textWidth;
-        drawX += textWidth + xPad;
         indicatorIconBounds = {
-            x: drawX,
+            x: isRightAligned
+                ? hasIcon
+                    ? iconBounds.x - headerIconSize - xPad
+                    : x + width - headerIconSize - xPad
+                : drawX + textWidth + xPad,
             y: y + (height - headerIconSize) / 2,
             width: headerIconSize,
             height: headerIconSize,
@@ -286,14 +297,13 @@ function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered
     else {
         ctx.fillStyle = fillStyle;
     }
-    if (isRtl) {
-        ctx.textAlign = "right";
-    }
     if (headerLayout.textBounds !== undefined) {
-        ctx.fillText(c.title, isRtl ? headerLayout.textBounds.x + headerLayout.textBounds.width : headerLayout.textBounds.x, y + height / 2 + getMiddleCenterBias(ctx, theme.headerFontFull));
-    }
-    if (isRtl) {
-        ctx.textAlign = "left";
+        const isRightAligned = isRtl || c.contentAlign === "right";
+        ctx.textAlign = isRightAligned ? "right" : "left";
+        const textX = isRightAligned
+            ? headerLayout.textBounds.x + headerLayout.textBounds.width
+            : headerLayout.textBounds.x;
+        ctx.fillText(c.title, textX, y + height / 2 + getMiddleCenterBias(ctx, theme.headerFontFull));
     }
     if (c.indicatorIcon !== undefined &&
         headerLayout.indicatorIconBounds !== undefined &&

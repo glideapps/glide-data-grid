@@ -17,4 +17,3 @@ export declare function getCopyBufferContents(cells: readonly (readonly GridCell
 };
 export declare function decodeHTML(html: string): CopyBuffer | undefined;
 export {};
-//# sourceMappingURL=copy-paste.d.ts.map

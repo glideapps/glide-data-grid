@@ -11,4 +11,3 @@ interface Props {
 }
 export declare const MarkdownOverlayEditor: React.FunctionComponent<Props>;
 export {};
-//# sourceMappingURL=markdown-overlay-editor.d.ts.map

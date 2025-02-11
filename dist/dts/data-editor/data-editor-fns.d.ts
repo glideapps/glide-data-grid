@@ -13,4 +13,3 @@ export declare function copyToClipboard(cells: readonly (readonly GridCell[])[],
  * empty + click -> checked
  */
 export declare function toggleBoolean(data: boolean | null | undefined): boolean | null | undefined;
-//# sourceMappingURL=data-editor-fns.d.ts.map

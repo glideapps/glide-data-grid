@@ -36,6 +36,7 @@ interface AddColumnsProps {
 
 export const AddColumns: React.FC<AddColumnsProps> = p => {
     const { cols, getCellContent } = useMockDataGenerator(p.columnsCount);
+    const newCols = cols.map(c => ({ ...c, contentAlign: "right", icon: null }));
 
     return (
         <DataEditor
@@ -43,7 +44,7 @@ export const AddColumns: React.FC<AddColumnsProps> = p => {
             rowMarkers="number"
             getCellContent={getCellContent}
             experimental={{ strict: true }}
-            columns={cols}
+            columns={newCols}
             rows={10_000}
         />
     );
