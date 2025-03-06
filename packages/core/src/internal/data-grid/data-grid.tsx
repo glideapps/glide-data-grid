@@ -255,6 +255,12 @@ export interface DataGridProps {
               readonly scrollbarWidthOverride?: number;
               readonly hyperWrapping?: boolean;
               readonly renderStrategy?: "single-buffer" | "double-buffer" | "direct";
+              /**
+               * Allows providing a custom event target for event listeners.
+               * This is useful for scenarios where the grid is in a different context (e.g., iframe)
+               * or when you want to attach events to a specific DOM element.
+               */
+              readonly customWindowEventTarget?: HTMLElement | Window | Document;
           }
         | undefined;
 
@@ -396,7 +402,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const cellXOffset = Math.max(freezeColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
-    const windowEventTargetRef = React.useRef<Document | Window>(window);
+    const windowEventTargetRef = React.useRef<HTMLElement | Window | Document>(
+        experimental?.customWindowEventTarget ?? window
+    );
     const windowEventTarget = windowEventTargetRef.current;
 
     const imageLoader = imageWindowLoader;
@@ -1430,15 +1438,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             if (instance === null) {
-                windowEventTargetRef.current = window;
+                windowEventTargetRef.current = experimental?.customWindowEventTarget ?? window;
             } else {
                 const docRoot = instance.getRootNode();
 
-                if (docRoot === document) windowEventTargetRef.current = window;
-                windowEventTargetRef.current = docRoot as any;
+                windowEventTargetRef.current =
+                    docRoot === document ? experimental?.customWindowEventTarget ?? window : (docRoot as Document);
             }
         },
-        [canvasRef]
+        [canvasRef, experimental]
     );
 
     const onDragStartImpl = React.useCallback(
