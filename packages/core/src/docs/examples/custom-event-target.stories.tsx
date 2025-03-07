@@ -116,7 +116,7 @@ export const CustomEventTarget: React.VFC = () => {
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
             <div style={{ marginBottom: 10, padding: 10, backgroundColor: "#f0f0f0", borderRadius: 4 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span>Window click attempts blocked: {windowClickAttempts}</span>
+                    <span style={{ color: "#666" }}>Window click attempts blocked: {windowClickAttempts}</span>
                     <button
                         onClick={() => alert("This button should not work if window events are blocked!")}
                         style={{ padding: "5px 10px" }}>
