@@ -147,7 +147,7 @@ export const CustomEventTarget: React.VFC = () => {
                         columns={cols}
                         getCellContent={getCellContent}
                         experimental={{
-                            customWindowEventTarget: containerRef.current as HTMLElement,
+                            windowEventTarget: containerRef.current as HTMLElement,
                         }}
                     />
                 )}

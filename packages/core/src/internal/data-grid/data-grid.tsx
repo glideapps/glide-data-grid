@@ -260,7 +260,7 @@ export interface DataGridProps {
                * This is useful for scenarios where the grid is in a different context (e.g., iframe)
                * or when you want to attach events to a specific DOM element.
                */
-              readonly customWindowEventTarget?: HTMLElement | Window | Document;
+              readonly windowEventTarget?: HTMLElement | Window | Document;
           }
         | undefined;
 
@@ -403,7 +403,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const windowEventTargetRef = React.useRef<HTMLElement | Window | Document>(
-        experimental?.customWindowEventTarget ?? window
+        experimental?.windowEventTarget ?? window
     );
     const windowEventTarget = windowEventTargetRef.current;
 
@@ -1438,12 +1438,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             if (instance === null) {
-                windowEventTargetRef.current = experimental?.customWindowEventTarget ?? window;
+                windowEventTargetRef.current = experimental?.windowEventTarget ?? window;
             } else {
                 const docRoot = instance.getRootNode();
 
                 windowEventTargetRef.current =
-                    docRoot === document ? experimental?.customWindowEventTarget ?? window : (docRoot as Document);
+                    docRoot === document ? experimental?.windowEventTarget ?? window : (docRoot as Document);
             }
         },
         [canvasRef, experimental]
