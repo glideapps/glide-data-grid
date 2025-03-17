@@ -259,7 +259,7 @@ export interface DataGridProps {
                * Allows providing a custom event target for event listeners.
                * If not provided, the grid will use the window as the event target.
                */
-              readonly windowEventTarget?: HTMLElement | Window | Document;
+              readonly eventTarget?: HTMLElement | Window | Document;
           }
         | undefined;
 
@@ -401,9 +401,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const cellXOffset = Math.max(freezeColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
-    const windowEventTargetRef = React.useRef<HTMLElement | Window | Document>(
-        experimental?.windowEventTarget ?? window
-    );
+    const windowEventTargetRef = React.useRef<HTMLElement | Window | Document>(experimental?.eventTarget ?? window);
     const windowEventTarget = windowEventTargetRef.current;
 
     const imageLoader = imageWindowLoader;
@@ -1436,13 +1434,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 canvasRef.current = instance;
             }
 
-            if (instance === null) {
-                windowEventTargetRef.current = experimental?.windowEventTarget ?? window;
+            if (experimental?.eventTarget) {
+                windowEventTargetRef.current = experimental.eventTarget;
+            } else if (instance === null) {
+                windowEventTargetRef.current = window;
             } else {
                 const docRoot = instance.getRootNode();
 
-                windowEventTargetRef.current =
-                    docRoot === document ? experimental?.windowEventTarget ?? window : (docRoot as Document);
+                if (docRoot === document) windowEventTargetRef.current = window;
+                windowEventTargetRef.current = docRoot as any;
             }
         },
         [canvasRef, experimental]
