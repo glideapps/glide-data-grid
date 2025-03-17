@@ -257,8 +257,7 @@ export interface DataGridProps {
               readonly renderStrategy?: "single-buffer" | "double-buffer" | "direct";
               /**
                * Allows providing a custom event target for event listeners.
-               * This is useful for scenarios where the grid is in a different context (e.g., iframe)
-               * or when you want to attach events to a specific DOM element.
+               * If not provided, the grid will use the window as the event target.
                */
               readonly windowEventTarget?: HTMLElement | Window | Document;
           }
