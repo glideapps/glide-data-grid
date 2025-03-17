@@ -1445,7 +1445,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 windowEventTargetRef.current = docRoot as any;
             }
         },
-        [canvasRef, experimental]
+        [canvasRef, experimental?.eventTarget]
     );
 
     const onDragStartImpl = React.useCallback(
