@@ -9,7 +9,7 @@ import {
     isSizedGridColumn,
     type Item,
 } from "../src/index.js";
-import type { CustomCell } from "../src/internal/data-grid/data-grid-types.js";
+import type { CustomCell, SizedGridColumn } from "../src/internal/data-grid/data-grid-types.js";
 import type { DataEditorRef } from "../src/data-editor/data-editor.js";
 import { assert } from "../src/common/support.js";
 import { vi, type Mock, expect, describe, test, beforeEach, afterEach } from "vitest";
@@ -1352,7 +1352,7 @@ describe("data-editor", () => {
         expect(document.body.contains(overlay)).toBe(false);
     });
 
-    test("Open markdown overlay", async () => {
+    test("Open and close markdown overlay", async () => {
         vi.useFakeTimers();
         render(<DataEditor {...basicProps} />, {
             wrapper: Context,
@@ -1383,6 +1383,125 @@ describe("data-editor", () => {
 
         expect(document.body.contains(overlay)).toBe(false);
     });
+
+    test("Open and close overlays", async () => {
+        vi.useFakeTimers();
+
+        const columns = basicProps.columns.slice(0, 5);
+        const getCellContent: (typeof basicProps)["getCellContent"] = c => {
+            const [col, row] = c;
+            switch (col) {
+                case 0: {
+                    return {
+                        kind: GridCellKind.Bubble,
+                        allowOverlay: true,
+                        data: ["Foobar"],
+                        readOnly: true,
+                    };
+                }
+                case 1: {
+                    return {
+                        kind: GridCellKind.Drilldown,
+                        allowOverlay: true,
+                        data: [
+                            {
+                                img: "https://cdn.pixabay.com/photo/2017/02/20/18/03/cat-2083492_1280.jpg",
+                                text: "Foobar",
+                            },
+                        ],
+                        readOnly: true,
+                    };
+                }
+                case 2: {
+                    return {
+                        kind: GridCellKind.Image,
+                        data: [
+                            "https://i.imgur.com/5J0BftG.jpg",
+                            "https://preview.redd.it/7jlqkp2cyap51.jpg?width=575&auto=webp&s=26fa9ed15b16fb450ee08ed1f2f0ccb5e0223581",
+                        ],
+                        allowOverlay: true,
+                        readOnly: true,
+                    };
+                }
+                case 3: {
+                    return {
+                        kind: GridCellKind.Markdown,
+                        allowOverlay: true,
+                        data: `# Header: ${col}, ${row}`,
+                        readOnly: true,
+                    };
+                }
+                case 4: {
+                    return {
+                        kind: GridCellKind.Number,
+                        allowOverlay: true,
+                        data: row,
+                        displayData: row.toString(),
+                        readOnly: true,
+                    };
+                }
+                case 5: {
+                    return {
+                        kind: GridCellKind.Uri,
+                        allowOverlay: true,
+                        data: "https://www.google.com",
+                        readOnly: true,
+                    };
+                }
+            }
+
+            return basicProps.getCellContent(c);
+        };
+
+        render(
+            <DataEditor 
+                {...basicProps} 
+                columns={columns}
+                getCellContent={getCellContent}
+            />, 
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        let clientX = 10;
+        for (const col of columns) {
+            // Double click to open overlay
+            sendClick(canvas, {
+                clientX,
+                clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+            });
+
+            sendClick(canvas, {
+                clientX,
+                clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+            });
+
+            // Single click on overlay editor
+            sendClick(canvas, {
+                clientX,
+                clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+            });
+
+            const overlay = screen.getByTestId("data-grid-overlay-editor")
+            expect(document.body.contains(overlay)).toBe(true);
+    
+            vi.useFakeTimers();
+            fireEvent.keyDown(canvas, {
+                key: "Escape",
+            });
+            act(() => {
+                vi.runAllTimers();
+            });
+    
+            expect(document.body.contains(overlay)).toBe(false);
+
+            clientX += (col as SizedGridColumn).width;
+        }
+    })
 
     test("Open overlay with keypress", async () => {
         vi.useFakeTimers();

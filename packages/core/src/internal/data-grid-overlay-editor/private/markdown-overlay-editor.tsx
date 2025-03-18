@@ -59,7 +59,8 @@ export const MarkdownOverlayEditor: React.FunctionComponent<Props> = p => {
                     </div>
                 </>
             )}
-            <textarea className="gdg-md-edit-textarea gdg-input" autoFocus={true} />
         </MarkdownOverlayEditorStyle>
     );
 };
+
+export default MarkdownOverlayEditor;

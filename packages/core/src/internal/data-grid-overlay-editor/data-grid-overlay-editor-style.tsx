@@ -47,6 +47,10 @@ export const DataGridOverlayEditorStyle = styled.div<Props>`
             0px 6px 12px rgba(62, 65, 86, 0.15);
 
         animation: glide_fade_in 60ms 1;
+
+        &:focus {
+            outline: none;
+        }
     }
 
     &.gdg-pad {
