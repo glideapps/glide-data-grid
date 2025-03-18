@@ -1396,30 +1396,52 @@ describe("data-editor", () => {
             clientX: 300, // Col B
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
+        
+        const testKeys = [
+            {
+                keyCode: 74,
+                key: "j",
+            },
+            {
+                keyCode: 381,
+                key: "ž",
+            },
+            {
+                keyCode: 246,
+                key: "ö",
+            },
+            {
+                keyCode: 1096,
+                key: "ш",
+            },
+            {
+                keyCode: 187,
+                key: "+",
+            },
+            {
+                keyCode: 222,
+                key: "'",
+            },
+        ]
 
-        fireEvent.keyDown(canvas, {
-            keyCode: 74,
-            key: "j",
-        });
-
-        fireEvent.keyUp(canvas, {
-            keyCode: 74,
-            key: "j",
-        });
-
-        const overlay = screen.getByDisplayValue("j");
-        expect(document.body.contains(overlay)).toBe(true);
-
-        vi.useFakeTimers();
-        fireEvent.keyDown(overlay, {
-            key: "Escape",
-        });
-
-        act(() => {
-            vi.runAllTimers();
-        });
-
-        expect(document.body.contains(overlay)).toBe(false);
+        for (const key of testKeys) {
+            fireEvent.keyDown(canvas, key);
+            fireEvent.keyUp(canvas, key);
+    
+            const overlay = screen.getByDisplayValue(key.key);
+            expect(document.body.contains(overlay)).toBe(true);
+    
+            vi.useFakeTimers();
+            fireEvent.keyDown(overlay, {
+                key: "Escape",
+            });
+    
+            act(() => {
+                vi.runAllTimers();
+            });
+    
+            expect(document.body.contains(overlay)).toBe(false);
+        }
     });
 
     test("Open overlay with keypress when prior is disabled", async () => {
