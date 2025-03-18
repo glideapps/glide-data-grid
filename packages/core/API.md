@@ -45,15 +45,16 @@ Details of each property can be found by clicking on it.
 
 ## Ref Methods
 
-| Name                                  | Description                                                                                                  |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [appendRow](#appendrow)               | Append a row to the data grid.                                                                               |
-| [emit](#emit)                         | Used to emit commands normally emitted by keyboard shortcuts.                                                |
-| [focus](#focus)                       | Focuses the data grid.                                                                                       |
-| [getBounds](#getbounds)               | Gets the current screen-space bounds of a desired cell.                                                      |
-| [remeasureColumns](#remeasureColumns) | Causes the columns in the selection to have their natural sizes recomputed and re-emitted as a resize event. |
-| [scrollTo](#scrollto)                 | Tells the data-grid to scroll to a particular location.                                                      |
-| [updateCells](#updatecells)           | Invalidates the rendering of a list of passed cells.                                                         |
+| Name                                                | Description                                                                                                  |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [appendRow](#appendrow)                             | Append a row to the data grid.                                                                               |
+| [emit](#emit)                                       | Used to emit commands normally emitted by keyboard shortcuts.                                                |
+| [focus](#focus)                                     | Focuses the data grid.                                                                                       |
+| [getBounds](#getbounds)                             | Gets the current screen-space bounds of a desired cell.                                                      |
+| [remeasureColumns](#remeasureColumns)               | Causes the columns in the selection to have their natural sizes recomputed and re-emitted as a resize event. |
+| [scrollTo](#scrollto)                               | Tells the data-grid to scroll to a particular location.                                                      |
+| [updateCells](#updatecells)                         | Invalidates the rendering of a list of passed cells.                                                         |
+| [getMouseArgsForPosition](#getMouseArgsForPosition) | Gets the mouse args from pointer event position.                                     |
 
 ## Required Props
 
