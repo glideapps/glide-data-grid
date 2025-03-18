@@ -136,7 +136,7 @@ export const CustomEventTarget: React.VFC = () => {
                     position: "relative",
                     border: "2px solid #3c78d8",
                     borderRadius: 4,
-                    padding: 10,
+                    padding: 15,
                 }}>
                 {containerMounted && (
                     <DataEditor
@@ -147,7 +147,7 @@ export const CustomEventTarget: React.VFC = () => {
                         columns={cols}
                         getCellContent={getCellContent}
                         experimental={{
-                            windowEventTarget: containerRef.current as HTMLElement,
+                            eventTarget: containerRef.current as HTMLElement,
                         }}
                     />
                 )}
