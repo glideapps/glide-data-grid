@@ -77,7 +77,7 @@ export function drawGridHeaders(
             ctx.font = theme.baseFontFull;
         }
         const selected = selection.columns.hasIndex(c.sourceIndex);
-        const noHover = dragAndDropState !== undefined || isResizing;
+        const noHover = dragAndDropState !== undefined || isResizing || c.headerRowMarkerDisabled === true;
         const hoveredBoolean = !noHover && hRow === -1 && hCol === c.sourceIndex;
         const hover = noHover
             ? 0
