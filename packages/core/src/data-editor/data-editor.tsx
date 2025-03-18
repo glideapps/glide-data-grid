@@ -4123,6 +4123,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             onFinishEditing={onFinishEditing}
                             markdownDivCreateNode={markdownDivCreateNode}
                             isOutsideClick={isOutsideClick}
+                            customEventTarget={experimental?.eventTarget}
                         />
                     </React.Suspense>
                 )}
