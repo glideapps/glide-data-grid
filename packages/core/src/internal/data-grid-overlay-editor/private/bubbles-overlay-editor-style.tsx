@@ -7,6 +7,7 @@ export const BubblesOverlayEditorStyle = styled.div`
     flex-wrap: wrap;
     margin-top: auto;
     margin-bottom: auto;
+    overflow: auto;
 
     .boe-bubble {
         display: flex;
@@ -20,6 +21,7 @@ export const BubblesOverlayEditorStyle = styled.div`
         background-color: var(--gdg-bg-bubble);
         color: var(--gdg-text-dark);
         margin: 2px;
+        white-space: nowrap;
     }
 
     textarea {

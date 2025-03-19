@@ -730,7 +730,14 @@ Try out [Glide](https://www.glideapps.com/)
             getContent: () => {
                 return {
                     kind: GridCellKind.Bubble,
-                    data: [faker.lorem.word(), faker.lorem.word(), faker.lorem.word()],
+                    data: [
+                        faker.lorem.word(),
+                        faker.lorem.word(),
+                        faker.lorem.word(),
+                        faker.lorem.words(2),
+                        faker.lorem.words(2),
+                        faker.lorem.words(2),
+                    ],
                     allowOverlay: true,
                 };
             },
