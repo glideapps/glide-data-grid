@@ -117,6 +117,7 @@ export function drawHighlightRings(
                 ) {
                     const wasDashed: boolean = dashed;
                     const needsClip = !rectContains(s.clip, s.rect);
+                    ctx.beginPath();
                     if (needsClip) {
                         ctx.save();
                         ctx.rect(s.clip.x, s.clip.y, s.clip.width, s.clip.height);
@@ -133,6 +134,7 @@ export function drawHighlightRings(
                         s.style === "solid-outline"
                             ? blend(blend(s.color, theme.borderColor), theme.bgCell)
                             : withAlpha(s.color, 1);
+                    ctx.closePath();
                     ctx.strokeRect(s.rect.x + 0.5, s.rect.y + 0.5, s.rect.width - 1, s.rect.height - 1);
                     if (needsClip) {
                         ctx.restore();
