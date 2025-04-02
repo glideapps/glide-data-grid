@@ -455,6 +455,7 @@ export interface BooleanCell extends BaseGridCell {
     readonly allowOverlay: false;
     readonly maxSize?: number;
     readonly hoverEffectIntensity?: number;
+    readonly checkboxStyle?: 'circle' | 'square';
 }
 
 // Can be written more concisely, not easier to read if more concise.
