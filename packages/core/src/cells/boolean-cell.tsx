@@ -52,7 +52,8 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
             a.cell.data,
             booleanCellIsEditable(a.cell),
             a.cell.maxSize ?? defaultCellMaxSize,
-            a.cell.hoverEffectIntensity ?? 0.35
+            a.cell.hoverEffectIntensity ?? 0.35,
+            a.cell.checkboxStyle ?? 'square'
         ),
     onDelete: c => ({
         ...c,
@@ -95,7 +96,8 @@ function drawBoolean(
     data: boolean | BooleanEmpty | BooleanIndeterminate,
     canEdit: boolean,
     maxSize: number,
-    hoverEffectIntensity: number
+    hoverEffectIntensity: number,
+    checkboxStyle: 'circle' | 'square'
 ) {
     if (!canEdit && data === BooleanEmpty) {
         return;
@@ -129,7 +131,7 @@ function drawBoolean(
         }
     }
 
-    drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY, maxSize, contentAlign);
+    drawCheckbox(ctx, theme, data, x, y, w, h, highlighted, hoverX, hoverY, maxSize, contentAlign, checkboxStyle);
 
     if (shouldRestoreAlpha) {
         ctx.globalAlpha = 1;
