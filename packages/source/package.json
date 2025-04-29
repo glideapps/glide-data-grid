@@ -46,8 +46,8 @@
     },
     "peerDependencies": {
         "lodash": "^4.17.19",
-        "react": "^16.12.0 || 17.x || 18.x",
-        "react-dom": "^16.12.0 || 17.x || 18.x"
+        "react": "^16.12.0 || 17.x || 18.x || 19.x",
+        "react-dom": "^16.12.0 || 17.x || 18.x || 19.x"
     },
     "devDependencies": {
         "@babel/cli": "^7.16.0",
