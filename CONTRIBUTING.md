@@ -15,8 +15,10 @@ is to use Codespaces if you have access to it. If you do not, simply cloning the
 Once codespaces is up and running make sure `jq` is installed and then:
 
 ```bash
-npm run install && npm run storybook
+npm install && npm run start
 ```
+
+This will build the packages and serve the core package for testing.
 
 ## Forking the data grid?
 

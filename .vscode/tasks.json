@@ -6,15 +6,14 @@
             "type": "npm",
             "script": "start",
             "isBackground": true,
-
             "problemMatcher": {
                 "pattern": {
                     "regexp": ".*"
                 },
                 "background": {
                     "activeOnStart": true,
-                    "beginsPattern": "^.*Starting Storybook.*$", // Adjust if there's a more specific start message
-                    "endsPattern": "^.*Storybook \\d+.\\d+.\\d+ for react-webpack5 started.*$"
+                    "beginsPattern": "^.*Server running.*$",
+                    "endsPattern": "^.*Available on:.*$"
                 }
             },
             "group": {

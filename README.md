@@ -21,7 +21,7 @@
 
 # 👩‍💻 Demo and features
 
-Lots of fun examples are in our [Storybook](https://glideapps.github.io/glide-data-grid).
+Lots of fun examples can be found in the test-projects directory.
 
 You can also visit our [main site](https://grid.glideapps.com).
 
@@ -130,7 +130,7 @@ Data Grid is agnostic about the way you load/store/generate/mutate your data. Wh
 
 **Does it do sorting, searching, and filtering?**
 
-Search is included. You provide the trigger, we do the search. [Example](https://glideapps.github.io/glide-data-grid/?path=/story/glide-data-grid-docs--search) in our storybook.
+Search is included. You provide the trigger, we do the search.
 
 Filtering and sorting are something you would have to implement with your data source. There are hooks for adding column header menus if you want that.
 
@@ -142,7 +142,7 @@ Yes!
 
 **Can I render my own cells?**
 
-Yes, but the renderer has to use HTML Canvas. [Simple example](https://glideapps.github.io/glide-data-grid/?path=/story/glide-data-grid-dataeditor-demos--draw-custom-cells) in our Storybook.
+Yes, but the renderer has to use HTML Canvas.
 
 **Why does Data Grid use HTML Canvas?**
 
