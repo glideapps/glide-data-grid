@@ -444,7 +444,13 @@ export function prepTextCell(
 }
 
 /** @category Drawing */
-export function drawTextCellExternal(args: BaseDrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]) {
+export function drawTextCellExternal(
+    args: BaseDrawArgs,
+    data: string,
+    contentAlign?: BaseGridCell["contentAlign"],
+    allowWrapping?: boolean,
+    hyperWrapping?: boolean
+) {
     const { rect, ctx, theme } = args;
 
     ctx.fillStyle = theme.textDark;
@@ -455,7 +461,9 @@ export function drawTextCellExternal(args: BaseDrawArgs, data: string, contentAl
             theme: theme,
         },
         data,
-        contentAlign
+        contentAlign,
+        allowWrapping,
+        hyperWrapping,
     );
 }
 
