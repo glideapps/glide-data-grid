@@ -463,7 +463,7 @@ export function drawTextCellExternal(
         data,
         contentAlign,
         allowWrapping,
-        hyperWrapping,
+        hyperWrapping
     );
 }
 
