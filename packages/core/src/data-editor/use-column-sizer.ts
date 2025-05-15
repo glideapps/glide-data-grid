@@ -2,7 +2,7 @@ import * as React from "react";
 import type { FullTheme } from "../common/styles.js";
 import type { DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
 import type { GetCellRendererCallback } from "../cells/cell-types.js";
-
+import { measureTextCached } from "../internal/data-grid/render/data-grid-lib.js";
 import {
     type CellArray,
     type GridCell,
@@ -13,6 +13,8 @@ import {
     type SizedGridColumn,
 } from "../internal/data-grid/data-grid-types.js";
 const defaultSize = 150;
+// 15x more than the default size (of 10)
+const DEFAULT_COMPUTE_ROWS = 150;
 
 function measureCell(
     ctx: CanvasRenderingContext2D,
@@ -66,7 +68,7 @@ export function measureColumn(
     ctx.font = theme.headerFontFull;
     max = Math.max(
         max,
-        ctx.measureText(c?.title ?? "#").width + theme.cellHorizontalPadding * 2 + (c?.icon === undefined ? 0 : 28)
+        ctx.measureText(c.title).width + theme.cellHorizontalPadding * 2 + (c.icon === undefined ? 0 : 28)
     );
     ctx.font = currentFont;
     const final = Math.max(Math.ceil(minColumnWidth), Math.min(Math.floor(maxColumnWidth), Math.ceil(max)));
@@ -123,7 +125,7 @@ export function useColumnSizer(
     React.useLayoutEffect(() => {
         const getCells = getCellsForSelectionRef.current;
         if (getCells === undefined || columns.every(isSizedGridColumn)) return;
-        let computeRows = Math.max(1, 10 - Math.floor(columns.length / 10_000));
+        let computeRows = Math.max(1, DEFAULT_COMPUTE_ROWS - Math.floor(columns.length / 10));
         let tailRows = 0;
         if (computeRows < rowsRef.current && computeRows > 1) {
             computeRows--;
@@ -211,7 +213,6 @@ export function useColumnSizer(
                     selectedData,
                     minColumnWidth,
                     maxColumnWidth,
-                    true,
                     getCellRenderer
                 );
                 memoMap.current[c.id] = r.width;

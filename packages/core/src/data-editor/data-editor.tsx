@@ -2230,7 +2230,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         cells,
                         minColumnWidth,
                         maxColumnWidth,
-                        false,
                         getCellRenderer
                     );
                     onColumnResize?.(inputCol, newCol.width, col, newCol.width);
