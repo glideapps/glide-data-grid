@@ -12,3 +12,4 @@ declare class ImageWindowLoaderImpl extends WindowingTrackerBase implements Imag
     loadOrGetImage(url: string, col: number, row: number): HTMLImageElement | ImageBitmap | undefined;
 }
 export default ImageWindowLoaderImpl;
+//# sourceMappingURL=image-window-loader.d.ts.map

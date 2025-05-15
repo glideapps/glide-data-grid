@@ -79,3 +79,4 @@ export interface UseRowGroupingInnerResult {
 }
 export declare function useRowGroupingInner(options: RowGroupingOptions | undefined, rows: number, rowHeightIn: NonNullable<DataEditorProps["rowHeight"]>, getRowThemeOverrideIn: DataEditorProps["getRowThemeOverride"]): UseRowGroupingInnerResult;
 export {};
+//# sourceMappingURL=row-grouping.d.ts.map

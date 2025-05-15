@@ -1045,7 +1045,7 @@ const DataEditorImpl = (p, forwardedRef) => {
             const ctx = offscreen.getContext("2d", { alpha: false });
             if (ctx !== null) {
                 ctx.font = mergedTheme.baseFontFull;
-                const newCol = measureColumn(ctx, mergedTheme, inputCol, 0, cells, minColumnWidth, maxColumnWidth, false, getCellRenderer);
+                const newCol = measureColumn(ctx, mergedTheme, inputCol, 0, cells, minColumnWidth, maxColumnWidth, getCellRenderer);
                 onColumnResize?.(inputCol, newCol.width, col, newCol.width);
             }
         }

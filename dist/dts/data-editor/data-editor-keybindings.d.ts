@@ -59,3 +59,4 @@ export declare const keybindingDefaults: Keybinds;
 export declare function realizeKeybinds(keybinds: Keybinds): RealizedKeybinds;
 export declare function useKeybindingsWithDefaults(keybindingsIn?: Partial<Keybinds>): RealizedKeybinds;
 export {};
+//# sourceMappingURL=data-editor-keybindings.d.ts.map
