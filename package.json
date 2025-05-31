@@ -43,14 +43,11 @@
         "@linaria/shaker": "^4.5.3",
         "@linaria/vite": "^4.5.3",
         "@linaria/webpack-loader": "^4.5.3",
-        "@storybook/addon-actions": "^7.6.12",
-        "@storybook/addon-controls": "^7.6.12",
-        "@storybook/addon-links": "^7.6.12",
-        "@storybook/addon-storysource": "^7.6.12",
-        "@storybook/addons": "^7.6.12",
-        "@storybook/react": "^7.6.12",
-        "@storybook/react-vite": "^7.6.12",
-        "@storybook/react-webpack5": "^7.6.12",
+        "@storybook/addon-docs": "^9.0.1",
+        "@storybook/addon-links": "^9.0.1",
+        "@storybook/addons": "^7.6.17",
+        "@storybook/react-vite": "^9.0.1",
+        "@storybook/react-webpack5": "^9.0.1",
         "@testing-library/dom": "^10.4.0",
         "@testing-library/react": "^16.3.0",
         "@testing-library/react-hooks": "^8.0.1",
@@ -94,12 +91,15 @@
         "react-syntax-highlighter": "^15.4.5",
         "react-test-renderer": "^19.1.0",
         "resolve-typescript-plugin": "^2.0.1",
-        "storybook": "^7.6.12",
+        "storybook": "^9.0.1",
         "tsc-esm-fix": "^2.7.8",
         "typedoc": "^0.25.4",
         "typescript": "^5.1.6",
         "vitest": "^0.34.6",
         "vitest-canvas-mock": "^0.3.3",
         "webpack": "^5.73.0"
+    },
+    "overrides": {
+        "storybook": "$storybook"
     }
 }
