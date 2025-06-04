@@ -1200,12 +1200,11 @@ const DataEditorImpl = (p, forwardedRef) => {
                     preventDefault,
                 });
             }
-            if (a.button === 1)
-                return !isPrevented.current;
-            if (!isPrevented.current) {
+            // Always call the cell renderer's onClick for valid clicks, including middle clicks
+            if (!isPrevented.current && isValidClick) {
                 const c = getMangledCellContent(args.location);
                 const r = getCellRenderer(c);
-                if (r !== undefined && r.onClick !== undefined && isValidClick) {
+                if (r !== undefined && r.onClick !== undefined) {
                     const newVal = r.onClick({
                         ...a,
                         cell: c,
@@ -1224,8 +1223,14 @@ const DataEditorImpl = (p, forwardedRef) => {
                         ]);
                     }
                 }
+            }
+            // For middle clicks, return early to prevent selection/activation behavior
+            if (a.button === 1)
+                return !isPrevented.current;
+            if (!isPrevented.current) {
                 if (isPrevented.current || gridSelection.current === undefined)
                     return false;
+                const c = getMangledCellContent(args.location);
                 let shouldActivate = false;
                 switch (c.activationBehaviorOverride ?? cellActivationBehavior) {
                     case "double-click":

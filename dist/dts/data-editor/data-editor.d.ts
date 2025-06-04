@@ -302,7 +302,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
     readonly gridSelection?: GridSelection;
     /**
      * Emitted whenever the grid selection changes. Specifying
-     * this function will make the grid’s selection controlled, so
+     * this function will make the grid's selection controlled, so
      * so you will need to specify {@link gridSelection} as well. See
      * the "Controlled Selection" example for details.
      *
