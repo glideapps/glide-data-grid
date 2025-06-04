@@ -121,4 +121,43 @@ describe("uriCellRenderer", () => {
         });
         expect(updatedCell?.data).toBe(pasteData);
     });
+
+    it("onClick triggers onClickUri callback on middle click (button 1)", () => {
+        const onClickUriMock = vi.fn();
+        const cell: UriCell = {
+            kind: GridCellKind.Uri,
+            data: "http://example.com",
+            hoverEffect: true,
+            onClickUri: onClickUriMock,
+            allowOverlay: true,
+        };
+        const drawArgs: DrawArgs<UriCell> = {
+            ...baseDrawArgs,
+            cell,
+            theme,
+            ctx: mockCanvasContext,
+            rect: { x: 0, y: 0, width: 100, height: 120 },
+            hoverX: 10,
+            hoverY: 10,
+        };
+        uriCellRenderer.draw(drawArgs, cell);
+        uriCellRenderer.onClick?.({
+            cell,
+            bounds: { x: 0, y: 0, width: 100, height: 120 },
+            posX: 10,
+            posY: 60,
+            theme,
+            button: 1, // Middle click
+            buttons: 0,
+            ctrlKey: false,
+            isEdge: false,
+            isTouch: false,
+            location: [0, 0],
+            metaKey: false,
+            preventDefault: () => undefined,
+            scrollEdge: [0, 0],
+            shiftKey: false,
+        });
+        expect(onClickUriMock).toHaveBeenCalled();
+    });
 });
