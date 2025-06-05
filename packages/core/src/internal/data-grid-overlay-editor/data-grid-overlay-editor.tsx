@@ -152,10 +152,10 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     const [editorProvider, useLabel] = React.useMemo((): [ProvideEditorCallbackResult<GridCell>, boolean] | [] => {
         if (isInnerOnlyCell(content)) return [];
-        const external = provideEditor?.(content);
+        const external = provideEditor?.(content, cell);
         if (external !== undefined) return [external, false];
-        return [getCellRenderer(content)?.provideEditor?.(content), false];
-    }, [content, getCellRenderer, provideEditor]);
+        return [getCellRenderer(content)?.provideEditor?.(content, cell), false];
+    }, [content, getCellRenderer, provideEditor, cell]);
 
     const { ref, style: stayOnScreenStyle } = useStayOnScreen();
 
