@@ -511,9 +511,30 @@ export const KeyName = styled.kbd`
 
 export const defaultProps: Partial<DataEditorProps> = {
     smoothScrollX: true,
-    smoothScrollY: true,
+    smoothScrollY: false,
     getCellsForSelection: true,
     width: "100%",
+    height: "100%",
+    headerHeight: 24,
+    rowHeight: 22,
+    // Enable search
+    keybindings: { search: true },
+    theme: {
+        // FONT
+        headerFontStyle: "600 0.688rem",
+        baseFontStyle: "0.688rem",
+        markerFontStyle: "0.688rem",
+
+        editorFontSize: "0.688rem",
+        lineHeight: 1.4, //unitless scaler depends on your font
+
+        // PADDING
+        cellHorizontalPadding: 4,
+        cellVerticalPadding: 0,
+
+        // ICON
+        headerIconSize: 16,
+    },
 };
 
 export function clearCell(cell: GridCell): GridCell {
