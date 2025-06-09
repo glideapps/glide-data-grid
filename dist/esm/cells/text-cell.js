@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
 import { GrowingEntry } from "../internal/growing-entry/growing-entry.js";
-import { drawTextCell, prepTextCell } from "../internal/data-grid/render/data-grid-lib.js";
+import { drawTextCell, prepTextCell, measureTextCached } from "../internal/data-grid/render/data-grid-lib.js";
 import { GridCellKind } from "../internal/data-grid/data-grid-types.js";
 import { drawEditHoverIndicator } from "../internal/data-grid/render/draw-edit-hover-indicator.js";
 export const textCellRenderer = {
@@ -23,7 +23,7 @@ export const textCellRenderer = {
         const lines = cell.displayData.split("\n", cell.allowWrapping === true ? undefined : 1);
         let maxLineWidth = 0;
         for (const line of lines) {
-            maxLineWidth = Math.max(maxLineWidth, ctx.measureText(line).width);
+            maxLineWidth = Math.max(maxLineWidth, measureTextCached(line, ctx, t.baseFontFull).width);
         }
         return maxLineWidth + 2 * t.cellHorizontalPadding;
     },

@@ -38,4 +38,3 @@ export interface DataGridSearchProps extends Omit<ScrollingDataGridProps, "preli
 }
 declare const DataGridSearch: React.FunctionComponent<DataGridSearchProps>;
 export default DataGridSearch;
-//# sourceMappingURL=data-grid-search.d.ts.map

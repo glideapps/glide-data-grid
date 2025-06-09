@@ -37,7 +37,7 @@ exports.markdownCellRenderer = {
     drawPrep: data_grid_lib_js_1.prepTextCell,
     measure: (ctx, cell, t) => {
         const firstLine = cell.data.split("\n")[0];
-        return ctx.measureText(firstLine).width + 2 * t.cellHorizontalPadding;
+        return (0, data_grid_lib_js_1.measureTextCached)(firstLine, ctx, t.baseFontFull).width + 2 * t.cellHorizontalPadding;
     },
     draw: a => (0, data_grid_lib_js_1.drawTextCell)(a, a.cell.data, a.cell.contentAlign),
     onDelete: c => ({

@@ -1,1 +1,1 @@
-{"version":3,"file":"number-cell.d.ts","sourceRoot":"","sources":["../../../src/cells/number-cell.tsx"],"names":[],"mappings":"AAGA,OAAO,EAAgB,KAAK,UAAU,EAAE,MAAM,0CAA0C,CAAC;AACzF,OAAO,KAAK,EAAE,oBAAoB,EAAE,MAAM,iBAAiB,CAAC;AAO5D,eAAO,MAAM,kBAAkB,EAAE,oBAAoB,CAAC,UAAU,CAoD/D,CAAC"}
+{"version":3,"file":"number-cell.d.ts","sourceRoot":"","sources":["../../../src/cells/number-cell.tsx"],"names":[],"mappings":"AAGA,OAAO,EAAgB,KAAK,UAAU,EAAE,MAAM,0CAA0C,CAAC;AACzF,OAAO,KAAK,EAAE,oBAAoB,EAAE,MAAM,iBAAiB,CAAC;AAO5D,eAAO,MAAM,kBAAkB,EAAE,oBAAoB,CAAC,UAAU,CAqD/D,CAAC"}

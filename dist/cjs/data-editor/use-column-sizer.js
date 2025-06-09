@@ -25,6 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useColumnSizer = exports.measureColumn = void 0;
 const React = __importStar(require("react"));
+const data_grid_lib_js_1 = require("../internal/data-grid/render/data-grid-lib.js");
 const data_grid_types_js_1 = require("../internal/data-grid/data-grid-types.js");
 const defaultSize = 150;
 // 15x more than the default size (of 10)
@@ -39,8 +40,11 @@ function measureColumn(ctx, theme, c, colIndex, selectedData, minColumnWidth, ma
     for (const row of selectedData) {
         max = Math.max(max, measureCell(ctx, row[colIndex], theme, getCellRenderer));
     }
-    // Check title width
-    max = Math.max(max, ctx.measureText(c?.title ?? "#").width + theme.cellHorizontalPadding * 2 + (c?.icon === undefined ? 0 : 28));
+    // Check title width - using enhanced measureTextCached for cross-browser accuracy
+    const titleWidth = (0, data_grid_lib_js_1.measureTextCached)(c?.title ?? "#", ctx, theme.headerFontFull).width +
+        theme.cellHorizontalPadding * 2 +
+        (c?.icon === undefined ? 0 : 28);
+    max = Math.max(max, titleWidth);
     return {
         ...c,
         width: Math.max(Math.ceil(minColumnWidth), Math.min(Math.floor(maxColumnWidth), Math.ceil(max))),

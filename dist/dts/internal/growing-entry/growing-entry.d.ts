@@ -9,4 +9,3 @@ interface Props extends React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTM
 /** @category Renderers */
 export declare const GrowingEntry: React.FunctionComponent<Props>;
 export {};
-//# sourceMappingURL=growing-entry.d.ts.map

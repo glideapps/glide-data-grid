@@ -6,4 +6,3 @@ export interface ImageWindowLoader {
     loadOrGetImage(url: string, col: number, row: number): HTMLImageElement | ImageBitmap | undefined;
     setCallback(imageLoaded: (locations: CellSet) => void): void;
 }
-//# sourceMappingURL=image-window-loader-interface.d.ts.map

@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
-import { drawTextCell, prepTextCell } from "../internal/data-grid/render/data-grid-lib.js";
+import { drawTextCell, prepTextCell, measureTextCached } from "../internal/data-grid/render/data-grid-lib.js";
 import { GridCellKind } from "../internal/data-grid/data-grid-types.js";
 import { drawEditHoverIndicator } from "../internal/data-grid/render/draw-edit-hover-indicator.js";
 const NumberOverlayEditor = React.lazy(async () => await import("../internal/data-grid-overlay-editor/private/number-overlay-editor.js"));
@@ -19,7 +19,7 @@ export const numberCellRenderer = {
         }
         drawTextCell(a, a.cell.displayData, a.cell.contentAlign);
     },
-    measure: (ctx, cell, theme) => ctx.measureText(cell.displayData).width + theme.cellHorizontalPadding * 2,
+    measure: (ctx, cell, theme) => measureTextCached(cell.displayData, ctx, theme.baseFontFull).width + theme.cellHorizontalPadding * 2,
     onDelete: c => ({
         ...c,
         data: undefined,

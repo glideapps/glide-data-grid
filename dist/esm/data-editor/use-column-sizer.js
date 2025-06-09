@@ -1,4 +1,5 @@
 import * as React from "react";
+import { measureTextCached } from "../internal/data-grid/render/data-grid-lib.js";
 import { isSizedGridColumn, resolveCellsThunk, } from "../internal/data-grid/data-grid-types.js";
 const defaultSize = 150;
 // 15x more than the default size (of 10)
@@ -13,8 +14,11 @@ export function measureColumn(ctx, theme, c, colIndex, selectedData, minColumnWi
     for (const row of selectedData) {
         max = Math.max(max, measureCell(ctx, row[colIndex], theme, getCellRenderer));
     }
-    // Check title width
-    max = Math.max(max, ctx.measureText(c?.title ?? "#").width + theme.cellHorizontalPadding * 2 + (c?.icon === undefined ? 0 : 28));
+    // Check title width - using enhanced measureTextCached for cross-browser accuracy
+    const titleWidth = measureTextCached(c?.title ?? "#", ctx, theme.headerFontFull).width +
+        theme.cellHorizontalPadding * 2 +
+        (c?.icon === undefined ? 0 : 28);
+    max = Math.max(max, titleWidth);
     return {
         ...c,
         width: Math.max(Math.ceil(minColumnWidth), Math.min(Math.floor(maxColumnWidth), Math.ceil(max))),

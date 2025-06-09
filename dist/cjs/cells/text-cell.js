@@ -49,7 +49,7 @@ exports.textCellRenderer = {
         const lines = cell.displayData.split("\n", cell.allowWrapping === true ? undefined : 1);
         let maxLineWidth = 0;
         for (const line of lines) {
-            maxLineWidth = Math.max(maxLineWidth, ctx.measureText(line).width);
+            maxLineWidth = Math.max(maxLineWidth, (0, data_grid_lib_js_1.measureTextCached)(line, ctx, t.baseFontFull).width);
         }
         return maxLineWidth + 2 * t.cellHorizontalPadding;
     },

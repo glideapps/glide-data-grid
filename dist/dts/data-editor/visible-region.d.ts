@@ -16,4 +16,3 @@ export type VisibleRegion = Rectangle & {
         freezeRegions?: readonly Rectangle[];
     };
 };
-//# sourceMappingURL=visible-region.d.ts.map

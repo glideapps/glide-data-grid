@@ -53,4 +53,3 @@ export declare const ThemeContext: React.Context<Theme>;
 /** @category Hooks */
 export declare function useTheme(): Theme;
 export declare function mergeAndRealizeTheme(theme: Theme, ...overlays: Partial<Theme | undefined>[]): FullTheme;
-//# sourceMappingURL=styles.d.ts.map

@@ -113,7 +113,8 @@ exports.uriCellRenderer = {
         }
         return undefined;
     },
-    measure: (ctx, cell, theme) => ctx.measureText(cell.displayData ?? cell.data).width + theme.cellHorizontalPadding * 2,
+    measure: (ctx, cell, theme) => (0, data_grid_lib_js_1.measureTextCached)(cell.displayData ?? cell.data, ctx, theme.baseFontFull).width +
+        theme.cellHorizontalPadding * 2,
     onDelete: c => ({
         ...c,
         data: "",

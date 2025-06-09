@@ -58,4 +58,3 @@ export interface DataGridDndProps extends Props {
 }
 declare const DataGridDnd: React.FunctionComponent<DataGridDndProps>;
 export default DataGridDnd;
-//# sourceMappingURL=data-grid-dnd.d.ts.map

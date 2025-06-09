@@ -240,6 +240,33 @@ exports.getRowIndexForY = getRowIndexForY;
 let metricsSize = 0;
 let metricsCache = {};
 const isSSR = typeof window === "undefined";
+// Single reusable element for accurate text measurement (when safe to use)
+let measurementElement = null;
+let domMeasurementAvailable = false;
+function initializeDOMMeasurement() {
+    if (isSSR || domMeasurementAvailable)
+        return;
+    if (typeof document === "undefined")
+        return;
+    try {
+        measurementElement = document.createElement("span");
+        measurementElement.style.visibility = "hidden";
+        measurementElement.style.position = "absolute";
+        measurementElement.style.top = "-9999px";
+        measurementElement.style.left = "-9999px";
+        measurementElement.style.whiteSpace = "nowrap";
+        measurementElement.style.padding = "0";
+        measurementElement.style.margin = "0";
+        measurementElement.style.border = "none";
+        document.body.append(measurementElement);
+        domMeasurementAvailable = true;
+    }
+    catch {
+        // DOM measurement not available in this environment
+        domMeasurementAvailable = false;
+        measurementElement = null;
+    }
+}
 async function clearCacheOnLoad() {
     if (isSSR || document?.fonts?.ready === undefined)
         return;
@@ -247,8 +274,15 @@ async function clearCacheOnLoad() {
     metricsSize = 0;
     metricsCache = {};
     (0, canvas_hypertxt_1.clearCache)();
+    // Try to initialize DOM measurement after fonts are ready
+    initializeDOMMeasurement();
 }
 void clearCacheOnLoad();
+// Try to initialize DOM measurement immediately if possible
+if (!isSSR) {
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(initializeDOMMeasurement, 0);
+}
 function makeCacheKey(s, ctx, baseline, font) {
     return `${s}_${font ?? ctx?.font}_${baseline}`;
 }
@@ -257,7 +291,29 @@ function measureTextCached(s, ctx, font, baseline = "middle") {
     const key = makeCacheKey(s, ctx, baseline, font);
     let metrics = metricsCache[key];
     if (metrics === undefined) {
-        metrics = ctx.measureText(s);
+        // Get base measurement from canvas
+        const canvasMetrics = ctx.measureText(s);
+        // For longer text and when DOM measurement is available, enhance accuracy
+        if (s.length > 5 && domMeasurementAvailable && measurementElement) {
+            try {
+                measurementElement.style.font = font ?? ctx.font;
+                measurementElement.textContent = s;
+                const domWidth = measurementElement.getBoundingClientRect().width;
+                // Create enhanced metrics using the more accurate DOM width
+                // but preserving other canvas metrics properties
+                metrics = {
+                    ...canvasMetrics,
+                    width: Math.max(canvasMetrics.width, domWidth),
+                };
+            }
+            catch {
+                // Fallback to canvas measurement if DOM approach fails
+                metrics = canvasMetrics;
+            }
+        }
+        else {
+            metrics = canvasMetrics;
+        }
         metricsCache[key] = metrics;
         metricsSize++;
     }

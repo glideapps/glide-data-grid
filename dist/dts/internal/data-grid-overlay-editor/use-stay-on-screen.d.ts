@@ -5,4 +5,3 @@ interface StayOnScreen {
 }
 export declare function useStayOnScreen(): StayOnScreen;
 export {};
-//# sourceMappingURL=use-stay-on-screen.d.ts.map

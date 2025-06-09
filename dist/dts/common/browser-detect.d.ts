@@ -8,4 +8,3 @@ export declare const browserIsFirefox: Lazy<boolean>;
 export declare const browserIsSafari: Lazy<boolean>;
 export declare const browserIsOSX: Lazy<boolean>;
 export {};
-//# sourceMappingURL=browser-detect.d.ts.map

@@ -31,4 +31,3 @@ export declare const sprites: {
     renameIcon: (props: SpriteProps) => string;
 };
 export type HeaderIconMap = Readonly<typeof sprites>;
-//# sourceMappingURL=sprites.d.ts.map

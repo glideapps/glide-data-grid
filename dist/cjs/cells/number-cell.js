@@ -45,7 +45,7 @@ exports.numberCellRenderer = {
         }
         (0, data_grid_lib_js_1.drawTextCell)(a, a.cell.displayData, a.cell.contentAlign);
     },
-    measure: (ctx, cell, theme) => ctx.measureText(cell.displayData).width + theme.cellHorizontalPadding * 2,
+    measure: (ctx, cell, theme) => (0, data_grid_lib_js_1.measureTextCached)(cell.displayData, ctx, theme.baseFontFull).width + theme.cellHorizontalPadding * 2,
     onDelete: c => ({
         ...c,
         data: undefined,

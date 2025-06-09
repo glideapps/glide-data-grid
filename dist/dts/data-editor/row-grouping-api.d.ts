@@ -18,4 +18,3 @@ export interface UseRowGroupingResult {
 export declare function useRowGrouping(options: RowGroupingOptions | undefined, rows: number): UseRowGroupingResult;
 export declare function updateRowGroupingByPath(rowGrouping: readonly RowGroup[], path: readonly number[], update: Partial<RowGroup>): readonly RowGroup[];
 export declare function getRowGroupingForPath(rowGrouping: readonly RowGroup[], path: readonly number[]): RowGroup;
-//# sourceMappingURL=row-grouping-api.d.ts.map

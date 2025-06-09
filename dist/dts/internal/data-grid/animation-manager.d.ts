@@ -23,4 +23,3 @@ export declare class AnimationManager {
     setHovered: (item: Item | undefined) => void;
 }
 export {};
-//# sourceMappingURL=animation-manager.d.ts.map

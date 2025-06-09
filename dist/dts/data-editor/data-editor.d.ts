@@ -509,4 +509,3 @@ export interface DataEditorRef {
  */
 export declare const DataEditor: React.ForwardRefExoticComponent<DataEditorProps & React.RefAttributes<DataEditorRef>>;
 export {};
-//# sourceMappingURL=data-editor.d.ts.map
