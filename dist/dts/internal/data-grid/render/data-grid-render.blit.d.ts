@@ -17,3 +17,4 @@ export declare function blitLastFrame(ctx: CanvasRenderingContext2D, blitSource:
 };
 export declare function blitResizedCol(last: BlitData, cellXOffset: number, cellYOffset: number, translateX: number, translateY: number, width: number, height: number, totalHeaderHeight: number, effectiveCols: readonly MappedGridColumn[], resizedIndex: number): Rectangle[];
 export declare function computeCanBlit(current: DrawGridArg, last: DrawGridArg | undefined): boolean | number;
+//# sourceMappingURL=data-grid-render.blit.d.ts.map

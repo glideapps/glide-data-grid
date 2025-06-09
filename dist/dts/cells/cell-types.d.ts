@@ -86,3 +86,4 @@ export type CellRenderer<T extends InnerGridCell> = [T] extends [CustomCell<infe
 /** @category Renderers */
 export type GetCellRendererCallback = <T extends InnerGridCell>(cell: T) => CellRenderer<T> | undefined;
 export {};
+//# sourceMappingURL=cell-types.d.ts.map

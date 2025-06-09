@@ -9,3 +9,4 @@ interface Props {
 }
 export declare const GroupRename: React.VFC<Props>;
 export {};
+//# sourceMappingURL=group-rename.d.ts.map

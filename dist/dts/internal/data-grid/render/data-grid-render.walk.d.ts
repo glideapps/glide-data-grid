@@ -8,3 +8,4 @@ export declare function walkColumns(effectiveCols: readonly MappedGridColumn[], 
 export type WalkGroupsCallback = (colSpan: Item, group: string, x: number, y: number, width: number, height: number) => void;
 export declare function walkGroups(effectiveCols: readonly MappedGridColumn[], width: number, translateX: number, groupHeaderHeight: number, cb: WalkGroupsCallback): void;
 export declare function getSpanBounds(span: Item, cellX: number, cellY: number, cellW: number, cellH: number, column: MappedGridColumn, allColumns: readonly MappedGridColumn[]): [Rectangle | undefined, Rectangle | undefined];
+//# sourceMappingURL=data-grid-render.walk.d.ts.map

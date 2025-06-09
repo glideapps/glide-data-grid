@@ -314,6 +314,9 @@ const isSSR = typeof window === "undefined";
 let measurementElement: HTMLSpanElement | null = null;
 let domMeasurementAvailable = false;
 
+// Safari detection for measureText bug workaround
+const isSafari = !isSSR && /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
 function initializeDOMMeasurement() {
     if (isSSR || domMeasurementAvailable) return;
     if (typeof document === "undefined") return;
@@ -376,18 +379,17 @@ export function measureTextCached(
         // Get base measurement from canvas
         metrics = ctx.measureText(s);
 
-        // For longer text and when DOM measurement is available, enhance accuracy
-        if (s.length > 5 && domMeasurementAvailable && measurementElement) {
+        // Safari-specific workaround: Safari's measureText can be inaccurate for longer text
+        if (isSafari && s.length > 5 && domMeasurementAvailable && measurementElement) {
             try {
                 measurementElement.style.font = font ?? ctx.font;
                 measurementElement.textContent = s;
 
                 const domWidth = measurementElement.getBoundingClientRect().width;
 
-                // Enhance the width with more accurate DOM measurement
-                // while preserving the TextMetrics prototype and all other properties
+                // Use the more accurate DOM measurement for Safari
+                // but preserve TextMetrics prototype to maintain click detection
                 if (domWidth > metrics.width) {
-                    // Use Object.defineProperty to modify the width while maintaining the TextMetrics prototype
                     Object.defineProperty(metrics, "width", {
                         value: domWidth,
                         writable: true,

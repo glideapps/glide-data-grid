@@ -11,3 +11,4 @@ export default class ClickOutsideContainer extends React.PureComponent<Props> {
     render(): React.ReactNode;
 }
 export {};
+//# sourceMappingURL=click-outside-container.d.ts.map

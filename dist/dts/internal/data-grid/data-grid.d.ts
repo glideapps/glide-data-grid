@@ -224,3 +224,4 @@ export interface DataGridRef {
 }
 declare const _default: React.MemoExoticComponent<React.ForwardRefExoticComponent<DataGridProps & React.RefAttributes<DataGridRef>>>;
 export default _default;
+//# sourceMappingURL=data-grid.d.ts.map

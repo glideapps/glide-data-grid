@@ -224,6 +224,8 @@ const isSSR = typeof window === "undefined";
 // Single reusable element for accurate text measurement (when safe to use)
 let measurementElement = null;
 let domMeasurementAvailable = false;
+// Safari detection for measureText bug workaround
+const isSafari = !isSSR && /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 function initializeDOMMeasurement() {
     if (isSSR || domMeasurementAvailable)
         return;
@@ -273,27 +275,27 @@ export function measureTextCached(s, ctx, font, baseline = "middle") {
     let metrics = metricsCache[key];
     if (metrics === undefined) {
         // Get base measurement from canvas
-        const canvasMetrics = ctx.measureText(s);
-        // For longer text and when DOM measurement is available, enhance accuracy
-        if (s.length > 5 && domMeasurementAvailable && measurementElement) {
+        metrics = ctx.measureText(s);
+        // Safari-specific workaround: Safari's measureText can be inaccurate for longer text
+        if (isSafari && s.length > 5 && domMeasurementAvailable && measurementElement) {
             try {
                 measurementElement.style.font = font ?? ctx.font;
                 measurementElement.textContent = s;
                 const domWidth = measurementElement.getBoundingClientRect().width;
-                // Create enhanced metrics using the more accurate DOM width
-                // but preserving other canvas metrics properties
-                metrics = {
-                    ...canvasMetrics,
-                    width: Math.max(canvasMetrics.width, domWidth),
-                };
+                // Use the more accurate DOM measurement for Safari
+                // but preserve TextMetrics prototype to maintain click detection
+                if (domWidth > metrics.width) {
+                    Object.defineProperty(metrics, "width", {
+                        value: domWidth,
+                        writable: true,
+                        enumerable: true,
+                        configurable: true,
+                    });
+                }
             }
             catch {
                 // Fallback to canvas measurement if DOM approach fails
-                metrics = canvasMetrics;
             }
-        }
-        else {
-            metrics = canvasMetrics;
         }
         metricsCache[key] = metrics;
         metricsSize++;

@@ -54,3 +54,4 @@ export interface ScrollingDataGridProps extends Props {
 }
 declare const GridScroller: React.FunctionComponent<ScrollingDataGridProps>;
 export default GridScroller;
+//# sourceMappingURL=scrolling-data-grid.d.ts.map

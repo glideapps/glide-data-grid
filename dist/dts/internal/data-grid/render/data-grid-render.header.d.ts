@@ -19,3 +19,4 @@ interface HeaderLayout {
 export declare function computeHeaderLayout(ctx: CanvasRenderingContext2D | undefined, c: MappedGridColumn, x: number, y: number, width: number, height: number, theme: FullTheme, isRTL: boolean): HeaderLayout;
 export declare function drawHeader(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, c: MappedGridColumn, selected: boolean, theme: FullTheme, isHovered: boolean, posX: number | undefined, posY: number | undefined, hasSelectedCell: boolean, hoverAmount: number, spriteManager: SpriteManager, drawHeaderCallback: DrawHeaderCallback | undefined, touchMode: boolean): void;
 export {};
+//# sourceMappingURL=data-grid-render.header.d.ts.map

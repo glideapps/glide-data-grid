@@ -10,3 +10,4 @@ interface Props {
 }
 declare const UriOverlayEditor: React.FunctionComponent<Props>;
 export default UriOverlayEditor;
+//# sourceMappingURL=uri-overlay-editor.d.ts.map

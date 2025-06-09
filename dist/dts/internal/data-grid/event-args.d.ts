@@ -100,3 +100,4 @@ export interface DragHandler {
 /** @category Types */
 export type GridDragEventArgs = GridMouseEventArgs & DragHandler;
 export declare function mouseEventArgsAreEqual(args: GridMouseEventArgs | undefined, other: GridMouseEventArgs | undefined): boolean;
+//# sourceMappingURL=event-args.d.ts.map

@@ -5,3 +5,4 @@ export interface DataEditorAllProps extends Omit<DataEditorProps, "renderers" | 
     imageWindowLoader?: ImageWindowLoader;
 }
 export declare const DataEditorAll: React.ForwardRefExoticComponent<DataEditorAllProps & React.RefAttributes<DataEditorRef>>;
+//# sourceMappingURL=data-editor-all.d.ts.map

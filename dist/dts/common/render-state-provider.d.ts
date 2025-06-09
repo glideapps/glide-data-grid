@@ -17,3 +17,4 @@ export declare class RenderStateProvider extends WindowingTrackerBase {
     getValue: (location: Item) => any;
     protected clearOutOfWindow: () => void;
 }
+//# sourceMappingURL=render-state-provider.d.ts.map
