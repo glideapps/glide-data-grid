@@ -152,7 +152,15 @@ function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[
         if (el.img !== undefined) {
             const img = imageLoader.loadOrGetImage(el.img, col, row);
             if (img !== undefined) {
-                imgWidth = bubbleHeight - 8 + 4;
+                // Check if image is valid before including its width in calculations
+                const isValidImage =
+                    img instanceof HTMLImageElement
+                        ? img.complete && img.naturalWidth > 0 && img.naturalHeight > 0
+                        : img.width > 0 && img.height > 0;
+
+                if (isValidImage) {
+                    imgWidth = bubbleHeight - 8 + 4;
+                }
             }
         }
         const renderWidth = textWidth + imgWidth + bubblePad * 2;
@@ -166,39 +174,54 @@ function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[
 
     if (tileMap !== null) {
         const { el, height, middleWidth, sideWidth, width, dpr, padding } = tileMap;
-        const outerSideWidth = sideWidth / dpr;
-        const outerPadding = padding / dpr;
-        for (const rectInfo of renderBoxes) {
-            const rx = Math.floor(rectInfo.x);
-            const rw = Math.floor(rectInfo.width);
-            const outerMiddleWidth = rw - (outerSideWidth - outerPadding) * 2;
-            ctx.imageSmoothingEnabled = false;
 
-            ctx.drawImage(el, 0, 0, sideWidth, height, rx - outerPadding, y, outerSideWidth, h);
-            if (outerMiddleWidth > 0)
-                ctx.drawImage(
-                    el,
-                    sideWidth,
-                    0,
-                    middleWidth,
-                    height,
-                    rx + (outerSideWidth - outerPadding),
-                    y,
-                    outerMiddleWidth,
-                    h
-                );
-            ctx.drawImage(
-                el,
-                width - sideWidth,
-                0,
-                sideWidth,
-                height,
-                rx + rw - (outerSideWidth - outerPadding),
-                y,
-                outerSideWidth,
-                h
-            );
-            ctx.imageSmoothingEnabled = true;
+        // Validate that the cached canvas element is still valid
+        if (el.width > 0 && el.height > 0) {
+            const outerSideWidth = sideWidth / dpr;
+            const outerPadding = padding / dpr;
+            for (const rectInfo of renderBoxes) {
+                const rx = Math.floor(rectInfo.x);
+                const rw = Math.floor(rectInfo.width);
+                const outerMiddleWidth = rw - (outerSideWidth - outerPadding) * 2;
+                ctx.imageSmoothingEnabled = false;
+
+                try {
+                    ctx.drawImage(el, 0, 0, sideWidth, height, rx - outerPadding, y, outerSideWidth, h);
+                    if (outerMiddleWidth > 0)
+                        ctx.drawImage(
+                            el,
+                            sideWidth,
+                            0,
+                            middleWidth,
+                            height,
+                            rx + (outerSideWidth - outerPadding),
+                            y,
+                            outerMiddleWidth,
+                            h
+                        );
+                    ctx.drawImage(
+                        el,
+                        width - sideWidth,
+                        0,
+                        sideWidth,
+                        height,
+                        rx + rw - (outerSideWidth - outerPadding),
+                        y,
+                        outerSideWidth,
+                        h
+                    );
+                } catch {
+                    // If drawing the cached canvas fails, clear the cache and skip border rendering
+                    const key = `${theme.bgCell}_${theme.drilldownBorder}_${h}_${rounding}`;
+                    delete drilldownCache[key];
+                    // The cell content will still render without the border
+                }
+                ctx.imageSmoothingEnabled = true;
+            }
+        } else {
+            // Clear invalid cached element
+            const key = `${theme.bgCell}_${theme.drilldownBorder}_${h}_${rounding}`;
+            delete drilldownCache[key];
         }
     }
 
@@ -211,29 +234,47 @@ function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[
         if (d.img !== undefined) {
             const img = imageLoader.loadOrGetImage(d.img, col, row);
             if (img !== undefined) {
-                const imgSize = bubbleHeight - 8;
-                let srcX = 0;
-                let srcY = 0;
-                let srcWidth = img.width;
-                let srcHeight = img.height;
+                // Check if image is valid and ready for drawing
+                const isValidImage =
+                    img instanceof HTMLImageElement
+                        ? img.complete && img.naturalWidth > 0 && img.naturalHeight > 0
+                        : img.width > 0 && img.height > 0;
 
-                if (srcWidth > srcHeight) {
-                    // landscape
-                    srcX += (srcWidth - srcHeight) / 2;
-                    srcWidth = srcHeight;
-                } else if (srcHeight > srcWidth) {
-                    //portrait
-                    srcY += (srcHeight - srcWidth) / 2;
-                    srcHeight = srcWidth;
+                if (isValidImage) {
+                    const imgSize = bubbleHeight - 8;
+                    let srcX = 0;
+                    let srcY = 0;
+                    let srcWidth = img.width;
+                    let srcHeight = img.height;
+
+                    if (srcWidth > srcHeight) {
+                        // landscape
+                        srcX += (srcWidth - srcHeight) / 2;
+                        srcWidth = srcHeight;
+                    } else if (srcHeight > srcWidth) {
+                        //portrait
+                        srcY += (srcHeight - srcWidth) / 2;
+                        srcHeight = srcWidth;
+                    }
+                    ctx.beginPath();
+                    roundedRect(ctx, drawX, y + h / 2 - imgSize / 2, imgSize, imgSize, theme.roundingRadius ?? 3);
+                    ctx.save();
+                    ctx.clip();
+                    ctx.drawImage(
+                        img,
+                        srcX,
+                        srcY,
+                        srcWidth,
+                        srcHeight,
+                        drawX,
+                        y + h / 2 - imgSize / 2,
+                        imgSize,
+                        imgSize
+                    );
+                    ctx.restore();
+
+                    drawX += imgSize + 4;
                 }
-                ctx.beginPath();
-                roundedRect(ctx, drawX, y + h / 2 - imgSize / 2, imgSize, imgSize, theme.roundingRadius ?? 3);
-                ctx.save();
-                ctx.clip();
-                ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, drawX, y + h / 2 - imgSize / 2, imgSize, imgSize);
-                ctx.restore();
-
-                drawX += imgSize + 4;
             }
         }
 

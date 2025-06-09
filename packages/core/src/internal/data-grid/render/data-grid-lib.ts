@@ -310,15 +310,49 @@ let metricsSize = 0;
 let metricsCache: Record<string, TextMetrics | undefined> = {};
 const isSSR = typeof window === "undefined";
 
+// Single reusable element for accurate text measurement (when safe to use)
+let measurementElement: HTMLSpanElement | null = null;
+let domMeasurementAvailable = false;
+
+function initializeDOMMeasurement() {
+    if (isSSR || domMeasurementAvailable) return;
+    if (typeof document === "undefined") return;
+    try {
+        measurementElement = document.createElement("span");
+        measurementElement.style.visibility = "hidden";
+        measurementElement.style.position = "absolute";
+        measurementElement.style.top = "-9999px";
+        measurementElement.style.left = "-9999px";
+        measurementElement.style.whiteSpace = "nowrap";
+        measurementElement.style.padding = "0";
+        measurementElement.style.margin = "0";
+        measurementElement.style.border = "none";
+        document.body.append(measurementElement);
+        domMeasurementAvailable = true;
+    } catch {
+        // DOM measurement not available in this environment
+        domMeasurementAvailable = false;
+        measurementElement = null;
+    }
+}
+
 async function clearCacheOnLoad() {
     if (isSSR || document?.fonts?.ready === undefined) return;
     await document.fonts.ready;
     metricsSize = 0;
     metricsCache = {};
     clearCache();
+    // Try to initialize DOM measurement after fonts are ready
+    initializeDOMMeasurement();
 }
 
 void clearCacheOnLoad();
+
+// Try to initialize DOM measurement immediately if possible
+if (!isSSR) {
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(initializeDOMMeasurement, 0);
+}
 
 function makeCacheKey(
     s: string,
@@ -339,7 +373,33 @@ export function measureTextCached(
     const key = makeCacheKey(s, ctx, baseline, font);
     let metrics = metricsCache[key];
     if (metrics === undefined) {
+        // Get base measurement from canvas
         metrics = ctx.measureText(s);
+
+        // For longer text and when DOM measurement is available, enhance accuracy
+        if (s.length > 5 && domMeasurementAvailable && measurementElement) {
+            try {
+                measurementElement.style.font = font ?? ctx.font;
+                measurementElement.textContent = s;
+
+                const domWidth = measurementElement.getBoundingClientRect().width;
+
+                // Enhance the width with more accurate DOM measurement
+                // while preserving the TextMetrics prototype and all other properties
+                if (domWidth > metrics.width) {
+                    // Use Object.defineProperty to modify the width while maintaining the TextMetrics prototype
+                    Object.defineProperty(metrics, "width", {
+                        value: domWidth,
+                        writable: true,
+                        enumerable: true,
+                        configurable: true,
+                    });
+                }
+            } catch {
+                // Fallback to canvas measurement if DOM approach fails
+            }
+        }
+
         metricsCache[key] = metrics;
         metricsSize++;
     }

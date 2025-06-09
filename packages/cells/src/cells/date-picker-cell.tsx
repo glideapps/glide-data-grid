@@ -8,6 +8,7 @@ import {
     GridCellKind,
     type ProvideEditorCallback,
     TextCellEntry,
+    measureTextCached,
 } from "@glideapps/glide-data-grid";
 
 export const StyledInputBox = styled.input`
@@ -152,7 +153,7 @@ const renderer: CustomRenderer<DatePickerCell> = {
     },
     measure: (ctx, cell, theme) => {
         const { displayDate } = cell.data;
-        return ctx.measureText(displayDate).width + theme.cellHorizontalPadding * 2;
+        return measureTextCached(displayDate, ctx).width + theme.cellHorizontalPadding * 2;
     },
     provideEditor: () => ({
         editor: Editor,

@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import * as React from "react";
 import { MarkdownOverlayEditor } from "../internal/data-grid-overlay-editor/private/markdown-overlay-editor.js";
-import { drawTextCell, prepTextCell } from "../internal/data-grid/render/data-grid-lib.js";
+import { drawTextCell, prepTextCell, measureTextCached } from "../internal/data-grid/render/data-grid-lib.js";
 import { GridCellKind, type MarkdownCell } from "../internal/data-grid/data-grid-types.js";
 import type { InternalCellRenderer } from "./cell-types.js";
 
@@ -13,7 +13,7 @@ export const markdownCellRenderer: InternalCellRenderer<MarkdownCell> = {
     drawPrep: prepTextCell,
     measure: (ctx, cell, t) => {
         const firstLine = cell.data.split("\n")[0];
-        return ctx.measureText(firstLine).width + 2 * t.cellHorizontalPadding;
+        return measureTextCached(firstLine, ctx, t.baseFontFull).width + 2 * t.cellHorizontalPadding;
     },
     draw: a => drawTextCell(a, a.cell.data, a.cell.contentAlign),
     onDelete: c => ({

@@ -11,6 +11,7 @@ import {
     useTheme,
     GridCellKind,
     TextCellEntry,
+    measureTextCached,
 } from "@glideapps/glide-data-grid";
 
 interface CustomMenuProps extends MenuProps<any> {}
@@ -207,7 +208,7 @@ const renderer: CustomRenderer<DropdownCell> = {
     },
     measure: (ctx, cell, theme) => {
         const { value } = cell.data;
-        return (value ? ctx.measureText(value).width : 0) + theme.cellHorizontalPadding * 2;
+        return (value ? measureTextCached(value, ctx).width : 0) + theme.cellHorizontalPadding * 2;
     },
     provideEditor: () => ({
         editor: Editor,

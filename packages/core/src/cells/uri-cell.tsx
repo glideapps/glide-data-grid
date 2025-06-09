@@ -122,7 +122,8 @@ export const uriCellRenderer: InternalCellRenderer<UriCell> = {
         return undefined;
     },
     measure: (ctx, cell, theme) =>
-        ctx.measureText(cell.displayData ?? cell.data).width + theme.cellHorizontalPadding * 2,
+        measureTextCached(cell.displayData ?? cell.data, ctx, theme.baseFontFull).width +
+        theme.cellHorizontalPadding * 2,
     onDelete: c => ({
         ...c,
         data: "",

@@ -25,7 +25,6 @@ function measureCell(
     const r = getCellRenderer(cell);
     return r?.measure?.(ctx, cell, theme) ?? defaultSize;
 }
-
 export function measureColumn(
     ctx: CanvasRenderingContext2D,
     theme: FullTheme,
@@ -34,48 +33,26 @@ export function measureColumn(
     selectedData: CellArray,
     minColumnWidth: number,
     maxColumnWidth: number,
-    removeOutliers: boolean,
     getCellRenderer: GetCellRendererCallback
 ): SizedGridColumn {
     let max = 0;
-    const sizes: number[] =
-        selectedData === undefined
-            ? []
-            : selectedData.map(row => {
-                  const r = measureCell(ctx, row[colIndex], theme, getCellRenderer);
-                  max = Math.max(max, r);
-                  return r;
-              });
 
-    if (sizes.length > 5 && removeOutliers) {
-        max = 0;
-        // Filter out outliers
-        let sum = 0;
-        for (const size of sizes) {
-            sum += size;
-        }
-        const average = sum / sizes.length;
-        // Set sizes that are considered outliers to zero
-        for (let i = 0; i < sizes.length; i++) {
-            if (sizes[i] >= average * 2) {
-                sizes[i] = 0;
-            } else {
-                max = Math.max(max, sizes[i]);
-            }
-        }
+    // Check rows width
+    for (const row of selectedData) {
+        max = Math.max(max, measureCell(ctx, row[colIndex], theme, getCellRenderer));
     }
-    const currentFont = ctx.font;
-    ctx.font = theme.headerFontFull;
-    max = Math.max(
-        max,
-        ctx.measureText(c.title).width + theme.cellHorizontalPadding * 2 + (c.icon === undefined ? 0 : 28)
-    );
-    ctx.font = currentFont;
-    const final = Math.max(Math.ceil(minColumnWidth), Math.min(Math.floor(maxColumnWidth), Math.ceil(max)));
+
+    // Check title width - using enhanced measureTextCached for cross-browser accuracy
+    const titleWidth =
+        measureTextCached(c?.title ?? "#", ctx, theme.headerFontFull).width +
+        theme.cellHorizontalPadding * 2 +
+        (c?.icon === undefined ? 0 : 28);
+
+    max = Math.max(max, titleWidth);
 
     return {
         ...c,
-        width: final,
+        width: Math.max(Math.ceil(minColumnWidth), Math.min(Math.floor(maxColumnWidth), Math.ceil(max))),
     };
 }
 
