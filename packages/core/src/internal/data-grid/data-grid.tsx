@@ -940,7 +940,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
         ? "pointer"
         : "default";
-    console.log("CURSOR", cursor, cursorOverride, headerHovered);
+    
     const style = React.useMemo(
         () => ({
             // width,
