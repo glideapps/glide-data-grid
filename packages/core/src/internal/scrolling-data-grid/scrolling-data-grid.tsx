@@ -194,6 +194,11 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             }
         }
 
+        // // Clamp row calculations to prevent overshooting beyond actual row count
+        // // This is critical when devicePixelRatio is small (zoomed out) and precision is lost
+        // cellY = Math.max(0, Math.min(cellY, rows - 1));
+        // cellBottom = Math.max(cellY, Math.min(cellBottom, rows));
+
         const rect: Rectangle = {
             x: cellX,
             y: cellY,

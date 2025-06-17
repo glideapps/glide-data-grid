@@ -149,6 +149,10 @@ export const InfiniteScroller: React.FC<Props> = p => {
     const idleTimer = React.useRef(0);
 
     React.useLayoutEffect(() => {
+        offsetY.current = 0;
+    }, [dpr]);
+
+    React.useLayoutEffect(() => {
         if (!isIdle || hasTouches || lastScrollPosition.current.lockDirection === undefined) return;
         const el = scroller.current;
         if (el === null) return;
@@ -163,6 +167,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
 
     const onScroll = React.useCallback(
         (scrollLeft?: number, scrollTop?: number) => {
+            console.log("onScroll", scrollLeft, scrollTop, offsetY.current);
             const el = scroller.current;
             if (el === null) return;
 
@@ -196,19 +201,56 @@ export const InfiniteScroller: React.FC<Props> = p => {
             const cWidth = el.clientWidth;
             const cHeight = el.clientHeight;
 
-            const newY = scrollTop;
+            const newY = scrollTop * Math.min(dpr, 1);
             const delta = lastScrollY.current - newY;
             const scrollableHeight = el.scrollHeight - cHeight;
             lastScrollY.current = newY;
-
+            console.log(
+                "cHeight",
+                cHeight,
+                "scrollTop",
+                scrollTop,
+                "scrollHeight",
+                scrollHeight,
+                "el.scrollHeight",
+                el.scrollHeight,
+                "delta",
+                delta,
+                "scrollableHeight",
+                scrollableHeight,
+                "newY",
+                newY,
+                "offsetY.current",
+                offsetY.current
+            );
+            console.log(scrollTop, scrollHeight, el.scrollHeight, delta, scrollableHeight, newY);
+            // Browsers have a maximum height for any single DOM element.
+            // For Chromium-based browsers, this is around 33.5 million pixels.
+            // To make scrolling work we detect if this is the case and apply some
+            // optimizations to still allow scrolling through the entire grid.
             if (
                 scrollableHeight > 0 &&
                 (Math.abs(delta) > 2000 || newY === 0 || newY === scrollableHeight) &&
                 scrollHeight > el.scrollHeight + 5
             ) {
-                const prog = newY / scrollableHeight;
+                // Make sure we never overshoot the scrollable height.
+                // This can happen due to floating point precision issues.
+                const prog = Math.min(newY / scrollableHeight, 1);
+
                 const recomputed = (scrollHeight - cHeight) * prog;
                 offsetY.current = recomputed - newY;
+                console.log(
+                    "offsetY",
+                    offsetY.current,
+                    delta,
+                    scrollHeight,
+                    recomputed,
+                    prog,
+                    scrollableHeight,
+                    newY,
+                    cHeight,
+                    scrollTop
+                );
             }
 
             if (lock !== undefined) {
@@ -225,7 +267,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                 paddingRight: rightWrapRef.current?.clientWidth ?? 0,
             });
         },
-        [paddingBottom, paddingRight, scrollHeight, update, preventDiagonalScrolling, hasTouches]
+        [paddingBottom, paddingRight, scrollHeight, update, preventDiagonalScrolling, hasTouches, dpr]
     );
 
     useKineticScroll(kineticScrollPerfHack && browserIsSafari.value, onScroll, scroller);

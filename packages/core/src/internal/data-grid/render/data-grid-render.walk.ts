@@ -33,7 +33,15 @@ export function walkRowsInCol(
     let row = startRow;
     const rowEnd = rows - freezeTrailingRows;
     let didBreak = false;
+
+    // // Additional bounds check to prevent accessing rows beyond the data
+    // // This is crucial when devicePixelRatio is small (zoomed out) and precision is lost
+    // row = Math.max(0, Math.min(row, rows - 1));
+
     while (y < height && row < rowEnd) {
+        // // Ensure we don't access rows beyond the actual data
+        // if (row >= rows) break;
+
         const rh = getRowHeight(row);
         if (y + rh > skipToY && cb(y, row, rh, false, hasAppendRow && row === rows - 1) === true) {
             didBreak = true;
@@ -48,6 +56,9 @@ export function walkRowsInCol(
     y = height;
     for (let fr = 0; fr < freezeTrailingRows; fr++) {
         row = rows - 1 - fr;
+        // // Ensure we don't access negative rows or rows beyond the data
+        // if (row < 0 || row >= rows) continue;
+
         const rh = getRowHeight(row);
         y -= rh;
         cb(y, row, rh, true, hasAppendRow && row === rows - 1);
