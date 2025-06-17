@@ -44,6 +44,7 @@ interface DataGridOverlayEditorProps {
         prevValue: GridCell
     ) => boolean | ValidatedGridCell;
     readonly isOutsideClick?: (e: MouseEvent | TouchEvent) => boolean;
+    readonly customEventTarget?: HTMLElement | Window | Document;
 }
 
 const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps> = p => {
@@ -65,6 +66,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         getCellRenderer,
         provideEditor,
         isOutsideClick,
+        customEventTarget,
     } = p;
 
     const [tempValue, setTempValueRaw] = React.useState<GridCell | undefined>(forceEditMode ? content : undefined);
@@ -218,7 +220,8 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 style={makeCSSStyle(theme)}
                 className={className}
                 onClickOutside={onClickOutside}
-                isOutsideClick={isOutsideClick}>
+                isOutsideClick={isOutsideClick}
+                customEventTarget={customEventTarget}>
                 <DataGridOverlayEditorStyle
                     ref={ref}
                     id={id}

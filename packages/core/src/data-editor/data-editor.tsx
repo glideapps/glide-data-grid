@@ -3342,7 +3342,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 !event.ctrlKey &&
                 gridSelection.current !== undefined &&
                 event.key.length === 1 &&
-                /[ -~]/g.test(event.key) &&
+                /[\p{L}\p{M}\p{N}\p{S}\p{P}]/u.test(event.key) &&
                 event.bounds !== undefined &&
                 isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, Math.min(row, rows - 1))]))
             ) {
@@ -4123,6 +4123,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             onFinishEditing={onFinishEditing}
                             markdownDivCreateNode={markdownDivCreateNode}
                             isOutsideClick={isOutsideClick}
+                            customEventTarget={experimental?.eventTarget}
                         />
                     </React.Suspense>
                 )}

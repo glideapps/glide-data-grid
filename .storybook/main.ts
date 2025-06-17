@@ -4,7 +4,7 @@ import { mergeConfig } from "vite";
 
 export default {
     stories: ["../**/src/**/*.stories.tsx"],
-    addons: [getAbsolutePath("@storybook/addon-storysource"), getAbsolutePath("@storybook/addon-controls")],
+    addons: [getAbsolutePath("@storybook/addon-docs")],
 
     typescript: {
         reactDocgen: false,
@@ -19,11 +19,7 @@ export default {
     framework: {
         name: getAbsolutePath("@storybook/react-vite"),
         options: {},
-    },
-
-    docs: {
-        autodocs: false,
-    },
+    }
 };
 
 function getAbsolutePath(value) {
