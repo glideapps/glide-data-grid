@@ -50,12 +50,12 @@
         "react-dom": "^16.12.0 || 17.x || 18.x || 19.x"
     },
     "devDependencies": {
-        "@babel/cli": "^7.16.0",
-        "eslint": "^8.19.0",
-        "eslint-plugin-import": "^2.22.0",
-        "eslint-plugin-react": "^7.21.5",
-        "eslint-plugin-react-hooks": "^4.2.0",
+        "@babel/cli": "^7.27.2",
+        "eslint": "^8.57.1",
+        "eslint-plugin-import": "^2.31.0",
+        "eslint-plugin-react": "^7.37.5",
+        "eslint-plugin-react-hooks": "^4.6.2",
         "react-resize-detector": "^7.1.2",
-        "tsc-esm-fix": "^2.7.8"
+        "tsc-esm-fix": "^2.20.27"
     }
 }

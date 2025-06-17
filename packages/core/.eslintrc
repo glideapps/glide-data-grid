@@ -47,6 +47,7 @@
         "unicorn/prefer-dom-node-text-content": "off",
         "unicorn/consistent-destructuring": "off",
         "unicorn/no-array-reduce": "off",
+        "unicorn/expiring-todo-comments": "off",
         "@typescript-eslint/no-misused-promises": [
             "error",
             {

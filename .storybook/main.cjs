@@ -1,8 +1,6 @@
-import { dirname, join } from "path";
-import linaria from "@linaria/vite";
-import { mergeConfig } from "vite";
+const { dirname, join } = require("path");
 
-export default {
+module.exports = {
     stories: ["../**/src/**/*.stories.tsx"],
     addons: [getAbsolutePath("@storybook/addon-docs")],
 
@@ -11,15 +9,17 @@ export default {
     },
 
     async viteFinal(config) {
+        const { mergeConfig } = await import("vite");
+        const linaria = await import("@linaria/vite");
         return mergeConfig(config, {
-            plugins: [linaria()],
+            plugins: [linaria.default()],
         });
     },
 
     framework: {
         name: getAbsolutePath("@storybook/react-vite"),
         options: {},
-    }
+    },
 };
 
 function getAbsolutePath(value) {
