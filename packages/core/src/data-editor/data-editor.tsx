@@ -2532,7 +2532,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onColumnProposeMove,
         React.useCallback(
             (startIndex: number, endIndex: number) => {
-                return onColumnProposeMove?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset) === false;
+                return onColumnProposeMove?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset);
             },
             [onColumnProposeMove, rowMarkerOffset]
         )
