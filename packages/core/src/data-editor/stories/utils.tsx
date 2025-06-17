@@ -238,7 +238,7 @@ interface BeautifulProps {
     scale?: string;
 }
 
-export const BeautifulWrapper: React.FC<BeautifulProps> = p => {
+export const BeautifulWrapper: React.FC<React.PropsWithChildren<BeautifulProps>> = p => {
     const { title, children, description, className, scale } = p;
 
     const { ref, width, height } = useResizeDetector();
