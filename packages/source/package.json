@@ -1,6 +1,6 @@
 {
     "name": "@glideapps/glide-data-grid-source",
-    "version": "6.0.4-alpha8",
+    "version": "6.0.4-alpha9",
     "description": "Useful data source hooks for Glide Data Grid",
     "sideEffects": false,
     "type": "module",
@@ -42,12 +42,12 @@
         "canvas"
     ],
     "dependencies": {
-        "@glideapps/glide-data-grid": "6.0.4-alpha8"
+        "@glideapps/glide-data-grid": "6.0.4-alpha9"
     },
     "peerDependencies": {
         "lodash": "^4.17.19",
-        "react": "^16.12.0 || 17.x || 18.x",
-        "react-dom": "^16.12.0 || 17.x || 18.x"
+        "react": "^16.12.0 || 17.x || 18.x || 19.x",
+        "react-dom": "^16.12.0 || 17.x || 18.x || 19.x"
     },
     "devDependencies": {
         "@babel/cli": "^7.16.0",

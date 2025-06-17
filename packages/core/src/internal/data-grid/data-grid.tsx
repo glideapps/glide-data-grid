@@ -255,6 +255,11 @@ export interface DataGridProps {
               readonly scrollbarWidthOverride?: number;
               readonly hyperWrapping?: boolean;
               readonly renderStrategy?: "single-buffer" | "double-buffer" | "direct";
+              /**
+               * Allows providing a custom event target for event listeners.
+               * If not provided, the grid will use the window as the event target.
+               */
+              readonly eventTarget?: HTMLElement | Window | Document;
           }
         | undefined;
 
@@ -397,7 +402,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const cellXOffset = Math.max(freezeColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
-    const windowEventTargetRef = React.useRef<Document | Window>(window);
+    const windowEventTargetRef = React.useRef<HTMLElement | Window | Document>(experimental?.eventTarget ?? window);
     const windowEventTarget = windowEventTargetRef.current;
 
     const imageLoader = imageWindowLoader;
@@ -1430,7 +1435,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 canvasRef.current = instance;
             }
 
-            if (instance === null) {
+            if (experimental?.eventTarget) {
+                windowEventTargetRef.current = experimental.eventTarget;
+            } else if (instance === null) {
                 windowEventTargetRef.current = window;
             } else {
                 const docRoot = instance.getRootNode();
@@ -1439,7 +1446,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 windowEventTargetRef.current = docRoot as any;
             }
         },
-        [canvasRef]
+        [canvasRef, experimental?.eventTarget]
     );
 
     const onDragStartImpl = React.useCallback(
