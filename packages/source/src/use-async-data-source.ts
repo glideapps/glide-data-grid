@@ -13,7 +13,8 @@ import range from "lodash/range.js";
 import chunk from "lodash/chunk.js";
 import React from "react";
 
-export type RowCallback<T> = (range: Item) => Promise<readonly T[]>;
+type Range = readonly [startIndex: number, endIndex: number];
+export type RowCallback<T> = (range: Range) => Promise<readonly T[]>;
 export type RowToCell<T> = (row: T, col: number) => GridCell;
 export type RowEditedCallback<T> = (cell: Item, newVal: EditableGridCell, rowData: T) => T | undefined;
 export function useAsyncDataSource<TRowType>(
