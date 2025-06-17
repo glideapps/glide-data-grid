@@ -1,39 +1,66 @@
-<!DOCTYPE html>
+<!doctype html>
 <!--suppress HtmlUnknownTarget -->
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Storybook</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<head>
-  <meta charset="utf-8" />
-  <title>Storybook</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      @font-face {
+        font-family: 'Nunito Sans';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('./sb-common-assets/nunito-sans-regular.woff2') format('woff2');
+      }
 
-  <link rel="prefetch" href="./sb-common-assets/nunito-sans-regular.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="prefetch" href="./sb-common-assets/nunito-sans-italic.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="prefetch" href="./sb-common-assets/nunito-sans-bold.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="prefetch" href="./sb-common-assets/nunito-sans-bold-italic.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="./sb-common-assets/fonts.css" />
+      @font-face {
+        font-family: 'Nunito Sans';
+        font-style: italic;
+        font-weight: 400;
+        font-display: swap;
+        src: url('./sb-common-assets/nunito-sans-italic.woff2') format('woff2');
+      }
 
-  <script>
-    window.CONFIG_TYPE = 'PRODUCTION';
-    window.LOGLEVEL = 'info';
-    window.FRAMEWORK_OPTIONS = {};
-    window.CHANNEL_OPTIONS = {};
-    window.FEATURES = {"warnOnLegacyHierarchySeparator":true,"buildStoriesJson":false,"storyStoreV7":true,"argTypeTargetsV7":true,"legacyDecoratorFileOrder":false,"disallowImplicitActionsInRenderV8":false};
-    window.STORIES = [{"titlePrefix":"","directory":".","files":"**/src/**/*.stories.tsx","importPathMatcher":"^\\.(?:(?:^|\\/|(?:(?:(?!(?:^|\\/)\\.).)*?)\\/)src(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)\\/|\\/|$)(?!\\.)(?=.)[^/]*?\\.stories\\.tsx)$"}];
-    window.DOCS_OPTIONS = {"autodocs":false};
+      @font-face {
+        font-family: 'Nunito Sans';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('./sb-common-assets/nunito-sans-bold.woff2') format('woff2');
+      }
 
-    
+      @font-face {
+        font-family: 'Nunito Sans';
+        font-style: italic;
+        font-weight: 700;
+        font-display: swap;
+        src: url('./sb-common-assets/nunito-sans-bold-italic.woff2') format('woff2');
+      }
+    </style>
 
-    // We do this so that "module && module.hot" etc. in Storybook source code
-    // doesn't fail (it will simply be disabled)
-    window.module = undefined;
-    window.global = window;
-  </script>
-  <base target="_parent" />
+    <script>
+      window.CONFIG_TYPE = 'PRODUCTION';
+      window.LOGLEVEL = 'info';
+      window.FRAMEWORK_OPTIONS = {};
+      window.CHANNEL_OPTIONS = {};
+      window.FEATURES = {"argTypeTargetsV7":true,"legacyDecoratorFileOrder":false,"disallowImplicitActionsInRenderV8":true,"viewport":true,"highlight":true,"controls":true,"interactions":true,"actions":true,"backgrounds":true,"outline":true,"measure":true};
+      window.STORIES = [{"titlePrefix":"","directory":".","files":"**/src/**/*.stories.tsx","importPathMatcher":"^\\.(?:(?:^|\\/|(?:(?:(?!(?:^|\\/)\\.).)*?)\\/)src(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)\\/|\\/|$)(?!\\.)(?=.)[^/]*?\\.stories\\.tsx)$"}];
+      window.DOCS_OPTIONS = {"defaultName":"Docs"};
+      window.TAGS_OPTIONS = {"dev-only":{"excludeFromDocsStories":true},"docs-only":{"excludeFromSidebar":true},"test-only":{"excludeFromSidebar":true,"excludeFromDocsStories":true}};
+
+      
+
+      // We do this so that "module && module.hot" etc. in Storybook source code
+      // doesn't fail (it will simply be disabled)
+      window.module = undefined;
+      window.global = window;
+    </script>
+    <base target="_parent" />
 
 <style>
-  /* While we aren't showing the main block yet, but still preparing, we want everything the user
-     has rendered, which may or may not be in #storybook-root, to be display none */
+  /* While we aren't showing the main block yet, but still preparing, we want everything the user has rendered, which may or may not be in #storybook-root, to be display none */
   .sb-show-preparing-story:not(.sb-show-main) > :not(.sb-preparing-story) {
     display: none;
   }
@@ -61,7 +88,8 @@
     box-sizing: border-box;
     margin: auto;
     padding: 1rem;
-    max-height: 100%; /* Hack for centering correctly in IE11 */
+    max-height: 100%;
+    /* Hack for centering correctly in IE11 */
   }
 
   /* Vertical centering fix for IE11 */
@@ -92,11 +120,34 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 20px;
-    font-family: 'Nunito Sans', -apple-system, '.SFNSText-Regular', 'San Francisco',
-      BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    box-sizing: border-box;
+
+    padding: 40px;
+    font-family:
+      'Nunito Sans',
+      -apple-system,
+      '.SFNSText-Regular',
+      'San Francisco',
+      BlinkMacSystemFont,
+      'Segoe UI',
+      'Helvetica Neue',
+      Helvetica,
+      Arial,
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow: auto;
+  }
+
+  @media (max-width: 700px) {
+    .sb-wrapper {
+      padding: 20px;
+    }
+  }
+
+  @media (max-width: 500px) {
+    .sb-wrapper {
+      padding: 10px;
+    }
   }
 
   .sb-heading {
@@ -111,6 +162,7 @@
     display: flex;
     align-content: center;
     justify-content: center;
+    box-sizing: border-box;
   }
 
   .sb-nopreview_main {
@@ -125,54 +177,134 @@
   }
 
   .sb-errordisplay {
-    border: 20px solid rgb(187, 49, 49);
-    background: #222;
-    color: #fff;
+    background: #f6f9fc;
+    color: black;
     z-index: 999999;
+    width: 100vw;
+    min-height: 100vh;
+    box-sizing: border-box;
+
+    & ol {
+      padding-left: 18px;
+      margin: 0;
+    }
+
+    & h1 {
+      font-family: Nunito Sans;
+      font-size: 22px;
+      font-weight: 400;
+      line-height: 30px;
+      font-weight: normal;
+      margin: 0;
+
+      &::before {
+        content: '';
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        background: #ff4400;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+    }
+
+    & p,
+    & ol {
+      font-family: Nunito Sans;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 19px;
+      margin: 0;
+    }
+
+    & li + li {
+      margin: 0;
+      padding: 0;
+      padding-top: 12px;
+    }
+
+    & a {
+      color: currentColor;
+    }
+  }
+
+  .sb-errordisplay_main {
+    margin: auto;
+    padding: 24px;
+    display: flex;
+    box-sizing: border-box;
+
+    flex-direction: column;
+    min-height: 100%;
+    width: 100%;
+    border-radius: 6px;
+    background: white;
+    border: 1px solid #ff0000;
+    box-shadow: 0 0 64px rgba(0, 0, 0, 0.1);
+    gap: 24px;
   }
 
   .sb-errordisplay_code {
     padding: 10px;
-    background: #000;
-    color: #eee;
-    font-family: 'Operator Mono', 'Fira Code Retina', 'Fira Code', 'FiraCode-Retina', 'Andale Mono',
+    flex: 1;
+    background: #242424;
+    color: #c6c6c6;
+    box-sizing: border-box;
+
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 19px;
+    border-radius: 4px;
+
+    font-family:
+      'Operator Mono', 'Fira Code Retina', 'Fira Code', 'FiraCode-Retina', 'Andale Mono',
       'Lucida Console', Consolas, Monaco, monospace;
+    margin: 0;
+    overflow: auto;
   }
 
   .sb-errordisplay pre {
     white-space: pre-wrap;
+    white-space: revert;
   }
 
   @-webkit-keyframes sb-rotate360 {
     from {
       transform: rotate(0deg);
     }
+
     to {
       transform: rotate(360deg);
     }
   }
+
   @keyframes sb-rotate360 {
     from {
       transform: rotate(0deg);
     }
+
     to {
       transform: rotate(360deg);
     }
   }
+
   @-webkit-keyframes sb-glow {
     0%,
     100% {
       opacity: 1;
     }
+
     50% {
       opacity: 0.4;
     }
   }
+
   @keyframes sb-glow {
     0%,
     100% {
       opacity: 1;
     }
+
     50% {
       opacity: 0.4;
     }
@@ -235,6 +367,7 @@
     height: 14px;
     width: 14px;
   }
+
   .sb-previewBlock_icon:last-child {
     margin-left: auto;
   }
@@ -256,23 +389,28 @@
     text-align: left;
     width: 100%;
   }
+
   .sb-argstableBlock th:first-of-type,
   .sb-argstableBlock td:first-of-type {
     padding-left: 20px;
   }
+
   .sb-argstableBlock th:nth-of-type(2),
   .sb-argstableBlock td:nth-of-type(2) {
     width: 35%;
   }
+
   .sb-argstableBlock th:nth-of-type(3),
   .sb-argstableBlock td:nth-of-type(3) {
     width: 15%;
   }
+
   .sb-argstableBlock th:last-of-type,
   .sb-argstableBlock td:last-of-type {
     width: 25%;
     padding-right: 20px;
   }
+
   .sb-argstableBlock th span,
   .sb-argstableBlock td span {
     -webkit-animation: sb-glow 1.5s ease-in-out infinite;
@@ -282,43 +420,55 @@
     box-shadow: none;
     color: transparent;
   }
+
   .sb-argstableBlock th {
     padding: 10px 15px;
   }
 
   .sb-argstableBlock-body {
     border-radius: 4px;
-    box-shadow: rgba(0, 0, 0, 0.1) 0 1px 3px 1px, rgba(0, 0, 0, 0.065) 0 0 0 1px;
+    box-shadow:
+      rgba(0, 0, 0, 0.1) 0 1px 3px 1px,
+      rgba(0, 0, 0, 0.065) 0 0 0 1px;
   }
+
   .sb-argstableBlock-body tr {
     background: transparent;
     overflow: hidden;
   }
+
   .sb-argstableBlock-body tr:not(:first-child) {
     border-top: 1px solid #e6e6e6;
   }
+
   .sb-argstableBlock-body tr:first-child td:first-child {
     border-top-left-radius: 4px;
   }
+
   .sb-argstableBlock-body tr:first-child td:last-child {
     border-top-right-radius: 4px;
   }
+
   .sb-argstableBlock-body tr:last-child td:first-child {
     border-bottom-left-radius: 4px;
   }
+
   .sb-argstableBlock-body tr:last-child td:last-child {
     border-bottom-right-radius: 4px;
   }
+
   .sb-argstableBlock-body td {
     background: #fff;
     padding-bottom: 10px;
     padding-top: 10px;
     vertical-align: top;
   }
+
   .sb-argstableBlock-body td:not(:first-of-type) {
     padding-left: 15px;
     padding-right: 15px;
   }
+
   .sb-argstableBlock-body button {
     -webkit-animation: sb-glow 1.5s ease-in-out infinite;
     animation: sb-glow 1.5s ease-in-out infinite;
@@ -342,11 +492,31 @@
     margin-bottom: 4px;
     padding: 2px 5px;
   }
+
+  .sb-sr-only,
+  .sb-hidden-until-focus:not(:focus) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: none;
+  }
+
+  .sb-hidden-until-focus {
+    opacity: 0;
+    transition: opacity 150ms ease-out;
+  }
+
+  .sb-hidden-until-focus:focus {
+    opacity: 1;
+  }
 </style>
 
 <script>
   /* globals window */
-  /* eslint-disable no-underscore-dangle */
   try {
     if (window.top !== window) {
       window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = window.top.__REACT_DEVTOOLS_GLOBAL_HOOK__;
@@ -382,11 +552,11 @@
     }
 </style>
 
-  <script type="module" crossorigin src="./assets/iframe-lW6lBOu1.js"></script>
-</head>
+    <script type="module" crossorigin src="./assets/iframe-E18WDqGN.js"></script>
+  </head>
 
-<body>
-  <div id="portal" style="position: fixed; left: 0; top: 0; z-index: 9999;"></div><div class="sb-preparing-story sb-wrapper">
+  <body>
+    <div id="portal" style="position: fixed; left: 0; top: 0; z-index: 9999;"></div><div class="sb-preparing-story sb-wrapper">
   <div class="sb-loader"></div>
 </div>
 
@@ -470,12 +640,69 @@
 </div>
 
 <div class="sb-errordisplay sb-wrapper">
-  <pre id="error-message" class="sb-heading"></pre>
-  <pre class="sb-errordisplay_code"><code id="error-stack"></code></pre>
+  <div class="sb-errordisplay_main">
+    <h1 id="error-message"></h1>
+    <p>
+      The component failed to render properly, likely due to a configuration issue in Storybook.
+      Here are some common causes and how you can address them:
+    </p>
+    <ol>
+      <li>
+        <strong>Missing Context/Providers</strong>: You can use decorators to supply specific
+        contexts or providers, which are sometimes necessary for components to render correctly. For
+        detailed instructions on using decorators, please visit the
+        <a href="https://storybook.js.org/docs/writing-stories/decorators"
+          >Decorators documentation</a
+        >.
+      </li>
+      <li>
+        <strong>Misconfigured Webpack or Vite</strong>: Verify that Storybook picks up all necessary
+        settings for loaders, plugins, and other relevant parameters. You can find step-by-step
+        guides for configuring
+        <a href="https://storybook.js.org/docs/builders/webpack">Webpack</a> or
+        <a href="https://storybook.js.org/docs/builders/vite">Vite</a>
+        with Storybook.
+      </li>
+      <li>
+        <strong>Missing Environment Variables</strong>: Your Storybook may require specific
+        environment variables to function as intended. You can set up custom environment variables
+        as outlined in the
+        <a href="https://storybook.js.org/docs/configure/environment-variables"
+          >Environment Variables documentation</a
+        >.
+      </li>
+    </ol>
+    <pre class="sb-errordisplay_code"><code id="error-stack"></code></pre>
+  </div>
 </div>
 
-  <div id="storybook-root"></div>
-  <div id="storybook-docs"></div>
-</body>
+    <div id="storybook-root"></div>
+    <div id="storybook-docs"></div>
+    <script>
+      function __onViteAppLoadingError(event) {
+        const hostname = globalThis.location.hostname;
+        if (hostname !== 'localhost' && globalThis.CONFIG_TYPE === 'DEVELOPMENT') {
+          const message = `Failed to load the Storybook preview file 'vite-app.js':
 
+It looks like you're visiting the Storybook development server on another hostname than localhost: '${hostname}', but you haven't configured the necessary security features to support this.
+Please re-run your Storybook development server with the '--host ${hostname}' flag, or manually configure your Vite allowedHosts configuration with viteFinal.
+
+See:`;
+          const docs = [
+            'https://storybook.js.org/docs/api/cli-options#dev',
+            'https://storybook.js.org/docs/api/main-config/main-config-vite-final',
+            'https://vite.dev/config/server-options.html#server-allowedhosts',
+          ];
+          console.error(`${message}\n${docs.map((doc) => `- ${doc}`).join('\n')}`);
+
+          document.getElementById('storybook-root').innerHTML =
+            `<p style="color: red; max-width: 70ch">${message.replaceAll(
+              '\n',
+              '<br/>'
+            )}<ul>${docs.map((doc) => `<li><a href='${doc}' target='_blank'>${doc}</a></li>`).join('')}<ul></p>`;
+          return;
+        }
+      }
+    </script>
+  </body>
 </html>

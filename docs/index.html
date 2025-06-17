@@ -3,34 +3,52 @@
   <head>
     <meta charset="utf-8" />
 
-    <title>@storybook/cli - Storybook</title>
+    <title>storybook - Storybook</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     
-    <link
-      rel="prefetch"
-      href="./sb-common-assets/nunito-sans-regular.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="prefetch"
-      href="./sb-common-assets/nunito-sans-bold.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link rel="stylesheet" href="./sb-common-assets/fonts.css" />
+    <style>
+      @font-face {
+        font-family: 'Nunito Sans';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('./sb-common-assets/nunito-sans-regular.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Nunito Sans';
+        font-style: italic;
+        font-weight: 400;
+        font-display: swap;
+        src: url('./sb-common-assets/nunito-sans-italic.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Nunito Sans';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('./sb-common-assets/nunito-sans-bold.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Nunito Sans';
+        font-style: italic;
+        font-weight: 700;
+        font-display: swap;
+        src: url('./sb-common-assets/nunito-sans-bold-italic.woff2') format('woff2');
+      }
+    </style>
 
     <link href="./sb-manager/runtime.js" rel="modulepreload" />
 
     
-    <link href="./sb-addons/storysource-0/manager-bundle.js" rel="modulepreload" />
+    <link href="./sb-addons/storybook-core-server-presets-0/common-manager-bundle.js" rel="modulepreload" />
     
-    <link href="./sb-addons/controls-1/manager-bundle.js" rel="modulepreload" />
+    <link href="./sb-addons/docs-1/manager-bundle.js" rel="modulepreload" />
     
     <link href="./sb-addons/storybook-2/manager-bundle.js" rel="modulepreload" />
        
@@ -51,12 +69,17 @@
       
         
           window['FEATURES'] = {
-  "warnOnLegacyHierarchySeparator": true,
-  "buildStoriesJson": false,
-  "storyStoreV7": true,
   "argTypeTargetsV7": true,
   "legacyDecoratorFileOrder": false,
-  "disallowImplicitActionsInRenderV8": false
+  "disallowImplicitActionsInRenderV8": true,
+  "viewport": true,
+  "highlight": true,
+  "controls": true,
+  "interactions": true,
+  "actions": true,
+  "backgrounds": true,
+  "outline": true,
+  "measure": true
 };
         
       
@@ -70,7 +93,7 @@
       
         
           window['DOCS_OPTIONS'] = {
-  "autodocs": false
+  "defaultName": "Docs"
 };
         
       
@@ -82,21 +105,48 @@
       
         
       
+        
+          window['TAGS_OPTIONS'] = {
+  "dev-only": {
+    "excludeFromDocsStories": true
+  },
+  "docs-only": {
+    "excludeFromSidebar": true
+  },
+  "test-only": {
+    "excludeFromSidebar": true,
+    "excludeFromDocsStories": true
+  }
+};
+        
+      
+        
+          window['STORYBOOK_RENDERER'] = "react";
+        
+      
+        
+          window['STORYBOOK_BUILDER'] = "@storybook/builder-vite";
+        
+      
+        
+          window['STORYBOOK_FRAMEWORK'] = "/home/runner/work/glide-data-grid/glide-data-grid/node_modules/@storybook/react-vite";
+        
+      
     </script>
     
 
     <script type="module">
+      import './sb-manager/globals-runtime.js';
+
+      
+        import './sb-addons/storybook-core-server-presets-0/common-manager-bundle.js';
+      
+        import './sb-addons/docs-1/manager-bundle.js';
+      
+        import './sb-addons/storybook-2/manager-bundle.js';
+      
+
       import './sb-manager/runtime.js';
-
-      
-      import './sb-addons/storysource-0/manager-bundle.js';
-      
-      import './sb-addons/controls-1/manager-bundle.js';
-      
-      import './sb-addons/storybook-2/manager-bundle.js';
-      
     </script>
-
-    <link href="./sb-preview/runtime.js" rel="prefetch" as="script" />
   </body>
 </html>
