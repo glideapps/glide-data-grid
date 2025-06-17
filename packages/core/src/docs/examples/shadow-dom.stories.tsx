@@ -9,7 +9,7 @@ import {
     defaultProps,
 } from "../../data-editor/stories/utils.js";
 import { SimpleThemeWrapper } from "../../stories/story-utils.js";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 export default {
     title: "Glide-Data-Grid/DataEditor Demos",
@@ -94,12 +94,12 @@ const ShadowDOMWrapper: React.FC<{
         shadowRoot.append(reactRootContainer);
 
         // Create a React root and render the children inside it
-        ReactDOM.render(<>{render()}</>, reactRootContainer);
+        const root = createRoot(reactRootContainer);
+        root.render(<>{render()}</>);
 
         // Clean up when the component unmounts
         return () => {
-            //   reactRoot.unmount()
-            reactRootContainer.remove();
+            root.unmount();
         };
     }, [render]);
 
