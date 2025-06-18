@@ -102,6 +102,8 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const lastY = React.useRef<number | undefined>();
     const lastSize = React.useRef<readonly [number, number] | undefined>();
 
+    const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
+
     const width = nonGrowWidth + Math.max(0, overscrollX ?? 0);
 
     let height = enableGroups ? headerHeight + groupHeaderHeight : headerHeight;
@@ -130,7 +132,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
         args.x = args.x < 0 ? 0 : args.x;
 
         let stickyColWidth = 0;
-        for (let i = 0; i < freezeColumns; i++) {
+        for (let i = 0; i < freezeLeftColumns; i++) {
             stickyColWidth += columns[i].width;
         }
 
@@ -214,25 +216,13 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             args.width !== lastSize.current?.[0] ||
             args.height !== lastSize.current?.[1]
         ) {
-            onVisibleRegionChanged?.(
-                {
-                    x: cellX,
-                    y: cellY,
-                    width: cellRight - cellX,
-                    height: cellBottom - cellY,
-                },
-                args.width,
-                args.height,
-                args.paddingRight ?? 0,
-                tx,
-                ty
-            );
+            onVisibleRegionChanged?.(rect, args.width, args.height, args.paddingRight ?? 0, tx, ty);
             last.current = rect;
             lastX.current = tx;
             lastY.current = ty;
             lastSize.current = [args.width, args.height];
         }
-    }, [columns, rowHeight, rows, onVisibleRegionChanged, freezeColumns, smoothScrollX, smoothScrollY]);
+    }, [columns, rowHeight, rows, onVisibleRegionChanged, freezeLeftColumns, smoothScrollX, smoothScrollY]);
 
     const onScrollUpdate = React.useCallback(
         (args: Rectangle & { paddingRight: number }) => {

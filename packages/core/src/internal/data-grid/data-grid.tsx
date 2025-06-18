@@ -70,7 +70,7 @@ export interface DataGridProps {
 
     readonly accessibilityHeight: number;
 
-    readonly freezeColumns: number;
+    readonly freezeColumns: number | [left: number, right: number];
     readonly freezeTrailingRows: number;
     readonly hasAppendRow: boolean;
     readonly firstColAccessible: boolean;
@@ -399,7 +399,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
-    const cellXOffset = Math.max(freezeColumns, Math.min(columns.length - 1, cellXOffsetReal));
+    const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
+    const freezeRightColumns = typeof freezeColumns === "number" ? 0 : freezeColumns[1];
+    const cellXOffset = Math.max(freezeLeftColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
     const windowEventTargetRef = React.useRef<HTMLElement | Window | Document>(experimental?.eventTarget ?? window);
@@ -446,7 +448,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     }, [cellYOffset, cellXOffset, translateX, translateY, enableFirefoxRescaling, enableSafariRescaling]);
 
     const mappedColumns = useMappedColumns(columns, freezeColumns);
-    const stickyX = fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0;
+    const stickyX = React.useMemo(
+        () => (fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : [0, 0]),
+        [fixedShadowX, mappedColumns, dragAndDropState]
+    );
 
     // row: -1 === columnHeader, -2 === groupHeader
     const getBoundsForItem = React.useCallback(
@@ -471,7 +476,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 translateX,
                 translateY,
                 rows,
-                freezeColumns,
+                freezeLeftColumns,
                 freezeTrailingRows,
                 mappedColumns,
                 rowHeight
@@ -499,7 +504,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             translateX,
             translateY,
             rows,
-            freezeColumns,
+            freezeLeftColumns,
             freezeTrailingRows,
             mappedColumns,
             rowHeight,
@@ -514,7 +519,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const y = (posY - rect.top) / scale;
             const edgeDetectionBuffer = 5;
 
-            const effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, undefined, translateX);
+            const effectiveCols = getEffectiveColumns(
+                mappedColumns,
+                cellXOffset,
+                width,
+                freezeColumns,
+                undefined,
+                translateX
+            );
 
             let button = 0;
             let buttons = 0;
@@ -524,7 +536,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             }
 
             // -1 === off right edge
-            const col = getColumnIndexForX(x, effectiveCols, translateX);
+            const col = getColumnIndexForX(x, effectiveCols, freezeColumns, width, translateX);
 
             // -1: header or above
             // undefined: offbottom
@@ -596,7 +608,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 let isEdge = bounds !== undefined && bounds.x + bounds.width - posX <= edgeDetectionBuffer;
 
                 const previousCol = col - 1;
-                if (posX - bounds.x <= edgeDetectionBuffer && previousCol >= 0) {
+                if (
+                    posX - bounds.x <= edgeDetectionBuffer &&
+                    previousCol >= 0 &&
+                    col < mappedColumns.length - freezeRightColumns
+                ) {
                     isEdge = true;
                     bounds = getBoundsForItem(canvas, previousCol, row);
                     assert(bounds !== undefined);
@@ -692,6 +708,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             fillHandle,
             selection,
             totalHeaderHeight,
+            freezeColumns,
+            freezeRightColumns,
         ]
     );
 
@@ -1732,7 +1750,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const accessibilityTree = useDebouncedMemo(
         () => {
             if (width < 50 || experimental?.disableAccessibilityTree === true) return null;
-            let effectiveCols = getEffectiveColumns(mappedColumns, cellXOffset, width, dragAndDropState, translateX);
+            let effectiveCols = getEffectiveColumns(
+                mappedColumns,
+                cellXOffset,
+                width,
+                freezeColumns,
+                dragAndDropState,
+                translateX
+            );
             const colOffset = firstColAccessible ? 0 : -1;
             if (!firstColAccessible && effectiveCols[0]?.sourceIndex === 0) {
                 effectiveCols = effectiveCols.slice(1);
@@ -1866,31 +1891,57 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             onKeyDown,
             getBoundsForItem,
             onCellFocused,
+            freezeColumns,
         ],
         200
     );
 
-    const opacityX =
-        freezeColumns === 0 || !fixedShadowX ? 0 : cellXOffset > freezeColumns ? 1 : clamp(-translateX / 100, 0, 1);
+    const opacityXLeft =
+        freezeLeftColumns === 0 || !fixedShadowX
+            ? 0
+            : cellXOffset > freezeLeftColumns
+            ? 1
+            : clamp(-translateX / 100, 0, 1);
+
+    const opacityXRight =
+        freezeRightColumns === 0 || !fixedShadowX
+            ? 0
+            : cellXOffset + width < columns.length - freezeRightColumns
+            ? 1
+            : clamp((translateX - (columns.length - freezeRightColumns - width) * 32) / 100, 0, 1);
 
     const absoluteOffsetY = -cellYOffset * 32 + translateY;
     const opacityY = !fixedShadowY ? 0 : clamp(-absoluteOffsetY / 100, 0, 1);
 
     const stickyShadow = React.useMemo(() => {
-        if (!opacityX && !opacityY) {
+        if (!opacityXLeft && !opacityY && !opacityXRight) {
             return null;
         }
 
-        const styleX: React.CSSProperties = {
+        const transition = "opacity 0.2s";
+
+        const styleXLeft: React.CSSProperties = {
             position: "absolute",
             top: 0,
-            left: stickyX,
-            width: width - stickyX,
+            left: stickyX[0],
+            width: width - stickyX[0],
             height: height,
-            opacity: opacityX,
+            opacity: opacityXLeft,
             pointerEvents: "none",
-            transition: !smoothScrollX ? "opacity 0.2s" : undefined,
+            transition: !smoothScrollX ? transition : undefined,
             boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
+        };
+
+        const styleXRight: React.CSSProperties = {
+            position: "absolute",
+            top: 0,
+            right: stickyX[1],
+            width: width - stickyX[1],
+            height: height,
+            opacity: opacityXRight,
+            pointerEvents: "none",
+            transition: !smoothScrollX ? transition : undefined,
+            boxShadow: "inset -13px 0 10px -13px rgba(0, 0, 0, 0.2)",
         };
 
         const styleY: React.CSSProperties = {
@@ -1901,17 +1952,28 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             height: height,
             opacity: opacityY,
             pointerEvents: "none",
-            transition: !smoothScrollY ? "opacity 0.2s" : undefined,
+            transition: !smoothScrollY ? transition : undefined,
             boxShadow: "inset 0 13px 10px -13px rgba(0, 0, 0, 0.2)",
         };
 
         return (
             <>
-                {opacityX > 0 && <div id="shadow-x" style={styleX} />}
+                {opacityXLeft > 0 && <div id="shadow-x" style={styleXLeft} />}
+                {opacityXRight > 0 && <div id="shadow-x" style={styleXRight} />}
                 {opacityY > 0 && <div id="shadow-y" style={styleY} />}
             </>
         );
-    }, [opacityX, opacityY, stickyX, width, smoothScrollX, totalHeaderHeight, height, smoothScrollY]);
+    }, [
+        opacityXLeft,
+        opacityY,
+        stickyX,
+        width,
+        smoothScrollX,
+        totalHeaderHeight,
+        height,
+        smoothScrollY,
+        opacityXRight,
+    ]);
 
     const overlayStyle = React.useMemo<React.CSSProperties>(
         () => ({
