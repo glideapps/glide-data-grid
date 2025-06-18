@@ -493,6 +493,12 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      */
     readonly gridSelection?: GridSelection;
     /**
+     * Scroll position configuration when using {@link gridSelection}.
+     * See "Controlled selection" example for details.
+     * @group Selection
+     */
+    readonly gridSelectionScrollOptions?: GridSelectionScrollOptions;
+    /**
      * Emitted whenever the grid selection changes. Specifying
      * this function will make the grid’s selection controlled, so
      * so you will need to specify {@link gridSelection} as well. See
@@ -678,16 +684,26 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
     readonly drawFocusRing?: boolean | "no-editor";
 }
 
+type GridSelectionScrollOptions = {
+    dir?: ScrollDir;
+    paddingX?: number;
+    paddingY?: number;
+    options?: ScrollAlignOptions;
+};
+
+type ScrollDir = "horizontal" | "vertical" | "both";
+type ScrollAlignOptions = {
+    hAlign?: "start" | "center" | "end";
+    vAlign?: "start" | "center" | "end";
+};
+
 type ScrollToFn = (
     col: number | { amount: number; unit: "cell" | "px" },
     row: number | { amount: number; unit: "cell" | "px" },
-    dir?: "horizontal" | "vertical" | "both",
+    dir?: ScrollDir,
     paddingX?: number,
     paddingY?: number,
-    options?: {
-        hAlign?: "start" | "center" | "end";
-        vAlign?: "start" | "center" | "end";
-    }
+    options?: ScrollAlignOptions
 ) => void;
 
 /** @category DataEditor */
@@ -824,6 +840,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         showSearch: showSearchIn,
         onVisibleRegionChanged,
         gridSelection: gridSelectionOuter,
+        gridSelectionScrollOptions,
         onGridSelectionChange,
         minColumnWidth: minColumnWidthIn = 50,
         maxColumnWidth: maxColumnWidthIn = 500,
@@ -3782,10 +3799,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             (outCol !== expectedExternalGridSelection.current?.current?.cell[0] ||
                 outRow !== expectedExternalGridSelection.current?.current?.cell[1])
         ) {
-            scrollToRef.current(outCol, outRow);
+            const { dir, paddingX, paddingY, options } = gridSelectionScrollOptions ?? {};
+
+            scrollToRef.current(outCol, outRow, dir, paddingX, paddingY, options);
         }
         hasJustScrolled.current = false; //only allow skipping a single scroll
-    }, [outCol, outRow]);
+    }, [outCol, outRow, gridSelectionScrollOptions]);
 
     const selectionOutOfBounds =
         gridSelection.current !== undefined &&
