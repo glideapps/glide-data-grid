@@ -1,22 +1,24 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import { assertNever } from "../common/support.js";
 import {
-    GridCellKind,
-    type GridCell,
     BooleanEmpty,
     BooleanIndeterminate,
+    GridCellKind,
+    type GridCell,
 } from "../internal/data-grid/data-grid-types.js";
 
 type StringArrayCellBuffer = {
     formatted: string[];
     rawValue: string[];
     format: "string-array";
+    doNotEscape?: boolean;
 };
 
 type BasicCellBuffer = {
     formatted: string;
     rawValue: string | number | boolean | BooleanEmpty | BooleanIndeterminate | undefined;
     format: "string" | "number" | "boolean" | "url";
+    doNotEscape?: boolean;
 };
 export type CellBuffer = StringArrayCellBuffer | BasicCellBuffer;
 export type CopyBuffer = CellBuffer[][];
@@ -27,6 +29,8 @@ function convertCellToBuffer(cell: GridCell): CellBuffer {
             formatted: cell.copyData,
             rawValue: cell.copyData,
             format: "string",
+            // Do not escape the copy value if it was explicitly specified via copyData:
+            doNotEscape: true,
         };
     }
     switch (cell.kind) {
@@ -140,7 +144,7 @@ function createTextBuffer(copyBuffer: CopyBuffer): string {
             } else if (cell.format === "string-array") {
                 line.push(cell.formatted.map(x => escapeIfNeeded(x, true)).join(","));
             } else {
-                line.push(escapeIfNeeded(cell.formatted, false));
+                line.push(cell.doNotEscape === true ? cell.formatted : escapeIfNeeded(cell.formatted, false));
             }
         }
         lines.push(line.join("\t"));
