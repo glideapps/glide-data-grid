@@ -4,6 +4,7 @@ import {
     type CustomRenderer,
     getMiddleCenterBias,
     GridCellKind,
+    getEmHeight,
 } from "@glideapps/glide-data-grid";
 import * as React from "react";
 import { roundedRect } from "../draw-fns.js";
@@ -19,8 +20,6 @@ interface RangeCellProps {
 }
 
 export type RangeCell = CustomCell<RangeCellProps>;
-
-const RANGE_HEIGHT = 6;
 
 const inputStyle: React.CSSProperties = {
     marginRight: 8,
@@ -44,19 +43,21 @@ const renderer: CustomRenderer<RangeCell> = {
 
         const rangeSize = max - min;
         const fillRatio = (value - min) / rangeSize;
+        const labelFont = `calc(${theme.baseFontStyle} * 0.9) ${theme.fontFamily}`;
+
+        const emHeight = getEmHeight(ctx, labelFont);
+        const rangeHeight = emHeight / 2;
 
         ctx.save();
         let labelWidth = 0;
         if (label !== undefined) {
-            ctx.font = `12px ${theme.fontFamily}`; // fixme this is slow
-            labelWidth =
-                measureTextCached(measureLabel ?? label, ctx, `12px ${theme.fontFamily}`).width +
-                theme.cellHorizontalPadding;
+            ctx.font = labelFont; // fixme this is slow
+            labelWidth = measureTextCached(measureLabel ?? label, ctx, labelFont).width + theme.cellHorizontalPadding;
         }
 
         const rangeWidth = rect.width - theme.cellHorizontalPadding * 2 - labelWidth;
 
-        if (rangeWidth >= RANGE_HEIGHT) {
+        if (rangeWidth >= rangeHeight) {
             const gradient = ctx.createLinearGradient(x, yMid, x + rangeWidth, yMid);
 
             gradient.addColorStop(0, theme.accentColor);
@@ -66,17 +67,17 @@ const renderer: CustomRenderer<RangeCell> = {
 
             ctx.beginPath();
             ctx.fillStyle = gradient;
-            roundedRect(ctx, x, yMid - RANGE_HEIGHT / 2, rangeWidth, RANGE_HEIGHT, RANGE_HEIGHT / 2);
+            roundedRect(ctx, x, yMid - rangeHeight / 2, rangeWidth, rangeHeight, rangeHeight / 2);
             ctx.fill();
 
             ctx.beginPath();
             roundedRect(
                 ctx,
                 x + 0.5,
-                yMid - RANGE_HEIGHT / 2 + 0.5,
+                yMid - rangeHeight / 2 + 0.5,
                 rangeWidth - 1,
-                RANGE_HEIGHT - 1,
-                (RANGE_HEIGHT - 1) / 2
+                rangeHeight - 1,
+                (rangeHeight - 1) / 2
             );
             ctx.strokeStyle = theme.accentLight;
             ctx.lineWidth = 1;
@@ -89,7 +90,7 @@ const renderer: CustomRenderer<RangeCell> = {
             ctx.fillText(
                 label,
                 rect.x + rect.width - theme.cellHorizontalPadding,
-                yMid + getMiddleCenterBias(ctx, `12px ${theme.fontFamily}`)
+                yMid + getMiddleCenterBias(ctx, labelFont)
             );
         }
 
