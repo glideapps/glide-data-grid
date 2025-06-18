@@ -3337,6 +3337,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (onKeyDownIn !== undefined) {
                 onKeyDownIn({
                     ...event,
+                    ...event.location && {
+                        location: [event.location[0] - rowMarkerOffset, event.location[1]] as any,
+                    },
                     cancel: () => {
                         cancelled = true;
                     },
