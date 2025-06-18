@@ -1,6 +1,6 @@
 {
     "name": "@glideapps/glide-data-grid-source",
-    "version": "6.0.4-alpha8",
+    "version": "6.0.4-alpha10",
     "description": "Useful data source hooks for Glide Data Grid",
     "sideEffects": false,
     "type": "module",
@@ -42,20 +42,20 @@
         "canvas"
     ],
     "dependencies": {
-        "@glideapps/glide-data-grid": "6.0.4-alpha8"
+        "@glideapps/glide-data-grid": "6.0.4-alpha10"
     },
     "peerDependencies": {
         "lodash": "^4.17.19",
-        "react": "^16.12.0 || 17.x || 18.x",
-        "react-dom": "^16.12.0 || 17.x || 18.x"
+        "react": "^16.12.0 || 17.x || 18.x || 19.x",
+        "react-dom": "^16.12.0 || 17.x || 18.x || 19.x"
     },
     "devDependencies": {
-        "@babel/cli": "^7.16.0",
-        "eslint": "^8.19.0",
-        "eslint-plugin-import": "^2.22.0",
-        "eslint-plugin-react": "^7.21.5",
-        "eslint-plugin-react-hooks": "^4.2.0",
+        "@babel/cli": "^7.27.2",
+        "eslint": "^8.57.1",
+        "eslint-plugin-import": "^2.31.0",
+        "eslint-plugin-react": "^7.37.5",
+        "eslint-plugin-react-hooks": "^4.6.2",
         "react-resize-detector": "^7.1.2",
-        "tsc-esm-fix": "^2.7.8"
+        "tsc-esm-fix": "^2.20.27"
     }
 }

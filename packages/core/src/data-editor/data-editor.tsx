@@ -722,6 +722,10 @@ export interface DataEditorRef {
      * Causes the columns in the selection to have their natural size recomputed and re-emitted as a resize event.
      */
     remeasureColumns: (cols: CompactSelection) => void;
+    /**
+     * Gets the mouse args from pointer event position.
+     */
+    getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => GridMouseEventArgs | undefined
 }
 
 const loadingCell: GridCell = {
@@ -1334,7 +1338,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let result = getCellContent([outerCol, row]);
                 if (rowMarkerOffset !== 0 && result.span !== undefined) {
                     result = {
-                        ...result, // FIXME: Mutate
+                        ...result,
                         span: [result.span[0] + rowMarkerOffset, result.span[1] + rowMarkerOffset],
                     };
                 }
@@ -1364,7 +1368,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             let result = getGroupDetails?.(group) ?? { name: group };
             if (onGroupHeaderRenamed !== undefined && group !== "") {
                 result = {
-                    // FIXME: Mutate
                     icon: result.icon,
                     name: result.name,
                     overrideTheme: result.overrideTheme,
@@ -2415,7 +2418,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onMouseMoveImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
             const a: GridMouseEventArgs = {
-                ...args, // FIXME: Mutate
+                ...args,
                 location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
             };
             onMouseMove?.(a);
@@ -2526,6 +2529,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             setVisibleRegion,
             onVisibleRegionChanged,
         ]
+    );
+
+    const onColumnProposeMoveImpl = whenDefined(
+        onColumnProposeMove,
+        React.useCallback(
+            (startIndex: number, endIndex: number) => {
+                return onColumnProposeMove?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset) !== false;
+            },
+            [onColumnProposeMove, rowMarkerOffset]
+        )
     );
 
     const onColumnMovedImpl = whenDefined(
@@ -3342,7 +3355,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 !event.ctrlKey &&
                 gridSelection.current !== undefined &&
                 event.key.length === 1 &&
-                /[ -~]/g.test(event.key) &&
+                /[\p{L}\p{M}\p{N}\p{S}\p{P}]/u.test(event.key) &&
                 event.bounds !== undefined &&
                 isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, Math.min(row, rows - 1))]))
             ) {
@@ -3912,6 +3925,21 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     void normalSizeColumn(col + rowMarkerOffset);
                 }
             },
+            getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent): GridMouseEventArgs | undefined => {
+                if (gridRef?.current === null) {
+                    return undefined;
+                }
+
+                const args = gridRef.current.getMouseArgsForPosition(posX, posY, ev);
+                if (args === undefined) {
+                    return undefined;
+                }
+                
+                return {
+                    ...args,
+                    location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
+                };
+            }
         }),
         [appendRow, normalSizeColumn, scrollRef, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
     );
@@ -4052,7 +4080,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     columns={mangledCols}
                     nonGrowWidth={nonGrowWidth}
                     drawHeader={drawHeader}
-                    onColumnProposeMove={onColumnProposeMove}
+                    onColumnProposeMove={onColumnProposeMoveImpl}
                     drawCell={drawCell}
                     disabledRows={disabledRows}
                     freezeColumns={mangledFreezeColumns}
@@ -4123,6 +4151,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             onFinishEditing={onFinishEditing}
                             markdownDivCreateNode={markdownDivCreateNode}
                             isOutsideClick={isOutsideClick}
+                            customEventTarget={experimental?.eventTarget}
                         />
                     </React.Suspense>
                 )}
