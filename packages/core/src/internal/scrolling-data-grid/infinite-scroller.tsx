@@ -7,6 +7,7 @@ import { useEventListener } from "../../common/utils.js";
 import useKineticScroll from "./use-kinetic-scroll.js";
 
 interface Props {
+    readonly children: React.ReactNode;
     readonly className?: string;
     readonly preventDiagonalScrolling?: boolean;
     readonly draggable: boolean;

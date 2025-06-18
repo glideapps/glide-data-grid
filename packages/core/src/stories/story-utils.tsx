@@ -63,7 +63,7 @@ export class BuilderThemeWrapper extends React.PureComponent<React.PropsWithChil
     }
 }
 
-export const SimpleThemeWrapper: React.FC = p => {
+export const SimpleThemeWrapper: React.FC<React.PropsWithChildren> = p => {
     return (
         <SimpleWrapper>
             <div className="content">{p.children}</div>

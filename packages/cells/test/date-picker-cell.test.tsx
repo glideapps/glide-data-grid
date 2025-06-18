@@ -17,6 +17,21 @@ describe("formatValueForHTMLInput", () => {
     ])("check %p format and %p date leads correct format: {%p}", (format: string, date: Date, valueForHTML: string) => {
         expect(formatValueForHTMLInput(format as DateKind, date)).toStrictEqual(valueForHTML);
     });
+
+    it.each([
+        ["datetime-local", new Date("2023-01-01T12:00:00.000Z"), 60 * 60 * 1000, "2023-01-01T13:00:00.000"],
+        ["datetime-local", new Date("2023-01-01T12:00:00.000Z"), -60 * 60 * 1000, "2023-01-01T11:00:00.000"],
+        ["date", new Date("2023-01-01T23:30:00.000Z"), 60 * 60 * 1000, "2023-01-02"],
+        ["date", new Date("2023-01-02T00:30:00.000Z"), -60 * 60 * 1000, "2023-01-01"],
+        ["time", new Date("1970-01-01T10:00:00.000Z"), 30 * 60 * 1000, "10:30:00.000"],
+        ["time", new Date("1970-01-01T10:00:00.000Z"), -30 * 60 * 1000, "09:30:00.000"],
+    ])(
+        "check %p format and %p date with timezoneOffsetMs %p leads to correct format: %p",
+        (format: string, date: Date, timezoneOffsetMs: number, valueForHTML: string) => {
+            expect(formatValueForHTMLInput(format as DateKind, date, timezoneOffsetMs)).toStrictEqual(valueForHTML);
+        }
+    );
+
     it("throws an error when a weird value is passed", () => {
         expect(() => formatValueForHTMLInput("weird" as DateKind, new Date())).toThrow("Unknown date kind weird");
     });
