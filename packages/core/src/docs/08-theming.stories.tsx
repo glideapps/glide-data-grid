@@ -254,8 +254,9 @@ The global theme is provided by the DataEditor by default and can be overriden b
 | bgIconHeader | --gdg-bg-icon-header | string | The background color for header icons |
 | fgIconHeader | --gdg-fg-icon-header | string | The foreground color for header icons |
 | textHeader | --gdg-text-header | string | The header text color |
-| bgGroupHeader | --gdg-bg-group-header | string \\| undefined | The group header background color, if none provided the \`bgHeader\` is used instead. |
-| textGroupHeader | --gdg-text-group-header | string \\| undefined | The group header text color, if none provided the \`textHeader\` is used instead. |
+| bgGroupHeader | --gdg-bg-group-header | string | The group header background color, if none provided the \`bgHeader\` is used instead. |
+| bgGroupHeaderHovered | --gdg-bg-group-header-hovered | string | The group header background color when it is hovered, if none provided the \`bgHeaderHovered\` is used instead. |
+| textGroupHeader | --gdg-text-group-header | string | The group header text color, if none provided the \`textHeader\` is used instead. |
 | textHeaderSelected | --gdg-text-header-selected | string | The text color used for selected headers |
 | bgCell | --gdg-bg-cell | string | The primary background color of the data grid. |
 | bgCellMedium | --gdg-bg-cell-medium | string | Used for disabled or otherwise off colored cells. |
@@ -282,10 +283,10 @@ If an option is missing from any theme it will be filled in with the default the
             </Marked>
             <Highlight>
                 {`
-return <DataEditor 
+return <DataEditor
         theme={{
           bgCell: "#F2F9FF"
-        }} 
+        }}
         getCellContent={getContent} columns={columns} rows={data.length} />
 `}
             </Highlight>
@@ -377,7 +378,7 @@ const getContent = React.useCallback((cell: Item): GridCell => {
             textDark: "#FF0000",
         }
     }
-    
+
     const d = getDataForCell(col, row);
     return {
         kind: GridCellKind.Text,
