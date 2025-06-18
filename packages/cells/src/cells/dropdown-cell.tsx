@@ -223,7 +223,13 @@ const renderer: CustomRenderer<DropdownCell> = {
     }),
     onPaste: (v, d) => ({
         ...d,
-        value: d.allowedValues.includes(v) ? v : d.value,
+        value: d.allowedValues.some(option => {
+            if (option === null || option === undefined) return false;
+            if (typeof option === "string") return option === v;
+            return option.value === v;
+        })
+            ? v
+            : d.value,
     }),
 };
 
