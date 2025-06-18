@@ -51,6 +51,8 @@ export type DrawHeaderCallback = (
         hasSelectedCell: boolean;
         spriteManager: SpriteManager;
         menuBounds: Rectangle;
+        hoverX: number | undefined;
+        hoverY: number | undefined;
     },
     drawContent: () => void
 ) => void;

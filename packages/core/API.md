@@ -729,6 +729,8 @@ drawHeader?: (args: {
     theme: Theme;
     rect: Rectangle;
     hoverAmount: number;
+    hoverX: number | undefined;
+    hoverY: number | undefined;
     isSelected: boolean;
     isHovered: boolean;
     hasSelectedCell: boolean;
