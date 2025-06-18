@@ -9,6 +9,20 @@ import {
 import * as React from "react";
 import { roundedRect } from "../draw-fns.js";
 
+function adaptFontSize(font: string, percentage: number): string {
+    const regex = /(\d+\.?\d*)\s*(px|rem|em|%|pt)/;
+    const match = font.match(regex);
+
+    if (match) {
+        const value = parseFloat(match[1]);
+        const unit = match[2];
+        const scaledValue = value * percentage;
+        return font.replace(regex, `${Number(scaledValue.toPrecision(3))}${unit}`);
+    }
+
+    return font;
+}
+
 interface RangeCellProps {
     readonly kind: "range-cell";
     readonly value: number;
@@ -43,7 +57,8 @@ const renderer: CustomRenderer<RangeCell> = {
 
         const rangeSize = max - min;
         const fillRatio = (value - min) / rangeSize;
-        const labelFont = `calc(${theme.baseFontStyle} * 0.9) ${theme.fontFamily}`;
+        // Only use 90% of the base font size for the label
+        const labelFont = `${adaptFontSize(theme.baseFontStyle, 0.9)} ${theme.fontFamily}`;
 
         const emHeight = getEmHeight(ctx, labelFont);
         const rangeHeight = emHeight / 2;
