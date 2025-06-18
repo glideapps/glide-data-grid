@@ -371,6 +371,8 @@ The data grid uses the `Theme` provided to the DataEditer in the `theme` prop. T
 | bgHeader              | string              | --gdg-bg-header               | The header background color                                                                       |
 | bgHeaderHasFocus      | string              | --gdg-bg-header-has           | The header background color when its column contains the selected cell                            |
 | bgHeaderHovered       | string              | --gdg-bg-header-hovered       | The header background color when it is hovered                                                    |
+| bgGroupHeader         | string \| undefined | --gdg-bg-group-header         | The group header background color, if none provided the `bgHeader` is used instead.               |
+| bgGroupHeaderHovered  | string \| undefined | --gdg-bg-group-header-hovered | The group header background color when it is hovered, if none provided the `bgHeaderHovered` is used instead. |
 | bgBubble              | string              | --gdg-bg-bubble               | The background color used in bubbles                                                              |
 | bgBubbleSelected      | string              | --gdg-bg-bubble-selected      | The background color used in bubbles when the cell is selected                                    |
 | bgSearchResult        | string              | --gdg-bg-search-result        | The background color used for cells which match the search string                                 |
@@ -418,7 +420,12 @@ scrollTo: (
         row: number,
         dir?: "horizontal" | "vertical" | "both",
         paddingX?: number,
-        paddingY?: number
+        paddingY?: number,
+        options?: {
+            hAlign?: "start" | "center" | "end";
+            vAlign?: "start" | "center" | "end";
+            behavior?: ScrollBehavior; // "auto" | "smooth" | "instant"
+        }
     ) => void;
 ```
 
@@ -432,7 +439,11 @@ Requests the data grid to scroll to a particular location. If only one direction
 ## appendRow
 
 ```ts
-appendRow: (col: number, openOverlay: boolean = true) => Promise<void>;
+appendRow: (
+         col: number,
+         openOverlay: boolean = true,
+         behavior?: ScrollBehavior; // "auto" | "smooth" | "instant"
+) => Promise<void>;
 ```
 
 Appends a row to the data grid.
@@ -729,6 +740,8 @@ drawHeader?: (args: {
     theme: Theme;
     rect: Rectangle;
     hoverAmount: number;
+    hoverX: number | undefined;
+    hoverY: number | undefined;
     isSelected: boolean;
     isHovered: boolean;
     hasSelectedCell: boolean;

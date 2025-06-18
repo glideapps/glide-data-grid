@@ -17,6 +17,8 @@ export function makeCSSStyle(theme: Theme): Record<string, string> {
         "--gdg-fg-icon-header": theme.fgIconHeader,
         "--gdg-text-header": theme.textHeader,
         "--gdg-text-group-header": theme.textGroupHeader ?? theme.textHeader,
+        "--gdg-bg-group-header": theme.bgGroupHeader ?? theme.bgHeader,
+        "--gdg-bg-group-header-hovered": theme.bgGroupHeaderHovered ?? theme.bgHeaderHovered,
         "--gdg-text-header-selected": theme.textHeaderSelected,
         "--gdg-bg-cell": theme.bgCell,
         "--gdg-bg-cell-medium": theme.bgCellMedium,
@@ -60,6 +62,8 @@ export interface Theme {
     fgIconHeader: string;
     textHeader: string;
     textGroupHeader?: string;
+    bgGroupHeader?: string;
+    bgGroupHeaderHovered?: string;
     textHeaderSelected: string;
     bgCell: string;
     bgCellMedium: string;

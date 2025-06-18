@@ -1396,7 +1396,7 @@ describe("data-editor", () => {
             clientX: 300, // Col B
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
-        
+
         const testKeys = [
             {
                 keyCode: 74,
@@ -1422,24 +1422,24 @@ describe("data-editor", () => {
                 keyCode: 222,
                 key: "'",
             },
-        ]
+        ];
 
         for (const key of testKeys) {
             fireEvent.keyDown(canvas, key);
             fireEvent.keyUp(canvas, key);
-    
+
             const overlay = screen.getByDisplayValue(key.key);
             expect(document.body.contains(overlay)).toBe(true);
-    
+
             vi.useFakeTimers();
             fireEvent.keyDown(overlay, {
                 key: "Escape",
             });
-    
+
             act(() => {
                 vi.runAllTimers();
             });
-    
+
             expect(document.body.contains(overlay)).toBe(false);
         }
     });
@@ -3731,7 +3731,11 @@ describe("data-editor", () => {
         act(() => {
             vi.runAllTimers();
         });
-        expect(Element.prototype.scrollTo).toBeCalledWith(0, 15_101);
+        expect(Element.prototype.scrollTo).toBeCalledWith({
+            behavior: "auto",
+            left: 0,
+            top: 15_101,
+        });
     });
 
     test("Imperative scrollTo pixel", async () => {
@@ -3751,7 +3755,11 @@ describe("data-editor", () => {
         act(() => {
             vi.runAllTimers();
         });
-        expect(Element.prototype.scrollTo).toBeCalledWith(0, 533);
+        expect(Element.prototype.scrollTo).toBeCalledWith({
+            behavior: "auto",
+            left: 0,
+            top: 533,
+        });
     });
 
     test("Imperative scrollTo pixel start", async () => {
@@ -3780,7 +3788,11 @@ describe("data-editor", () => {
         act(() => {
             vi.runAllTimers();
         });
-        expect(Element.prototype.scrollTo).toBeCalledWith(0, 1464);
+        expect(Element.prototype.scrollTo).toBeCalledWith({
+            behavior: "auto",
+            left: 0,
+            top: 1464,
+        });
     });
 
     test("Imperative scrollTo pixel center", async () => {
@@ -3809,7 +3821,11 @@ describe("data-editor", () => {
         act(() => {
             vi.runAllTimers();
         });
-        expect(Element.prototype.scrollTo).toBeCalledWith(0, 998.5);
+        expect(Element.prototype.scrollTo).toBeCalledWith({
+            behavior: "auto",
+            left: 0,
+            top: 998.5,
+        });
     });
 
     test("Imperative scrollTo pixel end", async () => {
@@ -3838,7 +3854,11 @@ describe("data-editor", () => {
         act(() => {
             vi.runAllTimers();
         });
-        expect(Element.prototype.scrollTo).toBeCalledWith(0, 533);
+        expect(Element.prototype.scrollTo).toBeCalledWith({
+            behavior: "auto",
+            left: 0,
+            top: 533,
+        });
     });
 
     test("Imperative damage gets right cell", async () => {
