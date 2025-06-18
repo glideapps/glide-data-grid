@@ -726,7 +726,11 @@ export interface DataEditorRef {
     /**
      * Gets the mouse args from pointer event position.
      */
-    getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => GridMouseEventArgs | undefined
+    getMouseArgsForPosition: (
+        posX: number,
+        posY: number,
+        ev?: MouseEvent | TouchEvent
+    ) => GridMouseEventArgs | undefined;
 }
 
 const loadingCell: GridCell = {
@@ -1643,7 +1647,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     getCellContentRef.current = getCellContent;
     rowsRef.current = rows;
     const appendRow = React.useCallback(
-        async (col: number, openOverlay: boolean = true, behavior?:  ScrollBehavior): Promise<void> => {
+        async (col: number, openOverlay: boolean = true, behavior?: ScrollBehavior): Promise<void> => {
             const c = mangledCols[col];
             if (c?.trailingRowOptions?.disabled === true) {
                 return;
@@ -1935,7 +1939,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }
                         lastSelectedColRef.current = col;
                     } else if (columnSelect !== "none") {
-                        setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, isMultiKey);
+                        if (selectedColumns.hasIndex(col)) {
+                            setSelectedColumns(selectedColumns.remove(col), undefined, isMultiKey);
+                        } else {
+                            setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, isMultiKey);
+                        }
                         lastSelectedColRef.current = col;
                     }
                     lastSelectedRowRef.current = undefined;
@@ -3337,9 +3345,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (onKeyDownIn !== undefined) {
                 onKeyDownIn({
                     ...event,
-                    ...event.location && {
+                    ...(event.location && {
                         location: [event.location[0] - rowMarkerOffset, event.location[1]] as any,
-                    },
+                    }),
                     cancel: () => {
                         cancelled = true;
                     },
@@ -3930,7 +3938,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     void normalSizeColumn(col + rowMarkerOffset);
                 }
             },
-            getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent): GridMouseEventArgs | undefined => {
+            getMouseArgsForPosition: (
+                posX: number,
+                posY: number,
+                ev?: MouseEvent | TouchEvent
+            ): GridMouseEventArgs | undefined => {
                 if (gridRef?.current === null) {
                     return undefined;
                 }
@@ -3939,12 +3951,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (args === undefined) {
                     return undefined;
                 }
-                
+
                 return {
                     ...args,
                     location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
                 };
-            }
+            },
         }),
         [appendRow, normalSizeColumn, scrollRef, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
     );
