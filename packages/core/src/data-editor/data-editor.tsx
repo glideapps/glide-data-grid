@@ -1933,6 +1933,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }
                     } else if (isMultiCol) {
                         if (selectedColumns.hasIndex(col)) {
+                            // If the column is already selected, deselect that column:
                             setSelectedColumns(selectedColumns.remove(col), undefined, isMultiKey);
                         } else {
                             setSelectedColumns(undefined, col, isMultiKey);
