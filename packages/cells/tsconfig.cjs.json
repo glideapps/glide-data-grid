@@ -14,7 +14,7 @@
         "rootDir": "./src",
         "outDir": "./dist/cjs",
         "declarationDir": "./dist/dts",
-        "module": "CommonJS",
+        "module": "Node16",
         "verbatimModuleSyntax": false,
         "sourceMap": true
     }

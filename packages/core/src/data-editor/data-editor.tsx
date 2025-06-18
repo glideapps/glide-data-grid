@@ -687,6 +687,7 @@ type ScrollToFn = (
     options?: {
         hAlign?: "start" | "center" | "end";
         vAlign?: "start" | "center" | "end";
+        behavior?: ScrollBehavior;
     }
 ) => void;
 
@@ -697,7 +698,7 @@ export interface DataEditorRef {
      * @param col The column index to focus in the new row.
      * @returns A promise which waits for the append to complete.
      */
-    appendRow: (col: number, openOverlay?: boolean) => Promise<void>;
+    appendRow: (col: number, openOverlay?: boolean, behavior?: ScrollBehavior) => Promise<void>;
     /**
      * Triggers cells to redraw.
      */
@@ -722,6 +723,10 @@ export interface DataEditorRef {
      * Causes the columns in the selection to have their natural size recomputed and re-emitted as a resize event.
      */
     remeasureColumns: (cols: CompactSelection) => void;
+    /**
+     * Gets the mouse args from pointer event position.
+     */
+    getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => GridMouseEventArgs | undefined
 }
 
 const loadingCell: GridCell = {
@@ -877,6 +882,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const rowMarkerTheme = rowMarkersObj?.theme ?? p.rowMarkerTheme;
     const headerRowMarkerTheme = rowMarkersObj?.headerTheme;
     const headerRowMarkerAlwaysVisible = rowMarkersObj?.headerAlwaysVisible;
+    const headerRowMarkerDisabled = rowSelect !== "multi";
     const rowMarkerCheckboxStyle = rowMarkersObj?.checkboxStyle ?? "square";
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
@@ -1112,6 +1118,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 rowMarkerChecked,
                 headerRowMarkerTheme,
                 headerRowMarkerAlwaysVisible,
+                headerRowMarkerDisabled,
             },
             ...columns,
         ];
@@ -1124,6 +1131,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         rowMarkerChecked,
         headerRowMarkerTheme,
         headerRowMarkerAlwaysVisible,
+        headerRowMarkerDisabled,
     ]);
 
     const visibleRegionRef = React.useRef<VisibleRegion>({
@@ -1331,7 +1339,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 let result = getCellContent([outerCol, row]);
                 if (rowMarkerOffset !== 0 && result.span !== undefined) {
                     result = {
-                        ...result, // FIXME: Mutate
+                        ...result,
                         span: [result.span[0] + rowMarkerOffset, result.span[1] + rowMarkerOffset],
                     };
                 }
@@ -1361,7 +1369,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             let result = getGroupDetails?.(group) ?? { name: group };
             if (onGroupHeaderRenamed !== undefined && group !== "") {
                 result = {
-                    // FIXME: Mutate
                     icon: result.icon,
                     name: result.name,
                     overrideTheme: result.overrideTheme,
@@ -1605,10 +1612,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                                 scrollX /= scale;
                                 scrollY /= scale;
                             }
-                            scrollRef.current.scrollTo(
-                                scrollX + scrollRef.current.scrollLeft,
-                                scrollY + scrollRef.current.scrollTop
-                            );
+                            scrollRef.current.scrollTo({
+                                left: scrollX + scrollRef.current.scrollLeft,
+                                top: scrollY + scrollRef.current.scrollTop,
+                                behavior: options?.behavior ?? "auto",
+                            });
                         }
                     }
                 }
@@ -1635,7 +1643,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     getCellContentRef.current = getCellContent;
     rowsRef.current = rows;
     const appendRow = React.useCallback(
-        async (col: number, openOverlay: boolean = true): Promise<void> => {
+        async (col: number, openOverlay: boolean = true, behavior?:  ScrollBehavior): Promise<void> => {
             const c = mangledCols[col];
             if (c?.trailingRowOptions?.disabled === true) {
                 return;
@@ -1661,7 +1669,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 }
 
                 const row = typeof r === "number" ? r : bottom ? rows : 0;
-                scrollToRef.current(col - rowMarkerOffset, row);
+                scrollToRef.current(col - rowMarkerOffset, row, "both", 0, 0, behavior ? { behavior } : undefined);
                 setCurrent(
                     {
                         cell: [col, row],
@@ -1795,7 +1803,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         } else {
                             setSelectedRows(CompactSelection.fromSingleSelection(newSlice), undefined, isMultiRow);
                         }
-                    } else if (isMultiRow || args.isTouch || rowSelectionMode === "multi") {
+                    } else if (rowSelect === "multi" && (isMultiRow || args.isTouch || rowSelectionMode === "multi")) {
                         if (isSelected) {
                             setSelectedRows(selectedRows.remove(row), undefined, true);
                         } else {
@@ -2412,7 +2420,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const onMouseMoveImpl = React.useCallback(
         (args: GridMouseEventArgs) => {
             const a: GridMouseEventArgs = {
-                ...args, // FIXME: Mutate
+                ...args,
                 location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
             };
             onMouseMove?.(a);
@@ -2523,6 +2531,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             setVisibleRegion,
             onVisibleRegionChanged,
         ]
+    );
+
+    const onColumnProposeMoveImpl = whenDefined(
+        onColumnProposeMove,
+        React.useCallback(
+            (startIndex: number, endIndex: number) => {
+                return onColumnProposeMove?.(startIndex - rowMarkerOffset, endIndex - rowMarkerOffset) !== false;
+            },
+            [onColumnProposeMove, rowMarkerOffset]
+        )
     );
 
     const onColumnMovedImpl = whenDefined(
@@ -3319,6 +3337,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             if (onKeyDownIn !== undefined) {
                 onKeyDownIn({
                     ...event,
+                    ...event.location && {
+                        location: [event.location[0] - rowMarkerOffset, event.location[1]] as any,
+                    },
                     cancel: () => {
                         cancelled = true;
                     },
@@ -3339,7 +3360,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 !event.ctrlKey &&
                 gridSelection.current !== undefined &&
                 event.key.length === 1 &&
-                /[ -~]/g.test(event.key) &&
+                /[\p{L}\p{M}\p{N}\p{S}\p{P}]/u.test(event.key) &&
                 event.bounds !== undefined &&
                 isReadWriteCell(getCellContent([col - rowMarkerOffset, Math.max(0, Math.min(row, rows - 1))]))
             ) {
@@ -3909,6 +3930,21 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     void normalSizeColumn(col + rowMarkerOffset);
                 }
             },
+            getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent): GridMouseEventArgs | undefined => {
+                if (gridRef?.current === null) {
+                    return undefined;
+                }
+
+                const args = gridRef.current.getMouseArgsForPosition(posX, posY, ev);
+                if (args === undefined) {
+                    return undefined;
+                }
+                
+                return {
+                    ...args,
+                    location: [args.location[0] - rowMarkerOffset, args.location[1]] as any,
+                };
+            }
         }),
         [appendRow, normalSizeColumn, scrollRef, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
     );
@@ -4049,7 +4085,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     columns={mangledCols}
                     nonGrowWidth={nonGrowWidth}
                     drawHeader={drawHeader}
-                    onColumnProposeMove={onColumnProposeMove}
+                    onColumnProposeMove={onColumnProposeMoveImpl}
                     drawCell={drawCell}
                     disabledRows={disabledRows}
                     freezeColumns={mangledFreezeColumns}
@@ -4120,6 +4156,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             onFinishEditing={onFinishEditing}
                             markdownDivCreateNode={markdownDivCreateNode}
                             isOutsideClick={isOutsideClick}
+                            customEventTarget={experimental?.eventTarget}
                         />
                     </React.Suspense>
                 )}

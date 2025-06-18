@@ -427,7 +427,7 @@ function drawHeaderInner(
     isRtl: boolean,
     headerLayout: HeaderLayout
 ) {
-    if (c.rowMarker !== undefined) {
+    if (c.rowMarker !== undefined && c.headerRowMarkerDisabled !== true) {
         const checked = c.rowMarkerChecked;
         if (checked !== true && c.headerRowMarkerAlwaysVisible !== true) {
             ctx.globalAlpha = hoverAmount;
@@ -642,6 +642,8 @@ export function drawHeader(
                 hasSelectedCell,
                 spriteManager,
                 menuBounds: headerLayout?.menuBounds ?? { x: 0, y: 0, height: 0, width: 0 },
+                hoverX: posX,
+                hoverY: posY,
             },
             () =>
                 drawHeaderInner(

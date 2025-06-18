@@ -31,7 +31,7 @@ export interface DatePickerCellProps {
     readonly displayDate: string;
     /* Defines the type of the HTML input element. */
     readonly format: DateKind;
-    /* Timezone offset in minutes. 
+    /* Timezone offset in minutes.
     This can be used to adjust the date by a given timezone offset. */
     readonly timezoneOffset?: number;
     /* Minimum value that can be entered by the user.
@@ -40,17 +40,27 @@ export interface DatePickerCellProps {
     /* Maximum value that can be entered by the user.
     This is passed to the max attribute of the HTML input element. */
     readonly max?: string | Date;
-    /* Granularity that the date must adhere. 
+    /* Granularity that the date must adhere.
     This is passed to the step attribute of the HTML input element. */
     readonly step?: string;
 }
 
 export type DateKind = "date" | "time" | "datetime-local";
 
-export const formatValueForHTMLInput = (dateKind: DateKind, date: Date | undefined | null): string => {
+export const formatValueForHTMLInput = (
+    dateKind: DateKind,
+    date: Date | undefined | null,
+    timezoneOffsetMs?: number
+): string => {
     if (date === undefined || date === null) {
         return "";
     }
+
+    if (timezoneOffsetMs) {
+        // Adjust based on the configured timezone offset:
+        date = new Date(date.getTime() + timezoneOffsetMs);
+    }
+
     const isoDate = date.toISOString();
     switch (dateKind) {
         case "date":
@@ -72,18 +82,18 @@ const Editor: ReturnType<ProvideEditorCallback<DatePickerCell>> = cell => {
     const step =
         cellData.step !== undefined && !Number.isNaN(Number(cellData.step)) ? Number(cellData.step) : undefined;
 
-    const minValue = cellData.min instanceof Date ? formatValueForHTMLInput(format, cellData.min) : cellData.min;
-
-    const maxValue = cellData.max instanceof Date ? formatValueForHTMLInput(format, cellData.max) : cellData.max;
-
-    let date = cellData.date;
-    // Convert timezone offset to milliseconds
+    // Convert timezone offset from minutes to milliseconds:
     const timezoneOffsetMs = cellData.timezoneOffset ? cellData.timezoneOffset * 60 * 1000 : 0;
-    if (timezoneOffsetMs && date) {
-        // Adjust based on the timezone offset
-        date = new Date(date.getTime() + timezoneOffsetMs);
-    }
-    const value = formatValueForHTMLInput(format, date);
+
+    // We need to convert the min and max to iso strings. Thereby, we are also
+    // adjusting the values to the given timezone offset.
+    const minValue =
+        cellData.min instanceof Date ? formatValueForHTMLInput(format, cellData.min, timezoneOffsetMs) : cellData.min;
+    const maxValue =
+        cellData.max instanceof Date ? formatValueForHTMLInput(format, cellData.max, timezoneOffsetMs) : cellData.max;
+
+    const value = formatValueForHTMLInput(format, cellData.date, timezoneOffsetMs);
+
     if (cell.value.readonly) {
         return (
             <TextCellEntry

@@ -1,12 +1,12 @@
-import type { Theme } from "../../common/styles.js";
-import { assertNever, proveType } from "../../common/support.js";
 import has from "lodash/has.js";
 import type React from "react";
 import type { CSSProperties } from "react";
-import type { SpriteManager } from "./data-grid-sprites.js";
+import type { Theme } from "../../common/styles.js";
+import { assertNever, proveType } from "../../common/support.js";
 import type { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor.js";
-import type { ImageWindowLoader } from "./image-window-loader-interface.js";
+import type { SpriteManager } from "./data-grid-sprites.js";
 import type { BaseGridMouseEventArgs } from "./event-args.js";
+import type { ImageWindowLoader } from "./image-window-loader-interface.js";
 
 // Thoughts:
 // rows/columns are called out as selected, but when selected they must also be added
@@ -51,6 +51,8 @@ export type DrawHeaderCallback = (
         hasSelectedCell: boolean;
         spriteManager: SpriteManager;
         menuBounds: Rectangle;
+        hoverX: number | undefined;
+        hoverY: number | undefined;
     },
     drawContent: () => void
 ) => void;
@@ -197,6 +199,7 @@ export type InnerColumnExtension = {
     rowMarkerChecked?: BooleanIndeterminate | boolean;
     headerRowMarkerTheme?: Partial<Theme>;
     headerRowMarkerAlwaysVisible?: boolean;
+    headerRowMarkerDisabled?: boolean;
 };
 
 /** @category Columns */
@@ -258,17 +261,17 @@ export function isInnerOnlyCell(cell: InnerGridCell): cell is InnerOnlyGridCell 
 export function isReadWriteCell(cell: GridCell): cell is ReadWriteGridCell {
     if (!isEditableGridCell(cell) || cell.kind === GridCellKind.Image) return false;
 
-    if (
-        cell.kind === GridCellKind.Text ||
-        cell.kind === GridCellKind.Number ||
-        cell.kind === GridCellKind.Markdown ||
-        cell.kind === GridCellKind.Uri ||
-        cell.kind === GridCellKind.Custom ||
-        cell.kind === GridCellKind.Boolean
-    ) {
-        return cell.readonly !== true;
+    switch (cell.kind) {
+        case GridCellKind.Text:
+        case GridCellKind.Number:
+        case GridCellKind.Markdown:
+        case GridCellKind.Uri:
+        case GridCellKind.Custom:
+        case GridCellKind.Boolean:
+            return cell.readonly !== true;
+        default:
+            assertNever(cell, "A cell was passed with an invalid kind");
     }
-    assertNever(cell, "A cell was passed with an invalid kind");
 }
 
 /** @category Cells */

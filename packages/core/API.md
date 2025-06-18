@@ -45,15 +45,16 @@ Details of each property can be found by clicking on it.
 
 ## Ref Methods
 
-| Name                                  | Description                                                                                                  |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [appendRow](#appendrow)               | Append a row to the data grid.                                                                               |
-| [emit](#emit)                         | Used to emit commands normally emitted by keyboard shortcuts.                                                |
-| [focus](#focus)                       | Focuses the data grid.                                                                                       |
-| [getBounds](#getbounds)               | Gets the current screen-space bounds of a desired cell.                                                      |
-| [remeasureColumns](#remeasureColumns) | Causes the columns in the selection to have their natural sizes recomputed and re-emitted as a resize event. |
-| [scrollTo](#scrollto)                 | Tells the data-grid to scroll to a particular location.                                                      |
-| [updateCells](#updatecells)           | Invalidates the rendering of a list of passed cells.                                                         |
+| Name                                                | Description                                                                                                  |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [appendRow](#appendrow)                             | Append a row to the data grid.                                                                               |
+| [emit](#emit)                                       | Used to emit commands normally emitted by keyboard shortcuts.                                                |
+| [focus](#focus)                                     | Focuses the data grid.                                                                                       |
+| [getBounds](#getbounds)                             | Gets the current screen-space bounds of a desired cell.                                                      |
+| [remeasureColumns](#remeasurecolumns)               | Causes the columns in the selection to have their natural sizes recomputed and re-emitted as a resize event. |
+| [scrollTo](#scrollto)                               | Tells the data-grid to scroll to a particular location.                                                      |
+| [updateCells](#updatecells)                         | Invalidates the rendering of a list of passed cells.                                                         |
+| [getMouseArgsForPosition](#getmouseargsforposition) | Gets the mouse args from pointer event position. |
 
 ## Required Props
 
@@ -417,7 +418,12 @@ scrollTo: (
         row: number,
         dir?: "horizontal" | "vertical" | "both",
         paddingX?: number,
-        paddingY?: number
+        paddingY?: number,
+        options?: {
+            hAlign?: "start" | "center" | "end";
+            vAlign?: "start" | "center" | "end";
+            behavior?: ScrollBehavior; // "auto" | "smooth" | "instant"
+        }
     ) => void;
 ```
 
@@ -431,7 +437,11 @@ Requests the data grid to scroll to a particular location. If only one direction
 ## appendRow
 
 ```ts
-appendRow: (col: number, openOverlay: boolean = true) => Promise<void>;
+appendRow: (
+         col: number,
+         openOverlay: boolean = true,
+         behavior?: ScrollBehavior; // "auto" | "smooth" | "instant"
+) => Promise<void>;
 ```
 
 Appends a row to the data grid.
@@ -457,6 +467,20 @@ emit: (eventName: EmitEvents) => Promise<void>;
 ```
 
 Emits the event into the data grid as if the user had pressed the keyboard shortcut.
+
+---
+
+## getMouseArgsForPosition
+
+```ts
+getMouseArgsForPosition: (
+    posX: number,
+    posY: number,
+    ev?: MouseEvent | TouchEvent
+) => GridMouseEventArgs | undefined;
+```
+
+Returns grid coordinates and context for a pointer event position. Useful for handling interactions outside of built-in callbacks.
 
 ---
 
@@ -714,6 +738,8 @@ drawHeader?: (args: {
     theme: Theme;
     rect: Rectangle;
     hoverAmount: number;
+    hoverX: number | undefined;
+    hoverY: number | undefined;
     isSelected: boolean;
     isHovered: boolean;
     hasSelectedCell: boolean;
