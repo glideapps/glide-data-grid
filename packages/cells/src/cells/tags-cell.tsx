@@ -21,9 +21,6 @@ interface TagsCellProps {
 
 export type TagsCell = CustomCell<TagsCellProps>;
 
-const tagHeight = 20;
-const innerPad = 6;
-
 const EditorWrap = styled.div<{ tagHeight: number; innerPad: number }>`
     display: flex;
     flex-direction: column;
@@ -94,6 +91,8 @@ const renderer: CustomRenderer<TagsCell> = {
             width: rect.width - 2 * theme.cellHorizontalPadding,
             height: rect.height - 2 * theme.cellVerticalPadding,
         };
+        const tagHeight = theme.bubbleHeight;
+        const innerPad = theme.bubblePadding;
         const rows = Math.max(1, Math.floor(drawArea.height / (tagHeight + innerPad)));
 
         let x = drawArea.x;
@@ -130,11 +129,14 @@ const renderer: CustomRenderer<TagsCell> = {
     provideEditor: () => {
         // eslint-disable-next-line react/display-name
         return p => {
-            const { onChange, value } = p;
+            const { onChange, value, theme } = p;
             const { readonly = false } = value;
             const { possibleTags, tags } = value.data;
             return (
-                <EditorWrap tagHeight={tagHeight} innerPad={innerPad} className={readonly ? "gdg-readonly" : ""}>
+                <EditorWrap
+                    tagHeight={theme.bubbleHeight}
+                    innerPad={theme.bubblePadding}
+                    className={readonly ? "gdg-readonly" : ""}>
                     {possibleTags.map(t => {
                         const selected = tags.indexOf(t.tag) !== -1;
                         return (

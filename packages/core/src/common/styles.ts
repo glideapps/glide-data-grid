@@ -27,6 +27,9 @@ export function makeCSSStyle(theme: Theme): Record<string, string> {
         "--gdg-bg-header-hovered": theme.bgHeaderHovered,
         "--gdg-bg-bubble": theme.bgBubble,
         "--gdg-bg-bubble-selected": theme.bgBubbleSelected,
+        "--gdg-bubble-height": `${theme.bubbleHeight}px`,
+        "--gdg-bubble-padding": `${theme.bubblePadding}px`,
+        "--gdg-bubble-margin": `${theme.bubbleMargin}px`,
         "--gdg-bg-search-result": theme.bgSearchResult,
         "--gdg-border-color": theme.borderColor,
         "--gdg-horizontal-border-color": theme.horizontalBorderColor ?? theme.borderColor,
@@ -72,6 +75,9 @@ export interface Theme {
     bgHeaderHovered: string;
     bgBubble: string;
     bgBubbleSelected: string;
+    bubbleHeight: number;
+    bubblePadding: number;
+    bubbleMargin: number;
     bgSearchResult: string;
     borderColor: string;
     drilldownBorder: string;
@@ -116,6 +122,9 @@ const dataEditorBaseTheme: Theme = {
 
     bgBubble: "#EDEDF3",
     bgBubbleSelected: "#FFFFFF",
+    bubbleHeight: 20,
+    bubblePadding: 6,
+    bubbleMargin: 4,
 
     bgSearchResult: "#fff9e3",
 
