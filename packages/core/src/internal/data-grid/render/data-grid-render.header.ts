@@ -5,14 +5,14 @@ import type { HoverValues } from "../animation-manager.js";
 import type { CellSet } from "../cell-set.js";
 import { withAlpha } from "../color-parser.js";
 import type { SpriteManager, SpriteVariant } from "../data-grid-sprites.js";
-import { type DrawHeaderCallback, type Rectangle, GridColumnMenuIcon, type GridSelection } from "../data-grid-types.js";
+import { GridColumnMenuIcon, type DrawHeaderCallback, type GridSelection, type Rectangle } from "../data-grid-types.js";
 import {
     drawMenuDots,
+    getMeasuredTextCache,
     getMiddleCenterBias,
+    measureTextCached,
     roundedPoly,
     type MappedGridColumn,
-    measureTextCached,
-    getMeasuredTextCache,
 } from "./data-grid-lib.js";
 import type { GroupDetails, GroupDetailsCallback } from "./data-grid-render.cells.js";
 import { walkColumns, walkGroups } from "./data-grid-render.walk.js";
@@ -185,8 +185,10 @@ export function drawGroups(
         const groupTheme =
             group?.overrideTheme === undefined ? theme : mergeAndRealizeTheme(theme, group.overrideTheme);
         const isHovered = hRow === -2 && hCol !== undefined && hCol >= span[0] && hCol <= span[1];
+        const fillColor = isHovered
+            ? groupTheme.bgGroupHeaderHovered ?? groupTheme.bgHeaderHovered
+            : groupTheme.bgGroupHeader ?? groupTheme.bgHeader;
 
-        const fillColor = isHovered ? groupTheme.bgHeaderHovered : groupTheme.bgHeader;
         if (fillColor !== theme.bgHeader) {
             ctx.fillStyle = fillColor;
             ctx.fill();
