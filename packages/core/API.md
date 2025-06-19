@@ -568,8 +568,7 @@ export type ProvideEditorCallbackResult<T extends InnerGridCell> =
     | undefined;
 
 export type ProvideEditorCallback<T extends InnerGridCell> = (
-    cell: T,
-    location: Item
+    cell: T & { location?: Item }
 ) => ProvideEditorCallbackResult<T>;
 
 provideEditor?: ProvideEditorCallback<GridCell>;
