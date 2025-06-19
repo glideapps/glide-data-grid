@@ -303,7 +303,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
     let h = 0;
 
     // Browser's maximum div height limit
-    const maxDomHeight = 33_554_432;
+    const maxDomHeight = BROWSER_MAX_DIV_HEIGHT;
     // Ensure we don't create padders that exceed browser limits
     const effectiveScrollHeight = Math.min(scrollHeight, maxDomHeight);
 
