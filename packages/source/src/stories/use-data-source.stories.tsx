@@ -173,6 +173,9 @@ const testTheme: Theme = {
 
     bgBubble: "#EDEDF3",
     bgBubbleSelected: "#FFFFFF",
+    bubbleHeight: 20,
+    bubblePadding: 6,
+    bubbleMargin: 4,
 
     headerIconSize: 20,
     markerFontStyle: "13px",

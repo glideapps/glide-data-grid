@@ -45,15 +45,16 @@ Details of each property can be found by clicking on it.
 
 ## Ref Methods
 
-| Name                                  | Description                                                                                                  |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [appendRow](#appendrow)               | Append a row to the data grid.                                                                               |
-| [emit](#emit)                         | Used to emit commands normally emitted by keyboard shortcuts.                                                |
-| [focus](#focus)                       | Focuses the data grid.                                                                                       |
-| [getBounds](#getbounds)               | Gets the current screen-space bounds of a desired cell.                                                      |
-| [remeasureColumns](#remeasureColumns) | Causes the columns in the selection to have their natural sizes recomputed and re-emitted as a resize event. |
-| [scrollTo](#scrollto)                 | Tells the data-grid to scroll to a particular location.                                                      |
-| [updateCells](#updatecells)           | Invalidates the rendering of a list of passed cells.                                                         |
+| Name                                                | Description                                                                                                  |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [appendRow](#appendrow)                             | Append a row to the data grid.                                                                               |
+| [emit](#emit)                                       | Used to emit commands normally emitted by keyboard shortcuts.                                                |
+| [focus](#focus)                                     | Focuses the data grid.                                                                                       |
+| [getBounds](#getbounds)                             | Gets the current screen-space bounds of a desired cell.                                                      |
+| [remeasureColumns](#remeasurecolumns)               | Causes the columns in the selection to have their natural sizes recomputed and re-emitted as a resize event. |
+| [scrollTo](#scrollto)                               | Tells the data-grid to scroll to a particular location.                                                      |
+| [updateCells](#updatecells)                         | Invalidates the rendering of a list of passed cells.                                                         |
+| [getMouseArgsForPosition](#getmouseargsforposition) | Gets the mouse args from pointer event position. |
 
 ## Required Props
 
@@ -189,7 +190,8 @@ Most data grids will want to set the majority of these props one way or another.
 
 | Name                               | Description                                            |
 | ---------------------------------- | ------------------------------------------------------ |
-| [customRenderers](#customRenderer) | FIXME                                                  |
+| [customRenderers](#customRenderer) | Custom renderers for `GridCellKind.Custom`.            |
+| [renderers](#renderers)            | Overrides built-in cell renderers.                     |
 | [drawCell](#drawcell)              | Callback used to override the rendering of any cell.   |
 | [drawHeader](#drawheader)          | Callback used to override the rendering of any header. |
 
@@ -370,6 +372,8 @@ The data grid uses the `Theme` provided to the DataEditer in the `theme` prop. T
 | bgHeader              | string              | --gdg-bg-header               | The header background color                                                                       |
 | bgHeaderHasFocus      | string              | --gdg-bg-header-has           | The header background color when its column contains the selected cell                            |
 | bgHeaderHovered       | string              | --gdg-bg-header-hovered       | The header background color when it is hovered                                                    |
+| bgGroupHeader         | string \| undefined | --gdg-bg-group-header         | The group header background color, if none provided the `bgHeader` is used instead.               |
+| bgGroupHeaderHovered  | string \| undefined | --gdg-bg-group-header-hovered | The group header background color when it is hovered, if none provided the `bgHeaderHovered` is used instead. |
 | bgBubble              | string              | --gdg-bg-bubble               | The background color used in bubbles                                                              |
 | bgBubbleSelected      | string              | --gdg-bg-bubble-selected      | The background color used in bubbles when the cell is selected                                    |
 | bgSearchResult        | string              | --gdg-bg-search-result        | The background color used for cells which match the search string                                 |
@@ -384,6 +388,9 @@ The data grid uses the `Theme` provided to the DataEditer in the `theme` prop. T
 | fontFamily            | string              | --gdg-font-family             | The font family used by the data grid.                                                            |
 | editorFontSize        | string              | --gdg-editor-font-size        | The font size used by overlay editors.                                                            |
 | lineHeight            | number              | None                          | A unitless scaler which defines the height of a line of text relative to the ink size.            |
+| bubbleHeight          | number              | --gdg-bubble-height           | The height (in pixels) of a bubble.                                                               |
+| bubblePadding         | number              | --gdg-bubble-padding          | The left & right padding (in pixels) of a bubble.                                                 |
+| bubbleMargin          | number              | --gdg-bubble-margin           | The margin (in pixels) between bubbles.                                                           |
 
 ---
 
@@ -417,7 +424,12 @@ scrollTo: (
         row: number,
         dir?: "horizontal" | "vertical" | "both",
         paddingX?: number,
-        paddingY?: number
+        paddingY?: number,
+        options?: {
+            hAlign?: "start" | "center" | "end";
+            vAlign?: "start" | "center" | "end";
+            behavior?: ScrollBehavior; // "auto" | "smooth" | "instant"
+        }
     ) => void;
 ```
 
@@ -431,7 +443,11 @@ Requests the data grid to scroll to a particular location. If only one direction
 ## appendRow
 
 ```ts
-appendRow: (col: number, openOverlay: boolean = true) => Promise<void>;
+appendRow: (
+         col: number,
+         openOverlay: boolean = true,
+         behavior?: ScrollBehavior; // "auto" | "smooth" | "instant"
+) => Promise<void>;
 ```
 
 Appends a row to the data grid.
@@ -457,6 +473,20 @@ emit: (eventName: EmitEvents) => Promise<void>;
 ```
 
 Emits the event into the data grid as if the user had pressed the keyboard shortcut.
+
+---
+
+## getMouseArgsForPosition
+
+```ts
+getMouseArgsForPosition: (
+    posX: number,
+    posY: number,
+    ev?: MouseEvent | TouchEvent
+) => GridMouseEventArgs | undefined;
+```
+
+Returns grid coordinates and context for a pointer event position. Useful for handling interactions outside of built-in callbacks.
 
 ---
 
@@ -714,6 +744,8 @@ drawHeader?: (args: {
     theme: Theme;
     rect: Rectangle;
     hoverAmount: number;
+    hoverX: number | undefined;
+    hoverY: number | undefined;
     isSelected: boolean;
     isHovered: boolean;
     hasSelectedCell: boolean;
@@ -725,6 +757,16 @@ drawHeader?: (args: {
 `drawHeader` may be specified to override the rendering of a header. The grid will call this for every header it needs to render. Header rendering is not as well optimized because they do not redraw as often, but very heavy drawing methods can negatively impact horizontal scrolling performance. The return result works the same way as `drawCell`, `false` means the default rendering will happen and `true` means the default rendering will not happen.
 
 It is possible to return `false` after rendering just a background and the regular foreground rendering will happen.
+
+---
+
+## renderers
+
+```ts
+readonly renderers?: readonly InternalCellRenderer<InnerGridCell>[];
+```
+
+An array of cell renderers used when drawing built-in cell types. Provide this prop to override default cell renderers. If omitted, `AllCellRenderers` is used.
 
 ---
 

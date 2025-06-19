@@ -238,7 +238,7 @@ interface BeautifulProps {
     scale?: string;
 }
 
-export const BeautifulWrapper: React.FC<BeautifulProps> = p => {
+export const BeautifulWrapper: React.FC<React.PropsWithChildren<BeautifulProps>> = p => {
     const { title, children, description, className, scale } = p;
 
     const { ref, width, height } = useResizeDetector();
@@ -730,7 +730,14 @@ Try out [Glide](https://www.glideapps.com/)
             getContent: () => {
                 return {
                     kind: GridCellKind.Bubble,
-                    data: [faker.lorem.word(), faker.lorem.word(), faker.lorem.word()],
+                    data: [
+                        faker.lorem.word(),
+                        faker.lorem.word(),
+                        faker.lorem.word(),
+                        faker.lorem.words(2),
+                        faker.lorem.words(2),
+                        faker.lorem.words(2),
+                    ],
                     allowOverlay: true,
                 };
             },
