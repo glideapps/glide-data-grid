@@ -537,8 +537,8 @@ export const CustomCells: React.VFC = () => {
                         width: 120,
                     },
                     {
+                        id: "treeview",
                         title: "TreeView",
-                        width: 150,
                     },
                     {
                         id: "multiselect",
