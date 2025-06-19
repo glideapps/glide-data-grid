@@ -70,6 +70,9 @@ const ScrollRegionStyle = styled.div<{ isSafari: boolean }>`
     }
 `;
 
+const BROWSER_MAX_DIV_HEIGHT = 33_554_432;
+const MAX_PADDER_SEGMENT_HEIGHT = 5_000_000;
+
 type ScrollLock = [undefined, number] | [number, undefined] | undefined;
 
 function useTouchUpDelayed(delay: number): boolean {
@@ -315,7 +318,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
     // based on the current scroll position.
     padders.push(<div key={key++} style={{ width: scrollWidth, height: 0 }} />);
     while (h < effectiveScrollHeight) {
-        const toAdd = Math.min(5_000_000, effectiveScrollHeight - h);
+        const toAdd = Math.min(MAX_PADDER_SEGMENT_HEIGHT, effectiveScrollHeight - h);
         padders.push(<div key={key++} style={{ width: 0, height: toAdd }} />);
         h += toAdd;
     }
