@@ -1,0 +1,10 @@
+import{R as e}from"./iframe-DP2Cy3oG.js";import{D as p}from"./data-editor-all-nHNSaI91.js";import{B as d,D as g,P as u,u as D,d as w}from"./utils-DOe6Dv0J.js";import{S as C}from"./story-utils-Q6JxRjGS.js";import"./image-window-loader-BYBI60yr.js";import"./throttle-xBCR_LDJ.js";import"./marked.esm-DAjvWwlD.js";import"./flatten-DyjghEx7.js";import"./scrolling-data-grid-AUX7pIUX.js";import"./index-D_kXk1yT.js";import"./index.esm-DGfrhf2x.js";import"./index-BkGQT0qr.js";const G={title:"Glide-Data-Grid/DataEditor Demos",decorators:[t=>e.createElement(C,null,e.createElement(d,{title:"Drag source",description:e.createElement(e.Fragment,null,e.createElement(g,null,"Setting the ",e.createElement(u,null,"isDraggable")," prop can allow for more granular control over what is draggable in the grid via HTML drag and drop."))},e.createElement(t,null)))]},r=t=>{const{cols:i,getCellContent:m,onColumnResize:c}=D(200);return e.createElement(p,{...w,getCellContent:m,columns:i,rowMarkers:"both",rows:5e3,onRowMoved:(o,a)=>window.alert(`Moved row ${o} to ${a}`),onColumnMoved:(o,a)=>window.alert(`Moved col ${o} to ${a}`),onColumnResize:c,isDraggable:t.isDraggable,onDragStart:o=>{o.setData("text/plain","Drag data here!")}})};r.argTypes={isDraggable:{control:{type:"select"},options:[!0,!1,"cell","header"]}};r.args={isDraggable:!1};var n,l,s;r.parameters={...r.parameters,docs:{...(n=r.parameters)==null?void 0:n.docs,source:{originalSource:`p => {
+  const {
+    cols,
+    getCellContent,
+    onColumnResize
+  } = useMockDataGenerator(200);
+  return <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rowMarkers="both" rows={5000} onRowMoved={(s, e) => window.alert(\`Moved row \${s} to \${e}\`)} onColumnMoved={(s, e) => window.alert(\`Moved col \${s} to \${e}\`)} onColumnResize={onColumnResize} isDraggable={p.isDraggable} onDragStart={e => {
+    e.setData("text/plain", "Drag data here!");
+  }} />;
+}`,...(s=(l=r.parameters)==null?void 0:l.docs)==null?void 0:s.source}}};const P=["DragSource"];export{r as DragSource,P as __namedExportsOrder,G as default};
