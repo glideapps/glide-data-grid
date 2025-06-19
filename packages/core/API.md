@@ -388,6 +388,9 @@ The data grid uses the `Theme` provided to the DataEditer in the `theme` prop. T
 | fontFamily            | string              | --gdg-font-family             | The font family used by the data grid.                                                            |
 | editorFontSize        | string              | --gdg-editor-font-size        | The font size used by overlay editors.                                                            |
 | lineHeight            | number              | None                          | A unitless scaler which defines the height of a line of text relative to the ink size.            |
+| bubbleHeight          | number              | --gdg-bubble-height           | The height (in pixels) of a bubble.                                                               |
+| bubblePadding         | number              | --gdg-bubble-padding          | The left & right padding (in pixels) of a bubble.                                                 |
+| bubbleMargin          | number              | --gdg-bubble-margin           | The margin (in pixels) between bubbles.                                                           |
 
 ---
 
