@@ -43,6 +43,11 @@ const renderer: CustomRenderer<TreeViewCell> = {
         const overIcon = isOverIcon(posX, posY, depth * depthShift, theme, h);
         return overIcon ? onClickOpener(cell) : undefined;
     },
+    measure: (ctx, cell, theme) => {
+        const { text, depth } = cell.data;
+        // We add 2 to the depth to give it a bit more space, otherwise it looks cramped.
+        return ctx.measureText(text).width + theme.cellHorizontalPadding * 2 + (depth + 2) * depthShift;
+    },
     draw: (args, cell) => {
         const { ctx, theme, rect, hoverX = 0, hoverY = 0 } = args;
         const { x, y, height: h } = rect;

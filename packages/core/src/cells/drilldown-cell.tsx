@@ -17,12 +17,17 @@ export const drilldownCellRenderer: InternalCellRenderer<DrilldownCell> = {
     needsHover: false,
     useLabel: false,
     needsHoverPosition: false,
-    measure: (ctx, cell, t) =>
+    measure: (ctx, cell, theme) =>
         cell.data.reduce(
-            (acc, data) => ctx.measureText(data.text).width + acc + 20 + (data.img !== undefined ? 18 : 0),
+            (acc, data) =>
+                ctx.measureText(data.text).width +
+                acc +
+                theme.bubblePadding * 2 +
+                theme.bubbleMargin +
+                (data.img !== undefined ? 18 : 0),
             0
         ) +
-        2 * t.cellHorizontalPadding -
+        2 * theme.cellHorizontalPadding -
         4,
     draw: a => drawDrilldownCell(a, a.cell.data),
     provideEditor: () => p => {
@@ -31,8 +36,6 @@ export const drilldownCellRenderer: InternalCellRenderer<DrilldownCell> = {
     },
     onPaste: () => undefined,
 };
-
-const itemMargin = 4;
 
 const drilldownCache: {
     [key: string]: HTMLCanvasElement;
@@ -133,8 +136,8 @@ function drawDrilldownCell(args: BaseDrawArgs, data: readonly DrilldownCellData[
     const y = Math.floor(rect.y + (rect.height - h) / 2);
 
     const bubbleHeight = h - 10;
-    const bubblePad = 8;
-    const bubbleMargin = itemMargin;
+    const bubblePad = theme.bubblePadding;
+    const bubbleMargin = theme.bubbleMargin;
     let renderX = x + theme.cellHorizontalPadding;
     const rounding = theme.roundingRadius ?? 6;
 

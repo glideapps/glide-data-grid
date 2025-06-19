@@ -8,6 +8,10 @@ import {
     GridCellKind,
     isSizedGridColumn,
     type Item,
+    markerCellRenderer,
+    type InnerGridCell,
+    type InternalCellRenderer,
+    AllCellRenderers,
 } from "../src/index.js";
 import type { CustomCell } from "../src/internal/data-grid/data-grid-types.js";
 import type { DataEditorRef } from "../src/data-editor/data-editor.js";
@@ -1397,29 +1401,51 @@ describe("data-editor", () => {
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
 
-        fireEvent.keyDown(canvas, {
-            keyCode: 74,
-            key: "j",
-        });
+        const testKeys = [
+            {
+                keyCode: 74,
+                key: "j",
+            },
+            {
+                keyCode: 381,
+                key: "ž",
+            },
+            {
+                keyCode: 246,
+                key: "ö",
+            },
+            {
+                keyCode: 1096,
+                key: "ш",
+            },
+            {
+                keyCode: 187,
+                key: "+",
+            },
+            {
+                keyCode: 222,
+                key: "'",
+            },
+        ];
 
-        fireEvent.keyUp(canvas, {
-            keyCode: 74,
-            key: "j",
-        });
+        for (const key of testKeys) {
+            fireEvent.keyDown(canvas, key);
+            fireEvent.keyUp(canvas, key);
 
-        const overlay = screen.getByDisplayValue("j");
-        expect(document.body.contains(overlay)).toBe(true);
+            const overlay = screen.getByDisplayValue(key.key);
+            expect(document.body.contains(overlay)).toBe(true);
 
-        vi.useFakeTimers();
-        fireEvent.keyDown(overlay, {
-            key: "Escape",
-        });
+            vi.useFakeTimers();
+            fireEvent.keyDown(overlay, {
+                key: "Escape",
+            });
 
-        act(() => {
-            vi.runAllTimers();
-        });
+            act(() => {
+                vi.runAllTimers();
+            });
 
-        expect(document.body.contains(overlay)).toBe(false);
+            expect(document.body.contains(overlay)).toBe(false);
+        }
     });
 
     test("Open overlay with keypress when prior is disabled", async () => {
@@ -2572,6 +2598,30 @@ describe("data-editor", () => {
         expect(onClickSpy).not.toBeCalled();
     });
 
+    test("renderers can override internal cells", async () => {    
+        const spy = vi.fn();
+
+        vi.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                renderers={[
+                    ...AllCellRenderers,
+                    {
+                        ...markerCellRenderer,
+                        draw: spy
+                    } as InternalCellRenderer<InnerGridCell>,
+                ]}
+                rowMarkers="both"
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        expect(spy).toHaveBeenCalledTimes(31); // Math.ceil((height - headerHeight) / rowHeight)
+    });
+
     test("onCellsEdited blocks onCellEdited", async () => {
         const spy = vi.fn();
         vi.useFakeTimers();
@@ -3709,7 +3759,11 @@ describe("data-editor", () => {
         act(() => {
             vi.runAllTimers();
         });
-        expect(Element.prototype.scrollTo).toBeCalledWith(0, 15_101);
+        expect(Element.prototype.scrollTo).toBeCalledWith({
+            behavior: "auto",
+            left: 0,
+            top: 15_101,
+        });
     });
 
     test("Imperative scrollTo pixel", async () => {
@@ -3729,7 +3783,11 @@ describe("data-editor", () => {
         act(() => {
             vi.runAllTimers();
         });
-        expect(Element.prototype.scrollTo).toBeCalledWith(0, 533);
+        expect(Element.prototype.scrollTo).toBeCalledWith({
+            behavior: "auto",
+            left: 0,
+            top: 533,
+        });
     });
 
     test("Imperative scrollTo pixel start", async () => {
@@ -3758,7 +3816,11 @@ describe("data-editor", () => {
         act(() => {
             vi.runAllTimers();
         });
-        expect(Element.prototype.scrollTo).toBeCalledWith(0, 1464);
+        expect(Element.prototype.scrollTo).toBeCalledWith({
+            behavior: "auto",
+            left: 0,
+            top: 1464,
+        });
     });
 
     test("Imperative scrollTo pixel center", async () => {
@@ -3787,7 +3849,11 @@ describe("data-editor", () => {
         act(() => {
             vi.runAllTimers();
         });
-        expect(Element.prototype.scrollTo).toBeCalledWith(0, 998.5);
+        expect(Element.prototype.scrollTo).toBeCalledWith({
+            behavior: "auto",
+            left: 0,
+            top: 998.5,
+        });
     });
 
     test("Imperative scrollTo pixel end", async () => {
@@ -3816,7 +3882,11 @@ describe("data-editor", () => {
         act(() => {
             vi.runAllTimers();
         });
-        expect(Element.prototype.scrollTo).toBeCalledWith(0, 533);
+        expect(Element.prototype.scrollTo).toBeCalledWith({
+            behavior: "auto",
+            left: 0,
+            top: 533,
+        });
     });
 
     test("Imperative damage gets right cell", async () => {

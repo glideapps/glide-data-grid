@@ -320,6 +320,7 @@ export interface DataGridRef {
     focus: () => void;
     getBounds: (col?: number, row?: number) => Rectangle | undefined;
     damage: (cells: DamageUpdateList) => void;
+    getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => GridMouseEventArgs | undefined;
 }
 
 const getRowData = (cell: InnerGridCell, getCellRenderer?: GetCellRendererCallback) => {
@@ -445,7 +446,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     }, [cellYOffset, cellXOffset, translateX, translateY, enableFirefoxRescaling, enableSafariRescaling]);
 
     const mappedColumns = useMappedColumns(columns, freezeColumns);
-    const stickyX = fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0;
+    const stickyX = React.useMemo(() => fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0,[mappedColumns, dragAndDropState, fixedShadowX]);
 
     // row: -1 === columnHeader, -2 === groupHeader
     const getBoundsForItem = React.useCallback(
@@ -1715,6 +1716,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 return getBoundsForItem(canvasRef.current, col ?? 0, row ?? -1);
             },
             damage,
+            getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => {
+                if (canvasRef === undefined || canvasRef.current === null) {
+                    return undefined;
+                }
+
+                return getMouseArgsForPosition(canvasRef.current, posX, posY, ev);
+            }
         }),
         [canvasRef, damage, getBoundsForItem]
     );
