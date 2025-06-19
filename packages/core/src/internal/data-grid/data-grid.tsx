@@ -507,7 +507,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     );
 
     const getMouseArgsForPosition = React.useCallback(
-        (canvas: HTMLCanvasElement, posX: number, posY: number, ev?: MouseEvent | TouchEvent): GridMouseEventArgs => {
+        (canvas: HTMLCanvasElement, posX: number, posY: number, ev?: MouseEvent | TouchEvent | PointerEvent): GridMouseEventArgs => {
             const rect = canvas.getBoundingClientRect();
             const scale = rect.width / width;
             const x = (posX - rect.left) / scale;
@@ -518,7 +518,11 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             let button = 0;
             let buttons = 0;
-            if (ev instanceof MouseEvent) {
+
+            const isMouse = ev instanceof MouseEvent || (ev instanceof PointerEvent && ev.pointerType === 'mouse')
+            const isTouch = ev instanceof TouchEvent || (ev instanceof PointerEvent && ev.pointerType === 'touch')
+            
+            if (isMouse) {
                 button = ev.button;
                 buttons = ev.buttons;
             }
@@ -544,7 +548,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const shiftKey = ev?.shiftKey === true;
             const ctrlKey = ev?.ctrlKey === true;
             const metaKey = ev?.metaKey === true;
-            const isTouch = (ev !== undefined && !(ev instanceof MouseEvent)) || (ev as any)?.pointerType === "touch";
 
             const scrollEdge: GridMouseEventArgs["scrollEdge"] = [
                 x < 0 ? -1 : width < x ? 1 : 0,
@@ -1036,22 +1039,16 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const downTime = React.useRef(0);
     const downPosition = React.useRef<Item>();
     const mouseDown = React.useRef(false);
-    const onMouseDownImpl = React.useCallback(
-        (ev: MouseEvent | TouchEvent) => {
+    const onPointerDown = React.useCallback(
+        (ev: PointerEvent) => {
             const canvas = ref.current;
             const eventTarget = eventTargetRef?.current;
             if (canvas === null || (ev.target !== canvas && ev.target !== eventTarget)) return;
             mouseDown.current = true;
 
-            let clientX: number;
-            let clientY: number;
-            if (ev instanceof MouseEvent) {
-                clientX = ev.clientX;
-                clientY = ev.clientY;
-            } else {
-                clientX = ev.touches[0].clientX;
-                clientY = ev.touches[0].clientY;
-            }
+            const clientX = ev.clientX;
+            const clientY = ev.clientY;
+            
             if (ev.target === eventTarget && eventTarget !== null) {
                 const bounds = eventTarget.getBoundingClientRect();
                 if (clientX > bounds.right || clientY > bounds.bottom) return;
@@ -1100,13 +1097,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             onMouseDown,
         ]
     );
-    useEventListener("touchstart", onMouseDownImpl, windowEventTarget, false);
-    useEventListener("mousedown", onMouseDownImpl, windowEventTarget, false);
+    useEventListener("pointerdown", onPointerDown, windowEventTarget, false);
 
     const lastUpTime = React.useRef(0);
 
-    const onMouseUpImpl = React.useCallback(
-        (ev: MouseEvent | TouchEvent) => {
+    const onPointerUp = React.useCallback(
+        (ev: PointerEvent) => {
             const lastUpTimeValue = lastUpTime.current;
             lastUpTime.current = Date.now();
             const canvas = ref.current;
@@ -1115,21 +1111,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const eventTarget = eventTargetRef?.current;
 
             const isOutside = ev.target !== canvas && ev.target !== eventTarget;
-
-            let clientX: number;
-            let clientY: number;
-            let canCancel = true;
-            if (ev instanceof MouseEvent) {
-                clientX = ev.clientX;
-                clientY = ev.clientY;
-                canCancel = ev.button < 3;
-                if ((ev as any).pointerType === "touch") {
-                    return;
-                }
-            } else {
-                clientX = ev.changedTouches[0].clientX;
-                clientY = ev.changedTouches[0].clientY;
-            }
+            const clientX = ev.clientX;
+            const clientY = ev.clientY;
+            const canCancel = ev.pointerType === 'mouse' ? ev.button < 3 : true;
 
             let args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
 
@@ -1177,8 +1161,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         },
         [onMouseUp, eventTargetRef, getMouseArgsForPosition, isOverHeaderElement, groupHeaderActionForEvent]
     );
-    useEventListener("mouseup", onMouseUpImpl, windowEventTarget, false);
-    useEventListener("touchend", onMouseUpImpl, windowEventTarget, false);
+    useEventListener("pointerup", onPointerUp, windowEventTarget, false);
 
     const onClickImpl = React.useCallback(
         (ev: MouseEvent | TouchEvent) => {
@@ -1283,7 +1266,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     }, [getCellContent, getCellRenderer, hoveredItem]);
 
     const hoveredRef = React.useRef<GridMouseEventArgs>();
-    const onMouseMoveImpl = React.useCallback(
+    const onPointerMove = React.useCallback(
         (ev: MouseEvent) => {
             const canvas = ref.current;
             if (canvas === null) return;
@@ -1366,7 +1349,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             damageInternal,
         ]
     );
-    useEventListener("mousemove", onMouseMoveImpl, windowEventTarget, true);
+    useEventListener("pointermove", onPointerMove, windowEventTarget, true);
 
     const onKeyDownImpl = React.useCallback(
         (event: React.KeyboardEvent<HTMLCanvasElement>) => {
