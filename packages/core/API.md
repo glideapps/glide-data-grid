@@ -190,7 +190,8 @@ Most data grids will want to set the majority of these props one way or another.
 
 | Name                               | Description                                            |
 | ---------------------------------- | ------------------------------------------------------ |
-| [customRenderers](#customRenderer) | FIXME                                                  |
+| [customRenderers](#customRenderer) | Custom renderers for `GridCellKind.Custom`.            |
+| [renderers](#renderers)            | Overrides built-in cell renderers.                     |
 | [drawCell](#drawcell)              | Callback used to override the rendering of any cell.   |
 | [drawHeader](#drawheader)          | Callback used to override the rendering of any header. |
 
@@ -753,6 +754,16 @@ drawHeader?: (args: {
 `drawHeader` may be specified to override the rendering of a header. The grid will call this for every header it needs to render. Header rendering is not as well optimized because they do not redraw as often, but very heavy drawing methods can negatively impact horizontal scrolling performance. The return result works the same way as `drawCell`, `false` means the default rendering will happen and `true` means the default rendering will not happen.
 
 It is possible to return `false` after rendering just a background and the regular foreground rendering will happen.
+
+---
+
+## renderers
+
+```ts
+readonly renderers?: readonly InternalCellRenderer<InnerGridCell>[];
+```
+
+An array of cell renderers used when drawing built-in cell types. Provide this prop to override default cell renderers. If omitted, `AllCellRenderers` is used.
 
 ---
 
