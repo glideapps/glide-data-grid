@@ -153,7 +153,7 @@ export function getRowSpanBounds(
     const [startRow, endRow] = rowSpan;
     const totalSpannedRows = endRow - startRow;
     let tempY = cellY;
-    let tempH = totalSpannedRows * 34;
+    let tempH = totalSpannedRows * getRowHeight(row);
     if (getRowHeight !== undefined) {
         tempH = getRowHeight(row);
         for (let x = row - 1; x >= startRow; x--) {
