@@ -101,6 +101,7 @@ export interface RowMarkerOptions {
     theme?: Partial<Theme>;
     headerTheme?: Partial<Theme>;
     headerAlwaysVisible?: boolean;
+    headerDisabled?: boolean;
 }
 
 interface MouseState {
@@ -886,7 +887,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const rowMarkerTheme = rowMarkersObj?.theme ?? p.rowMarkerTheme;
     const headerRowMarkerTheme = rowMarkersObj?.headerTheme;
     const headerRowMarkerAlwaysVisible = rowMarkersObj?.headerAlwaysVisible;
-    const headerRowMarkerDisabled = rowSelect !== "multi";
+    const headerRowMarkerDisabled = rowSelect !== "multi" || rowMarkersObj?.headerDisabled === true;
     const rowMarkerCheckboxStyle = rowMarkersObj?.checkboxStyle ?? "square";
 
     const minColumnWidth = Math.max(minColumnWidthIn, 20);
@@ -1908,7 +1909,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (hasRowMarkers && col === 0) {
                     lastSelectedRowRef.current = undefined;
                     lastSelectedColRef.current = undefined;
-                    if (rowSelect === "multi") {
+                    if (!headerRowMarkerDisabled && rowSelect === "multi") {
                         if (selectedRows.length !== rows) {
                             setSelectedRows(CompactSelection.fromSingleSelection([0, rows]), undefined, isMultiKey);
                         } else {
