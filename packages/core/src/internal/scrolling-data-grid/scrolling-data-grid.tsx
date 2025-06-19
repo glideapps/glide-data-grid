@@ -194,6 +194,13 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
             }
         }
 
+        // Ensure cellY and cellBottom never exceed the actual row count
+        // This is critical for preventing out-of-bounds access with large datasets
+        cellY = Math.min(cellY, rows - 1);
+        cellY = Math.max(0, cellY);
+        cellBottom = Math.min(cellBottom, rows);
+        cellBottom = Math.max(cellY, cellBottom);
+
         const rect: Rectangle = {
             x: cellX,
             y: cellY,
