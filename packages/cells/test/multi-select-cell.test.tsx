@@ -267,7 +267,10 @@ describe("Multi Select Editor", () => {
 
     it("renders into the dom with correct value", async () => {
         // @ts-ignore
-        const Editor = renderer.provideEditor?.(getMockCell()).editor;
+        const Editor = renderer.provideEditor?.({
+            ...getMockCell(),
+            location: [0, 0],
+        }).editor;        
         if (Editor === undefined) {
             throw new Error("Editor is invalid");
         }
@@ -285,7 +288,10 @@ describe("Multi Select Editor", () => {
     it("allows to select values", async () => {
         const mockCell = getMockCell();
         // @ts-ignore
-        const Editor = renderer.provideEditor?.(mockCell).editor;
+        const Editor = renderer.provideEditor?.({
+            ...mockCell,
+            location: [0, 0],
+        }).editor;
         if (Editor === undefined) {
             throw new Error("Editor is invalid");
         }
@@ -317,7 +323,10 @@ describe("Multi Select Editor", () => {
     it("is disabled if readonly", async () => {
         const mockCell = getMockCell({ readonly: true });
         // @ts-ignore
-        const Editor = renderer.provideEditor?.(mockCell).editor;
+        const Editor = renderer.provideEditor?.({
+            ...mockCell,
+            location: [0, 0],
+        }).editor;
         if (Editor === undefined) {
             throw new Error("Editor is invalid");
         }
@@ -334,7 +343,10 @@ describe("Multi Select Editor", () => {
     it("allowDuplicates allows to select values multiple times", async () => {
         const mockCell = getMockCell({ data: { allowDuplicates: true } } as any);
         // @ts-ignore
-        const Editor = renderer.provideEditor?.(mockCell).editor;
+        const Editor = renderer.provideEditor?.({
+            ...mockCell,
+            location: [0, 0],
+        }).editor;
         if (Editor === undefined) {
             throw new Error("Editor is invalid");
         }

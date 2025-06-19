@@ -422,7 +422,9 @@ export function isObjectEditorCallbackResult<T extends InnerGridCell>(
 }
 
 /** @category Renderers */
-export type ProvideEditorCallback<T extends InnerGridCell> = (cell: T) => ProvideEditorCallbackResult<T>;
+export type ProvideEditorCallback<T extends InnerGridCell> = (
+    cell: T & { location?: Item }
+) => ProvideEditorCallbackResult<T>;
 
 /** @category Cells */
 export type ValidatedGridCell = EditableGridCell & {

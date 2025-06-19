@@ -58,7 +58,10 @@ describe("editor", () => {
 
     it("renders into the dom with correct value", () => {
         // @ts-ignore
-        const Editor = renderer.provideEditor?.(getMockDateCell()).editor;
+        const Editor = renderer.provideEditor?.({
+            ...getMockDateCell(),
+            location: [0, 0],
+        }).editor;        
         if (Editor === undefined) {
             throw new Error("Editor is invalid");
         }
@@ -74,10 +77,10 @@ describe("editor", () => {
 
     it.each([["date"], ["time"], ["datetime-local"]])("renders with correct format", (format: string) => {
         // @ts-ignore
-        const Editor = renderer.provideEditor?.(
-            getMockDateCell({ data: { format: format } } as DatePickerCell)
-            // @ts-ignore
-        ).editor;
+        const Editor = renderer.provideEditor?.({
+            ...getMockDateCell({ data: { format: format } } as DatePickerCell),
+            location: [0, 0],
+        }).editor;
         if (Editor === undefined) {
             throw new Error("Editor is invalid");
         }
@@ -92,10 +95,10 @@ describe("editor", () => {
 
     it("renders textarea when readonly is true", () => {
         // @ts-ignore
-        const Editor = renderer.provideEditor?.(
-            getMockDateCell({ readonly: true } as DatePickerCell)
-            // @ts-ignore
-        ).editor;
+        const Editor = renderer.provideEditor?.({
+            ...getMockDateCell({ readonly: true } as DatePickerCell),
+            location: [0, 0],
+        }).editor;
         if (Editor === undefined) {
             throw new Error("Editor is invalid");
         }
@@ -118,7 +121,10 @@ describe("editor", () => {
         };
 
         // @ts-ignore
-        const Editor = renderer.provideEditor?.(getMockDateCell(extraProps)).editor;
+        const Editor = renderer.provideEditor?.({
+            ...getMockDateCell(extraProps),
+            location: [0, 0],
+        }).editor;
         if (Editor === undefined) {
             throw new Error("Editor is invalid");
         }
@@ -139,7 +145,10 @@ describe("editor", () => {
         const valueAsNumber = 100;
 
         // @ts-ignore
-        const Editor = renderer.provideEditor?.(getMockDateCell()).editor;
+        const Editor = renderer.provideEditor?.({
+            ...getMockDateCell(),
+            location: [0, 0],
+        }).editor;
         if (Editor === undefined) {
             throw new Error("Editor is invalid");
         }
@@ -171,7 +180,10 @@ describe("editor", () => {
 
     it('properly sets new date to undefined when value is ""', async () => {
         // @ts-ignore
-        const Editor = renderer.provideEditor?.(getMockDateCell()).editor;
+        const Editor = renderer.provideEditor?.({
+            ...getMockDateCell(),
+            location: [0, 0],
+        }).editor;
         if (Editor === undefined) {
             throw new Error("Editor is invalid");
         }
