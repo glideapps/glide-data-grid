@@ -224,8 +224,8 @@ export const InfiniteScroller: React.FC<Props> = p => {
             const cHeight = el.clientHeight;
 
             const newY = scrollTop;
-            const scrollableHeight = el.scrollHeight - cHeight;
             const delta = lastScrollY.current - newY;
+            const scrollableHeight = el.scrollHeight - cHeight;
             lastScrollY.current = newY;
 
             // Calculate the virtual Y position
