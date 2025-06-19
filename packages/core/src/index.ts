@@ -33,6 +33,7 @@ export { parseToRgba, withAlpha, blend, interpolateColors, getLuminance } from "
 export {
     measureTextCached,
     getMiddleCenterBias,
+    getEmHeight,
     roundedPoly,
     roundedRect,
     drawTextCellExternal as drawTextCell,
