@@ -3379,6 +3379,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 ) {
                     return;
                 }
+                onCellActivated?.([col - rowMarkerOffset, row]);
                 reselect(event.bounds, true, event.key);
                 event.stopPropagation();
                 event.preventDefault();
@@ -3393,6 +3394,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             rowMarkerOffset,
             rows,
             showTrailingBlankRow,
+            onCellActivated,
             reselect,
         ]
     );

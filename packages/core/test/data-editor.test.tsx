@@ -665,6 +665,33 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith([1, 1]);
     });
 
+    test("Emits activated event when typing", async () => {
+        const spy = vi.fn();
+
+        vi.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellActivated={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "A",
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith([1, 1]);
+    });
+
     test("keyDown and keyUp events include the cell location", async () => {
         let keyDownEvent: GridKeyEventArgs | undefined;
         let keyUpEvent: GridKeyEventArgs | undefined;

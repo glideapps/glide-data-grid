@@ -55,8 +55,8 @@ export const CellActivatedEvent: React.VFC<Pick<DataEditorCoreProps, "cellActiva
             description={
                 <>
                     <Description>
-                        When you tap <KeyName>Enter</KeyName>, <KeyName>Space</KeyName> or double click a cell, that
-                        cell is activated. You can track this with <PropName>onCellActivated</PropName>.
+                        When you tap <KeyName>Enter</KeyName>, <KeyName>Space</KeyName>, start typing, or double click a cell,
+                        that cell is activated. You can track this with <PropName>onCellActivated</PropName>.
                     </Description>
                     <MoreInfo>
                         Last activated cell:{" "}
