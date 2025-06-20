@@ -10,9 +10,9 @@ module.exports = {
 
     async viteFinal(config) {
         const { mergeConfig } = await import("vite");
-        const linaria = await import("@linaria/vite");
+        const wyw = await import("@wyw-in-js/vite");
         return mergeConfig(config, {
-            plugins: [linaria.default()],
+            plugins: [wyw.default()],
         });
     },
 
