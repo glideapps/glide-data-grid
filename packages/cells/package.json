@@ -51,7 +51,7 @@
     ],
     "dependencies": {
         "@glideapps/glide-data-grid": "6.0.4-alpha12",
-        "@linaria/react": "^4.5.4",
+        "@linaria/react": "^6.3.0",
         "@toast-ui/editor": "3.2.2",
         "@toast-ui/react-editor": "3.2.3",
         "react-select": "^5.10.1"
