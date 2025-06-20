@@ -408,6 +408,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         onKeyDownCapture={onSearchKeyDown}
                     />
                     <button
+                        type="button"
                         aria-label="Previous Result"
                         aria-hidden={!showSearch}
                         tabIndex={showSearch ? undefined : -1}
@@ -416,6 +417,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         {upArrow}
                     </button>
                     <button
+                        type="button"
                         aria-label="Next Result"
                         aria-hidden={!showSearch}
                         tabIndex={showSearch ? undefined : -1}
@@ -425,6 +427,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                     </button>
                     {onSearchClose !== undefined && (
                         <button
+                            type="button"
                             aria-label="Close Search"
                             aria-hidden={!showSearch}
                             data-testid="search-close-button"
