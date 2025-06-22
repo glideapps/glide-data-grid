@@ -98,7 +98,6 @@ export function useColumnSort(p: Props): Result {
         if (activeSorts.length === 0) return undefined;
 
         const values = activeSorts.map(() => new Array<string>(rows));
-
         for (let sIndex = 0; sIndex < activeSorts.length; sIndex++) {
             const { col } = activeSorts[sIndex];
             const index: [number, number] = [col, 0];
@@ -110,19 +109,19 @@ export function useColumnSort(p: Props): Result {
 
         return range(rows).sort((a, b) => {
             for (let sIndex = 0; sIndex < activeSorts.length; sIndex++) {
-                const { sort } = activeSorts[sIndex];
+                const { sort: colSort } = activeSorts[sIndex];
                 const va = values[sIndex][a];
                 const vb = values[sIndex][b];
                 let cmp: number;
-                if (sort.mode === "raw") {
+                if (colSort.mode === "raw") {
                     cmp = compareRaw(va, vb);
-                } else if (sort.mode === "smart") {
+                } else if (colSort.mode === "smart") {
                     cmp = compareSmart(va, vb);
                 } else {
                     cmp = va.localeCompare(vb);
                 }
                 if (cmp !== 0) {
-                    if ((sort.direction ?? "asc") === "desc") cmp = -cmp;
+                    if ((colSort.direction ?? "asc") === "desc") cmp = -cmp;
                     return cmp;
                 }
             }
