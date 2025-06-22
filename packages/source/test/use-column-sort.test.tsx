@@ -1,4 +1,6 @@
-import { compareSmart } from "../src/use-column-sort.js";
+import { compareSmart, useColumnSort } from "../src/use-column-sort.js";
+import { renderHook } from "@testing-library/react-hooks";
+import { GridCellKind, type GridCell } from "@glideapps/glide-data-grid";
 import { expect, describe, test } from "vitest";
 
 describe("use-column-sort", () => {
@@ -23,5 +25,37 @@ describe("use-column-sort", () => {
                 "2022-12-03",
             ]);
         });
+    });
+
+    test("multi column sort", () => {
+        const columns = [{ title: "A" }, { title: "B" }];
+        const data = [
+            ["2", "a"],
+            ["1", "b"],
+            ["2", "b"],
+            ["1", "a"],
+        ];
+
+        const getCellContent = ([col, row]: [number, number]): GridCell => ({
+            kind: GridCellKind.Text,
+            allowOverlay: false,
+            data: data[row][col],
+            displayData: data[row][col],
+        });
+
+        const { result } = renderHook(() =>
+            useColumnSort({
+                columns,
+                rows: data.length,
+                getCellContent,
+                sort: [
+                    { column: columns[0], direction: "asc" },
+                    { column: columns[1], direction: "asc" },
+                ],
+            })
+        );
+
+        const order = Array.from({ length: data.length }, (_, i) => result.current.getOriginalIndex(i));
+        expect(order).toEqual([3, 1, 0, 2]);
     });
 });
