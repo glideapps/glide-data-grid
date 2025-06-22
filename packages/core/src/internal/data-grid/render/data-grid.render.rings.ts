@@ -69,22 +69,22 @@ export function drawHighlightRings(
                 rect.width === 1 && rect.height === 1
                     ? topLeftBounds
                     : computeBounds(
-                          rect.x + rect.width - 1,
-                          rect.y + rect.height - 1,
-                          width,
-                          height,
-                          groupHeaderHeight,
-                          headerHeight + groupHeaderHeight,
-                          cellXOffset,
-                          cellYOffset,
-                          translateX,
-                          translateY,
-                          rows,
-                          freezeColumns,
-                          freezeTrailingRows,
-                          mappedColumns,
-                          rowHeight
-                      );
+                        rect.x + rect.width - 1,
+                        rect.y + rect.height - 1,
+                        width,
+                        height,
+                        groupHeaderHeight,
+                        headerHeight + groupHeaderHeight,
+                        cellXOffset,
+                        cellYOffset,
+                        translateX,
+                        translateY,
+                        rows,
+                        freezeColumns,
+                        freezeTrailingRows,
+                        mappedColumns,
+                        rowHeight
+                    );
 
             if (rect.x + rect.width >= mappedColumns.length) {
                 bottomRightBounds.width -= 1;
@@ -237,8 +237,7 @@ export function drawFillHandle(
         translateY,
         totalHeaderHeight,
         freezeTrailingColumns,
-        (col, drawX, colDrawY, clipX, startRow) => {
-            clipX;
+        (col, drawX, colDrawY, clipX, _clipXRight, startRow) => {
             if (col.sticky && targetCol > col.sourceIndex) return;
 
             const isBeforeTarget = col.sourceIndex < targetColSpan[0];

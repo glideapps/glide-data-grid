@@ -40,17 +40,24 @@ function clipHeaderDamage(
 
     ctx.beginPath();
 
-    walkGroups(effectiveColumns, width, translateX, groupHeaderHeight, (span, _group, x, y, w, h) => {
-        const hasItemInSpan = damage.hasItemInRectangle({
-            x: span[0],
-            y: -2,
-            width: span[1] - span[0] + 1,
-            height: 1,
-        });
-        if (hasItemInSpan) {
-            ctx.rect(x, y, w, h);
+    walkGroups(
+        effectiveColumns,
+        width,
+        translateX,
+        groupHeaderHeight,
+        freezeTrailingColumns,
+        (span, _group, x, y, w, h) => {
+            const hasItemInSpan = damage.hasItemInRectangle({
+                x: span[0],
+                y: -2,
+                width: span[1] - span[0] + 1,
+                height: 1,
+            });
+            if (hasItemInSpan) {
+                ctx.rect(x, y, w, h);
+            }
         }
-    });
+    );
 
     walkColumns(
         effectiveColumns,
@@ -60,11 +67,11 @@ function clipHeaderDamage(
         translateY,
         totalHeaderHeight,
         freezeTrailingColumns,
-        (c, drawX, _colDrawY, clipX) => {
+        (c, drawX, _colDrawY, clipX, clipXRight) => {
             const diff = Math.max(0, clipX - drawX);
 
             const finalX = drawX + diff + 1;
-            const finalWidth = c.width - diff - 1;
+            const finalWidth = c.stickyPosition === "right" ? c.width - diff : Math.min(c.width - diff - 1, width - drawX - clipXRight); // c.width - diff - 1;
             if (damage.has([c.sourceIndex, -1])) {
                 ctx.rect(finalX, groupHeaderHeight, finalWidth, totalHeaderHeight - groupHeaderHeight);
             }
@@ -96,7 +103,7 @@ function getLastRow(
         translateY,
         totalHeaderHeight,
         freezeTrailingColumns,
-        (_c, __drawX, colDrawY, _clipX, startRow) => {
+        (_c, __drawX, colDrawY, _clipX, _clipXRight, startRow) => {
             walkRowsInCol(
                 startRow,
                 colDrawY,
@@ -624,25 +631,25 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     // the overdraw may have nuked out our focus ring right edge.
     const focusRedraw = drawFocus
         ? drawFillHandle(
-              targetCtx,
-              width,
-              height,
-              cellYOffset,
-              translateX,
-              translateY,
-              effectiveCols,
-              mappedColumns,
-              theme,
-              totalHeaderHeight,
-              selection,
-              getRowHeight,
-              getCellContent,
-              freezeTrailingRows,
-              freezeRightColumns,
-              hasAppendRow,
-              fillHandle,
-              rows
-          )
+            targetCtx,
+            width,
+            height,
+            cellYOffset,
+            translateX,
+            translateY,
+            effectiveCols,
+            mappedColumns,
+            theme,
+            totalHeaderHeight,
+            selection,
+            getRowHeight,
+            getCellContent,
+            freezeTrailingRows,
+            freezeRightColumns,
+            hasAppendRow,
+            fillHandle,
+            rows
+        )
         : undefined;
 
     targetCtx.fillStyle = theme.bgCell;
