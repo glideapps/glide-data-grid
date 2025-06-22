@@ -243,6 +243,19 @@ export function getEffectiveColumns(
             width -= c.width;
         }
     }
+
+    const stickyRight: MappedGridColumn[] = [];
+
+    for (let i = mappedCols.length - freezeRightColumns; i < mappedCols.length; i++) {
+        stickyRight.push(mappedCols[i]);
+    }
+
+    if (stickyRight.length > 0) {
+        for (const c of stickyRight) {
+            width -= c.width;
+        }
+    }
+
     let endIndex = cellXOffset;
     let curX = tx ?? 0;
 
@@ -258,9 +271,7 @@ export function getEffectiveColumns(
         }
     }
 
-    for (let i = mappedCols.length - freezeRightColumns; i < mappedCols.length; i++) {
-        sticky.push(mappedCols[i]);
-    }
+    sticky.push(...stickyRight);
 
     return sticky;
 }

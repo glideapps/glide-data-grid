@@ -132,12 +132,12 @@ export function drawCells(
         translateY,
         totalHeaderHeight,
         freezeTrailingColumns,
-        (c, drawX, colDrawStartY, clipX, startRow) => {
+        (c, drawX, colDrawStartY, clipX, clipXRight, startRow) => {
             const diff = Math.max(0, clipX - drawX);
 
             const colDrawX = drawX + diff;
             const colDrawY = totalHeaderHeight + 1;
-            const colWidth = c.width - diff;
+            const colWidth = c.stickyPosition === "right" ? c.width - diff : Math.min(c.width - diff, width - drawX - clipXRight);
             const colHeight = height - totalHeaderHeight - 1;
             if (drawRegions.length > 0) {
                 let found = false;
@@ -555,11 +555,11 @@ export function drawCell(
             partialPrepResult === undefined
                 ? undefined
                 : {
-                      deprep: partialPrepResult?.deprep,
-                      fillStyle: partialPrepResult?.fillStyle,
-                      font: partialPrepResult?.font,
-                      renderer: r,
-                  };
+                    deprep: partialPrepResult?.deprep,
+                    fillStyle: partialPrepResult?.fillStyle,
+                    font: partialPrepResult?.font,
+                    renderer: r,
+                };
     }
 
     if (needsAnim || animationFrameRequested) enqueue?.(allocatedItem);
