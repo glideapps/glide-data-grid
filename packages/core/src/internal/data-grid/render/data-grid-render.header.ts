@@ -55,85 +55,107 @@ export function drawGridHeaders(
     const font = outerTheme.headerFontFull;
     // Assinging the context font too much can be expensive, it can be worth it to minimze this
     ctx.font = font;
-    walkColumns(effectiveCols, width, 0, translateX, 0, totalHeaderHeight, freezeTrailingColumns, (c, x, _y, clipX) => {
-        if (damage !== undefined && !damage.has([c.sourceIndex, -1])) return;
-        const diff = Math.max(0, clipX - x);
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(x + diff, groupHeaderHeight, c.width - diff, headerHeight);
-        ctx.clip();
+    walkColumns(
+        effectiveCols,
+        width,
+        0,
+        translateX,
+        0,
+        totalHeaderHeight,
+        freezeTrailingColumns,
+        (c, x, _y, clipX, clipXRight) => {
+            if (damage !== undefined && !damage.has([c.sourceIndex, -1])) return;
+            const diff = Math.max(0, clipX - x);
 
-        const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
-        const theme =
-            c.themeOverride === undefined && groupTheme === undefined
-                ? outerTheme
-                : mergeAndRealizeTheme(outerTheme, groupTheme, c.themeOverride);
+            let rectWidth =
+                c.stickyPosition === "right" ? c.width - diff : Math.min(c.width - diff, width - x - clipXRight);
 
-        if (c.sticky) {
-            ctx.fillStyle = theme.bgHeader;
-            ctx.fill();
-        }
-
-        if (theme.bgHeader !== outerTheme.bgHeader) {
-            ctx.fillStyle = theme.bgHeader;
-            ctx.fill();
-        }
-
-        if (theme !== outerTheme) {
-            ctx.font = theme.headerFontFull;
-        }
-        const selected = selection.columns.hasIndex(c.sourceIndex);
-        const noHover = dragAndDropState !== undefined || isResizing || c.headerRowMarkerDisabled === true;
-        const hoveredBoolean = !noHover && hRow === -1 && hCol === c.sourceIndex;
-        const hover = noHover
-            ? 0
-            : (hoverValues.find(s => s.item[0] === c.sourceIndex && s.item[1] === -1)?.hoverAmount ?? 0);
-
-        const hasSelectedCell = selection?.current !== undefined && selection.current.cell[0] === c.sourceIndex;
-
-        const bgFillStyle = selected ? theme.accentColor : hasSelectedCell ? theme.bgHeaderHasFocus : theme.bgHeader;
-
-        const y = enableGroups ? groupHeaderHeight : 0;
-        const xOffset = c.sourceIndex === 0 ? 0 : 1;
-
-        if (selected) {
-            ctx.fillStyle = bgFillStyle;
-            ctx.fillRect(x + xOffset, y, c.width - xOffset, headerHeight);
-        } else if (hasSelectedCell || hover > 0) {
+            ctx.save();
             ctx.beginPath();
-            ctx.rect(x + xOffset, y, c.width - xOffset, headerHeight);
-            if (hasSelectedCell) {
-                ctx.fillStyle = theme.bgHeaderHasFocus;
-                ctx.fill();
-            }
-            if (hover > 0) {
-                ctx.globalAlpha = hover;
-                ctx.fillStyle = theme.bgHeaderHovered;
-                ctx.fill();
-                ctx.globalAlpha = 1;
-            }
-        }
+            ctx.rect(x + diff, groupHeaderHeight, rectWidth, headerHeight);
+            ctx.clip();
 
-        drawHeader(
-            ctx,
-            x,
-            y,
-            c.width,
-            headerHeight,
-            c,
-            selected,
-            theme,
-            hoveredBoolean,
-            hoveredBoolean ? hPosX : undefined,
-            hoveredBoolean ? hPosY : undefined,
-            hasSelectedCell,
-            hover,
-            spriteManager,
-            drawHeaderCallback,
-            touchMode
-        );
-        ctx.restore();
-    });
+            const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
+            const theme =
+                c.themeOverride === undefined && groupTheme === undefined
+                    ? outerTheme
+                    : mergeAndRealizeTheme(outerTheme, groupTheme, c.themeOverride);
+
+            if (c.sticky === true) {
+                ctx.fillStyle = theme.bgHeader;
+                ctx.fill();
+            }
+
+            if (theme.bgHeader !== outerTheme.bgHeader) {
+                ctx.fillStyle = theme.bgHeader;
+                ctx.fill();
+            }
+
+            if (theme !== outerTheme) {
+                ctx.font = theme.headerFontFull;
+            }
+            const selected = selection.columns.hasIndex(c.sourceIndex);
+            const noHover = dragAndDropState !== undefined || isResizing || c.headerRowMarkerDisabled === true;
+            const hoveredBoolean = !noHover && hRow === -1 && hCol === c.sourceIndex;
+            const hover = noHover
+                ? 0
+                : (hoverValues.find(s => s.item[0] === c.sourceIndex && s.item[1] === -1)?.hoverAmount ?? 0);
+
+            const hasSelectedCell = selection?.current !== undefined && selection.current.cell[0] === c.sourceIndex;
+
+            const bgFillStyle = selected
+                ? theme.accentColor
+                : hasSelectedCell
+                  ? theme.bgHeaderHasFocus
+                  : theme.bgHeader;
+
+            const y = enableGroups ? groupHeaderHeight : 0;
+            const xOffset = c.sourceIndex === 0 ? 0 : 1;
+
+            if (selected) {
+                ctx.fillStyle = bgFillStyle;
+                ctx.fillRect(x + xOffset, y, c.width - xOffset, headerHeight);
+            } else if (hasSelectedCell || hover > 0) {
+                rectWidth =
+                    c.stickyPosition === "right"
+                        ? c.width - xOffset
+                        : Math.min(c.width - xOffset, width - x - clipXRight);
+
+                ctx.beginPath();
+                ctx.rect(x + xOffset, y, rectWidth, headerHeight);
+                if (hasSelectedCell) {
+                    ctx.fillStyle = theme.bgHeaderHasFocus;
+                    ctx.fill();
+                }
+                if (hover > 0) {
+                    ctx.globalAlpha = hover;
+                    ctx.fillStyle = theme.bgHeaderHovered;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            drawHeader(
+                ctx,
+                x,
+                y,
+                c.width,
+                headerHeight,
+                c,
+                selected,
+                theme,
+                hoveredBoolean,
+                hoveredBoolean ? hPosX : undefined,
+                hoveredBoolean ? hPosY : undefined,
+                hasSelectedCell,
+                hover,
+                spriteManager,
+                drawHeaderCallback,
+                touchMode
+            );
+            ctx.restore();
+        }
+    );
 
     if (enableGroups) {
         drawGroups(
@@ -148,7 +170,8 @@ export function drawGridHeaders(
             hoverValues,
             verticalBorder,
             getGroupDetails,
-            damage
+            damage,
+            freezeTrailingColumns
         );
     }
 }
@@ -165,120 +188,128 @@ export function drawGroups(
     _hoverValues: HoverValues,
     verticalBorder: (col: number) => boolean,
     getGroupDetails: GroupDetailsCallback,
-    damage: CellSet | undefined
+    damage: CellSet | undefined,
+    freezeTrailingColumns: number
 ) {
     const xPad = 8;
     const [hCol, hRow] = hovered?.[0] ?? [];
 
     let finalX = 0;
-    walkGroups(effectiveCols, width, translateX, groupHeaderHeight, (span, groupName, x, y, w, h) => {
-        if (
-            damage !== undefined &&
-            !damage.hasItemInRectangle({
-                x: span[0],
-                y: -2,
-                width: span[1] - span[0] + 1,
-                height: 1,
-            })
-        )
-            return;
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(x, y, w, h);
-        ctx.clip();
+    walkGroups(
+        effectiveCols,
+        width,
+        translateX,
+        groupHeaderHeight,
+        freezeTrailingColumns,
+        (span, groupName, x, y, w, h) => {
+            if (
+                damage !== undefined &&
+                !damage.hasItemInRectangle({
+                    x: span[0],
+                    y: -2,
+                    width: span[1] - span[0] + 1,
+                    height: 1,
+                })
+            )
+                return;
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(x, y, w, h);
+            ctx.clip();
 
-        const group = getGroupDetails(groupName);
-        const groupTheme =
-            group?.overrideTheme === undefined ? theme : mergeAndRealizeTheme(theme, group.overrideTheme);
-        const isHovered = hRow === -2 && hCol !== undefined && hCol >= span[0] && hCol <= span[1];
-        const fillColor = isHovered
-            ? (groupTheme.bgGroupHeaderHovered ?? groupTheme.bgHeaderHovered)
-            : (groupTheme.bgGroupHeader ?? groupTheme.bgHeader);
+            const group = getGroupDetails(groupName);
+            const groupTheme =
+                group?.overrideTheme === undefined ? theme : mergeAndRealizeTheme(theme, group.overrideTheme);
+            const isHovered = hRow === -2 && hCol !== undefined && hCol >= span[0] && hCol <= span[1];
+            const fillColor = isHovered
+                ? (groupTheme.bgGroupHeaderHovered ?? groupTheme.bgHeaderHovered)
+                : (groupTheme.bgGroupHeader ?? groupTheme.bgHeader);
 
-        if (fillColor !== theme.bgHeader) {
-            ctx.fillStyle = fillColor;
-            ctx.fill();
-        }
-
-        ctx.fillStyle = groupTheme.textGroupHeader ?? groupTheme.textHeader;
-        if (group !== undefined) {
-            let drawX = x;
-            if (group.icon !== undefined) {
-                spriteManager.drawSprite(
-                    group.icon,
-                    "normal",
-                    ctx,
-                    drawX + xPad,
-                    (groupHeaderHeight - 20) / 2,
-                    20,
-                    groupTheme
-                );
-                drawX += 26;
-            }
-            ctx.fillText(
-                group.name,
-                drawX + xPad,
-                groupHeaderHeight / 2 + getMiddleCenterBias(ctx, theme.headerFontFull)
-            );
-
-            if (group.actions !== undefined && isHovered) {
-                const actionBoxes = getActionBoundsForGroup({ x, y, width: w, height: h }, group.actions);
-
-                ctx.beginPath();
-                const fadeStartX = actionBoxes[0].x - 10;
-                const fadeWidth = x + w - fadeStartX;
-                ctx.rect(fadeStartX, 0, fadeWidth, groupHeaderHeight);
-                const grad = ctx.createLinearGradient(fadeStartX, 0, fadeStartX + fadeWidth, 0);
-                const trans = withAlpha(fillColor, 0);
-                grad.addColorStop(0, trans);
-                grad.addColorStop(10 / fadeWidth, fillColor);
-                grad.addColorStop(1, fillColor);
-                ctx.fillStyle = grad;
-
+            if (fillColor !== theme.bgHeader) {
+                ctx.fillStyle = fillColor;
                 ctx.fill();
+            }
 
-                ctx.globalAlpha = 0.6;
-
-                // eslint-disable-next-line prefer-const
-                const [mouseX, mouseY] = hovered?.[1] ?? [-1, -1];
-                for (let i = 0; i < group.actions.length; i++) {
-                    const action = group.actions[i];
-                    const box = actionBoxes[i];
-                    const actionHovered = pointInRect(box, mouseX + x, mouseY);
-                    if (actionHovered) {
-                        ctx.globalAlpha = 1;
-                    }
+            ctx.fillStyle = groupTheme.textGroupHeader ?? groupTheme.textHeader;
+            if (group !== undefined) {
+                let drawX = x;
+                if (group.icon !== undefined) {
                     spriteManager.drawSprite(
-                        action.icon,
+                        group.icon,
                         "normal",
                         ctx,
-                        box.x + box.width / 2 - 10,
-                        box.y + box.height / 2 - 10,
+                        drawX + xPad,
+                        (groupHeaderHeight - 20) / 2,
                         20,
                         groupTheme
                     );
-                    if (actionHovered) {
-                        ctx.globalAlpha = 0.6;
-                    }
+                    drawX += 26;
                 }
+                ctx.fillText(
+                    group.name,
+                    drawX + xPad,
+                    groupHeaderHeight / 2 + getMiddleCenterBias(ctx, theme.headerFontFull)
+                );
 
-                ctx.globalAlpha = 1;
+                if (group.actions !== undefined && isHovered) {
+                    const actionBoxes = getActionBoundsForGroup({ x, y, width: w, height: h }, group.actions);
+
+                    ctx.beginPath();
+                    const fadeStartX = actionBoxes[0].x - 10;
+                    const fadeWidth = x + w - fadeStartX;
+                    ctx.rect(fadeStartX, 0, fadeWidth, groupHeaderHeight);
+                    const grad = ctx.createLinearGradient(fadeStartX, 0, fadeStartX + fadeWidth, 0);
+                    const trans = withAlpha(fillColor, 0);
+                    grad.addColorStop(0, trans);
+                    grad.addColorStop(10 / fadeWidth, fillColor);
+                    grad.addColorStop(1, fillColor);
+                    ctx.fillStyle = grad;
+
+                    ctx.fill();
+
+                    ctx.globalAlpha = 0.6;
+
+                    // eslint-disable-next-line prefer-const
+                    const [mouseX, mouseY] = hovered?.[1] ?? [-1, -1];
+                    for (let i = 0; i < group.actions.length; i++) {
+                        const action = group.actions[i];
+                        const box = actionBoxes[i];
+                        const actionHovered = pointInRect(box, mouseX + x, mouseY);
+                        if (actionHovered) {
+                            ctx.globalAlpha = 1;
+                        }
+                        spriteManager.drawSprite(
+                            action.icon,
+                            "normal",
+                            ctx,
+                            box.x + box.width / 2 - 10,
+                            box.y + box.height / 2 - 10,
+                            20,
+                            groupTheme
+                        );
+                        if (actionHovered) {
+                            ctx.globalAlpha = 0.6;
+                        }
+                    }
+
+                    ctx.globalAlpha = 1;
+                }
             }
+
+            if (x !== 0 && verticalBorder(span[0])) {
+                ctx.beginPath();
+                ctx.moveTo(x + 0.5, 0);
+                ctx.lineTo(x + 0.5, groupHeaderHeight);
+                ctx.strokeStyle = theme.borderColor;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+
+            ctx.restore();
+
+            finalX = x + w;
         }
-
-        if (x !== 0 && verticalBorder(span[0])) {
-            ctx.beginPath();
-            ctx.moveTo(x + 0.5, 0);
-            ctx.lineTo(x + 0.5, groupHeaderHeight);
-            ctx.strokeStyle = theme.borderColor;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        }
-
-        ctx.restore();
-
-        finalX = x + w;
-    });
+    );
 
     ctx.beginPath();
     ctx.moveTo(finalX + 0.5, 0);

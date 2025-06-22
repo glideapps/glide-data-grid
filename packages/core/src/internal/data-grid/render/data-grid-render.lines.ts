@@ -48,7 +48,7 @@ export function drawBlanks(
         translateY,
         totalHeaderHeight,
         freezeTrailingColumns,
-        (c, drawX, colDrawY, clipX, startRow) => {
+        (c, drawX, colDrawY, clipX, _clipXRight, startRow) => {
             if (c !== effectiveColumns[effectiveColumns.length - 1]) return;
             drawX += c.width;
             const x = Math.max(drawX, clipX);
@@ -331,7 +331,7 @@ export function drawGridLines(
     for (let index = 0; index < effectiveCols.length; index++) {
         const c = effectiveCols[index];
         if (c.width === 0) continue;
-        if (c.sticky && c.stickyPosition !== "left") break;
+        if (effectiveCols[index + 1]?.sticky && effectiveCols[index + 1].stickyPosition !== "left") break;
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
         if (tx >= minX && tx <= maxX && verticalBorder(index + 1)) {

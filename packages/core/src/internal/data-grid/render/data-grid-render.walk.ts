@@ -60,6 +60,7 @@ export type WalkColsCallback = (
     drawX: number,
     drawY: number,
     clipX: number,
+    clipXRight: number,
     startRow: number
 ) => boolean | void;
 
@@ -76,11 +77,12 @@ export function walkColumns(
     let x = 0;
     let clipX = 0; // this tracks the total width of sticky cols
     const drawY = totalHeaderHeight + translateY;
+    const clipXRight = freezeTrailingColumns === 0 ? 0 : effectiveCols.slice(-freezeTrailingColumns).reduce((acc, col) => acc + col.width, 0);
 
     for (let i = 0; i < effectiveCols.length - freezeTrailingColumns; i++) {
         const c = effectiveCols[i];
         const drawX = c.sticky ? clipX : x + translateX;
-        if (cb(c, drawX, drawY, c.sticky ? 0 : clipX, cellYOffset) === true) {
+        if (cb(c, drawX, drawY, c.sticky ? 0 : clipX, clipXRight, cellYOffset) === true) {
             break;
         }
 
@@ -94,7 +96,7 @@ export function walkColumns(
         const drawX = x - c.width;
 
         x -= c.width;
-        cb(c, drawX, drawY, clipX, cellYOffset);
+        cb(c, drawX, drawY, clipX, clipXRight, cellYOffset);
     }
 }
 
@@ -113,11 +115,17 @@ export function walkGroups(
     width: number,
     translateX: number,
     groupHeaderHeight: number,
+    freezeTrailingColumns: number,
     cb: WalkGroupsCallback
 ): void {
     let x = 0;
     let clipX = 0;
-    for (let index = 0; index < effectiveCols.length; index++) {
+
+    const effectiveColsRight = freezeTrailingColumns === 0 ? [] : effectiveCols.slice(-freezeTrailingColumns);
+    const widthRight = effectiveColsRight.reduce((acc, col) => acc + col.width, 0);
+    width -= widthRight;
+
+    for (let index = 0; index < effectiveCols.length - freezeTrailingColumns; index++) {
         const startCol = effectiveCols[index];
 
         let end = index + 1;
@@ -153,6 +161,42 @@ export function walkGroups(
         );
 
         x += boxWidth;
+    }
+
+    for (let index = 0; index < effectiveColsRight.length; index++) {
+        const startCol = effectiveColsRight[index];
+
+        let end = index + 1;
+        let boxWidth = startCol.width;
+
+        while (
+            end < effectiveColsRight.length &&
+            isGroupEqual(effectiveColsRight[end].group, startCol.group) &&
+            effectiveColsRight[end].sticky === effectiveColsRight[index].sticky
+        ) {
+            const endCol = effectiveColsRight[end];
+            boxWidth += endCol.width;
+            end++;
+            index++;
+            if (endCol.sticky) {
+                clipX += endCol.width;
+            }
+        }
+
+        const t = width + boxWidth;
+        const localX = t - boxWidth;
+        const delta = 0;
+        const w = boxWidth - delta;
+        cb(
+            [startCol.sourceIndex, effectiveColsRight[end - 1].sourceIndex],
+            startCol.group ?? "",
+            localX + delta,
+            0,
+            w,
+            groupHeaderHeight
+        );
+
+        width += w;
     }
 }
 

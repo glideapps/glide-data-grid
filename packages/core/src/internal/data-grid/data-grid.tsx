@@ -480,7 +480,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 translateX,
                 translateY,
                 rows,
-                freezeLeftColumns,
+                freezeColumns,
                 freezeTrailingRows,
                 mappedColumns,
                 rowHeight
@@ -508,7 +508,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             translateX,
             translateY,
             rows,
-            freezeLeftColumns,
+            freezeColumns,
             freezeTrailingRows,
             mappedColumns,
             rowHeight,
@@ -1905,12 +1905,27 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
               ? 1
               : clamp(-translateX / 100, 0, 1);
 
+    let translateXRight = 0;
+
+    if (eventTargetRef?.current) {
+        translateXRight = eventTargetRef?.current?.scrollLeft + width - eventTargetRef?.current?.scrollWidth;
+    }
+
     const opacityXRight =
         freezeRightColumns === 0 || !fixedShadowX
             ? 0
-            : cellXOffset + width < columns.length - freezeRightColumns
+            : cellXOffset +
+                    getEffectiveColumns(
+                        mappedColumns,
+                        cellXOffset,
+                        width,
+                        freezeColumns,
+                        dragAndDropState,
+                        translateX
+                    ).filter(column => !column.sticky).length <
+                columns.length - freezeRightColumns
               ? 1
-              : clamp((translateX - (columns.length - freezeRightColumns - width) * 32) / 100, 0, 1);
+              : clamp(-translateXRight / 100, 0, 1);
 
     const absoluteOffsetY = -cellYOffset * 32 + translateY;
     const opacityY = !fixedShadowY ? 0 : clamp(-absoluteOffsetY / 100, 0, 1);
