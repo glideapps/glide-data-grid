@@ -74,7 +74,7 @@ export function drawGridHeaders(
         }
 
         if (theme !== outerTheme) {
-            ctx.font = theme.baseFontFull;
+            ctx.font = theme.headerFontFull;
         }
         const selected = selection.columns.hasIndex(c.sourceIndex);
         const noHover = dragAndDropState !== undefined || isResizing;
