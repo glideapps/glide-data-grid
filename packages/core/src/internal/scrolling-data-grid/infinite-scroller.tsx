@@ -70,8 +70,7 @@ const ScrollRegionStyle = styled.div<{ isSafari: boolean }>`
     }
 `;
 
-// Browser's maximum div height limit
-
+// Browser's maximum div height limit. Varies a bit by browsers.
 const BROWSER_MAX_DIV_HEIGHT = 33_554_400;
 // Maximum height of a single padder segment to avoid browser performance issues.
 // Padders are invisible div elements that create the scrollable area in the DOM.
