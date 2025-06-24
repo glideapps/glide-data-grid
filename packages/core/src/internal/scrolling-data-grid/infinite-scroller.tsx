@@ -70,7 +70,16 @@ const ScrollRegionStyle = styled.div<{ isSafari: boolean }>`
     }
 `;
 
-const BROWSER_MAX_DIV_HEIGHT = 33_554_432;
+// Browser's maximum div height limit
+
+const BROWSER_MAX_DIV_HEIGHT = 33_554_400;
+// Maximum height of a single padder segment to avoid browser performance issues.
+// Padders are invisible div elements that create the scrollable area in the DOM.
+// They trick the browser into showing a scrollbar for the full virtual content height
+// without actually rendering millions of rows. We create multiple smaller padders
+// (max 5M pixels each) instead of one large padder to avoid browser performance issues.
+// The actual grid content is absolutely positioned and rendered on top of these padders
+// based on the current scroll position.
 const MAX_PADDER_SEGMENT_HEIGHT = 5_000_000;
 
 type ScrollLock = [undefined, number] | [number, undefined] | undefined;
@@ -305,17 +314,9 @@ export const InfiniteScroller: React.FC<Props> = p => {
     let key = 0;
     let h = 0;
 
-    // Browser's maximum div height limit
-    const maxDomHeight = BROWSER_MAX_DIV_HEIGHT;
     // Ensure we don't create padders that exceed browser limits
-    const effectiveScrollHeight = Math.min(scrollHeight, maxDomHeight);
+    const effectiveScrollHeight = Math.min(scrollHeight, BROWSER_MAX_DIV_HEIGHT);
 
-    // Padders are invisible div elements that create the scrollable area in the DOM.
-    // They trick the browser into showing a scrollbar for the full virtual content height
-    // without actually rendering millions of rows. We create multiple smaller padders
-    // (max 5M pixels each) instead of one large padder to avoid browser performance issues.
-    // The actual grid content is absolutely positioned and rendered on top of these padders
-    // based on the current scroll position.
     padders.push(<div key={key++} style={{ width: scrollWidth, height: 0 }} />);
     while (h < effectiveScrollHeight) {
         const toAdd = Math.min(MAX_PADDER_SEGMENT_HEIGHT, effectiveScrollHeight - h);
@@ -364,7 +365,7 @@ export const InfiniteScroller: React.FC<Props> = p => {
                                         marginBottom: -40,
                                         marginRight: paddingRight,
                                         flexGrow: rightElementFill ? 1 : undefined,
-                                        right: rightElementSticky ? paddingRight ?? 0 : undefined,
+                                        right: rightElementSticky ? (paddingRight ?? 0) : undefined,
                                         pointerEvents: "auto",
                                     }}>
                                     {rightElement}
