@@ -156,7 +156,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [maxColumnAutoWidth](#maxcolumnwidth)                 | Sets the maximum width a column can be auto-sized to.                                                                                                                               |
 | [maxColumnWidth](#maxcolumnwidth)                     | Sets the maximum width the user can resize a column to.                                                                                                                             |
 | [minColumnWidth](#maxcolumnwidth)                     | Sets the minimum width the user can resize a column to.                                                                                                                             |
-| [onCellActivated](#oncellactivated)                   | Emitted when a cell is activated, by pressing Enter, Space or double clicking it.                                                                                                   |
+| [onCellActivated](#oncellactivated)                   | Emitted when a cell is activated, such as by pressing Enter, Space, double clicking, or typing.                                                                                     |
 | [onCellClicked](#oncellclicked)                       | Emitted when a cell is clicked.                                                                                                                                                     |
 | [onCellContextMenu](#oncellcontextmenu)               | Emitted when a cell should show a context menu. Usually right click.                                                                                                                |
 | [onColumnMoved](#oncolumnmoved)                       | Emitted when a column has been dragged to a new location.                                                                                                                           |
@@ -1124,7 +1124,7 @@ onCellClicked?: (cell: Item) => void;
 onCellActivated?: (cell: Item) => void;
 ```
 
-`onCellActivated` is called whenever the user double clicks, taps Enter, or taps Space on a cell in the grid.
+`onCellActivated` is called whenever the user double clicks, presses Enter or Space, or begins typing with a cell selected.
 
 ---
 
