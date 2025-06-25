@@ -57,12 +57,14 @@ export function compareRaw(a: string | number, b: string | number) {
     return -1;
 }
 
+export type ColumnSort = {
+    column: GridColumn;
+    mode?: "default" | "raw" | "smart";
+    direction?: "asc" | "desc";
+};
+
 type Props = Pick<DataEditorProps, "getCellContent" | "rows" | "columns"> & {
-    sort?: {
-        column: GridColumn;
-        mode?: "default" | "raw" | "smart";
-        direction?: "asc" | "desc";
-    };
+    sort?: ColumnSort | ColumnSort[];
 };
 type Result = Pick<DataEditorProps, "getCellContent"> & {
     getOriginalIndex: (index: number) => number;
@@ -71,40 +73,61 @@ type Result = Pick<DataEditorProps, "getCellContent"> & {
 export function useColumnSort(p: Props): Result {
     const { sort, rows, getCellContent: getCellContentIn } = p;
 
-    let sortCol =
-        sort === undefined
-            ? undefined
-            : p.columns.findIndex(c => sort.column === c || (c.id !== undefined && sort.column.id === c.id));
-    if (sortCol === -1) sortCol = undefined;
+    const sorts = React.useMemo(() => {
+        if (sort === undefined) return [] as ColumnSort[];
+        return Array.isArray(sort) ? sort : [sort];
+    }, [sort]);
+
+    const sortCols = React.useMemo(() =>
+        sorts.map(s => {
+            const c = p.columns.findIndex(col => s.column === col || (col.id !== undefined && s.column.id === col.id));
+            return c === -1 ? undefined : c;
+        }),
+        [sorts, p.columns]
+    );
 
     // This scales to about 100k rows. Beyond that things take a pretty noticeable amount of time
     // The performance "issue" from here on out seems to be the lookup to get the value. Not sure
     // what to do there. We need the indirection to produce the final sort map. Perhaps someone
     // more clever than me will wander in and save most of that time.
-    const dir = sort?.direction ?? "asc";
     const sortMap = React.useMemo(() => {
-        if (sortCol === undefined) return undefined;
-        const vals: string[] = new Array(rows);
+        const activeSorts = sorts
+            .map((s, i) => ({ sort: s, col: sortCols[i] }))
+            .filter((v): v is { sort: ColumnSort; col: number } => v.col !== undefined);
 
-        const index: [number, number] = [sortCol, 0];
-        for (let i = 0; i < rows; i++) {
-            index[1] = i;
-            vals[i] = cellToSortData(getCellContentIn(index));
+        if (activeSorts.length === 0) return undefined;
+
+        const values = activeSorts.map(() => new Array<string>(rows));
+        for (let sIndex = 0; sIndex < activeSorts.length; sIndex++) {
+            const { col } = activeSorts[sIndex];
+            const index: [number, number] = [col, 0];
+            for (let i = 0; i < rows; i++) {
+                index[1] = i;
+                values[sIndex][i] = cellToSortData(getCellContentIn(index));
+            }
         }
 
-        let result: number[];
-        if (sort?.mode === "raw") {
-            result = range(rows).sort((a, b) => compareRaw(vals[a], vals[b]));
-        } else if (sort?.mode === "smart") {
-            result = range(rows).sort((a, b) => compareSmart(vals[a], vals[b]));
-        } else {
-            result = range(rows).sort((a, b) => vals[a].localeCompare(vals[b]));
-        }
-        if (dir === "desc") {
-            result.reverse();
-        }
-        return result;
-    }, [getCellContentIn, rows, sort?.mode, dir, sortCol]);
+        return range(rows).sort((a, b) => {
+            for (let sIndex = 0; sIndex < activeSorts.length; sIndex++) {
+                const { sort: colSort } = activeSorts[sIndex];
+                const va = values[sIndex][a];
+                const vb = values[sIndex][b];
+                let cmp: number;
+                if (colSort.mode === "raw") {
+                    cmp = compareRaw(va, vb);
+                } else if (colSort.mode === "smart") {
+                    cmp = compareSmart(va, vb);
+                } else {
+                    cmp = va.localeCompare(vb);
+                }
+                if (cmp !== 0) {
+                    if ((colSort.direction ?? "asc") === "desc") cmp = -cmp;
+                    return cmp;
+                }
+            }
+            return 0;
+        });
+    }, [getCellContentIn, rows, sorts, sortCols]);
 
     const getOriginalIndex = React.useCallback(
         (index: number): number => {

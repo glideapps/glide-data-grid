@@ -1,6 +1,6 @@
 {
     "name": "@glideapps/glide-data-grid",
-    "version": "6.0.4-alpha10",
+    "version": "6.0.4-alpha13",
     "description": "React data grid for beautifully displaying and editing large amounts of data with amazing performance.",
     "sideEffects": [
         "**/*.css"
@@ -57,7 +57,7 @@
     },
     "homepage": "https://grid.glideapps.com",
     "dependencies": {
-        "@linaria/react": "^4.5.4",
+        "@linaria/react": "^6.3.0",
         "canvas-hypertxt": "^1.0.3",
         "react-number-format": "^5.4.4"
     },
