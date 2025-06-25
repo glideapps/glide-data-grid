@@ -35,14 +35,8 @@
         "@babel/preset-react": "^7.27.1",
         "@babel/preset-typescript": "^7.27.1",
         "@faker-js/faker": "^7.6.0",
-        "@linaria/babel-preset": "^4.5.4",
-        "@linaria/cli": "^4.5.4",
-        "@linaria/core": "^4.5.4",
-        "@linaria/esbuild": "^4.5.4",
-        "@linaria/react": "^4.5.4",
-        "@linaria/shaker": "^4.5.3",
-        "@linaria/vite": "^4.5.4",
-        "@linaria/webpack-loader": "^4.5.4",
+        "@linaria/core": "^6.3.0",
+        "@linaria/react": "^6.3.0",
         "@storybook/addon-docs": "^9.0.11",
         "@storybook/addon-links": "^9.0.11",
         "@storybook/addons": "^7.6.20",
@@ -67,6 +61,9 @@
         "@typescript-eslint/parser": "^6.21.0",
         "@typescript-eslint/typescript-estree": "^5.62.0",
         "@vitejs/plugin-react": "^4.5.2",
+        "@wyw-in-js/cli": "^0.6.0",
+        "@wyw-in-js/vite": "^0.6.0",
+        "@wyw-in-js/babel-preset": "^0.6.0",
         "babel-loader": "^8.4.1",
         "chokidar-cli": "^3.0.0",
         "clean-css-cli": "^5.6.3",
@@ -101,5 +98,6 @@
     },
     "overrides": {
         "storybook": "$storybook"
-    }
+    },
+    "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

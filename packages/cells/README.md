@@ -24,14 +24,13 @@ Current cells
 
 # Usage
 
-Step 1: Add the extra cells to your grid.
+Step 1: Import the cell renderers you want to use and pass them to the grid.
 
 ```tsx
-import { useExtraCells } from "@glideapps/glide-data-grid-cells";
+import { allCells } from "@glideapps/glide-data-grid-cells";
 
 const Grid = () => {
-    const { customRenderers } = useExtraCells();
-    return <DataEditor customRenderers={customRenderers} {...rest} />;
+    return <DataEditor customRenderers={allCells} {...rest} />;
 };
 ```
 

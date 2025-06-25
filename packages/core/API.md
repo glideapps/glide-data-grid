@@ -156,7 +156,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [maxColumnAutoWidth](#maxcolumnwidth)                 | Sets the maximum width a column can be auto-sized to.                                                                                                                               |
 | [maxColumnWidth](#maxcolumnwidth)                     | Sets the maximum width the user can resize a column to.                                                                                                                             |
 | [minColumnWidth](#maxcolumnwidth)                     | Sets the minimum width the user can resize a column to.                                                                                                                             |
-| [onCellActivated](#oncellactivated)                   | Emitted when a cell is activated, by pressing Enter, Space or double clicking it.                                                                                                   |
+| [onCellActivated](#oncellactivated)                   | Emitted when a cell is activated, such as by pressing Enter, Space, double clicking, or typing.                                                                                     |
 | [onCellClicked](#oncellclicked)                       | Emitted when a cell is clicked.                                                                                                                                                     |
 | [onCellContextMenu](#oncellcontextmenu)               | Emitted when a cell should show a context menu. Usually right click.                                                                                                                |
 | [onColumnMoved](#oncolumnmoved)                       | Emitted when a column has been dragged to a new location.                                                                                                                           |
@@ -1124,7 +1124,7 @@ onCellClicked?: (cell: Item) => void;
 onCellActivated?: (cell: Item) => void;
 ```
 
-`onCellActivated` is called whenever the user double clicks, taps Enter, or taps Space on a cell in the grid.
+`onCellActivated` is called whenever the user double clicks, presses Enter or Space, or begins typing with a cell selected.
 
 ---
 
@@ -1316,49 +1316,3 @@ If `isDraggable` is set, the whole Grid is draggable, and `onDragStart` will be 
 Behavior not defined or officially supported. Feel free to check out what this does in github but anything in here is up for grabs to be changed at any time.
 
 ---
-
-# Hooks
-
-## useCustomCells
-
-```ts
-// arguments passed to the draw callback
-interface DrawArgs {
-    ctx: CanvasRenderingContext2D;
-    theme: Theme;
-    rect: Rectangle;
-    hoverAmount: number;
-    hoverX: number | undefined;
-    hoverY: number | undefined;
-    col: number;
-    row: number;
-    highlighted: boolean;
-    imageLoader: ImageWindowLoader;
-}
-
-// a standardized cell renderer consumed by the hook
-type CustomCellRenderer<T extends CustomCell> = {
-    isMatch: (cell: CustomCell) => cell is T;
-    draw: (args: DrawArgs, cell: T) => boolean;
-    provideEditor: ProvideEditorCallback<T>;
-};
-
-// the hook itself
-declare function useCustomCells(cells: readonly CustomCellRenderer<any>[]): {
-    drawCell: DrawCustomCellCallback;
-    provideEditor: ProvideEditorCallback<GridCell>;
-};
-```
-
-The useCustomCells hook provides a standardized method of integrating custom cells into the Glide Data Grid. All cells in the `@glideapps/glide-data-grid-source` package are already in this format and can be used individually by passing them to this hook as so. The result of the hook is an object which can be spread on the DataEditor to implement the cells.
-
-```tsx
-import StarCell from "@glideapps/glide-data-grid-cells/cells/star-cell";
-import DropdownCell from "@glideapps/glide-data-grid-cells/cells/dropdown-cell";
-
-const MyGrid = () => {
-    const args = useCustomCells([StarCell, DropdownCell]);
-
-    return <DataEditor {...args} />;
-};
-```
