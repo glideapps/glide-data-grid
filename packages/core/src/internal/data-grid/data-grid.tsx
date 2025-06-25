@@ -924,7 +924,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const [overFill, setOverFill] = React.useState(false);
 
     const [hCol, hRow] = hoveredItem ?? [];
-    const headerHovered = hCol !== undefined && hRow === -1;
+    const headerHovered = hCol !== undefined && hRow === -1 && columns[hCol].headerRowMarkerDisabled !== true;
     const groupHeaderHovered = hCol !== undefined && hRow === -2;
     let clickableInnerCellHovered = false;
     let editableBoolHovered = false;
@@ -949,6 +949,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
         ? "pointer"
         : "default";
+    
     const style = React.useMemo(
         () => ({
             // width,
