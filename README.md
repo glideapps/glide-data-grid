@@ -13,7 +13,7 @@
 </picture>
 
 [![Version](https://img.shields.io/npm/v/@glideapps/glide-data-grid?color=blue&label=latest&style=for-the-badge)](https://github.com/glideapps/glide-data-grid/releases)
-[![React 16+](https://img.shields.io/badge/React-16+-00ADD8?style=for-the-badge&logo=react)](https://reactjs.org)
+[![React 16-19](https://img.shields.io/badge/React-16--19-00ADD8?style=for-the-badge&logo=react)](https://reactjs.org)
 [![Code Coverage](https://img.shields.io/coverallsCoverage/github/glideapps/glide-data-grid?color=457aba&label=Cover&style=for-the-badge)](https://coveralls.io/github/glideapps/glide-data-grid)
 [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@glideapps/glide-data-grid?color=success&label=bundle&style=for-the-badge)](https://bundlephobia.com/package/@glideapps/glide-data-grid)
 [![License](https://img.shields.io/github/license/glideapps/glide-data-grid?color=red&style=for-the-badge)](https://github.com/glideapps/glide-data-grid/blob/main/LICENSE)
@@ -40,7 +40,7 @@ You can also visit our [main site](https://grid.glideapps.com).
 
 # ⚡ Quick Start
 
-First make sure you are using React 16 or greater. Then install the data grid:
+First make sure you are using React 16 or greater (including React 17, 18, and 19). Then install the data grid:
 
 ```shell
 npm i @glideapps/glide-data-grid

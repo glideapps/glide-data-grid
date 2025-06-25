@@ -1,28 +1,24 @@
-import { dirname, join } from "path";
-import linaria from "@linaria/vite";
-import { mergeConfig } from "vite";
+const { dirname, join } = require("path");
 
-export default {
+module.exports = {
     stories: ["../**/src/**/*.stories.tsx"],
-    addons: [getAbsolutePath("@storybook/addon-storysource"), getAbsolutePath("@storybook/addon-controls")],
+    addons: [getAbsolutePath("@storybook/addon-docs")],
 
     typescript: {
         reactDocgen: false,
     },
 
     async viteFinal(config) {
+        const { mergeConfig } = await import("vite");
+        const wyw = await import("@wyw-in-js/vite");
         return mergeConfig(config, {
-            plugins: [linaria()],
+            plugins: [wyw.default()],
         });
     },
 
     framework: {
         name: getAbsolutePath("@storybook/react-vite"),
         options: {},
-    },
-
-    docs: {
-        autodocs: false,
     },
 };
 

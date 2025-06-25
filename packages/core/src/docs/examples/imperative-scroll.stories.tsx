@@ -28,6 +28,7 @@ interface ImperativeScrollProps {
     paddingX: number;
     vAlign?: "start" | "center" | "end";
     hAlign?: "start" | "center" | "end";
+    behavior?: "smooth" | "instant" | "auto";
 }
 
 export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
@@ -39,6 +40,7 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
         ref.current?.scrollTo(4, 99, "both", p.paddingX, p.paddingY, {
             vAlign: p.vAlign,
             hAlign: p.hAlign,
+            behavior: p.behavior,
         });
     };
 
@@ -74,6 +76,7 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
     paddingX: 0,
     vAlign: "start",
     hAlign: "start",
+    behavior: "auto",
 };
 (ImperativeScroll as any).argTypes = {
     paddingY: 0,
@@ -85,5 +88,9 @@ export const ImperativeScroll: React.VFC<ImperativeScrollProps> = p => {
     hAlign: {
         control: { type: "select" },
         options: ["start", "center", "end", undefined],
+    },
+    behavior: {
+        control: { type: "select" },
+        options: ["smooth", "instant", "auto", undefined],
     },
 };

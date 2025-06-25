@@ -35,14 +35,10 @@ export default {
 
 export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
     const { cols, getCellContent } = useMockDataGenerator(100);
-    const rows = 1000;
+    const rows = 100_000;
 
     const [rowGrouping, setRowGrouping] = React.useState<RowGroupingOptions>(() => ({
         groups: [
-            {
-                headerIndex: 0,
-                isCollapsed: false,
-            },
             {
                 headerIndex: 10,
                 isCollapsed: true,
@@ -61,6 +57,12 @@ export const RowGrouping: React.VFC<any> = (p: { freezeColumns: number }) => {
                 headerIndex: 30,
                 isCollapsed: false,
             },
+            ...Array.from({ length: 100 }, (_value, i): RowGroupingOptions["groups"][number] => {
+                return {
+                    headerIndex: (rows / 100) * i,
+                    isCollapsed: false,
+                };
+            }),
         ],
         height: 55,
         navigationBehavior: "block",

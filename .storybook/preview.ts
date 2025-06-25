@@ -1,6 +1,7 @@
 const preview = {
     parameters: {
         layout: "fullscreen",
+
         options: {
             storySort: {
                 method: "alphabetical",
@@ -8,6 +9,10 @@ const preview = {
                 locales: "en-US",
             },
         },
+
+        docs: {
+            codePanel: true
+        }
     },
 };
 

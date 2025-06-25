@@ -50,7 +50,7 @@ remove_all_css_imports() {
 
 compile() {
     tsc -p tsconfig.$1.json --outdir ./dist/$1-tmp --declarationDir ./dist/dts-tmp
-    linaria -r dist/$1-tmp/ -m esnext -o dist/$1-tmp/ dist/$1-tmp/**/*.js -t -i dist/$1-tmp -c ../../config/linaria.json > /dev/null
+    wyw-in-js -r dist/$1-tmp/ -m esnext -o dist/$1-tmp/ dist/$1-tmp/**/*.js -t -i dist/$1-tmp -c ../../config/linaria.json > /dev/null
     remove_all_css_imports dist/$1-tmp
 
     # replace dist/$1 (if it exists) with dist/$1-tmp
