@@ -421,8 +421,7 @@ export function isObjectEditorCallbackResult<T extends InnerGridCell>(
 
 /** @category Renderers */
 export type ProvideEditorCallback<T extends InnerGridCell> = (
-    cell: T,
-    location: Item
+    cell: T & { location?: Item }
 ) => ProvideEditorCallbackResult<T>;
 
 /** @category Cells */
