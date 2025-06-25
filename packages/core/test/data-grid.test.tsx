@@ -7,6 +7,7 @@ import { AllCellRenderers } from "../src/cells/index.js";
 import { vi, expect, describe, test, beforeEach, afterEach } from "vitest";
 import ImageWindowLoaderImpl from "../src/common/image-window-loader.js";
 import { mergeAndRealizeTheme } from "../src/common/styles.js";
+import { standardBeforeEach } from "./test-utils.js";
 
 const basicProps: DataGridProps = {
     cellXOffset: 0,
@@ -114,6 +115,8 @@ const basicProps: DataGridProps = {
 const dataGridCanvasId = "data-grid-canvas";
 describe("data-grid", () => {
     beforeEach(() => {
+        standardBeforeEach();
+
         Element.prototype.getBoundingClientRect = () => ({
             bottom: 1000,
             height: 1000,
@@ -136,12 +139,12 @@ describe("data-grid", () => {
         const spy = vi.fn();
         render(<DataGrid {...basicProps} onMouseDown={spy} />);
 
-        fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
+        fireEvent.pointerDown(screen.getByTestId(dataGridCanvasId), {
             clientX: 300, // Col B
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
 
-        fireEvent.mouseUp(screen.getByTestId(dataGridCanvasId), {
+        fireEvent.pointerUp(screen.getByTestId(dataGridCanvasId), {
             clientX: 300, // Col B
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
@@ -164,7 +167,7 @@ describe("data-grid", () => {
         const spy = vi.fn();
         render(<DataGrid {...basicProps} onMouseDown={spy} />);
 
-        fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
+        fireEvent.pointerDown(screen.getByTestId(dataGridCanvasId), {
             clientX: 990, // Col B
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
@@ -181,12 +184,12 @@ describe("data-grid", () => {
         const spy = vi.fn();
         render(<DataGrid {...basicProps} onMouseUp={spy} />);
 
-        fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
+        fireEvent.pointerDown(screen.getByTestId(dataGridCanvasId), {
             clientX: 300, // Col B
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
 
-        fireEvent.mouseUp(screen.getByTestId(dataGridCanvasId), {
+        fireEvent.pointerUp(screen.getByTestId(dataGridCanvasId), {
             clientX: 300, // Col B
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
@@ -221,12 +224,12 @@ describe("data-grid", () => {
         );
 
         const el = screen.getByTestId(dataGridCanvasId);
-        fireEvent.mouseDown(el, {
+        fireEvent.pointerDown(el, {
             clientX: 140,
             clientY: 18,
         });
 
-        fireEvent.mouseUp(el, {
+        fireEvent.pointerUp(el, {
             clientX: 140,
             clientY: 18,
         });
@@ -241,7 +244,7 @@ describe("data-grid", () => {
         render(<DataGrid {...basicProps} onItemHovered={spy} />);
 
         const el = screen.getByTestId(dataGridCanvasId);
-        fireEvent.mouseMove(el, {
+        fireEvent.pointerMove(el, {
             clientX: 350, // Col C
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
@@ -272,7 +275,7 @@ describe("data-grid", () => {
         );
 
         const outsideElement = screen.getByTestId("outside-element");
-        fireEvent.mouseMove(outsideElement, {
+        fireEvent.pointerMove(outsideElement, {
             clientX: 350, // Col C
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
@@ -286,7 +289,7 @@ describe("data-grid", () => {
         render(<DataGrid {...basicProps} onItemHovered={spy} />);
 
         const el = screen.getByTestId(dataGridCanvasId);
-        fireEvent.mouseMove(el, {
+        fireEvent.pointerMove(el, {
             clientX: 350, // Col C
             clientY: 16, // Header
         });
@@ -307,7 +310,7 @@ describe("data-grid", () => {
         );
 
         const el = screen.getByTestId(dataGridCanvasId);
-        fireEvent.mouseMove(el, {
+        fireEvent.pointerMove(el, {
             clientX: 350, // Col C
             clientY: 46, // Header
         });
@@ -326,7 +329,7 @@ describe("data-grid", () => {
         render(<DataGrid {...basicProps} onItemHovered={spy} enableGroups={true} groupHeaderHeight={28} />);
 
         const el = screen.getByTestId(dataGridCanvasId);
-        fireEvent.mouseMove(el, {
+        fireEvent.pointerMove(el, {
             clientX: 350, // Col C
             clientY: 14, // Header
         });
@@ -367,12 +370,12 @@ describe("data-grid", () => {
         const spy = vi.fn();
         render(<DataGrid {...basicProps} freezeColumns={1} cellXOffset={3} onMouseUp={spy} />);
 
-        fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
+        fireEvent.pointerDown(screen.getByTestId(dataGridCanvasId), {
             clientX: 50, // Col A
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
 
-        fireEvent.mouseUp(screen.getByTestId(dataGridCanvasId), {
+        fireEvent.pointerUp(screen.getByTestId(dataGridCanvasId), {
             clientX: 50, // Col A
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
