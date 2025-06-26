@@ -105,7 +105,6 @@ export function lossyCopyData<T extends EditableGridCell>(source: EditableGridCe
             }
             // No default
         }
-    assertNever(target);
 }
 
 export type GridColumnWithMockingInfo = GridColumn & {
@@ -668,6 +667,7 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
                     data: checked,
                     allowOverlay: false,
                     readonly: false,
+                    maxSize: 18,
                 };
             },
         },
@@ -814,7 +814,7 @@ export function useAllMockedKinds() {
                 const copied = lossyCopyData(val, current);
                 cache.current.set(col, row, {
                     ...copied,
-                    displayData: noDisplay === true ? undefined : copied.data?.toString() ?? "",
+                    displayData: noDisplay === true ? undefined : (copied.data?.toString() ?? ""),
                 } as any);
 
                 if (forceUpdate === true) {

@@ -391,6 +391,8 @@ The data grid uses the `Theme` provided to the DataEditer in the `theme` prop. T
 | bubbleHeight          | number              | --gdg-bubble-height           | The height (in pixels) of a bubble.                                                               |
 | bubblePadding         | number              | --gdg-bubble-padding          | The left & right padding (in pixels) of a bubble.                                                 |
 | bubbleMargin          | number              | --gdg-bubble-margin           | The margin (in pixels) between bubbles.                                                           |
+| checkboxMaxSize       | number \| undefined | --gdg-checkbox-max-size       | The maximum size of checkboxes (in pixels), e.g. for boolean cell and row markers.                |
+| roundingRadius        | number \| undefined | --gdg-rounding-radius         | The radius of rounded corners used by various grid elements (in pixels).                          |
 
 ---
 

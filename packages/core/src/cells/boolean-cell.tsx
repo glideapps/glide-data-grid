@@ -51,7 +51,7 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
             a,
             a.cell.data,
             booleanCellIsEditable(a.cell),
-            a.cell.maxSize ?? defaultCellMaxSize,
+            a.cell.maxSize ?? a.theme.checkboxMaxSize ?? defaultCellMaxSize,
             a.cell.hoverEffectIntensity ?? 0.35
         ),
     onDelete: c => ({

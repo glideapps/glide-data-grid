@@ -49,6 +49,7 @@ export function makeCSSStyle(theme: Theme): Record<string, string> {
             ? {}
             : { "--gdg-header-bottom-border-color": theme.headerBottomBorderColor }),
         ...(theme.roundingRadius === undefined ? {} : { "--gdg-rounding-radius": `${theme.roundingRadius}px` }),
+        ...(theme.checkboxMaxSize === undefined ? {} : { "--gdg-checkbox-max-size": `${theme.checkboxMaxSize}px` }),
     };
 }
 
@@ -96,6 +97,7 @@ export interface Theme {
     horizontalBorderColor?: string;
     headerBottomBorderColor?: string;
     roundingRadius?: number;
+    checkboxMaxSize?: number;
 }
 
 const dataEditorBaseTheme: Theme = {

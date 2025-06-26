@@ -57,6 +57,7 @@ const darkTheme = {
     baseFontStyle: "13px",
     fontFamily:
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
+    checkboxMaxSize: 18,
 };
 
 const hotdogStand = {
@@ -94,6 +95,7 @@ const hotdogStand = {
     fontFamily:
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
     roundingRadius: 6,
+    checkboxMaxSize: 40,
 };
 
 export const ThemeSupport: React.VFC = () => {
