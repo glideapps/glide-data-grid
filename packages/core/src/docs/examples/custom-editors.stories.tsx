@@ -16,7 +16,7 @@ export default {
         (Story: React.ComponentType) => (
             <SimpleThemeWrapper>
                 <BeautifulWrapper
-                    title="Provide Editor"
+                    title="Custom Editors"
                     description={
                         <Description>
                             The <PropName>provideEditor</PropName> callback allows you to provide a custom editor for a
@@ -36,6 +36,7 @@ const CustomEditor: React.FC<any> = p => {
 
     return (
         <div style={{ width: "100%", height: "100%" }}>
+            Type something:
             <input
                 style={{
                     width: "100%",
@@ -63,12 +64,13 @@ CustomEditor.displayName = "CustomEditor";
 const provideEditor: ProvideEditorCallback<TextCell> = cell => {
     // You can get the location of the activated cell via cell.location:
     if (cell.location?.[0] === 0) {
+        // eslint-disable-next-line react/display-name
         return p => <CustomEditor {...p} />;
     }
     return undefined;
 };
 
-export const ProvideEditor: React.VFC = () => {
+export const CustomEditors: React.VFC = () => {
     const { cols, getCellContent, setCellValue } = useMockDataGenerator(10, false);
 
     return (
@@ -85,4 +87,4 @@ export const ProvideEditor: React.VFC = () => {
         />
     );
 };
-ProvideEditor.displayName = "ProvideEditor";
+CustomEditors.displayName = "CustomEditors";
