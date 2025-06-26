@@ -448,7 +448,7 @@ function drawHeaderInner(
             false,
             undefined,
             undefined,
-            theme.checkboxMaxSize ?? 18,
+            theme.checkboxMaxSize,
             "center",
             c.rowMarker
         );

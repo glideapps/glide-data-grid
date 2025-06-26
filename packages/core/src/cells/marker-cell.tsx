@@ -73,7 +73,7 @@ function drawMarkerRowCell(
             true,
             undefined,
             undefined,
-            theme.checkboxMaxSize ?? 18,
+            theme.checkboxMaxSize,
             "center",
             style
         );

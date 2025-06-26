@@ -42,6 +42,7 @@ export function makeCSSStyle(theme: Theme): Record<string, string> {
         "--gdg-marker-font-style": theme.markerFontStyle,
         "--gdg-font-family": theme.fontFamily,
         "--gdg-editor-font-size": theme.editorFontSize,
+        "--gdg-checkbox-max-size": `${theme.checkboxMaxSize}px`,
         ...(theme.resizeIndicatorColor === undefined
             ? {}
             : { "--gdg-resize-indicator-color": theme.resizeIndicatorColor }),
@@ -49,7 +50,6 @@ export function makeCSSStyle(theme: Theme): Record<string, string> {
             ? {}
             : { "--gdg-header-bottom-border-color": theme.headerBottomBorderColor }),
         ...(theme.roundingRadius === undefined ? {} : { "--gdg-rounding-radius": `${theme.roundingRadius}px` }),
-        ...(theme.checkboxMaxSize === undefined ? {} : { "--gdg-checkbox-max-size": `${theme.checkboxMaxSize}px` }),
     };
 }
 
@@ -92,12 +92,12 @@ export interface Theme {
     fontFamily: string;
     editorFontSize: string;
     lineHeight: number;
+    checkboxMaxSize: number;
 
     resizeIndicatorColor?: string;
     horizontalBorderColor?: string;
     headerBottomBorderColor?: string;
     roundingRadius?: number;
-    checkboxMaxSize?: number;
 }
 
 const dataEditorBaseTheme: Theme = {
@@ -147,6 +147,7 @@ const dataEditorBaseTheme: Theme = {
         "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
     editorFontSize: "13px",
     lineHeight: 1.4, //unitless scaler depends on your font
+    checkboxMaxSize: 18,
 };
 
 export interface FullTheme extends Theme {
