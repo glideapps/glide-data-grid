@@ -667,7 +667,6 @@ function getColumnsForCellTypes(): GridColumnWithMockingInfo[] {
                     data: checked,
                     allowOverlay: false,
                     readonly: false,
-                    maxSize: 18,
                 };
             },
         },
