@@ -19,12 +19,12 @@ function getMockBooleanData(row: number): boolean | null | undefined {
 }
 
 export function sendClick(el: Element | Node | Document | Window, options?: any, runTimers?: boolean): void {
-    fireEvent.pointerDown(el, options);
+    fireEvent.mouseDown(el, options);
     if (runTimers === true)
         act(() => {
             vi.runAllTimers();
         });
-    fireEvent.pointerUp(el, options);
+    fireEvent.mouseUp(el, options);
     if (runTimers === true)
         act(() => {
             vi.runAllTimers();
@@ -33,15 +33,17 @@ export function sendClick(el: Element | Node | Document | Window, options?: any,
 }
 
 export function sendTouchClick(el: Element | Node | Document | Window, options?: any): void {
-    const mouseOptions = {
+    fireEvent.touchStart(el, options);
+    fireEvent.touchEnd(el, {
+        ...options,
+        changedTouches: options.touches,
+    });
+    fireEvent.click(el, {
         clientX: options?.touches?.[0]?.clientX,
         clientY: options?.touches?.[0]?.clientY,
         pointerType: "touch",
         ...options,
-    }
-    fireEvent.pointerDown(el, mouseOptions);
-    fireEvent.pointerUp(el, mouseOptions);
-    fireEvent.click(el, mouseOptions);
+    });
 }
 
 export const makeCell = (cell: Item): GridCell => {
@@ -289,10 +291,6 @@ export function standardBeforeEach() {
     //     unobserve: vi.fn(),
     //     disconnect: vi.fn(),
     // }));
-
-    // JSDOM does not support PointerEvent
-    // https://github.com/jsdom/jsdom/issues/2527
-    (window as any).PointerEvent = MouseEvent;
 
     Element.prototype.scrollTo = vi.fn() as any;
     Element.prototype.scrollBy = vi.fn() as any;

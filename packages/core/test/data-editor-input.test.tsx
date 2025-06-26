@@ -12,7 +12,6 @@ import {
 import type { DataEditorRef } from "../src/data-editor/data-editor.js";
 import { CompactSelection } from "../src/internal/data-grid/data-grid-types.js";
 import { vi, expect, describe, test, beforeEach, afterEach } from "vitest";
-import { standardBeforeEach } from "./test-utils.js";
 
 const makeCell = (cell: Item): GridCell => {
     const [col, row] = cell;
@@ -224,8 +223,6 @@ describe("data-editor-input", () => {
     });
 
     beforeEach(() => {
-        standardBeforeEach();
-
         Element.prototype.scrollTo = vi.fn() as any;
         Element.prototype.scrollBy = vi.fn() as any;
         Object.assign(navigator, {
@@ -270,17 +267,17 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             clientX: 350,
             clientY: 36 + 32 * 2 + 16,
         });
 
-        fireEvent.pointerMove(canvas, {
+        fireEvent.mouseMove(canvas, {
             clientX: 650,
             clientY: 36 + 32 * 12 + 16,
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             clientX: 650,
             clientY: 36 + 32 * 12 + 16,
         });
@@ -319,19 +316,19 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             ctrlKey: true,
             clientX: 350,
             clientY: 36 + 32 * 2 + 16,
         });
 
-        fireEvent.pointerMove(canvas, {
+        fireEvent.mouseMove(canvas, {
             ctrlKey: true,
             clientX: 650,
             clientY: 36 + 32 * 12 + 16,
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             ctrlKey: true,
             clientX: 650,
             clientY: 36 + 32 * 12 + 16,
@@ -375,19 +372,19 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             ctrlKey: true,
             clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
-        fireEvent.pointerMove(canvas, {
+        fireEvent.mouseMove(canvas, {
             ctrlKey: true,
             clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             ctrlKey: true,
             clientX: 20,
             clientY: 36 + 32 * 3 + 16,
@@ -432,19 +429,19 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             ctrlKey: true,
             clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
-        fireEvent.pointerMove(canvas, {
+        fireEvent.mouseMove(canvas, {
             ctrlKey: true,
             clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             ctrlKey: true,
             clientX: 20,
             clientY: 36 + 32 * 3 + 16,
@@ -488,19 +485,19 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             ctrlKey: true,
             clientX: 220,
             clientY: 16,
         });
 
-        fireEvent.pointerMove(canvas, {
+        fireEvent.mouseMove(canvas, {
             ctrlKey: true,
             clientX: 220,
             clientY: 16,
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             ctrlKey: true,
             clientX: 220,
             clientY: 16,
@@ -545,19 +542,19 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             ctrlKey: true,
             clientX: 220,
             clientY: 16,
         });
 
-        fireEvent.pointerMove(canvas, {
+        fireEvent.mouseMove(canvas, {
             ctrlKey: true,
             clientX: 220,
             clientY: 16,
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             ctrlKey: true,
             clientX: 220,
             clientY: 16,

@@ -30,18 +30,18 @@ describe("data-editor", () => {
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             clientX: 310, // Col B Right Edge
             clientY: 16, // Header
         });
 
-        fireEvent.pointerMove(canvas, {
+        fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
             buttons: 1,
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             clientX: 350,
             clientY: 16,
         });
@@ -63,22 +63,22 @@ describe("data-editor", () => {
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             clientX: 310, // Col B Right Edge
             clientY: 16, // Header
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             clientX: 310,
             clientY: 16,
         });
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             clientX: 310, // Col B Right Edge
             clientY: 16, // Header
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             clientX: 310,
             clientY: 16,
         });
@@ -114,18 +114,18 @@ describe("data-editor", () => {
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             clientX: 310, // Col B Right Edge
             clientY: 16, // Header
         });
 
-        fireEvent.pointerMove(canvas, {
+        fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
             buttons: 1,
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             clientX: 350,
             clientY: 16,
         });
@@ -159,18 +159,18 @@ describe("data-editor", () => {
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             clientX: 310, // Col B Right Edge
             clientY: 16, // Header
         });
 
-        fireEvent.pointerMove(canvas, {
+        fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
             buttons: 1,
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             clientX: 350,
             clientY: 16,
         });
@@ -204,18 +204,18 @@ describe("data-editor", () => {
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             clientX: 310, // Col B Right Edge
             clientY: 16, // Header
         });
 
-        fireEvent.pointerMove(canvas, {
+        fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
             buttons: 1,
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             clientX: 350,
             clientY: 16,
         });
@@ -245,18 +245,18 @@ describe("data-editor", () => {
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.pointerDown(canvas, {
+        fireEvent.mouseDown(canvas, {
             clientX: 314, // Col B Right Edge
             clientY: 16, // Header
         });
 
-        fireEvent.pointerMove(canvas, {
+        fireEvent.mouseMove(canvas, {
             clientX: 350,
             clientY: 16,
             buttons: 1,
         });
 
-        fireEvent.pointerUp(canvas, {
+        fireEvent.mouseUp(canvas, {
             clientX: 350,
             clientY: 16,
         });
