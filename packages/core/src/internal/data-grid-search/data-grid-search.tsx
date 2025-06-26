@@ -391,7 +391,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
         return (
             <SearchWrapper
-                className={showSearch ? "" : "out"}
+                className={"gdg-search-bar" + (showSearch ? "" : " out")}
                 onMouseDown={cancelEvent}
                 onMouseMove={cancelEvent}
                 onMouseUp={cancelEvent}

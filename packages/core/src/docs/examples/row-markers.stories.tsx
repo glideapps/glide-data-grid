@@ -34,6 +34,7 @@ export default {
 
 interface RowMarkersProps {
     markers: RowMarkerOptions["kind"];
+    headerDisabled: boolean;
 }
 
 export const RowMarkers: React.VFC<RowMarkersProps> = p => {
@@ -48,6 +49,7 @@ export const RowMarkers: React.VFC<RowMarkersProps> = p => {
                 kind: p.markers,
                 checkboxStyle: "square",
                 headerAlwaysVisible: true,
+                headerDisabled: p.headerDisabled,
                 headerTheme: {
                     textMedium: "rgba(51, 51, 51, 0.50)",
                 },
@@ -59,10 +61,14 @@ export const RowMarkers: React.VFC<RowMarkersProps> = p => {
 };
 (RowMarkers as any).args = {
     markers: "both",
+    headerDisabled: false,
 };
 (RowMarkers as any).argTypes = {
     markers: {
         control: { type: "select" },
         options: ["both", "checkbox", "number", "none", "clickable-number", "checkbox-visible"],
+    },
+    headerDisabled: {
+        control: { type: "boolean" },
     },
 };
