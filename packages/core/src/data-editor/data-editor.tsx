@@ -3023,7 +3023,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     let newVal: InnerGridCell | undefined = undefined;
                     if (cellValue.kind === GridCellKind.Custom) {
                         const toDelete = getCellRenderer(cellValue);
-                        const editor = toDelete?.provideEditor?.(cellValue);
+                        const editor = toDelete?.provideEditor?.({
+                            ...cellValue,
+                            location: [x - rowMarkerOffset, y],
+                        });
                         if (toDelete?.onDelete !== undefined) {
                             newVal = toDelete.onDelete(cellValue);
                         } else if (isObjectEditorCallbackResult(editor)) {
