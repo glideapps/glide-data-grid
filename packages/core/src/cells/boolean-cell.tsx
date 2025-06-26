@@ -12,8 +12,6 @@ import {
 import { drawCheckbox } from "../internal/data-grid/render/draw-checkbox.js";
 import type { BaseDrawArgs, InternalCellRenderer } from "./cell-types.js";
 
-const defaultCellMaxSize = 20;
-
 function isOverEditableRegion(e: {
     readonly cell: BooleanCell;
     readonly posX: number;
@@ -23,7 +21,7 @@ function isOverEditableRegion(e: {
 }): boolean {
     const { cell, posX: pointerX, posY: pointerY, bounds, theme } = e;
     const { width, height, x: cellX, y: cellY } = bounds;
-    const maxWidth = cell.maxSize ?? defaultCellMaxSize;
+    const maxWidth = cell.maxSize ?? theme.checkboxMaxSize;
     const cellCenterY = Math.floor(bounds.y + height / 2);
     const checkBoxWidth = getSquareWidth(maxWidth, height, theme.cellVerticalPadding);
     const posX = getSquareXPosFromAlign(
@@ -51,7 +49,7 @@ export const booleanCellRenderer: InternalCellRenderer<BooleanCell> = {
             a,
             a.cell.data,
             booleanCellIsEditable(a.cell),
-            a.cell.maxSize ?? defaultCellMaxSize,
+            a.cell.maxSize ?? a.theme.checkboxMaxSize,
             a.cell.hoverEffectIntensity ?? 0.35
         ),
     onDelete: c => ({
