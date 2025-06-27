@@ -7,7 +7,7 @@ export const UriOverlayEditorStyle = styled.div`
 
     align-items: center;
 
-    min-height: 21px;
+    min-height: 1.25rem;
 
     .gdg-link-area {
         flex-grow: 1;
