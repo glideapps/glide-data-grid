@@ -2962,6 +2962,42 @@ describe("data-editor", () => {
         expect(Element.prototype.scrollTo).toHaveBeenCalled();
     });
 
+    test("appendRow ref without trailing row", async () => {
+        const spy = vi.fn();
+        const ref = React.createRef<DataEditorRef>();
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor {...basicProps} onRowAppended={spy} ref={ref} trailingRowOptions={undefined} />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        await act(async () => {
+            await ref.current?.appendRow(1, false);
+        });
+
+        expect(spy).toHaveBeenCalled();
+    });
+
+    test("appendColumn ref", async () => {
+        const spy = vi.fn();
+        const ref = React.createRef<DataEditorRef>();
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor {...basicProps} onColumnAppended={spy} ref={ref} trailingRowOptions={undefined} />,
+            { wrapper: Context }
+        );
+        prep();
+
+        await act(async () => {
+            await ref.current?.appendColumn(0, false);
+        });
+
+        expect(spy).toHaveBeenCalled();
+    });
+
     test("Click row marker", async () => {
         const spy = vi.fn();
         vi.useFakeTimers();
