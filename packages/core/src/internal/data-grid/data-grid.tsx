@@ -506,7 +506,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     );
 
     const getMouseArgsForPosition = React.useCallback(
-        (canvas: HTMLCanvasElement, posX: number, posY: number, ev?: MouseEvent | TouchEvent | PointerEvent): GridMouseEventArgs => {
+        (
+            canvas: HTMLCanvasElement,
+            posX: number,
+            posY: number,
+            ev?: PointerEvent | MouseEvent | TouchEvent
+        ): GridMouseEventArgs => {
             const rect = canvas.getBoundingClientRect();
             const scale = rect.width / width;
             const x = (posX - rect.left) / scale;
@@ -518,9 +523,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             let button = 0;
             let buttons = 0;
 
-            const isMouse = ev instanceof MouseEvent || (ev instanceof PointerEvent && ev.pointerType === 'mouse')
-            const isTouch = ev instanceof TouchEvent || (ev instanceof PointerEvent && ev.pointerType === 'touch')
-            
+            const isMouse =
+                (typeof PointerEvent !== "undefined" && ev instanceof PointerEvent && ev.pointerType === "mouse") ||
+                (typeof MouseEvent !== "undefined" && ev instanceof MouseEvent);
+
+            const isTouch =
+                (typeof PointerEvent !== "undefined" && ev instanceof PointerEvent && ev.pointerType === "touch") ||
+                (typeof TouchEvent !== "undefined" && ev instanceof TouchEvent);
+
             if (isMouse) {
                 button = ev.button;
                 buttons = ev.buttons;
@@ -1047,7 +1057,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
             const clientX = ev.clientX;
             const clientY = ev.clientY;
-            
+
             if (ev.target === eventTarget && eventTarget !== null) {
                 const bounds = eventTarget.getBoundingClientRect();
                 if (clientX > bounds.right || clientY > bounds.bottom) return;
@@ -1112,7 +1122,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             const isOutside = ev.target !== canvas && ev.target !== eventTarget;
             const clientX = ev.clientX;
             const clientY = ev.clientY;
-            const canCancel = ev.pointerType === 'mouse' ? ev.button < 3 : true;
+            const canCancel = ev.pointerType === "mouse" ? ev.button < 3 : true;
 
             let args = getMouseArgsForPosition(canvas, clientX, clientY, ev);
 
