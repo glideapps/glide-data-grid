@@ -70,7 +70,7 @@ export interface DataGridProps {
 
     readonly accessibilityHeight: number;
 
-    readonly freezeColumns: number | [left: number, right: number];
+    readonly freezeColumns: number | readonly [left: number, right: number];
     readonly freezeTrailingRows: number;
     readonly hasAppendRow: boolean;
     readonly firstColAccessible: boolean;
@@ -973,15 +973,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const cursor = isDragging
         ? "grabbing"
         : canDrag || isResizing
-        ? "col-resize"
-        : overFill || isFilling
-        ? "crosshair"
-        : cursorOverride !== undefined
-        ? cursorOverride
-        : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
-        ? "pointer"
-        : "default";
-    
+          ? "col-resize"
+          : overFill || isFilling
+            ? "crosshair"
+            : cursorOverride !== undefined
+              ? cursorOverride
+              : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
+                ? "pointer"
+                : "default";
+
     const style = React.useMemo(
         () => ({
             // width,
@@ -1898,8 +1898,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         freezeLeftColumns === 0 || !fixedShadowX
             ? 0
             : cellXOffset > freezeLeftColumns
-            ? 1
-            : clamp(-translateX / 100, 0, 1);
+              ? 1
+              : clamp(-translateX / 100, 0, 1);
 
     let translateXRight = 0;
 
@@ -1911,17 +1911,17 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         freezeRightColumns === 0 || !fixedShadowX
             ? 0
             : cellXOffset +
-                  getEffectiveColumns(
-                      mappedColumns,
-                      cellXOffset,
-                      width,
-                      freezeColumns,
-                      dragAndDropState,
-                      translateX
-                  ).filter(column => !column.sticky).length <
-              columns.length - freezeRightColumns
-            ? 1
-            : clamp(-translateXRight / 100, 0, 1);
+                    getEffectiveColumns(
+                        mappedColumns,
+                        cellXOffset,
+                        width,
+                        freezeColumns,
+                        dragAndDropState,
+                        translateX
+                    ).filter(column => !column.sticky).length <
+                columns.length - freezeRightColumns
+              ? 1
+              : clamp(-translateXRight / 100, 0, 1);
 
     const absoluteOffsetY = -cellYOffset * 32 + translateY;
     const opacityY = !fixedShadowY ? 0 : clamp(-absoluteOffsetY / 100, 0, 1);
