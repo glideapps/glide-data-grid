@@ -24,6 +24,8 @@ export function useMappedColumns(
     columns: readonly InnerGridColumn[],
     freezeColumns: number | [left: number, right: number]
 ): readonly MappedGridColumn[] {
+    // Extract freeze column counts from the union type parameter. freezeColumnsLeft and freezeColumnsRight
+    // determine which columns should remain sticky at the left and right sides respectively during horizontal scrolling.
     const freezeColumnsLeft = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
     const freezeColumnsRight = typeof freezeColumns === "number" ? 0 : freezeColumns[1];
 
