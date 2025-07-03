@@ -1581,7 +1581,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             frozenLeftWidth += columns[i].width;
                         }
                         let frozenRightWidth = 0;
-                        for (let i = mangledCols.length - 1; i >= mangledCols.length - freezeRightColumns; i--) {
+                        for (let i = columns.length - 1; i >= columns.length - 1 - freezeRightColumns; i--) {
                             frozenRightWidth += columns[i].width;
                         }
                         let trailingRowHeight = 0;
