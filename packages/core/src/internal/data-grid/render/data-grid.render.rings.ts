@@ -17,7 +17,7 @@ export function drawHighlightRings(
     translateX: number,
     translateY: number,
     mappedColumns: readonly MappedGridColumn[],
-    freezeColumns: number | [left: number, right: number],
+    freezeColumns: number | readonly [left: number, right: number],
     headerHeight: number,
     groupHeaderHeight: number,
     rowHeight: number | ((index: number) => number),
@@ -69,22 +69,22 @@ export function drawHighlightRings(
                 rect.width === 1 && rect.height === 1
                     ? topLeftBounds
                     : computeBounds(
-                        rect.x + rect.width - 1,
-                        rect.y + rect.height - 1,
-                        width,
-                        height,
-                        groupHeaderHeight,
-                        headerHeight + groupHeaderHeight,
-                        cellXOffset,
-                        cellYOffset,
-                        translateX,
-                        translateY,
-                        rows,
-                        freezeColumns,
-                        freezeTrailingRows,
-                        mappedColumns,
-                        rowHeight
-                    );
+                          rect.x + rect.width - 1,
+                          rect.y + rect.height - 1,
+                          width,
+                          height,
+                          groupHeaderHeight,
+                          headerHeight + groupHeaderHeight,
+                          cellXOffset,
+                          cellYOffset,
+                          translateX,
+                          translateY,
+                          rows,
+                          freezeColumns,
+                          freezeTrailingRows,
+                          mappedColumns,
+                          rowHeight
+                      );
 
             if (rect.x + rect.width >= mappedColumns.length) {
                 bottomRightBounds.width -= 1;

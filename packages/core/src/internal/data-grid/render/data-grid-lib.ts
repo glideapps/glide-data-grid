@@ -22,7 +22,7 @@ export interface MappedGridColumn extends FullyDefined<InnerGridColumn> {
 
 export function useMappedColumns(
     columns: readonly InnerGridColumn[],
-    freezeColumns: number | [left: number, right: number]
+    freezeColumns: number | readonly [left: number, right: number]
 ): readonly MappedGridColumn[] {
     // Extract freeze column counts from the union type parameter. freezeColumnsLeft and freezeColumnsRight
     // determine which columns should remain sticky at the left and right sides respectively during horizontal scrolling.
@@ -223,7 +223,7 @@ export function getEffectiveColumns(
     columns: readonly MappedGridColumn[],
     cellXOffset: number,
     width: number,
-    freezeColumns: number | [left: number, right: number],
+    freezeColumns: number | readonly [left: number, right: number],
     dndState?: {
         src: number;
         dest: number;
@@ -281,7 +281,7 @@ export function getEffectiveColumns(
 export function getColumnIndexForX(
     targetX: number,
     effectiveColumns: readonly MappedGridColumn[],
-    freezeColumns: number | [left: number, right: number],
+    freezeColumns: number | readonly [left: number, right: number],
     width: number,
     translateX?: number
 ): number {
@@ -817,7 +817,7 @@ export function computeBounds(
     translateX: number,
     translateY: number,
     rows: number,
-    freezeColumns: number | [left: number, right: number],
+    freezeColumns: number | readonly [left: number, right: number],
     freezeTrailingRows: number,
     mappedColumns: readonly MappedGridColumn[],
     rowHeight: number | ((index: number) => number)

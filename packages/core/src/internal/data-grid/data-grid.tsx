@@ -72,7 +72,7 @@ export interface DataGridProps {
 
     readonly accessibilityHeight: number;
 
-    readonly freezeColumns: number | [left: number, right: number];
+    readonly freezeColumns: number | readonly [left: number, right: number];
     readonly freezeTrailingRows: number;
     readonly hasAppendRow: boolean;
     readonly firstColAccessible: boolean;
