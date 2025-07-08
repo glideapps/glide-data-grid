@@ -71,7 +71,10 @@ function clipHeaderDamage(
             const diff = Math.max(0, clipX - drawX);
 
             const finalX = drawX + diff + 1;
-            const finalWidth = c.stickyPosition === "right" ? c.width - diff : Math.min(c.width - diff - 1, width - drawX - clipXRight); // c.width - diff - 1;
+            const finalWidth =
+                c.stickyPosition === "right"
+                    ? c.width - diff
+                    : Math.min(c.width - diff - 1, width - drawX - clipXRight);
             if (damage.has([c.sourceIndex, -1])) {
                 ctx.rect(finalX, groupHeaderHeight, finalWidth, totalHeaderHeight - groupHeaderHeight);
             }
@@ -631,25 +634,25 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
     // the overdraw may have nuked out our focus ring right edge.
     const focusRedraw = drawFocus
         ? drawFillHandle(
-            targetCtx,
-            width,
-            height,
-            cellYOffset,
-            translateX,
-            translateY,
-            effectiveCols,
-            mappedColumns,
-            theme,
-            totalHeaderHeight,
-            selection,
-            getRowHeight,
-            getCellContent,
-            freezeTrailingRows,
-            freezeRightColumns,
-            hasAppendRow,
-            fillHandle,
-            rows
-        )
+              targetCtx,
+              width,
+              height,
+              cellYOffset,
+              translateX,
+              translateY,
+              effectiveCols,
+              mappedColumns,
+              theme,
+              totalHeaderHeight,
+              selection,
+              getRowHeight,
+              getCellContent,
+              freezeTrailingRows,
+              freezeRightColumns,
+              hasAppendRow,
+              fillHandle,
+              rows
+          )
         : undefined;
 
     targetCtx.fillStyle = theme.bgCell;
@@ -823,7 +826,8 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             height: lastRowDrawn - cellYOffset,
         },
         freezeColumns,
-        Array.from({ length: freezeTrailingRows }, (_, i) => rows - 1 - i)
+        Array.from({ length: freezeTrailingRows }, (_, i) => rows - 1 - i),
+        mappedColumns.length
     );
 
     const scrollX = last !== undefined && (cellXOffset !== last.cellXOffset || translateX !== last.translateX);
