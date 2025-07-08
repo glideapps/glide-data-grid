@@ -2,10 +2,25 @@
 
 ## HTML/CSS Prerequisites
 
-Currently the Grid depends on there being a root level "portal" div in your HTML. Insert this snippet as the last child of your `<body>` tag:
+The Grid depends on there being a root level "portal" div in your HTML. Insert this snippet as the last child of your `<body>` tag:
 
 ```HTML
 <div id="portal" style="position: fixed; left: 0; top: 0; z-index: 9999;" />
+```
+
+or you can create a portal element yourself using the `createPortal` function from `react-dom` and pass it to the DataEditor via the `portalElementRef` prop.
+
+```jsx
+const portalRef = useRef(null);
+<>
+  {
+    createPortal(
+      <div ref={portalRef} style="position: fixed; left: 0; top: 0; z-index: 9999;" />, 
+      document.body
+    )
+  }
+  <DataEditor width={500} height={300} portalElementRef={portalRef} {...props} />
+</>
 ```
 
 Once you've got that done, the easiest way to use the Data Grid is to give it a fixed size:
@@ -71,7 +86,7 @@ All data grids must set these props. These props are the bare minimum required t
 Most data grids will want to set the majority of these props one way or another.
 
 | Name                                              | Description                                                                                                                                                                                                                                                         |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|---------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [fixedShadowX](#fixedshadow)                      | Enable/disable a shadow behind fixed columns on the X axis.                                                                                                                                                                                                         |
 | [fixedShadowY](#fixedshadow)                      | Enable/disable a shadow behind the header(s) on the Y axis.                                                                                                                                                                                                         |
 | [freezeColumns](#freezecolumns)                   | The number of columns which should remain in place when scrolling horizontally. The row marker column, if enabled is always frozen and is not included in this count.                                                                                               |
@@ -79,6 +94,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [markdownDivCreateNode](#markdowndivcreatenode)   | If specified, it will be used to render Markdown, instead of the default Markdown renderer used by the Grid. You'll want to use this if you need to process your Markdown for security purposes, or if you want to use a renderer with different Markdown features. |
 | [onVisibleRegionChanged](#onvisibleregionchanged) | Emits whenever the visible rows/columns changes.                                                                                                                                                                                                                    |
 | [provideEditor](#provideeditor)                   | Callback for providing a custom editor for a cell.                                                                                                                                                                                                                  |
+| [portalElementRef](#portalelementref)             | A ref to the portal element to use for the overlay editor.                                                                                                                                                                                                          |
 | [rowHeight](#rowheight)                           | Callback or number used to specify the height of a given row.                                                                                                                                                                                                       |
 | [rowMarkers](#rowmarkers)                         | Enable/disable row marker column on the left. Can show row numbers, selection boxes, or both.                                                                                                                                                                       |
 | [smoothScrollX](#smoothscroll)                    | Enable/disable smooth scrolling on the X axis.                                                                                                                                                                                                                      |
@@ -607,6 +623,12 @@ provideEditor?: ProvideEditorCallback<GridCell>;
 ```
 
 When provided the `provideEditor` callbacks job is to be a constructor for functional components which have the correct properties to be used by the data grid as an editor. The editor must implement `onChange` and `onFinishedEditing` callbacks as well support the `isHighlighted` flag which tells the editor to begin with any editable text pre-selected so typing will immediately begin to overwrite it.
+
+---
+
+## portalElementRef
+
+Defaults to div#portal
 
 ---
 
