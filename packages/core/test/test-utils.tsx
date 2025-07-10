@@ -263,7 +263,7 @@ export const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps
         [p]
     );
 
-    const onRowAppened = React.useCallback(() => {
+    const onRowAppended = React.useCallback(() => {
         setExtraRows(cv => cv + 1);
         void p.onRowAppended?.();
     }, [p]);
@@ -295,7 +295,7 @@ export const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps
             gridSelection={sel}
             onGridSelectionChange={onGridSelectionChange}
             rows={p.rows + extraRows}
-            onRowAppended={p.onRowAppended === undefined ? undefined : onRowAppened}
+            onRowAppended={p.onRowAppended === undefined ? undefined : onRowAppended}
             onColumnAppended={p.onColumnAppended === undefined ? undefined : onColumnAppended}
         />
     );
