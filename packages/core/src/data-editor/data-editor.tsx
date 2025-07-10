@@ -1721,7 +1721,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         [mangledCols, onRowAppended, rowMarkerOffset, rows, setCurrent]
     );
 
-        const appendColumn = React.useCallback(
+    const appendColumn = React.useCallback(
         async (row: number, openOverlay: boolean = true): Promise<void> => {
             const appendResult = onColumnAppended?.();
 
@@ -3053,18 +3053,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             const [movX, movY] = movement;
             if (gridSelection.current !== undefined && (movX !== 0 || movY !== 0)) {
-                const isEditingTrailingRow =
-                    gridSelection.current.cell[1] === mangledRows - 1 && newValue !== undefined;
-                const isEditingTrailingCol =
+                const isEditingLastRow = gridSelection.current.cell[1] === mangledRows - 1 && newValue !== undefined;
+                const isEditingLastCol =
                     gridSelection.current.cell[0] === mangledCols.length - 1 && newValue !== undefined;
                 let updateSelected = true;
-                if (isEditingTrailingRow && movY === 1) {
+                if (isEditingLastRow && movY === 1 && onRowAppended !== undefined) {
                     updateSelected = false;
                     const col = gridSelection.current.cell[0] + movX;
                     const customTargetColumn = getCustomNewRowTargetColumn(col);
                     void appendRow(customTargetColumn ?? col, false);
                 }
-                if (isEditingTrailingCol && movX === 1) {
+                if (isEditingLastCol && movX === 1 && onColumnAppended !== undefined) {
                     updateSelected = false;
                     const row = gridSelection.current.cell[1] + movY;
                     void appendColumn(row, false);
@@ -3073,7 +3072,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     updateSelectedCell(
                         clamp(gridSelection.current.cell[0] + movX, 0, mangledCols.length - 1),
                         clamp(gridSelection.current.cell[1] + movY, 0, mangledRows - 1),
-                        isEditingTrailingRow,
+                        isEditingLastRow,
                         false
                     );
                 }
@@ -3089,6 +3088,11 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             mangledRows,
             updateSelectedCell,
             mangledCols.length,
+            appendRow,
+            appendColumn,
+            onRowAppended,
+            onColumnAppended,
+            getCustomNewRowTargetColumn,
         ]
     );
 
@@ -4050,7 +4054,17 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 };
             },
         }),
-        [appendRow, appendColumn, normalSizeColumn, scrollRef, onCopy, onKeyDown, onPasteInternal, rowMarkerOffset, scrollTo]
+        [
+            appendRow,
+            appendColumn,
+            normalSizeColumn,
+            scrollRef,
+            onCopy,
+            onKeyDown,
+            onPasteInternal,
+            rowMarkerOffset,
+            scrollTo,
+        ]
     );
 
     const [selCol, selRow] = currentCell ?? [];
