@@ -131,7 +131,7 @@ const CustomMenu: React.FC<CustomMenuProps> = p => {
 export type MultiSelectCell = CustomCell<MultiSelectCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
-    const { value: cell, initialValue, onChange, onFinishedEditing } = p;
+    const { value: cell, initialValue, onChange, onFinishedEditing, portalElementRef } = p;
     const { options: optionsIn, values: valuesIn, allowCreation, allowDuplicates } = cell.data;
 
     const theme = useTheme();
@@ -343,7 +343,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 value={resolveValues(value, options, allowDuplicates)}
                 onKeyDown={cell.readonly ? undefined : handleKeyDown}
                 menuPlacement={"auto"}
-                menuPortalTarget={document.getElementById("portal")}
+                menuPortalTarget={portalElementRef?.current ??  document.getElementById("portal")}
                 autoFocus={true}
                 openMenuOnFocus={true}
                 openMenuOnClick={true}

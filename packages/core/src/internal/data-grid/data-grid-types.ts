@@ -395,6 +395,7 @@ export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComp
     readonly forceEditMode: boolean;
     readonly isValid?: boolean;
     readonly theme: Theme;
+    readonly portalElementRef?: React.RefObject<HTMLElement>;
 }>;
 
 type ObjectEditorCallbackResult<T extends InnerGridCell> = {
