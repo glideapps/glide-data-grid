@@ -11,7 +11,7 @@ import {
 } from "@glideapps/glide-data-grid";
 
 export const StyledInputBox = styled.input`
-    min-height: 26px;
+    min-height: 1.625rem;
     border: none;
     outline: none;
     background-color: transparent;
