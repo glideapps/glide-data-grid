@@ -48,13 +48,14 @@ Details of each property can be found by clicking on it.
 | Name                                                | Description                                                                                                  |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | [appendRow](#appendrow)                             | Append a row to the data grid.                                                                               |
+| [appendColumn](#appendcolumn)                       | Append a column to the data grid.                                                                            |
 | [emit](#emit)                                       | Used to emit commands normally emitted by keyboard shortcuts.                                                |
 | [focus](#focus)                                     | Focuses the data grid.                                                                                       |
 | [getBounds](#getbounds)                             | Gets the current screen-space bounds of a desired cell.                                                      |
 | [remeasureColumns](#remeasurecolumns)               | Causes the columns in the selection to have their natural sizes recomputed and re-emitted as a resize event. |
 | [scrollTo](#scrollto)                               | Tells the data-grid to scroll to a particular location.                                                      |
 | [updateCells](#updatecells)                         | Invalidates the rendering of a list of passed cells.                                                         |
-| [getMouseArgsForPosition](#getmouseargsforposition) | Gets the mouse args from pointer event position. |
+| [getMouseArgsForPosition](#getmouseargsforposition) | Gets the mouse args from pointer event position.                                                             |
 
 ## Required Props
 
@@ -146,6 +147,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [onGroupHeaderRenamed](#ongroupheaderrenamed) | Emitted whe the user wishes to rename a group.                                                                                     |
 | [onPaste](#onpaste)                           | Emitted any time data is pasted to the grid. Allows controlling paste behavior.                                                    |
 | [onRowAppended](#trailingrowoptions)          | Emitted whenever a row append operation is requested. Append location can be set in callback.                                      |
+| [onColumnAppended](#oncolumnappended)         | Emitted whenever a column append operation is requested. Append location can be set in callback.                                   |
 | [trailingRowOptions](#trailingrowoptions)     | Controls the built in trailing row to allow appending new rows.                                                                    |
 
 ## Input Interaction
@@ -353,46 +355,46 @@ The `cell` is the [col, row] formatted cell which will have the focus ring drawn
 
 The data grid uses the `Theme` provided to the DataEditer in the `theme` prop. This is used to style editors as well as the grid itself. The theme interface is flat. The data grid comes with a built in theme which it will use to fill in any missing values.
 
-| Property              | Type                | CSS Variable                  | Description                                                                                       |
-| --------------------- | ------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------- |
-| accentColor           | string              | --gdg-accent-color            | The primary accent color of the grid. This will show up in focus rings and selected rows/headers. |
-| accentFg              | string              | --gdg-accent-fg               | A foreground color which works well on top of the accent color.                                   |
-| accentLight           | string              | --gdg-accent-light            | A lighter version of the accent color used to hint selection.                                     |
-| textDark              | string              | --gdg-text-dark               | The standard text color.                                                                          |
-| textMedium            | string              | --gdg-text-medium             | A lighter text color used for non-editable data in some cases.                                    |
-| textLight             | string              | --gdg-text-light              | An even lighter text color                                                                        |
-| textBubble            | string              | --gdg-text-bubble             | The text color used in bubbles                                                                    |
-| bgIconHeader          | string              | --gdg-bg-icon-header          | The background color for header icons                                                             |
-| fgIconHeader          | string              | --gdg-fg-icon-header          | The foreground color for header icons                                                             |
-| textHeader            | string              | --gdg-text-header             | The header text color                                                                             |
-| textGroupHeader       | string \| undefined | --gdg-text-group-header       | The group header text color, if none provided the `textHeader` is used instead.                   |
-| textHeaderSelected    | string              | --gdg-text-header-selected    | The text color used for selected headers                                                          |
-| bgCell                | string              | --gdg-bg-cell                 | The primary background color of the data grid.                                                    |
-| bgCellMedium          | string              | --gdg-bg-cell-medium          | Used for disabled or otherwise off colored cells.                                                 |
-| bgHeader              | string              | --gdg-bg-header               | The header background color                                                                       |
-| bgHeaderHasFocus      | string              | --gdg-bg-header-has           | The header background color when its column contains the selected cell                            |
-| bgHeaderHovered       | string              | --gdg-bg-header-hovered       | The header background color when it is hovered                                                    |
-| bgGroupHeader         | string \| undefined | --gdg-bg-group-header         | The group header background color, if none provided the `bgHeader` is used instead.               |
+| Property              | Type                | CSS Variable                  | Description                                                                                                   |
+| --------------------- | ------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| accentColor           | string              | --gdg-accent-color            | The primary accent color of the grid. This will show up in focus rings and selected rows/headers.             |
+| accentFg              | string              | --gdg-accent-fg               | A foreground color which works well on top of the accent color.                                               |
+| accentLight           | string              | --gdg-accent-light            | A lighter version of the accent color used to hint selection.                                                 |
+| textDark              | string              | --gdg-text-dark               | The standard text color.                                                                                      |
+| textMedium            | string              | --gdg-text-medium             | A lighter text color used for non-editable data in some cases.                                                |
+| textLight             | string              | --gdg-text-light              | An even lighter text color                                                                                    |
+| textBubble            | string              | --gdg-text-bubble             | The text color used in bubbles                                                                                |
+| bgIconHeader          | string              | --gdg-bg-icon-header          | The background color for header icons                                                                         |
+| fgIconHeader          | string              | --gdg-fg-icon-header          | The foreground color for header icons                                                                         |
+| textHeader            | string              | --gdg-text-header             | The header text color                                                                                         |
+| textGroupHeader       | string \| undefined | --gdg-text-group-header       | The group header text color, if none provided the `textHeader` is used instead.                               |
+| textHeaderSelected    | string              | --gdg-text-header-selected    | The text color used for selected headers                                                                      |
+| bgCell                | string              | --gdg-bg-cell                 | The primary background color of the data grid.                                                                |
+| bgCellMedium          | string              | --gdg-bg-cell-medium          | Used for disabled or otherwise off colored cells.                                                             |
+| bgHeader              | string              | --gdg-bg-header               | The header background color                                                                                   |
+| bgHeaderHasFocus      | string              | --gdg-bg-header-has           | The header background color when its column contains the selected cell                                        |
+| bgHeaderHovered       | string              | --gdg-bg-header-hovered       | The header background color when it is hovered                                                                |
+| bgGroupHeader         | string \| undefined | --gdg-bg-group-header         | The group header background color, if none provided the `bgHeader` is used instead.                           |
 | bgGroupHeaderHovered  | string \| undefined | --gdg-bg-group-header-hovered | The group header background color when it is hovered, if none provided the `bgHeaderHovered` is used instead. |
-| bgBubble              | string              | --gdg-bg-bubble               | The background color used in bubbles                                                              |
-| bgBubbleSelected      | string              | --gdg-bg-bubble-selected      | The background color used in bubbles when the cell is selected                                    |
-| bgSearchResult        | string              | --gdg-bg-search-result        | The background color used for cells which match the search string                                 |
-| borderColor           | string              | --gdg-border-color            | The color of all vertical borders and horizontal borders if a horizontal override is not provided |
-| horizontalBorderColor | string \| undefined | --gdg-horizontal-border-color | The horizontal border color override                                                              |
-| drilldownBorder       | string              | --gdg-drilldown-border        | The ring color of a drilldown cell                                                                |
-| linkColor             | string              | --gdg-link-color              | What color to render links                                                                        |
-| cellHorizontalPadding | number              | --gdg-cell-horizontal-padding | The internal horizontal padding size of a cell.                                                   |
-| cellVerticalPadding   | number              | --gdg-cell-vertical-padding   | The internal vertical padding size of a cell.                                                     |
-| headerFontStyle       | string              | --gdg-header-font-style       | The font style of the header. e.g. `bold 15px`                                                    |
-| baseFontStyle         | string              | --gdg-base-font-style         | The font style used for cells by default, e.g. `13px`                                             |
-| fontFamily            | string              | --gdg-font-family             | The font family used by the data grid.                                                            |
-| editorFontSize        | string              | --gdg-editor-font-size        | The font size used by overlay editors.                                                            |
-| lineHeight            | number              | None                          | A unitless scaler which defines the height of a line of text relative to the ink size.            |
-| bubbleHeight          | number              | --gdg-bubble-height           | The height (in pixels) of a bubble.                                                               |
-| bubblePadding         | number              | --gdg-bubble-padding          | The left & right padding (in pixels) of a bubble.                                                 |
-| bubbleMargin          | number              | --gdg-bubble-margin           | The margin (in pixels) between bubbles.                                                           |
-| checkboxMaxSize       | number              | --gdg-checkbox-max-size       | The maximum size of checkboxes (in pixels), e.g. for boolean cell and row markers.                |
-| roundingRadius        | number \| undefined | --gdg-rounding-radius         | The radius of rounded corners used by various grid elements (in pixels).                          |
+| bgBubble              | string              | --gdg-bg-bubble               | The background color used in bubbles                                                                          |
+| bgBubbleSelected      | string              | --gdg-bg-bubble-selected      | The background color used in bubbles when the cell is selected                                                |
+| bgSearchResult        | string              | --gdg-bg-search-result        | The background color used for cells which match the search string                                             |
+| borderColor           | string              | --gdg-border-color            | The color of all vertical borders and horizontal borders if a horizontal override is not provided             |
+| horizontalBorderColor | string \| undefined | --gdg-horizontal-border-color | The horizontal border color override                                                                          |
+| drilldownBorder       | string              | --gdg-drilldown-border        | The ring color of a drilldown cell                                                                            |
+| linkColor             | string              | --gdg-link-color              | What color to render links                                                                                    |
+| cellHorizontalPadding | number              | --gdg-cell-horizontal-padding | The internal horizontal padding size of a cell.                                                               |
+| cellVerticalPadding   | number              | --gdg-cell-vertical-padding   | The internal vertical padding size of a cell.                                                                 |
+| headerFontStyle       | string              | --gdg-header-font-style       | The font style of the header. e.g. `bold 15px`                                                                |
+| baseFontStyle         | string              | --gdg-base-font-style         | The font style used for cells by default, e.g. `13px`                                                         |
+| fontFamily            | string              | --gdg-font-family             | The font family used by the data grid.                                                                        |
+| editorFontSize        | string              | --gdg-editor-font-size        | The font size used by overlay editors.                                                                        |
+| lineHeight            | number              | None                          | A unitless scaler which defines the height of a line of text relative to the ink size.                        |
+| bubbleHeight          | number              | --gdg-bubble-height           | The height (in pixels) of a bubble.                                                                           |
+| bubblePadding         | number              | --gdg-bubble-padding          | The left & right padding (in pixels) of a bubble.                                                             |
+| bubbleMargin          | number              | --gdg-bubble-margin           | The margin (in pixels) between bubbles.                                                                       |
+| checkboxMaxSize       | number              | --gdg-checkbox-max-size       | The maximum size of checkboxes (in pixels), e.g. for boolean cell and row markers.                            |
+| roundingRadius        | number \| undefined | --gdg-rounding-radius         | The radius of rounded corners used by various grid elements (in pixels).                                      |
 
 ---
 
@@ -456,6 +458,16 @@ Appends a row to the data grid.
 
 ---
 
+## appendColumn
+
+```ts
+appendColumn: (row: number, openOverlay?: boolean) => Promise<void>;
+```
+
+Appends a column to the data grid.
+
+---
+
 ## focus
 
 ```ts
@@ -481,11 +493,7 @@ Emits the event into the data grid as if the user had pressed the keyboard short
 ## getMouseArgsForPosition
 
 ```ts
-getMouseArgsForPosition: (
-    posX: number,
-    posY: number,
-    ev?: MouseEvent | TouchEvent
-) => GridMouseEventArgs | undefined;
+getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => GridMouseEventArgs | undefined;
 ```
 
 Returns grid coordinates and context for a pointer event position. Useful for handling interactions outside of built-in callbacks.
@@ -1093,10 +1101,41 @@ trailingRowOptions?: {
     readonly themeOverride?: Partial<Theme>; // GridColumn only
     readonly disabled?: boolean; // GridColumn only
 }
-onRowAppended?: () => void;
+```
+
+---
+
+## onRowAppended
+
+```ts
+onRowAppended?: () => Promise<"top" | "bottom" | number | undefined> | void;
 ```
 
 `onRowAppended` controls adding new rows at the bottom of the Grid. If `onRowAppended` is defined, an empty row will display at the bottom. When the user clicks on one of its cells, `onRowAppended` is called, which is responsible for appending the new row. The appearance of the blank row can be configured using `trailingRowOptions`.
+
+The callback can optionally return (or resolve to) one of the following values to control focus after the row is added:
+
+- `"top"` – focus the first row in the grid.
+- `"bottom"` – focus the last row in the grid (default behaviour).
+- `number` – focus the row at the specified zero-based index.
+- `undefined` – default focus behaviour (equivalent to `"bottom"`).
+
+---
+
+## onColumnAppended
+
+```ts
+onColumnAppended?: () => Promise<"left" | "right" | number | undefined> | void;
+```
+
+`onColumnAppended` controls adding new columns to the Grid. When defined, the callback is invoked when the user requests to append a column (for example by editing past the last column). Your implementation is responsible for inserting the new column into the `columns` prop supplied to the grid.
+
+The callback can optionally return (or resolve to) one of the following values to control focus after the column is added:
+
+- `"left"` – focus the first column in the grid.
+- `"right"` – focus the last column in the grid (default behaviour).
+- `number` – focus the column at the specified zero-based index.
+- `undefined` – default focus behaviour (equivalent to `"right"`).
 
 ---
 
