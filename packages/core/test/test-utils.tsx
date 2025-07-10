@@ -251,6 +251,7 @@ export const Context: React.FC = p => {
 export const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, ref) => {
     const [sel, setSel] = React.useState<GridSelection | undefined>(p.gridSelection);
     const [extraRows, setExtraRows] = React.useState(0);
+    const [extraCols, setExtraCols] = React.useState(0);
 
     const onGridSelectionChange = React.useCallback(
         (s: GridSelection) => {
@@ -260,19 +261,40 @@ export const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps
         [p]
     );
 
-    const onRowAppened = React.useCallback(() => {
+    const onRowAppended = React.useCallback(() => {
         setExtraRows(cv => cv + 1);
         void p.onRowAppended?.();
     }, [p]);
 
+    const onColumnAppended = React.useCallback(() => {
+        setExtraCols(cv => cv + 1);
+        void p.onColumnAppended?.();
+    }, [p]);
+
+    const columns = React.useMemo(() => p.columns.concat(Array.from({ length: extraCols }, (_, i) => ({ title: `Z${i}`, width: 50 }))), [p.columns, extraCols]);
+
+    const getCellContent = React.useCallback(
+        (cell: Item): GridCell => {
+            const [c] = cell;
+            if (c >= p.columns.length) {
+                return { kind: GridCellKind.Text, allowOverlay: true, data: "", displayData: "" };
+            }
+            return p.getCellContent(cell);
+        },
+        [p, p.getCellContent]
+    );
+
     return (
         <DataEditor
             {...p}
+            columns={columns}
+            getCellContent={getCellContent}
             ref={ref}
             gridSelection={sel}
             onGridSelectionChange={onGridSelectionChange}
             rows={p.rows + extraRows}
-            onRowAppended={p.onRowAppended === undefined ? undefined : onRowAppened}
+            onRowAppended={p.onRowAppended === undefined ? undefined : onRowAppended}
+            onColumnAppended={p.onColumnAppended === undefined ? undefined : onColumnAppended}
         />
     );
 });
