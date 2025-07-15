@@ -317,6 +317,8 @@ export function drawGridLines(
         }
         ctx.clip("evenodd");
     }
+
+    const effectiveWidth = effectiveCols.reduce((acc, col) => acc + col.width, 0);
     const hColor = theme.horizontalBorderColor ?? theme.borderColor;
     const vColor = theme.borderColor;
 
@@ -345,6 +347,7 @@ export function drawGridLines(
         }
     }
 
+    width = Math.min(width, effectiveWidth);
     let rightX = width + 0.5;
     for (let index = effectiveCols.length - 1; index >= 0; index--) {
         const c = effectiveCols[index];
