@@ -59,7 +59,7 @@ const PortalWrap = styled.div`
     color: var(--gdg-text-dark);
 
     > div {
-        border-radius: 4px;
+        border-radius: var(--gdg-rounding-radius, 4px);
         border: 1px solid var(--gdg-border-color);
     }
 `;
@@ -343,7 +343,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 value={resolveValues(value, options, allowDuplicates)}
                 onKeyDown={cell.readonly ? undefined : handleKeyDown}
                 menuPlacement={"auto"}
-                menuPortalTarget={portalElementRef?.current ??  document.getElementById("portal")}
+                menuPortalTarget={portalElementRef?.current ?? document.getElementById("portal")}
                 autoFocus={true}
                 openMenuOnFocus={true}
                 openMenuOnClick={true}
