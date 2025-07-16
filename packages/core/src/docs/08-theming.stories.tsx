@@ -277,6 +277,8 @@ The global theme is provided by the DataEditor by default and can be overriden b
 | fontFamily | --gdg-font-family | string | The font family used by the data grid. |
 | editorFontSize | --gdg-editor-font-size | string | The font size used by overlay editors. |
 | lineHeight | None | number | A unitless scaler which defines the height of a line of text relative to the ink size. |
+| checkboxMaxSize | --gdg-checkbox-max-size | number | The maximum size of checkboxes (in pixels), e.g. for boolean cell and row markers. |
+| roundingRadius | --gdg-rounding-radius | number | The radius of rounded corners used by various grid elements (in pixels). |
 
 If an option is missing from any theme it will be filled in with the default theme.
 `}

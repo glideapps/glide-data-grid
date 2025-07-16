@@ -33,6 +33,7 @@ export { parseToRgba, withAlpha, blend, interpolateColors, getLuminance } from "
 export {
     measureTextCached,
     getMiddleCenterBias,
+    getEmHeight,
     roundedPoly,
     roundedRect,
     drawTextCellExternal as drawTextCell,
@@ -44,6 +45,7 @@ export { useColumnSizer } from "./data-editor/use-column-sizer.js";
 export type { DataEditorRef } from "./data-editor/data-editor.js";
 export { DataEditorAll as DataEditor } from "./data-editor-all.js";
 export type { DataEditorAllProps as DataEditorProps } from "./data-editor-all.js";
+export { emptyGridSelection } from "./data-editor/data-editor.js";
 
 export { DataEditor as DataEditorCore } from "./data-editor/data-editor.js";
 export type { DataEditorProps as DataEditorCoreProps } from "./data-editor/data-editor.js";
@@ -61,6 +63,7 @@ export { markerCellRenderer } from "./cells/marker-cell.js";
 export { bubbleCellRenderer } from "./cells/bubble-cell.js";
 export { protectedCellRenderer } from "./cells/protected-cell.js";
 export { rowIDCellRenderer } from "./cells/row-id-cell.js";
+export type { InternalCellRenderer } from "./cells/cell-types.js";
 export { AllCellRenderers } from "./cells/index.js";
 export { sprites } from "./internal/data-grid/sprites.js";
 export { default as ImageWindowLoaderImpl } from "./common/image-window-loader.js";

@@ -34,6 +34,7 @@ interface DataGridOverlayEditorProps {
     readonly onFinishEditing: (newCell: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly forceEditMode: boolean;
     readonly highlight: boolean;
+    readonly portalElementRef?: React.RefObject<HTMLElement>
     readonly imageEditorOverride?: ImageEditorType;
     readonly getCellRenderer: GetCellRendererCallback;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
@@ -62,6 +63,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         id,
         cell,
         bloom,
+        portalElementRef,
         validateCell,
         getCellRenderer,
         provideEditor,
@@ -152,10 +154,13 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     const [editorProvider, useLabel] = React.useMemo((): [ProvideEditorCallbackResult<GridCell>, boolean] | [] => {
         if (isInnerOnlyCell(content)) return [];
-        const external = provideEditor?.(content);
+        const cellWithLocation = { ...content, location: cell } as GridCell & {
+            location: Item;
+        };
+        const external = provideEditor?.(cellWithLocation);
         if (external !== undefined) return [external, false];
-        return [getCellRenderer(content)?.provideEditor?.(content), false];
-    }, [content, getCellRenderer, provideEditor]);
+        return [getCellRenderer(content)?.provideEditor?.(cellWithLocation), false];
+    }, [cell, content, getCellRenderer, provideEditor]);
 
     const { ref, style: stayOnScreenStyle } = useStayOnScreen();
 
@@ -174,6 +179,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         const CustomEditor = isObjectEditor ? editorProvider.editor : editorProvider;
         editor = (
             <CustomEditor
+                portalElementRef={portalElementRef}
                 isHighlighted={highlight}
                 onChange={setTempValue}
                 value={targetValue}
@@ -193,11 +199,11 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     styleOverride = { ...styleOverride, ...stayOnScreenStyle };
 
     // Consider imperatively creating and adding the element to the dom?
-    const portalElement = document.getElementById("portal");
+    const portalElement = portalElementRef?.current ?? document.getElementById("portal");
     if (portalElement === null) {
         // eslint-disable-next-line no-console
         console.error(
-            'Cannot open Data Grid overlay editor, because portal not found.  Please add `<div id="portal" />` as the last child of your `<body>`.'
+            'Cannot open Data Grid overlay editor, because portal not found. Please, either provide a portalElementRef or add `<div id="portal" />` as the last child of your `<body>`.'
         );
         return null;
     }

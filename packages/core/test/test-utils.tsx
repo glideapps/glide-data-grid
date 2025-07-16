@@ -19,12 +19,12 @@ function getMockBooleanData(row: number): boolean | null | undefined {
 }
 
 export function sendClick(el: Element | Node | Document | Window, options?: any, runTimers?: boolean): void {
-    fireEvent.mouseDown(el, options);
+    fireEvent.pointerDown(el, options);
     if (runTimers === true)
         act(() => {
             vi.runAllTimers();
         });
-    fireEvent.mouseUp(el, options);
+    fireEvent.pointerUp(el, options);
     if (runTimers === true)
         act(() => {
             vi.runAllTimers();
@@ -33,17 +33,15 @@ export function sendClick(el: Element | Node | Document | Window, options?: any,
 }
 
 export function sendTouchClick(el: Element | Node | Document | Window, options?: any): void {
-    fireEvent.touchStart(el, options);
-    fireEvent.touchEnd(el, {
-        ...options,
-        changedTouches: options.touches,
-    });
-    fireEvent.click(el, {
+    const mouseOptions = {
         clientX: options?.touches?.[0]?.clientX,
         clientY: options?.touches?.[0]?.clientY,
         pointerType: "touch",
         ...options,
-    });
+    }
+    fireEvent.pointerDown(el, mouseOptions);
+    fireEvent.pointerUp(el, mouseOptions);
+    fireEvent.click(el, mouseOptions);
 }
 
 export const makeCell = (cell: Item): GridCell => {
@@ -253,6 +251,7 @@ export const Context: React.FC = p => {
 export const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, ref) => {
     const [sel, setSel] = React.useState<GridSelection | undefined>(p.gridSelection);
     const [extraRows, setExtraRows] = React.useState(0);
+    const [extraCols, setExtraCols] = React.useState(0);
 
     const onGridSelectionChange = React.useCallback(
         (s: GridSelection) => {
@@ -262,19 +261,40 @@ export const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps
         [p]
     );
 
-    const onRowAppened = React.useCallback(() => {
+    const onRowAppended = React.useCallback(() => {
         setExtraRows(cv => cv + 1);
         void p.onRowAppended?.();
     }, [p]);
 
+    const onColumnAppended = React.useCallback(() => {
+        setExtraCols(cv => cv + 1);
+        void p.onColumnAppended?.();
+    }, [p]);
+
+    const columns = React.useMemo(() => p.columns.concat(Array.from({ length: extraCols }, (_, i) => ({ title: `Z${i}`, width: 50 }))), [p.columns, extraCols]);
+
+    const getCellContent = React.useCallback(
+        (cell: Item): GridCell => {
+            const [c] = cell;
+            if (c >= p.columns.length) {
+                return { kind: GridCellKind.Text, allowOverlay: true, data: "", displayData: "" };
+            }
+            return p.getCellContent(cell);
+        },
+        [p, p.getCellContent]
+    );
+
     return (
         <DataEditor
             {...p}
+            columns={columns}
+            getCellContent={getCellContent}
             ref={ref}
             gridSelection={sel}
             onGridSelectionChange={onGridSelectionChange}
             rows={p.rows + extraRows}
-            onRowAppended={p.onRowAppended === undefined ? undefined : onRowAppened}
+            onRowAppended={p.onRowAppended === undefined ? undefined : onRowAppended}
+            onColumnAppended={p.onColumnAppended === undefined ? undefined : onColumnAppended}
         />
     );
 });
@@ -291,6 +311,10 @@ export function standardBeforeEach() {
     //     unobserve: vi.fn(),
     //     disconnect: vi.fn(),
     // }));
+
+    // JSDOM does not support PointerEvent
+    // https://github.com/jsdom/jsdom/issues/2527
+    (window as any).PointerEvent = MouseEvent;
 
     Element.prototype.scrollTo = vi.fn() as any;
     Element.prototype.scrollBy = vi.fn() as any;

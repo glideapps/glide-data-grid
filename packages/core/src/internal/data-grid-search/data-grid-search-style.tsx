@@ -61,7 +61,7 @@ export const SearchWrapper = styled.div`
         cursor: pointer;
         color: var(--gdg-text-medium);
 
-        :hover {
+        &:hover {
             color: var(--gdg-text-dark);
         }
 
@@ -70,7 +70,7 @@ export const SearchWrapper = styled.div`
             height: 16px;
         }
 
-        :disabled {
+        &:disabled {
             opacity: 0.4;
             pointer-events: none;
         }

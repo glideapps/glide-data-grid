@@ -1,8 +1,8 @@
 import { assertNever } from "../../../common/support.js";
-import { getSquareWidth, getSquareXPosFromAlign, getSquareBB, pointIsWithinBB } from "../../../common/utils.js";
+import { getSquareBB, getSquareWidth, getSquareXPosFromAlign, pointIsWithinBB } from "../../../common/utils.js";
 import type { Theme } from "../../../index.js";
-import { roundedRect } from "./data-grid-lib.js";
 import { BooleanEmpty, BooleanIndeterminate, type BaseGridCell } from "../data-grid-types.js";
+import { roundedRect } from "./data-grid-lib.js";
 
 export function drawCheckbox(
     ctx: CanvasRenderingContext2D,
@@ -15,13 +15,13 @@ export function drawCheckbox(
     highlighted: boolean,
     hoverX: number = -20,
     hoverY: number = -20,
-    maxSize: number = 32,
+    maxSize: number | undefined = undefined,
     alignment: BaseGridCell["contentAlign"] = "center",
     style: "circle" | "square" = "square"
 ) {
     const centerY = Math.floor(y + height / 2);
-    const rectBordRadius = style === "circle" ? 10_000 : theme.roundingRadius ?? 4;
-    let checkBoxWidth = getSquareWidth(maxSize, height, theme.cellVerticalPadding);
+    const rectBordRadius = style === "circle" ? 10_000 : (theme.roundingRadius ?? 4);
+    let checkBoxWidth = getSquareWidth(maxSize ?? theme.checkboxMaxSize, height, theme.cellVerticalPadding);
     let checkBoxHalfWidth = checkBoxWidth / 2;
     const posX = getSquareXPosFromAlign(alignment, x, width, theme.cellHorizontalPadding, checkBoxWidth);
     const bb = getSquareBB(posX, centerY, checkBoxWidth);

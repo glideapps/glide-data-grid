@@ -467,7 +467,7 @@ Want to add more vertical space to the vertical scrolling area? Simply set the d
 
 ### **Arbitrary insertion into Grid**
 
-The `onRowAppeneded` callback has been augmented to allow returning the index of the blank row that has been inserted into the data model. This allows for more varied insertion stories. Shout out to @pzcfg!
+The `onRowAppended` callback has been augmented to allow returning the index of the blank row that has been inserted into the data model. This allows for more varied insertion stories. Shout out to @pzcfg!
 
 ### **ScrollTo now supported**
 

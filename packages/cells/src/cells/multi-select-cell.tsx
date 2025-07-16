@@ -36,9 +36,6 @@ interface MultiSelectCellProps {
     readonly allowDuplicates?: boolean;
 }
 
-const BUBBLE_HEIGHT = 20;
-const BUBBLE_PADDING = 6;
-const BUBBLE_MARGIN = 4;
 /* This prefix is used when allowDuplicates is enabled to make sure that
 all underlying values are unique. */
 const VALUE_PREFIX = "__value";
@@ -134,7 +131,7 @@ const CustomMenu: React.FC<CustomMenuProps> = p => {
 export type MultiSelectCell = CustomCell<MultiSelectCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
-    const { value: cell, initialValue, onChange, onFinishedEditing } = p;
+    const { value: cell, initialValue, onChange, onFinishedEditing, portalElementRef } = p;
     const { options: optionsIn, values: valuesIn, allowCreation, allowDuplicates } = cell.data;
 
     const theme = useTheme();
@@ -229,14 +226,14 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
             return {
                 ...styles,
                 backgroundColor: data.color ?? theme.bgBubble,
-                borderRadius: `${theme.roundingRadius ?? BUBBLE_HEIGHT / 2}px`,
+                borderRadius: `${theme.roundingRadius ?? theme.bubbleHeight / 2}px`,
             };
         },
         multiValueLabel: (styles, { data, isDisabled }) => {
             return {
                 ...styles,
-                paddingRight: isDisabled ? BUBBLE_PADDING : 0,
-                paddingLeft: BUBBLE_PADDING,
+                paddingRight: isDisabled ? theme.bubblePadding : 0,
+                paddingLeft: theme.bubblePadding,
                 paddingTop: 0,
                 paddingBottom: 0,
                 color: data.color
@@ -251,7 +248,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 justifyContent: "center",
                 alignItems: "center",
                 display: "flex",
-                height: BUBBLE_HEIGHT,
+                height: theme.bubbleHeight,
             };
         },
         multiValueRemove: (styles, { data, isDisabled, isFocused }) => {
@@ -270,7 +267,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                         : "white"
                     : theme.textBubble,
                 backgroundColor: undefined,
-                borderRadius: isFocused ? `${theme.roundingRadius ?? BUBBLE_HEIGHT / 2}px` : undefined,
+                borderRadius: isFocused ? `${theme.roundingRadius ?? theme.bubbleHeight / 2}px` : undefined,
                 ":hover": {
                     cursor: "pointer",
                 },
@@ -346,7 +343,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 value={resolveValues(value, options, allowDuplicates)}
                 onKeyDown={cell.readonly ? undefined : handleKeyDown}
                 menuPlacement={"auto"}
-                menuPortalTarget={document.getElementById("portal")}
+                menuPortalTarget={portalElementRef?.current ??  document.getElementById("portal")}
                 autoFocus={true}
                 openMenuOnFocus={true}
                 openMenuOnClick={true}
@@ -398,32 +395,32 @@ const renderer: CustomRenderer<MultiSelectCell> = {
             width: rect.width - 2 * theme.cellHorizontalPadding,
             height: rect.height - 2 * theme.cellVerticalPadding,
         };
-        const rows = Math.max(1, Math.floor(drawArea.height / (BUBBLE_HEIGHT + BUBBLE_PADDING)));
+        const rows = Math.max(1, Math.floor(drawArea.height / (theme.bubbleHeight + theme.bubblePadding)));
 
         let { x } = drawArea;
         let row = 1;
 
         let y =
             rows === 1
-                ? drawArea.y + (drawArea.height - BUBBLE_HEIGHT) / 2
-                : drawArea.y + (drawArea.height - rows * BUBBLE_HEIGHT - (rows - 1) * BUBBLE_PADDING) / 2;
+                ? drawArea.y + (drawArea.height - theme.bubbleHeight) / 2
+                : drawArea.y + (drawArea.height - rows * theme.bubbleHeight - (rows - 1) * theme.bubblePadding) / 2;
         for (const value of values) {
             const matchedOption = options.find(t => t.value === value);
             const color = matchedOption?.color ?? (highlighted ? theme.bgBubbleSelected : theme.bgBubble);
             const displayText = matchedOption?.label ?? value;
             const metrics = measureTextCached(displayText, ctx);
-            const width = metrics.width + BUBBLE_PADDING * 2;
-            const textY = BUBBLE_HEIGHT / 2;
+            const width = metrics.width + theme.bubblePadding * 2;
+            const textY = theme.bubbleHeight / 2;
 
             if (x !== drawArea.x && x + width > drawArea.x + drawArea.width && row < rows) {
                 row++;
-                y += BUBBLE_HEIGHT + BUBBLE_PADDING;
+                y += theme.bubbleHeight + theme.bubblePadding;
                 x = drawArea.x;
             }
 
             ctx.fillStyle = color;
             ctx.beginPath();
-            roundedRect(ctx, x, y, width, BUBBLE_HEIGHT, theme.roundingRadius ?? BUBBLE_HEIGHT / 2);
+            roundedRect(ctx, x, y, width, theme.bubbleHeight, theme.roundingRadius ?? theme.bubbleHeight / 2);
             ctx.fill();
 
             // If a color is set for this option, we use either black or white as the text color depending on the background.
@@ -433,9 +430,9 @@ const renderer: CustomRenderer<MultiSelectCell> = {
                     ? "#000000"
                     : "#ffffff"
                 : theme.textBubble;
-            ctx.fillText(displayText, x + BUBBLE_PADDING, y + textY + getMiddleCenterBias(ctx, theme));
+            ctx.fillText(displayText, x + theme.bubblePadding, y + textY + getMiddleCenterBias(ctx, theme));
 
-            x += width + BUBBLE_MARGIN;
+            x += width + theme.bubbleMargin;
             if (x > drawArea.x + drawArea.width + theme.cellHorizontalPadding && row >= rows) {
                 break;
             }
@@ -443,11 +440,11 @@ const renderer: CustomRenderer<MultiSelectCell> = {
 
         return true;
     },
-    measure: (ctx, cell, t) => {
+    measure: (ctx, cell, theme) => {
         const { values, options } = cell.data;
 
         if (!values) {
-            return t.cellHorizontalPadding * 2;
+            return theme.cellHorizontalPadding * 2;
         }
 
         // Resolve the values to the actual display labels:
@@ -455,11 +452,16 @@ const renderer: CustomRenderer<MultiSelectCell> = {
             x => x.label ?? x.value
         );
 
-        return (
-            labels.reduce((acc, data) => ctx.measureText(data).width + acc + BUBBLE_PADDING * 2 + BUBBLE_MARGIN, 0) +
-            2 * t.cellHorizontalPadding -
-            4
+        const bubblesWidth = labels.reduce(
+            (acc, data) => ctx.measureText(data).width + acc + theme.bubblePadding * 2 + theme.bubbleMargin,
+            0
         );
+
+        if (labels.length === 0) {
+            return theme.cellHorizontalPadding * 2;
+        }
+
+        return bubblesWidth + 2 * theme.cellHorizontalPadding - theme.bubbleMargin;
     },
     provideEditor: () => ({
         editor: Editor,

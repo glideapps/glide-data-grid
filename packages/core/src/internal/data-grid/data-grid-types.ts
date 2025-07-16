@@ -395,6 +395,7 @@ export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComp
     readonly forceEditMode: boolean;
     readonly isValid?: boolean;
     readonly theme: Theme;
+    readonly portalElementRef?: React.RefObject<HTMLElement>;
 }>;
 
 type ObjectEditorCallbackResult<T extends InnerGridCell> = {
@@ -422,7 +423,9 @@ export function isObjectEditorCallbackResult<T extends InnerGridCell>(
 }
 
 /** @category Renderers */
-export type ProvideEditorCallback<T extends InnerGridCell> = (cell: T) => ProvideEditorCallbackResult<T>;
+export type ProvideEditorCallback<T extends InnerGridCell> = (
+    cell: T & { location?: Item }
+) => ProvideEditorCallbackResult<T>;
 
 /** @category Cells */
 export type ValidatedGridCell = EditableGridCell & {

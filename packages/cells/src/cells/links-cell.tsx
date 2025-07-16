@@ -218,12 +218,12 @@ const LinksCellEditorStyle = styled.div`
         padding: 6px 8px;
         cursor: pointer;
 
-        :hover,
-        :focus-visible {
+        &:hover,
+        &:focus-visible {
             background-color: var(--gdg-accent-light);
         }
 
-        :disabled {
+        &:disabled {
             opacity: 0.4;
             pointer-events: none;
         }
@@ -274,8 +274,8 @@ const LinksCellEditorStyle = styled.div`
 
             color: var(--gdg-text-medium);
 
-            :hover,
-            :focus-visible {
+            &:hover,
+            &:focus-visible {
                 background-color: var(--gdg-accent-light);
                 color: var(--gdg-text-dark);
             }

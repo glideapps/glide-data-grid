@@ -5,7 +5,7 @@ import { sprites } from "./internal/data-grid/sprites.js";
 import ImageWindowLoaderImpl from "./common/image-window-loader.js";
 import type { ImageWindowLoader } from "./internal/data-grid/image-window-loader-interface.js";
 
-export interface DataEditorAllProps extends Omit<DataEditorProps, "renderers" | "imageWindowLoader"> {
+export interface DataEditorAllProps extends Omit<DataEditorProps, "imageWindowLoader"> {
     imageWindowLoader?: ImageWindowLoader;
 }
 
@@ -14,6 +14,10 @@ const DataEditorAllImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEdito
         return { ...sprites, ...p.headerIcons };
     }, [p.headerIcons]);
 
+    const renderers = React.useMemo(() => {
+        return p.renderers ?? AllCellRenderers;
+    }, [p.renderers])
+
     const imageWindowLoader = React.useMemo(() => {
         return p.imageWindowLoader ?? new ImageWindowLoaderImpl();
     }, [p.imageWindowLoader]);
@@ -21,7 +25,7 @@ const DataEditorAllImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEdito
     return (
         <DataEditor
             {...p}
-            renderers={AllCellRenderers}
+            renderers={renderers}
             headerIcons={allSprites}
             ref={ref}
             imageWindowLoader={imageWindowLoader}
