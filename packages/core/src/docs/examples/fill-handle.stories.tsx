@@ -72,7 +72,7 @@ export const FillHandle: React.VFC = () => {
             columns={cols}
             rowMarkers={"both"}
             onPaste={true}
-            fillHandle={true}
+            fillHandle={{ shape: "circle", size: 6, offsetX: 0, offsetY: 0, outline: 1 }}
             keybindings={{ downFill: true, rightFill: true }}
             onCellEdited={setCellValue}
             trailingRowOptions={{

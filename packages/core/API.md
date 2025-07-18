@@ -1019,10 +1019,28 @@ Highlight regions are regions on the grid which get drawn with a background colo
 ## fillHandle
 
 ```ts
-fillHandle?: boolean;
+fillHandle?: boolean | Partial<FillHandleConfig>;
 ```
 
-Controls the visibility of the fill handle used for filling cells with the mouse.
+Controls the presence of the fill handle used for filling cells with the mouse.
+
+**Configuration for the fill-handle (the small drag handle that appears in the
+bottom-right of the current selection).**
+
+```ts
+interface FillHandleConfig {
+    /** Shape of the handle. Defaults to "square". */
+    shape?: "square" | "circle";
+    /** Width/height (or diameter for circles) in CSS pixels. Defaults to `6`. */
+    size?: number;
+    /** Horizontal offset from the bottom-right corner of the cell (px). */
+    offsetX?: number;
+    /** Vertical offset from the bottom-right corner of the cell (px). */
+    offsetY?: number;
+    /** Stroke width (px) of the outline that surrounds the handle. Defaults to `1`. */
+    outline?: number;
+}
+```
 
 ---
 
