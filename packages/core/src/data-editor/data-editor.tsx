@@ -499,7 +499,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
     readonly gridSelection?: GridSelection;
     /**
      * Emitted whenever the grid selection changes. Specifying
-     * this function will make the grid’s selection controlled, so
+     * this function will make the grid's selection controlled, so
      * so you will need to specify {@link gridSelection} as well. See
      * the "Controlled Selection" example for details.
      *
@@ -686,6 +686,22 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * Allows overriding the default portal element.
      */
     readonly portalElementRef?: React.RefObject<HTMLElement>;
+
+    /**
+     * When true (default) draws accent-coloured grid lines around selected columns in the header. Set to false to
+     * revert to the original behaviour where only the header background is accented.
+     * @group Style
+     * @defaultValue true
+     */
+    readonly columnSelectionGridLines?: boolean;
+
+    /**
+     * When true (default) draws accent-coloured grid lines around selected rows in the header. Set to false to
+     * revert to the original behaviour where only the header background is accented.
+     * @group Style
+     * @defaultValue true
+     */
+    readonly rowSelectionGridLines?: boolean;
 }
 
 type ScrollToFn = (
@@ -892,6 +908,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         scrollToActiveCell = true,
         drawFocusRing: drawFocusRingIn = true,
         portalElementRef,
+        columnSelectionGridLines = false,
+        rowSelectionGridLines = false,
     } = p;
 
     const drawFocusRing = drawFocusRingIn === "no-editor" ? overlay === undefined : drawFocusRingIn;
@@ -4264,6 +4282,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     gridRef={gridRef}
                     getCellRenderer={getCellRenderer}
                     resizeIndicator={resizeIndicator}
+                    columnSelectionGridLines={columnSelectionGridLines}
+                    rowSelectionGridLines={rowSelectionGridLines}
                 />
                 {renameGroupNode}
                 {overlay !== undefined && (

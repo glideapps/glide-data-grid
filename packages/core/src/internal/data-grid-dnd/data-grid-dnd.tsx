@@ -439,6 +439,8 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             dragAndDropState={dragOffset}
             onMouseMoveRaw={onMouseMove}
             ref={gridRef}
+            columnSelectionGridLines={p.columnSelectionGridLines}
+            rowSelectionGridLines={p.rowSelectionGridLines}
         />
     );
 };

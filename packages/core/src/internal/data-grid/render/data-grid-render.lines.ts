@@ -294,7 +294,9 @@ export function drawGridLines(
     freezeTrailingRows: number,
     rows: number,
     theme: FullTheme,
-    verticalOnly: boolean = false
+    verticalOnly: boolean = false,
+    selectedColumns?: CompactSelection,
+    selectedRows?: CompactSelection
 ) {
     if (spans !== undefined) {
         ctx.beginPath();
@@ -307,6 +309,8 @@ export function drawGridLines(
     }
     const hColor = theme.horizontalBorderColor ?? theme.borderColor;
     const vColor = theme.borderColor;
+    const selectedVColor = theme.accentColor;
+    const selectedHColor = theme.accentColor;
 
     const { minX, maxX, minY, maxY } = getMinMaxXY(drawRegions, width, height);
 
@@ -322,12 +326,20 @@ export function drawGridLines(
         x += c.width;
         const tx = c.sticky ? x : x + translateX;
         if (tx >= minX && tx <= maxX && verticalBorder(index + 1)) {
+            const leftSelected = selectedColumns?.hasIndex(c.sourceIndex) ?? false;
+            const rightSelected =
+                index < effectiveCols.length - 1
+                    ? selectedColumns?.hasIndex(effectiveCols[index + 1].sourceIndex) ?? false
+                    : false;
+            const color = leftSelected !== rightSelected
+                ? selectedVColor
+                : vColor;
             toDraw.push({
                 x1: tx,
                 y1: Math.max(groupHeaderHeight, minY),
                 x2: tx,
                 y2: Math.min(height, maxY),
-                color: vColor,
+                color,
             });
         }
     }
@@ -348,12 +360,25 @@ export function drawGridLines(
             const ty = y + translateY;
             if (ty >= minY && ty <= maxY - 1) {
                 const rowTheme = getRowThemeOverride?.(row);
+
+                let color = rowTheme?.horizontalBorderColor ?? rowTheme?.borderColor ?? hColor;
+
+                if (selectedRows !== undefined) {
+                    const currentSelected = selectedRows.hasIndex(row);
+                    const prevSelected = row > 0 ? selectedRows.hasIndex(row - 1) : false;
+
+                    // Accent the line if it is a boundary between selected and unselected rows.
+                    if (currentSelected !== prevSelected && (currentSelected || prevSelected)) {
+                        color = selectedHColor;
+                    }
+                }
+
                 toDraw.push({
                     x1: minX,
                     y1: ty,
                     x2: maxX,
                     y2: ty,
-                    color: rowTheme?.horizontalBorderColor ?? rowTheme?.borderColor ?? hColor,
+                    color,
                 });
             }
 

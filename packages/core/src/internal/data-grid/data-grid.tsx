@@ -307,6 +307,18 @@ export interface DataGridProps {
      * @group Style
      */
     readonly resizeIndicator: "full" | "header" | "none" | undefined;
+
+    /** Enables accent-coloured grid lines for selected columns in the header.
+     * @defaultValue false
+     * @group Style
+     */
+    readonly columnSelectionGridLines?: boolean;
+
+    /** Enables accent-coloured grid lines for selected rows in the header.
+     * @defaultValue false
+     * @group Style
+     */
+    readonly rowSelectionGridLines?: boolean;
 }
 
 type DamageUpdateList = readonly {
@@ -320,7 +332,11 @@ export interface DataGridRef {
     focus: () => void;
     getBounds: (col?: number, row?: number) => Rectangle | undefined;
     damage: (cells: DamageUpdateList) => void;
-    getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => GridMouseEventArgs | undefined;
+    getMouseArgsForPosition: (
+        posX: number,
+        posY: number,
+        ev?: MouseEvent | TouchEvent
+    ) => GridMouseEventArgs | undefined;
 }
 
 const getRowData = (cell: InnerGridCell, getCellRenderer?: GetCellRendererCallback) => {
@@ -396,6 +412,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         experimental,
         getCellRenderer,
         resizeIndicator = "full",
+        columnSelectionGridLines = false,
+        rowSelectionGridLines = false,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -446,7 +464,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     }, [cellYOffset, cellXOffset, translateX, translateY, enableFirefoxRescaling, enableSafariRescaling]);
 
     const mappedColumns = useMappedColumns(columns, freezeColumns);
-    const stickyX = React.useMemo(() => fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0,[mappedColumns, dragAndDropState, fixedShadowX]);
+    const stickyX = React.useMemo(
+        () => (fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0),
+        [mappedColumns, dragAndDropState, fixedShadowX]
+    );
 
     // row: -1 === columnHeader, -2 === groupHeader
     const getBoundsForItem = React.useCallback(
@@ -829,6 +850,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getCellRenderer,
             minimumCellWidth,
             resizeIndicator,
+            columnSelectionGridLines,
+            rowSelectionGridLines,
         };
 
         // This confusing bit of code due to some poor design. Long story short, the damage property is only used
@@ -895,6 +918,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         getCellRenderer,
         minimumCellWidth,
         resizeIndicator,
+        columnSelectionGridLines,
+        rowSelectionGridLines,
     ]);
 
     const lastDrawRef = React.useRef(draw);
@@ -951,15 +976,15 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const cursor = isDragging
         ? "grabbing"
         : canDrag || isResizing
-        ? "col-resize"
-        : overFill || isFilling
-        ? "crosshair"
-        : cursorOverride !== undefined
-        ? cursorOverride
-        : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
-        ? "pointer"
-        : "default";
-    
+          ? "col-resize"
+          : overFill || isFilling
+            ? "crosshair"
+            : cursorOverride !== undefined
+              ? cursorOverride
+              : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
+                ? "pointer"
+                : "default";
+
     const style = React.useMemo(
         () => ({
             // width,
@@ -1716,7 +1741,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 }
 
                 return getMouseArgsForPosition(canvasRef.current, posX, posY, ev);
-            }
+            },
         }),
         [canvasRef, damage, getBoundsForItem]
     );

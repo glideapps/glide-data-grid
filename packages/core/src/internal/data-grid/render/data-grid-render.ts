@@ -268,6 +268,17 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         }
     }
     const drawHeaderTexture = () => {
+        
+        // Draw the bottom border of the header.
+        overlayCtx.beginPath();
+        overlayCtx.moveTo(0, overlayHeight - 0.5);
+        overlayCtx.lineTo(width, overlayHeight - 0.5);
+        overlayCtx.strokeStyle = blend(
+            theme.headerBottomBorderColor ?? theme.horizontalBorderColor ?? theme.borderColor,
+            theme.bgHeader
+        );
+        overlayCtx.stroke();
+
         drawGridHeaders(
             overlayCtx,
             effectiveCols,
@@ -308,17 +319,10 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             freezeTrailingRows,
             rows,
             theme,
-            true
+            true,
+            arg.columnSelectionGridLines ? selection.columns : undefined,
+            arg.rowSelectionGridLines ? selection.rows : undefined
         );
-
-        overlayCtx.beginPath();
-        overlayCtx.moveTo(0, overlayHeight - 0.5);
-        overlayCtx.lineTo(width, overlayHeight - 0.5);
-        overlayCtx.strokeStyle = blend(
-            theme.headerBottomBorderColor ?? theme.horizontalBorderColor ?? theme.borderColor,
-            theme.bgHeader
-        );
-        overlayCtx.stroke();
 
         if (mustDrawHighlightRingsOnHeader) {
             drawHighlightRings(
@@ -716,7 +720,10 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
         verticalBorder,
         freezeTrailingRows,
         rows,
-        theme
+        theme,
+        false,
+        arg.columnSelectionGridLines ? selection.columns : undefined,
+        arg.rowSelectionGridLines ? selection.rows : undefined
     );
 
     highlightRedraw?.();
