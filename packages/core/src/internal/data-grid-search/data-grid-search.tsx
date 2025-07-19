@@ -549,6 +549,8 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 smoothScrollX={p.smoothScrollX}
                 smoothScrollY={p.smoothScrollY}
                 resizeIndicator={p.resizeIndicator}
+                columnSelectionGridLines={p.columnSelectionGridLines}
+                rowSelectionGridLines={p.rowSelectionGridLines}
             />
             {searchbox}
         </>
