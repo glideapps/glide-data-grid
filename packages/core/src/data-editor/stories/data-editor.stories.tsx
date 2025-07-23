@@ -351,6 +351,22 @@ export function IdealSize() {
     );
 }
 
+export function DraggableWithEventAnchor() {
+    return (
+        <DataEditor
+            width="100%"
+            isDraggable={true}
+            onDragStart={args => {
+                args.setData("text", "testing");
+            }}
+            dragImageAnchor={'click'}
+            getCellContent={getData}
+            columns={columns}
+            rows={1000}
+        />
+    );
+}
+
 export function DynamicAddRemoveColumns({ columnCount }: { columnCount: number }) {
     // trying to be 500x500
     const cols: GridColumn[] = [

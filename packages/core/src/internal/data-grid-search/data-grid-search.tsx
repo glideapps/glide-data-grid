@@ -527,6 +527,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 gridRef={p.gridRef}
                 headerIcons={p.headerIcons}
                 isDraggable={p.isDraggable}
+                dragImageAnchor={p.dragImageAnchor}
                 onCanvasBlur={p.onCanvasBlur}
                 onCanvasFocused={p.onCanvasFocused}
                 onCellFocused={p.onCellFocused}
