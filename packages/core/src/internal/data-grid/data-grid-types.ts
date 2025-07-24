@@ -557,7 +557,7 @@ let emptyCompactSelection: CompactSelection | undefined;
 
 /** @category Selection */
 export class CompactSelection {
-    private constructor(private readonly items: CompactSelectionRanges) {}
+    private constructor(public readonly items: CompactSelectionRanges) {}
 
     static empty = (): CompactSelection => {
         return emptyCompactSelection ?? (emptyCompactSelection = new CompactSelection([]));
