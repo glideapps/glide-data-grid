@@ -559,6 +559,10 @@ let emptyCompactSelection: CompactSelection | undefined;
 export class CompactSelection {
     private constructor(public readonly items: CompactSelectionRanges) {}
 
+    static create = (items: CompactSelectionRanges) => {
+        return new CompactSelection(mergeRanges(items))
+    }
+
     static empty = (): CompactSelection => {
         return emptyCompactSelection ?? (emptyCompactSelection = new CompactSelection([]));
     };
@@ -575,9 +579,7 @@ export class CompactSelection {
 
     public add(selection: number | Slice): CompactSelection {
         const slice: Slice = typeof selection === "number" ? [selection, selection + 1] : selection;
-
         const newItems = mergeRanges([...this.items, slice]);
-
         return new CompactSelection(newItems);
     }
 
