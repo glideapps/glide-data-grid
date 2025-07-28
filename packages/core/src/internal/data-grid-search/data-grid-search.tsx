@@ -296,6 +296,8 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     React.useEffect(() => {
         if (showSearch && searchInputRef.current !== null) {
             setSearchString("");
+            setSearchStatus(undefined);
+            setSearchResultsInner([]);
             searchInputRef.current.focus({ preventScroll: true });
         }
     }, [showSearch, searchInputRef, setSearchString]);
