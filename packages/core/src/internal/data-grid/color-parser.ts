@@ -98,7 +98,17 @@ export function interpolateColors(leftColor: string, rightColor: string, val: nu
     if (val >= 1) return rightColor;
 
     // Parse to rgba returns straight alpha colors, for interpolation we want pre-multiplied alpha
-    // FIXME: This can be faster if instead of makign an array we just use variables. No memory allocation.
+    const [lr, lg, lb, la] = parseToRgba(leftColor);
+    const [rr, rg, rb, ra] = parseToRgba(rightColor);
+
+    const leftR = lr * la;
+    const leftG = lg * la;
+    const leftB = lb * la;
+
+    const rightR = rr * ra;
+    const rightG = rg * ra;
+    const rightB = rb * ra;
+
     const left = [...parseToRgba(leftColor)];
     left[0] = left[0] * left[3];
     left[1] = left[1] * left[3];
@@ -111,11 +121,11 @@ export function interpolateColors(leftColor: string, rightColor: string, val: nu
     const hScaler = val;
     const nScaler = 1 - val;
 
-    const a = left[3] * nScaler + right[3] * hScaler;
+    const a = la * nScaler + ra * hScaler;
     // now we need to divide the alpha back out to get linear alpha back for the final result
-    const r = Math.floor((left[0] * nScaler + right[0] * hScaler) / a);
-    const g = Math.floor((left[1] * nScaler + right[1] * hScaler) / a);
-    const b = Math.floor((left[2] * nScaler + right[2] * hScaler) / a);
+    const r = Math.floor((leftR * nScaler + rightR * hScaler) / a);
+    const g = Math.floor((leftG * nScaler + rightG * hScaler) / a);
+    const b = Math.floor((leftB * nScaler + rightB * hScaler) / a);
     return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
