@@ -567,6 +567,13 @@ export class CompactSelection {
         return CompactSelection.empty().add(selection);
     };
 
+    static fromArray = (items: readonly number[]): CompactSelection => {
+        if (items.length === 0) return CompactSelection.empty();
+        const slices = items.map(s => [s, s + 1] as Slice);
+        const newItems = mergeRanges(slices);
+        return new CompactSelection(newItems);
+    };
+
     public offset(amount: number): CompactSelection {
         if (amount === 0) return this;
         const newItems = this.items.map(x => [x[0] + amount, x[1] + amount] as Slice);
@@ -575,9 +582,7 @@ export class CompactSelection {
 
     public add(selection: number | Slice): CompactSelection {
         const slice: Slice = typeof selection === "number" ? [selection, selection + 1] : selection;
-
         const newItems = mergeRanges([...this.items, slice]);
-
         return new CompactSelection(newItems);
     }
 
