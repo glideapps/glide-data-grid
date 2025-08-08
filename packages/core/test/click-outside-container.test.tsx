@@ -5,7 +5,7 @@ import ClickOutsideContainer from "../src/internal/click-outside-container/click
 import { vi, expect, describe, it, afterEach } from "vitest";
 
 // skip this for now because github actions is failing
-describe.skip("click-outside-container", () => {
+describe("click-outside-container", () => {
     afterEach(() => {
         cleanup();
     });

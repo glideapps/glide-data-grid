@@ -38,11 +38,6 @@ describe("data-grid-types", () => {
         ).toBe(true);
     });
 
-
-
-
-
-
     test("Load sprites", () => {
         const keys = Object.keys(sprites) as (keyof typeof sprites)[];
         for (const k of keys) {
