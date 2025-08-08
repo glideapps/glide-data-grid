@@ -34,7 +34,7 @@ export function useCollapsingGroups(props: Props): Result {
         const result: [number, number][] = [];
         let current: [number, number] = [-1, -1];
         let lastGroup: string | undefined;
-        for (let i = freezeColumnsLeft as number; i < columnsIn.length - freezeColumnsRight; i++) {
+        for (let i = freezeColumnsLeft; i < columnsIn.length - freezeColumnsRight; i++) {
             const c = columnsIn[i];
             const group = c.group ?? "";
             const isCollapsed = collapsed.includes(group);
@@ -121,8 +121,8 @@ export function useCollapsingGroups(props: Props): Result {
                 name: group,
                 overrideTheme: collapsed.includes(group ?? "")
                     ? {
-                        bgHeader: theme.bgHeaderHasFocus,
-                    }
+                          bgHeader: theme.bgHeaderHasFocus,
+                      }
                     : undefined,
             };
         },
