@@ -305,7 +305,7 @@ export function isRectangleEqual(a: Rectangle | undefined, b: Rectangle | undefi
     return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
 
-export type CellActiviationBehavior = "double-click" | "single-click" | "second-click";
+export type CellActivationBehavior = "double-click" | "single-click" | "second-click";
 
 /** @category Cells */
 export interface BaseGridCell {
@@ -317,7 +317,7 @@ export interface BaseGridCell {
     readonly contentAlign?: "left" | "right" | "center";
     readonly cursor?: CSSProperties["cursor"];
     readonly copyData?: string;
-    readonly activationBehaviorOverride?: CellActiviationBehavior;
+    readonly activationBehaviorOverride?: CellActivationBehavior;
 }
 
 /** @category Cells */

@@ -31,7 +31,7 @@ import {
     BooleanIndeterminate,
     type FillHandleDirection,
     type EditListItem,
-    type CellActiviationBehavior,
+    type CellActivationBehavior,
 } from "../internal/data-grid/data-grid-types.js";
 import DataGridSearch, { type DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
 import { browserIsOSX } from "../common/browser-detect.js";
@@ -664,7 +664,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * Determines when a cell is considered activated and will emit the `onCellActivated` event. Generally an activated
      * cell will open to edit mode.
      */
-    readonly cellActivationBehavior?: CellActiviationBehavior;
+    readonly cellActivationBehavior?: CellActivationBehavior;
 
     /**
      * Controls if focus will trap inside the data grid when doing tab and caret navigation.

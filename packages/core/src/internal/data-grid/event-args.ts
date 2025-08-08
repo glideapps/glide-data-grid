@@ -1,4 +1,4 @@
-import type { Item, Rectangle, CellActiviationBehavior } from "./data-grid-types.js";
+import type { Item, Rectangle, CellActivationBehavior } from "./data-grid-types.js";
 
 /** @category Types */
 export interface BaseGridMouseEventArgs {
@@ -112,7 +112,7 @@ export interface KeyboardCellActivatedEvent extends BaseCellActivatedEvent {
 /** Pointer-initiated activation */
 export interface PointerCellActivatedEvent extends BaseCellActivatedEvent {
     readonly inputType: "pointer";
-    readonly pointerActivation: CellActiviationBehavior;
+    readonly pointerActivation: CellActivationBehavior;
     readonly pointerType?: "mouse" | "touch" | "pen";
 }
 
