@@ -959,7 +959,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
         ? "pointer"
         : "default";
-    
+
     const style = React.useMemo(
         () => ({
             // width,
@@ -1219,11 +1219,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         onHeaderIndicatorClick?.(col, headerBounds.bounds);
                     }
                 }
-            } else if (args.kind === groupHeaderKind) {
-                const action = groupHeaderActionForEvent(args.group, args.bounds, args.localEventX, args.localEventY);
-                if (action !== undefined && args.button === 0) {
-                    action.onClick(args);
-                }
             }
         },
         [
@@ -1232,7 +1227,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             isOverHeaderElement,
             onHeaderMenuClick,
             onHeaderIndicatorClick,
-            groupHeaderActionForEvent,
         ]
     );
     useEventListener("click", onClickImpl, windowEventTarget, false);
