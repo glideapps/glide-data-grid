@@ -31,7 +31,7 @@ import {
     BooleanIndeterminate,
     type FillHandleDirection,
     type EditListItem,
-    type CellActiviationBehavior,
+    type CellActivationBehavior,
 } from "../internal/data-grid/data-grid-types.js";
 import DataGridSearch, { type DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
 import { browserIsOSX } from "../common/browser-detect.js";
@@ -78,6 +78,7 @@ import {
     type GridDragEventArgs,
     mouseEventArgsAreEqual,
     type GridKeyEventArgs,
+    type CellActivatedEventArgs,
 } from "../internal/data-grid/event-args.js";
 import { type Keybinds, useKeybindingsWithDefaults } from "./data-editor-keybindings.js";
 import type { Highlight } from "../internal/data-grid/render/data-grid-render.cells.js";
@@ -241,7 +242,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
     /** Emitted when a cell is activated, by pressing Enter, Space or double clicking it.
      * @group Events
      */
-    readonly onCellActivated?: (cell: Item) => void;
+    readonly onCellActivated?: (cell: Item, event: CellActivatedEventArgs) => void;
 
     /**
      * Emitted whenever the user initiats a pattern fill using the fill handle. This event provides both
@@ -663,7 +664,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * Determines when a cell is considered activated and will emit the `onCellActivated` event. Generally an activated
      * cell will open to edit mode.
      */
-    readonly cellActivationBehavior?: CellActiviationBehavior;
+    readonly cellActivationBehavior?: CellActivationBehavior;
 
     /**
      * Controls if focus will trap inside the data grid when doing tab and caret navigation.
@@ -771,6 +772,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         cell: Item;
         highlight: boolean;
         forceEditMode: boolean;
+        activation: CellActivatedEventArgs;
     }>();
     const searchInputRef = React.useRef<HTMLInputElement | null>(null);
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -1431,7 +1433,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     );
 
     const reselect = React.useCallback(
-        (bounds: Rectangle, fromKeyboard: boolean, initialValue?: string) => {
+        (bounds: Rectangle, activation: CellActivatedEventArgs, initialValue?: string) => {
             if (gridSelection.current === undefined) return;
 
             const [col, row] = gridSelection.current.cell;
@@ -1466,8 +1468,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     cell: [col, row],
                     highlight: initialValue === undefined,
                     forceEditMode: initialValue !== undefined,
+                    activation,
                 });
-            } else if (c.kind === GridCellKind.Boolean && fromKeyboard && c.readonly !== true) {
+            } else if (c.kind === GridCellKind.Boolean && activation.inputType === "keyboard" && c.readonly !== true) {
                 mangledOnCellsEdited([
                     {
                         location: gridSelection.current.cell,
@@ -1502,6 +1505,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 highlight: true,
                 cell: [col, row],
                 forceEditMode: true,
+                activation: { inputType: "keyboard", key: "Enter" },
             });
         },
         [getMangledCellContent, scrollRef, setOverlaySimple]
@@ -2058,6 +2062,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             mapper,
             lastRowSticky,
             setCurrent,
+            headerRowMarkerDisabled,
             setSelectedColumns,
             setGridSelection,
             onSelectionCleared,
@@ -2387,8 +2392,16 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }
                     }
                     if (shouldActivate) {
-                        onCellActivated?.([col - rowMarkerOffset, row]);
-                        reselect(a.bounds, false);
+                        const act = a.isDoubleClick === true
+                            ? "double-click"
+                            : (c.activationBehaviorOverride ?? cellActivationBehavior);
+                        const activationEvent: CellActivatedEventArgs = {
+                            inputType: "pointer",
+                            pointerActivation: act,
+                            pointerType: a.isTouch ? "touch" : "mouse",
+                        };
+                        onCellActivated?.([col - rowMarkerOffset, row], activationEvent);
+                        reselect(a.bounds, activationEvent);
                         return true;
                     }
                 }
@@ -3265,8 +3278,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         void appendRow(customTargetColumn ?? col);
                     }, 0);
                 } else {
-                    onCellActivated?.([col - rowMarkerOffset, row]);
-                    reselect(bounds, true);
+                    const activationEvent: CellActivatedEventArgs = {
+                        inputType: "keyboard",
+                        key: event.key,
+                    };
+                    onCellActivated?.([col - rowMarkerOffset, row], activationEvent);
+                    reselect(bounds, activationEvent);
                 }
             } else if (gridSelection.current.range.height > 1 && isHotkey(keys.downFill, event, details)) {
                 fillDown();
@@ -3477,8 +3494,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 ) {
                     return;
                 }
-                onCellActivated?.([col - rowMarkerOffset, row]);
-                reselect(event.bounds, true, event.key);
+                const activationEvent: CellActivatedEventArgs = {
+                    inputType: "keyboard",
+                    key: event.key,
+                };
+                onCellActivated?.([col - rowMarkerOffset, row], activationEvent);
+                reselect(event.bounds, activationEvent, event.key);
                 event.stopPropagation();
                 event.preventDefault();
             }
@@ -3543,7 +3564,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 formatted?: string | string[]
             ): EditListItem | undefined {
                 const stringifiedRawValue =
-                    typeof rawValue === "object" ? rawValue?.join("\n") ?? "" : rawValue?.toString() ?? "";
+                    typeof rawValue === "object" ? (rawValue?.join("\n") ?? "") : (rawValue?.toString() ?? "");
 
                 if (!isInnerOnlyCell(inner) && isReadWriteCell(inner) && inner.readonly !== true) {
                     const coerced = coercePasteValue?.(stringifiedRawValue, inner);

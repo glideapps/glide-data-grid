@@ -11,6 +11,9 @@ export * from "./internal/data-grid/data-grid-types.js";
 export type {
     BaseGridMouseEventArgs,
     CellClickedEventArgs,
+    CellActivatedEventArgs,
+    KeyboardCellActivatedEvent,
+    PointerCellActivatedEvent,
     DragHandler,
     FillPatternEventArgs,
     GridDragEventArgs,

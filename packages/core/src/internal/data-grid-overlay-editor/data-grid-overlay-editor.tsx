@@ -16,6 +16,8 @@ import {
     type Rectangle,
     type ValidatedGridCell,
 } from "../data-grid/data-grid-types.js";
+
+import type { CellActivatedEventArgs } from "../data-grid/event-args.js";
 import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style.js";
 import type { OverlayImageEditorProps } from "./private/image-overlay-editor.js";
 import { useStayOnScreen } from "./use-stay-on-screen.js";
@@ -39,6 +41,7 @@ interface DataGridOverlayEditorProps {
     readonly getCellRenderer: GetCellRendererCallback;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
     readonly provideEditor?: ProvideEditorCallback<GridCell>;
+    readonly activation: CellActivatedEventArgs;
     readonly validateCell?: (
         cell: Item,
         newValue: EditableGridCell,
@@ -69,6 +72,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         provideEditor,
         isOutsideClick,
         customEventTarget,
+        activation,
     } = p;
 
     const [tempValue, setTempValueRaw] = React.useState<GridCell | undefined>(forceEditMode ? content : undefined);
@@ -160,13 +164,14 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
 
     const [editorProvider, useLabel] = React.useMemo((): [ProvideEditorCallbackResult<GridCell>, boolean] | [] => {
         if (isInnerOnlyCell(content)) return [];
-        const cellWithLocation = { ...content, location: cell } as GridCell & {
+        const cellWithLocation = { ...content, location: cell, activation } as GridCell & {
             location: Item;
+            activation: CellActivatedEventArgs;
         };
         const external = provideEditor?.(cellWithLocation);
         if (external !== undefined) return [external, false];
         return [getCellRenderer(content)?.provideEditor?.(cellWithLocation), false];
-    }, [cell, content, getCellRenderer, provideEditor]);
+    }, [cell, content, getCellRenderer, provideEditor, activation]);
 
     const { ref, style: stayOnScreenStyle } = useStayOnScreen();
 
@@ -187,6 +192,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
             <CustomEditor
                 portalElementRef={portalElementRef}
                 isHighlighted={highlight}
+                activation={activation}
                 onChange={setTempValue}
                 value={targetValue}
                 initialValue={initialValue}

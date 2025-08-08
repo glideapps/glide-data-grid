@@ -1712,7 +1712,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 return getMouseArgsForPosition(canvasRef.current, posX, posY, ev);
             }
         }),
-        [canvasRef, damage, getBoundsForItem]
+        [canvasRef, damage, getBoundsForItem, getMouseArgsForPosition]
     );
 
     const lastFocusedSubdomNode = React.useRef<Item>();
