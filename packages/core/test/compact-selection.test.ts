@@ -207,4 +207,15 @@ describe("CompactSelection", () => {
         expect(adjacent.items).toEqual([[1, 7]]);
         expect([...adjacent]).toEqual([1, 2, 3, 4, 5, 6]);
     });
+
+    test("Compact selection fromArray", () => {
+        const sel = CompactSelection.fromArray([3, 4, 6]);
+        expect([...sel]).toEqual([3, 4, 6]);
+    });
+
+    test("Compact selection array roundtrip", () => {
+        const sel = CompactSelection.fromSingleSelection([2, 7]).add(8);
+        const altSel = CompactSelection.fromArray(sel.toArray());
+        expect(altSel.equals(sel)).toBe(true);
+    });
 });
