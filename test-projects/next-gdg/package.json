@@ -12,7 +12,7 @@
         "@glideapps/glide-data-grid": "^3.4.1",
         "canvas-hypertxt": "^1.0.3",
         "lodash": "^4.17.21",
-        "marked": "^4.0.12",
+        "marked": "^16.1.2",
         "next": "12.1.0",
         "react": "17.0.2",
         "react-dom": "17.0.2",

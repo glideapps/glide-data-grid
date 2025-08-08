@@ -969,14 +969,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const cursor = isDragging
         ? "grabbing"
         : canDrag || isResizing
-          ? "col-resize"
-          : overFill || isFilling
-            ? "crosshair"
-            : cursorOverride !== undefined
-              ? cursorOverride
-              : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
-                ? "pointer"
-                : "default";
+        ? "col-resize"
+        : overFill || isFilling
+        ? "crosshair"
+        : cursorOverride !== undefined
+        ? cursorOverride
+        : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
+        ? "pointer"
+        : "default";
 
     const style = React.useMemo(
         () => ({
@@ -1237,11 +1237,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                         onHeaderIndicatorClick?.(col, headerBounds.bounds);
                     }
                 }
-            } else if (args.kind === groupHeaderKind) {
-                const action = groupHeaderActionForEvent(args.group, args.bounds, args.localEventX, args.localEventY);
-                if (action !== undefined && args.button === 0) {
-                    action.onClick(args);
-                }
             }
         },
         [
@@ -1250,7 +1245,6 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             isOverHeaderElement,
             onHeaderMenuClick,
             onHeaderIndicatorClick,
-            groupHeaderActionForEvent,
         ]
     );
     useEventListener("click", onClickImpl, windowEventTarget, false);
@@ -1736,7 +1730,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 return getMouseArgsForPosition(canvasRef.current, posX, posY, ev);
             },
         }),
-        [canvasRef, damage, getBoundsForItem]
+        [canvasRef, damage, getBoundsForItem, getMouseArgsForPosition]
     );
 
     const lastFocusedSubdomNode = React.useRef<Item>();
