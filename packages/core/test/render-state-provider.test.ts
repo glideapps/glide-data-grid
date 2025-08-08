@@ -78,7 +78,7 @@ describe("Data Grid Utility Functions", () => {
         it("should update visible window and freeze columns correctly", () => {
             renderStateProvider.setValue([0, 30], "state");
             renderStateProvider.setValue([1, 0], "state");
-            renderStateProvider.setWindow(testRectangle, 1, []);
+            renderStateProvider.setWindow(testRectangle, 1, [], 10);
             expect(renderStateProvider.getValue([0, 30])).to.equal("state");
             expect(renderStateProvider.getValue([1, 0])).to.equal(undefined);
         });
