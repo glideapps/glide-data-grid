@@ -44,7 +44,7 @@ import {
     mergeAndRealizeTheme,
 } from "../common/styles.js";
 import type { DataGridRef } from "../internal/data-grid/data-grid.js";
-import { getScrollBarWidth, useEventListener, whenDefined } from "../common/utils.js";
+import { getScrollBarWidth, useEventListener, normalizeFreezeColumns, whenDefined } from "../common/utils.js";
 import {
     isGroupEqual,
     itemsAreEqual,
@@ -923,8 +923,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     const maxColumnWidth = Math.max(maxColumnWidthIn, minColumnWidth);
     const maxColumnAutoWidth = Math.max(maxColumnAutoWidthIn ?? maxColumnWidth, minColumnWidth);
 
-    const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
-    const freezeRightColumns = typeof freezeColumns === "number" ? 0 : freezeColumns[1];
+    const [freezeLeftColumns, freezeRightColumns] = normalizeFreezeColumns(freezeColumns);
 
     const docStyle = React.useMemo(() => {
         if (typeof window === "undefined") return { fontSize: "16px" };
@@ -1581,7 +1580,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             frozenLeftWidth += columns[i].width;
                         }
                         let frozenRightWidth = 0;
-                        for (let i = columns.length - 1; i >= columns.length - 1 - freezeRightColumns; i--) {
+                        for (let i = columns.length - 1; i >= columns.length - freezeRightColumns; i--) {
                             frozenRightWidth += columns[i].width;
                         }
                         let trailingRowHeight = 0;

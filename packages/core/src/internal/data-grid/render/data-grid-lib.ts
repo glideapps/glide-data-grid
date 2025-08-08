@@ -8,7 +8,7 @@ import {
     type Rectangle,
     type BaseGridCell,
 } from "../data-grid-types.js";
-import { direction } from "../../../common/utils.js";
+import { direction, normalizeFreezeColumns } from "../../../common/utils.js";
 import React from "react";
 import type { BaseDrawArgs, PrepResult } from "../../../cells/cell-types.js";
 import { split as splitText, clearCache } from "canvas-hypertxt";
@@ -232,8 +232,7 @@ export function getEffectiveColumns(
 ): readonly MappedGridColumn[] {
     const mappedCols = remapForDnDState(columns, dndState);
 
-    const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
-    const freezeRightColumns = typeof freezeColumns === "number" ? 0 : freezeColumns[1];
+    const [freezeLeftColumns, freezeRightColumns] = normalizeFreezeColumns(freezeColumns);
 
     const sticky: MappedGridColumn[] = [];
     for (let i = 0; i < freezeLeftColumns; i++) {
@@ -829,8 +828,7 @@ export function computeBounds(
         height: 0,
     };
 
-    const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
-    const freezeRightColumns = typeof freezeColumns === "number" ? 0 : freezeColumns[1];
+    const [freezeLeftColumns, freezeRightColumns] = normalizeFreezeColumns(freezeColumns);
     const column = mappedColumns[col];
 
     if (col >= mappedColumns.length || row >= rows || row < -2 || col < 0) {

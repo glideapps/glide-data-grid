@@ -2,6 +2,7 @@ import * as React from "react";
 import DataGridDnd, { type DataGridDndProps } from "../data-grid-dnd/data-grid-dnd.js";
 import type { Rectangle } from "../data-grid/data-grid-types.js";
 import { InfiniteScroller } from "./infinite-scroller.js";
+import { normalizeFreezeColumns } from "../../common/utils.js";
 
 type Props = Omit<DataGridDndProps, "width" | "height" | "eventTargetRef">;
 
@@ -102,7 +103,7 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
     const lastY = React.useRef<number | undefined>();
     const lastSize = React.useRef<readonly [number, number] | undefined>();
 
-    const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
+    const [freezeLeftColumns] = normalizeFreezeColumns(freezeColumns);
 
     const width = nonGrowWidth + Math.max(0, overscrollX ?? 0);
 

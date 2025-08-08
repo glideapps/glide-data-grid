@@ -7,6 +7,7 @@ import { blend, withAlpha } from "../color-parser.js";
 import { hugRectToTarget, intersectRect, rectContains, splitRectIntoRegions } from "../../../common/math.js";
 import { getSpanBounds, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
 import { type Highlight } from "./data-grid-render.cells.js";
+import { normalizeFreezeColumns } from "../../../common/utils.js";
 
 export function drawHighlightRings(
     ctx: CanvasRenderingContext2D,
@@ -27,8 +28,7 @@ export function drawHighlightRings(
     theme: FullTheme
 ): (() => void) | undefined {
     const highlightRegions = allHighlightRegions?.filter(x => x.style !== "no-outline");
-    const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
-    const freezeRightColumns = typeof freezeColumns === "number" ? 0 : freezeColumns[1];
+    const [freezeLeftColumns, freezeRightColumns] = normalizeFreezeColumns(freezeColumns);
 
     if (highlightRegions === undefined || highlightRegions.length === 0) return undefined;
 
