@@ -28,7 +28,13 @@ import {
 } from "./data-grid-types.js";
 import { CellSet } from "./cell-set.js";
 import { SpriteManager, type SpriteMap } from "./data-grid-sprites.js";
-import { direction, getScrollBarWidth, useDebouncedMemo, useEventListener } from "../../common/utils.js";
+import {
+    direction,
+    getScrollBarWidth,
+    useDebouncedMemo,
+    useEventListener,
+    normalizeFreezeColumns,
+} from "../../common/utils.js";
 import clamp from "lodash/clamp.js";
 import makeRange from "lodash/range.js";
 import { drawGrid } from "./render/data-grid-render.js";
@@ -403,8 +409,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
-    const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
-    const freezeRightColumns = typeof freezeColumns === "number" ? 0 : freezeColumns[1];
+    const [freezeLeftColumns, freezeRightColumns] = normalizeFreezeColumns(freezeColumns);
     const cellXOffset = Math.max(freezeLeftColumns, Math.min(columns.length - 1, cellXOffsetReal));
 
     const ref = React.useRef<HTMLCanvasElement | null>(null);
