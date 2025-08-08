@@ -443,7 +443,7 @@ export function drawGrid(arg: DrawGridArg, lastArg: DrawGridArg | undefined) {
             const selectionCurrent = selection.current;
 
             if (
-                fillHandle &&
+                (fillHandle !== false && fillHandle !== undefined) &&
                 drawFocus &&
                 selectionCurrent !== undefined &&
                 damage.has(rectBottomRight(selectionCurrent.range))
