@@ -275,11 +275,12 @@ export function drawFillHandle(
                                 ctx.rect(clipX, 0, width - clipX, height);
                                 ctx.clip();
                             }
-                            // Draw a larger, outlined fill-handle similar to Excel / Google Sheets.
+                            // Draw a larger, outlined fill handle similar to Excel / Google Sheets.
                             const size = fill.size;
                             const half = size / 2;
                             
-                            // Place the handle so its center sits exactly on the bottom-right corner of the cell.
+                            // Place the handle so its center sits on the bottom-right corner of the cell,
+                            // plus any configured offsets (fill.offsetX, fill.offsetY).
                             // Offset by half pixel to align with grid lines.
                             const hx = cellX + cellWidth + fill.offsetX - half + 0.5;
                             const hy = drawY + rh + fill.offsetY - half + 0.5;

@@ -533,6 +533,7 @@ export type FillHandleDirection = "horizontal" | "vertical" | "orthogonal" | "an
  *  `size`    – Width/height (or diameter) in CSS pixels. Default is `6`.
  *  `offsetX` – Horizontal offset from the bottom-right corner of the cell (positive is →). Default is `0`.
  *  `offsetY` – Vertical offset from the bottom-right corner of the cell (positive is ↓). Default is `0`.
+ *  `outline` – Width of the outline stroke in CSS pixels. Default is `1`.
  */
 export type FillHandleConfig = {
     readonly shape: "square" | "circle";
