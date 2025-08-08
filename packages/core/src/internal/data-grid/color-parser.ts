@@ -109,15 +109,6 @@ export function interpolateColors(leftColor: string, rightColor: string, val: nu
     const rightG = rg * ra;
     const rightB = rb * ra;
 
-    const left = [...parseToRgba(leftColor)];
-    left[0] = left[0] * left[3];
-    left[1] = left[1] * left[3];
-    left[2] = left[2] * left[3];
-    const right = [...parseToRgba(rightColor)];
-    right[0] = right[0] * right[3];
-    right[1] = right[1] * right[3];
-    right[2] = right[2] * right[3];
-
     const hScaler = val;
     const nScaler = 1 - val;
 
