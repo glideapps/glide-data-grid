@@ -1,6 +1,7 @@
 /* eslint-disable sonarjs/no-identical-functions */
 import * as React from "react";
 
+import { useState, useCallback, useMemo } from "storybook/preview-api";
 import { BuilderThemeWrapper } from "../../stories/story-utils.js";
 import {
     CompactSelection,
@@ -151,9 +152,9 @@ function getDummyCols() {
 }
 
 export function Simplenotest() {
-    const [cols, setColumns] = React.useState(getDummyCols);
+    const [cols, setColumns] = useState(getDummyCols);
 
-    const onColumnResize = React.useCallback(
+    const onColumnResize = useCallback(
         (col: GridColumn, newSize: number) => {
             const index = cols.indexOf(col);
             const newCols = [...cols];
@@ -205,9 +206,9 @@ function getDummyRelationData([col, row]: Item): GridCell {
 }
 
 export function RelationColumn() {
-    const [cols, setColumns] = React.useState(getDummyRelationColumn);
+    const [cols, setColumns] = useState(getDummyRelationColumn);
 
-    const onColumnResize = React.useCallback(
+    const onColumnResize = useCallback(
         (col: GridColumn, newSize: number) => {
             const index = cols.indexOf(col);
             const newCols = [...cols];
@@ -254,9 +255,9 @@ export function Minimal() {
 }
 
 export function Smooth() {
-    const [cols, setCols] = React.useState(getDummyCols);
+    const [cols, setCols] = useState(getDummyCols);
 
-    const onColumnResize = React.useCallback(
+    const onColumnResize = useCallback(
         (column: GridColumn, newSize: number) => {
             const index = cols.indexOf(column);
             if (index !== -1) {
@@ -288,7 +289,7 @@ export function Smooth() {
 }
 
 export function ManualControl() {
-    const [gridSelection, setGridSelection] = React.useState<GridSelection | undefined>(undefined);
+    const [gridSelection, setGridSelection] = useState<GridSelection | undefined>(undefined);
 
     const cb = (newVal: GridSelection) => {
         if ((newVal.current?.cell[0] ?? 0) % 2 === 0) {
@@ -383,20 +384,20 @@ DynamicAddRemoveColumns.args = {
 };
 
 export function GridSelectionOutOfRangeNoColumns() {
-    const dummyCols = React.useMemo(
+    const dummyCols = useMemo(
         () => getDummyCols().map(v => ({ ...v, width: 300, title: "Making column smaller used to crash!" })),
         []
     );
 
-    const [selected, setSelected] = React.useState<GridSelection | undefined>({
+    const [selected, setSelected] = useState<GridSelection | undefined>({
         current: { cell: [2, 8], range: { width: 1, height: 1, x: 2, y: 8 }, rangeStack: [] },
         columns: CompactSelection.empty(),
         rows: CompactSelection.empty(),
     });
 
-    const [cols, setCols] = React.useState(dummyCols);
+    const [cols, setCols] = useState(dummyCols);
 
-    const onSelected = React.useCallback((newSel?: GridSelection) => {
+    const onSelected = useCallback((newSel?: GridSelection) => {
         setSelected(newSel);
     }, []);
 
@@ -444,13 +445,13 @@ function getResizableColumns(sizeMap: ResizableColumnsSizeMap): GridColumn[] {
 }
 
 export function ResizableColumns() {
-    const [colSizes, setColSizes] = React.useState(getResizableColumnsInitSize);
+    const [colSizes, setColSizes] = useState(getResizableColumnsInitSize);
 
-    const cols = React.useMemo(() => {
+    const cols = useMemo(() => {
         return getResizableColumns(colSizes);
     }, [colSizes]);
 
-    const onColumnResize = React.useCallback((column: GridColumn, newSize: number) => {
+    const onColumnResize = useCallback((column: GridColumn, newSize: number) => {
         setColSizes(prevColSizes => {
             return {
                 ...prevColSizes,
@@ -474,20 +475,20 @@ export function ResizableColumns() {
 }
 
 export function GridSelectionOutOfRangeLessColumnsThanSelection() {
-    const dummyCols = React.useMemo(
+    const dummyCols = useMemo(
         () => getDummyCols().map(v => ({ ...v, width: 300, title: "Making column smaller used to crash!" })),
         []
     );
 
-    const [selected, setSelected] = React.useState<GridSelection | undefined>({
+    const [selected, setSelected] = useState<GridSelection | undefined>({
         current: { cell: [2, 8], range: { width: 1, height: 1, x: 2, y: 8 }, rangeStack: [] },
         columns: CompactSelection.empty(),
         rows: CompactSelection.empty(),
     });
 
-    const [cols, setCols] = React.useState(dummyCols);
+    const [cols, setCols] = useState(dummyCols);
 
-    const onSelected = React.useCallback((newSel?: GridSelection) => {
+    const onSelected = useCallback((newSel?: GridSelection) => {
         setSelected(newSel);
     }, []);
 
@@ -511,17 +512,17 @@ export function GridSelectionOutOfRangeLessColumnsThanSelection() {
 }
 
 export function GridAddNewRows() {
-    const cols = React.useMemo(getDummyCols, []);
+    const cols = useMemo(getDummyCols, []);
 
-    const [rowsCount, setRowsCount] = React.useState(10);
+    const [rowsCount, setRowsCount] = useState(10);
 
-    const onRowAppended = React.useCallback(() => {
+    const onRowAppended = useCallback(() => {
         setRowsCount(r => r + 1);
     }, []);
 
-    const [selected, setSelected] = React.useState<GridSelection | undefined>(undefined);
+    const [selected, setSelected] = useState<GridSelection | undefined>(undefined);
 
-    const onSelected = React.useCallback((newSel?: GridSelection) => {
+    const onSelected = useCallback((newSel?: GridSelection) => {
         setSelected(newSel);
     }, []);
 
@@ -539,11 +540,11 @@ export function GridAddNewRows() {
 }
 
 export function GridNoTrailingBlankRow() {
-    const cols = React.useMemo(getDummyCols, []);
+    const cols = useMemo(getDummyCols, []);
 
-    const [selected, setSelected] = React.useState<GridSelection | undefined>(undefined);
+    const [selected, setSelected] = useState<GridSelection | undefined>(undefined);
 
-    const onSelected = React.useCallback((newSel?: GridSelection) => {
+    const onSelected = useCallback((newSel?: GridSelection) => {
         setSelected(newSel);
     }, []);
 
@@ -560,7 +561,7 @@ export function GridNoTrailingBlankRow() {
 }
 
 export function MarkdownEdits() {
-    const dummyCols: GridColumn[] = React.useMemo(() => {
+    const dummyCols: GridColumn[] = useMemo(() => {
         return [
             {
                 title: "MD short",
@@ -573,7 +574,7 @@ export function MarkdownEdits() {
         ];
     }, []);
 
-    const dummyCells = React.useCallback(([col, _row]: Item) => {
+    const dummyCells = useCallback(([col, _row]: Item) => {
         if (col === 0) {
             const editable: EditableGridCell = {
                 data: "text",
@@ -610,13 +611,13 @@ export function MarkdownEdits() {
         return editable;
     }, []);
 
-    const [selected, setSelected] = React.useState<GridSelection | undefined>({
+    const [selected, setSelected] = useState<GridSelection | undefined>({
         current: { cell: [2, 8], range: { width: 1, height: 1, x: 2, y: 8 }, rangeStack: [] },
         columns: CompactSelection.empty(),
         rows: CompactSelection.empty(),
     });
 
-    const onSelected = React.useCallback((newSel?: GridSelection) => {
+    const onSelected = useCallback((newSel?: GridSelection) => {
         setSelected(newSel);
     }, []);
 
@@ -633,7 +634,7 @@ export function MarkdownEdits() {
 }
 
 export const CanEditBoolean = () => {
-    const [vals, setVals] = React.useState<[boolean | null | undefined, boolean | null | undefined]>([false, false]);
+    const [vals, setVals] = useState<[boolean | null | undefined, boolean | null | undefined]>([false, false]);
     return (
         <DataEditor
             width="100%"
@@ -670,7 +671,7 @@ export const CanEditBoolean = () => {
 };
 
 export const SimpleEditable = () => {
-    const [vals, setVals] = React.useState<[string, string][]>(() => {
+    const [vals, setVals] = useState<[string, string][]>(() => {
         const result: [string, string][] = [];
         for (let i = 0; i < 2000; i++) {
             result.push(["Edit", "Me"]);
@@ -716,7 +717,7 @@ export function GroupHeaderActionClick() {
         { title: "Col1", width: 100, grow: 1, group: "Group"},
     ];
 
-    const [clickCount, setClickCount] = React.useState(0);
+    const [clickCount, setClickCount] = useState(0);
 
     return (
         <div>
