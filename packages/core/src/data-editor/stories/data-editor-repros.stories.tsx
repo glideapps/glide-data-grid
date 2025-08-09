@@ -1,6 +1,5 @@
 import * as React from "react";
 
-import { useState, useMemo } from "@storybook/addons";
 import { BuilderThemeWrapper } from "../../stories/story-utils.js";
 import { type GridCell, GridCellKind, type Item } from "../../internal/data-grid/data-grid-types.js";
 import { DataEditorAll as DataEditor } from "../../data-editor-all.js";
@@ -76,9 +75,9 @@ const filteringColumns = [
 ];
 
 export function FilterColumns() {
-    const [searchText, setSearchText] = useState("");
+    const [searchText, setSearchText] = React.useState("");
 
-    const cols = useMemo(() => {
+    const cols = React.useMemo(() => {
         if (searchText === "") {
             return filteringColumns;
         }

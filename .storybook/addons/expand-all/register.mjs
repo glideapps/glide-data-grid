@@ -1,5 +1,5 @@
-import { STORY_RENDERED } from "@storybook/core-events";
-import { addons } from "@storybook/addons";
+import { STORY_RENDERED, STORIES_EXPAND_ALL } from "@storybook/core-events";
+import { addons } from '@storybook/manager-api';
 
 let hasExpanded = false;
 
@@ -8,7 +8,7 @@ addons.register("expand-all", api => {
 
     emitter.on(STORY_RENDERED, () => {
         if (!hasExpanded) {
-            setTimeout(api.expandAll); // Calling on the next tick after storyRendered seems to work reliably.
+            setTimeout(api.emit(STORIES_EXPAND_ALL)); // Calling on the next tick after storyRendered seems to work reliably.
             hasExpanded = true;
         }
     });
