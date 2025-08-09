@@ -4,7 +4,6 @@ import type { DataEditorProps } from "./data-editor.js";
 import type { DataGridProps } from "../internal/data-grid/data-grid.js";
 import { whenDefined } from "../common/utils.js";
 import type { RowGroupingMapperResult } from "./row-grouping-api.js";
-import type { Item } from "../internal/data-grid/data-grid-types.js";
 
 type Mutable<T> = {
     -readonly [K in keyof T]: T[K];
@@ -181,13 +180,7 @@ export function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number):
 
 
 // grid relative index to path and other details
-export function mapRowIndexToPath(itemOrRow: number, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number>;
-export function mapRowIndexToPath(itemOrRow: Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<Item>;
-export function mapRowIndexToPath(itemOrRow: number | Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number> | RowGroupingMapperResult<Item>;
-export function mapRowIndexToPath(itemOrRow: number | Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number> | RowGroupingMapperResult<Item> {
-    const row = typeof itemOrRow === "number" ? itemOrRow : itemOrRow[1];
-    const originalIndex = typeof itemOrRow === "number" ? row : itemOrRow[0];
-
+export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number> {
     if (flattenedRowGroups === undefined || flattenRowGroups.length === 0)
         return {
             path: [row],
@@ -229,7 +222,7 @@ export function mapRowIndexToPath(itemOrRow: number | Item, flattenedRowGroups?:
     // I suppose to eliminate this, you can treat this case as part of the overflow of the last group.
     return {
         path: [row],
-        originalIndex,
+        originalIndex: row,
         isGroupHeader: false,
         groupIndex: row,
         contentIndex: row,

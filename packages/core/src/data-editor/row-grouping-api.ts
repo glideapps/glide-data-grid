@@ -34,7 +34,16 @@ export function useRowGrouping(options: RowGroupingOptions | undefined, rows: nu
         getRowGroupingForPath,
         updateRowGroupingByPath,
         mapper: React.useCallback<UseRowGroupingResult["mapper"]>(
-            (itemOrRow) => mapRowIndexToPath(itemOrRow, flattenedRowGroups),
+            (itemOrRow: number | Item) => {
+                if (typeof itemOrRow === "number") {
+                    return mapRowIndexToPath(itemOrRow, flattenedRowGroups);
+                }
+                const r = mapRowIndexToPath(itemOrRow[1], flattenedRowGroups);
+                return {
+                    ...r,
+                    originalIndex: [itemOrRow[0], r.originalIndex],
+                } as RowGroupingMapperResult<Item>;
+            },
             [flattenedRowGroups]
         ),
     };
