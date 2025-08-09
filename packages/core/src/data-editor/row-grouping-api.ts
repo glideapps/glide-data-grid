@@ -14,7 +14,6 @@ export interface RowGroupingMapperResult<T> {
 
 export type RowGroupingMapper = (itemOrRow: number | Item) => RowGroupingMapperResult<Item | number>;
 
-
 export interface UseRowGroupingResult {
     readonly mapper: RowGroupingMapper;
     readonly updateRowGroupingByPath: (
@@ -34,17 +33,8 @@ export function useRowGrouping(options: RowGroupingOptions | undefined, rows: nu
     return {
         getRowGroupingForPath,
         updateRowGroupingByPath,
-        mapper: React.useCallback<RowGroupingMapper>(
-             (itemOrRow) => {
-                if (typeof itemOrRow === "number") {
-                    return mapRowIndexToPath(itemOrRow, flattenedRowGroups);
-                }
-                const r = mapRowIndexToPath(itemOrRow[1], flattenedRowGroups);
-                return {
-                    ...r,
-                    originalIndex: [itemOrRow[0], r.originalIndex],
-                } as RowGroupingMapperResult<Item>;
-            },
+        mapper: React.useCallback<UseRowGroupingResult["mapper"]>(
+            (itemOrRow) => mapRowIndexToPath(itemOrRow, flattenedRowGroups),
             [flattenedRowGroups]
         ),
     };

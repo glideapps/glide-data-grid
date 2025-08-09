@@ -4,6 +4,7 @@ import type { DataEditorProps } from "./data-editor.js";
 import type { DataGridProps } from "../internal/data-grid/data-grid.js";
 import { whenDefined } from "../common/utils.js";
 import type { RowGroupingMapperResult } from "./row-grouping-api.js";
+import type { Item } from "../internal/data-grid/data-grid-types.js";
 
 type Mutable<T> = {
     -readonly [K in keyof T]: T[K];
@@ -178,8 +179,14 @@ export function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number):
         });
 }
 
+
 // grid relative index to path and other details
-export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number> {
+function mapRowIndexToPathFn(itemRow: number, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number>;
+function mapRowIndexToPathFn(itemRow: Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<Item>;
+function mapRowIndexToPathFn(itemRow: number | Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number> | RowGroupingMapperResult<Item> {
+    const row = typeof itemRow === "number" ? itemRow : itemRow[1];
+    const originalIndex = typeof itemRow === "number" ? row : itemRow[0];
+
     if (flattenedRowGroups === undefined || flattenRowGroups.length === 0)
         return {
             path: [row],
@@ -221,13 +228,15 @@ export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly Fla
     // I suppose to eliminate this, you can treat this case as part of the overflow of the last group.
     return {
         path: [row],
-        originalIndex: row,
+        originalIndex,
         isGroupHeader: false,
         groupIndex: row,
         contentIndex: row,
         groupRows: -1,
     };
 }
+
+export const mapRowIndexToPath = (itemOrRow: number | Item, flattenedRowGroups?: readonly FlattenedRowGroup[]) => typeof itemOrRow === "number" ? mapRowIndexToPathFn(itemOrRow, flattenedRowGroups) : mapRowIndexToPathFn(itemOrRow, flattenedRowGroups);
 
 export interface UseRowGroupingInnerResult {
     readonly rows: number;
