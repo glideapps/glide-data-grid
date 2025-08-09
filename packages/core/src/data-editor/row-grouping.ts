@@ -181,11 +181,11 @@ export function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number):
 
 
 // grid relative index to path and other details
-function mapRowIndexToPathFn(itemRow: number, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number>;
-function mapRowIndexToPathFn(itemRow: Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<Item>;
-function mapRowIndexToPathFn(itemRow: number | Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number> | RowGroupingMapperResult<Item> {
-    const row = typeof itemRow === "number" ? itemRow : itemRow[1];
-    const originalIndex = typeof itemRow === "number" ? row : itemRow[0];
+function mapRowIndexToPathFn(itemOrRow: number, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number>;
+function mapRowIndexToPathFn(itemOrRow: Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<Item>;
+function mapRowIndexToPathFn(itemOrRow: number | Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number> | RowGroupingMapperResult<Item> {
+    const row = typeof itemOrRow === "number" ? itemOrRow : itemOrRow[1];
+    const originalIndex = typeof itemOrRow === "number" ? row : itemOrRow[0];
 
     if (flattenedRowGroups === undefined || flattenRowGroups.length === 0)
         return {
