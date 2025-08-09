@@ -59,10 +59,9 @@ export function gridSelectionHasItem(sel: GridSelection, item: Item): boolean {
     if (sel.columns.hasIndex(col) || sel.rows.hasIndex(row)) return true;
     if (sel.current !== undefined) {
         if (itemsAreEqual(sel.current.cell, item)) return true;
-        const toCheck = [sel.current.range, ...sel.current.rangeStack]; // FIXME: pointless alloc
-        for (const r of toCheck) {
-            // dont we have a function for this?
-            if (col >= r.x && col < r.x + r.width && row >= r.y && row < r.y + r.height) return true;
+        if (col >= sel.current.range.x && col < sel.current.range.x + sel.current.range.width && row >= sel.current.range.y && row < sel.current.range.y + sel.current.range.height) return true;
+        for (let i = 0; i < sel.current.rangeStack.length; i++) {
+            if (col >= sel.current.rangeStack[i].x && col < sel.current.rangeStack[i].x + sel.current.rangeStack[i].width && row >= sel.current.rangeStack[i].y && row < sel.current.rangeStack[i].y + sel.current.rangeStack[i].height) return true;
         }
     }
     return false;
