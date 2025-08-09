@@ -25,7 +25,7 @@ export function rowGroupingMapper(itemOrRow: number | Item, flattenedRowGroups?:
         ...r,
         originalIndex: [itemOrRow[0], r.originalIndex],
     } as RowGroupingMapperResult<Item>;
-};
+}
 
 export interface UseRowGroupingResult {
     readonly mapper: RowGroupingMapper;
