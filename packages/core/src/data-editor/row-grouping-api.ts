@@ -1,7 +1,6 @@
 import React from "react";
 import type { Item } from "../internal/data-grid/data-grid-types.js";
-import { flattenRowGroups, mapRowIndexToPath, type RowGroup, type RowGroupingOptions } from "./row-grouping.js";
-
+import { flattenRowGroups, mapRowIndexToPath, type FlattenedRowGroup, type RowGroup, type RowGroupingOptions } from "./row-grouping.js";
 
 export interface RowGroupingMapperResult<T> {
     path: readonly number[];
@@ -13,6 +12,20 @@ export interface RowGroupingMapperResult<T> {
 }
 
 export type RowGroupingMapper = (itemOrRow: number | Item) => RowGroupingMapperResult<Item | number>;
+
+export function rowGroupingMapper(itemOrRow: number, flattenedRowGroups?: readonly FlattenedRowGroup[] | undefined): RowGroupingMapperResult<number>;
+export function rowGroupingMapper(itemOrRow: Item, flattenedRowGroups?: readonly FlattenedRowGroup[] | undefined): RowGroupingMapperResult<Item>;
+export function rowGroupingMapper(itemOrRow: number | Item, flattenedRowGroups?: readonly FlattenedRowGroup[] | undefined): RowGroupingMapperResult<number> | RowGroupingMapperResult<Item>;
+export function rowGroupingMapper(itemOrRow: number | Item, flattenedRowGroups?: readonly FlattenedRowGroup[] | undefined): RowGroupingMapperResult<number> | RowGroupingMapperResult<Item> {
+    if (typeof itemOrRow === "number") {
+        return mapRowIndexToPath(itemOrRow, flattenedRowGroups);
+    }
+    const r = mapRowIndexToPath(itemOrRow[1], flattenedRowGroups);
+    return {
+        ...r,
+        originalIndex: [itemOrRow[0], r.originalIndex],
+    } as RowGroupingMapperResult<Item>;
+};
 
 export interface UseRowGroupingResult {
     readonly mapper: RowGroupingMapper;
@@ -34,21 +47,11 @@ export function useRowGrouping(options: RowGroupingOptions | undefined, rows: nu
         getRowGroupingForPath,
         updateRowGroupingByPath,
         mapper: React.useCallback<UseRowGroupingResult["mapper"]>(
-            (itemOrRow: number | Item) => {
-                if (typeof itemOrRow === "number") {
-                    return mapRowIndexToPath(itemOrRow, flattenedRowGroups);
-                }
-                const r = mapRowIndexToPath(itemOrRow[1], flattenedRowGroups);
-                return {
-                    ...r,
-                    originalIndex: [itemOrRow[0], r.originalIndex],
-                } as RowGroupingMapperResult<Item>;
-            },
+            (itemOrRow: number | Item) => rowGroupingMapper(itemOrRow, flattenedRowGroups),
             [flattenedRowGroups]
         ),
     };
 }
-
 
 export function updateRowGroupingByPath(
     rowGrouping: readonly RowGroup[],
