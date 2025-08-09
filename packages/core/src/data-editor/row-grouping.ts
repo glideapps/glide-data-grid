@@ -181,9 +181,10 @@ export function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number):
 
 
 // grid relative index to path and other details
-function mapRowIndexToPathFn(itemOrRow: number, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number>;
-function mapRowIndexToPathFn(itemOrRow: Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<Item>;
-function mapRowIndexToPathFn(itemOrRow: number | Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number> | RowGroupingMapperResult<Item> {
+export function mapRowIndexToPath(itemOrRow: number, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number>;
+export function mapRowIndexToPath(itemOrRow: Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<Item>;
+export function mapRowIndexToPath(itemOrRow: number | Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number> | RowGroupingMapperResult<Item>;
+export function mapRowIndexToPath(itemOrRow: number | Item, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number> | RowGroupingMapperResult<Item> {
     const row = typeof itemOrRow === "number" ? itemOrRow : itemOrRow[1];
     const originalIndex = typeof itemOrRow === "number" ? row : itemOrRow[0];
 
@@ -235,8 +236,6 @@ function mapRowIndexToPathFn(itemOrRow: number | Item, flattenedRowGroups?: read
         groupRows: -1,
     };
 }
-
-export const mapRowIndexToPath = (itemOrRow: number | Item, flattenedRowGroups?: readonly FlattenedRowGroup[]) => typeof itemOrRow === "number" ? mapRowIndexToPathFn(itemOrRow, flattenedRowGroups) : mapRowIndexToPathFn(itemOrRow, flattenedRowGroups);
 
 export interface UseRowGroupingInnerResult {
     readonly rows: number;
