@@ -3,7 +3,7 @@ import { render, cleanup } from "@testing-library/react";
 import BubblesOverlayEditor from "../src/internal/data-grid-overlay-editor/private/bubbles-overlay-editor.js";
 import DrilldownOverlayEditor from "../src/internal/data-grid-overlay-editor/private/drilldown-overlay-editor.js";
 import { GridCellKind, ImageOverlayEditor } from "../src/index.js";
-import { MarkdownOverlayEditor } from "../src/internal/data-grid-overlay-editor/private/markdown-overlay-editor.js";
+import MarkdownOverlayEditor from "../src/internal/data-grid-overlay-editor/private/markdown-overlay-editor.js";
 import NumberOverlayEditor from "../src/internal/data-grid-overlay-editor/private/number-overlay-editor.js";
 import UriOverlayEditor from "../src/internal/data-grid-overlay-editor/private/uri-overlay-editor.js";
 import { vi, describe, test, afterEach } from "vitest";
