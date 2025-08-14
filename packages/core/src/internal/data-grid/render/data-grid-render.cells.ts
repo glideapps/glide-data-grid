@@ -32,7 +32,7 @@ import type { RenderStateProvider } from "../../../common/render-state-provider.
 import type { ImageWindowLoader } from "../image-window-loader-interface.js";
 import { intersectRect } from "../../../common/math.js";
 import type { GridMouseGroupHeaderEventArgs } from "../event-args.js";
-import { getSkipPoint, getSpanBounds, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
+import { getRowSpanBounds, getSkipPoint, getSpanBounds, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
 
 const loadingCell: InnerGridCell = {
     kind: GridCellKind.Loading,
@@ -119,6 +119,7 @@ export function drawCells(
         freezeTrailingRows > 0 ? getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) : 0;
     let result: Rectangle[] | undefined;
     let handledSpans: Set<string> | undefined = undefined;
+    let handledRowSpans: Set<string> | undefined = undefined;
 
     const skipPoint = getSkipPoint(drawRegions);
 
@@ -220,9 +221,52 @@ export function drawCells(
                     const cell: InnerGridCell = row < rows ? getCellContent(cellIndex) : loadingCell;
 
                     let cellX = drawX;
+                    let cellY = drawY;
+                    let cellHeight = getRowHeight(row);
                     let cellWidth = c.width;
                     let drawingSpan = false;
                     let skipContents = false;
+
+                    if (cell?.rowSpan !== undefined) {
+                        const [start, end] = cell.rowSpan;
+                        const spanKey = `${c.sourceIndex - 1},${start},${end}`;
+                        if (handledRowSpans === undefined) handledRowSpans = new Set();
+                        if (!handledRowSpans.has(spanKey)) {
+                            const area = getRowSpanBounds(
+                                cell?.rowSpan as Item,
+                                drawX,
+                                drawY,
+                                c.width,
+                                row,
+                                getRowHeight
+                            );
+                            if (area !== undefined) {
+                                cellY = area.y;
+                                cellHeight = area.height;
+                                handledRowSpans.add(spanKey);
+                                ctx.restore();
+                                prepResult = undefined;
+                                ctx.save();
+                                ctx.beginPath();
+                                ctx.rect(area.x, area.y, area.width, area.height);
+                                if (result === undefined) {
+                                    result = [];
+                                }
+                                result.push({
+                                    x: area.x,
+                                    y: area.y,
+                                    width: area.width,
+                                    height: area.height,
+                                });
+                                ctx.clip();
+                                drawingSpan = true;
+                            }
+                        } else {
+                            toDraw--;
+                            return;
+                        }
+                    }
+
                     if (cell.span !== undefined) {
                         const [startCol, endCol] = cell.span;
                         const spanKey = `${row},${startCol},${endCol},${c.sticky}`; //alloc
@@ -280,12 +324,17 @@ export function drawCells(
                         selection.columns.some(
                             index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1] //alloc
                         );
+                    const rowSpanIsHighlighted =
+                        cell.rowSpan !== undefined &&
+                        selection.rows.some(
+                            index => cell.rowSpan !== undefined && index >= cell.rowSpan[0] && index <= cell.rowSpan[1] //alloc
+                        );
                     if (isSelected && !isFocused && drawFocus) {
                         accentCount = 0;
                     } else if (isSelected && drawFocus) {
                         accentCount = Math.max(accentCount, 1);
                     }
-                    if (spanIsHighlighted) {
+                    if (spanIsHighlighted || rowSpanIsHighlighted) {
                         accentCount++;
                     }
                     if (!isSelected) {
@@ -336,15 +385,15 @@ export function drawCells(
                         // we want to clip each cell individually rather than form a super clip region. The reason for
                         // this is passing too many clip regions to the GPU at once can cause a performance hit. This
                         // allows us to damage a large number of cells at once without issue.
-                        const top = drawY + 1;
+                        const top = cellY + 1;
                         const bottom = isSticky
-                            ? top + rh - 1
-                            : Math.min(top + rh - 1, height - freezeTrailingRowsHeight);
+                            ? top + cellHeight - 1
+                            : Math.min(top + cellHeight - 1, height - freezeTrailingRowsHeight);
                         const h = bottom - top;
 
                         // however, not clipping at all is even better. We want to clip if we are the left most col
                         // or overlapping the bottom clip area.
-                        if (h !== rh - 1 || cellX + 1 <= clipX) {
+                        if (h !== cellHeight - 1 || cellX + 1 <= clipX) {
                             didDamageClip = true;
                             ctx.save();
                             ctx.beginPath();
@@ -369,12 +418,12 @@ export function drawCells(
                             // because technically the bottom right corner of the outline are on other cells.
                             ctx.fillRect(
                                 cellX + 1,
-                                drawY + 1,
+                                cellY + 1,
                                 cellWidth - (isLastColumn ? 2 : 1),
-                                rh - (isLastRow ? 2 : 1)
+                                cellHeight - (isLastRow ? 2 : 1)
                             );
                         } else {
-                            ctx.fillRect(cellX, drawY, cellWidth, rh);
+                            ctx.fillRect(cellX, cellY, cellWidth, cellHeight);
                         }
                     }
 
@@ -405,9 +454,9 @@ export function drawCells(
                             isLastColumn,
                             isLastRow,
                             cellX,
-                            drawY,
+                            cellY,
                             cellWidth,
-                            rh,
+                            cellHeight,
                             accentCount > 0,
                             theme,
                             fill ?? theme.bgCell,
