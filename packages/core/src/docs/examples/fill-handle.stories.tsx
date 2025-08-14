@@ -67,7 +67,7 @@ export const FillHandle: React.VFC<{
     offsetY: number;
     outline: number;
     allowedFillDirections: FillHandleDirection;
-}> = ({ fillHandleEnabled, shape, size, offsetX, offsetY, outline, allowedFillDirections, onFillPattern }) => {
+}> = ({ fillHandleEnabled, shape, size, offsetX, offsetY, outline, allowedFillDirections }) => {
     const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
 
     const [numRows, setNumRows] = React.useState(50);
