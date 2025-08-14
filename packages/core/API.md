@@ -624,13 +624,14 @@ export type ProvideEditorCallbackResult<T extends InnerGridCell> =
     | undefined;
 
 export type ProvideEditorCallback<T extends InnerGridCell> = (
-    cell: T & { location?: Item }
+    cell: T & { location?: Item; activation?: CellActivatedEventArgs }
 ) => ProvideEditorCallbackResult<T>;
 
 provideEditor?: ProvideEditorCallback<GridCell>;
 ```
 
 When provided the `provideEditor` callbacks job is to be a constructor for functional components which have the correct properties to be used by the data grid as an editor. The editor must implement `onChange` and `onFinishedEditing` callbacks as well support the `isHighlighted` flag which tells the editor to begin with any editable text pre-selected so typing will immediately begin to overwrite it.
+The `cell` passed to this callback includes a `location` of the activated cell and an `activation` event describing how the editor was opened.
 
 ---
 
@@ -1249,10 +1250,18 @@ onCellClicked?: (cell: Item) => void;
 ## onCellActivated
 
 ```ts
-onCellActivated?: (cell: Item) => void;
+onCellActivated?: (
+    cell: Item,
+    event: CellActivatedEventArgs
+) => void;
 ```
 
-`onCellActivated` is called whenever the user double clicks, presses Enter or Space, or begins typing with a cell selected.
+`onCellActivated` is called whenever the user double clicks, presses Enter or Space, or begins typing with a cell selected. The second argument describes how the activation occurred.
+
+The `event` parameter is one of:
+
+- `KeyboardCellActivatedEvent` – contains `inputType: "keyboard"` and a `key` field with the physical key pressed.
+- `PointerCellActivatedEvent` – contains `inputType: "pointer"`, a `pointerActivation` reason such as `"double-click"` or `"single-click"`, and an optional `pointerType` (`"mouse"`, `"touch"`, or `"pen"`).
 
 ---
 
