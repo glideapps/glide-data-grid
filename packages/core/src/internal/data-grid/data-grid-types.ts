@@ -526,6 +526,36 @@ export type CompactSelectionRanges = readonly Slice[];
 
 export type FillHandleDirection = "horizontal" | "vertical" | "orthogonal" | "any";
 
+/**
+ * Configuration options for the fill-handle (the little drag square in the bottom-right of a selection).
+ *
+ *  `shape`   – Either a square or a circle. Default is `square`.
+ *  `size`    – Width/height (or diameter) in CSS pixels. Default is `4`.
+ *  `offsetX` – Horizontal offset from the bottom-right corner of the cell (positive is →). Default is `-2`.
+ *  `offsetY` – Vertical offset from the bottom-right corner of the cell (positive is ↓). Default is `-2`.
+ *  `outline` – Width of the outline stroke in CSS pixels. Default is `0`.
+ */
+export type FillHandleConfig = {
+    readonly shape: "square" | "circle";
+    readonly size: number;
+    readonly offsetX: number;
+    readonly offsetY: number;
+    readonly outline: number;
+};
+
+export type FillHandle = boolean | Partial<FillHandleConfig>;
+
+/**
+ * Default configuration used when `fillHandle` is simply `true`.
+ */
+export const DEFAULT_FILL_HANDLE: Readonly<FillHandleConfig> = {
+    shape: "square",
+    size: 4,
+    offsetX: -2,
+    offsetY: -2,
+    outline: 0,
+} as const;
+
 function mergeRanges(input: CompactSelectionRanges) {
     if (input.length === 0) {
         return [];
@@ -561,7 +591,7 @@ export class CompactSelection {
 
     static create = (items: CompactSelectionRanges) => {
         return new CompactSelection(mergeRanges(items));
-    }
+    };
 
     static empty = (): CompactSelection => {
         return emptyCompactSelection ?? (emptyCompactSelection = new CompactSelection([]));

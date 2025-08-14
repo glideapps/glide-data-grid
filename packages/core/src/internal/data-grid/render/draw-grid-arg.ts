@@ -13,6 +13,7 @@ import type {
     DrawHeaderCallback,
     CellList,
     DrawCellCallback,
+    FillHandle,
 } from "../data-grid-types.js";
 import type { CellSet } from "../cell-set.js";
 import type { EnqueueCallback } from "../use-animation-queue.js";
@@ -52,7 +53,7 @@ export interface DrawGridArg {
     readonly isFocused: boolean;
     readonly drawFocus: boolean;
     readonly selection: GridSelection;
-    readonly fillHandle: boolean;
+    readonly fillHandle: FillHandle;
     readonly freezeTrailingRows: number;
     readonly hasAppendRow: boolean;
     readonly hyperWrapping: boolean;
