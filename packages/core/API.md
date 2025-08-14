@@ -1031,13 +1031,13 @@ bottom-right of the current selection).**
 interface FillHandleConfig {
     /** Shape of the handle. Defaults to "square". */
     shape?: "square" | "circle";
-    /** Width/height (or diameter for circles) in CSS pixels. Defaults to `6`. */
+    /** Width/height (or diameter for circles) in CSS pixels. Defaults to `4`. */
     size?: number;
     /** Horizontal offset from the bottom-right corner of the cell (px). */
     offsetX?: number;
-    /** Vertical offset from the bottom-right corner of the cell (px). */
+    /** Vertical offset from the bottom-right corner of the cell (px). Default is `-2`. */
     offsetY?: number;
-    /** Stroke width (px) of the outline that surrounds the handle. Defaults to `1`. */
+    /** Stroke width (px) of the outline that surrounds the handle. Defaults to `0`. */
     outline?: number;
 }
 ```
