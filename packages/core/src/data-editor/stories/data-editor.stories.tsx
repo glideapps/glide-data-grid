@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/no-identical-functions */
 import * as React from "react";
 
-import { useState, useCallback, useMemo } from "@storybook/addons";
+import { useState, useCallback, useMemo } from "storybook/preview-api";
 import { BuilderThemeWrapper } from "../../stories/story-utils.js";
 import {
     CompactSelection,
