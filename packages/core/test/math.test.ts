@@ -1,6 +1,6 @@
-import { expect, describe, it } from "vitest";
-import type { Rectangle } from "../src/internal/data-grid/data-grid-types.js";
+import { describe, expect, it } from "vitest";
 import { getClosestRect, hugRectToTarget, splitRectIntoRegions } from "../src/common/math.js";
+import type { FillHandleDirection, Rectangle } from "../src/internal/data-grid/data-grid-types.js";
 
 describe("getClosestRect", () => {
     const testRect: Rectangle = { x: 10, y: 10, width: 5, height: 5 };
@@ -47,6 +47,38 @@ describe("getClosestRect", () => {
                 "orthogonal"
             )
         ).to.deep.equal({ x: 11, y: 10, width: 10, height: 1 });
+    });
+
+    it("respects FillHandleDirection: horizontal", () => {
+        const dir: FillHandleDirection = "horizontal";
+        // Horizontal should ignore vertical displacement and extend left/right only
+        expect(getClosestRect(testRect, 5, 50, dir)).to.deep.equal({ x: 5, y: 10, width: 5, height: 5 });
+        expect(getClosestRect(testRect, 20, 50, dir)).to.deep.equal({ x: 15, y: 10, width: 6, height: 5 });
+        // Inside (horizontally) returns undefined after y is forced to rect.y
+        expect(getClosestRect(testRect, 12, 5, dir)).to.be.undefined;
+    });
+
+    it("respects FillHandleDirection: vertical", () => {
+        const dir: FillHandleDirection = "vertical";
+        // Vertical should ignore horizontal displacement and extend up/down only
+        expect(getClosestRect(testRect, 50, 5, dir)).to.deep.equal({ x: 10, y: 5, width: 5, height: 5 });
+        expect(getClosestRect(testRect, 50, 20, dir)).to.deep.equal({ x: 10, y: 15, width: 5, height: 6 });
+        // Inside (vertically) returns undefined after x is forced to rect.x
+        expect(getClosestRect(testRect, 12, 12, dir)).to.be.undefined;
+    });
+
+    it("respects FillHandleDirection: orthogonal (default)", () => {
+        const dir: FillHandleDirection = "orthogonal";
+        // Should choose nearest edge in either axis
+        expect(getClosestRect(testRect, 12, 5, dir)).to.deep.equal({ x: 10, y: 5, width: 5, height: 5 });
+        expect(getClosestRect(testRect, 20, 12, dir)).to.deep.equal({ x: 15, y: 10, width: 6, height: 5 });
+    });
+
+    it("respects FillHandleDirection: any", () => {
+        const dir: FillHandleDirection = "any";
+        // Should form a rectangle combining original and the pointer position (free expansion)
+        expect(getClosestRect(testRect, 20, 20, dir)).to.deep.equal({ x: 10, y: 10, width: 11, height: 11 });
+        expect(getClosestRect(testRect, 5, 5, dir)).to.deep.equal({ x: 5, y: 5, width: 10, height: 10 });
     });
 });
 

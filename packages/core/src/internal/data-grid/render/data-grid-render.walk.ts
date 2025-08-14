@@ -7,6 +7,7 @@ export function getSkipPoint(drawRegions: readonly Rectangle[]): number | undefi
     for (const dr of drawRegions) {
         drawRegionsLowestY = Math.min(drawRegionsLowestY ?? dr.y, dr.y);
     }
+    return drawRegionsLowestY;
 }
 
 export type WalkRowsCallback = (

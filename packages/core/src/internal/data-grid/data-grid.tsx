@@ -23,6 +23,8 @@ import {
     booleanCellIsEditable,
     type InnerGridColumn,
     type DrawCellCallback,
+    type FillHandle,
+    DEFAULT_FILL_HANDLE,
 } from "./data-grid-types.js";
 import { CellSet } from "./cell-set.js";
 import { SpriteManager, type SpriteMap } from "./data-grid-sprites.js";
@@ -145,7 +147,7 @@ export interface DataGridProps {
      * @defaultValue false
      * @group Editing
      */
-    readonly fillHandle: boolean | undefined;
+    readonly fillHandle: FillHandle | undefined;
 
     readonly disabledRows: CompactSelection | undefined;
     /**
@@ -314,13 +316,15 @@ type DamageUpdateList = readonly {
     // newValue: GridCell,
 }[];
 
-const fillHandleClickSize = 6;
-
 export interface DataGridRef {
     focus: () => void;
     getBounds: (col?: number, row?: number) => Rectangle | undefined;
     damage: (cells: DamageUpdateList) => void;
-    getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => GridMouseEventArgs | undefined;
+    getMouseArgsForPosition: (
+        posX: number,
+        posY: number,
+        ev?: MouseEvent | TouchEvent
+    ) => GridMouseEventArgs | undefined;
 }
 
 const getRowData = (cell: InnerGridCell, getCellRenderer?: GetCellRendererCallback) => {
@@ -446,7 +450,10 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     }, [cellYOffset, cellXOffset, translateX, translateY, enableFirefoxRescaling, enableSafariRescaling]);
 
     const mappedColumns = useMappedColumns(columns, freezeColumns);
-    const stickyX = React.useMemo(() => fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0,[mappedColumns, dragAndDropState, fixedShadowX]);
+    const stickyX = React.useMemo(
+        () => (fixedShadowX ? getStickyWidth(mappedColumns, dragAndDropState) : 0),
+        [mappedColumns, dragAndDropState, fixedShadowX]
+    );
 
     // row: -1 === columnHeader, -2 === groupHeader
     const getBoundsForItem = React.useCallback(
@@ -653,18 +660,29 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 const isEdge = bounds !== undefined && bounds.x + bounds.width - posX < edgeDetectionBuffer;
 
                 let isFillHandle = false;
-                if (fillHandle && selection.current !== undefined) {
+                const drawFill = fillHandle !== false && fillHandle !== undefined;
+                if (drawFill && selection.current !== undefined) {
+                    const fill =
+                        typeof fillHandle === "object"
+                            ? { ...DEFAULT_FILL_HANDLE, ...fillHandle }
+                            : DEFAULT_FILL_HANDLE;
+
+                    const fillHandleClickSize = fill.size;
+                    const half = fillHandleClickSize / 2;
+
                     const fillHandleLocation = rectBottomRight(selection.current.range);
-                    const fillHandleCellBounds = getBoundsForItem(canvas, fillHandleLocation[0], fillHandleLocation[1]);
+                    const fillBounds = getBoundsForItem(canvas, fillHandleLocation[0], fillHandleLocation[1]);
 
-                    if (fillHandleCellBounds !== undefined) {
-                        const handleLogicalCenterX = fillHandleCellBounds.x + fillHandleCellBounds.width - 2;
-                        const handleLogicalCenterY = fillHandleCellBounds.y + fillHandleCellBounds.height - 2;
+                    if (fillBounds !== undefined) {
+                        // Handle center sits exactly on the bottom-right corner of the cell.
+                        // Offset by half pixel to align with grid lines.
+                        const centerX = fillBounds.x + fillBounds.width + fill.offsetX - half + 0.5;
+                        const centerY = fillBounds.y + fillBounds.height + fill.offsetY - half + 0.5;
 
-                        //check if posX and posY are within fillHandleClickSize from handleLogicalCenter
+                        // Check if posX and posY are within fillHandleClickSize from handleLogicalCenter
                         isFillHandle =
-                            Math.abs(handleLogicalCenterX - posX) < fillHandleClickSize &&
-                            Math.abs(handleLogicalCenterY - posY) < fillHandleClickSize;
+                            Math.abs(centerX - posX) < fillHandleClickSize &&
+                            Math.abs(centerY - posY) < fillHandleClickSize;
                     }
                 }
 
@@ -1710,9 +1728,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 }
 
                 return getMouseArgsForPosition(canvasRef.current, posX, posY, ev);
-            }
+            },
         }),
-        [canvasRef, damage, getBoundsForItem]
+        [canvasRef, damage, getBoundsForItem, getMouseArgsForPosition]
     );
 
     const lastFocusedSubdomNode = React.useRef<Item>();

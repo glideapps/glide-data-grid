@@ -9,7 +9,8 @@ import {
     defaultProps,
     clearCell,
 } from "../../data-editor/stories/utils.js";
-import { GridCellKind } from "../../internal/data-grid/data-grid-types.js";
+import { GridCellKind, type FillHandleDirection } from "../../internal/data-grid/data-grid-types.js";
+import type { FillPatternEventArgs } from "../../index.js";
 import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 
 export default {
@@ -34,9 +35,39 @@ export default {
             </SimpleThemeWrapper>
         ),
     ],
+    argTypes: {
+        fillHandleEnabled: { control: "boolean", name: "fillHandle enabled" },
+        shape: { control: { type: "inline-radio" }, options: ["square", "circle"], name: "shape" },
+        size: { control: { type: "number" }, name: "size" },
+        offsetX: { control: { type: "number" }, name: "offsetX" },
+        offsetY: { control: { type: "number" }, name: "offsetY" },
+        outline: { control: { type: "number" }, name: "outline" },
+        allowedFillDirections: {
+            control: { type: "inline-radio" },
+            options: ["horizontal", "vertical", "orthogonal", "any"],
+            name: "allowedFillDirections",
+        },
+    },
+    args: {
+        fillHandleEnabled: true,
+        shape: "square",
+        size: 4,
+        offsetX: -2,
+        offsetY: -2,
+        outline: 0,
+        allowedFillDirections: "orthogonal",
+    },
 };
 
-export const FillHandle: React.VFC = () => {
+export const FillHandle: React.VFC<{
+    fillHandleEnabled: boolean;
+    shape: "square" | "circle";
+    size: number;
+    offsetX: number;
+    offsetY: number;
+    outline: number;
+    allowedFillDirections: FillHandleDirection;
+}> = ({ fillHandleEnabled, shape, size, offsetX, offsetY, outline, allowedFillDirections }) => {
     const { cols, getCellContent, setCellValueRaw, setCellValue } = useMockDataGenerator(60, false);
 
     const [numRows, setNumRows] = React.useState(50);
@@ -72,7 +103,8 @@ export const FillHandle: React.VFC = () => {
             columns={cols}
             rowMarkers={"both"}
             onPaste={true}
-            fillHandle={true}
+            fillHandle={fillHandleEnabled ? { shape, size, offsetX, offsetY, outline } : false}
+            allowedFillDirections={allowedFillDirections}
             keybindings={{ downFill: true, rightFill: true }}
             onCellEdited={setCellValue}
             trailingRowOptions={{
