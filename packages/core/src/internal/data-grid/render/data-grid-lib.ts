@@ -59,7 +59,12 @@ export function gridSelectionHasItem(sel: GridSelection, item: Item): boolean {
     if (sel.columns.hasIndex(col) || sel.rows.hasIndex(row)) return true;
     if (sel.current !== undefined) {
         if (itemsAreEqual(sel.current.cell, item)) return true;
-        if (col >= sel.current.range.x && col < sel.current.range.x + sel.current.range.width && row >= sel.current.range.y && row < sel.current.range.y + sel.current.range.height) return true;
+        const range = sel.current.range;
+        const xMin = range.x;
+        const xMax = range.x + range.width;
+        const yMin = range.y;
+        const yMax = range.y + range.height;
+        if (col >= xMin && col < xMax && row >= yMin && row < yMax) return true;
         for (const r of sel.current.rangeStack) {
             if (col >= r.x && col < r.x + r.width && row >= r.y && row < r.y + r.height) return true;
         }
