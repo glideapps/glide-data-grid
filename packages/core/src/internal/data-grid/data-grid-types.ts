@@ -557,7 +557,11 @@ let emptyCompactSelection: CompactSelection | undefined;
 
 /** @category Selection */
 export class CompactSelection {
-    private constructor(private readonly items: CompactSelectionRanges) {}
+    private constructor(public readonly items: CompactSelectionRanges) {}
+
+    static create = (items: CompactSelectionRanges) => {
+        return new CompactSelection(mergeRanges(items));
+    }
 
     static empty = (): CompactSelection => {
         return emptyCompactSelection ?? (emptyCompactSelection = new CompactSelection([]));
@@ -565,6 +569,13 @@ export class CompactSelection {
 
     static fromSingleSelection = (selection: number | Slice) => {
         return CompactSelection.empty().add(selection);
+    };
+
+    static fromArray = (items: readonly number[]): CompactSelection => {
+        if (items.length === 0) return CompactSelection.empty();
+        const slices = items.map(s => [s, s + 1] as Slice);
+        const newItems = mergeRanges(slices);
+        return new CompactSelection(newItems);
     };
 
     public offset(amount: number): CompactSelection {
@@ -575,9 +586,7 @@ export class CompactSelection {
 
     public add(selection: number | Slice): CompactSelection {
         const slice: Slice = typeof selection === "number" ? [selection, selection + 1] : selection;
-
         const newItems = mergeRanges([...this.items, slice]);
-
         return new CompactSelection(newItems);
     }
 

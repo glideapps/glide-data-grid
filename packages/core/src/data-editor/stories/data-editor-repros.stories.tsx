@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { useState, useMemo } from "@storybook/addons";
+import { useState, useMemo } from "storybook/preview-api";
 import { BuilderThemeWrapper } from "../../stories/story-utils.js";
 import { type GridCell, GridCellKind, type Item } from "../../internal/data-grid/data-grid-types.js";
 import { DataEditorAll as DataEditor } from "../../data-editor-all.js";

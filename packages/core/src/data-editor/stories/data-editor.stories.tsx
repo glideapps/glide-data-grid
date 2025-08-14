@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/no-identical-functions */
 import * as React from "react";
 
-import { useState, useCallback, useMemo } from "@storybook/addons";
+import { useState, useCallback, useMemo } from "storybook/preview-api";
 import { BuilderThemeWrapper } from "../../stories/story-utils.js";
 import {
     CompactSelection,
@@ -711,3 +711,32 @@ export const SimpleEditable = () => {
         />
     );
 };
+
+export function GroupHeaderActionClick() {
+    const cols = [
+        { title: "Col1", width: 100, grow: 1, group: "Group"},
+    ];
+
+    const [clickCount, setClickCount] = useState(0);
+
+    return (
+        <div>
+            <h3>Click count: {clickCount}</h3>
+            <DataEditor
+                width={500}
+                height={500}
+                rows={0}
+                columns={cols}
+                getCellContent={() => ({ kind: GridCellKind.Text, data: '', displayData: '',allowOverlay: false })}
+                getGroupDetails={(name) => ({
+                  name,
+                  actions: [{
+                    icon: 'headerString',
+                    title: "Action",
+                    onClick: (e) => setClickCount(c => c + 1 ),
+                  }]
+                })}
+            />
+        </div>
+    );
+}

@@ -305,7 +305,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const onNext = React.useCallback(
         (ev?: React.MouseEvent) => {
             ev?.stopPropagation?.();
-            if (searchStatus === undefined) return;
+            if (searchStatus === undefined || searchStatus.results === 0) return;
             const newIndex = (searchStatus.selectedIndex + 1) % searchStatus.results;
             setSearchStatus({
                 ...searchStatus,
@@ -319,7 +319,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const onPrev = React.useCallback(
         (ev?: React.MouseEvent) => {
             ev?.stopPropagation?.();
-            if (searchStatus === undefined) return;
+            if (searchStatus === undefined || searchStatus.results === 0) return;
             let newIndex = (searchStatus.selectedIndex - 1) % searchStatus.results;
             if (newIndex < 0) newIndex += searchStatus.results;
             setSearchStatus({
@@ -386,7 +386,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
             ev.stopPropagation();
         };
 
-        const rowsSearchedProgress = Math.floor(((searchStatus?.rowsSearched ?? 0) / rows) * 100);
+        const rowsSearchedProgress = rows > 0 ? Math.floor(((searchStatus?.rowsSearched ?? 0) / rows) * 100) : 0;
         const progressStyle: React.CSSProperties = {
             width: `${rowsSearchedProgress}%`,
         };

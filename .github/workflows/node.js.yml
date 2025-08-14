@@ -20,12 +20,6 @@ jobs:
             - run: npm run test-source
             - run: npm run test-cells
             - run: npm run test-projects
-            - name: Coveralls
-              uses: coverallsapp/github-action@master
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  path-to-lcov: ./packages/core/coverage/lcov.info
-                  base-path: ./packages/core
     test-react-18:
         runs-on: ubuntu-latest
         steps:
