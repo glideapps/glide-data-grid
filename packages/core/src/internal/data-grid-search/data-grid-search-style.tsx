@@ -39,7 +39,7 @@ export const SearchWrapper = styled.div`
 
     input {
         width: 220px;
-        color: var(--gdg-textDark);
+        color: var(--gdg-text-dark);
         background-color: var(--gdg-bg-cell);
         border: none;
         border-width: 0;
