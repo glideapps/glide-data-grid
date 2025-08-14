@@ -15,7 +15,7 @@ const portalRef = useRef(null);
 <>
   {
     createPortal(
-      <div ref={portalRef} style="position: fixed; left: 0; top: 0; z-index: 9999;" />, 
+      <div ref={portalRef} style="position: fixed; left: 0; top: 0; z-index: 9999;" />,
       document.body
     )
   }
@@ -1019,10 +1019,73 @@ Highlight regions are regions on the grid which get drawn with a background colo
 ## fillHandle
 
 ```ts
-fillHandle?: boolean;
+fillHandle?: boolean | Partial<FillHandleConfig>;
 ```
 
-Controls the visibility of the fill handle used for filling cells with the mouse.
+Controls the presence of the fill handle used for filling cells with the mouse.
+
+**Configuration for the fill-handle (the small drag handle that appears in the
+bottom-right of the current selection).**
+
+```ts
+interface FillHandleConfig {
+    /** Shape of the handle. Defaults to "square". */
+    shape?: "square" | "circle";
+    /** Width/height (or diameter for circles) in CSS pixels. Defaults to `4`. */
+    size?: number;
+    /** Horizontal offset from the bottom-right corner of the cell (px). */
+    offsetX?: number;
+    /** Vertical offset from the bottom-right corner of the cell (px). Default is `-2`. */
+    offsetY?: number;
+    /** Stroke width (px) of the outline that surrounds the handle. Defaults to `0`. */
+    outline?: number;
+}
+```
+
+---
+
+## allowedFillDirections
+
+```ts
+allowedFillDirections?: "horizontal" | "vertical" | "orthogonal" | "any"; // default "orthogonal"
+```
+
+Controls which directions the fill-handle may extend when the user drags it.
+
+- "horizontal": Only left/right expansion is allowed.
+- "vertical": Only up/down expansion is allowed.
+- "orthogonal": Expands to the closest orthogonal edge (up/down/left/right). This is the default.
+- "any": Expands freely in both axes (forms a rectangle to the pointer).
+
+---
+
+## onFillPattern
+
+```ts
+onFillPattern?: (event: FillPatternEventArgs) => void;
+
+interface FillPatternEventArgs extends PreventableEvent {
+    patternSource: Rectangle;
+    fillDestination: Rectangle;
+}
+```
+
+Emitted whenever the user initiates a pattern fill using the fill handle. The event provides both the source
+pattern region and the destination region about to be filled. Call `event.preventDefault()` to cancel the fill.
+
+Example: prevent filling into protected regions
+
+```ts
+<DataEditor
+  onFillPattern={e => {
+    const { fillDestination } = e;
+    if (/* your condition */ false) {
+      e.preventDefault();
+    }
+  }}
+  {...props}
+/>
+```
 
 ---
 
