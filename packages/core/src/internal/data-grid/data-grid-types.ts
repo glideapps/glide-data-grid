@@ -530,10 +530,10 @@ export type FillHandleDirection = "horizontal" | "vertical" | "orthogonal" | "an
  * Configuration options for the fill-handle (the little drag square in the bottom-right of a selection).
  *
  *  `shape`   – Either a square or a circle. Default is `square`.
- *  `size`    – Width/height (or diameter) in CSS pixels. Default is `6`.
- *  `offsetX` – Horizontal offset from the bottom-right corner of the cell (positive is →). Default is `0`.
- *  `offsetY` – Vertical offset from the bottom-right corner of the cell (positive is ↓). Default is `0`.
- *  `outline` – Width of the outline stroke in CSS pixels. Default is `1`.
+ *  `size`    – Width/height (or diameter) in CSS pixels. Default is `4`.
+ *  `offsetX` – Horizontal offset from the bottom-right corner of the cell (positive is →). Default is `-2`.
+ *  `offsetY` – Vertical offset from the bottom-right corner of the cell (positive is ↓). Default is `-2`.
+ *  `outline` – Width of the outline stroke in CSS pixels. Default is `0`.
  */
 export type FillHandleConfig = {
     readonly shape: "square" | "circle";
@@ -541,7 +541,7 @@ export type FillHandleConfig = {
     readonly offsetX: number;
     readonly offsetY: number;
     readonly outline: number;
-}
+};
 
 export type FillHandle = boolean | Partial<FillHandleConfig>;
 
@@ -550,10 +550,10 @@ export type FillHandle = boolean | Partial<FillHandleConfig>;
  */
 export const DEFAULT_FILL_HANDLE: Readonly<FillHandleConfig> = {
     shape: "square",
-    size: 6,
-    offsetX: 0,
-    offsetY: 0,
-    outline: 1,
+    size: 4,
+    offsetX: -2,
+    offsetY: -2,
+    outline: 0,
 } as const;
 
 function mergeRanges(input: CompactSelectionRanges) {
@@ -591,7 +591,7 @@ export class CompactSelection {
 
     static create = (items: CompactSelectionRanges) => {
         return new CompactSelection(mergeRanges(items));
-    }
+    };
 
     static empty = (): CompactSelection => {
         return emptyCompactSelection ?? (emptyCompactSelection = new CompactSelection([]));
