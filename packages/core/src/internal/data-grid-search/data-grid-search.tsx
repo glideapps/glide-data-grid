@@ -307,7 +307,15 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
             cancelSearch();
             searchInputRef.current.focus({ preventScroll: true });
         }
-    }, [showSearch, searchInputRef, setSearchString, onSearchResultsChanged, cancelSearch]);
+    }, [
+        showSearch,
+        searchInputRef,
+        setSearchString,
+        setSearchStatus,
+        setSearchResultsInner,
+        onSearchResultsChanged,
+        cancelSearch,
+    ]);
 
     const onNext = React.useCallback(
         (ev?: React.MouseEvent) => {
