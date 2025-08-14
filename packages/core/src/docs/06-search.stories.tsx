@@ -182,7 +182,7 @@ const onSearchClose = React.useCallback(() => setShowSearch(false), []);
 return <DataEditor {...rest} showSearch={showSearch} getCellsForSelection={true} onSearchClose={onSearchClose}  />
 `}
             </Highlight>
-            <button onClick={() => setShowSearch(true)}>Show Search</button>
+            <button onClick={() => setShowSearch(prev => !prev)}>Show Search</button>
             <Wrapper height={200}>
                 <DataEditor
                     showSearch={showSearch}
