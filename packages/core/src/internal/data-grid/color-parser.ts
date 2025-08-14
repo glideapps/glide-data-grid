@@ -113,6 +113,8 @@ export function interpolateColors(leftColor: string, rightColor: string, val: nu
     const nScaler = 1 - val;
 
     const a = la * nScaler + ra * hScaler;
+    // If both colors are fully transparent the resulting alpha can be 0, avoid dividing by 0
+    if (a === 0) return "rgba(0, 0, 0, 0)";
     // now we need to divide the alpha back out to get linear alpha back for the final result
     const r = Math.floor((leftR * nScaler + rightR * hScaler) / a);
     const g = Math.floor((leftG * nScaler + rightG * hScaler) / a);
