@@ -152,8 +152,12 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         if (searchHandle.current !== undefined) {
             window.cancelAnimationFrame(searchHandle.current);
             searchHandle.current = undefined;
+        }
+        // Always abort and replace the controller to ensure a fresh, non-aborted signal
+        if (abortControllerRef.current !== undefined) {
             abortControllerRef.current.abort();
         }
+        abortControllerRef.current = new AbortController();
     }, []);
 
     const cellYOffsetRef = React.useRef(cellYOffset);
@@ -295,12 +299,15 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
 
     React.useEffect(() => {
         if (showSearch && searchInputRef.current !== null) {
+            // Reset search whenever it gets shown:
             setSearchString("");
             setSearchStatus(undefined);
             setSearchResultsInner([]);
+            onSearchResultsChanged?.([], -1);
+            cancelSearch();
             searchInputRef.current.focus({ preventScroll: true });
         }
-    }, [showSearch, searchInputRef, setSearchString]);
+    }, [showSearch, searchInputRef, setSearchString, onSearchResultsChanged, cancelSearch]);
 
     const onNext = React.useCallback(
         (ev?: React.MouseEvent) => {
