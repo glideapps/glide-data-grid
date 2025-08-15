@@ -298,24 +298,25 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     );
 
     React.useEffect(() => {
-        if (showSearch && searchInputRef.current !== null) {
-            // Reset search whenever it gets shown:
-            setSearchString("");
-            setSearchStatus(undefined);
+        if (searchInputRef.current === null) return;
+
+        // Reset search whenever search status changes:
+        setSearchString("");
+        setSearchStatus(undefined);
+        if (searchResultsInner.length > 0) {
             setSearchResultsInner([]);
             onSearchResultsChanged?.([], -1);
-            cancelSearch();
-            searchInputRef.current.focus({ preventScroll: true });
         }
-    }, [
-        showSearch,
-        searchInputRef,
-        setSearchString,
-        setSearchStatus,
-        setSearchResultsInner,
-        onSearchResultsChanged,
-        cancelSearch,
-    ]);
+
+        if (showSearch) {
+            searchInputRef.current.focus({ preventScroll: true });
+        } else {
+            // Cancel search when it gets hidden:
+            cancelSearch();
+        }
+        // Only re-run when showSearch changes:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showSearch, searchInputRef]);
 
     const onNext = React.useCallback(
         (ev?: React.MouseEvent) => {
