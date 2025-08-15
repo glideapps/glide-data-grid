@@ -3,6 +3,7 @@ import type { Theme } from "../common/styles.js";
 import type { DataEditorProps } from "./data-editor.js";
 import type { DataGridProps } from "../internal/data-grid/data-grid.js";
 import { whenDefined } from "../common/utils.js";
+import type { RowGroupingMapperResult } from "./row-grouping-api.js";
 
 type Mutable<T> = {
     -readonly [K in keyof T]: T[K];
@@ -177,17 +178,9 @@ export function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number):
         });
 }
 
-export interface MapResult {
-    readonly path: readonly number[];
-    readonly isGroupHeader: boolean;
-    readonly originalIndex: number;
-    readonly groupIndex: number;
-    readonly groupRows: number;
-    readonly contentIndex: number;
-}
 
 // grid relative index to path and other details
-export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly FlattenedRowGroup[]): MapResult {
+export function mapRowIndexToPath(row: number, flattenedRowGroups?: readonly FlattenedRowGroup[]): RowGroupingMapperResult<number> {
     if (flattenedRowGroups === undefined || flattenRowGroups.length === 0)
         return {
             path: [row],
