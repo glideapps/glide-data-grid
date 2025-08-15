@@ -26,7 +26,7 @@
         "url": "git+https://github.com/glideapps/glide-data-grid.git",
         "directory": "packages/source"
     },
-    "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/cells",
+    "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/packages/source",
     "author": "Glide",
     "license": "MIT",
     "keywords": [
