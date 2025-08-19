@@ -1,6 +1,6 @@
 {
     "name": "@glideapps/glide-data-grid",
-    "version": "6.0.4-alpha19",
+    "version": "6.0.4-alpha20",
     "description": "React data grid for beautifully displaying and editing large amounts of data with amazing performance.",
     "sideEffects": [
         "**/*.css"
