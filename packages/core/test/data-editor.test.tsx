@@ -12,6 +12,7 @@ import {
     type InnerGridCell,
     type InternalCellRenderer,
     AllCellRenderers,
+    type ProvideEditorCallback,
 } from "../src/index.js";
 import type { CustomCell } from "../src/internal/data-grid/data-grid-types.js";
 import type { DataEditorRef } from "../src/data-editor/data-editor.js";
@@ -441,7 +442,13 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith([1, 1]);
+        const event = spy.mock.calls[0][1];
+        expect(event).toEqual(
+            expect.objectContaining({
+                inputType: "pointer",
+                pointerActivation: "double-click",
+            })
+        );
     });
 
     describe("cellActivationBehavior", () => {
@@ -470,7 +477,7 @@ describe("data-editor", () => {
             });
 
             expect(spy).toHaveBeenCalled();
-            expect(spy).toHaveBeenCalledWith([1, 1]);
+            expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
         });
 
         test("double-click miss", async () => {
@@ -525,7 +532,7 @@ describe("data-editor", () => {
             });
 
             expect(spy).toHaveBeenCalled();
-            expect(spy).toHaveBeenCalledWith([1, 1]);
+            expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
         });
 
         test("single-click", async () => {
@@ -548,7 +555,7 @@ describe("data-editor", () => {
             );
 
             expect(spy).toHaveBeenCalled();
-            expect(spy).toHaveBeenCalledWith([1, 1]);
+            expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
         });
     });
 
@@ -601,7 +608,13 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith([1, 1]);
+        const event = spy.mock.calls[0][1];
+        expect(event).toEqual(
+            expect.objectContaining({
+                inputType: "keyboard",
+                key: "Enter",
+            })
+        );
     });
 
     test("Toggle boolean with Enter key", async () => {
@@ -629,7 +642,7 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith([7, 2]);
+        expect(spy).toHaveBeenCalledWith([7, 2], expect.anything());
         expect(editSpy).toHaveBeenCalledWith([7, 2], {
             allowOverlay: false,
             data: true,
@@ -662,7 +675,7 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith([1, 1]);
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
     });
 
     test("Emits activated event when typing", async () => {
@@ -689,7 +702,7 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith([1, 1]);
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
     });
 
     test("keyDown and keyUp events include the cell location", async () => {
@@ -1528,6 +1541,39 @@ describe("data-editor", () => {
         });
 
         expect(document.body.contains(overlay)).toBe(false);
+    });
+
+    test("Editor provider receives activation info", async () => {
+        const spy = vi.fn();
+        const provider: ProvideEditorCallback<GridCell> = cell => {
+            spy(cell.activation);
+            return undefined;
+        };
+
+        vi.useFakeTimers();
+        render(
+            <DataEditor {...basicProps} provideEditor={provider} />,
+            { wrapper: Context }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 + 16,
+        });
+
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 + 16,
+        });
+
+        expect(spy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                inputType: "pointer",
+                pointerActivation: "double-click",
+            })
+        );
     });
 
     test("Send edit", async () => {

@@ -5,7 +5,7 @@ import type { Theme } from "../../common/styles.js";
 import { assertNever, proveType } from "../../common/support.js";
 import type { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor.js";
 import type { SpriteManager } from "./data-grid-sprites.js";
-import type { BaseGridMouseEventArgs } from "./event-args.js";
+import type { BaseGridMouseEventArgs, CellActivatedEventArgs } from "./event-args.js";
 import type { ImageWindowLoader } from "./image-window-loader-interface.js";
 
 // Thoughts:
@@ -305,7 +305,7 @@ export function isRectangleEqual(a: Rectangle | undefined, b: Rectangle | undefi
     return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
 
-export type CellActiviationBehavior = "double-click" | "single-click" | "second-click";
+export type CellActivationBehavior = "double-click" | "single-click" | "second-click";
 
 /** @category Cells */
 export interface BaseGridCell {
@@ -317,7 +317,7 @@ export interface BaseGridCell {
     readonly contentAlign?: "left" | "right" | "center";
     readonly cursor?: CSSProperties["cursor"];
     readonly copyData?: string;
-    readonly activationBehaviorOverride?: CellActiviationBehavior;
+    readonly activationBehaviorOverride?: CellActivationBehavior;
 }
 
 /** @category Cells */
@@ -396,6 +396,7 @@ export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComp
     readonly isValid?: boolean;
     readonly theme: Theme;
     readonly portalElementRef?: React.RefObject<HTMLElement>;
+    readonly activation?: CellActivatedEventArgs;
 }>;
 
 type ObjectEditorCallbackResult<T extends InnerGridCell> = {
@@ -424,7 +425,7 @@ export function isObjectEditorCallbackResult<T extends InnerGridCell>(
 
 /** @category Renderers */
 export type ProvideEditorCallback<T extends InnerGridCell> = (
-    cell: T & { location?: Item }
+    cell: T & { location?: Item; activation?: CellActivatedEventArgs }
 ) => ProvideEditorCallbackResult<T>;
 
 /** @category Cells */
