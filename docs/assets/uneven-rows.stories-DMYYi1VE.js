@@ -1,0 +1,7 @@
+import{R as e}from"./iframe-DuKzhFAV.js";import{D as m}from"./data-editor-all-h01LK8X1.js";import{B as i,D as p,P as c,u,d}from"./utils-CXj6_Jia.js";import{S as w}from"./story-utils-BbqVCsEB.js";import"./preload-helper-C1FmrZbK.js";import"./image-window-loader-D4WXs3fS.js";import"./throttle-C9zA5J5l.js";import"./marked.esm-B1hMdrV8.js";import"./flatten-mmeTaiPx.js";import"./scrolling-data-grid-BBESFY1a.js";import"./index-D_kXk1yT.js";import"./index.esm-CRvNmNkt.js";import"./index-Cfg5Tl68.js";const S={title:"Glide-Data-Grid/DataEditor Demos",decorators:[r=>e.createElement(w,null,e.createElement(i,{title:"Uneven Rows",description:e.createElement(p,null,"Rows can be made uneven by passing a callback to the ",e.createElement(c,null,"rowHeight")," prop")},e.createElement(r,null)))]},t=()=>{const{cols:r,getCellContent:l}=u(6);return e.createElement(m,{...d,rowHeight:o=>o%3===0?30:o%2?50:60,getCellContent:l,columns:r,rows:1e3})};var a,n,s;t.parameters={...t.parameters,docs:{...(a=t.parameters)==null?void 0:a.docs,source:{originalSource:`() => {
+  const {
+    cols,
+    getCellContent
+  } = useMockDataGenerator(6);
+  return <DataEditor {...defaultProps} rowHeight={r => r % 3 === 0 ? 30 : r % 2 ? 50 : 60} getCellContent={getCellContent} columns={cols} rows={1000} />;
+}`,...(s=(n=t.parameters)==null?void 0:n.docs)==null?void 0:s.source}}};const U=["UnevenRows"];export{t as UnevenRows,U as __namedExportsOrder,S as default};
