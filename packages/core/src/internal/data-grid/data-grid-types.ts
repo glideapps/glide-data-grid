@@ -396,7 +396,7 @@ export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComp
     readonly isValid?: boolean;
     readonly theme: Theme;
     readonly portalElementRef?: React.RefObject<HTMLElement>;
-    readonly activation: CellActivatedEventArgs;
+    readonly activation?: CellActivatedEventArgs;
 }>;
 
 type ObjectEditorCallbackResult<T extends InnerGridCell> = {
@@ -562,7 +562,7 @@ export class CompactSelection {
 
     static create = (items: CompactSelectionRanges) => {
         return new CompactSelection(mergeRanges(items));
-    }
+    };
 
     static empty = (): CompactSelection => {
         return emptyCompactSelection ?? (emptyCompactSelection = new CompactSelection([]));
