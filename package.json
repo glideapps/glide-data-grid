@@ -87,7 +87,7 @@
         "react-test-renderer": "^19.1.1",
         "resolve-typescript-plugin": "^2.0.1",
         "storybook": "^9.1.2",
-        "tsc-esm-fix": "^2.20.27",
+        "tsc-esm-fix": "^3.1.2",
         "typedoc": "^0.28.5",
         "typescript": "^5.8.3",
         "vitest": "^0.34.6",
