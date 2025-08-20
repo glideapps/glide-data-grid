@@ -77,7 +77,11 @@ export function walkColumns(
     let x = 0;
     let clipX = 0; // this tracks the total width of sticky cols
     const drawY = totalHeaderHeight + translateY;
-    const clipXRight = freezeTrailingColumns === 0 ? 0 : effectiveCols.slice(-freezeTrailingColumns).reduce((acc, col) => acc + col.width, 0);
+
+    let clipXRight = 0;
+    for (let i = effectiveCols.length - freezeTrailingColumns; i < effectiveCols.length; i++) {
+        clipXRight += effectiveCols[i].width;
+    }
 
     for (let i = 0; i < effectiveCols.length - freezeTrailingColumns; i++) {
         const c = effectiveCols[i];
@@ -121,9 +125,12 @@ export function walkGroups(
     let x = 0;
     let clipX = 0;
 
-    const effectiveColsRight = freezeTrailingColumns === 0 ? [] : effectiveCols.slice(-freezeTrailingColumns);
-    const widthRight = effectiveColsRight.reduce((acc, col) => acc + col.width, 0);
-    width -= widthRight;
+    // Pre-calculate right freeze columns total width
+    let widthRight = 0;
+    for (let i = effectiveCols.length - freezeTrailingColumns; i < effectiveCols.length; i++) {
+        widthRight += effectiveCols[i].width;
+    }
+    const clippedWidth = width - widthRight;
 
     for (let index = 0; index < effectiveCols.length - freezeTrailingColumns; index++) {
         const startCol = effectiveCols[index];
@@ -150,7 +157,7 @@ export function walkGroups(
         const t = startCol.sticky ? 0 : translateX;
         const localX = x + t;
         const delta = startCol.sticky ? 0 : Math.max(0, clipX - localX);
-        const w = Math.min(boxWidth - delta, width - (localX + delta));
+        const w = Math.min(boxWidth - delta, clippedWidth - (localX + delta));
         cb(
             [startCol.sourceIndex, effectiveCols[end - 1].sourceIndex],
             startCol.group ?? "",
@@ -163,18 +170,21 @@ export function walkGroups(
         x += boxWidth;
     }
 
-    for (let index = 0; index < effectiveColsRight.length; index++) {
-        const startCol = effectiveColsRight[index];
+    let currentWidth = clippedWidth;
+    const rightStartIndex = effectiveCols.length - freezeTrailingColumns;
+
+    for (let index = rightStartIndex; index < effectiveCols.length; index++) {
+        const startCol = effectiveCols[index];
 
         let end = index + 1;
         let boxWidth = startCol.width;
 
         while (
-            end < effectiveColsRight.length &&
-            isGroupEqual(effectiveColsRight[end].group, startCol.group) &&
-            effectiveColsRight[end].sticky === effectiveColsRight[index].sticky
+            end < effectiveCols.length &&
+            isGroupEqual(effectiveCols[end].group, startCol.group) &&
+            effectiveCols[end].sticky === effectiveCols[index].sticky
         ) {
-            const endCol = effectiveColsRight[end];
+            const endCol = effectiveCols[end];
             boxWidth += endCol.width;
             end++;
             index++;
@@ -183,12 +193,12 @@ export function walkGroups(
             }
         }
 
-        const t = width + boxWidth;
+        const t = currentWidth + boxWidth;
         const localX = t - boxWidth;
         const delta = 0;
         const w = boxWidth - delta;
         cb(
-            [startCol.sourceIndex, effectiveColsRight[end - 1].sourceIndex],
+            [startCol.sourceIndex, effectiveCols[end - 1].sourceIndex],
             startCol.group ?? "",
             localX + delta,
             0,
@@ -196,7 +206,7 @@ export function walkGroups(
             groupHeaderHeight
         );
 
-        width += w;
+        currentWidth += w;
     }
 }
 

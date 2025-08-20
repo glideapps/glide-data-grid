@@ -347,8 +347,8 @@ export function drawGridLines(
         }
     }
 
-    width = Math.min(width, effectiveWidth);
-    let rightX = width + 0.5;
+    const clippedWidth = Math.min(width, effectiveWidth);
+    let rightX = clippedWidth + 0.5;
     for (let index = effectiveCols.length - 1; index >= 0; index--) {
         const c = effectiveCols[index];
         if (c.width === 0) continue;
