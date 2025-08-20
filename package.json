@@ -59,7 +59,7 @@
         "@typescript-eslint/parser": "^6.21.0",
         "@typescript-eslint/typescript-estree": "^5.62.0",
         "@vitejs/plugin-react": "^4.5.2",
-        "@wyw-in-js/babel-preset": "^0.6.0",
+        "@wyw-in-js/babel-preset": "^0.7.0",
         "@wyw-in-js/cli": "^0.6.0",
         "@wyw-in-js/vite": "^0.6.0",
         "babel-loader": "^8.4.1",
