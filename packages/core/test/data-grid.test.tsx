@@ -437,12 +437,12 @@ describe("data-grid", () => {
         render(<DataGrid {...basicPropsWithMoreColumns} freezeColumns={[1, 1]} cellXOffset={3} onMouseUp={spy} />);
 
 
-        fireEvent.mouseDown(screen.getByTestId(dataGridCanvasId), {
+        fireEvent.pointerDown(screen.getByTestId(dataGridCanvasId), {
             clientX: 950, // Col A
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
 
-        fireEvent.mouseUp(screen.getByTestId(dataGridCanvasId), {
+        fireEvent.pointerUp(screen.getByTestId(dataGridCanvasId), {
             clientX: 950, // Col A
             clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
         });
