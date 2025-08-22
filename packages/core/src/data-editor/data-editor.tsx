@@ -4026,7 +4026,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         );
     }, [onGroupHeaderRenamed, renameGroup]);
 
-    const mangledFreezeColumns = Math.min(mangledCols.length, freezeLeftColumns + (hasRowMarkers ? 1 : 0));
+    const mangledFreezeColumns = React.useMemo(() => {
+      return [
+        Math.min(mangledCols.length, freezeLeftColumns + (hasRowMarkers ? 1 : 0)),
+        Math.min(mangledCols.length, freezeRightColumns)
+      ] as const;
+    }, [freezeLeftColumns, freezeRightColumns, hasRowMarkers, mangledCols.length])
 
     React.useImperativeHandle(
         forwardedRef,
@@ -4294,7 +4299,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     onColumnProposeMove={onColumnProposeMoveImpl}
                     drawCell={drawCell}
                     disabledRows={disabledRows}
-                    freezeColumns={[mangledFreezeColumns, freezeRightColumns]}
+                    freezeColumns={mangledFreezeColumns}
                     lockColumns={rowMarkerOffset}
                     firstColAccessible={rowMarkerOffset === 0}
                     getCellContent={getMangledCellContent}
