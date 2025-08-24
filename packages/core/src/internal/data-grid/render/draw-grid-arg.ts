@@ -40,7 +40,7 @@ export interface DrawGridArg {
     readonly translateY: number;
     readonly mappedColumns: readonly MappedGridColumn[];
     readonly enableGroups: boolean;
-    readonly freezeColumns: number;
+    readonly freezeColumns: number | readonly [left: number, right: number];
     readonly dragAndDropState: DragAndDropState | undefined;
     readonly theme: FullTheme;
     readonly headerHeight: number;

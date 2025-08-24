@@ -7,6 +7,7 @@ import { blend, withAlpha } from "../color-parser.js";
 import { hugRectToTarget, intersectRect, rectContains, splitRectIntoRegions } from "../../../common/math.js";
 import { getSpanBounds, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
 import { type Highlight } from "./data-grid-render.cells.js";
+import { normalizeFreezeColumns } from "../../../common/utils.js";
 
 export function drawHighlightRings(
     ctx: CanvasRenderingContext2D,
@@ -17,7 +18,7 @@ export function drawHighlightRings(
     translateX: number,
     translateY: number,
     mappedColumns: readonly MappedGridColumn[],
-    freezeColumns: number,
+    freezeColumns: number | readonly [left: number, right: number],
     headerHeight: number,
     groupHeaderHeight: number,
     rowHeight: number | ((index: number) => number),
@@ -27,19 +28,25 @@ export function drawHighlightRings(
     theme: FullTheme
 ): (() => void) | undefined {
     const highlightRegions = allHighlightRegions?.filter(x => x.style !== "no-outline");
+    const [freezeLeftColumns, freezeRightColumns] = normalizeFreezeColumns(freezeColumns);
 
     if (highlightRegions === undefined || highlightRegions.length === 0) return undefined;
 
-    const freezeLeft = getStickyWidth(mappedColumns);
+    const [freezeLeft, freezeRight] = getStickyWidth(mappedColumns);
     const freezeBottom = getFreezeTrailingHeight(rows, freezeTrailingRows, rowHeight);
-    const splitIndicies = [freezeColumns, 0, mappedColumns.length, rows - freezeTrailingRows] as const;
-    const splitLocations = [freezeLeft, 0, width, height - freezeBottom] as const;
+    const splitIndices = [
+        freezeLeftColumns,
+        0,
+        mappedColumns.length - freezeRightColumns,
+        rows - freezeTrailingRows,
+    ] as const;
+    const splitLocations = [freezeLeft, 0, width - freezeRight, height - freezeBottom] as const;
 
     const drawRects = highlightRegions.map(h => {
         const r = h.range;
         const style = h.style ?? "dashed";
 
-        return splitRectIntoRegions(r, splitIndicies, width, height, splitLocations).map(arg => {
+        return splitRectIntoRegions(r, splitIndices, width, height, splitLocations).map(arg => {
             const rect = arg.rect;
             const topLeftBounds = computeBounds(
                 rect.x,
@@ -187,6 +194,7 @@ export function drawFillHandle(
     getRowHeight: (row: number) => number,
     getCellContent: (cell: Item) => InnerGridCell,
     freezeTrailingRows: number,
+    freezeTrailingColumns: number,
     hasAppendRow: boolean,
     fillHandle: FillHandle,
     rows: number
@@ -223,12 +231,13 @@ export function drawFillHandle(
 
     walkColumns(
         effectiveCols,
+        width,
         cellYOffset,
         translateX,
         translateY,
         totalHeaderHeight,
-        (col, drawX, colDrawY, clipX, startRow) => {
-            clipX;
+        freezeTrailingColumns,
+        (col, drawX, colDrawY, clipX, _clipXRight, startRow) => {
             if (col.sticky && targetCol > col.sourceIndex) return;
 
             const isBeforeTarget = col.sourceIndex < targetColSpan[0];

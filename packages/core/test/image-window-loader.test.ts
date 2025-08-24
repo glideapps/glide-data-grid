@@ -19,11 +19,26 @@ describe("ImageWindowLoaderImpl", () => {
             };
             const freezeCols = 5;
 
-            loader.setWindow(newWindow, freezeCols, []);
+            loader.setWindow(newWindow, freezeCols, [], 10);
 
             // Assuming you modify your class to expose `visibleWindow` and `freezeCols` for testing
             expect(loader.visibleWindow).toEqual(newWindow);
             expect(loader.freezeCols).toBe(freezeCols);
+        });
+
+        it("should set the new columnsLength", () => {
+            const newWindow = {
+                x: 10,
+                y: 10,
+                width: 100,
+                height: 100,
+            };
+            const freezeCols = 5;
+            const columnsLength = 10;
+
+            loader.setWindow(newWindow, freezeCols, [], columnsLength);
+
+            expect(loader.columnsLength).toBe(columnsLength);
         });
 
         it("should call clearOutOfWindow() if the window or freezeCols changes", () => {
@@ -44,13 +59,13 @@ describe("ImageWindowLoaderImpl", () => {
             const freezeCols1 = 5;
             const freezeCols2 = 10;
 
-            loader.setWindow(window1, freezeCols1, []);
+            loader.setWindow(window1, freezeCols1, [], 10);
             expect(spyClearOutOfWindow).toHaveBeenCalledTimes(1);
 
-            loader.setWindow(window2, freezeCols1, []);
+            loader.setWindow(window2, freezeCols1, [], 10);
             expect(spyClearOutOfWindow).toHaveBeenCalledTimes(2);
 
-            loader.setWindow(window2, freezeCols2, []);
+            loader.setWindow(window2, freezeCols2, [], 10);
             expect(spyClearOutOfWindow).toHaveBeenCalledTimes(3);
 
             // Cleanup
@@ -68,8 +83,8 @@ describe("ImageWindowLoaderImpl", () => {
             };
             const freezeCols = 5;
 
-            loader.setWindow(newWindow, freezeCols, []);
-            loader.setWindow(newWindow, freezeCols, []);
+            loader.setWindow(newWindow, freezeCols, [], 10);
+            loader.setWindow(newWindow, freezeCols, [], 10);
 
             expect(spyClearOutOfWindow).toHaveBeenCalledTimes(1);
 
