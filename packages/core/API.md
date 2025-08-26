@@ -993,12 +993,12 @@ When range select is set to cell, only one cell may be selected at a time. When 
 ## rangeSelectionBlending
 
 ```ts
-rangeSelectionBlending?: "exclusive" | "mixed"; // default exclusive
-columnSelectionBlending?: "exclusive" | "mixed"; // default exclusive
-rowSelectionBlending?: "exclusive" | "mixed"; // default exclusive
+rangeSelectionBlending?: "exclusive" | "mixed" | "inclusive"; // default exclusive
+columnSelectionBlending?: "exclusive" | "mixed" | "inclusive"; // default exclusive
+rowSelectionBlending?: "exclusive" | "mixed" | "inclusive"; // default exclusive
 ```
 
-Controls which types of selections can exist at the same time in the grid. If selection blending is set to exclusive, the grid will clear other types of selections when the exclusive selection is made. By default row, column, and range selections are exclusive.
+Controls which types of selections can exist at the same time in the grid. If selection blending is set to "exclusive", the grid will clear other types of selections when the exclusive selection is made. By default row, column, and range selections are exclusive. If "mixed" is set, other types of selections are kept only when a multi-key (e.g., Cmd/Ctrl) is held. If "inclusive" is set, other types of selections are always kept; selections accumulate without a modifier.
 
 ---
 
