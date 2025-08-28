@@ -70,7 +70,7 @@
     },
     "devDependencies": {
         "@babel/cli": "^7.27.2",
-        "@glideapps/ts-helper": "5.0.0",
+        "@glideapps/ts-helper": "6.0.0",
         "@skypack/package-check": "^0.2.2",
         "@vitest/coverage-v8": "^0.34.6",
         "eslint": "^8.57.1",
