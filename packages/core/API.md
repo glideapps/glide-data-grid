@@ -998,7 +998,7 @@ columnSelectionBlending?: "exclusive" | "mixed" | "additive"; // default exclusi
 rowSelectionBlending?: "exclusive" | "mixed" | "additive"; // default exclusive
 ```
 
-Controls which types of selections can exist at the same time in the grid. If selection blending is set to "exclusive", the grid will clear other types of selections when the exclusive selection is made. By default row, column, and range selections are exclusive. If "mixed" is set, other types of selections are kept only when a multi-key (e.g., Cmd/Ctrl) is held. If "additive" is set, other types of selections are always kept; selections accumulate without a modifier.
+Controls which types of selections can exist at the same time in the grid. If selection blending is set to `exclusive`, the grid will clear other types of selections when the exclusive selection is made. By default row, column, and range selections are exclusive. If `mixed` is set, other types of selections are kept only when a multi-key (e.g., Cmd/Ctrl) is held. If `additive` is set, other types of selections are always kept; selections accumulate without a modifier.
 
 ---
 
