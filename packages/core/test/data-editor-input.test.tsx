@@ -573,4 +573,111 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
             rows: CompactSelection.empty(),
         });
     });
+
+    test("Select row - single-cell/single-row with additive row blending (no modifiers)", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                gridSelection={{
+                    current: {
+                        cell: [1, 2],
+                        range: { height: 1, width: 1, x: 1, y: 2 },
+                        rangeStack: [],
+                    },
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
+                }}
+                rangeSelect="cell"
+                rowSelect="single"
+                rowSelectionBlending="additive"
+                rangeSelectionBlending="additive"
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.pointerDown(canvas, {
+            clientX: 20,
+            clientY: 36 + 32 * 3 + 16,
+        });
+
+        fireEvent.pointerMove(canvas, {
+            clientX: 20,
+            clientY: 36 + 32 * 3 + 16,
+        });
+
+        fireEvent.pointerUp(canvas, {
+            clientX: 20,
+            clientY: 36 + 32 * 3 + 16,
+        });
+
+        expect(spy).toBeCalledWith({
+            current: {
+                cell: [1, 2],
+                range: { height: 1, width: 1, x: 1, y: 2 },
+                rangeStack: [],
+            },
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection(3),
+        });
+    });
+
+    test("Select col - single-cell with additive col blending (no modifiers)", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                gridSelection={{
+                    current: {
+                        cell: [1, 2],
+                        range: { height: 1, width: 1, x: 1, y: 2 },
+                        rangeStack: [],
+                    },
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
+                }}
+                rangeSelect="cell"
+                columnSelectionBlending="additive"
+                rangeSelectionBlending="additive"
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.pointerDown(canvas, {
+            clientX: 220,
+            clientY: 16,
+        });
+
+        fireEvent.pointerMove(canvas, {
+            clientX: 220,
+            clientY: 16,
+        });
+
+        fireEvent.pointerUp(canvas, {
+            clientX: 220,
+            clientY: 16,
+        });
+
+        expect(spy).toBeCalledWith({
+            current: {
+                cell: [1, 2],
+                range: { height: 1, width: 1, x: 1, y: 2 },
+                rangeStack: [],
+            },
+            columns: CompactSelection.fromSingleSelection(1),
+            rows: CompactSelection.empty(),
+        });
+    });
 });

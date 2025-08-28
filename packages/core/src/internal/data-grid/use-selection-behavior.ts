@@ -3,6 +3,12 @@ import { CompactSelection, type GridSelection, type Slice } from "./data-grid-ty
 
 type SetCallback = (newVal: GridSelection, expand: boolean) => void;
 
+/**
+ * The type of selection blending to use:
+ * - `exclusive`: Only one type of selection can be made at a time.
+ * - `mixed`: Multiple types of selection can be made at a time, but only when a multi-key (e.g., Cmd/Ctrl) is held.
+ * - `additive`: Multiple types of selection can be made at a time, and selections accumulate without a modifier.
+ */
 export type SelectionBlending = "exclusive" | "mixed" | "additive";
 
 type SelectionTrigger = "click" | "drag" | "keyboard-nav" | "keyboard-select" | "edit";
