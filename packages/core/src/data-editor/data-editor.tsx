@@ -4193,14 +4193,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         if (typeof rowHeight === "number") {
             h = totalHeaderHeight + rowsCountWithTrailingRow * rowHeight;
         } else {
-            let avg = 0;
-            const toAverage = Math.min(rowsCountWithTrailingRow, 10);
-            for (let i = 0; i < toAverage; i++) {
-                avg += rowHeight(i);
+            h = totalHeaderHeight;
+            for (let i = 0; i < rowsCountWithTrailingRow; i++) {
+                h += rowHeight(i);
             }
-            avg = Math.floor(avg / toAverage);
-
-            h = totalHeaderHeight + rowsCountWithTrailingRow * avg;
         }
         h += scrollbarWidth;
 
