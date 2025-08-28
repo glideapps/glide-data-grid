@@ -56,7 +56,7 @@
         "@types/react-dom": "^16.9.5 || 17.x || 18.x || 19.x",
         "@types/react-syntax-highlighter": "^15.5.13",
         "@typescript-eslint/eslint-plugin": "^5.62.0",
-        "@typescript-eslint/parser": "^6.21.0",
+        "@typescript-eslint/parser": "^8.40.0",
         "@typescript-eslint/typescript-estree": "^8.40.0",
         "@vitejs/plugin-react": "^5.0.0",
         "@wyw-in-js/babel-preset": "^0.7.0",
