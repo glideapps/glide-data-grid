@@ -713,9 +713,7 @@ export const SimpleEditable = () => {
 };
 
 export function GroupHeaderActionClick() {
-    const cols = [
-        { title: "Col1", width: 100, grow: 1, group: "Group"},
-    ];
+    const cols = [{ title: "Col1", width: 100, grow: 1, group: "Group" }];
 
     const [clickCount, setClickCount] = useState(0);
 
@@ -727,16 +725,72 @@ export function GroupHeaderActionClick() {
                 height={500}
                 rows={0}
                 columns={cols}
-                getCellContent={() => ({ kind: GridCellKind.Text, data: '', displayData: '',allowOverlay: false })}
-                getGroupDetails={(name) => ({
-                  name,
-                  actions: [{
-                    icon: 'headerString',
-                    title: "Action",
-                    onClick: (e) => setClickCount(c => c + 1 ),
-                  }]
+                getCellContent={() => ({ kind: GridCellKind.Text, data: "", displayData: "", allowOverlay: false })}
+                getGroupDetails={name => ({
+                    name,
+                    actions: [
+                        {
+                            icon: "headerString",
+                            title: "Action",
+                            onClick: _e => setClickCount(c => c + 1),
+                        },
+                    ],
                 })}
             />
+        </div>
+    );
+}
+
+export function DeleteColumnsViaOnDelete() {
+    const [headers, setHeaders] = useState<string[]>(["col-a", "col-b"]);
+
+    const dynColumns: GridColumn[] = headers.map(value => ({
+        id: value,
+        title: value,
+        width: 100,
+    }));
+
+    const renderCell = React.useCallback((): GridCell => {
+        return { kind: GridCellKind.Loading, allowOverlay: false };
+    }, []);
+
+    const addColumn = () => {
+        const str = Math.random().toString(36).slice(2, 8);
+        setHeaders(prev => [...prev, str]);
+    };
+
+    const removeColumns = (indices: number[]) => {
+        setHeaders(prev => prev.filter((_, i) => !indices.includes(i)));
+    };
+
+    const [selection, setSelection] = useState<GridSelection | undefined>(undefined);
+
+    const onDelete = (sel: GridSelection) => {
+        if (sel.columns.length > 0) {
+            setSelection(undefined);
+            removeColumns(sel.columns.toArray());
+            return false;
+        }
+        return true;
+    };
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+            <div style={{ marginBottom: 8 }}>
+                <button onClick={addColumn}>Add</button>
+            </div>
+            <div style={{ flex: 1, position: "relative" }}>
+                <DataEditor
+                    width="100%"
+                    height="100%"
+                    columns={dynColumns}
+                    rows={0}
+                    getCellContent={renderCell}
+                    gridSelection={selection}
+                    onGridSelectionChange={setSelection}
+                    onDelete={onDelete}
+                />
+            </div>
         </div>
     );
 }

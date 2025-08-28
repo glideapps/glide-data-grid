@@ -952,7 +952,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const [overFill, setOverFill] = React.useState(false);
 
     const [hCol, hRow] = hoveredItem ?? [];
-    const headerHovered = hCol !== undefined && hRow === -1 && columns[hCol].headerRowMarkerDisabled !== true;
+    const headerHovered =
+        hCol !== undefined &&
+        hRow === -1 &&
+        hCol >= 0 &&
+        hCol < mappedColumns.length &&
+        mappedColumns[hCol].headerRowMarkerDisabled !== true;
     const groupHeaderHovered = hCol !== undefined && hRow === -2;
     let clickableInnerCellHovered = false;
     let editableBoolHovered = false;
@@ -969,14 +974,14 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     const cursor = isDragging
         ? "grabbing"
         : canDrag || isResizing
-        ? "col-resize"
-        : overFill || isFilling
-        ? "crosshair"
-        : cursorOverride !== undefined
-        ? cursorOverride
-        : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
-        ? "pointer"
-        : "default";
+          ? "col-resize"
+          : overFill || isFilling
+            ? "crosshair"
+            : cursorOverride !== undefined
+              ? cursorOverride
+              : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
+                ? "pointer"
+                : "default";
 
     const style = React.useMemo(
         () => ({
@@ -1239,13 +1244,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 }
             }
         },
-        [
-            eventTargetRef,
-            getMouseArgsForPosition,
-            isOverHeaderElement,
-            onHeaderMenuClick,
-            onHeaderIndicatorClick,
-        ]
+        [eventTargetRef, getMouseArgsForPosition, isOverHeaderElement, onHeaderMenuClick, onHeaderIndicatorClick]
     );
     useEventListener("click", onClickImpl, windowEventTarget, false);
 
