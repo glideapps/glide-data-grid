@@ -3,7 +3,7 @@ import { CompactSelection, type GridSelection, type Slice } from "./data-grid-ty
 
 type SetCallback = (newVal: GridSelection, expand: boolean) => void;
 
-export type SelectionBlending = "exclusive" | "mixed" | "inclusive";
+export type SelectionBlending = "exclusive" | "mixed" | "additive";
 
 type SelectionTrigger = "click" | "drag" | "keyboard-nav" | "keyboard-select" | "edit";
 
@@ -48,9 +48,9 @@ export function useSelectionBehavior(
             }
 
             const rangeMixable =
-                (rangeBehavior === "mixed" || rangeBehavior === "inclusive") && (append || trigger === "drag");
-            const allowColumnCoSelect = (columnBehavior === "mixed" || columnBehavior === "inclusive") && rangeMixable;
-            const allowRowCoSelect = (rowBehavior === "mixed" || rowBehavior === "inclusive") && rangeMixable;
+                (rangeBehavior === "mixed" || rangeBehavior === "additive") && (append || trigger === "drag");
+            const allowColumnCoSelect = (columnBehavior === "mixed" || columnBehavior === "additive") && rangeMixable;
+            const allowRowCoSelect = (rowBehavior === "mixed" || rowBehavior === "additive") && rangeMixable;
             let newVal: GridSelection = {
                 current:
                     value === undefined
@@ -100,8 +100,8 @@ export function useSelectionBehavior(
                     rows: newRows,
                 };
             } else {
-                const rangeMixed = (allowMixed && rangeBehavior === "mixed") || rangeBehavior === "inclusive";
-                const columnMixed = (allowMixed && columnBehavior === "mixed") || columnBehavior === "inclusive";
+                const rangeMixed = (allowMixed && rangeBehavior === "mixed") || rangeBehavior === "additive";
+                const columnMixed = (allowMixed && columnBehavior === "mixed") || columnBehavior === "additive";
                 const current = !rangeMixed ? undefined : gridSelection.current;
                 newVal = {
                     current,
@@ -128,8 +128,8 @@ export function useSelectionBehavior(
                     columns: newCols,
                 };
             } else {
-                const rangeMixed = (allowMixed && rangeBehavior === "mixed") || rangeBehavior === "inclusive";
-                const rowMixed = (allowMixed && rowBehavior === "mixed") || rowBehavior === "inclusive";
+                const rangeMixed = (allowMixed && rangeBehavior === "mixed") || rangeBehavior === "additive";
+                const rowMixed = (allowMixed && rowBehavior === "mixed") || rowBehavior === "additive";
                 const current = !rangeMixed ? undefined : gridSelection.current;
                 newVal = {
                     current,
