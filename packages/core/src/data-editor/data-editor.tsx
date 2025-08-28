@@ -1839,7 +1839,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (args: GridMouseEventArgs) => {
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
             const isMultiRow = isMultiKey && rowSelect === "multi";
-            f;
+
             const [col, row] = args.location;
             const selectedColumns = gridSelection.columns;
             const selectedRows = gridSelection.rows;
