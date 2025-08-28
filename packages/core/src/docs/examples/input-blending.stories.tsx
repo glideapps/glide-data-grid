@@ -31,6 +31,7 @@ interface InputBlendingGridProps {
     rangeMultiSelect: "none" | "cell" | "rect" | "multi-cell" | "multi-rect";
     columnMultiSelect: "none" | "single" | "multi";
     rowMultiSelect: "none" | "single" | "multi";
+    rowSelectionMode: "auto" | "multi";
 }
 
 export const InputBlending: React.FC<InputBlendingGridProps> = p => {
@@ -60,6 +61,7 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
             rangeSelectionBlending={p.rangeBlending}
             columnSelectionBlending={p.columnBlending}
             rowSelectionBlending={p.rowBlending}
+            rowSelectionMode={p.rowSelectionMode}
             getCellContent={getCellContent}
             columns={cols}
             rows={10_000}
@@ -73,6 +75,7 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
     rangeMultiSelect: "rect",
     columnMultiSelect: "multi",
     rowMultiSelect: "multi",
+    rowSelectionMode: "auto",
 };
 (InputBlending as any).argTypes = {
     rangeBlending: {
@@ -98,5 +101,9 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
     rowMultiSelect: {
         control: { type: "select" },
         options: ["none", "single", "multi"],
+    },
+    rowSelectionMode: {
+        control: { type: "select" },
+        options: ["auto", "multi"],
     },
 };

@@ -1320,7 +1320,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 //If the grid is empty, we will return text
                 const isFirst = col === rowMarkerOffset;
 
-                const maybeFirstColumnHint = isFirst ? trailingRowOptions?.hint ?? "" : "";
+                const maybeFirstColumnHint = isFirst ? (trailingRowOptions?.hint ?? "") : "";
                 const c = mangledColsRef.current[col];
 
                 if (c?.trailingRowOptions?.disabled === true) {
@@ -2003,6 +2003,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         lastCol !== undefined &&
                         selectedColumns.hasIndex(lastCol)
                     ) {
+                        // Support for selecting a slice of columns:
                         const newSlice: Slice = [Math.min(lastCol, col), Math.max(lastCol, col) + 1];
 
                         if (isMultiCol) {
@@ -2010,7 +2011,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         } else {
                             setSelectedColumns(CompactSelection.fromSingleSelection(newSlice), undefined, isMultiKey);
                         }
-                    } else if (isMultiCol) {
+                    } else if (isMultiCol || (columnSelectionBlending === "additive" && columnSelect === "multi")) {
+                        // Support for selecting a single columns additively:
                         if (selectedColumns.hasIndex(col)) {
                             // If the column is already selected, deselect that column:
                             setSelectedColumns(selectedColumns.remove(col), undefined, isMultiKey);
@@ -2020,6 +2022,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         lastSelectedColRef.current = col;
                     } else if (columnSelect !== "none") {
                         if (selectedColumns.hasIndex(col)) {
+                            // If the column is already selected, deselect that column:
                             setSelectedColumns(selectedColumns.remove(col), undefined, isMultiKey);
                         } else {
                             setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, isMultiKey);
@@ -2392,9 +2395,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }
                     }
                     if (shouldActivate) {
-                        const act = a.isDoubleClick === true
-                            ? "double-click"
-                            : (c.activationBehaviorOverride ?? cellActivationBehavior);
+                        const act =
+                            a.isDoubleClick === true
+                                ? "double-click"
+                                : (c.activationBehaviorOverride ?? cellActivationBehavior);
                         const activationEvent: CellActivatedEventArgs = {
                             inputType: "pointer",
                             pointerActivation: act,
@@ -3942,7 +3946,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (col: number) => {
             return typeof verticalBorder === "boolean"
                 ? verticalBorder
-                : verticalBorder?.(col - rowMarkerOffset) ?? true;
+                : (verticalBorder?.(col - rowMarkerOffset) ?? true);
         },
         [rowMarkerOffset, verticalBorder]
     );
