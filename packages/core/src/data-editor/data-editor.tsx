@@ -544,6 +544,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * @returns A valid GridCell to be rendered by the Grid.
      */
     readonly getCellContent: (cell: Item) => GridCell;
+
     /**
      * Determines if row selection requires a modifier key to enable multi-selection or not. In auto mode it adapts to
      * touch or mouse environments automatically, in multi-mode it always acts as if the multi key (Ctrl) is pressed.
@@ -551,6 +552,14 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * @defaultValue `auto`
      */
     readonly rowSelectionMode?: "auto" | "multi";
+
+    /**
+     * Determines if column selection requires a modifier key to enable multi-selection or not. In auto mode it adapts to
+     * touch or mouse environments automatically, in multi-mode it always acts as if the multi key (Ctrl) is pressed.
+     * @group Editing
+     * @defaultValue `auto`
+     */
+    readonly columnSelectionMode?: "auto" | "multi";
 
     /**
      * Add table headers to copied data.
@@ -838,6 +847,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         freezeColumns = 0,
         cellActivationBehavior = "second-click",
         rowSelectionMode = "auto",
+        columnSelectionMode = "auto",
         onHeaderMenuClick,
         onHeaderIndicatorClick,
         getGroupDetails,
@@ -1320,7 +1330,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 //If the grid is empty, we will return text
                 const isFirst = col === rowMarkerOffset;
 
-                const maybeFirstColumnHint = isFirst ? trailingRowOptions?.hint ?? "" : "";
+                const maybeFirstColumnHint = isFirst ? (trailingRowOptions?.hint ?? "") : "";
                 const c = mangledColsRef.current[col];
 
                 if (c?.trailingRowOptions?.disabled === true) {
@@ -1829,7 +1839,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (args: GridMouseEventArgs) => {
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
             const isMultiRow = isMultiKey && rowSelect === "multi";
-            const isMultiCol = isMultiKey && columnSelect === "multi";
+
             const [col, row] = args.location;
             const selectedColumns = gridSelection.columns;
             const selectedRows = gridSelection.rows;
@@ -2003,14 +2013,19 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         lastCol !== undefined &&
                         selectedColumns.hasIndex(lastCol)
                     ) {
+                        // Support for selecting a slice of columns:
                         const newSlice: Slice = [Math.min(lastCol, col), Math.max(lastCol, col) + 1];
 
-                        if (isMultiCol) {
+                        if (isMultiKey || args.isTouch || columnSelectionMode === "multi") {
                             setSelectedColumns(undefined, newSlice, isMultiKey);
                         } else {
                             setSelectedColumns(CompactSelection.fromSingleSelection(newSlice), undefined, isMultiKey);
                         }
-                    } else if (isMultiCol) {
+                    } else if (
+                        columnSelect === "multi" &&
+                        (isMultiKey || args.isTouch || columnSelectionMode === "multi")
+                    ) {
+                        // Support for selecting a single columns additively:
                         if (selectedColumns.hasIndex(col)) {
                             // If the column is already selected, deselect that column:
                             setSelectedColumns(selectedColumns.remove(col), undefined, isMultiKey);
@@ -2020,6 +2035,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         lastSelectedColRef.current = col;
                     } else if (columnSelect !== "none") {
                         if (selectedColumns.hasIndex(col)) {
+                            // If the column is already selected, deselect that column:
                             setSelectedColumns(selectedColumns.remove(col), undefined, isMultiKey);
                         } else {
                             setSelectedColumns(CompactSelection.fromSingleSelection(col), undefined, isMultiKey);
@@ -2053,6 +2069,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onRowMoved,
             focus,
             rowSelectionMode,
+            columnSelectionMode,
             getCellRenderer,
             themeForCell,
             setSelectedRows,
@@ -2146,7 +2163,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             focus();
 
-            if (isMultiKey) {
+            if (isMultiKey || args.isTouch || columnSelectionMode === "multi") {
                 if (selectedColumns.hasAll([start, end + 1])) {
                     let newVal = selectedColumns;
                     for (let index = start; index <= end; index++) {
@@ -2160,7 +2177,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 setSelectedColumns(CompactSelection.fromSingleSelection([start, end + 1]), undefined, isMultiKey);
             }
         },
-        [columnSelect, focus, gridSelection.columns, mangledCols, rowMarkerOffset, setSelectedColumns]
+        [
+            columnSelect,
+            focus,
+            gridSelection.columns,
+            mangledCols,
+            rowMarkerOffset,
+            setSelectedColumns,
+            columnSelectionMode,
+        ]
     );
 
     const isPrevented = React.useRef(false);
@@ -2392,9 +2417,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         }
                     }
                     if (shouldActivate) {
-                        const act = a.isDoubleClick === true
-                            ? "double-click"
-                            : (c.activationBehaviorOverride ?? cellActivationBehavior);
+                        const act =
+                            a.isDoubleClick === true
+                                ? "double-click"
+                                : (c.activationBehaviorOverride ?? cellActivationBehavior);
                         const activationEvent: CellActivatedEventArgs = {
                             inputType: "pointer",
                             pointerActivation: act,
@@ -2709,7 +2735,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 args.buttons !== 0 &&
                 mouseState !== undefined &&
                 mouseDownData.current?.location[0] === 0 &&
-                args.location[0] === 0 &&
                 rowMarkerOffset === 1 &&
                 rowSelect === "multi" &&
                 mouseState.previousSelection &&
@@ -2720,7 +2745,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const end = Math.max(mouseDownData.current.location[1], args.location[1]) + 1;
                 setSelectedRows(CompactSelection.fromSingleSelection([start, end]), undefined, false);
             }
-            if (
+            // Only handle rect selection if not already processed by row selection:
+            else if (
                 args.buttons !== 0 &&
                 mouseState !== undefined &&
                 gridSelection.current !== undefined &&
@@ -3942,7 +3968,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (col: number) => {
             return typeof verticalBorder === "boolean"
                 ? verticalBorder
-                : verticalBorder?.(col - rowMarkerOffset) ?? true;
+                : (verticalBorder?.(col - rowMarkerOffset) ?? true);
         },
         [rowMarkerOffset, verticalBorder]
     );

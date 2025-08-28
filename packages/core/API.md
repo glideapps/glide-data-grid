@@ -192,6 +192,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [onRowMoved](#onrowmoved)                             | Emitted when a row has been dragged to a new location.                                                                                                                              |
 | [preventDiagonalScrolling](#preventdiagonalscrolling) | Prevents diagonal scrolling                                                                                                                                                         |
 | [rowSelectionMode](#rowselectionmode)                 | Determines if row selection requires a modifier key to enable multi-selection or not.                                                                                               |
+| [columnSelectionMode](#columnselectionmode)           | Determines if column selection requires a modifier key to enable multi-selection or not.                                                                                             |
 | [scrollToEnd](#scrolltoend)                           | When set to true, the grid will scroll to the end. The ref has a better method to do this and this prop should not be used but it will remain supported for the foreseeable future. |
 | [showMinimap](#showminimap)                           | Shows the interactive minimap of the grid.                                                                                                                                          |
 | [validateCell](#validatecell)                         | When returns false indicates to the user the value will not be accepted. When returns a new GridCell the value is coerced to match.                                                 |
@@ -1404,6 +1405,16 @@ rowSelectionMode?: "auto" | "multi";
 ```
 
 `rowSelectionMode` changes how selecting a row marker behaves. In auto mode it adapts to touch or mouse environments automatically, in multi-mode it always acts as if the multi key (Ctrl) is pressed.
+
+---
+
+## columnSelectionMode
+
+```ts
+columnSelectionMode?: "auto" | "multi";
+```
+
+`columnSelectionMode` changes how selecting columns behaves. In auto mode it adapts to touch or mouse environments automatically, in multi-mode it always acts as if the multi key (Ctrl) is pressed.
 
 ---
 

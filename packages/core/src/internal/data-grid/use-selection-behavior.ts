@@ -54,7 +54,7 @@ export function useSelectionBehavior(
             }
 
             const rangeMixable =
-                (rangeBehavior === "mixed" || rangeBehavior === "additive") && (append || trigger === "drag");
+                (rangeBehavior === "mixed" && (append || trigger === "drag")) || rangeBehavior === "additive";
             const allowColumnCoSelect = (columnBehavior === "mixed" || columnBehavior === "additive") && rangeMixable;
             const allowRowCoSelect = (rowBehavior === "mixed" || rowBehavior === "additive") && rangeMixable;
             let newVal: GridSelection = {
