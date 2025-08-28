@@ -3,7 +3,13 @@ import { CompactSelection, type GridSelection, type Slice } from "./data-grid-ty
 
 type SetCallback = (newVal: GridSelection, expand: boolean) => void;
 
-export type SelectionBlending = "exclusive" | "mixed";
+/**
+ * The type of selection blending to use:
+ * - `exclusive`: Only one type of selection can be made at a time.
+ * - `mixed`: Multiple types of selection can be made at a time, but only when a multi-key (e.g., Cmd/Ctrl) is held.
+ * - `additive`: Multiple types of selection can be made at a time, and selections accumulate without a modifier.
+ */
+export type SelectionBlending = "exclusive" | "mixed" | "additive";
 
 type SelectionTrigger = "click" | "drag" | "keyboard-nav" | "keyboard-select" | "edit";
 
@@ -47,16 +53,17 @@ export function useSelectionBehavior(
                 };
             }
 
-            const rangeMixable = rangeBehavior === "mixed" && (append || trigger === "drag");
-            const allowColumnCoSelect = columnBehavior === "mixed" && rangeMixable;
-            const allowRowCoSelect = rowBehavior === "mixed" && rangeMixable;
+            const rangeMixable =
+                (rangeBehavior === "mixed" || rangeBehavior === "additive") && (append || trigger === "drag");
+            const allowColumnCoSelect = (columnBehavior === "mixed" || columnBehavior === "additive") && rangeMixable;
+            const allowRowCoSelect = (rowBehavior === "mixed" || rowBehavior === "additive") && rangeMixable;
             let newVal: GridSelection = {
                 current:
                     value === undefined
                         ? undefined
                         : {
                               ...value,
-                              rangeStack: trigger === "drag" ? gridSelection.current?.rangeStack ?? [] : [],
+                              rangeStack: trigger === "drag" ? (gridSelection.current?.rangeStack ?? []) : [],
                           },
                 columns: allowColumnCoSelect ? gridSelection.columns : CompactSelection.empty(),
                 rows: allowRowCoSelect ? gridSelection.rows : CompactSelection.empty(),
@@ -99,8 +106,8 @@ export function useSelectionBehavior(
                     rows: newRows,
                 };
             } else {
-                const rangeMixed = allowMixed && rangeBehavior === "mixed";
-                const columnMixed = allowMixed && columnBehavior === "mixed";
+                const rangeMixed = (allowMixed && rangeBehavior === "mixed") || rangeBehavior === "additive";
+                const columnMixed = (allowMixed && columnBehavior === "mixed") || columnBehavior === "additive";
                 const current = !rangeMixed ? undefined : gridSelection.current;
                 newVal = {
                     current,
@@ -127,8 +134,8 @@ export function useSelectionBehavior(
                     columns: newCols,
                 };
             } else {
-                const rangeMixed = allowMixed && rangeBehavior === "mixed";
-                const rowMixed = allowMixed && rowBehavior === "mixed";
+                const rangeMixed = (allowMixed && rangeBehavior === "mixed") || rangeBehavior === "additive";
+                const rowMixed = (allowMixed && rowBehavior === "mixed") || rowBehavior === "additive";
                 const current = !rangeMixed ? undefined : gridSelection.current;
                 newVal = {
                     current,

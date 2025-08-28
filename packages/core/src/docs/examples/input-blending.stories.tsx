@@ -25,9 +25,9 @@ export default {
 };
 
 interface InputBlendingGridProps {
-    rangeBlending: "mixed" | "exclusive";
-    columnBlending: "mixed" | "exclusive";
-    rowBlending: "mixed" | "exclusive";
+    rangeBlending: "mixed" | "exclusive" | "additive";
+    columnBlending: "mixed" | "exclusive" | "additive";
+    rowBlending: "mixed" | "exclusive" | "additive";
     rangeMultiSelect: "none" | "cell" | "rect" | "multi-cell" | "multi-rect";
     columnMultiSelect: "none" | "single" | "multi";
     rowMultiSelect: "none" | "single" | "multi";
@@ -77,15 +77,15 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
 (InputBlending as any).argTypes = {
     rangeBlending: {
         control: { type: "select" },
-        options: ["mixed", "exclusive"],
+        options: ["mixed", "exclusive", "additive"],
     },
     columnBlending: {
         control: { type: "select" },
-        options: ["mixed", "exclusive"],
+        options: ["mixed", "exclusive", "additive"],
     },
     rowBlending: {
         control: { type: "select" },
-        options: ["mixed", "exclusive"],
+        options: ["mixed", "exclusive", "additive"],
     },
     rangeMultiSelect: {
         control: { type: "select" },
