@@ -1551,10 +1551,7 @@ describe("data-editor", () => {
         };
 
         vi.useFakeTimers();
-        render(
-            <DataEditor {...basicProps} provideEditor={provider} />,
-            { wrapper: Context }
-        );
+        render(<DataEditor {...basicProps} provideEditor={provider} />, { wrapper: Context });
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
@@ -2671,7 +2668,7 @@ describe("data-editor", () => {
         expect(onClickSpy).not.toBeCalled();
     });
 
-    test("renderers can override internal cells", async () => {    
+    test("renderers can override internal cells", async () => {
         const spy = vi.fn();
 
         vi.useFakeTimers();
@@ -2682,7 +2679,7 @@ describe("data-editor", () => {
                     ...AllCellRenderers,
                     {
                         ...markerCellRenderer,
-                        draw: spy
+                        draw: spy,
                     } as InternalCellRenderer<InnerGridCell>,
                 ]}
                 rowMarkers="both"
@@ -3012,12 +3009,9 @@ describe("data-editor", () => {
         const spy = vi.fn();
         const ref = React.createRef<DataEditorRef>();
         vi.useFakeTimers();
-        render(
-            <EventedDataEditor {...basicProps} onRowAppended={spy} ref={ref} trailingRowOptions={undefined} />,
-            {
-                wrapper: Context,
-            }
-        );
+        render(<EventedDataEditor {...basicProps} onRowAppended={spy} ref={ref} trailingRowOptions={undefined} />, {
+            wrapper: Context,
+        });
         prep();
 
         await act(async () => {
@@ -3031,10 +3025,9 @@ describe("data-editor", () => {
         const spy = vi.fn();
         const ref = React.createRef<DataEditorRef>();
         vi.useFakeTimers();
-        render(
-            <EventedDataEditor {...basicProps} onColumnAppended={spy} ref={ref} trailingRowOptions={undefined} />,
-            { wrapper: Context }
-        );
+        render(<EventedDataEditor {...basicProps} onColumnAppended={spy} ref={ref} trailingRowOptions={undefined} />, {
+            wrapper: Context,
+        });
         prep();
 
         await act(async () => {
@@ -4805,5 +4798,92 @@ describe("data-editor", () => {
             vi.runAllTimers();
         });
         expect(spy.mock.calls.findIndex(x => x[0][1] > 1)).toBe(-1);
+    });
+
+    test("Row marker click preserves current with additive row blending", async () => {
+        const spy = vi.fn();
+
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                gridSelection={{
+                    current: {
+                        cell: [1, 1],
+                        range: { x: 1, y: 1, width: 1, height: 1 },
+                        rangeStack: [],
+                    },
+                    rows: CompactSelection.empty(),
+                    columns: CompactSelection.empty(),
+                }}
+                rowMarkers="both"
+                rowSelectionBlending="additive"
+                rangeSelectionBlending="additive"
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 3 + 16, // Row 3 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection(3),
+            current: {
+                cell: [1, 1],
+                range: { x: 1, y: 1, width: 1, height: 1 },
+                rangeStack: [],
+            },
+        });
+    });
+
+    test("Header click preserves current with additive column blending", async () => {
+        const spy = vi.fn();
+
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                gridSelection={{
+                    current: {
+                        cell: [1, 1],
+                        range: { x: 1, y: 1, width: 1, height: 1 },
+                        rangeStack: [],
+                    },
+                    rows: CompactSelection.empty(),
+                    columns: CompactSelection.empty(),
+                }}
+                columnSelectionBlending="additive"
+                rangeSelectionBlending="additive"
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B header
+            clientY: 16, // Header
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.fromSingleSelection(1),
+            rows: CompactSelection.empty(),
+            current: {
+                cell: [1, 1],
+                range: { x: 1, y: 1, width: 1, height: 1 },
+                rangeStack: [],
+            },
+        });
     });
 });
