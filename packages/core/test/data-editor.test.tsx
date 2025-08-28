@@ -4886,4 +4886,60 @@ describe("data-editor", () => {
             },
         });
     });
+
+    test("Row marker drag selects rows when a rect selection exists in multi mode", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                onGridSelectionChange={spy}
+                rowMarkers="both"
+                rangeSelect="multi-rect"
+                rowSelectionBlending="additive"
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        // Create a rect selection first (click cell B2 then shift-click B4)
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 1 + 16,
+        });
+        sendClick(canvas, {
+            shiftKey: true,
+            clientX: 300,
+            clientY: 36 + 32 * 3 + 16,
+        });
+
+        spy.mockClear();
+
+        // Now drag on the row marker from row 2 to row 5
+        fireEvent.pointerDown(canvas, {
+            clientX: 10,
+            clientY: 36 + 32 * 1 + 16,
+        });
+
+        fireEvent.pointerMove(canvas, {
+            clientX: 10,
+            clientY: 36 + 32 * 4 + 16,
+            buttons: 1,
+        });
+
+        fireEvent.pointerUp(canvas, {
+            clientX: 10,
+            clientY: 36 + 32 * 4 + 16,
+        });
+
+        expect(spy).toHaveBeenLastCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection([1, 5]),
+            current: undefined,
+        });
+    });
 });

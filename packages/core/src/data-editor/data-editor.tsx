@@ -2724,7 +2724,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 args.buttons !== 0 &&
                 mouseState !== undefined &&
                 mouseDownData.current?.location[0] === 0 &&
-                args.location[0] === 0 &&
                 rowMarkerOffset === 1 &&
                 rowSelect === "multi" &&
                 mouseState.previousSelection &&
@@ -2735,7 +2734,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const end = Math.max(mouseDownData.current.location[1], args.location[1]) + 1;
                 setSelectedRows(CompactSelection.fromSingleSelection([start, end]), undefined, false);
             }
-            if (
+            // Only handle rect selection if not already processed by row selection:
+            else if (
                 args.buttons !== 0 &&
                 mouseState !== undefined &&
                 gridSelection.current !== undefined &&
