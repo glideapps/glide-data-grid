@@ -2016,12 +2016,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         // Support for selecting a slice of columns:
                         const newSlice: Slice = [Math.min(lastCol, col), Math.max(lastCol, col) + 1];
 
-                        if (isMultiKey || columnSelectionMode === "multi") {
+                        if (isMultiKey || args.isTouch || columnSelectionMode === "multi") {
                             setSelectedColumns(undefined, newSlice, isMultiKey);
                         } else {
                             setSelectedColumns(CompactSelection.fromSingleSelection(newSlice), undefined, isMultiKey);
                         }
-                    } else if (columnSelect === "multi" && (isMultiKey || columnSelectionMode === "multi")) {
+                    } else if (
+                        columnSelect === "multi" &&
+                        (isMultiKey || args.isTouch || columnSelectionMode === "multi")
+                    ) {
                         // Support for selecting a single columns additively:
                         if (selectedColumns.hasIndex(col)) {
                             // If the column is already selected, deselect that column:
@@ -2160,7 +2163,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             focus();
 
-            if (isMultiKey) {
+            if (isMultiKey || args.isTouch || columnSelectionMode === "multi") {
                 if (selectedColumns.hasAll([start, end + 1])) {
                     let newVal = selectedColumns;
                     for (let index = start; index <= end; index++) {
@@ -2174,7 +2177,15 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 setSelectedColumns(CompactSelection.fromSingleSelection([start, end + 1]), undefined, isMultiKey);
             }
         },
-        [columnSelect, focus, gridSelection.columns, mangledCols, rowMarkerOffset, setSelectedColumns]
+        [
+            columnSelect,
+            focus,
+            gridSelection.columns,
+            mangledCols,
+            rowMarkerOffset,
+            setSelectedColumns,
+            columnSelectionMode,
+        ]
     );
 
     const isPrevented = React.useRef(false);
