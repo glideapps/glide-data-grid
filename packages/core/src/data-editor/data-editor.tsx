@@ -544,6 +544,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * @returns A valid GridCell to be rendered by the Grid.
      */
     readonly getCellContent: (cell: Item) => GridCell;
+
     /**
      * Determines if row selection requires a modifier key to enable multi-selection or not. In auto mode it adapts to
      * touch or mouse environments automatically, in multi-mode it always acts as if the multi key (Ctrl) is pressed.
@@ -551,6 +552,14 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * @defaultValue `auto`
      */
     readonly rowSelectionMode?: "auto" | "multi";
+
+    /**
+     * Determines if column selection requires a modifier key to enable multi-selection or not. In auto mode it adapts to
+     * touch or mouse environments automatically, in multi-mode it always acts as if the multi key (Ctrl) is pressed.
+     * @group Editing
+     * @defaultValue `auto`
+     */
+    readonly columnSelectionMode?: "auto" | "multi";
 
     /**
      * Add table headers to copied data.
@@ -838,6 +847,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         freezeColumns = 0,
         cellActivationBehavior = "second-click",
         rowSelectionMode = "auto",
+        columnSelectionMode = "auto",
         onHeaderMenuClick,
         onHeaderIndicatorClick,
         getGroupDetails,
@@ -1829,7 +1839,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (args: GridMouseEventArgs) => {
             const isMultiKey = browserIsOSX.value ? args.metaKey : args.ctrlKey;
             const isMultiRow = isMultiKey && rowSelect === "multi";
-            const isMultiCol = isMultiKey && columnSelect === "multi";
+            f;
             const [col, row] = args.location;
             const selectedColumns = gridSelection.columns;
             const selectedRows = gridSelection.rows;
@@ -2006,12 +2016,12 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         // Support for selecting a slice of columns:
                         const newSlice: Slice = [Math.min(lastCol, col), Math.max(lastCol, col) + 1];
 
-                        if (isMultiCol) {
+                        if (isMultiKey || columnSelectionMode === "multi") {
                             setSelectedColumns(undefined, newSlice, isMultiKey);
                         } else {
                             setSelectedColumns(CompactSelection.fromSingleSelection(newSlice), undefined, isMultiKey);
                         }
-                    } else if (isMultiCol || (columnSelectionBlending === "additive" && columnSelect === "multi")) {
+                    } else if (columnSelect === "multi" && (isMultiKey || columnSelectionMode === "multi")) {
                         // Support for selecting a single columns additively:
                         if (selectedColumns.hasIndex(col)) {
                             // If the column is already selected, deselect that column:
@@ -2056,6 +2066,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onRowMoved,
             focus,
             rowSelectionMode,
+            columnSelectionMode,
             getCellRenderer,
             themeForCell,
             setSelectedRows,
