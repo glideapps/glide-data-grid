@@ -72,7 +72,7 @@
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-sonarjs": "^0.25.1",
-        "eslint-plugin-unicorn": "^43.0.2",
+        "eslint-plugin-unicorn": "^60.0.0",
         "http-server": "^14.1.1",
         "jsdom": "^26.1.0",
         "lodash": "^4.17.21",
