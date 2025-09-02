@@ -36,7 +36,7 @@ interface DataGridOverlayEditorProps {
     readonly onFinishEditing: (newCell: GridCell | undefined, movement: readonly [-1 | 0 | 1, -1 | 0 | 1]) => void;
     readonly forceEditMode: boolean;
     readonly highlight: boolean;
-    readonly portalElementRef?: React.RefObject<HTMLElement>
+    readonly portalElementRef?: React.RefObject<HTMLElement>;
     readonly imageEditorOverride?: ImageEditorType;
     readonly getCellRenderer: GetCellRendererCallback;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
@@ -132,7 +132,12 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 event.stopPropagation();
                 event.preventDefault();
                 customMotion.current = [0, 0];
-            } else if (event.key === "Enter" && !event.shiftKey) {
+            } else if (
+                event.key === "Enter" &&
+                // The shift key is reserved for multi-line editing
+                // to allow inserting new lines without closing the editor.
+                !event.shiftKey
+            ) {
                 event.stopPropagation();
                 event.preventDefault();
                 customMotion.current = [0, 1];
