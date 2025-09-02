@@ -128,28 +128,22 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
     const onKeyDown = React.useCallback(
         async (event: React.KeyboardEvent) => {
             let save = false;
-            switch (event.key) {
-                case "Escape": {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    customMotion.current = [0, 0];
-                    break;
-                }
-                case "Enter": {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    customMotion.current = [0, event.shiftKey ? -1 : 1];
-                    save = true;
-                    break;
-                }
-                case "Tab": {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    customMotion.current = [event.shiftKey ? -1 : 1, 0];
-                    save = true;
-                    break;
-                }
+            if (event.key === "Escape") {
+                event.stopPropagation();
+                event.preventDefault();
+                customMotion.current = [0, 0];
+            } else if (event.key === "Enter" && !event.shiftKey) {
+                event.stopPropagation();
+                event.preventDefault();
+                customMotion.current = [0, 1];
+                save = true;
+            } else if (event.key === "Tab") {
+                event.stopPropagation();
+                event.preventDefault();
+                customMotion.current = [event.shiftKey ? -1 : 1, 0];
+                save = true;
             }
+
             window.setTimeout(() => {
                 if (!finished.current && customMotion.current !== undefined) {
                     onFinishEditing(save ? tempValue : undefined, customMotion.current);
