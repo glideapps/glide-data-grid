@@ -3516,7 +3516,9 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             ) {
                 if (
                     (!showTrailingBlankRow || row !== rows) &&
-                    (vr.y > row || row > vr.y + vr.height || vr.x > col || col > vr.x + vr.width)
+                    (vr.y > row || row > vr.y + vr.height) &&
+                    col >= freezeColumns &&
+                    (vr.x > col || col > vr.x + vr.width)
                 ) {
                     return;
                 }
