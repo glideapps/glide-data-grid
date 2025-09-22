@@ -74,7 +74,7 @@
         "eslint-plugin-sonarjs": "^0.25.1",
         "eslint-plugin-unicorn": "^43.0.2",
         "http-server": "^14.1.1",
-        "jsdom": "^26.1.0",
+        "jsdom": "^27.0.0",
         "lodash": "^4.17.21",
         "marked": "^16.1.2",
         "mini-css-extract-plugin": "^2.9.2",
