@@ -31,6 +31,8 @@ interface RangeCellProps {
     readonly step: number;
     readonly label?: string;
     readonly measureLabel?: string;
+    /* The color of the range, fallback to theme.accentColor. */
+    readonly color?: string;
 }
 
 export type RangeCell = CustomCell<RangeCellProps>;
@@ -50,7 +52,7 @@ const renderer: CustomRenderer<RangeCell> = {
     isMatch: (c): c is RangeCell => (c.data as any).kind === "range-cell",
     draw: (args, cell) => {
         const { ctx, theme, rect } = args;
-        const { min, max, value, label, measureLabel } = cell.data;
+        const { min, max, value, label, measureLabel, color } = cell.data;
 
         const x = rect.x + theme.cellHorizontalPadding;
         const yMid = rect.y + rect.height / 2;
@@ -75,8 +77,9 @@ const renderer: CustomRenderer<RangeCell> = {
         if (rangeWidth >= rangeHeight) {
             const gradient = ctx.createLinearGradient(x, yMid, x + rangeWidth, yMid);
 
-            gradient.addColorStop(0, theme.accentColor);
-            gradient.addColorStop(fillRatio, theme.accentColor);
+            const fillColor = color ?? theme.accentColor;
+            gradient.addColorStop(0, fillColor);
+            gradient.addColorStop(fillRatio, fillColor);
             gradient.addColorStop(fillRatio, theme.bgBubble);
             gradient.addColorStop(1, theme.bgBubble);
 

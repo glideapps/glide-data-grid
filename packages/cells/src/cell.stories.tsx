@@ -312,6 +312,7 @@ export const CustomCells: React.VFC = () => {
                                 step: 1,
                                 label: `${Math.round(v * 100)}%`,
                                 measureLabel: "100%",
+                                color: row % 2 === 0 ? "#77c4c4" : undefined,
                             },
                         };
                         return d;
