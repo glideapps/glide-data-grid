@@ -309,6 +309,18 @@ export interface DataGridProps {
      * @group Style
      */
     readonly resizeIndicator: "full" | "header" | "none" | undefined;
+
+    /** Enables accent-coloured grid lines for selected columns in the header.
+     * @defaultValue false
+     * @group Style
+     */
+    readonly columnSelectionGridLines?: boolean;
+
+    /** Enables accent-coloured grid lines for selected rows in the header.
+     * @defaultValue false
+     * @group Style
+     */
+    readonly rowSelectionGridLines?: boolean;
 }
 
 type DamageUpdateList = readonly {
@@ -400,6 +412,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         experimental,
         getCellRenderer,
         resizeIndicator = "full",
+        columnSelectionGridLines = false,
+        rowSelectionGridLines = false,
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -847,6 +861,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             getCellRenderer,
             minimumCellWidth,
             resizeIndicator,
+            columnSelectionGridLines,
+            rowSelectionGridLines,
         };
 
         // This confusing bit of code due to some poor design. Long story short, the damage property is only used
@@ -913,6 +929,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         getCellRenderer,
         minimumCellWidth,
         resizeIndicator,
+        columnSelectionGridLines,
+        rowSelectionGridLines,
     ]);
 
     const lastDrawRef = React.useRef(draw);
