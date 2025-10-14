@@ -1,6 +1,6 @@
 {
     "name": "@glideapps/glide-data-grid-cells",
-    "version": "6.0.4-alpha12",
+    "version": "6.0.4-alpha24",
     "description": "Extra cells for glide-data-grid",
     "sideEffects": [
         "**/*.css"
@@ -34,7 +34,7 @@
         "url": "git+https://github.com/glideapps/glide-data-grid.git",
         "directory": "packages/cells"
     },
-    "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/cells",
+    "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/packages/cells",
     "author": "Glide",
     "license": "MIT",
     "keywords": [
@@ -50,8 +50,8 @@
         "canvas"
     ],
     "dependencies": {
-        "@glideapps/glide-data-grid": "6.0.4-alpha12",
-        "@linaria/react": "^4.5.4",
+        "@glideapps/glide-data-grid": "6.0.4-alpha24",
+        "@linaria/react": "^6.3.0",
         "@toast-ui/editor": "3.2.2",
         "@toast-ui/react-editor": "3.2.3",
         "react-select": "^5.10.1"
@@ -66,9 +66,9 @@
         "eslint": "^8.57.1",
         "eslint-plugin-import": "^2.31.0",
         "eslint-plugin-react": "^7.37.5",
-        "eslint-plugin-react-hooks": "^4.6.2",
-        "react-resize-detector": "^7.1.2",
-        "tsc-esm-fix": "^2.20.27",
+        "eslint-plugin-react-hooks": "^5.2.0",
+        "react-resize-detector": "^12.1.0",
+        "tsc-esm-fix": "^3.1.2",
         "typescript": "^5.8.3"
     }
 }

@@ -1,6 +1,6 @@
 {
     "name": "@glideapps/glide-data-grid",
-    "version": "6.0.4-alpha12",
+    "version": "6.0.4-alpha24",
     "description": "React data grid for beautifully displaying and editing large amounts of data with amazing performance.",
     "sideEffects": [
         "**/*.css"
@@ -57,25 +57,25 @@
     },
     "homepage": "https://grid.glideapps.com",
     "dependencies": {
-        "@linaria/react": "^4.5.4",
+        "@linaria/react": "^6.3.0",
         "canvas-hypertxt": "^1.0.3",
         "react-number-format": "^5.4.4"
     },
     "peerDependencies": {
         "lodash": "^4.17.19",
-        "marked": "^4.0.10",
+        "marked": "^16.0.10",
         "react": "^16.12.0 || 17.x || 18.x || 19.x",
         "react-dom": "^16.12.0 || 17.x || 18.x || 19.x",
         "react-responsive-carousel": "^3.2.7"
     },
     "devDependencies": {
         "@babel/cli": "^7.27.2",
-        "@glideapps/ts-helper": "5.0.0",
+        "@glideapps/ts-helper": "6.0.0",
         "@skypack/package-check": "^0.2.2",
         "@vitest/coverage-v8": "^0.34.6",
         "eslint": "^8.57.1",
-        "react-resize-detector": "^7.1.2",
-        "tsc-esm-fix": "^2.20.27",
+        "react-resize-detector": "^12.1.0",
+        "tsc-esm-fix": "^3.1.2",
         "typedoc": "^0.28.5"
     }
 }

@@ -11,6 +11,9 @@ export * from "./internal/data-grid/data-grid-types.js";
 export type {
     BaseGridMouseEventArgs,
     CellClickedEventArgs,
+    CellActivatedEventArgs,
+    KeyboardCellActivatedEvent,
+    PointerCellActivatedEvent,
     DragHandler,
     FillPatternEventArgs,
     GridDragEventArgs,
@@ -45,6 +48,7 @@ export { useColumnSizer } from "./data-editor/use-column-sizer.js";
 export type { DataEditorRef } from "./data-editor/data-editor.js";
 export { DataEditorAll as DataEditor } from "./data-editor-all.js";
 export type { DataEditorAllProps as DataEditorProps } from "./data-editor-all.js";
+export { emptyGridSelection } from "./data-editor/data-editor.js";
 
 export { DataEditor as DataEditorCore } from "./data-editor/data-editor.js";
 export type { DataEditorProps as DataEditorCoreProps } from "./data-editor/data-editor.js";

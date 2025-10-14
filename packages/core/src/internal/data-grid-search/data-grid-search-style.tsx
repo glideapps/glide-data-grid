@@ -39,7 +39,7 @@ export const SearchWrapper = styled.div`
 
     input {
         width: 220px;
-        color: var(--gdg-textDark);
+        color: var(--gdg-text-dark);
         background-color: var(--gdg-bg-cell);
         border: none;
         border-width: 0;
@@ -61,7 +61,7 @@ export const SearchWrapper = styled.div`
         cursor: pointer;
         color: var(--gdg-text-medium);
 
-        :hover {
+        &:hover {
             color: var(--gdg-text-dark);
         }
 
@@ -70,7 +70,7 @@ export const SearchWrapper = styled.div`
             height: 16px;
         }
 
-        :disabled {
+        &:disabled {
             opacity: 0.4;
             pointer-events: none;
         }

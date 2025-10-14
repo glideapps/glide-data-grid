@@ -152,8 +152,12 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
         if (searchHandle.current !== undefined) {
             window.cancelAnimationFrame(searchHandle.current);
             searchHandle.current = undefined;
+        }
+        // Always abort and replace the controller to ensure a fresh, non-aborted signal
+        if (abortControllerRef.current !== undefined) {
             abortControllerRef.current.abort();
         }
+        abortControllerRef.current = new AbortController();
     }, []);
 
     const cellYOffsetRef = React.useRef(cellYOffset);
@@ -294,16 +298,30 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     );
 
     React.useEffect(() => {
-        if (showSearch && searchInputRef.current !== null) {
-            setSearchString("");
-            searchInputRef.current.focus({ preventScroll: true });
+        if (searchInputRef.current === null) return;
+
+        // Reset search whenever search status changes:
+        setSearchString("");
+        setSearchStatus(undefined);
+        if (searchResultsInner.length > 0) {
+            setSearchResultsInner([]);
+            onSearchResultsChanged?.([], -1);
         }
-    }, [showSearch, searchInputRef, setSearchString]);
+
+        if (showSearch) {
+            searchInputRef.current.focus({ preventScroll: true });
+        } else {
+            // Cancel search when it gets hidden:
+            cancelSearch();
+        }
+        // Only re-run when showSearch changes:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showSearch, searchInputRef]);
 
     const onNext = React.useCallback(
         (ev?: React.MouseEvent) => {
             ev?.stopPropagation?.();
-            if (searchStatus === undefined) return;
+            if (searchStatus === undefined || searchStatus.results === 0) return;
             const newIndex = (searchStatus.selectedIndex + 1) % searchStatus.results;
             setSearchStatus({
                 ...searchStatus,
@@ -317,7 +335,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
     const onPrev = React.useCallback(
         (ev?: React.MouseEvent) => {
             ev?.stopPropagation?.();
-            if (searchStatus === undefined) return;
+            if (searchStatus === undefined || searchStatus.results === 0) return;
             let newIndex = (searchStatus.selectedIndex - 1) % searchStatus.results;
             if (newIndex < 0) newIndex += searchStatus.results;
             setSearchStatus({
@@ -384,14 +402,14 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
             ev.stopPropagation();
         };
 
-        const rowsSearchedProgress = Math.floor(((searchStatus?.rowsSearched ?? 0) / rows) * 100);
+        const rowsSearchedProgress = rows > 0 ? Math.floor(((searchStatus?.rowsSearched ?? 0) / rows) * 100) : 0;
         const progressStyle: React.CSSProperties = {
             width: `${rowsSearchedProgress}%`,
         };
 
         return (
             <SearchWrapper
-                className={showSearch ? "" : "out"}
+                className={"gdg-search-bar" + (showSearch ? "" : " out")}
                 onMouseDown={cancelEvent}
                 onMouseMove={cancelEvent}
                 onMouseUp={cancelEvent}
@@ -408,6 +426,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         onKeyDownCapture={onSearchKeyDown}
                     />
                     <button
+                        type="button"
                         aria-label="Previous Result"
                         aria-hidden={!showSearch}
                         tabIndex={showSearch ? undefined : -1}
@@ -416,6 +435,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                         {upArrow}
                     </button>
                     <button
+                        type="button"
                         aria-label="Next Result"
                         aria-hidden={!showSearch}
                         tabIndex={showSearch ? undefined : -1}
@@ -425,6 +445,7 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                     </button>
                     {onSearchClose !== undefined && (
                         <button
+                            type="button"
                             aria-label="Close Search"
                             aria-hidden={!showSearch}
                             data-testid="search-close-button"

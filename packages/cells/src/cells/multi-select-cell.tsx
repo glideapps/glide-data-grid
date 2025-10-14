@@ -131,7 +131,7 @@ const CustomMenu: React.FC<CustomMenuProps> = p => {
 export type MultiSelectCell = CustomCell<MultiSelectCellProps>;
 
 const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
-    const { value: cell, initialValue, onChange, onFinishedEditing } = p;
+    const { value: cell, initialValue, onChange, onFinishedEditing, portalElementRef } = p;
     const { options: optionsIn, values: valuesIn, allowCreation, allowDuplicates } = cell.data;
 
     const theme = useTheme();
@@ -159,11 +159,21 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
     // Apply styles to the react-select component.
     // All components: https://react-select.com/components
     const colorStyles: StylesConfig<SelectOption, true> = {
-        control: base => ({
+        control: (base, state) => ({
             ...base,
             border: 0,
             boxShadow: "none",
             backgroundColor: theme.bgCell,
+            // Allow interaction (e.g. wheel scrolling) even when the select is disabled
+            pointerEvents: state.isDisabled ? "auto" : base.pointerEvents,
+            cursor: state.isDisabled ? "default" : base.cursor,
+        }),
+        valueContainer: base => ({
+            ...base,
+            // Keep default wrapping so multiple chips can move to new lines
+            flexWrap: base.flexWrap ?? "wrap",
+            overflowX: "auto",
+            overflowY: "hidden",
         }),
         menu: styles => ({
             ...styles,
@@ -227,6 +237,8 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 ...styles,
                 backgroundColor: data.color ?? theme.bgBubble,
                 borderRadius: `${theme.roundingRadius ?? theme.bubbleHeight / 2}px`,
+                flexShrink: 0,
+                whiteSpace: "nowrap",
             };
         },
         multiValueLabel: (styles, { data, isDisabled }) => {
@@ -249,6 +261,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 alignItems: "center",
                 display: "flex",
                 height: theme.bubbleHeight,
+                whiteSpace: "nowrap",
             };
         },
         multiValueRemove: (styles, { data, isDisabled, isFocused }) => {
@@ -343,7 +356,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 value={resolveValues(value, options, allowDuplicates)}
                 onKeyDown={cell.readonly ? undefined : handleKeyDown}
                 menuPlacement={"auto"}
-                menuPortalTarget={document.getElementById("portal")}
+                menuPortalTarget={portalElementRef?.current ?? document.getElementById("portal")}
                 autoFocus={true}
                 openMenuOnFocus={true}
                 openMenuOnClick={true}

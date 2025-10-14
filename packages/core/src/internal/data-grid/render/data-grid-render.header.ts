@@ -74,14 +74,14 @@ export function drawGridHeaders(
         }
 
         if (theme !== outerTheme) {
-            ctx.font = theme.baseFontFull;
+            ctx.font = theme.headerFontFull;
         }
         const selected = selection.columns.hasIndex(c.sourceIndex);
-        const noHover = dragAndDropState !== undefined || isResizing;
+        const noHover = dragAndDropState !== undefined || isResizing || c.headerRowMarkerDisabled === true;
         const hoveredBoolean = !noHover && hRow === -1 && hCol === c.sourceIndex;
         const hover = noHover
             ? 0
-            : hoverValues.find(s => s.item[0] === c.sourceIndex && s.item[1] === -1)?.hoverAmount ?? 0;
+            : (hoverValues.find(s => s.item[0] === c.sourceIndex && s.item[1] === -1)?.hoverAmount ?? 0);
 
         const hasSelectedCell = selection?.current !== undefined && selection.current.cell[0] === c.sourceIndex;
 
@@ -186,8 +186,8 @@ export function drawGroups(
             group?.overrideTheme === undefined ? theme : mergeAndRealizeTheme(theme, group.overrideTheme);
         const isHovered = hRow === -2 && hCol !== undefined && hCol >= span[0] && hCol <= span[1];
         const fillColor = isHovered
-            ? groupTheme.bgGroupHeaderHovered ?? groupTheme.bgHeaderHovered
-            : groupTheme.bgGroupHeader ?? groupTheme.bgHeader;
+            ? (groupTheme.bgGroupHeaderHovered ?? groupTheme.bgHeaderHovered)
+            : (groupTheme.bgGroupHeader ?? groupTheme.bgHeader);
 
         if (fillColor !== theme.bgHeader) {
             ctx.fillStyle = fillColor;
@@ -389,7 +389,7 @@ export function computeHeaderLayout(
     if (c.indicatorIcon !== undefined) {
         const textWidth =
             ctx === undefined
-                ? getMeasuredTextCache(c.title, theme.headerFontFull)?.width ?? 0
+                ? (getMeasuredTextCache(c.title, theme.headerFontFull)?.width ?? 0)
                 : measureTextCached(c.title, ctx, theme.headerFontFull).width;
         textBounds.width = textWidth;
         drawX += textWidth + xPad;
@@ -448,7 +448,7 @@ function drawHeaderInner(
             false,
             undefined,
             undefined,
-            18,
+            theme.checkboxMaxSize,
             "center",
             c.rowMarker
         );

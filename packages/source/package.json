@@ -1,6 +1,6 @@
 {
     "name": "@glideapps/glide-data-grid-source",
-    "version": "6.0.4-alpha12",
+    "version": "6.0.4-alpha24",
     "description": "Useful data source hooks for Glide Data Grid",
     "sideEffects": false,
     "type": "module",
@@ -26,7 +26,7 @@
         "url": "git+https://github.com/glideapps/glide-data-grid.git",
         "directory": "packages/source"
     },
-    "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/cells",
+    "homepage": "https://github.com/glideapps/glide-data-grid/tree/main/packages/source",
     "author": "Glide",
     "license": "MIT",
     "keywords": [
@@ -42,7 +42,7 @@
         "canvas"
     ],
     "dependencies": {
-        "@glideapps/glide-data-grid": "6.0.4-alpha12"
+        "@glideapps/glide-data-grid": "6.0.4-alpha24"
     },
     "peerDependencies": {
         "lodash": "^4.17.19",
@@ -54,8 +54,8 @@
         "eslint": "^8.57.1",
         "eslint-plugin-import": "^2.31.0",
         "eslint-plugin-react": "^7.37.5",
-        "eslint-plugin-react-hooks": "^4.6.2",
-        "react-resize-detector": "^7.1.2",
-        "tsc-esm-fix": "^2.20.27"
+        "eslint-plugin-react-hooks": "^5.2.0",
+        "react-resize-detector": "^12.1.0",
+        "tsc-esm-fix": "^3.1.2"
     }
 }

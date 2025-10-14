@@ -12,6 +12,7 @@ import {
 import type { DataEditorRef } from "../src/data-editor/data-editor.js";
 import { CompactSelection } from "../src/internal/data-grid/data-grid-types.js";
 import { vi, expect, describe, test, beforeEach, afterEach } from "vitest";
+import { standardBeforeEach } from "./test-utils.js";
 
 const makeCell = (cell: Item): GridCell => {
     const [col, row] = cell;
@@ -198,7 +199,7 @@ const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, r
         [p]
     );
 
-    const onRowAppened = React.useCallback(() => {
+    const onRowAppended = React.useCallback(() => {
         setExtraRows(cv => cv + 1);
         void p.onRowAppended?.();
     }, [p]);
@@ -210,7 +211,7 @@ const EventedDataEditor = React.forwardRef<DataEditorRef, DataEditorProps>((p, r
             gridSelection={sel}
             onGridSelectionChange={onGridSelectionChange}
             rows={p.rows + extraRows}
-            onRowAppended={p.onRowAppended === undefined ? undefined : onRowAppened}
+            onRowAppended={p.onRowAppended === undefined ? undefined : onRowAppended}
         />
     );
 });
@@ -223,6 +224,8 @@ describe("data-editor-input", () => {
     });
 
     beforeEach(() => {
+        standardBeforeEach();
+
         Element.prototype.scrollTo = vi.fn() as any;
         Element.prototype.scrollBy = vi.fn() as any;
         Object.assign(navigator, {
@@ -267,17 +270,17 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 350,
             clientY: 36 + 32 * 2 + 16,
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 650,
             clientY: 36 + 32 * 12 + 16,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 650,
             clientY: 36 + 32 * 12 + 16,
         });
@@ -316,19 +319,19 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             ctrlKey: true,
             clientX: 350,
             clientY: 36 + 32 * 2 + 16,
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             ctrlKey: true,
             clientX: 650,
             clientY: 36 + 32 * 12 + 16,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             ctrlKey: true,
             clientX: 650,
             clientY: 36 + 32 * 12 + 16,
@@ -372,19 +375,19 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             ctrlKey: true,
             clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             ctrlKey: true,
             clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             ctrlKey: true,
             clientX: 20,
             clientY: 36 + 32 * 3 + 16,
@@ -429,19 +432,19 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             ctrlKey: true,
             clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             ctrlKey: true,
             clientX: 20,
             clientY: 36 + 32 * 3 + 16,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             ctrlKey: true,
             clientX: 20,
             clientY: 36 + 32 * 3 + 16,
@@ -485,19 +488,19 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             ctrlKey: true,
             clientX: 220,
             clientY: 16,
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             ctrlKey: true,
             clientX: 220,
             clientY: 16,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             ctrlKey: true,
             clientX: 220,
             clientY: 16,
@@ -542,20 +545,127 @@ a new line char ""more quotes"" plus a tab  ."	https://google.com`)
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             ctrlKey: true,
             clientX: 220,
             clientY: 16,
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             ctrlKey: true,
             clientX: 220,
             clientY: 16,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             ctrlKey: true,
+            clientX: 220,
+            clientY: 16,
+        });
+
+        expect(spy).toBeCalledWith({
+            current: {
+                cell: [1, 2],
+                range: { height: 1, width: 1, x: 1, y: 2 },
+                rangeStack: [],
+            },
+            columns: CompactSelection.fromSingleSelection(1),
+            rows: CompactSelection.empty(),
+        });
+    });
+
+    test("Select row - single-cell/single-row with additive row blending (no modifiers)", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                gridSelection={{
+                    current: {
+                        cell: [1, 2],
+                        range: { height: 1, width: 1, x: 1, y: 2 },
+                        rangeStack: [],
+                    },
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
+                }}
+                rangeSelect="cell"
+                rowSelect="single"
+                rowSelectionBlending="additive"
+                rangeSelectionBlending="additive"
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.pointerDown(canvas, {
+            clientX: 20,
+            clientY: 36 + 32 * 3 + 16,
+        });
+
+        fireEvent.pointerMove(canvas, {
+            clientX: 20,
+            clientY: 36 + 32 * 3 + 16,
+        });
+
+        fireEvent.pointerUp(canvas, {
+            clientX: 20,
+            clientY: 36 + 32 * 3 + 16,
+        });
+
+        expect(spy).toBeCalledWith({
+            current: {
+                cell: [1, 2],
+                range: { height: 1, width: 1, x: 1, y: 2 },
+                rangeStack: [],
+            },
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection(3),
+        });
+    });
+
+    test("Select col - single-cell with additive col blending (no modifiers)", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                gridSelection={{
+                    current: {
+                        cell: [1, 2],
+                        range: { height: 1, width: 1, x: 1, y: 2 },
+                        rangeStack: [],
+                    },
+                    columns: CompactSelection.empty(),
+                    rows: CompactSelection.empty(),
+                }}
+                rangeSelect="cell"
+                columnSelectionBlending="additive"
+                rangeSelectionBlending="additive"
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        fireEvent.pointerDown(canvas, {
+            clientX: 220,
+            clientY: 16,
+        });
+
+        fireEvent.pointerMove(canvas, {
+            clientX: 220,
+            clientY: 16,
+        });
+
+        fireEvent.pointerUp(canvas, {
             clientX: 220,
             clientY: 16,
         });

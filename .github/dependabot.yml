@@ -1,0 +1,16 @@
+version: 2
+updates:
+    - package-ecosystem: "npm"
+      directory: "/"
+      schedule:
+          interval: "weekly"
+      open-pull-requests-limit: 10
+      commit-message:
+          prefix: "deps"
+          include: "scope"
+      labels:
+          - "dependencies"
+      # Use cooldown to avoid updating dependencies too frequently
+      # and minimize risk of supply chain attacks.
+      cooldown:
+          default-days: 5

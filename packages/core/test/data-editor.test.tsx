@@ -12,6 +12,7 @@ import {
     type InnerGridCell,
     type InternalCellRenderer,
     AllCellRenderers,
+    type ProvideEditorCallback,
 } from "../src/index.js";
 import type { CustomCell } from "../src/internal/data-grid/data-grid-types.js";
 import type { DataEditorRef } from "../src/data-editor/data-editor.js";
@@ -441,7 +442,13 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith([1, 1]);
+        const event = spy.mock.calls[0][1];
+        expect(event).toEqual(
+            expect.objectContaining({
+                inputType: "pointer",
+                pointerActivation: "double-click",
+            })
+        );
     });
 
     describe("cellActivationBehavior", () => {
@@ -470,7 +477,7 @@ describe("data-editor", () => {
             });
 
             expect(spy).toHaveBeenCalled();
-            expect(spy).toHaveBeenCalledWith([1, 1]);
+            expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
         });
 
         test("double-click miss", async () => {
@@ -525,7 +532,7 @@ describe("data-editor", () => {
             });
 
             expect(spy).toHaveBeenCalled();
-            expect(spy).toHaveBeenCalledWith([1, 1]);
+            expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
         });
 
         test("single-click", async () => {
@@ -548,7 +555,7 @@ describe("data-editor", () => {
             );
 
             expect(spy).toHaveBeenCalled();
-            expect(spy).toHaveBeenCalledWith([1, 1]);
+            expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
         });
     });
 
@@ -601,7 +608,13 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith([1, 1]);
+        const event = spy.mock.calls[0][1];
+        expect(event).toEqual(
+            expect.objectContaining({
+                inputType: "keyboard",
+                key: "Enter",
+            })
+        );
     });
 
     test("Toggle boolean with Enter key", async () => {
@@ -629,7 +642,7 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith([7, 2]);
+        expect(spy).toHaveBeenCalledWith([7, 2], expect.anything());
         expect(editSpy).toHaveBeenCalledWith([7, 2], {
             allowOverlay: false,
             data: true,
@@ -662,7 +675,34 @@ describe("data-editor", () => {
         });
 
         expect(spy).toHaveBeenCalled();
-        expect(spy).toHaveBeenCalledWith([1, 1]);
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    });
+
+    test("Emits activated event when typing", async () => {
+        const spy = vi.fn();
+
+        vi.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellActivated={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "A",
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
     });
 
     test("keyDown and keyUp events include the cell location", async () => {
@@ -713,12 +753,12 @@ describe("data-editor", () => {
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 300, // Col B, ends at x = 310
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 320, // Col C, started at x = 310
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
@@ -736,12 +776,12 @@ describe("data-editor", () => {
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 300, // Col B, ends at x = 310
             clientY: 16, // Header
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 320, // Col C, started at x = 310
             clientY: 16, // Header
         });
@@ -978,7 +1018,7 @@ describe("data-editor", () => {
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 300, // Col B
             clientY: 16, // Group Header
         });
@@ -1024,7 +1064,7 @@ describe("data-editor", () => {
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 300, // Col B
             clientY: 16, // Header
         });
@@ -1081,7 +1121,7 @@ describe("data-editor", () => {
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
@@ -1100,7 +1140,7 @@ describe("data-editor", () => {
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
@@ -1501,6 +1541,36 @@ describe("data-editor", () => {
         });
 
         expect(document.body.contains(overlay)).toBe(false);
+    });
+
+    test("Editor provider receives activation info", async () => {
+        const spy = vi.fn();
+        const provider: ProvideEditorCallback<GridCell> = cell => {
+            spy(cell.activation);
+            return undefined;
+        };
+
+        vi.useFakeTimers();
+        render(<DataEditor {...basicProps} provideEditor={provider} />, { wrapper: Context });
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 + 16,
+        });
+
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 + 16,
+        });
+
+        expect(spy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                inputType: "pointer",
+                pointerActivation: "double-click",
+            })
+        );
     });
 
     test("Send edit", async () => {
@@ -2510,20 +2580,20 @@ describe("data-editor", () => {
         vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
 
         // mouse down col b row 2
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 300,
             clientY: 36 + 32 * 2 + 16,
         });
 
         // mouse move col b row 3
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 300,
             clientY: 36 + 32 * 2 + 16,
             buttons: 1,
         });
 
         // mouse up
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 300,
             clientY: 36 + 32 * 2 + 16,
         });
@@ -2573,20 +2643,20 @@ describe("data-editor", () => {
         vi.spyOn(document, "activeElement", "get").mockImplementation(() => canvas);
 
         // mouse down col b row 2
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 300,
             clientY: 36 + 32 * 2 + 16,
         });
 
         // mouse move col b row 3
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 300,
             clientY: 36 + 32 * 3 + 16,
             buttons: 1,
         });
 
         // mouse up
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 300,
             clientY: 36 + 32 * 3 + 16,
         });
@@ -2598,7 +2668,7 @@ describe("data-editor", () => {
         expect(onClickSpy).not.toBeCalled();
     });
 
-    test("renderers can override internal cells", async () => {    
+    test("renderers can override internal cells", async () => {
         const spy = vi.fn();
 
         vi.useFakeTimers();
@@ -2609,7 +2679,7 @@ describe("data-editor", () => {
                     ...AllCellRenderers,
                     {
                         ...markerCellRenderer,
-                        draw: spy
+                        draw: spy,
                     } as InternalCellRenderer<InnerGridCell>,
                 ]}
                 rowMarkers="both"
@@ -2793,7 +2863,7 @@ describe("data-editor", () => {
 
         spy.mockClear();
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 300, // Col B
             clientY: 16, // Header
         });
@@ -2809,7 +2879,7 @@ describe("data-editor", () => {
         const scroller = prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 300, // Col B
             clientY: 16, // Header
         });
@@ -2867,7 +2937,7 @@ describe("data-editor", () => {
         const scroller = prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 300, // Col B
             clientY: 16, // Header
         });
@@ -2935,6 +3005,38 @@ describe("data-editor", () => {
         expect(Element.prototype.scrollTo).toHaveBeenCalled();
     });
 
+    test("appendRow ref without trailing row", async () => {
+        const spy = vi.fn();
+        const ref = React.createRef<DataEditorRef>();
+        vi.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onRowAppended={spy} ref={ref} trailingRowOptions={undefined} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        await act(async () => {
+            await ref.current?.appendRow(1, false);
+        });
+
+        expect(spy).toHaveBeenCalled();
+    });
+
+    test("appendColumn ref", async () => {
+        const spy = vi.fn();
+        const ref = React.createRef<DataEditorRef>();
+        vi.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onColumnAppended={spy} ref={ref} trailingRowOptions={undefined} />, {
+            wrapper: Context,
+        });
+        prep();
+
+        await act(async () => {
+            await ref.current?.appendColumn(0, false);
+        });
+
+        expect(spy).toHaveBeenCalled();
+    });
+
     test("Click row marker", async () => {
         const spy = vi.fn();
         vi.useFakeTimers();
@@ -2995,21 +3097,21 @@ describe("data-editor", () => {
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 10, // Row marker
             clientY: 36 + 32 * 2 + 16, // Row 2 (0 indexed)
         });
 
         spy.mockClear();
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             shiftKey: true,
             clientX: 10, // Row marker
             clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
             buttons: 1,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             shiftKey: true,
             clientX: 10, // Row marker
             clientY: 36 + 32 * 5 + 16, // Row 2 (0 indexed)
@@ -3391,36 +3493,36 @@ describe("data-editor", () => {
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 300, // Col B
             clientY: 16, // Header
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 250,
             clientY: 16,
             buttons: 1,
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 200,
             clientY: 16,
             buttons: 1,
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 150,
             clientY: 16,
             buttons: 1,
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 100,
             clientY: 16,
             buttons: 1,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 100, // Col A
             clientY: 16, // Header
         });
@@ -3442,18 +3544,18 @@ describe("data-editor", () => {
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 10, // Col B Right Edge
             clientY: 300, // Header
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 10,
             clientY: 400,
             buttons: 1,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 10,
             clientY: 400,
         });
@@ -3475,13 +3577,13 @@ describe("data-editor", () => {
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 * 2 + 16, // Row 2
         });
 
         spy.mockClear();
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
             buttons: 1,
@@ -3493,7 +3595,7 @@ describe("data-editor", () => {
             })
         );
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
         });
@@ -3514,14 +3616,14 @@ describe("data-editor", () => {
             clientY: 36 + 32 * 2 + 16, // Row 2
         });
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             button: 1,
             clientX: 300, // Col B
             clientY: 36 + 32 * 2 + 16, // Row 2
         });
 
         spy.mockClear();
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
             buttons: 1,
@@ -3529,7 +3631,7 @@ describe("data-editor", () => {
 
         expect(spy).not.toBeCalled();
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
         });
@@ -4049,13 +4151,13 @@ describe("data-editor", () => {
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 * 2 + 16, // Row 2
         });
 
         spy.mockClear();
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
             buttons: 1,
@@ -4067,7 +4169,7 @@ describe("data-editor", () => {
             })
         );
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
         });
@@ -4257,18 +4359,18 @@ describe("data-editor", () => {
         prep();
         const canvas = screen.getByTestId("data-grid-canvas");
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 300, // Col B
             clientY: 36 + 32 * 2 + 16, // Row 2
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
             buttons: 1,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 600, // Col B
             clientY: 36 + 32 * 12 + 16, // Row 2
         });
@@ -4308,25 +4410,25 @@ describe("data-editor", () => {
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 300, // Col B
             clientY: 16 + 200, // Not Header
         });
 
         await act(() => new Promise(r => window.setTimeout(r, 10)));
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 300, // Col B
             clientY: 16 + 200, // Not Header
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 300, // Col B
             clientY: 16, // Header
             buttons: 1,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 300, // Col B
             clientY: 16, // Header
         });
@@ -4345,12 +4447,12 @@ describe("data-editor", () => {
         prep();
 
         const canvas = screen.getByTestId("data-grid-canvas");
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 300, // Col B
             clientY: 16, // Header
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 300, // Col B
             clientY: 0,
             buttons: 1,
@@ -4358,7 +4460,7 @@ describe("data-editor", () => {
 
         await act(() => new Promise(r => window.setTimeout(r, 100)));
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 300, // Col B
             clientY: 0,
         });
@@ -4380,18 +4482,18 @@ describe("data-editor", () => {
             clientY: 36 + 30, // Row 2
         });
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 308, // Col A
             clientY: 36 + 30, // Row 2
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 308, // Col A
             clientY: 36 + 32 * 2 + 16, // Row 2
             buttons: 1,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 308, // Col A
             clientY: 36 + 32 * 2 + 16, // Row 2
         });
@@ -4418,18 +4520,18 @@ describe("data-editor", () => {
             clientY: 36 + 30, // Row 2
         });
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 308, // Col A
             clientY: 36 + 30, // Row 2
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 360,
             clientY: 36 + 32 * 5 + 16, // Row 5
             buttons: 1,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 360,
             clientY: 36 + 32 * 5 + 16, // Row 5
         });
@@ -4456,18 +4558,18 @@ describe("data-editor", () => {
             clientY: 36 + 30, // Row 2
         });
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 308, // Col A
             clientY: 36 + 30, // Row 2
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 360,
             clientY: 36 + 32 * 5 + 16, // Row 5
             buttons: 1,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 360,
             clientY: 36 + 32 * 5 + 16, // Row 5
         });
@@ -4494,18 +4596,18 @@ describe("data-editor", () => {
             clientY: 36 + 30,
         });
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 308,
             clientY: 36 + 30,
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 308,
             clientY: 36 + 32 * 5 + 16,
             buttons: 1,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 308,
             clientY: 36 + 32 * 5 + 16,
         });
@@ -4544,24 +4646,24 @@ describe("data-editor", () => {
             clientY: 36 + 30,
         });
 
-        fireEvent.mouseDown(canvas, {
+        fireEvent.pointerDown(canvas, {
             clientX: 308,
             clientY: 36 + 30,
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 308,
             clientY: 800,
             buttons: 1,
         });
 
-        fireEvent.mouseMove(canvas, {
+        fireEvent.pointerMove(canvas, {
             clientX: 308,
             clientY: 995,
             buttons: 1,
         });
 
-        fireEvent.mouseUp(canvas, {
+        fireEvent.pointerUp(canvas, {
             clientX: 308,
             clientY: 995,
         });
@@ -4696,5 +4798,148 @@ describe("data-editor", () => {
             vi.runAllTimers();
         });
         expect(spy.mock.calls.findIndex(x => x[0][1] > 1)).toBe(-1);
+    });
+
+    test("Row marker click preserves current with additive row blending", async () => {
+        const spy = vi.fn();
+
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                gridSelection={{
+                    current: {
+                        cell: [1, 1],
+                        range: { x: 1, y: 1, width: 1, height: 1 },
+                        rangeStack: [],
+                    },
+                    rows: CompactSelection.empty(),
+                    columns: CompactSelection.empty(),
+                }}
+                rowMarkers="both"
+                rowSelectionBlending="additive"
+                rangeSelectionBlending="additive"
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 10, // Row marker
+            clientY: 36 + 32 * 3 + 16, // Row 3 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection(3),
+            current: {
+                cell: [1, 1],
+                range: { x: 1, y: 1, width: 1, height: 1 },
+                rangeStack: [],
+            },
+        });
+    });
+
+    test("Header click preserves current with additive column blending", async () => {
+        const spy = vi.fn();
+
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                gridSelection={{
+                    current: {
+                        cell: [1, 1],
+                        range: { x: 1, y: 1, width: 1, height: 1 },
+                        rangeStack: [],
+                    },
+                    rows: CompactSelection.empty(),
+                    columns: CompactSelection.empty(),
+                }}
+                columnSelectionBlending="additive"
+                rangeSelectionBlending="additive"
+                onGridSelectionChange={spy}
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B header
+            clientY: 16, // Header
+        });
+
+        expect(spy).toHaveBeenCalledWith({
+            columns: CompactSelection.fromSingleSelection(1),
+            rows: CompactSelection.empty(),
+            current: {
+                cell: [1, 1],
+                range: { x: 1, y: 1, width: 1, height: 1 },
+                rangeStack: [],
+            },
+        });
+    });
+
+    test("Row marker drag selects rows when a rect selection exists in multi mode", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                onGridSelectionChange={spy}
+                rowMarkers="both"
+                rangeSelect="multi-rect"
+                rowSelectionBlending="additive"
+            />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        // Create a rect selection first (click cell B2 then shift-click B4)
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 * 1 + 16,
+        });
+        sendClick(canvas, {
+            shiftKey: true,
+            clientX: 300,
+            clientY: 36 + 32 * 3 + 16,
+        });
+
+        spy.mockClear();
+
+        // Now drag on the row marker from row 2 to row 5
+        fireEvent.pointerDown(canvas, {
+            clientX: 10,
+            clientY: 36 + 32 * 1 + 16,
+        });
+
+        fireEvent.pointerMove(canvas, {
+            clientX: 10,
+            clientY: 36 + 32 * 4 + 16,
+            buttons: 1,
+        });
+
+        fireEvent.pointerUp(canvas, {
+            clientX: 10,
+            clientY: 36 + 32 * 4 + 16,
+        });
+
+        expect(spy).toHaveBeenLastCalledWith({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.fromSingleSelection([1, 5]),
+            current: undefined,
+        });
     });
 });

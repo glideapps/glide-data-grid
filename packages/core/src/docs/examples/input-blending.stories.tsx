@@ -25,12 +25,14 @@ export default {
 };
 
 interface InputBlendingGridProps {
-    rangeBlending: "mixed" | "exclusive";
-    columnBlending: "mixed" | "exclusive";
-    rowBlending: "mixed" | "exclusive";
+    rangeBlending: "mixed" | "exclusive" | "additive";
+    columnBlending: "mixed" | "exclusive" | "additive";
+    rowBlending: "mixed" | "exclusive" | "additive";
     rangeMultiSelect: "none" | "cell" | "rect" | "multi-cell" | "multi-rect";
     columnMultiSelect: "none" | "single" | "multi";
     rowMultiSelect: "none" | "single" | "multi";
+    rowSelectionMode: "auto" | "multi";
+    columnSelectionMode: "auto" | "multi";
 }
 
 export const InputBlending: React.FC<InputBlendingGridProps> = p => {
@@ -60,6 +62,8 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
             rangeSelectionBlending={p.rangeBlending}
             columnSelectionBlending={p.columnBlending}
             rowSelectionBlending={p.rowBlending}
+            rowSelectionMode={p.rowSelectionMode}
+            columnSelectionMode={p.columnSelectionMode}
             getCellContent={getCellContent}
             columns={cols}
             rows={10_000}
@@ -73,19 +77,21 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
     rangeMultiSelect: "rect",
     columnMultiSelect: "multi",
     rowMultiSelect: "multi",
+    rowSelectionMode: "auto",
+    columnSelectionMode: "auto",
 };
 (InputBlending as any).argTypes = {
     rangeBlending: {
         control: { type: "select" },
-        options: ["mixed", "exclusive"],
+        options: ["mixed", "exclusive", "additive"],
     },
     columnBlending: {
         control: { type: "select" },
-        options: ["mixed", "exclusive"],
+        options: ["mixed", "exclusive", "additive"],
     },
     rowBlending: {
         control: { type: "select" },
-        options: ["mixed", "exclusive"],
+        options: ["mixed", "exclusive", "additive"],
     },
     rangeMultiSelect: {
         control: { type: "select" },
@@ -98,5 +104,13 @@ export const InputBlending: React.FC<InputBlendingGridProps> = p => {
     rowMultiSelect: {
         control: { type: "select" },
         options: ["none", "single", "multi"],
+    },
+    rowSelectionMode: {
+        control: { type: "select" },
+        options: ["auto", "multi"],
+    },
+    columnSelectionMode: {
+        control: { type: "select" },
+        options: ["auto", "multi"],
     },
 };
