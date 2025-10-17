@@ -971,6 +971,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         cursorOverride = cell.cursor;
     }
     const canDrag = hoveredOnEdge ?? false;
+    const headerCursorOverride =
+        headerHovered && hCol !== undefined ? mappedColumns[hCol]?.headerCursor : undefined;
+
     const cursor = isDragging
         ? "grabbing"
         : canDrag || isResizing
@@ -979,7 +982,9 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             ? "crosshair"
             : cursorOverride !== undefined
               ? cursorOverride
-              : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
+              : headerCursorOverride !== undefined
+                ? headerCursorOverride
+                : headerHovered || clickableInnerCellHovered || editableBoolHovered || groupHeaderHovered
                 ? "pointer"
                 : "default";
 

@@ -150,6 +150,7 @@ export interface BaseGridColumn {
     readonly group?: string;
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
+    readonly headerCursor?: CSSProperties["cursor"];
     readonly menuIcon?: GridColumnMenuIcon | string;
     readonly indicatorIcon?: GridColumnIcon | string;
     readonly hasMenu?: boolean;
