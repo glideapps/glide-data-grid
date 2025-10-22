@@ -10,7 +10,7 @@ export const GrowingEntry = (props) => {
     const useText = value ?? "";
     assert(onChange !== undefined, "GrowingEntry must be a controlled input area");
     // 10 million id's aught to be enough for anybody
-    const [inputID] = React.useState(() => "input-box-" + (globalInputID = (globalInputID + 1) % 10000000));
+    const [inputID] = React.useState(() => "input-box-" + (globalInputID = (globalInputID + 1) % 10_000_000));
     React.useEffect(() => {
         const ta = inputRef.current;
         if (ta === null)

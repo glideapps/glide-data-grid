@@ -54,6 +54,7 @@ export type ExpandedRowGroup = {
 };
 export declare function expandRowGroups(groups: readonly RowGroup[]): ExpandedRowGroup[];
 export interface FlattenedRowGroup {
+    readonly rowIndex: number;
     readonly headerIndex: number;
     readonly contentIndex: number;
     readonly isCollapsed: boolean;
@@ -62,7 +63,7 @@ export interface FlattenedRowGroup {
     readonly path: readonly number[];
 }
 export declare function flattenRowGroups(rowGrouping: RowGroupingOptions, rows: number): FlattenedRowGroup[];
-interface MapResult {
+export interface MapResult {
     readonly path: readonly number[];
     readonly isGroupHeader: boolean;
     readonly originalIndex: number;
@@ -78,5 +79,4 @@ export interface UseRowGroupingInnerResult {
     readonly getRowThemeOverride: DataGridProps["getRowThemeOverride"];
 }
 export declare function useRowGroupingInner(options: RowGroupingOptions | undefined, rows: number, rowHeightIn: NonNullable<DataEditorProps["rowHeight"]>, getRowThemeOverrideIn: DataEditorProps["getRowThemeOverride"]): UseRowGroupingInnerResult;
-export {};
 //# sourceMappingURL=row-grouping.d.ts.map

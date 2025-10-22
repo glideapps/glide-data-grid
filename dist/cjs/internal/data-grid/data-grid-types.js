@@ -1,17 +1,11 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CompactSelection = exports.InnerGridCellKind = exports.booleanCellIsEditable = exports.isObjectEditorCallbackResult = exports.isRectangleEqual = exports.isReadWriteCell = exports.isInnerOnlyCell = exports.isTextEditableGridCell = exports.isEditableGridCell = exports.resolveCellsThunk = exports.isSizedGridColumn = exports.GridColumnMenuIcon = exports.GridColumnIcon = exports.GridCellKind = exports.BooleanIndeterminate = exports.BooleanEmpty = void 0;
-const support_js_1 = require("../../common/support.js");
-const has_js_1 = __importDefault(require("lodash/has.js"));
+import has from "lodash/has.js";
+import { assertNever, proveType } from "../../common/support.js";
 /** @category Types */
-exports.BooleanEmpty = null;
+export const BooleanEmpty = null;
 /** @category Types */
-exports.BooleanIndeterminate = undefined;
+export const BooleanIndeterminate = undefined;
 /** @category Cells */
-var GridCellKind;
+export var GridCellKind;
 (function (GridCellKind) {
     GridCellKind["Uri"] = "uri";
     GridCellKind["Text"] = "text";
@@ -25,9 +19,9 @@ var GridCellKind;
     GridCellKind["Drilldown"] = "drilldown";
     GridCellKind["Protected"] = "protected";
     GridCellKind["Custom"] = "custom";
-})(GridCellKind || (exports.GridCellKind = GridCellKind = {}));
+})(GridCellKind || (GridCellKind = {}));
 /** @category Columns */
-var GridColumnIcon;
+export var GridColumnIcon;
 (function (GridColumnIcon) {
     GridColumnIcon["HeaderRowID"] = "headerRowID";
     GridColumnIcon["HeaderCode"] = "headerCode";
@@ -57,28 +51,26 @@ var GridColumnIcon;
     GridColumnIcon["HeaderArray"] = "headerArray";
     GridColumnIcon["RowOwnerOverlay"] = "rowOwnerOverlay";
     GridColumnIcon["ProtectedColumnOverlay"] = "protectedColumnOverlay";
-})(GridColumnIcon || (exports.GridColumnIcon = GridColumnIcon = {}));
+})(GridColumnIcon || (GridColumnIcon = {}));
 /** @category Columns */
-var GridColumnMenuIcon;
+export var GridColumnMenuIcon;
 (function (GridColumnMenuIcon) {
     GridColumnMenuIcon["Triangle"] = "triangle";
     GridColumnMenuIcon["Dots"] = "dots";
-})(GridColumnMenuIcon || (exports.GridColumnMenuIcon = GridColumnMenuIcon = {}));
+})(GridColumnMenuIcon || (GridColumnMenuIcon = {}));
 /** @category Columns */
-function isSizedGridColumn(c) {
+export function isSizedGridColumn(c) {
     return "width" in c && typeof c.width === "number";
 }
-exports.isSizedGridColumn = isSizedGridColumn;
 /** @category Types */
-async function resolveCellsThunk(thunk) {
+export async function resolveCellsThunk(thunk) {
     if (typeof thunk === "object")
         return thunk;
     return await thunk();
 }
-exports.resolveCellsThunk = resolveCellsThunk;
 // All EditableGridCells are inherently ValidatedGridCells, and this is more specific and thus more useful.
 /** @category Cells */
-function isEditableGridCell(cell) {
+export function isEditableGridCell(cell) {
     if (cell.kind === GridCellKind.Loading ||
         cell.kind === GridCellKind.Bubble ||
         cell.kind === GridCellKind.RowID ||
@@ -86,12 +78,11 @@ function isEditableGridCell(cell) {
         cell.kind === GridCellKind.Drilldown) {
         return false;
     }
-    (0, support_js_1.proveType)(cell);
+    proveType(cell);
     return true;
 }
-exports.isEditableGridCell = isEditableGridCell;
 /** @category Cells */
-function isTextEditableGridCell(cell) {
+export function isTextEditableGridCell(cell) {
     if (cell.kind === GridCellKind.Loading ||
         cell.kind === GridCellKind.Bubble ||
         cell.kind === GridCellKind.RowID ||
@@ -102,55 +93,61 @@ function isTextEditableGridCell(cell) {
         cell.kind === GridCellKind.Custom) {
         return false;
     }
-    (0, support_js_1.proveType)(cell);
+    proveType(cell);
     return true;
 }
-exports.isTextEditableGridCell = isTextEditableGridCell;
 /** @category Cells */
-function isInnerOnlyCell(cell) {
+export function isInnerOnlyCell(cell) {
     return cell.kind === InnerGridCellKind.Marker || cell.kind === InnerGridCellKind.NewRow;
 }
-exports.isInnerOnlyCell = isInnerOnlyCell;
 /** @category Cells */
-function isReadWriteCell(cell) {
+export function isReadWriteCell(cell) {
     if (!isEditableGridCell(cell) || cell.kind === GridCellKind.Image)
         return false;
-    if (cell.kind === GridCellKind.Text ||
-        cell.kind === GridCellKind.Number ||
-        cell.kind === GridCellKind.Markdown ||
-        cell.kind === GridCellKind.Uri ||
-        cell.kind === GridCellKind.Custom ||
-        cell.kind === GridCellKind.Boolean) {
-        return cell.readonly !== true;
+    switch (cell.kind) {
+        case GridCellKind.Text:
+        case GridCellKind.Number:
+        case GridCellKind.Markdown:
+        case GridCellKind.Uri:
+        case GridCellKind.Custom:
+        case GridCellKind.Boolean:
+            return cell.readonly !== true;
+        default:
+            assertNever(cell, "A cell was passed with an invalid kind");
     }
-    (0, support_js_1.assertNever)(cell, "A cell was passed with an invalid kind");
 }
-exports.isReadWriteCell = isReadWriteCell;
-function isRectangleEqual(a, b) {
+export function isRectangleEqual(a, b) {
     if (a === b)
         return true;
     if (a === undefined || b === undefined)
         return false;
     return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
-exports.isRectangleEqual = isRectangleEqual;
 /** @category Renderers */
-function isObjectEditorCallbackResult(obj) {
-    return (0, has_js_1.default)(obj, "editor");
+export function isObjectEditorCallbackResult(obj) {
+    return has(obj, "editor");
 }
-exports.isObjectEditorCallbackResult = isObjectEditorCallbackResult;
 // Can be written more concisely, not easier to read if more concise.
 /** @category Cells */
-function booleanCellIsEditable(cell) {
+export function booleanCellIsEditable(cell) {
     return !(cell.readonly ?? false);
 }
-exports.booleanCellIsEditable = booleanCellIsEditable;
 /** @category Cells */
-var InnerGridCellKind;
+export var InnerGridCellKind;
 (function (InnerGridCellKind) {
     InnerGridCellKind["NewRow"] = "new-row";
     InnerGridCellKind["Marker"] = "marker";
-})(InnerGridCellKind || (exports.InnerGridCellKind = InnerGridCellKind = {}));
+})(InnerGridCellKind || (InnerGridCellKind = {}));
+/**
+ * Default configuration used when `fillHandle` is simply `true`.
+ */
+export const DEFAULT_FILL_HANDLE = {
+    shape: "square",
+    size: 4,
+    offsetX: -2,
+    offsetY: -2,
+    outline: 0,
+};
 function mergeRanges(input) {
     if (input.length === 0) {
         return [];
@@ -174,16 +171,26 @@ function mergeRanges(input) {
 }
 let emptyCompactSelection;
 /** @category Selection */
-class CompactSelection {
+export class CompactSelection {
     items;
     constructor(items) {
         this.items = items;
     }
+    static create = (items) => {
+        return new CompactSelection(mergeRanges(items));
+    };
     static empty = () => {
         return emptyCompactSelection ?? (emptyCompactSelection = new CompactSelection([]));
     };
     static fromSingleSelection = (selection) => {
         return CompactSelection.empty().add(selection);
+    };
+    static fromArray = (items) => {
+        if (items.length === 0)
+            return CompactSelection.empty();
+        const slices = items.map(s => [s, s + 1]);
+        const newItems = mergeRanges(slices);
+        return new CompactSelection(newItems);
     };
     offset(amount) {
         if (amount === 0)
@@ -289,5 +296,4 @@ class CompactSelection {
         }
     }
 }
-exports.CompactSelection = CompactSelection;
 //# sourceMappingURL=data-grid-types.js.map

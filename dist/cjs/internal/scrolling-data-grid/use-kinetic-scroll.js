@@ -1,15 +1,13 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const react_1 = require("react");
+import { useEffect, useRef } from "react";
 const useKineticScroll = (isEnabled, callback, targetScroller) => {
-    const rafId = (0, react_1.useRef)(null);
-    const isTouching = (0, react_1.useRef)(null);
-    const lastScrollPosition = (0, react_1.useRef)(null);
-    const sameCount = (0, react_1.useRef)(0);
-    const callbackRef = (0, react_1.useRef)(callback);
+    const rafId = useRef(null);
+    const isTouching = useRef(null);
+    const lastScrollPosition = useRef(null);
+    const sameCount = useRef(0);
+    const callbackRef = useRef(callback);
     callbackRef.current = callback;
     const scrollEl = targetScroller.current;
-    (0, react_1.useEffect)(() => {
+    useEffect(() => {
         const handleScroll = () => {
             if (isTouching.current === false && scrollEl !== null) {
                 const currentScrollPosition = [scrollEl.scrollLeft, scrollEl.scrollTop];
@@ -63,5 +61,5 @@ const useKineticScroll = (isEnabled, callback, targetScroller) => {
         }
     }, [isEnabled, scrollEl]);
 };
-exports.default = useKineticScroll;
+export default useKineticScroll;
 //# sourceMappingURL=use-kinetic-scroll.js.map

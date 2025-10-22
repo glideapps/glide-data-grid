@@ -1,4 +1,3 @@
-/// <reference types="react" resolution-mode="require"/>
 import type { GetCellRendererCallback } from "../../../cells/cell-types.js";
 import type { RenderStateProvider } from "../../../common/render-state-provider.js";
 import type { FullTheme } from "../../../common/styles.js";
@@ -6,7 +5,7 @@ import type { HoverValues } from "../animation-manager.js";
 import type { MappedGridColumn } from "./data-grid-lib.js";
 import type { BlitData } from "./data-grid-render.blit.js";
 import type { SpriteManager } from "../data-grid-sprites.js";
-import type { CompactSelection, GridSelection, Item, InnerGridCell, DrawHeaderCallback, CellList, DrawCellCallback } from "../data-grid-types.js";
+import type { CompactSelection, GridSelection, Item, InnerGridCell, DrawHeaderCallback, CellList, DrawCellCallback, FillHandle } from "../data-grid-types.js";
 import type { CellSet } from "../cell-set.js";
 import type { EnqueueCallback } from "../use-animation-queue.js";
 import type { ImageWindowLoader } from "../image-window-loader-interface.js";
@@ -42,7 +41,7 @@ export interface DrawGridArg {
     readonly isFocused: boolean;
     readonly drawFocus: boolean;
     readonly selection: GridSelection;
-    readonly fillHandle: boolean;
+    readonly fillHandle: FillHandle;
     readonly freezeTrailingRows: number;
     readonly hasAppendRow: boolean;
     readonly hyperWrapping: boolean;

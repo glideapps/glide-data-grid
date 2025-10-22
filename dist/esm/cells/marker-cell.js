@@ -47,7 +47,7 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle, style) 
     if (markerKind !== "number" && checkedboxAlpha > 0) {
         ctx.globalAlpha = checkedboxAlpha;
         const offsetAmount = 7 * (checked ? hoverAmount : 1);
-        drawCheckbox(ctx, theme, checked, drawHandle ? x + offsetAmount : x, y, drawHandle ? width - offsetAmount : width, height, true, undefined, undefined, 18, "center", style);
+        drawCheckbox(ctx, theme, checked, drawHandle ? x + offsetAmount : x, y, drawHandle ? width - offsetAmount : width, height, true, undefined, undefined, theme.checkboxMaxSize, "center", style);
         if (drawHandle) {
             ctx.globalAlpha = hoverAmount;
             ctx.beginPath();

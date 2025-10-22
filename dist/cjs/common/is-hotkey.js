@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.isHotkey = void 0;
-const browser_detect_js_1 = require("./browser-detect.js");
+import { browserIsOSX } from "./browser-detect.js";
 // brain dead syntax, find your deps, and make buggy replacements with 5 times the effort
 // all lower case
 // ctrl+shift+alt+d or ctrl+x or shift+c or shift+Backspace or alt+_53
@@ -23,13 +20,12 @@ function checkKey(key, args) {
     }
     return key === args.key;
 }
-function isHotkey(hotkey, args, details) {
+export function isHotkey(hotkey, args, details) {
     const result = isHotkeyInner(hotkey, args);
     if (result)
         details.didMatch = true;
     return result;
 }
-exports.isHotkey = isHotkey;
 function isHotkeyInner(hotkey, args) {
     if (hotkey.length === 0)
         return false;
@@ -66,7 +62,7 @@ function isHotkeyInner(hotkey, args) {
                 wantMeta = true;
                 break;
             case "primary":
-                if (browser_detect_js_1.browserIsOSX.value) {
+                if (browserIsOSX.value) {
                     wantMeta = true;
                 }
                 else {

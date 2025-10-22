@@ -1,16 +1,13 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.drawCell = exports.drawCells = void 0;
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable unicorn/no-for-loop */
-const data_grid_types_js_1 = require("../data-grid-types.js");
-const data_grid_lib_js_1 = require("./data-grid-lib.js");
-const styles_js_1 = require("../../../common/styles.js");
-const color_parser_js_1 = require("../color-parser.js");
-const math_js_1 = require("../../../common/math.js");
-const data_grid_render_walk_js_1 = require("./data-grid-render.walk.js");
+import { GridCellKind, isInnerOnlyCell, } from "../data-grid-types.js";
+import { cellIsSelected, cellIsInRange, getFreezeTrailingHeight, drawLastUpdateUnderlay, } from "./data-grid-lib.js";
+import { mergeAndRealizeTheme } from "../../../common/styles.js";
+import { blend } from "../color-parser.js";
+import { intersectRect } from "../../../common/math.js";
+import { getSkipPoint, getSpanBounds, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
 const loadingCell = {
-    kind: data_grid_types_js_1.GridCellKind.Loading,
+    kind: GridCellKind.Loading,
     allowOverlay: false,
 };
 // preppable items:
@@ -25,18 +22,18 @@ const loadingCell = {
 // - Prep next item, giving previous result
 // - If next item type is different, de-prep
 // - Result per column
-function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight, translateX, translateY, cellYOffset, rows, getRowHeight, getCellContent, getGroupDetails, getRowThemeOverride, disabledRows, isFocused, drawFocus, freezeTrailingRows, hasAppendRow, drawRegions, damage, selection, prelightCells, highlightRegions, imageLoader, spriteManager, hoverValues, hoverInfo, drawCellCallback, hyperWrapping, outerTheme, enqueue, renderStateProvider, getCellRenderer, overrideCursor, minimumCellWidth) {
+export function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight, translateX, translateY, cellYOffset, rows, getRowHeight, getCellContent, getGroupDetails, getRowThemeOverride, disabledRows, isFocused, drawFocus, freezeTrailingRows, hasAppendRow, drawRegions, damage, selection, prelightCells, highlightRegions, imageLoader, spriteManager, hoverValues, hoverInfo, drawCellCallback, hyperWrapping, outerTheme, enqueue, renderStateProvider, getCellRenderer, overrideCursor, minimumCellWidth) {
     let toDraw = damage?.size ?? Number.MAX_SAFE_INTEGER;
     const frameTime = performance.now();
     let font = outerTheme.baseFontFull;
     ctx.font = font;
     const deprepArg = { ctx };
     const cellIndex = [0, 0];
-    const freezeTrailingRowsHeight = freezeTrailingRows > 0 ? (0, data_grid_lib_js_1.getFreezeTrailingHeight)(rows, freezeTrailingRows, getRowHeight) : 0;
+    const freezeTrailingRowsHeight = freezeTrailingRows > 0 ? getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) : 0;
     let result;
     let handledSpans = undefined;
-    const skipPoint = (0, data_grid_render_walk_js_1.getSkipPoint)(drawRegions);
-    (0, data_grid_render_walk_js_1.walkColumns)(effectiveColumns, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, colDrawStartY, clipX, startRow) => {
+    const skipPoint = getSkipPoint(drawRegions);
+    walkColumns(effectiveColumns, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, colDrawStartY, clipX, startRow) => {
         const diff = Math.max(0, clipX - drawX);
         const colDrawX = drawX + diff;
         const colDrawY = totalHeaderHeight + 1;
@@ -46,7 +43,7 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
             let found = false;
             for (let i = 0; i < drawRegions.length; i++) {
                 const dr = drawRegions[i];
-                if ((0, math_js_1.intersectRect)(colDrawX, colDrawY, colWidth, colHeight, dr.x, dr.y, dr.width, dr.height)) {
+                if (intersectRect(colDrawX, colDrawY, colWidth, colHeight, dr.x, dr.y, dr.width, dr.height)) {
                     found = true;
                     break;
                 }
@@ -64,7 +61,7 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
         const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
         const colTheme = c.themeOverride === undefined && groupTheme === undefined
             ? outerTheme
-            : (0, styles_js_1.mergeAndRealizeTheme)(outerTheme, groupTheme, c.themeOverride);
+            : mergeAndRealizeTheme(outerTheme, groupTheme, c.themeOverride);
         const colFont = colTheme.baseFontFull;
         if (colFont !== font) {
             font = colFont;
@@ -72,7 +69,7 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
         }
         reclip();
         let prepResult = undefined;
-        (0, data_grid_render_walk_js_1.walkRowsInCol)(startRow, colDrawStartY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, skipPoint, (drawY, row, rh, isSticky, isTrailingRow) => {
+        walkRowsInCol(startRow, colDrawStartY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, skipPoint, (drawY, row, rh, isSticky, isTrailingRow) => {
             if (row < 0)
                 return;
             cellIndex[0] = c.sourceIndex;
@@ -99,7 +96,7 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
                 let found = false;
                 for (let i = 0; i < drawRegions.length; i++) {
                     const dr = drawRegions[i];
-                    if ((0, math_js_1.intersectRect)(drawX, drawY, c.width, rh, dr.x, dr.y, dr.width, dr.height)) {
+                    if (intersectRect(drawX, drawY, c.width, rh, dr.x, dr.y, dr.width, dr.height)) {
                         found = true;
                         break;
                     }
@@ -120,7 +117,7 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
                 if (handledSpans === undefined)
                     handledSpans = new Set();
                 if (!handledSpans.has(spanKey)) {
-                    const areas = (0, data_grid_render_walk_js_1.getSpanBounds)(cell.span, drawX, drawY, c.width, rh, c, allColumns);
+                    const areas = getSpanBounds(cell.span, drawX, drawY, c.width, rh, c, allColumns);
                     const area = c.sticky ? areas[0] : areas[1];
                     if (!c.sticky && areas[0] !== undefined) {
                         skipContents = true;
@@ -159,10 +156,10 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
                 : undefined;
             const theme = cell.themeOverride === undefined && rowTheme === undefined && trailingTheme === undefined
                 ? colTheme
-                : (0, styles_js_1.mergeAndRealizeTheme)(colTheme, rowTheme, trailingTheme, cell.themeOverride); //alloc
+                : mergeAndRealizeTheme(colTheme, rowTheme, trailingTheme, cell.themeOverride); //alloc
             ctx.beginPath();
-            const isSelected = (0, data_grid_lib_js_1.cellIsSelected)(cellIndex, cell, selection);
-            let accentCount = (0, data_grid_lib_js_1.cellIsInRange)(cellIndex, cell, selection, drawFocus);
+            const isSelected = cellIsSelected(cellIndex, cell, selection);
+            let accentCount = cellIsInRange(cellIndex, cell, selection, drawFocus);
             const spanIsHighlighted = cell.span !== undefined &&
                 selection.columns.some(index => cell.span !== undefined && index >= cell.span[0] && index <= cell.span[1] //alloc
                 );
@@ -181,23 +178,23 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
                 if (colSelected && !isTrailingRow)
                     accentCount++;
             }
-            const bgCell = cell.kind === data_grid_types_js_1.GridCellKind.Protected ? theme.bgCellMedium : theme.bgCell;
+            const bgCell = cell.kind === GridCellKind.Protected ? theme.bgCellMedium : theme.bgCell;
             let fill;
             if (isSticky || bgCell !== outerTheme.bgCell) {
-                fill = (0, color_parser_js_1.blend)(bgCell, fill);
+                fill = blend(bgCell, fill);
             }
             if (accentCount > 0 || rowDisabled) {
                 if (rowDisabled) {
-                    fill = (0, color_parser_js_1.blend)(theme.bgHeader, fill);
+                    fill = blend(theme.bgHeader, fill);
                 }
                 for (let i = 0; i < accentCount; i++) {
-                    fill = (0, color_parser_js_1.blend)(theme.accentLight, fill);
+                    fill = blend(theme.accentLight, fill);
                 }
             }
             else if (prelightCells !== undefined) {
                 for (const pre of prelightCells) {
                     if (pre[0] === c.sourceIndex && pre[1] === row) {
-                        fill = (0, color_parser_js_1.blend)(theme.bgSearchResult, fill);
+                        fill = blend(theme.bgSearchResult, fill);
                         break;
                     }
                 }
@@ -211,7 +208,7 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
                         c.sourceIndex < r.x + r.width &&
                         r.y <= row &&
                         row < r.y + r.height) {
-                        fill = (0, color_parser_js_1.blend)(region.color, fill);
+                        fill = blend(region.color, fill);
                     }
                 }
             }
@@ -236,7 +233,7 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
                 }
                 // we also need to make sure to wipe the contents. Since the fill can do that lets repurpose
                 // that call to avoid an extra draw call.
-                fill = fill === undefined ? theme.bgCell : (0, color_parser_js_1.blend)(fill, theme.bgCell);
+                fill = fill === undefined ? theme.bgCell : blend(fill, theme.bgCell);
             }
             const isLastColumn = c.sourceIndex === allColumns.length - 1;
             const isLastRow = row === rows - 1;
@@ -295,7 +292,6 @@ function drawCells(ctx, effectiveColumns, allColumns, height, totalHeaderHeight,
     });
     return result;
 }
-exports.drawCells = drawCells;
 const allocatedItem = [0, 0];
 const reusableRect = { x: 0, y: 0, width: 0, height: 0 };
 const drawState = [undefined, () => undefined];
@@ -303,7 +299,7 @@ let animationFrameRequested = false;
 function animRequest() {
     animationFrameRequested = true;
 }
-function drawCell(ctx, cell, col, row, isLastCol, isLastRow, x, y, w, h, highlighted, theme, finalCellFillColor, imageLoader, spriteManager, hoverAmount, hoverInfo, hyperWrapping, frameTime, drawCellCallback, lastPrep, enqueue, renderStateProvider, getCellRenderer, overrideCursor) {
+export function drawCell(ctx, cell, col, row, isLastCol, isLastRow, x, y, w, h, highlighted, theme, finalCellFillColor, imageLoader, spriteManager, hoverAmount, hoverInfo, hyperWrapping, frameTime, drawCellCallback, lastPrep, enqueue, renderStateProvider, getCellRenderer, overrideCursor) {
     let hoverX;
     let hoverY;
     if (hoverInfo !== undefined && hoverInfo[0][0] === col && hoverInfo[0][1] === row) {
@@ -341,7 +337,7 @@ function drawCell(ctx, cell, col, row, isLastCol, isLastRow, x, y, w, h, highlig
         overrideCursor: hoverX !== undefined ? overrideCursor : undefined,
         requestAnimationFrame: animRequest,
     };
-    const needsAnim = (0, data_grid_lib_js_1.drawLastUpdateUnderlay)(args, cell.lastUpdated, frameTime, lastPrep, isLastCol, isLastRow);
+    const needsAnim = drawLastUpdateUnderlay(args, cell.lastUpdated, frameTime, lastPrep, isLastCol, isLastRow);
     const r = getCellRenderer(cell);
     if (r !== undefined) {
         if (lastPrep?.renderer !== r) {
@@ -349,7 +345,7 @@ function drawCell(ctx, cell, col, row, isLastCol, isLastRow, x, y, w, h, highlig
             lastPrep = undefined;
         }
         const partialPrepResult = r.drawPrep?.(args, lastPrep);
-        if (drawCellCallback !== undefined && !(0, data_grid_types_js_1.isInnerOnlyCell)(args.cell)) {
+        if (drawCellCallback !== undefined && !isInnerOnlyCell(args.cell)) {
             drawCellCallback(args, () => r.draw(args, cell));
         }
         else {
@@ -369,5 +365,4 @@ function drawCell(ctx, cell, col, row, isLastCol, isLastRow, x, y, w, h, highlig
         enqueue?.(allocatedItem);
     return result;
 }
-exports.drawCell = drawCell;
 //# sourceMappingURL=data-grid-render.cells.js.map

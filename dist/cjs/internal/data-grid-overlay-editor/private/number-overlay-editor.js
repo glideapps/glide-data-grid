@@ -1,31 +1,6 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const React = __importStar(require("react"));
-const number_overlay_editor_style_js_1 = require("./number-overlay-editor-style.js");
-const react_number_format_1 = require("react-number-format");
+import * as React from "react";
+import { NumberOverlayEditorStyle } from "./number-overlay-editor-style.js";
+import { NumericFormat } from "react-number-format";
 function getDecimalSeparator() {
     const numberWithDecimalSeparator = 1.1;
     const result = Intl.NumberFormat()
@@ -45,11 +20,11 @@ const NumberOverlayEditor = p => {
             inputRef.current?.setSelectionRange(range[0], range[1]);
         }
     }, [validatedSelection]);
-    return (React.createElement(number_overlay_editor_style_js_1.NumberOverlayEditorStyle, null,
-        React.createElement(react_number_format_1.NumericFormat, { autoFocus: true, getInputRef: inputRef, className: "gdg-input", onFocus: (e) => e.target.setSelectionRange(highlight ? 0 : e.target.value.length, e.target.value.length), disabled: disabled === true, decimalScale: fixedDecimals, allowNegative: allowNegative, thousandSeparator: thousandSeparator ?? getThousandSeprator(), decimalSeparator: decimalSeparator ?? getDecimalSeparator(), value: Object.is(value, -0) ? "-" : value ?? "", 
+    return (React.createElement(NumberOverlayEditorStyle, null,
+        React.createElement(NumericFormat, { autoFocus: true, getInputRef: inputRef, className: "gdg-input", onFocus: (e) => e.target.setSelectionRange(highlight ? 0 : e.target.value.length, e.target.value.length), disabled: disabled === true, decimalScale: fixedDecimals, allowNegative: allowNegative, thousandSeparator: thousandSeparator ?? getThousandSeprator(), decimalSeparator: decimalSeparator ?? getDecimalSeparator(), value: Object.is(value, -0) ? "-" : value ?? "", 
             // decimalScale={3}
             // prefix={"$"}
             onValueChange: onChange })));
 };
-exports.default = NumberOverlayEditor;
+export default NumberOverlayEditor;
 //# sourceMappingURL=number-overlay-editor.js.map

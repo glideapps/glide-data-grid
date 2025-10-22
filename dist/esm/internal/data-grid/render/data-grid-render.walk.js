@@ -7,6 +7,7 @@ export function getSkipPoint(drawRegions) {
     for (const dr of drawRegions) {
         drawRegionsLowestY = Math.min(drawRegionsLowestY ?? dr.y, dr.y);
     }
+    return drawRegionsLowestY;
 }
 export function walkRowsInCol(startRow, drawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, skipToY, cb) {
     skipToY = skipToY ?? drawY;

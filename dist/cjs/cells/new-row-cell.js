@@ -1,11 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.newRowCellRenderer = void 0;
-const data_grid_lib_js_1 = require("../internal/data-grid/render/data-grid-lib.js");
-const data_grid_types_js_1 = require("../internal/data-grid/data-grid-types.js");
-exports.newRowCellRenderer = {
+import { getMiddleCenterBias } from "../internal/data-grid/render/data-grid-lib.js";
+import { InnerGridCellKind } from "../internal/data-grid/data-grid-types.js";
+export const newRowCellRenderer = {
     getAccessibilityString: () => "",
-    kind: data_grid_types_js_1.InnerGridCellKind.NewRow,
+    kind: InnerGridCellKind.NewRow,
     needsHover: true,
     needsHoverPosition: false,
     measure: () => 200,
@@ -50,7 +47,7 @@ function drawNewRowCell(args, data, icon) {
         }
     }
     ctx.fillStyle = theme.textMedium;
-    ctx.fillText(data, textX + x + theme.cellHorizontalPadding + 0.5, y + h / 2 + (0, data_grid_lib_js_1.getMiddleCenterBias)(ctx, theme));
+    ctx.fillText(data, textX + x + theme.cellHorizontalPadding + 0.5, y + h / 2 + getMiddleCenterBias(ctx, theme));
     ctx.beginPath();
 }
 //# sourceMappingURL=new-row-cell.js.map

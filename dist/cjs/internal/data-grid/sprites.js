@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.sprites = void 0;
 const iconHead = `<svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">`;
 const headerRowID = (props) => {
     const fg = props.fgColor;
@@ -257,7 +254,7 @@ const protectedColumnOverlay = (props) => {
   </svg>
 `;
 };
-exports.sprites = {
+export const sprites = {
     headerRowID,
     headerNumber,
     headerCode,

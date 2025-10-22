@@ -1,22 +1,19 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadingCellRenderer = void 0;
-const color_parser_js_1 = require("../internal/data-grid/color-parser.js");
-const data_grid_lib_js_1 = require("../internal/data-grid/render/data-grid-lib.js");
-const data_grid_types_js_1 = require("../internal/data-grid/data-grid-types.js");
+import { withAlpha } from "../internal/data-grid/color-parser.js";
+import { roundedRect } from "../internal/data-grid/render/data-grid-lib.js";
+import { GridCellKind } from "../internal/data-grid/data-grid-types.js";
 // returns a "random" number between -1 and 1
 function getRandomNumber(x, y) {
-    let seed = x * 49632 + y * 325176;
+    let seed = x * 49_632 + y * 325_176;
     // Inline Xorshift algorithm
     seed ^= seed << 13;
     seed ^= seed >> 17;
     seed ^= seed << 5;
     // eslint-disable-next-line unicorn/number-literal-case
-    return (seed / 4294967295) * 2;
+    return (seed / 0xff_ff_ff_ff) * 2;
 }
-exports.loadingCellRenderer = {
+export const loadingCellRenderer = {
     getAccessibilityString: () => "",
-    kind: data_grid_types_js_1.GridCellKind.Loading,
+    kind: GridCellKind.Loading,
     needsHover: false,
     useLabel: false,
     needsHoverPosition: false,
@@ -35,8 +32,8 @@ exports.loadingCellRenderer = {
             width = rect.width - hpad * 2 - 1;
         }
         const rectHeight = cell.skeletonHeight ?? Math.min(18, rect.height - 2 * theme.cellVerticalPadding);
-        (0, data_grid_lib_js_1.roundedRect)(ctx, rect.x + hpad, rect.y + (rect.height - rectHeight) / 2, width, rectHeight, theme.roundingRadius ?? 3);
-        ctx.fillStyle = (0, color_parser_js_1.withAlpha)(theme.textDark, 0.1);
+        roundedRect(ctx, rect.x + hpad, rect.y + (rect.height - rectHeight) / 2, width, rectHeight, theme.roundingRadius ?? 3);
+        ctx.fillStyle = withAlpha(theme.textDark, 0.1);
         ctx.fill();
     },
     onPaste: () => undefined,

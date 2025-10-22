@@ -1,12 +1,9 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.markerCellRenderer = void 0;
-const data_grid_lib_js_1 = require("../internal/data-grid/render/data-grid-lib.js");
-const data_grid_types_js_1 = require("../internal/data-grid/data-grid-types.js");
-const draw_checkbox_js_1 = require("../internal/data-grid/render/draw-checkbox.js");
-exports.markerCellRenderer = {
+import { getMiddleCenterBias } from "../internal/data-grid/render/data-grid-lib.js";
+import { InnerGridCellKind } from "../internal/data-grid/data-grid-types.js";
+import { drawCheckbox } from "../internal/data-grid/render/draw-checkbox.js";
+export const markerCellRenderer = {
     getAccessibilityString: c => c.row.toString(),
-    kind: data_grid_types_js_1.InnerGridCellKind.Marker,
+    kind: InnerGridCellKind.Marker,
     needsHover: true,
     needsHoverPosition: false,
     drawPrep: prepMarkerRowCell,
@@ -50,7 +47,7 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle, style) 
     if (markerKind !== "number" && checkedboxAlpha > 0) {
         ctx.globalAlpha = checkedboxAlpha;
         const offsetAmount = 7 * (checked ? hoverAmount : 1);
-        (0, draw_checkbox_js_1.drawCheckbox)(ctx, theme, checked, drawHandle ? x + offsetAmount : x, y, drawHandle ? width - offsetAmount : width, height, true, undefined, undefined, 18, "center", style);
+        drawCheckbox(ctx, theme, checked, drawHandle ? x + offsetAmount : x, y, drawHandle ? width - offsetAmount : width, height, true, undefined, undefined, theme.checkboxMaxSize, "center", style);
         if (drawHandle) {
             ctx.globalAlpha = hoverAmount;
             ctx.beginPath();
@@ -74,7 +71,7 @@ function drawMarkerRowCell(args, index, checked, markerKind, drawHandle, style) 
         }
         ctx.fillStyle = theme.textLight;
         ctx.font = fontStyle;
-        ctx.fillText(text, start, y + height / 2 + (0, data_grid_lib_js_1.getMiddleCenterBias)(ctx, fontStyle));
+        ctx.fillText(text, start, y + height / 2 + getMiddleCenterBias(ctx, fontStyle));
         if (hoverAmount !== 0) {
             ctx.globalAlpha = 1;
         }

@@ -1,17 +1,14 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSpanBounds = exports.walkGroups = exports.walkColumns = exports.walkRowsInCol = exports.getSkipPoint = void 0;
-const data_grid_lib_js_1 = require("./data-grid-lib.js");
-function getSkipPoint(drawRegions) {
+import { isGroupEqual } from "./data-grid-lib.js";
+export function getSkipPoint(drawRegions) {
     if (drawRegions.length === 0)
         return undefined;
     let drawRegionsLowestY;
     for (const dr of drawRegions) {
         drawRegionsLowestY = Math.min(drawRegionsLowestY ?? dr.y, dr.y);
     }
+    return drawRegionsLowestY;
 }
-exports.getSkipPoint = getSkipPoint;
-function walkRowsInCol(startRow, drawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, skipToY, cb) {
+export function walkRowsInCol(startRow, drawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, skipToY, cb) {
     skipToY = skipToY ?? drawY;
     let y = drawY;
     let row = startRow;
@@ -36,8 +33,7 @@ function walkRowsInCol(startRow, drawY, height, rows, getRowHeight, freezeTraili
         cb(y, row, rh, true, hasAppendRow && row === rows - 1);
     }
 }
-exports.walkRowsInCol = walkRowsInCol;
-function walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, cb) {
+export function walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, cb) {
     let x = 0;
     let clipX = 0; // this tracks the total width of sticky cols
     const drawY = totalHeaderHeight + translateY;
@@ -50,8 +46,7 @@ function walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHe
         clipX += c.sticky ? c.width : 0;
     }
 }
-exports.walkColumns = walkColumns;
-function walkGroups(effectiveCols, width, translateX, groupHeaderHeight, cb) {
+export function walkGroups(effectiveCols, width, translateX, groupHeaderHeight, cb) {
     let x = 0;
     let clipX = 0;
     for (let index = 0; index < effectiveCols.length; index++) {
@@ -62,7 +57,7 @@ function walkGroups(effectiveCols, width, translateX, groupHeaderHeight, cb) {
             clipX += boxWidth;
         }
         while (end < effectiveCols.length &&
-            (0, data_grid_lib_js_1.isGroupEqual)(effectiveCols[end].group, startCol.group) &&
+            isGroupEqual(effectiveCols[end].group, startCol.group) &&
             effectiveCols[end].sticky === effectiveCols[index].sticky) {
             const endCol = effectiveCols[end];
             boxWidth += endCol.width;
@@ -80,8 +75,7 @@ function walkGroups(effectiveCols, width, translateX, groupHeaderHeight, cb) {
         x += boxWidth;
     }
 }
-exports.walkGroups = walkGroups;
-function getSpanBounds(span, cellX, cellY, cellW, cellH, column, allColumns) {
+export function getSpanBounds(span, cellX, cellY, cellW, cellH, column, allColumns) {
     const [startCol, endCol] = span;
     let frozenRect;
     let contentRect;
@@ -124,5 +118,4 @@ function getSpanBounds(span, cellX, cellY, cellW, cellH, column, allColumns) {
     }
     return [frozenRect, contentRect];
 }
-exports.getSpanBounds = getSpanBounds;
 //# sourceMappingURL=data-grid-render.walk.js.map

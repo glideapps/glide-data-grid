@@ -1,22 +1,16 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.GrowingEntryStyle = exports.ShadowBox = exports.InputBox = void 0;
-const react_1 = require("@linaria/react");
-exports.InputBox = /*#__PURE__*/react_1.styled('textarea')({
-  name: "growing-entry-style0",
-  class: "gdg-gzpuzkl",
+import { styled } from "@linaria/react";
+export const InputBox = /*#__PURE__*/styled('textarea')({
+  name: "InputBox",
+  class: "gdg-izpuzkl",
   propsAsIs: false
 });
-exports.ShadowBox = /*#__PURE__*/react_1.styled('div')({
-  name: "growing-entry-style1",
-  class: "gdg-g69h75o",
+export const ShadowBox = /*#__PURE__*/styled('div')({
+  name: "ShadowBox",
+  class: "gdg-s69h75o",
   propsAsIs: false
 });
-exports.GrowingEntryStyle = /*#__PURE__*/react_1.styled('div')({
-  name: "growing-entry-style2",
+export const GrowingEntryStyle = /*#__PURE__*/styled('div')({
+  name: "GrowingEntryStyle",
   class: "gdg-g1y0xocz",
   propsAsIs: false
 });

@@ -2,6 +2,7 @@ import * as React from "react";
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
     onClickOutside: () => void;
     isOutsideClick?: (event: MouseEvent | TouchEvent) => boolean;
+    customEventTarget?: HTMLElement | Window | Document;
 }
 export default class ClickOutsideContainer extends React.PureComponent<Props> {
     private wrapperRef;

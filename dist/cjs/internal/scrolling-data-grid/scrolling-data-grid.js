@@ -1,34 +1,6 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const React = __importStar(require("react"));
-const data_grid_dnd_js_1 = __importDefault(require("../data-grid-dnd/data-grid-dnd.js"));
-const infinite_scroller_js_1 = require("./infinite-scroller.js");
+import * as React from "react";
+import DataGridDnd from "../data-grid-dnd/data-grid-dnd.js";
+import { InfiniteScroller } from "./infinite-scroller.js";
 const GridScroller = p => {
     const { columns, rows, rowHeight, headerHeight, groupHeaderHeight, enableGroups, freezeColumns, experimental, nonGrowWidth, clientSize, className, onVisibleRegionChanged, scrollRef, preventDiagonalScrolling, rightElement, rightElementProps, overscrollX, overscrollY, initialSize, smoothScrollX = false, smoothScrollY = false, isDraggable, } = p;
     const { paddingRight, paddingBottom } = experimental ?? {};
@@ -133,6 +105,10 @@ const GridScroller = p => {
                 }
             }
         }
+        // Ensure cellY and cellBottom never exceed the actual row count
+        // This is a safeguard to prevent unexpected out-of-bounds access with large datasets
+        cellY = Math.max(0, Math.min(cellY, rows - 1));
+        cellBottom = Math.max(cellY, Math.min(cellBottom, rows));
         const rect = {
             x: cellX,
             y: cellY,
@@ -168,8 +144,8 @@ const GridScroller = p => {
     React.useEffect(() => {
         processArgs();
     }, [processArgs]);
-    return (React.createElement(infinite_scroller_js_1.InfiniteScroller, { scrollRef: scrollRef, className: className, kineticScrollPerfHack: experimental?.kineticScrollPerfHack, preventDiagonalScrolling: preventDiagonalScrolling, draggable: isDraggable === true || typeof isDraggable === "string", scrollWidth: width + (paddingRight ?? 0), scrollHeight: height + (paddingBottom ?? 0), clientHeight: clientHeight, rightElement: rightElement, paddingBottom: paddingBottom, paddingRight: paddingRight, rightElementProps: rightElementProps, update: onScrollUpdate, initialSize: initialSize },
-        React.createElement(data_grid_dnd_js_1.default, { eventTargetRef: scrollRef, width: clientWidth, height: clientHeight, accessibilityHeight: p.accessibilityHeight, canvasRef: p.canvasRef, cellXOffset: p.cellXOffset, cellYOffset: p.cellYOffset, columns: p.columns, disabledRows: p.disabledRows, enableGroups: p.enableGroups, fillHandle: p.fillHandle, firstColAccessible: p.firstColAccessible, fixedShadowX: p.fixedShadowX, fixedShadowY: p.fixedShadowY, freezeColumns: p.freezeColumns, getCellContent: p.getCellContent, getCellRenderer: p.getCellRenderer, getGroupDetails: p.getGroupDetails, getRowThemeOverride: p.getRowThemeOverride, groupHeaderHeight: p.groupHeaderHeight, headerHeight: p.headerHeight, highlightRegions: p.highlightRegions, imageWindowLoader: p.imageWindowLoader, isFilling: p.isFilling, isFocused: p.isFocused, lockColumns: p.lockColumns, maxColumnWidth: p.maxColumnWidth, minColumnWidth: p.minColumnWidth, onHeaderMenuClick: p.onHeaderMenuClick, onHeaderIndicatorClick: p.onHeaderIndicatorClick, onMouseMove: p.onMouseMove, prelightCells: p.prelightCells, rowHeight: p.rowHeight, rows: p.rows, selection: p.selection, theme: p.theme, freezeTrailingRows: p.freezeTrailingRows, hasAppendRow: p.hasAppendRow, translateX: p.translateX, translateY: p.translateY, onColumnProposeMove: p.onColumnProposeMove, verticalBorder: p.verticalBorder, drawFocusRing: p.drawFocusRing, drawHeader: p.drawHeader, drawCell: p.drawCell, experimental: p.experimental, gridRef: p.gridRef, headerIcons: p.headerIcons, isDraggable: p.isDraggable, onCanvasBlur: p.onCanvasBlur, onCanvasFocused: p.onCanvasFocused, onCellFocused: p.onCellFocused, onColumnMoved: p.onColumnMoved, onColumnResize: p.onColumnResize, onColumnResizeEnd: p.onColumnResizeEnd, onColumnResizeStart: p.onColumnResizeStart, onContextMenu: p.onContextMenu, onDragEnd: p.onDragEnd, onDragLeave: p.onDragLeave, onDragOverCell: p.onDragOverCell, onDragStart: p.onDragStart, onDrop: p.onDrop, onItemHovered: p.onItemHovered, onKeyDown: p.onKeyDown, onKeyUp: p.onKeyUp, onMouseDown: p.onMouseDown, onMouseUp: p.onMouseUp, onRowMoved: p.onRowMoved, smoothScrollX: p.smoothScrollX, smoothScrollY: p.smoothScrollY, resizeIndicator: p.resizeIndicator })));
+    return (React.createElement(InfiniteScroller, { scrollRef: scrollRef, className: className, kineticScrollPerfHack: experimental?.kineticScrollPerfHack, preventDiagonalScrolling: preventDiagonalScrolling, draggable: isDraggable === true || typeof isDraggable === "string", scrollWidth: width + (paddingRight ?? 0), scrollHeight: height + (paddingBottom ?? 0), clientHeight: clientHeight, rightElement: rightElement, paddingBottom: paddingBottom, paddingRight: paddingRight, rightElementProps: rightElementProps, update: onScrollUpdate, initialSize: initialSize },
+        React.createElement(DataGridDnd, { eventTargetRef: scrollRef, width: clientWidth, height: clientHeight, accessibilityHeight: p.accessibilityHeight, canvasRef: p.canvasRef, cellXOffset: p.cellXOffset, cellYOffset: p.cellYOffset, columns: p.columns, disabledRows: p.disabledRows, enableGroups: p.enableGroups, fillHandle: p.fillHandle, firstColAccessible: p.firstColAccessible, fixedShadowX: p.fixedShadowX, fixedShadowY: p.fixedShadowY, freezeColumns: p.freezeColumns, getCellContent: p.getCellContent, getCellRenderer: p.getCellRenderer, getGroupDetails: p.getGroupDetails, getRowThemeOverride: p.getRowThemeOverride, groupHeaderHeight: p.groupHeaderHeight, headerHeight: p.headerHeight, highlightRegions: p.highlightRegions, imageWindowLoader: p.imageWindowLoader, isFilling: p.isFilling, isFocused: p.isFocused, lockColumns: p.lockColumns, maxColumnWidth: p.maxColumnWidth, minColumnWidth: p.minColumnWidth, onHeaderMenuClick: p.onHeaderMenuClick, onHeaderIndicatorClick: p.onHeaderIndicatorClick, onMouseMove: p.onMouseMove, prelightCells: p.prelightCells, rowHeight: p.rowHeight, rows: p.rows, selection: p.selection, theme: p.theme, freezeTrailingRows: p.freezeTrailingRows, hasAppendRow: p.hasAppendRow, translateX: p.translateX, translateY: p.translateY, onColumnProposeMove: p.onColumnProposeMove, verticalBorder: p.verticalBorder, drawFocusRing: p.drawFocusRing, drawHeader: p.drawHeader, drawCell: p.drawCell, experimental: p.experimental, gridRef: p.gridRef, headerIcons: p.headerIcons, isDraggable: p.isDraggable, onCanvasBlur: p.onCanvasBlur, onCanvasFocused: p.onCanvasFocused, onCellFocused: p.onCellFocused, onColumnMoved: p.onColumnMoved, onColumnResize: p.onColumnResize, onColumnResizeEnd: p.onColumnResizeEnd, onColumnResizeStart: p.onColumnResizeStart, onContextMenu: p.onContextMenu, onDragEnd: p.onDragEnd, onDragLeave: p.onDragLeave, onDragOverCell: p.onDragOverCell, onDragStart: p.onDragStart, onDrop: p.onDrop, onItemHovered: p.onItemHovered, onKeyDown: p.onKeyDown, onKeyUp: p.onKeyUp, onMouseDown: p.onMouseDown, onMouseUp: p.onMouseUp, onRowMoved: p.onRowMoved, smoothScrollX: p.smoothScrollX, smoothScrollY: p.smoothScrollY, resizeIndicator: p.resizeIndicator })));
 };
-exports.default = GridScroller;
+export default GridScroller;
 //# sourceMappingURL=scrolling-data-grid.js.map

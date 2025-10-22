@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.RenderStateProvider = exports.WindowingTrackerBase = exports.unpackNumberToColRow = exports.unpackRow = exports.unpackCol = exports.packColRowToNumber = void 0;
-const support_js_1 = require("./support.js");
+import { deepEqual } from "./support.js";
 // max safe int 2^53 - 1 (minus 1 omitted from here on)
 // max safe columns is 2^21 or 2,097,151
 // max safe rows is 2^32 or 4,294,967,295
@@ -9,25 +6,21 @@ const support_js_1 = require("./support.js");
 // the distance to the moon is 238,900 miles, so this would give you a data grid that goes to the moon and back 94 times
 // seems fine
 const rowShift = 1 << 21;
-function packColRowToNumber(col, row) {
+export function packColRowToNumber(col, row) {
     return (row + 2) * rowShift + col;
 }
-exports.packColRowToNumber = packColRowToNumber;
-function unpackCol(packed) {
+export function unpackCol(packed) {
     return packed % rowShift;
 }
-exports.unpackCol = unpackCol;
-function unpackRow(packed) {
+export function unpackRow(packed) {
     return Math.floor(packed / rowShift) - 2;
 }
-exports.unpackRow = unpackRow;
-function unpackNumberToColRow(packed) {
+export function unpackNumberToColRow(packed) {
     const col = unpackCol(packed);
     const row = unpackRow(packed);
     return [col, row];
 }
-exports.unpackNumberToColRow = unpackNumberToColRow;
-class WindowingTrackerBase {
+export class WindowingTrackerBase {
     visibleWindow = {
         x: 0,
         y: 0,
@@ -50,7 +43,7 @@ class WindowingTrackerBase {
             this.visibleWindow.width === newWindow.width &&
             this.visibleWindow.height === newWindow.height &&
             this.freezeCols === freezeCols &&
-            (0, support_js_1.deepEqual)(this.freezeRows, freezeRows))
+            deepEqual(this.freezeRows, freezeRows))
             return;
         this.visibleWindow = newWindow;
         this.freezeCols = freezeCols;
@@ -58,8 +51,7 @@ class WindowingTrackerBase {
         this.clearOutOfWindow();
     }
 }
-exports.WindowingTrackerBase = WindowingTrackerBase;
-class RenderStateProvider extends WindowingTrackerBase {
+export class RenderStateProvider extends WindowingTrackerBase {
     cache = new Map();
     setValue = (location, state) => {
         this.cache.set(packColRowToNumber(location[0], location[1]), state);
@@ -75,5 +67,4 @@ class RenderStateProvider extends WindowingTrackerBase {
         }
     };
 }
-exports.RenderStateProvider = RenderStateProvider;
 //# sourceMappingURL=render-state-provider.js.map

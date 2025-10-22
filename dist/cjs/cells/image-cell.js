@@ -1,37 +1,11 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.drawImage = exports.imageCellRenderer = void 0;
 /* eslint-disable react/display-name */
-const React = __importStar(require("react"));
-const image_overlay_editor_js_1 = require("../internal/data-grid-overlay-editor/private/image-overlay-editor.js");
-const data_grid_lib_js_1 = require("../internal/data-grid/render/data-grid-lib.js");
-const data_grid_types_js_1 = require("../internal/data-grid/data-grid-types.js");
-exports.imageCellRenderer = {
+import * as React from "react";
+import { ImageOverlayEditor } from "../internal/data-grid-overlay-editor/private/image-overlay-editor.js";
+import { roundedRect } from "../internal/data-grid/render/data-grid-lib.js";
+import { GridCellKind } from "../internal/data-grid/data-grid-types.js";
+export const imageCellRenderer = {
     getAccessibilityString: c => c.data.join(", "),
-    kind: data_grid_types_js_1.GridCellKind.Image,
+    kind: GridCellKind.Image,
     needsHover: false,
     useLabel: false,
     needsHoverPosition: false,
@@ -43,7 +17,7 @@ exports.imageCellRenderer = {
     }),
     provideEditor: () => p => {
         const { value, onFinishedEditing, imageEditorOverride } = p;
-        const ImageEditor = imageEditorOverride ?? image_overlay_editor_js_1.ImageOverlayEditor;
+        const ImageEditor = imageEditorOverride ?? ImageOverlayEditor;
         return (React.createElement(ImageEditor, { urls: value.data, canWrite: value.readonly !== true, onCancel: onFinishedEditing, onChange: newImage => {
                 onFinishedEditing({
                     ...value,
@@ -74,7 +48,7 @@ exports.imageCellRenderer = {
     },
 };
 const itemMargin = 4;
-function drawImage(args, data, rounding, contentAlign) {
+export function drawImage(args, data, rounding, contentAlign) {
     const { rect, col, row, theme, ctx, imageLoader } = args;
     const { x, y, height: h, width: w } = rect;
     const imgHeight = h - theme.cellVerticalPadding * 2;
@@ -106,7 +80,7 @@ function drawImage(args, data, rounding, contentAlign) {
         const imgWidth = img.width * (imgHeight / img.height);
         if (rounding > 0) {
             ctx.beginPath();
-            (0, data_grid_lib_js_1.roundedRect)(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, rounding);
+            roundedRect(ctx, drawX, y + theme.cellVerticalPadding, imgWidth, imgHeight, rounding);
             ctx.save();
             ctx.clip();
         }
@@ -117,5 +91,4 @@ function drawImage(args, data, rounding, contentAlign) {
         drawX += imgWidth + itemMargin;
     }
 }
-exports.drawImage = drawImage;
 //# sourceMappingURL=image-cell.js.map

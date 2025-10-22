@@ -1,16 +1,10 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.useAutoscroll = void 0;
-const react_1 = __importDefault(require("react"));
+import React from "react";
 const maxPxPerMs = 2;
 const msToFullSpeed = 1300;
-function useAutoscroll(scrollDirection, scrollRef, onScroll) {
-    const speedScalar = react_1.default.useRef(0);
+export function useAutoscroll(scrollDirection, scrollRef, onScroll) {
+    const speedScalar = React.useRef(0);
     const [xDir, yDir] = scrollDirection ?? [0, 0];
-    react_1.default.useEffect(() => {
+    React.useEffect(() => {
         if (xDir === 0 && yDir === 0) {
             speedScalar.current = 0;
             return;
@@ -39,5 +33,4 @@ function useAutoscroll(scrollDirection, scrollRef, onScroll) {
         };
     }, [scrollRef, xDir, yDir, onScroll]);
 }
-exports.useAutoscroll = useAutoscroll;
 //# sourceMappingURL=use-autoscroll.js.map

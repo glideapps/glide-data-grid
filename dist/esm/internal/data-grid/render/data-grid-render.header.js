@@ -3,7 +3,7 @@ import { mergeAndRealizeTheme } from "../../../common/styles.js";
 import { direction } from "../../../common/utils.js";
 import { withAlpha } from "../color-parser.js";
 import { GridColumnMenuIcon } from "../data-grid-types.js";
-import { drawMenuDots, getMiddleCenterBias, roundedPoly, measureTextCached, getMeasuredTextCache, } from "./data-grid-lib.js";
+import { drawMenuDots, getMeasuredTextCache, getMiddleCenterBias, measureTextCached, roundedPoly, } from "./data-grid-lib.js";
 import { walkColumns, walkGroups } from "./data-grid-render.walk.js";
 import { drawCheckbox } from "./draw-checkbox.js";
 export function drawGridHeaders(ctx, effectiveCols, enableGroups, hovered, width, translateX, headerHeight, groupHeaderHeight, dragAndDropState, isResizing, selection, outerTheme, spriteManager, hoverValues, verticalBorder, getGroupDetails, damage, drawHeaderCallback, touchMode) {
@@ -36,10 +36,10 @@ export function drawGridHeaders(ctx, effectiveCols, enableGroups, hovered, width
             ctx.fill();
         }
         if (theme !== outerTheme) {
-            ctx.font = theme.baseFontFull;
+            ctx.font = theme.headerFontFull;
         }
         const selected = selection.columns.hasIndex(c.sourceIndex);
-        const noHover = dragAndDropState !== undefined || isResizing;
+        const noHover = dragAndDropState !== undefined || isResizing || c.headerRowMarkerDisabled === true;
         const hoveredBoolean = !noHover && hRow === -1 && hCol === c.sourceIndex;
         const hover = noHover
             ? 0
@@ -93,7 +93,9 @@ export function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHei
         const group = getGroupDetails(groupName);
         const groupTheme = group?.overrideTheme === undefined ? theme : mergeAndRealizeTheme(theme, group.overrideTheme);
         const isHovered = hRow === -2 && hCol !== undefined && hCol >= span[0] && hCol <= span[1];
-        const fillColor = isHovered ? groupTheme.bgHeaderHovered : groupTheme.bgHeader;
+        const fillColor = isHovered
+            ? groupTheme.bgGroupHeaderHovered ?? groupTheme.bgHeaderHovered
+            : groupTheme.bgGroupHeader ?? groupTheme.bgHeader;
         if (fillColor !== theme.bgHeader) {
             ctx.fillStyle = fillColor;
             ctx.fill();
@@ -162,8 +164,8 @@ function getHeaderMenuBounds(x, y, width, height, isRtl) {
     if (isRtl)
         return { x, y, width: menuButtonSize, height: Math.min(menuButtonSize, height) };
     return {
-        x: x + width - menuButtonSize,
-        y: Math.max(y, y + height / 2 - menuButtonSize / 2),
+        x: x + width - menuButtonSize, // right align
+        y: Math.max(y, y + height / 2 - menuButtonSize / 2), // center vertically
         width: menuButtonSize,
         height: Math.min(menuButtonSize, height),
     };
@@ -262,7 +264,7 @@ function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered
             ctx.globalAlpha = hoverAmount;
         }
         const markerTheme = c.headerRowMarkerTheme !== undefined ? mergeAndRealizeTheme(theme, c.headerRowMarkerTheme) : theme;
-        drawCheckbox(ctx, markerTheme, checked, x, y, width, height, false, undefined, undefined, 18, "center", c.rowMarker);
+        drawCheckbox(ctx, markerTheme, checked, x, y, width, height, false, undefined, undefined, theme.checkboxMaxSize, "center", c.rowMarker);
         if (checked !== true && c.headerRowMarkerAlwaysVisible !== true) {
             ctx.globalAlpha = 1;
         }
@@ -379,6 +381,8 @@ export function drawHeader(ctx, x, y, width, height, c, selected, theme, isHover
             hasSelectedCell,
             spriteManager,
             menuBounds: headerLayout?.menuBounds ?? { x: 0, y: 0, height: 0, width: 0 },
+            hoverX: posX,
+            hoverY: posY,
         }, () => drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, posX, posY, hoverAmount, spriteManager, touchMode, isRtl, headerLayout));
     }
     else {

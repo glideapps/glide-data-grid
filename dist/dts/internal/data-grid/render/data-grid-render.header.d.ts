@@ -2,7 +2,7 @@ import { type FullTheme } from "../../../common/styles.js";
 import type { HoverValues } from "../animation-manager.js";
 import type { CellSet } from "../cell-set.js";
 import type { SpriteManager } from "../data-grid-sprites.js";
-import { type DrawHeaderCallback, type Rectangle, type GridSelection } from "../data-grid-types.js";
+import { type DrawHeaderCallback, type GridSelection, type Rectangle } from "../data-grid-types.js";
 import { type MappedGridColumn } from "./data-grid-lib.js";
 import type { GroupDetails, GroupDetailsCallback } from "./data-grid-render.cells.js";
 import type { DragAndDropState, HoverInfo } from "./draw-grid-arg.js";

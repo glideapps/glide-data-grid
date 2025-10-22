@@ -1,13 +1,7 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.useKeybindingsWithDefaults = exports.realizeKeybinds = exports.keybindingDefaults = void 0;
-const react_1 = __importDefault(require("react"));
-const browser_detect_js_1 = require("../common/browser-detect.js");
-const utils_js_1 = require("../common/utils.js");
-exports.keybindingDefaults = {
+import React from "react";
+import { browserIsOSX } from "../common/browser-detect.js";
+import { useDeepMemo } from "../common/utils.js";
+export const keybindingDefaults = {
     downFill: false,
     rightFill: false,
     clear: true,
@@ -60,8 +54,8 @@ function realizeKeybind(keybind, defaultVal) {
         return "";
     return keybind;
 }
-function realizeKeybinds(keybinds) {
-    const isOSX = browser_detect_js_1.browserIsOSX.value;
+export function realizeKeybinds(keybinds) {
+    const isOSX = browserIsOSX.value;
     return {
         activateCell: realizeKeybind(keybinds.activateCell, " |Enter|shift+Enter"),
         clear: realizeKeybind(keybinds.clear, "any+Escape"),
@@ -109,26 +103,24 @@ function realizeKeybinds(keybinds) {
         selectToLastRow: realizeKeybind(keybinds.selectToLastRow, "primary+shift+ArrowDown"),
     };
 }
-exports.realizeKeybinds = realizeKeybinds;
-function useKeybindingsWithDefaults(keybindingsIn) {
-    const keys = (0, utils_js_1.useDeepMemo)(keybindingsIn);
-    return react_1.default.useMemo(() => {
+export function useKeybindingsWithDefaults(keybindingsIn) {
+    const keys = useDeepMemo(keybindingsIn);
+    return React.useMemo(() => {
         if (keys === undefined)
-            return realizeKeybinds(exports.keybindingDefaults);
+            return realizeKeybinds(keybindingDefaults);
         const withBackCompatApplied = {
             ...keys,
-            goToNextPage: keys?.goToNextPage ?? keys?.pageDown ?? exports.keybindingDefaults.goToNextPage,
-            goToPreviousPage: keys?.goToPreviousPage ?? keys?.pageUp ?? exports.keybindingDefaults.goToPreviousPage,
-            goToFirstCell: keys?.goToFirstCell ?? keys?.first ?? exports.keybindingDefaults.goToFirstCell,
-            goToLastCell: keys?.goToLastCell ?? keys?.last ?? exports.keybindingDefaults.goToLastCell,
-            selectToFirstCell: keys?.selectToFirstCell ?? keys?.first ?? exports.keybindingDefaults.selectToFirstCell,
-            selectToLastCell: keys?.selectToLastCell ?? keys?.last ?? exports.keybindingDefaults.selectToLastCell,
+            goToNextPage: keys?.goToNextPage ?? keys?.pageDown ?? keybindingDefaults.goToNextPage,
+            goToPreviousPage: keys?.goToPreviousPage ?? keys?.pageUp ?? keybindingDefaults.goToPreviousPage,
+            goToFirstCell: keys?.goToFirstCell ?? keys?.first ?? keybindingDefaults.goToFirstCell,
+            goToLastCell: keys?.goToLastCell ?? keys?.last ?? keybindingDefaults.goToLastCell,
+            selectToFirstCell: keys?.selectToFirstCell ?? keys?.first ?? keybindingDefaults.selectToFirstCell,
+            selectToLastCell: keys?.selectToLastCell ?? keys?.last ?? keybindingDefaults.selectToLastCell,
         };
         return realizeKeybinds({
-            ...exports.keybindingDefaults,
+            ...keybindingDefaults,
             ...withBackCompatApplied,
         });
     }, [keys]);
 }
-exports.useKeybindingsWithDefaults = useKeybindingsWithDefaults;
 //# sourceMappingURL=data-editor-keybindings.js.map

@@ -126,7 +126,7 @@ const DataGridDnd = p => {
                 }
             }
             clearAll();
-            if (dragCol !== undefined && dropCol !== undefined) {
+            if (dragCol !== undefined && dropCol !== undefined && onColumnProposeMove?.(dragCol, dropCol) !== false) {
                 onColumnMoved?.(dragCol, dropCol);
             }
             if (dragRow !== undefined && dropRow !== undefined) {
@@ -150,6 +150,7 @@ const DataGridDnd = p => {
         onColumnMoved,
         onRowMoved,
         clearAll,
+        onColumnProposeMove,
     ]);
     const dragOffset = React.useMemo(() => {
         if (dragCol === undefined || dropCol === undefined)

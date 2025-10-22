@@ -1,53 +1,11 @@
-"use strict";
-
-var __createBinding = this && this.__createBinding || (Object.create ? function (o, m, k, k2) {
-  if (k2 === undefined) k2 = k;
-  var desc = Object.getOwnPropertyDescriptor(m, k);
-  if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-    desc = {
-      enumerable: true,
-      get: function () {
-        return m[k];
-      }
-    };
-  }
-  Object.defineProperty(o, k2, desc);
-} : function (o, m, k, k2) {
-  if (k2 === undefined) k2 = k;
-  o[k2] = m[k];
-});
-var __setModuleDefault = this && this.__setModuleDefault || (Object.create ? function (o, v) {
-  Object.defineProperty(o, "default", {
-    enumerable: true,
-    value: v
-  });
-} : function (o, v) {
-  o["default"] = v;
-});
-var __importStar = this && this.__importStar || function (mod) {
-  if (mod && mod.__esModule) return mod;
-  var result = {};
-  if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-  __setModuleDefault(result, mod);
-  return result;
-};
-var __importDefault = this && this.__importDefault || function (mod) {
-  return mod && mod.__esModule ? mod : {
-    "default": mod
-  };
-};
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.InfiniteScroller = void 0;
-const react_1 = require("@linaria/react");
-const React = __importStar(require("react"));
-const resize_detector_js_1 = require("../../common/resize-detector.js");
-const browser_detect_js_1 = require("../../common/browser-detect.js");
-const utils_js_1 = require("../../common/utils.js");
-const use_kinetic_scroll_js_1 = __importDefault(require("./use-kinetic-scroll.js"));
+import { styled } from "@linaria/react";
+import * as React from "react";
+import { useResizeDetector } from "../../common/resize-detector.js";
+import { browserIsSafari } from "../../common/browser-detect.js";
+import { useEventListener } from "../../common/utils.js";
+import useKineticScroll from "./use-kinetic-scroll.js";
 const _exp = /*#__PURE__*/() => p => p.isSafari ? "scroll" : "auto";
-const ScrollRegionStyle = /*#__PURE__*/react_1.styled('div')({
+const ScrollRegionStyle = /*#__PURE__*/styled('div')({
   name: "ScrollRegionStyle",
   class: "gdg-s1dgczr6",
   propsAsIs: false,
@@ -55,22 +13,43 @@ const ScrollRegionStyle = /*#__PURE__*/react_1.styled('div')({
     "s1dgczr6-0": [_exp()]
   }
 });
+// Browser's maximum div height limit. Varies a bit by browsers.
+const BROWSER_MAX_DIV_HEIGHT = 33_554_400;
+// Maximum height of a single padder segment to avoid browser performance issues.
+// Padders are invisible div elements that create the scrollable area in the DOM.
+// They trick the browser into showing a scrollbar for the full virtual content height
+// without actually rendering millions of rows. We create multiple smaller padders
+// (max 5M pixels each) instead of one large padder to avoid browser performance issues.
+// The actual grid content is absolutely positioned and rendered on top of these padders
+// based on the current scroll position.
+const MAX_PADDER_SEGMENT_HEIGHT = 5_000_000;
 function useTouchUpDelayed(delay) {
   const [hasTouches, setHasTouches] = React.useState(false);
   const safeWindow = typeof window === "undefined" ? null : window;
   const cbTimer = React.useRef(0);
-  (0, utils_js_1.useEventListener)("touchstart", React.useCallback(() => {
+  useEventListener("touchstart", React.useCallback(() => {
     window.clearTimeout(cbTimer.current);
     setHasTouches(true);
   }, []), safeWindow, true, false);
-  (0, utils_js_1.useEventListener)("touchend", React.useCallback(e => {
+  useEventListener("touchend", React.useCallback(e => {
     if (e.touches.length === 0) {
       cbTimer.current = window.setTimeout(() => setHasTouches(false), delay);
     }
   }, [delay]), safeWindow, true, false);
   return hasTouches;
 }
-const InfiniteScroller = p => {
+/**
+ * InfiniteScroller provides virtual scrolling capabilities for the data grid.
+ * It handles the mapping between DOM scroll positions and virtual scroll positions
+ * when the content height exceeds browser limitations.
+ *
+ * Browser Limitations:
+ * - Most browsers limit div heights to ~33.5 million pixels
+ * - With large datasets (e.g., 100M rows × 31px = 3.1B pixels), we exceed this limit
+ * - This component uses an offset-based approach to map the limited DOM scroll range
+ *   to the full virtual scroll range
+ */
+export const InfiniteScroller = p => {
   const {
     children,
     clientHeight,
@@ -91,10 +70,24 @@ const InfiniteScroller = p => {
   const padders = [];
   const rightElementSticky = rightElementProps?.sticky ?? false;
   const rightElementFill = rightElementProps?.fill ?? false;
-  const offsetY = React.useRef(0);
+  // Track the virtual scroll position directly for smooth scrolling
+  const virtualScrollY = React.useRef(0);
   const lastScrollY = React.useRef(0);
   const scroller = React.useRef(null);
   const dpr = typeof window === "undefined" ? 1 : window.devicePixelRatio;
+  const lastDpr = React.useRef(dpr);
+  // Reset scroll tracking when device pixel ratio changes (e.g., browser zoom)
+  React.useEffect(() => {
+    if (lastDpr.current !== dpr) {
+      virtualScrollY.current = 0;
+      lastScrollY.current = 0;
+      lastDpr.current = dpr;
+      const el = scroller.current;
+      if (el !== null) {
+        onScrollRef.current(el.scrollLeft, el.scrollTop);
+      }
+    }
+  }, [dpr]);
   const lastScrollPosition = React.useRef({
     scrollLeft: 0,
     scrollTop: 0,
@@ -139,11 +132,32 @@ const InfiniteScroller = p => {
     const delta = lastScrollY.current - newY;
     const scrollableHeight = el.scrollHeight - cHeight;
     lastScrollY.current = newY;
-    if (scrollableHeight > 0 && (Math.abs(delta) > 2000 || newY === 0 || newY === scrollableHeight) && scrollHeight > el.scrollHeight + 5) {
-      const prog = newY / scrollableHeight;
-      const recomputed = (scrollHeight - cHeight) * prog;
-      offsetY.current = recomputed - newY;
+    // Calculate the virtual Y position
+    let virtualY;
+    // When content height exceeds browser limits, use hybrid approach
+    if (scrollableHeight > 0 && scrollHeight > el.scrollHeight + 5) {
+      // For large jumps (scrollbar interaction) or edge positions,
+      // recalculate position based on percentage
+      if (Math.abs(delta) > 2000 || newY === 0 || newY === scrollableHeight) {
+        const scrollProgress = Math.max(0, Math.min(1, newY / scrollableHeight));
+        const virtualScrollableHeight = scrollHeight - cHeight;
+        virtualY = scrollProgress * virtualScrollableHeight;
+        // Update our tracked position for subsequent smooth scrolling
+        virtualScrollY.current = virtualY;
+      } else {
+        // For smooth scrolling, apply the delta directly to virtual position
+        // This preserves 1:1 pixel movement for smooth scrolling
+        virtualScrollY.current -= delta;
+        virtualY = virtualScrollY.current;
+      }
+    } else {
+      // Direct mapping when within browser limits
+      virtualY = newY;
+      virtualScrollY.current = virtualY;
     }
+    // Ensure virtual Y is within valid bounds
+    virtualY = Math.max(0, Math.min(virtualY, scrollHeight - cHeight));
+    virtualScrollY.current = virtualY; // Keep tracked position in bounds too
     if (lock !== undefined) {
       window.clearTimeout(idleTimer.current);
       setIsIdle(false);
@@ -151,13 +165,13 @@ const InfiniteScroller = p => {
     }
     update({
       x: scrollLeft,
-      y: newY + offsetY.current,
+      y: virtualY,
       width: cWidth - paddingRight,
       height: cHeight - paddingBottom,
       paddingRight: rightWrapRef.current?.clientWidth ?? 0
     });
   }, [paddingBottom, paddingRight, scrollHeight, update, preventDiagonalScrolling, hasTouches]);
-  (0, use_kinetic_scroll_js_1.default)(kineticScrollPerfHack && browser_detect_js_1.browserIsSafari.value, onScroll, scroller);
+  useKineticScroll(kineticScrollPerfHack && browserIsSafari.value, onScroll, scroller);
   const onScrollRef = React.useRef(onScroll);
   onScrollRef.current = onScroll;
   const lastProps = React.useRef();
@@ -175,6 +189,8 @@ const InfiniteScroller = p => {
   }, [scrollRef]);
   let key = 0;
   let h = 0;
+  // Ensure we don't create padders that exceed browser limits
+  const effectiveScrollHeight = Math.min(scrollHeight, BROWSER_MAX_DIV_HEIGHT);
   padders.push(React.createElement("div", {
     key: key++,
     style: {
@@ -182,8 +198,8 @@ const InfiniteScroller = p => {
       height: 0
     }
   }));
-  while (h < scrollHeight) {
-    const toAdd = Math.min(5000000, scrollHeight - h);
+  while (h < effectiveScrollHeight) {
+    const toAdd = Math.min(MAX_PADDER_SEGMENT_HEIGHT, effectiveScrollHeight - h);
     padders.push(React.createElement("div", {
       key: key++,
       style: {
@@ -197,7 +213,7 @@ const InfiniteScroller = p => {
     ref,
     width,
     height
-  } = (0, resize_detector_js_1.useResizeDetector)(initialSize);
+  } = useResizeDetector(initialSize);
   if (typeof window !== "undefined" && (lastProps.current?.height !== height || lastProps.current?.width !== width)) {
     window.setTimeout(() => onScrollRef.current(), 0);
     lastProps.current = {
@@ -211,7 +227,7 @@ const InfiniteScroller = p => {
   return React.createElement("div", {
     ref: ref
   }, React.createElement(ScrollRegionStyle, {
-    isSafari: browser_detect_js_1.browserIsSafari.value
+    isSafari: browserIsSafari.value
   }, React.createElement("div", {
     className: "dvn-underlay"
   }, children), React.createElement("div", {
@@ -248,5 +264,4 @@ const InfiniteScroller = p => {
     }
   }, rightElement))))));
 };
-exports.InfiniteScroller = InfiniteScroller;
 

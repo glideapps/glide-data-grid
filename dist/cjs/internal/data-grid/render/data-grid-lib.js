@@ -1,14 +1,8 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.computeBounds = exports.roundedPoly = exports.drawMenuDots = exports.roundedRect = exports.drawTextCell = exports.getEmHeight = exports.drawTextCellExternal = exports.prepTextCell = exports.drawLastUpdateUnderlay = exports.getMiddleCenterBias = exports.getMeasuredTextCache = exports.measureTextCached = exports.getRowIndexForY = exports.getColumnIndexForX = exports.getEffectiveColumns = exports.getFreezeTrailingHeight = exports.getStickyWidth = exports.remapForDnDState = exports.cellIsInRange = exports.rectBottomRight = exports.itemsAreEqual = exports.itemIsInRect = exports.cellIsSelected = exports.isGroupEqual = exports.gridSelectionHasItem = exports.useMappedColumns = void 0;
-const utils_js_1 = require("../../../common/utils.js");
-const react_1 = __importDefault(require("react"));
-const canvas_hypertxt_1 = require("canvas-hypertxt");
-function useMappedColumns(columns, freezeColumns) {
-    return react_1.default.useMemo(() => columns.map((c, i) => ({
+import { direction } from "../../../common/utils.js";
+import React from "react";
+import { split as splitText, clearCache } from "canvas-hypertxt";
+export function useMappedColumns(columns, freezeColumns) {
+    return React.useMemo(() => columns.map((c, i) => ({
         group: c.group,
         grow: c.grow,
         hasMenu: c.hasMenu,
@@ -33,8 +27,7 @@ function useMappedColumns(columns, freezeColumns) {
         headerRowMarkerDisabled: c.headerRowMarkerDisabled,
     })), [columns, freezeColumns]);
 }
-exports.useMappedColumns = useMappedColumns;
-function gridSelectionHasItem(sel, item) {
+export function gridSelectionHasItem(sel, item) {
     const [col, row] = item;
     if (sel.columns.hasIndex(col) || sel.rows.hasIndex(row))
         return true;
@@ -50,12 +43,10 @@ function gridSelectionHasItem(sel, item) {
     }
     return false;
 }
-exports.gridSelectionHasItem = gridSelectionHasItem;
-function isGroupEqual(left, right) {
+export function isGroupEqual(left, right) {
     return (left ?? "") === (right ?? "");
 }
-exports.isGroupEqual = isGroupEqual;
-function cellIsSelected(location, cell, selection) {
+export function cellIsSelected(location, cell, selection) {
     if (selection.current === undefined)
         return false;
     if (location[1] !== selection.current.cell[1])
@@ -65,20 +56,16 @@ function cellIsSelected(location, cell, selection) {
     }
     return selection.current.cell[0] >= cell.span[0] && selection.current.cell[0] <= cell.span[1];
 }
-exports.cellIsSelected = cellIsSelected;
-function itemIsInRect(location, rect) {
+export function itemIsInRect(location, rect) {
     const [x, y] = location;
     return x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height;
 }
-exports.itemIsInRect = itemIsInRect;
-function itemsAreEqual(a, b) {
+export function itemsAreEqual(a, b) {
     return a?.[0] === b?.[0] && a?.[1] === b?.[1];
 }
-exports.itemsAreEqual = itemsAreEqual;
-function rectBottomRight(rect) {
+export function rectBottomRight(rect) {
     return [rect.x + rect.width - 1, rect.y + rect.height - 1];
 }
-exports.rectBottomRight = rectBottomRight;
 function cellIsInRect(location, cell, rect) {
     const startX = rect.x;
     const endX = rect.x + rect.width - 1;
@@ -95,7 +82,7 @@ function cellIsInRect(location, cell, rect) {
         (spanEnd >= startX && spanStart <= endX) ||
         (spanStart < startX && spanEnd > endX));
 }
-function cellIsInRange(location, cell, selection, includeSingleSelection) {
+export function cellIsInRange(location, cell, selection, includeSingleSelection) {
     let result = 0;
     if (selection.current === undefined)
         return result;
@@ -110,8 +97,7 @@ function cellIsInRange(location, cell, selection, includeSingleSelection) {
     }
     return result;
 }
-exports.cellIsInRange = cellIsInRange;
-function remapForDnDState(columns, dndState) {
+export function remapForDnDState(columns, dndState) {
     let mappedCols = columns;
     if (dndState !== undefined) {
         let writable = [...columns];
@@ -132,8 +118,7 @@ function remapForDnDState(columns, dndState) {
     }
     return mappedCols;
 }
-exports.remapForDnDState = remapForDnDState;
-function getStickyWidth(columns, dndState) {
+export function getStickyWidth(columns, dndState) {
     let result = 0;
     const remapped = remapForDnDState(columns, dndState);
     for (let i = 0; i < remapped.length; i++) {
@@ -145,8 +130,7 @@ function getStickyWidth(columns, dndState) {
     }
     return result;
 }
-exports.getStickyWidth = getStickyWidth;
-function getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) {
+export function getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) {
     if (typeof getRowHeight === "number") {
         return freezeTrailingRows * getRowHeight;
     }
@@ -158,8 +142,7 @@ function getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) {
         return result;
     }
 }
-exports.getFreezeTrailingHeight = getFreezeTrailingHeight;
-function getEffectiveColumns(columns, cellXOffset, width, dndState, tx) {
+export function getEffectiveColumns(columns, cellXOffset, width, dndState, tx) {
     const mappedCols = remapForDnDState(columns, dndState);
     const sticky = [];
     for (const c of mappedCols) {
@@ -189,8 +172,7 @@ function getEffectiveColumns(columns, cellXOffset, width, dndState, tx) {
     }
     return sticky;
 }
-exports.getEffectiveColumns = getEffectiveColumns;
-function getColumnIndexForX(targetX, effectiveColumns, translateX) {
+export function getColumnIndexForX(targetX, effectiveColumns, translateX) {
     let x = 0;
     for (const c of effectiveColumns) {
         const cx = c.sticky ? x : x + (translateX ?? 0);
@@ -201,8 +183,7 @@ function getColumnIndexForX(targetX, effectiveColumns, translateX) {
     }
     return -1;
 }
-exports.getColumnIndexForX = getColumnIndexForX;
-function getRowIndexForY(targetY, height, hasGroups, headerHeight, groupHeaderHeight, rows, rowHeight, cellYOffset, translateY, freezeTrailingRows) {
+export function getRowIndexForY(targetY, height, hasGroups, headerHeight, groupHeaderHeight, rows, rowHeight, cellYOffset, translateY, freezeTrailingRows) {
     const totalHeaderHeight = headerHeight + groupHeaderHeight;
     if (hasGroups && targetY <= groupHeaderHeight)
         return -2;
@@ -236,7 +217,6 @@ function getRowIndexForY(targetY, height, hasGroups, headerHeight, groupHeaderHe
         return undefined;
     }
 }
-exports.getRowIndexForY = getRowIndexForY;
 let metricsSize = 0;
 let metricsCache = {};
 const isSSR = typeof window === "undefined";
@@ -275,7 +255,7 @@ async function clearCacheOnLoad() {
     await document.fonts.ready;
     metricsSize = 0;
     metricsCache = {};
-    (0, canvas_hypertxt_1.clearCache)();
+    clearCache();
     // Try to initialize DOM measurement after fonts are ready
     initializeDOMMeasurement();
 }
@@ -289,7 +269,7 @@ function makeCacheKey(s, ctx, baseline, font) {
     return `${s}_${font ?? ctx?.font}_${baseline}`;
 }
 /** @category Drawing */
-function measureTextCached(s, ctx, font, baseline = "middle") {
+export function measureTextCached(s, ctx, font, baseline = "middle") {
     const key = makeCacheKey(s, ctx, baseline, font);
     let metrics = metricsCache[key];
     if (metrics === undefined) {
@@ -319,26 +299,23 @@ function measureTextCached(s, ctx, font, baseline = "middle") {
         metricsCache[key] = metrics;
         metricsSize++;
     }
-    if (metricsSize > 10000) {
+    if (metricsSize > 10_000) {
         metricsCache = {};
         metricsSize = 0;
     }
     return metrics;
 }
-exports.measureTextCached = measureTextCached;
-function getMeasuredTextCache(s, font) {
+export function getMeasuredTextCache(s, font) {
     const key = makeCacheKey(s, undefined, "middle", font);
     return metricsCache[key];
 }
-exports.getMeasuredTextCache = getMeasuredTextCache;
 /** @category Drawing */
-function getMiddleCenterBias(ctx, font) {
+export function getMiddleCenterBias(ctx, font) {
     if (typeof font !== "string") {
         font = font.baseFontFull;
     }
     return getMiddleCenterBiasInner(ctx, font);
 }
-exports.getMiddleCenterBias = getMiddleCenterBias;
 function loadMetric(ctx, baseline) {
     const sample = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     ctx.save();
@@ -363,7 +340,7 @@ function getMiddleCenterBiasInner(ctx, font) {
     });
     return bias;
 }
-function drawLastUpdateUnderlay(args, lastUpdate, frameTime, lastPrep, isLastCol, isLastRow) {
+export function drawLastUpdateUnderlay(args, lastUpdate, frameTime, lastPrep, isLastCol, isLastRow) {
     const { ctx, rect, theme } = args;
     let progress = Number.MAX_SAFE_INTEGER;
     const animTime = 500;
@@ -382,8 +359,7 @@ function drawLastUpdateUnderlay(args, lastUpdate, frameTime, lastPrep, isLastCol
     }
     return progress < animTime;
 }
-exports.drawLastUpdateUnderlay = drawLastUpdateUnderlay;
-function prepTextCell(args, lastPrep, overrideColor) {
+export function prepTextCell(args, lastPrep, overrideColor) {
     const { ctx, theme } = args;
     const result = lastPrep ?? {};
     const newFill = overrideColor ?? theme.textDark;
@@ -393,18 +369,16 @@ function prepTextCell(args, lastPrep, overrideColor) {
     }
     return result;
 }
-exports.prepTextCell = prepTextCell;
 /** @category Drawing */
-function drawTextCellExternal(args, data, contentAlign) {
+export function drawTextCellExternal(args, data, contentAlign, allowWrapping, hyperWrapping) {
     const { rect, ctx, theme } = args;
     ctx.fillStyle = theme.textDark;
     drawTextCell({
         ctx: ctx,
         rect,
         theme: theme,
-    }, data, contentAlign);
+    }, data, contentAlign, allowWrapping, hyperWrapping);
 }
-exports.drawTextCellExternal = drawTextCellExternal;
 function drawSingleTextLine(ctx, data, x, y, w, h, bias, theme, contentAlign) {
     if (contentAlign === "right") {
         ctx.fillText(data, x + w - (theme.cellHorizontalPadding + 0.5), y + h / 2 + bias);
@@ -416,11 +390,10 @@ function drawSingleTextLine(ctx, data, x, y, w, h, bias, theme, contentAlign) {
         ctx.fillText(data, x + theme.cellHorizontalPadding + 0.5, y + h / 2 + bias);
     }
 }
-function getEmHeight(ctx, fontStyle) {
+export function getEmHeight(ctx, fontStyle) {
     const textMetrics = measureTextCached("ABCi09jgqpy", ctx, fontStyle); // do not question the magic string
     return textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
 }
-exports.getEmHeight = getEmHeight;
 function truncateString(data, w) {
     if (data.includes("\n")) {
         // new lines are rare and split is relatively expensive compared to the search
@@ -436,7 +409,7 @@ function truncateString(data, w) {
 }
 function drawMultiLineText(ctx, data, x, y, w, h, bias, theme, contentAlign, hyperWrapping) {
     const fontStyle = theme.baseFontFull;
-    const split = (0, canvas_hypertxt_1.split)(ctx, data, fontStyle, w - theme.cellHorizontalPadding * 2, hyperWrapping ?? false);
+    const split = splitText(ctx, data, fontStyle, w - theme.cellHorizontalPadding * 2, hyperWrapping ?? false);
     const emHeight = getEmHeight(ctx, fontStyle);
     const lineHeight = theme.lineHeight * emHeight;
     const actualHeight = emHeight + lineHeight * (split.length - 1);
@@ -460,7 +433,7 @@ function drawMultiLineText(ctx, data, x, y, w, h, bias, theme, contentAlign, hyp
     }
 }
 /** @category Drawing */
-function drawTextCell(args, data, contentAlign, allowWrapping, hyperWrapping) {
+export function drawTextCell(args, data, contentAlign, allowWrapping, hyperWrapping) {
     const { ctx, rect, theme } = args;
     const { x, y, width: w, height: h } = rect;
     allowWrapping = allowWrapping ?? false;
@@ -468,7 +441,7 @@ function drawTextCell(args, data, contentAlign, allowWrapping, hyperWrapping) {
         data = truncateString(data, w);
     }
     const bias = getMiddleCenterBias(ctx, theme);
-    const isRtl = (0, utils_js_1.direction)(data) === "rtl";
+    const isRtl = direction(data) === "rtl";
     if (contentAlign === undefined && isRtl) {
         contentAlign = "right";
     }
@@ -502,8 +475,7 @@ function drawTextCell(args, data, contentAlign, allowWrapping, hyperWrapping) {
         }
     }
 }
-exports.drawTextCell = drawTextCell;
-function roundedRect(ctx, x, y, width, height, radius) {
+export function roundedRect(ctx, x, y, width, height, radius) {
     if (typeof radius === "number") {
         radius = { tl: radius, tr: radius, br: radius, bl: radius };
     }
@@ -520,15 +492,13 @@ function roundedRect(ctx, x, y, width, height, radius) {
     ctx.arcTo(x, y + height, x, y + height - radius.bl, radius.bl);
     ctx.arcTo(x, y, x + radius.tl, y, radius.tl);
 }
-exports.roundedRect = roundedRect;
-function drawMenuDots(ctx, dotsX, dotsY) {
+export function drawMenuDots(ctx, dotsX, dotsY) {
     const radius = 1.25;
     ctx.arc(dotsX, dotsY - radius * 3.5, radius, 0, 2 * Math.PI, false);
     ctx.arc(dotsX, dotsY, radius, 0, 2 * Math.PI, false);
     ctx.arc(dotsX, dotsY + radius * 3.5, radius, 0, 2 * Math.PI, false);
 }
-exports.drawMenuDots = drawMenuDots;
-function roundedPoly(ctx, points, radiusAll) {
+export function roundedPoly(ctx, points, radiusAll) {
     // convert 2 points into vector form, polar form, and normalised
     const asVec = function (p, pp) {
         const vx = pp.x - p.x;
@@ -616,8 +586,7 @@ function roundedPoly(ctx, points, radiusAll) {
     }
     ctx.closePath();
 }
-exports.roundedPoly = roundedPoly;
-function computeBounds(col, row, width, height, groupHeaderHeight, totalHeaderHeight, cellXOffset, cellYOffset, translateX, translateY, rows, freezeColumns, freezeTrailingRows, mappedColumns, rowHeight) {
+export function computeBounds(col, row, width, height, groupHeaderHeight, totalHeaderHeight, cellXOffset, cellYOffset, translateX, translateY, rows, freezeColumns, freezeTrailingRows, mappedColumns, rowHeight) {
     const result = {
         x: 0,
         y: totalHeaderHeight + translateY,
@@ -706,5 +675,4 @@ function computeBounds(col, row, width, height, groupHeaderHeight, totalHeaderHe
     }
     return result;
 }
-exports.computeBounds = computeBounds;
 //# sourceMappingURL=data-grid-lib.js.map

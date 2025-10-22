@@ -10,8 +10,12 @@ export const drilldownCellRenderer = {
     needsHover: false,
     useLabel: false,
     needsHoverPosition: false,
-    measure: (ctx, cell, t) => cell.data.reduce((acc, data) => measureTextCached(data.text, ctx, t.baseFontFull).width + acc + 20 + (data.img !== undefined ? 18 : 0), 0) +
-        2 * t.cellHorizontalPadding -
+    measure: (ctx, cell, theme) => cell.data.reduce((acc, data) => ctx.measureText(data.text).width +
+        acc +
+        theme.bubblePadding * 2 +
+        theme.bubbleMargin +
+        (data.img !== undefined ? 18 : 0), 0) +
+        2 * theme.cellHorizontalPadding -
         4,
     draw: a => drawDrilldownCell(a, a.cell.data),
     provideEditor: () => p => {
@@ -20,7 +24,6 @@ export const drilldownCellRenderer = {
     },
     onPaste: () => undefined,
 };
-const itemMargin = 4;
 const drilldownCache = {};
 function getAndCacheDrilldownBorder(bgCell, border, height, rounding) {
     const dpr = Math.ceil(window.devicePixelRatio);
@@ -88,8 +91,8 @@ function drawDrilldownCell(args, data) {
     const h = Math.min(rect.height, Math.max(16, Math.ceil(emHeight * theme.lineHeight) * 2));
     const y = Math.floor(rect.y + (rect.height - h) / 2);
     const bubbleHeight = h - 10;
-    const bubblePad = 8;
-    const bubbleMargin = itemMargin;
+    const bubblePad = theme.bubblePadding;
+    const bubbleMargin = theme.bubbleMargin;
     let renderX = x + theme.cellHorizontalPadding;
     const rounding = theme.roundingRadius ?? 6;
     const tileMap = getAndCacheDrilldownBorder(theme.bgCell, theme.drilldownBorder, h, rounding);

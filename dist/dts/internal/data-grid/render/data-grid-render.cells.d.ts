@@ -1,4 +1,3 @@
-/// <reference types="react" resolution-mode="require"/>
 import { type GridSelection, type InnerGridCell, type Rectangle, CompactSelection, GridColumnIcon, type Item, type CellList, type DrawCellCallback } from "../data-grid-types.js";
 import { CellSet } from "../cell-set.js";
 import type { HoverValues } from "../animation-manager.js";

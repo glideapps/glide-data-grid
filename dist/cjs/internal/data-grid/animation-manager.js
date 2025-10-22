@@ -1,17 +1,11 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AnimationManager = void 0;
-const clamp_js_1 = __importDefault(require("lodash/clamp.js"));
-const data_grid_lib_js_1 = require("./render/data-grid-lib.js");
+import clamp from "lodash/clamp.js";
+import { itemsAreEqual } from "./render/data-grid-lib.js";
 const hoverTime = 80;
 function easeOutCubic(x) {
     const x1 = x - 1;
     return x1 * x1 * x1 + 1;
 }
-class AnimationManager {
+export class AnimationManager {
     callback;
     constructor(callback) {
         this.callback = callback;
@@ -20,7 +14,7 @@ class AnimationManager {
     leavingItems = [];
     lastAnimationTime;
     addToLeavingItems = (item) => {
-        const isAlreadyLeaving = this.leavingItems.some(i => (0, data_grid_lib_js_1.itemsAreEqual)(i.item, item.item));
+        const isAlreadyLeaving = this.leavingItems.some(i => itemsAreEqual(i.item, item.item));
         if (isAlreadyLeaving) {
             return;
         }
@@ -30,7 +24,7 @@ class AnimationManager {
      * @returns the hover amount of the item, if it was leaving (0 if not).
      */
     removeFromLeavingItems = (item) => {
-        const leavingItem = this.leavingItems.find(e => (0, data_grid_lib_js_1.itemsAreEqual)(e.item, item));
+        const leavingItem = this.leavingItems.find(e => itemsAreEqual(e.item, item));
         this.leavingItems = this.leavingItems.filter(i => i !== leavingItem);
         return leavingItem?.hoverAmount ?? 0;
     };
@@ -59,10 +53,10 @@ class AnimationManager {
             const step = timestamp - this.lastAnimationTime;
             const delta = step / hoverTime;
             for (const item of this.leavingItems) {
-                item.hoverAmount = (0, clamp_js_1.default)(item.hoverAmount - delta, 0, 1);
+                item.hoverAmount = clamp(item.hoverAmount - delta, 0, 1);
             }
             if (this.currentHoveredItem !== undefined) {
-                this.currentHoveredItem.hoverAmount = (0, clamp_js_1.default)(this.currentHoveredItem.hoverAmount + delta, 0, 1);
+                this.currentHoveredItem.hoverAmount = clamp(this.currentHoveredItem.hoverAmount + delta, 0, 1);
             }
             const animating = this.getAnimatingItems();
             this.callback(animating);
@@ -77,7 +71,7 @@ class AnimationManager {
         }
     };
     setHovered = (item) => {
-        if ((0, data_grid_lib_js_1.itemsAreEqual)(this.currentHoveredItem?.item, item)) {
+        if (itemsAreEqual(this.currentHoveredItem?.item, item)) {
             return;
         }
         if (this.currentHoveredItem !== undefined) {
@@ -98,5 +92,4 @@ class AnimationManager {
         }
     };
 }
-exports.AnimationManager = AnimationManager;
 //# sourceMappingURL=animation-manager.js.map

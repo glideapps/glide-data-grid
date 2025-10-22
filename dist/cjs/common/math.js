@@ -1,9 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.splitRectIntoRegions = exports.hugRectToTarget = exports.rectContains = exports.combineRects = exports.pointInRect = exports.intersectRect = exports.getClosestRect = void 0;
 /* eslint-disable unicorn/prefer-ternary */
-const data_grid_lib_js_1 = require("../internal/data-grid/render/data-grid-lib.js");
-function getClosestRect(rect, px, py, allowedDirections) {
+import { itemIsInRect } from "../internal/data-grid/render/data-grid-lib.js";
+export function getClosestRect(rect, px, py, allowedDirections) {
     if (allowedDirections === "any")
         return combineRects(rect, { x: px, y: py, width: 1, height: 1 });
     if (allowedDirections === "vertical")
@@ -11,7 +8,7 @@ function getClosestRect(rect, px, py, allowedDirections) {
     if (allowedDirections === "horizontal")
         py = rect.y;
     // Check if the point is inside the rectangle
-    if ((0, data_grid_lib_js_1.itemIsInRect)([px, py], rect)) {
+    if (itemIsInRect([px, py], rect)) {
         return undefined;
     }
     // Calculate distances to the closest edges
@@ -35,34 +32,29 @@ function getClosestRect(rect, px, py, allowedDirections) {
         return { x: px, y: rect.y, width: rect.x - px, height: rect.height };
     }
 }
-exports.getClosestRect = getClosestRect;
-function intersectRect(x1, y1, w1, h1, x2, y2, w2, h2) {
+export function intersectRect(x1, y1, w1, h1, x2, y2, w2, h2) {
     return x1 <= x2 + w2 && x2 <= x1 + w1 && y1 <= y2 + h2 && y2 <= y1 + h1;
 }
-exports.intersectRect = intersectRect;
-function pointInRect(rect, x, y) {
+export function pointInRect(rect, x, y) {
     return x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
 }
-exports.pointInRect = pointInRect;
-function combineRects(a, b) {
+export function combineRects(a, b) {
     const x = Math.min(a.x, b.x);
     const y = Math.min(a.y, b.y);
     const width = Math.max(a.x + a.width, b.x + b.width) - x;
     const height = Math.max(a.y + a.height, b.y + b.height) - y;
     return { x, y, width, height };
 }
-exports.combineRects = combineRects;
-function rectContains(a, b) {
+export function rectContains(a, b) {
     return a.x <= b.x && a.y <= b.y && a.x + a.width >= b.x + b.width && a.y + a.height >= b.y + b.height;
 }
-exports.rectContains = rectContains;
 /**
  * This function is absolutely critical for the performance of the fill handle and highlight regions. If you don't
  * hug rectanges when they are dashed and they are huge you will get giant GPU stalls. The reason for the mod is
  * if you don't respect the dash stroke size you will get weird artificts as the rectangle changes sizes (the dashes
  * won't line up from one frame to the next)
  */
-function hugRectToTarget(rect, width, height, mod) {
+export function hugRectToTarget(rect, width, height, mod) {
     // Combine checks for early return
     if (rect.x > width ||
         rect.y > height ||
@@ -91,8 +83,7 @@ function hugRectToTarget(rect, width, height, mod) {
     const bottom = bottomOverflow > 0 ? rect.y + rect.height - Math.floor(bottomOverflow / mod) * mod : rect.y + rect.height;
     return { x: left, y: top, width: right - left, height: bottom - top };
 }
-exports.hugRectToTarget = hugRectToTarget;
-function splitRectIntoRegions(rect, splitIndicies, width, height, splitLocations) {
+export function splitRectIntoRegions(rect, splitIndicies, width, height, splitLocations) {
     const [lSplit, tSplit, rSplit, bSplit] = splitIndicies;
     const [lClip, tClip, rClip, bClip] = splitLocations;
     const { x: inX, y: inY, width: inW, height: inH } = rect;
@@ -303,5 +294,4 @@ function splitRectIntoRegions(rect, splitIndicies, width, height, splitLocations
     }
     return result;
 }
-exports.splitRectIntoRegions = splitRectIntoRegions;
 //# sourceMappingURL=math.js.map

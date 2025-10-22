@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { FullTheme } from "../../common/styles.js";
-import { type Rectangle, type GridSelection, type InnerGridCell, CompactSelection, type Item, type DrawHeaderCallback, type InnerGridColumn, type DrawCellCallback } from "./data-grid-types.js";
+import { type Rectangle, type GridSelection, type InnerGridCell, CompactSelection, type Item, type DrawHeaderCallback, type InnerGridColumn, type DrawCellCallback, type FillHandle } from "./data-grid-types.js";
 import { type SpriteMap } from "./data-grid-sprites.js";
 import type { CellRenderer } from "../../cells/cell-types.js";
 import type { ImageWindowLoader } from "./image-window-loader-interface.js";
@@ -79,7 +79,7 @@ export interface DataGridProps {
      * @defaultValue false
      * @group Editing
      */
-    readonly fillHandle: boolean | undefined;
+    readonly fillHandle: FillHandle | undefined;
     readonly disabledRows: CompactSelection | undefined;
     /**
      * Allows passing a custom image window loader.
@@ -172,6 +172,11 @@ export interface DataGridProps {
         readonly scrollbarWidthOverride?: number;
         readonly hyperWrapping?: boolean;
         readonly renderStrategy?: "single-buffer" | "double-buffer" | "direct";
+        /**
+         * Allows providing a custom event target for event listeners.
+         * If not provided, the grid will use the window as the event target.
+         */
+        readonly eventTarget?: HTMLElement | Window | Document;
     } | undefined;
     /**
      * Additional header icons for use by `GridColumn`.
@@ -221,6 +226,7 @@ export interface DataGridRef {
     focus: () => void;
     getBounds: (col?: number, row?: number) => Rectangle | undefined;
     damage: (cells: DamageUpdateList) => void;
+    getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => GridMouseEventArgs | undefined;
 }
 declare const _default: React.MemoExoticComponent<React.ForwardRefExoticComponent<DataGridProps & React.RefAttributes<DataGridRef>>>;
 export default _default;

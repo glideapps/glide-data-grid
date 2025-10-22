@@ -1,12 +1,6 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.UriOverlayEditorStyle = void 0;
-const react_1 = require("@linaria/react");
-exports.UriOverlayEditorStyle = /*#__PURE__*/react_1.styled('div')({
-  name: "uri-overlay-editor-style0",
+import { styled } from "@linaria/react";
+export const UriOverlayEditorStyle = /*#__PURE__*/styled('div')({
+  name: "UriOverlayEditorStyle",
   class: "gdg-u1rrojo",
   propsAsIs: false
 });

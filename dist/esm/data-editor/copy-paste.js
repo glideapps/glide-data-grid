@@ -1,12 +1,14 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import { assertNever } from "../common/support.js";
-import { GridCellKind, BooleanEmpty, BooleanIndeterminate, } from "../internal/data-grid/data-grid-types.js";
+import { BooleanEmpty, BooleanIndeterminate, GridCellKind, } from "../internal/data-grid/data-grid-types.js";
 function convertCellToBuffer(cell) {
     if (cell.copyData !== undefined) {
         return {
             formatted: cell.copyData,
             rawValue: cell.copyData,
             format: "string",
+            // Do not escape the copy value if it was explicitly specified via copyData:
+            doNotEscape: true,
         };
     }
     switch (cell.kind) {
@@ -115,7 +117,7 @@ function createTextBuffer(copyBuffer) {
                 line.push(cell.formatted.map(x => escapeIfNeeded(x, true)).join(","));
             }
             else {
-                line.push(escapeIfNeeded(cell.formatted, false));
+                line.push(cell.doNotEscape === true ? cell.formatted : escapeIfNeeded(cell.formatted, false));
             }
         }
         lines.push(line.join("\t"));

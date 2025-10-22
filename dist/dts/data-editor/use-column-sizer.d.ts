@@ -8,3 +8,4 @@ export declare function useColumnSizer(columns: readonly GridColumn[], rows: num
     readonly sizedColumns: readonly InnerGridColumn[];
     readonly nonGrowWidth: number;
 };
+//# sourceMappingURL=use-column-sizer.d.ts.map

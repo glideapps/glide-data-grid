@@ -1,13 +1,7 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.SearchWrapper = void 0;
-const react_1 = require("@linaria/react");
-exports.SearchWrapper = /*#__PURE__*/react_1.styled('div')({
-  name: "data-grid-search-style0",
-  class: "gdg-deveqep",
+import { styled } from "@linaria/react";
+export const SearchWrapper = /*#__PURE__*/styled('div')({
+  name: "SearchWrapper",
+  class: "gdg-seveqep",
   propsAsIs: false
 });
 

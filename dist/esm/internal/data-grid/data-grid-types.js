@@ -1,5 +1,5 @@
-import { assertNever, proveType } from "../../common/support.js";
 import has from "lodash/has.js";
+import { assertNever, proveType } from "../../common/support.js";
 /** @category Types */
 export const BooleanEmpty = null;
 /** @category Types */
@@ -104,15 +104,17 @@ export function isInnerOnlyCell(cell) {
 export function isReadWriteCell(cell) {
     if (!isEditableGridCell(cell) || cell.kind === GridCellKind.Image)
         return false;
-    if (cell.kind === GridCellKind.Text ||
-        cell.kind === GridCellKind.Number ||
-        cell.kind === GridCellKind.Markdown ||
-        cell.kind === GridCellKind.Uri ||
-        cell.kind === GridCellKind.Custom ||
-        cell.kind === GridCellKind.Boolean) {
-        return cell.readonly !== true;
+    switch (cell.kind) {
+        case GridCellKind.Text:
+        case GridCellKind.Number:
+        case GridCellKind.Markdown:
+        case GridCellKind.Uri:
+        case GridCellKind.Custom:
+        case GridCellKind.Boolean:
+            return cell.readonly !== true;
+        default:
+            assertNever(cell, "A cell was passed with an invalid kind");
     }
-    assertNever(cell, "A cell was passed with an invalid kind");
 }
 export function isRectangleEqual(a, b) {
     if (a === b)
@@ -136,6 +138,16 @@ export var InnerGridCellKind;
     InnerGridCellKind["NewRow"] = "new-row";
     InnerGridCellKind["Marker"] = "marker";
 })(InnerGridCellKind || (InnerGridCellKind = {}));
+/**
+ * Default configuration used when `fillHandle` is simply `true`.
+ */
+export const DEFAULT_FILL_HANDLE = {
+    shape: "square",
+    size: 4,
+    offsetX: -2,
+    offsetY: -2,
+    outline: 0,
+};
 function mergeRanges(input) {
     if (input.length === 0) {
         return [];
@@ -164,11 +176,21 @@ export class CompactSelection {
     constructor(items) {
         this.items = items;
     }
+    static create = (items) => {
+        return new CompactSelection(mergeRanges(items));
+    };
     static empty = () => {
         return emptyCompactSelection ?? (emptyCompactSelection = new CompactSelection([]));
     };
     static fromSingleSelection = (selection) => {
         return CompactSelection.empty().add(selection);
+    };
+    static fromArray = (items) => {
+        if (items.length === 0)
+            return CompactSelection.empty();
+        const slices = items.map(s => [s, s + 1]);
+        const newItems = mergeRanges(slices);
+        return new CompactSelection(newItems);
     };
     offset(amount) {
         if (amount === 0)

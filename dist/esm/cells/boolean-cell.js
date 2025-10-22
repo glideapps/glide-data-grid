@@ -2,11 +2,10 @@ import { getSquareWidth, getSquareXPosFromAlign, getSquareBB, pointIsWithinBB } 
 import { toggleBoolean } from "../data-editor/data-editor-fns.js";
 import { GridCellKind, booleanCellIsEditable, BooleanEmpty, BooleanIndeterminate, } from "../internal/data-grid/data-grid-types.js";
 import { drawCheckbox } from "../internal/data-grid/render/draw-checkbox.js";
-const defaultCellMaxSize = 20;
 function isOverEditableRegion(e) {
     const { cell, posX: pointerX, posY: pointerY, bounds, theme } = e;
     const { width, height, x: cellX, y: cellY } = bounds;
-    const maxWidth = cell.maxSize ?? defaultCellMaxSize;
+    const maxWidth = cell.maxSize ?? theme.checkboxMaxSize;
     const cellCenterY = Math.floor(bounds.y + height / 2);
     const checkBoxWidth = getSquareWidth(maxWidth, height, theme.cellVerticalPadding);
     const posX = getSquareXPosFromAlign(cell.contentAlign ?? "center", cellX, width, theme.cellHorizontalPadding, checkBoxWidth);
@@ -21,7 +20,7 @@ export const booleanCellRenderer = {
     useLabel: false,
     needsHoverPosition: true,
     measure: () => 50,
-    draw: a => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell), a.cell.maxSize ?? defaultCellMaxSize, a.cell.hoverEffectIntensity ?? 0.35),
+    draw: a => drawBoolean(a, a.cell.data, booleanCellIsEditable(a.cell), a.cell.maxSize ?? a.theme.checkboxMaxSize, a.cell.hoverEffectIntensity ?? 0.35),
     onDelete: c => ({
         ...c,
         data: false,

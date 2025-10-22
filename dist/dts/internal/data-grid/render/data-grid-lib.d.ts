@@ -37,7 +37,7 @@ export declare function getMiddleCenterBias(ctx: CanvasRenderingContext2D, font:
 export declare function drawLastUpdateUnderlay(args: BaseDrawArgs, lastUpdate: number | undefined, frameTime: number, lastPrep: PrepResult | undefined, isLastCol: boolean, isLastRow: boolean): boolean;
 export declare function prepTextCell(args: BaseDrawArgs, lastPrep: PrepResult | undefined, overrideColor?: string): Partial<PrepResult>;
 /** @category Drawing */
-export declare function drawTextCellExternal(args: BaseDrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"]): void;
+export declare function drawTextCellExternal(args: BaseDrawArgs, data: string, contentAlign?: BaseGridCell["contentAlign"], allowWrapping?: boolean, hyperWrapping?: boolean): void;
 export declare function getEmHeight(ctx: CanvasRenderingContext2D, fontStyle: string): number;
 /** @category Drawing */
 export declare function drawTextCell(args: Pick<BaseDrawArgs, "rect" | "ctx" | "theme">, data: string, contentAlign?: BaseGridCell["contentAlign"], allowWrapping?: boolean, hyperWrapping?: boolean): void;

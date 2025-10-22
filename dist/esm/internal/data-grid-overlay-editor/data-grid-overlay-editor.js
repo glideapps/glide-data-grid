@@ -6,7 +6,7 @@ import { isEditableGridCell, isInnerOnlyCell, isObjectEditorCallbackResult, } fr
 import { DataGridOverlayEditorStyle } from "./data-grid-overlay-editor-style.js";
 import { useStayOnScreen } from "./use-stay-on-screen.js";
 const DataGridOverlayEditor = p => {
-    const { target, content, onFinishEditing: onFinishEditingIn, forceEditMode, initialValue, imageEditorOverride, markdownDivCreateNode, highlight, className, theme, id, cell, bloom, validateCell, getCellRenderer, provideEditor, isOutsideClick, } = p;
+    const { target, content, onFinishEditing: onFinishEditingIn, forceEditMode, initialValue, imageEditorOverride, markdownDivCreateNode, highlight, className, theme, id, cell, bloom, portalElementRef, validateCell, getCellRenderer, provideEditor, isOutsideClick, customEventTarget, activation, } = p;
     const [tempValue, setTempValueRaw] = React.useState(forceEditMode ? content : undefined);
     const lastValueRef = React.useRef(tempValue ?? content);
     lastValueRef.current = tempValue ?? content;
@@ -51,7 +51,10 @@ const DataGridOverlayEditor = p => {
             event.preventDefault();
             customMotion.current = [0, 0];
         }
-        else if (event.key === "Enter" && !event.shiftKey) {
+        else if (event.key === "Enter" &&
+            // The shift key is reserved for multi-line editing
+            // to allow inserting new lines without closing the editor.
+            !event.shiftKey) {
             event.stopPropagation();
             event.preventDefault();
             customMotion.current = [0, 1];
@@ -74,11 +77,12 @@ const DataGridOverlayEditor = p => {
     const [editorProvider, useLabel] = React.useMemo(() => {
         if (isInnerOnlyCell(content))
             return [];
-        const external = provideEditor?.(content);
+        const cellWithLocation = { ...content, location: cell, activation };
+        const external = provideEditor?.(cellWithLocation);
         if (external !== undefined)
             return [external, false];
-        return [getCellRenderer(content)?.provideEditor?.(content), false];
-    }, [content, getCellRenderer, provideEditor]);
+        return [getCellRenderer(content)?.provideEditor?.(cellWithLocation), false];
+    }, [cell, content, getCellRenderer, provideEditor, activation]);
     const { ref, style: stayOnScreenStyle } = useStayOnScreen();
     let pad = true;
     let editor;
@@ -92,14 +96,14 @@ const DataGridOverlayEditor = p => {
             styleOverride = editorProvider.styleOverride;
         }
         const CustomEditor = isObjectEditor ? editorProvider.editor : editorProvider;
-        editor = (React.createElement(CustomEditor, { isHighlighted: highlight, onChange: setTempValue, value: targetValue, initialValue: initialValue, onFinishedEditing: onEditorFinished, validatedSelection: isEditableGridCell(targetValue) ? targetValue.selectionRange : undefined, forceEditMode: forceEditMode, target: target, imageEditorOverride: imageEditorOverride, markdownDivCreateNode: markdownDivCreateNode, isValid: isValid, theme: theme }));
+        editor = (React.createElement(CustomEditor, { portalElementRef: portalElementRef, isHighlighted: highlight, activation: activation, onChange: setTempValue, value: targetValue, initialValue: initialValue, onFinishedEditing: onEditorFinished, validatedSelection: isEditableGridCell(targetValue) ? targetValue.selectionRange : undefined, forceEditMode: forceEditMode, target: target, imageEditorOverride: imageEditorOverride, markdownDivCreateNode: markdownDivCreateNode, isValid: isValid, theme: theme }));
     }
     styleOverride = { ...styleOverride, ...stayOnScreenStyle };
     // Consider imperatively creating and adding the element to the dom?
-    const portalElement = document.getElementById("portal");
+    const portalElement = portalElementRef?.current ?? document.getElementById("portal");
     if (portalElement === null) {
         // eslint-disable-next-line no-console
-        console.error('Cannot open Data Grid overlay editor, because portal not found.  Please add `<div id="portal" />` as the last child of your `<body>`.');
+        console.error('Cannot open Data Grid overlay editor, because portal not found. Please, either provide a portalElementRef or add `<div id="portal" />` as the last child of your `<body>`.');
         return null;
     }
     let classWrap = style ? "gdg-style" : "gdg-unstyle";
@@ -112,7 +116,7 @@ const DataGridOverlayEditor = p => {
     const bloomX = bloom?.[0] ?? 1;
     const bloomY = bloom?.[1] ?? 1;
     return createPortal(React.createElement(ThemeContext.Provider, { value: theme },
-        React.createElement(ClickOutsideContainer, { style: makeCSSStyle(theme), className: className, onClickOutside: onClickOutside, isOutsideClick: isOutsideClick },
+        React.createElement(ClickOutsideContainer, { style: makeCSSStyle(theme), className: className, onClickOutside: onClickOutside, isOutsideClick: isOutsideClick, customEventTarget: customEventTarget },
             React.createElement(DataGridOverlayEditorStyle, { ref: ref, id: id, className: classWrap, style: styleOverride, as: useLabel === true ? "label" : undefined, targetX: target.x - bloomX, targetY: target.y - bloomY, targetWidth: target.width + bloomX * 2, targetHeight: target.height + bloomY * 2 },
                 React.createElement("div", { className: "gdg-clip-region", onKeyDown: onKeyDown }, editor)))), portalElement);
 };

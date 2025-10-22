@@ -1,32 +1,6 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.useColumnSizer = exports.measureColumn = void 0;
-const React = __importStar(require("react"));
-const data_grid_lib_js_1 = require("../internal/data-grid/render/data-grid-lib.js");
-const data_grid_types_js_1 = require("../internal/data-grid/data-grid-types.js");
+import * as React from "react";
+import { measureTextCached } from "../internal/data-grid/render/data-grid-lib.js";
+import { isSizedGridColumn, resolveCellsThunk, } from "../internal/data-grid/data-grid-types.js";
 const defaultSize = 150;
 // 15x more than the default size (of 10)
 const DEFAULT_COMPUTE_ROWS = 150;
@@ -34,14 +8,14 @@ function measureCell(ctx, cell, theme, getCellRenderer) {
     const r = getCellRenderer(cell);
     return r?.measure?.(ctx, cell, theme) ?? defaultSize;
 }
-function measureColumn(ctx, theme, c, colIndex, selectedData, minColumnWidth, maxColumnWidth, getCellRenderer) {
+export function measureColumn(ctx, theme, c, colIndex, selectedData, minColumnWidth, maxColumnWidth, getCellRenderer) {
     let max = 0;
     // Check rows width
     for (const row of selectedData) {
         max = Math.max(max, measureCell(ctx, row[colIndex], theme, getCellRenderer));
     }
     // Check title width - using enhanced measureTextCached for cross-browser accuracy
-    const titleWidth = (0, data_grid_lib_js_1.measureTextCached)(c?.title ?? "#", ctx, theme.headerFontFull).width +
+    const titleWidth = measureTextCached(c?.title ?? "#", ctx, theme.headerFontFull).width +
         theme.cellHorizontalPadding * 2 +
         (c?.icon === undefined ? 0 : 28);
     max = Math.max(max, titleWidth);
@@ -50,9 +24,8 @@ function measureColumn(ctx, theme, c, colIndex, selectedData, minColumnWidth, ma
         width: Math.max(Math.ceil(minColumnWidth), Math.min(Math.floor(maxColumnWidth), Math.ceil(max))),
     };
 }
-exports.measureColumn = measureColumn;
 /** @category Hooks */
-function useColumnSizer(columns, rows, getCellsForSelection, clientWidth, minColumnWidth, maxColumnWidth, theme, getCellRenderer, abortController) {
+export function useColumnSizer(columns, rows, getCellsForSelection, clientWidth, minColumnWidth, maxColumnWidth, theme, getCellRenderer, abortController) {
     const rowsRef = React.useRef(rows);
     const getCellsForSelectionRef = React.useRef(getCellsForSelection);
     const themeRef = React.useRef(theme);
@@ -80,7 +53,7 @@ function useColumnSizer(columns, rows, getCellsForSelection, clientWidth, minCol
     const [selectedData, setSelectionData] = React.useState();
     React.useLayoutEffect(() => {
         const getCells = getCellsForSelectionRef.current;
-        if (getCells === undefined || columns.every(data_grid_types_js_1.isSizedGridColumn))
+        if (getCells === undefined || columns.every(isSizedGridColumn))
             return;
         let computeRows = Math.max(1, DEFAULT_COMPUTE_ROWS - Math.floor(columns.length / 10));
         let tailRows = 0;
@@ -109,7 +82,7 @@ function useColumnSizer(columns, rows, getCellsForSelection, clientWidth, minCol
                 toSet = getResult;
             }
             else {
-                toSet = await (0, data_grid_types_js_1.resolveCellsThunk)(getResult);
+                toSet = await resolveCellsThunk(getResult);
             }
             if (tailGetResult !== undefined) {
                 // eslint-disable-next-line unicorn/prefer-ternary
@@ -117,7 +90,7 @@ function useColumnSizer(columns, rows, getCellsForSelection, clientWidth, minCol
                     toSet = [...toSet, ...tailGetResult];
                 }
                 else {
-                    toSet = [...toSet, ...(await (0, data_grid_types_js_1.resolveCellsThunk)(tailGetResult))];
+                    toSet = [...toSet, ...(await resolveCellsThunk(tailGetResult))];
                 }
             }
             lastColumns.current = columns;
@@ -127,12 +100,12 @@ function useColumnSizer(columns, rows, getCellsForSelection, clientWidth, minCol
     }, [abortController.signal, columns]);
     return React.useMemo(() => {
         const getRaw = () => {
-            if (columns.every(data_grid_types_js_1.isSizedGridColumn)) {
+            if (columns.every(isSizedGridColumn)) {
                 return columns;
             }
             if (ctx === null) {
                 return columns.map(c => {
-                    if ((0, data_grid_types_js_1.isSizedGridColumn)(c))
+                    if (isSizedGridColumn(c))
                         return c;
                     return {
                         ...c,
@@ -142,7 +115,7 @@ function useColumnSizer(columns, rows, getCellsForSelection, clientWidth, minCol
             }
             ctx.font = themeRef.current.baseFontFull;
             return columns.map((c, colIndex) => {
-                if ((0, data_grid_types_js_1.isSizedGridColumn)(c))
+                if (isSizedGridColumn(c))
                     return c;
                 if (memoMap.current[c.id] !== undefined) {
                     return {
@@ -195,5 +168,4 @@ function useColumnSizer(columns, rows, getCellsForSelection, clientWidth, minCol
         };
     }, [clientWidth, columns, ctx, selectedData, theme, minColumnWidth, maxColumnWidth, getCellRenderer]);
 }
-exports.useColumnSizer = useColumnSizer;
 //# sourceMappingURL=use-column-sizer.js.map

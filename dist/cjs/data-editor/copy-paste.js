@@ -1,88 +1,87 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.decodeHTML = exports.getCopyBufferContents = void 0;
 /* eslint-disable sonarjs/no-duplicate-string */
-const support_js_1 = require("../common/support.js");
-const data_grid_types_js_1 = require("../internal/data-grid/data-grid-types.js");
+import { assertNever } from "../common/support.js";
+import { BooleanIndeterminate, GridCellKind, } from "../internal/data-grid/data-grid-types.js";
 function convertCellToBuffer(cell) {
     if (cell.copyData !== undefined) {
         return {
             formatted: cell.copyData,
             rawValue: cell.copyData,
             format: "string",
+            // Do not escape the copy value if it was explicitly specified via copyData:
+            doNotEscape: true,
         };
     }
     switch (cell.kind) {
-        case data_grid_types_js_1.GridCellKind.Boolean:
+        case GridCellKind.Boolean:
             return {
                 formatted: cell.data === true
                     ? "TRUE"
                     : cell.data === false
                         ? "FALSE"
-                        : cell.data === data_grid_types_js_1.BooleanIndeterminate
+                        : cell.data === BooleanIndeterminate
                             ? "INDETERMINATE"
                             : "",
                 rawValue: cell.data,
                 format: "boolean",
             };
-        case data_grid_types_js_1.GridCellKind.Custom:
+        case GridCellKind.Custom:
             return {
                 formatted: cell.copyData,
                 rawValue: cell.copyData,
                 format: "string",
             };
-        case data_grid_types_js_1.GridCellKind.Image:
-        case data_grid_types_js_1.GridCellKind.Bubble:
+        case GridCellKind.Image:
+        case GridCellKind.Bubble:
             return {
                 formatted: cell.data,
                 rawValue: cell.data,
                 format: "string-array",
             };
-        case data_grid_types_js_1.GridCellKind.Drilldown:
+        case GridCellKind.Drilldown:
             return {
                 formatted: cell.data.map(x => x.text),
                 rawValue: cell.data.map(x => x.text),
                 format: "string-array",
             };
-        case data_grid_types_js_1.GridCellKind.Text:
+        case GridCellKind.Text:
             return {
                 formatted: cell.displayData ?? cell.data,
                 rawValue: cell.data,
                 format: "string",
             };
-        case data_grid_types_js_1.GridCellKind.Uri:
+        case GridCellKind.Uri:
             return {
                 formatted: cell.displayData ?? cell.data,
                 rawValue: cell.data,
                 format: "url",
             };
-        case data_grid_types_js_1.GridCellKind.Markdown:
-        case data_grid_types_js_1.GridCellKind.RowID:
+        case GridCellKind.Markdown:
+        case GridCellKind.RowID:
             return {
                 formatted: cell.data,
                 rawValue: cell.data,
                 format: "string",
             };
-        case data_grid_types_js_1.GridCellKind.Number:
+        case GridCellKind.Number:
             return {
                 formatted: cell.displayData,
                 rawValue: cell.data,
                 format: "number",
             };
-        case data_grid_types_js_1.GridCellKind.Loading:
+        case GridCellKind.Loading:
             return {
                 formatted: "#LOADING",
                 rawValue: "",
                 format: "string",
             };
-        case data_grid_types_js_1.GridCellKind.Protected:
+        case GridCellKind.Protected:
             return {
                 formatted: "************",
                 rawValue: "",
                 format: "string",
             };
         default:
-            (0, support_js_1.assertNever)(cell);
+            assertNever(cell);
     }
 }
 function createBufferFromGridCells(cells, columnIndexes) {
@@ -118,7 +117,7 @@ function createTextBuffer(copyBuffer) {
                 line.push(cell.formatted.map(x => escapeIfNeeded(x, true)).join(","));
             }
             else {
-                line.push(escapeIfNeeded(cell.formatted, false));
+                line.push(cell.doNotEscape === true ? cell.formatted : escapeIfNeeded(cell.formatted, false));
             }
         }
         lines.push(line.join("\t"));
@@ -178,7 +177,7 @@ function createHtmlBuffer(copyBuffer) {
 // - A string directly and the td has a `gdg-raw-value` attribute with the raw value
 // - An anchor tag with a href and the text is the formatted value
 // - An ordered list with each item containing a `gdg-raw-value` attribute with the raw value
-function getCopyBufferContents(cells, columnIndexes) {
+export function getCopyBufferContents(cells, columnIndexes) {
     const copyBuffer = createBufferFromGridCells(cells, columnIndexes);
     const textPlain = createTextBuffer(copyBuffer);
     const textHtml = createHtmlBuffer(copyBuffer);
@@ -187,8 +186,7 @@ function getCopyBufferContents(cells, columnIndexes) {
         textHtml,
     };
 }
-exports.getCopyBufferContents = getCopyBufferContents;
-function decodeHTML(html) {
+export function decodeHTML(html) {
     const fragment = document.createElement("html");
     // we dont want to retain the pasted non-breaking spaces
     fragment.innerHTML = html.replace(/&nbsp;/g, " ");
@@ -268,5 +266,4 @@ function decodeHTML(html) {
     }
     return result;
 }
-exports.decodeHTML = decodeHTML;
 //# sourceMappingURL=copy-paste.js.map

@@ -3,11 +3,12 @@ export { ImageOverlayEditor } from "./internal/data-grid-overlay-editor/private/
 export { default as MarkdownDiv } from "./internal/markdown-div/markdown-div.js";
 export { GrowingEntry as TextCellEntry } from "./internal/growing-entry/growing-entry.js";
 export { parseToRgba, withAlpha, blend, interpolateColors, getLuminance } from "./internal/data-grid/color-parser.js";
-export { measureTextCached, getMiddleCenterBias, roundedPoly, roundedRect, drawTextCellExternal as drawTextCell, } from "./internal/data-grid/render/data-grid-lib.js";
+export { measureTextCached, getMiddleCenterBias, getEmHeight, roundedPoly, roundedRect, drawTextCellExternal as drawTextCell, } from "./internal/data-grid/render/data-grid-lib.js";
 export { CellSet } from "./internal/data-grid/cell-set.js";
 export { getDataEditorTheme as getDefaultTheme, useTheme } from "./common/styles.js";
 export { useColumnSizer } from "./data-editor/use-column-sizer.js";
 export { DataEditorAll as DataEditor } from "./data-editor-all.js";
+export { emptyGridSelection } from "./data-editor/data-editor.js";
 export { DataEditor as DataEditorCore } from "./data-editor/data-editor.js";
 export { booleanCellRenderer } from "./cells/boolean-cell.js";
 export { imageCellRenderer } from "./cells/image-cell.js";

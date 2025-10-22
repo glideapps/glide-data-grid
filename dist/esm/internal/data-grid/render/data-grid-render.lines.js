@@ -23,12 +23,12 @@ export function drawBlanks(ctx, effectiveColumns, allColumns, width, height, tot
             return;
         ctx.save();
         ctx.beginPath();
-        ctx.rect(x, totalHeaderHeight + 1, 10000, height - totalHeaderHeight - 1);
+        ctx.rect(x, totalHeaderHeight + 1, 10_000, height - totalHeaderHeight - 1);
         ctx.clip();
         walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, skipPoint, (drawY, row, rh, isSticky) => {
             if (!isSticky &&
                 drawRegions.length > 0 &&
-                !drawRegions.some(dr => intersectRect(drawX, drawY, 10000, rh, dr.x, dr.y, dr.width, dr.height))) {
+                !drawRegions.some(dr => intersectRect(drawX, drawY, 10_000, rh, dr.x, dr.y, dr.width, dr.height))) {
                 return;
             }
             const rowSelected = selectedRows.hasIndex(row);
@@ -38,15 +38,15 @@ export function drawBlanks(ctx, effectiveColumns, allColumns, width, height, tot
             const blankTheme = rowTheme === undefined ? theme : mergeAndRealizeTheme(theme, rowTheme);
             if (blankTheme.bgCell !== theme.bgCell) {
                 ctx.fillStyle = blankTheme.bgCell;
-                ctx.fillRect(drawX, drawY, 10000, rh);
+                ctx.fillRect(drawX, drawY, 10_000, rh);
             }
             if (rowDisabled) {
                 ctx.fillStyle = blankTheme.bgHeader;
-                ctx.fillRect(drawX, drawY, 10000, rh);
+                ctx.fillRect(drawX, drawY, 10_000, rh);
             }
             if (rowSelected) {
                 ctx.fillStyle = blankTheme.accentLight;
-                ctx.fillRect(drawX, drawY, 10000, rh);
+                ctx.fillRect(drawX, drawY, 10_000, rh);
             }
         });
         ctx.restore();

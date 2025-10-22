@@ -1,20 +1,15 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const react_1 = __importDefault(require("react"));
-const marked_1 = require("marked");
-const markdown_container_js_1 = require("./private/markdown-container.js");
+import React from "react";
+import { marked } from "marked";
+import { MarkdownContainer } from "./private/markdown-container.js";
 /** @category Renderers */
-class MarkdownDiv extends react_1.default.PureComponent {
+export default class MarkdownDiv extends React.PureComponent {
     targetElement = null;
     renderMarkdownIntoDiv() {
         const { targetElement, props } = this;
         if (targetElement === null)
             return;
         const { contents, createNode } = props;
-        const innerHTML = marked_1.marked(contents);
+        const innerHTML = marked(contents);
         const childRange = document.createRange();
         childRange.selectNodeContents(targetElement);
         childRange.deleteContents();
@@ -40,8 +35,7 @@ class MarkdownDiv extends react_1.default.PureComponent {
         // This only works great after the first render, but not in the first render.
         // Putting the two together makes the full solution.
         this.renderMarkdownIntoDiv();
-        return react_1.default.createElement(markdown_container_js_1.MarkdownContainer, { ref: this.containerRefHook });
+        return React.createElement(MarkdownContainer, { ref: this.containerRefHook });
     }
 }
-exports.default = MarkdownDiv;
 //# sourceMappingURL=markdown-div.js.map

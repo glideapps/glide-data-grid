@@ -1,15 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.drawHeader = exports.computeHeaderLayout = exports.getActionBoundsForGroup = exports.drawGroups = exports.drawGridHeaders = void 0;
-const math_js_1 = require("../../../common/math.js");
-const styles_js_1 = require("../../../common/styles.js");
-const utils_js_1 = require("../../../common/utils.js");
-const color_parser_js_1 = require("../color-parser.js");
-const data_grid_types_js_1 = require("../data-grid-types.js");
-const data_grid_lib_js_1 = require("./data-grid-lib.js");
-const data_grid_render_walk_js_1 = require("./data-grid-render.walk.js");
-const draw_checkbox_js_1 = require("./draw-checkbox.js");
-function drawGridHeaders(ctx, effectiveCols, enableGroups, hovered, width, translateX, headerHeight, groupHeaderHeight, dragAndDropState, isResizing, selection, outerTheme, spriteManager, hoverValues, verticalBorder, getGroupDetails, damage, drawHeaderCallback, touchMode) {
+import { intersectRect, pointInRect } from "../../../common/math.js";
+import { mergeAndRealizeTheme } from "../../../common/styles.js";
+import { direction } from "../../../common/utils.js";
+import { withAlpha } from "../color-parser.js";
+import { GridColumnMenuIcon } from "../data-grid-types.js";
+import { drawMenuDots, getMeasuredTextCache, getMiddleCenterBias, measureTextCached, roundedPoly, } from "./data-grid-lib.js";
+import { walkColumns, walkGroups } from "./data-grid-render.walk.js";
+import { drawCheckbox } from "./draw-checkbox.js";
+export function drawGridHeaders(ctx, effectiveCols, enableGroups, hovered, width, translateX, headerHeight, groupHeaderHeight, dragAndDropState, isResizing, selection, outerTheme, spriteManager, hoverValues, verticalBorder, getGroupDetails, damage, drawHeaderCallback, touchMode) {
     const totalHeaderHeight = headerHeight + groupHeaderHeight;
     if (totalHeaderHeight <= 0)
         return;
@@ -22,7 +19,7 @@ function drawGridHeaders(ctx, effectiveCols, enableGroups, hovered, width, trans
     const font = outerTheme.headerFontFull;
     // Assinging the context font too much can be expensive, it can be worth it to minimze this
     ctx.font = font;
-    (0, data_grid_render_walk_js_1.walkColumns)(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x, _y, clipX) => {
+    walkColumns(effectiveCols, 0, translateX, 0, totalHeaderHeight, (c, x, _y, clipX) => {
         if (damage !== undefined && !damage.has([c.sourceIndex, -1]))
             return;
         const diff = Math.max(0, clipX - x);
@@ -33,16 +30,16 @@ function drawGridHeaders(ctx, effectiveCols, enableGroups, hovered, width, trans
         const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
         const theme = c.themeOverride === undefined && groupTheme === undefined
             ? outerTheme
-            : (0, styles_js_1.mergeAndRealizeTheme)(outerTheme, groupTheme, c.themeOverride);
+            : mergeAndRealizeTheme(outerTheme, groupTheme, c.themeOverride);
         if (theme.bgHeader !== outerTheme.bgHeader) {
             ctx.fillStyle = theme.bgHeader;
             ctx.fill();
         }
         if (theme !== outerTheme) {
-            ctx.font = theme.baseFontFull;
+            ctx.font = theme.headerFontFull;
         }
         const selected = selection.columns.hasIndex(c.sourceIndex);
-        const noHover = dragAndDropState !== undefined || isResizing;
+        const noHover = dragAndDropState !== undefined || isResizing || c.headerRowMarkerDisabled === true;
         const hoveredBoolean = !noHover && hRow === -1 && hCol === c.sourceIndex;
         const hover = noHover
             ? 0
@@ -76,12 +73,11 @@ function drawGridHeaders(ctx, effectiveCols, enableGroups, hovered, width, trans
         drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, hovered, outerTheme, spriteManager, hoverValues, verticalBorder, getGroupDetails, damage);
     }
 }
-exports.drawGridHeaders = drawGridHeaders;
-function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, hovered, theme, spriteManager, _hoverValues, verticalBorder, getGroupDetails, damage) {
+export function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, hovered, theme, spriteManager, _hoverValues, verticalBorder, getGroupDetails, damage) {
     const xPad = theme.cellHorizontalPadding;
     const [hCol, hRow] = hovered?.[0] ?? [];
     let finalX = 0;
-    (0, data_grid_render_walk_js_1.walkGroups)(effectiveCols, width, translateX, groupHeaderHeight, (span, groupName, x, y, w, h) => {
+    walkGroups(effectiveCols, width, translateX, groupHeaderHeight, (span, groupName, x, y, w, h) => {
         if (damage !== undefined &&
             !damage.hasItemInRectangle({
                 x: span[0],
@@ -95,9 +91,11 @@ function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, ho
         ctx.rect(x, y, w, h);
         ctx.clip();
         const group = getGroupDetails(groupName);
-        const groupTheme = group?.overrideTheme === undefined ? theme : (0, styles_js_1.mergeAndRealizeTheme)(theme, group.overrideTheme);
+        const groupTheme = group?.overrideTheme === undefined ? theme : mergeAndRealizeTheme(theme, group.overrideTheme);
         const isHovered = hRow === -2 && hCol !== undefined && hCol >= span[0] && hCol <= span[1];
-        const fillColor = isHovered ? groupTheme.bgHeaderHovered : groupTheme.bgHeader;
+        const fillColor = isHovered
+            ? groupTheme.bgGroupHeaderHovered ?? groupTheme.bgHeaderHovered
+            : groupTheme.bgGroupHeader ?? groupTheme.bgHeader;
         if (fillColor !== theme.bgHeader) {
             ctx.fillStyle = fillColor;
             ctx.fill();
@@ -109,7 +107,7 @@ function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, ho
                 spriteManager.drawSprite(group.icon, "normal", ctx, drawX + xPad, (groupHeaderHeight - 20) / 2, 20, groupTheme);
                 drawX += 26;
             }
-            ctx.fillText(group.name, drawX + xPad, groupHeaderHeight / 2 + (0, data_grid_lib_js_1.getMiddleCenterBias)(ctx, theme.headerFontFull));
+            ctx.fillText(group.name, drawX + xPad, groupHeaderHeight / 2 + getMiddleCenterBias(ctx, theme.headerFontFull));
             if (group.actions !== undefined && isHovered) {
                 const actionBoxes = getActionBoundsForGroup({ x, y, width: w, height: h }, group.actions);
                 ctx.beginPath();
@@ -117,7 +115,7 @@ function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, ho
                 const fadeWidth = x + w - fadeStartX;
                 ctx.rect(fadeStartX, 0, fadeWidth, groupHeaderHeight);
                 const grad = ctx.createLinearGradient(fadeStartX, 0, fadeStartX + fadeWidth, 0);
-                const trans = (0, color_parser_js_1.withAlpha)(fillColor, 0);
+                const trans = withAlpha(fillColor, 0);
                 grad.addColorStop(0, trans);
                 grad.addColorStop(10 / fadeWidth, fillColor);
                 grad.addColorStop(1, fillColor);
@@ -129,7 +127,7 @@ function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, ho
                 for (let i = 0; i < group.actions.length; i++) {
                     const action = group.actions[i];
                     const box = actionBoxes[i];
-                    const actionHovered = (0, math_js_1.pointInRect)(box, mouseX + x, mouseY);
+                    const actionHovered = pointInRect(box, mouseX + x, mouseY);
                     if (actionHovered) {
                         ctx.globalAlpha = 1;
                     }
@@ -161,19 +159,18 @@ function drawGroups(ctx, effectiveCols, width, translateX, groupHeaderHeight, ho
     ctx.lineWidth = 1;
     ctx.stroke();
 }
-exports.drawGroups = drawGroups;
 const menuButtonSize = 30;
 function getHeaderMenuBounds(x, y, width, height, isRtl) {
     if (isRtl)
         return { x, y, width: menuButtonSize, height: Math.min(menuButtonSize, height) };
     return {
-        x: x + width - menuButtonSize,
-        y: Math.max(y, y + height / 2 - menuButtonSize / 2),
+        x: x + width - menuButtonSize, // right align
+        y: Math.max(y, y + height / 2 - menuButtonSize / 2), // center vertically
         width: menuButtonSize,
         height: Math.min(menuButtonSize, height),
     };
 }
-function getActionBoundsForGroup(box, actions) {
+export function getActionBoundsForGroup(box, actions) {
     const result = [];
     let x = box.x + box.width - 26 * actions.length;
     const y = box.y + box.height / 2 - 13;
@@ -190,14 +187,13 @@ function getActionBoundsForGroup(box, actions) {
     }
     return result;
 }
-exports.getActionBoundsForGroup = getActionBoundsForGroup;
 function flipHorizontal(toFlip, mirrorX, isRTL) {
     if (!isRTL || toFlip === undefined)
         return toFlip;
     toFlip.x = mirrorX - (toFlip.x - mirrorX) - toFlip.width;
     return toFlip;
 }
-function computeHeaderLayout(ctx, c, x, y, width, height, theme, isRTL) {
+export function computeHeaderLayout(ctx, c, x, y, width, height, theme, isRTL) {
     const xPad = theme.cellHorizontalPadding;
     const headerIconSize = theme.headerIconSize;
     const menuBounds = getHeaderMenuBounds(x, y, width, height, false);
@@ -227,8 +223,8 @@ function computeHeaderLayout(ctx, c, x, y, width, height, theme, isRTL) {
         }
     }
     const textWidth = ctx === undefined
-        ? (0, data_grid_lib_js_1.getMeasuredTextCache)(c.title, theme.headerFontFull)?.width ?? 0
-        : (0, data_grid_lib_js_1.measureTextCached)(c.title, ctx, theme.headerFontFull).width;
+        ? getMeasuredTextCache(c.title, theme.headerFontFull)?.width ?? 0
+        : measureTextCached(c.title, ctx, theme.headerFontFull).width;
     const textBounds = {
         x: isCenterAligned ? x + (width - textWidth) / 2 : isRightAligned ? x : drawX,
         y,
@@ -261,15 +257,14 @@ function computeHeaderLayout(ctx, c, x, y, width, height, theme, isRTL) {
         indicatorIconBounds: flipHorizontal(indicatorIconBounds, mirrorPoint, isRTL),
     };
 }
-exports.computeHeaderLayout = computeHeaderLayout;
 function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, posX, posY, hoverAmount, spriteManager, touchMode, isRtl, headerLayout) {
     if (c.rowMarker !== undefined && c.headerRowMarkerDisabled !== true) {
         const checked = c.rowMarkerChecked;
         if (checked !== true && c.headerRowMarkerAlwaysVisible !== true) {
             ctx.globalAlpha = hoverAmount;
         }
-        const markerTheme = c.headerRowMarkerTheme !== undefined ? (0, styles_js_1.mergeAndRealizeTheme)(theme, c.headerRowMarkerTheme) : theme;
-        (0, draw_checkbox_js_1.drawCheckbox)(ctx, markerTheme, checked, x, y, width, height, false, undefined, undefined, 18, "center", c.rowMarker);
+        const markerTheme = c.headerRowMarkerTheme !== undefined ? mergeAndRealizeTheme(theme, c.headerRowMarkerTheme) : theme;
+        drawCheckbox(ctx, markerTheme, checked, x, y, width, height, false, undefined, undefined, theme.checkboxMaxSize, "center", c.rowMarker);
         if (checked !== true && c.headerRowMarkerAlwaysVisible !== true) {
             ctx.globalAlpha = 1;
         }
@@ -294,7 +289,7 @@ function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered
         const fadeStartPercent = fadeStart / width;
         const fadeEndPercent = fadeEnd / width;
         const grad = ctx.createLinearGradient(x, 0, x + width, 0);
-        const trans = (0, color_parser_js_1.withAlpha)(fillStyle, 0);
+        const trans = withAlpha(fillStyle, 0);
         grad.addColorStop(isRtl ? 1 : 0, fillStyle);
         grad.addColorStop(fadeStartPercent, fillStyle);
         grad.addColorStop(fadeEndPercent, trans);
@@ -310,12 +305,12 @@ function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered
         const textX = isRightAligned
             ? headerLayout.textBounds.x + headerLayout.textBounds.width
             : headerLayout.textBounds.x;
-        ctx.fillText(c.title, textX, y + height / 2 + (0, data_grid_lib_js_1.getMiddleCenterBias)(ctx, theme.headerFontFull));
+        ctx.fillText(c.title, textX, y + height / 2 + getMiddleCenterBias(ctx, theme.headerFontFull));
     }
     if (c.indicatorIcon !== undefined &&
         headerLayout.indicatorIconBounds !== undefined &&
         (!shouldDrawMenu ||
-            !(0, math_js_1.intersectRect)(headerLayout.menuBounds.x, headerLayout.menuBounds.y, headerLayout.menuBounds.width, headerLayout.menuBounds.height, headerLayout.indicatorIconBounds.x, headerLayout.indicatorIconBounds.y, headerLayout.indicatorIconBounds.width, headerLayout.indicatorIconBounds.height))) {
+            !intersectRect(headerLayout.menuBounds.x, headerLayout.menuBounds.y, headerLayout.menuBounds.width, headerLayout.menuBounds.height, headerLayout.indicatorIconBounds.x, headerLayout.indicatorIconBounds.y, headerLayout.indicatorIconBounds.width, headerLayout.indicatorIconBounds.height))) {
         let variant = selected ? "selected" : "normal";
         if (c.style === "highlight") {
             variant = selected ? "selected" : "special";
@@ -324,16 +319,16 @@ function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered
     }
     if (shouldDrawMenu && headerLayout.menuBounds !== undefined) {
         const menuBounds = headerLayout.menuBounds;
-        const hovered = posX !== undefined && posY !== undefined && (0, math_js_1.pointInRect)(menuBounds, posX + x, posY + y);
+        const hovered = posX !== undefined && posY !== undefined && pointInRect(menuBounds, posX + x, posY + y);
         if (!hovered) {
             ctx.globalAlpha = 0.7;
         }
-        if (c.menuIcon === undefined || c.menuIcon === data_grid_types_js_1.GridColumnMenuIcon.Triangle) {
+        if (c.menuIcon === undefined || c.menuIcon === GridColumnMenuIcon.Triangle) {
             // Draw the default triangle menu icon:
             ctx.beginPath();
             const triangleX = menuBounds.x + menuBounds.width / 2 - 5.5;
             const triangleY = menuBounds.y + menuBounds.height / 2 - 3;
-            (0, data_grid_lib_js_1.roundedPoly)(ctx, [
+            roundedPoly(ctx, [
                 {
                     x: triangleX,
                     y: triangleY,
@@ -350,12 +345,12 @@ function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered
             ctx.fillStyle = fillStyle;
             ctx.fill();
         }
-        else if (c.menuIcon === data_grid_types_js_1.GridColumnMenuIcon.Dots) {
+        else if (c.menuIcon === GridColumnMenuIcon.Dots) {
             // Draw the three dots menu icon:
             ctx.beginPath();
             const dotsX = menuBounds.x + menuBounds.width / 2;
             const dotsY = menuBounds.y + menuBounds.height / 2;
-            (0, data_grid_lib_js_1.drawMenuDots)(ctx, dotsX, dotsY);
+            drawMenuDots(ctx, dotsX, dotsY);
             ctx.fillStyle = fillStyle;
             ctx.fill();
         }
@@ -370,8 +365,8 @@ function drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered
         }
     }
 }
-function drawHeader(ctx, x, y, width, height, c, selected, theme, isHovered, posX, posY, hasSelectedCell, hoverAmount, spriteManager, drawHeaderCallback, touchMode) {
-    const isRtl = (0, utils_js_1.direction)(c.title) === "rtl";
+export function drawHeader(ctx, x, y, width, height, c, selected, theme, isHovered, posX, posY, hasSelectedCell, hoverAmount, spriteManager, drawHeaderCallback, touchMode) {
+    const isRtl = direction(c.title) === "rtl";
     const headerLayout = computeHeaderLayout(ctx, c, x, y, width, height, theme, isRtl);
     if (drawHeaderCallback !== undefined) {
         drawHeaderCallback({
@@ -386,11 +381,12 @@ function drawHeader(ctx, x, y, width, height, c, selected, theme, isHovered, pos
             hasSelectedCell,
             spriteManager,
             menuBounds: headerLayout?.menuBounds ?? { x: 0, y: 0, height: 0, width: 0 },
+            hoverX: posX,
+            hoverY: posY,
         }, () => drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, posX, posY, hoverAmount, spriteManager, touchMode, isRtl, headerLayout));
     }
     else {
         drawHeaderInner(ctx, x, y, width, height, c, selected, theme, isHovered, posX, posY, hoverAmount, spriteManager, touchMode, isRtl, headerLayout);
     }
 }
-exports.drawHeader = drawHeader;
 //# sourceMappingURL=data-grid-render.header.js.map

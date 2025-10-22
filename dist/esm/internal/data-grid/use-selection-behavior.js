@@ -24,15 +24,15 @@ export function useSelectionBehavior(gridSelection, setGridSelection, rangeBehav
                 },
             };
         }
-        const rangeMixable = rangeBehavior === "mixed" && (append || trigger === "drag");
-        const allowColumnCoSelect = columnBehavior === "mixed" && rangeMixable;
-        const allowRowCoSelect = rowBehavior === "mixed" && rangeMixable;
+        const rangeMixable = (rangeBehavior === "mixed" && (append || trigger === "drag")) || rangeBehavior === "additive";
+        const allowColumnCoSelect = (columnBehavior === "mixed" || columnBehavior === "additive") && rangeMixable;
+        const allowRowCoSelect = (rowBehavior === "mixed" || rowBehavior === "additive") && rangeMixable;
         let newVal = {
             current: value === undefined
                 ? undefined
                 : {
                     ...value,
-                    rangeStack: trigger === "drag" ? gridSelection.current?.rangeStack ?? [] : [],
+                    rangeStack: trigger === "drag" ? (gridSelection.current?.rangeStack ?? []) : [],
                 },
             columns: allowColumnCoSelect ? gridSelection.columns : CompactSelection.empty(),
             rows: allowRowCoSelect ? gridSelection.rows : CompactSelection.empty(),
@@ -71,8 +71,8 @@ export function useSelectionBehavior(gridSelection, setGridSelection, rangeBehav
             };
         }
         else {
-            const rangeMixed = allowMixed && rangeBehavior === "mixed";
-            const columnMixed = allowMixed && columnBehavior === "mixed";
+            const rangeMixed = (allowMixed && rangeBehavior === "mixed") || rangeBehavior === "additive";
+            const columnMixed = (allowMixed && columnBehavior === "mixed") || columnBehavior === "additive";
             const current = !rangeMixed ? undefined : gridSelection.current;
             newVal = {
                 current,
@@ -96,8 +96,8 @@ export function useSelectionBehavior(gridSelection, setGridSelection, rangeBehav
             };
         }
         else {
-            const rangeMixed = allowMixed && rangeBehavior === "mixed";
-            const rowMixed = allowMixed && rowBehavior === "mixed";
+            const rangeMixed = (allowMixed && rangeBehavior === "mixed") || rangeBehavior === "additive";
+            const rowMixed = (allowMixed && rowBehavior === "mixed") || rowBehavior === "additive";
             const current = !rangeMixed ? undefined : gridSelection.current;
             newVal = {
                 current,

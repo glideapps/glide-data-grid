@@ -1,11 +1,11 @@
 import type { Item } from "../internal/data-grid/data-grid-types.js";
-import { type RowGroup, type RowGroupingOptions } from "./row-grouping.js";
-export type RowGroupingMapperResult<T> = {
+import { type RowGroup, type RowGroupingOptions, type MapResult } from "./row-grouping.js";
+export interface RowGroupingMapperResult<T> extends Omit<MapResult, 'originalIndex'> {
     path: readonly number[];
     originalIndex: T;
     isGroupHeader: boolean;
     groupRows: number;
-};
+}
 export type RowGroupingMapper = {
     (itemOrRow: number): RowGroupingMapperResult<number>;
     (itemOrRow: Item): RowGroupingMapperResult<Item>;

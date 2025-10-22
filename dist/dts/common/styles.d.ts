@@ -14,6 +14,8 @@ export interface Theme {
     fgIconHeader: string;
     textHeader: string;
     textGroupHeader?: string;
+    bgGroupHeader?: string;
+    bgGroupHeaderHovered?: string;
     textHeaderSelected: string;
     bgCell: string;
     bgCellMedium: string;
@@ -22,6 +24,9 @@ export interface Theme {
     bgHeaderHovered: string;
     bgBubble: string;
     bgBubbleSelected: string;
+    bubbleHeight: number;
+    bubblePadding: number;
+    bubbleMargin: number;
     bgSearchResult: string;
     borderColor: string;
     drilldownBorder: string;
@@ -35,6 +40,7 @@ export interface Theme {
     fontFamily: string;
     editorFontSize: string;
     lineHeight: number;
+    checkboxMaxSize: number;
     resizeIndicatorColor?: string;
     horizontalBorderColor?: string;
     headerBottomBorderColor?: string;

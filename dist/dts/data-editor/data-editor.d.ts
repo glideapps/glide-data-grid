@@ -1,11 +1,11 @@
 import * as React from "react";
-import { type EditableGridCell, type GridCell, type GridSelection, type Rectangle, type InnerGridCell, CompactSelection, type ProvideEditorCallback, type GridColumn, type Item, type ValidatedGridCell, type ImageEditorType, type FillHandleDirection, type EditListItem, type CellActiviationBehavior } from "../internal/data-grid/data-grid-types.js";
+import { type EditableGridCell, type GridCell, type GridSelection, type Rectangle, type InnerGridCell, CompactSelection, type ProvideEditorCallback, type GridColumn, type Item, type ValidatedGridCell, type ImageEditorType, type FillHandleDirection, type EditListItem, type CellActivationBehavior } from "../internal/data-grid/data-grid-types.js";
 import { type DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
 import { type Theme } from "../common/styles.js";
 import type { DataGridRef } from "../internal/data-grid/data-grid.js";
 import { type SelectionBlending } from "../internal/data-grid/use-selection-behavior.js";
 import type { CustomRenderer, InternalCellRenderer } from "../cells/cell-types.js";
-import { type HeaderClickedEventArgs, type GroupHeaderClickedEventArgs, type CellClickedEventArgs, type FillPatternEventArgs } from "../internal/data-grid/event-args.js";
+import { type HeaderClickedEventArgs, type GroupHeaderClickedEventArgs, type CellClickedEventArgs, type FillPatternEventArgs, type GridMouseEventArgs, type CellActivatedEventArgs } from "../internal/data-grid/event-args.js";
 import { type Keybinds } from "./data-editor-keybindings.js";
 import { type RowGroupingOptions } from "./row-grouping.js";
 export interface RowMarkerOptions {
@@ -16,6 +16,7 @@ export interface RowMarkerOptions {
     theme?: Partial<Theme>;
     headerTheme?: Partial<Theme>;
     headerAlwaysVisible?: boolean;
+    headerDisabled?: boolean;
 }
 type Props = Partial<Omit<DataGridSearchProps, "accessibilityHeight" | "canvasRef" | "cellXOffset" | "cellYOffset" | "className" | "clientSize" | "columns" | "disabledRows" | "drawFocusRing" | "enableGroups" | "firstColAccessible" | "firstColSticky" | "freezeColumns" | "hasAppendRow" | "getCellContent" | "getCellRenderer" | "getCellsForSelection" | "getRowThemeOverride" | "gridRef" | "groupHeaderHeight" | "headerHeight" | "isFilling" | "isFocused" | "imageWindowLoader" | "lockColumns" | "maxColumnWidth" | "minColumnWidth" | "nonGrowWidth" | "onCanvasBlur" | "onCanvasFocused" | "onCellFocused" | "onContextMenu" | "onDragEnd" | "onMouseDown" | "onMouseMove" | "onMouseUp" | "onVisibleRegionChanged" | "rowHeight" | "rows" | "scrollRef" | "searchInputRef" | "selectedColumns" | "selection" | "theme" | "translateX" | "translateY" | "verticalBorder">>;
 type EmitEvents = "copy" | "paste" | "delete" | "fill-right" | "fill-down";
@@ -39,6 +40,10 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * @group Editing
      */
     readonly onRowAppended?: () => Promise<"top" | "bottom" | number | undefined> | void;
+    /** Emitted whenever a column append operation is requested. Append location can be set in callback.
+     * @group Editing
+     */
+    readonly onColumnAppended?: () => Promise<"left" | "right" | number | undefined> | void;
     /** Emitted when a column header should show a context menu. Usually right click.
      * @group Events
      */
@@ -58,7 +63,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
     /** Emitted when a cell is activated, by pressing Enter, Space or double clicking it.
      * @group Events
      */
-    readonly onCellActivated?: (cell: Item) => void;
+    readonly onCellActivated?: (cell: Item, event: CellActivatedEventArgs) => void;
     /** Emitted when the grid is focused.
      * @group Events
      */
@@ -347,6 +352,13 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      */
     readonly rowSelectionMode?: "auto" | "multi";
     /**
+     * Determines if column selection requires a modifier key to enable multi-selection or not. In auto mode it adapts to
+     * touch or mouse environments automatically, in multi-mode it always acts as if the multi key (Ctrl) is pressed.
+     * @group Editing
+     * @defaultValue `auto`
+     */
+    readonly columnSelectionMode?: "auto" | "multi";
+    /**
      * Add table headers to copied data.
      * @group Editing
      * @defaultValue `false`
@@ -444,7 +456,7 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      * Determines when a cell is considered activated and will emit the `onCellActivated` event. Generally an activated
      * cell will open to edit mode.
      */
-    readonly cellActivationBehavior?: CellActiviationBehavior;
+    readonly cellActivationBehavior?: CellActivationBehavior;
     /**
      * Controls if focus will trap inside the data grid when doing tab and caret navigation.
      */
@@ -458,6 +470,10 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
      */
     readonly scrollToActiveCell?: boolean;
     readonly drawFocusRing?: boolean | "no-editor";
+    /**
+     * Allows overriding the default portal element.
+     */
+    readonly portalElementRef?: React.RefObject<HTMLElement>;
 }
 type ScrollToFn = (col: number | {
     amount: number;
@@ -468,6 +484,7 @@ type ScrollToFn = (col: number | {
 }, dir?: "horizontal" | "vertical" | "both", paddingX?: number, paddingY?: number, options?: {
     hAlign?: "start" | "center" | "end";
     vAlign?: "start" | "center" | "end";
+    behavior?: ScrollBehavior;
 }) => void;
 /** @category DataEditor */
 export interface DataEditorRef {
@@ -476,7 +493,13 @@ export interface DataEditorRef {
      * @param col The column index to focus in the new row.
      * @returns A promise which waits for the append to complete.
      */
-    appendRow: (col: number, openOverlay?: boolean) => Promise<void>;
+    appendRow: (col: number, openOverlay?: boolean, behavior?: ScrollBehavior) => Promise<void>;
+    /**
+     * Programatically appends a column.
+     * @param row The row index to focus in the new column.
+     * @returns A promise which waits for the append to complete.
+     */
+    appendColumn: (row: number, openOverlay?: boolean) => Promise<void>;
     /**
      * Triggers cells to redraw.
      */
@@ -501,7 +524,12 @@ export interface DataEditorRef {
      * Causes the columns in the selection to have their natural size recomputed and re-emitted as a resize event.
      */
     remeasureColumns: (cols: CompactSelection) => void;
+    /**
+     * Gets the mouse args from pointer event position.
+     */
+    getMouseArgsForPosition: (posX: number, posY: number, ev?: MouseEvent | TouchEvent) => GridMouseEventArgs | undefined;
 }
+export declare const emptyGridSelection: GridSelection;
 /**
  * The primary component of Glide Data Grid.
  * @category DataEditor

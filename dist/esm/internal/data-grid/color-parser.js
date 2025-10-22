@@ -83,22 +83,24 @@ export function interpolateColors(leftColor, rightColor, val) {
     if (val >= 1)
         return rightColor;
     // Parse to rgba returns straight alpha colors, for interpolation we want pre-multiplied alpha
-    // FIXME: This can be faster if instead of makign an array we just use variables. No memory allocation.
-    const left = [...parseToRgba(leftColor)];
-    left[0] = left[0] * left[3];
-    left[1] = left[1] * left[3];
-    left[2] = left[2] * left[3];
-    const right = [...parseToRgba(rightColor)];
-    right[0] = right[0] * right[3];
-    right[1] = right[1] * right[3];
-    right[2] = right[2] * right[3];
+    const [lr, lg, lb, la] = parseToRgba(leftColor);
+    const [rr, rg, rb, ra] = parseToRgba(rightColor);
+    const leftR = lr * la;
+    const leftG = lg * la;
+    const leftB = lb * la;
+    const rightR = rr * ra;
+    const rightG = rg * ra;
+    const rightB = rb * ra;
     const hScaler = val;
     const nScaler = 1 - val;
-    const a = left[3] * nScaler + right[3] * hScaler;
+    const a = la * nScaler + ra * hScaler;
+    // If both colors are fully transparent the resulting alpha can be 0, avoid dividing by 0
+    if (a === 0)
+        return "rgba(0, 0, 0, 0)";
     // now we need to divide the alpha back out to get linear alpha back for the final result
-    const r = Math.floor((left[0] * nScaler + right[0] * hScaler) / a);
-    const g = Math.floor((left[1] * nScaler + right[1] * hScaler) / a);
-    const b = Math.floor((left[2] * nScaler + right[2] * hScaler) / a);
+    const r = Math.floor((leftR * nScaler + rightR * hScaler) / a);
+    const g = Math.floor((leftG * nScaler + rightG * hScaler) / a);
+    const b = Math.floor((leftB * nScaler + rightB * hScaler) / a);
     return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 /**
@@ -112,7 +114,7 @@ export function getLuminance(color) {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     function f(x) {
         const channel = x / 255;
-        return channel <= 0.04045 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+        return channel <= 0.040_45 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
     }
     const [r, g, b] = parseToRgba(color);
     return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);

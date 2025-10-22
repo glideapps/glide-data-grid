@@ -1,40 +1,12 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable unicorn/consistent-destructuring */
-const clamp_js_1 = __importDefault(require("lodash/clamp.js"));
-const React = __importStar(require("react"));
-const data_grid_js_1 = __importDefault(require("../data-grid/data-grid.js"));
+import clamp from "lodash/clamp.js";
+import * as React from "react";
+import DataGrid from "../data-grid/data-grid.js";
 // Dear Past Jason,
 // Wtf does this function do? If you remember in the future come back and add a comment
 // -- Future-Past Jason
 function offsetColumnSize(column, width, min, max) {
-    return (0, clamp_js_1.default)(Math.round(width - (column.growOffset ?? 0)), Math.ceil(min), Math.floor(max));
+    return clamp(Math.round(width - (column.growOffset ?? 0)), Math.ceil(min), Math.floor(max));
 }
 const DataGridDnd = p => {
     const [resizeColStartX, setResizeColStartX] = React.useState();
@@ -154,7 +126,7 @@ const DataGridDnd = p => {
                 }
             }
             clearAll();
-            if (dragCol !== undefined && dropCol !== undefined) {
+            if (dragCol !== undefined && dropCol !== undefined && onColumnProposeMove?.(dragCol, dropCol) !== false) {
                 onColumnMoved?.(dragCol, dropCol);
             }
             if (dragRow !== undefined && dropRow !== undefined) {
@@ -178,6 +150,7 @@ const DataGridDnd = p => {
         onColumnMoved,
         onRowMoved,
         clearAll,
+        onColumnProposeMove,
     ]);
     const dragOffset = React.useMemo(() => {
         if (dragCol === undefined || dropCol === undefined)
@@ -259,7 +232,7 @@ const DataGridDnd = p => {
             clearAll();
         }
     }, [clearAll, onDragStart]);
-    return (React.createElement(data_grid_js_1.default, { accessibilityHeight: p.accessibilityHeight, canvasRef: p.canvasRef, cellXOffset: p.cellXOffset, cellYOffset: p.cellYOffset, columns: p.columns, disabledRows: p.disabledRows, drawFocusRing: p.drawFocusRing, drawHeader: p.drawHeader, drawCell: p.drawCell, enableGroups: p.enableGroups, eventTargetRef: p.eventTargetRef, experimental: p.experimental, fillHandle: p.fillHandle, firstColAccessible: p.firstColAccessible, fixedShadowX: p.fixedShadowX, fixedShadowY: p.fixedShadowY, freezeColumns: p.freezeColumns, getCellRenderer: p.getCellRenderer, getGroupDetails: p.getGroupDetails, getRowThemeOverride: p.getRowThemeOverride, groupHeaderHeight: p.groupHeaderHeight, headerHeight: p.headerHeight, headerIcons: p.headerIcons, height: p.height, highlightRegions: p.highlightRegions, imageWindowLoader: p.imageWindowLoader, resizeColumn: resizeCol, isDraggable: p.isDraggable, isFilling: p.isFilling, isFocused: p.isFocused, onCanvasBlur: p.onCanvasBlur, onCanvasFocused: p.onCanvasFocused, onCellFocused: p.onCellFocused, onContextMenu: p.onContextMenu, onDragEnd: p.onDragEnd, onDragLeave: p.onDragLeave, onDragOverCell: p.onDragOverCell, onDrop: p.onDrop, onKeyDown: p.onKeyDown, onKeyUp: p.onKeyUp, onMouseMove: p.onMouseMove, prelightCells: p.prelightCells, rowHeight: p.rowHeight, rows: p.rows, selection: p.selection, smoothScrollX: p.smoothScrollX, smoothScrollY: p.smoothScrollY, theme: p.theme, freezeTrailingRows: p.freezeTrailingRows, hasAppendRow: p.hasAppendRow, translateX: p.translateX, translateY: p.translateY, resizeIndicator: p.resizeIndicator, verticalBorder: p.verticalBorder, width: p.width, getCellContent: getMangledCellContent, isResizing: resizeCol !== undefined, onHeaderMenuClick: onHeaderMenuClickMangled, onHeaderIndicatorClick: onHeaderIndicatorClickMangled, isDragging: dragColActive, onItemHovered: onItemHoveredImpl, onDragStart: onDragStartImpl, onMouseDown: onMouseDownImpl, allowResize: canResize, onMouseUp: onMouseUpImpl, dragAndDropState: dragOffset, onMouseMoveRaw: onMouseMove, ref: gridRef }));
+    return (React.createElement(DataGrid, { accessibilityHeight: p.accessibilityHeight, canvasRef: p.canvasRef, cellXOffset: p.cellXOffset, cellYOffset: p.cellYOffset, columns: p.columns, disabledRows: p.disabledRows, drawFocusRing: p.drawFocusRing, drawHeader: p.drawHeader, drawCell: p.drawCell, enableGroups: p.enableGroups, eventTargetRef: p.eventTargetRef, experimental: p.experimental, fillHandle: p.fillHandle, firstColAccessible: p.firstColAccessible, fixedShadowX: p.fixedShadowX, fixedShadowY: p.fixedShadowY, freezeColumns: p.freezeColumns, getCellRenderer: p.getCellRenderer, getGroupDetails: p.getGroupDetails, getRowThemeOverride: p.getRowThemeOverride, groupHeaderHeight: p.groupHeaderHeight, headerHeight: p.headerHeight, headerIcons: p.headerIcons, height: p.height, highlightRegions: p.highlightRegions, imageWindowLoader: p.imageWindowLoader, resizeColumn: resizeCol, isDraggable: p.isDraggable, isFilling: p.isFilling, isFocused: p.isFocused, onCanvasBlur: p.onCanvasBlur, onCanvasFocused: p.onCanvasFocused, onCellFocused: p.onCellFocused, onContextMenu: p.onContextMenu, onDragEnd: p.onDragEnd, onDragLeave: p.onDragLeave, onDragOverCell: p.onDragOverCell, onDrop: p.onDrop, onKeyDown: p.onKeyDown, onKeyUp: p.onKeyUp, onMouseMove: p.onMouseMove, prelightCells: p.prelightCells, rowHeight: p.rowHeight, rows: p.rows, selection: p.selection, smoothScrollX: p.smoothScrollX, smoothScrollY: p.smoothScrollY, theme: p.theme, freezeTrailingRows: p.freezeTrailingRows, hasAppendRow: p.hasAppendRow, translateX: p.translateX, translateY: p.translateY, resizeIndicator: p.resizeIndicator, verticalBorder: p.verticalBorder, width: p.width, getCellContent: getMangledCellContent, isResizing: resizeCol !== undefined, onHeaderMenuClick: onHeaderMenuClickMangled, onHeaderIndicatorClick: onHeaderIndicatorClickMangled, isDragging: dragColActive, onItemHovered: onItemHoveredImpl, onDragStart: onDragStartImpl, onMouseDown: onMouseDownImpl, allowResize: canResize, onMouseUp: onMouseUpImpl, dragAndDropState: dragOffset, onMouseMoveRaw: onMouseMove, ref: gridRef }));
 };
-exports.default = DataGridDnd;
+export default DataGridDnd;
 //# sourceMappingURL=data-grid-dnd.js.map

@@ -1,21 +1,15 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.drawGridLines = exports.drawExtraRowThemes = exports.overdrawStickyBoundaries = exports.drawBlanks = void 0;
-const groupBy_js_1 = __importDefault(require("lodash/groupBy.js"));
-const data_grid_lib_js_1 = require("./data-grid-lib.js");
-const styles_js_1 = require("../../../common/styles.js");
-const color_parser_js_1 = require("../color-parser.js");
-const math_js_1 = require("../../../common/math.js");
-const data_grid_render_walk_js_1 = require("./data-grid-render.walk.js");
-function drawBlanks(ctx, effectiveColumns, allColumns, width, height, totalHeaderHeight, translateX, translateY, cellYOffset, rows, getRowHeight, getRowTheme, selectedRows, disabledRows, freezeTrailingRows, hasAppendRow, drawRegions, damage, theme) {
+import groupBy from "lodash/groupBy.js";
+import { getStickyWidth, getFreezeTrailingHeight } from "./data-grid-lib.js";
+import { mergeAndRealizeTheme } from "../../../common/styles.js";
+import { blendCache } from "../color-parser.js";
+import { intersectRect } from "../../../common/math.js";
+import { getSkipPoint, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
+export function drawBlanks(ctx, effectiveColumns, allColumns, width, height, totalHeaderHeight, translateX, translateY, cellYOffset, rows, getRowHeight, getRowTheme, selectedRows, disabledRows, freezeTrailingRows, hasAppendRow, drawRegions, damage, theme) {
     if (damage !== undefined ||
         effectiveColumns[effectiveColumns.length - 1] !== allColumns[effectiveColumns.length - 1])
         return;
-    const skipPoint = (0, data_grid_render_walk_js_1.getSkipPoint)(drawRegions);
-    (0, data_grid_render_walk_js_1.walkColumns)(effectiveColumns, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, colDrawY, clipX, startRow) => {
+    const skipPoint = getSkipPoint(drawRegions);
+    walkColumns(effectiveColumns, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, colDrawY, clipX, startRow) => {
         if (c !== effectiveColumns[effectiveColumns.length - 1])
             return;
         drawX += c.width;
@@ -24,37 +18,36 @@ function drawBlanks(ctx, effectiveColumns, allColumns, width, height, totalHeade
             return;
         ctx.save();
         ctx.beginPath();
-        ctx.rect(x, totalHeaderHeight + 1, 10000, height - totalHeaderHeight - 1);
+        ctx.rect(x, totalHeaderHeight + 1, 10_000, height - totalHeaderHeight - 1);
         ctx.clip();
-        (0, data_grid_render_walk_js_1.walkRowsInCol)(startRow, colDrawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, skipPoint, (drawY, row, rh, isSticky) => {
+        walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, skipPoint, (drawY, row, rh, isSticky) => {
             if (!isSticky &&
                 drawRegions.length > 0 &&
-                !drawRegions.some(dr => (0, math_js_1.intersectRect)(drawX, drawY, 10000, rh, dr.x, dr.y, dr.width, dr.height))) {
+                !drawRegions.some(dr => intersectRect(drawX, drawY, 10_000, rh, dr.x, dr.y, dr.width, dr.height))) {
                 return;
             }
             const rowSelected = selectedRows.hasIndex(row);
             const rowDisabled = disabledRows.hasIndex(row);
             ctx.beginPath();
             const rowTheme = getRowTheme?.(row);
-            const blankTheme = rowTheme === undefined ? theme : (0, styles_js_1.mergeAndRealizeTheme)(theme, rowTheme);
+            const blankTheme = rowTheme === undefined ? theme : mergeAndRealizeTheme(theme, rowTheme);
             if (blankTheme.bgCell !== theme.bgCell) {
                 ctx.fillStyle = blankTheme.bgCell;
-                ctx.fillRect(drawX, drawY, 10000, rh);
+                ctx.fillRect(drawX, drawY, 10_000, rh);
             }
             if (rowDisabled) {
                 ctx.fillStyle = blankTheme.bgHeader;
-                ctx.fillRect(drawX, drawY, 10000, rh);
+                ctx.fillRect(drawX, drawY, 10_000, rh);
             }
             if (rowSelected) {
                 ctx.fillStyle = blankTheme.accentLight;
-                ctx.fillRect(drawX, drawY, 10000, rh);
+                ctx.fillRect(drawX, drawY, 10_000, rh);
             }
         });
         ctx.restore();
     });
 }
-exports.drawBlanks = drawBlanks;
-function overdrawStickyBoundaries(ctx, effectiveCols, width, height, freezeTrailingRows, rows, verticalBorder, getRowHeight, theme) {
+export function overdrawStickyBoundaries(ctx, effectiveCols, width, height, freezeTrailingRows, rows, verticalBorder, getRowHeight, theme) {
     let drawFreezeBorder = false;
     for (const c of effectiveCols) {
         if (c.sticky)
@@ -64,10 +57,10 @@ function overdrawStickyBoundaries(ctx, effectiveCols, width, height, freezeTrail
     }
     const hColor = theme.horizontalBorderColor ?? theme.borderColor;
     const vColor = theme.borderColor;
-    const drawX = drawFreezeBorder ? (0, data_grid_lib_js_1.getStickyWidth)(effectiveCols) : 0;
+    const drawX = drawFreezeBorder ? getStickyWidth(effectiveCols) : 0;
     let vStroke;
     if (drawX !== 0) {
-        vStroke = (0, color_parser_js_1.blendCache)(vColor, theme.bgCell);
+        vStroke = blendCache(vColor, theme.bgCell);
         ctx.beginPath();
         ctx.moveTo(drawX + 0.5, 0);
         ctx.lineTo(drawX + 0.5, height);
@@ -75,8 +68,8 @@ function overdrawStickyBoundaries(ctx, effectiveCols, width, height, freezeTrail
         ctx.stroke();
     }
     if (freezeTrailingRows > 0) {
-        const hStroke = vColor === hColor && vStroke !== undefined ? vStroke : (0, color_parser_js_1.blendCache)(hColor, theme.bgCell);
-        const h = (0, data_grid_lib_js_1.getFreezeTrailingHeight)(rows, freezeTrailingRows, getRowHeight);
+        const hStroke = vColor === hColor && vStroke !== undefined ? vStroke : blendCache(hColor, theme.bgCell);
+        const h = getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight);
         ctx.beginPath();
         ctx.moveTo(0, height - h + 0.5);
         ctx.lineTo(width, height - h + 0.5);
@@ -84,7 +77,6 @@ function overdrawStickyBoundaries(ctx, effectiveCols, width, height, freezeTrail
         ctx.stroke();
     }
 }
-exports.overdrawStickyBoundaries = overdrawStickyBoundaries;
 const getMinMaxXY = (drawRegions, width, height) => {
     let minX = 0;
     let maxX = width;
@@ -104,11 +96,11 @@ const getMinMaxXY = (drawRegions, width, height) => {
     }
     return { minX, maxX, minY, maxY };
 };
-function drawExtraRowThemes(ctx, effectiveCols, cellYOffset, translateX, translateY, width, height, drawRegions, totalHeaderHeight, getRowHeight, getRowThemeOverride, verticalBorder, freezeTrailingRows, rows, theme) {
+export function drawExtraRowThemes(ctx, effectiveCols, cellYOffset, translateX, translateY, width, height, drawRegions, totalHeaderHeight, getRowHeight, getRowThemeOverride, verticalBorder, freezeTrailingRows, rows, theme) {
     const bgCell = theme.bgCell;
     const { minX, maxX, minY, maxY } = getMinMaxXY(drawRegions, width, height);
     const toDraw = [];
-    const freezeY = height - (0, data_grid_lib_js_1.getFreezeTrailingHeight)(rows, freezeTrailingRows, getRowHeight);
+    const freezeY = height - getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight);
     // row overflow
     let y = totalHeaderHeight;
     let row = cellYOffset;
@@ -186,9 +178,8 @@ function drawExtraRowThemes(ctx, effectiveCols, cellYOffset, translateX, transla
     }
     ctx.beginPath();
 }
-exports.drawExtraRowThemes = drawExtraRowThemes;
 // lines are effectively drawn on the top left edge of a cell.
-function drawGridLines(ctx, effectiveCols, cellYOffset, translateX, translateY, width, height, drawRegions, spans, groupHeaderHeight, totalHeaderHeight, getRowHeight, getRowThemeOverride, verticalBorder, freezeTrailingRows, rows, theme, verticalOnly = false) {
+export function drawGridLines(ctx, effectiveCols, cellYOffset, translateX, translateY, width, height, drawRegions, spans, groupHeaderHeight, totalHeaderHeight, getRowHeight, getRowThemeOverride, verticalBorder, freezeTrailingRows, rows, theme, verticalOnly = false) {
     if (spans !== undefined) {
         ctx.beginPath();
         ctx.save();
@@ -248,7 +239,7 @@ function drawGridLines(ctx, effectiveCols, cellYOffset, translateX, translateY, 
             row++;
         }
     }
-    const groups = (0, groupBy_js_1.default)(toDraw, line => line.color);
+    const groups = groupBy(toDraw, line => line.color);
     for (const g of Object.keys(groups)) {
         ctx.strokeStyle = g;
         for (const line of groups[g]) {
@@ -262,5 +253,4 @@ function drawGridLines(ctx, effectiveCols, cellYOffset, translateX, translateY, 
         ctx.restore();
     }
 }
-exports.drawGridLines = drawGridLines;
 //# sourceMappingURL=data-grid-render.lines.js.map

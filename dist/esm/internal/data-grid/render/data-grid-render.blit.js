@@ -89,7 +89,7 @@ export function blitLastFrame(ctx, blitSource, blitSourceScroll, targetScroll, l
             drawRegions.push({
                 x: stickyWidth - 1,
                 y: 0,
-                width: deltaX + 2,
+                width: deltaX + 2, // extra width to account for first col not drawing a left side border
                 height: height,
             });
         }

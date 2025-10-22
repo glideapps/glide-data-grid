@@ -1,22 +1,19 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CellSet = void 0;
-const render_state_provider_js_1 = require("../../common/render-state-provider.js");
-class CellSet {
+import { packColRowToNumber, unpackNumberToColRow, unpackRow } from "../../common/render-state-provider.js";
+export class CellSet {
     cells;
     constructor(items = []) {
-        this.cells = new Set(items.map(x => (0, render_state_provider_js_1.packColRowToNumber)(x[0], x[1])));
+        this.cells = new Set(items.map(x => packColRowToNumber(x[0], x[1])));
     }
     add(cell) {
-        this.cells.add((0, render_state_provider_js_1.packColRowToNumber)(cell[0], cell[1]));
+        this.cells.add(packColRowToNumber(cell[0], cell[1]));
     }
     has(cell) {
         if (cell === undefined)
             return false;
-        return this.cells.has((0, render_state_provider_js_1.packColRowToNumber)(cell[0], cell[1]));
+        return this.cells.has(packColRowToNumber(cell[0], cell[1]));
     }
     remove(cell) {
-        this.cells.delete((0, render_state_provider_js_1.packColRowToNumber)(cell[0], cell[1]));
+        this.cells.delete(packColRowToNumber(cell[0], cell[1]));
     }
     clear() {
         this.cells.clear();
@@ -26,7 +23,7 @@ class CellSet {
     }
     hasHeader() {
         for (const cellNumber of this.cells) {
-            const row = (0, render_state_provider_js_1.unpackRow)(cellNumber);
+            const row = unpackRow(cellNumber);
             if (row < 0)
                 return true;
         }
@@ -35,7 +32,7 @@ class CellSet {
     hasItemInRectangle(rect) {
         for (let row = rect.y; row < rect.y + rect.height; row++) {
             for (let col = rect.x; col < rect.x + rect.width; col++) {
-                if (this.cells.has((0, render_state_provider_js_1.packColRowToNumber)(col, row))) {
+                if (this.cells.has(packColRowToNumber(col, row))) {
                     return true;
                 }
             }
@@ -52,9 +49,8 @@ class CellSet {
     }
     *values() {
         for (const cellNumber of this.cells) {
-            yield (0, render_state_provider_js_1.unpackNumberToColRow)(cellNumber);
+            yield unpackNumberToColRow(cellNumber);
         }
     }
 }
-exports.CellSet = CellSet;
 //# sourceMappingURL=cell-set.js.map

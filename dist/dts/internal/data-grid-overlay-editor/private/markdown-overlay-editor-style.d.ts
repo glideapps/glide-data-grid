@@ -1,4 +1,3 @@
-/// <reference types="react" resolution-mode="require"/>
 interface Props {
     targetWidth: number;
 }

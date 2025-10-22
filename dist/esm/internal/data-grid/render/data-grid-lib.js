@@ -300,7 +300,7 @@ export function measureTextCached(s, ctx, font, baseline = "middle") {
         metricsCache[key] = metrics;
         metricsSize++;
     }
-    if (metricsSize > 10000) {
+    if (metricsSize > 10_000) {
         metricsCache = {};
         metricsSize = 0;
     }
@@ -371,14 +371,14 @@ export function prepTextCell(args, lastPrep, overrideColor) {
     return result;
 }
 /** @category Drawing */
-export function drawTextCellExternal(args, data, contentAlign) {
+export function drawTextCellExternal(args, data, contentAlign, allowWrapping, hyperWrapping) {
     const { rect, ctx, theme } = args;
     ctx.fillStyle = theme.textDark;
     drawTextCell({
         ctx: ctx,
         rect,
         theme: theme,
-    }, data, contentAlign);
+    }, data, contentAlign, allowWrapping, hyperWrapping);
 }
 function drawSingleTextLine(ctx, data, x, y, w, h, bias, theme, contentAlign) {
     if (contentAlign === "right") {

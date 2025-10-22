@@ -1,10 +1,10 @@
-import type { Theme } from "../../common/styles.js";
 import type React from "react";
 import type { CSSProperties } from "react";
-import type { SpriteManager } from "./data-grid-sprites.js";
+import type { Theme } from "../../common/styles.js";
 import type { OverlayImageEditorProps } from "../data-grid-overlay-editor/private/image-overlay-editor.js";
+import type { SpriteManager } from "./data-grid-sprites.js";
+import type { BaseGridMouseEventArgs, CellActivatedEventArgs } from "./event-args.js";
 import type { ImageWindowLoader } from "./image-window-loader-interface.js";
-import type { BaseGridMouseEventArgs } from "./event-args.js";
 /** @category Selection */
 export interface GridSelection {
     readonly current?: {
@@ -38,6 +38,8 @@ export type DrawHeaderCallback = (args: {
     hasSelectedCell: boolean;
     spriteManager: SpriteManager;
     menuBounds: Rectangle;
+    hoverX: number | undefined;
+    hoverY: number | undefined;
 }, drawContent: () => void) => void;
 /** @category Types */
 export type DrawCellCallback = (args: {
@@ -194,7 +196,7 @@ export interface Rectangle {
     height: number;
 }
 export declare function isRectangleEqual(a: Rectangle | undefined, b: Rectangle | undefined): boolean;
-export type CellActiviationBehavior = "double-click" | "single-click" | "second-click";
+export type CellActivationBehavior = "double-click" | "single-click" | "second-click";
 /** @category Cells */
 export interface BaseGridCell {
     readonly allowOverlay: boolean;
@@ -205,7 +207,7 @@ export interface BaseGridCell {
     readonly contentAlign?: "left" | "right" | "center";
     readonly cursor?: CSSProperties["cursor"];
     readonly copyData?: string;
-    readonly activationBehaviorOverride?: CellActiviationBehavior;
+    readonly activationBehaviorOverride?: CellActivationBehavior;
 }
 /** @category Cells */
 export interface LoadingCell extends BaseGridCell {
@@ -274,6 +276,8 @@ export type ProvideEditorComponent<T extends InnerGridCell> = React.FunctionComp
     readonly forceEditMode: boolean;
     readonly isValid?: boolean;
     readonly theme: Theme;
+    readonly portalElementRef?: React.RefObject<HTMLElement>;
+    readonly activation?: CellActivatedEventArgs;
 }>;
 type ObjectEditorCallbackResult<T extends InnerGridCell> = {
     editor: ProvideEditorComponent<T>;
@@ -290,7 +294,10 @@ export type ProvideEditorCallbackResult<T extends InnerGridCell> = (ProvideEdito
 /** @category Renderers */
 export declare function isObjectEditorCallbackResult<T extends InnerGridCell>(obj: ProvideEditorCallbackResult<T>): obj is ObjectEditorCallbackResult<T>;
 /** @category Renderers */
-export type ProvideEditorCallback<T extends InnerGridCell> = (cell: T) => ProvideEditorCallbackResult<T>;
+export type ProvideEditorCallback<T extends InnerGridCell> = (cell: T & {
+    location?: Item;
+    activation?: CellActivatedEventArgs;
+}) => ProvideEditorCallbackResult<T>;
 /** @category Cells */
 export type ValidatedGridCell = EditableGridCell & {
     selectionRange?: SelectionRange;
@@ -377,12 +384,35 @@ export type Slice = [start: number, end: number];
 /** @category Selection */
 export type CompactSelectionRanges = readonly Slice[];
 export type FillHandleDirection = "horizontal" | "vertical" | "orthogonal" | "any";
+/**
+ * Configuration options for the fill-handle (the little drag square in the bottom-right of a selection).
+ *
+ *  `shape`   – Either a square or a circle. Default is `square`.
+ *  `size`    – Width/height (or diameter) in CSS pixels. Default is `4`.
+ *  `offsetX` – Horizontal offset from the bottom-right corner of the cell (positive is →). Default is `-2`.
+ *  `offsetY` – Vertical offset from the bottom-right corner of the cell (positive is ↓). Default is `-2`.
+ *  `outline` – Width of the outline stroke in CSS pixels. Default is `0`.
+ */
+export type FillHandleConfig = {
+    readonly shape: "square" | "circle";
+    readonly size: number;
+    readonly offsetX: number;
+    readonly offsetY: number;
+    readonly outline: number;
+};
+export type FillHandle = boolean | Partial<FillHandleConfig>;
+/**
+ * Default configuration used when `fillHandle` is simply `true`.
+ */
+export declare const DEFAULT_FILL_HANDLE: Readonly<FillHandleConfig>;
 /** @category Selection */
 export declare class CompactSelection {
-    private readonly items;
+    readonly items: CompactSelectionRanges;
     private constructor();
+    static create: (items: CompactSelectionRanges) => CompactSelection;
     static empty: () => CompactSelection;
     static fromSingleSelection: (selection: number | Slice) => CompactSelection;
+    static fromArray: (items: readonly number[]) => CompactSelection;
     offset(amount: number): CompactSelection;
     add(selection: number | Slice): CompactSelection;
     remove(selection: number | Slice): CompactSelection;

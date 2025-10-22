@@ -1,31 +1,5 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.useInitialScrollOffset = void 0;
-const React = __importStar(require("react"));
-const utils_js_1 = require("../common/utils.js");
+import * as React from "react";
+import { useStateWithReactiveInput } from "../common/utils.js";
 // shamelessly stolen and modified from: https://github.com/theKashey/use-callback-ref
 // MIT License https://github.com/theKashey/use-callback-ref/tree/master?tab=MIT-1-ov-file#readme
 function useCallbackRef(initialValue, callback) {
@@ -48,7 +22,7 @@ function useCallbackRef(initialValue, callback) {
     ref.callback = callback;
     return ref.facade;
 }
-function useInitialScrollOffset(scrollOffsetX, scrollOffsetY, rowHeight, visibleRegionRef, onDidScroll) {
+export function useInitialScrollOffset(scrollOffsetX, scrollOffsetY, rowHeight, visibleRegionRef, onDidScroll) {
     const [visibleRegionY, visibleRegionTy] = React.useMemo(() => {
         return [
             scrollOffsetY !== undefined && typeof rowHeight === "number" ? Math.floor(scrollOffsetY / rowHeight) : 0,
@@ -63,7 +37,7 @@ function useInitialScrollOffset(scrollOffsetX, scrollOffsetY, rowHeight, visible
         // tx: 'TODO',
         ty: visibleRegionTy,
     }), [visibleRegionRef, visibleRegionTy, visibleRegionY]);
-    const [visibleRegion, setVisibleRegion, empty] = (0, utils_js_1.useStateWithReactiveInput)(visibleRegionInput);
+    const [visibleRegion, setVisibleRegion, empty] = useStateWithReactiveInput(visibleRegionInput);
     const onDidScrollRef = React.useRef(onDidScroll);
     onDidScrollRef.current = onDidScroll;
     const scrollRef = useCallbackRef(null, newVal => {
@@ -104,5 +78,4 @@ function useInitialScrollOffset(scrollOffsetX, scrollOffsetY, rowHeight, visible
         scrollRef,
     };
 }
-exports.useInitialScrollOffset = useInitialScrollOffset;
 //# sourceMappingURL=use-initial-scroll-offset.js.map

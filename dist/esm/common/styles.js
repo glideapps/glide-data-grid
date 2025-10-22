@@ -15,6 +15,8 @@ export function makeCSSStyle(theme) {
         "--gdg-fg-icon-header": theme.fgIconHeader,
         "--gdg-text-header": theme.textHeader,
         "--gdg-text-group-header": theme.textGroupHeader ?? theme.textHeader,
+        "--gdg-bg-group-header": theme.bgGroupHeader ?? theme.bgHeader,
+        "--gdg-bg-group-header-hovered": theme.bgGroupHeaderHovered ?? theme.bgHeaderHovered,
         "--gdg-text-header-selected": theme.textHeaderSelected,
         "--gdg-bg-cell": theme.bgCell,
         "--gdg-bg-cell-medium": theme.bgCellMedium,
@@ -23,6 +25,9 @@ export function makeCSSStyle(theme) {
         "--gdg-bg-header-hovered": theme.bgHeaderHovered,
         "--gdg-bg-bubble": theme.bgBubble,
         "--gdg-bg-bubble-selected": theme.bgBubbleSelected,
+        "--gdg-bubble-height": `${theme.bubbleHeight}px`,
+        "--gdg-bubble-padding": `${theme.bubblePadding}px`,
+        "--gdg-bubble-margin": `${theme.bubbleMargin}px`,
         "--gdg-bg-search-result": theme.bgSearchResult,
         "--gdg-border-color": theme.borderColor,
         "--gdg-horizontal-border-color": theme.horizontalBorderColor ?? theme.borderColor,
@@ -35,6 +40,7 @@ export function makeCSSStyle(theme) {
         "--gdg-marker-font-style": theme.markerFontStyle,
         "--gdg-font-family": theme.fontFamily,
         "--gdg-editor-font-size": theme.editorFontSize,
+        "--gdg-checkbox-max-size": `${theme.checkboxMaxSize}px`,
         ...(theme.resizeIndicatorColor === undefined
             ? {}
             : { "--gdg-resize-indicator-color": theme.resizeIndicatorColor }),
@@ -64,6 +70,9 @@ const dataEditorBaseTheme = {
     bgHeaderHovered: "#EFEFF1",
     bgBubble: "#EDEDF3",
     bgBubbleSelected: "#FFFFFF",
+    bubbleHeight: 20,
+    bubblePadding: 6,
+    bubbleMargin: 4,
     bgSearchResult: "#fff9e3",
     borderColor: "rgba(115, 116, 131, 0.16)",
     drilldownBorder: "rgba(0, 0, 0, 0)",
@@ -77,6 +86,7 @@ const dataEditorBaseTheme = {
     fontFamily: "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
     editorFontSize: "13px",
     lineHeight: 1.4, //unitless scaler depends on your font
+    checkboxMaxSize: 18,
 };
 /** @category Theme */
 export function getDataEditorTheme() {

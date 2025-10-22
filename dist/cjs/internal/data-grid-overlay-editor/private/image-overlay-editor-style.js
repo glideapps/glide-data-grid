@@ -1,12 +1,6 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.ImageOverlayEditorStyle = void 0;
-const react_1 = require("@linaria/react");
-exports.ImageOverlayEditorStyle = /*#__PURE__*/react_1.styled('div')({
-  name: "image-overlay-editor-style0",
+import { styled } from "@linaria/react";
+export const ImageOverlayEditorStyle = /*#__PURE__*/styled('div')({
+  name: "ImageOverlayEditorStyle",
   class: "gdg-i2iowwq",
   propsAsIs: false
 });

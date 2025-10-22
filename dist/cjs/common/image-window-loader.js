@@ -1,13 +1,8 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const cell_set_js_1 = require("../internal/data-grid/cell-set.js");
-const throttle_js_1 = __importDefault(require("lodash/throttle.js"));
-const render_state_provider_js_1 = require("./render-state-provider.js");
+import { CellSet } from "../internal/data-grid/cell-set.js";
+import throttle from "lodash/throttle.js";
+import { packColRowToNumber, unpackNumberToColRow, WindowingTrackerBase } from "./render-state-provider.js";
 const imgPool = [];
-class ImageWindowLoaderImpl extends render_state_provider_js_1.WindowingTrackerBase {
+class ImageWindowLoaderImpl extends WindowingTrackerBase {
     imageLoaded = () => undefined;
     loadedLocations = [];
     cache = {};
@@ -15,8 +10,8 @@ class ImageWindowLoaderImpl extends render_state_provider_js_1.WindowingTrackerB
         this.imageLoaded = imageLoaded;
     }
     // eslint-disable-next-line unicorn/consistent-function-scoping
-    sendLoaded = (0, throttle_js_1.default)(() => {
-        this.imageLoaded(new cell_set_js_1.CellSet(this.loadedLocations));
+    sendLoaded = throttle(() => {
+        this.imageLoaded(new CellSet(this.loadedLocations));
         this.loadedLocations = [];
     }, 20);
     clearOutOfWindow = () => {
@@ -46,7 +41,7 @@ class ImageWindowLoaderImpl extends render_state_provider_js_1.WindowingTrackerB
         let canceled = false;
         const result = {
             img: undefined,
-            cells: [(0, render_state_provider_js_1.packColRowToNumber)(col, row)],
+            cells: [packColRowToNumber(col, row)],
             url,
             cancel: () => {
                 if (canceled)
@@ -71,7 +66,7 @@ class ImageWindowLoaderImpl extends render_state_provider_js_1.WindowingTrackerB
                 if (toWrite !== undefined && !canceled) {
                     toWrite.img = img;
                     for (const packed of toWrite.cells) {
-                        this.loadedLocations.push((0, render_state_provider_js_1.unpackNumberToColRow)(packed));
+                        this.loadedLocations.push(unpackNumberToColRow(packed));
                     }
                     loaded = true;
                     this.sendLoaded();
@@ -87,7 +82,7 @@ class ImageWindowLoaderImpl extends render_state_provider_js_1.WindowingTrackerB
         const key = url;
         const current = this.cache[key];
         if (current !== undefined) {
-            const packed = (0, render_state_provider_js_1.packColRowToNumber)(col, row);
+            const packed = packColRowToNumber(col, row);
             if (!current.cells.includes(packed)) {
                 current.cells.push(packed);
             }
@@ -99,5 +94,5 @@ class ImageWindowLoaderImpl extends render_state_provider_js_1.WindowingTrackerB
         return undefined;
     }
 }
-exports.default = ImageWindowLoaderImpl;
+export default ImageWindowLoaderImpl;
 //# sourceMappingURL=image-window-loader.js.map

@@ -1,8 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.toggleBoolean = exports.copyToClipboard = exports.unquote = exports.expandSelection = void 0;
-const copy_paste_js_1 = require("./copy-paste.js");
-function expandSelection(newVal, getCellsForSelection, rowMarkerOffset, spanRangeBehavior, abortController) {
+import { getCopyBufferContents } from "./copy-paste.js";
+export function expandSelection(newVal, getCellsForSelection, rowMarkerOffset, spanRangeBehavior, abortController) {
     const origVal = newVal;
     if (spanRangeBehavior === "allowPartial" || newVal.current === undefined || getCellsForSelection === undefined)
         return newVal;
@@ -78,14 +75,13 @@ function expandSelection(newVal, getCellsForSelection, rowMarkerOffset, spanRang
     } while (!isFilled);
     return newVal;
 }
-exports.expandSelection = expandSelection;
 function descape(s) {
     if (s.startsWith('"') && s.endsWith('"')) {
         s = s.slice(1, -1).replace(/""/g, '"');
     }
     return s;
 }
-function unquote(str) {
+export function unquote(str) {
     const result = [];
     let current = [];
     let start = 0;
@@ -138,9 +134,8 @@ function unquote(str) {
     result.push(current);
     return result.map(r => r.map(c => ({ rawValue: c, formatted: c, format: "string" })));
 }
-exports.unquote = unquote;
-function copyToClipboard(cells, columnIndexes, e) {
-    const copyBuffer = (0, copy_paste_js_1.getCopyBufferContents)(cells, columnIndexes);
+export function copyToClipboard(cells, columnIndexes, e) {
+    const copyBuffer = getCopyBufferContents(cells, columnIndexes);
     // eslint-disable-next-line unicorn/consistent-function-scoping
     const copyWithWriteText = (s) => {
         void window.navigator.clipboard?.writeText(s);
@@ -181,7 +176,6 @@ function copyToClipboard(cells, columnIndexes, e) {
     }
     e?.preventDefault();
 }
-exports.copyToClipboard = copyToClipboard;
 /**
  * Checkbox behavior:
  *
@@ -190,8 +184,7 @@ exports.copyToClipboard = copyToClipboard;
  * indeterminate + click -> checked
  * empty + click -> checked
  */
-function toggleBoolean(data) {
+export function toggleBoolean(data) {
     return data !== true;
 }
-exports.toggleBoolean = toggleBoolean;
 //# sourceMappingURL=data-editor-fns.js.map

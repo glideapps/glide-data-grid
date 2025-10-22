@@ -1,5 +1,4 @@
-/// <reference types="react" resolution-mode="require"/>
-import type { Item, Rectangle } from "./data-grid-types.js";
+import type { Item, Rectangle, CellActivationBehavior } from "./data-grid-types.js";
 /** @category Types */
 export interface BaseGridMouseEventArgs {
     readonly shiftKey: boolean;
@@ -87,6 +86,21 @@ export interface HeaderClickedEventArgs extends GridMouseHeaderEventArgs, Preven
 /** @category Types */
 export interface GroupHeaderClickedEventArgs extends GridMouseGroupHeaderEventArgs, PreventableEvent {
 }
+export interface BaseCellActivatedEvent {
+}
+/** Keyboard-initiated activation */
+export interface KeyboardCellActivatedEvent extends BaseCellActivatedEvent {
+    readonly inputType: "keyboard";
+    readonly key: string;
+}
+/** Pointer-initiated activation */
+export interface PointerCellActivatedEvent extends BaseCellActivatedEvent {
+    readonly inputType: "pointer";
+    readonly pointerActivation: CellActivationBehavior;
+    readonly pointerType?: "mouse" | "touch" | "pen";
+}
+/** The public event type the grid emits */
+export type CellActivatedEventArgs = KeyboardCellActivatedEvent | PointerCellActivatedEvent;
 export interface FillPatternEventArgs extends PreventableEvent {
     patternSource: Rectangle;
     fillDestination: Rectangle;

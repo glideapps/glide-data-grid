@@ -177,7 +177,7 @@ export function makeAccessibilityStringForArray(arr) {
     let count = 0;
     for (const str of arr) {
         count += str.length;
-        if (count > 10000)
+        if (count > 10_000)
             break;
         index++;
     }

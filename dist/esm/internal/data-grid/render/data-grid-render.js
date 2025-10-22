@@ -197,7 +197,7 @@ export function drawGrid(arg, lastArg) {
         const doDamage = (ctx) => {
             drawCells(ctx, effectiveCols, mappedColumns, height, totalHeaderHeight, translateX, translateY, cellYOffset, rows, getRowHeight, getCellContent, getGroupDetails, getRowThemeOverride, disabledRows, isFocused, drawFocus, freezeTrailingRows, hasAppendRow, drawRegions, damage, selection, prelightCells, highlightRegions, imageLoader, spriteManager, hoverValues, hoverInfo, drawCellCallback, hyperWrapping, theme, enqueue, renderStateProvider, getCellRenderer, overrideCursor, minimumCellWidth);
             const selectionCurrent = selection.current;
-            if (fillHandle &&
+            if ((fillHandle !== false && fillHandle !== undefined) &&
                 drawFocus &&
                 selectionCurrent !== undefined &&
                 damage.has(rectBottomRight(selectionCurrent.range))) {

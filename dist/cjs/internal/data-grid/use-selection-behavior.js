@@ -1,14 +1,8 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.useSelectionBehavior = void 0;
-const react_1 = __importDefault(require("react"));
-const data_grid_types_js_1 = require("./data-grid-types.js");
-function useSelectionBehavior(gridSelection, setGridSelection, rangeBehavior, columnBehavior, rowBehavior, rangeSelect, rangeSelectionColumnSpanning) {
+import React from "react";
+import { CompactSelection } from "./data-grid-types.js";
+export function useSelectionBehavior(gridSelection, setGridSelection, rangeBehavior, columnBehavior, rowBehavior, rangeSelect, rangeSelectionColumnSpanning) {
     // if append is true, the current range will be added to the rangeStack
-    const setCurrent = react_1.default.useCallback((value, expand, append, trigger) => {
+    const setCurrent = React.useCallback((value, expand, append, trigger) => {
         if ((rangeSelect === "cell" || rangeSelect === "multi-cell") && value !== undefined) {
             value = {
                 ...value,
@@ -30,18 +24,18 @@ function useSelectionBehavior(gridSelection, setGridSelection, rangeBehavior, co
                 },
             };
         }
-        const rangeMixable = rangeBehavior === "mixed" && (append || trigger === "drag");
-        const allowColumnCoSelect = columnBehavior === "mixed" && rangeMixable;
-        const allowRowCoSelect = rowBehavior === "mixed" && rangeMixable;
+        const rangeMixable = (rangeBehavior === "mixed" && (append || trigger === "drag")) || rangeBehavior === "additive";
+        const allowColumnCoSelect = (columnBehavior === "mixed" || columnBehavior === "additive") && rangeMixable;
+        const allowRowCoSelect = (rowBehavior === "mixed" || rowBehavior === "additive") && rangeMixable;
         let newVal = {
             current: value === undefined
                 ? undefined
                 : {
                     ...value,
-                    rangeStack: trigger === "drag" ? gridSelection.current?.rangeStack ?? [] : [],
+                    rangeStack: trigger === "drag" ? (gridSelection.current?.rangeStack ?? []) : [],
                 },
-            columns: allowColumnCoSelect ? gridSelection.columns : data_grid_types_js_1.CompactSelection.empty(),
-            rows: allowRowCoSelect ? gridSelection.rows : data_grid_types_js_1.CompactSelection.empty(),
+            columns: allowColumnCoSelect ? gridSelection.columns : CompactSelection.empty(),
+            rows: allowRowCoSelect ? gridSelection.rows : CompactSelection.empty(),
         };
         const addLastRange = append && (rangeSelect === "multi-rect" || rangeSelect === "multi-cell");
         if (addLastRange && newVal.current !== undefined && gridSelection.current !== undefined) {
@@ -63,7 +57,7 @@ function useSelectionBehavior(gridSelection, setGridSelection, rangeBehavior, co
         rowBehavior,
         setGridSelection,
     ]);
-    const setSelectedRows = react_1.default.useCallback((newRows, append, allowMixed) => {
+    const setSelectedRows = React.useCallback((newRows, append, allowMixed) => {
         newRows = newRows ?? gridSelection.rows;
         if (append !== undefined) {
             newRows = newRows.add(append);
@@ -72,23 +66,23 @@ function useSelectionBehavior(gridSelection, setGridSelection, rangeBehavior, co
         if (rowBehavior === "exclusive" && newRows.length > 0) {
             newVal = {
                 current: undefined,
-                columns: data_grid_types_js_1.CompactSelection.empty(),
+                columns: CompactSelection.empty(),
                 rows: newRows,
             };
         }
         else {
-            const rangeMixed = allowMixed && rangeBehavior === "mixed";
-            const columnMixed = allowMixed && columnBehavior === "mixed";
+            const rangeMixed = (allowMixed && rangeBehavior === "mixed") || rangeBehavior === "additive";
+            const columnMixed = (allowMixed && columnBehavior === "mixed") || columnBehavior === "additive";
             const current = !rangeMixed ? undefined : gridSelection.current;
             newVal = {
                 current,
-                columns: columnMixed ? gridSelection.columns : data_grid_types_js_1.CompactSelection.empty(),
+                columns: columnMixed ? gridSelection.columns : CompactSelection.empty(),
                 rows: newRows,
             };
         }
         setGridSelection(newVal, false);
     }, [columnBehavior, gridSelection, rangeBehavior, rowBehavior, setGridSelection]);
-    const setSelectedColumns = react_1.default.useCallback((newCols, append, allowMixed) => {
+    const setSelectedColumns = React.useCallback((newCols, append, allowMixed) => {
         newCols = newCols ?? gridSelection.columns;
         if (append !== undefined) {
             newCols = newCols.add(append);
@@ -97,17 +91,17 @@ function useSelectionBehavior(gridSelection, setGridSelection, rangeBehavior, co
         if (columnBehavior === "exclusive" && newCols.length > 0) {
             newVal = {
                 current: undefined,
-                rows: data_grid_types_js_1.CompactSelection.empty(),
+                rows: CompactSelection.empty(),
                 columns: newCols,
             };
         }
         else {
-            const rangeMixed = allowMixed && rangeBehavior === "mixed";
-            const rowMixed = allowMixed && rowBehavior === "mixed";
+            const rangeMixed = (allowMixed && rangeBehavior === "mixed") || rangeBehavior === "additive";
+            const rowMixed = (allowMixed && rowBehavior === "mixed") || rowBehavior === "additive";
             const current = !rangeMixed ? undefined : gridSelection.current;
             newVal = {
                 current,
-                rows: rowMixed ? gridSelection.rows : data_grid_types_js_1.CompactSelection.empty(),
+                rows: rowMixed ? gridSelection.rows : CompactSelection.empty(),
                 columns: newCols,
             };
         }
@@ -115,5 +109,4 @@ function useSelectionBehavior(gridSelection, setGridSelection, rangeBehavior, co
     }, [columnBehavior, gridSelection, rangeBehavior, rowBehavior, setGridSelection]);
     return [setCurrent, setSelectedRows, setSelectedColumns];
 }
-exports.useSelectionBehavior = useSelectionBehavior;
 //# sourceMappingURL=use-selection-behavior.js.map

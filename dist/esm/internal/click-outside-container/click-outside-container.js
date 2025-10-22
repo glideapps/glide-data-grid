@@ -2,14 +2,14 @@ import * as React from "react";
 export default class ClickOutsideContainer extends React.PureComponent {
     wrapperRef = React.createRef();
     componentDidMount() {
-        document.addEventListener("touchend", this.clickOutside, true);
-        document.addEventListener("mousedown", this.clickOutside, true);
-        document.addEventListener("contextmenu", this.clickOutside, true);
+        const eventTarget = this.props.customEventTarget ?? document;
+        eventTarget.addEventListener("pointerdown", this.clickOutside, true);
+        eventTarget.addEventListener("contextmenu", this.clickOutside, true);
     }
     componentWillUnmount() {
-        document.removeEventListener("touchend", this.clickOutside, true);
-        document.removeEventListener("mousedown", this.clickOutside, true);
-        document.removeEventListener("contextmenu", this.clickOutside, true);
+        const eventTarget = this.props.customEventTarget ?? document;
+        eventTarget.removeEventListener("pointerdown", this.clickOutside, true);
+        eventTarget.removeEventListener("contextmenu", this.clickOutside, true);
     }
     clickOutside = (event) => {
         if (this.props.isOutsideClick && !this.props.isOutsideClick(event)) {
@@ -27,7 +27,7 @@ export default class ClickOutsideContainer extends React.PureComponent {
         }
     };
     render() {
-        const { onClickOutside, isOutsideClick, ...rest } = this.props;
+        const { onClickOutside, isOutsideClick, customEventTarget, ...rest } = this.props;
         return (React.createElement("div", { ...rest, ref: this.wrapperRef }, this.props.children));
     }
 }

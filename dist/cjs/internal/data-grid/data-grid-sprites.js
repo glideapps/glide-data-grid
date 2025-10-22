@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SpriteManager = void 0;
 function getColors(variant, theme) {
     if (variant === "normal") {
         return [theme.bgIconHeader, theme.fgIconHeader];
@@ -13,7 +10,7 @@ function getColors(variant, theme) {
     }
 }
 /** @category Columns */
-class SpriteManager {
+export class SpriteManager {
     onSettled;
     spriteMap = new Map();
     headerIcons;
@@ -64,5 +61,4 @@ class SpriteManager {
         }
     }
 }
-exports.SpriteManager = SpriteManager;
 //# sourceMappingURL=data-grid-sprites.js.map

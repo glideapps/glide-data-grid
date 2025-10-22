@@ -1,14 +1,8 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.mergeAndRealizeTheme = exports.useTheme = exports.ThemeContext = exports.getDataEditorTheme = exports.makeCSSStyle = void 0;
-const react_1 = __importDefault(require("react"));
-const color_parser_js_1 = require("../internal/data-grid/color-parser.js");
+import React from "react";
+import { blend } from "../internal/data-grid/color-parser.js";
 // theme variable precidence
 /** @category Theme */
-function makeCSSStyle(theme) {
+export function makeCSSStyle(theme) {
     return {
         "--gdg-accent-color": theme.accentColor,
         "--gdg-accent-fg": theme.accentFg,
@@ -21,6 +15,8 @@ function makeCSSStyle(theme) {
         "--gdg-fg-icon-header": theme.fgIconHeader,
         "--gdg-text-header": theme.textHeader,
         "--gdg-text-group-header": theme.textGroupHeader ?? theme.textHeader,
+        "--gdg-bg-group-header": theme.bgGroupHeader ?? theme.bgHeader,
+        "--gdg-bg-group-header-hovered": theme.bgGroupHeaderHovered ?? theme.bgHeaderHovered,
         "--gdg-text-header-selected": theme.textHeaderSelected,
         "--gdg-bg-cell": theme.bgCell,
         "--gdg-bg-cell-medium": theme.bgCellMedium,
@@ -29,6 +25,9 @@ function makeCSSStyle(theme) {
         "--gdg-bg-header-hovered": theme.bgHeaderHovered,
         "--gdg-bg-bubble": theme.bgBubble,
         "--gdg-bg-bubble-selected": theme.bgBubbleSelected,
+        "--gdg-bubble-height": `${theme.bubbleHeight}px`,
+        "--gdg-bubble-padding": `${theme.bubblePadding}px`,
+        "--gdg-bubble-margin": `${theme.bubbleMargin}px`,
         "--gdg-bg-search-result": theme.bgSearchResult,
         "--gdg-border-color": theme.borderColor,
         "--gdg-horizontal-border-color": theme.horizontalBorderColor ?? theme.borderColor,
@@ -41,6 +40,7 @@ function makeCSSStyle(theme) {
         "--gdg-marker-font-style": theme.markerFontStyle,
         "--gdg-font-family": theme.fontFamily,
         "--gdg-editor-font-size": theme.editorFontSize,
+        "--gdg-checkbox-max-size": `${theme.checkboxMaxSize}px`,
         ...(theme.resizeIndicatorColor === undefined
             ? {}
             : { "--gdg-resize-indicator-color": theme.resizeIndicatorColor }),
@@ -50,7 +50,6 @@ function makeCSSStyle(theme) {
         ...(theme.roundingRadius === undefined ? {} : { "--gdg-rounding-radius": `${theme.roundingRadius}px` }),
     };
 }
-exports.makeCSSStyle = makeCSSStyle;
 const dataEditorBaseTheme = {
     accentColor: "#4F5DFF",
     accentFg: "#FFFFFF",
@@ -71,6 +70,9 @@ const dataEditorBaseTheme = {
     bgHeaderHovered: "#EFEFF1",
     bgBubble: "#EDEDF3",
     bgBubbleSelected: "#FFFFFF",
+    bubbleHeight: 20,
+    bubblePadding: 6,
+    bubbleMargin: 4,
     bgSearchResult: "#fff9e3",
     borderColor: "rgba(115, 116, 131, 0.16)",
     drilldownBorder: "rgba(0, 0, 0, 0)",
@@ -84,20 +86,19 @@ const dataEditorBaseTheme = {
     fontFamily: "Inter, Roboto, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, noto, arial, sans-serif",
     editorFontSize: "13px",
     lineHeight: 1.4, //unitless scaler depends on your font
+    checkboxMaxSize: 18,
 };
 /** @category Theme */
-function getDataEditorTheme() {
+export function getDataEditorTheme() {
     return dataEditorBaseTheme;
 }
-exports.getDataEditorTheme = getDataEditorTheme;
 /** @category Theme */
-exports.ThemeContext = react_1.default.createContext(dataEditorBaseTheme);
+export const ThemeContext = React.createContext(dataEditorBaseTheme);
 /** @category Hooks */
-function useTheme() {
-    return react_1.default.useContext(exports.ThemeContext);
+export function useTheme() {
+    return React.useContext(ThemeContext);
 }
-exports.useTheme = useTheme;
-function mergeAndRealizeTheme(theme, ...overlays) {
+export function mergeAndRealizeTheme(theme, ...overlays) {
     const merged = { ...theme };
     for (const overlay of overlays) {
         if (overlay !== undefined) {
@@ -105,7 +106,7 @@ function mergeAndRealizeTheme(theme, ...overlays) {
                 // eslint-disable-next-line no-prototype-builtins
                 if (overlay.hasOwnProperty(key)) {
                     if (key === "bgCell") {
-                        merged[key] = (0, color_parser_js_1.blend)(overlay[key], merged[key]);
+                        merged[key] = blend(overlay[key], merged[key]);
                     }
                     else {
                         merged[key] = overlay[key];
@@ -131,5 +132,4 @@ function mergeAndRealizeTheme(theme, ...overlays) {
     }
     return merged;
 }
-exports.mergeAndRealizeTheme = mergeAndRealizeTheme;
 //# sourceMappingURL=styles.js.map

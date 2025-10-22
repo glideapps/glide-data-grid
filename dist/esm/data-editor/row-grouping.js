@@ -36,8 +36,9 @@ export function flattenRowGroups(rowGrouping, rows) {
         }
         rowsInGroup--; // the header isn't in the group
         flattened.push({
+            rowIndex: -1, // we will fill this in later
             headerIndex: group.headerIndex,
-            contentIndex: -1,
+            contentIndex: -1, // we will fill this in later
             skip: skipChildren,
             isCollapsed: group.isCollapsed,
             depth: group.depth,
@@ -56,10 +57,13 @@ export function flattenRowGroups(rowGrouping, rows) {
         const nextHeaderIndex = i < expandedGroups.length - 1 ? expandedGroups[i + 1].headerIndex : null;
         processGroup(expandedGroups[i], nextHeaderIndex);
     }
+    let rowIndex = 0;
     let contentIndex = 0;
     for (const g of flattened) {
         g.contentIndex = contentIndex;
         contentIndex += g.rows;
+        g.rowIndex = rowIndex;
+        rowIndex += g.isCollapsed ? 1 : g.rows + 1;
     }
     return flattened
         .filter(x => x.skip === false)
@@ -90,18 +94,20 @@ export function mapRowIndexToPath(row, flattenedRowGroups) {
                 contentIndex: -1,
                 groupRows: group.rows,
             };
-        toGo--;
         if (!group.isCollapsed) {
-            if (toGo < group.rows)
+            if (toGo <= group.rows)
                 return {
-                    path: [...group.path, toGo],
+                    path: [...group.path, toGo - 1],
                     originalIndex: group.headerIndex + toGo,
                     isGroupHeader: false,
-                    groupIndex: toGo,
-                    contentIndex: group.contentIndex + toGo,
+                    groupIndex: toGo - 1,
+                    contentIndex: group.contentIndex + toGo - 1,
                     groupRows: group.rows,
                 };
-            toGo -= group.rows;
+            toGo = toGo - group.rows - 1;
+        }
+        else {
+            toGo--;
         }
     }
     // this shouldn't happen
@@ -118,6 +124,12 @@ export function mapRowIndexToPath(row, flattenedRowGroups) {
 }
 export function useRowGroupingInner(options, rows, rowHeightIn, getRowThemeOverrideIn) {
     const flattenedRowGroups = React.useMemo(() => (options === undefined ? undefined : flattenRowGroups(options, rows)), [options, rows]);
+    const flattenedRowGroupsMap = React.useMemo(() => {
+        return flattenedRowGroups?.reduce((acc, group) => {
+            acc[group.rowIndex] = group;
+            return acc;
+        }, {});
+    }, [flattenedRowGroups]);
     const effectiveRows = React.useMemo(() => {
         if (flattenedRowGroups === undefined)
             return rows;
@@ -129,12 +141,11 @@ export function useRowGroupingInner(options, rows, rowHeightIn, getRowThemeOverr
         if (typeof rowHeightIn === "number" && options.height === rowHeightIn)
             return rowHeightIn;
         return (rowIndex) => {
-            const { isGroupHeader } = mapRowIndexToPath(rowIndex, flattenedRowGroups);
-            if (isGroupHeader)
+            if (flattenedRowGroupsMap?.[rowIndex])
                 return options.height;
             return typeof rowHeightIn === "number" ? rowHeightIn : rowHeightIn(rowIndex);
         };
-    }, [flattenedRowGroups, options, rowHeightIn]);
+    }, [flattenedRowGroupsMap, options, rowHeightIn]);
     const rowNumberMapperOut = React.useCallback((row) => {
         if (flattenedRowGroups === undefined)
             return row;

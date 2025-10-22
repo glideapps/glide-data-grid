@@ -49,8 +49,12 @@ const DataGridSearch = p => {
         if (searchHandle.current !== undefined) {
             window.cancelAnimationFrame(searchHandle.current);
             searchHandle.current = undefined;
+        }
+        // Always abort and replace the controller to ensure a fresh, non-aborted signal
+        if (abortControllerRef.current !== undefined) {
             abortControllerRef.current.abort();
         }
+        abortControllerRef.current = new AbortController();
     }, []);
     const cellYOffsetRef = React.useRef(cellYOffset);
     cellYOffsetRef.current = cellYOffset;
@@ -164,14 +168,28 @@ const DataGridSearch = p => {
         }
     }, [beginSearch, cancelSearch, setSearchString, searchResultsIn]);
     React.useEffect(() => {
-        if (showSearch && searchInputRef.current !== null) {
-            setSearchString("");
+        if (searchInputRef.current === null)
+            return;
+        // Reset search whenever search status changes:
+        setSearchString("");
+        setSearchStatus(undefined);
+        if (searchResultsInner.length > 0) {
+            setSearchResultsInner([]);
+            onSearchResultsChanged?.([], -1);
+        }
+        if (showSearch) {
             searchInputRef.current.focus({ preventScroll: true });
         }
-    }, [showSearch, searchInputRef, setSearchString]);
+        else {
+            // Cancel search when it gets hidden:
+            cancelSearch();
+        }
+        // Only re-run when showSearch changes:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showSearch, searchInputRef]);
     const onNext = React.useCallback((ev) => {
         ev?.stopPropagation?.();
-        if (searchStatus === undefined)
+        if (searchStatus === undefined || searchStatus.results === 0)
             return;
         const newIndex = (searchStatus.selectedIndex + 1) % searchStatus.results;
         setSearchStatus({
@@ -182,7 +200,7 @@ const DataGridSearch = p => {
     }, [searchStatus, onSearchResultsChanged, searchResults]);
     const onPrev = React.useCallback((ev) => {
         ev?.stopPropagation?.();
-        if (searchStatus === undefined)
+        if (searchStatus === undefined || searchStatus.results === 0)
             return;
         let newIndex = (searchStatus.selectedIndex - 1) % searchStatus.results;
         if (newIndex < 0)
@@ -241,16 +259,16 @@ const DataGridSearch = p => {
         const cancelEvent = (ev) => {
             ev.stopPropagation();
         };
-        const rowsSearchedProgress = Math.floor(((searchStatus?.rowsSearched ?? 0) / rows) * 100);
+        const rowsSearchedProgress = rows > 0 ? Math.floor(((searchStatus?.rowsSearched ?? 0) / rows) * 100) : 0;
         const progressStyle = {
             width: `${rowsSearchedProgress}%`,
         };
-        return (React.createElement(SearchWrapper, { className: showSearch ? "" : "out", onMouseDown: cancelEvent, onMouseMove: cancelEvent, onMouseUp: cancelEvent, onClick: cancelEvent },
+        return (React.createElement(SearchWrapper, { className: "gdg-search-bar" + (showSearch ? "" : " out"), onMouseDown: cancelEvent, onMouseMove: cancelEvent, onMouseUp: cancelEvent, onClick: cancelEvent },
             React.createElement("div", { className: "gdg-search-bar-inner" },
                 React.createElement("input", { id: searchID, "aria-hidden": !showSearch, "data-testid": "search-input", ref: searchInputRef, onChange: onSearchChange, value: searchString, tabIndex: showSearch ? undefined : -1, onKeyDownCapture: onSearchKeyDown }),
-                React.createElement("button", { "aria-label": "Previous Result", "aria-hidden": !showSearch, tabIndex: showSearch ? undefined : -1, onClick: onPrev, disabled: (searchStatus?.results ?? 0) === 0 }, upArrow),
-                React.createElement("button", { "aria-label": "Next Result", "aria-hidden": !showSearch, tabIndex: showSearch ? undefined : -1, onClick: onNext, disabled: (searchStatus?.results ?? 0) === 0 }, downArrow),
-                onSearchClose !== undefined && (React.createElement("button", { "aria-label": "Close Search", "aria-hidden": !showSearch, "data-testid": "search-close-button", tabIndex: showSearch ? undefined : -1, onClick: onClose }, closeX))),
+                React.createElement("button", { type: "button", "aria-label": "Previous Result", "aria-hidden": !showSearch, tabIndex: showSearch ? undefined : -1, onClick: onPrev, disabled: (searchStatus?.results ?? 0) === 0 }, upArrow),
+                React.createElement("button", { type: "button", "aria-label": "Next Result", "aria-hidden": !showSearch, tabIndex: showSearch ? undefined : -1, onClick: onNext, disabled: (searchStatus?.results ?? 0) === 0 }, downArrow),
+                onSearchClose !== undefined && (React.createElement("button", { type: "button", "aria-label": "Close Search", "aria-hidden": !showSearch, "data-testid": "search-close-button", tabIndex: showSearch ? undefined : -1, onClick: onClose }, closeX))),
             searchStatus !== undefined ? (React.createElement(React.Fragment, null,
                 React.createElement("div", { className: "gdg-search-status" },
                     React.createElement("div", { "data-testid": "search-result-area" }, resultString)),

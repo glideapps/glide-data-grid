@@ -1,27 +1,27 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.drawFillHandle = exports.drawColumnResizeOutline = exports.drawHighlightRings = void 0;
-const data_grid_lib_js_1 = require("./data-grid-lib.js");
-const color_parser_js_1 = require("../color-parser.js");
-const math_js_1 = require("../../../common/math.js");
-const data_grid_render_walk_js_1 = require("./data-grid-render.walk.js");
-function drawHighlightRings(ctx, width, height, cellXOffset, cellYOffset, translateX, translateY, mappedColumns, freezeColumns, headerHeight, groupHeaderHeight, rowHeight, freezeTrailingRows, rows, allHighlightRegions, theme) {
+/* eslint-disable sonarjs/no-duplicate-string */
+/* eslint-disable unicorn/no-for-loop */
+import { DEFAULT_FILL_HANDLE } from "../data-grid-types.js";
+import { getStickyWidth, computeBounds, getFreezeTrailingHeight } from "./data-grid-lib.js";
+import { blend, withAlpha } from "../color-parser.js";
+import { hugRectToTarget, intersectRect, rectContains, splitRectIntoRegions } from "../../../common/math.js";
+import { getSpanBounds, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
+export function drawHighlightRings(ctx, width, height, cellXOffset, cellYOffset, translateX, translateY, mappedColumns, freezeColumns, headerHeight, groupHeaderHeight, rowHeight, freezeTrailingRows, rows, allHighlightRegions, theme) {
     const highlightRegions = allHighlightRegions?.filter(x => x.style !== "no-outline");
     if (highlightRegions === undefined || highlightRegions.length === 0)
         return undefined;
-    const freezeLeft = (0, data_grid_lib_js_1.getStickyWidth)(mappedColumns);
-    const freezeBottom = (0, data_grid_lib_js_1.getFreezeTrailingHeight)(rows, freezeTrailingRows, rowHeight);
+    const freezeLeft = getStickyWidth(mappedColumns);
+    const freezeBottom = getFreezeTrailingHeight(rows, freezeTrailingRows, rowHeight);
     const splitIndicies = [freezeColumns, 0, mappedColumns.length, rows - freezeTrailingRows];
     const splitLocations = [freezeLeft, 0, width, height - freezeBottom];
     const drawRects = highlightRegions.map(h => {
         const r = h.range;
         const style = h.style ?? "dashed";
-        return (0, math_js_1.splitRectIntoRegions)(r, splitIndicies, width, height, splitLocations).map(arg => {
+        return splitRectIntoRegions(r, splitIndicies, width, height, splitLocations).map(arg => {
             const rect = arg.rect;
-            const topLeftBounds = (0, data_grid_lib_js_1.computeBounds)(rect.x, rect.y, width, height, groupHeaderHeight, headerHeight + groupHeaderHeight, cellXOffset, cellYOffset, translateX, translateY, rows, freezeColumns, freezeTrailingRows, mappedColumns, rowHeight);
+            const topLeftBounds = computeBounds(rect.x, rect.y, width, height, groupHeaderHeight, headerHeight + groupHeaderHeight, cellXOffset, cellYOffset, translateX, translateY, rows, freezeColumns, freezeTrailingRows, mappedColumns, rowHeight);
             const bottomRightBounds = rect.width === 1 && rect.height === 1
                 ? topLeftBounds
-                : (0, data_grid_lib_js_1.computeBounds)(rect.x + rect.width - 1, rect.y + rect.height - 1, width, height, groupHeaderHeight, headerHeight + groupHeaderHeight, cellXOffset, cellYOffset, translateX, translateY, rows, freezeColumns, freezeTrailingRows, mappedColumns, rowHeight);
+                : computeBounds(rect.x + rect.width - 1, rect.y + rect.height - 1, width, height, groupHeaderHeight, headerHeight + groupHeaderHeight, cellXOffset, cellYOffset, translateX, translateY, rows, freezeColumns, freezeTrailingRows, mappedColumns, rowHeight);
             if (rect.x + rect.width >= mappedColumns.length) {
                 bottomRightBounds.width -= 1;
             }
@@ -32,7 +32,7 @@ function drawHighlightRings(ctx, width, height, cellXOffset, cellYOffset, transl
                 color: h.color,
                 style,
                 clip: arg.clip,
-                rect: (0, math_js_1.hugRectToTarget)({
+                rect: hugRectToTarget({
                     x: topLeftBounds.x,
                     y: topLeftBounds.y,
                     width: bottomRightBounds.x + bottomRightBounds.width - topLeftBounds.x,
@@ -47,9 +47,10 @@ function drawHighlightRings(ctx, width, height, cellXOffset, cellYOffset, transl
         for (const dr of drawRects) {
             for (const s of dr) {
                 if (s?.rect !== undefined &&
-                    (0, math_js_1.intersectRect)(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)) {
+                    intersectRect(0, 0, width, height, s.rect.x, s.rect.y, s.rect.width, s.rect.height)) {
                     const wasDashed = dashed;
-                    const needsClip = !(0, math_js_1.rectContains)(s.clip, s.rect);
+                    const needsClip = !rectContains(s.clip, s.rect);
+                    ctx.beginPath();
                     if (needsClip) {
                         ctx.save();
                         ctx.rect(s.clip.x, s.clip.y, s.clip.width, s.clip.height);
@@ -65,8 +66,9 @@ function drawHighlightRings(ctx, width, height, cellXOffset, cellYOffset, transl
                     }
                     ctx.strokeStyle =
                         s.style === "solid-outline"
-                            ? (0, color_parser_js_1.blend)((0, color_parser_js_1.blend)(s.color, theme.borderColor), theme.bgCell)
-                            : (0, color_parser_js_1.withAlpha)(s.color, 1);
+                            ? blend(blend(s.color, theme.borderColor), theme.bgCell)
+                            : withAlpha(s.color, 1);
+                    ctx.closePath();
                     ctx.strokeRect(s.rect.x + 0.5, s.rect.y + 0.5, s.rect.width - 1, s.rect.height - 1);
                     if (needsClip) {
                         ctx.restore();
@@ -82,8 +84,7 @@ function drawHighlightRings(ctx, width, height, cellXOffset, cellYOffset, transl
     drawCb();
     return drawCb;
 }
-exports.drawHighlightRings = drawHighlightRings;
-function drawColumnResizeOutline(ctx, yOffset, xOffset, height, style) {
+export function drawColumnResizeOutline(ctx, yOffset, xOffset, height, style) {
     ctx.beginPath();
     ctx.moveTo(yOffset, xOffset);
     ctx.lineTo(yOffset, height);
@@ -92,10 +93,13 @@ function drawColumnResizeOutline(ctx, yOffset, xOffset, height, style) {
     ctx.stroke();
     ctx.globalAlpha = 1;
 }
-exports.drawColumnResizeOutline = drawColumnResizeOutline;
-function drawFillHandle(ctx, width, height, cellYOffset, translateX, translateY, effectiveCols, allColumns, theme, totalHeaderHeight, selectedCell, getRowHeight, getCellContent, freezeTrailingRows, hasAppendRow, fillHandle, rows) {
+export function drawFillHandle(ctx, width, height, cellYOffset, translateX, translateY, effectiveCols, allColumns, theme, totalHeaderHeight, selectedCell, getRowHeight, getCellContent, freezeTrailingRows, hasAppendRow, fillHandle, rows) {
     if (selectedCell.current === undefined)
         return undefined;
+    const drawFill = fillHandle !== false && fillHandle !== undefined;
+    if (!drawFill)
+        return undefined;
+    const fill = typeof fillHandle === "object" ? { ...DEFAULT_FILL_HANDLE, ...fillHandle } : DEFAULT_FILL_HANDLE;
     const range = selectedCell.current.range;
     const currentItem = selectedCell.current.cell;
     const fillHandleTarget = [range.x + range.width - 1, range.y + range.height - 1];
@@ -110,11 +114,11 @@ function drawFillHandle(ctx, width, height, cellYOffset, translateX, translateY,
     const targetColSpan = cell.span ?? [targetCol, targetCol];
     const isStickyRow = targetRow >= rows - freezeTrailingRows;
     const stickRowHeight = freezeTrailingRows > 0 && !isStickyRow
-        ? (0, data_grid_lib_js_1.getFreezeTrailingHeight)(rows, freezeTrailingRows, getRowHeight) - 1
+        ? getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) - 1
         : 0;
     const fillHandleRow = fillHandleTarget[1];
     let drawHandleCb = undefined;
-    (0, data_grid_render_walk_js_1.walkColumns)(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, (col, drawX, colDrawY, clipX, startRow) => {
+    walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, (col, drawX, colDrawY, clipX, startRow) => {
         clipX;
         if (col.sticky && targetCol > col.sourceIndex)
             return;
@@ -125,20 +129,20 @@ function drawFillHandle(ctx, width, height, cellYOffset, translateX, translateY,
             // we dont need to do any drawing on this column but may yet need to draw
             return;
         }
-        (0, data_grid_render_walk_js_1.walkRowsInCol)(startRow, colDrawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, undefined, (drawY, row, rh) => {
+        walkRowsInCol(startRow, colDrawY, height, rows, getRowHeight, freezeTrailingRows, hasAppendRow, undefined, (drawY, row, rh) => {
             if (row !== targetRow && row !== fillHandleRow)
                 return;
             let cellX = drawX;
             let cellWidth = col.width;
             if (cell.span !== undefined) {
-                const areas = (0, data_grid_render_walk_js_1.getSpanBounds)(cell.span, drawX, drawY, col.width, rh, col, allColumns);
+                const areas = getSpanBounds(cell.span, drawX, drawY, col.width, rh, col, allColumns);
                 const area = col.sticky ? areas[0] : areas[1];
                 if (area !== undefined) {
                     cellX = area.x;
                     cellWidth = area.width;
                 }
             }
-            const doHandle = row === fillHandleRow && isFillHandleCol && fillHandle;
+            const doHandle = row === fillHandleRow && isFillHandleCol && drawFill;
             if (doHandle) {
                 drawHandleCb = () => {
                     if (clipX > cellX && !col.sticky) {
@@ -146,10 +150,37 @@ function drawFillHandle(ctx, width, height, cellYOffset, translateX, translateY,
                         ctx.rect(clipX, 0, width - clipX, height);
                         ctx.clip();
                     }
+                    // Draw a larger, outlined fill handle similar to Excel / Google Sheets.
+                    const size = fill.size;
+                    const half = size / 2;
+                    // Place the handle so its center sits on the bottom-right corner of the cell,
+                    // plus any configured offsets (fill.offsetX, fill.offsetY).
+                    // Offset by half pixel to align with grid lines.
+                    const hx = cellX + cellWidth + fill.offsetX - half + 0.5;
+                    const hy = drawY + rh + fill.offsetY - half + 0.5;
                     ctx.beginPath();
-                    ctx.rect(cellX + cellWidth - 4, drawY + rh - 4, 4, 4);
+                    if (fill.shape === "circle") {
+                        ctx.arc(hx + half, hy + half, half, 0, Math.PI * 2);
+                    }
+                    else {
+                        ctx.rect(hx, hy, size, size);
+                    }
+                    // Fill
                     ctx.fillStyle = col.themeOverride?.accentColor ?? theme.accentColor;
                     ctx.fill();
+                    // Outline (drawn so it doesn't eat into the filled area)
+                    if (fill.outline > 0) {
+                        ctx.lineWidth = fill.outline;
+                        ctx.strokeStyle = theme.bgCell;
+                        if (fill.shape === "circle") {
+                            ctx.beginPath();
+                            ctx.arc(hx + half, hy + half, half + fill.outline / 2, 0, Math.PI * 2);
+                            ctx.stroke();
+                        }
+                        else {
+                            ctx.strokeRect(hx - fill.outline / 2, hy - fill.outline / 2, size + fill.outline, size + fill.outline);
+                        }
+                    }
                 };
             }
             return drawHandleCb !== undefined;
@@ -169,5 +200,4 @@ function drawFillHandle(ctx, width, height, cellYOffset, translateX, translateY,
     result();
     return result;
 }
-exports.drawFillHandle = drawFillHandle;
 //# sourceMappingURL=data-grid.render.rings.js.map

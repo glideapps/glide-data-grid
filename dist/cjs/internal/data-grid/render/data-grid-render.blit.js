@@ -1,12 +1,9 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.computeCanBlit = exports.blitResizedCol = exports.blitLastFrame = void 0;
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable unicorn/no-for-loop */
-const support_js_1 = require("../../../common/support.js");
-const data_grid_lib_js_1 = require("./data-grid-lib.js");
-const data_grid_render_walk_js_1 = require("./data-grid-render.walk.js");
-function blitLastFrame(ctx, blitSource, blitSourceScroll, targetScroll, last, cellXOffset, cellYOffset, translateX, translateY, freezeTrailingRows, width, height, rows, totalHeaderHeight, dpr, mappedColumns, effectiveCols, getRowHeight, doubleBuffer) {
+import { deepEqual } from "../../../common/support.js";
+import { getStickyWidth, getFreezeTrailingHeight } from "./data-grid-lib.js";
+import { walkColumns } from "./data-grid-render.walk.js";
+export function blitLastFrame(ctx, blitSource, blitSourceScroll, targetScroll, last, cellXOffset, cellYOffset, translateX, translateY, freezeTrailingRows, width, height, rows, totalHeaderHeight, dpr, mappedColumns, effectiveCols, getRowHeight, doubleBuffer) {
     const drawRegions = [];
     ctx.imageSmoothingEnabled = false;
     const minY = Math.min(last.cellYOffset, cellYOffset);
@@ -34,13 +31,13 @@ function blitLastFrame(ctx, blitSource, blitSourceScroll, targetScroll, last, ce
         deltaX = -deltaX;
     }
     deltaX += translateX - last.translateX;
-    const stickyWidth = (0, data_grid_lib_js_1.getStickyWidth)(effectiveCols);
+    const stickyWidth = getStickyWidth(effectiveCols);
     if (deltaX !== 0 && deltaY !== 0) {
         return {
             regions: [],
         };
     }
-    const freezeTrailingRowsHeight = freezeTrailingRows > 0 ? (0, data_grid_lib_js_1.getFreezeTrailingHeight)(rows, freezeTrailingRows, getRowHeight) : 0;
+    const freezeTrailingRowsHeight = freezeTrailingRows > 0 ? getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) : 0;
     const blitWidth = width - stickyWidth - Math.abs(deltaX);
     const blitHeight = height - totalHeaderHeight - freezeTrailingRowsHeight - Math.abs(deltaY) - 1;
     if (blitWidth > 150 && blitHeight > 150) {
@@ -91,7 +88,7 @@ function blitLastFrame(ctx, blitSource, blitSourceScroll, targetScroll, last, ce
             drawRegions.push({
                 x: stickyWidth - 1,
                 y: 0,
-                width: deltaX + 2,
+                width: deltaX + 2, // extra width to account for first col not drawing a left side border
                 height: height,
             });
         }
@@ -138,8 +135,7 @@ function blitLastFrame(ctx, blitSource, blitSourceScroll, targetScroll, last, ce
         regions: drawRegions,
     };
 }
-exports.blitLastFrame = blitLastFrame;
-function blitResizedCol(last, cellXOffset, cellYOffset, translateX, translateY, width, height, totalHeaderHeight, effectiveCols, resizedIndex) {
+export function blitResizedCol(last, cellXOffset, cellYOffset, translateX, translateY, width, height, totalHeaderHeight, effectiveCols, resizedIndex) {
     const drawRegions = [];
     // ctx.imageSmoothingEnabled = false;
     if (cellXOffset !== last.cellXOffset ||
@@ -148,7 +144,7 @@ function blitResizedCol(last, cellXOffset, cellYOffset, translateX, translateY, 
         translateY !== last.translateY) {
         return drawRegions;
     }
-    (0, data_grid_render_walk_js_1.walkColumns)(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, _drawY, clipX) => {
+    walkColumns(effectiveCols, cellYOffset, translateX, translateY, totalHeaderHeight, (c, drawX, _drawY, clipX) => {
         if (c.sourceIndex === resizedIndex) {
             const x = Math.max(drawX, clipX) + 1;
             drawRegions.push({
@@ -162,8 +158,7 @@ function blitResizedCol(last, cellXOffset, cellYOffset, translateX, translateY, 
     });
     return drawRegions;
 }
-exports.blitResizedCol = blitResizedCol;
-function computeCanBlit(current, last) {
+export function computeCanBlit(current, last) {
     if (last === undefined)
         return false;
     if (current.width !== last.width ||
@@ -198,7 +193,7 @@ function computeCanBlit(current, last) {
         for (let i = 0; i < current.mappedColumns.length; i++) {
             const curCol = current.mappedColumns[i];
             const lastCol = last.mappedColumns[i];
-            if ((0, support_js_1.deepEqual)(curCol, lastCol))
+            if (deepEqual(curCol, lastCol))
                 continue;
             // two columns changed, abort
             if (resized !== undefined)
@@ -208,7 +203,7 @@ function computeCanBlit(current, last) {
             const { width, ...curRest } = curCol;
             const { width: lastWidth, ...lastRest } = lastCol;
             // more than width changed, abort
-            if (!(0, support_js_1.deepEqual)(curRest, lastRest))
+            if (!deepEqual(curRest, lastRest))
                 return false;
             resized = i;
         }
@@ -220,5 +215,4 @@ function computeCanBlit(current, last) {
     }
     return true;
 }
-exports.computeCanBlit = computeCanBlit;
 //# sourceMappingURL=data-grid-render.blit.js.map

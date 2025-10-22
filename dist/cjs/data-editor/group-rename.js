@@ -1,19 +1,8 @@
-"use strict";
-
-var __importDefault = this && this.__importDefault || function (mod) {
-  return mod && mod.__esModule ? mod : {
-    "default": mod
-  };
-};
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.GroupRename = void 0;
-const react_1 = __importDefault(require("react"));
-const react_2 = require("@linaria/react");
-const click_outside_container_js_1 = __importDefault(require("../internal/click-outside-container/click-outside-container.js"));
+import React from "react";
+import { styled } from "@linaria/react";
+import ClickOutsideContainer from "../internal/click-outside-container/click-outside-container.js";
 const _exp = /*#__PURE__*/() => p => Math.max(16, p.targetHeight - 10);
-const RenameInput = /*#__PURE__*/react_2.styled('input')({
+const RenameInput = /*#__PURE__*/styled('input')({
   name: "RenameInput",
   class: "gdg-r17m35ur",
   propsAsIs: false,
@@ -21,7 +10,7 @@ const RenameInput = /*#__PURE__*/react_2.styled('input')({
     "r17m35ur-0": [_exp(), "px"]
   }
 });
-const GroupRename = p => {
+export const GroupRename = p => {
   const {
     bounds,
     group,
@@ -29,8 +18,8 @@ const GroupRename = p => {
     canvasBounds,
     onFinish
   } = p;
-  const [value, setValue] = react_1.default.useState(group);
-  return react_1.default.createElement(click_outside_container_js_1.default, {
+  const [value, setValue] = React.useState(group);
+  return React.createElement(ClickOutsideContainer, {
     style: {
       position: "absolute",
       left: bounds.x - canvasBounds.left + 1,
@@ -40,7 +29,7 @@ const GroupRename = p => {
     },
     className: "gdg-c1tqibwd",
     onClickOutside: onClose
-  }, react_1.default.createElement(RenameInput, {
+  }, React.createElement(RenameInput, {
     targetHeight: bounds.height,
     "data-testid": "group-rename-input",
     value: value,
@@ -57,5 +46,4 @@ const GroupRename = p => {
     autoFocus: true
   }));
 };
-exports.GroupRename = GroupRename;
 

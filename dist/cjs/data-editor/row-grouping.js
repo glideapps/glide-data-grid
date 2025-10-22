@@ -1,12 +1,6 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.useRowGroupingInner = exports.mapRowIndexToPath = exports.flattenRowGroups = exports.expandRowGroups = void 0;
-const react_1 = __importDefault(require("react"));
-const utils_js_1 = require("../common/utils.js");
-function expandRowGroups(groups) {
+import React from "react";
+import { whenDefined } from "../common/utils.js";
+export function expandRowGroups(groups) {
     function processGroup(group, depth, path) {
         if (typeof group === "number") {
             return {
@@ -33,8 +27,7 @@ function expandRowGroups(groups) {
     // Sort the top-level expanded groups
     return expanded.sort((a, b) => a.headerIndex - b.headerIndex);
 }
-exports.expandRowGroups = expandRowGroups;
-function flattenRowGroups(rowGrouping, rows) {
+export function flattenRowGroups(rowGrouping, rows) {
     const flattened = [];
     function processGroup(group, nextHeaderIndex, skipChildren = false) {
         let rowsInGroup = nextHeaderIndex !== null ? nextHeaderIndex - group.headerIndex : rows - group.headerIndex;
@@ -43,8 +36,9 @@ function flattenRowGroups(rowGrouping, rows) {
         }
         rowsInGroup--; // the header isn't in the group
         flattened.push({
+            rowIndex: -1, // we will fill this in later
             headerIndex: group.headerIndex,
-            contentIndex: -1,
+            contentIndex: -1, // we will fill this in later
             skip: skipChildren,
             isCollapsed: group.isCollapsed,
             depth: group.depth,
@@ -63,10 +57,13 @@ function flattenRowGroups(rowGrouping, rows) {
         const nextHeaderIndex = i < expandedGroups.length - 1 ? expandedGroups[i + 1].headerIndex : null;
         processGroup(expandedGroups[i], nextHeaderIndex);
     }
+    let rowIndex = 0;
     let contentIndex = 0;
     for (const g of flattened) {
         g.contentIndex = contentIndex;
         contentIndex += g.rows;
+        g.rowIndex = rowIndex;
+        rowIndex += g.isCollapsed ? 1 : g.rows + 1;
     }
     return flattened
         .filter(x => x.skip === false)
@@ -75,9 +72,8 @@ function flattenRowGroups(rowGrouping, rows) {
         return rest;
     });
 }
-exports.flattenRowGroups = flattenRowGroups;
 // grid relative index to path and other details
-function mapRowIndexToPath(row, flattenedRowGroups) {
+export function mapRowIndexToPath(row, flattenedRowGroups) {
     if (flattenedRowGroups === undefined || flattenRowGroups.length === 0)
         return {
             path: [row],
@@ -98,18 +94,20 @@ function mapRowIndexToPath(row, flattenedRowGroups) {
                 contentIndex: -1,
                 groupRows: group.rows,
             };
-        toGo--;
         if (!group.isCollapsed) {
-            if (toGo < group.rows)
+            if (toGo <= group.rows)
                 return {
-                    path: [...group.path, toGo],
+                    path: [...group.path, toGo - 1],
                     originalIndex: group.headerIndex + toGo,
                     isGroupHeader: false,
-                    groupIndex: toGo,
-                    contentIndex: group.contentIndex + toGo,
+                    groupIndex: toGo - 1,
+                    contentIndex: group.contentIndex + toGo - 1,
                     groupRows: group.rows,
                 };
-            toGo -= group.rows;
+            toGo = toGo - group.rows - 1;
+        }
+        else {
+            toGo--;
         }
     }
     // this shouldn't happen
@@ -124,27 +122,31 @@ function mapRowIndexToPath(row, flattenedRowGroups) {
         groupRows: -1,
     };
 }
-exports.mapRowIndexToPath = mapRowIndexToPath;
-function useRowGroupingInner(options, rows, rowHeightIn, getRowThemeOverrideIn) {
-    const flattenedRowGroups = react_1.default.useMemo(() => (options === undefined ? undefined : flattenRowGroups(options, rows)), [options, rows]);
-    const effectiveRows = react_1.default.useMemo(() => {
+export function useRowGroupingInner(options, rows, rowHeightIn, getRowThemeOverrideIn) {
+    const flattenedRowGroups = React.useMemo(() => (options === undefined ? undefined : flattenRowGroups(options, rows)), [options, rows]);
+    const flattenedRowGroupsMap = React.useMemo(() => {
+        return flattenedRowGroups?.reduce((acc, group) => {
+            acc[group.rowIndex] = group;
+            return acc;
+        }, {});
+    }, [flattenedRowGroups]);
+    const effectiveRows = React.useMemo(() => {
         if (flattenedRowGroups === undefined)
             return rows;
         return flattenedRowGroups.reduce((acc, group) => acc + (group.isCollapsed ? 1 : group.rows + 1), 0);
     }, [flattenedRowGroups, rows]);
-    const rowHeight = react_1.default.useMemo(() => {
+    const rowHeight = React.useMemo(() => {
         if (options === undefined)
             return rowHeightIn;
         if (typeof rowHeightIn === "number" && options.height === rowHeightIn)
             return rowHeightIn;
         return (rowIndex) => {
-            const { isGroupHeader } = mapRowIndexToPath(rowIndex, flattenedRowGroups);
-            if (isGroupHeader)
+            if (flattenedRowGroupsMap?.[rowIndex])
                 return options.height;
             return typeof rowHeightIn === "number" ? rowHeightIn : rowHeightIn(rowIndex);
         };
-    }, [flattenedRowGroups, options, rowHeightIn]);
-    const rowNumberMapperOut = react_1.default.useCallback((row) => {
+    }, [flattenedRowGroupsMap, options, rowHeightIn]);
+    const rowNumberMapperOut = React.useCallback((row) => {
         if (flattenedRowGroups === undefined)
             return row;
         let toGo = row;
@@ -160,7 +162,7 @@ function useRowGroupingInner(options, rows, rowHeightIn, getRowThemeOverrideIn) 
         }
         return row;
     }, [flattenedRowGroups]);
-    const getRowThemeOverride = (0, utils_js_1.whenDefined)(getRowThemeOverrideIn ?? options?.themeOverride, react_1.default.useCallback((row) => {
+    const getRowThemeOverride = whenDefined(getRowThemeOverrideIn ?? options?.themeOverride, React.useCallback((row) => {
         if (options === undefined)
             return getRowThemeOverrideIn?.(row, row, row);
         if (getRowThemeOverrideIn === undefined && options?.themeOverride === undefined)
@@ -184,5 +186,4 @@ function useRowGroupingInner(options, rows, rowHeightIn, getRowThemeOverrideIn) 
         getRowThemeOverride,
     };
 }
-exports.useRowGroupingInner = useRowGroupingInner;
 //# sourceMappingURL=row-grouping.js.map

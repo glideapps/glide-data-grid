@@ -1,13 +1,15 @@
-import { type GridCell, BooleanEmpty, BooleanIndeterminate } from "../internal/data-grid/data-grid-types.js";
+import { BooleanEmpty, BooleanIndeterminate, type GridCell } from "../internal/data-grid/data-grid-types.js";
 type StringArrayCellBuffer = {
     formatted: string[];
     rawValue: string[];
     format: "string-array";
+    doNotEscape?: boolean;
 };
 type BasicCellBuffer = {
     formatted: string;
     rawValue: string | number | boolean | BooleanEmpty | BooleanIndeterminate | undefined;
     format: "string" | "number" | "boolean" | "url";
+    doNotEscape?: boolean;
 };
 export type CellBuffer = StringArrayCellBuffer | BasicCellBuffer;
 export type CopyBuffer = CellBuffer[][];
