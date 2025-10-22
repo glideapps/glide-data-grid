@@ -1,1 +1,0 @@
-export declare const ImageOverlayEditorStyle: import("@linaria/react").StyledComponent<import("react").ClassAttributes<HTMLDivElement> & import("react").HTMLAttributes<HTMLDivElement> & Record<never, unknown>>;

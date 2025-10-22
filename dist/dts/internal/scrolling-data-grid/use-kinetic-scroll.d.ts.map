@@ -1,1 +1,0 @@
-{"version":3,"file":"use-kinetic-scroll.d.ts","sourceRoot":"","sources":["../../../../src/internal/scrolling-data-grid/use-kinetic-scroll.ts"],"names":[],"mappings":"AAEA,QAAA,MAAM,gBAAgB,GAClB,WAAW,OAAO,EAClB,UAAU,CAAC,UAAU,EAAE,MAAM,EAAE,SAAS,EAAE,MAAM,KAAK,IAAI,EACzD,gBAAgB,KAAK,CAAC,gBAAgB,CAAC,cAAc,GAAG,IAAI,CAAC,SAsEhE,CAAC;AAEF,eAAe,gBAAgB,CAAC"}

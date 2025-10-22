@@ -1,2 +1,0 @@
-export declare const SearchWrapper: import("@linaria/react").StyledComponent<import("react").ClassAttributes<HTMLDivElement> & import("react").HTMLAttributes<HTMLDivElement> & Record<never, unknown>>;
-//# sourceMappingURL=data-grid-search-style.d.ts.map
