@@ -1,45 +1,11 @@
 # Basic Usage
 
-## HTML/CSS Prerequisites
-
-The Grid depends on there being a root level "portal" div in your HTML. Insert this snippet as the last child of your `<body>` tag:
-
-```HTML
-<div id="portal" style="position: fixed; left: 0; top: 0; z-index: 9999;" />
-```
-
-or you can create a portal element yourself using the `createPortal` function from `react-dom` and pass it to the DataEditor via the `portalElementRef` prop.
-
-```jsx
-const portalRef = useRef(null);
-<>
-  {
-    createPortal(
-      <div ref={portalRef} style="position: fixed; left: 0; top: 0; z-index: 9999;" />,
-      document.body
-    )
-  }
-  <DataEditor width={500} height={300} portalElementRef={portalRef} {...props} />
-</>
-```
-
-Once you've got that done, the easiest way to use the Data Grid is to give it a fixed size:
-
-```jsx
-<DataEditor width={500} height={300} {...props} />
-```
-
 ## Changes to your data
 
 The Grid will never change any of your underlying data. You have to do so yourself when one of the callbacks is invoked. For example, when the user edits the value in a cell, the Grid will invoke the `onCellEdited` callback. If you don't implement that callback, or if it doesn't change the undelying data to the new value, the Grid will keep displaying the old value.
 
 Note that there is currently no way to tell the grid that data has changed. It has to be forced to redraw by passing a different object to the `getCellContent` property. This triggers the entire grid to redraw. You should avoid changing the `getCellContent` object ID as much as possible otherwise.
 
-If you want to use the default Image overlay preview you must remember to include the react-responsive-carousel css file or it will not function correctly. This should be available in your node-modules.
-
-```ts
-import "react-responsive-carousel/lib/styles/carousel.min.css";
-```
 
 ## A note on col/row values
 
