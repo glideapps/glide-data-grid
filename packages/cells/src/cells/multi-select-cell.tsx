@@ -59,7 +59,7 @@ const PortalWrap = styled.div`
     color: var(--gdg-text-dark);
 
     > div {
-        border-radius: 4px;
+        border-radius: var(--gdg-rounding-radius, 4px);
         border: 1px solid var(--gdg-border-color);
     }
 `;
