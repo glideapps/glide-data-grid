@@ -73,7 +73,7 @@
         "@glideapps/ts-helper": "6.0.0",
         "@skypack/package-check": "^0.2.2",
         "@vitest/coverage-v8": "^0.34.6",
-        "eslint": "^8.57.1",
+        "eslint": "^9.38.0",
         "react-resize-detector": "^12.1.0",
         "tsc-esm-fix": "^3.1.2",
         "typedoc": "^0.28.5"
