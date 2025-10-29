@@ -29,6 +29,7 @@ import {
     Context,
     standardBeforeEach,
     standardAfterEach,
+    makeCell,
 } from "./test-utils.js";
 
 describe("data-editor", () => {
@@ -4941,5 +4942,480 @@ describe("data-editor", () => {
             rows: CompactSelection.fromSingleSelection([1, 5]),
             current: undefined,
         });
+    });
+
+    test("Cell renderer onKeyDown should be called with correct parameters", async () => {
+        const mockOnKeyDown = vi.fn();
+        const customRenderer = {
+            kind: GridCellKind.Custom,
+            isMatch: (c: GridCell): c is CustomCell => c.kind === GridCellKind.Custom,
+            draw: () => true,
+            onKeyDown: mockOnKeyDown,
+        };
+
+        vi.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                customRenderers={[customRenderer]}
+                getCellContent={() => {
+                    return {
+                        kind: GridCellKind.Custom,
+                        allowOverlay: false,
+                        copyData: "",
+                        data: { value: 'custom-cell' },
+                    };
+                }}
+            />,
+            { wrapper: Context }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        // Click on cell [1, 1]
+        sendClick(canvas, {
+            clientX: 300, // Col B (index 1)
+            clientY: 36 + 32 + 16, // Row 1
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        // Press a key
+        fireEvent.keyDown(canvas, {
+            key: "a",
+            keyCode: 65,
+            altKey: false,
+            shiftKey: false,
+            ctrlKey: false,
+            metaKey: false,
+        });
+
+        expect(mockOnKeyDown).toHaveBeenCalledWith(
+            expect.objectContaining({
+                cell: expect.objectContaining({
+                    kind: GridCellKind.Custom,
+                    data: {  value: 'custom-cell' },
+                }),
+                bounds: expect.any(Object),
+                location: [1, 1], // Without row marker offset
+                theme: expect.any(Object),
+                preventDefault: expect.any(Function),
+                key: "a",
+                keyCode: 65,
+                altKey: false,
+                shiftKey: false,
+                ctrlKey: false,
+                metaKey: false,
+            })
+        );
+    });
+
+    test("Cell renderer onKeyDown preventDefault should stop event propagation", async () => {
+        const mockOnKeyDown = vi.fn((args) => {
+            args.preventDefault();
+            return undefined;
+        });
+
+        const customRenderer = {
+            kind: GridCellKind.Custom,
+            isMatch: (c: GridCell): c is CustomCell => c.kind === GridCellKind.Custom,
+            draw: () => true,
+            onKeyDown: mockOnKeyDown,
+        };
+
+        const mockDataEditorOnKeyDown = vi.fn();
+
+        vi.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                customRenderers={[customRenderer]}
+                onKeyDown={mockDataEditorOnKeyDown}
+                getCellContent={([col, row]) => {
+                    if (col === 1 && row === 1) {
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: false,
+                            copyData: "",
+                            data: { value: "custom-cell" },
+                        };
+                    }
+                    return makeCell([col, row]);
+                }}
+            />,
+            { wrapper: Context }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 + 16,
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        const mockPreventDefault = vi.fn();
+        const mockStopPropagation = vi.fn();
+
+        const evt = createEvent.keyDown(canvas, { key: 'ArrowDown', code: 'ArrowDown' });
+        evt.preventDefault = mockPreventDefault
+        evt.stopPropagation = mockStopPropagation
+        fireEvent(canvas, evt);
+
+        // Renderer's onKeyDown should have been called
+        expect(mockOnKeyDown).toHaveBeenCalled();
+
+        // Event should be prevented and stopped
+        expect(mockPreventDefault).toHaveBeenCalled();
+        expect(mockStopPropagation).toHaveBeenCalled();
+    });
+
+    test("Cell renderer onKeyDown can return new cell value", async () => {
+        const mockOnCellsEdited = vi.fn();
+
+        const mockOnKeyDown = vi.fn((args) => {
+            if (args.key === "x") {
+                return {
+                    ...args.cell,
+                    data: { ...args.cell.data, modified: true },
+                };
+            }
+            return undefined;
+        });
+
+        const customRenderer = {
+            kind: GridCellKind.Custom,
+            isMatch: (c: GridCell): c is CustomCell => c.kind === GridCellKind.Custom,
+            draw: () => true,
+            onKeyDown: mockOnKeyDown,
+        };
+
+        vi.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                customRenderers={[customRenderer]}
+                onCellsEdited={mockOnCellsEdited}
+                getCellContent={([col, row]) => {
+                    if (col === 1 && row === 1) {
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "",
+                            data: { value: 'custom-cell' },
+                        };
+                    }
+                    return makeCell([col, row]);
+                }}
+            />,
+            { wrapper: Context }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 + 16,
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "x",
+            keyCode: 88,
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        // onCellsEdited should be called with the new value
+        expect(mockOnCellsEdited).toHaveBeenCalledWith(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    location: [1, 1],
+                    value: expect.objectContaining({
+                        data: { value: 'custom-cell', modified: true },
+                    }),
+                }),
+            ])
+        );
+    });
+
+    test("Cell renderer onKeyDown should not save readonly cells", async () => {
+        const mockOnCellsEdited = vi.fn();
+
+        const mockOnKeyDown = vi.fn((args) => {
+            return {
+                ...args.cell,
+                data: { ...args.cell.data, modified: true },
+            };
+        });
+
+        const customRenderer = {
+            kind: GridCellKind.Custom,
+            isMatch: (c: GridCell): c is CustomCell => c.kind === GridCellKind.Custom,
+            draw: () => true,
+            onKeyDown: mockOnKeyDown,
+        };
+
+        vi.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                customRenderers={[customRenderer]}
+                onCellsEdited={mockOnCellsEdited}
+                getCellContent={([col, row]) => {
+                    if (col === 1 && row === 1) {
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "",
+                            readonly: true, // Cell is readonly
+                            data: { value: 'custom-cell', modified: false },
+                        };
+                    }
+                    return makeCell([col, row]);
+                }}
+            />,
+            { wrapper: Context }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 + 16,
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "x",
+            keyCode: 88,
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        // onCellsEdited should NOT be called for readonly cells
+        expect(mockOnCellsEdited).not.toHaveBeenCalled();
+    });
+
+    test("Cell renderer onKeyDown with preventDefault should not continue to default keybindings", async () => {
+        const mockOnGridSelectionChange = vi.fn();
+
+        const mockOnKeyDown = vi.fn((args) => {
+            if (args.key === "ArrowDown") {
+                args.preventDefault();
+            }
+            return undefined;
+        });
+
+        const customRenderer = {
+            kind: GridCellKind.Custom,
+            isMatch: (c: GridCell): c is CustomCell => c.kind === GridCellKind.Custom,
+            draw: () => true,
+            onKeyDown: mockOnKeyDown,
+        };
+
+        vi.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                customRenderers={[customRenderer]}
+                onGridSelectionChange={mockOnGridSelectionChange}
+                getCellContent={([col, row]) => {
+                    if (col === 1 && row === 1) {
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: false,
+                            copyData: "",
+                            data: { value: 'custom-cell' },
+                        };
+                    }
+                    return makeCell([col, row]);
+                }}
+            />,
+            { wrapper: Context }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 + 16,
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        mockOnGridSelectionChange.mockClear();
+
+        // Press ArrowDown which would normally move selection down
+        fireEvent.keyDown(canvas, {
+            key: "ArrowDown",
+            keyCode: 40,
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        // Selection should NOT change because preventDefault was called
+        expect(mockOnGridSelectionChange).not.toHaveBeenCalled();
+    });
+
+    test("Cell renderer onKeyDown should not be called when overlay is open", async () => {
+        const mockOnKeyDown = vi.fn();
+
+        const customRenderer = {
+            kind: GridCellKind.Custom,
+            isMatch: (c: GridCell): c is CustomCell => c.kind === GridCellKind.Custom,
+            draw: () => true,
+            onKeyDown: mockOnKeyDown,
+            provideEditor: () => () => <input data-testid="custom-editor" />,
+        };
+
+        vi.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                customRenderers={[customRenderer]}
+                getCellContent={([col, row]) => {
+                    if (col === 1 && row === 1) {
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "",
+                            data: { value: 'custom-cell' },
+                        };
+                    }
+                    return makeCell([col, row]);
+                }}
+            />,
+            { wrapper: Context }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 + 16,
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        // Open the overlay by double-clicking
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 + 16,
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        mockOnKeyDown.mockClear();
+
+        // Press a key while overlay is open
+        fireEvent.keyDown(canvas, {
+            key: "a",
+            keyCode: 65,
+        });
+
+        // onKeyDown should NOT be called when overlay is open
+        expect(mockOnKeyDown).not.toHaveBeenCalled();
+    });
+
+    test("Cell renderer onKeyDown should handle both preventDefault and return value", async () => {
+        const mockOnCellsEdited = vi.fn();
+
+        const mockOnKeyDown = vi.fn((args) => {
+            if (args.key === "x") {
+                args.preventDefault(); // Both prevent default AND return new value
+                return {
+                    ...args.cell,
+                    data: { value: 'modified' },
+                };
+            }
+            return undefined;
+        });
+
+        const customRenderer = {
+            kind: GridCellKind.Custom,
+            isMatch: (c: GridCell): c is CustomCell => c.kind === GridCellKind.Custom,
+            draw: () => true,
+            onKeyDown: mockOnKeyDown,
+        };
+
+        vi.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                customRenderers={[customRenderer]}
+                onCellsEdited={mockOnCellsEdited}
+                getCellContent={([col, row]) => {
+                    if (col === 1 && row === 1) {
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: true,
+                            copyData: "",
+                            data: { value: 'custom-cell' },
+                        };
+                    }
+                    return makeCell([col, row]);
+                }}
+            />,
+            { wrapper: Context }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            clientX: 300,
+            clientY: 36 + 32 + 16,
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        const mockPreventDefault = vi.fn();
+        const mockStopPropagation = vi.fn();
+
+        const evt = createEvent.keyDown(canvas, { key: 'x' });
+        evt.preventDefault = mockPreventDefault
+        evt.stopPropagation = mockStopPropagation
+        fireEvent(canvas, evt);
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        // Should both save the new value AND prevent default
+        expect(mockOnCellsEdited).toHaveBeenCalled();
+        expect(mockPreventDefault).toHaveBeenCalled();
+        expect(mockStopPropagation).toHaveBeenCalled();
     });
 });

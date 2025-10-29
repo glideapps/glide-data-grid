@@ -91,6 +91,22 @@ interface BaseCellRenderer<T extends InnerGridCell> {
         } & BaseGridMouseEventArgs
     ) => void;
     readonly onDelete?: (cell: T) => T | undefined;
+
+    readonly onKeyDown?: (
+        args: {
+            readonly cell: T;
+            readonly bounds: Rectangle;
+            readonly location: Item;
+            readonly theme: FullTheme;
+            readonly preventDefault: () => void;
+            readonly key: string;
+            readonly keyCode: number;
+            readonly altKey: boolean;
+            readonly shiftKey: boolean;
+            readonly ctrlKey: boolean;
+            readonly metaKey: boolean;
+        }
+    ) => T | undefined;
 }
 
 /** @category Renderers */
