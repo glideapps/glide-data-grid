@@ -3506,19 +3506,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 if (renderer?.onKeyDown !== undefined) {
                     let prevented = false;
                     const newVal = renderer.onKeyDown({
+                        ...event,
                         cell,
-                        bounds: event.bounds,
                         location: [col - rowMarkerOffset, row],
                         theme: themeForCell(cell, event.location),
                         preventDefault: () => {
                             prevented = true;
                         },
-                        key: event.key,
-                        keyCode: event.keyCode,
-                        altKey: event.altKey,
-                        shiftKey: event.shiftKey,
-                        ctrlKey: event.ctrlKey,
-                        metaKey: event.metaKey,
                     });
 
                     if (prevented) {
