@@ -3507,6 +3507,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     let prevented = false;
                     const newVal = renderer.onKeyDown({
                         ...event,
+                        bounds: event.bounds,
                         cell,
                         location: [col - rowMarkerOffset, row],
                         theme: themeForCell(cell, event.location),
