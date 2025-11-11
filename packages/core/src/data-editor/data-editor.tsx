@@ -4311,6 +4311,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     gridRef={gridRef}
                     getCellRenderer={getCellRenderer}
                     resizeIndicator={resizeIndicator}
+                    setScrollDir={setScrollDir}
                 />
                 {renameGroupNode}
                 {overlay !== undefined && (
