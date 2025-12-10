@@ -17,6 +17,7 @@ import { useResizeDetector } from "react-resize-detector";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import "glide-data-grid-fork/dist/index.css";
 import type { DatePickerCell } from "./cells/date-picker-cell.js";
+import { formatDateDisplay, formatDateTimeDisplay, formatTimeDisplay } from "./cells/date-picker-cell.js";
 import type { LinksCell } from "./cells/links-cell.js";
 import type { ButtonCell } from "./cells/button-cell.js";
 import type { TreeViewCell } from "./cells/tree-view-cell.js";
@@ -169,6 +170,7 @@ const possibleTags = [
 ];
 
 export const CustomCells: React.VFC = () => {
+    const datePickerData = React.useRef<Record<number, Date | undefined>>({});
     return (
         <BeautifulWrapper title="Custom cells" description={<Description>Some of our extension cells.</Description>}>
             <DataEditor
@@ -176,7 +178,13 @@ export const CustomCells: React.VFC = () => {
                 customRenderers={allCells}
                 onPaste={true}
                 // eslint-disable-next-line no-console
-                onCellEdited={(...args) => console.log("Edit Cell", ...args)}
+                onCellEdited={( cell, newVal ) => {
+                    console.log("Edit Cell", cell, newVal);
+                    const [col, row] = cell;
+                    if (col === 11 && newVal.kind === GridCellKind.Custom && (newVal.data as any).kind === "date-picker-cell") {
+                        datePickerData.current[row] = (newVal.data as any).date;
+                    }
+                }}
                 getCellsForSelection={true}
                 getCellContent={cell => {
                     const [col, row] = cell;
@@ -352,7 +360,7 @@ export const CustomCells: React.VFC = () => {
                             data: {
                                 kind: "date-picker-cell",
                                 date: new Date(),
-                                displayDate: new Date().toISOString(),
+                                displayDate: formatDateTimeDisplay(new Date()),
                                 format: "datetime-local",
                             },
                         };
@@ -360,6 +368,8 @@ export const CustomCells: React.VFC = () => {
                     } else if (col === 11) {
                         num = row + 1;
                         rand();
+                        const stored = datePickerData.current[row];
+                        const dateVal = stored !== undefined ? stored : new Date();
                         const d: DatePickerCell = {
                             kind: GridCellKind.Custom,
                             allowOverlay: true,
@@ -367,8 +377,8 @@ export const CustomCells: React.VFC = () => {
                             readonly: row % 2 === 0,
                             data: {
                                 kind: "date-picker-cell",
-                                date: new Date(),
-                                displayDate: new Date().toISOString().split("T")[0],
+                                date: dateVal,
+                                displayDate: formatDateDisplay(dateVal),
                                 format: "date",
                             },
                         };
@@ -384,7 +394,7 @@ export const CustomCells: React.VFC = () => {
                             data: {
                                 kind: "date-picker-cell",
                                 date: new Date(),
-                                displayDate: new Date().toISOString().split("T")[1].replace("Z", ""),
+                                displayDate: formatTimeDisplay(new Date()),
                                 format: "time",
                             },
                         };
