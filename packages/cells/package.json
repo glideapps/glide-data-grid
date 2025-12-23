@@ -1,6 +1,6 @@
 {
     "name": "glide-data-grid-cells-fork",
-    "version": "6.0.4-alpha14",
+    "version": "6.0.4-alpha15",
     "description": "Extra cells for glide-data-grid",
     "sideEffects": [
         "**/*.css"
@@ -53,7 +53,7 @@
         "@linaria/react": "^4.5.3",
         "@toast-ui/editor": "3.1.10",
         "@toast-ui/react-editor": "3.1.10",
-        "glide-data-grid-fork": "6.0.4-alpha8",
+        "glide-data-grid-fork": "6.0.4-alpha9",
         "react-day-picker": "^9.11.3",
         "react-select": "^5.8.0"
     },

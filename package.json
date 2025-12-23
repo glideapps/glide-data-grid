@@ -1,6 +1,6 @@
 {
     "name": "glide-data-grid",
-    "version": "6.0.4-alpha8",
+    "version": "6.0.4-alpha9",
     "scripts": {
         "start": "npm run storybook",
         "version": "./update-version.sh",
