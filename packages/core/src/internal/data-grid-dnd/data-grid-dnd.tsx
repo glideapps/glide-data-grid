@@ -402,6 +402,7 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             imageWindowLoader={p.imageWindowLoader}
             resizeColumn={resizeCol}
             isDraggable={p.isDraggable}
+            dragImageAnchor={p.dragImageAnchor}
             isFilling={p.isFilling}
             isFocused={p.isFocused}
             onCanvasBlur={p.onCanvasBlur}

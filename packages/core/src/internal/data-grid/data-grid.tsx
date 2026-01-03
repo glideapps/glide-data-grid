@@ -191,6 +191,13 @@ export interface DataGridProps {
      * @group Drag and Drop
      */
     readonly isDraggable: boolean | "cell" | "header" | undefined;
+
+    /**
+    * Determines, when dragging, where the cursor is anchored to the drag image. 
+    * @defaultValue 'center'
+    * @group Drag and Drop
+    */
+    readonly dragImageAnchor: 'center' | 'click' | 'click-x' | 'click-y' | undefined;
     /**
      * If `isDraggable` is set, the grid becomes HTML draggable, and `onDragStart` will be called when dragging starts.
      * You can use this to build a UI where the user can drag the Grid around.
@@ -400,6 +407,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         experimental,
         getCellRenderer,
         resizeIndicator = "full",
+        dragImageAnchor = "center"
     } = p;
     const translateX = p.translateX ?? 0;
     const translateY = p.translateY ?? 0;
@@ -1579,10 +1587,13 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
                         document.body.append(offscreen);
 
+                        const dragAnchorX = ['click', 'click-x'].includes(dragImageAnchor) ? event.clientX - boundsForDragTarget.x : boundsForDragTarget.width / 2
+                        const dragAnchorY = ['click', 'click-y'].includes(dragImageAnchor) ? event.clientY - boundsForDragTarget.y : boundsForDragTarget.height / 2
+
                         event.dataTransfer.setDragImage(
                             offscreen,
-                            boundsForDragTarget.width / 2,
-                            boundsForDragTarget.height / 2
+                            dragAnchorX,
+                            dragAnchorY
                         );
 
                         window.setTimeout(() => {
