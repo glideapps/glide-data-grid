@@ -1,0 +1,10 @@
+import{R as e}from"./iframe-DZuEdV5X.js";import{D as p}from"./data-editor-all-CbfCHv6t.js";import{B as d,D as g,P as u,u as D,d as w}from"./utils-IwtLjhsu.js";import{S as C}from"./story-utils-BA76i5xk.js";import"./preload-helper-C1FmrZbK.js";import"./image-window-loader-DBDgupDy.js";import"./throttle-1tkNeiYB.js";import"./marked.esm-cmvEwW9n.js";import"./flatten-BtdT1SSX.js";import"./scrolling-data-grid-BCgMC22z.js";import"./index-D_kXk1yT.js";import"./throttle--dN168Gr.js";const G={title:"Glide-Data-Grid/DataEditor Demos",decorators:[t=>e.createElement(C,null,e.createElement(d,{title:"Drag source",description:e.createElement(e.Fragment,null,e.createElement(g,null,"Setting the ",e.createElement(u,null,"isDraggable")," prop can allow for more granular control over what is draggable in the grid via HTML drag and drop."))},e.createElement(t,null)))]},r=t=>{const{cols:i,getCellContent:m,onColumnResize:c}=D(200);return e.createElement(p,{...w,getCellContent:m,columns:i,rowMarkers:"both",rows:5e3,onRowMoved:(o,a)=>window.alert(`Moved row ${o} to ${a}`),onColumnMoved:(o,a)=>window.alert(`Moved col ${o} to ${a}`),onColumnResize:c,isDraggable:t.isDraggable,onDragStart:o=>{o.setData("text/plain","Drag data here!")}})};r.argTypes={isDraggable:{control:{type:"select"},options:[!0,!1,"cell","header"]}};r.args={isDraggable:!1};var n,l,s;r.parameters={...r.parameters,docs:{...(n=r.parameters)==null?void 0:n.docs,source:{originalSource:`p => {
+  const {
+    cols,
+    getCellContent,
+    onColumnResize
+  } = useMockDataGenerator(200);
+  return <DataEditor {...defaultProps} getCellContent={getCellContent} columns={cols} rowMarkers="both" rows={5000} onRowMoved={(s, e) => window.alert(\`Moved row \${s} to \${e}\`)} onColumnMoved={(s, e) => window.alert(\`Moved col \${s} to \${e}\`)} onColumnResize={onColumnResize} isDraggable={p.isDraggable} onDragStart={e => {
+    e.setData("text/plain", "Drag data here!");
+  }} />;
+}`,...(s=(l=r.parameters)==null?void 0:l.docs)==null?void 0:s.source}}};const P=["DragSource"];export{r as DragSource,P as __namedExportsOrder,G as default};
