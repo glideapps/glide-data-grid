@@ -138,30 +138,34 @@ const CustomMenu: React.FC<CustomMenuProps> = p => {
  * - Clicking on the pill label text won't open the dropdown menu (click input area to open)
  * - Removing pills via the X button still works normally (separate component)
  * - Keyboard navigation still works normally
+ *
+ * Note on type assertions: react-select's MultiValueGenericProps.innerProps type is
+ * { className?: string }, but the underlying div element accepts all standard div props.
+ * The type assertion to React.ComponentPropsWithoutRef<"div"> is necessary to add
+ * event handlers that the actual DOM element supports.
  */
 const SelectableMultiValueLabel: React.FC<MultiValueGenericProps<SelectOption>> = props => {
-    // Preserve any existing handlers from innerProps (for forward compatibility)
+    // Cast innerProps to the full div props type since react-select's types are overly restrictive
+    // (they only type { className?: string } but the div accepts all standard props)
     const existingInnerProps = props.innerProps as React.ComponentPropsWithoutRef<"div"> | undefined;
+
+    const enhancedInnerProps: React.ComponentPropsWithoutRef<"div"> = {
+        ...existingInnerProps,
+        // Allow text selection by stopping propagation but not preventing default
+        onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => {
+            e.stopPropagation(); // Prevents react-select from treating it as a control click
+            existingInnerProps?.onMouseDown?.(e);
+        },
+        onTouchEnd: (e: React.TouchEvent<HTMLDivElement>) => {
+            e.stopPropagation();
+            existingInnerProps?.onTouchEnd?.(e);
+        },
+    };
 
     return (
         <components.MultiValueLabel
             {...props}
-            innerProps={
-                {
-                    ...existingInnerProps,
-                    // Allow text selection by not preventing default on mouse down
-                    onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => {
-                        e.stopPropagation(); // Prevents react-select from treating it as a control click
-                        // Call any existing handler
-                        existingInnerProps?.onMouseDown?.(e);
-                    },
-                    onTouchEnd: (e: React.TouchEvent<HTMLDivElement>) => {
-                        e.stopPropagation();
-                        // Call any existing handler
-                        existingInnerProps?.onTouchEnd?.(e);
-                    },
-                } as React.ComponentPropsWithoutRef<"div">
-            }
+            innerProps={enhancedInnerProps as typeof props.innerProps}
         />
     );
 };
