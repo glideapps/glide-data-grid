@@ -14,7 +14,7 @@ import {
 } from "@glideapps/glide-data-grid";
 
 import { styled } from "@linaria/react";
-import Select, { type MenuProps, components, type StylesConfig } from "react-select";
+import Select, { type MenuProps, type MultiValueGenericProps, components, type StylesConfig } from "react-select";
 import CreatableSelect from "react-select/creatable";
 
 type SelectOption = { value: string; label?: string; color?: string };
@@ -126,6 +126,44 @@ const CustomMenu: React.FC<CustomMenuProps> = p => {
     const { Menu } = components;
     const { children, ...rest } = p;
     return <Menu {...rest}>{children}</Menu>;
+};
+
+/**
+ * Custom MultiValueLabel component that allows text selection within pills.
+ * By default, react-select prevents text selection via onMouseDown preventDefault.
+ * We override this to allow users to select and copy text from the pills.
+ *
+ * Side effects:
+ * - Clicking on the pill label text won't focus the select input (click elsewhere to focus)
+ * - Clicking on the pill label text won't open the dropdown menu (click input area to open)
+ * - Removing pills via the X button still works normally (separate component)
+ * - Keyboard navigation still works normally
+ */
+const SelectableMultiValueLabel: React.FC<MultiValueGenericProps<SelectOption>> = props => {
+    // Preserve any existing handlers from innerProps (for forward compatibility)
+    const existingInnerProps = props.innerProps as React.ComponentPropsWithoutRef<"div"> | undefined;
+
+    return (
+        <components.MultiValueLabel
+            {...props}
+            innerProps={
+                {
+                    ...existingInnerProps,
+                    // Allow text selection by not preventing default on mouse down
+                    onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => {
+                        e.stopPropagation(); // Prevents react-select from treating it as a control click
+                        // Call any existing handler
+                        existingInnerProps?.onMouseDown?.(e);
+                    },
+                    onTouchEnd: (e: React.TouchEvent<HTMLDivElement>) => {
+                        e.stopPropagation();
+                        // Call any existing handler
+                        existingInnerProps?.onTouchEnd?.(e);
+                    },
+                } as React.ComponentPropsWithoutRef<"div">
+            }
+        />
+    );
 };
 
 export type MultiSelectCell = CustomCell<MultiSelectCellProps>;
@@ -367,6 +405,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 components={{
                     DropdownIndicator: () => null,
                     IndicatorSeparator: () => null,
+                    MultiValueLabel: SelectableMultiValueLabel,
                     Menu: props => {
                         if (menuDisabled) {
                             return null;
