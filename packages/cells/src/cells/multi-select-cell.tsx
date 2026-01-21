@@ -418,10 +418,10 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                     },
                 }}
                 onChange={async e => {
-                    if (e === null) {
+                    if (e === null || !Array.isArray(e)) {
                         return;
                     }
-                    submitValues(e.map(x => x.value));
+                    submitValues(e.map((x: SelectOption) => x.value));
                 }}
             />
         </Wrap>
