@@ -3498,6 +3498,38 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
             if (cancelled) return;
 
+            if (event.location !== undefined && event.bounds !== undefined && !overlayOpen) {
+                const [col, row] = event.location;
+                const cell = getMangledCellContent([col, row]);
+                const renderer = getCellRenderer(cell);
+
+                if (renderer?.onKeyDown !== undefined) {
+                    let prevented = false;
+                    const newVal = renderer.onKeyDown({
+                        ...event,
+                        bounds: event.bounds,
+                        cell,
+                        location: [col - rowMarkerOffset, row],
+                        theme: themeForCell(cell, event.location),
+                        preventDefault: () => {
+                            prevented = true;
+                        },
+                    });
+
+                    if (prevented) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+
+                    if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal) && newVal.readonly !== true) {
+                        mangledOnCellsEdited([{ location: event.location, value: newVal }]);
+                        gridRef.current?.damage([{ cell: event.location }]);
+                    }
+
+                    if (prevented) return;
+                }
+            }
+
             if (handleFixedKeybindings(event)) return;
 
             if (gridSelection.current === undefined) return;
