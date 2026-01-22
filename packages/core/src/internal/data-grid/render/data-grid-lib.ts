@@ -31,6 +31,7 @@ export function useMappedColumns(
                     grow: c.grow,
                     hasMenu: c.hasMenu,
                     icon: c.icon,
+                    headerCursor: c.headerCursor,
                     id: c.id,
                     menuIcon: c.menuIcon,
                     overlayIcon: c.overlayIcon,

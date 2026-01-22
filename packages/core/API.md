@@ -262,6 +262,7 @@ interface BaseGridColumn {
     readonly group?: string;
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
+    readonly headerCursor?: CSSProperties["cursor"];
     readonly hasMenu?: boolean;
     readonly style?: "normal" | "highlight";
     readonly grow?: number;
@@ -293,6 +294,7 @@ export type GridColumn = SizedGridColumn | AutoGridColumn;
 | group              | The name of the group the column belongs to                                                                                              |
 | icon               | The icon the column belongs to. The icon must be either one of the predefined icons or an icon passed to the `headerIcons` prop          |
 | overlayIcon        | An icon which is painted on top offset bottom right of the `icon`. Must be a predefined icon or an icon passed to the `headerIcons` prop |
+| headerCursor       | Optional cursor to use when hovering the column header. Falls back to pointer/default based on interaction if not provided.            |
 | hasMenu            | Enables/disables the menu dropdown indicator. If not enabled, `onHeaderMenuClick` will not be emitted.                                   |
 | style              | Makes the column use the highlighted theming from the `Theme`. `themeOverride` can be used to perform the same effect.                   |
 | grow               | When set to a number > 0 the column will grow to consume extra available space according to the weight of its grow property.             |
