@@ -77,6 +77,7 @@ export function drawCells(
     effectiveColumns: readonly MappedGridColumn[],
     allColumns: readonly MappedGridColumn[],
     height: number,
+    width: number,
     totalHeaderHeight: number,
     translateX: number,
     translateY: number,
@@ -90,6 +91,7 @@ export function drawCells(
     isFocused: boolean,
     drawFocus: boolean,
     freezeTrailingRows: number,
+    freezeTrailingColumns: number,
     hasAppendRow: boolean,
     drawRegions: readonly Rectangle[],
     damage: CellSet | undefined,
@@ -124,16 +126,18 @@ export function drawCells(
 
     walkColumns(
         effectiveColumns,
+        width,
         cellYOffset,
         translateX,
         translateY,
         totalHeaderHeight,
-        (c, drawX, colDrawStartY, clipX, startRow) => {
+        freezeTrailingColumns,
+        (c, drawX, colDrawStartY, clipX, clipXRight, startRow) => {
             const diff = Math.max(0, clipX - drawX);
 
             const colDrawX = drawX + diff;
             const colDrawY = totalHeaderHeight + 1;
-            const colWidth = c.width - diff;
+            const colWidth = c.stickyPosition === "right" ? c.width - diff : Math.min(c.width - diff, width - drawX - clipXRight);
             const colHeight = height - totalHeaderHeight - 1;
             if (drawRegions.length > 0) {
                 let found = false;
@@ -295,7 +299,7 @@ export function drawCells(
 
                     const bgCell = cell.kind === GridCellKind.Protected ? theme.bgCellMedium : theme.bgCell;
                     let fill: string | undefined;
-                    if (isSticky || bgCell !== outerTheme.bgCell) {
+                    if (isSticky || bgCell !== outerTheme.bgCell || c.sticky) {
                         fill = blend(bgCell, fill);
                     }
 
@@ -551,11 +555,11 @@ export function drawCell(
             partialPrepResult === undefined
                 ? undefined
                 : {
-                      deprep: partialPrepResult?.deprep,
-                      fillStyle: partialPrepResult?.fillStyle,
-                      font: partialPrepResult?.font,
-                      renderer: r,
-                  };
+                    deprep: partialPrepResult?.deprep,
+                    fillStyle: partialPrepResult?.fillStyle,
+                    font: partialPrepResult?.font,
+                    renderer: r,
+                };
     }
 
     if (needsAnim || animationFrameRequested) enqueue?.(allocatedItem);
