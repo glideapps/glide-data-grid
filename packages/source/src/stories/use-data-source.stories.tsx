@@ -10,9 +10,10 @@ import {
     type Theme,
 } from "@glideapps/glide-data-grid";
 import { faker } from "@faker-js/faker";
-import { useCollapsingGroups, useColumnSort, useMoveableColumns } from "../index.js";
+import { useCollapsingGroups, useColumnFilter, useColumnSort, useMoveableColumns } from "../index.js";
 import { useUndoRedo } from "../use-undo-redo.js";
 import { useMockDataGenerator } from "./utils.js";
+import _ from "lodash";
 
 faker.seed(1337);
 
@@ -204,6 +205,7 @@ const cols: GridColumn[] = [
         title: "A",
         width: 200,
         group: "Group 1",
+        hasMenu: true,
     },
     {
         title: "B",
@@ -260,6 +262,11 @@ export const UseDataSource: React.VFC = () => {
     });
 
     const [sort, setSort] = React.useState<number>();
+    const [filterValue, setFilterValue] = React.useState<number | undefined>(undefined);
+
+    const filterHandler = (value: number) => {
+        return filterValue > value;
+    }
 
     const sortArgs = useColumnSort({
         columns: moveArgs.columns,
@@ -275,6 +282,16 @@ export const UseDataSource: React.VFC = () => {
                   },
     });
 
+    const filterArgs = useColumnFilter({
+        columns: moveArgs.columns,
+        getCellContent: moveArgs.getCellContent,
+        rows,
+        filter: filterValue === undefined ? undefined : {
+            column: moveArgs.columns[0],
+            filterCallback: filterHandler
+        }
+    })
+
     const collapseArgs = useCollapsingGroups({
         columns: moveArgs.columns,
         theme: testTheme,
@@ -287,12 +304,13 @@ export const UseDataSource: React.VFC = () => {
 
     return (
         <BeautifulWrapper title="Custom source extensions" description={<Description>Fixme.</Description>}>
+            <input value={filterValue} type="number" onChange={(e) => setFilterValue(_.parseInt(e.target.value))} placeholder="Filter value for column A"/>
             <DataEditor
                 {...defaultProps}
                 {...moveArgs}
                 {...sortArgs}
                 {...collapseArgs}
-                rows={rows}
+                {...filterArgs}
                 onColumnMoved={moveArgs.onColumnMoved}
                 onHeaderClicked={onHeaderClick}
             />
