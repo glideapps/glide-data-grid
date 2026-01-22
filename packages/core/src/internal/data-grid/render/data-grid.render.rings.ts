@@ -1,11 +1,17 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable unicorn/no-for-loop */
-import { type GridSelection, type InnerGridCell, type Item, type FillHandle, DEFAULT_FILL_HANDLE } from "../data-grid-types.js";
+import {
+    type GridSelection,
+    type InnerGridCell,
+    type Item,
+    type FillHandle,
+    DEFAULT_FILL_HANDLE,
+} from "../data-grid-types.js";
 import { getStickyWidth, type MappedGridColumn, computeBounds, getFreezeTrailingHeight } from "./data-grid-lib.js";
 import { type FullTheme } from "../../../common/styles.js";
 import { blend, withAlpha } from "../color-parser.js";
 import { hugRectToTarget, intersectRect, rectContains, splitRectIntoRegions } from "../../../common/math.js";
-import { getSpanBounds, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
+import { getRowSpanBounds, getSpanBounds, walkColumns, walkRowsInCol } from "./data-grid-render.walk.js";
 import { type Highlight } from "./data-grid-render.cells.js";
 
 export function drawHighlightRings(
@@ -254,7 +260,18 @@ export function drawFillHandle(
                     if (row !== targetRow && row !== fillHandleRow) return;
 
                     let cellX = drawX;
+                    let cellY = drawY;
                     let cellWidth = col.width;
+                    let cellHeight = getRowHeight(row);
+
+                    if (cell.rowSpan !== undefined) {
+                        const area = getRowSpanBounds(cell.rowSpan, drawX, drawY, col.width, row, getRowHeight);
+
+                        if (area !== undefined) {
+                            cellHeight = area.height;
+                            cellY = area.y;
+                        }
+                    }
 
                     if (cell.span !== undefined) {
                         const areas = getSpanBounds(cell.span, drawX, drawY, col.width, rh, col, allColumns);
@@ -278,7 +295,7 @@ export function drawFillHandle(
                             // Draw a larger, outlined fill handle similar to Excel / Google Sheets.
                             const size = fill.size;
                             const half = size / 2;
-                            
+
                             // Place the handle so its center sits on the bottom-right corner of the cell,
                             // plus any configured offsets (fill.offsetX, fill.offsetY).
                             // Offset by half pixel to align with grid lines.
@@ -286,6 +303,7 @@ export function drawFillHandle(
                             const hy = drawY + rh + fill.offsetY - half + 0.5;
 
                             ctx.beginPath();
+                            // ctx.rect(cellX + cellWidth - 4, cellY + cellHeight - 4, 4, 4);
                             if (fill.shape === "circle") {
                                 ctx.arc(hx + half, hy + half, half, 0, Math.PI * 2);
                             } else {
@@ -302,13 +320,7 @@ export function drawFillHandle(
                                 ctx.strokeStyle = theme.bgCell;
                                 if (fill.shape === "circle") {
                                     ctx.beginPath();
-                                    ctx.arc(
-                                        hx + half,
-                                        hy + half,
-                                        half + fill.outline / 2,
-                                        0,
-                                        Math.PI * 2
-                                    );
+                                    ctx.arc(hx + half, hy + half, half + fill.outline / 2, 0, Math.PI * 2);
                                     ctx.stroke();
                                 } else {
                                     ctx.strokeRect(

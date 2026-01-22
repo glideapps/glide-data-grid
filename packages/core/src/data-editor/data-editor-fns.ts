@@ -67,15 +67,27 @@ export function expandSelection(
 
         let left = r.x - rowMarkerOffset;
         let right = r.x + r.width - 1 - rowMarkerOffset;
+        let top = r.y;
+        let bottom = r.y + r.height - 1;
         for (const row of cells) {
             for (const cell of row) {
-                if (cell.span === undefined) continue;
-                left = Math.min(cell.span[0], left);
-                right = Math.max(cell.span[1], right);
+                if (cell.span !== undefined) {
+                    left = Math.min(cell.span[0], left);
+                    right = Math.max(cell.span[1], right);
+                }
+                if (cell?.rowSpan !== undefined) {
+                    top = Math.min(cell.rowSpan[0], top);
+                    bottom = Math.max(cell.rowSpan[1], bottom);
+                }
             }
         }
 
-        if (left === r.x - rowMarkerOffset && right === r.x + r.width - 1 - rowMarkerOffset) {
+        if (
+            left === r.x - rowMarkerOffset &&
+            right === r.x + r.width - 1 - rowMarkerOffset &&
+            top === r.y &&
+            bottom === r.y + r.height - 1
+        ) {
             isFilled = true;
         } else {
             newVal = {
@@ -83,9 +95,9 @@ export function expandSelection(
                     cell: newVal.current.cell ?? [0, 0],
                     range: {
                         x: left + rowMarkerOffset,
-                        y: r.y,
+                        y: top,
                         width: right - left + 1,
-                        height: r.height,
+                        height: bottom - top + 1,
                     },
                     rangeStack: newVal.current.rangeStack,
                 },
