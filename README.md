@@ -52,17 +52,35 @@ You may also need to install the peer dependencies if you don't have them alread
 npm i lodash marked react-responsive-carousel
 ```
 
+Import Grid and mandatory CSS:
+
+```ts
+import DataEditor, { GridColumn, GridCell, Item } from "@glideapps/glide-data-grid";
+import "@glideapps/glide-data-grid/dist/index.css";
+```
+
+Add dummy data:
+```shell
+const data = [
+  {
+    firstName: "John",
+    lastName: "Doe"
+  },
+  {
+    firstName: "John",
+    lastName: "Wick"
+  }
+];
+
+const numRows = data.length;
+```
+
 Create a new `DataEditor` wherever you need to display lots and lots of data
 
 ```tsx
 <DataEditor getCellContent={getData} columns={columns} rows={numRows} />
 ```
 
-Don't forget to import mandatory CSS
-
-```ts
-import "@glideapps/glide-data-grid/dist/index.css";
-```
 
 Making your columns is easy
 
