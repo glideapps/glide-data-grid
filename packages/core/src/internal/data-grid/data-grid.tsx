@@ -1263,6 +1263,25 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
     );
     useEventListener("contextmenu", onContextMenuImpl, eventTargetRef?.current ?? null, false);
 
+    const onContextMenuWithKeyboardImpl = React.useCallback(
+      (ev: MouseEvent) => {
+        const canvas = ref.current;
+        const currentSelectedCell = selectionRef.current.current?.cell
+        if (canvas === null || onContextMenu === undefined || currentSelectedCell === undefined)
+          return;
+        const bounds = getBoundsForItem(canvas, ...currentSelectedCell);
+        if (bounds) {
+          const args = getMouseArgsForPosition(canvas, bounds.x + bounds.width / 2, bounds.y + bounds.height / 2, ev);
+          onContextMenu(args, () => {
+          if (ev.cancelable) ev.preventDefault();
+          });
+        }
+      },
+      [getMouseArgsForPosition, onContextMenu, getBoundsForItem]
+   );
+
+    useEventListener("contextmenu", onContextMenuWithKeyboardImpl, ref?.current ?? null, false);
+
     const onAnimationFrame = React.useCallback<StepCallback>(values => {
         damageRegion.current = new CellSet(values.map(x => x.item));
         hoverValues.current = values;
