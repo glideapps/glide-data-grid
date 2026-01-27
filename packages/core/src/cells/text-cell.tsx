@@ -42,7 +42,7 @@ export const textCellRenderer: InternalCellRenderer<TextCell> = {
                     style={cell.allowWrapping === true ? { padding: "3px 8.5px" } : undefined}
                     highlight={isHighlighted}
                     autoFocus={value.readonly !== true}
-                    disabled={value.readonly === true}
+                    readOnly={value.readonly === true}
                     altNewline={true}
                     value={value.data}
                     validatedSelection={validatedSelection}

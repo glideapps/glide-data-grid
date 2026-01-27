@@ -240,16 +240,23 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 isOutsideClick={isOutsideClick}
                 customEventTarget={customEventTarget}>
                 <DataGridOverlayEditorStyle
-                    ref={ref}
+                    ref={elem => {
+                        ref(elem);
+                        if (elem) elem.focus();
+                    }}
                     id={id}
+                    data-testid="data-grid-overlay-editor"
                     className={classWrap}
                     style={styleOverride}
                     as={useLabel === true ? "label" : undefined}
                     targetX={target.x - bloomX}
                     targetY={target.y - bloomY}
                     targetWidth={target.width + bloomX * 2}
-                    targetHeight={target.height + bloomY * 2}>
-                    <div className="gdg-clip-region" onKeyDown={onKeyDown}>
+                    targetHeight={target.height + bloomY * 2}
+                    tabIndex={-1}
+                    onKeyDown={onKeyDown}
+                >
+                    <div className="gdg-clip-region">
                         {editor}
                     </div>
                 </DataGridOverlayEditorStyle>
