@@ -3263,6 +3263,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
                 }
             }
+            console.log({event, details}, "keys.contextMenu:", keys.contextMenu, overlayOpen )
 
             if (details.didMatch) {
                 cancel();
@@ -3363,23 +3364,44 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 } else if (isHotkey(keys.goToFirstColumn, event, details)) {
                     col = Number.MIN_SAFE_INTEGER;
                 } else if (rangeSelect === "rect" || rangeSelect === "multi-rect") {
-                    if (isHotkey(keys.selectGrowDown, event, details)) {
-                        adjustSelection([0, 1]);
-                    } else if (isHotkey(keys.selectGrowUp, event, details)) {
-                        adjustSelection([0, -1]);
-                    } else if (isHotkey(keys.selectGrowRight, event, details)) {
-                        adjustSelection([1, 0]);
-                    } else if (isHotkey(keys.selectGrowLeft, event, details)) {
-                        adjustSelection([-1, 0]);
-                    } else if (isHotkey(keys.selectToLastRow, event, details)) {
-                        adjustSelection([0, 2]);
-                    } else if (isHotkey(keys.selectToFirstRow, event, details)) {
-                        adjustSelection([0, -2]);
-                    } else if (isHotkey(keys.selectToLastColumn, event, details)) {
-                        adjustSelection([2, 0]);
-                    } else if (isHotkey(keys.selectToFirstColumn, event, details)) {
-                        adjustSelection([-2, 0]);
-                    }
+                  if (isHotkey(keys.selectGrowDown, event, details)) {
+                    adjustSelection([0, 1]);
+                  } else if (isHotkey(keys.selectGrowUp, event, details)) {
+                    adjustSelection([0, -1]);
+                  } else if (isHotkey(keys.selectGrowRight, event, details)) {
+                    adjustSelection([1, 0]);
+                  } else if (isHotkey(keys.selectGrowLeft, event, details)) {
+                    adjustSelection([-1, 0]);
+                  } else if (isHotkey(keys.selectToLastRow, event, details)) {
+                    adjustSelection([0, 2]);
+                  } else if (isHotkey(keys.selectToFirstRow, event, details)) {
+                    adjustSelection([0, -2]);
+                  } else if (isHotkey(keys.selectToLastColumn, event, details)) {
+                    adjustSelection([2, 0]);
+                  } else if (isHotkey(keys.selectToFirstColumn, event, details)) {
+                    adjustSelection([-2, 0]);
+                  } else if (isHotkey(keys.contextMenu, event, details) &&
+                    event.bounds !== undefined &&
+                    event.location !== undefined
+                  ) {
+                    onContextMenu(
+                      {
+                        kind: "cell",
+                        isFillHandle: false,
+                        isTouch: false,
+                        isEdge: false,
+                        button: 0,
+                        scrollEdge: [0, 0],
+                        localEventX: event.bounds.width / 2,
+                        localEventY: event.bounds.height / 2,
+                        location: [col, row],
+                        bounds: event.bounds,
+                        ctrlKey: false,
+                        metaKey: false,
+                        shiftKey: true,
+                        buttons: 0
+                      }, cancel)
+                  }
                 }
                 cancelOnlyOnMove = details.didMatch;
             } else {
