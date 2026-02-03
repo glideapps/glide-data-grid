@@ -3362,52 +3362,53 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     col = Number.MAX_SAFE_INTEGER;
                 } else if (isHotkey(keys.goToFirstColumn, event, details)) {
                     col = Number.MIN_SAFE_INTEGER;
-                } else if (isHotkey(keys.contextMenu, event, details) &&
-                  bounds !== undefined &&
-                  event.location !== undefined
+                } else if (
+                    isHotkey(keys.contextMenu, event, details) &&
+                    bounds !== undefined &&
+                    event.location !== undefined
                 ) {
-                  const {
-                    location,
-                    ctrlKey,
-                    metaKey,
-                    shiftKey,
-                  } = event;
-
-                  onContextMenu(
-                    {
-                      kind: "cell",
-                      isFillHandle: false,
-                      isTouch: false,
-                      isEdge: false,
-                      button: 0,
-                      scrollEdge: [0, 0],
-                      localEventX: bounds.width / 2,
-                      localEventY: bounds.height / 2,
+                    const {
                       location,
-                      bounds,
                       ctrlKey,
                       metaKey,
                       shiftKey,
-                      buttons: 0
-                    }, cancel)
+                    } = event;
+
+                    onContextMenu(
+                      {
+                        kind: "cell",
+                        isFillHandle: false,
+                        isTouch: false,
+                        isEdge: false,
+                        button: 0,
+                        scrollEdge: [0, 0],
+                        localEventX: bounds.width / 2,
+                        localEventY: bounds.height / 2,
+                        location,
+                        bounds,
+                        ctrlKey,
+                        metaKey,
+                        shiftKey,
+                        buttons: 0
+                      }, cancel)
                 } else if (rangeSelect === "rect" || rangeSelect === "multi-rect") {
-                  if (isHotkey(keys.selectGrowDown, event, details)) {
-                    adjustSelection([0, 1]);
-                  } else if (isHotkey(keys.selectGrowUp, event, details)) {
-                    adjustSelection([0, -1]);
-                  } else if (isHotkey(keys.selectGrowRight, event, details)) {
-                    adjustSelection([1, 0]);
-                  } else if (isHotkey(keys.selectGrowLeft, event, details)) {
-                    adjustSelection([-1, 0]);
-                  } else if (isHotkey(keys.selectToLastRow, event, details)) {
-                    adjustSelection([0, 2]);
-                  } else if (isHotkey(keys.selectToFirstRow, event, details)) {
-                    adjustSelection([0, -2]);
-                  } else if (isHotkey(keys.selectToLastColumn, event, details)) {
-                    adjustSelection([2, 0]);
-                  } else if (isHotkey(keys.selectToFirstColumn, event, details)) {
-                    adjustSelection([-2, 0]);
-                  }
+                    if (isHotkey(keys.selectGrowDown, event, details)) {
+                        adjustSelection([0, 1]);
+                    } else if (isHotkey(keys.selectGrowUp, event, details)) {
+                        adjustSelection([0, -1]);
+                    } else if (isHotkey(keys.selectGrowRight, event, details)) {
+                        adjustSelection([1, 0]);
+                    } else if (isHotkey(keys.selectGrowLeft, event, details)) {
+                        adjustSelection([-1, 0]);
+                    } else if (isHotkey(keys.selectToLastRow, event, details)) {
+                        adjustSelection([0, 2]);
+                    } else if (isHotkey(keys.selectToFirstRow, event, details)) {
+                        adjustSelection([0, -2]);
+                    } else if (isHotkey(keys.selectToLastColumn, event, details)) {
+                        adjustSelection([2, 0]);
+                    } else if (isHotkey(keys.selectToFirstColumn, event, details)) {
+                        adjustSelection([-2, 0]);
+                    }
                 }
                 cancelOnlyOnMove = details.didMatch;
             } else {
