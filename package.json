@@ -34,7 +34,7 @@
         "@babel/preset-env": "^7.27.2",
         "@babel/preset-react": "^7.27.1",
         "@babel/preset-typescript": "^7.27.1",
-        "@faker-js/faker": "^7.6.0",
+        "@faker-js/faker": "^10.1.0",
         "@linaria/core": "^6.3.0",
         "@linaria/react": "^6.3.0",
         "@storybook/addon-docs": "^9.1.2",
