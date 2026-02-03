@@ -3185,6 +3185,42 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const overlayOpen = overlay !== undefined;
 
+    const onContextMenu = React.useCallback(
+      (args: GridMouseEventArgs, preventDefault: () => void) => {
+        const adjustedCol = args.location[0] - rowMarkerOffset;
+        if (args.kind === "header") {
+          onHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
+        }
+
+        if (args.kind === groupHeaderKind) {
+          if (adjustedCol < 0) {
+            return;
+          }
+          onGroupHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
+        }
+
+        if (args.kind === "cell") {
+          const [col, row] = args.location;
+          onCellContextMenu?.([adjustedCol, row], {
+            ...args,
+            preventDefault,
+          });
+
+          if (!gridSelectionHasItem(gridSelection, args.location)) {
+            updateSelectedCell(col, row, false, false);
+          }
+        }
+      },
+      [
+        gridSelection,
+        onCellContextMenu,
+        onGroupHeaderContextMenu,
+        onHeaderContextMenu,
+        rowMarkerOffset,
+        updateSelectedCell,
+      ]
+    );
+
     const handleFixedKeybindings = React.useCallback(
         (event: GridKeyEventArgs): boolean => {
             const cancel = () => {
@@ -3480,6 +3516,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             return didMatch;
         },
         [
+            onContextMenu,
             rowGroupingNavBehavior,
             overlayOpen,
             gridSelection,
@@ -3570,42 +3607,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             showTrailingBlankRow,
             onCellActivated,
             reselect,
-        ]
-    );
-
-    const onContextMenu = React.useCallback(
-        (args: GridMouseEventArgs, preventDefault: () => void) => {
-            const adjustedCol = args.location[0] - rowMarkerOffset;
-            if (args.kind === "header") {
-                onHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
-            }
-
-            if (args.kind === groupHeaderKind) {
-                if (adjustedCol < 0) {
-                    return;
-                }
-                onGroupHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
-            }
-
-            if (args.kind === "cell") {
-                const [col, row] = args.location;
-                onCellContextMenu?.([adjustedCol, row], {
-                    ...args,
-                    preventDefault,
-                });
-
-                if (!gridSelectionHasItem(gridSelection, args.location)) {
-                    updateSelectedCell(col, row, false, false);
-                }
-            }
-        },
-        [
-            gridSelection,
-            onCellContextMenu,
-            onGroupHeaderContextMenu,
-            onHeaderContextMenu,
-            rowMarkerOffset,
-            updateSelectedCell,
         ]
     );
 
