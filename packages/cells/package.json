@@ -66,7 +66,7 @@
         "eslint": "^8.57.1",
         "eslint-plugin-import": "^2.31.0",
         "eslint-plugin-react": "^7.37.5",
-        "eslint-plugin-react-hooks": "^5.2.0",
+        "eslint-plugin-react-hooks": "^7.0.0",
         "react-resize-detector": "^12.1.0",
         "tsc-esm-fix": "^3.1.2",
         "typescript": "^5.8.3"
