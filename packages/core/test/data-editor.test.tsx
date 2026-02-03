@@ -1183,10 +1183,10 @@ describe("data-editor", () => {
           width: expect.any(Number),
           height: expect.any(Number),
         }),
+        localEventX: eventArgs.bounds.width / 2,
+        localEventY: eventArgs.bounds.height / 2,
       });
 
-      expect(eventArgs.localEventX).toBe(eventArgs.bounds.width / 2);
-      expect(eventArgs.localEventY).toBe(eventArgs.bounds.height / 2);
     });
 
     test("does not open context menu with Shift+F10 when no cells are selected", async () => {
@@ -1211,6 +1211,7 @@ describe("data-editor", () => {
 
       const canvas = screen.getByTestId("data-grid-canvas");
 
+      // Press Shift+F10 without selecting any cell
       fireEvent.keyDown(canvas, {
         key: "F10",
         keyCode: 121,

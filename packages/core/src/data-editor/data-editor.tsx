@@ -3263,7 +3263,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     }
                 }
             }
-            console.log({event, details}, "keys.contextMenu:", keys.contextMenu, overlayOpen )
 
             if (details.didMatch) {
                 cancel();
@@ -3363,6 +3362,34 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     col = Number.MAX_SAFE_INTEGER;
                 } else if (isHotkey(keys.goToFirstColumn, event, details)) {
                     col = Number.MIN_SAFE_INTEGER;
+                } else if (isHotkey(keys.contextMenu, event, details) &&
+                  bounds !== undefined &&
+                  event.location !== undefined
+                ) {
+                  const {
+                    location,
+                    ctrlKey,
+                    metaKey,
+                    shiftKey,
+                  } = event;
+
+                  onContextMenu(
+                    {
+                      kind: "cell",
+                      isFillHandle: false,
+                      isTouch: false,
+                      isEdge: false,
+                      button: 0,
+                      scrollEdge: [0, 0],
+                      localEventX: bounds.width / 2,
+                      localEventY: bounds.height / 2,
+                      location,
+                      bounds,
+                      ctrlKey,
+                      metaKey,
+                      shiftKey,
+                      buttons: 0
+                    }, cancel)
                 } else if (rangeSelect === "rect" || rangeSelect === "multi-rect") {
                   if (isHotkey(keys.selectGrowDown, event, details)) {
                     adjustSelection([0, 1]);
@@ -3380,27 +3407,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     adjustSelection([2, 0]);
                   } else if (isHotkey(keys.selectToFirstColumn, event, details)) {
                     adjustSelection([-2, 0]);
-                  } else if (isHotkey(keys.contextMenu, event, details) &&
-                    event.bounds !== undefined &&
-                    event.location !== undefined
-                  ) {
-                    onContextMenu(
-                      {
-                        kind: "cell",
-                        isFillHandle: false,
-                        isTouch: false,
-                        isEdge: false,
-                        button: 0,
-                        scrollEdge: [0, 0],
-                        localEventX: event.bounds.width / 2,
-                        localEventY: event.bounds.height / 2,
-                        location: [col, row],
-                        bounds: event.bounds,
-                        ctrlKey: false,
-                        metaKey: false,
-                        shiftKey: true,
-                        buttons: 0
-                      }, cancel)
                   }
                 }
                 cancelOnlyOnMove = details.didMatch;
