@@ -1149,6 +1149,78 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith(expect.objectContaining({ location: [1, 1] }));
     });
 
+    test("opens context menu with Shift+F10 when cell is selected", async () => {
+      const spy = vi.fn();
+
+      vi.useFakeTimers();
+      render(<DataEditor {...basicProps} onCellContextMenu={spy} />, {
+        wrapper: Context,
+      });
+      prep(false);
+
+      const canvas = screen.getByTestId("data-grid-canvas");
+      sendClick(canvas, {
+        clientX: 300,
+        clientY: 84,
+      });
+
+      fireEvent.keyDown(canvas, {
+        key: "F10",
+        keyCode: 121,
+        shiftKey: true,
+      });
+
+      expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+
+      const eventArgs = spy.mock.calls[0][1];
+      expect(eventArgs).toMatchObject({
+        kind: "cell",
+        shiftKey: true,
+        location: [1, 1],
+        bounds: expect.objectContaining({
+          x: expect.any(Number),
+          y: expect.any(Number),
+          width: expect.any(Number),
+          height: expect.any(Number),
+        }),
+        localEventX: eventArgs.bounds.width / 2,
+        localEventY: eventArgs.bounds.height / 2,
+      });
+
+    });
+
+    test("does not open context menu with Shift+F10 when no cells are selected", async () => {
+      const spy = vi.fn();
+
+      vi.useFakeTimers();
+      render(
+        <DataEditor
+          {...basicProps}
+          onCellContextMenu={spy}
+          gridSelection={{
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+            current: undefined,
+          }}
+        />,
+        {
+          wrapper: Context,
+        }
+      );
+      prep(false);
+
+      const canvas = screen.getByTestId("data-grid-canvas");
+
+      // Press Shift+F10 without selecting any cell
+      fireEvent.keyDown(canvas, {
+        key: "F10",
+        keyCode: 121,
+        shiftKey: true,
+      });
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
     test("Delete cell", async () => {
         const spy = vi.fn();
 

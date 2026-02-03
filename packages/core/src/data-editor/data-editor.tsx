@@ -3185,6 +3185,42 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const overlayOpen = overlay !== undefined;
 
+    const onContextMenu = React.useCallback(
+      (args: GridMouseEventArgs, preventDefault: () => void) => {
+        const adjustedCol = args.location[0] - rowMarkerOffset;
+        if (args.kind === "header") {
+          onHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
+        }
+
+        if (args.kind === groupHeaderKind) {
+          if (adjustedCol < 0) {
+            return;
+          }
+          onGroupHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
+        }
+
+        if (args.kind === "cell") {
+          const [col, row] = args.location;
+          onCellContextMenu?.([adjustedCol, row], {
+            ...args,
+            preventDefault,
+          });
+
+          if (!gridSelectionHasItem(gridSelection, args.location)) {
+            updateSelectedCell(col, row, false, false);
+          }
+        }
+      },
+      [
+        gridSelection,
+        onCellContextMenu,
+        onGroupHeaderContextMenu,
+        onHeaderContextMenu,
+        rowMarkerOffset,
+        updateSelectedCell,
+      ]
+    );
+
     const handleFixedKeybindings = React.useCallback(
         (event: GridKeyEventArgs): boolean => {
             const cancel = () => {
@@ -3362,6 +3398,35 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     col = Number.MAX_SAFE_INTEGER;
                 } else if (isHotkey(keys.goToFirstColumn, event, details)) {
                     col = Number.MIN_SAFE_INTEGER;
+                } else if (
+                    isHotkey(keys.contextMenu, event, details) &&
+                    bounds !== undefined &&
+                    event.location !== undefined
+                ) {
+                    const {
+                      location,
+                      ctrlKey,
+                      metaKey,
+                      shiftKey,
+                    } = event;
+
+                    onContextMenu(
+                      {
+                        kind: "cell",
+                        isFillHandle: false,
+                        isTouch: false,
+                        isEdge: false,
+                        button: 0,
+                        scrollEdge: [0, 0],
+                        localEventX: bounds.width / 2,
+                        localEventY: bounds.height / 2,
+                        location,
+                        bounds,
+                        ctrlKey,
+                        metaKey,
+                        shiftKey,
+                        buttons: 0
+                      }, cancel)
                 } else if (rangeSelect === "rect" || rangeSelect === "multi-rect") {
                     if (isHotkey(keys.selectGrowDown, event, details)) {
                         adjustSelection([0, 1]);
@@ -3451,6 +3516,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             return didMatch;
         },
         [
+            onContextMenu,
             rowGroupingNavBehavior,
             overlayOpen,
             gridSelection,
@@ -3541,42 +3607,6 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             showTrailingBlankRow,
             onCellActivated,
             reselect,
-        ]
-    );
-
-    const onContextMenu = React.useCallback(
-        (args: GridMouseEventArgs, preventDefault: () => void) => {
-            const adjustedCol = args.location[0] - rowMarkerOffset;
-            if (args.kind === "header") {
-                onHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
-            }
-
-            if (args.kind === groupHeaderKind) {
-                if (adjustedCol < 0) {
-                    return;
-                }
-                onGroupHeaderContextMenu?.(adjustedCol, { ...args, preventDefault });
-            }
-
-            if (args.kind === "cell") {
-                const [col, row] = args.location;
-                onCellContextMenu?.([adjustedCol, row], {
-                    ...args,
-                    preventDefault,
-                });
-
-                if (!gridSelectionHasItem(gridSelection, args.location)) {
-                    updateSelectedCell(col, row, false, false);
-                }
-            }
-        },
-        [
-            gridSelection,
-            onCellContextMenu,
-            onGroupHeaderContextMenu,
-            onHeaderContextMenu,
-            rowMarkerOffset,
-            updateSelectedCell,
         ]
     );
 

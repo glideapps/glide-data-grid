@@ -67,6 +67,8 @@ export interface ConfigurableKeybinds {
     readonly selectAll: Keybind;
     readonly selectRow: Keybind;
     readonly selectColumn: Keybind;
+
+    readonly contextMenu: Keybind;
 }
 
 export type Keybinds = ConfigurableKeybinds & ForcedKeybinds & Partial<BackCompatKeybinds>;
@@ -118,6 +120,7 @@ export const keybindingDefaults: Keybinds = {
     selectGrowRight: true,
     selectGrowDown: true,
     selectGrowLeft: true,
+    contextMenu: true,
 };
 
 function realizeKeybind(keybind: Keybind, defaultVal: string): string {
@@ -174,6 +177,7 @@ export function realizeKeybinds(keybinds: Keybinds): RealizedKeybinds {
         selectToLastCell: realizeKeybind(keybinds.selectToLastCell, "primary+shift+End"),
         selectToLastColumn: realizeKeybind(keybinds.selectToLastColumn, "primary+shift+ArrowRight"),
         selectToLastRow: realizeKeybind(keybinds.selectToLastRow, "primary+shift+ArrowDown"),
+        contextMenu: realizeKeybind(keybinds.contextMenu, "shift+F10"),
     };
 }
 
