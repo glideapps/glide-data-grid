@@ -3525,6 +3525,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         newVal !== undefined &&
                         !isInnerOnlyCell(newVal) &&
                         isEditableGridCell(newVal) &&
+                        !isInnerOnlyCell(cell) &&
                         isEditableGridCell(cell) &&
                         cell.readonly !== true
                     ) {
