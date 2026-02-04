@@ -5065,8 +5065,8 @@ describe("data-editor", () => {
         const mockStopPropagation = vi.fn();
 
         const evt = createEvent.keyDown(canvas, { key: 'ArrowDown', code: 'ArrowDown' });
-        evt.preventDefault = mockPreventDefault
-        evt.stopPropagation = mockStopPropagation
+        evt.preventDefault = mockPreventDefault;
+        evt.stopPropagation = mockStopPropagation;
         fireEvent(canvas, evt);
 
         // Renderer's onKeyDown should have been called
@@ -5405,8 +5405,8 @@ describe("data-editor", () => {
         const mockStopPropagation = vi.fn();
 
         const evt = createEvent.keyDown(canvas, { key: 'x' });
-        evt.preventDefault = mockPreventDefault
-        evt.stopPropagation = mockStopPropagation
+        evt.preventDefault = mockPreventDefault;
+        evt.stopPropagation = mockStopPropagation;
         fireEvent(canvas, evt);
 
         act(() => {
@@ -5417,5 +5417,64 @@ describe("data-editor", () => {
         expect(mockOnCellsEdited).toHaveBeenCalled();
         expect(mockPreventDefault).toHaveBeenCalled();
         expect(mockStopPropagation).toHaveBeenCalled();
+    });
+
+    test("Cell renderer onKeyDown location should be adjusted when row markers are enabled", async () => {
+        const mockOnKeyDown = vi.fn();
+        const customRenderer = {
+            kind: GridCellKind.Custom,
+            isMatch: (c: GridCell): c is CustomCell => c.kind === GridCellKind.Custom,
+            draw: () => true,
+            onKeyDown: mockOnKeyDown,
+        };
+
+        vi.useFakeTimers();
+        render(
+            <DataEditor
+                {...basicProps}
+                rowMarkers="both"
+                customRenderers={[customRenderer]}
+                getCellContent={() => {
+                    return {
+                        kind: GridCellKind.Custom,
+                        allowOverlay: false,
+                        copyData: "",
+                        data: { value: "custom-cell" },
+                    };
+                }}
+            />,
+            { wrapper: Context }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        // Click on cell at visual position [2, 1] (which is col B when row markers are enabled)
+        // With row markers, column 0 is the row marker, so visual col 2 is data col 1
+        sendClick(canvas, {
+            clientX: 320, // Adjusted for row marker width
+            clientY: 36 + 32 + 16, // Row 1
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        // Press a key
+        fireEvent.keyDown(canvas, {
+            key: "a",
+            keyCode: 65,
+        });
+
+        // The location should be adjusted: internal grid col 2 minus rowMarkerOffset (1) = [1, 1]
+        expect(mockOnKeyDown).toHaveBeenCalledWith(
+            expect.objectContaining({
+                cell: expect.objectContaining({
+                    kind: GridCellKind.Custom,
+                }),
+                location: [1, 1], // Adjusted for row marker offset
+                key: "a",
+            })
+        );
     });
 });

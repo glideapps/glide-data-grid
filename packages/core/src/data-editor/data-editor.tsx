@@ -3521,7 +3521,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                         event.stopPropagation();
                     }
 
-                    if (newVal !== undefined && !isInnerOnlyCell(newVal) && isEditableGridCell(newVal) && newVal.readonly !== true) {
+                    if (
+                        newVal !== undefined &&
+                        !isInnerOnlyCell(newVal) &&
+                        isEditableGridCell(newVal) &&
+                        isEditableGridCell(cell) &&
+                        cell.readonly !== true
+                    ) {
                         mangledOnCellsEdited([{ location: event.location, value: newVal }]);
                         gridRef.current?.damage([{ cell: event.location }]);
                     }
