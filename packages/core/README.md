@@ -64,6 +64,12 @@ Don't forget to import mandatory CSS
 import "@glideapps/glide-data-grid/dist/index.css";
 ```
 
+If you want to use the default Image overlay preview you must remember to include the react-responsive-carousel css file or it will not function correctly. This should be available in your node-modules.
+
+```ts
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+```
+
 Making your columns is easy
 
 ```ts
@@ -102,6 +108,33 @@ function getData([col, row]: Item): GridCell {
 }
 ```
 
+The Grid depends on there being a root level "portal" div in your HTML. Insert this snippet as the last child of your `<body>` tag:
+
+```HTML
+<div id="portal" style="position: fixed; left: 0; top: 0; z-index: 9999;" />
+```
+
+or you can create a portal element yourself using the `createPortal` function from `react-dom` and pass it to the DataEditor via the `portalElementRef` prop.
+
+```ts
+const portalRef = useRef(null);
+<>
+  {
+    createPortal(
+      <div ref={portalRef} style="position: fixed; left: 0; top: 0; z-index: 9999;" />,
+      document.body
+    )
+  }
+  <DataEditor width={500} height={300} portalElementRef={portalRef} {...props} />
+</>
+```
+
+Once you've got that done, the easiest way to use the Data Grid is to give it a fixed size:
+
+```ts
+<DataEditor width={500} height={300} {...props} />
+```
+
 ## Full API documentation
 
 The full [API documentation is on the main site](https://grid.glideapps.com/docs/index.html).
@@ -110,11 +143,11 @@ The full [API documentation is on the main site](https://grid.glideapps.com/docs
 
 **Nothing shows up!**
 
-Please read the [Prerequisites section in the docs](API.md).
+Please read the [Quickstart section in the docs](#-quick-start).
 
 **It crashes when I try to edit a cell!**
 
-Please read the [Prerequisites section in the docs](API.md).
+Please read the [Quickstart section in the docs](#-quick-start).
 
 **Does it work with screen readers and other a11y tools?**
 
