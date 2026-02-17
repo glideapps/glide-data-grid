@@ -722,3 +722,14 @@ export class CompactSelection {
         }
     }
 }
+
+/** @category Types */
+export interface MultilineTextLayout {
+    split: string[]; // array of wrapped text lines (from canvas-hypertxt split)
+    emHeight: number; // em height of the font in pixels
+    lineHeight: number; // computed line height (theme.lineHeight * emHeight)
+    actualHeight: number; // total text height: emHeight + lineHeight * (lines - 1)
+    desiredHeight: number; // actualHeight + theme.cellVerticalPadding
+    mustClip: boolean; // whether desiredHeight exceeds the cell height
+    optimalY: number; // vertically centered Y position for the text block
+}

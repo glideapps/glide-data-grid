@@ -7,6 +7,7 @@ import {
     type InnerGridColumn,
     type Rectangle,
     type BaseGridCell,
+    type MultilineTextLayout,
 } from "../data-grid-types.js";
 import { direction } from "../../../common/utils.js";
 import React from "react";
@@ -506,6 +507,44 @@ function truncateString(data: string, w: number): string {
     return data;
 }
 
+function computeMultilineTextLayout(
+    ctx: CanvasRenderingContext2D,
+    data: string,
+    y: number,
+    w: number,
+    h: number,
+    theme: FullTheme,
+    hyperWrapping?: boolean
+): MultilineTextLayout {
+    const fontStyle = theme.baseFontFull;
+    const split = splitText(ctx, data, fontStyle, w - theme.cellHorizontalPadding * 2, hyperWrapping ?? false);
+
+    const emHeight = getEmHeight(ctx, fontStyle);
+    const lineHeight = theme.lineHeight * emHeight;
+
+    const actualHeight = emHeight + lineHeight * (split.length - 1);
+    const desiredHeight = actualHeight + theme.cellVerticalPadding;
+
+    const mustClip = desiredHeight > h;
+    const optimalY = y + h / 2 - actualHeight / 2;
+
+    return {
+        split,
+        emHeight,
+        lineHeight,
+        actualHeight,
+        desiredHeight,
+        mustClip,
+        optimalY,
+    };
+}
+
+export function computeMultilineTextLayoutExternal(args: BaseDrawArgs, data: string, hyperWrapping?: boolean) {
+    const { ctx, rect, theme } = args;
+    const { y, width, height } = rect;
+    return computeMultilineTextLayout(ctx, data, y, width, height, theme, hyperWrapping);
+}
+
 function drawMultiLineText(
     ctx: CanvasRenderingContext2D,
     data: string,
@@ -518,14 +557,15 @@ function drawMultiLineText(
     contentAlign?: BaseGridCell["contentAlign"],
     hyperWrapping?: boolean
 ) {
-    const fontStyle = theme.baseFontFull;
-    const split = splitText(ctx, data, fontStyle, w - theme.cellHorizontalPadding * 2, hyperWrapping ?? false);
-
-    const emHeight = getEmHeight(ctx, fontStyle);
-    const lineHeight = theme.lineHeight * emHeight;
-
-    const actualHeight = emHeight + lineHeight * (split.length - 1);
-    const mustClip = actualHeight + theme.cellVerticalPadding > h;
+    const { split, emHeight, lineHeight, mustClip, optimalY } = computeMultilineTextLayout(
+        ctx,
+        data,
+        y,
+        w,
+        h,
+        theme,
+        hyperWrapping
+    );
 
     if (mustClip) {
         // well now we have to clip because we might render outside the cell vertically
@@ -534,7 +574,6 @@ function drawMultiLineText(
         ctx.clip();
     }
 
-    const optimalY = y + h / 2 - actualHeight / 2;
     let drawY = Math.max(y + theme.cellVerticalPadding, optimalY);
     for (const line of split) {
         drawSingleTextLine(ctx, line, x, drawY, w, emHeight, bias, theme, contentAlign);
