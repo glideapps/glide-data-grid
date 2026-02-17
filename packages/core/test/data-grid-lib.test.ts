@@ -5,6 +5,7 @@ import {
     remapForDnDState,
     type MappedGridColumn,
     drawLastUpdateUnderlay,
+    computeMultilineTextLayoutExternal,
 } from "../src/internal/data-grid/render/data-grid-lib.js";
 import { GridCellKind, type Rectangle } from "../src/internal/data-grid/data-grid-types.js";
 import { vi, type Mocked, expect, describe, test, it, beforeEach } from "vitest";
@@ -453,5 +454,146 @@ describe("drawWithLastUpdate", () => {
         );
 
         expect(mockLastPrep.fillStyle).toBe(mockTheme.bgSearchResult);
+    });
+});
+
+describe("computeMultilineTextLayout", () => {
+    vi.mock("canvas-hypertxt", () => ({
+        split: (_ctx: unknown, text: string, _font: string, _w: number, _hyperWrapping: boolean) => {
+            return text.split("\n");
+        },
+        clearCache: vi.fn(),
+    }));
+
+    let mockCtx: Mocked<CanvasRenderingContext2D>;
+    let theme: FullTheme;
+    let defaultArgs: BaseDrawArgs;
+
+    beforeEach(() => {
+        mockCtx = {
+            font: "",
+            measureText: vi.fn().mockReturnValue({
+                actualBoundingBoxAscent: 10,
+                actualBoundingBoxDescent: 2,
+                width: 50,
+            }),
+        } as any;
+
+        theme = mergeAndRealizeTheme(getDataEditorTheme());
+        defaultArgs = {
+            ctx: mockCtx,
+            theme,
+            cellFillColor: theme.bgCell,
+            rect: { x: 0, y: 0, width: 200, height: 100 },
+            cell: { kind: GridCellKind.Text, allowOverlay: false, data: "", displayData: "" },
+            col: 0,
+            row: 0,
+            highlighted: false,
+            hoverAmount: 0,
+            hoverX: undefined,
+            hoverY: undefined,
+            hyperWrapping: false,
+            imageLoader: {} as any,
+            spriteManager: {} as any,
+        };
+    });
+
+    it("should compute height dimensions from emHeight and theme", () => {
+        const result = computeMultilineTextLayoutExternal(defaultArgs, "Test");
+
+        expect(result.emHeight).toBe(12);
+        expect(result.lineHeight).toBeCloseTo(theme.lineHeight * result.emHeight);
+        expect(result.desiredHeight).toBeCloseTo(result.actualHeight + theme.cellVerticalPadding);
+    });
+
+    it("should split text with explicit newlines", () => {
+        const result = computeMultilineTextLayoutExternal(
+            {
+                ...defaultArgs,
+                rect: { x: 0, y: 0, width: 500, height: 500 },
+            },
+            "Line 1\nLine 2\nLine 3"
+        );
+
+        expect(result.split.length).toBe(3);
+        expect(result.actualHeight).toBeCloseTo(result.emHeight + result.lineHeight * (result.split.length - 1));
+    });
+
+    it("should set mustClip to true when content overflows cell height", () => {
+        const result = computeMultilineTextLayoutExternal(
+            {
+                ...defaultArgs,
+                rect: { x: 0, y: 0, width: 20, height: 5 },
+            },
+            "Line 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7\nLine 8\nLine 9\nLine 10"
+        );
+
+        expect(result.mustClip).toBe(true);
+    });
+
+    it("should not clip when content fits within cell height", () => {
+        const result = computeMultilineTextLayoutExternal(
+            {
+                ...defaultArgs,
+                rect: { x: 0, y: 0, width: 500, height: 500 },
+            },
+            "Short"
+        );
+
+        expect(result.split.length).toBe(1);
+        expect(result.mustClip).toBe(false);
+    });
+
+    it("should handle lines that wrap at cell width and extend beyond a single line", async () => {
+        const canvasHypertxt = await import("canvas-hypertxt");
+        const splitSpy = vi
+            .spyOn(canvasHypertxt, "split")
+            .mockImplementation((_ctx: unknown, text: string, _font: string, w: number, _hyperWrapping: boolean) => {
+                // Simulate wrapping: each explicit line that exceeds the available width
+                // gets broken into multiple wrapped lines
+                const explicitLines = text.split("\n");
+                const result: string[] = [];
+                for (const line of explicitLines) {
+                    // Approximate: assume ~10px per char, wrap when line exceeds width
+                    const charsPerLine = Math.max(1, Math.floor(w / 10));
+                    for (let i = 0; i < line.length; i += charsPerLine) {
+                        result.push(line.slice(i, i + charsPerLine));
+                    }
+                }
+                return result;
+            });
+
+        const narrowWidth = 60; // allows ~6 chars per line
+        const result = computeMultilineTextLayoutExternal(
+            {
+                ...defaultArgs,
+                rect: { x: 0, y: 0, width: narrowWidth, height: 5000 },
+            },
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur\nExcepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
+        );
+
+        // Each line is a long lorem ipsum sentence (~100+ chars) at ~6 chars/line, wrapping heavily
+        // 4 explicit newline-separated lines, each wrapping to many lines
+        // Total split lines should be more than the 4 explicit newline-separated lines
+        expect(result.split.length).toBeGreaterThan(4);
+        expect(result.actualHeight).toBeCloseTo(result.emHeight + result.lineHeight * (result.split.length - 1));
+        expect(result.desiredHeight).toBeCloseTo(result.actualHeight + theme.cellVerticalPadding);
+        // With many wrapped lines in a tall cell, content should fit
+        expect(result.mustClip).toBe(false);
+
+        splitSpy.mockRestore();
+    });
+
+    it("should center optimalY vertically within the cell", () => {
+        const rect = { x: 0, y: 50, width: 500, height: 200 };
+        const result = computeMultilineTextLayoutExternal(
+            {
+                ...defaultArgs,
+                rect,
+            },
+            "Centered"
+        );
+
+        expect(result.optimalY).toBeCloseTo(rect.y + rect.height / 2 - result.actualHeight / 2);
     });
 });

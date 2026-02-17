@@ -40,6 +40,7 @@ export {
     roundedPoly,
     roundedRect,
     drawTextCellExternal as drawTextCell,
+    computeMultilineTextLayoutExternal as computeMultilineTextLayout,
 } from "./internal/data-grid/render/data-grid-lib.js";
 export { CellSet } from "./internal/data-grid/cell-set.js";
 export { getDataEditorTheme as getDefaultTheme, useTheme } from "./common/styles.js";
