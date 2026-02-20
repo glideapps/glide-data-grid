@@ -26,8 +26,8 @@ function cellToSortData(c: GridCell): string {
     }
 }
 
-function tryParse(val: string | number): number | string {
-    if (typeof val === "number") return val;
+function tryParse(val: string | number | bigint): number | bigint | string {
+    if (typeof val === "number" || typeof val === "bigint") return val;
     if (val.length > 0) {
         const x = Number(val);
         if (!isNaN(x)) {
@@ -37,21 +37,34 @@ function tryParse(val: string | number): number | string {
     return val;
 }
 
-export function compareSmart(a: string | number, b: string | number): number {
-    a = tryParse(a);
-    b = tryParse(b);
-    if (typeof a === "string" && typeof b === "string") {
-        return a.localeCompare(b);
-    } else if (typeof a === "number" && typeof b === "number") {
-        if (a === b) return 0;
-        return a > b ? 1 : -1;
-    } else if (a == b) {
-        return 0;
+export function compareSmart(a: string | number | bigint, b: string | number | bigint): number {
+    const pa = tryParse(a);
+    const pb = tryParse(b);
+
+    if (typeof pa === "string" && typeof pb === "string") {
+        return pa.localeCompare(pb);
     }
-    return a > b ? 1 : -1;
+
+    const aIsNumeric = typeof pa === "number" || typeof pa === "bigint";
+    const bIsNumeric = typeof pb === "number" || typeof pb === "bigint";
+
+    if (aIsNumeric && !bIsNumeric) return -1;
+    if (!aIsNumeric && bIsNumeric) return 1;
+    if (!aIsNumeric && !bIsNumeric) return (pa as string).localeCompare(pb as string);
+
+    if (pa == pb) return 0;
+
+    // Both are numeric, potentially mixed. Convert to number for comparison.
+    // This may lose precision on huge BigInts, but it is the only pragmatic
+    // way to compare floats and bigints, and it avoids crashing.
+    const numA = Number(pa);
+    const numB = Number(pb);
+
+    if (numA === numB) return 0;
+    return numA > numB ? 1 : -1;
 }
 
-export function compareRaw(a: string | number, b: string | number) {
+export function compareRaw(a: string | number | bigint, b: string | number | bigint) {
     if (a > b) return 1;
     if (a === b) return 0;
     return -1;
@@ -78,11 +91,14 @@ export function useColumnSort(p: Props): Result {
         return Array.isArray(sort) ? sort : [sort];
     }, [sort]);
 
-    const sortCols = React.useMemo(() =>
-        sorts.map(s => {
-            const c = p.columns.findIndex(col => s.column === col || (col.id !== undefined && s.column.id === col.id));
-            return c === -1 ? undefined : c;
-        }),
+    const sortCols = React.useMemo(
+        () =>
+            sorts.map(s => {
+                const c = p.columns.findIndex(
+                    col => s.column === col || (col.id !== undefined && s.column.id === col.id)
+                );
+                return c === -1 ? undefined : c;
+            }),
         [sorts, p.columns]
     );
 

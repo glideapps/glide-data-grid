@@ -16,7 +16,7 @@ type StringArrayCellBuffer = {
 
 type BasicCellBuffer = {
     formatted: string;
-    rawValue: string | number | boolean | BooleanEmpty | BooleanIndeterminate | undefined;
+    rawValue: string | number | bigint | boolean | BooleanEmpty | BooleanIndeterminate | undefined;
     format: "string" | "number" | "boolean" | "url";
     doNotEscape?: boolean;
 };
@@ -40,10 +40,10 @@ function convertCellToBuffer(cell: GridCell): CellBuffer {
                     cell.data === true
                         ? "TRUE"
                         : cell.data === false
-                        ? "FALSE"
-                        : cell.data === BooleanIndeterminate
-                        ? "INDETERMINATE"
-                        : "",
+                          ? "FALSE"
+                          : cell.data === BooleanIndeterminate
+                            ? "INDETERMINATE"
+                            : "",
                 rawValue: cell.data,
                 format: "boolean",
             };
@@ -85,12 +85,14 @@ function convertCellToBuffer(cell: GridCell): CellBuffer {
                 rawValue: cell.data,
                 format: "string",
             };
-        case GridCellKind.Number:
+        case GridCellKind.Number: {
+            const v = cell.data;
             return {
                 formatted: cell.displayData,
-                rawValue: cell.data,
+                rawValue: v,
                 format: "number",
             };
+        }
         case GridCellKind.Loading:
             return {
                 formatted: "#LOADING",

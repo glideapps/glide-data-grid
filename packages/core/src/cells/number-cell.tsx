@@ -9,6 +9,28 @@ const NumberOverlayEditor = React.lazy(
     async () => await import("../internal/data-grid-overlay-editor/private/number-overlay-editor.js")
 );
 
+function parseToNumberOrBigInt(str: string): number | bigint | undefined {
+    const trimmed = str.trim();
+    if (trimmed === "") return undefined;
+
+    // Check if it's a plain integer string.
+    if (/^-?\d+$/.test(trimmed)) {
+        try {
+            const big = BigInt(trimmed);
+            if (big >= BigInt(Number.MIN_SAFE_INTEGER) && big <= BigInt(Number.MAX_SAFE_INTEGER)) {
+                return Number(big);
+            }
+            return big;
+        } catch {
+            return undefined;
+        }
+    }
+
+    // Otherwise, try to parse as a float.
+    const num = Number.parseFloat(trimmed);
+    return Number.isNaN(num) ? undefined : num;
+}
+
 export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
     getAccessibilityString: c => c.data?.toString() ?? "",
     kind: GridCellKind.Number,
@@ -37,28 +59,46 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
                 <NumberOverlayEditor
                     highlight={isHighlighted}
                     disabled={value.readonly === true}
-                    value={value.data}
+                    value={
+                        typeof value.data === "bigint"
+                            ? value.data <= BigInt(Number.MAX_SAFE_INTEGER) &&
+                              value.data >= BigInt(Number.MIN_SAFE_INTEGER)
+                                ? Number(value.data)
+                                : undefined
+                            : value.data
+                    }
                     fixedDecimals={value.fixedDecimals}
                     allowNegative={value.allowNegative}
                     thousandSeparator={value.thousandSeparator}
                     decimalSeparator={value.decimalSeparator}
                     validatedSelection={validatedSelection}
-                    onChange={x =>
+                    onChange={x => {
+                        const newNumber = parseToNumberOrBigInt(x.value);
                         onChange({
                             ...value,
-                            data: Number.isNaN(x.floatValue ?? 0) ? 0 : x.floatValue,
-                        })
-                    }
+                            data: newNumber,
+                        });
+                    }}
                 />
             </React.Suspense>
         );
     },
     onPaste: (toPaste, cell, details) => {
-        const newNumber =
-            typeof details.rawValue === "number"
-                ? details.rawValue
-                : Number.parseFloat(typeof details.rawValue === "string" ? details.rawValue : toPaste);
-        if (Number.isNaN(newNumber) || cell.data === newNumber) return undefined;
+        let newNumber: number | bigint | undefined;
+
+        if (typeof details.rawValue === "number" || typeof details.rawValue === "bigint") {
+            newNumber = details.rawValue;
+        } else {
+            const strVal = typeof details.rawValue === "string" ? details.rawValue : toPaste;
+            newNumber = parseToNumberOrBigInt(strVal);
+        }
+
+        if (
+            newNumber === undefined ||
+            (typeof newNumber === "number" && Number.isNaN(newNumber)) ||
+            cell.data === newNumber
+        )
+            return undefined;
         return { ...cell, data: newNumber, displayData: details.formattedString ?? cell.displayData };
     },
 };
