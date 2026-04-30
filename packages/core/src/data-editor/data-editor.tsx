@@ -581,6 +581,16 @@ export interface DataEditorProps extends Props, Pick<DataGridSearchProps, "image
     readonly editOnType?: boolean;
 
     /**
+     * When true, pressing Enter to commit an overlay edit keeps the cursor on the edited cell instead
+     * of moving it down. Tab / Shift+Tab / Shift+Enter still move horizontally / upward as usual —
+     * only the [0, 1] (Enter → down) movement is neutralized.
+     *
+     * Default: `false` (preserves the historical "Enter moves down" behavior).
+     * @group Editing
+     */
+    readonly keepFocusOnEnterAccept?: boolean;
+
+    /**
      * Used to fetch large amounts of cells at once. Used for copy/paste, if unset copy will not work.
      *
      * `getCellsForSelection` is called when the user copies a selection to the clipboard or the data editor needs to
@@ -828,6 +838,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         onKeyUp: onKeyUpIn,
         keybindings: keybindingsIn,
         editOnType = true,
+        keepFocusOnEnterAccept = false,
         onRowAppended,
         onColumnAppended,
         onColumnMoved,
@@ -3096,6 +3107,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             focus(true);
             setOverlay(undefined);
 
+            // When keepFocusOnEnterAccept is enabled, only the Enter (down) movement is neutralized so
+            // pressing Enter commits without dropping a row. Tab / Shift+Tab / Shift+Enter keep
+            // their default direction-of-travel behavior.
+            if (keepFocusOnEnterAccept && movement[0] === 0 && movement[1] === 1) {
+                movement = [0, 0];
+            }
+
             const [movX, movY] = movement;
             if (gridSelection.current !== undefined && (movX !== 0 || movY !== 0)) {
                 const isEditingLastRow = gridSelection.current.cell[1] === mangledRows - 1 && newValue !== undefined;
@@ -3138,6 +3156,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
             onRowAppended,
             onColumnAppended,
             getCustomNewRowTargetColumn,
+            keepFocusOnEnterAccept,
         ]
     );
 
