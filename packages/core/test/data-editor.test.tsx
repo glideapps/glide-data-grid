@@ -4504,6 +4504,39 @@ describe("data-editor", () => {
         expect(spy).toBeCalledTimes(2);
     });
 
+    test("Use fill handle when mouse is released outside the canvas", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(<EventedDataEditor {...basicProps} onCellEdited={spy} fillHandle={true} />, {
+            wrapper: Context,
+        });
+        prep();
+        const canvas = screen.getByTestId("data-grid-canvas");
+
+        sendClick(canvas, {
+            clientX: 290, // Col A
+            clientY: 36 + 30, // Row 2
+        });
+
+        fireEvent.mouseDown(canvas, {
+            clientX: 308, // Fill handle on Col A
+            clientY: 36 + 30,
+        });
+
+        fireEvent.mouseMove(canvas, {
+            clientX: 308,
+            clientY: 995, // Last visible row
+            buttons: 1,
+        });
+
+        fireEvent.mouseUp(document.body, {
+            clientX: 308,
+            clientY: 1105, // Released outside the canvas bounds
+        });
+
+        expect(spy).toBeCalledTimes(999);
+    });
+
     test("Close overlay with enter key", async () => {
         const spy = vi.fn();
         vi.useFakeTimers();

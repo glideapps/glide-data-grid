@@ -2214,29 +2214,34 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         (args: GridMouseEventArgs, isOutside: boolean) => {
             const mouse = mouseState;
             setMouseState(undefined);
-            setFillHighlightRegion(undefined);
             setScrollDir(undefined);
             isActivelyDraggingHeader.current = false;
-
-            if (isOutside) return;
 
             if (
                 mouse?.fillHandle === true &&
                 gridSelection.current !== undefined &&
                 mouse.previousSelection?.current !== undefined
             ) {
-                if (fillHighlightRegion === undefined) return;
+                const highlightRegion = fillHighlightRegion;
+                setFillHighlightRegion(undefined);
+
+                if (highlightRegion === undefined) return;
+
                 const newRange = {
                     ...gridSelection,
                     current: {
                         ...gridSelection.current,
-                        range: combineRects(mouse.previousSelection.current.range, fillHighlightRegion),
+                        range: combineRects(mouse.previousSelection.current.range, highlightRegion),
                     },
                 };
                 void fillPattern(mouse.previousSelection, newRange);
                 setGridSelection(newRange, true);
                 return;
             }
+
+            setFillHighlightRegion(undefined);
+
+            if (isOutside) return;
 
             const [col, row] = args.location;
             const [lastMouseDownCol, lastMouseDownRow] = lastMouseSelectLocation.current ?? [];
