@@ -3695,7 +3695,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 const textPlain = "text/plain";
                 const textHtml = "text/html";
 
-                if (navigator.clipboard.read !== undefined) {
+                if (navigator.clipboard?.read !== undefined) {
                     const clipboardContent = await navigator.clipboard.read();
 
                     for (const item of clipboardContent) {
@@ -3713,7 +3713,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             text = await (await item.getType(textPlain)).text();
                         }
                     }
-                } else if (navigator.clipboard.readText !== undefined) {
+                } else if (navigator.clipboard?.readText !== undefined) {
                     text = await navigator.clipboard.readText();
                 } else if (e !== undefined && e?.clipboardData !== null) {
                     if (e.clipboardData.types.includes(textHtml)) {

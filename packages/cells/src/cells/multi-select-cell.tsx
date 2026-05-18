@@ -14,7 +14,7 @@ import {
 } from "@glideapps/glide-data-grid";
 
 import { styled } from "@linaria/react";
-import Select, { type MenuProps, components, type StylesConfig } from "react-select";
+import Select, { type MenuProps, type MultiValueGenericProps, components, type StylesConfig } from "react-select";
 import CreatableSelect from "react-select/creatable";
 
 type SelectOption = { value: string; label?: string; color?: string };
@@ -126,6 +126,48 @@ const CustomMenu: React.FC<CustomMenuProps> = p => {
     const { Menu } = components;
     const { children, ...rest } = p;
     return <Menu {...rest}>{children}</Menu>;
+};
+
+/**
+ * Custom MultiValueLabel component that allows text selection within pills.
+ * By default, react-select prevents text selection via onMouseDown preventDefault.
+ * We override this to allow users to select and copy text from the pills.
+ *
+ * Side effects:
+ * - Clicking on the pill label text won't focus the select input (click elsewhere to focus)
+ * - Clicking on the pill label text won't open the dropdown menu (click input area to open)
+ * - Removing pills via the X button still works normally (separate component)
+ * - Keyboard navigation still works normally
+ *
+ * Note on type assertions: react-select's MultiValueGenericProps.innerProps type is
+ * { className?: string }, but the underlying div element accepts all standard div props.
+ * The type assertion to React.ComponentPropsWithoutRef<"div"> is necessary to add
+ * event handlers that the actual DOM element supports.
+ */
+const SelectableMultiValueLabel: React.FC<MultiValueGenericProps<SelectOption>> = props => {
+    // Cast innerProps to the full div props type since react-select's types are overly restrictive
+    // (they only type { className?: string } but the div accepts all standard props)
+    const existingInnerProps = props.innerProps as React.ComponentPropsWithoutRef<"div"> | undefined;
+
+    const enhancedInnerProps: React.ComponentPropsWithoutRef<"div"> = {
+        ...existingInnerProps,
+        // Allow text selection by stopping propagation but not preventing default
+        onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => {
+            e.stopPropagation(); // Prevents react-select from treating it as a control click
+            existingInnerProps?.onMouseDown?.(e);
+        },
+        onTouchEnd: (e: React.TouchEvent<HTMLDivElement>) => {
+            e.stopPropagation();
+            existingInnerProps?.onTouchEnd?.(e);
+        },
+    };
+
+    return (
+        <components.MultiValueLabel
+            {...props}
+            innerProps={enhancedInnerProps as typeof props.innerProps}
+        />
+    );
 };
 
 export type MultiSelectCell = CustomCell<MultiSelectCellProps>;
@@ -367,6 +409,7 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                 components={{
                     DropdownIndicator: () => null,
                     IndicatorSeparator: () => null,
+                    MultiValueLabel: SelectableMultiValueLabel,
                     Menu: props => {
                         if (menuDisabled) {
                             return null;
@@ -379,10 +422,10 @@ const Editor: ReturnType<ProvideEditorCallback<MultiSelectCell>> = p => {
                     },
                 }}
                 onChange={async e => {
-                    if (e === null) {
+                    if (e === null || !Array.isArray(e)) {
                         return;
                     }
-                    submitValues(e.map(x => x.value));
+                    submitValues(e.map((x: SelectOption) => x.value));
                 }}
             />
         </Wrap>

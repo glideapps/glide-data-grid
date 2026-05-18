@@ -270,7 +270,7 @@ describe("Multi Select Editor", () => {
         const Editor = renderer.provideEditor?.({
             ...getMockCell(),
             location: [0, 0],
-        }).editor;        
+        }).editor;
         if (Editor === undefined) {
             throw new Error("Editor is invalid");
         }
@@ -377,4 +377,97 @@ describe("Multi Select Editor", () => {
     });
 
     // TODO: Add test for creating new options
+
+    it("allows text selection in pill labels (onMouseDown does not prevent default)", async () => {
+        const mockCell = getMockCell({
+            data: {
+                kind: "multi-select-cell",
+                options: [
+                    { value: "option1", label: "Option 1", color: "red" },
+                    { value: "option2", label: "Option 2", color: "blue" },
+                ],
+                values: ["option1", "option2"],
+            },
+        });
+        // @ts-ignore
+        const Editor = renderer.provideEditor?.({
+            ...mockCell,
+            location: [0, 0],
+        }).editor;
+        if (Editor === undefined) {
+            throw new Error("Editor is invalid");
+        }
+
+        const mockCellOnChange = vi.fn();
+        const result = render(<Editor isHighlighted={false} value={mockCell} onChange={mockCellOnChange} />);
+        const cellEditor = result.getByTestId("multi-select-cell");
+
+        // Find the pill labels (MultiValueLabel components render with the label text)
+        const pillLabel = getByText(cellEditor, "Option 1");
+        expect(pillLabel).toBeDefined();
+
+        // Simulate mousedown on the pill label - it should not prevent default (allowing text selection)
+        // We verify this by checking that the event's defaultPrevented is false after the handler runs
+        const mouseDownEvent = new MouseEvent("mousedown", {
+            bubbles: true,
+            cancelable: true,
+        });
+
+        // The event should not be prevented (allowing text selection)
+        pillLabel.dispatchEvent(mouseDownEvent);
+        expect(mouseDownEvent.defaultPrevented).toBe(false);
+
+        // The onChange should NOT have been called just from clicking the label
+        // (stopPropagation prevents the control from receiving the click)
+        expect(mockCellOnChange).not.toHaveBeenCalled();
+    });
+
+    it("still allows removing pills via the remove button after text selection enhancement", async () => {
+        const mockCell = getMockCell({
+            data: {
+                kind: "multi-select-cell",
+                options: [
+                    { value: "option1", label: "Option 1", color: "red" },
+                    { value: "option2", label: "Option 2", color: "blue" },
+                ],
+                values: ["option1"],
+            },
+        });
+        // @ts-ignore
+        const Editor = renderer.provideEditor?.({
+            ...mockCell,
+            location: [0, 0],
+        }).editor;
+        if (Editor === undefined) {
+            throw new Error("Editor is invalid");
+        }
+
+        const mockCellOnChange = vi.fn();
+        const result = render(<Editor isHighlighted={false} value={mockCell} onChange={mockCellOnChange} />);
+        const cellEditor = result.getByTestId("multi-select-cell");
+
+        // Find the pill label first
+        const pillLabel = getByText(cellEditor, "Option 1");
+        expect(pillLabel).toBeDefined();
+
+        // The remove button is a sibling of the label within the multi-value container
+        // react-select renders: <div class="...multi-value"><div class="...label">text</div><div class="...remove">X</div></div>
+        const multiValueContainer = pillLabel.parentElement;
+        expect(multiValueContainer).not.toBeNull();
+
+        // Find the remove button (it's the element with the SVG/X icon, typically the last child or has a specific role)
+        // react-select's remove button contains an SVG with a path
+        const removeButton = multiValueContainer?.querySelector("svg")?.parentElement;
+        expect(removeButton).not.toBeNull();
+
+        // Click the remove button
+        fireEvent.click(removeButton!);
+
+        // The onChange should have been called to remove the value
+        expect(mockCellOnChange).toHaveBeenCalledTimes(1);
+        expect(mockCellOnChange).toHaveBeenCalledWith({
+            ...mockCell,
+            data: { ...mockCell.data, values: [] },
+        });
+    });
 });
