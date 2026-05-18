@@ -395,4 +395,71 @@ describe("data-grid", () => {
             false
         );
     });
+
+    test("Freeze column simple check with trailing", () => {
+        const spy = vi.fn();
+
+        const basicPropsWithMoreColumns = {
+            ...basicProps,
+            columns: [
+                ...basicProps.columns,
+                {
+                    title: "F",
+                    width: 150,
+                },
+                {
+                    title: "G",
+                    width: 150,
+                },
+                {
+                    title: "H",
+                    width: 150,
+                },
+                {
+                    title: "I",
+                    width: 150,
+                },
+                {
+                    title: "J",
+                    width: 150,
+                },
+                {
+                    title: "K",
+                    width: 150,
+                },
+                {
+                    title: "L",
+                    width: 150,
+                },
+            ],
+        };
+
+        render(<DataGrid {...basicPropsWithMoreColumns} freezeColumns={[1, 1]} cellXOffset={3} onMouseUp={spy} />);
+
+
+        fireEvent.pointerDown(screen.getByTestId(dataGridCanvasId), {
+            clientX: 950, // Col A
+            clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
+        });
+
+        fireEvent.pointerUp(screen.getByTestId(dataGridCanvasId), {
+            clientX: 950, // Col A
+            clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
+        });
+
+        fireEvent.click(screen.getByTestId(dataGridCanvasId), {
+            clientX: 950, // Col A
+            clientY: 36 + 32 * 5 + 16, // Row 5 (0 indexed)
+        });
+
+        expect(spy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                location: [11, 5],
+                kind: "cell",
+                localEventX: 100,
+                localEventY: 16,
+            }),
+            false
+        );
+    });
 });

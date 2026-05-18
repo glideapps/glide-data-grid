@@ -282,3 +282,10 @@ export function useDeepMemo<T>(value: T): T {
 
     return ref.current;
 }
+
+export function normalizeFreezeColumns(freezeColumns: number | readonly [number, number]): readonly [number, number] {
+    const freezeLeftColumns = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
+    const freezeRightColumns = typeof freezeColumns === "number" ? 0 : freezeColumns[1];
+
+    return [freezeLeftColumns, freezeRightColumns];
+}

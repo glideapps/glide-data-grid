@@ -13,14 +13,9 @@ or you can create a portal element yourself using the `createPortal` function fr
 ```jsx
 const portalRef = useRef(null);
 <>
-  {
-    createPortal(
-      <div ref={portalRef} style="position: fixed; left: 0; top: 0; z-index: 9999;" />,
-      document.body
-    )
-  }
-  <DataEditor width={500} height={300} portalElementRef={portalRef} {...props} />
-</>
+    {createPortal(<div ref={portalRef} style="position: fixed; left: 0; top: 0; z-index: 9999;" />, document.body)}
+    <DataEditor width={500} height={300} portalElementRef={portalRef} {...props} />
+</>;
 ```
 
 Once you've got that done, the easiest way to use the Data Grid is to give it a fixed size:
@@ -87,10 +82,10 @@ All data grids must set these props. These props are the bare minimum required t
 Most data grids will want to set the majority of these props one way or another.
 
 | Name                                              | Description                                                                                                                                                                                                                                                         |
-|---------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [fixedShadowX](#fixedshadow)                      | Enable/disable a shadow behind fixed columns on the X axis.                                                                                                                                                                                                         |
 | [fixedShadowY](#fixedshadow)                      | Enable/disable a shadow behind the header(s) on the Y axis.                                                                                                                                                                                                         |
-| [freezeColumns](#freezecolumns)                   | The number of columns which should remain in place when scrolling horizontally. The row marker column, if enabled is always frozen and is not included in this count.                                                                                               |
+| [freezeColumns](#freezecolumns)                   | The number of columns which should remain in place when scrolling horizontally, or a tuple `[left, right]` to freeze columns on both sides. The row marker column, if enabled is always frozen and is not included in this count.                                   |
 | [getCellsForSelection](#getcellsforselection)     | Used to fetch large amounts of cells at once. Used for copy/paste, if unset copy will not work.                                                                                                                                                                     |
 | [markdownDivCreateNode](#markdowndivcreatenode)   | If specified, it will be used to render Markdown, instead of the default Markdown renderer used by the Grid. You'll want to use this if you need to process your Markdown for security purposes, or if you want to use a renderer with different Markdown features. |
 | [onVisibleRegionChanged](#onvisibleregionchanged) | Emits whenever the visible rows/columns changes.                                                                                                                                                                                                                    |
@@ -192,7 +187,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [onRowMoved](#onrowmoved)                             | Emitted when a row has been dragged to a new location.                                                                                                                              |
 | [preventDiagonalScrolling](#preventdiagonalscrolling) | Prevents diagonal scrolling                                                                                                                                                         |
 | [rowSelectionMode](#rowselectionmode)                 | Determines if row selection requires a modifier key to enable multi-selection or not.                                                                                               |
-| [columnSelectionMode](#columnselectionmode)           | Determines if column selection requires a modifier key to enable multi-selection or not.                                                                                             |
+| [columnSelectionMode](#columnselectionmode)           | Determines if column selection requires a modifier key to enable multi-selection or not.                                                                                            |
 | [scrollToEnd](#scrolltoend)                           | When set to true, the grid will scroll to the end. The ref has a better method to do this and this prop should not be used but it will remain supported for the foreseeable future. |
 | [showMinimap](#showminimap)                           | Shows the interactive minimap of the grid.                                                                                                                                          |
 | [validateCell](#validatecell)                         | When returns false indicates to the user the value will not be accepted. When returns a new GridCell the value is coerced to match.                                                 |
@@ -550,10 +545,17 @@ getCellContent: (cell: Item) => GridCell;
 ## freezeColumns
 
 ```ts
-freezeColumns?: number;
+freezeColumns?: number | readonly [left: number, right: number];
 ```
 
 Set to a positive number to freeze columns on the left side of the grid during horizontal scrolling.
+
+Alternatively, pass a tuple `[left, right]` where:
+
+- `left` is the number of columns to freeze on the left side
+- `right` is the number of columns to freeze on the right side
+
+Note: The row marker column, if enabled, is always frozen and is not included in the left freeze count.
 
 ---
 

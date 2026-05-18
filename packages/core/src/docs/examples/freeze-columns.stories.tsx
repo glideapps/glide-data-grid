@@ -30,14 +30,14 @@ export default {
     ],
 };
 
-export const FreezeColumns: React.VFC<any> = (p: { freezeColumns: number }) => {
+export const FreezeColumns: React.VFC<any> = (p: { freezeLeftColumns: number, freezeRightColumns: number }) => {
     const { cols, getCellContent } = useMockDataGenerator(100);
 
     return (
         <DataEditor
             {...defaultProps}
             rowMarkers="both"
-            freezeColumns={p.freezeColumns}
+            freezeColumns={[p.freezeLeftColumns, p.freezeRightColumns]}
             getCellContent={getCellContent}
             columns={cols}
             verticalBorder={false}
@@ -46,7 +46,14 @@ export const FreezeColumns: React.VFC<any> = (p: { freezeColumns: number }) => {
     );
 };
 (FreezeColumns as any).argTypes = {
-    freezeColumns: {
+    freezeLeftColumns: {
+        control: {
+            type: "range",
+            min: 0,
+            max: 10,
+        },
+    },
+    freezeRightColumns: {
         control: {
             type: "range",
             min: 0,
@@ -55,5 +62,6 @@ export const FreezeColumns: React.VFC<any> = (p: { freezeColumns: number }) => {
     },
 };
 (FreezeColumns as any).args = {
-    freezeColumns: 1,
+    freezeLeftColumns: 1,
+    freezeRightColumns: 1,
 };

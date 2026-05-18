@@ -2273,6 +2273,53 @@ describe("data-editor", () => {
         );
     });
 
+
+    test("Freeze area reported with right freeze included", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(
+            <EventedDataEditor {...basicProps} freezeColumns={[2, 2]} onVisibleRegionChanged={spy} />,
+            {
+                wrapper: Context,
+            }
+        );
+        prep();
+
+        expect(spy).toBeCalledWith(
+            expect.objectContaining({
+                height: 32,
+                width: 9,
+                x: 2,
+                y: 0,
+            }),
+            0,
+            0,
+            expect.objectContaining({
+                freezeRegion: {
+                    height: 32,
+                    width: 2,
+                    x: 0,
+                    y: 0,
+                },
+                freezeRegions: [
+                    {
+                        height: 32,
+                        width: 2,
+                        x: 0,
+                        y: 0,
+                    },
+                    {
+                        height: 32,
+                        width: 2,
+                        x: 9,
+                        y: 0,
+                    },
+                ],
+                selected: undefined,
+            })
+        );
+    });
+
     test("Search close", async () => {
         const spy = vi.fn();
         vi.useFakeTimers();

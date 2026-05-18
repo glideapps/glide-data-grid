@@ -25,13 +25,16 @@ export function useCollapsingGroups(props: Props): Result {
         theme,
     } = props;
 
+    const freezeColumnsLeft = typeof freezeColumns === "number" ? freezeColumns : freezeColumns[0];
+    const freezeColumnsRight = typeof freezeColumns === "number" ? 0 : freezeColumns[1];
+
     const gridSelection = gridSelectionIn ?? gridSelectionInner;
 
     const spans = React.useMemo(() => {
         const result: [number, number][] = [];
         let current: [number, number] = [-1, -1];
         let lastGroup: string | undefined;
-        for (let i = freezeColumns; i < columnsIn.length; i++) {
+        for (let i = freezeColumnsLeft; i < columnsIn.length - freezeColumnsRight; i++) {
             const c = columnsIn[i];
             const group = c.group ?? "";
             const isCollapsed = collapsed.includes(group);
@@ -53,7 +56,7 @@ export function useCollapsingGroups(props: Props): Result {
         }
         if (current[0] !== -1) result.push(current);
         return result;
-    }, [collapsed, columnsIn, freezeColumns]);
+    }, [collapsed, columnsIn, freezeColumnsLeft, freezeColumnsRight]);
 
     const columns = React.useMemo(() => {
         if (spans.length === 0) return columnsIn;
