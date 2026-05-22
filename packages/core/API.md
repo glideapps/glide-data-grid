@@ -98,6 +98,7 @@ Most data grids will want to set the majority of these props one way or another.
 | [portalElementRef](#portalelementref)             | A ref to the portal element to use for the overlay editor.                                                                                                                                                                                                          |
 | [rowHeight](#rowheight)                           | Callback or number used to specify the height of a given row.                                                                                                                                                                                                       |
 | [rowMarkers](#rowmarkers)                         | Enable/disable row marker column on the left. Can show row numbers, selection boxes, or both.                                                                                                                                                                       |
+| [sections](#sections)                             | Adds non-selectable full-width section rows before the provided row indexes.                                                                                                                                                                                        |
 | [smoothScrollX](#smoothscroll)                    | Enable/disable smooth scrolling on the X axis.                                                                                                                                                                                                                      |
 | [smoothScrollY](#smoothscroll)                    | Enable/disable smooth scrolling on the Y axis.                                                                                                                                                                                                                      |
 
@@ -177,6 +178,8 @@ Most data grids will want to set the majority of these props one way or another.
 | [onCellActivated](#oncellactivated)                   | Emitted when a cell is activated, such as by pressing Enter, Space, double clicking, or typing.                                                                                     |
 | [onCellClicked](#oncellclicked)                       | Emitted when a cell is clicked.                                                                                                                                                     |
 | [onCellContextMenu](#oncellcontextmenu)               | Emitted when a cell should show a context menu. Usually right click.                                                                                                                |
+| [onSectionHeaderClicked](#onsectionheaderclicked)     | Emitted when a section header is clicked.                                                                                                                                           |
+| [onSectionHeaderContextMenu](#onsectionheadercontextmenu) | Emitted when a section header should show a context menu. Usually right click.                                                                                                  |
 | [onColumnMoved](#oncolumnmoved)                       | Emitted when a column has been dragged to a new location.                                                                                                                           |
 | [onColumnResize](#oncolumnresize)                     | Emitted when a column has been resized to a new size.                                                                                                                               |
 | [onColumnResizeEnd](#oncolumnresize)                  | Emitted when a column has been resized to a new size and the user has stopped interacting wtih the resize handle.                                                                   |
@@ -659,6 +662,30 @@ rowMarkers?: "checkbox" | "number" | "both" | "none";
 ```
 
 `rowMarkers` determines whether to display the marker column on the very left. It defaults to `none`. Note that this column doesn't count as a table column, i.e. it has no index, and doesn't change column indexes.
+
+---
+
+## sections
+
+```ts
+interface RowSection {
+    row: number;
+    title: string;
+    height?: number;
+    sticky?: boolean;
+    stickyStyle?: "solid" | "frosted";
+    themeOverride?: Partial<Theme>;
+}
+
+sections?: readonly RowSection[];
+sectionHeight?: number;
+```
+
+`sections` inserts non-selectable full-width section rows before the provided row indexes. Section rows render with a title and are skipped by row marker selection and keyboard navigation. `sectionHeight` controls the default section row height and defaults to `44`. Set `sticky` on a section to keep it pinned at the top of the visible rows until the next section pushes it away.
+
+`stickyStyle` controls the pinned section header. Use `"solid"` for an opaque sticky header or `"frosted"` for a translucent sticky header with backdrop blur. It defaults to `"solid"`.
+
+Use `themeOverride` to style individual section rows. Section rendering uses `bgGroupHeader` and `textGroupHeader` when provided, falling back to the standard header theme.
 
 ---
 
@@ -1267,6 +1294,32 @@ The `event` parameter is one of:
 ---
 
 ## onCellContextMenu
+
+```ts
+onCellContextMenu?: (cell: Item, event: CellClickedEventArgs) => void;
+```
+
+`onCellContextMenu` is called whenever a cell context menu should be presented, usually right click.
+
+---
+
+## onSectionHeaderClicked
+
+```ts
+onSectionHeaderClicked?: (section: RowSection, event: CellClickedEventArgs) => void;
+```
+
+`onSectionHeaderClicked` is called whenever the user clicks a section header. Section header events use the section's data row as `event.location[1]`; `event.location[0]` is the clicked column when the section is rendered in the grid, or `0` when the sticky section header is clicked.
+
+---
+
+## onSectionHeaderContextMenu
+
+```ts
+onSectionHeaderContextMenu?: (section: RowSection, event: CellClickedEventArgs) => void;
+```
+
+`onSectionHeaderContextMenu` is called whenever a section header context menu should be presented, usually right click. Section headers remain non-selectable when this callback fires.
 
 ---
 

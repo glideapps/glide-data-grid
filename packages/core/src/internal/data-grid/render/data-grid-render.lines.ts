@@ -1,6 +1,12 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable unicorn/no-for-loop */
-import { type Rectangle, CompactSelection } from "../data-grid-types.js";
+import {
+    type Rectangle,
+    CompactSelection,
+    InnerGridCellKind,
+    type InnerGridCell,
+    type Item,
+} from "../data-grid-types.js";
 import { CellSet } from "../cell-set.js";
 import groupBy from "lodash/groupBy.js";
 import { getStickyWidth, type MappedGridColumn, getFreezeTrailingHeight } from "./data-grid-lib.js";
@@ -111,8 +117,12 @@ export function overdrawStickyBoundaries(
     height: number,
     freezeTrailingRows: number,
     rows: number,
+    totalHeaderHeight: number,
+    translateY: number,
+    cellYOffset: number,
     verticalBorder: (col: number) => boolean,
     getRowHeight: (row: number) => number,
+    getCellContent: (cell: Item) => InnerGridCell,
     theme: FullTheme
 ) {
     let drawFreezeBorder = false;
@@ -129,8 +139,33 @@ export function overdrawStickyBoundaries(
     if (drawX !== 0) {
         vStroke = blendCache(vColor, theme.bgCell);
         ctx.beginPath();
-        ctx.moveTo(drawX + 0.5, 0);
-        ctx.lineTo(drawX + 0.5, height);
+        const x = drawX + 0.5;
+        let segmentStart = 0;
+        const drawSegment = (toY: number) => {
+            if (toY <= segmentStart) return;
+            ctx.moveTo(x, segmentStart);
+            ctx.lineTo(x, toY);
+        };
+
+        walkRowsInCol(
+            cellYOffset,
+            totalHeaderHeight + translateY,
+            height,
+            rows,
+            getRowHeight,
+            freezeTrailingRows,
+            false,
+            undefined,
+            (drawY, row, rh) => {
+                if (getCellContent([0, row]).kind !== InnerGridCellKind.Section) return;
+
+                const sectionTop = Math.max(segmentStart, drawY);
+                const sectionBottom = Math.min(height, drawY + rh);
+                drawSegment(sectionTop);
+                segmentStart = Math.max(segmentStart, sectionBottom);
+            }
+        );
+        drawSegment(height);
         ctx.strokeStyle = vStroke;
         ctx.stroke();
     }

@@ -9,6 +9,7 @@ import {
     type Item,
     type CellList,
     GridCellKind,
+    InnerGridCellKind,
     type DrawCellCallback,
     isInnerOnlyCell,
     type GridCell,
@@ -57,6 +58,14 @@ export interface Highlight {
     readonly color: string;
     readonly range: Rectangle;
     readonly style?: "dashed" | "solid" | "no-outline" | "solid-outline";
+}
+
+function getSpanStartX(startCol: number, allColumns: readonly MappedGridColumn[]): number {
+    let x = 0;
+    for (let index = 0; index < startCol; index++) {
+        x += allColumns[index].width;
+    }
+    return x;
 }
 
 // preppable items:
@@ -221,6 +230,7 @@ export function drawCells(
 
                     let cellX = drawX;
                     let cellWidth = c.width;
+                    let cellForDraw = cell;
                     let drawingSpan = false;
                     let skipContents = false;
                     if (cell.span !== undefined) {
@@ -229,13 +239,26 @@ export function drawCells(
                         if (handledSpans === undefined) handledSpans = new Set();
                         if (!handledSpans.has(spanKey)) {
                             const areas = getSpanBounds(cell.span, drawX, drawY, c.width, rh, c, allColumns);
-                            const area = c.sticky ? areas[0] : areas[1];
-                            if (!c.sticky && areas[0] !== undefined) {
+                            const frozenArea = areas[0];
+                            const scrollableArea = areas[1];
+                            const area = c.sticky ? frozenArea : scrollableArea;
+                            const spanStartX = getSpanStartX(startCol, allColumns);
+                            const splitSectionSpan =
+                                cell.kind === InnerGridCellKind.Section &&
+                                frozenArea !== undefined &&
+                                scrollableArea !== undefined;
+                            if (!c.sticky && frozenArea !== undefined && !splitSectionSpan) {
                                 skipContents = true;
                             }
                             if (area !== undefined) {
                                 cellX = area.x;
                                 cellWidth = area.width;
+                                if (!c.sticky && splitSectionSpan) {
+                                    cellForDraw = {
+                                        ...cell,
+                                        titleOffset: spanStartX - area.x,
+                                    } as InnerGridCell;
+                                }
                                 handledSpans.add(spanKey);
                                 ctx.restore();
                                 prepResult = undefined;
@@ -243,13 +266,14 @@ export function drawCells(
                                 ctx.beginPath();
                                 const d = Math.max(0, clipX - area.x);
                                 ctx.rect(area.x + d, drawY, area.width - d, rh);
+                                const gridLineClipOverlap = !c.sticky && splitSectionSpan ? 1 : 0;
                                 if (result === undefined) {
                                     result = [];
                                 }
                                 result.push({
-                                    x: area.x + d,
+                                    x: area.x + d - gridLineClipOverlap,
                                     y: drawY,
-                                    width: area.width - d,
+                                    width: area.width - d + gridLineClipOverlap,
                                     height: rh,
                                 });
                                 ctx.clip();
@@ -399,7 +423,7 @@ export function drawCells(
                         }
                         prepResult = drawCell(
                             ctx,
-                            cell,
+                            cellForDraw,
                             c.sourceIndex,
                             row,
                             isLastColumn,

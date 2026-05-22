@@ -9,6 +9,7 @@ import {
     rectBottomRight,
     useMappedColumns,
 } from "./render/data-grid-lib.js";
+import { walkRowsInCol } from "./render/data-grid-render.walk.js";
 import {
     GridCellKind,
     type Rectangle,
@@ -332,6 +333,65 @@ const getRowData = (cell: InnerGridCell, getCellRenderer?: GetCellRendererCallba
     const r = getCellRenderer?.(cell);
     return r?.getAccessibilityString(cell) ?? "";
 };
+
+interface ShadowSegment {
+    readonly top: number;
+    readonly height: number;
+}
+
+function getStickyShadowSegments(
+    height: number,
+    totalHeaderHeight: number,
+    translateY: number,
+    cellYOffset: number,
+    rows: number,
+    getRowHeight: (row: number) => number,
+    freezeTrailingRows: number,
+    hasAppendRow: boolean,
+    getCellContent: (cell: Item, forceStrict?: boolean) => InnerGridCell
+): readonly ShadowSegment[] {
+    const excluded: { top: number; bottom: number }[] = [];
+    const sectionCell: [number, number] = [0, 0];
+
+    walkRowsInCol(
+        cellYOffset,
+        totalHeaderHeight + translateY,
+        height,
+        rows,
+        getRowHeight,
+        freezeTrailingRows,
+        hasAppendRow,
+        undefined,
+        (drawY, row, rh) => {
+            if (row < 0) return;
+
+            sectionCell[1] = row;
+            if (getCellContent(sectionCell).kind !== InnerGridCellKind.Section) return;
+
+            const top = Math.max(0, drawY);
+            const bottom = Math.min(height, drawY + rh);
+            if (bottom > top) {
+                excluded.push({ top, bottom });
+            }
+        }
+    );
+
+    if (excluded.length === 0) return [{ top: 0, height }];
+
+    const segments: ShadowSegment[] = [];
+    let top = 0;
+    for (const section of excluded) {
+        if (section.top > top) {
+            segments.push({ top, height: section.top - top });
+        }
+        top = Math.max(top, section.bottom);
+    }
+    if (top < height) {
+        segments.push({ top, height: height - top });
+    }
+
+    return segments;
+}
 
 const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p, forwardedRef) => {
     const {
@@ -1765,7 +1825,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                     role="grid"
                     aria-rowcount={rows + 1}
                     aria-multiselectable="true"
-                    aria-colcount={mappedColumns.length + colOffset}>
+                    aria-colcount={mappedColumns.length + colOffset}
+                >
                     <thead role="rowgroup">
                         <tr role="row" aria-rowindex={1}>
                             {effectiveCols.map(c => (
@@ -1778,7 +1839,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                         if (e.target === focusRef.current) return;
                                         return onCellFocused?.([c.sourceIndex, -1]);
                                     }}
-                                    key={c.sourceIndex}>
+                                    key={c.sourceIndex}
+                                >
                                     {c.title}
                                 </th>
                             ))}
@@ -1790,7 +1852,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                 role="row"
                                 aria-selected={selection.rows.hasIndex(row)}
                                 key={row}
-                                aria-rowindex={row + 2}>
+                                aria-rowindex={row + 2}
+                            >
                                 {effectiveCols.map(c => {
                                     const col = c.sourceIndex;
                                     const key = packColRowToNumber(col, row);
@@ -1844,7 +1907,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                                 return onCellFocused?.(location);
                                             }}
                                             ref={focused ? focusElement : undefined}
-                                            tabIndex={-1}>
+                                            tabIndex={-1}
+                                        >
                                             {getRowData(cellContent, getCellRenderer)}
                                         </td>
                                     );
@@ -1880,6 +1944,33 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
     const absoluteOffsetY = -cellYOffset * 32 + translateY;
     const opacityY = !fixedShadowY ? 0 : clamp(-absoluteOffsetY / 100, 0, 1);
+    const shadowXSegments = React.useMemo(() => {
+        if (opacityX <= 0) return [{ top: 0, height }];
+
+        const getRowHeight = typeof rowHeight === "number" ? () => rowHeight : rowHeight;
+        return getStickyShadowSegments(
+            height,
+            totalHeaderHeight,
+            translateY,
+            cellYOffset,
+            rows,
+            getRowHeight,
+            freezeTrailingRows,
+            hasAppendRow,
+            getCellContent
+        );
+    }, [
+        cellYOffset,
+        freezeTrailingRows,
+        getCellContent,
+        hasAppendRow,
+        height,
+        opacityX,
+        rowHeight,
+        rows,
+        totalHeaderHeight,
+        translateY,
+    ]);
 
     const stickyShadow = React.useMemo(() => {
         if (!opacityX && !opacityY) {
@@ -1895,6 +1986,12 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             opacity: opacityX,
             pointerEvents: "none",
             transition: !smoothScrollX ? "opacity 0.2s" : undefined,
+        };
+
+        const styleXSegment: React.CSSProperties = {
+            position: "absolute",
+            left: 0,
+            width: "100%",
             boxShadow: "inset 13px 0 10px -13px rgba(0, 0, 0, 0.2)",
         };
 
@@ -1912,11 +2009,24 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
 
         return (
             <>
-                {opacityX > 0 && <div id="shadow-x" style={styleX} />}
+                {opacityX > 0 && (
+                    <div id="shadow-x" style={styleX}>
+                        {shadowXSegments.map((segment, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    ...styleXSegment,
+                                    top: segment.top,
+                                    height: segment.height,
+                                }}
+                            />
+                        ))}
+                    </div>
+                )}
                 {opacityY > 0 && <div id="shadow-y" style={styleY} />}
             </>
         );
-    }, [opacityX, opacityY, stickyX, width, smoothScrollX, totalHeaderHeight, height, smoothScrollY]);
+    }, [opacityX, opacityY, stickyX, width, height, smoothScrollX, totalHeaderHeight, smoothScrollY, shadowXSegments]);
 
     const overlayStyle = React.useMemo<React.CSSProperties>(
         () => ({
@@ -1937,7 +2047,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                 onFocus={onCanvasFocused}
                 onBlur={onCanvasBlur}
                 ref={refImpl}
-                style={style}>
+                style={style}
+            >
                 {accessibilityTree}
             </canvas>
             <canvas ref={overlayRef} style={overlayStyle} />

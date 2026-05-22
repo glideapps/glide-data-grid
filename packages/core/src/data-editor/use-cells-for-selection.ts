@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { DataGridSearchProps } from "../internal/data-grid-search/data-grid-search.js";
-import { type CellArray, type GridCell, GridCellKind } from "../internal/data-grid/data-grid-types.js";
+import { type CellArray, type GridCell, GridCellKind, type Rectangle } from "../internal/data-grid/data-grid-types.js";
 import type { DataEditorProps } from "./data-editor.js";
 
 type CellsForSelectionCallback = NonNullable<DataGridSearchProps["getCellsForSelection"]>;
@@ -9,7 +9,8 @@ export function useCellsForSelection(
     getCellContent: DataEditorProps["getCellContent"],
     rowMarkerOffset: number,
     abortController: AbortController,
-    rows: number
+    rows: number,
+    mapRectangleToDataRectangle: (rect: Rectangle) => Rectangle | undefined
 ) {
     const getCellsForSelectionDirectWhenValid = React.useCallback<CellsForSelectionCallback>(
         rect => {
@@ -42,9 +43,11 @@ export function useCellsForSelection(
     const getCellsForSelectionMangled = React.useCallback<CellsForSelectionCallback>(
         rect => {
             if (getCellsForSelectionDirect === undefined) return [];
+            const dataRect = mapRectangleToDataRectangle(rect);
+            if (dataRect === undefined) return [];
             const newRect = {
-                ...rect,
-                x: rect.x - rowMarkerOffset,
+                ...dataRect,
+                x: dataRect.x - rowMarkerOffset,
             };
             if (newRect.x < 0) {
                 newRect.x = 0;
@@ -63,7 +66,7 @@ export function useCellsForSelection(
             }
             return getCellsForSelectionDirect(newRect, abortController.signal);
         },
-        [abortController.signal, getCellsForSelectionDirect, rowMarkerOffset]
+        [abortController.signal, getCellsForSelectionDirect, mapRectangleToDataRectangle, rowMarkerOffset]
     );
 
     const getCellsForSelection = getCellsForSelectionIn !== undefined ? getCellsForSelectionMangled : undefined;

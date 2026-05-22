@@ -1,7 +1,7 @@
 import * as React from "react";
 import { render, fireEvent, screen, cleanup } from "@testing-library/react";
 import DataGrid, { type DataGridProps, type DataGridRef } from "../src/internal/data-grid/data-grid.js";
-import { CompactSelection, GridCellKind } from "../src/internal/data-grid/data-grid-types.js";
+import { CompactSelection, GridCellKind, InnerGridCellKind } from "../src/internal/data-grid/data-grid-types.js";
 import { getDefaultTheme } from "../src/index.js";
 import { AllCellRenderers } from "../src/cells/index.js";
 import { vi, expect, describe, test, beforeEach, afterEach } from "vitest";
@@ -133,6 +133,41 @@ describe("data-grid", () => {
 
     afterEach(() => {
         cleanup();
+    });
+
+    test("Clips frozen column shadow around section rows", () => {
+        render(
+            <DataGrid
+                {...basicProps}
+                freezeColumns={1}
+                translateX={-24}
+                getCellContent={([col, row]) =>
+                    row === 1
+                        ? {
+                              kind: InnerGridCellKind.Section,
+                              allowOverlay: false,
+                              title: "Section",
+                              span: [0, basicProps.columns.length - 1],
+                          }
+                        : {
+                              kind: GridCellKind.Text,
+                              allowOverlay: false,
+                              data: `${col},${row}`,
+                              displayData: `${col},${row}`,
+                          }
+                }
+            />
+        );
+
+        const shadow = document.querySelector("#shadow-x");
+        expect(shadow).not.toBeNull();
+        const segments = Array.from(shadow?.children ?? []) as HTMLElement[];
+
+        expect(segments).toHaveLength(2);
+        expect(segments[0].style.top).toBe("0px");
+        expect(segments[0].style.height).toBe("68px");
+        expect(segments[1].style.top).toBe("100px");
+        expect(segments[1].style.height).toBe("900px");
     });
 
     test("Emits mouse down", () => {

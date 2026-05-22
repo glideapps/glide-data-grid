@@ -45,7 +45,7 @@ export { CellSet } from "./internal/data-grid/cell-set.js";
 export { getDataEditorTheme as getDefaultTheme, useTheme } from "./common/styles.js";
 export { useColumnSizer } from "./data-editor/use-column-sizer.js";
 
-export type { DataEditorRef } from "./data-editor/data-editor.js";
+export type { DataEditorRef, RowSection } from "./data-editor/data-editor.js";
 export { DataEditorAll as DataEditor } from "./data-editor-all.js";
 export type { DataEditorAllProps as DataEditorProps } from "./data-editor-all.js";
 export { emptyGridSelection } from "./data-editor/data-editor.js";
