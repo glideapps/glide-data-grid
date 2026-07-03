@@ -256,8 +256,15 @@ export function drawCells(
                                 drawingSpan = true;
                             }
                         } else {
-                            toDraw--;
-                            return;
+                            // Frozen trailing rows: fall through with skipContents=true so each column
+                            // repaints its own fill (overwriting scrolling-row overflow past freezeY
+                            // and applying per-column selection/highlight). Content stays drawn once
+                            // by the span push above. Non-frozen spans keep the short-circuit.
+                            if (!isSticky) {
+                                toDraw--;
+                                return;
+                            }
+                            skipContents = true;
                         }
                     }
 

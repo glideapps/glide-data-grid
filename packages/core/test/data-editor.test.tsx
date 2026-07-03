@@ -3830,6 +3830,49 @@ describe("data-editor", () => {
         });
     });
 
+    test("Span in frozen trailing row repaints fill per column (no bleed)", async () => {
+        // Regression: with a spanning cell in a frozen trailing row, every column must
+        // paint its own fill so scrolling-row overflow at freezeY is overwritten per
+        // column — not just once by the first column that hit the span.
+        vi.useFakeTimers();
+
+        const rowHeight = basicProps.rowHeight as number;
+        const spannedRow = basicProps.rows - 1;
+        const getCellContent: (typeof basicProps)["getCellContent"] = c => {
+            if (c[1] === spannedRow) {
+                return {
+                    ...basicProps.getCellContent([0, spannedRow]),
+                    span: [0, basicProps.columns.length - 1] as const,
+                };
+            }
+            return basicProps.getCellContent(c);
+        };
+
+        render(
+            <EventedDataEditor
+                {...basicProps}
+                getCellContent={getCellContent}
+                freezeTrailingRows={1}
+                trailingRowOptions={undefined}
+            />,
+            { wrapper: Context }
+        );
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas") as HTMLCanvasElement;
+        const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+        const frozenY = canvas.height - rowHeight;
+        const fillRectMock = ctx.fillRect as unknown as Mock;
+        // ±2px tolerates the damage-path +1 inset. h === rowHeight distinguishes row
+        // fills from cell decoration draws.
+        const frozenRowFills = fillRectMock.mock.calls.filter(
+            ([, y, , h]) => typeof y === "number" && Math.abs(y - frozenY) <= 2 && h === rowHeight
+        );
+
+        // Without the fix: 1 wide fill (first column only). With it: 1 wide + N-1 per-column.
+        expect(frozenRowFills.length).toBeGreaterThan(1);
+    });
+
     test("Imperative scrollTo false fire", async () => {
         vi.useFakeTimers();
         const ref = React.createRef<DataEditorRef>();
