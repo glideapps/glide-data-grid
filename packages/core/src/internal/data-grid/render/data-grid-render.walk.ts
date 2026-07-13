@@ -1,5 +1,5 @@
 import { type Item, type Rectangle } from "../data-grid-types.js";
-import { type MappedGridColumn, isGroupEqual } from "./data-grid-lib.js";
+import { type MappedGridColumn, isGroupEqual, getFreezeTrailingHeight } from "./data-grid-lib.js";
 
 export function getSkipPoint(drawRegions: readonly Rectangle[]): number | undefined {
     if (drawRegions.length === 0) return undefined;
@@ -33,8 +33,15 @@ export function walkRowsInCol(
     let y = drawY;
     let row = startRow;
     const rowEnd = rows - freezeTrailingRows;
+    // Trailing frozen rows always occupy the bottom `getFreezeTrailingHeight(...)` pixels of the
+    // canvas, anchored to `height`. The scrollable loop below must stop at that boundary instead
+    // of at the raw `height` — otherwise, whenever `height` isn't an exact multiple of the row
+    // heights (the common case), ordinary rows spill into the space reserved for the frozen rows
+    // and can get repainted on top of them by a later damage/animation-driven redraw.
+    const freezeY =
+        freezeTrailingRows > 0 ? height - getFreezeTrailingHeight(rows, freezeTrailingRows, getRowHeight) : height;
     let didBreak = false;
-    while (y < height && row < rowEnd) {
+    while (y < freezeY && row < rowEnd) {
         const rh = getRowHeight(row);
         if (y + rh > skipToY && cb(y, row, rh, false, hasAppendRow && row === rows - 1) === true) {
             didBreak = true;

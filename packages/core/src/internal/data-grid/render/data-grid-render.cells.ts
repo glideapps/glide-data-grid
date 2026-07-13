@@ -256,15 +256,8 @@ export function drawCells(
                                 drawingSpan = true;
                             }
                         } else {
-                            // Frozen trailing rows: fall through with skipContents=true so each column
-                            // repaints its own fill (overwriting scrolling-row overflow past freezeY
-                            // and applying per-column selection/highlight). Content stays drawn once
-                            // by the span push above. Non-frozen spans keep the short-circuit.
-                            if (!isSticky) {
-                                toDraw--;
-                                return;
-                            }
-                            skipContents = true;
+                            toDraw--;
+                            return;
                         }
                     }
 
@@ -364,6 +357,35 @@ export function drawCells(
                         fill = fill === undefined ? theme.bgCell : blend(fill, theme.bgCell);
                     }
 
+                    // Full-redraw counterpart to the damage-path clamp above. Columns draw left-to-right and
+                    // each paints its scrolling rows before the next column runs, so a scrolling row whose
+                    // bottom crosses into the frozen band would overwrite a spanning frozen row that an
+                    // earlier column already drew. Clip such straddling rows to the freeze boundary so the
+                    // frozen band stays reserved for frozen rows only.
+                    //
+                    // Exception: a span drawn by a sticky (frozen) column — e.g. a group-header row whose
+                    // label lives in the frozen columns. Sticky columns are re-composited over the blitted
+                    // frame every draw, and clipping that composite to the freeze boundary leaves the group
+                    // row's background a shade darker than its scrollable half (a visible two-tone seam that
+                    // accumulates while scrolling). Such a straddling group span doesn't need the clip anyway:
+                    // the frozen trailing rows are painted afterwards in each column's sticky pass and cover
+                    // any bleed. So skip the clip for sticky spans; keep it for sticky non-span cells (which
+                    // still must not bleed into the band) and for all scrollable cells.
+                    let didFreezeClip = false;
+                    if (
+                        damage === undefined &&
+                        !isSticky &&
+                        !(c.sticky && drawingSpan) &&
+                        freezeTrailingRowsHeight > 0 &&
+                        drawY + rh > height - freezeTrailingRowsHeight
+                    ) {
+                        didFreezeClip = true;
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.rect(cellX, drawY, cellWidth, height - freezeTrailingRowsHeight - drawY);
+                        ctx.clip();
+                    }
+
                     const isLastColumn = c.sourceIndex === allColumns.length - 1;
                     const isLastRow = row === rows - 1;
                     if (fill !== undefined) {
@@ -434,6 +456,10 @@ export function drawCells(
                     }
 
                     if (didDamageClip) {
+                        ctx.restore();
+                    }
+
+                    if (didFreezeClip) {
                         ctx.restore();
                     }
 

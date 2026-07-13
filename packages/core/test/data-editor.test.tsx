@@ -2689,7 +2689,10 @@ describe("data-editor", () => {
             }
         );
         prep();
-        expect(spy).toHaveBeenCalledTimes(31); // Math.ceil((height - headerHeight) / rowHeight)
+        // basicProps sets a sticky trailingRowOptions row, which reserves one rowHeight of space
+        // at the bottom of the canvas for that frozen row. The scrollable rows above it stop at
+        // that boundary rather than at the raw canvas height.
+        expect(spy).toHaveBeenCalledTimes(30); // Math.ceil((height - rowHeight - headerHeight) / rowHeight)
     });
 
     test("onCellsEdited blocks onCellEdited", async () => {
@@ -3830,10 +3833,12 @@ describe("data-editor", () => {
         });
     });
 
-    test("Span in frozen trailing row repaints fill per column (no bleed)", async () => {
-        // Regression: with a spanning cell in a frozen trailing row, every column must
-        // paint its own fill so scrolling-row overflow at freezeY is overwritten per
-        // column — not just once by the first column that hit the span.
+    test("Span in frozen trailing row draws full-width content once (no per-column overpaint)", async () => {
+        // Regression: a spanning cell in a frozen trailing row must be painted once at full width
+        // by the first column that hits it. The previous behavior repainted each column's own fill
+        // over the band (to cover scrolling-row overflow into the freeze band), which overpainted
+        // the wide span content and truncated it. Scrolling rows are now kept out of the freeze
+        // band instead, so the single wide fill survives and no narrow per-column fill lands there.
         vi.useFakeTimers();
 
         const rowHeight = basicProps.rowHeight as number;
@@ -3863,14 +3868,16 @@ describe("data-editor", () => {
         const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
         const frozenY = canvas.height - rowHeight;
         const fillRectMock = ctx.fillRect as unknown as Mock;
-        // ±2px tolerates the damage-path +1 inset. h === rowHeight distinguishes row
-        // fills from cell decoration draws.
-        const frozenRowFills = fillRectMock.mock.calls.filter(
+        // Full-redraw row fills at the frozen band. h === rowHeight distinguishes them from the
+        // damage-path (inset) fills and from cell-decoration draws.
+        const bandFills = fillRectMock.mock.calls.filter(
             ([, y, , h]) => typeof y === "number" && Math.abs(y - frozenY) <= 2 && h === rowHeight
         );
 
-        // Without the fix: 1 wide fill (first column only). With it: 1 wide + N-1 per-column.
-        expect(frozenRowFills.length).toBeGreaterThan(1);
+        // The span is filled once across the whole grid, far wider than any single column.
+        expect(bandFills.some(([, , w]) => typeof w === "number" && w > 500)).toBe(true);
+        // No column repaints its own narrow slice over the band — that overpaint truncated the span.
+        expect(bandFills.some(([, , w]) => typeof w === "number" && w < 300)).toBe(false);
     });
 
     test("Imperative scrollTo false fire", async () => {
