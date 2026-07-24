@@ -286,7 +286,7 @@ export function drawGridLines(
     height: number,
     drawRegions: Rectangle[] | undefined,
     spans: Rectangle[] | undefined,
-    groupHeaderHeight: number,
+    totalGroupHeaderHeight: number,
     totalHeaderHeight: number,
     getRowHeight: (row: number) => number,
     getRowThemeOverride: GetRowThemeCallback | undefined,
@@ -324,7 +324,7 @@ export function drawGridLines(
         if (tx >= minX && tx <= maxX && verticalBorder(index + 1)) {
             toDraw.push({
                 x1: tx,
-                y1: Math.max(groupHeaderHeight, minY),
+                y1: Math.max(totalGroupHeaderHeight, minY),
                 x2: tx,
                 y2: Math.min(height, maxY),
                 color: vColor,

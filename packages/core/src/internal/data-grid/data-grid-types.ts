@@ -119,6 +119,8 @@ export enum GridColumnIcon {
     HeaderSplitString = "headerSplitString",
     HeaderGeoDistance = "headerGeoDistance",
     HeaderArray = "headerArray",
+    ArrowLeft = "arrowLeft",
+    ArrowRight = "arrowRight",
     RowOwnerOverlay = "rowOwnerOverlay",
     ProtectedColumnOverlay = "protectedColumnOverlay",
 }
@@ -138,16 +140,25 @@ export type CellArray = readonly (readonly GridCell[])[];
  * numbers identify cells.
  *
  * - `-1`: Header
- * - `-2`: Group header
+ * - `-2 and lower`: Group headers (for nested groups)
  * - `0 and higher`: Row index
  *
  * @category Types
  */
 export type Item = readonly [col: number, row: number];
 
+/** @category Columns */
+export type GridColumnGroup = string | readonly string[];
+
 export interface BaseGridColumn {
     readonly title: string;
-    readonly group?: string;
+    /**
+     * Assigns this column to one or more header groups.
+     *
+     * - `string`: single group row
+     * - `string[]`: nested groups from outermost to innermost
+     */
+    readonly group?: GridColumnGroup;
     readonly icon?: GridColumnIcon | string;
     readonly overlayIcon?: GridColumnIcon | string;
     readonly menuIcon?: GridColumnMenuIcon | string;

@@ -19,6 +19,7 @@ import {
     type MappedGridColumn,
     cellIsSelected,
     cellIsInRange,
+    getColumnGroupPath,
     getFreezeTrailingHeight,
     drawLastUpdateUnderlay,
 } from "./data-grid-lib.js";
@@ -50,7 +51,14 @@ export interface GroupDetails {
     }[];
 }
 
-export type GroupDetailsCallback = (groupName: string) => GroupDetails;
+export interface GroupDetailsContext {
+    /** Path from outermost group to the currently requested level. */
+    readonly path: readonly string[];
+    /** `0` is innermost/leaf group, `1` is its parent, etc. */
+    readonly levelFromBottom: number;
+}
+
+export type GroupDetailsCallback = (groupName: string, context?: GroupDetailsContext) => GroupDetails;
 export type GetRowThemeCallback = (row: number) => Partial<Theme> | undefined;
 
 export interface Highlight {
@@ -156,7 +164,13 @@ export function drawCells(
 
             const colSelected = selection.columns.hasIndex(c.sourceIndex);
 
-            const groupTheme = getGroupDetails(c.group ?? "").overrideTheme;
+            const leafGroupPath = getColumnGroupPath(c.group, 0) ?? [];
+            const leafGroupName =
+                leafGroupPath.length === 0 ? "" : leafGroupPath[leafGroupPath.length - 1];
+            const groupTheme = getGroupDetails(leafGroupName, {
+                path: leafGroupPath,
+                levelFromBottom: 0,
+            }).overrideTheme;
             const colTheme =
                 c.themeOverride === undefined && groupTheme === undefined
                     ? outerTheme

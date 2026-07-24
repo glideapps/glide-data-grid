@@ -93,7 +93,13 @@ describe("data-editor", () => {
             clientY: 36 + 32 + 16, // Row 1 (0 indexed)
         });
 
-        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+        expect(spy).toHaveBeenCalledWith(
+            [1, 1],
+            expect.objectContaining({
+                mouseX: 300,
+                mouseY: 36 + 32 + 16,
+            })
+        );
         expect(spySelection).toHaveBeenCalledWith(
             expect.objectContaining({
                 current: expect.objectContaining({ cell: [1, 1] }),

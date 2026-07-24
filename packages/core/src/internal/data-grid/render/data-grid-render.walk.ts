@@ -1,5 +1,5 @@
 import { type Item, type Rectangle } from "../data-grid-types.js";
-import { type MappedGridColumn, isGroupEqual } from "./data-grid-lib.js";
+import { type MappedGridColumn, getColumnGroupName, getColumnGroupPath, isGroupEqual } from "./data-grid-lib.js";
 
 export function getSkipPoint(drawRegions: readonly Rectangle[]): number | undefined {
     if (drawRegions.length === 0) return undefined;
@@ -92,7 +92,10 @@ export type WalkGroupsCallback = (
     x: number,
     y: number,
     width: number,
-    height: number
+    height: number,
+    row: number,
+    levelFromBottom: number,
+    groupPath: readonly string[]
 ) => void;
 
 export function walkGroups(
@@ -100,46 +103,58 @@ export function walkGroups(
     width: number,
     translateX: number,
     groupHeaderHeight: number,
+    groupHeaderDepth: number,
     cb: WalkGroupsCallback
 ): void {
-    let x = 0;
-    let clipX = 0;
-    for (let index = 0; index < effectiveCols.length; index++) {
-        const startCol = effectiveCols[index];
+    for (let levelFromTop = 0; levelFromTop < groupHeaderDepth; levelFromTop++) {
+        const levelFromBottom = groupHeaderDepth - 1 - levelFromTop;
+        const row = -2 - levelFromBottom;
+        const y = levelFromTop * groupHeaderHeight;
 
-        let end = index + 1;
-        let boxWidth = startCol.width;
-        if (startCol.sticky) {
-            clipX += boxWidth;
-        }
-        while (
-            end < effectiveCols.length &&
-            isGroupEqual(effectiveCols[end].group, startCol.group) &&
-            effectiveCols[end].sticky === effectiveCols[index].sticky
-        ) {
-            const endCol = effectiveCols[end];
-            boxWidth += endCol.width;
-            end++;
-            index++;
-            if (endCol.sticky) {
-                clipX += endCol.width;
+        let x = 0;
+        let clipX = 0;
+        for (let index = 0; index < effectiveCols.length; index++) {
+            const startCol = effectiveCols[index];
+
+            let end = index + 1;
+            let boxWidth = startCol.width;
+            if (startCol.sticky) {
+                clipX += boxWidth;
             }
+            const startGroupPath = getColumnGroupPath(startCol.group, levelFromBottom) ?? [];
+            const startGroup = getColumnGroupName(startCol.group, levelFromBottom);
+            while (
+                end < effectiveCols.length &&
+                isGroupEqual(getColumnGroupName(effectiveCols[end].group, levelFromBottom), startGroup) &&
+                effectiveCols[end].sticky === effectiveCols[index].sticky
+            ) {
+                const endCol = effectiveCols[end];
+                boxWidth += endCol.width;
+                end++;
+                index++;
+                if (endCol.sticky) {
+                    clipX += endCol.width;
+                }
+            }
+
+            const t = startCol.sticky ? 0 : translateX;
+            const localX = x + t;
+            const delta = startCol.sticky ? 0 : Math.max(0, clipX - localX);
+            const w = Math.min(boxWidth - delta, width - (localX + delta));
+            cb(
+                [startCol.sourceIndex, effectiveCols[end - 1].sourceIndex],
+                startGroup ?? "",
+                localX + delta,
+                y,
+                w,
+                groupHeaderHeight,
+                row,
+                levelFromBottom,
+                startGroupPath
+            );
+
+            x += boxWidth;
         }
-
-        const t = startCol.sticky ? 0 : translateX;
-        const localX = x + t;
-        const delta = startCol.sticky ? 0 : Math.max(0, clipX - localX);
-        const w = Math.min(boxWidth - delta, width - (localX + delta));
-        cb(
-            [startCol.sourceIndex, effectiveCols[end - 1].sourceIndex],
-            startCol.group ?? "",
-            localX + delta,
-            0,
-            w,
-            groupHeaderHeight
-        );
-
-        x += boxWidth;
     }
 }
 

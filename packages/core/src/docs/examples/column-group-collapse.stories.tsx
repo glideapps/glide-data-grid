@@ -10,6 +10,7 @@ import {
 } from "../../data-editor/stories/utils.js";
 import type { GridColumn } from "../../internal/data-grid/data-grid-types.js";
 import { CompactSelection } from "../../internal/data-grid/data-grid-types.js";
+import { getColumnGroupName } from "../../internal/data-grid/render/data-grid-lib.js";
 import { SimpleThemeWrapper } from "../../stories/story-utils.js";
 import type { GroupHeaderClickedEventArgs } from "../../internal/data-grid/event-args.js";
 
@@ -44,12 +45,12 @@ function useCollapsableColumnGroups(cols: readonly GridColumn[]) {
     const [collapsed, setCollapsed] = React.useState<readonly string[]>([]);
 
     const onGroupHeaderClicked = React.useCallback(
-        (colIndex: number, args: GroupHeaderClickedEventArgs) => {
-            const group = cols[colIndex].group ?? "";
+        (_colIndex: number, args: GroupHeaderClickedEventArgs) => {
+            const group = args.group;
             setCollapsed(cv => (cv.includes(group) ? cv.filter(g => g !== group) : [...cv, group]));
             args.preventDefault();
         },
-        [cols]
+        []
     );
 
     const [selectedColumns, setSelectedColumns] = React.useState<CompactSelection>(CompactSelection.empty());
@@ -62,7 +63,7 @@ function useCollapsableColumnGroups(cols: readonly GridColumn[]) {
 
     const columns = React.useMemo(() => {
         return cols.map(c => {
-            if (!collapsed.includes(c.group ?? ""))
+            if (!collapsed.includes(getColumnGroupName(c.group, 0) ?? ""))
                 return {
                     ...c,
                     hasMenu: true,

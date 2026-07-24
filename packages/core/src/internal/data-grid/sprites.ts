@@ -267,6 +267,24 @@ const headerArray = (props: SpriteProps) => {
 </svg>`;
 };
 
+const arrowLeft = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
+    return `${iconHead}
+  <rect x="2" y="2" width="16" height="16" rx="4" fill="${bg}"/>
+  <path d="M11.8 6.8L8.9 9.5l2.9 2.7" fill="none" stroke="${fg}" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+};
+
+const arrowRight = (props: SpriteProps) => {
+    const fg = props.fgColor;
+    const bg = props.bgColor;
+    return `${iconHead}
+  <rect x="2" y="2" width="16" height="16" rx="4" fill="${bg}"/>
+  <path d="M8.2 6.8l2.9 2.7-2.9 2.7" fill="none" stroke="${fg}" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+};
+
 const rowOwnerOverlay = (props: SpriteProps) => {
     const fg = props.fgColor;
     const bg = props.bgColor;
@@ -313,6 +331,8 @@ export const sprites = {
     headerSplitString,
     headerGeoDistance,
     headerArray,
+    arrowLeft,
+    arrowRight,
     rowOwnerOverlay,
     protectedColumnOverlay,
     renameIcon,

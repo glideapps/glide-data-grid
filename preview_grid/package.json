@@ -1,0 +1,25 @@
+{
+    "name": "preview-grid",
+    "private": true,
+    "version": "0.0.1",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "lodash": "^4.17.21",
+        "marked": "^16.1.2",
+        "react": "^19.1.1",
+        "react-dom": "^19.1.1",
+        "react-responsive-carousel": "^3.2.23"
+    },
+    "devDependencies": {
+        "@wyw-in-js/babel-preset": "^0.7.0",
+        "@wyw-in-js/vite": "^0.6.0",
+        "@vitejs/plugin-react": "^5.0.0",
+        "typescript": "^5.8.3",
+        "vite": "^7.1.6"
+    }
+}
