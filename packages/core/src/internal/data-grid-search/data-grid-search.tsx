@@ -505,6 +505,8 @@ const DataGridSearch: React.FunctionComponent<DataGridSearchProps> = p => {
                 fixedShadowY={p.fixedShadowY}
                 freezeColumns={p.freezeColumns}
                 getCellContent={p.getCellContent}
+                getCellAccessibilityProps={p.getCellAccessibilityProps}
+                getRowAccessibilityProps={p.getRowAccessibilityProps}
                 getCellRenderer={p.getCellRenderer}
                 getGroupDetails={p.getGroupDetails}
                 getRowThemeOverride={p.getRowThemeOverride}
