@@ -113,6 +113,18 @@ export interface DataGridProps {
 
     readonly getCellContent: (cell: Item, forceStrict?: boolean) => InnerGridCell;
     /**
+     * Provides additional HTML attributes to apply to the accessibility `<td>` element rendered for a cell. Useful
+     * for attaching custom `aria-*` attributes to individual cells in the hidden accessibility tree.
+     * @group Accessibility
+     */
+    readonly getCellAccessibilityProps?: (cell: Item) => React.TdHTMLAttributes<HTMLTableCellElement>;
+    /**
+     * Provides additional HTML attributes to apply to the accessibility `<tr>` element rendered for a row. Useful
+     * for attaching custom `aria-*` attributes to individual rows in the hidden accessibility tree.
+     * @group Accessibility
+     */
+    readonly getRowAccessibilityProps?: (row: number) => React.HTMLAttributes<HTMLTableRowElement>;
+    /**
      * Provides additional details about groups to extend group functionality.
      * @group Data
      */
@@ -328,8 +340,8 @@ export interface DataGridRef {
 }
 
 const getRowData = (cell: InnerGridCell, getCellRenderer?: GetCellRendererCallback) => {
-    if (cell.kind === GridCellKind.Custom) return cell.copyData;
     const r = getCellRenderer?.(cell);
+    if (cell.kind === GridCellKind.Custom) return r?.getAccessibilityString?.(cell) ?? cell.copyData;
     return r?.getAccessibilityString(cell) ?? "";
 };
 
@@ -347,6 +359,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
         rowHeight,
         rows,
         getCellContent,
+        getCellAccessibilityProps,
+        getRowAccessibilityProps,
         getRowThemeOverride,
         onHeaderMenuClick,
         onHeaderIndicatorClick,
@@ -1790,7 +1804,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                 role="row"
                                 aria-selected={selection.rows.hasIndex(row)}
                                 key={row}
-                                aria-rowindex={row + 2}>
+                                aria-rowindex={row + 2}
+                                {...getRowAccessibilityProps?.(row)}>
                                 {effectiveCols.map(c => {
                                     const col = c.sourceIndex;
                                     const key = packColRowToNumber(col, row);
@@ -1813,6 +1828,7 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
                                             aria-readonly={
                                                 isInnerOnlyCell(cellContent) || !isReadWriteCell(cellContent)
                                             }
+                                            {...getCellAccessibilityProps?.(location)}
                                             id={id}
                                             data-testid={id}
                                             onClick={() => {
@@ -1867,6 +1883,8 @@ const DataGrid: React.ForwardRefRenderFunction<DataGridRef, DataGridProps> = (p,
             selection,
             focusElement,
             getCellContent,
+            getCellAccessibilityProps,
+            getRowAccessibilityProps,
             canvasRef,
             onKeyDown,
             getBoundsForItem,

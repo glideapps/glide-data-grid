@@ -4,6 +4,7 @@ import DataGrid, { type DataGridProps, type DataGridRef } from "../src/internal/
 import { CompactSelection, GridCellKind } from "../src/internal/data-grid/data-grid-types.js";
 import { getDefaultTheme } from "../src/index.js";
 import { AllCellRenderers } from "../src/cells/index.js";
+import type { CustomRenderer } from "../src/cells/cell-types.js";
 import { vi, expect, describe, test, beforeEach, afterEach } from "vitest";
 import ImageWindowLoaderImpl from "../src/common/image-window-loader.js";
 import { mergeAndRealizeTheme } from "../src/common/styles.js";
@@ -394,5 +395,109 @@ describe("data-grid", () => {
             }),
             false
         );
+    });
+
+    test("getCellAccessibilityProps adds and overrides built-in attributes on the a11y td", () => {
+        render(
+            <DataGrid
+                {...basicProps}
+                getCellAccessibilityProps={([col, row]) => ({
+                    "aria-label": `custom-${col}-${row}`,
+                    "aria-readonly": false,
+                })}
+            />
+        );
+
+        const cell = screen.getByTestId("glide-cell-1-1");
+        expect(cell.getAttribute("aria-label")).toBe("custom-1-1");
+        // basicProps cells have allowOverlay: false, so aria-readonly would default to "true".
+        // Confirm the caller supplied value wins.
+        expect(cell.getAttribute("aria-readonly")).toBe("false");
+        expect(cell.getAttribute("role")).toBe("gridcell");
+    });
+
+    test("getRowAccessibilityProps adds and overrides built-in attributes on the a11y tr", () => {
+        render(
+            <DataGrid
+                {...basicProps}
+                getRowAccessibilityProps={row => ({
+                    "aria-label": `row-${row}`,
+                    "aria-rowindex": 999,
+                })}
+            />
+        );
+
+        const cell = screen.getByTestId("glide-cell-0-3");
+        const row = cell.closest("tr");
+        expect(row).not.toBeNull();
+        expect(row?.getAttribute("aria-label")).toBe("row-3");
+        // built-in aria-rowindex would be 5 (row + 2), confirm the caller supplied value wins.
+        expect(row?.getAttribute("aria-rowindex")).toBe("999");
+        expect(row?.getAttribute("role")).toBe("row");
+    });
+
+    test("Custom cell a11y string uses renderer's getAccessibilityString when available", () => {
+        const customRenderer: CustomRenderer<any> = {
+            kind: GridCellKind.Custom,
+            isMatch: (c): c is any => c.data?.type === "with-a11y",
+            draw: () => undefined,
+            getAccessibilityString: c => `a11y:${c.data.value}`,
+        };
+
+        render(
+            <DataGrid
+                {...basicProps}
+                getCellContent={([col, row]) => {
+                    if (col === 0 && row === 0) {
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: false,
+                            copyData: "copy-data",
+                            data: { type: "with-a11y", value: "hello" },
+                        };
+                    }
+                    return basicProps.getCellContent([col, row]);
+                }}
+                getCellRenderer={cell => {
+                    if (cell.kind === GridCellKind.Custom) return customRenderer as any;
+                    return AllCellRenderers.find(x => x.kind === cell.kind) as any;
+                }}
+            />
+        );
+
+        const cell = screen.getByTestId("glide-cell-0-0");
+        expect(cell.textContent).toBe("a11y:hello");
+    });
+
+    test("Custom cell a11y string falls back to copyData when renderer has no getAccessibilityString", () => {
+        const customRenderer: CustomRenderer<any> = {
+            kind: GridCellKind.Custom,
+            isMatch: (c): c is any => c.data?.type === "no-a11y",
+            draw: () => undefined,
+        };
+
+        render(
+            <DataGrid
+                {...basicProps}
+                getCellContent={([col, row]) => {
+                    if (col === 0 && row === 0) {
+                        return {
+                            kind: GridCellKind.Custom,
+                            allowOverlay: false,
+                            copyData: "copy-data-fallback",
+                            data: { type: "no-a11y" },
+                        };
+                    }
+                    return basicProps.getCellContent([col, row]);
+                }}
+                getCellRenderer={cell => {
+                    if (cell.kind === GridCellKind.Custom) return customRenderer as any;
+                    return AllCellRenderers.find(x => x.kind === cell.kind) as any;
+                }}
+            />
+        );
+
+        const cell = screen.getByTestId("glide-cell-0-0");
+        expect(cell.textContent).toBe("copy-data-fallback");
     });
 });

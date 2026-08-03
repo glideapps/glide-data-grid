@@ -799,6 +799,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
         columns: columnsIn,
         rows: rowsIn,
         getCellContent,
+        getCellAccessibilityProps,
+        getRowAccessibilityProps,
         onCellClicked,
         onCellActivated,
         onFillPattern,
@@ -4263,6 +4265,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                     lockColumns={rowMarkerOffset}
                     firstColAccessible={rowMarkerOffset === 0}
                     getCellContent={getMangledCellContent}
+                    getCellAccessibilityProps={getCellAccessibilityProps}
+                    getRowAccessibilityProps={getRowAccessibilityProps}
                     minColumnWidth={minColumnWidth}
                     maxColumnWidth={maxColumnWidth}
                     searchInputRef={searchInputRef}

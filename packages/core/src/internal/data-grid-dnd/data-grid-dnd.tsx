@@ -430,6 +430,8 @@ const DataGridDnd: React.FunctionComponent<DataGridDndProps> = p => {
             verticalBorder={p.verticalBorder}
             width={p.width}
             getCellContent={getMangledCellContent}
+            getCellAccessibilityProps={p.getCellAccessibilityProps}
+            getRowAccessibilityProps={p.getRowAccessibilityProps}
             isResizing={resizeCol !== undefined}
             onHeaderMenuClick={onHeaderMenuClickMangled}
             onHeaderIndicatorClick={onHeaderIndicatorClickMangled}

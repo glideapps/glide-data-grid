@@ -284,6 +284,8 @@ const GridScroller: React.FunctionComponent<ScrollingDataGridProps> = p => {
                 fixedShadowY={p.fixedShadowY}
                 freezeColumns={p.freezeColumns}
                 getCellContent={p.getCellContent}
+                getCellAccessibilityProps={p.getCellAccessibilityProps}
+                getRowAccessibilityProps={p.getRowAccessibilityProps}
                 getCellRenderer={p.getCellRenderer}
                 getGroupDetails={p.getGroupDetails}
                 getRowThemeOverride={p.getRowThemeOverride}
