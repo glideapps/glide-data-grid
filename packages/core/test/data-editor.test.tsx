@@ -705,6 +705,34 @@ describe("data-editor", () => {
         expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
     });
 
+    test("Emits activated event when typing on a frozen column outside the tracked scroll region", async () => {
+        const spy = vi.fn();
+
+        vi.useFakeTimers();
+        render(<DataEditor {...basicProps} freezeColumns={2} onCellActivated={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        const [x, y] = getCellCenterPositionForDefaultGrid([1, 1]);
+        sendClick(canvas, {
+            clientX: x, // Col B, frozen (freezeColumns=2 covers cols 0 and 1)
+            clientY: y,
+        });
+
+        fireEvent.keyDown(canvas, {
+            key: "A",
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith([1, 1], expect.anything());
+    });
+
     test("keyDown and keyUp events include the cell location", async () => {
         let keyDownEvent: GridKeyEventArgs | undefined;
         let keyUpEvent: GridKeyEventArgs | undefined;
