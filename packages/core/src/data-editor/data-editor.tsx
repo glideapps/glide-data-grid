@@ -2701,6 +2701,8 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
 
     const onDragEnd = React.useCallback(() => {
         isActivelyDragging.current = false;
+        isActivelyDraggingHeader.current = false;
+        setScrollDir(undefined);
     }, []);
 
     const rowGroupingSelectionBehavior = rowGrouping?.selectionBehavior;
