@@ -1620,6 +1620,54 @@ describe("data-editor", () => {
         expect(document.body.contains(overlay)).toBe(false);
     });
 
+    test("Send edit when Enter follows another key before its timer fires", async () => {
+        const spy = vi.fn();
+        vi.useFakeTimers();
+        render(<DataEditor {...basicProps} onCellEdited={spy} />, {
+            wrapper: Context,
+        });
+        prep(false);
+
+        const canvas = screen.getByTestId("data-grid-canvas");
+        sendClick(canvas, {
+            clientX: 300, // Col B
+            clientY: 36 + 32 + 16, // Row 1 (0 indexed)
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        fireEvent.keyDown(canvas, {
+            keyCode: 74,
+            key: "j",
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        const overlay = screen.getByDisplayValue("j");
+
+        // A fast typist: the "k" keydown and Enter both land before any timer
+        // runs. The "k" timer must not commit on Enter's behalf with no value.
+        fireEvent.keyDown(overlay, {
+            keyCode: 75,
+            key: "k",
+        });
+        fireEvent.change(overlay, { target: { value: "jk" } });
+        fireEvent.keyDown(overlay, {
+            key: "Enter",
+        });
+
+        act(() => {
+            vi.runAllTimers();
+        });
+
+        expect(spy).toBeCalledWith([1, 1], expect.objectContaining({ data: "jk" }));
+        expect(document.body.contains(overlay)).toBe(false);
+    });
+
     test("Send edit with click off", async () => {
         const spy = vi.fn();
         vi.useFakeTimers();
