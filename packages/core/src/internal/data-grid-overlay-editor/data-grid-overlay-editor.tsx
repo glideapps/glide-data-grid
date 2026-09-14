@@ -147,6 +147,12 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
                 event.preventDefault();
                 customMotion.current = [event.shiftKey ? -1 : 1, 0];
                 save = true;
+            } else {
+                // Only a motion key may schedule a commit. Any other key's timer
+                // could fire after a fast Enter has set the motion, committing
+                // with no value and marking the edit finished, so the commit
+                // that follows would be dropped.
+                return;
             }
 
             window.setTimeout(() => {
