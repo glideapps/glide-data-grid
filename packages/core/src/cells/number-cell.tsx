@@ -4,8 +4,11 @@ import { drawTextCell, prepTextCell } from "../internal/data-grid/render/data-gr
 import { GridCellKind, type NumberCell } from "../internal/data-grid/data-grid-types.js";
 import type { InternalCellRenderer } from "./cell-types.js";
 import { drawEditHoverIndicator } from "../internal/data-grid/render/draw-edit-hover-indicator.js";
+import { preloadableLazy } from "../common/preloadable-lazy.js";
 
-const NumberOverlayEditor = React.lazy(
+// Stays in its own chunk. Drawing a number cell preloads it, so a grid that never shows
+// one never fetches it, and one that does has it before the cell can be edited.
+const { Component: NumberOverlayEditor, preload: preloadNumberOverlayEditor } = preloadableLazy(
     async () => await import("../internal/data-grid-overlay-editor/private/number-overlay-editor.js")
 );
 
@@ -17,6 +20,7 @@ export const numberCellRenderer: InternalCellRenderer<NumberCell> = {
     useLabel: true,
     drawPrep: prepTextCell,
     draw: a => {
+        void preloadNumberOverlayEditor();
         const { hoverAmount, cell, ctx, theme, rect, overrideCursor } = a;
         const { hoverEffect, displayData, hoverEffectTheme } = cell;
 

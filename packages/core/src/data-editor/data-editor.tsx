@@ -86,8 +86,10 @@ import { useRowGroupingInner, type RowGroupingOptions } from "./row-grouping.js"
 import { useRowGrouping } from "./row-grouping-api.js";
 import { useInitialScrollOffset } from "./use-initial-scroll-offset.js";
 import type { VisibleRegion } from "./visible-region.js";
+import { preloadableLazy } from "../common/preloadable-lazy.js";
 
-const DataGridOverlayEditor = React.lazy(
+// Stays in its own chunk; `DataEditor` preloads it on mount so the first edit doesn't suspend.
+const { Component: DataGridOverlayEditor, preload: preloadDataGridOverlayEditor } = preloadableLazy(
     async () => await import("../internal/data-grid-overlay-editor/data-grid-overlay-editor.js")
 );
 
@@ -975,6 +977,10 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
     if (abortControllerRef.current === undefined) abortControllerRef.current = new AbortController();
 
     React.useEffect(() => () => abortControllerRef?.current.abort(), []);
+
+    React.useEffect(() => {
+        void preloadDataGridOverlayEditor();
+    }, []);
 
     const [getCellsForSelection, getCellsForSeletionDirect] = useCellsForSelection(
         getCellsForSelectionIn,
