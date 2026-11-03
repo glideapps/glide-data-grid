@@ -37,6 +37,7 @@ interface DataGridOverlayEditorProps {
     readonly forceEditMode: boolean;
     readonly highlight: boolean;
     readonly portalElementRef?: React.RefObject<HTMLElement>;
+    readonly scrollRef: React.RefObject<HTMLDivElement | null>;
     readonly imageEditorOverride?: ImageEditorType;
     readonly getCellRenderer: GetCellRendererCallback;
     readonly markdownDivCreateNode?: (content: string) => DocumentFragment;
@@ -67,6 +68,7 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         cell,
         bloom,
         portalElementRef,
+        scrollRef,
         validateCell,
         getCellRenderer,
         provideEditor,
@@ -116,6 +118,17 @@ const DataGridOverlayEditor: React.FunctionComponent<DataGridOverlayEditorProps>
         onFinishEditing(tempValue, [0, 0]);
         finished.current = true;
     }, [tempValue, onFinishEditing]);
+
+    React.useEffect(() => {
+        const onScroll = (event: Event) => {
+            if (!finished.current && event.target instanceof Node && event.target.contains(scrollRef.current)) {
+                onClickOutside();
+            }
+        };
+
+        window.addEventListener("scroll", onScroll, true);
+        return () => window.removeEventListener("scroll", onScroll, true);
+    }, [onClickOutside, scrollRef]);
 
     const onEditorFinished = React.useCallback(
         (newValue: GridCell | undefined, movement?: readonly [-1 | 0 | 1, -1 | 0 | 1]) => {

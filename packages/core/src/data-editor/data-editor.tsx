@@ -4326,6 +4326,7 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                             provideEditor={provideEditor}
                             imageEditorOverride={imageEditorOverride}
                             portalElementRef={portalElementRef}
+                            scrollRef={scrollRef}
                             onFinishEditing={onFinishEditing}
                             markdownDivCreateNode={markdownDivCreateNode}
                             isOutsideClick={isOutsideClick}
