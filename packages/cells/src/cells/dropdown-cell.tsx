@@ -53,6 +53,12 @@ const PortalWrap = styled.div`
     }
 `;
 
+const DropdownMenu: React.FC<CustomMenuProps> = props => (
+    <PortalWrap>
+        <CustomMenu className={"click-outside-ignore"} {...props} />
+    </PortalWrap>
+);
+
 // This is required since the padding is disabled for this cell type
 // The settings are based on the "pad" settings in the data-grid-overlay-editor-style.tsx
 const ReadOnlyWrap = styled.div`
@@ -157,11 +163,7 @@ const Editor: ReturnType<ProvideEditorCallback<DropdownCell>> = p => {
                 components={{
                     DropdownIndicator: () => null,
                     IndicatorSeparator: () => null,
-                    Menu: props => (
-                        <PortalWrap>
-                            <CustomMenu className={"click-outside-ignore"} {...props} />
-                        </PortalWrap>
-                    ),
+                    Menu: DropdownMenu,
                 }}
                 options={values}
                 onChange={async e => {
