@@ -135,12 +135,13 @@ export function useDebouncedMemo<T>(factory: () => T, deps: React.DependencyList
     const [state, setState] = React.useState(factory);
 
     const mountedRef = React.useRef(true);
-    React.useEffect(
-        () => () => {
+    React.useEffect(() => {
+        // Re-arm on mount: StrictMode runs this effect, its cleanup, then the effect again.
+        mountedRef.current = true;
+        return () => {
             mountedRef.current = false;
-        },
-        []
-    );
+        };
+    }, []);
 
     const debouncedSetState = React.useRef<typeof setState>(
         debounce(x => {
