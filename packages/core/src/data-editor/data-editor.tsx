@@ -2276,7 +2276,13 @@ const DataEditorImpl: React.ForwardRefRenderFunction<DataEditorRef, DataEditorPr
                 for (let y = 0; y < currentRange.height; y++) {
                     const cell: Item = [currentRange.x + x, currentRange.y + y];
                     if (itemIsInRect(cell, patternRange)) continue;
-                    const patternCell = pattern[y % patternRange.height][x % patternRange.width];
+                    // Keep the pattern anchored to its source when filling upward or leftward.
+                    const patternX = (cell[0] - patternRange.x) % patternRange.width;
+                    const patternY = (cell[1] - patternRange.y) % patternRange.height;
+                    const patternCell =
+                        pattern[(patternY + patternRange.height) % patternRange.height][
+                            (patternX + patternRange.width) % patternRange.width
+                        ];
                     if (isInnerOnlyCell(patternCell) || !isReadWriteCell(patternCell)) continue;
                     editItemList.push({
                         location: cell,
